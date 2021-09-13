@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:gateway.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="executableClient" class="com.alibaba.xxpt.gateway.shared.client.http.ExecutableClient"
+          factory-method="getInstance" init-method="init" destroy-method="destroy">
+        <property name="protocal" value="${xxpt.gateway.protocal}"/>
+        <property name="domainName" value="${xxpt.gateway.domainName}"/>
+        <property name="accessKey" value="${xxpt.gateway.accessKey}"/>
+        <property name="secretKey" value="${xxpt.gateway.secretKey}"/>
+    </bean>
+
+    <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+        <property name="beanNames">
+            <list>
+                <value>entityDefineService</value>
+                <value>mdcEntityDataCallService</value>
+            </list>
+        </property>
+        <property name="interceptorNames">
+            <list>
+                <value>epaasAdvice</value>
+            </list>
+        </property>
+    </bean>
+</beans>
