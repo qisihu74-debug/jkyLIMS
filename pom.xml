@@ -107,6 +107,32 @@
             <systemPath>${project.basedir}/src/lib/xxpt.gateway.shared.client-1.0.6-SNAPSHOT.jar</systemPath>
         </dependency>
             <!--钉钉工具包,如缺失请到钉钉服务器开发文档下载-->
+        <!--添加阿里云core依赖-->
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>tea-openapi</artifactId>
+                <version>0.0.19</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>fnf20190315</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+            <!--添加阿里云短信-->
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>dysmsapi20170525</artifactId>
+                <version>2.0.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>dingtalk</artifactId>
+                <version>1.1.78</version>
+                <scope>system</scope>
+                <systemPath>${pom.basedir}/src/lib/dingtalk-1.1.78.jar</systemPath>
+            </dependency>
             <dependency>
                 <groupId>com.taobao.top</groupId>
                 <artifactId>top-api-sdk-dev</artifactId>
