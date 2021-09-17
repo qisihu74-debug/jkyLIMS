@@ -31,7 +31,7 @@ public class CrmServiceImpl implements CrmService {
             Boolean aBoolean = DingUtils.sendMessageToServiceWindow(token,"账号/密码：psh/111111", GenID.getUUID(),
                     "sxmwx7mtl2cnzvmxlwmnznpzty");
             if (aBoolean){
-                logger.debug("消息发送成功。。。。。。。。。。。。。。");
+
             }
         }
     }
