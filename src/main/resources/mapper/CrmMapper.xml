@@ -15,12 +15,13 @@
         contact_union_id,
         instance_id,
         modify_time,
-        next_token
+        next_token,
+        mobile
         )
         VALUES
         <foreach collection="list" item="item" open="" separator="," close="">
             (#{item.userId},#{item.creatorUserId},#{item.createTime},#{item.contactName},#{item.contactUnionId},
-            #{item.instanceId},#{item.modifyTime},#{item.nextToken})
+            #{item.instanceId},#{item.modifyTime},#{item.nextToken},#{item.mobile})
         </foreach>
     </insert>
 </mapper>

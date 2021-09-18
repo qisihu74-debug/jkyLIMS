@@ -112,6 +112,10 @@ public class CrmJob {
                     entity.setUserId(object.get("userId").toString());
                     JSONObject name = (JSONObject) object1.get("data");
                     entity.setContactName(name.get("contact_name") == null?"":name.get("contact_name").toString());
+                    JSONObject phone = (JSONObject) name.get("contact_phone");
+                    if (phone != null){
+                        entity.setMobile(phone.get("value") == null?"":phone.get("value").toString());
+                    }
                     JSONObject data = (JSONObject) object1.get("extendData");
                     entity.setContactUnionId(data.get("contactUnionId") == null?"":data.get("contactUnionId").toString());
                     DateFormat format = new SimpleDateFormat("yyyy-MM-dd");

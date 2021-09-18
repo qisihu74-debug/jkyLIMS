@@ -3,7 +3,6 @@ package com.stu.manage.demo.service;
 import com.aliyun.dingtalkcrm_1_0.models.GetOfficialAccountContactsResponse;
 import com.stu.manage.demo.entity.CrmEntity;
 
-import java.util.HashSet;
 import java.util.List;
 
 /**

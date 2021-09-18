@@ -53,4 +53,9 @@ public class CrmEntity {
      */
     private String nextToken;
 
+    /**
+     * 手机号
+     */
+    private String mobile;
+
 }
