@@ -11,12 +11,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * @author gjl
  */
 
 @SpringBootApplication
+@EnableScheduling
 @MapperScan("com.stu.manage.demo.mapper")
 public class MyApplication {
     @Value("${server.port}")

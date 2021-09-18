@@ -1,14 +1,20 @@
 package com.stu.manage.demo.service.impl;
 
-import com.aliyun.dingtalkcrm_1_0.Client;
 import com.aliyun.dingtalkcrm_1_0.models.GetOfficialAccountContactsResponse;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.stu.manage.demo.entity.CrmEntity;
+import com.stu.manage.demo.mapper.CrmMapper;
 import com.stu.manage.demo.service.CrmService;
 import com.stu.manage.demo.util.AccessTokenSingleton;
 import com.stu.manage.demo.util.DingUtils;
-import com.stu.manage.demo.util.GenID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * @author gjl
@@ -21,18 +27,35 @@ import org.springframework.stereotype.Service;
 @Service
 public class CrmServiceImpl implements CrmService {
     Logger logger = LoggerFactory.getLogger(CrmServiceImpl.class);
+    @Autowired
+    private CrmMapper crmMapper;
 
     @Override
-    public void getCustomer(String tokenUrl, String appKey, String appsecret) throws Exception {
-        String token = AccessTokenSingleton.getInstance().getToken(tokenUrl, appKey, appsecret);
-        GetOfficialAccountContactsResponse response = DingUtils.getServiceWindow(token, "10");
-        if (response != null){
-            //发送消息
-            Boolean aBoolean = DingUtils.sendMessageToServiceWindow(token,"账号/密码：psh/111111", GenID.getUUID(),
-                    "sxmwx7mtl2cnzvmxlwmnznpzty");
-            if (aBoolean){
+    public CrmEntity checkExist(String instanceId) {
+        QueryWrapper<CrmEntity> queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("instance_id",instanceId);
+        return crmMapper.selectOne(queryWrapper);
+    }
 
-            }
+    @Override
+    public GetOfficialAccountContactsResponse getCustomer(String tokenUrl, String appKey, String appsecret, String nextToken) throws Exception {
+        String token = AccessTokenSingleton.getInstance().getToken(tokenUrl, appKey, appsecret);
+        GetOfficialAccountContactsResponse response = DingUtils.getServiceWindow(token, nextToken);
+        return response;
+    }
+
+    @Override
+    public String getMaxIndex() {
+        return crmMapper.getMaxIndex();
+    }
+
+    @Override
+    public void BatchSave(List<CrmEntity> list) {
+        try {
+            crmMapper.BatchSave(list);
+        }catch (Exception e){
+            logger.error("crm数据入库失败:{}",e);
         }
+
     }
 }

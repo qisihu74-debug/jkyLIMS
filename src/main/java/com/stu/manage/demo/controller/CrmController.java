@@ -32,21 +32,12 @@ public class CrmController {
     @Autowired
     private CrmService crmService;
 
-    @Value("${dingtalk.token_url}")
-    private String tokenUrl;
-    @Value("${dingtalk.app_key}")
-    private String appKey;
-    @Value("${dingtalk.app_secret}")
-    private String appsecret;
-
     /**
      * 获取服务窗客户信息
      * @throws Exception
      */
-    @GetMapping("getCustomer")
+    @GetMapping("")
     public  void testCrm() throws Exception {
-        crmService.getCustomer(tokenUrl,appKey,appsecret);
-
 
     }
 
