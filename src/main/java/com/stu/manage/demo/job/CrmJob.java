@@ -48,7 +48,7 @@ public class CrmJob {
     private String appsecret;
 
     @Async("syncExecutor")
-    @Scheduled(cron="0/30 * * * * ? ")
+    @Scheduled(cron="0 */30 * * * ?")
     public void sync(){
         //获取当前最大nextToken
         Boolean flag = true;
