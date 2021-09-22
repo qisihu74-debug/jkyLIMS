@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.stu.manage.demo.mapper.EntrustMapper">
+    <select id="onceMore" parameterType="Integer" resultType="com.stu.manage.demo.entity.EntrustInfo">
+        SELECT
+            entrust_id entrustId,
+            entrust_number entrustNumber,
+            entrust_type entrustType,
+            entrust_company_id entrustCompanyId,
+            witness_company_name witnessCompanyName,
+            project_id projectId,
+            project_part projectPart,
+            sample_receive_way sampleReceiveWay,
+            check_purpose checkPurpose,
+            report_num reportNum,
+            report_get_way reportGetWay,
+            entrust_note entrustNote,
+            entrust_data entrustData
+        FROM
+            jt_entrust_info
+        WHERE
+            entrust_id = #{entrustId}
+    </select>
+</mapper>
