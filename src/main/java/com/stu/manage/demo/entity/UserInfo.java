@@ -1,6 +1,5 @@
 package com.stu.manage.demo.entity;
 
-import com.sun.istack.internal.NotNull;
 import lombok.Data;
 
 /**
@@ -25,8 +24,6 @@ public class UserInfo {
     private String signatureId;
 
     private Integer signatureFileId;
-
-    @NotNull
     private Integer depId;
     private String depName;
     //private List<RoleCode> roleCodeList;

@@ -1,6 +1,8 @@
 package com.stu.manage.demo.util;
 
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -59,8 +61,7 @@ public class CryptoUtil {
      * String明文输入,String密文输出
      */
     public static String encode(String key, String str) {
-        return Base64.encodeBase64URLSafeString(obtainEncode(key, str.getBytes()));
-        // return Hex.encodeHexString(obtainEncode(key, str.getBytes()));
+        return Hex.encodeHexString(obtainEncode(key, str.getBytes()));
         // 可以转化为16进制数据
     }
 
@@ -77,14 +78,15 @@ public class CryptoUtil {
      * 以String密文输入,String明文输出
      */
     public static String decode(String key, String str) {
-        return new String(obtainDecode(key, Base64.decodeBase64(str)));
-        // 可以转化为16进制的数据
-//      try {
-//          return new String(obtainDecode(key, Hex.decodeHex(str.toCharArray())));
-//      } catch (DecoderException e) {
-//          // TODO Auto-generated catch block
-//          e.printStackTrace();
-//      }
+        //return new String(obtainDecode(key, Base64.decodeBase64(str)));
+        String s = "";
+        try {
+            byte[] bytes = Hex.decodeHex(str.toCharArray());
+            s = new String(obtainDecode(key, bytes));
+        }catch (Exception e){
+
+        }
+        return s;
     }
 
     /**

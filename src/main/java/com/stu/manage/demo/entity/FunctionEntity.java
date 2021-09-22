@@ -15,7 +15,7 @@ public class FunctionEntity {
     /**
      * 菜单id
      */
-    private Long id;
+    private int id;
     /**
      * 菜单名称
      */
@@ -23,7 +23,7 @@ public class FunctionEntity {
     /**
      * 菜单上级id
      */
-    private Long parentId;
+    private int parentId;
     /**
      * 组件名称
      */

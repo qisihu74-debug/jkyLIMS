@@ -17,7 +17,7 @@ import java.util.List;
 @Service
 public class FunctionServiceImpl implements FunctionService {
     @Override
-    public List<FunctionEntity> getFunctionsById(Long id) {
+    public List<FunctionEntity> getFunctionsById(int id) {
         //TODO
         return null;
     }

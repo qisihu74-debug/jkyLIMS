@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @TableName(value = "jky_ding_lims_user")
 public class Login {
-    private Long id;
+    private int id;
     /**
      * 用户名称
      */
