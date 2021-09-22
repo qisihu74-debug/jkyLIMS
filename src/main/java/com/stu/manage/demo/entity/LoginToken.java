@@ -3,6 +3,7 @@ package com.stu.manage.demo.entity;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * 登录验证成功返回
@@ -13,41 +14,22 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class LoginToken {
-    @NotNull
+    /**
+     * 管理员姓名
+     */
     private String name;
-    private String passWord;
     private String token;
     private String adminId;
+    private String passWord;
+    /**
+     * 账号
+     */
+    private String nick;
+    /**
+     * 菜单
+     */
+    private List<FunctionEntity> list;
 
-    public String getName() {
-        return name;
-    }
+    private UserInfo userInfo;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getPassWord() {
-        return passWord;
-    }
-
-    public void setPassWord(String passWord) {
-        this.passWord = passWord;
-    }
-
-    public String getAdminId() {
-        return adminId;
-    }
-
-    public void setAdminId(String adminId) {
-        this.adminId = adminId;
-    }
 }

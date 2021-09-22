@@ -21,9 +21,9 @@ public class LoginServiceImpl implements LoginService {
     private LoginMapper loginMapper;
 
     @Override
-    public Login getAdmin(String name){
+    public Login getAdmin(String nick){
         QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.eq("admin_name",name);
+        queryWrapper.eq("nick",nick);
         return loginMapper.selectOne(queryWrapper);
     }
 

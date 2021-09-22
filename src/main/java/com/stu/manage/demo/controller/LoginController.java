@@ -2,6 +2,7 @@ package com.stu.manage.demo.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.stu.manage.demo.entity.FunctionEntity;
 import com.stu.manage.demo.entity.Login;
 import com.stu.manage.demo.entity.LoginToken;
 import com.stu.manage.demo.filter.PassToken;
@@ -9,6 +10,7 @@ import com.stu.manage.demo.http.HttpClientUtil;
 import com.stu.manage.demo.result.Result;
 import com.stu.manage.demo.result.ResultEnum;
 import com.stu.manage.demo.result.ResultUtil;
+import com.stu.manage.demo.service.FunctionService;
 import com.stu.manage.demo.service.LoginService;
 import com.stu.manage.demo.util.CryptoUtil;
 import com.stu.manage.demo.util.GenID;
@@ -37,18 +39,30 @@ import java.util.List;
 public class LoginController {
    @Autowired
    private LoginService loginService;
+   @Autowired
+   private FunctionService functionService;
 
     @PassToken
     @PostMapping("login")
     public Result getadmin(@RequestBody @Valid Login login){
-        Login admin = loginService.getAdmin(login.getAdminName());
+        if (StringUtils.isEmpty(login.getNick())){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NICK.getCode(),ResultEnum.VERIFY_FAIL_NICK.getMsg());
+        }
+        if (StringUtils.isEmpty(login.getPassWord())){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_PASS_WORD.getCode(),ResultEnum.VERIFY_FAIL_PASS_WORD.getMsg());
+        }
+        Login admin = loginService.getAdmin(login.getNick());
         String decode = CryptoUtil.decode(admin.getAdminId(), admin.getPassWord());
         if(login.getPassWord().equals(decode)){
            LoginToken res=new LoginToken();
            res.setName(login.getAdminName());
            res.setAdminId(admin.getAdminId());
-           res.setPassWord(decode);
            res.setToken(TokenUtil.getToken(res));
+           res.setNick(login.getNick());
+           List<FunctionEntity> list = functionService.getFunctionsById(admin.getId());
+           res.setList(list);
+           //TODO
+           res.setUserInfo(null);
            return ResultUtil.success(res);
        }else {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL.getCode(),ResultEnum.VERIFY_FAIL.getMsg());

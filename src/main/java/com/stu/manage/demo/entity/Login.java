@@ -14,35 +14,19 @@ import javax.validation.constraints.NotNull;
 
 
 @Data
-@TableName(value = "admin")
+@TableName(value = "jky_ding_lims_user")
 public class Login {
-    @NotNull
+    private Long id;
+    /**
+     * 用户名称
+     */
     private String adminName;
-    @NotNull
     private String passWord;
     private String adminId;
-
-    public String getAdminName() {
-        return adminName;
-    }
-
-    public void setAdminName(String adminName) {
-        this.adminName = adminName;
-    }
-
-    public String getPassWord() {
-        return passWord;
-    }
-
-    public void setPassWord(String passWord) {
-        this.passWord = passWord;
-    }
-
-    public String getAdminId() {
-        return adminId;
-    }
-
-    public void setAdminId(String adminId) {
-        this.adminId = adminId;
-    }
+    /**
+     * 账号
+     */
+    private String nick;
+    private String mobile;
+    private String address;
 }

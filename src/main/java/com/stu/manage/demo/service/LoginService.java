@@ -14,10 +14,10 @@ public interface LoginService {
     /**
      * 查询管理员对应的密码
      *
-     * @param name
+     * @param nick
      * @return String
      */
-    Login getAdmin(String name);
+    Login getAdmin(String nick);
 
     /**
      * 获取用户对象
