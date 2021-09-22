@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.stu.manage.demo.mapper.ProductMapper">
+    <select id="getProductType" resultType="com.stu.manage.demo.entity.ProductVo">
+        SELECT
+            product_type_name text,
+            product_type value
+        FROM
+            s_product_type
+        WHERE
+            is_valid = 1
+    </select>
+    <select id="getProduct" parameterType="Integer" resultType="com.stu.manage.demo.entity.ProductVo">
+        SELECT
+            product_name text,
+            product_id VALUE
+        FROM
+            d_product_msg
+        WHERE
+            valid = 1
+          AND product_type = #{type}
+    </select>
+</mapper>
