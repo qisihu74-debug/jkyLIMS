@@ -57,6 +57,7 @@ public class LoginController {
            LoginToken res=new LoginToken();
            res.setName(login.getAdminName());
            res.setAdminId(admin.getAdminId());
+           res.setPassWord(decode);
            res.setToken(TokenUtil.getToken(res));
            res.setNick(login.getNick());
            List<FunctionEntity> list = functionService.getFunctionsById(admin.getId());

@@ -1,7 +1,10 @@
 package com.stu.manage.demo.service.impl;
 
+import com.stu.manage.demo.entity.FunctionEntity;
 import com.stu.manage.demo.service.FunctionService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author gjl
@@ -13,4 +16,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class FunctionServiceImpl implements FunctionService {
+    @Override
+    public List<FunctionEntity> getFunctionsById(Long id) {
+        //TODO
+        return null;
+    }
 }
