@@ -86,4 +86,132 @@ public class EntrustInfo {
      * 备注信息
      */
     private String entrustNote;
+
+    public Integer getEntrustId() {
+        return entrustId;
+    }
+
+    public void setEntrustId(Integer entrustId) {
+        this.entrustId = entrustId;
+    }
+
+    public String getEntrustNumber() {
+        return entrustNumber;
+    }
+
+    public void setEntrustNumber(String entrustNumber) {
+        this.entrustNumber = entrustNumber;
+    }
+
+    public Integer getEntrustType() {
+        return entrustType;
+    }
+
+    public void setEntrustType(Integer entrustType) {
+        this.entrustType = entrustType;
+    }
+
+    public Integer getEntrustCompanyId() {
+        return entrustCompanyId;
+    }
+
+    public void setEntrustCompanyId(Integer entrustCompanyId) {
+        this.entrustCompanyId = entrustCompanyId;
+    }
+
+    public String getEntrustPeople() {
+        return entrustPeople;
+    }
+
+    public void setEntrustPeople(String entrustPeople) {
+        this.entrustPeople = entrustPeople;
+    }
+
+    public String getEntrustPeoplePhone() {
+        return entrustPeoplePhone;
+    }
+
+    public void setEntrustPeoplePhone(String entrustPeoplePhone) {
+        this.entrustPeoplePhone = entrustPeoplePhone;
+    }
+
+    public String getWitnessCompanyName() {
+        return witnessCompanyName;
+    }
+
+    public void setWitnessCompanyName(String witnessCompanyName) {
+        this.witnessCompanyName = witnessCompanyName;
+    }
+
+    public String getWitnessPeople() {
+        return witnessPeople;
+    }
+
+    public void setWitnessPeople(String witnessPeople) {
+        this.witnessPeople = witnessPeople;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getProjectPart() {
+        return projectPart;
+    }
+
+    public void setProjectPart(String projectPart) {
+        this.projectPart = projectPart;
+    }
+
+    public String getSampleReceiveWay() {
+        return sampleReceiveWay;
+    }
+
+    public void setSampleReceiveWay(String sampleReceiveWay) {
+        this.sampleReceiveWay = sampleReceiveWay;
+    }
+
+    public String getCheckPurpose() {
+        return checkPurpose;
+    }
+
+    public void setCheckPurpose(String checkPurpose) {
+        this.checkPurpose = checkPurpose;
+    }
+
+    public String getReportGetWay() {
+        return reportGetWay;
+    }
+
+    public void setReportGetWay(String reportGetWay) {
+        this.reportGetWay = reportGetWay;
+    }
+
+    public Integer getReportNum() {
+        return reportNum;
+    }
+
+    public void setReportNum(Integer reportNum) {
+        this.reportNum = reportNum;
+    }
+
+    public String getEntrustData() {
+        return entrustData;
+    }
+
+    public void setEntrustData(String entrustData) {
+        this.entrustData = entrustData;
+    }
+
+    public String getEntrustNote() {
+        return entrustNote;
+    }
+
+    public void setEntrustNote(String entrustNote) {
+        this.entrustNote = entrustNote;
+    }
 }
