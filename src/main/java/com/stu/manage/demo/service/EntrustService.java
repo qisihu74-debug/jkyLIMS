@@ -1,6 +1,7 @@
 package com.stu.manage.demo.service;
 
 import com.stu.manage.demo.entity.EntrustInfo;
+import com.stu.manage.demo.entity.StatusEntity;
 
 public interface EntrustService {
     /**
@@ -9,4 +10,11 @@ public interface EntrustService {
      * @return
      */
     EntrustInfo onceMore(int entrustId);
+
+    /**
+     * 查询委托单状态
+     * @param id
+     * @return
+     */
+    StatusEntity status(Integer id);
 }
