@@ -52,6 +52,9 @@ public class LoginController {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_PASS_WORD.getCode(),ResultEnum.VERIFY_FAIL_PASS_WORD.getMsg());
         }
         Login admin = loginService.getAdmin(login.getNick());
+        if (admin == null){
+            return ResultUtil.error(ResultEnum.STUDENT_NOT_EXIST.getCode(),"用户不存在！");
+        }
         String decode = DESUtils.decrypt(admin.getPassWord(),admin.getAdminId());
         if(login.getPassWord().equals(decode)){
            LoginToken res=new LoginToken();

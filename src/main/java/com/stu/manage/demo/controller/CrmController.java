@@ -33,11 +33,13 @@ public class CrmController {
     private CrmService crmService;
 
     /**
-     * 获取服务窗客户信息
-     * @throws Exception
+     * 授权crm数据，授权后加入用户表和分配
+     * 账号密码推送到客户 服务窗信息
+     * @throws Exception TODO
      */
-    @GetMapping("")
-    public  void testCrm() throws Exception {
+    @GetMapping("authorize")
+    public  void testCrm(String userId) throws Exception {
+        crmService.authorize(userId);
 
     }
 

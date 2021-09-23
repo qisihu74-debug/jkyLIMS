@@ -12,11 +12,14 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * @author gjl
+ * EnableTransactionManagement开启事务
+ * EnableScheduling开启定时任务
  */
-
+@EnableTransactionManagement
 @SpringBootApplication
 @EnableScheduling
 @MapperScan("com.stu.manage.demo.mapper")
