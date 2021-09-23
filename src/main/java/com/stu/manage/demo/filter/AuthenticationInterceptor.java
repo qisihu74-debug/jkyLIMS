@@ -9,7 +9,7 @@ import com.stu.manage.demo.Exception.CommonEnum;
 import com.stu.manage.demo.Exception.JkyException;
 import com.stu.manage.demo.entity.LoginToken;
 import com.stu.manage.demo.service.LoginService;
-import com.stu.manage.demo.util.CryptoUtil;
+import com.stu.manage.demo.util.DESUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -60,7 +60,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 throw new RuntimeException ("401");
             }
             LoginToken admin = loginService.getUser(adminId);
-            String decode = CryptoUtil.decode(admin.getAdminId(), admin.getPassWord());
+            String decode = DESUtils.decrypt(admin.getPassWord(),admin.getAdminId());
             if (admin == null) {
                 throw new JkyException ("用户不存在");
             }

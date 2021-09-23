@@ -3,9 +3,12 @@ package com.stu.manage.demo.util;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -19,6 +22,7 @@ import java.security.SecureRandom;
  * @Copyright © 河南交科院
  */
 public class CryptoUtil {
+    public static Logger logger = LoggerFactory.getLogger(CryptoUtil.class);
     public static Key DEFAULT_KEY = null;
 
     public static final String DEFAULT_SECRET_KEY = "1qaz2wsx3edc$RFV%TGB^YHN&UJM";
@@ -33,6 +37,7 @@ public class CryptoUtil {
      * 获得key
      **/
     public static Key obtainKey(String key) {
+        String charset = "utf-8";
         if (key == null) {
             return DEFAULT_KEY;
         }
@@ -42,7 +47,14 @@ public class CryptoUtil {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        generator.init(new SecureRandom(key.getBytes()));
+        byte[] bytes = null;
+        try {
+            bytes = key.getBytes(charset);
+        }catch (UnsupportedEncodingException e){
+            logger.error("编码不支持的异常:{}",e);
+        }
+
+        generator.init(new SecureRandom(bytes));
         Key key1 = generator.generateKey();
         generator = null;
         return key1;
@@ -61,8 +73,13 @@ public class CryptoUtil {
      * String明文输入,String密文输出
      */
     public static String encode(String key, String str) {
-        return Hex.encodeHexString(obtainEncode(key, str.getBytes()));
-        // 可以转化为16进制数据
+        byte[] bytes = null;
+        try {
+            bytes = str.getBytes("utf-8");
+        }catch (UnsupportedEncodingException e){
+            logger.error("编码不支持的异常:{}",e);
+        }
+        return Base64.encodeBase64URLSafeString(obtainEncode(key, bytes));
     }
 
     /**
@@ -78,15 +95,7 @@ public class CryptoUtil {
      * 以String密文输入,String明文输出
      */
     public static String decode(String key, String str) {
-        //return new String(obtainDecode(key, Base64.decodeBase64(str)));
-        String s = "";
-        try {
-            byte[] bytes = Hex.decodeHex(str.toCharArray());
-            s = new String(obtainDecode(key, bytes));
-        }catch (Exception e){
-
-        }
-        return s;
+        return new String(obtainDecode(key, Base64.decodeBase64(str)));
     }
 
     /**

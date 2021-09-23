@@ -12,8 +12,8 @@ import com.stu.manage.demo.result.ResultEnum;
 import com.stu.manage.demo.result.ResultUtil;
 import com.stu.manage.demo.service.FunctionService;
 import com.stu.manage.demo.service.LoginService;
-import com.stu.manage.demo.util.CryptoUtil;
-import com.stu.manage.demo.util.GenID;
+import com.stu.manage.demo.util.DESUtils;
+import com.stu.manage.demo.util.IdGenerator;
 import com.stu.manage.demo.util.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -52,7 +52,7 @@ public class LoginController {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_PASS_WORD.getCode(),ResultEnum.VERIFY_FAIL_PASS_WORD.getMsg());
         }
         Login admin = loginService.getAdmin(login.getNick());
-        String decode = CryptoUtil.decode(admin.getAdminId(), admin.getPassWord());
+        String decode = DESUtils.decrypt(admin.getPassWord(),admin.getAdminId());
         if(login.getPassWord().equals(decode)){
            LoginToken res=new LoginToken();
            res.setName(login.getAdminName());
@@ -83,8 +83,8 @@ public class LoginController {
         if (StringUtils.isEmpty(login.getPassWord())){
             return ResultUtil.error(-1,"请输入密码");
         }
-        login.setAdminId(GenID.getUUID());
-        String encode = CryptoUtil.encode(login.getAdminId(), login.getPassWord());
+        login.setAdminId(IdGenerator.get());
+        String encode = DESUtils.encrypt(login.getPassWord(),login.getAdminId());
         login.setPassWord(encode);
         int save = loginService.save(login);
         if (save == 1){
