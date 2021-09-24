@@ -15,4 +15,5 @@ public interface JtEntrustCheckInfoMapper {
 
     int insertSelective(JtEntrustCheckInfo record);
 
+
 }

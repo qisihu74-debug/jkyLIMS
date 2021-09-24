@@ -30,7 +30,6 @@ public class JtEntrustCheckItem {
     private String receivablePrice;
 
     private String totalReceivablePrice;
-
     /**
      * 数据传输需要和表结构无关
      */

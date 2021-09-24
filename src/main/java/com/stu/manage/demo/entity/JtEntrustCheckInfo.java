@@ -33,7 +33,6 @@ public class JtEntrustCheckInfo {
     private Integer source;
 
     private String standardCost;
-
     /**
      * 传输需要与表结构无关
      */

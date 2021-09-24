@@ -39,4 +39,6 @@ public class jtEntrustType {
     // 取报告项
     private String reportGetWay;
 
+
+
 }

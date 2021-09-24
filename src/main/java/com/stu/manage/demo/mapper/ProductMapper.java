@@ -22,4 +22,5 @@ public interface ProductMapper {
      * @return
      */
     List<ProductVo> getProduct(int type);
+
 }

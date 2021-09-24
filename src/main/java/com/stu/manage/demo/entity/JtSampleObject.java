@@ -45,4 +45,6 @@ public class JtSampleObject {
     private String sampleBatch;
 
     private List<JtEntrustCheckItem> checkList;
+
+
 }

@@ -80,4 +80,5 @@ public class JtEntrustInfo {
     private Integer financeUserId;
 
     private String acceptUserName;
+
 }

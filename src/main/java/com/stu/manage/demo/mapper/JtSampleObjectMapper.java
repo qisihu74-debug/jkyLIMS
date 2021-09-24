@@ -15,4 +15,5 @@ public interface JtSampleObjectMapper {
 
     int insertSelective(JtSampleObject record);
 
+
 }

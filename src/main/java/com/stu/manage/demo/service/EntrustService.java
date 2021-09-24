@@ -41,4 +41,5 @@ public interface EntrustService {
      * @return
      */
     List<ProductVo> getCheckBasisByProductId(int productId);
+
 }

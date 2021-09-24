@@ -257,4 +257,5 @@
     <select id="getreportGetWay" resultType="com.stu.manage.demo.entity.ProductVo">
         SELECT report_get_way_id value,report_get_way text FROM jt_report_get_way;
     </select>
+
 </mapper>

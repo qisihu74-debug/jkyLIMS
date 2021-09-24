@@ -137,7 +137,7 @@ public class EntrustServiceImpl implements EntrustService {
         for (JtEntrustCheckItem jtEntrustCheckItem:jtSampleObject.getCheckList()) {
             System.out.println("解析 产品下的 检测项数据 "+jtEntrustCheckItem);
             jtEntrustCheckItem.setProductId(jtSampleObject.getProductId());
-            jtEntrustCheckItem.setEntrustId(jtEntrustInfo.getEntrustId());
+            jtEntrustCheckItem.setSampleId(jtSampleObject.getSampleObjectId());
             jtEntrustCheckItemMapper.insertSelective(jtEntrustCheckItem);
         }
 

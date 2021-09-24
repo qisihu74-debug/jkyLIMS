@@ -14,4 +14,5 @@ import org.springframework.stereotype.Component;
 public interface JtEntrustCheckItemMapper {
 
     int insertSelective(JtEntrustCheckItem record);
+
 }

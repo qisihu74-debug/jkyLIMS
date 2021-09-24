@@ -48,7 +48,6 @@ public class EntrustController {
     {
         System.out.println("展示存储信息！   "+map);
         int status = entrustService.addEntrustInfo(map);
-//        System.out.println("存储状态为" + status);
     }
 
     /**

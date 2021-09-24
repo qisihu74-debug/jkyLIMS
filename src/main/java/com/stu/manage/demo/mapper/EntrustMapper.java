@@ -43,4 +43,5 @@ public interface EntrustMapper {
      * @return
      */
     List<ProductVo> getCheckBasisByProductId(int productId);
+
 }
