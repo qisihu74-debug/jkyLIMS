@@ -4,14 +4,10 @@ import com.stu.manage.demo.entity.CheckItemCostVo;
 import com.stu.manage.demo.entity.EntrustInfo;
 import com.stu.manage.demo.entity.JtEntrustInfo;
 import com.stu.manage.demo.entity.ProductVo;
-import com.stu.manage.demo.entity.jtEntrustType;
-
-import java.util.List;
-import java.util.Map;
-import com.stu.manage.demo.entity.ProductVo;
 import com.stu.manage.demo.entity.StatusEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface EntrustService {
     /**
