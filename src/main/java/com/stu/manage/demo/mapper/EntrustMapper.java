@@ -58,4 +58,5 @@ public interface EntrustMapper extends BaseMapper<EntrustStat> {
      * @return
      */
     List<SampleStatus> getTaskStat(Integer id);
+
 }

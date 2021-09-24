@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.stu.manage.demo.mapper.JtEntrustCheckItemMapper">
+
+    <insert id="insertSelective" parameterType="com.stu.manage.demo.entity.JtEntrustCheckItem">
+        insert into jt_entrust_check_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="entrustCheckItemId != null">
+                entrust_check_item_id,
+            </if>
+            <if test="entrustId != null">
+                entrust_id,
+            </if>
+            <if test="productId != null">
+                product_id,
+            </if>
+            <if test="checkItemId != null">
+                check_item_id,
+            </if>
+            <if test="standardId != null">
+                standard_id,
+            </if>
+            <if test="sampleId != null">
+                sample_id,
+            </if>
+            <if test="checkTimes != null">
+                check_times,
+            </if>
+            <if test="proceedsPrice != null">
+                proceeds_price,
+            </if>
+            <if test="totalProceedsPrice != null">
+                total_proceeds_price,
+            </if>
+            <if test="receivablePrice != null">
+                receivable_price,
+            </if>
+            <if test="totalReceivablePrice != null">
+                total_receivable_price,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="entrustCheckItemId != null">
+                #{entrustCheckItemId,jdbcType=INTEGER},
+            </if>
+            <if test="entrustId != null">
+                #{entrustId,jdbcType=INTEGER},
+            </if>
+            <if test="productId != null">
+                #{productId,jdbcType=INTEGER},
+            </if>
+            <if test="checkItemId != null">
+                #{checkItemId,jdbcType=INTEGER},
+            </if>
+            <if test="standardId != null">
+                #{standardId,jdbcType=INTEGER},
+            </if>
+            <if test="sampleId != null">
+                #{sampleId,jdbcType=INTEGER},
+            </if>
+            <if test="checkTimes != null">
+                #{checkTimes,jdbcType=INTEGER},
+            </if>
+            <if test="proceedsPrice != null">
+                #{proceedsPrice,jdbcType=VARCHAR},
+            </if>
+            <if test="totalProceedsPrice != null">
+                #{totalProceedsPrice,jdbcType=VARCHAR},
+            </if>
+            <if test="receivablePrice != null">
+                #{receivablePrice,jdbcType=VARCHAR},
+            </if>
+            <if test="totalReceivablePrice != null">
+                #{totalReceivablePrice,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+
+
+</mapper>

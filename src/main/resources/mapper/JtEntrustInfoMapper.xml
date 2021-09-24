@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.stu.manage.demo.mapper.JtEntrustInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.stu.manage.demo.entity.JtEntrustInfo">
+        <id column="entrust_id" jdbcType="INTEGER" property="entrustId" />
+        <result column="entrust_number" jdbcType="VARCHAR" property="entrustNumber" />
+        <result column="entrust_type" jdbcType="INTEGER" property="entrustType" />
+        <result column="entrust_company_id" jdbcType="INTEGER" property="entrustCompanyId" />
+        <result column="witness_company_name" jdbcType="VARCHAR" property="witnessCompanyName" />
+        <result column="project_id" jdbcType="VARCHAR" property="projectId" />
+        <result column="project_part" jdbcType="VARCHAR" property="projectPart" />
+        <result column="sample_receive_way" jdbcType="VARCHAR" property="sampleReceiveWay" />
+        <result column="check_purpose" jdbcType="VARCHAR" property="checkPurpose" />
+        <result column="product_standard_source" jdbcType="VARCHAR" property="productStandardSource" />
+        <result column="report_num" jdbcType="INTEGER" property="reportNum" />
+        <result column="report_get_way" jdbcType="VARCHAR" property="reportGetWay" />
+        <result column="report_get_company" jdbcType="VARCHAR" property="reportGetCompany" />
+        <result column="contact_address" jdbcType="VARCHAR" property="contactAddress" />
+        <result column="contact_people" jdbcType="VARCHAR" property="contactPeople" />
+        <result column="contact_tel" jdbcType="VARCHAR" property="contactTel" />
+        <result column="entrust_people" jdbcType="VARCHAR" property="entrustPeople" />
+        <result column="entrust_people_phone" jdbcType="VARCHAR" property="entrustPeoplePhone" />
+        <result column="witness_people" jdbcType="VARCHAR" property="witnessPeople" />
+        <result column="entrust_note" jdbcType="VARCHAR" property="entrustNote" />
+        <result column="entrust_flow_type" jdbcType="INTEGER" property="entrustFlowType" />
+        <result column="entrust_data" jdbcType="VARCHAR" property="entrustData" />
+        <result column="com_name" jdbcType="VARCHAR" property="comName" />
+        <result column="entrust_status" jdbcType="INTEGER" property="entrustStatus" />
+        <result column="entrust_type_name" jdbcType="VARCHAR" property="entrustTypeName" />
+        <result column="entrust_create_user_name" jdbcType="VARCHAR" property="entrustCreateUserName" />
+        <result column="entrust_create_user_id" jdbcType="INTEGER" property="entrustCreateUserId" />
+        <result column="finance_user_name" jdbcType="VARCHAR" property="financeUserName" />
+        <result column="audit_time" jdbcType="VARCHAR" property="auditTime" />
+        <result column="accept_user_id" jdbcType="INTEGER" property="acceptUserId" />
+        <result column="accept_time" jdbcType="VARCHAR" property="acceptTime" />
+        <result column="accept_user_name" jdbcType="VARCHAR" property="acceptUserName" />
+        <result column="pay_mode" jdbcType="INTEGER" property="payMode" />
+        <result column="finance_user_id" jdbcType="INTEGER" property="financeUserId" />
+        <result column="entrust_company_name" jdbcType="VARCHAR" property="entrustCompanyName" />
+    </resultMap>
+
+    <insert id="insertSelective" useGeneratedKeys="true" keyProperty="entrustId" parameterType="com.stu.manage.demo.entity.JtEntrustInfo">
+        insert into jt_entrust_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="entrustId != null">
+                entrust_id,
+            </if>
+            <if test="entrustNumber != null">
+                entrust_number,
+            </if>
+            <if test="entrustType != null">
+                entrust_type,
+            </if>
+            <if test="entrustCompanyId != null">
+                entrust_company_id,
+            </if>
+            <if test="witnessCompanyName != null">
+                witness_company_name,
+            </if>
+            <if test="projectId != null">
+                project_id,
+            </if>
+            <if test="projectPart != null">
+                project_part,
+            </if>
+            <if test="sampleReceiveWay != null">
+                sample_receive_way,
+            </if>
+            <if test="checkPurpose != null">
+                check_purpose,
+            </if>
+            <if test="productStandardSource != null">
+                product_standard_source,
+            </if>
+            <if test="reportNum != null">
+                report_num,
+            </if>
+            <if test="reportGetWay != null">
+                report_get_way,
+            </if>
+            <if test="reportGetCompany != null">
+                report_get_company,
+            </if>
+            <if test="contactAddress != null">
+                contact_address,
+            </if>
+            <if test="contactPeople != null">
+                contact_people,
+            </if>
+            <if test="contactTel != null">
+                contact_tel,
+            </if>
+            <if test="entrustPeople != null">
+                entrust_people,
+            </if>
+            <if test="entrustPeoplePhone != null">
+                entrust_people_phone,
+            </if>
+            <if test="witnessPeople != null">
+                witness_people,
+            </if>
+            <if test="entrustNote != null">
+                entrust_note,
+            </if>
+            <if test="entrustFlowType != null">
+                entrust_flow_type,
+            </if>
+            <if test="entrustData != null">
+                entrust_data,
+            </if>
+            <if test="entrustCreateUserId != null">
+                entrust_create_user_id,
+            </if>
+            <if test="entrustStatus != null">
+                entrust_status,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="entrustId != null">
+                #{entrustId,jdbcType=INTEGER},
+            </if>
+            <if test="entrustNumber != null">
+                #{entrustNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="entrustType != null">
+                #{entrustType,jdbcType=INTEGER},
+            </if>
+            <if test="entrustCompanyId != null">
+                #{entrustCompanyId,jdbcType=INTEGER},
+            </if>
+            <if test="witnessCompanyName != null">
+                #{witnessCompanyName,jdbcType=VARCHAR},
+            </if>
+            <if test="projectId != null">
+                #{projectId,jdbcType=VARCHAR},
+            </if>
+            <if test="projectPart != null">
+                #{projectPart,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleReceiveWay != null">
+                #{sampleReceiveWay,jdbcType=VARCHAR},
+            </if>
+            <if test="checkPurpose != null">
+                #{checkPurpose,jdbcType=VARCHAR},
+            </if>
+            <if test="productStandardSource != null">
+                #{productStandardSource,jdbcType=VARCHAR},
+            </if>
+            <if test="reportNum != null">
+                #{reportNum,jdbcType=INTEGER},
+            </if>
+            <if test="reportGetWay != null">
+                #{reportGetWay,jdbcType=VARCHAR},
+            </if>
+            <if test="reportGetCompany != null">
+                #{reportGetCompany,jdbcType=VARCHAR},
+            </if>
+            <if test="contactAddress != null">
+                #{contactAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="contactPeople != null">
+                #{contactPeople,jdbcType=VARCHAR},
+            </if>
+            <if test="contactTel != null">
+                #{contactTel,jdbcType=VARCHAR},
+            </if>
+            <if test="entrustPeople != null">
+                #{entrustPeople,jdbcType=VARCHAR},
+            </if>
+            <if test="entrustPeoplePhone != null">
+                #{entrustPeoplePhone,jdbcType=VARCHAR},
+            </if>
+            <if test="witnessPeople != null">
+                #{witnessPeople,jdbcType=VARCHAR},
+            </if>
+            <if test="entrustNote != null">
+                #{entrustNote,jdbcType=VARCHAR},
+            </if>
+            <if test="entrustFlowType != null">
+                #{entrustFlowType,jdbcType=INTEGER},
+            </if>
+            <if test="entrustData != null">
+                #{entrustData,jdbcType=VARCHAR},
+            </if>
+            <if test="entrustCreateUserId != null">
+                #{entrustCreateUserId,jdbcType=INTEGER},
+            </if>
+            <if test="entrustStatus != null">
+                #{entrustStatus,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="selectEntrustNumberForCount" resultType="int">
+    SELECT  count(a.entrust_id)
+    from jt_entrust_info a
+    where a.entrust_number like  CONCAT('',#{entrustNumber},'%')
+
+  </select>
+
+    <select id="selectCompanyName" resultType="com.stu.manage.demo.entity.Company">
+        SELECT count(*) as count,com_id as comId,
+               com_address as comAddress,com_contact_person as comContactPerson,
+               com_contact_phone as comContactPhone
+         FROM company WHERE com_name LIKE #{comName,jdbcType=VARCHAR}
+    </select>
+
+    <insert id="insertCompany" useGeneratedKeys="true" keyProperty="comId" parameterType="com.stu.manage.demo.entity.Company">
+    INSERT into company
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="comId != null">
+            com_id,
+        </if>
+        <if test="comName != null">
+            com_name,
+        </if>
+        <if test="comAddress != null">
+            com_addres,
+        </if>
+        <if test="comContactPerson != null">
+            com_contact_person,
+        </if>
+        <if test="comContactPhone != null">
+            com_contact_phone,
+        </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="comId != null">
+                #{comId,jdbcType=INTEGER},
+            </if>
+            <if test="comName != null">
+                #{comName,jdbcType=VARCHAR},
+            </if>
+            <if test="comAddress != null">
+                #{comAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="comContactPerson != null">
+                #{comContactPerson,jdbcType=VARCHAR},
+            </if>
+            <if test="comContactPhone != null">
+                #{comContactPhone,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="getEntrustTheWay" resultType="com.stu.manage.demo.entity.ProductVo">
+        SELECT entrust_type_name text,entrust_type value FROM jt_entrust_type;
+    </select>
+    <select id="getcheckPurpose" resultType="com.stu.manage.demo.entity.ProductVo">
+        SELECT check_purpose_id value,check_purpose_item text FROM jt_check_purpose;
+    </select>
+    <select id="getreceiveWay" resultType="com.stu.manage.demo.entity.ProductVo">
+        SELECT receive_way value,receive_way_name text FROM s_sample_receive_way;
+    </select>
+    <select id="getreportGetWay" resultType="com.stu.manage.demo.entity.ProductVo">
+        SELECT report_get_way_id value,report_get_way text FROM jt_report_get_way;
+    </select>
+
+</mapper>

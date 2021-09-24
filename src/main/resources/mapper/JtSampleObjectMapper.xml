@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.stu.manage.demo.mapper.JtSampleObjectMapper">
+
+    <insert id="insertSelective" useGeneratedKeys="true" keyProperty="sampleObjectId" parameterType="com.stu.manage.demo.entity.JtSampleObject">
+        insert into jt_sample_object
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="sampleObjectId != null">
+                sample_object_id,
+            </if>
+            <if test="productId != null">
+                product_id,
+            </if>
+            <if test="modelId != null">
+                model_id,
+            </if>
+            <if test="entrustCompanyId != null">
+                entrust_company_id,
+            </if>
+            <if test="productNumber != null">
+                product_number,
+            </if>
+            <if test="productCompanyName != null">
+                product_company_name,
+            </if>
+            <if test="productDate != null">
+                product_date,
+            </if>
+            <if test="sendPeople != null">
+                send_people,
+            </if>
+            <if test="receiveTime != null">
+                receive_time,
+            </if>
+            <if test="receiveUserId != null">
+                receive_user_Id,
+            </if>
+            <if test="objectCount != null">
+                object_count,
+            </if>
+            <if test="storagePlace != null">
+                storage_place,
+            </if>
+            <if test="receiveWay != null">
+                receive_way,
+            </if>
+            <if test="contactTel != null">
+                contact_tel,
+            </if>
+            <if test="sampleObjectNote != null">
+                sample_object_note,
+            </if>
+            <if test="sampleBatch != null">
+                sample_batch,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="sampleObjectId != null">
+                #{sampleObjectId,jdbcType=INTEGER},
+            </if>
+            <if test="productId != null">
+                #{productId,jdbcType=INTEGER},
+            </if>
+            <if test="modelId != null">
+                #{modelId,jdbcType=VARCHAR},
+            </if>
+            <if test="entrustCompanyId != null">
+                #{entrustCompanyId,jdbcType=INTEGER},
+            </if>
+            <if test="productNumber != null">
+                #{productNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="productCompanyName != null">
+                #{productCompanyName,jdbcType=VARCHAR},
+            </if>
+            <if test="productDate != null">
+                #{productDate,jdbcType=VARCHAR},
+            </if>
+            <if test="sendPeople != null">
+                #{sendPeople,jdbcType=VARCHAR},
+            </if>
+            <if test="receiveTime != null">
+                #{receiveTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="receiveUserId != null">
+                #{receiveUserId,jdbcType=INTEGER},
+            </if>
+            <if test="objectCount != null">
+                #{objectCount,jdbcType=VARCHAR},
+            </if>
+            <if test="storagePlace != null">
+                #{storagePlace,jdbcType=VARCHAR},
+            </if>
+            <if test="receiveWay != null">
+                #{receiveWay,jdbcType=VARCHAR},
+            </if>
+            <if test="contactTel != null">
+                #{contactTel,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleObjectNote != null">
+                #{sampleObjectNote,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleBatch != null">
+                #{sampleBatch,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+
+
+</mapper>
