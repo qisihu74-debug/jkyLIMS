@@ -26,4 +26,11 @@ public interface EntrustMapper extends BaseMapper<EntrustStat> {
      * @return
      */
     List<SampleStatus> getSampleStat(Integer id);
+
+    /**
+     * 获取任务状态和任务流程审批状态
+     * @param id
+     * @return
+     */
+    List<SampleStatus> getTaskStat(Integer id);
 }

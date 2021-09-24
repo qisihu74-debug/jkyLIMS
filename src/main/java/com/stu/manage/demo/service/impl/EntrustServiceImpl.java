@@ -31,7 +31,16 @@ public class EntrustServiceImpl implements EntrustService {
         statusEntity.setStatus(stat.getStatus());
         //获取委托单下，样品检测状态
         List<SampleStatus> list = entrustMapper.getSampleStat(id);
-        statusEntity.setList(list);
+        //获取任务状态和任务流程审批状态
+        List<SampleStatus> ll = entrustMapper.getTaskStat(id);
+        for (SampleStatus status :ll) {
+            for (SampleStatus sampleStatus:list) {
+                if (sampleStatus.getSampleId()==status.getSampleId()){
+                    status.setReportStat(sampleStatus.getReportStat());
+                }
+            }
+        }
+        statusEntity.setList(ll);
         return statusEntity;
     }
 }
