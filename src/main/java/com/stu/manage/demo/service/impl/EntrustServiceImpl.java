@@ -40,4 +40,9 @@ public class EntrustServiceImpl implements EntrustService {
     public List<CheckItemCostVo> getCheckItemsByProductId(int productId) {
         return entrustMapper.getCheckItemsByProductId(productId);
     }
+
+    @Override
+    public List<ProductVo> getCheckBasisByProductId(int productId) {
+        return entrustMapper.getCheckBasisByProductId(productId);
+    }
 }

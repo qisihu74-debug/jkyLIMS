@@ -20,4 +20,10 @@ public interface EntrustService {
      * @return
      */
     List<CheckItemCostVo> getCheckItemsByProductId(int productId);
+    /**
+     * 根据产品获取产品检测依据
+     * @param productId
+     * @return
+     */
+    List<ProductVo> getCheckBasisByProductId(int productId);
 }

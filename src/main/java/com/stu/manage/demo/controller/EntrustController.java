@@ -29,4 +29,8 @@ public class EntrustController {
     public Result getCheckItems(int productId){
         return ResultUtil.success(entrustService.getCheckItemsByProductId(productId));
     }
+    @GetMapping("get_check_basis")
+    public Result getCheckBasis(int productId){
+        return ResultUtil.success(entrustService.getCheckBasisByProductId(productId));
+    }
 }
