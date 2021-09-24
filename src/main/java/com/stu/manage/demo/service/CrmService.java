@@ -44,4 +44,10 @@ public interface CrmService {
      * @param list
      */
     void BatchSave(List<CrmEntity> list);
+
+    /**
+     * 授权
+     * @param userId
+     */
+    void authorize(String userId);
 }

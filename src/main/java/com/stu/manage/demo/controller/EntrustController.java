@@ -32,6 +32,11 @@ public class EntrustController {
         return ResultUtil.success(entrustService.onceMore(entrustId));
     }
 
+    @GetMapping("get_check_items")
+    public Result getCheckItems(int productId){
+        return ResultUtil.success(entrustService.getCheckItemsByProductId(productId));
+    }
+
 
 
     @RequestMapping(value="/add",method = RequestMethod.POST)
