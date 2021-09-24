@@ -1,5 +1,7 @@
 package com.stu.manage.demo.entity;
 
+import java.util.List;
+
 /**
  * @Author: DLC
  * @Date: 2021/9/22 14:06
@@ -86,6 +88,33 @@ public class EntrustInfo {
      * 备注信息
      */
     private String entrustNote;
+    /**
+     * 样品信息
+     */
+    private List<SampleInfoVo> sampleInfoVos;
+
+    public EntrustInfo() {
+    }
+
+    public EntrustInfo(EntrustInfo info, List<SampleInfoVo> sampleInfoVos) {
+        this.entrustId = info.getEntrustId();
+        this.entrustNumber = info.getEntrustNumber();
+        this.entrustType = info.getEntrustType();
+        this.entrustCompanyId = info.getEntrustCompanyId();
+        this.entrustPeople = info.getEntrustPeople();
+        this.entrustPeoplePhone = info.getEntrustPeoplePhone();
+        this.witnessCompanyName = info.getWitnessCompanyName();
+        this.witnessPeople = info.getWitnessPeople();
+        this.projectId = info.getProjectId();
+        this.projectPart = info.getProjectPart();
+        this.sampleReceiveWay = info.getSampleReceiveWay();
+        this.checkPurpose = info.getCheckPurpose();
+        this.reportGetWay = info.getReportGetWay();
+        this.reportNum = info.getReportNum();
+        this.entrustData = info.getEntrustData();
+        this.entrustNote = info.getEntrustNote();
+        this.sampleInfoVos = sampleInfoVos;
+    }
 
     public Integer getEntrustId() {
         return entrustId;
@@ -213,5 +242,13 @@ public class EntrustInfo {
 
     public void setEntrustNote(String entrustNote) {
         this.entrustNote = entrustNote;
+    }
+
+    public List<SampleInfoVo> getSampleInfoVos() {
+        return sampleInfoVos;
+    }
+
+    public void setSampleInfoVos(List<SampleInfoVo> sampleInfoVos) {
+        this.sampleInfoVos = sampleInfoVos;
     }
 }
