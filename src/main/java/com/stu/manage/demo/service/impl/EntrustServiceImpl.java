@@ -61,6 +61,11 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    public List<ProductVo> getCheckBasisByProductId(int productId) {
+        return entrustMapper.getCheckBasisByProductId(productId);
+    }
+
+    @Override
     public Integer addEntrust(JtEntrustInfo jtEntrustInfo) {
         JtEntrustInfo jtEntrustInfos = new JtEntrustInfo();
         jtEntrustInfos.setEntrustNumber("2021090023");// (getEntrustNumber() 委托号

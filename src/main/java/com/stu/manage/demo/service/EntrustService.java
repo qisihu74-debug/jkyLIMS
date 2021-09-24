@@ -35,4 +35,10 @@ public interface EntrustService {
     Integer addEntrustInfo(Map<String,Object> map);
 
     Map<String, List<ProductVo>> getSelectLists();
+    /**
+     * 根据产品获取产品检测依据
+     * @param productId
+     * @return
+     */
+    List<ProductVo> getCheckBasisByProductId(int productId);
 }

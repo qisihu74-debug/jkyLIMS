@@ -75,5 +75,13 @@
             is_valid = 1
           AND T1.product_id = #{productId}
     </select>
+    <select id="getCheckBasisByProductId" parameterType="Integer" resultType="com.stu.manage.demo.entity.ProductVo">
+        SELECT
+            T1.check_basis_id value,
+	        CONCAT(T2.check_basis_doc_name,',',T2.check_basis_code) text
+        FROM
+            ( SELECT DISTINCT check_basis_id FROM d_product_check_basis_info WHERE product_id = #{productId} ) T1
+            LEFT JOIN s_check_basis_code T2 ON T1.check_basis_id = T2.check_basis_id
+    </select>
 
 </mapper>

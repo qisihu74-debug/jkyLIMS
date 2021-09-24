@@ -36,4 +36,11 @@ public interface EntrustMapper {
      * @return
      */
     List<CheckItemCostVo> getCheckItemsByProductId(int productId);
+
+    /**
+     * 根据产品获取产品判定依据
+     * @param productId
+     * @return
+     */
+    List<ProductVo> getCheckBasisByProductId(int productId);
 }
