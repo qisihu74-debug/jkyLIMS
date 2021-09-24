@@ -3,6 +3,7 @@ package com.stu.manage.demo.service;
 import com.stu.manage.demo.entity.CheckItemCostVo;
 import com.stu.manage.demo.entity.EntrustInfo;
 import com.stu.manage.demo.entity.ProductVo;
+import com.stu.manage.demo.entity.StatusEntity;
 
 import java.util.List;
 
@@ -26,4 +27,11 @@ public interface EntrustService {
      * @return
      */
     List<ProductVo> getCheckBasisByProductId(int productId);
+
+    /**
+     * 查询委托单状态
+     * @param id
+     * @return
+     */
+    StatusEntity status(Integer id);
 }

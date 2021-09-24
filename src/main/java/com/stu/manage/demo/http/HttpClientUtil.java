@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * HttpClient工具类
- * @author drs
+ * @author gjl
  */
 public class HttpClientUtil {
 

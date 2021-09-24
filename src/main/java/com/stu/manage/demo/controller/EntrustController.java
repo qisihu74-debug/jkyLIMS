@@ -33,4 +33,18 @@ public class EntrustController {
     public Result getCheckBasis(int productId){
         return ResultUtil.success(entrustService.getCheckBasisByProductId(productId));
     }
+
+    /**
+     * 根据委托单id查看委托单状态和所属样品检测进度
+     * @param id
+     * @return
+     */
+    @GetMapping("status")
+    public Result status(Integer id){
+        if (id == null){
+            return ResultUtil.error(-1,"缺少必要参数");
+        }
+        return ResultUtil.success(entrustService.status(id));
+    }
+
 }
