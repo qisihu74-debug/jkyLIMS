@@ -1,15 +1,15 @@
 package com.stu.manage.demo.entity;
 
 public class ProductVo {
-    private String text;
+    private String label;
     private int value;
 
-    public String getText() {
-        return text;
+    public String getLabel() {
+        return label;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public int getValue() {

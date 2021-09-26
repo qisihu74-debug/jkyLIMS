@@ -246,16 +246,16 @@
     </insert>
 
     <select id="getEntrustTheWay" resultType="com.stu.manage.demo.entity.ProductVo">
-        SELECT entrust_type_name text,entrust_type value FROM jt_entrust_type;
+        SELECT entrust_type_name label,entrust_type value FROM jt_entrust_type;
     </select>
     <select id="getcheckPurpose" resultType="com.stu.manage.demo.entity.ProductVo">
-        SELECT check_purpose_id value,check_purpose_item text FROM jt_check_purpose;
+        SELECT check_purpose_id value,check_purpose_item label FROM jt_check_purpose;
     </select>
     <select id="getreceiveWay" resultType="com.stu.manage.demo.entity.ProductVo">
-        SELECT receive_way value,receive_way_name text FROM s_sample_receive_way;
+        SELECT receive_way value,receive_way_name label FROM s_sample_receive_way;
     </select>
     <select id="getreportGetWay" resultType="com.stu.manage.demo.entity.ProductVo">
-        SELECT report_get_way_id value,report_get_way text FROM jt_report_get_way;
+        SELECT report_get_way_id value,report_get_way label FROM jt_report_get_way;
     </select>
 
 </mapper>
