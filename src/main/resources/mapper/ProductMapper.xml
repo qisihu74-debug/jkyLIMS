@@ -3,7 +3,7 @@
 <mapper namespace="com.stu.manage.demo.mapper.ProductMapper">
     <select id="getProductType" resultType="com.stu.manage.demo.entity.ProductVo">
         SELECT
-            product_type_name text,
+            product_type_name label,
             product_type value
         FROM
             s_product_type
@@ -12,7 +12,7 @@
     </select>
     <select id="getProduct" parameterType="Integer" resultType="com.stu.manage.demo.entity.ProductVo">
         SELECT
-            product_name text,
+            product_name label,
             product_id VALUE
         FROM
             d_product_msg
