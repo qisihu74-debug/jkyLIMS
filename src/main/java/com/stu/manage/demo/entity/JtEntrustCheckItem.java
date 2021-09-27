@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * @Author: DLC
  * @Date: 2021/9/24 15:35
- * 产品下所属检测项
+ * 产品下所属检测项1
  */
 @Data
 public class JtEntrustCheckItem {

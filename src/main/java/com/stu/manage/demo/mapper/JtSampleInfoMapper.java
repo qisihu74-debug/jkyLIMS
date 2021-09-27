@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 /**
  * @Author: DLC
  * @Date: 2021/9/26 9:30
- * 样品关联关系
+ * 样品关联关系1
  */
 @Component
 @Mapper

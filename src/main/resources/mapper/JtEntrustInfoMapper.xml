@@ -205,7 +205,6 @@
     where a.sample_number like  CONCAT('',#{sampleNumber},'%')
     order by a.sample_id desc limit 0,1
   </select>
-
     <select id="selectCompanyName" resultType="com.stu.manage.demo.entity.Company">
         SELECT count(*) as count,com_id as comId,
                com_address as comAddress,com_contact_person as comContactPerson,

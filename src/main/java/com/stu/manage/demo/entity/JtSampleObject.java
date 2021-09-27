@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @Author: DLC
  * @Date: 2021/9/24 15:02
- * 样品基本信息
+ * 样品基本信息1
  */
 @Data
 public class JtSampleObject {

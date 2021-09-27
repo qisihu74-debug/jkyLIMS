@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * @Author: DLC
  * @Date: 2021/9/27 10:25
- * 补充样品关联关系
+ * 补充样品关联关系1
  */
 @Data
 public class JtReportInfo {

@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * @Author: DLC
  * @Date: 2021/9/24 9:20
- * 委托项 价格补充信息
+ * 委托项 价格补充信息1
  */
 @Data
 public class JtEntrustCheckInfo {

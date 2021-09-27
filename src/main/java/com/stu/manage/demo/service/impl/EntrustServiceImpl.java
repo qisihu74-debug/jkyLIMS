@@ -180,7 +180,7 @@ public class EntrustServiceImpl implements EntrustService {
             //-------------------------------------------------
             for (JtSampleObject jtSampleObject:jtSampleObjects){
                 System.out.println("展示数据===="+jtSampleObject);
-                // 后台补充业务id
+                // 后台补充业务id1
                 jtSampleObject.setReceiveUserId(Integer.parseInt(jtEntrustInfo.getAcceptUserId()));//受理人默认为 程萍 160；
                 jtSampleObject.setReceiveTime(new Date());
 
