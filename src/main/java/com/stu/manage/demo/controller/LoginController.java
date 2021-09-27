@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.stu.manage.demo.entity.FunctionEntity;
 import com.stu.manage.demo.entity.Login;
 import com.stu.manage.demo.entity.LoginToken;
+import com.stu.manage.demo.entity.UserInfo;
 import com.stu.manage.demo.filter.PassToken;
 import com.stu.manage.demo.http.HttpClientUtil;
 import com.stu.manage.demo.result.Result;
@@ -65,8 +66,9 @@ public class LoginController {
            res.setNick(login.getNick());
            List<FunctionEntity> list = functionService.getFunctionsById(admin.getId());
            res.setList(list);
-           //TODO
-           res.setUserInfo(null);
+           UserInfo userInfo = new UserInfo();
+           userInfo.setUserId(admin.getUserId());
+           res.setUserInfo(userInfo);
            return ResultUtil.success(res);
        }else {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL.getCode(),ResultEnum.VERIFY_FAIL.getMsg());
