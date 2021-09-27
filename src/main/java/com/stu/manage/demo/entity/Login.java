@@ -29,4 +29,8 @@ public class Login {
     private String nick;
     private String mobile;
     private String address;
+    /**
+     * lims内组织架构人员
+     */
+    private int userId;
 }
