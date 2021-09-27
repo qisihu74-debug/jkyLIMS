@@ -57,6 +57,8 @@ public class JtSampleObject {
     private Integer sampleId;
 
     private String sampleStatus;
+    // 样品信息下 产品标准
+    private String productStandardSource;
 
     @Override
     public String toString() {
@@ -82,6 +84,7 @@ public class JtSampleObject {
                 ", checkList=" + checkList +
                 ", sampleId=" + sampleId +
                 ", sampleStatus='" + sampleStatus + '\'' +
+                ", productStandardSource='" + productStandardSource + '\'' +
                 '}';
     }
 }

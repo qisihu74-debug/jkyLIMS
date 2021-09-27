@@ -78,4 +78,10 @@
     </insert>
 
 
+    <select id="selectCheckItem" resultType="com.stu.manage.demo.entity.JtEntrustCheckItem">
+        SELECT cost
+        FROM d_product_cost
+        WHERE check_item_id =  #{checkItemId,jdbcType=INTEGER} ORDER BY cost_id desc limit 0,1
+    </select>
+
 </mapper>

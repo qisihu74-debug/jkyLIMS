@@ -1,6 +1,7 @@
 package com.stu.manage.demo.mapper;
 
 import com.stu.manage.demo.entity.JtEntrustCheckItem;
+import org.apache.ibatis.annotations.Param;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -14,5 +15,7 @@ import org.springframework.stereotype.Component;
 public interface JtEntrustCheckItemMapper {
 
     int insertSelective(JtEntrustCheckItem record);
+
+    JtEntrustCheckItem selectCheckItem(@Param("checkItemId")Integer checkItemId);
 
 }

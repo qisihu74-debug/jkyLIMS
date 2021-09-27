@@ -199,10 +199,10 @@
     where a.entrust_number like  CONCAT('',#{entrustNumber},'%')
 
   </select>
-    <select id="selectSampleNumberForCount" resultMap="BaseResultMap">
+    <select id="selectSampleNumberForCount" resultType="com.stu.manage.demo.entity.JtSampleInfo">
     select *
     from jt_sample_info a
-    where a.sample_number like  CONCAT('',#{sampleNumber},'%')
+    where a.sample_number like  CONCAT('',#{sampleNumber,jdbcType=VARCHAR},'%')
     order by a.sample_id desc limit 0,1
   </select>
     <select id="selectCompanyName" resultType="com.stu.manage.demo.entity.Company">

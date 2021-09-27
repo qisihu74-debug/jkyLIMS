@@ -13,13 +13,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
+
     @Autowired
     private EntrustMapper entrustMapper;
     @Autowired
@@ -137,8 +135,20 @@ public class EntrustServiceImpl implements EntrustService {
         jtEntrustInfo.setContactAddress(company.getComAddress());
         jtEntrustInfo.setContactPeople(company.getComContactPerson());
         jtEntrustInfo.setContactTel(company.getComContactPhone());
-        //待完善
-        jtEntrustInfo.setProductStandardSource("GB待完善");
+
+        //完善 产品标准
+        if(sampleList!=null) {
+            List<JtSampleObject> jtSampleObjects = JSON.parseArray(JSON.toJSONString(sampleList), JtSampleObject.class);
+            List<String> strlist = new ArrayList<>();
+            for (JtSampleObject jtSampleObject:jtSampleObjects) {
+                strlist.add(jtSampleObject.getProductStandardSource());
+            }
+
+            jtEntrustInfo.setProductStandardSource(returnStr(strlist));
+
+        }
+
+
         jtEntrustInfo.setReportGetCompany("——");
         jtEntrustInfo.setContactAddress("——");
         jtEntrustInfoMapper.insertSelective(jtEntrustInfo);
@@ -159,7 +169,6 @@ public class EntrustServiceImpl implements EntrustService {
             jtEntrustCheckInfo.setEndPlanDate(new Date());
             jtEntrustCheckInfo.setStandardCost("0");
             jtEntrustCheckInfoMapper.insertSelective(jtEntrustCheckInfo);//任务来源
-
         }
         System.out.println("存储委托价格信息默认值"+jtEntrustCheckInfo);
         // 保存委托和产品关系
@@ -171,13 +180,7 @@ public class EntrustServiceImpl implements EntrustService {
         // 增加样品基本信息 有可能是多个。
         if(sampleList!=null) {
             List<JtSampleObject> jtSampleObjects=JSON.parseArray(JSON.toJSONString(sampleList),JtSampleObject.class);
-//            System.out.println("=================");
-//            List<JtSampleObject> jtSampleObjects = (List<JtSampleObject>) sampleList.get("sampleList");
-//            System.out.println("====="+jtSampleObjects.size());
-//            List<JtSampleObject> jtSampleObjects = JSONObject.parseArray(sampleList.toString(), JtSampleObject.class);
-//            JtSampleObject jtSampleObject = JSONObject.parseObject(sampleList.toString(), JtSampleObject.class);
-//            System.out.println(jtSampleObject.toString());
-            //-------------------------------------------------
+
             for (JtSampleObject jtSampleObject:jtSampleObjects){
                 System.out.println("展示数据===="+jtSampleObject);
                 // 后台补充业务id1
@@ -196,17 +199,26 @@ public class EntrustServiceImpl implements EntrustService {
                         jtEntrustCheckItem.setProductId(jtSampleObject.getProductId());
                         jtEntrustCheckItem.setSampleId(jtSampleObject.getSampleObjectId());
                         jtEntrustCheckItem.setEntrustId(jtEntrustInfo.getEntrustId());
+                        // 根据检测项id 获取价格信息 进行补充；
+                        JtEntrustCheckItem dataCost = jtEntrustCheckItemMapper.selectCheckItem(jtEntrustCheckItem.getCheckItemId());
+                        if(dataCost!=null)
+                        {
+                            jtEntrustCheckItem.setTotalProceedsPrice(String.valueOf(dataCost.getCost()));
+                        }
+                        else
+                        {
+                            jtEntrustCheckItem.setTotalProceedsPrice(String.valueOf(0));
+                        }
                         jtEntrustCheckItemMapper.insertSelective(jtEntrustCheckItem);
                     }
                 }
-
                 // 设置一个样品下存放的关系
                 JtSampleInfo jtSampleInfo = new JtSampleInfo();
                 jtSampleInfo.setSampleId(jtSampleObject.getSampleObjectId());
                 jtSampleInfo.setEntrustId(jtEntrustInfo.getEntrustId());
                 jtSampleInfo.setProductId(jtSampleObject.getProductId());
 //                jtSampleInfo.setSampleNumber(createSampleNumber());// 样品编码补充
-                jtSampleInfo.setSampleNumber("YP-2021-0119");// 样品编码补充
+                jtSampleInfo.setSampleNumber(createSampleNumber());// 样品编码补充
 
                 jtSampleInfo.setSampleType(jtSampleObject.getSampleType());
                 jtSampleInfo.setEntrustCompanyId(jtEntrustInfo.getEntrustCompanyId());
@@ -221,9 +233,7 @@ public class EntrustServiceImpl implements EntrustService {
                 jtReportInfo.setSampleId(jtSampleObject.getSampleObjectId());
 
                 jtReportInfoMapper.insertSelective(jtReportInfo);
-
             }
-
         }
         return 1;
     }
@@ -241,7 +251,7 @@ public class EntrustServiceImpl implements EntrustService {
     /**
      * 自动生产委托编号
      */
-    private String getEntrustNumber(){
+    public String getEntrustNumber(){
         StringBuilder stringBuffer=new StringBuilder();
         Calendar calendar=Calendar.getInstance();
         int month = calendar.get(Calendar.MONTH) + 1;
@@ -269,4 +279,29 @@ public class EntrustServiceImpl implements EntrustService {
         }
         return stringBuffer.toString();
     }
+
+    /**
+     * 设置多个产品下 产品标准输出
+      */
+    String returnStr(List<String> strlist)
+    {
+        HashSet<String> hashSet = new HashSet<>();
+        for (String str:strlist) {
+            // 根据,(逗号)进行分割
+            String[] split = str.split(",");
+            for(int i = 0; i < split.length; i++) {
+                System.out.println(split[i]);
+                hashSet.add(split[i]);
+            }
+        }
+        String strAdd = "";
+        for (String strs:hashSet) {
+            strAdd+=strs+",";
+        }
+        // 去掉最后符号,
+        strAdd = strAdd.substring(0, strAdd.length() -1);
+        return strAdd;
+    }
+
+
 }

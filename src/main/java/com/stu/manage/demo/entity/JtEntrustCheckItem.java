@@ -39,4 +39,7 @@ public class JtEntrustCheckItem {
     private String checkBasisDocName;
     private Integer depId;
     private String depName;
+
+    // 检测项 价格信息
+    private Integer cost;
 }
