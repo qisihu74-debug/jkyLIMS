@@ -59,7 +59,7 @@ public class LoginController {
         String decode = DESUtils.decrypt(admin.getPassWord(),admin.getAdminId());
         if(login.getPassWord().equals(decode)){
            LoginToken res=new LoginToken();
-           res.setName(login.getAdminName());
+           res.setName(admin.getAdminName());
            res.setAdminId(admin.getAdminId());
            res.setPassWord(decode);
            res.setToken(TokenUtil.getToken(res));
