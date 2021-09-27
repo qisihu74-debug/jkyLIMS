@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @Author: DLC
  * @Date: 2021/9/22 14:06
- * 委托基本信息录入
+ * 委托基本信息录入1
  */
 public class EntrustInfo {
 

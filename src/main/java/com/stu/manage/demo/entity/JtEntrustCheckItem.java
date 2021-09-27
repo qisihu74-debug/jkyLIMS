@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * @Author: DLC
  * @Date: 2021/9/24 15:35
- * 产品下所属检测项
+ * 产品下所属检测项1
  */
 @Data
 public class JtEntrustCheckItem {
@@ -39,4 +39,7 @@ public class JtEntrustCheckItem {
     private String checkBasisDocName;
     private Integer depId;
     private String depName;
+
+    // 检测项 价格信息
+    private Integer cost;
 }

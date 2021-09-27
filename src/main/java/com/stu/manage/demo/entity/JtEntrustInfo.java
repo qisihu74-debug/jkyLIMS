@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * @Author: DLC
  * @Date: 2021/9/23 9:48
- * 委托单基本信息
+ * 委托单基本信息1
  */
 @Data
 public class JtEntrustInfo {

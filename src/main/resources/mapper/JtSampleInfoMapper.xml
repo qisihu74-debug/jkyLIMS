@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.stu.manage.demo.mapper.JtSampleInfoMapper">
+
+    <insert id="insertSelective"  useGeneratedKeys="true" keyProperty="sampleId" parameterType="com.stu.manage.demo.entity.JtSampleInfo">
+        insert into jt_sample_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="sampleId != null">
+                sample_id,
+            </if>
+            <if test="productId != null">
+                product_id,
+            </if>
+            <if test="sampleNumber != null">
+                sample_number,
+            </if>
+            <if test="sampleType != null">
+                sample_type,
+            </if>
+            <if test="entrustCompanyId != null">
+                entrust_company_id,
+            </if>
+            <if test="samplingBaseCount != null">
+                sampling_base_count,
+            </if>
+            <if test="samplingPlace != null">
+                sampling_place,
+            </if>
+            <if test="sampleStatus != null">
+                sample_status,
+            </if>
+            <if test="sampleObjectId != null">
+                sample_object_id,
+            </if>
+            <if test="objectRatio != null">
+                object_ratio,
+            </if>
+            <if test="sampleNote != null">
+                sample_note,
+            </if>
+            <if test="lifecycle != null">
+                lifecycle,
+            </if>
+            <if test="entrustId != null">
+                entrust_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="sampleId != null">
+                #{sampleId,jdbcType=INTEGER},
+            </if>
+            <if test="productId != null">
+                #{productId,jdbcType=INTEGER},
+            </if>
+            <if test="sampleNumber != null">
+                #{sampleNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleType != null">
+                #{sampleType,jdbcType=INTEGER},
+            </if>
+            <if test="entrustCompanyId != null">
+                #{entrustCompanyId,jdbcType=INTEGER},
+            </if>
+            <if test="samplingBaseCount != null">
+                #{samplingBaseCount,jdbcType=VARCHAR},
+            </if>
+            <if test="samplingPlace != null">
+                #{samplingPlace,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleStatus != null">
+                #{sampleStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleObjectId != null">
+                #{sampleObjectId,jdbcType=INTEGER},
+            </if>
+            <if test="objectRatio != null">
+                #{objectRatio,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleNote != null">
+                #{sampleNote,jdbcType=VARCHAR},
+            </if>
+            <if test="lifecycle != null">
+                #{lifecycle,jdbcType=INTEGER},
+            </if>
+            <if test="entrustId != null">
+                #{entrustId,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+
+
+</mapper>

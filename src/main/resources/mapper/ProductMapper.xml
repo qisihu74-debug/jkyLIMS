@@ -20,4 +20,5 @@
             valid = 1
           AND product_type = #{type}
     </select>
+
 </mapper>
