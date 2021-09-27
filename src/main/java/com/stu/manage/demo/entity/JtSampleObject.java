@@ -44,7 +44,44 @@ public class JtSampleObject {
 
     private String sampleBatch;
 
+
+    /**
+     * 数据传输需要，与类字段无关
+     */
+    private String sampleNumber;
+
+    private Integer sampleType;
+
     private List<JtEntrustCheckItem> checkList;
 
+    private Integer sampleId;
 
+    private String sampleStatus;
+
+    @Override
+    public String toString() {
+        return "JtSampleObject{" +
+                "sampleObjectId=" + sampleObjectId +
+                ", productId=" + productId +
+                ", modelId='" + modelId + '\'' +
+                ", entrustCompanyId=" + entrustCompanyId +
+                ", productNumber='" + productNumber + '\'' +
+                ", productCompanyName='" + productCompanyName + '\'' +
+                ", productDate='" + productDate + '\'' +
+                ", sendPeople='" + sendPeople + '\'' +
+                ", receiveTime=" + receiveTime +
+                ", receiveUserId=" + receiveUserId +
+                ", objectCount='" + objectCount + '\'' +
+                ", storagePlace='" + storagePlace + '\'' +
+                ", receiveWay='" + receiveWay + '\'' +
+                ", contactTel='" + contactTel + '\'' +
+                ", sampleObjectNote='" + sampleObjectNote + '\'' +
+                ", sampleBatch='" + sampleBatch + '\'' +
+                ", sampleNumber='" + sampleNumber + '\'' +
+                ", sampleType=" + sampleType +
+                ", checkList=" + checkList +
+                ", sampleId=" + sampleId +
+                ", sampleStatus='" + sampleStatus + '\'' +
+                '}';
+    }
 }

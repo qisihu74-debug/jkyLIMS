@@ -4,28 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Maps;
-import com.stu.manage.demo.entity.CheckItemCostVo;
-import com.stu.manage.demo.entity.CheckItemInfoVo;
-import com.stu.manage.demo.entity.Company;
-import com.stu.manage.demo.entity.EntrustInfo;
-import com.stu.manage.demo.entity.EntrustStat;
-import com.stu.manage.demo.entity.JtEntrustCheckInfo;
-import com.stu.manage.demo.entity.JtEntrustCheckItem;
-import com.stu.manage.demo.entity.JtEntrustInfo;
-import com.stu.manage.demo.entity.JtSampleObject;
-import com.stu.manage.demo.entity.ProductVo;
-import com.stu.manage.demo.entity.SampleInfoVo;
-import com.stu.manage.demo.entity.SampleStatus;
-import com.stu.manage.demo.entity.StatusEntity;
-import com.stu.manage.demo.mapper.EntrustMapper;
-import com.stu.manage.demo.mapper.JtEntrustCheckInfoMapper;
-import com.stu.manage.demo.mapper.JtEntrustCheckItemMapper;
-import com.stu.manage.demo.mapper.JtEntrustInfoMapper;
-import com.stu.manage.demo.mapper.JtSampleObjectMapper;
+import com.stu.manage.demo.entity.*;
+import com.stu.manage.demo.mapper.*;
 import com.stu.manage.demo.service.EntrustService;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Calendar;
@@ -45,6 +30,12 @@ public class EntrustServiceImpl implements EntrustService {
     private JtSampleObjectMapper jtSampleObjectMapper;
     @Autowired
     private JtEntrustCheckItemMapper jtEntrustCheckItemMapper;
+    @Autowired
+    private JtSampleInfoMapper jtSampleInfoMapper;
+    @Autowired
+    private JtEntrustProductMapper jtEntrustProductMapper;
+    @Autowired
+    private JtReportInfoMapper jtReportInfoMapper;
 
     @Override
     public EntrustInfo onceMore(int entrustId) {
@@ -117,6 +108,7 @@ public class EntrustServiceImpl implements EntrustService {
         return null;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public synchronized Integer addEntrustInfo(Map<String, Object> map) {
 
@@ -127,8 +119,6 @@ public class EntrustServiceImpl implements EntrustService {
         jtEntrustInfo.setEntrustNumber(getEntrustNumber());//getEntrustNumber()
         // TODO: 2021/6/15 委托单状态 0 未分任务 1分完任务
         jtEntrustInfo.setEntrustStatus(0);
-
-
         // 1、得到公司名称 进行查询 增加id 2、没有公司名称 新增进行 id 补充
         Company company = jtEntrustInfoMapper.selectCompanyName(jtEntrustInfo.getComName());
         if(company.getCount()!=0)
@@ -147,6 +137,10 @@ public class EntrustServiceImpl implements EntrustService {
         jtEntrustInfo.setContactAddress(company.getComAddress());
         jtEntrustInfo.setContactPeople(company.getComContactPerson());
         jtEntrustInfo.setContactTel(company.getComContactPhone());
+        //待完善
+        jtEntrustInfo.setProductStandardSource("GB待完善");
+        jtEntrustInfo.setReportGetCompany("——");
+        jtEntrustInfo.setContactAddress("——");
         jtEntrustInfoMapper.insertSelective(jtEntrustInfo);
         System.out.println("存储委托基本信息"+jtEntrustInfo);
         // 后台补充委托基本价格信息
@@ -159,34 +153,78 @@ public class EntrustServiceImpl implements EntrustService {
             jtEntrustCheckInfo.setCost("0");
             jtEntrustCheckInfo.setPayMode(2);
             jtEntrustCheckInfo.setPay("0");
-            jtEntrustCheckInfo.setAcceptUserId(160);//受理人默认为 程萍 160；
+            jtEntrustCheckInfo.setAcceptUserId(Integer.parseInt(jtEntrustInfo.getAcceptUserId()));//受理人默认为 程萍 160；
             jtEntrustCheckInfo.setSource(1);
             jtEntrustCheckInfo.setAcceptTime(new Date());
+            jtEntrustCheckInfo.setEndPlanDate(new Date());
             jtEntrustCheckInfo.setStandardCost("0");
             jtEntrustCheckInfoMapper.insertSelective(jtEntrustCheckInfo);//任务来源
 
         }
         System.out.println("存储委托价格信息默认值"+jtEntrustCheckInfo);
-        // 增加样品基本信息
-        JtSampleObject jtSampleObject= JSONObject.parseObject(JSON.toJSONString(sampleList),JtSampleObject.class);
-        // 后台补充业务id
-        jtSampleObject.setReceiveUserId(160);//受理人默认为 程萍 160；
-        jtSampleObject.setReceiveTime(new Date());
-        jtSampleObjectMapper.insertSelective(jtSampleObject);
+        // 保存委托和产品关系
+        JtEntrustProduct jtEntrustProduct = new JtEntrustProduct();
+        jtEntrustProduct.setEntrustId(jtEntrustCheckInfo.getEntrustId());
+//        jtEntrustProduct.setProductId(jtSampleObject.getProductId());
+        jtEntrustProduct.setProductId(2568);
+        jtEntrustProductMapper.insertSelective(jtEntrustProduct);
+        // 增加样品基本信息 有可能是多个。
+        if(sampleList!=null) {
+            List<JtSampleObject> jtSampleObjects=JSON.parseArray(JSON.toJSONString(sampleList),JtSampleObject.class);
+//            System.out.println("=================");
+//            List<JtSampleObject> jtSampleObjects = (List<JtSampleObject>) sampleList.get("sampleList");
+//            System.out.println("====="+jtSampleObjects.size());
+//            List<JtSampleObject> jtSampleObjects = JSONObject.parseArray(sampleList.toString(), JtSampleObject.class);
+//            JtSampleObject jtSampleObject = JSONObject.parseObject(sampleList.toString(), JtSampleObject.class);
+//            System.out.println(jtSampleObject.toString());
+            //-------------------------------------------------
+            for (JtSampleObject jtSampleObject:jtSampleObjects){
+                System.out.println("展示数据===="+jtSampleObject);
+                // 后台补充业务id
+                jtSampleObject.setReceiveUserId(Integer.parseInt(jtEntrustInfo.getAcceptUserId()));//受理人默认为 程萍 160；
+                jtSampleObject.setReceiveTime(new Date());
 
-        //解析 产品下的 数据
-        for (JtEntrustCheckItem jtEntrustCheckItem:jtSampleObject.getCheckList()) {
-            System.out.println("解析 产品下的 检测项数据 "+jtEntrustCheckItem);
-            jtEntrustCheckItem.setProductId(jtSampleObject.getProductId());
-            jtEntrustCheckItem.setSampleId(jtSampleObject.getSampleObjectId());
-            jtEntrustCheckItemMapper.insertSelective(jtEntrustCheckItem);
+                //后台补充
+                jtSampleObject.setStoragePlace("——");
+                jtSampleObject.setSampleObjectNote("——");
+                jtSampleObject.setSampleBatch("——");
+                jtSampleObjectMapper.insertSelective(jtSampleObject);
+                //解析 产品下的 数据
+                if(null!=jtSampleObject.getCheckList()){
+                    for (JtEntrustCheckItem jtEntrustCheckItem:jtSampleObject.getCheckList()) {
+                        System.out.println("解析 产品下的 检测项数据 "+jtEntrustCheckItem);
+                        jtEntrustCheckItem.setProductId(jtSampleObject.getProductId());
+                        jtEntrustCheckItem.setSampleId(jtSampleObject.getSampleObjectId());
+                        jtEntrustCheckItem.setEntrustId(jtEntrustInfo.getEntrustId());
+                        jtEntrustCheckItemMapper.insertSelective(jtEntrustCheckItem);
+                    }
+                }
+
+                // 设置一个样品下存放的关系
+                JtSampleInfo jtSampleInfo = new JtSampleInfo();
+                jtSampleInfo.setSampleId(jtSampleObject.getSampleObjectId());
+                jtSampleInfo.setEntrustId(jtEntrustInfo.getEntrustId());
+                jtSampleInfo.setProductId(jtSampleObject.getProductId());
+//                jtSampleInfo.setSampleNumber(createSampleNumber());// 样品编码补充
+                jtSampleInfo.setSampleNumber("YP-2021-0119");// 样品编码补充
+
+                jtSampleInfo.setSampleType(jtSampleObject.getSampleType());
+                jtSampleInfo.setEntrustCompanyId(jtEntrustInfo.getEntrustCompanyId());
+                jtSampleInfo.setSampleStatus("——");//补充信息
+                jtSampleInfo.setSampleObjectId(jtSampleObject.getSampleObjectId());
+                jtSampleInfo.setLifecycle(3);
+                jtSampleInfoMapper.insertSelective(jtSampleInfo);
+
+                //补充样品id信息信息：
+                JtReportInfo jtReportInfo = new JtReportInfo();
+                jtReportInfo.setFlowStatus(4);
+                jtReportInfo.setSampleId(jtSampleObject.getSampleObjectId());
+
+                jtReportInfoMapper.insertSelective(jtReportInfo);
+
+            }
+
         }
-
-
-
-
-
-
         return 1;
     }
 
@@ -211,6 +249,24 @@ public class EntrustServiceImpl implements EntrustService {
         stringBuffer.append(year).append(month>9?month:"0"+month);
         int count=jtEntrustInfoMapper.selectEntrustNumberForCount(stringBuffer.toString());
         stringBuffer.append(String.format("%04d",count+1));
+        return stringBuffer.toString();
+    }
+    /**
+     * 自动生成样品编号
+     */
+    public  String createSampleNumber(){
+        StringBuilder stringBuffer=new StringBuilder();
+        Calendar calendar=Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        stringBuffer.append("YP-").append(year).append("-");
+        JtSampleInfo jtSampleInfo=jtEntrustInfoMapper.selectSampleNumberForCount(stringBuffer.toString());
+        if(jtSampleInfo==null){
+            stringBuffer.append("0001");
+        }else{
+            String number=jtSampleInfo.getSampleNumber().substring(jtSampleInfo.getSampleNumber().length()-4);
+            int integer=Integer.parseInt(number);
+            stringBuffer.append(String.format("%04d",integer+1));
+        }
         return stringBuffer.toString();
     }
 }

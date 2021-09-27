@@ -1,9 +1,6 @@
 package com.stu.manage.demo.mapper;
 
-import com.stu.manage.demo.entity.Company;
-import com.stu.manage.demo.entity.JtEntrustInfo;
-import com.stu.manage.demo.entity.ProductVo;
-import com.stu.manage.demo.entity.jtEntrustType;
+import com.stu.manage.demo.entity.*;
 import org.apache.ibatis.annotations.Param;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
@@ -32,6 +29,8 @@ public interface JtEntrustInfoMapper {
      * @return
      */
     int selectEntrustNumberForCount(@Param("entrustNumber")String entrustNumber);
+
+    JtSampleInfo selectSampleNumberForCount(@Param("sampleNumber")String sampleNumber);
 
     /**
      * 查询委托公司信息
