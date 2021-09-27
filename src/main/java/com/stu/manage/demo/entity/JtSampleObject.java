@@ -59,6 +59,8 @@ public class JtSampleObject {
     private String sampleStatus;
     // 样品信息下 产品标准
     private String productStandardSource;
+    // 产品名称
+    private String productname;
 
     @Override
     public String toString() {
@@ -85,6 +87,7 @@ public class JtSampleObject {
                 ", sampleId=" + sampleId +
                 ", sampleStatus='" + sampleStatus + '\'' +
                 ", productStandardSource='" + productStandardSource + '\'' +
+                ", productname='" + productname + '\'' +
                 '}';
     }
 }
