@@ -57,10 +57,15 @@ public class EntrustController {
 
 
     @RequestMapping(value="/add",method = RequestMethod.POST)
-    public void add(@RequestBody HashMap<String,Object> map)
+    public Result add(@RequestBody HashMap<String,Object> map)
     {
         System.out.println("展示存储信息！   "+map);
         int status = entrustService.addEntrustInfo(map);
+        if (status ==1)
+        {
+            return ResultUtil.success();
+        }
+         return ResultUtil.error(-1,"缺少必要参数");
     }
 
     /**

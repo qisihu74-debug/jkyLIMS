@@ -135,6 +135,8 @@ public class EntrustServiceImpl implements EntrustService {
         jtEntrustInfo.setContactAddress(company.getComAddress());
         jtEntrustInfo.setContactPeople(company.getComContactPerson());
         jtEntrustInfo.setContactTel(company.getComContactPhone());
+        // 客户来源
+        jtEntrustInfo.setCrm(0);
 
         //完善 产品标准
         if(sampleList!=null) {
@@ -233,9 +235,11 @@ public class EntrustServiceImpl implements EntrustService {
                 jtReportInfo.setSampleId(jtSampleObject.getSampleObjectId());
 
                 jtReportInfoMapper.insertSelective(jtReportInfo);
+                return 1;
             }
         }
-        return 1;
+        return -1;
+
     }
 
     @Override

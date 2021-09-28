@@ -58,6 +58,8 @@ public class JtEntrustInfo {
 
     private Integer entrustStatus;
 
+    private String crm;
+
     /**
      * 数据传输需要与实体类无关
      */
