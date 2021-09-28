@@ -60,12 +60,12 @@ public class EntrustController {
     public Result add(@RequestBody HashMap<String,Object> map)
     {
         System.out.println("展示存储信息！   "+map);
-        int status = entrustService.addEntrustInfo(map);
-        if (status ==1)
+        String status = entrustService.addEntrustInfo(map);
+        if (status !=null)
         {
-            return ResultUtil.success();
+            return ResultUtil.success(status);
         }
-         return ResultUtil.error(-1,"缺少必要参数");
+         return ResultUtil.error(-1,"新增失败");
     }
 
     /**

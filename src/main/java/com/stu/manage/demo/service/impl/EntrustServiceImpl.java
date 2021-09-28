@@ -95,20 +95,10 @@ public class EntrustServiceImpl implements EntrustService {
         return statusEntity;
     }
 
-    @Override
-    public Integer addEntrust(JtEntrustInfo jtEntrustInfo) {
-        JtEntrustInfo jtEntrustInfos = new JtEntrustInfo();
-        jtEntrustInfos.setEntrustNumber("2021090023");// (getEntrustNumber() 委托号
-        // 委托单基本信息
-        // TODO: 2021/6/15 委托单状态 0 未分任务 1分完任务
-        jtEntrustInfos.setEntrustStatus(0);
-//        jtEntrustInfoMapper.insertSelective(jtEntrustInfo);
-        return null;
-    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public synchronized Integer addEntrustInfo(Map<String, Object> map) {
+    public synchronized String addEntrustInfo(Map<String, Object> map) {
 
         Object entrustInfo = map.get("entrustInfo");
         Object sampleList = map.get("sampleList");
@@ -234,10 +224,12 @@ public class EntrustServiceImpl implements EntrustService {
                 jtReportInfo.setSampleId(jtSampleObject.getSampleObjectId());
 
                 jtReportInfoMapper.insertSelective(jtReportInfo);
-                return 1;
+                // 成功返回委托编号
+
+                return  jtEntrustInfo.getEntrustNumber();
             }
         }
-        return -1;
+        return null;
 
     }
 
