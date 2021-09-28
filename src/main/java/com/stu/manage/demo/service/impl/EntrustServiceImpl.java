@@ -132,8 +132,7 @@ public class EntrustServiceImpl implements EntrustService {
 
         return list;
     }
-
-    @Override
+    
     public Integer addEntrust(JtEntrustInfo jtEntrustInfo) {
         JtEntrustInfo jtEntrustInfos = new JtEntrustInfo();
         jtEntrustInfos.setEntrustNumber("2021090023");// (getEntrustNumber() 委托号
