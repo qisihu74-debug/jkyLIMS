@@ -24,12 +24,11 @@ public interface EntrustService {
      */
     List<CheckItemCostVo> getCheckItemsByProductId(int productId);
 
+
     /**
      * 实现add 用户委托基本信息
      */
-    Integer addEntrust(JtEntrustInfo jtEntrustInfo);
-
-    Integer addEntrustInfo(Map<String,Object> map);
+    String addEntrustInfo(Map<String,Object> map);
 
     Map<String, List<ProductVo>> getSelectLists();
     /**

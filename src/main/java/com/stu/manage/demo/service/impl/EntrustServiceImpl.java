@@ -146,7 +146,7 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public synchronized Integer addEntrustInfo(Map<String, Object> map) {
+    public synchronized String addEntrustInfo(Map<String, Object> map) {
 
         Object entrustInfo = map.get("entrustInfo");
         Object sampleList = map.get("sampleList");
@@ -173,6 +173,7 @@ public class EntrustServiceImpl implements EntrustService {
         jtEntrustInfo.setContactAddress(company.getComAddress());
         jtEntrustInfo.setContactPeople(company.getComContactPerson());
         jtEntrustInfo.setContactTel(company.getComContactPhone());
+        // 客户来源
 
         //完善 产品标准
         if(sampleList!=null) {
@@ -271,9 +272,13 @@ public class EntrustServiceImpl implements EntrustService {
                 jtReportInfo.setSampleId(jtSampleObject.getSampleObjectId());
 
                 jtReportInfoMapper.insertSelective(jtReportInfo);
+                // 成功返回委托编号
+
+                return  jtEntrustInfo.getEntrustNumber();
             }
         }
-        return 1;
+        return null;
+
     }
 
     @Override
