@@ -19,6 +19,10 @@ import java.util.List;
 @Data
 public class StatusEntity {
     private int id;
+    private String entrustId;
+    private String entrustCode;
+    private String entrustDept;
+    private String entrustTime;
     /**
      * 委托单状态0 未分任务 1已分任务
      */

@@ -98,5 +98,15 @@
             where j.entrust_id=#{id}
     </select>
 
+    <select id="ownerTask" resultType="com.stu.manage.demo.entity.StatusEntity">
+        SELECT DISTINCT a.entrust_id As entrustId,a.entrust_status As status, a.entrust_number As entrustCode,
+        b.com_name As entrustDept,c.accept_time As entrustTime from
+        jt_entrust_info a
+        left join company b on a.entrust_company_id=b.com_id
+        left join jt_entrust_check_info c on a.entrust_id=c.entrust_id
+        where c.accept_time >= #{startTime} and c.accept_time&lt;= #{endTime}
+        and a.entrust_people=#{userId} and a.crm=#{adminId}
+    </select>
+
 
 </mapper>

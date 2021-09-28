@@ -46,4 +46,21 @@ public interface EntrustService {
      */
     StatusEntity status(Integer id);
 
+    /**
+     * 发送消息
+     */
+    List<String> sendMessage();
+
+    /**
+     * 我的委托列表
+     * @param type
+     * @param userId
+     * @param adminId
+     * @param startTime
+     * @param endTime
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    List<StatusEntity> ownerTask(String type, Integer userId, String adminId, String startTime, String endTime, Integer pageNo, Integer pageSize);
 }

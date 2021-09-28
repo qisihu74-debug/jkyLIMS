@@ -3,11 +3,14 @@ package com.stu.manage.demo.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Maps;
 import com.stu.manage.demo.entity.*;
+import com.stu.manage.demo.http.HttpClientUtil;
 import com.stu.manage.demo.mapper.*;
 import com.stu.manage.demo.service.EntrustService;
 import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,6 +96,41 @@ public class EntrustServiceImpl implements EntrustService {
             statusEntity.setList(ll);
         }
         return statusEntity;
+    }
+
+    @Override
+    public List<String> sendMessage() {
+        //TODO 后续推送模块有了替换此处
+        String url = "http://qxsdcloud.com:18083/data/juheApi";
+        Map<String,String> map = new HashMap<>();
+        Map<String,String> headerMap = new HashMap<>();
+        map.put("key","8299e5e44e3d47e58eda9a65f4abecb2");
+        map.put("userKey","sfx");
+        map.put("querys","{'type':'top'}");
+
+        headerMap.put("Content-Type","application/json;charset=UTF-8");
+        Pair<Integer, String> postJson = HttpClientUtil.postJson(url, JSON.toJSONString(map), headerMap);
+        Integer left = postJson.getLeft();
+        String right = postJson.getRight();
+        List<String> list = new ArrayList<>();
+        if (left == 200){
+            JSONObject jsonObject = JSON.parseObject(right);
+            JSONObject result = (JSONObject) jsonObject.get("result");
+            List<JSONObject> objectList = (List<JSONObject>) result.get("data");
+            objectList.forEach(data -> {
+                list.add(data.get("title").toString());
+            });
+        }
+        return list;
+    }
+
+    @Override
+    public List<StatusEntity> ownerTask(String type, Integer userId, String adminId, String startTime, String endTime, Integer pageNo, Integer pageSize) {
+        PageHelper.startPage(pageNo, pageSize);
+        List<StatusEntity> list = entrustMapper.ownerTask(type,userId,adminId,startTime,endTime);
+        //TODO 根据不同委托类型组装数据
+
+        return list;
     }
 
     @Override

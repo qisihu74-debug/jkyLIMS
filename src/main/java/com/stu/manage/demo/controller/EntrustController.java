@@ -1,13 +1,18 @@
 package com.stu.manage.demo.controller;
 
+import com.stu.manage.demo.entity.StatusEntity;
 import com.stu.manage.demo.mapper.JtEntrustInfoMapper;
 import com.stu.manage.demo.result.Result;
 import com.stu.manage.demo.result.ResultUtil;
 import com.stu.manage.demo.service.EntrustService;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.Get;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -70,5 +76,41 @@ public class EntrustController {
     @GetMapping("get_select_lists")
     public Result getEntrustTheWay() {
         return ResultUtil.success(entrustService.getSelectLists());
+    }
+
+    /**
+     * 发送消息
+     * @return
+     */
+    @GetMapping("sendMessage")
+    public Result sendMessage(){
+        return ResultUtil.success(entrustService.sendMessage());
+    }
+
+    /**
+     * 获取委托列表
+     * @param type
+     * @param userId
+     * @param adminId
+     * @param startTime
+     * @param endTime
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @GetMapping("ownerTask")
+    public Result ownerTask(String type, Integer userId, String adminId, String startTime,
+                            String endTime, Integer pageNo, Integer pageSize){
+        if (pageNo == null || pageSize == null){
+            return ResultUtil.error(-1,"缺少分页参数");
+        }
+        if (StringUtils.isEmpty(type)){
+            return ResultUtil.error(-1,"缺少要查看的委托类型");
+        }
+        if (StringUtils.isEmpty(adminId) || userId == null){
+            return ResultUtil.error(-1,"缺少必要参数");
+        }
+        List<StatusEntity> list = entrustService.ownerTask(type, userId, adminId, startTime,endTime, pageNo, pageSize);
+        return ResultUtil.success(list);
     }
 }
