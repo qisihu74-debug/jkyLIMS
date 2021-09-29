@@ -1,8 +1,8 @@
 package com.stu.manage.demo.service;
 
+import com.github.pagehelper.PageInfo;
 import com.stu.manage.demo.entity.CheckItemCostVo;
 import com.stu.manage.demo.entity.EntrustInfo;
-import com.stu.manage.demo.entity.JtEntrustInfo;
 import com.stu.manage.demo.entity.ProductVo;
 import com.stu.manage.demo.entity.StatusEntity;
 
@@ -61,5 +61,5 @@ public interface EntrustService {
      * @param pageSize
      * @return
      */
-    List<StatusEntity> ownerTask(String type, Integer userId, String adminId, String startTime, String endTime, Integer pageNo, Integer pageSize);
+    PageInfo ownerTask(String type, Integer userId, String adminId, Long startTime, Long endTime, Integer pageNo, Integer pageSize);
 }

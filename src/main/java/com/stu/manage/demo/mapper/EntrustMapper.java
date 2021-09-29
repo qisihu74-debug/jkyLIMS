@@ -5,6 +5,7 @@ import com.stu.manage.demo.entity.*;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -68,5 +69,5 @@ public interface EntrustMapper extends BaseMapper<EntrustStat> {
      * @param endTime
      * @return
      */
-    List<StatusEntity> ownerTask(String type, Integer userId, String adminId, String startTime, String endTime);
+    List<StatusEntity> ownerTask(String type, Integer userId, String adminId, Date startTime, Date endTime);
 }

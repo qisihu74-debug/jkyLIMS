@@ -1,5 +1,6 @@
 package com.stu.manage.demo.controller;
 
+import com.github.pagehelper.PageInfo;
 import com.stu.manage.demo.entity.StatusEntity;
 import com.stu.manage.demo.mapper.JtEntrustInfoMapper;
 import com.stu.manage.demo.result.Result;
@@ -104,8 +105,8 @@ public class EntrustController {
      * @return
      */
     @GetMapping("ownerTask")
-    public Result ownerTask(String type, Integer userId, String adminId, String startTime,
-                            String endTime, Integer pageNo, Integer pageSize){
+    public Result ownerTask(String type, Integer userId, String adminId, Long startTime,
+                            Long endTime, Integer pageNo, Integer pageSize){
         if (pageNo == null || pageSize == null){
             return ResultUtil.error(-1,"缺少分页参数");
         }
@@ -115,7 +116,7 @@ public class EntrustController {
         if (StringUtils.isEmpty(adminId) || userId == null){
             return ResultUtil.error(-1,"缺少必要参数");
         }
-        List<StatusEntity> list = entrustService.ownerTask(type, userId, adminId, startTime,endTime, pageNo, pageSize);
-        return ResultUtil.success(list);
+        PageInfo pageInfo = entrustService.ownerTask(type, userId, adminId, startTime,endTime, pageNo, pageSize);
+        return ResultUtil.success(pageInfo);
     }
 }

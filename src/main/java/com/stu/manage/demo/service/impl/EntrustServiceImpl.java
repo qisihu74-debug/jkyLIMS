@@ -4,10 +4,33 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Maps;
-import com.stu.manage.demo.entity.*;
+import com.stu.manage.demo.entity.CheckItemCostVo;
+import com.stu.manage.demo.entity.CheckItemInfoVo;
+import com.stu.manage.demo.entity.Company;
+import com.stu.manage.demo.entity.EntrustInfo;
+import com.stu.manage.demo.entity.EntrustStat;
+import com.stu.manage.demo.entity.JtEntrustCheckInfo;
+import com.stu.manage.demo.entity.JtEntrustCheckItem;
+import com.stu.manage.demo.entity.JtEntrustInfo;
+import com.stu.manage.demo.entity.JtEntrustProduct;
+import com.stu.manage.demo.entity.JtReportInfo;
+import com.stu.manage.demo.entity.JtSampleInfo;
+import com.stu.manage.demo.entity.JtSampleObject;
+import com.stu.manage.demo.entity.ProductVo;
+import com.stu.manage.demo.entity.SampleInfoVo;
+import com.stu.manage.demo.entity.SampleStatus;
+import com.stu.manage.demo.entity.StatusEntity;
 import com.stu.manage.demo.http.HttpClientUtil;
-import com.stu.manage.demo.mapper.*;
+import com.stu.manage.demo.mapper.EntrustMapper;
+import com.stu.manage.demo.mapper.JtEntrustCheckInfoMapper;
+import com.stu.manage.demo.mapper.JtEntrustCheckItemMapper;
+import com.stu.manage.demo.mapper.JtEntrustInfoMapper;
+import com.stu.manage.demo.mapper.JtEntrustProductMapper;
+import com.stu.manage.demo.mapper.JtReportInfoMapper;
+import com.stu.manage.demo.mapper.JtSampleInfoMapper;
+import com.stu.manage.demo.mapper.JtSampleObjectMapper;
 import com.stu.manage.demo.service.EntrustService;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,7 +39,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -85,6 +114,9 @@ public class EntrustServiceImpl implements EntrustService {
         List<SampleStatus> list = entrustMapper.getSampleStat(id);
         //获取任务状态和任务流程审批状态
         List<SampleStatus> ll = entrustMapper.getTaskStat(id);
+        if (!CollectionUtils.isEmpty(list) && CollectionUtils.isEmpty(ll)){
+            statusEntity.setList(list);
+        }
         if (!CollectionUtils.isEmpty(ll) && !CollectionUtils.isEmpty(list)){
             for (SampleStatus status :ll) {
                 for (SampleStatus sampleStatus:list) {
@@ -125,14 +157,21 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public List<StatusEntity> ownerTask(String type, Integer userId, String adminId, String startTime, String endTime, Integer pageNo, Integer pageSize) {
+    public PageInfo ownerTask(String type, Integer userId, String adminId, Long startTime, Long endTime, Integer pageNo, Integer pageSize) {
         PageHelper.startPage(pageNo, pageSize);
-        List<StatusEntity> list = entrustMapper.ownerTask(type,userId,adminId,startTime,endTime);
-        //TODO 根据不同委托类型组装数据
+        List<StatusEntity> list = entrustMapper.ownerTask(type,userId,adminId, new Date(startTime),new Date(endTime));
+        PageInfo pageInfo = new PageInfo<>(list);
+        for (StatusEntity entity:list) {
+            StatusEntity status = this.status(Integer.parseInt(entity.getEntrustId()));
+            if (status != null){
+                entity.setList(status.getList());
+            }
+        }
 
-        return list;
+        //TODO 根据不同委托类型组装数据
+        return pageInfo;
     }
-    
+
     public Integer addEntrust(JtEntrustInfo jtEntrustInfo) {
         JtEntrustInfo jtEntrustInfos = new JtEntrustInfo();
         jtEntrustInfos.setEntrustNumber("2021090023");// (getEntrustNumber() 委托号

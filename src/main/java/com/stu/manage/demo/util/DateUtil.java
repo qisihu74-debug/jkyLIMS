@@ -28,6 +28,8 @@ public class DateUtil {
         return yyyy_MM_dd.format(date);
     }
 
+
+
     /**
      * 获得当前时间 格式：2014-12-02 10:38:53
      * @return String
