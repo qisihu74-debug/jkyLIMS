@@ -173,6 +173,16 @@ public class EntrustServiceImpl implements EntrustService {
         return pageInfo;
     }
 
+    @Override
+    public Map<String, String> count(String adminId) {
+        Map<String,String> map = new HashMap();
+        String currentEntrustNum = entrustMapper.countCurrent(adminId);
+        String historyEntrustNum = entrustMapper.countHistory(adminId);
+        map.put("currentEntrustNum",currentEntrustNum);
+        map.put("historyEntrustNum",historyEntrustNum);
+        return map;
+    }
+
     public Integer addEntrust(JtEntrustInfo jtEntrustInfo) {
         JtEntrustInfo jtEntrustInfos = new JtEntrustInfo();
         jtEntrustInfos.setEntrustNumber("2021090023");// (getEntrustNumber() 委托号

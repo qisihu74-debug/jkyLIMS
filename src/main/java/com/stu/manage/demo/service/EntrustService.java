@@ -62,4 +62,11 @@ public interface EntrustService {
      * @return
      */
     PageInfo ownerTask(String type, Integer userId, String adminId, Long startTime, Long endTime, Integer pageNo, Integer pageSize);
+
+    /**
+     * 统计我的任务
+     * @param adminId
+     * @return
+     */
+    Map<String, String> count(String adminId);
 }

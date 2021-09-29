@@ -117,5 +117,22 @@
         </if>
     </select>
 
+    <select id="countCurrent" resultType="String">
+        SELECT DISTINCT count(a.entrust_id) from
+                jt_entrust_info a
+                left join jt_entrust_check_info c on a.entrust_id=c.entrust_id
+                left join jt_sample_info s on s.entrust_id=a.entrust_id
+                left join jt_report_info jri on s.sample_id = jri.sample_id
+                where a.crm=#{adminId} AND jri.flow_status = 3
+    </select>
+
+    <select id="countHistory" resultType="String">
+        SELECT DISTINCT count(a.entrust_id) from
+                jt_entrust_info a
+                left join jt_entrust_check_info c on a.entrust_id=c.entrust_id
+                left join jt_sample_info s on s.entrust_id=a.entrust_id
+                left join jt_report_info jri on s.sample_id = jri.sample_id
+                where a.crm=#{adminId} AND jri.flow_status != 3
+    </select>
 
 </mapper>

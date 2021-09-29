@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Slf4j
@@ -118,5 +119,19 @@ public class EntrustController {
         }
         PageInfo pageInfo = entrustService.ownerTask(type, userId, adminId, startTime,endTime, pageNo, pageSize);
         return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * 获取委托数量
+     * @param adminId
+     * @return
+     */
+    @GetMapping("count")
+    public Result count(String adminId){
+        if (StringUtils.isEmpty(adminId)){
+            return ResultUtil.error(-1,"缺少必要的参数！");
+        }
+        Map<String,String> map = entrustService.count(adminId);
+        return ResultUtil.success(map);
     }
 }

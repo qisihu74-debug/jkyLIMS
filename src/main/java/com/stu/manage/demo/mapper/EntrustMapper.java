@@ -70,4 +70,18 @@ public interface EntrustMapper extends BaseMapper<EntrustStat> {
      * @return
      */
     List<StatusEntity> ownerTask(String type, Integer userId, String adminId, Date startTime, Date endTime);
+
+    /**
+     * 统计当前委托
+     * @param adminId
+     * @return
+     */
+    String countCurrent(String adminId);
+
+    /**
+     * 统计历史委托
+     * @param adminId
+     * @return
+     */
+    String countHistory(String adminId);
 }
