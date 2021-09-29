@@ -276,9 +276,9 @@ public class EntrustServiceImpl implements EntrustService {
                 jtSampleObject.setReceiveTime(new Date());
 
                 //后台补充
-                jtSampleObject.setStoragePlace("——");
-                jtSampleObject.setSampleObjectNote("——");
-                jtSampleObject.setSampleBatch("——");
+                jtSampleObject.setStoragePlace("0");
+                jtSampleObject.setSampleObjectNote("0");
+                jtSampleObject.setSampleBatch("0");
                 jtSampleObjectMapper.insertSelective(jtSampleObject);
                 //解析 产品下的 数据
                 if(null!=jtSampleObject.getCheckList()){
@@ -323,10 +323,11 @@ public class EntrustServiceImpl implements EntrustService {
                 jtReportInfoMapper.insertSelective(jtReportInfo);
                 // 成功返回委托编号
 
-                return  jtEntrustInfo.getEntrustNumber();
+
             }
+
         }
-        return null;
+        return  jtEntrustInfo.getEntrustNumber();
 
     }
 
