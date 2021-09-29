@@ -86,9 +86,10 @@
     </select>
 
     <select id="getSampleStat" resultType="com.stu.manage.demo.entity.SampleStatus">
-        select DISTINCT a.sample_id As sampleId,a.sample_number As sampleCode,jri.flow_status As reportStat
+        select DISTINCT a.sample_id As sampleId,a.sample_number As sampleCode,m.product_name As sampleName ,jri.flow_status As reportStat
     from jt_sample_info a
-           inner join jt_report_info jri on a.sample_id = jri.sample_id
+    left join d_product_msg m on a.product_id=m.product_id
+           left join jt_report_info jri on a.sample_id = jri.sample_id
     where a.entrust_id=#{id}
     </select>
 

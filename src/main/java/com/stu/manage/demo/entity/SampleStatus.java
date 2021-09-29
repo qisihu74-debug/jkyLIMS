@@ -18,6 +18,10 @@ public class SampleStatus {
      */
     private String sampleCode;
     /**
+     * 样品名称
+     */
+    private String sampleName;
+    /**
      * 报告状态1.流程审核中2.非正常结束3.审核通过4.待发起
      */
     private String reportStat;
