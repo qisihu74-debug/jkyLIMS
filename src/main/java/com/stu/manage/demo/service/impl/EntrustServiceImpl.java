@@ -6,22 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Maps;
-import com.stu.manage.demo.entity.CheckItemCostVo;
-import com.stu.manage.demo.entity.CheckItemInfoVo;
-import com.stu.manage.demo.entity.Company;
-import com.stu.manage.demo.entity.EntrustInfo;
-import com.stu.manage.demo.entity.EntrustStat;
-import com.stu.manage.demo.entity.JtEntrustCheckInfo;
-import com.stu.manage.demo.entity.JtEntrustCheckItem;
-import com.stu.manage.demo.entity.JtEntrustInfo;
-import com.stu.manage.demo.entity.JtEntrustProduct;
-import com.stu.manage.demo.entity.JtReportInfo;
-import com.stu.manage.demo.entity.JtSampleInfo;
-import com.stu.manage.demo.entity.JtSampleObject;
-import com.stu.manage.demo.entity.ProductVo;
-import com.stu.manage.demo.entity.SampleInfoVo;
-import com.stu.manage.demo.entity.SampleStatus;
-import com.stu.manage.demo.entity.StatusEntity;
+import com.stu.manage.demo.entity.*;
 import com.stu.manage.demo.http.HttpClientUtil;
 import com.stu.manage.demo.mapper.EntrustMapper;
 import com.stu.manage.demo.mapper.JtEntrustCheckInfoMapper;
@@ -70,10 +55,10 @@ public class EntrustServiceImpl implements EntrustService {
     private JtReportInfoMapper jtReportInfoMapper;
 
     @Override
-    public EntrustInfo onceMore(int entrustId) {
-        EntrustInfo entrustInfo = entrustMapper.onceMore(entrustId);
-        List<SampleInfoVo> sampleInfo = entrustMapper.getSampleInfo(entrustId);
-        List<CheckItemInfoVo> checkItemInfo = entrustMapper.getCheckItemInfo(entrustId);
+    public EntrustBaseInfo onceMore(String entrustNumber) {
+        EntrustBaseInfo entrustInfo = entrustMapper.onceMore(entrustNumber);
+        List<SampleInfoVo> sampleInfo = entrustMapper.getSampleInfo(entrustNumber);
+        List<CheckItemInfoVo> checkItemInfo = entrustMapper.getCheckItemInfo(entrustNumber);
 
         for (int i = 0; i < sampleInfo.size(); i++) {
             SampleInfoVo sampleInfoVo = sampleInfo.get(i);
@@ -84,10 +69,10 @@ public class EntrustServiceImpl implements EntrustService {
                     items.add(checkItemInfoVo);
                 }
             }
-            sampleInfoVo.setItems(items);
+            sampleInfoVo.setCheckList(items);
         }
 
-        EntrustInfo result = new EntrustInfo(entrustInfo,sampleInfo);
+        EntrustBaseInfo result = new EntrustBaseInfo(entrustInfo,sampleInfo);
 
         return result;
     }

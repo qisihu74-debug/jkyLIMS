@@ -35,8 +35,8 @@ public class EntrustController {
     private JtEntrustInfoMapper jtEntrustInfoMapper;
 
     @GetMapping("once_more")
-    public Result onceMore(int entrustId){
-        return ResultUtil.success(entrustService.onceMore(entrustId));
+    public Result onceMore(String entrustNumber){
+        return ResultUtil.success(entrustService.onceMore(entrustNumber));
     }
 
     @GetMapping("get_check_items")

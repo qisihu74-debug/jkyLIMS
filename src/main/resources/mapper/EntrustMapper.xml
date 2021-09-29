@@ -2,68 +2,85 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.stu.manage.demo.mapper.EntrustMapper">
      
-    <select id="onceMore" parameterType="Integer" resultType="com.stu.manage.demo.entity.EntrustInfo">
+    <select id="onceMore" parameterType="String" resultType="com.stu.manage.demo.entity.EntrustBaseInfo">
         SELECT
-            entrust_id entrustId,
-            entrust_number entrustNumber,
-            entrust_type entrustType,
-            entrust_company_id entrustCompanyId,
-            witness_company_name witnessCompanyName,
-            project_id projectId,
-            project_part projectPart,
-            sample_receive_way sampleReceiveWay,
-            check_purpose checkPurpose,
-            report_num reportNum,
-            report_get_way reportGetWay,
-            entrust_note entrustNote,
-            entrust_data entrustData
+            t1.check_purpose checkPurpose,
+            t2.com_name comName,
+            t1.entrust_note entrustNote,
+            t1.entrust_people entrustPeople,
+            t1.entrust_people_phone entrustPeoplePhone,
+            t3.entrust_type_name entrustType,
+            t1.project_id projectId,
+            t1.project_part projectPart,
+            t1.report_get_way reportGetWay,
+            t1.report_num reportNum,
+            t1.sample_receive_way sampleReceiveWay,
+            t1.witness_company_name witnessCompanyName,
+            t1.witness_people witnessPeople
         FROM
-            jt_entrust_info
+            jt_entrust_info t1
+                LEFT JOIN company t2 ON t1.entrust_company_id = t2.com_id
+                LEFT JOIN jt_entrust_type t3 ON t1.entrust_type = t3.entrust_type
         WHERE
-            entrust_number = #{entrustId}
+            t1.entrust_number = #{entrustNumber}
     </select>
 
-    <select id="getSampleInfo" parameterType="Integer" resultType="com.stu.manage.demo.entity.SampleInfoVo">
+    <select id="getSampleInfo" parameterType="String" resultType="com.stu.manage.demo.entity.SampleInfoVo">
         SELECT
-            T1.product_id productId,
-            T2.product_name productName,
-            T1.standard standard,
-            T1.model_id model,
-            T1.product_number batch,
-            T1.object_count sampleCount,
-            T1.product_company_name vendor,
-            T1.sampleType sampleType
+            t1.model_id modelId,
+            t1.object_count objectCount,
+            t1.product_company_name productCompanyName,
+            t1.product_id productId,
+            t1.product_number productNumber,
+            t2.check_basis_code productStandardSource,
+            t3.product_name productName,
+            t4.sample_type sampleType,
+            t4.sample_type_name sampleTypeName
         FROM
-            (
+            jt_sample_object t1
+                LEFT JOIN (
                 SELECT
-                    product_id,
-                    '依据' standard,
-                    model_id,
-                    product_number,
-                    object_count,
-                    product_company_name,
-                    '样品类型' sampleType
+                    t1.product_id,
+                    t1.standard_id,
+                    t2.check_basis_code
                 FROM
-                    jt_sample_object
+                    ( SELECT DISTINCT product_id, standard_id FROM jt_entrust_check_item WHERE entrust_id = ( SELECT entrust_id FROM jt_entrust_info WHERE entrust_number = #{entrustNumber} ) ) t1
+                        LEFT JOIN s_check_basis_code t2 ON t1.standard_id = t2.check_basis_id
+            ) t2 ON t1.product_id = t2.product_id
+                LEFT JOIN d_product_msg t3 ON t1.product_id = t3.product_id
+                LEFT JOIN (
+                SELECT
+                    t1.sample_id,
+                    t2.sample_type,
+                    t2.sample_type_name
+                FROM
+                    jt_sample_info t1
+                        LEFT JOIN jt_sample_type t2 ON t1.sample_type = t2.sample_type
                 WHERE
-                        sample_object_id IN ( SELECT DISTINCT sample_Id FROM jt_entrust_check_item WHERE entrust_number = #{entrustId} )
-            ) T1
-                LEFT JOIN d_product_msg T2 ON T1.product_id = T2.product_id
+                        entrust_id = ( SELECT entrust_id FROM jt_entrust_info WHERE entrust_number = #{entrustNumber} )
+            ) t4 ON t1.sample_object_id = t4.sample_id
+        WHERE
+                t1.sample_object_id IN ( SELECT DISTINCT sample_Id FROM jt_entrust_check_item WHERE entrust_id = ( SELECT entrust_id FROM jt_entrust_info WHERE entrust_number = #{entrustNumber} ) )
     </select>
 
-    <select id="getCheckItemInfo" parameterType="Integer" resultType="com.stu.manage.demo.entity.CheckItemInfoVo">
+    <select id="getCheckItemInfo" parameterType="String" resultType="com.stu.manage.demo.entity.CheckItemInfoVo">
         SELECT
-            T1.product_id productId,
+            T2.check_item_id checkItemId,
             T2.check_item_name checkItemName,
-            CONCAT( T3.check_basis_doc_name, ',', T3.check_basis_code ) standard,
-            T1.check_times checkTimes
+            T1.check_times checkTimes,
+            T3.check_basis_id standardId,
+            T1.product_id productId,
+            T4.product_name productName,
+            CONCAT( T3.check_basis_doc_name, ',', T3.check_basis_code ) standard
         FROM
             jt_entrust_check_item T1
                 LEFT JOIN d_product_check_item T2 ON T1.check_item_id = T2.check_item_id
                 LEFT JOIN s_check_basis_code T3 ON T1.standard_id = T3.check_basis_id
+                LEFT JOIN d_product_msg T4 ON T1.product_id = T4.product_id
         WHERE
-            T1.entrust_number = #{entrustId}
+                T1.entrust_id = ( SELECT entrust_id FROM jt_entrust_info WHERE entrust_number =  #{entrustNumber} )
     </select>
+
     <select id="getCheckItemsByProductId" parameterType="Integer" resultType="com.stu.manage.demo.entity.CheckItemCostVo">
         SELECT
             T1.check_item_id itemId,
@@ -76,6 +93,7 @@
             is_valid = 1
           AND T1.product_id = #{productId}
     </select>
+
     <select id="getCheckBasisByProductId" parameterType="Integer" resultType="com.stu.manage.demo.entity.ProductVo">
         SELECT
             T1.check_basis_id value,
