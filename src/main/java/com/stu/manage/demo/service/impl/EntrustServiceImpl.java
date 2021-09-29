@@ -178,8 +178,8 @@ public class EntrustServiceImpl implements EntrustService {
         Map<String,String> map = new HashMap();
         String currentEntrustNum = entrustMapper.countCurrent(adminId);
         String historyEntrustNum = entrustMapper.countHistory(adminId);
-        map.put("currentEntrustNum",currentEntrustNum);
-        map.put("historyEntrustNum",historyEntrustNum);
+        map.put("historyEntrustNum",currentEntrustNum);
+        map.put("currentEntrustNum",historyEntrustNum);
         return map;
     }
 
