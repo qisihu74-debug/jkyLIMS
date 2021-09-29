@@ -20,7 +20,7 @@
         FROM
             jt_entrust_info
         WHERE
-            entrust_id = #{entrustId}
+            entrust_number = #{entrustId}
     </select>
 
     <select id="getSampleInfo" parameterType="Integer" resultType="com.stu.manage.demo.entity.SampleInfoVo">
@@ -46,7 +46,7 @@
                 FROM
                     jt_sample_object
                 WHERE
-                        sample_object_id IN ( SELECT DISTINCT sample_Id FROM jt_entrust_check_item WHERE entrust_id = #{entrustId} )
+                        sample_object_id IN ( SELECT DISTINCT sample_Id FROM jt_entrust_check_item WHERE entrust_number = #{entrustId} )
             ) T1
                 LEFT JOIN d_product_msg T2 ON T1.product_id = T2.product_id
     </select>
@@ -62,7 +62,7 @@
                 LEFT JOIN d_product_check_item T2 ON T1.check_item_id = T2.check_item_id
                 LEFT JOIN s_check_basis_code T3 ON T1.standard_id = T3.check_basis_id
         WHERE
-            T1.entrust_id = #{entrustId}
+            T1.entrust_number = #{entrustId}
     </select>
     <select id="getCheckItemsByProductId" parameterType="Integer" resultType="com.stu.manage.demo.entity.CheckItemCostVo">
         SELECT
