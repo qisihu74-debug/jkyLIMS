@@ -34,6 +34,8 @@ import com.stu.manage.demo.mapper.JtSampleObjectMapper;
 import com.stu.manage.demo.service.EntrustService;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +51,7 @@ import java.util.Map;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
-
+    Logger logger = LoggerFactory.getLogger(EntrustServiceImpl.class);
     @Autowired
     private EntrustMapper entrustMapper;
     @Autowired
@@ -159,7 +161,8 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public PageInfo ownerTask(String type, Integer userId, String adminId, Long startTime, Long endTime, Integer pageNo, Integer pageSize) {
         PageHelper.startPage(pageNo, pageSize);
-        List<StatusEntity> list = entrustMapper.ownerTask(type,userId,adminId, new Date(startTime),new Date(endTime));
+        List<StatusEntity> list = entrustMapper.ownerTask(type, userId, adminId, new Date(startTime), new Date(endTime));
+        logger.debug("查询的数据:{}",JSON.toJSONString(list));
         PageInfo pageInfo = new PageInfo<>(list);
         for (StatusEntity entity:list) {
             StatusEntity status = this.status(Integer.parseInt(entity.getEntrustId()));
@@ -167,8 +170,6 @@ public class EntrustServiceImpl implements EntrustService {
                 entity.setList(status.getList());
             }
         }
-
-        //TODO 根据不同委托类型组装数据
         return pageInfo;
     }
 
