@@ -170,8 +170,6 @@ public class EntrustServiceImpl implements EntrustService {
                 entity.setList(status.getList());
             }
         }
-
-        //TODO 根据不同委托类型组装数据
         return pageInfo;
     }
 
