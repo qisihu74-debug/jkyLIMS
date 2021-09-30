@@ -13,6 +13,7 @@ import lombok.Data;
 @Data
 public class SampleStatus {
     private int sampleId;
+    private int taskId;
     /**
      * 样品编号
      */

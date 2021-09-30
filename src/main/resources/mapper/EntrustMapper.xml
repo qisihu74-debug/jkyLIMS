@@ -90,6 +90,7 @@
     from jt_sample_info a
     left join d_product_msg m on a.product_id=m.product_id
            left join jt_report_info jri on a.sample_id = jri.sample_id
+           left join d_check_sample_item d on d.sample_id = a.sample_id
     where a.entrust_id=#{id}
     </select>
 
@@ -135,4 +136,40 @@
                 where a.crm=#{adminId} AND jri.flow_status != 3
     </select>
 
+    <select id="getFileIdBySampleId" resultType="String">
+        select report_id from jt_report_info where sample_id=#{sampleId}
+    </select>
+
+    <select id="queryByfId" resultType="com.stu.manage.demo.entity.FileInfo">
+        select a.file_id, b.category_id,a.file_type,a.file_name,a.path,
+			a.create_time,a.system_id,a.status_code,a.note,a.sha,a.is_del,c.category_name
+			from d_file_info a
+			LEFT JOIN r_file_category b ON a.file_id=b.file_id
+			left join d_category_info c on b.category_id = c.category_id
+			where a.file_id=#{fileId} and is_del=0
+    </select>
+
+    <select id="selectFileVersionByVersion" resultType="com.stu.manage.demo.entity.FileVersionInfo">
+        SELECT
+            file_id,
+            file_version,
+            update_time,
+            update_login_no,
+            sha,
+            note,
+            is_with_upload
+        FROM d_file_version_info
+        WHERE file_id = #{fileId} and file_version=#{fileVersion}
+        limit 1
+    </select>
+
+    <select id="selectNewFileVersion" resultType="com.stu.manage.demo.entity.FileVersionInfo">
+        SELECT
+            file_id,
+            max(file_version) file_version,
+             is_with_upload
+        FROM d_file_version_info
+        WHERE file_id = #{fileId}
+        GROUP BY file_id
+    </select>
 </mapper>

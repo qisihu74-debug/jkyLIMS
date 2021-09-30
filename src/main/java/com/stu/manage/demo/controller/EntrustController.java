@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,5 +134,27 @@ public class EntrustController {
         }
         Map<String,String> map = entrustService.count(adminId);
         return ResultUtil.success(map);
+    }
+
+    /**
+     * 根据样品id下载已完成的报告
+     * @param response
+     * @param sampleId
+     * @param version
+     * @return
+     */
+    @GetMapping("downloadReport")
+    public Result downloadReport(HttpServletResponse response,Integer sampleId, String version,String entrustId){
+        if (sampleId == null){
+            return ResultUtil.error(-1,"缺少必要的参数");
+        }
+        try {
+            entrustService.downloadReport(response,sampleId,version,entrustId);
+            return ResultUtil.success(response);
+        }catch (Exception e){
+            logger.error("报告下载异常:{}",e);
+            return ResultUtil.error(-1,"报告下载异常");
+        }
+
     }
 }

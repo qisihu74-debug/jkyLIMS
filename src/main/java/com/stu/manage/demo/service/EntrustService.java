@@ -6,6 +6,8 @@ import com.stu.manage.demo.entity.EntrustInfo;
 import com.stu.manage.demo.entity.ProductVo;
 import com.stu.manage.demo.entity.StatusEntity;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -69,4 +71,12 @@ public interface EntrustService {
      * @return
      */
     Map<String, String> count(String adminId);
+
+    /**
+     * 下载报告
+     * @param response
+     * @param sampleId
+     * @param version
+     */
+    void downloadReport(HttpServletResponse response, Integer sampleId, String version,String entrustId) throws IOException;
 }

@@ -84,4 +84,22 @@ public interface EntrustMapper extends BaseMapper<EntrustStat> {
      * @return
      */
     String countHistory(String adminId);
+
+    /**
+     * 根据样品id获取文件id
+     * @param sampleId
+     * @return
+     */
+    String getFileIdBySampleId(Integer sampleId,String entrustId);
+
+    /**
+     * 根据文件id获取文件信息
+     * @param fileId
+     * @return
+     */
+    FileInfo queryByfId(String fileId);
+
+    FileVersionInfo selectFileVersionByVersion(String fileId, Integer version);
+
+    FileVersionInfo selectNewFileVersion(String fileId);
 }

@@ -11,6 +11,9 @@ import com.stu.manage.demo.entity.CheckItemInfoVo;
 import com.stu.manage.demo.entity.Company;
 import com.stu.manage.demo.entity.EntrustInfo;
 import com.stu.manage.demo.entity.EntrustStat;
+import com.stu.manage.demo.entity.FileHomeLocation;
+import com.stu.manage.demo.entity.FileInfo;
+import com.stu.manage.demo.entity.FileVersionInfo;
 import com.stu.manage.demo.entity.JtEntrustCheckInfo;
 import com.stu.manage.demo.entity.JtEntrustCheckItem;
 import com.stu.manage.demo.entity.JtEntrustInfo;
@@ -41,6 +44,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -124,6 +129,9 @@ public class EntrustServiceImpl implements EntrustService {
                 for (SampleStatus sampleStatus:list) {
                     if (sampleStatus.getSampleId()==status.getSampleId()){
                         status.setReportStat(sampleStatus.getReportStat());
+                        status.setSampleId(sampleStatus.getSampleId());
+                        status.setSampleCode(sampleStatus.getSampleCode());
+                        status.setSampleName(sampleStatus.getSampleName());
                     }
                 }
             }
@@ -395,5 +403,47 @@ public class EntrustServiceImpl implements EntrustService {
         return strAdd;
     }
 
+    @Override
+    public void downloadReport(HttpServletResponse response, Integer sampleId, String version,String entrustId) throws IOException {
+        //根据sampleId获取文件id
+        String fileId = entrustMapper.getFileIdBySampleId(sampleId,entrustId);
+        FileInfo fileInfo = entrustMapper.queryByfId(fileId);
+        new FileHomeLocation().responseFile(response, getFilePath(fileId, null), fileInfo.getFileName());
+    }
 
+    public String getFilePath(String fileId, Integer version) throws IOException {
+        FileInfo fileInfo = entrustMapper.queryByfId(fileId);
+        // 需要处理文件版本为题
+        // 默认下载 最大版本的
+        FileVersionInfo fileVersionInfo;
+        String realPath = fileLocation("location");
+        realPath = realPath + fileInfo.getPath().substring(fileInfo.getPath().indexOf("filesys") + "filesys".length() + 1);
+        if (version != null) {
+            fileVersionInfo = entrustMapper.selectFileVersionByVersion(fileId, version);
+        } else {
+            fileVersionInfo = entrustMapper.selectNewFileVersion(fileId);
+        }
+        // 通过
+        if ("1".equals(fileVersionInfo.getIsWithUpload())) {
+            realPath = realPath.substring(0, realPath.lastIndexOf(".")) + "_" + fileVersionInfo.getFileVersion() + realPath.substring(realPath.lastIndexOf('.'));
+        } else {
+            if (version != null) {
+                realPath = realPath.substring(0, realPath.lastIndexOf(".")) + "_" + fileVersionInfo.getFileVersion() + realPath.substring(realPath.lastIndexOf('.'));
+
+            }
+        }
+        return realPath;
+    }
+
+    /**
+     * 通过配置文件的键 读取配置文件
+     *
+     * @param fileName 配置文件键的名字
+     * @return 返回配置文件键对应的值
+     * @throws IOException
+     */
+    public String fileLocation(String fileName) throws IOException {
+        FileHomeLocation fileHomeLocation = new FileHomeLocation();
+        return fileHomeLocation.fileLocation(fileName);
+    }
 }
