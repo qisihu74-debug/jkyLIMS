@@ -1,10 +1,7 @@
 package com.stu.manage.demo.service;
 
 import com.github.pagehelper.PageInfo;
-import com.stu.manage.demo.entity.CheckItemCostVo;
-import com.stu.manage.demo.entity.EntrustInfo;
-import com.stu.manage.demo.entity.ProductVo;
-import com.stu.manage.demo.entity.StatusEntity;
+import com.stu.manage.demo.entity.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -14,10 +11,10 @@ import java.util.Map;
 public interface EntrustService {
     /**
      * 再来一单--委托基本信息
-     * @param entrustId
+     * @param entrustNumber
      * @return
      */
-    EntrustInfo onceMore(int entrustId);
+    EntrustBaseInfo onceMore(String entrustNumber);
 
     /**
      * 根据产品获取产品全部检测项

@@ -14,23 +14,23 @@ public interface EntrustMapper extends BaseMapper<EntrustStat> {
 
     /**
      * 再来一单--委托基本信息
-     * @param entrustId
+     * @param entrustNumber
      * @return
      */
-    EntrustInfo onceMore(int entrustId);
+    EntrustBaseInfo onceMore(String entrustNumber);
 
     /**
      * 再来一单--样品信息
-     * @param entrustId
+     * @param entrustNumber
      * @return
      */
-    List<SampleInfoVo> getSampleInfo(int entrustId);
+    List<SampleInfoVo> getSampleInfo(String entrustNumber);
     /**
      * 再来一单--检测项信息
-     * @param entrustId
+     * @param entrustNumber
      * @return
      */
-    List<CheckItemInfoVo> getCheckItemInfo(int entrustId);
+    List<CheckItemInfoVo> getCheckItemInfo(String entrustNumber);
 
     /**
      * 根据产品获取产品全部检测项

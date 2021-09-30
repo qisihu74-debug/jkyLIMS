@@ -25,6 +25,7 @@ import com.stu.manage.demo.entity.ProductVo;
 import com.stu.manage.demo.entity.SampleInfoVo;
 import com.stu.manage.demo.entity.SampleStatus;
 import com.stu.manage.demo.entity.StatusEntity;
+import com.stu.manage.demo.entity.*;
 import com.stu.manage.demo.http.HttpClientUtil;
 import com.stu.manage.demo.mapper.EntrustMapper;
 import com.stu.manage.demo.mapper.JtEntrustCheckInfoMapper;
@@ -75,10 +76,10 @@ public class EntrustServiceImpl implements EntrustService {
     private JtReportInfoMapper jtReportInfoMapper;
 
     @Override
-    public EntrustInfo onceMore(int entrustId) {
-        EntrustInfo entrustInfo = entrustMapper.onceMore(entrustId);
-        List<SampleInfoVo> sampleInfo = entrustMapper.getSampleInfo(entrustId);
-        List<CheckItemInfoVo> checkItemInfo = entrustMapper.getCheckItemInfo(entrustId);
+    public EntrustBaseInfo onceMore(String entrustNumber) {
+        EntrustBaseInfo entrustInfo = entrustMapper.onceMore(entrustNumber);
+        List<SampleInfoVo> sampleInfo = entrustMapper.getSampleInfo(entrustNumber);
+        List<CheckItemInfoVo> checkItemInfo = entrustMapper.getCheckItemInfo(entrustNumber);
 
         for (int i = 0; i < sampleInfo.size(); i++) {
             SampleInfoVo sampleInfoVo = sampleInfo.get(i);
@@ -89,10 +90,10 @@ public class EntrustServiceImpl implements EntrustService {
                     items.add(checkItemInfoVo);
                 }
             }
-            sampleInfoVo.setItems(items);
+            sampleInfoVo.setCheckList(items);
         }
 
-        EntrustInfo result = new EntrustInfo(entrustInfo,sampleInfo);
+        EntrustBaseInfo result = new EntrustBaseInfo(entrustInfo,sampleInfo);
 
         return result;
     }
@@ -284,9 +285,9 @@ public class EntrustServiceImpl implements EntrustService {
                 jtSampleObject.setReceiveTime(new Date());
 
                 //后台补充
-                jtSampleObject.setStoragePlace("——");
-                jtSampleObject.setSampleObjectNote("——");
-                jtSampleObject.setSampleBatch("——");
+                jtSampleObject.setStoragePlace("0");
+                jtSampleObject.setSampleObjectNote("0");
+                jtSampleObject.setSampleBatch("0");
                 jtSampleObjectMapper.insertSelective(jtSampleObject);
                 //解析 产品下的 数据
                 if(null!=jtSampleObject.getCheckList()){
@@ -331,10 +332,11 @@ public class EntrustServiceImpl implements EntrustService {
                 jtReportInfoMapper.insertSelective(jtReportInfo);
                 // 成功返回委托编号
 
-                return  jtEntrustInfo.getEntrustNumber();
+
             }
+
         }
-        return null;
+        return  jtEntrustInfo.getEntrustNumber();
 
     }
 
