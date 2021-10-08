@@ -1,6 +1,7 @@
 package com.stu.manage.demo.mapper;
 
 import com.stu.manage.demo.entity.JtSampleInfo;
+import org.apache.ibatis.annotations.Param;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -13,4 +14,6 @@ import org.springframework.stereotype.Component;
 @Mapper
 public interface JtSampleInfoMapper {
     int insertSelective(JtSampleInfo record);
+
+    JtSampleInfo getProductOtherName(@Param("productId") Integer productId);
 }

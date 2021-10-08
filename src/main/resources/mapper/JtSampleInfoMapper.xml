@@ -45,6 +45,9 @@
             <if test="entrustId != null">
                 entrust_id,
             </if>
+            <if test="productOtherName != null">
+                product_other_name,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="sampleId != null">
@@ -86,8 +89,16 @@
             <if test="entrustId != null">
                 #{entrustId,jdbcType=INTEGER},
             </if>
+            <if test="productOtherName != null">
+                #{productOtherName,jdbcType=VARCHAR},
+            </if>
         </trim>
     </insert>
+
+    <select id="getProductOtherName" parameterType="Integer" resultType="com.stu.manage.demo.entity.JtSampleInfo">
+        SELECT product_name  as productOtherName  FROM d_product_msg
+        WHERE product_id =  #{productId,jdbcType=INTEGER}
+    </select>
 
 
 </mapper>
