@@ -91,6 +91,7 @@
             LEFT JOIN (SELECT * FROM d_product_cost WHERE product_id = #{productId}) T2 ON T1.check_item_id = T2.check_item_id
         WHERE
             is_valid = 1
+          AND T2.cost IS NOT NULL
           AND T1.product_id = #{productId}
     </select>
 

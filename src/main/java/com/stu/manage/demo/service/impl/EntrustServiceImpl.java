@@ -332,15 +332,16 @@ public class EntrustServiceImpl implements EntrustService {
                         }
                         GetEntrustCheckItemList.add(jtEntrustCheckItem);
                         // 单个新增
-                        jtEntrustCheckItemMapper.insertSelective(jtEntrustCheckItem);
+//                        jtEntrustCheckItemMapper.insertSelective(jtEntrustCheckItem);
                     }
                     // 实现批量增加到数据库中
-
+                    jtEntrustCheckItemMapper.insertSelectiveList(GetEntrustCheckItemList);
                 }
                 //补充样品id信息信息：
                 JtReportInfo jtReportInfo = new JtReportInfo();
                 jtReportInfo.setFlowStatus(4);
                 jtReportInfo.setSampleId(jtSampleInfo.getSampleId());
+                // 单个新增
                 jtReportInfoMapper.insertSelective(jtReportInfo);
                 // 成功返回委托编号
             }
