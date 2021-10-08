@@ -75,5 +75,5 @@ public interface EntrustService {
      * @param sampleId
      * @param version
      */
-    void downloadReport(HttpServletResponse response, Integer sampleId, String version,String entrustId) throws IOException;
+    void downloadReport(HttpServletResponse response, Integer sampleId, String version,String entrustId,String reportPath) throws IOException;
 }

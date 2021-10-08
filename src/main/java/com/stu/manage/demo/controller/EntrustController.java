@@ -2,6 +2,7 @@ package com.stu.manage.demo.controller;
 
 import com.github.pagehelper.PageInfo;
 import com.stu.manage.demo.entity.StatusEntity;
+import com.stu.manage.demo.filter.PassToken;
 import com.stu.manage.demo.mapper.JtEntrustInfoMapper;
 import com.stu.manage.demo.result.Result;
 import com.stu.manage.demo.result.ResultUtil;
@@ -13,6 +14,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,12 +31,15 @@ import java.util.Map;
 @RestController
 @Slf4j
 @RequestMapping("/entrust/")
+@PropertySource(value="classpath:application.properties",encoding = "Unicode")
 public class EntrustController {
     Logger logger = LoggerFactory.getLogger(EntrustController.class);
     @Autowired
     private EntrustService entrustService;
     @Autowired
     private JtEntrustInfoMapper jtEntrustInfoMapper;
+    @Value("${report.path}")
+    private String reportPath;
 
     @GetMapping("once_more")
     public Result onceMore(String entrustNumber){
@@ -144,12 +150,13 @@ public class EntrustController {
      * @return
      */
     @GetMapping("downloadReport")
+    @PassToken
     public Result downloadReport(HttpServletResponse response,Integer sampleId, String version,String entrustId){
         if (sampleId == null){
             return ResultUtil.error(-1,"缺少必要的参数");
         }
         try {
-            entrustService.downloadReport(response,sampleId,version,entrustId);
+            entrustService.downloadReport(response,sampleId,version,entrustId,reportPath);
             return ResultUtil.success(response);
         }catch (Exception e){
             logger.error("报告下载异常:{}",e);

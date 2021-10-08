@@ -414,20 +414,20 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public void downloadReport(HttpServletResponse response, Integer sampleId, String version,String entrustId) throws IOException {
+    public void downloadReport(HttpServletResponse response, Integer sampleId, String version,String entrustId,String reportPath) throws IOException {
         //根据sampleId获取文件id
         String fileId = entrustMapper.getFileIdBySampleId(sampleId,entrustId);
         FileInfo fileInfo = entrustMapper.queryByfId(fileId);
-        new FileHomeLocation().responseFile(response, getFilePath(fileId, null), fileInfo.getFileName());
+        new FileHomeLocation().responseFile(response, getFilePath(fileId, null,reportPath), fileInfo.getFileName());
     }
 
-    public String getFilePath(String fileId, Integer version) throws IOException {
+    public String getFilePath(String fileId, Integer version,String reportPath) throws IOException {
         FileInfo fileInfo = entrustMapper.queryByfId(fileId);
         // 需要处理文件版本为题
         // 默认下载 最大版本的
         FileVersionInfo fileVersionInfo;
-        String realPath = fileLocation("location");
-        realPath = realPath + fileInfo.getPath().substring(fileInfo.getPath().indexOf("filesys") + "filesys".length() + 1);
+        //TODO 路径暂时写死
+        reportPath = reportPath + "ff71942e-526d-ff71942e-526d-465c-9170-37a1a85fafce_1.pdf";
         if (version != null) {
             fileVersionInfo = entrustMapper.selectFileVersionByVersion(fileId, version);
         } else {
@@ -435,14 +435,14 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 通过
         if ("1".equals(fileVersionInfo.getIsWithUpload())) {
-            realPath = realPath.substring(0, realPath.lastIndexOf(".")) + "_" + fileVersionInfo.getFileVersion() + realPath.substring(realPath.lastIndexOf('.'));
+            reportPath = reportPath.substring(0, reportPath.lastIndexOf(".")) + "_" + fileVersionInfo.getFileVersion() + reportPath.substring(reportPath.lastIndexOf('.'));
         } else {
             if (version != null) {
-                realPath = realPath.substring(0, realPath.lastIndexOf(".")) + "_" + fileVersionInfo.getFileVersion() + realPath.substring(realPath.lastIndexOf('.'));
+                reportPath = reportPath.substring(0, reportPath.lastIndexOf(".")) + "_" + fileVersionInfo.getFileVersion() + reportPath.substring(reportPath.lastIndexOf('.'));
 
             }
         }
-        return realPath;
+        return reportPath;
     }
 
     /**

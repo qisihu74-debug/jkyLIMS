@@ -83,7 +83,7 @@
 
     <select id="getCheckItemsByProductId" parameterType="Integer" resultType="com.stu.manage.demo.entity.CheckItemCostVo">
         SELECT
-            T1.check_item_id itemId,
+            T1.check_item_id itemId,getFileIdBySampleId
             T1.check_item_name itemName,
             T2.cost itemCost
         FROM
@@ -155,12 +155,12 @@
     </select>
 
     <select id="getFileIdBySampleId" resultType="String">
-        select report_id from jt_report_info where sample_id=#{sampleId}
+        select file_id from jt_report_info where sample_id=#{sampleId}
     </select>
 
     <select id="queryByfId" resultType="com.stu.manage.demo.entity.FileInfo">
-        select a.file_id, b.category_id,a.file_type,a.file_name,a.path,
-			a.create_time,a.system_id,a.status_code,a.note,a.sha,a.is_del,c.category_name
+        select a.file_id As fileId, b.category_id As categoryId,a.file_type As fileType,a.file_name As fileName,a.path As path,
+			a.create_time As createTime,a.system_id As systemId,a.status_code As statusCode,a.note As note,a.sha As sha,a.is_del As isDel,c.category_name As categoryName
 			from d_file_info a
 			LEFT JOIN r_file_category b ON a.file_id=b.file_id
 			left join d_category_info c on b.category_id = c.category_id
@@ -169,25 +169,22 @@
 
     <select id="selectFileVersionByVersion" resultType="com.stu.manage.demo.entity.FileVersionInfo">
         SELECT
-            file_id,
-            file_version,
-            update_time,
-            update_login_no,
+            file_id As fileId,
+            file_version As fileVersion,
+            update_time As updateTime,
+            update_login_no As updateLoginNo,
             sha,
             note,
-            is_with_upload
+            is_with_upload As isWithUpload
         FROM d_file_version_info
         WHERE file_id = #{fileId} and file_version=#{fileVersion}
         limit 1
     </select>
 
     <select id="selectNewFileVersion" resultType="com.stu.manage.demo.entity.FileVersionInfo">
-        SELECT
-            file_id,
-            max(file_version) file_version,
-             is_with_upload
+        SELECT MAX(file_version) As fileVersion
         FROM d_file_version_info
         WHERE file_id = #{fileId}
-        GROUP BY file_id
+ORDER BY file_id desc
     </select>
 </mapper>

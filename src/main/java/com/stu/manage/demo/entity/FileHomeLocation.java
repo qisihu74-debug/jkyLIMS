@@ -208,7 +208,7 @@ public class FileHomeLocation {
     public synchronized void responseFile(HttpServletResponse response, String path, String fileNam2) throws UnsupportedEncodingException {
 
 
-        String fileName = fileNam2 != null ? fileNam2 : path.substring(path.lastIndexOf(systemProperty()) + 1);
+        String fileName = "检测报告.pdf";
         response.reset();
         response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
         response.setHeader("Connection", "close");
