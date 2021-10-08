@@ -268,17 +268,21 @@ public class EntrustServiceImpl implements EntrustService {
             jtEntrustCheckInfoMapper.insertSelective(jtEntrustCheckInfo);//任务来源
         }
         System.out.println("存储委托价格信息默认值"+jtEntrustCheckInfo);
-        // 保存委托和产品关系
-        JtEntrustProduct jtEntrustProduct = new JtEntrustProduct();
-        jtEntrustProduct.setEntrustId(jtEntrustCheckInfo.getEntrustId());
-//        jtEntrustProduct.setProductId(jtSampleObject.getProductId());
-        jtEntrustProduct.setProductId(2568);
-        jtEntrustProductMapper.insertSelective(jtEntrustProduct);
+
+
+
         // 增加样品基本信息 有可能是多个。
         if(sampleList!=null) {
             List<JtSampleObject> jtSampleObjects=JSON.parseArray(JSON.toJSONString(sampleList),JtSampleObject.class);
 
             for (JtSampleObject jtSampleObject:jtSampleObjects){
+
+                // 保存委托和产品关系
+                JtEntrustProduct jtEntrustProduct = new JtEntrustProduct();
+                jtEntrustProduct.setEntrustId(jtEntrustCheckInfo.getEntrustId());
+                jtEntrustProduct.setProductId(jtSampleObject.getProductId());
+                jtEntrustProductMapper.insertSelective(jtEntrustProduct);
+
                 System.out.println("展示数据===="+jtSampleObject);
                 // 后台补充业务id1
                 jtSampleObject.setReceiveUserId(Integer.parseInt(jtEntrustInfo.getAcceptUserId()));//受理人默认为 程萍 160；
@@ -301,17 +305,20 @@ public class EntrustServiceImpl implements EntrustService {
                         if(dataCost!=null)
                         {
                             jtEntrustCheckItem.setTotalProceedsPrice(String.valueOf(dataCost.getCost()));
+                            jtEntrustCheckItem.setReceivablePrice(String.valueOf(dataCost.getCost()));
+
                         }
                         else
                         {
                             jtEntrustCheckItem.setTotalProceedsPrice(String.valueOf(0));
+                            jtEntrustCheckItem.setReceivablePrice(String.valueOf(0));
                         }
                         jtEntrustCheckItemMapper.insertSelective(jtEntrustCheckItem);
                     }
                 }
                 // 设置一个样品下存放的关系
                 JtSampleInfo jtSampleInfo = new JtSampleInfo();
-                jtSampleInfo.setSampleId(jtSampleObject.getSampleObjectId());
+//                jtSampleInfo.setSampleId(jtSampleObject.getSampleObjectId());
                 jtSampleInfo.setEntrustId(jtEntrustInfo.getEntrustId());
                 jtSampleInfo.setProductId(jtSampleObject.getProductId());
 //                jtSampleInfo.setSampleNumber(createSampleNumber());// 样品编码补充
@@ -327,7 +334,7 @@ public class EntrustServiceImpl implements EntrustService {
                 //补充样品id信息信息：
                 JtReportInfo jtReportInfo = new JtReportInfo();
                 jtReportInfo.setFlowStatus(4);
-                jtReportInfo.setSampleId(jtSampleObject.getSampleObjectId());
+                jtReportInfo.setSampleId(jtSampleInfo.getSampleId());
 
                 jtReportInfoMapper.insertSelective(jtReportInfo);
                 // 成功返回委托编号
