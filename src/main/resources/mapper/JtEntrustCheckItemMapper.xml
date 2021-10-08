@@ -83,6 +83,17 @@
         </trim>
     </insert>
 
+    <!-- 实现新增详细信息操作 动态sql -->
+    <insert id="insertSelectiveList" useGeneratedKeys="true" keyProperty="entrustCheckItemId" parameterType="java.util.List">
+        INSERT into  jt_entrust_check_item(product_id,sample_id,entrust_id,check_item_id,standard_id,check_times,proceeds_price,
+        total_proceeds_price,receivable_price,total_receivable_price,check_item_other_name)
+        VALUES
+        <foreach collection="list" item="item" open="" separator="," close="">
+            (#{item.productId},#{item.sampleId},#{item.entrustId},#{item.checkItemId},#{item.standardId},#{item.checkTimes},#{item.proceedsPrice},
+            #{item.totalProceedsPrice},#{item.receivablePrice},#{item.totalReceivablePrice},#{item.checkItemOtherName})
+        </foreach>
+    </insert>
+
 
     <select id="selectCheckItem" resultType="com.stu.manage.demo.entity.JtEntrustCheckItem">
          SELECT d_product_cost.cost as cost,d_product_check_item.check_item_name as checkItemOtherName
