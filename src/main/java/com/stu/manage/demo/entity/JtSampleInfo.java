@@ -41,6 +41,8 @@ public class JtSampleInfo {
 
     private Integer fileId;
 
+    private String productOtherName;
+
 
 
     /**

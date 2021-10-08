@@ -293,29 +293,7 @@ public class EntrustServiceImpl implements EntrustService {
                 jtSampleObject.setSampleObjectNote("0");
                 jtSampleObject.setSampleBatch("0");
                 jtSampleObjectMapper.insertSelective(jtSampleObject);
-                //解析 产品下的 数据
-                if(null!=jtSampleObject.getCheckList()){
-                    for (JtEntrustCheckItem jtEntrustCheckItem:jtSampleObject.getCheckList()) {
-                        System.out.println("解析 产品下的 检测项数据 "+jtEntrustCheckItem);
-                        jtEntrustCheckItem.setProductId(jtSampleObject.getProductId());
-                        jtEntrustCheckItem.setSampleId(jtSampleObject.getSampleObjectId());
-                        jtEntrustCheckItem.setEntrustId(jtEntrustInfo.getEntrustId());
-                        // 根据检测项id 获取价格信息 进行补充；
-                        JtEntrustCheckItem dataCost = jtEntrustCheckItemMapper.selectCheckItem(jtEntrustCheckItem.getCheckItemId());
-                        if(dataCost!=null)
-                        {
-                            jtEntrustCheckItem.setTotalProceedsPrice(String.valueOf(dataCost.getCost()));
-                            jtEntrustCheckItem.setReceivablePrice(String.valueOf(dataCost.getCost()));
 
-                        }
-                        else
-                        {
-                            jtEntrustCheckItem.setTotalProceedsPrice(String.valueOf(0));
-                            jtEntrustCheckItem.setReceivablePrice(String.valueOf(0));
-                        }
-                        jtEntrustCheckItemMapper.insertSelective(jtEntrustCheckItem);
-                    }
-                }
                 // 设置一个样品下存放的关系
                 JtSampleInfo jtSampleInfo = new JtSampleInfo();
 //                jtSampleInfo.setSampleId(jtSampleObject.getSampleObjectId());
@@ -329,7 +307,42 @@ public class EntrustServiceImpl implements EntrustService {
                 jtSampleInfo.setSampleStatus("——");//补充信息
                 jtSampleInfo.setSampleObjectId(jtSampleObject.getSampleObjectId());
                 jtSampleInfo.setLifecycle(3);
+                // 根据产品id 得到 产品名
+                JtSampleInfo entityProductName = jtSampleInfoMapper.getProductOtherName(jtSampleObject.getProductId());
+                jtSampleInfo.setProductOtherName(entityProductName.getProductOtherName());
                 jtSampleInfoMapper.insertSelective(jtSampleInfo);
+
+                //解析 产品下的 数据
+                if(null!=jtSampleObject.getCheckList()){
+                    for (JtEntrustCheckItem jtEntrustCheckItem:jtSampleObject.getCheckList()) {
+                        System.out.println("解析 产品下的 检测项数据 "+jtEntrustCheckItem);
+                        jtEntrustCheckItem.setProductId(jtSampleObject.getProductId());
+//                        样品信息
+                        jtEntrustCheckItem.setSampleId(jtSampleInfo.getSampleId());
+                        jtEntrustCheckItem.setEntrustId(jtEntrustInfo.getEntrustId());
+                        // 根据检测项id 获取价格信息 进行补充；
+                        JtEntrustCheckItem dataCost = jtEntrustCheckItemMapper.selectCheckItem(jtEntrustCheckItem.getCheckItemId());
+                        if(dataCost!=null)
+                        {
+                            jtEntrustCheckItem.setProceedsPrice(String.valueOf(dataCost.getCost()));
+                            jtEntrustCheckItem.setTotalProceedsPrice(String.valueOf(dataCost.getCost()));
+                            jtEntrustCheckItem.setReceivablePrice(String.valueOf(dataCost.getCost()));
+                            jtEntrustCheckItem.setTotalReceivablePrice(String.valueOf(dataCost.getCost()));
+                            jtEntrustCheckItem.setCheckItemOtherName(dataCost.getCheckItemOtherName());
+
+                        }
+                        else
+                        {
+                            jtEntrustCheckItem.setProceedsPrice(String.valueOf(0));
+                            jtEntrustCheckItem.setTotalProceedsPrice(String.valueOf(0));
+                            jtEntrustCheckItem.setReceivablePrice(String.valueOf(0));
+                            jtEntrustCheckItem.setTotalReceivablePrice(String.valueOf(0));
+                            jtEntrustCheckItem.setCheckItemOtherName(null);
+                        }
+                        jtEntrustCheckItemMapper.insertSelective(jtEntrustCheckItem);
+                    }
+                }
+
 
                 //补充样品id信息信息：
                 JtReportInfo jtReportInfo = new JtReportInfo();

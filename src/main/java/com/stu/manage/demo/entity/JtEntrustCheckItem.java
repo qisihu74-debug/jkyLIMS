@@ -30,6 +30,8 @@ public class JtEntrustCheckItem {
     private String receivablePrice;
 
     private String totalReceivablePrice;
+
+    private String checkItemOtherName;
     /**
      * 数据传输需要和表结构无关
      */
@@ -39,6 +41,7 @@ public class JtEntrustCheckItem {
     private String checkBasisDocName;
     private Integer depId;
     private String depName;
+
 
     // 检测项 价格信息
     private Integer cost;
