@@ -16,6 +16,9 @@ public interface JtEntrustCheckItemMapper {
 
     int insertSelective(JtEntrustCheckItem record);
 
+    // 实现批量增加检测项
+
+
     JtEntrustCheckItem selectCheckItem(@Param("checkItemId")Integer checkItemId);
 
 }

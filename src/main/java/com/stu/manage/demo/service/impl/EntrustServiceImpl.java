@@ -205,7 +205,6 @@ public class EntrustServiceImpl implements EntrustService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public synchronized String addEntrustInfo(Map<String, Object> map) {
-
         Object entrustInfo = map.get("entrustInfo");
         Object sampleList = map.get("sampleList");
         Object entrustCheckInfo = map.get("entrustCheckInfo");
@@ -220,19 +219,20 @@ public class EntrustServiceImpl implements EntrustService {
             jtEntrustInfo.setEntrustCompanyId(company.getComId());
         }
         else {
-
             company.setComName(jtEntrustInfo.getComName());
             company.setComContactPerson(jtEntrustInfo.getEntrustPeople());
             company.setComContactPhone(jtEntrustInfo.getEntrustPeoplePhone());
             jtEntrustInfoMapper.insertCompany(company);
             jtEntrustInfo.setEntrustCompanyId(company.getComId());
         }
-        // 客户委托信息 代码补充基本信息
-        jtEntrustInfo.setContactAddress(company.getComAddress());
-        jtEntrustInfo.setContactPeople(company.getComContactPerson());
-        jtEntrustInfo.setContactTel(company.getComContactPhone());
+        // 客户委托信息 代码补充基本信息 判断是否为邮寄 则进行补充
+        if(jtEntrustInfo.getReportGetWay().equals("邮寄")==false){
+            jtEntrustInfo.setContactAddress("——");
+            jtEntrustInfo.setContactPeople("——");
+            jtEntrustInfo.setContactTel("——");
+            jtEntrustInfo.setReportGetCompany("——");
+        }
         // 客户来源
-
         //完善 产品标准
         if(sampleList!=null) {
             List<JtSampleObject> jtSampleObjects = JSON.parseArray(JSON.toJSONString(sampleList), JtSampleObject.class);
@@ -240,14 +240,8 @@ public class EntrustServiceImpl implements EntrustService {
             for (JtSampleObject jtSampleObject:jtSampleObjects) {
                 strlist.add(jtSampleObject.getProductStandardSource());
             }
-
             jtEntrustInfo.setProductStandardSource(returnStr(strlist));
-
         }
-
-
-        jtEntrustInfo.setReportGetCompany("——");
-        jtEntrustInfo.setContactAddress("——");
         jtEntrustInfoMapper.insertSelective(jtEntrustInfo);
         System.out.println("存储委托基本信息"+jtEntrustInfo);
         // 后台补充委托基本价格信息
@@ -260,17 +254,16 @@ public class EntrustServiceImpl implements EntrustService {
             jtEntrustCheckInfo.setCost("0");
             jtEntrustCheckInfo.setPayMode(2);
             jtEntrustCheckInfo.setPay("0");
-            jtEntrustCheckInfo.setAcceptUserId(Integer.parseInt(jtEntrustInfo.getAcceptUserId()));//受理人默认为 程萍 160；
+            //受理人默认为 程萍 160；
+            jtEntrustCheckInfo.setAcceptUserId(Integer.parseInt(jtEntrustInfo.getAcceptUserId()));
             jtEntrustCheckInfo.setSource(1);
             jtEntrustCheckInfo.setAcceptTime(new Date());
             jtEntrustCheckInfo.setEndPlanDate(new Date());
             jtEntrustCheckInfo.setStandardCost("0");
-            jtEntrustCheckInfoMapper.insertSelective(jtEntrustCheckInfo);//任务来源
+            //任务来源
+            jtEntrustCheckInfoMapper.insertSelective(jtEntrustCheckInfo);
         }
         System.out.println("存储委托价格信息默认值"+jtEntrustCheckInfo);
-
-
-
         // 增加样品基本信息 有可能是多个。
         if(sampleList!=null) {
             List<JtSampleObject> jtSampleObjects=JSON.parseArray(JSON.toJSONString(sampleList),JtSampleObject.class);
@@ -301,7 +294,6 @@ public class EntrustServiceImpl implements EntrustService {
                 jtSampleInfo.setProductId(jtSampleObject.getProductId());
 //                jtSampleInfo.setSampleNumber(createSampleNumber());// 样品编码补充
                 jtSampleInfo.setSampleNumber(createSampleNumber());// 样品编码补充
-
                 jtSampleInfo.setSampleType(jtSampleObject.getSampleType());
                 jtSampleInfo.setEntrustCompanyId(jtEntrustInfo.getEntrustCompanyId());
                 jtSampleInfo.setSampleStatus("——");//补充信息
@@ -311,9 +303,9 @@ public class EntrustServiceImpl implements EntrustService {
                 JtSampleInfo entityProductName = jtSampleInfoMapper.getProductOtherName(jtSampleObject.getProductId());
                 jtSampleInfo.setProductOtherName(entityProductName.getProductOtherName());
                 jtSampleInfoMapper.insertSelective(jtSampleInfo);
-
-                //解析 产品下的 数据
+                //解析 产品下的 检测项数据
                 if(null!=jtSampleObject.getCheckList()){
+                    List<JtEntrustCheckItem> GetEntrustCheckItemList = new ArrayList<>();
                     for (JtEntrustCheckItem jtEntrustCheckItem:jtSampleObject.getCheckList()) {
                         System.out.println("解析 产品下的 检测项数据 "+jtEntrustCheckItem);
                         jtEntrustCheckItem.setProductId(jtSampleObject.getProductId());
@@ -329,7 +321,6 @@ public class EntrustServiceImpl implements EntrustService {
                             jtEntrustCheckItem.setReceivablePrice(String.valueOf(dataCost.getCost()));
                             jtEntrustCheckItem.setTotalReceivablePrice(String.valueOf(dataCost.getCost()));
                             jtEntrustCheckItem.setCheckItemOtherName(dataCost.getCheckItemOtherName());
-
                         }
                         else
                         {
@@ -339,25 +330,22 @@ public class EntrustServiceImpl implements EntrustService {
                             jtEntrustCheckItem.setTotalReceivablePrice(String.valueOf(0));
                             jtEntrustCheckItem.setCheckItemOtherName(null);
                         }
+                        GetEntrustCheckItemList.add(jtEntrustCheckItem);
+                        // 单个新增
                         jtEntrustCheckItemMapper.insertSelective(jtEntrustCheckItem);
                     }
+                    // 实现批量增加到数据库中
+
                 }
-
-
                 //补充样品id信息信息：
                 JtReportInfo jtReportInfo = new JtReportInfo();
                 jtReportInfo.setFlowStatus(4);
                 jtReportInfo.setSampleId(jtSampleInfo.getSampleId());
-
                 jtReportInfoMapper.insertSelective(jtReportInfo);
                 // 成功返回委托编号
-
-
             }
-
         }
         return  jtEntrustInfo.getEntrustNumber();
-
     }
 
     @Override
