@@ -83,7 +83,7 @@
 
     <select id="getCheckItemsByProductId" parameterType="Integer" resultType="com.stu.manage.demo.entity.CheckItemCostVo">
         SELECT
-            T1.check_item_id itemId,getFileIdBySampleId
+            T1.check_item_id itemId,
             T1.check_item_name itemName,
             T2.cost itemCost
         FROM
