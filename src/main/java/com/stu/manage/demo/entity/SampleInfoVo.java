@@ -4,10 +4,10 @@ import java.util.List;
 
 public class SampleInfoVo {
     private String modelId;
-    private int objectCount;
+    private String objectCount;
     private String productCompanyName;
     private int productId;
-    private int productNumber;
+    private String productNumber;
     private String productStandardSource;
     private String productName;
     private int sampleType;
@@ -27,11 +27,11 @@ public class SampleInfoVo {
         this.modelId = modelId;
     }
 
-    public int getObjectCount() {
+    public String getObjectCount() {
         return objectCount;
     }
 
-    public void setObjectCount(int objectCount) {
+    public void setObjectCount(String objectCount) {
         this.objectCount = objectCount;
     }
 
@@ -51,11 +51,11 @@ public class SampleInfoVo {
         this.productId = productId;
     }
 
-    public int getProductNumber() {
+    public String getProductNumber() {
         return productNumber;
     }
 
-    public void setProductNumber(int productNumber) {
+    public void setProductNumber(String productNumber) {
         this.productNumber = productNumber;
     }
 
