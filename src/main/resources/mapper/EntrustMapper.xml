@@ -135,6 +135,7 @@
         <if test="type != '' and type != null and type==1">
             AND jri.flow_status != 3
         </if>
+        order by c.accept_time desc
     </select>
 
     <select id="countCurrent" resultType="String">

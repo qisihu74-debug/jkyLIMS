@@ -428,7 +428,8 @@ public class EntrustServiceImpl implements EntrustService {
         // 默认下载 最大版本的
         FileVersionInfo fileVersionInfo;
         //TODO 路径暂时写死
-        reportPath = reportPath + "ff71942e-526d-ff71942e-526d-465c-9170-37a1a85fafce_1.pdf";
+        reportPath = reportPath + "ff71942e-526d-" +
+                "llff71942e-526d-465c-9170-37a1a85fafce_1.pdf";
         if (version != null) {
             fileVersionInfo = entrustMapper.selectFileVersionByVersion(fileId, version);
         } else {
