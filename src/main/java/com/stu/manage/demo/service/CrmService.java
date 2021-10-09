@@ -17,10 +17,10 @@ public interface CrmService {
 
     /**
      * 判断人员是否已获取
-     * @param instanceId
+     * @param userId
      * @return
      */
-    CrmEntity checkExist(String instanceId);
+    CrmEntity checkExist(String userId);
 
     /**
      * 获取crm数据

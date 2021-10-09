@@ -31,9 +31,9 @@ public class CrmServiceImpl implements CrmService {
     private CrmMapper crmMapper;
 
     @Override
-    public CrmEntity checkExist(String instanceId) {
+    public CrmEntity checkExist(String userId) {
         QueryWrapper<CrmEntity> queryWrapper=new QueryWrapper<>();
-        queryWrapper.eq("instance_id",instanceId);
+        queryWrapper.eq("user_id",userId);
         return crmMapper.selectOne(queryWrapper);
     }
 

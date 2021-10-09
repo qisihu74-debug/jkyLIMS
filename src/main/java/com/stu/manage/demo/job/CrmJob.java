@@ -21,9 +21,12 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * @author gjl
@@ -47,6 +50,9 @@ public class CrmJob {
     @Value("${dingtalk.app_secret}")
     private String appsecret;
 
+    /**
+     * 定时拉取crm数据
+     */
     @Async("syncExecutor")
     @Scheduled(cron="0 */30 * * * ?")
     public void sync(){
@@ -72,28 +78,50 @@ public class CrmJob {
                 GetOfficialAccountContactsResponseBody body = response.getBody();
                 if (body != null){
                     JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(body));
-                    if (jsonObject.get("nextToken") != null){
-                        HashSet<CrmEntity> list1 = getList(jsonObject);
-                        list.addAll(list1);
-                        //更新nextToken
-                        nextToken = jsonObject.get("nextToken").toString();
-                    }else {
-                        HashSet<CrmEntity> list1 = getList(jsonObject);
-                        for (CrmEntity entity :list1) {
-                            CrmEntity crmEntity = crmService.checkExist(entity.getInstanceId());
-                            if (crmEntity == null){
-                                list.add(entity);
+                    if (jsonObject != null){
+                        List<JSONObject> values = (List<JSONObject>) jsonObject.get("values");
+                        if (CollectionUtils.isEmpty(values)){
+                            flag = false;
+                        }else {
+                            HashSet<CrmEntity> list1 = getList(jsonObject);
+                            for (CrmEntity entity :list1) {
+                                CrmEntity crmEntity = crmService.checkExist(entity.getUserId());
+                                if (crmEntity == null){
+                                    list.add(entity);
+                                }
+                            }
+                            Object next = jsonObject.get("nextToken");
+                            if (next != null){
+                                nextToken = next.toString();
                             }
                         }
-                        flag = false;
                     }
+                }else {
+                    flag = false;
                 }
             }
-
         }
         if (!CollectionUtils.isEmpty(list)){
-            crmService.BatchSave(list);
+            //去重
+            crmService.BatchSave(removalItem(list));
         }
+    }
+
+    /**
+     * 去重
+     * @param list
+     * @return
+     */
+    public List<CrmEntity> removalItem(List<CrmEntity> list) {
+        Set<CrmEntity> set = new TreeSet<>(new Comparator<CrmEntity>() {
+
+            @Override
+            public int compare(CrmEntity o1, CrmEntity o2) {
+                return o1.getUserId().compareTo(o2.getUserId());
+            }
+        });
+        set.addAll(list);
+        return new ArrayList<>(set);
     }
 
     /**
