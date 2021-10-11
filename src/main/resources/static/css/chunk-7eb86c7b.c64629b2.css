@@ -1,0 +1,1 @@
+.case{position:fixed;bottom:0;width:7.5rem;height:1.08rem;background:#fff;justify-content:space-around}.case,.case a{display:flex;align-items:center}.case a{width:50%;height:100%;flex-direction:column;justify-content:center}.case a :first-child{font-size:27px}.case a :nth-child(2){font-size:12px}.case .router{color:#000}.case .router-link-active{color:#1989fa!important}
