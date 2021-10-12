@@ -156,8 +156,7 @@
                 where a.crm=#{adminId} AND jri.flow_status != 3
     </select>
 
-    <select id="
-    getFileIdBySampleId" resultType="String">
+    <select id="getFileIdBySampleId" resultType="String">
         select file_id from jt_report_info where sample_id=#{sampleId}
     </select>
 

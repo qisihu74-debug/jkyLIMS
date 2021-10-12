@@ -87,7 +87,7 @@ public class AccessTokenSingleton {
                     request.setAppsecret(appsecret);
                     request.setHttpMethod("GET");
                     rsp = client.execute(request);
-                    logger.debug("获取token成功:{}", JSON.toJSONString(rsp));
+                    logger.info("获取token成功:{}", JSON.toJSONString(rsp));
                 } catch (Exception e) {
                     logger.error("通过钉钉接口获取企业内部token失败:{}", e);
                 }
@@ -118,7 +118,7 @@ public class AccessTokenSingleton {
             req.setCode(code);
             req.setHttpMethod("GET");
             rsp1 = client.execute(req, token);
-            logger.debug("获取用户成功:{}", JSON.toJSONString(rsp1));
+            logger.info("获取用户成功:{}", JSON.toJSONString(rsp1));
         } catch (Exception e) {
             logger.error("调用钉钉接口获取用户信息失败:{}", e);
         }
@@ -141,7 +141,7 @@ public class AccessTokenSingleton {
             req.setHttpMethod("GET");
             req.setUserid(userId);
             rsp2 = client.execute(req, token);
-            logger.debug("获取用户详情成功:{}", JSON.toJSONString(rsp2));
+            logger.info("获取用户详情成功:{}", JSON.toJSONString(rsp2));
         } catch (Exception e) {
             logger.error("调用钉钉接口获取用户详情信息失败:{}", e);
         }
@@ -167,7 +167,7 @@ public class AccessTokenSingleton {
                 req.setId(deptId + "");
                 rsp3 = client.execute(req, token);
                 list.add(rsp3);
-                logger.debug("获取部门成功:{}", JSON.toJSONString(rsp3));
+                logger.info("获取部门成功:{}", JSON.toJSONString(rsp3));
             } catch (Exception e) {
                 logger.error("调用钉钉接口获取部门信息失败:{}", e);
             }
@@ -246,9 +246,9 @@ public class AccessTokenSingleton {
             param.put("formInstId", formInstId);
             //param.put("useLatestVersion", useLatestVersion);
             param.put("updateFormDataJson", updateFormDataJson);
-            logger.debug("开始更新书籍表单数据:{}",JSON.toJSONString(map));
+            logger.info("开始更新书籍表单数据:{}",JSON.toJSONString(map));
             result = GatewayRequestUtil.baseRequest(param, api);
-            logger.debug("更新完成表单数据");
+            logger.info("更新完成表单数据");
         } catch (Exception e) {
             e.printStackTrace();
         }

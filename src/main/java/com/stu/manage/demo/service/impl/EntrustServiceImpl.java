@@ -9,7 +9,7 @@ import com.google.common.collect.Maps;
 import com.stu.manage.demo.entity.CheckItemCostVo;
 import com.stu.manage.demo.entity.CheckItemInfoVo;
 import com.stu.manage.demo.entity.Company;
-import com.stu.manage.demo.entity.EntrustInfo;
+import com.stu.manage.demo.entity.EntrustBaseInfo;
 import com.stu.manage.demo.entity.EntrustStat;
 import com.stu.manage.demo.entity.FileHomeLocation;
 import com.stu.manage.demo.entity.FileInfo;
@@ -25,7 +25,6 @@ import com.stu.manage.demo.entity.ProductVo;
 import com.stu.manage.demo.entity.SampleInfoVo;
 import com.stu.manage.demo.entity.SampleStatus;
 import com.stu.manage.demo.entity.StatusEntity;
-import com.stu.manage.demo.entity.*;
 import com.stu.manage.demo.http.HttpClientUtil;
 import com.stu.manage.demo.mapper.EntrustMapper;
 import com.stu.manage.demo.mapper.JtEntrustCheckInfoMapper;
@@ -58,6 +57,7 @@ import java.util.Map;
 @Service
 public class EntrustServiceImpl implements EntrustService {
     Logger logger = LoggerFactory.getLogger(EntrustServiceImpl.class);
+
     @Autowired
     private EntrustMapper entrustMapper;
     @Autowired
@@ -171,7 +171,7 @@ public class EntrustServiceImpl implements EntrustService {
     public PageInfo ownerTask(String type, Integer userId, String adminId, Long startTime, Long endTime, Integer pageNo, Integer pageSize) {
         PageHelper.startPage(pageNo, pageSize);
         List<StatusEntity> list = entrustMapper.ownerTask(type, userId, adminId, new Date(startTime), new Date(endTime));
-        logger.debug("查询的数据:{}",JSON.toJSONString(list));
+        logger.info("查询的数据:{}",JSON.toJSONString(list));
         PageInfo pageInfo = new PageInfo<>(list);
         for (StatusEntity entity:list) {
             StatusEntity status = this.status(Integer.parseInt(entity.getEntrustId()));
@@ -427,10 +427,17 @@ public class EntrustServiceImpl implements EntrustService {
         // 需要处理文件版本为题
         // 默认下载 最大版本的
         FileVersionInfo fileVersionInfo;
-        //TODO 路径暂时写死
-//        reportPath = reportPath + "ff71942e-526d-llff71942e-526d-465c-9170-37a1a85fafce_1.pdf";
-        String[] strings = fileInfo.getPath().split("/");
-        reportPath = reportPath + strings[strings.length-1];
+        String infoPath = fileInfo.getPath();
+        String[] strings = null;
+        if (infoPath.contains("/")){
+            strings = fileInfo.getPath().split("/");
+        }else {
+            strings = fileInfo.getPath().split("\\\\");
+        }
+        if (strings != null){
+            reportPath = reportPath + strings[strings.length-1];
+        }
+        logger.info("下载报告的路径为:{}",reportPath);
         if (version != null) {
             fileVersionInfo = entrustMapper.selectFileVersionByVersion(fileId, version);
         } else {

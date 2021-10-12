@@ -51,7 +51,7 @@ public class DingUtils {
         GetOfficialAccountContactsResponse response = null;
         try {
             response = client.getOfficialAccountContactsWithOptions(getOfficialAccountContactsRequest, getOfficialAccountContactsHeaders, new RuntimeOptions());
-            logger.debug("获取服务窗数据成功:{}",JSON.toJSONString(response));
+            logger.info("获取服务窗数据成功:{}",JSON.toJSONString(response));
         } catch (TeaException err) {
             if (!com.aliyun.teautil.Common.empty(err.code) && !com.aliyun.teautil.Common.empty(err.message)) {
                 logger.error("获取服务窗数据失败:{}",JSON.toJSONString(err));
@@ -114,7 +114,7 @@ public class DingUtils {
         //.setBizId("abc");
         try {
             SendOfficialAccountOTOMessageResponse response = client.sendOfficialAccountOTOMessageWithOptions(sendOfficialAccountOTOMessageRequest, sendOfficialAccountOTOMessageHeaders, new RuntimeOptions());
-            logger.debug("发送客户服务窗消息成功:{}",JSON.toJSONString(response));
+            logger.info("发送客户服务窗消息成功:{}",JSON.toJSONString(response));
         } catch (TeaException err) {
             flag = false;
 
