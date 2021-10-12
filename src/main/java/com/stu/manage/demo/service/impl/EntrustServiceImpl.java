@@ -427,17 +427,19 @@ public class EntrustServiceImpl implements EntrustService {
         // 需要处理文件版本为题
         // 默认下载 最大版本的
         FileVersionInfo fileVersionInfo;
-        String infoPath = fileInfo.getPath();
-        String[] strings = null;
-        if (infoPath.contains("/")){
-            strings = fileInfo.getPath().split("/");
-        }else {
-            strings = fileInfo.getPath().split("\\\\");
+        if(fileInfo != null){
+            String infoPath = fileInfo.getPath();
+            String[] strings = null;
+            if (infoPath.contains("/")){
+                strings = fileInfo.getPath().split("/");
+            }else {
+                strings = fileInfo.getPath().split("\\\\");
+            }
+            if (strings != null){
+                reportPath = reportPath + strings[strings.length-1];
+            }
+            logger.info("下载报告的路径为:{}",reportPath);
         }
-        if (strings != null){
-            reportPath = reportPath + strings[strings.length-1];
-        }
-        logger.info("下载报告的路径为:{}",reportPath);
         if (version != null) {
             fileVersionInfo = entrustMapper.selectFileVersionByVersion(fileId, version);
         } else {
