@@ -1,0 +1,56 @@
+package com.stu.manage.demo.controller;
+
+import com.alibaba.fastjson.JSONObject;
+import com.stu.manage.demo.entity.InvoiceEntity;
+import com.stu.manage.demo.filter.PassToken;
+import com.stu.manage.demo.util.BaiduOrcUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+
+/**
+ * @author gjl
+ * @version V1.0
+ * @Package com.stu.manage.demo.controller
+ * @desc
+ * @date 2021/10/15 14:30
+ * @Copyright © 河南交科院
+ */
+@RestController
+@Slf4j
+@RequestMapping("/orc/")
+public class OrcController {
+    /**
+     * 获取增值税发票信息
+     * @param uploadFile
+     * @return
+     */
+    @PassToken
+    @RequestMapping(value="getOrcMessage", method= RequestMethod.POST)
+    @ResponseBody
+    public InvoiceEntity getOrcMessage(MultipartHttpServletRequest uploadFile) {
+        MultipartFile file = uploadFile.getFile("uploadFile");
+        try {
+            InputStream in = file.getInputStream();
+            String ocrResult = BaiduOrcUtils.getocrByInputStream(in);
+
+            Map resultMap = JSONObject.parseObject(ocrResult,Map.class);
+            String invoiceString = JSONObject.toJSONString(resultMap.get("words_result"));
+            InvoiceEntity invoice = JSONObject.parseObject(invoiceString,InvoiceEntity.class);
+            return invoice;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+}
