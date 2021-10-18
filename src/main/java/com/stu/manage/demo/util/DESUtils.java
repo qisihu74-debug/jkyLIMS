@@ -22,27 +22,16 @@ public class DESUtils {
      */
 
     public static String encrypt(String inStr, String secretKey) {
-
         SecretKey deskey = new SecretKeySpec(secretKey.getBytes(), "DESede");
-
         Cipher cipher;
-
         String outStr = null;
-
         try {
-
             cipher = Cipher.getInstance("DESede");
-
             cipher.init(Cipher.ENCRYPT_MODE, deskey);
-
             outStr = byte2hex(cipher.doFinal(inStr.getBytes()));
-
         } catch (Exception e) {
-
             System.err.println("3DES加密异常"+ e.getMessage());
         }
-        System.out.println("3DES加密后字符串：" + outStr);
-
         return outStr;
 
     }
@@ -56,27 +45,16 @@ public class DESUtils {
      */
 
     public static String decrypt(String inStr, String secretKey) {
-
         SecretKey deskey = new SecretKeySpec(secretKey.getBytes(), "DESede");
-
         Cipher cipher;
         String outStr = null;
-
         try {
-
             cipher = Cipher.getInstance("DESede");
-
             cipher.init(Cipher.DECRYPT_MODE, deskey);
-
             outStr = new String(cipher.doFinal(hex2byte(inStr)));
-
         } catch (Exception e) {
-
             System.err.println("3DES解密异常"+e.getMessage());
-
         }
-        System.out.println("3DES解密后数据：" + outStr);
-
         return outStr;
 
     }

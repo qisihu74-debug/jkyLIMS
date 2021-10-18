@@ -6,6 +6,7 @@ import com.stu.manage.demo.filter.PassToken;
 import com.stu.manage.demo.util.BaiduOrcUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -29,6 +31,17 @@ import java.util.Map;
 @Slf4j
 @RequestMapping("/orc/")
 public class OrcController {
+    @Value("${orc.client.id}")
+    private String clientId;
+    @Value("${orc.client.secret}")
+    private String clientSecret;
+    @Value("${orc.auth.host}")
+    private String authHost;
+    @Value("${orc.invoice.url}")
+    private String invoiceUrl;
+    @Value("${orc.invoice.verification.url}")
+    private String invoiceVerificationUrl;
+
     /**
      * 获取增值税发票信息
      * @param uploadFile
@@ -39,13 +52,22 @@ public class OrcController {
     @ResponseBody
     public InvoiceEntity getOrcMessage(MultipartHttpServletRequest uploadFile) {
         MultipartFile file = uploadFile.getFile("uploadFile");
+        Boolean flag = null;
         try {
             InputStream in = file.getInputStream();
-            String ocrResult = BaiduOrcUtils.getocrByInputStream(in);
-
+            String ocrResult = BaiduOrcUtils.getocrByInputStream(in,clientId,clientSecret,authHost,invoiceUrl);
             Map resultMap = JSONObject.parseObject(ocrResult,Map.class);
             String invoiceString = JSONObject.toJSONString(resultMap.get("words_result"));
             InvoiceEntity invoice = JSONObject.parseObject(invoiceString,InvoiceEntity.class);
+            //请求接口校验发票真伪 https://aip.baidubce.com/rest/2.0/ocr/v1/vat_invoice_verification
+            if (invoice != null){
+                flag = BaiduOrcUtils.checkInvoice(invoice,clientId,clientSecret,authHost,invoiceVerificationUrl);
+            }
+            if (flag != null){
+                invoice.setFlag(flag);
+            }else {
+                invoice.setMessage("发票真伪验证失败");
+            }
             return invoice;
         } catch (IOException e) {
             e.printStackTrace();

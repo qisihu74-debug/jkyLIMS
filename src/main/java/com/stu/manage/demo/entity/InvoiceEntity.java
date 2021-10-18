@@ -14,17 +14,52 @@ import java.math.BigDecimal;
  */
 @Data
 public class InvoiceEntity {
-    private String invoiceCode; //发票代码
-    private String invoiceDate; //开票时间
-    private String purchaserName; //购方名称
-    private String purchaserRegisterNum; //购方纳税人识别号
-    private BigDecimal amountInFiguers; //价税合计
-    private String sellerName; //售方名称
-    private String sellerRegisterNum; //售方纳税人识别号
-    @Override
-    public String toString() {
-        return "Invoice [invoiceCode=" + invoiceCode + ", invoiceDate=" + invoiceDate + ", purchaserName="
-                + purchaserName + ", purchaserRegisterNum=" + purchaserRegisterNum + ", amountInFiguers="
-                + amountInFiguers + ", sellerName=" + sellerName + ", sellerRegisterNum=" + sellerRegisterNum + "]";
-    }
+    /**
+     * 发票代码
+     */
+    private String invoiceCode;
+    /**
+     * 发票号码
+     */
+    private String InvoiceNum;
+    /**
+     * 开票时间
+     */
+    private String invoiceDate;
+    /**
+     * 发票种类
+     */
+    private String InvoiceTypeOrg;
+    /**
+     * 校验码
+     */
+    private String CheckCode;
+    /**
+     * 购方名称
+     */
+    private String purchaserName;
+    /**
+     * 购方纳税人识别号
+     */
+    private String purchaserRegisterNum;
+    /**
+     * 价税合计
+     */
+    private BigDecimal amountInFiguers;
+    /**
+     * 售方名称
+     */
+    private String sellerName;
+    /**
+     * 售方纳税人识别号
+     */
+    private String sellerRegisterNum;
+    /**
+     * 发票是否为真，true真，false假
+     */
+    private Boolean flag;
+    /**
+     * 注释
+     */
+    private String message;
 }

@@ -10,10 +10,8 @@ package com.stu.manage.demo.crm;
  */
 public class TST {
     public static void main(String[] args) {
-        if ((12 & 1) != 0) {
-            System.out.println("ok");
-        }else {
-            System.out.println("ok");
-        }
+        String code = "123456789ggss";
+        String substring = code.substring(code.length() - 6);
+        System.out.println(substring);
     }
 }

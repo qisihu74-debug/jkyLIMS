@@ -1,6 +1,8 @@
 package com.stu.manage.demo.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.stu.manage.demo.entity.InvoiceEntity;
+import com.stu.manage.demo.http.BaiduHttpUtil;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -32,40 +34,23 @@ import java.util.Base64;
  * @Copyright © 河南交科院
  */
 public class BaiduOrcUtils {
-    /**
-     * 获取权限token
-     * @return 返回示例：
-     * {
-     * "access_token": "24.460da4889caad24cccdb1fea17221975.2592000.1491995545.282335-1234567",
-     * "expires_in": 2592000
-     * }
-     */
-    public static String getAuth() {
-        // 官网获取的 API Key 更新为你注册的
-        String clientId = "i4a66fhj3eWkke3YS9cnthNf";
-        // 官网获取的 Secret Key 更新为你注册的
-        String clientSecret = "bYq5lcteHIGifAKllIAUdGFGU54fdyiw";
-        return getAuth(clientId, clientSecret);
-    }
 
     /**
      * 获取API访问token
      * 该token有一定的有效期，需要自行管理，当失效时需重新获取.
-     * @param ak - 百度云官网获取的 API Key
-     * @param sk - 百度云官网获取的 Securet Key
+     * @param clientId - 百度云官网获取的 API Key
+     * @param clientSecret - 百度云官网获取的 Securet Key
      * @return assess_token 示例：
      * "24.460da4889caad24cccdb1fea17221975.2592000.1491995545.282335-1234567"
      */
-    public static String getAuth(String ak, String sk) {
-        // 获取token地址
-        String authHost = "https://aip.baidubce.com/oauth/2.0/token?";
+    public static String getAuth(String clientId, String clientSecret,String authHost) {
         String getAccessTokenUrl = authHost
                 // 1. grant_type为固定参数
                 + "grant_type=client_credentials"
                 // 2. 官网获取的 API Key
-                + "&client_id=" + ak
+                + "&client_id=" + clientId
                 // 3. 官网获取的 Secret Key
-                + "&client_secret=" + sk;
+                + "&client_secret=" + clientSecret;
         try {
             URL realUrl = new URL(getAccessTokenUrl);
             // 打开和URL之间的连接
@@ -96,10 +81,10 @@ public class BaiduOrcUtils {
      * @param in
      * @return
      */
-    public static String getocrByInputStream(InputStream in){
+    public static String getocrByInputStream(InputStream in,String clientId,String clientSecret,String authHost,String invoiceUrl){
         byte[] fileByte = getFileBytes(in);// 获取图片字节数组
         String base64UrlencodedImg = base64Urlencode(fileByte);// 编码
-        return sendOcr(base64UrlencodedImg);// 发送给百度进行文字识别
+        return sendOcr(base64UrlencodedImg,clientId,clientSecret,authHost,invoiceUrl);// 发送给百度进行文字识别
     }
 
     /**
@@ -110,11 +95,11 @@ public class BaiduOrcUtils {
      * @throws ClientProtocolException
      * @throws IOException
      */
-    public static String sendOcr(String base64UrlencodedImg){
-        String token = getAuth();
+    public static String sendOcr(String base64UrlencodedImg,String clientId,String clientSecret,String authHost,String invoiceUrl){
+        String token = getAuth(clientId,clientSecret,authHost);
         CloseableHttpClient httpclient = HttpClients.createMinimal();
-        HttpPost post = new HttpPost("https://aip.baidubce.com/rest/2.0/ocr/v1/vat_invoice?access_token="+token);
-        Header header = new BasicHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8");
+        HttpPost post = new HttpPost(invoiceUrl+token);
+        Header header = new BasicHeader("Content-Type","application/x-www-form-urlencoded");
         post.setHeader(header);
         try {
             HttpEntity entity = new StringEntity("image=" + base64UrlencodedImg);
@@ -176,6 +161,33 @@ public class BaiduOrcUtils {
             String base64UrlencodedImg = URLEncoder.encode(new String(base64Img), "utf-8");
             return base64UrlencodedImg;
         } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 校验发票真伪
+     * @param invoice
+     * @param clientId
+     * @param clientSecret
+     * @param authHost
+     * @param invoiceVerificationUrl
+     * @return
+     */
+    public static Boolean checkInvoice(InvoiceEntity invoice, String clientId, String clientSecret,
+                                       String authHost, String invoiceVerificationUrl) {
+        String token = getAuth(clientId,clientSecret,authHost);
+        //设置参数
+        String time = invoice.getInvoiceDate().replace("年", "").replace("月", "").replace("日", "");
+        String param = "invoice_code=" + invoice.getInvoiceCode() + "&invoice_num=" + invoice.getInvoiceNum()
+                + "&invoice_date=" + time + "&check_code=" + invoice.getCheckCode().substring(invoice.getCheckCode().length()-6)
+                + "&invoice_type=" + "client_credentials" + "&total_amount=" + invoice.getAmountInFiguers();
+        try {
+            String post = BaiduHttpUtil.post(invoiceVerificationUrl, token, param);
+            JSONObject jsonObject = JSONObject.parseObject(post);
+            System.out.println("===");
+        }catch(Exception e){
             e.printStackTrace();
         }
         return null;
