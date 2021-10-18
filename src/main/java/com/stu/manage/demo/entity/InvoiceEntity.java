@@ -45,7 +45,7 @@ public class InvoiceEntity {
     /**
      * 价税合计
      */
-    private BigDecimal amountInFiguers;
+    private String amountInFiguers;
     /**
      * 售方名称
      */

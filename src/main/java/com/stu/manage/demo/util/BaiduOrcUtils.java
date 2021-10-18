@@ -3,6 +3,7 @@ package com.stu.manage.demo.util;
 import com.alibaba.fastjson.JSONObject;
 import com.stu.manage.demo.entity.InvoiceEntity;
 import com.stu.manage.demo.http.BaiduHttpUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -33,6 +34,7 @@ import java.util.Base64;
  * @date 2021/10/15 15:51
  * @Copyright © 河南交科院
  */
+@Slf4j
 public class BaiduOrcUtils {
 
     /**
@@ -182,13 +184,17 @@ public class BaiduOrcUtils {
         String time = invoice.getInvoiceDate().replace("年", "").replace("月", "").replace("日", "");
         String param = "invoice_code=" + invoice.getInvoiceCode() + "&invoice_num=" + invoice.getInvoiceNum()
                 + "&invoice_date=" + time + "&check_code=" + invoice.getCheckCode().substring(invoice.getCheckCode().length()-6)
-                + "&invoice_type=" + "client_credentials" + "&total_amount=" + invoice.getAmountInFiguers();
+                + "&invoice_type=" + "special_vat_invoice" + "&total_amount=" + invoice.getAmountInFiguers();
         try {
             String post = BaiduHttpUtil.post(invoiceVerificationUrl, token, param);
             JSONObject jsonObject = JSONObject.parseObject(post);
-            System.out.println("===");
+            String verifyResult = jsonObject.get("VerifyResult").toString();
+            if (verifyResult.equals("0001")){
+                return true;
+            }
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("发票认证真假失败:{}",e);
+            return false;
         }
         return null;
     }

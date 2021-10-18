@@ -3,6 +3,8 @@ package com.stu.manage.demo.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.stu.manage.demo.entity.InvoiceEntity;
 import com.stu.manage.demo.filter.PassToken;
+import com.stu.manage.demo.result.Result;
+import com.stu.manage.demo.result.ResultUtil;
 import com.stu.manage.demo.util.BaiduOrcUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,8 @@ public class OrcController {
     private String invoiceUrl;
     @Value("${orc.invoice.verification.url}")
     private String invoiceVerificationUrl;
+    @Value("${orc.from.url}")
+    private String formUrl;
 
     /**
      * 获取增值税发票信息
@@ -75,4 +79,30 @@ public class OrcController {
         return null;
     }
 
+    /**
+     * 解析Excel表格图片
+     * @param uploadFile
+     * @return
+     */
+    @PassToken
+    @RequestMapping(value="getExcelMessage", method= RequestMethod.POST)
+    @ResponseBody
+    public Result getExcelMessage(MultipartHttpServletRequest uploadFile) {
+        if (uploadFile == null){
+            return ResultUtil.error(-1,"请上传需要识别的Excel图片");
+        }
+        MultipartFile file = uploadFile.getFile("uploadFile");
+        Boolean flag = null;
+        try {
+            InputStream in = file.getInputStream();
+            String ocrResult = BaiduOrcUtils.getocrByInputStream(in,clientId,clientSecret,authHost,formUrl);
+            Map resultMap = JSONObject.parseObject(ocrResult,Map.class);
+            String invoiceString = JSONObject.toJSONString(resultMap.get("words_result"));
+            System.out.println("========");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+
+    }
 }
