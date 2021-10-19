@@ -9,11 +9,11 @@
         <relativePath/>
     </parent>
     <groupId>com.stu-mange</groupId>
-    <artifactId>demo</artifactId>
+    <artifactId>jkyService</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>demo</name>
-    <description>Demo project for Spring Boot</description>
+    <name>jkyService</name>
+    <description>jkyService project for Spring Boot</description>
 
     <properties>
         <java.version>1.8</java.version>
@@ -473,7 +473,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
-        <finalName>lims</finalName>
+        <finalName>jkyService</finalName>
     </build>
 
 </project>
