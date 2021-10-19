@@ -12,7 +12,6 @@ var Step1Page = {
     },
     operate: function () {
         var startId = $("#startId").val();
-
         $.post('/jkyService/dingservice/get_all_user_steps_test',{date:startId},function (data) {
             console.log(data);
             let box= document.getElementById("test");
