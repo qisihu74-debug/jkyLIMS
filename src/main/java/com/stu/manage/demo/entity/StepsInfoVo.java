@@ -1,6 +1,7 @@
 package com.stu.manage.demo.entity;
 
 public class StepsInfoVo {
+    private String date;
     private String name;
     private long steps;
     private String userId;
@@ -29,10 +30,19 @@ public class StepsInfoVo {
         this.userId = userId;
     }
 
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
     @Override
     public String toString() {
         return "StepsInfoVo{" +
-                "name='" + name + '\'' +
+                "date='" + date + '\'' +
+                ", name='" + name + '\'' +
                 ", steps=" + steps +
                 ", userId='" + userId + '\'' +
                 '}';

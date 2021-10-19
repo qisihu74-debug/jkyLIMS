@@ -12,14 +12,8 @@ import com.aliyun.teaopenapi.models.Config;
 import com.aliyun.teautil.models.RuntimeOptions;
 import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
-import com.dingtalk.api.request.OapiHealthStepinfoListbyuseridRequest;
-import com.dingtalk.api.request.OapiUserListidRequest;
-import com.dingtalk.api.request.OapiV2DepartmentListsubidRequest;
-import com.dingtalk.api.request.OapiV2UserGetRequest;
-import com.dingtalk.api.response.OapiHealthStepinfoListbyuseridResponse;
-import com.dingtalk.api.response.OapiUserListidResponse;
-import com.dingtalk.api.response.OapiV2DepartmentListsubidResponse;
-import com.dingtalk.api.response.OapiV2UserGetResponse;
+import com.dingtalk.api.request.*;
+import com.dingtalk.api.response.*;
 import com.taobao.api.ApiException;
 import org.apache.commons.compress.utils.Lists;
 import org.slf4j.Logger;
@@ -252,6 +246,54 @@ public class DingUtils {
 
             result = rsp.getResult();
             System.out.println(result.getName());
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+    /**
+     * 查询所有用户的ID和姓名
+     * @param accesToken
+     * @param userUrl
+     * @param deptId
+     * @return
+     */
+    public static List<OapiUserListsimpleResponse.ListUserSimpleResponse> getAllUserNameAndId(String accesToken, String userUrl, Long deptId){
+        List<OapiUserListsimpleResponse.ListUserSimpleResponse> result = Lists.newArrayList();
+        Long cursor = 0L;
+        boolean hasMore = true;
+        while (hasMore){
+            OapiUserListsimpleResponse rsp = getUserNameAndId(accesToken, userUrl, deptId, cursor);
+            if(rsp.getResult() != null){
+                result.addAll(rsp.getResult().getList());
+                hasMore = rsp.getResult().getHasMore();
+                cursor = rsp.getResult().getNextCursor();
+            }
+        }
+        return result;
+    }
+
+
+    /**
+     * 获取部门下用户的ID和姓名
+     * @param accesToken
+     * @param userUrl
+     * @param deptId
+     * @param cursor
+     * @return
+     */
+    public static OapiUserListsimpleResponse getUserNameAndId(String accesToken, String userUrl, Long deptId,Long cursor){
+        OapiUserListsimpleResponse result = new OapiUserListsimpleResponse();
+        try {
+            DingTalkClient client = new DefaultDingTalkClient(userUrl);
+            OapiUserListsimpleRequest req = new OapiUserListsimpleRequest();
+            req.setDeptId(deptId);
+            req.setCursor(cursor);
+            req.setSize(100L);
+            req.setContainAccessLimit(true);
+            req.setLanguage("zh_CN");
+            OapiUserListsimpleResponse rsp = client.execute(req, accesToken);
+            result = rsp;
         } catch (ApiException e) {
             e.printStackTrace();
         }

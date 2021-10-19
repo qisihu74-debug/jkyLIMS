@@ -1,6 +1,8 @@
 package com.stu.manage.demo.service.impl;
 
 import com.dingtalk.api.response.OapiHealthStepinfoListbyuseridResponse;
+import com.dingtalk.api.response.OapiUserListsimpleResponse;
+import com.google.common.collect.Maps;
 import com.stu.manage.demo.entity.StepsInfoVo;
 import com.stu.manage.demo.service.DingService;
 import com.stu.manage.demo.util.AccessTokenSingleton;
@@ -10,6 +12,7 @@ import org.apache.commons.compress.utils.Lists;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service("dingService")
 public class DingServiceImpl implements DingService {
@@ -20,22 +23,26 @@ public class DingServiceImpl implements DingService {
         //获取部门ID
         List<Long> allDeptId = DingUtils.getAllDeptId(token, deptUrl);
         //根据部门ID获取用户ID
-        List<String> userIds = Lists.newArrayList();
+        List<OapiUserListsimpleResponse.ListUserSimpleResponse> userInfos = Lists.newArrayList();
+        Map<String,String> map = Maps.newHashMap();
         for (int i = 0; i < allDeptId.size(); i++) {
-            List<String> userId = DingUtils.getUserId(token, userUrl, allDeptId.get(i));
-            userIds.addAll(userId);
+            List<OapiUserListsimpleResponse.ListUserSimpleResponse> allUserNameAndId = DingUtils.getAllUserNameAndId(token, userUrl, allDeptId.get(i));
+            userInfos.addAll(allUserNameAndId);
+            for (int j = 0; j < allUserNameAndId.size(); j++) {
+                map.put(allUserNameAndId.get(j).getUserid(),allUserNameAndId.get(j).getName());
+            }
         }
         //根据用户ID获取用户步数
         List<String> userIdsStr = Lists.newArrayList();
-        if(!userIds.isEmpty() && userIds.size()>50){
-            List<List<String>> lists = ListUtil.fixedGrouping(userIds, 50);
+        if(!userInfos.isEmpty() && userInfos.size()>50){
+            List<List<OapiUserListsimpleResponse.ListUserSimpleResponse>> lists = ListUtil.fixedGrouping(userInfos, 50);
             for (int i = 0; i <lists.size() ; i++) {
                 StringBuilder stringBuilder = new StringBuilder();
                 for (int j = 0; j < lists.get(i).size(); j++) {
                     if(j!=lists.get(i).size()){
-                        stringBuilder.append(lists.get(i).get(j)+",");
+                        stringBuilder.append(lists.get(i).get(j).getUserid()+",");
                     }else{
-                        stringBuilder.append(lists.get(i).get(j));
+                        stringBuilder.append(lists.get(i).get(j).getUserid());
                     }
                 }
                 userIdsStr.add(stringBuilder.toString());
@@ -46,8 +53,10 @@ public class DingServiceImpl implements DingService {
             List<OapiHealthStepinfoListbyuseridResponse.BasicStepInfoVo> userSteps = DingUtils.getUserSteps(token, stepUrl, userIdsStr.get(i), date);
             for (int j = 0; j < userSteps.size(); j++) {
                 StepsInfoVo vo = new StepsInfoVo();
+                vo.setDate(date);
                 vo.setSteps(userSteps.get(j).getStepCount());
                 vo.setUserId(userSteps.get(j).getUserid());
+                vo.setName(map.get(userSteps.get(j).getUserid()));
                 result.add(vo);
             }
         }
