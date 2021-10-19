@@ -10,8 +10,22 @@ import com.aliyun.dingtalkcrm_1_0.models.SendOfficialAccountOTOMessageResponse;
 import com.aliyun.tea.TeaException;
 import com.aliyun.teaopenapi.models.Config;
 import com.aliyun.teautil.models.RuntimeOptions;
+import com.dingtalk.api.DefaultDingTalkClient;
+import com.dingtalk.api.DingTalkClient;
+import com.dingtalk.api.request.OapiHealthStepinfoListbyuseridRequest;
+import com.dingtalk.api.request.OapiUserListidRequest;
+import com.dingtalk.api.request.OapiV2DepartmentListsubidRequest;
+import com.dingtalk.api.request.OapiV2UserGetRequest;
+import com.dingtalk.api.response.OapiHealthStepinfoListbyuseridResponse;
+import com.dingtalk.api.response.OapiUserListidResponse;
+import com.dingtalk.api.response.OapiV2DepartmentListsubidResponse;
+import com.dingtalk.api.response.OapiV2UserGetResponse;
+import com.taobao.api.ApiException;
+import org.apache.commons.compress.utils.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * @author gjl
@@ -130,4 +144,118 @@ public class DingUtils {
         }
         return flag;
     }
+
+    /**
+     * 获取组织内所有部门ID
+     * @param accesToken
+     * @return
+     * @throws Exception
+     */
+    public static List<Long> getAllDeptId(String accesToken, String deptUrl){
+        List<Long> allDeptId = Lists.newArrayList();
+        Long deptId = 1l;
+        if(allDeptId.isEmpty()){
+            List<Long> deptId1 = getDeptId(accesToken, deptUrl, deptId);
+            allDeptId.addAll(deptId1);
+        }
+        if(!allDeptId.isEmpty()){
+            for (int i = 0; i < allDeptId.size(); i++) {
+                deptId = allDeptId.get(i);
+                List<Long> deptId1 = getDeptId(accesToken, deptUrl, deptId);
+                allDeptId.addAll(deptId1);
+            }
+        }
+        return allDeptId;
+    }
+
+    /**
+     * 根据上级部门ID获取所有部门ID
+     * @param accesToken
+     * @return
+     * @throws Exception
+     */
+    public static List<Long> getDeptId(String accesToken,String deptUrl,Long deptId){
+        List<Long> result = Lists.newArrayList();
+        try {
+            DefaultDingTalkClient client = new DefaultDingTalkClient(deptUrl);
+            OapiV2DepartmentListsubidRequest req = new OapiV2DepartmentListsubidRequest();
+            req.setDeptId(deptId);
+            OapiV2DepartmentListsubidResponse rsp = client.execute(req,accesToken);
+            OapiV2DepartmentListsubidResponse.DeptListSubIdResponse result1 = rsp.getResult();
+            result= result1.getDeptIdList();
+            System.out.println(rsp.getBody());
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * 根据部门ID获取该部门下用户的ID
+     * @param accesToken
+     * @param userUrl
+     * @param deptId
+     * @return
+     */
+    public static List<String> getUserId(String accesToken,String userUrl,Long deptId){
+        List<String> result = Lists.newArrayList();
+        try {
+            DingTalkClient client = new DefaultDingTalkClient(userUrl);
+            OapiUserListidRequest req = new OapiUserListidRequest();
+            req.setDeptId(deptId);
+            OapiUserListidResponse rsp = client.execute(req, accesToken);
+            OapiUserListidResponse.ListUserByDeptResponse result1 = rsp.getResult();
+            result = result1.getUseridList();
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * 根据用户ID获取用户单天的步数--单次调用最多50人
+     * @param accesToken
+     * @param stepsUrl
+     * @param userIdsStr
+     * @param date
+     * @return
+     */
+    public static List<OapiHealthStepinfoListbyuseridResponse.BasicStepInfoVo> getUserSteps(String accesToken, String stepsUrl, String userIdsStr, String date){
+        List<OapiHealthStepinfoListbyuseridResponse.BasicStepInfoVo> result = Lists.newArrayList();
+        try {
+            DingTalkClient client = new DefaultDingTalkClient(stepsUrl);
+            OapiHealthStepinfoListbyuseridRequest req = new OapiHealthStepinfoListbyuseridRequest();
+            req.setUserids(userIdsStr);
+            req.setStatDate(date);
+            OapiHealthStepinfoListbyuseridResponse rsp = client.execute(req, accesToken);
+            result = rsp.getStepinfoList();
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * 根据用户ID获取用户信息
+     * @param accesToken
+     * @param userInfoUrl
+     * @param userIdsStr
+     * @return
+     */
+    public static OapiV2UserGetResponse.UserGetResponse getUserInfo(String accesToken, String userInfoUrl, String userIdsStr){
+        OapiV2UserGetResponse.UserGetResponse result = new OapiV2UserGetResponse.UserGetResponse();
+        try {
+            DingTalkClient client = new DefaultDingTalkClient(userInfoUrl);
+            OapiV2UserGetRequest req = new OapiV2UserGetRequest();
+            req.setUserid(userIdsStr);
+            OapiV2UserGetResponse rsp = client.execute(req, accesToken);
+
+            result = rsp.getResult();
+            System.out.println(result.getName());
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
 }
