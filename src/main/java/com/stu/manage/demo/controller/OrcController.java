@@ -54,8 +54,11 @@ public class OrcController {
     @PassToken
     @RequestMapping(value="getOrcMessage", method= RequestMethod.POST)
     @ResponseBody
-    public InvoiceEntity getOrcMessage(MultipartHttpServletRequest uploadFile) {
-        MultipartFile file = uploadFile.getFile("uploadFile");
+    public Result getOrcMessage(MultipartHttpServletRequest uploadFile) {
+        MultipartFile file = uploadFile.getFile("file");
+        if (file == null){
+            return ResultUtil.error(-1,"文件参数名称不正确");
+        }
         Boolean flag = null;
         try {
             InputStream in = file.getInputStream();
@@ -72,7 +75,7 @@ public class OrcController {
             }else {
                 invoice.setMessage("发票真伪验证失败");
             }
-            return invoice;
+            return ResultUtil.success(invoice);
         } catch (IOException e) {
             e.printStackTrace();
         }
