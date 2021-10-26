@@ -6,7 +6,6 @@ import com.jifen.manage.demo.service.FunctionService;
 import com.jifen.manage.demo.entity.FunctionEntity;
 import com.jifen.manage.demo.entity.Login;
 import com.jifen.manage.demo.entity.LoginToken;
-import com.jifen.manage.demo.entity.UserInfo;
 import com.jifen.manage.demo.filter.PassToken;
 import com.jifen.manage.demo.http.HttpClientUtil;
 import com.jifen.manage.demo.result.Result;
@@ -66,9 +65,6 @@ public class LoginController {
            res.setNick(login.getNick());
            List<FunctionEntity> list = functionService.getFunctionsById(admin.getId());
            res.setList(list);
-           UserInfo userInfo = new UserInfo();
-           userInfo.setUserId(admin.getUserId());
-           res.setUserInfo(userInfo);
            return ResultUtil.success(res);
        }else {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL.getCode(),ResultEnum.VERIFY_FAIL.getMsg());

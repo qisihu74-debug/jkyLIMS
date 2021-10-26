@@ -29,6 +29,4 @@ public class LoginToken {
      */
     private List<FunctionEntity> list;
 
-    private UserInfo userInfo;
-
 }
