@@ -127,4 +127,9 @@ public class LoginController {
         return null;
     }
 
+    @PassToken
+    @GetMapping("test")
+    public Result test(){
+        return ResultUtil.success("请求接口成功==app开发");
+    }
 }

@@ -7,6 +7,9 @@ import com.jifen.manage.demo.result.Result;
 import com.jifen.manage.demo.result.ResultUtil;
 import com.jifen.manage.demo.util.BaiduOrcUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.csource.fastdfs.TrackerClient;
+import org.csource.fastdfs.TrackerServer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -43,6 +46,8 @@ public class OrcController {
     private String invoiceVerificationUrl;
     @Value("${orc.from.url}")
     private String formUrl;
+    @Autowired
+    private TrackerClient trackerClient;
 
     /**
      * 获取增值税发票信息
@@ -106,4 +111,14 @@ public class OrcController {
         return null;
 
     }
+
+    @PassToken
+    @RequestMapping(value="testFastDfs", method= RequestMethod.POST)
+    @ResponseBody
+    public Result testFastDfs(MultipartHttpServletRequest uploadFile) throws IOException {
+        TrackerServer connection = trackerClient.getConnection();
+
+        return ResultUtil.success("测试域名成功！");
+    }
+
 }

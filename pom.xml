@@ -267,7 +267,12 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.60</version>
         </dependency>
-
+        <!--文件服务器依赖fastdfs -->
+      <!--  <dependency>
+            <groupId>org.csource</groupId>
+            <artifactId>fastdfs-client-java</artifactId>
+            <version>1.27-SNAPSHOT</version>
+        </dependency>-->
         <!--监控+refresh配置-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

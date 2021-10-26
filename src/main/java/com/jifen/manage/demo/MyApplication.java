@@ -1,5 +1,6 @@
 package com.jifen.manage.demo;
 
+import com.jifen.manage.demo.config.FastDFSConfig;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.mybatis.spring.annotation.MapperScan;
@@ -9,6 +10,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableMBeanExport;
+import org.springframework.context.annotation.Import;
+import org.springframework.jmx.support.RegistrationPolicy;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -17,6 +21,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * EnableTransactionManagement开启事务
  * EnableScheduling开启定时任务
  */
+@EnableMBeanExport(registration = RegistrationPolicy.IGNORE_EXISTING)
+@Import(FastDFSConfig.class)
 @EnableTransactionManagement
 @SpringBootApplication
 @EnableScheduling
