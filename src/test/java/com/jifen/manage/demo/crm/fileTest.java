@@ -1,5 +1,11 @@
 package com.jifen.manage.demo.crm;
 
+import com.jifen.manage.demo.util.FastDFSClient;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
 /**
  * @author gjl
  * @version V1.0
@@ -9,9 +15,8 @@ package com.jifen.manage.demo.crm;
  * @Copyright © 河南交科院
  */
 public class fileTest {
-    public static void main(String[] args) {
-        /*FastDFSConfig config = new FastDFSConfig();
-        TrackerClient client = config.initClient();
-        client.getConnection().getSocket().*/
+    public static void main(String[] args) throws Exception{
+
+
     }
 }

@@ -222,7 +222,12 @@
             <artifactId>poi-ooxml-schemas</artifactId>
             <version>4.1.2</version>
         </dependency>
-
+        <!--文件管理服务minio -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>6.0.4</version>
+        </dependency>
         <!-- 连接fastdfs文件系统 -->
         <dependency>
             <groupId>net.oschina.zcx7878</groupId>
