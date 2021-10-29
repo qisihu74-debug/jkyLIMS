@@ -173,6 +173,16 @@ public class MinIoUtil {
         return minioClient.presignedGetObject(bucketName, fileName);
     }
 
+    /**
+     *
+     * 获取minio文件的下载地址
+     * @param bucketName 桶名
+     * @param fileName  文件名
+     */
+    @SneakyThrows(Exception.class)
+    public static String getUrl(String bucketName, String fileName) {
+        return minioClient.getObjectUrl(bucketName,fileName);
+    }
 
 
 }

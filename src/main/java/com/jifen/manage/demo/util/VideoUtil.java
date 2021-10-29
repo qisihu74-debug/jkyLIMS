@@ -103,7 +103,7 @@ public class VideoUtil {
             return null;
         }
     }
-    
+
     /**
      * 根据视频旋转度来调整图片
      *

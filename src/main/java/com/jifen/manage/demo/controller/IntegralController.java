@@ -66,7 +66,7 @@ public class IntegralController {
    @GetMapping("test4")
    @PassToken
    public Result test4(HttpServletResponse response) throws Exception{
-       String fileUrl = MinIoUtil.getFileUrl("20211028ceshi002", "视频.mp4");
+       String fileUrl = MinIoUtil.getUrl("20211028ceshi002", "视频.mp4");
        MinIoUtil.download("20211028ceshi002", "视频.mp4", response);
        return ResultUtil.success(response);
    }
