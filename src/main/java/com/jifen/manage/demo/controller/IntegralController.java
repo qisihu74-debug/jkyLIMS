@@ -7,16 +7,19 @@ import com.jifen.manage.demo.result.ResultUtil;
 import com.jifen.manage.demo.util.Const;
 import com.jifen.manage.demo.util.FastDFSClient;
 import com.jifen.manage.demo.util.MinIoUtil;
+import com.jifen.manage.demo.util.VideoUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.util.Map;
 
 /**
  * @author gjl
@@ -49,9 +52,11 @@ public class IntegralController {
     @GetMapping("test3")
     @PassToken
     public Result test3() throws Exception{
-        InputStream in = new FileInputStream("D:\\Users\\Administrator\\Desktop\\work\\郭家林工作周总结.docx");
-
-        String upload = MinIoUtil.upload("20211028ceshi002", "文档2.docx", in, Const.text);
+        InputStream in = new FileInputStream("D:\\Users\\Administrator\\视频1.mp4");
+        File file = new File("D:\\Users\\Administrator\\视频1.mp4");
+        Map<String, Object> screenshot = VideoUtil.getScreenshot(file);
+        log.info("视频封面为:{}");
+        String upload = MinIoUtil.upload("20211028ceshi002", "视频1.mp4", in, Const.contentType);
         System.out.println("文件上传成功，地址:"+upload);
         //地址:http://192.168.2.35:9000/20211028ceshi002/%E6%96%87%E6%A1%A31?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=root%2F20211028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=
         // 20211028T072838Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=6eca71ca4089f022b4217e407e997d7a068d8c418fc9637e73a9021519cd4fb7
@@ -61,9 +66,15 @@ public class IntegralController {
    @GetMapping("test4")
    @PassToken
    public Result test4(HttpServletResponse response) throws Exception{
-       String fileUrl = MinIoUtil.getFileUrl("20211028ceshi002", "文档2.docx");
-       MinIoUtil.download("20211028ceshi002", "文档2.docx", response);
+       String fileUrl = MinIoUtil.getFileUrl("20211028ceshi002", "视频.mp4");
+       MinIoUtil.download("20211028ceshi002", "视频.mp4", response);
        return ResultUtil.success(response);
    }
 
+    @GetMapping("test5")
+    @PassToken
+    public Result test5() throws Exception{
+        MinIoUtil.deleteFile("20211028ceshi001","文档1");
+        return ResultUtil.success("删除成功");
+    }
 }

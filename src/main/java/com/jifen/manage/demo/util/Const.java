@@ -19,4 +19,5 @@ public class Const {
     public static final String js = "application/x-javascript";
     public static final String json = "application/json";
     public static final String image = "image/png jpg gif";
+    public static final String contentType = "application/octet-stream";
 }
