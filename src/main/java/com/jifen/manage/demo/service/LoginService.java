@@ -1,7 +1,6 @@
 package com.jifen.manage.demo.service;
 
-import com.jifen.manage.demo.entity.Login;
-import com.jifen.manage.demo.entity.LoginToken;
+import com.jifen.manage.demo.entity.User;
 
 import java.util.List;
 
@@ -17,20 +16,31 @@ public interface LoginService {
      * @param nick
      * @return String
      */
-    Login getAdmin(String nick);
+    User getAdmin(String nick);
 
     /**
      * 获取用户对象
      * @param adminId
      * @return
      */
-    LoginToken getUser(String adminId);
+    User getUser(String adminId);
 
     /**
      * 注册账号
-     * @param login
+     * @param user
      */
-    int save(Login login);
+    void save(User user);
 
-    List<Login> adminList();
+    List<User> adminList();
+
+    /**
+     * 根据用户名查找
+     * @param userName
+     * @return
+     */
+    User getUserByName(String userName);
+
+    User getUserById(String identification);
+
+    User getUserByMobile(String mobile);
 }

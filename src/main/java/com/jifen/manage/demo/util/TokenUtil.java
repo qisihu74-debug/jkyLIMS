@@ -2,7 +2,7 @@ package com.jifen.manage.demo.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.jifen.manage.demo.entity.LoginToken;
+import com.jifen.manage.demo.entity.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -26,11 +26,11 @@ public class TokenUtil {
      * @param admin
      * @return
      */
-    public static String getToken(LoginToken admin) {
+    public static String getToken(User admin) {
         Date start = new Date ();
         long currentTime = System.currentTimeMillis () + 60 * 60 * 1000;//一小时有效时间
         Date end = new Date (currentTime);
-        return JWT.create ().withAudience (admin.getAdminId()).withIssuedAt (start)
+        return JWT.create ().withAudience (admin.getUserCode()).withIssuedAt (start)
                 .withExpiresAt (end)
                 .sign (Algorithm.HMAC256 (admin.getPassWord()));
     }

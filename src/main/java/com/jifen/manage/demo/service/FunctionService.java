@@ -19,5 +19,5 @@ public interface FunctionService {
      * @param id
      * @return
      */
-    List<FunctionEntity> getFunctionsById(int id);
+    List<FunctionEntity> getFunctionsById(Long id);
 }

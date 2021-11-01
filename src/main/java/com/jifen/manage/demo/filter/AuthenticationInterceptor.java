@@ -7,7 +7,7 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.jifen.manage.demo.Exception.CommonEnum;
 import com.jifen.manage.demo.Exception.JkyException;
-import com.jifen.manage.demo.entity.LoginToken;
+import com.jifen.manage.demo.entity.User;
 import com.jifen.manage.demo.service.LoginService;
 import com.jifen.manage.demo.util.DESUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,14 +53,14 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 throw new JkyException(CommonEnum.SIGNATURE_NOT_MATCH);
             }
             // 获取 token 中的 user id
-            String adminId;
+            String userCode;
             try {
-                adminId = JWT.decode (token).getAudience ().get (0);
+                userCode = JWT.decode (token).getAudience ().get (0);
             } catch (JWTDecodeException j) {
                 throw new RuntimeException ("401");
             }
-            LoginToken admin = loginService.getUser(adminId);
-            String decode = DESUtils.decrypt(admin.getPassWord(),admin.getAdminId());
+            User admin = loginService.getUser(userCode);
+            String decode = DESUtils.decrypt(admin.getPassWord(),admin.getUserCode());
             if (admin == null) {
                 throw new JkyException ("用户不存在");
             }

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jifen.manage.demo.mapper.LoginMapper">
+    <insert id="insertUser" parameterType="com.jifen.manage.demo.entity.User">
+        insert into user(id,user_code,user_name,pass_word,business_type,mobile,address,identification,business_licens,identification_positive,identification_obverse)
+        values(id,userCode,userName,passWord,businessType,mobile,address,identification,businessLicens,identificationPositive,identificationObverse)
+    </insert>
+
+    <insert id="insertUserRole" parameterType="com.jifen.manage.demo.entity.UserRole">
+        insert into user_role(user_id,role_id)
+        values (userId,roleId)
+    </insert>
+
+    <select id="getFunctionsById" resultType="com.jifen.manage.demo.entity.FunctionEntity">
+        select fu.id
+fu.name
+fu.parent_id
+fu.obj_name
+fu.icon_name
+fu.sort
+ from user_role usr
+        left join role_function fun on usr.role_id=fun.role_id
+        left join function fu on fun.function_id=fu.id
+        where usr.user_id=#{id}
+    </select>
+
+    <select id="getUserByCode" resultType="com.jifen.manage.demo.entity.User">
+        select id
+,user_code
+,user_name
+,pass_word
+,business_type
+,mobile
+,address
+,identification
+,business_licens
+,identification_positive
+,identification_obverse
+from user where user_code = #{adminId}
+    </select>
+
+    <select id="getUserByName" resultType="com.jifen.manage.demo.entity.User">
+select id
+,user_code
+,user_name
+,pass_word
+,business_type
+,mobile
+,address
+,identification
+,business_licens
+,identification_positive
+,identification_obverse
+,is_valid
+from user where user_name = #{userName}
+    </select>
+
+</mapper>

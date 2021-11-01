@@ -1,7 +1,9 @@
 package com.jifen.manage.demo.service.impl;
 
+import com.jifen.manage.demo.mapper.LoginMapper;
 import com.jifen.manage.demo.service.FunctionService;
 import com.jifen.manage.demo.entity.FunctionEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,9 +18,12 @@ import java.util.List;
  */
 @Service
 public class FunctionServiceImpl implements FunctionService {
+    @Autowired
+    private LoginMapper mapper;
+
     @Override
-    public List<FunctionEntity> getFunctionsById(int id) {
-        //TODO
-        return null;
+    public List<FunctionEntity> getFunctionsById(Long id) {
+        List<FunctionEntity> functionsById = mapper.getFunctionsById(id);
+        return functionsById;
     }
 }

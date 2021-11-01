@@ -2,15 +2,14 @@ package com.jifen.manage.demo.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.jifen.manage.demo.service.FunctionService;
 import com.jifen.manage.demo.entity.FunctionEntity;
-import com.jifen.manage.demo.entity.Login;
-import com.jifen.manage.demo.entity.LoginToken;
+import com.jifen.manage.demo.entity.User;
 import com.jifen.manage.demo.filter.PassToken;
 import com.jifen.manage.demo.http.HttpClientUtil;
 import com.jifen.manage.demo.result.Result;
 import com.jifen.manage.demo.result.ResultEnum;
 import com.jifen.manage.demo.result.ResultUtil;
+import com.jifen.manage.demo.service.FunctionService;
 import com.jifen.manage.demo.service.LoginService;
 import com.jifen.manage.demo.util.DESUtils;
 import com.jifen.manage.demo.util.IdGenerator;
@@ -44,25 +43,27 @@ public class LoginController {
 
     @PassToken
     @PostMapping("login")
-    public Result getadmin(@RequestBody @Valid Login login){
-        if (StringUtils.isEmpty(login.getNick())){
+    public Result getadmin(@RequestBody @Valid User user){
+        if (StringUtils.isEmpty(user.getUserName())){
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NICK.getCode(),ResultEnum.VERIFY_FAIL_NICK.getMsg());
         }
-        if (StringUtils.isEmpty(login.getPassWord())){
+        if (StringUtils.isEmpty(user.getPassWord())){
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_PASS_WORD.getCode(),ResultEnum.VERIFY_FAIL_PASS_WORD.getMsg());
         }
-        Login admin = loginService.getAdmin(login.getNick());
+        User admin = loginService.getAdmin(user.getUserName());
         if (admin == null){
             return ResultUtil.error(ResultEnum.STUDENT_NOT_EXIST.getCode(),"用户不存在！");
         }
-        String decode = DESUtils.decrypt(admin.getPassWord(),admin.getAdminId());
-        if(login.getPassWord().equals(decode)){
-           LoginToken res=new LoginToken();
-           res.setName(admin.getAdminName());
-           res.setAdminId(admin.getAdminId());
+        if (admin.getIsValid() != 1){
+            return ResultUtil.error(-1,"用户审核中请耐心等待！");
+        }
+        String decode = DESUtils.decrypt(admin.getPassWord(),admin.getUserCode());
+        if(user.getPassWord().equals(decode)){
+           User res=new User();
+           res.setUserName(admin.getUserName());
+           res.setUserCode(admin.getUserCode());
            res.setPassWord(decode);
            res.setToken(TokenUtil.getToken(res));
-           res.setNick(login.getNick());
            List<FunctionEntity> list = functionService.getFunctionsById(admin.getId());
            res.setList(list);
            return ResultUtil.success(res);
@@ -77,20 +78,45 @@ public class LoginController {
      */
     @PassToken
     @PostMapping("register")
-    public Result register(@RequestBody Login login){
-        if (StringUtils.isEmpty(login.getAdminName())){
+    public Result register(@RequestBody User user){
+        if (StringUtils.isEmpty(user.getUserName())){
             return ResultUtil.error(-1,"请输入账号");
         }
-        if (StringUtils.isEmpty(login.getPassWord())){
+        if (StringUtils.isEmpty(user.getPassWord())){
             return ResultUtil.error(-1,"请输入密码");
         }
-        login.setAdminId(IdGenerator.get());
-        String encode = DESUtils.encrypt(login.getPassWord(),login.getAdminId());
-        login.setPassWord(encode);
-        int save = loginService.save(login);
-        if (save == 1){
+        if (StringUtils.isEmpty(user.getUserType()) || Integer.valueOf(user.getUserType())<2
+                || Integer.valueOf(user.getUserType())>3){
+            return ResultUtil.error(-1,"注册类型不正确，非商家或用户！");
+        }
+        if (user.getIdObverseFile() == null || user.getIdentificationPositive() == null){
+            return ResultUtil.error(-1,"请上传身份证正反面照片！");
+        }
+        if (Integer.valueOf(user.getUserType()) == 3){
+            return ResultUtil.error(-1,"请上传营业执照照片！");
+        }
+        //判断用户是否已注册
+        User user1 = loginService.getUserByName(user.getUserName());
+        if (user1 != null){
+            return ResultUtil.error(-1,user.getUserName()+" :此用户已注册！");
+        }
+        //判定身份证号和手机号
+        User user2 = loginService.getUserById(user.getIdentification());
+        if (user2 != null){
+            return ResultUtil.error(-1,user.getUserName()+" :身份证已存在无法注册重复使用！");
+        }
+        User user3 = loginService.getUserByMobile(user.getMobile());
+        if (user3 != null){
+            return ResultUtil.error(-1,user.getUserName()+" :手机号已存在无法注册重复使用！");
+        }
+        user.setUserCode(IdGenerator.get());
+        String encode = DESUtils.encrypt(user.getPassWord(), user.getUserCode());
+        user.setPassWord(encode);
+        try {
+            loginService.save(user);
             return ResultUtil.success();
-        }else {
+        }catch (Exception e){
+            log.error("用户注册失败:{}",e);
             return ResultUtil.error(-1,"保存失败");
         }
     }
@@ -101,7 +127,7 @@ public class LoginController {
      */
     @GetMapping("adminList")
     public Result adminList(){
-        List<Login> list = loginService.adminList();
+        List<User> list = loginService.adminList();
         return ResultUtil.success(list);
     }
 
