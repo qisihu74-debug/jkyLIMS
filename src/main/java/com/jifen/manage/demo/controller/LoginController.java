@@ -22,7 +22,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -55,7 +57,7 @@ public class LoginController {
             return ResultUtil.error(ResultEnum.STUDENT_NOT_EXIST.getCode(),"用户不存在！");
         }
         if (admin.getIsValid() != 1){
-            return ResultUtil.error(-1,"用户审核中请耐心等待！");
+            return ResultUtil.error(-1,"您已提交实名认证申请，我们将在1-3个工作日内审核。审核通过后您可直接登录系统，如审核不通过，请修改信息后再提交");
         }
         String decode = DESUtils.decrypt(admin.getPassWord(),admin.getUserCode());
         if(user.getPassWord().equals(decode)){
@@ -78,7 +80,8 @@ public class LoginController {
      */
     @PassToken
     @PostMapping("register")
-    public Result register(@RequestBody User user){
+    public Result register(@RequestParam("businessFile") MultipartFile businessFile, @RequestParam("IdPositiveFile")MultipartFile IdPositiveFile,
+                           @RequestParam("IdObverseFile")MultipartFile IdObverseFile, User user){
         if (StringUtils.isEmpty(user.getUserName())){
             return ResultUtil.error(-1,"请输入账号");
         }
@@ -103,11 +106,11 @@ public class LoginController {
         //判定身份证号和手机号
         User user2 = loginService.getUserById(user.getIdentification());
         if (user2 != null){
-            return ResultUtil.error(-1,user.getUserName()+" :身份证已存在无法注册重复使用！");
+            return ResultUtil.error(-1,user.getUserName()+" :身份证已被注册无法使用！");
         }
         User user3 = loginService.getUserByMobile(user.getMobile());
         if (user3 != null){
-            return ResultUtil.error(-1,user.getUserName()+" :手机号已存在无法注册重复使用！");
+            return ResultUtil.error(-1,user.getUserName()+" :手机号已被注册无法使用！");
         }
         user.setUserCode(IdGenerator.get());
         String encode = DESUtils.encrypt(user.getPassWord(), user.getUserCode());
