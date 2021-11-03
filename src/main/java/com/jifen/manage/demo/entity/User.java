@@ -72,18 +72,6 @@ public class User {
      */
     private List<FunctionEntity> list;
     /**
-     * 营业执照文件
-     */
-    private MultipartFile businessFile;
-    /**
-     * 身份证正面文件
-     */
-    private MultipartFile IdPositiveFile;
-    /**
-     * 身份证反面文件
-     */
-    private MultipartFile IdObverseFile;
-    /**
      * 用户审核0未审核，1通过，2拒绝
      */
     private int isValid;

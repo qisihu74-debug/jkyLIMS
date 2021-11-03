@@ -117,11 +117,11 @@ public class MinIoUtil {
      * @return: 文件url下载地址
      */
     @SneakyThrows(Exception.class)
-    public static String upload(String bucketName, MultipartFile file) {
+    public static String upload(String bucketName, MultipartFile file,String fileName) {
         createBucket(bucketName);
         final InputStream is = file.getInputStream();
-        final String fileName = file.getOriginalFilename();
-        minioClient.putObject(bucketName, fileName, is, is.available(), "");
+        //final String fileName = file.getOriginalFilename();
+        minioClient.putObject(bucketName, fileName, is, is.available(), Const.image);
         is.close();
         return getFileUrl(bucketName, fileName);
     }

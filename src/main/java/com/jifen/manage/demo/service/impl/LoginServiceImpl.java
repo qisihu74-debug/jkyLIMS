@@ -40,24 +40,19 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void save(User user) {
+    public void save(User user, MultipartFile idPositiveFile, MultipartFile idObverseFile, MultipartFile businessFile) {
         long id = GenID.getID();
         user.setId(id);
         UserRole userRole = new UserRole();
         userRole.setUserId(id);
         userRole.setRoleId(Long.parseLong(user.getUserType()));
         //上传文件
-        MultipartFile idPositiveFile = user.getIdPositiveFile();
-        MultipartFile idObverseFile = user.getIdObverseFile();
-        if (user.getBusinessFile() != null){
-            MultipartFile businessFile = user.getBusinessFile();
-            String upload = MinIoUtil.upload("营业执照目录", businessFile);
-            user.setBusinessLicens(upload);
-        }
-        String upload = MinIoUtil.upload("身份证正面目录", idPositiveFile);
-        user.setIdentificationPositive(upload);
-        String upload1 = MinIoUtil.upload("身份证反面目录", idObverseFile);
-        user.setIdentificationObverse(upload1);
+        String upload = MinIoUtil.upload("yyzzdir", businessFile, user.getIdentification());
+        user.setBusinessLicens(upload);
+        String upload1 = MinIoUtil.upload("sfzzmdir", idPositiveFile, user.getIdentification());
+        user.setIdentificationPositive(upload1);
+        String upload2 = MinIoUtil.upload("sfzfmdir", idObverseFile, user.getIdentification());
+        user.setIdentificationObverse(upload2);
         loginMapper.insertUser(user);
         loginMapper.insertUserRole(userRole);
     }

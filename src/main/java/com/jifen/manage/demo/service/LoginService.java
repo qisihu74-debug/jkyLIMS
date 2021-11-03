@@ -1,6 +1,7 @@
 package com.jifen.manage.demo.service;
 
 import com.jifen.manage.demo.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ public interface LoginService {
      * 注册账号
      * @param user
      */
-    void save(User user);
+    void save(User user, MultipartFile idPositiveFile, MultipartFile idObverseFile, MultipartFile businessFile);
 
     List<User> adminList();
 
@@ -43,4 +44,5 @@ public interface LoginService {
     User getUserById(String identification);
 
     User getUserByMobile(String mobile);
+
 }

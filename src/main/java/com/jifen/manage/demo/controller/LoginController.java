@@ -67,6 +67,7 @@ public class LoginController {
            res.setPassWord(decode);
            res.setToken(TokenUtil.getToken(res));
            List<FunctionEntity> list = functionService.getFunctionsById(admin.getId());
+           res.setPassWord("");
            res.setList(list);
            return ResultUtil.success(res);
        }else {
@@ -80,8 +81,8 @@ public class LoginController {
      */
     @PassToken
     @PostMapping("register")
-    public Result register(@RequestParam("businessFile") MultipartFile businessFile, @RequestParam("IdPositiveFile")MultipartFile IdPositiveFile,
-                           @RequestParam("IdObverseFile")MultipartFile IdObverseFile, User user){
+    public Result register(@RequestParam("businessFile") MultipartFile businessFile, @RequestParam("idPositiveFile")MultipartFile idPositiveFile,
+                           @RequestParam("idObverseFile")MultipartFile idObverseFile, User user){
         if (StringUtils.isEmpty(user.getUserName())){
             return ResultUtil.error(-1,"请输入账号");
         }
@@ -92,10 +93,10 @@ public class LoginController {
                 || Integer.valueOf(user.getUserType())>3){
             return ResultUtil.error(-1,"注册类型不正确，非商家或用户！");
         }
-        if (user.getIdObverseFile() == null || user.getIdentificationPositive() == null){
+        if (idObverseFile == null || idPositiveFile == null){
             return ResultUtil.error(-1,"请上传身份证正反面照片！");
         }
-        if (Integer.valueOf(user.getUserType()) == 3){
+        if (Integer.valueOf(user.getUserType()) == 3 && businessFile == null){
             return ResultUtil.error(-1,"请上传营业执照照片！");
         }
         //判断用户是否已注册
@@ -116,7 +117,7 @@ public class LoginController {
         String encode = DESUtils.encrypt(user.getPassWord(), user.getUserCode());
         user.setPassWord(encode);
         try {
-            loginService.save(user);
+            loginService.save(user,idPositiveFile,idObverseFile,businessFile);
             return ResultUtil.success();
         }catch (Exception e){
             log.error("用户注册失败:{}",e);
