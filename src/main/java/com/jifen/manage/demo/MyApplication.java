@@ -6,6 +6,7 @@ import org.apache.catalina.connector.Connector;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
@@ -24,7 +25,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableMBeanExport(registration = RegistrationPolicy.IGNORE_EXISTING)
 @Import(FastDFSConfig.class)
 @EnableTransactionManagement
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+        org.activiti.spring.boot.SecurityAutoConfiguration.class
+})
 @EnableScheduling
 @MapperScan("com.jifen.manage.demo.mapper")
 public class MyApplication {
