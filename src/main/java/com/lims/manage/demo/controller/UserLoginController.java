@@ -97,13 +97,13 @@ public class UserLoginController {
     public Map<String,Object> testAddUser(){
         // 设置基础参数
         SysUserEntity sysUser = new SysUserEntity();
-        sysUser.setUsername("user1");
+        sysUser.setUsername("gjl");
         sysUser.setState("NORMAL");
         // 随机生成盐值
         String salt = RandomStringUtils.randomAlphanumeric(20);
         sysUser.setSalt(salt);
         // 进行加密
-        String password ="123456";
+        String password ="gjl123456";
         sysUser.setPassword(SHA256Util.sha256(password, sysUser.getSalt()));
         // 保存用户
         sysUserService.save(sysUser);

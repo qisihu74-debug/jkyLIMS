@@ -39,8 +39,6 @@ public class ShiroConfig {
     private int port;
     @Value("${spring.redis.timeout}")
     private int timeout;
-    @Value("${spring.redis.password}")
-    private String password;
 
     /**
      * 开启Shiro-aop注解支持
@@ -133,7 +131,7 @@ public class ShiroConfig {
         redisManager.setHost(host);
         redisManager.setPort(port);
         redisManager.setTimeout(timeout);
-        redisManager.setPassword(password);
+        //redisManager.setPassword(password);
         return redisManager;
     }
 

@@ -1,3 +1,4 @@
+/*
 package com.lims.manage.demo.config;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -12,6 +13,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.net.UnknownHostException;
 
+*/
 /**
  * @author gjl
  * @version V1.0
@@ -19,7 +21,8 @@ import java.net.UnknownHostException;
  * @desc
  * @date 2021/9/13 14:36
  * @Copyright © 河南交科院
- */
+ *//*
+
 @Configuration
 public class RedisConfig {
     // 编写自定义的 RedisTemplate
@@ -55,3 +58,4 @@ public class RedisConfig {
         return template;
     }
 }
+*/
