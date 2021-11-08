@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * @Description 权限实体
- * @Author Sans
+ * @Author gjl
  * @CreateTime 2019/6/14 15:57
  */
 @Data

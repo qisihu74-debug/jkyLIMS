@@ -24,7 +24,7 @@ import java.util.Map;
 
 /**
  * @Description 用户登录
- * @Author Sans
+ * @Author gjl
  * @CreateTime 2019/6/17 15:21
  */
 @RestController
@@ -38,7 +38,7 @@ public class UserLoginController {
 
     /**
      * 登录
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2019/6/20 9:21
      */
     @RequestMapping("/login")
@@ -75,7 +75,7 @@ public class UserLoginController {
     }
     /**
      * 未登录
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2019/6/20 9:22
      */
     @RequestMapping("/unauth")
@@ -90,21 +90,20 @@ public class UserLoginController {
     /**
      * 添加一个用户演示接口
      * 这里仅作为演示不加任何权限和重复查询校验
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2020/1/6 9:22
      */
     @RequestMapping("/testAddUser")
-    public Map<String,Object> testAddUser(){
+    public Map<String,Object> testAddUser(String userName,String passWord){
         // 设置基础参数
         SysUserEntity sysUser = new SysUserEntity();
-        sysUser.setUsername("gjl");
+        sysUser.setUsername(userName);
         sysUser.setState("NORMAL");
         // 随机生成盐值
         String salt = RandomStringUtils.randomAlphanumeric(20);
         sysUser.setSalt(salt);
         // 进行加密
-        String password ="gjl123456";
-        sysUser.setPassword(SHA256Util.sha256(password, sysUser.getSalt()));
+        sysUser.setPassword(SHA256Util.sha256(passWord, sysUser.getSalt()));
         // 保存用户
         sysUserService.save(sysUser);
         // 保存角色

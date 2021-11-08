@@ -1,6 +1,7 @@
 package com.lims.manage.demo.util;
 
 import com.lims.manage.demo.entity.SysUserEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
 import org.apache.shiro.authc.LogoutAware;
@@ -15,9 +16,10 @@ import java.util.Objects;
 
 /**
  * @Description Shiro工具类
- * @Author Sans
+ * @Author gjl
  * @CreateTime 2019/6/15 16:11
  */
+@Slf4j
 public class ShiroUtils {
 
 	/** 私有构造器 **/
@@ -27,7 +29,7 @@ public class ShiroUtils {
 
     /**
      * 获取当前用户Session
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2019/6/17 17:03
      * @Return SysUserEntity 用户信息
      */
@@ -37,7 +39,7 @@ public class ShiroUtils {
 
     /**
      * 用户登出
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2019/6/17 17:23
      */
     public static void logout() {
@@ -46,7 +48,7 @@ public class ShiroUtils {
 
 	/**
 	 * 获取当前用户信息
-	 * @Author Sans
+	 * @Author gjl
 	 * @CreateTime 2019/6/17 17:03
 	 * @Return SysUserEntity 用户信息
 	 */
@@ -56,7 +58,7 @@ public class ShiroUtils {
 
     /**
      * 删除用户缓存信息
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2019/6/17 13:57
      * @Param  username  用户名称
      * @Param  isRemoveSession 是否删除Session
@@ -66,7 +68,6 @@ public class ShiroUtils {
         //从缓存中获取Session
         Session session = null;
         Collection<Session> sessions = redisSessionDAO.getActiveSessions();
-        SysUserEntity sysUserEntity;
         Object attribute = null;
         for(Session sessionInfo : sessions){
             //遍历Session,找到该用户名称对应的Session
@@ -74,7 +75,7 @@ public class ShiroUtils {
             if (attribute == null) {
                 continue;
             }
-            sysUserEntity = (SysUserEntity) ((SimplePrincipalCollection) attribute).getPrimaryPrincipal();
+            SysUserEntity sysUserEntity = (SysUserEntity) ((SimplePrincipalCollection) attribute).getPrimaryPrincipal();
             if (sysUserEntity == null) {
                 continue;
             }

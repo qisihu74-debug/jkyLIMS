@@ -4,7 +4,7 @@ import org.apache.shiro.crypto.hash.SimpleHash;
 
 /**
  * @Description Sha-256加密工具
- * @Author Sans
+ * @Author gjl
  * @CreateTime 2019/6/12 9:27
  */
 public class SHA256Util {

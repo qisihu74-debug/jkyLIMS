@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * @Description 权限测试
- * @Author Sans
+ * @Author gjl
  * @CreateTime 2019/6/19 11:38
  */
 @RestController
@@ -38,7 +38,7 @@ public class UserMenuController {
 
     /**
      * 获取用户信息集合
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2019/6/19 10:36
      * @Return Map<String,Object> 返回结果
      */
@@ -53,7 +53,7 @@ public class UserMenuController {
 
     /**
      * 获取角色信息集合
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2019/6/19 10:37
      * @Return Map<String,Object> 返回结果
      */
@@ -68,7 +68,7 @@ public class UserMenuController {
 
     /**
      * 获取权限信息集合
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2019/6/19 10:38
      * @Return Map<String,Object>
      */
@@ -83,7 +83,7 @@ public class UserMenuController {
 
     /**
      * 获取所有数据
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2019/6/19 10:38
      * @Return Map<String,Object>
      */
@@ -102,7 +102,7 @@ public class UserMenuController {
 
     /**
      * 添加管理员角色权限(测试动态权限更新)
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2019/6/19 10:39
      * @Param  username 用户ID
      * @Return Map<String,Object>

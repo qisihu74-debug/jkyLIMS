@@ -9,13 +9,13 @@ import java.io.Serializable;
 
 /**
  * @Description 自定义SessionId生成器
- * @Author Sans
+ * @Author gjl
  * @CreateTime 2019/6/11 11:48
  */
 public class ShiroSessionIdGenerator implements SessionIdGenerator {
     /**
      * 实现SessionId生成
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2019/6/11 11:54
      */
     @Override

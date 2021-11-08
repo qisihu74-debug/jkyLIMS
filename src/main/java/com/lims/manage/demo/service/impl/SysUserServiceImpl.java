@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * @Description 系统用户业务实现
- * @Author Sans
+ * @Author gjl
  * @CreateTime 2019/6/14 15:57
  */
 @Service("sysUserService")
@@ -18,7 +18,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 
     /**
      * 根据用户名查询实体
-     * @Author Sans
+     * @Author gjl
      * @CreateTime 2019/6/14 16:30
      * @Param  username 用户名
      * @Return SysUserEntity 用户实体

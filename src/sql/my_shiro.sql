@@ -87,8 +87,8 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 'admin', 'a1bb09ad5dea12e0f94762cb116c447e80c784d8aa2c6625263f7f3436cdd583', 'RvP3UID2n30Q2sycZYvH', 'NORMAL');
-INSERT INTO `sys_user` VALUES (2, 'user', '376eb5d2698c804ee83594fe8b0217f03ad138a046f7fa42b44c232c2e5e2b38', 'OVlrD37bDUKNcFRB10qG', 'NORMAL');
+INSERT INTO `sys_user` VALUES (1457656933753110530, 'admin', '2f16b9fe690122b2ad4396533d87377d735f2fc80f5411dee7ed50c105ed0c23', 'HcnXvMnHYNXRU28Tbeyz', 'NORMAL');
+INSERT INTO `sys_user` VALUES (1457656966263160833, 'user', '3ba5c66ad9159514391219a60602655b67304d005796a191a7ad8c1148f27b9d', 'UEWQ6iEodmXAZbLk22Xy', 'NORMAL');
 
 -- ----------------------------
 -- Table structure for sys_user_role
@@ -104,7 +104,7 @@ CREATE TABLE `sys_user_role`  (
 -- ----------------------------
 -- Records of sys_user_role
 -- ----------------------------
-INSERT INTO `sys_user_role` VALUES (1, 1, 1);
-INSERT INTO `sys_user_role` VALUES (2, 2, 2);
+INSERT INTO `sys_user_role` VALUES (1, 1457656933753110530, 1);
+INSERT INTO `sys_user_role` VALUES (2, 1457656966263160833, 2);
 
 SET FOREIGN_KEY_CHECKS = 1;
