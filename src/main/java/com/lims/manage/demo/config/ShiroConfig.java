@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * @Description Shiro配置类
  * @Author gjl
- * @CreateTime 2019/6/10 17:42
+ * @CreateTime 2021/11/09 17:42
  */
 @Configuration
 public class ShiroConfig {
@@ -44,7 +44,7 @@ public class ShiroConfig {
      * 开启Shiro-aop注解支持
      * @Attention 使用代理方式所以需要开启代码支持
      * @Author gjl
-     * @CreateTime 2019/6/12 8:38
+     * @CreateTime 2021/11/09 8:38
      */
     @Bean
     public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager) {
@@ -56,37 +56,28 @@ public class ShiroConfig {
     /**
      * Shiro基础配置
      * @Author gjl
-     * @CreateTime 2019/6/12 8:42
+     * @CreateTime 2021/11/09 8:42
      */
     @Bean
     public ShiroFilterFactoryBean shiroFilterFactory(SecurityManager securityManager){
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
         shiroFilterFactoryBean.setSecurityManager(securityManager);
-        shiroFilterFactoryBean.setLoginUrl("/userLogin/unauth");
-
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         // 注意过滤器配置顺序不能颠倒
         // 配置过滤:不会被拦截的链接
         filterChainDefinitionMap.put("/static/**", "anon");
-        //游客，开发权限
-        filterChainDefinitionMap.put("/guest/**", "anon");
-        //用户，需要角色权限 “user”
-        filterChainDefinitionMap.put("/user/**", "roles[user]");
-        //管理员，需要角色权限 “admin”
-        filterChainDefinitionMap.put("/admin/**", "roles[admin]");
-
         filterChainDefinitionMap.put("/userLogin/**", "anon");
         filterChainDefinitionMap.put("/**", "authc");
         // 配置shiro默认登录界面地址，前后端分离中登录界面跳转应由前端路由控制，后台仅返回json数据
-
+        shiroFilterFactoryBean.setLoginUrl("/userLogin/unauth");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         return shiroFilterFactoryBean;
-    }
+}
 
     /**
      * 安全管理器
      * @Author gjl
-     * @CreateTime 2019/6/12 10:34
+     * @CreateTime 2021/11/09 10:34
      */
     @Bean
     public SecurityManager securityManager() {
@@ -103,7 +94,7 @@ public class ShiroConfig {
     /**
      * 身份验证器
      * @Author gjl
-     * @CreateTime 2019/6/12 10:37
+     * @CreateTime 2021/11/09 10:37
      */
     @Bean
     public ShiroRealm shiroRealm() {
@@ -116,7 +107,7 @@ public class ShiroConfig {
      * 凭证匹配器
      * 将密码校验交给Shiro的SimpleAuthenticationInfo进行处理,在这里做匹配配置
      * @Author gjl
-     * @CreateTime 2019/6/12 10:48
+     * @CreateTime 2021/11/09 10:48
      */
     @Bean
     public HashedCredentialsMatcher hashedCredentialsMatcher() {
@@ -132,7 +123,7 @@ public class ShiroConfig {
      * 配置Redis管理器
      * @Attention 使用的是shiro-redis开源插件
      * @Author gjl
-     * @CreateTime 2019/6/12 11:06
+     * @CreateTime 2021/11/09 11:06
      */
     @Bean
     public RedisManager redisManager() {
@@ -149,7 +140,7 @@ public class ShiroConfig {
      * 用于往Redis存储权限和角色标识
      * @Attention 使用的是shiro-redis开源插件
      * @Author gjl
-     * @CreateTime 2019/6/12 12:37
+     * @CreateTime 2021/11/09 12:37
      */
     @Bean
     public RedisCacheManager cacheManager() {
@@ -164,7 +155,7 @@ public class ShiroConfig {
     /**
      * SessionID生成器
      * @Author gjl
-     * @CreateTime 2019/6/12 13:12
+     * @CreateTime 2021/11/09 13:12
      */
     @Bean
     public ShiroSessionIdGenerator sessionIdGenerator(){
@@ -175,7 +166,7 @@ public class ShiroConfig {
      * 配置RedisSessionDAO
      * @Attention 使用的是shiro-redis开源插件
      * @Author gjl
-     * @CreateTime 2019/6/12 13:44
+     * @CreateTime 2021/11/09 13:44
      */
     @Bean
     public RedisSessionDAO redisSessionDAO() {
@@ -190,7 +181,7 @@ public class ShiroConfig {
     /**
      * 配置Session管理器
      * @Author gjl
-     * @CreateTime 2019/6/12 14:25
+     * @CreateTime 2021/11/09 14:25
      */
     @Bean
     public SessionManager sessionManager() {

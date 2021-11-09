@@ -4,7 +4,7 @@ package com.lims.manage.demo.result;
  * 宜搭网关服务请求的返回结果类
  *
  * @Author: weimeng(shanyu)
- * @Date: 2019/2/28 下午2:52
+ * @Date: 2021/11/09 下午2:52
  */
 
 public class GatewayResult {

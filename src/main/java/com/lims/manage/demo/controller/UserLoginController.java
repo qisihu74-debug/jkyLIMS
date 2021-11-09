@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * @Description 用户登录
  * @Author gjl
- * @CreateTime 2019/6/17 15:21
+ * @CreateTime 2021/11/09 15:21
  */
 @RestController
 @RequestMapping("/userLogin")
@@ -39,7 +39,7 @@ public class UserLoginController {
     /**
      * 登录
      * @Author gjl
-     * @CreateTime 2019/6/20 9:21
+     * @CreateTime 2021/11/09 9:21
      */
     @RequestMapping("/login")
     public Map<String,Object> login(@RequestBody SysUserEntity sysUserEntity){
@@ -76,7 +76,7 @@ public class UserLoginController {
     /**
      * 未登录
      * @Author gjl
-     * @CreateTime 2019/6/20 9:22
+     * @CreateTime 2021/11/09 9:22
      */
     @RequestMapping("/unauth")
     public Map<String,Object> unauth(){
@@ -116,4 +116,5 @@ public class UserLoginController {
         map.put("msg","添加成功");
         return map;
     }
+
 }

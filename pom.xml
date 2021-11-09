@@ -94,6 +94,11 @@
             <artifactId>mssql-jdbc</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <!-- AOP依赖,一定要加,否则权限拦截验证不生效 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
         <!-- Shiro 核心依赖 -->
         <dependency>
             <groupId>org.apache.shiro</groupId>

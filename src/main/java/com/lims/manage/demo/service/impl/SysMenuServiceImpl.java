@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @Description 权限业务实现
  * @Author gjl
- * @CreateTime 2019/6/14 15:57
+ * @CreateTime 2021/11/09 15:57
  */
 @Service("sysMenuService")
 public class SysMenuServiceImpl extends ServiceImpl<SysMenuDao, SysMenuEntity> implements SysMenuService {
@@ -21,7 +21,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuDao, SysMenuEntity> i
     /**
      * 根据角色查询用户权限
      * @Author gjl
-     * @CreateTime 2019/6/19 10:14
+     * @CreateTime 2021/11/09 10:14
      * @Param  roleId 角色ID
      * @Return List<SysMenuEntity> 权限集合
      */

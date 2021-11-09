@@ -3,7 +3,7 @@ package com.lims.manage.demo.constant;
 /**
  * @Description redis常量类
  * @Author gjl
- * @CreateTime 2019/6/11 10:04
+ * @CreateTime 2021/11/09 10:04
  */
 public interface RedisConstant {
     /**

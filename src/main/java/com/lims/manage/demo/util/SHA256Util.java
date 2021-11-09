@@ -5,7 +5,7 @@ import org.apache.shiro.crypto.hash.SimpleHash;
 /**
  * @Description Sha-256加密工具
  * @Author gjl
- * @CreateTime 2019/6/12 9:27
+ * @CreateTime 2021/11/09 9:27
  */
 public class SHA256Util {
     /**  私有构造器 **/

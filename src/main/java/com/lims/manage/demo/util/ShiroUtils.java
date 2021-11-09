@@ -17,7 +17,7 @@ import java.util.Objects;
 /**
  * @Description Shiro工具类
  * @Author gjl
- * @CreateTime 2019/6/15 16:11
+ * @CreateTime 2021/11/09 16:11
  */
 @Slf4j
 public class ShiroUtils {
@@ -30,7 +30,7 @@ public class ShiroUtils {
     /**
      * 获取当前用户Session
      * @Author gjl
-     * @CreateTime 2019/6/17 17:03
+     * @CreateTime 2021/11/09 17:03
      * @Return SysUserEntity 用户信息
      */
     public static Session getSession() {
@@ -40,7 +40,7 @@ public class ShiroUtils {
     /**
      * 用户登出
      * @Author gjl
-     * @CreateTime 2019/6/17 17:23
+     * @CreateTime 2021/11/09 17:23
      */
     public static void logout() {
         SecurityUtils.getSubject().logout();
@@ -49,7 +49,7 @@ public class ShiroUtils {
 	/**
 	 * 获取当前用户信息
 	 * @Author gjl
-	 * @CreateTime 2019/6/17 17:03
+	 * @CreateTime 2021/11/09 17:03
 	 * @Return SysUserEntity 用户信息
 	 */
 	public static SysUserEntity getUserInfo() {
@@ -59,7 +59,7 @@ public class ShiroUtils {
     /**
      * 删除用户缓存信息
      * @Author gjl
-     * @CreateTime 2019/6/17 13:57
+     * @CreateTime 2021/11/09 13:57
      * @Param  username  用户名称
      * @Param  isRemoveSession 是否删除Session
      * @Return void

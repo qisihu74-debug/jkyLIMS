@@ -10,6 +10,7 @@ import com.lims.manage.demo.service.SysRoleService;
 import com.lims.manage.demo.service.SysUserService;
 import com.lims.manage.demo.util.ShiroUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +22,7 @@ import java.util.Map;
 /**
  * @Description 权限测试
  * @Author gjl
- * @CreateTime 2019/6/19 11:38
+ * @CreateTime 2021/11/09 11:38
  */
 @RestController
 @RequestMapping("/menu")
@@ -39,7 +40,7 @@ public class UserMenuController {
     /**
      * 获取用户信息集合
      * @Author gjl
-     * @CreateTime 2019/6/19 10:36
+     * @CreateTime 2021/11/09 10:36
      * @Return Map<String,Object> 返回结果
      */
     @RequestMapping("/getUserInfoList")
@@ -54,7 +55,7 @@ public class UserMenuController {
     /**
      * 获取角色信息集合
      * @Author gjl
-     * @CreateTime 2019/6/19 10:37
+     * @CreateTime 2021/11/09 10:37
      * @Return Map<String,Object> 返回结果
      */
     @RequestMapping("/getRoleInfoList")
@@ -69,7 +70,7 @@ public class UserMenuController {
     /**
      * 获取权限信息集合
      * @Author gjl
-     * @CreateTime 2019/6/19 10:38
+     * @CreateTime 2021/11/09 10:38
      * @Return Map<String,Object>
      */
     @RequestMapping("/getMenuInfoList")
@@ -84,7 +85,7 @@ public class UserMenuController {
     /**
      * 获取所有数据
      * @Author gjl
-     * @CreateTime 2019/6/19 10:38
+     * @CreateTime 2021/11/09 10:38
      * @Return Map<String,Object>
      */
     @RequestMapping("/getInfoAll")
@@ -101,9 +102,24 @@ public class UserMenuController {
     }
 
     /**
+     * 获取所有数据
+     * @Author gjl
+     * @CreateTime 2021/11/09 10:38
+     * @Return Map<String,Object>
+     */
+    @RequestMapping("/testRole")
+    @RequiresPermissions("aa:cc:dd")
+    public Map<String,Object> testRole(){
+        Map<String,Object> map = new HashMap<>();
+
+        map.put("sysMenuEntityList","aaa");
+        return map;
+    }
+
+    /**
      * 添加管理员角色权限(测试动态权限更新)
      * @Author gjl
-     * @CreateTime 2019/6/19 10:39
+     * @CreateTime 2021/11/09 10:39
      * @Param  username 用户ID
      * @Return Map<String,Object>
      */

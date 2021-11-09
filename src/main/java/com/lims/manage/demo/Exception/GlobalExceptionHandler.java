@@ -1,5 +1,6 @@
 package com.lims.manage.demo.Exception;
 
+import org.apache.shiro.authz.AuthorizationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -7,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author gjl
@@ -58,5 +61,20 @@ public class GlobalExceptionHandler {
     public ResultBody exceptionHandler(HttpServletRequest req, Exception e){
         logger.error("未知异常！原因是:",e);
         return ResultBody.error(CommonEnum.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * 处理Shiro权限拦截异常
+     * 如果返回JSON数据格式请加上 @ResponseBody注解
+     * @Author gjl
+     * @CreateTime 2021/11/09 13:35
+     * @Return Map<Object> 返回结果集
+     */
+    @ResponseBody
+    @ExceptionHandler(value = AuthorizationException.class)
+    public Map<String,Object> defaultErrorHandler(){
+        Map<String,Object> map = new HashMap<>();
+        map.put("403","权限不足");
+        return map;
     }
 }

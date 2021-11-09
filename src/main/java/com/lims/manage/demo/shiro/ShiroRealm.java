@@ -26,7 +26,7 @@ import java.util.Set;
 /**
  * @Description Shiro权限匹配和账号密码匹配
  * @Author gjl
- * @CreateTime 2019/6/15 11:27
+ * @CreateTime 2021/11/09 11:27
  */
 public class ShiroRealm extends AuthorizingRealm {
 
@@ -41,7 +41,7 @@ public class ShiroRealm extends AuthorizingRealm {
      * 授权权限
      * 用户进行权限验证时候Shiro会去缓存中找,如果查不到数据,会执行这个方法去查权限,并放入缓存中
      * @Author gjl
-     * @CreateTime 2019/6/12 11:44
+     * @CreateTime 2021/11/09 11:44
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
@@ -70,7 +70,7 @@ public class ShiroRealm extends AuthorizingRealm {
     /**
      * 身份认证
      * @Author gjl
-     * @CreateTime 2019/6/12 12:36
+     * @CreateTime 2021/11/09 12:36
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {

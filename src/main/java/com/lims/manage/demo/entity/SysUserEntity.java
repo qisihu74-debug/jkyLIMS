@@ -9,7 +9,7 @@ import java.io.Serializable;
 /**
  * @Description 系统用户实体
  * @Author gjl
- * @CreateTime 2019/6/14 15:57
+ * @CreateTime 2021/11/09 15:57
  */
 @Data
 @TableName("sys_user")

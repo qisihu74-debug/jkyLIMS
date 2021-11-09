@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * @Description 用户与角色关系实体
  * @Author gjl
- * @CreateTime 2019/6/14 15:57
+ * @CreateTime 2021/11/09 15:57
  */
 @Data
 @TableName("sys_user_role")

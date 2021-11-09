@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 /**
  * @Description 用户与角色业务实现
  * @Author gjl
- * @CreateTime 2019/6/14 15:57
+ * @CreateTime 2021/11/09 15:57
  */
 @Service("sysUserRoleService")
 public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleDao, SysUserRoleEntity> implements SysUserRoleService {

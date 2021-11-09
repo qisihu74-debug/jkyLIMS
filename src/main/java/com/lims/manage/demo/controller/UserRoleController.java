@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * @Description 角色测试
  * @Author gjl
- * @CreateTime 2019/6/19 11:38
+ * @CreateTime 2021/11/09 11:38
  */
 @RestController
 @RequestMapping("/role")
@@ -36,7 +36,7 @@ public class UserRoleController {
     /**
      * 管理员角色测试接口
      * @Author gjl
-     * @CreateTime 2019/6/19 10:38
+     * @CreateTime 2021/11/09 10:38
      * @Return Map<String,Object> 返回结果
      */
     @RequestMapping("/getAdminInfo")
@@ -51,7 +51,7 @@ public class UserRoleController {
     /**
      * 用户角色测试接口
      * @Author gjl
-     * @CreateTime 2019/6/19 10:38
+     * @CreateTime 2021/11/09 10:38
      * @Return Map<String,Object> 返回结果
      */
     @RequestMapping("/getUserInfo")
@@ -66,7 +66,7 @@ public class UserRoleController {
     /**
      * 角色测试接口
      * @Author gjl
-     * @CreateTime 2019/6/19 10:38
+     * @CreateTime 2021/11/09 10:38
      * @Return Map<String,Object> 返回结果
      */
     @RequestMapping("/getRoleInfo")
@@ -82,7 +82,7 @@ public class UserRoleController {
     /**
      * 登出
      * @Author gjl
-     * @CreateTime 2019/6/19 10:38
+     * @CreateTime 2021/11/09 10:38
      * @Return Map<String,Object> 返回结果
      */
     @RequestMapping("/getLogout")
