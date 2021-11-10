@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.demo.mapper.SysUserFuctionDao">
+
+   <select id="getFunctionByuserId" resultType="com.lims.manage.demo.entity.SysFunction">
+        SELECT DISTINCT
+	sf.function_id,
+	sf.function_pid,
+	sf. NAME,
+	sf.sort
+FROM
+	sys_user_role sr
+LEFT JOIN sys_role_function srf ON sr.role_id = srf.role_id
+LEFT JOIN sys_function sf ON srf.function_id = sf.function_id
+WHERE
+	sr.user_id = #{userId}
+   </select>
+
+
+</mapper>
