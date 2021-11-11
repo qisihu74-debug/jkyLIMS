@@ -39,7 +39,7 @@ public class ModelEditorJsonRestResource implements ModelDataJsonConstants {
   @Autowired
   private ObjectMapper objectMapper;
   
-  @RequestMapping(value="/model/{modelId}/json", method = RequestMethod.GET, produces = "application/json")
+  @RequestMapping(value="/modeler/model/{modelId}/json", method = RequestMethod.GET, produces = "application/json")
   public ObjectNode getEditorJson(@PathVariable String modelId) {
     ObjectNode modelNode = null;
     

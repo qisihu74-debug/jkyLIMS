@@ -51,7 +51,7 @@ public class ModelSaveRestResource implements ModelDataJsonConstants {
   @Autowired
   private ObjectMapper objectMapper;
 
-  @RequestMapping(value="/model/{modelId}/save", method = RequestMethod.PUT)
+  @RequestMapping(value="/modeler/model/{modelId}/save", method = RequestMethod.POST)
   @ResponseStatus(value = HttpStatus.OK)
   public void saveModel(@PathVariable String modelId, @RequestParam("name") String name,
                         @RequestParam("json_xml") String json_xml,

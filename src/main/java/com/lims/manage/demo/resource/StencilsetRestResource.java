@@ -17,7 +17,7 @@ import java.io.InputStream;
 @RequestMapping(value = "/service")
 public class StencilsetRestResource {
   
-  @RequestMapping(value="/editor/stencilset", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+  @RequestMapping(value="/modeler/editor/stencilset", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
   public @ResponseBody
   String getStencilset() {
     InputStream stencilsetStream = this.getClass().getClassLoader().getResourceAsStream("stencilset.json");

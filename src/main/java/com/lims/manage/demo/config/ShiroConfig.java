@@ -65,8 +65,22 @@ public class ShiroConfig {
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         // 注意过滤器配置顺序不能颠倒
         // 配置过滤:不会被拦截的链接
-        filterChainDefinitionMap.put("/static/**", "anon");
+        filterChainDefinitionMap.put("/modeler/**", "anon");
         filterChainDefinitionMap.put("/userLogin/**", "anon");
+        filterChainDefinitionMap.put("/guest/**", "anon");
+        //静态资源访问放行
+//        filterChainDefinitionMap.put("/diagram-viewer/**","anon");
+//        filterChainDefinitionMap.put("/editor-app/**","anon");
+//        filterChainDefinitionMap.put("/js/**","anon");
+//        filterChainDefinitionMap.put("/css/**","anon");
+//        filterChainDefinitionMap.put("/bootstrap/**/**","anon");
+//        filterChainDefinitionMap.put("/images/**","anon");
+//        filterChainDefinitionMap.put("/layui/**","anon");
+//        filterChainDefinitionMap.put("/index.html","anon");
+//        filterChainDefinitionMap.put("/login.html","anon");
+//        filterChainDefinitionMap.put("/modeler.html","anon");
+//        filterChainDefinitionMap.put("/fonts/**", "anon");
+
         filterChainDefinitionMap.put("/**", "authc");
         // 配置shiro默认登录界面地址，前后端分离中登录界面跳转应由前端路由控制，后台仅返回json数据
         shiroFilterFactoryBean.setLoginUrl("/userLogin/unauth");
