@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lims.manage.demo.resource;
+package com.lims.manage.demo.modeler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -40,7 +40,7 @@ import java.io.InputStream;
  * @author Tijs Rademakers
  */
 @RestController
-@RequestMapping(value = "/service")
+@RequestMapping(value = "/modeler")
 public class ModelSaveRestResource implements ModelDataJsonConstants {
 
   protected static final Logger LOGGER = LoggerFactory.getLogger(ModelSaveRestResource.class);
@@ -51,7 +51,7 @@ public class ModelSaveRestResource implements ModelDataJsonConstants {
   @Autowired
   private ObjectMapper objectMapper;
 
-  @RequestMapping(value="/modeler/model/{modelId}/save", method = RequestMethod.POST)
+  @RequestMapping(value="/model/{modelId}/save", method = RequestMethod.POST)
   @ResponseStatus(value = HttpStatus.OK)
   public void saveModel(@PathVariable String modelId, @RequestParam("name") String name,
                         @RequestParam("json_xml") String json_xml,

@@ -1,5 +1,5 @@
 
-package com.lims.manage.demo.resource;
+package com.lims.manage.demo.modeler;
 
 import org.activiti.engine.ActivitiException;
 import org.apache.commons.io.IOUtils;
@@ -14,10 +14,10 @@ import java.io.InputStream;
  * @author Tijs Rademakers
  */
 @RestController
-@RequestMapping(value = "/service")
+@RequestMapping(value = "/modeler")
 public class StencilsetRestResource {
   
-  @RequestMapping(value="/modeler/editor/stencilset", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+  @RequestMapping(value="/editor/stencilset", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
   public @ResponseBody
   String getStencilset() {
     InputStream stencilsetStream = this.getClass().getClassLoader().getResourceAsStream("stencilset.json");

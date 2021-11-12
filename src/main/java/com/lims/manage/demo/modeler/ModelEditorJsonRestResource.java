@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lims.manage.demo.resource;
+package com.lims.manage.demo.modeler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/service")
+@RequestMapping(value = "/modeler")
 public class ModelEditorJsonRestResource implements ModelDataJsonConstants {
   
   protected static final Logger LOGGER = LoggerFactory.getLogger(ModelEditorJsonRestResource.class);
@@ -39,7 +39,7 @@ public class ModelEditorJsonRestResource implements ModelDataJsonConstants {
   @Autowired
   private ObjectMapper objectMapper;
   
-  @RequestMapping(value="/modeler/model/{modelId}/json", method = RequestMethod.GET, produces = "application/json")
+  @RequestMapping(value="/model/{modelId}/json", method = RequestMethod.GET, produces = "application/json")
   public ObjectNode getEditorJson(@PathVariable String modelId) {
     ObjectNode modelNode = null;
     
