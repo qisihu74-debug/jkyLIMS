@@ -1,28 +1,24 @@
-/*
- * Activiti Modeler component part of the Activiti project
- * Copyright 2005-2014 Alfresco Software, Ltd. All rights reserved.
+/* Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
-
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-var KISBPM = KISBPM || {};
+var FLOWABLE = FLOWABLE || {};
 
 /** Inspired by https://github.com/krasimir/EventBus/blob/master/src/EventBus.js */
-KISBPM.eventBus = {
+FLOWABLE.eventBus = {
 
     /** Event fired when the editor is loaded and ready */
     EVENT_TYPE_EDITOR_READY: 'event-type-editor-ready',
+    
+    EVENT_TYPE_EDITOR_BOOTED: 'event-type-editor-booted',
 
     /** Event fired when a selection is made on the canvas. */
     EVENT_TYPE_SELECTION_CHANGE: 'event-type-selection-change',
@@ -50,6 +46,14 @@ KISBPM.eventBus = {
     
     /** Event fired when the quick menu buttons should be hidden. */
     EVENT_TYPE_HIDE_SHAPE_BUTTONS: 'event-type-hide-shape-buttons',
+    
+    /** Event fired when the validation popup should be shown. */
+    EVENT_TYPE_SHOW_VALIDATION_POPUP: 'event-type-show-validation-popup',
+    
+    /** Event fired when a different process must be loaded. */
+    EVENT_TYPE_NAVIGATE_TO_PROCESS: 'event-type-navigate-to-process',
+    
+    EVENT_TYPE_UNDO_REDO_RESET : 'event-type-undo-redo-reset',
 
     /** A mapping for storing the listeners*/
     listeners: {},
@@ -127,7 +131,7 @@ KISBPM.eventBus = {
     },
 
     dispatchOryxEvent: function(event, uiObject) {
-        KISBPM.eventBus.editor.handleEvents(event, uiObject);
+        FLOWABLE.eventBus.editor.handleEvents(event, uiObject);
     }
 
 };
