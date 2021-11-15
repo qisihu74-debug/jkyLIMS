@@ -8,8 +8,10 @@ import org.flowable.image.ProcessDiagramGenerator;
 import org.flowable.task.api.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
@@ -27,6 +29,8 @@ import java.util.List;
  * @date 2021/11/12 15:31
  * @Copyright © 河南交科院
  */
+@RestController
+@RequestMapping("/flowable/")
 public class FlowableController {
     /** 运行时Service（用于运行时流程实例、流程变量、流程节点） */
     @Autowired
@@ -54,7 +58,7 @@ public class FlowableController {
      * @param money     报销金额
      * @param descption 描述
      */
-    @RequestMapping(value = "add")
+    @GetMapping(value = "add")
     @ResponseBody
     public String addExpense(String userId, Integer money, String descption) {
         //启动流程
@@ -68,7 +72,7 @@ public class FlowableController {
     /**
      * 获取审批管理列表
      */
-    @RequestMapping(value = "/list")
+    @GetMapping(value = "/list")
     @ResponseBody
     public Object list(String userId) {
         List<Task> tasks = taskService.createTaskQuery().taskAssignee(userId).orderByTaskCreateTime().desc().list();
@@ -85,7 +89,7 @@ public class FlowableController {
      *
      * @param taskId 任务ID
      */
-    @RequestMapping(value = "apply")
+    @GetMapping(value = "apply")
     @ResponseBody
     public String apply(String taskId) {
         List<Task> t = taskService.createTaskQuery().list();
@@ -107,7 +111,7 @@ public class FlowableController {
      * 拒绝
      */
     @ResponseBody
-    @RequestMapping(value = "reject")
+    @GetMapping(value = "reject")
     public String reject(String taskId) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("outcome", "驳回");
@@ -120,7 +124,7 @@ public class FlowableController {
      *
      * @param processId 任务ID
      */
-    @RequestMapping(value = "processDiagram")
+    @GetMapping(value = "processDiagram")
     public void genProcessDiagram(HttpServletResponse httpServletResponse, String processId) throws Exception {
         List<ProcessInstance> t = runtimeService.createProcessInstanceQuery().list();
         ProcessInstance pi = runtimeService.createProcessInstanceQuery().processInstanceId(processId).singleResult();

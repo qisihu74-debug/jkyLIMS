@@ -1,14 +1,13 @@
 package com.lims.manage.demo;
 
-import com.lims.manage.demo.config.ApplicationConfiguration;
 import com.lims.manage.demo.config.FastDFSConfig;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
-import org.flowable.ui.idm.servlet.AppDispatcherServletConfiguration;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
@@ -24,13 +23,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * EnableScheduling开启定时任务
  */
 @EnableMBeanExport(registration = RegistrationPolicy.IGNORE_EXISTING)
-@Import({FastDFSConfig.class,
-        ApplicationConfiguration.class,
-        AppDispatcherServletConfiguration.class
-})
+@Import({FastDFSConfig.class})
 @EnableTransactionManagement
-@SpringBootApplication(exclude = {
-        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class
 })
 @EnableScheduling
 @MapperScan("com.lims.manage.demo.mapper")
