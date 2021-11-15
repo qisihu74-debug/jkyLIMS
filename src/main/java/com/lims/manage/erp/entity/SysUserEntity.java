@@ -36,5 +36,9 @@ public class SysUserEntity implements Serializable {
 	 * 状态:NORMAL正常  PROHIBIT禁用
 	 */
 	private String state;
+	/**
+	 * 用户所属组织
+	 */
+	private String userDept;
 
 }
