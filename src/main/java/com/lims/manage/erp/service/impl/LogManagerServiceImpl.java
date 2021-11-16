@@ -39,4 +39,16 @@ public class LogManagerServiceImpl extends ServiceImpl<LogManagerDao, SysLog> im
         }
         super.saveBatch(logs);
     }
+
+    @Override
+    public void addOpSysLog(SysUserEntity sysUser, String optDescs, String type) {
+        SysLog sysLog = new SysLog();
+        sysLog.setOperate_time(new Date(System.currentTimeMillis()));
+        sysLog.setOperateDesc(optDescs);
+        sysLog.setType(type);
+        sysLog.setUserId(sysUser.getUserId());
+        sysLog.setUserDept(sysUser.getUserDept());
+        sysLog.setUserName(sysUser.getUsername());
+        this.baseMapper.insert(sysLog);
+    }
 }

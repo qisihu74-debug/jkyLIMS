@@ -1,10 +1,15 @@
 package com.lims.manage.erp.controller;
 
 
+import com.lims.manage.erp.entity.SysLog;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserRoleEntity;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.SysUserRoleService;
 import com.lims.manage.erp.service.SysUserService;
+import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.SHA256Util;
 import com.lims.manage.erp.util.ShiroUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -14,7 +19,9 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +38,8 @@ import java.util.Map;
 @RequestMapping("/userLogin")
 public class UserLoginController {
 
+    @Autowired
+    private LogManagerService logManagerService;
     @Autowired
     private SysUserService sysUserService;
     @Autowired
@@ -71,6 +80,7 @@ public class UserLoginController {
         map.put("code",0);
         map.put("msg","登录成功");
         map.put("token", ShiroUtils.getSession().getId().toString());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"登陆成功!", Const.LOGIN_LOG);
         return map;
     }
     /**
@@ -115,6 +125,17 @@ public class UserLoginController {
         map.put("code",0);
         map.put("msg","添加成功");
         return map;
+    }
+
+    /**
+     * 用户推出登陆
+     * @return
+     */
+    @GetMapping("/logOut")
+    public Result logOut(){
+        ShiroUtils.logout();
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"退出登陆成功!", Const.LOGIN_LOG_OUT);
+        return ResultUtil.success("用户退出登陆成功！");
     }
 
 }
