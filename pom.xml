@@ -243,12 +243,7 @@
         <!-- flowable依赖-->
         <dependency>
             <groupId>org.flowable</groupId>
-            <artifactId>flowable-spring-boot-starter-process</artifactId>
-            <version>${flowable.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.flowable</groupId>
-            <artifactId>flowable-idm-spring-configurator</artifactId>
+            <artifactId>flowable-spring-boot-starter</artifactId>
             <version>${flowable.version}</version>
         </dependency>
         <!-- 兼容V5配置 -->
@@ -289,11 +284,11 @@
             <version>1.2.60</version>
         </dependency>
         <!--文件服务器依赖fastdfs -->
-      <!--  <dependency>
-            <groupId>org.csource</groupId>
-            <artifactId>fastdfs-client-java</artifactId>
-            <version>1.27-SNAPSHOT</version>
-        </dependency>-->
+        <!--  <dependency>
+              <groupId>org.csource</groupId>
+              <artifactId>fastdfs-client-java</artifactId>
+              <version>1.27-SNAPSHOT</version>
+          </dependency>-->
         <!--监控+refresh配置-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
