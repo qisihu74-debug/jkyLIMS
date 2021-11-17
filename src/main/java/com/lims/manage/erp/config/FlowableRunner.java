@@ -36,7 +36,7 @@ public class FlowableRunner implements ApplicationRunner {
             log.error("读取流程配置文件失败:{}",e);
         }
         File[] files = file.listFiles();
-        if (files.length>1){
+        if (files!=null && files.length>1){
             for (File file1:files) {
                 String path = "processes\\"+file1.getName();
                 try {
