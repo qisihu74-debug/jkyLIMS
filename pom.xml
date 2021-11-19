@@ -391,7 +391,28 @@
             </exclusions>
         </dependency>
 
-
+        <!--钉钉依赖 -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>dingtalk</artifactId>
+            <version>1.1.78</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/src/lib/dingtalk-1.1.78.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.taobao.top</groupId>
+            <artifactId>top-api-sdk-dev</artifactId>
+            <version>ding-open-mc-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/src/lib/taobao-sdk-java-auto_1479188381469-20210823.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.taobao.top</groupId>
+            <artifactId>lippi-oapi-encrpt</artifactId>
+            <version>dingtalk-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/src/lib/taobao-sdk-java-auto_1479188381469-20210823-source.jar</systemPath>
+        </dependency>
         <!--mybatis plus -->
         <dependency>
             <groupId>com.baomidou</groupId>
