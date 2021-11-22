@@ -17,7 +17,7 @@ public class DingDeptEntity {
     /**
      * 部门id
      */
-    private String id;
+    private Long id;
     /**
      * 部门名称
      */
@@ -25,5 +25,5 @@ public class DingDeptEntity {
     /**
      * 部门父级id
      */
-    private int parentId;
+    private Long parentId;
 }

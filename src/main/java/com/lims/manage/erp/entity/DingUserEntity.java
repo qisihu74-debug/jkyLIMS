@@ -1,6 +1,12 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author gjl
@@ -11,6 +17,30 @@ import lombok.Data;
  * @Copyright © 河南交科院
  */
 @Data
+@TableName("sys_ding_user")
 public class DingUserEntity {
+    private int active;
+    private String avatar;
+    private String department;
+    private String dingid;
+    private String email;
+    private String extattr;
+    private Date Hireddate;
+    private int isadmin;
+    private int isboss;
+    private int ishide;
+    private int isleader;
+    private String jobnumber;
+    private String mobile;
+    private String name;
+    private Long orders;
+    private String orgemail;
+    private String position;
+    private String remark;
+    private String tel;
+    private String unionid;
+    @TableId(value = "userid")
+    private String userid;
+    private String workplace;
 
 }

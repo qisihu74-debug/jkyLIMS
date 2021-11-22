@@ -6,14 +6,17 @@ import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiDepartmentListRequest;
 import com.dingtalk.api.request.OapiGettokenRequest;
+import com.dingtalk.api.request.OapiUserListbypageRequest;
 import com.dingtalk.api.response.OapiDepartmentListResponse;
 import com.dingtalk.api.response.OapiGettokenResponse;
+import com.dingtalk.api.response.OapiUserListbypageResponse;
 import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.entity.DingUserEntity;
 import com.taobao.api.ApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,8 +112,58 @@ public class AccessTokenSingleton {
         return list;
     }
 
-    public List<DingUserEntity> getUserList(){
-        return  null;
+    /**
+     * 获取钉钉用户信息
+     * @param userUrl
+     * @param token
+     * @return
+     */
+    public List<DingUserEntity> getUserList(String userUrl, String token, String deptUrl) throws ApiException{
+        List<DingUserEntity> list = new ArrayList<DingUserEntity>();
+        List<DingDeptEntity> list_department = this.getDeptList(deptUrl,token);
+        try {
+            for (int i=0;i<list_department.size();i++){
+                DingTalkClient client = new DefaultDingTalkClient(userUrl);
+                OapiUserListbypageRequest req = new OapiUserListbypageRequest();
+                req.setHttpMethod("GET");
+                req.setDepartmentId(list_department.get(i).getId());
+                req.setOffset(0L);
+                req.setSize(10L);
+                OapiUserListbypageResponse rsp = client.execute(req, token);
+                if (rsp.getErrcode() == 0){
+                    System.out.println(list_department.get(i).getName());
+                    for (int j=0;j<rsp.getUserlist().size();j++){
+                        DingUserEntity taobaoUser = new DingUserEntity();
+                        taobaoUser.setActive((rsp.getUserlist().get(j).getActive())?1:0);
+                        taobaoUser.setAvatar(rsp.getUserlist().get(j).getAvatar());
+                        taobaoUser.setDepartment(rsp.getUserlist().get(j).getDepartment().toString());
+                        taobaoUser.setDingid(rsp.getUserlist().get(j).getDingId());
+                        taobaoUser.setEmail(rsp.getUserlist().get(j).getEmail());
+                        taobaoUser.setExtattr(rsp.getUserlist().get(j).getExtattr());
+                        taobaoUser.setHireddate(rsp.getUserlist().get(j).getHiredDate());
+                        taobaoUser.setIsadmin((rsp.getUserlist().get(j).getIsAdmin())?1:0);
+                        taobaoUser.setIsboss((rsp.getUserlist().get(j).getIsBoss())?1:0);
+                        taobaoUser.setIshide((rsp.getUserlist().get(j).getIsHide())?1:0);
+                        taobaoUser.setIsleader((rsp.getUserlist().get(j).getIsLeader())?1:0);
+                        taobaoUser.setJobnumber(rsp.getUserlist().get(j).getJobnumber());
+                        taobaoUser.setMobile(rsp.getUserlist().get(j).getMobile());
+                        taobaoUser.setName(rsp.getUserlist().get(j).getName());
+                        taobaoUser.setOrders(rsp.getUserlist().get(j).getOrder());
+                        taobaoUser.setOrgemail(rsp.getUserlist().get(j).getOrgEmail());
+                        taobaoUser.setPosition(rsp.getUserlist().get(j).getPosition());
+                        taobaoUser.setRemark(rsp.getUserlist().get(j).getRemark());
+                        taobaoUser.setTel(rsp.getUserlist().get(j).getTel());
+                        taobaoUser.setUnionid(rsp.getUserlist().get(j).getUnionid());
+                        taobaoUser.setUserid(rsp.getUserlist().get(j).getUserid());
+                        taobaoUser.setWorkplace(rsp.getUserlist().get(j).getWorkPlace());
+                        list.add(taobaoUser);
+                    }
+                }
+            }
+        } catch (ApiException e) {
+            logger.error("获取人员数据异常:{}",e);
+        }
+        return  list;
     }
 
 }
