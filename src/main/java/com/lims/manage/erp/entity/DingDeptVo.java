@@ -9,7 +9,7 @@ public class DingDeptVo {
     /**
      * 部门id
      */
-    private String id;
+    private Integer id;
     /**
      * 部门名称
      */

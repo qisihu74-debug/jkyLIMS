@@ -3,7 +3,7 @@
 
 <mapper namespace="com.lims.manage.erp.mapper.DeptDao">
 
-    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.DingDeptEntity">
+    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.DingDeptVo">
         <result column="id" property="id"/>
         <result column="parent_id" property="parentId"/>
         <result column="name" property="name"/>
