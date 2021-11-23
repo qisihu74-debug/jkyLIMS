@@ -1,6 +1,6 @@
 package com.lims.manage.erp;
 
-import com.lims.manage.erp.config.FastDFSConfig;
+//import com.lims.manage.erp.config.FastDFSConfig;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.mybatis.spring.annotation.MapperScan;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * EnableScheduling开启定时任务
  */
 @EnableMBeanExport(registration = RegistrationPolicy.IGNORE_EXISTING)
-@Import({FastDFSConfig.class})
+//@Import({FastDFSConfig.class})
 @EnableTransactionManagement
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class
 })

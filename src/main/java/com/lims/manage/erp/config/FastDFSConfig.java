@@ -1,3 +1,4 @@
+/*
 package com.lims.manage.erp.config;
 
 import org.csource.fastdfs.ClientGlobal;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 
+*/
 /**
  * @author gjl
  * @version V1.0
@@ -16,7 +18,8 @@ import org.springframework.core.io.Resource;
  * @desc
  * @date 2021/9/17 14:08
  * @Copyright © 河南交科院
- */
+ *//*
+
 @Configuration
 public class FastDFSConfig {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -34,3 +37,4 @@ public class FastDFSConfig {
         }
     }
 }
+*/

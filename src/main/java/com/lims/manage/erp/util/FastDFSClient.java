@@ -1,3 +1,4 @@
+/*
 package com.lims.manage.erp.util;
 
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+*/
 /**
  * @author gjl
  * @version V1.0
@@ -20,16 +22,19 @@ import java.io.InputStream;
  * @desc
  * @date 2021/10/22 11:11
  * @Copyright © 河南交科院
- */
+ *//*
+
 @Slf4j
 public class FastDFSClient {
-    /**
+    */
+/**
      * @param pic  文件二进制
      * @param name 文件名称
      * @param size 文件大小
      * @return group1/M00/00/01/wKjIgFWOYc6APpjAAAD-qk29i78248.jpg
      * @Description: 上传文件
-     */
+     *//*
+
     public static String upload_file(byte[] pic, String name, long size) {
         String path = null;
         try {
@@ -52,42 +57,56 @@ public class FastDFSClient {
         return path;
     }
 
-    /**
+    */
+/**
      * 文件下载
      * return:文件字节码
      * group_name:group1
      * romte_fileName:M00/00/01/wKjIgFWOYc6APpjAAAD-qk29i78248.jpg
-     */
+     *//*
+
     public static byte[] download_file(String group_name, String romte_fileName) throws Exception {
-        /** 创建存储客户端对象 */
+        */
+/** 创建存储客户端对象 *//*
+
         StorageClient storageClient = new StorageClient();
-        /**
+        */
+/**
          * 文件下载
-         */
+         *//*
+
         byte[] bytes = storageClient.download_file(group_name, romte_fileName);
         return bytes;
     }
 
-    /**
+    */
+/**
      * 删除文件
      * return:0代表删除成功
      * group_name:group1
      * romte_fileName:M00/00/01/wKjIgFWOYc6APpjAAAD-qk29i78248.jpg
-     */
+     *//*
+
     public static int delete_file(String group_name, String romte_fileName) throws Exception {
-        /** 创建存储客户端对象 */
+        */
+/** 创建存储客户端对象 *//*
+
         StorageClient storageClient = new StorageClient();
-        /** 删除文件 */
+        */
+/** 删除文件 *//*
+
         int res = storageClient.delete_file(group_name, romte_fileName);
         return res;
     }
 
-    /**
+    */
+/**
      * 输入流转字节数组
      * @param in
      * @return
      * @throws IOException
-     */
+     *//*
+
     public static byte[] toByteArray(InputStream in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024 * 4];
@@ -100,3 +119,4 @@ public class FastDFSClient {
 }
 
 
+*/

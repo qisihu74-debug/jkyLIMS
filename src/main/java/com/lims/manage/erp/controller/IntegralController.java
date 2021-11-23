@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.FastDFSClient;
+//import com.lims.manage.erp.util.FastDFSClient;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.VideoUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -40,8 +40,8 @@ public class IntegralController {
         System.out.println("文件上传成功，地址:"+url);*/
 
         String url = "group1/M00/00/00/wKgCI2F5_0aAQlQnAAAxswjI0104808928";
-        byte[] bytes = FastDFSClient.download_file("group1","M00/00/00/wKgCI2F5_0aAQlQnAAAxswjI0104808928");
-        System.out.println("====="+ JSON.toJSONString(bytes));
+        //byte[] bytes = FastDFSClient.download_file("group1","M00/00/00/wKgCI2F5_0aAQlQnAAAxswjI0104808928");
+        //System.out.println("====="+ JSON.toJSONString(bytes));
         return null;
     }
 
