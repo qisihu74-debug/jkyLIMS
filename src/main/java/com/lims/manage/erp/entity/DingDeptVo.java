@@ -1,0 +1,25 @@
+package com.lims.manage.erp.entity;
+
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+public class DingDeptVo {
+    /**
+     * 部门id
+     */
+    private String id;
+    /**
+     * 部门名称
+     */
+    private String name;
+    /**
+     * 部门父级id
+     */
+    private int parentId;
+    /**
+     * 子部门
+     */
+    private List<DingDeptEntity> childNode;
+}

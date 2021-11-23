@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  * @author gjl
@@ -41,7 +42,8 @@ public class SysLog implements Serializable {
     /**
      * 操作时间
      */
-    private Date operate_time;
+//    private Date operate_time;
+    private Timestamp operate_time;
 
 
 }

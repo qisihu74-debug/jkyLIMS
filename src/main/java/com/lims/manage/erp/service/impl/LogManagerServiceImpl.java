@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class LogManagerServiceImpl extends ServiceImpl<LogManagerDao, SysLog> im
         if (!CollectionUtils.isEmpty(optDescs)){
             for (String des:optDescs) {
                 SysLog sysLog = new SysLog();
-                sysLog.setOperate_time(new Date(System.currentTimeMillis()));
+                sysLog.setOperate_time(new Timestamp(new Date(System.currentTimeMillis()).getTime()));
                 sysLog.setOperateDesc(des);
                 sysLog.setType(type);
                 sysLog.setUserId(sysUser.getUserId());
@@ -43,7 +44,7 @@ public class LogManagerServiceImpl extends ServiceImpl<LogManagerDao, SysLog> im
     @Override
     public void addOpSysLog(SysUserEntity sysUser, String optDescs, String type) {
         SysLog sysLog = new SysLog();
-        sysLog.setOperate_time(new Date(System.currentTimeMillis()));
+        sysLog.setOperate_time(new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         sysLog.setOperateDesc(optDescs);
         sysLog.setType(type);
         sysLog.setUserId(sysUser.getUserId());

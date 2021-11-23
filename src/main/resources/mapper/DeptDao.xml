@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.DeptDao">
+
+    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.DingDeptEntity">
+        <result column="id" property="id"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="name" property="name"/>
+    </resultMap>
+
+    <resultMap id="NodeTreeResult" type="com.lims.manage.erp.entity.DingDeptVo"
+               extends="BaseResultMap">
+        <collection property="childNode" column="id" ofType="com.lims.manage.erp.entity.DingDeptVo"
+                    javaType="java.util.ArrayList" select="getNextDept" >
+        </collection>
+    </resultMap>
+
+    <select id="getAllDept" resultMap="NodeTreeResult">
+        SELECT
+            id,
+            name,
+            parent_id parentId
+        FROM
+            sys_dept
+        WHERE id = 1
+    </select>
+
+    <select id="getNextDept" resultMap="NodeTreeResult" parameterType="java.lang.Integer">
+        SELECT
+            id,
+            name,
+            parent_id parentId
+        FROM
+            sys_dept
+        WHERE
+            parent_id = #{id}
+    </select>
+
+</mapper>
