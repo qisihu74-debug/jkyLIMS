@@ -2,6 +2,8 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.DingUserEntity;
+import org.mapstruct.Mapper;
+import org.springframework.stereotype.Component;
 
 /**
  * @author gjl
@@ -11,5 +13,7 @@ import com.lims.manage.erp.entity.DingUserEntity;
  * @date 2021/11/22 10:52
  * @Copyright © 河南交科院
  */
+@Component
+@Mapper
 public interface DingUsertDao extends BaseMapper<DingUserEntity> {
 }

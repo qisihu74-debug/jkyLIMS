@@ -141,8 +141,8 @@ public class UserLoginController {
      */
     @GetMapping("/logOut")
     public Result logOut(){
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"退出登陆成功!", Const.LOGIN_LOG_OUT);
         ShiroUtils.logout();
-//        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"退出登陆成功!", Const.LOGIN_LOG_OUT);
         return ResultUtil.success("用户退出登陆成功！");
     }
 

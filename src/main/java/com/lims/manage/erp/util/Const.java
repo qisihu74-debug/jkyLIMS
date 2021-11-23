@@ -36,6 +36,20 @@ public class Const {
      * 资产设备管理日志
      */
     public static final String DEVICE_LOG = "4";
-
-
+    /**
+     * 创建用户日志
+     */
+    public static final String CREATE_USER = "5";
+    /**
+     * 启用用户日志
+     */
+    public static final String ENABLE_USER = "6";
+    /**
+     * 停用用户日志
+     */
+    public static final String DISABLE_USER = "7";
+    /**
+     * 默认密码
+     */
+    public static final String DEFAULT_PASSWORD = "111111";
 }

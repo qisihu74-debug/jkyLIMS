@@ -1,12 +1,11 @@
 package com.lims.manage.erp.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.lims.manage.erp.vo.RegisterUserInfoVo;
 import lombok.Data;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author gjl
@@ -43,4 +42,14 @@ public class DingUserEntity {
     private String userid;
     private String workplace;
 
+    public DingUserEntity() {
+    }
+
+    public DingUserEntity(String userid,RegisterUserInfoVo vo) {
+        this.userid = userid;
+        this.name = vo.getName();
+        this.mobile = vo.getMobile();
+        this.email = vo.getEmail();
+        this.department = vo.getDeptId();
+    }
 }

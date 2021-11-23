@@ -2,7 +2,7 @@ package com.lims.manage.erp.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.DingDeptEntity;
-import com.lims.manage.erp.entity.DingDeptVo;
+import com.lims.manage.erp.vo.DingDeptVo;
 
 import java.util.List;
 

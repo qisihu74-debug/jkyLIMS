@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.service.SysUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 @Service("sysUserService")
 public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> implements SysUserService {
 
+    @Autowired
+    private SysUserDao sysUserDao;
     /**
      * 根据用户名查询实体
      * @Author gjl
@@ -29,4 +32,5 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
         queryWrapper.lambda().eq(SysUserEntity::getUsername,username);
         return this.baseMapper.selectOne(queryWrapper);
     }
+
 }

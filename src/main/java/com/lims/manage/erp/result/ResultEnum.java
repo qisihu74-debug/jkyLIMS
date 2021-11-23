@@ -21,8 +21,8 @@ public enum ResultEnum {
     VERIFY_FAIL_FIVE(12,"调用钉钉接口获取部门信息失败"),
     VERIFY_FAIL_SiX(13,"token无效"),
     VERIFY_FAIL_NICK(14,"请输入账号！"),
-    VERIFY_FAIL_PASS_WORD(15,"请输入密码！")
-    ;
+    VERIFY_FAIL_PASS_WORD(15,"请输入密码！"),
+    CREATE_USER_FAILD(16,"创建用户失败！");
     private Integer code;
     private String msg;
 

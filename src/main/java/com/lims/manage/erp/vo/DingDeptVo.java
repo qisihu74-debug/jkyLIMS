@@ -1,5 +1,6 @@
-package com.lims.manage.erp.entity;
+package com.lims.manage.erp.vo;
 
+import com.lims.manage.erp.entity.DingDeptEntity;
 import lombok.Data;
 
 import java.util.List;

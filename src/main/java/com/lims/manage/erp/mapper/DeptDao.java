@@ -2,7 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.DingDeptEntity;
-import com.lims.manage.erp.entity.DingDeptVo;
+import com.lims.manage.erp.vo.DingDeptVo;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 

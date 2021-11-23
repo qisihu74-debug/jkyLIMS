@@ -2,7 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.DingDeptEntity;
-import com.lims.manage.erp.entity.DingDeptVo;
+import com.lims.manage.erp.vo.DingDeptVo;
 import com.lims.manage.erp.mapper.DeptDao;
 import com.lims.manage.erp.service.DeptService;
 import org.springframework.beans.factory.annotation.Autowired;
