@@ -12,7 +12,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 
 /**
@@ -55,6 +59,8 @@ public class DingUserJob {
             logger.error("获取钉钉用户异常:{}",e);
         }
         //保存数据
+        //根据userid去重
+        userList = userList.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(DingUserEntity :: getUserid))), ArrayList::new));
         service.saveOrUpdateBatch(userList);
     }
 }
