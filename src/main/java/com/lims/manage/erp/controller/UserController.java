@@ -161,6 +161,11 @@ public class UserController {
         }
     }
 
+    /**
+     * 重置密码
+     * @param userEntity
+     * @return
+     */
     @RequestMapping("/resetPassword")
     @RequiresPermissions("sys:user:resetpassword")
     public Result resetPassword(@RequestBody SysUserEntity userEntity){
@@ -176,6 +181,29 @@ public class UserController {
         }else{
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"重置用户【"+userEntity.getUsername()+"】密码失败", Const.RESET_PASSWORD);
             return ResultUtil.error(ResultEnum.RESET_PASSWORD.getCode(),ResultEnum.RESET_PASSWORD.getMsg());
+        }
+    }
+
+    /**
+     * 修改密码
+     * @param userEntity
+     * @return
+     */
+    @RequestMapping("/updatePassword")
+    @RequiresPermissions("sys:user:updatepassword")
+    public Result updatePassword(@RequestBody SysUserEntity userEntity){
+        // 随机生成盐值
+        String salt = RandomStringUtils.randomAlphanumeric(20);
+        String password = SHA256Util.sha256(userEntity.getPassword(), salt);
+        userEntity.setPassword(password);
+        userEntity.setSalt(salt);
+        Boolean isSuccess = sysUserService.resetPassword(userEntity);
+        if(isSuccess){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改密码成功", Const.UPDATE_PASSWORD);
+            return ResultUtil.success();
+        }else{
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改密码失败", Const.UPDATE_PASSWORD);
+            return ResultUtil.error(ResultEnum.UPDATE_PASSWORD.getCode(),ResultEnum.UPDATE_PASSWORD.getMsg());
         }
     }
 }

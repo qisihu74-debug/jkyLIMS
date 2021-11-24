@@ -49,6 +49,10 @@ public class Const {
      */
     public static final String RESET_PASSWORD = "7";
     /**
+     * 修改密码
+     */
+    public static final String UPDATE_PASSWORD = "8";
+    /**
      * 默认密码
      */
     public static final String DEFAULT_PASSWORD = "111111";
