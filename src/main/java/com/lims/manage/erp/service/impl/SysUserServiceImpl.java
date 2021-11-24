@@ -3,12 +3,16 @@ package com.lims.manage.erp.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserTreeEntity;
 import com.lims.manage.erp.mapper.DeptDao;
 import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.service.SysUserService;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.UserInfoParamVo;
+import com.lims.manage.erp.vo.UserInfoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +30,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     @Autowired
     private SysUserDao sysUserDao;
     @Autowired
-    DeptDao deptDao;
+    private DeptDao deptDao;
 
     /**
      * 根据用户名查询实体
@@ -40,16 +44,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
         QueryWrapper<SysUserEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(SysUserEntity::getUsername,username);
         return this.baseMapper.selectOne(queryWrapper);
-    }
-
-    @Override
-    public Boolean updateUserState(SysUserEntity entity) {
-        return sysUserDao.updateUserState(entity);
-    }
-
-    @Override
-    public Boolean resetPassword(SysUserEntity entity) {
-        return sysUserDao.resetPassword(entity);
     }
 
     @Override
@@ -97,5 +91,52 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     public List<SysUserTreeEntity> selectUserAllList() {
         List<SysUserTreeEntity> dataList = sysUserDao.selectUserinfoList(null);
         return dataList;
+    }
+
+    @Override
+    public Boolean updateUserState(SysUserEntity entity) {
+        return sysUserDao.updateUserState(entity);
+    }
+
+    @Override
+    public Boolean resetPassword(SysUserEntity entity) {
+        return sysUserDao.resetPassword(entity);
+    }
+
+    @Override
+    public List<UserInfoVo> getUserInfos(UserInfoParamVo vo) {
+        List<UserInfoVo> userInfos = sysUserDao.getUserInfos(vo);
+        if(!userInfos.isEmpty()){
+            for (UserInfoVo userInfoVo: userInfos) {
+                List<LabelValueVo> department = Lists.newArrayList();
+                String departmentId = userInfoVo.getDepartmentId();
+                String replace;
+                if(departmentId != null && departmentId.contains("[")){
+                    replace = departmentId.replace("[", "").replace("]", "");
+                }else{
+                    replace = departmentId;
+                }
+                if(replace != null && replace.contains(",")){
+                    String[] split = replace.split(",");
+                    for (int i = 0; i < split.length; i++) {
+                        String deptId = split[i].trim();
+                        LabelValueVo departmentInfo = deptDao.getRoleInfoById(Long.parseLong(deptId));
+                        department.add(departmentInfo);
+                    }
+                }
+                userInfoVo.setDepartment(department);
+            }
+        }
+        return userInfos;
+    }
+
+    private static String removePrefix(String str){
+        String result;
+        if(str.contains("[")){
+            result = str.replace("[","");
+        }else {
+            result = str;
+        }
+        return result;
     }
 }
