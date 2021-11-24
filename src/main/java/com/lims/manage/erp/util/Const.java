@@ -41,13 +41,13 @@ public class Const {
      */
     public static final String CREATE_USER = "5";
     /**
-     * 启用用户日志
+     * 启用/停用用户日志
      */
-    public static final String ENABLE_USER = "6";
+    public static final String CHANGE_STATE = "6";
     /**
-     * 停用用户日志
+     * 重置密码
      */
-    public static final String DISABLE_USER = "7";
+    public static final String RESET_PASSWORD = "7";
     /**
      * 默认密码
      */

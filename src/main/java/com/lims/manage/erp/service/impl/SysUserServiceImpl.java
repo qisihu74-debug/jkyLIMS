@@ -48,6 +48,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     }
 
     @Override
+    public Boolean resetPassword(SysUserEntity entity) {
+        return sysUserDao.resetPassword(entity);
+    }
+
+    @Override
     public List<SysUserTreeEntity> selectUserList(String deptId) {
         List<SysUserTreeEntity> returnList = new ArrayList<>();
         // 依据部门id
