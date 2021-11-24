@@ -19,6 +19,13 @@ import org.springframework.stereotype.Component;
 @Component
 @Mapper
 public interface SysUserDao extends BaseMapper<SysUserEntity> {
+    /**
+     * 更改用户状态
+     * @param entity
+     * @return
+     */
+    Boolean updateUserState(SysUserEntity entity);
+
 
     @Select("SELECT user_id,username FROM sys_user WHERE state = 'NORMAL'")
     List<SysUserEntity> GetUserList();

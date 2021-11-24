@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserRoleEntity;
 import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.DingUserService;
 import com.lims.manage.erp.service.LogManagerService;
@@ -138,5 +139,21 @@ public class UserController {
         }
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增用户【"+vo.getUsername()+"】成功！", Const.CREATE_USER);
         return ResultUtil.success();
+    }
+
+    @RequestMapping("/changeState")
+    @RequiresPermissions("sys:user:changestate")
+    public Result changeState(@RequestBody SysUserEntity userEntity){
+        if(userEntity == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        Boolean isSuccess = sysUserService.updateUserState(userEntity);
+        if(isSuccess){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】状态为"+userEntity.getState()+"成功！", Const.CREATE_USER);
+            return ResultUtil.success();
+        }else{
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】状态为"+userEntity.getState()+"失败！", Const.CREATE_USER);
+            return ResultUtil.error(ResultEnum.CHANGE_USER_STATE.getCode(),ResultEnum.CHANGE_USER_STATE.getMsg());
+        }
     }
 }

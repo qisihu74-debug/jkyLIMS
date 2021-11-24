@@ -21,6 +21,9 @@
         <result property="modifyUser" column="modify_user"/>
     </resultMap>
 
+    <update id="updateUserState">
+        UPDATE sys_user SET state=#{state} WHERE user_id = #{userId}
+    </update>
     <select id="selectUserinfoList" resultType="com.lims.manage.erp.entity.SysUserTreeEntity" parameterType="com.lims.manage.erp.entity.SysUserTreeEntity">
         SELECT
             t2.user_id,
@@ -45,6 +48,5 @@
 
         </trim>
     </select>
-
 
 </mapper>
