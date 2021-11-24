@@ -2,6 +2,8 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.SysRoleEntity;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Options;
 
 import java.util.List;
 
@@ -22,5 +24,7 @@ public interface SysRoleDao extends BaseMapper<SysRoleEntity> {
     List<SysRoleEntity> selectSysRoleByUserId(Long userId);
 
     List<SysRoleEntity> selectSysRoleList(SysRoleEntity sysRoleEntity);
-	
+
+
+
 }

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 
 /**
@@ -25,4 +26,13 @@ public class SysRoleEntity implements Serializable {
 	 * 角色名称
 	 */
 	private String roleName;
+	/**
+	 * 备注
+	 */
+	private String roleRemark;
+	/**
+	 * 创建时间
+	 */
+	private Timestamp createTime;
+
 }
