@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.SysFunction;
+import com.lims.manage.erp.entity.TreeFunction;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -25,4 +26,6 @@ public interface SysUserFuctionDao extends BaseMapper {
      * @return
      */
     List<SysFunction> getFunctionByuserId(Long userId);
+
+    List<TreeFunction> getList();
 }

@@ -1,14 +1,17 @@
 package com.lims.manage.erp.controller;
 
+import com.lims.manage.erp.entity.SysRoleEntity;
 import com.lims.manage.erp.service.SysMenuService;
 import com.lims.manage.erp.service.SysRoleMenuService;
 import com.lims.manage.erp.service.SysRoleService;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.ShiroUtils;
 import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.authz.annotation.RequiresUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -95,4 +98,17 @@ public class UserRoleController {
         map.put("msg","登出");
         return map;
     }
+
+    @GetMapping("/list")
+    @RequiresPermissions("sys:role:list")
+    public Map<String,Object> mehtodStr(SysRoleEntity sysRoleEntity)
+    {
+        System.out.println("Get数据信息\t"+sysRoleEntity);
+        Map<String,Object> map = new HashMap<>();
+        map.put("data",sysRoleService.selectSysRoleList(sysRoleEntity));
+        map.put("code",200);
+        map.put("msg","查看角色成功");
+        return map;
+    }
+
 }

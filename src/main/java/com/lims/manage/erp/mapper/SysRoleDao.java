@@ -20,5 +20,7 @@ public interface SysRoleDao extends BaseMapper<SysRoleEntity> {
      * @Return List<SysRoleEntity> 角色名集合
      */
     List<SysRoleEntity> selectSysRoleByUserId(Long userId);
+
+    List<SysRoleEntity> selectSysRoleList(SysRoleEntity sysRoleEntity);
 	
 }

@@ -41,5 +41,18 @@ public interface SysUserService extends IService<SysUserEntity> {
      */
     List<SysUserTreeEntity> selectUserAllList();
 
+    /**
+     * 更新账号状态
+     * @param entity
+     * @return
+     */
+    Boolean updateUserState(SysUserEntity entity);
+
+    /**
+     * 重置密码
+     * @param entity
+     * @return
+     */
+    Boolean resetPassword(SysUserEntity entity);
 }
 

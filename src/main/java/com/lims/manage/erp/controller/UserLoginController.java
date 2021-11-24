@@ -60,14 +60,6 @@ public class UserLoginController {
 
             //进行登录操作
             subject.login(token);
-            // 登录成功 是否拥有角色
-            if (subject.isAuthenticated() == true) {
-                System.out.println("是否拥有role_super角色 = " + subject.hasRole("role_super"));
-                System.out.println("是否拥有role_a角色 = " + subject.hasRole("role_a"));
-                System.out.println("是否拥有role_b角色 = " + subject.hasRole("role_b"));
-                System.out.println("是否拥有role_c角色 = " + subject.hasRole("role_c"));
-                System.out.println("是否拥有ADMIN角色 = " + subject.hasRole("ADMIN"));
-            }
         }catch (IncorrectCredentialsException e) {
             map.put("code",500);
             map.put("msg","用户不存在或者密码错误");
@@ -85,7 +77,7 @@ public class UserLoginController {
             map.put("msg","未知异常");
             return map;
         }
-        map.put("code",0);
+        map.put("code",200);
         map.put("msg","登录成功");
         map.put("token", ShiroUtils.getSession().getId().toString());
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"登陆成功!", Const.LOGIN_LOG);

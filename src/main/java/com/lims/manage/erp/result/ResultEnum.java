@@ -22,7 +22,10 @@ public enum ResultEnum {
     VERIFY_FAIL_SiX(13,"token无效"),
     VERIFY_FAIL_NICK(14,"请输入账号！"),
     VERIFY_FAIL_PASS_WORD(15,"请输入密码！"),
-    CREATE_USER_FAILD(16,"创建用户失败！");
+    CREATE_USER_FAILD(16,"创建用户失败！"),
+    CHANGE_USER_STATE(17,"改变用户状态失败！"),
+    RESET_PASSWORD(18,"重置密码失败！"),
+    UPDATE_PASSWORD(19,"修改密码失败！");
     private Integer code;
     private String msg;
 

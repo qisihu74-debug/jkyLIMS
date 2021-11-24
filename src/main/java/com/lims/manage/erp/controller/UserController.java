@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserRoleEntity;
 import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.DingUserService;
 import com.lims.manage.erp.service.LogManagerService;
@@ -48,6 +49,7 @@ public class UserController {
 
     @Autowired
     SysUserService sysUserService;
+
     @Autowired
     private LogManagerService logManagerService;
 
@@ -108,8 +110,6 @@ public class UserController {
 
     }
 
-
-
     /**
      * 用户新增
      * @param vo
@@ -138,5 +138,72 @@ public class UserController {
         }
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增用户【"+vo.getUsername()+"】成功！", Const.CREATE_USER);
         return ResultUtil.success();
+    }
+
+    /**
+     * 更改用户状态（启用/停用账号）
+     * @param userEntity
+     * @return
+     */
+    @RequestMapping("/changeState")
+    @RequiresPermissions("sys:user:changestate")
+    public Result changeState(@RequestBody SysUserEntity userEntity){
+        if(userEntity == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        Boolean isSuccess = sysUserService.updateUserState(userEntity);
+        if(isSuccess){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】状态为"+userEntity.getState()+"成功！", Const.CHANGE_STATE);
+            return ResultUtil.success();
+        }else{
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】状态为"+userEntity.getState()+"失败！", Const.CHANGE_STATE);
+            return ResultUtil.error(ResultEnum.CHANGE_USER_STATE.getCode(),ResultEnum.CHANGE_USER_STATE.getMsg());
+        }
+    }
+
+    /**
+     * 重置密码
+     * @param userEntity
+     * @return
+     */
+    @RequestMapping("/resetPassword")
+    @RequiresPermissions("sys:user:resetpassword")
+    public Result resetPassword(@RequestBody SysUserEntity userEntity){
+        // 随机生成盐值
+        String salt = RandomStringUtils.randomAlphanumeric(20);
+        String password = SHA256Util.sha256(Const.DEFAULT_PASSWORD, salt);
+        userEntity.setPassword(password);
+        userEntity.setSalt(salt);
+        Boolean isSuccess = sysUserService.resetPassword(userEntity);
+        if(isSuccess){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】密码成功", Const.RESET_PASSWORD);
+            return ResultUtil.success();
+        }else{
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"重置用户【"+userEntity.getUsername()+"】密码失败", Const.RESET_PASSWORD);
+            return ResultUtil.error(ResultEnum.RESET_PASSWORD.getCode(),ResultEnum.RESET_PASSWORD.getMsg());
+        }
+    }
+
+    /**
+     * 修改密码
+     * @param userEntity
+     * @return
+     */
+    @RequestMapping("/updatePassword")
+    @RequiresPermissions("sys:user:updatepassword")
+    public Result updatePassword(@RequestBody SysUserEntity userEntity){
+        // 随机生成盐值
+        String salt = RandomStringUtils.randomAlphanumeric(20);
+        String password = SHA256Util.sha256(userEntity.getPassword(), salt);
+        userEntity.setPassword(password);
+        userEntity.setSalt(salt);
+        Boolean isSuccess = sysUserService.resetPassword(userEntity);
+        if(isSuccess){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改密码成功", Const.UPDATE_PASSWORD);
+            return ResultUtil.success();
+        }else{
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改密码失败", Const.UPDATE_PASSWORD);
+            return ResultUtil.error(ResultEnum.UPDATE_PASSWORD.getCode(),ResultEnum.UPDATE_PASSWORD.getMsg());
+        }
     }
 }

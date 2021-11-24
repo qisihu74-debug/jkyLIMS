@@ -21,6 +21,17 @@
         <result property="modifyUser" column="modify_user"/>
     </resultMap>
 
+    <update id="updateUserState">
+        UPDATE sys_user SET state=#{state} WHERE user_id = #{userId}
+    </update>
+
+    <update id="resetPassword">
+        UPDATE sys_user
+        SET PASSWORD = #{password}, salt = #{salt}
+        WHERE
+            user_id = #{userId}
+    </update>
+
     <select id="selectUserinfoList" resultType="com.lims.manage.erp.entity.SysUserTreeEntity" parameterType="com.lims.manage.erp.entity.SysUserTreeEntity">
         SELECT
             t2.user_id,
@@ -31,7 +42,7 @@
             t1.department
         FROM
             sys_ding_user AS t1
-            LEFT JOIN sys_user AS t2 ON t1.userid = t2.user_id
+            LEFT JOIN sys_user AS t2 ON t1.userid = t2.ding_user_id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
             <if test="loginName !=null and loginName !=''">
                 and t2.username LIKE CONCAT('%',#{loginName},'%')
@@ -45,6 +56,5 @@
 
         </trim>
     </select>
-
 
 </mapper>

@@ -20,5 +20,12 @@ public interface SysRoleService extends IService<SysRoleEntity> {
      * @Return List<SysRoleEntity> 角色名集合
      */
     List<SysRoleEntity> selectSysRoleByUserId(Long userId);
+
+    /**
+     * 展示角色信息
+     * @param sysRoleEntity
+     * @return
+     */
+    List<SysRoleEntity> selectSysRoleList(SysRoleEntity sysRoleEntity);
 }
 

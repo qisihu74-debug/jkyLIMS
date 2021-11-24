@@ -17,5 +17,18 @@ WHERE
 	sr.user_id = #{userId}
    </select>
 
+	<select id="getList" resultType="com.lims.manage.erp.entity.TreeFunction">
+        SELECT
+        function_id,
+        NAME AS treeName,
+        function_pid,
+        sort
+    FROM
+        sys_function
+    ORDER BY
+        function_pid,
+        sort ASC
+    </select>
+
 
 </mapper>

@@ -30,20 +30,27 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 
     /**
      * 根据用户名查询实体
-     *
      * @Author gjl
      * @CreateTime 2021/11/09 16:30
-     * @Param username 用户名
+     * @Param  username 用户名
      * @Return SysUserEntity 用户实体
      */
     @Override
     public SysUserEntity selectUserByName(String username) {
         QueryWrapper<SysUserEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(SysUserEntity::getUsername, username);
+        queryWrapper.lambda().eq(SysUserEntity::getUsername,username);
         return this.baseMapper.selectOne(queryWrapper);
     }
 
+    @Override
+    public Boolean updateUserState(SysUserEntity entity) {
+        return sysUserDao.updateUserState(entity);
+    }
 
+    @Override
+    public Boolean resetPassword(SysUserEntity entity) {
+        return sysUserDao.resetPassword(entity);
+    }
 
     @Override
     public List<SysUserTreeEntity> selectUserList(String deptId) {
@@ -75,23 +82,19 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 
     @Override
     public List<SysUserTreeEntity> selectUserLikeList(SysUserTreeEntity sysUserTreeEntity) {
-
         if(sysUserTreeEntity.getState()!=null){
-            if(!sysUserTreeEntity.getState().equals("NORMAL")&&!sysUserTreeEntity.getState().equals("PROHIBIT"))
-            {
+            if(!sysUserTreeEntity.getState().equals("NORMAL")&&!sysUserTreeEntity.getState().equals("PROHIBIT")) {
                 sysUserTreeEntity.setState(null);
             }
         }
-
         List<SysUserTreeEntity> dataList = sysUserDao.selectUserinfoList(sysUserTreeEntity);
-
-
+        List<SysUserTreeEntity> returnDataList = new ArrayList<>();
+        List<DingDeptEntity> deptList = deptDao.selectList(null);
         return dataList;
     }
 
     @Override
     public List<SysUserTreeEntity> selectUserAllList() {
-
         List<SysUserTreeEntity> dataList = sysUserDao.selectUserinfoList(null);
         return dataList;
     }
