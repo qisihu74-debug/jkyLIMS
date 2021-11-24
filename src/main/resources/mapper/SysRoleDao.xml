@@ -22,12 +22,17 @@
     <select id="selectSysRoleList" resultType="com.lims.manage.erp.entity.SysRoleEntity" parameterType="com.lims.manage.erp.entity.SysRoleEntity">
     SELECT
         role_id,
-        role_name
+        role_name,
+        role_remark,
+        create_time
     FROM
         sys_role
     <trim prefix="WHERE" prefixOverrides="AND |OR ">
         <if test="roleName!=null and roleName!=''">
             and role_name LIKE CONCAT('%',#{roleName},'%')
+        </if>
+        <if test="roleRemark!=null and roleRemark!=''">
+            and role_remark LIKE CONCAT('%',#{roleRemark},'%')
         </if>
     </trim>
 

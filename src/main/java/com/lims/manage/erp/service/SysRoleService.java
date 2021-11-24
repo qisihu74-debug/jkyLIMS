@@ -27,5 +27,25 @@ public interface SysRoleService extends IService<SysRoleEntity> {
      * @return
      */
     List<SysRoleEntity> selectSysRoleList(SysRoleEntity sysRoleEntity);
+
+    /**
+     * 更新角色
+     * @param sysRoleEntity
+     * @return
+     */
+    int updateSysRoleByUserId(SysRoleEntity sysRoleEntity);
+
+    /**
+     * 新增角色
+     * @param sysRoleEntity
+     * @return
+     */
+    SysRoleEntity addSysRoleByUserId(SysRoleEntity sysRoleEntity);
+
+    /**
+     *
+     */
+    int deleteSysRoleByUserId(Long roleId);
+
 }
 
