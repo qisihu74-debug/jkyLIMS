@@ -1,16 +1,22 @@
 package com.lims.manage.erp.controller;
 
+import com.lims.manage.erp.entity.FunctionMenuEntity;
 import com.lims.manage.erp.entity.SysMenuEntity;
 import com.lims.manage.erp.entity.SysRoleEntity;
+import com.lims.manage.erp.entity.SysRoleFuncMenuEntity;
 import com.lims.manage.erp.entity.SysRoleMenuEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.SysMenuService;
+import com.lims.manage.erp.service.SysRoleFuncMenuService;
 import com.lims.manage.erp.service.SysRoleMenuService;
 import com.lims.manage.erp.service.SysRoleService;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.ShiroUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,6 +41,8 @@ public class UserMenuController {
     private SysMenuService sysMenuService;
     @Autowired
     private SysRoleMenuService sysRoleMenuService;
+    @Autowired
+    private SysRoleFuncMenuService service;
 
     /**
      * 获取用户信息集合
@@ -137,4 +145,21 @@ public class UserMenuController {
         map.put("msg","权限添加成功");
         return map;
     }
+
+    /**
+     * 角色授权详情展示
+     * @param roleId
+     * @return
+     */
+    @GetMapping("detail")
+    @RequiresPermissions("sys:menu:detail")
+    public Result getFuncAndMenuByRoleId(Long roleId){
+        if (roleId == null){
+            return ResultUtil.error(-1,"缺少必要的参数！");
+        }
+        List<FunctionMenuEntity> funcAndMenuByRoleId = service.getFuncAndMenuByRoleId(roleId);
+        return ResultUtil.success(funcAndMenuByRoleId);
+    }
+
+
 }

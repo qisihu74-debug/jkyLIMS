@@ -1,5 +1,7 @@
 package com.lims.manage.erp.Exception;
 
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import org.apache.shiro.authz.AuthorizationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,9 +74,9 @@ public class GlobalExceptionHandler {
      */
     @ResponseBody
     @ExceptionHandler(value = AuthorizationException.class)
-    public Map<String,Object> defaultErrorHandler(){
+    public Result defaultErrorHandler(){
         Map<String,Object> map = new HashMap<>();
         map.put("403","权限不足");
-        return map;
+        return ResultUtil.success(map);
     }
 }

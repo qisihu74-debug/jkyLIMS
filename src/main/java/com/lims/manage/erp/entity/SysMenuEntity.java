@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -29,5 +30,10 @@ public class SysMenuEntity implements Serializable {
 	 * 权限标识
 	 */
 	private String perms;
+	/**
+	 * 权限所属菜单id
+	 */
+	@TableField(exist = false)
+	private Long fuctionId;
 
 }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.SysRoleFuncMenuDao">
+
+    <select id="getFunctionsByRoleId" resultType="com.lims.manage.erp.entity.SysFunction">
+            SELECT
+	f.function_id AS functionId,
+	f.function_pid AS functionPid,
+	f.name,
+	f.sort
+FROM
+	sys_role_function rf
+LEFT JOIN sys_function f ON rf.function_id = f.function_id
+WHERE
+	rf.role_id = #{roleId} order by f.sort ASC
+    </select>
+
+	<select id="getMenusByRoleId" resultType="com.lims.manage.erp.entity.SysMenuEntity">
+		SELECT
+	f.menu_id AS menuId,
+	f.name,
+	f.own_func As fuctionId
+FROM
+	sys_role_menu rf
+LEFT JOIN sys_menu f ON rf.menu_id = f.menu_id
+LEFT JOIN sys_function sf ON f.own_func = sf.function_id
+WHERE
+	rf.role_id = #{roleId}
+	</select>
+
+</mapper>
