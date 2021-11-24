@@ -27,4 +27,10 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleDao, SysRoleEntity> i
     public List<SysRoleEntity> selectSysRoleByUserId(Long userId) {
         return this.baseMapper.selectSysRoleByUserId(userId);
     }
+
+    @Override
+    public List<SysRoleEntity> selectSysRoleList(SysRoleEntity sysRoleEntity) {
+//        List<SysRoleEntity> dataList = this.baseMapper.selectSysRoleList(sysRoleEntity);
+        return this.baseMapper.selectSysRoleList(sysRoleEntity);
+    }
 }

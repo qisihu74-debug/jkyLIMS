@@ -2,6 +2,7 @@ package com.lims.manage.erp.controller;
 
 import com.lims.manage.erp.entity.SysFunction;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TreeFunction;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.SysUserFuctionService;
@@ -40,6 +41,13 @@ public class UserFuctionController {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         List<SysFunction> list = sysUserFuctionService.getFunctionByuserId(userInfo.getUserId());
         return ResultUtil.success(list);
+    }
+
+    // 暂时未做限制 直接放行。
+    @GetMapping("getMenuDisplay")
+    public List<TreeFunction> getMenuDisplay()
+    {
+        return sysUserFuctionService.GetList();
     }
 
 

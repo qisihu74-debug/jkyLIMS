@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.entity.SysFunction;
+import com.lims.manage.erp.entity.TreeFunction;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface SysUserFuctionService {
      * @return
      */
     List<SysFunction> getFunctionByuserId(Long userId);
+
+    List<TreeFunction> GetList();
 }

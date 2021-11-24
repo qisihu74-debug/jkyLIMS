@@ -88,6 +88,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
             }
         }
         List<SysUserTreeEntity> dataList = sysUserDao.selectUserinfoList(sysUserTreeEntity);
+        List<SysUserTreeEntity> returnDataList = new ArrayList<>();
+        List<DingDeptEntity> deptList = deptDao.selectList(null);
         return dataList;
     }
 

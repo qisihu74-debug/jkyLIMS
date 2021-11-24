@@ -42,7 +42,7 @@
             t1.department
         FROM
             sys_ding_user AS t1
-            LEFT JOIN sys_user AS t2 ON t1.userid = t2.user_id
+            LEFT JOIN sys_user AS t2 ON t1.userid = t2.ding_user_id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
             <if test="loginName !=null and loginName !=''">
                 and t2.username LIKE CONCAT('%',#{loginName},'%')
