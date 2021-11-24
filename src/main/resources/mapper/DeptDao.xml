@@ -11,7 +11,7 @@
 
     <resultMap id="NodeTreeResult" type="com.lims.manage.erp.vo.DingDeptVo"
                extends="BaseResultMap">
-        <collection property="childNode" column="id" ofType="com.lims.manage.erp.vo.DingDeptVo"
+        <collection property="children" column="id" ofType="com.lims.manage.erp.vo.DingDeptVo"
                     javaType="java.util.ArrayList" select="getNextDept" >
         </collection>
     </resultMap>
@@ -35,6 +35,16 @@
             sys_dept
         WHERE
             parent_id = #{id}
+    </select>
+
+    <select id="getRoleInfoById" parameterType="Long" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT
+            id value,
+            name label
+        FROM
+            sys_dept
+        WHERE
+            id = #{id}
     </select>
 
 </mapper>

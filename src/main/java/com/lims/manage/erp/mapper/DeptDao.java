@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.vo.DingDeptVo;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -24,4 +25,11 @@ public interface DeptDao extends BaseMapper<DingDeptEntity> {
      * @return
      */
     List<DingDeptVo> getAllDept();
+
+    /**
+     * 根据角色ID查询角色信息
+     * @param id
+     * @return
+     */
+    LabelValueVo getRoleInfoById(Long id);
 }

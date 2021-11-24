@@ -3,6 +3,8 @@ package com.lims.manage.erp.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserTreeEntity;
+import com.lims.manage.erp.vo.UserInfoParamVo;
+import com.lims.manage.erp.vo.UserInfoVo;
 
 import java.util.List;
 
@@ -54,5 +56,12 @@ public interface SysUserService extends IService<SysUserEntity> {
      * @return
      */
     Boolean resetPassword(SysUserEntity entity);
+
+    /**
+     * 获取用户信息列表
+     * @param vo
+     * @return
+     */
+    List<UserInfoVo> getUserInfos(UserInfoParamVo vo);
 }
 

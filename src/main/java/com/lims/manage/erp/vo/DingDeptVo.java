@@ -22,5 +22,5 @@ public class DingDeptVo {
     /**
      * 子部门
      */
-    private List<DingDeptEntity> childNode;
+    private List<DingDeptEntity> children;
 }

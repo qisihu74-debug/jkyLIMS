@@ -21,6 +21,23 @@
         <result property="modifyUser" column="modify_user"/>
     </resultMap>
 
+    <resultMap id="resultUserInfo" type="com.lims.manage.erp.vo.UserInfoVo">
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="createTime" column="create_time"/>
+        <result property="state" column="state"/>
+        <result property="note" column="note"/>
+        <result property="name" column="name"/>
+        <result property="mobile" column="mobile"/>
+        <result property="position" column="position"/>
+        <result property="email" column="email"/>
+        <result property="departmentId" column="department"/>
+        <collection property="roles" ofType="com.lims.manage.erp.vo.LabelValueVo">
+            <result property="label" column="role_name"/>
+            <result property="value" column="role_id"/>
+        </collection>
+    </resultMap>
+
     <update id="updateUserState">
         UPDATE sys_user SET state=#{state} WHERE user_id = #{userId}
     </update>
@@ -31,6 +48,40 @@
         WHERE
             user_id = #{userId}
     </update>
+
+    <select id="getUserInfos" resultMap="resultUserInfo" parameterType="com.lims.manage.erp.vo.UserInfoParamVo">
+        SELECT
+        t1.user_id,
+        username,
+        state,
+        t1.create_time,
+        note,
+        name,
+        mobile,
+        position,
+        email,
+        department,
+        t3.role_id,
+        role_name
+        FROM
+        sys_user t1
+        LEFT JOIN sys_ding_user t2 ON t1.ding_user_id = t2.userid
+        left join sys_user_role t3 on t1.user_id = t3.user_id
+        left join sys_role t4 on t3.role_id = t4.role_id
+        where 1=1
+        <if test="username != null and username != ''">
+            and t1.username like CONCAT('%',#{username},'%')
+        </if>
+        <if test="mobile != null and mobile != ''">
+            and mobile like CONCAT('%',#{mobile},'%')
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and department like CONCAT('%',#{deptId},'%')
+        </if>
+        <if test="state != null and state != ''">
+            and state = #{state}
+        </if>
+    </select>
 
     <select id="selectUserinfoList" resultType="com.lims.manage.erp.entity.SysUserTreeEntity" parameterType="com.lims.manage.erp.entity.SysUserTreeEntity">
         SELECT
