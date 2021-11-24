@@ -24,6 +24,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
+import com.lims.manage.erp.entity.SysUserTreeEntity;
+import com.lims.manage.erp.service.SysUserService;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author gjl
@@ -34,20 +43,72 @@ import java.util.List;
  * @Copyright © 河南交科院
  */
 @RestController
-@RequestMapping("user")
+@RequestMapping("/user/")
 public class UserController {
 
     @Autowired
-    private LogManagerService logManagerService;
-
+    SysUserService sysUserService;
     @Autowired
-    private SysUserService sysUserService;
+    private LogManagerService logManagerService;
 
     @Autowired
     private DingUserService dingUserService;
 
     @Autowired
     private SysUserRoleService sysUserRoleService;
+
+    @GetMapping("list")
+    @RequiresPermissions("sys:user:list")
+    public Map<String,Object> methodGetList(SysUserTreeEntity sysUserTreeEntity) {
+        System.out.println("得到的部门ID"+sysUserTreeEntity.getDepartment());
+        // 返回结果
+        Map<String,Object> map = new HashMap<>();
+        try {
+            if(sysUserTreeEntity.getDepartment()!=null && sysUserTreeEntity.getDepartment()!=""){
+                List<SysUserTreeEntity> dataList = sysUserService.selectUserList(sysUserTreeEntity.getDepartment());
+                if(dataList.size()>0){
+                    map.put("data",dataList);
+                    map.put("code",200);
+                    map.put("msg","查询成功");
+                    return map;
+                }
+            }
+            else if(sysUserTreeEntity.getLoginName()!=null||sysUserTreeEntity.getMobile()!=null||sysUserTreeEntity.getState()!=null){
+                List<SysUserTreeEntity> dataList =  sysUserService.selectUserLikeList(sysUserTreeEntity);
+                if(dataList.size()>0){
+                    map.put("data",dataList);
+                    map.put("code",200);
+                    map.put("msg","查询成功");
+                    return map;
+                }
+            }
+            else {
+                List<SysUserTreeEntity> dataList =  sysUserService.selectUserAllList();
+                if(dataList.size()>0){
+                    map.put("data",dataList);
+                    map.put("code",200);
+                    map.put("msg","查询成功");
+                    return map;
+                }
+
+            }
+
+            map.put("code",204);
+            map.put("msg","缺少必要参数");
+            return map;
+
+        }
+        catch (Exception e){
+
+        }
+        map.put("code",204);
+        map.put("msg","缺少必要参数");
+        return map;
+
+
+    }
+
+
 
     /**
      * 用户新增

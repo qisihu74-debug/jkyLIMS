@@ -21,6 +21,30 @@
         <result property="modifyUser" column="modify_user"/>
     </resultMap>
 
-    
+    <select id="selectUserinfoList" resultType="com.lims.manage.erp.entity.SysUserTreeEntity" parameterType="com.lims.manage.erp.entity.SysUserTreeEntity">
+        SELECT
+            t2.user_id,
+            t2.username as loginName,
+            t1.NAME as username,
+            t1.mobile,
+            t2.state,
+            t1.department
+        FROM
+            sys_ding_user AS t1
+            LEFT JOIN sys_user AS t2 ON t1.userid = t2.user_id
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="loginName !=null and loginName !=''">
+                and t2.username LIKE CONCAT('%',#{loginName},'%')
+            </if>
+            <if test="mobile !=null and mobile !=''">
+                and t1.mobile LIKE CONCAT('%',#{mobile},'%')
+            </if>
+            <if test="state !=null and state !=''">
+                and t2.state LIKE CONCAT('%',#{state},'%')
+            </if>
+
+        </trim>
+    </select>
+
 
 </mapper>

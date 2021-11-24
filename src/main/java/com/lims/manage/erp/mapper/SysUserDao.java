@@ -2,7 +2,13 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.SysUserEntity;
-import org.mapstruct.Mapper;
+import com.lims.manage.erp.entity.SysUserTreeEntity;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,5 +19,10 @@ import org.springframework.stereotype.Component;
 @Component
 @Mapper
 public interface SysUserDao extends BaseMapper<SysUserEntity> {
-	
+
+    @Select("SELECT user_id,username FROM sys_user WHERE state = 'NORMAL'")
+    List<SysUserEntity> GetUserList();
+
+    List<SysUserTreeEntity> selectUserinfoList(SysUserTreeEntity sysUserTreeEntity);
+
 }
