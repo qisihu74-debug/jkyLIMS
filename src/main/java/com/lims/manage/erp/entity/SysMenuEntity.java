@@ -38,7 +38,7 @@ public class SysMenuEntity implements Serializable {
 	 * 注释
 	 */
 	@TableField(exist = false)
-	private Long note;
+	private String note;
 
 
 }
