@@ -16,7 +16,11 @@ import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.ShiroUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -161,5 +165,54 @@ public class UserMenuController {
         return ResultUtil.success(funcAndMenuByRoleId);
     }
 
+    /**
+     * 角色授权
+     * @param entity
+     * @return
+     */
+    @PostMapping("grant")
+    @RequiresPermissions("sys:menu:grant")
+    public Result grant(@RequestBody SysRoleFuncMenuEntity entity){
+        if (entity.getRoleId() == null){
+            return ResultUtil.error(-1,"请选择授权的角色！");
+        }
+        if (CollectionUtils.isEmpty(entity.getList())){
+            return ResultUtil.error(-1,"请选择授权的菜单！");
+        }
+        Boolean flag = service.grant(entity);
+        if (flag){
+            //记录日志
+            return ResultUtil.success("授权成功！");
+        }else {
+            //记录失败日志
+            return ResultUtil.error(-1,"授权失败");
+        }
+    }
 
+    /**
+     * 添加权限
+     * @param entity
+     * @return
+     */
+    @PostMapping("add")
+    @RequiresPermissions("sys:menu:add")
+    public Result add(@RequestBody SysMenuEntity entity){
+        if (entity.getFuctionId() == null){
+            return ResultUtil.error(-1,"请选择权限所属菜单");
+        }
+        if (StringUtils.isEmpty(entity.getPerms())){
+            return ResultUtil.error(-1,"请输入权限接口url");
+        }
+        if (StringUtils.isEmpty(entity.getName())){
+            return ResultUtil.error(-1,"请输入权限名称");
+        }
+        Boolean flag = service.add(entity);
+        if (flag){
+            //记录日志 TODO
+            return ResultUtil.success("权限添加成功");
+        }else {
+            //记录日志 TODO
+            return ResultUtil.error(-1,"权限添加失败");
+        }
+    }
 }

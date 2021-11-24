@@ -3,10 +3,15 @@ package com.lims.manage.erp.service.impl;
 import com.lims.manage.erp.entity.FunctionMenuEntity;
 import com.lims.manage.erp.entity.SysFunction;
 import com.lims.manage.erp.entity.SysMenuEntity;
+import com.lims.manage.erp.entity.SysRoleFuncMenuEntity;
+import com.lims.manage.erp.entity.SysRoleFunction;
+import com.lims.manage.erp.entity.SysRoleMenuEntity;
 import com.lims.manage.erp.mapper.SysRoleFuncMenuDao;
+import com.lims.manage.erp.mapper.SysRoleMenuDao;
 import com.lims.manage.erp.service.SysRoleFuncMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -39,6 +44,7 @@ public class SysRoleFuncMenuServiceImpl implements SysRoleFuncMenuService {
             functionMenuEntity.setFunctionId(sysFunction.getFunctionId());
             functionMenuEntity.setFunctionPid(sysFunction.getFunctionPid());
             functionMenuEntity.setFunctionName(sysFunction.getName());
+            functionMenuEntity.setSort(sysFunction.getSort());
             list.add(functionMenuEntity);
         }
         //合并角色下的权限集合
@@ -64,6 +70,44 @@ public class SysRoleFuncMenuServiceImpl implements SysRoleFuncMenuService {
             }
         }
         return list;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean grant(SysRoleFuncMenuEntity entity) {
+        Boolean flag = false;
+        List<SysRoleFunction> roleFunctions = new ArrayList<>();
+        List<SysRoleMenuEntity> roleMenuEntities = new ArrayList<>();
+        List<FunctionMenuEntity> list = entity.getList();
+        for (FunctionMenuEntity functionMenuEntity:list) {
+            SysRoleFunction sysRoleFunction = new SysRoleFunction();
+            sysRoleFunction.setRoleId(entity.getRoleId());
+            sysRoleFunction.setFunctionId(functionMenuEntity.getFunctionId());
+            roleFunctions.add(sysRoleFunction);
+            List<SysMenuEntity> menuIds = functionMenuEntity.getMenuIds();
+            for (SysMenuEntity sysMenuEntity:menuIds) {
+                SysRoleMenuEntity sysRoleMenuEntity = new SysRoleMenuEntity();
+                sysRoleMenuEntity.setRoleId(entity.getRoleId());
+                sysRoleMenuEntity.setMenuId(sysMenuEntity.getMenuId());
+                roleMenuEntities.add(sysRoleMenuEntity);
+            }
+        }
+        //角色菜单重新更新
+        sysRoleFuncMenuDao.delFuncByRoleId(entity.getRoleId());
+        sysRoleFuncMenuDao.insertBatchRoleFunc(roleFunctions);
+        //角色权限重新更新
+        sysRoleFuncMenuDao.delMenuByRoleId(entity.getRoleId());
+        sysRoleFuncMenuDao.insertBatchRoleMenu(roleMenuEntities);
+        flag = true;
+        return flag;
+    }
+
+    @Override
+    public Boolean add(SysMenuEntity entity) {
+        Boolean flag = false;
+        sysRoleFuncMenuDao.add(entity);
+        flag = true;
+        return flag;
     }
 
 }

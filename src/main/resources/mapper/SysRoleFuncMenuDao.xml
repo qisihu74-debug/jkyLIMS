@@ -29,4 +29,44 @@ WHERE
 	rf.role_id = #{roleId}
 	</select>
 
+	<delete id="delFuncByRoleId">
+			DELETE
+FROM
+	sys_role_function
+WHERE
+	role_id = #{roleId}
+	</delete>
+
+	<delete id="delMenuByRoleId">
+						DELETE
+FROM
+	sys_role_menu
+WHERE
+	role_id = #{roleId}
+	</delete>
+
+	<insert id="insertBatchRoleFunc" parameterType="com.lims.manage.erp.entity.SysRoleFunction">
+		INSERT into  sys_role_function(role_id,function_id)
+		VALUES
+		<foreach collection="roleFunctions" item="item" open="" separator="," close="">
+			(#{item.roleId},#{item.functionId})
+		</foreach>
+	</insert>
+
+	<insert id="insertBatchRoleMenu" parameterType="com.lims.manage.erp.entity.SysRoleMenuEntity">
+		INSERT into  sys_role_menu(role_id,menu_id)
+		VALUES
+		<foreach collection="roleFunctions" item="item" open="" separator="," close="">
+			(#{item.roleId},#{item.menuId})
+		</foreach>
+	</insert>
+
+	<insert id="add" parameterType="com.lims.manage.erp.entity.SysMenuEntity">
+		insert into sys_menu(name,
+		perms,
+		own_func,
+		note
+		)
+		values (#{name},#{perms},#{fuctionId},#{note})
+	</insert>
 </mapper>

@@ -2,6 +2,8 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.SysFunction;
 import com.lims.manage.erp.entity.SysMenuEntity;
+import com.lims.manage.erp.entity.SysRoleFunction;
+import com.lims.manage.erp.entity.SysRoleMenuEntity;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -31,4 +33,34 @@ public interface SysRoleFuncMenuDao {
      * @return
      */
     List<SysMenuEntity> getMenusByRoleId(Long roleId);
+
+    /**
+     * 根据角色id删除角色下菜单
+     * @param roleId
+     */
+    void delFuncByRoleId(Long roleId);
+
+    /**
+     * 根据角色id删除角色下权限
+     * @param roleId
+     */
+    void delMenuByRoleId(Long roleId);
+
+    /**
+     * 授权保存角色菜单
+     * @param roleFunctions
+     */
+    void insertBatchRoleFunc(List<SysRoleFunction> roleFunctions);
+
+    /**
+     * 授权保存角色权限
+     * @param roleMenuEntities
+     */
+    void insertBatchRoleMenu(List<SysRoleMenuEntity> roleMenuEntities);
+
+    /**
+     * 添加权限
+     * @param entity
+     */
+    void add(SysMenuEntity entity);
 }

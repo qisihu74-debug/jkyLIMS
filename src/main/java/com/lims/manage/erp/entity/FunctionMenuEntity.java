@@ -26,6 +26,7 @@ public class FunctionMenuEntity {
      * 菜单父id
      */
     private Long functionPid;
+    private int sort;
     /**
      * 权限ids
      */

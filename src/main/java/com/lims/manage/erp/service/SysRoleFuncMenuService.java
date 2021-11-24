@@ -1,6 +1,8 @@
 package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.entity.FunctionMenuEntity;
+import com.lims.manage.erp.entity.SysMenuEntity;
+import com.lims.manage.erp.entity.SysRoleFuncMenuEntity;
 
 import java.util.List;
 
@@ -19,4 +21,18 @@ public interface SysRoleFuncMenuService {
      * @return
      */
     List<FunctionMenuEntity> getFuncAndMenuByRoleId(Long roleId);
+
+    /**
+     * 角色授权
+     * @param entity
+     * @return
+     */
+    Boolean grant(SysRoleFuncMenuEntity entity);
+
+    /**
+     * 添加权限
+     * @param entity
+     * @return
+     */
+    Boolean add(SysMenuEntity entity);
 }

@@ -16,7 +16,6 @@ import java.io.Serializable;
 @TableName("sys_menu")
 public class SysMenuEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
-
 	/**
 	 * 权限ID
 	 */
@@ -35,5 +34,11 @@ public class SysMenuEntity implements Serializable {
 	 */
 	@TableField(exist = false)
 	private Long fuctionId;
+	/**
+	 * 注释
+	 */
+	@TableField(exist = false)
+	private Long note;
+
 
 }
