@@ -28,6 +28,10 @@ public class FunctionMenuEntity {
     private Long functionPid;
     private int sort;
     /**
+     * 角色是否已有菜单
+     */
+    private Boolean flag;
+    /**
      * 权限ids
      */
     private List<SysMenuEntity> menuIds;

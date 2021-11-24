@@ -7,7 +7,6 @@ import com.lims.manage.erp.entity.SysRoleFuncMenuEntity;
 import com.lims.manage.erp.entity.SysRoleFunction;
 import com.lims.manage.erp.entity.SysRoleMenuEntity;
 import com.lims.manage.erp.mapper.SysRoleFuncMenuDao;
-import com.lims.manage.erp.mapper.SysRoleMenuDao;
 import com.lims.manage.erp.service.SysRoleFuncMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,27 +47,17 @@ public class SysRoleFuncMenuServiceImpl implements SysRoleFuncMenuService {
             list.add(functionMenuEntity);
         }
         //合并角色下的权限集合
-        Map<Long,List<SysMenuEntity>> map = new HashMap<>();
-        for (SysMenuEntity sysMenuEntity:menuList) {
-            if (CollectionUtils.isEmpty(map.get(sysMenuEntity.getFuctionId()))){
-                List<SysMenuEntity> entities = new ArrayList<>();
-                SysMenuEntity sysMenuEntity1 = new SysMenuEntity();
-                sysMenuEntity1.setMenuId(sysMenuEntity.getMenuId());
-                sysMenuEntity1.setName(sysMenuEntity.getName());
-                entities.add(sysMenuEntity1);
-                map.put(sysMenuEntity.getFuctionId(),entities);
-            }else {
-                List<SysMenuEntity> entityList = map.get(sysMenuEntity.getFuctionId());
-                entityList.add(sysMenuEntity);
-                map.put(sysMenuEntity.getFuctionId(),entityList);
-            }
-        }
+        Map<Long, List<SysMenuEntity>> map = batchMessage(menuList);
         //设置菜单下的权限
         for (FunctionMenuEntity entity:list) {
             if (map.get(entity.getFunctionId()) != null){
                 entity.setMenuIds(map.get(entity.getFunctionId()));
             }
         }
+        //TODO 获取所有菜单，和菜单下所有权限
+
+        //TODO 整合已有的菜单设置状态
+
         return list;
     }
 
@@ -108,6 +97,30 @@ public class SysRoleFuncMenuServiceImpl implements SysRoleFuncMenuService {
         sysRoleFuncMenuDao.add(entity);
         flag = true;
         return flag;
+    }
+
+    /**
+     * 处理权限集合
+     * @param menuList
+     * @return
+     */
+    public Map<Long,List<SysMenuEntity>> batchMessage(List<SysMenuEntity> menuList){
+        Map<Long,List<SysMenuEntity>> map = new HashMap<>();
+        for (SysMenuEntity sysMenuEntity:menuList) {
+            if (CollectionUtils.isEmpty(map.get(sysMenuEntity.getFuctionId()))){
+                List<SysMenuEntity> entities = new ArrayList<>();
+                SysMenuEntity sysMenuEntity1 = new SysMenuEntity();
+                sysMenuEntity1.setMenuId(sysMenuEntity.getMenuId());
+                sysMenuEntity1.setName(sysMenuEntity.getName());
+                entities.add(sysMenuEntity1);
+                map.put(sysMenuEntity.getFuctionId(),entities);
+            }else {
+                List<SysMenuEntity> entityList = map.get(sysMenuEntity.getFuctionId());
+                entityList.add(sysMenuEntity);
+                map.put(sysMenuEntity.getFuctionId(),entityList);
+            }
+        }
+        return map;
     }
 
 }
