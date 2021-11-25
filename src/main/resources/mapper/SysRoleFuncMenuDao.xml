@@ -4,7 +4,7 @@
 <mapper namespace="com.lims.manage.erp.mapper.SysRoleFuncMenuDao">
 
     <select id="getFunctionsByRoleId" resultType="com.lims.manage.erp.entity.SysFunction">
-            SELECT
+            SELECT DISTINCT
 	f.function_id AS functionId,
 	f.function_pid AS functionPid,
 	f.name,
@@ -17,7 +17,7 @@ WHERE
     </select>
 
 	<select id="getMenusByRoleId" resultType="com.lims.manage.erp.entity.SysMenuEntity">
-		SELECT
+		SELECT DISTINCT
 	f.menu_id AS menuId,
 	f.name,
 	f.own_func As fuctionId
@@ -69,4 +69,20 @@ WHERE
 		)
 		values (#{name},#{perms},#{fuctionId},#{note})
 	</insert>
+
+	<select id="getFunctions" resultType="com.lims.manage.erp.entity.SysFunction">
+		select function_id,
+		function_pid AS functionPid,
+		name,
+		sort
+		from sys_function order by sort asc
+	</select>
+
+	<select id="getMenus" resultType="com.lims.manage.erp.entity.SysMenuEntity">
+		SELECT DISTINCT
+	menu_id,
+	name,
+	own_func As fuctionId
+FROM sys_menu
+	</select>
 </mapper>

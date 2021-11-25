@@ -38,7 +38,11 @@ public class SysMenuEntity implements Serializable {
 	 * 注释
 	 */
 	@TableField(exist = false)
-	private Long note;
-
+	private String note;
+	/**
+	 * 角色是否已拥有权限
+	 */
+	@TableField(exist = false)
+	private Boolean flag;
 
 }
