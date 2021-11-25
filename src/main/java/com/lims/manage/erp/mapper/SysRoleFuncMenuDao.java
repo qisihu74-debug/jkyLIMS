@@ -63,4 +63,16 @@ public interface SysRoleFuncMenuDao {
      * @param entity
      */
     void add(SysMenuEntity entity);
+
+    /**
+     * 查询所有菜单列表
+     * @return
+     */
+    List<SysFunction> getFunctions();
+
+    /**
+     * 获取所有权限
+     * @return
+     */
+    List<SysMenuEntity> getMenus();
 }

@@ -8,6 +8,7 @@ import com.lims.manage.erp.entity.SysRoleFunction;
 import com.lims.manage.erp.entity.SysRoleMenuEntity;
 import com.lims.manage.erp.mapper.SysRoleFuncMenuDao;
 import com.lims.manage.erp.service.SysRoleFuncMenuService;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,28 +37,44 @@ public class SysRoleFuncMenuServiceImpl implements SysRoleFuncMenuService {
         List<FunctionMenuEntity> list = new ArrayList<>();
         //获取角色下的菜单列表
         List<SysFunction> funcs = sysRoleFuncMenuDao.getFunctionsByRoleId(roleId);
+        //获取所有菜单
+        List<SysFunction> allFuncs = sysRoleFuncMenuDao.getFunctions();
+        for (SysFunction abean :allFuncs) {
+            for (SysFunction bean:funcs) {
+                if (abean.getFunctionId().equals(bean.getFunctionId())){
+                    abean.setFlag(true);
+                }
+            }
+        }
         //获取菜单下的权限列表
         List<SysMenuEntity> menuList = sysRoleFuncMenuDao.getMenusByRoleId(roleId);
-        for (SysFunction sysFunction:funcs) {
+        //获取所有权限
+        List<SysMenuEntity> allMenuList = sysRoleFuncMenuDao.getMenus();
+        //整合已有的菜单、权限设置状态
+        for (SysMenuEntity entity:allMenuList) {
+            for (SysMenuEntity menuEntity:menuList) {
+                if (entity.getMenuId().equals(menuEntity.getMenuId())){
+                    entity.setFlag(true);
+                }
+            }
+        }
+        for (SysFunction sysFunction:allFuncs) {
             FunctionMenuEntity functionMenuEntity = new FunctionMenuEntity();
             functionMenuEntity.setFunctionId(sysFunction.getFunctionId());
             functionMenuEntity.setFunctionPid(sysFunction.getFunctionPid());
             functionMenuEntity.setFunctionName(sysFunction.getName());
             functionMenuEntity.setSort(sysFunction.getSort());
+            functionMenuEntity.setFlag(sysFunction.getFlag());
             list.add(functionMenuEntity);
         }
         //合并角色下的权限集合
-        Map<Long, List<SysMenuEntity>> map = batchMessage(menuList);
+        Map<Long, List<SysMenuEntity>> map = batchMessage(allMenuList);
         //设置菜单下的权限
         for (FunctionMenuEntity entity:list) {
             if (map.get(entity.getFunctionId()) != null){
                 entity.setMenuIds(map.get(entity.getFunctionId()));
             }
         }
-        //TODO 获取所有菜单，和菜单下所有权限
-
-        //TODO 整合已有的菜单设置状态
-
         return list;
     }
 

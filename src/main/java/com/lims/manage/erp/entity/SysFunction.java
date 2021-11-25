@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -33,5 +34,7 @@ public class SysFunction implements Serializable {
      * 菜单序号
      */
     private int sort;
+    @TableField(exist = false)
+    private Boolean flag;
 
 }
