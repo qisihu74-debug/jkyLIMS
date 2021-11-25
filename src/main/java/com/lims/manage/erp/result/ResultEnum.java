@@ -25,7 +25,8 @@ public enum ResultEnum {
     CREATE_USER_FAILD(16,"创建用户失败！"),
     CHANGE_USER_STATE(17,"改变用户状态失败！"),
     RESET_PASSWORD(18,"重置密码失败！"),
-    UPDATE_PASSWORD(19,"修改密码失败！");
+    UPDATE_PASSWORD(19,"修改密码失败！"),
+    UPDATE_USERINFO(20,"修改用户信息失败！");
     private Integer code;
     private String msg;
 

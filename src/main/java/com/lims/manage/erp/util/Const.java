@@ -53,6 +53,10 @@ public class Const {
      */
     public static final String UPDATE_PASSWORD = "8";
     /**
+     * 修改密码
+     */
+    public static final String UPDATE_USERINFO = "9";
+    /**
      * 默认密码
      */
     public static final String DEFAULT_PASSWORD = "111111";
