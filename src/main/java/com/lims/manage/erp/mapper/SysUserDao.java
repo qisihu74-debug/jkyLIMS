@@ -40,6 +40,13 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
      */
     List<UserInfoVo> getUserInfos(UserInfoParamVo vo);
 
+    /**
+     * 更新用户基本信息
+     * @param vo
+     * @return
+     */
+    Boolean updateUserInfo(UserInfoVo vo);
+
     @Select("SELECT user_id,username FROM sys_user WHERE state = 'NORMAL'")
     List<SysUserEntity> GetUserList();
 

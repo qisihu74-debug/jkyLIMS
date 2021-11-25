@@ -10,5 +10,11 @@
         <result property="roleId" column="role_id"/>
     </resultMap>
 
+    <delete id="removeOldRole">
+        DELETE FROM sys_user_role where user_id = #{userId}
+    </delete>
 
+    <insert id="insertNewRole" parameterType="com.lims.manage.erp.entity.SysUserRoleEntity">
+        insert into sys_user_role(user_id, role_id) values(#{userId}, #{roleId})
+    </insert>
 </mapper>

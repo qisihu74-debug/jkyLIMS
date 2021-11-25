@@ -6,15 +6,19 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.SysUserRoleEntity;
 import com.lims.manage.erp.entity.SysUserTreeEntity;
 import com.lims.manage.erp.mapper.DeptDao;
+import com.lims.manage.erp.mapper.DingUsertDao;
 import com.lims.manage.erp.mapper.SysUserDao;
+import com.lims.manage.erp.mapper.SysUserRoleDao;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.UserInfoParamVo;
 import com.lims.manage.erp.vo.UserInfoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +35,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     private SysUserDao sysUserDao;
     @Autowired
     private DeptDao deptDao;
+    @Autowired
+    private SysUserRoleDao sysUserRoleDao;
+    @Autowired
+    private DingUsertDao dingUsertDao;
 
     /**
      * 根据用户名查询实体
@@ -130,13 +138,38 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
         return userInfos;
     }
 
-    private static String removePrefix(String str){
-        String result;
-        if(str.contains("[")){
-            result = str.replace("[","");
-        }else {
-            result = str;
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateUserInfo(UserInfoVo vo) {
+        Boolean flag = false;
+        System.out.println("用户信息："+vo.toString());
+        //更新sys_user
+        sysUserDao.updateUserInfo(vo);
+        //更新sys_ding_user
+        dingUsertDao.updateDingUserInfo(vo);
+        //删除旧权限
+        sysUserRoleDao.removeOldRole(vo.getUserId());
+        //增加新权限
+        List<SysUserRoleEntity> newRoles = Lists.newArrayList();
+        if(vo.getRoleIds().contains(",")){
+            String[] split = vo.getRoleIds().split(",");
+            for (int i = 0; i < split.length; i++) {
+                SysUserRoleEntity entity = new SysUserRoleEntity();
+                entity.setUserId(Long.parseLong(vo.getUserId()));
+                entity.setRoleId(Long.parseLong(split[i].trim()));
+                newRoles.add(entity);
+            }
+        }else{
+            SysUserRoleEntity entity = new SysUserRoleEntity();
+            entity.setUserId(Long.parseLong(vo.getUserId()));
+            entity.setRoleId(Long.parseLong(vo.getRoleIds().trim()));
+            newRoles.add(entity);
         }
-        return result;
+        for (SysUserRoleEntity entity: newRoles) {
+            sysUserRoleDao.insertNewRole(entity);
+        }
+        flag = true;
+        return flag;
     }
+
 }

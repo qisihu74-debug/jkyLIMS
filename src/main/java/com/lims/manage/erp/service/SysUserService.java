@@ -63,5 +63,12 @@ public interface SysUserService extends IService<SysUserEntity> {
      * @return
      */
     List<UserInfoVo> getUserInfos(UserInfoParamVo vo);
+
+    /**
+     * 更新用户信息
+     * @param vo
+     * @return
+     */
+    Boolean updateUserInfo(UserInfoVo vo);
 }
 

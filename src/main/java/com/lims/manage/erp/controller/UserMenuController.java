@@ -8,11 +8,8 @@ import com.lims.manage.erp.entity.SysRoleMenuEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.SysMenuService;
-import com.lims.manage.erp.service.SysRoleFuncMenuService;
-import com.lims.manage.erp.service.SysRoleMenuService;
-import com.lims.manage.erp.service.SysRoleService;
-import com.lims.manage.erp.service.SysUserService;
+import com.lims.manage.erp.service.*;
+import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +44,8 @@ public class UserMenuController {
     private SysRoleMenuService sysRoleMenuService;
     @Autowired
     private SysRoleFuncMenuService service;
+    @Autowired
+    private LogManagerService logManagerService;
 
     /**
      * 获取用户信息集合
@@ -185,9 +184,11 @@ public class UserMenuController {
 
             //授权完成清除当前用户缓存信息
             ShiroUtils.deleteCache(ShiroUtils.getUserInfo().getUsername(),true);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"角色授权ID【"+entity.getRoleId()+"】状态为"+"成功！", Const.CHANGE_STATE);
             return ResultUtil.success("授权成功！");
         }else {
             //记录失败日志
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"角色授权ID【"+entity.getRoleId()+"】状态为"+"失败！", Const.CHANGE_STATE);
             return ResultUtil.error(-1,"授权失败");
         }
     }
@@ -212,9 +213,11 @@ public class UserMenuController {
         Boolean flag = service.add(entity);
         if (flag){
             //记录日志 TODO
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"添加权限ID【"+entity.getMenuId()+"】 权限名称:【"+entity.getName()+"】 状态为"+"成功！", Const.CHANGE_STATE);
             return ResultUtil.success("权限添加成功");
         }else {
             //记录日志 TODO
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"添加权限ID【"+entity.getMenuId()+"】状态为"+"失败！", Const.CHANGE_STATE);
             return ResultUtil.error(-1,"权限添加失败");
         }
     }

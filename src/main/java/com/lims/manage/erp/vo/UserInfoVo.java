@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class UserInfoVo {
-    private Long userId;
+    private String userId;
     private String username;
     private Timestamp createTime;
     private String state;
@@ -18,5 +18,6 @@ public class UserInfoVo {
     private String email;
     private String departmentId;
     private List<LabelValueVo> department;
+    private String roleIds;
     private List<LabelValueVo> roles;
 }

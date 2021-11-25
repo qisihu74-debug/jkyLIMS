@@ -15,6 +15,7 @@ import com.lims.manage.erp.util.SHA256Util;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.RegisterUserInfoVo;
 import com.lims.manage.erp.vo.UserInfoParamVo;
+import com.lims.manage.erp.vo.UserInfoVo;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
-import com.lims.manage.erp.entity.SysUserTreeEntity;
-import com.lims.manage.erp.service.SysUserService;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author gjl
@@ -61,7 +53,7 @@ public class UserController {
     private SysUserRoleService sysUserRoleService;
 
     /**
-     *
+     *获取用户列表
      * @return
      */
     @RequestMapping("list")
@@ -171,28 +163,20 @@ public class UserController {
     }
 
     /**
-     * 通过ID获取单个用户信息，回显到页面
-     * @param userId
+     *更新用户信息
      * @return
      */
-    @RequestMapping("/getUserInfo")
-//    @RequiresPermissions("sys:user:userinfo")
-    public Result getUserInfoById(Long userId){
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        System.out.println("-----"+userInfo);
-//        // 随机生成盐值
-//        String salt = RandomStringUtils.randomAlphanumeric(20);
-//        String password = SHA256Util.sha256(userEntity.getPassword(), salt);
-//        userEntity.setPassword(password);
-//        userEntity.setSalt(salt);
-//        Boolean isSuccess = sysUserService.resetPassword(userEntity);
-//        if(isSuccess){
-//            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改密码成功", Const.UPDATE_PASSWORD);
-//            return ResultUtil.success();
-//        }else{
-//            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改密码失败", Const.UPDATE_PASSWORD);
-//            return ResultUtil.error(ResultEnum.UPDATE_PASSWORD.getCode(),ResultEnum.UPDATE_PASSWORD.getMsg());
-//        }
-        return ResultUtil.success();
+    @RequestMapping("/updateUserInfo")
+//    @RequiresPermissions("sys:user:updateuserinfo")
+    public Result updateUserInfo(@RequestBody UserInfoVo vo){
+        Boolean isSuccess = sysUserService.updateUserInfo(vo);
+        if(isSuccess){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+vo.getUsername()+"】信息成功！", Const.UPDATE_USERINFO);
+            return ResultUtil.success();
+        }else{
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+vo.getUsername()+"】信息失败！", Const.UPDATE_USERINFO);
+            return ResultUtil.error(ResultEnum.UPDATE_USERINFO.getCode(),ResultEnum.UPDATE_USERINFO.getMsg());
+        }
     }
+
 }
