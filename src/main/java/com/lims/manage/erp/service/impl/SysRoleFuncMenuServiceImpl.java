@@ -8,7 +8,7 @@ import com.lims.manage.erp.entity.SysRoleFunction;
 import com.lims.manage.erp.entity.SysRoleMenuEntity;
 import com.lims.manage.erp.mapper.SysRoleFuncMenuDao;
 import com.lims.manage.erp.service.SysRoleFuncMenuService;
-import org.checkerframework.checker.units.qual.A;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +28,7 @@ import java.util.Map;
  * @Copyright © 河南交科院
  */
 @Service
+@Slf4j
 public class SysRoleFuncMenuServiceImpl implements SysRoleFuncMenuService {
     @Autowired
     private SysRoleFuncMenuDao sysRoleFuncMenuDao;
@@ -111,8 +112,12 @@ public class SysRoleFuncMenuServiceImpl implements SysRoleFuncMenuService {
     @Override
     public Boolean add(SysMenuEntity entity) {
         Boolean flag = false;
-        sysRoleFuncMenuDao.add(entity);
-        flag = true;
+        try {
+            sysRoleFuncMenuDao.add(entity);
+            flag = true;
+        }catch (Exception e){
+            log.error("添加权限失败:{}");
+        }
         return flag;
     }
 
