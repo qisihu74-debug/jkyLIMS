@@ -182,6 +182,9 @@ public class UserMenuController {
         Boolean flag = service.grant(entity);
         if (flag){
             //记录日志
+
+            //授权完成清除当前用户缓存信息
+            ShiroUtils.deleteCache(ShiroUtils.getUserInfo().getUsername(),true);
             return ResultUtil.success("授权成功！");
         }else {
             //记录失败日志
