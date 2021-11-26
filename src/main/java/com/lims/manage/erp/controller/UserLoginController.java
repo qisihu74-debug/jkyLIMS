@@ -80,7 +80,7 @@ public class UserLoginController {
         map.put("code",200);
         map.put("msg","登录成功");
         map.put("token", ShiroUtils.getSession().getId().toString());
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"登陆成功!", Const.LOGIN_LOG);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"登陆成功!", Const.LOGIN_LOG,true);
         return map;
     }
     /**
@@ -133,7 +133,7 @@ public class UserLoginController {
      */
     @GetMapping("/logOut")
     public Result logOut(){
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"退出登陆成功!", Const.LOGIN_LOG_OUT);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"退出登陆成功!", Const.LOGIN_LOG_OUT,true);
         ShiroUtils.logout();
         return ResultUtil.success("用户退出登陆成功！");
     }

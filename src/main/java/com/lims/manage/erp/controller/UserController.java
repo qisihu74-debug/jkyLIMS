@@ -88,7 +88,7 @@ public class UserController {
             roleEntity.setRoleId(id);
             sysUserRoleService.save(roleEntity);
         }
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增用户【"+vo.getUsername()+"】成功！", Const.CREATE_USER);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增用户【"+vo.getUsername()+"】成功！", Const.CREATE_USER,true);
         return ResultUtil.success();
     }
 
@@ -105,10 +105,10 @@ public class UserController {
         }
         Boolean isSuccess = sysUserService.updateUserState(userEntity);
         if(isSuccess){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】状态为"+userEntity.getState()+"成功！", Const.CHANGE_STATE);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】状态为"+userEntity.getState()+"成功！", Const.CHANGE_STATE,true);
             return ResultUtil.success();
         }else{
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】状态为"+userEntity.getState()+"失败！", Const.CHANGE_STATE);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】状态为"+userEntity.getState()+"失败！", Const.CHANGE_STATE,false);
             return ResultUtil.error(ResultEnum.CHANGE_USER_STATE.getCode(),ResultEnum.CHANGE_USER_STATE.getMsg());
         }
     }
@@ -128,10 +128,10 @@ public class UserController {
         userEntity.setSalt(salt);
         Boolean isSuccess = sysUserService.resetPassword(userEntity);
         if(isSuccess){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】密码成功", Const.RESET_PASSWORD);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】密码成功", Const.RESET_PASSWORD,true);
             return ResultUtil.success();
         }else{
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"重置用户【"+userEntity.getUsername()+"】密码失败", Const.RESET_PASSWORD);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"重置用户【"+userEntity.getUsername()+"】密码失败", Const.RESET_PASSWORD,false);
             return ResultUtil.error(ResultEnum.RESET_PASSWORD.getCode(),ResultEnum.RESET_PASSWORD.getMsg());
         }
     }
@@ -154,10 +154,10 @@ public class UserController {
         userEntity.setSalt(salt);
         Boolean isSuccess = sysUserService.resetPassword(userEntity);
         if(isSuccess){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改密码成功", Const.UPDATE_PASSWORD);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改密码成功", Const.UPDATE_PASSWORD,true);
             return ResultUtil.success();
         }else{
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改密码失败", Const.UPDATE_PASSWORD);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改密码失败", Const.UPDATE_PASSWORD,false);
             return ResultUtil.error(ResultEnum.UPDATE_PASSWORD.getCode(),ResultEnum.UPDATE_PASSWORD.getMsg());
         }
     }
@@ -171,10 +171,10 @@ public class UserController {
     public Result updateUserInfo(@RequestBody UserInfoVo vo){
         Boolean isSuccess = sysUserService.updateUserInfo(vo);
         if(isSuccess){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+vo.getUsername()+"】信息成功！", Const.UPDATE_USERINFO);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+vo.getUsername()+"】信息成功！", Const.UPDATE_USERINFO,true);
             return ResultUtil.success();
         }else{
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+vo.getUsername()+"】信息失败！", Const.UPDATE_USERINFO);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+vo.getUsername()+"】信息失败！", Const.UPDATE_USERINFO,false);
             return ResultUtil.error(ResultEnum.UPDATE_USERINFO.getCode(),ResultEnum.UPDATE_USERINFO.getMsg());
         }
     }

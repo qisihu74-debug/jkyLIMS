@@ -30,5 +30,5 @@ public interface LogManagerService extends IService<SysLog> {
      * @param optDescs 日志描述
      * @param type 日志类型
      */
-    void addOpSysLog(SysUserEntity sysUser, String optDescs, String type);
+    void addOpSysLog(SysUserEntity sysUser, String optDescs, String type,boolean state);
 }

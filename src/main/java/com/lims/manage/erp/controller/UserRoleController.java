@@ -128,12 +128,12 @@ public class UserRoleController {
         {
             map.put("code",200);
             map.put("msg","修改角色成功");
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"成功！", Const.SYS_MANAGER_LOG);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"成功！", Const.SYS_MANAGER_LOG,true);
             return map;
         }
         map.put("code",204);
         map.put("msg","修改失败");
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"失败！", Const.SYS_MANAGER_LOG);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"失败！", Const.SYS_MANAGER_LOG,false);
         return map;
     }
     @PostMapping("/add")
@@ -152,12 +152,12 @@ public class UserRoleController {
         {
             map.put("code",200);
             map.put("msg","新增角色成功");
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增角色ID【"+sysRoleEntity1.getRoleId()+"】状态为"+"成功！", Const.SYS_MANAGER_LOG);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增角色ID【"+sysRoleEntity1.getRoleId()+"】状态为"+"成功！", Const.SYS_MANAGER_LOG,true);
             return map;
         }
         map.put("code",204);
         map.put("msg","新增失败");
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"失败！", Const.SYS_MANAGER_LOG);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"失败！", Const.SYS_MANAGER_LOG,false);
         return map;
     }
 
@@ -178,12 +178,12 @@ public class UserRoleController {
         {
             map.put("code",200);
             map.put("msg","删除角色成功");
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除角色ID【"+roleId+"】状态为"+"成功！", Const.SYS_MANAGER_LOG);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除角色ID【"+roleId+"】", Const.SYS_MANAGER_LOG,true);
             return map;
         }
         map.put("code",204);
         map.put("msg","删除角色失败");
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除角色ID【"+roleId+"】状态为"+"失败！", Const.SYS_MANAGER_LOG);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除角色ID【"+roleId+"】", Const.SYS_MANAGER_LOG,false);
         return map;
     }
 

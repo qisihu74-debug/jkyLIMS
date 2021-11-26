@@ -44,6 +44,11 @@ public class SysLog implements Serializable {
      */
 //    private Date operate_time;
     private Timestamp operate_time;
+    /**
+     * 状态值
+     */
+    private Boolean isState;
+
 
 
 }
