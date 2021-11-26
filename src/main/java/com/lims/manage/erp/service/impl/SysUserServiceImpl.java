@@ -131,6 +131,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
                         LabelValueVo departmentInfo = deptDao.getRoleInfoById(Long.parseLong(deptId));
                         department.add(departmentInfo);
                     }
+                }else if(replace != null && !replace.contains(",")){
+                    LabelValueVo departmentInfo = deptDao.getRoleInfoById(Long.parseLong(replace));
+                    department.add(departmentInfo);
                 }
                 userInfoVo.setDepartment(department);
             }
@@ -145,8 +148,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
         System.out.println("用户信息："+vo.toString());
         //更新sys_user
         sysUserDao.updateUserInfo(vo);
-        //更新sys_ding_user
-        dingUsertDao.updateDingUserInfo(vo);
+//        //更新sys_ding_user
+//        dingUsertDao.updateDingUserInfo(vo);
         //删除旧权限
         sysUserRoleDao.removeOldRole(vo.getUserId());
         //增加新权限

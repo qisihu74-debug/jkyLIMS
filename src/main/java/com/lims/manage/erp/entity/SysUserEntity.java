@@ -51,6 +51,22 @@ public class SysUserEntity implements Serializable {
 	 */
 	@TableField(exist = false)
 	private String userDept;
+	/**
+	 * 手机号
+	 */
+	private String mobile;
+	/**
+	 * 邮箱
+	 */
+	private String email;
+	/**
+	 * 部门
+	 */
+	private String department;
+	/**
+	 * 中文名
+	 */
+	private String name;
 
 	public SysUserEntity() {
 	}
@@ -62,5 +78,9 @@ public class SysUserEntity implements Serializable {
 		this.state = vo.getState();
 		this.createTime = createTime;
 		this.note = vo.getNote();
+		this.mobile = vo.getMobile();
+		this.email = vo.getEmail();
+		this.department = vo.getDeptId();
+		this.name = vo.getName();
 	}
 }

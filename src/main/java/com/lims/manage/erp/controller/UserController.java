@@ -77,9 +77,9 @@ public class UserController {
         //存放sys_user数据
         SysUserEntity entity = new SysUserEntity(vo,password,salt,new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         sysUserService.save(entity);
-        //存放sys_ding_user数据
-        DingUserEntity dingUserEntity = new DingUserEntity(entity.getUserId().toString(),vo);
-        dingUserService.save(dingUserEntity);
+//        //存放sys_ding_user数据
+//        DingUserEntity dingUserEntity = new DingUserEntity(entity.getUserId().toString(),vo);
+//        dingUserService.save(dingUserEntity);
         //存放sys_user_role数据
         List<Long> roleIds = vo.getRoleIds();
         for (Long id:roleIds) {
