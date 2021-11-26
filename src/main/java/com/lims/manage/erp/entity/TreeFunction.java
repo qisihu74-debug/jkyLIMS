@@ -11,10 +11,9 @@ import java.util.List;
  */
 @Data
 public class TreeFunction {
-    private Integer functionId;
+    private Long functionId;
     private String treeName;
-    private Integer functionPid;
-    private String pidName;
+    private Long functionPid;
     private Integer sort;
     private boolean catesFlag;
     private List Children;

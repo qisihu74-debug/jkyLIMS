@@ -50,5 +50,15 @@ public class UserFuctionController {
         return sysUserFuctionService.GetList();
     }
 
+    // 暂时未做限制 直接放行 优化。
+    @GetMapping("getMenuDisplayNew")
+    public List<TreeFunction> getMenuDisplayNew()
+    {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        return sysUserFuctionService.GetListUpgrade(userInfo.getUserId());
+    }
+
+
+
 
 }
