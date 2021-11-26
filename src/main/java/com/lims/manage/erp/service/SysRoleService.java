@@ -40,7 +40,7 @@ public interface SysRoleService extends IService<SysRoleEntity> {
      * @param sysRoleEntity
      * @return
      */
-    SysRoleEntity addSysRoleByUserId(SysRoleEntity sysRoleEntity);
+    Boolean addSysRoleByUserId(SysRoleEntity sysRoleEntity);
 
     /**
      *
