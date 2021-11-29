@@ -29,7 +29,7 @@
         <result property="note" column="note"/>
         <result property="name" column="name"/>
         <result property="mobile" column="mobile"/>
-        <result property="position" column="position"/>
+<!--        <result property="position" column="position"/>-->
         <result property="email" column="email"/>
         <result property="departmentId" column="department"/>
         <collection property="roles" ofType="com.lims.manage.erp.vo.LabelValueVo">
@@ -58,14 +58,12 @@
         note,
         name,
         mobile,
-        position,
         email,
         department,
         t3.role_id,
         role_name
         FROM
         sys_user t1
-        LEFT JOIN sys_ding_user t2 ON t1.ding_user_id = t2.userid
         left join sys_user_role t3 on t1.user_id = t3.user_id
         left join sys_role t4 on t3.role_id = t4.role_id
         where 1=1
@@ -85,7 +83,11 @@
 
     <update id="updateUserInfo" parameterType="com.lims.manage.erp.vo.UserInfoVo">
         UPDATE sys_user
-        SET note = #{note}
+        SET name = #{name},
+            mobile = #{mobile},
+            email = #{email},
+            department = #{departmentId},
+            note = #{note}
         WHERE
             user_id = #{userId}
     </update>

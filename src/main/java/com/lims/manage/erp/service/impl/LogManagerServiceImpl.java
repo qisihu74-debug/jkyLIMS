@@ -42,7 +42,7 @@ public class LogManagerServiceImpl extends ServiceImpl<LogManagerDao, SysLog> im
     }
 
     @Override
-    public void addOpSysLog(SysUserEntity sysUser, String optDescs, String type) {
+    public void addOpSysLog(SysUserEntity sysUser, String optDescs, String type,boolean state) {
         SysLog sysLog = new SysLog();
         sysLog.setOperate_time(new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         sysLog.setOperateDesc(optDescs);
@@ -50,6 +50,7 @@ public class LogManagerServiceImpl extends ServiceImpl<LogManagerDao, SysLog> im
         sysLog.setUserId(sysUser.getUserId());
         sysLog.setUserDept(sysUser.getUserDept());
         sysLog.setUserName(sysUser.getUsername());
+        sysLog.setIsState(state);
         this.baseMapper.insert(sysLog);
     }
 }

@@ -23,4 +23,11 @@ public interface SysUserFuctionService {
     List<SysFunction> getFunctionByuserId(Long userId);
 
     List<TreeFunction> GetList();
+
+    /**
+     * 依据 用户ID 展示所属菜单项。
+     * @param userid
+     * @return
+     */
+    List<TreeFunction> GetListUpgrade(Long userid);
 }

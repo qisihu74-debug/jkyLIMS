@@ -181,14 +181,13 @@ public class UserMenuController {
         Boolean flag = service.grant(entity);
         if (flag){
             //记录日志
-
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"角色授权ID【"+entity.getRoleId()+"】状态为"+"成功！", Const.SYS_MANAGER_LOG,true);
             //授权完成清除当前用户缓存信息
             ShiroUtils.deleteCache(ShiroUtils.getUserInfo().getUsername(),true);
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"角色授权ID【"+entity.getRoleId()+"】状态为"+"成功！", Const.CHANGE_STATE);
             return ResultUtil.success("授权成功！");
         }else {
             //记录失败日志
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"角色授权ID【"+entity.getRoleId()+"】状态为"+"失败！", Const.CHANGE_STATE);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"角色授权ID【"+entity.getRoleId()+"】状态为"+"失败！", Const.SYS_MANAGER_LOG,false);
             return ResultUtil.error(-1,"授权失败");
         }
     }
@@ -213,11 +212,11 @@ public class UserMenuController {
         Boolean flag = service.add(entity);
         if (flag){
             //记录日志 TODO
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"添加权限ID【"+entity.getMenuId()+"】 权限名称:【"+entity.getName()+"】 状态为"+"成功！", Const.CHANGE_STATE);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"添加权限ID【"+entity.getMenuId()+"】 权限名称:【"+entity.getName()+"】 状态为"+"成功！", Const.SYS_MANAGER_LOG,true);
             return ResultUtil.success("权限添加成功");
         }else {
             //记录日志 TODO
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"添加权限ID【"+entity.getMenuId()+"】状态为"+"失败！", Const.CHANGE_STATE);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"添加权限ID【"+entity.getMenuId()+"】状态为"+"失败！", Const.SYS_MANAGER_LOG,false);
             return ResultUtil.error(-1,"权限添加失败");
         }
     }

@@ -75,4 +75,11 @@ public interface SysRoleFuncMenuDao {
      * @return
      */
     List<SysMenuEntity> getMenus();
+
+    /**
+     * 通过用户id 得到 角色所属的 菜单项集合。
+     * @param userId
+     * @return
+     */
+    List<SysRoleFunction> selectSetMenu(Long userId);
 }

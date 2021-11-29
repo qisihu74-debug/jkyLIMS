@@ -5,6 +5,7 @@ import com.lims.manage.erp.entity.SysRoleEntity;
 import com.lims.manage.erp.mapper.SysRoleDao;
 import com.lims.manage.erp.service.SysRoleService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -40,13 +41,13 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleDao, SysRoleEntity> i
     }
 
     @Override
-    public SysRoleEntity addSysRoleByUserId(SysRoleEntity sysRoleEntity) {
-
-        int statusNumber = baseMapper.insert(sysRoleEntity);
-        if(statusNumber>=1){
-            return  sysRoleEntity;
-        }
-        return null;
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean addSysRoleByUserId(SysRoleEntity sysRoleEntity) {
+       int statusNumber = baseMapper.insert(sysRoleEntity);
+       if(statusNumber==1){
+           return true;
+       }
+        return  false;
     }
 
     @Override

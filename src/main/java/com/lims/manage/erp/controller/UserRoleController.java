@@ -128,39 +128,37 @@ public class UserRoleController {
         {
             map.put("code",200);
             map.put("msg","修改角色成功");
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"成功！", Const.CHANGE_STATE);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"成功！", Const.SYS_MANAGER_LOG,true);
             return map;
         }
         map.put("code",204);
         map.put("msg","修改失败");
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"失败！", Const.CHANGE_STATE);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"失败！", Const.SYS_MANAGER_LOG,false);
         return map;
     }
     @PostMapping("/add")
     @RequiresPermissions("sys:role:add")
-    @Transactional(rollbackFor = Exception.class)
     public Map<String,Object> methodAddData(@RequestBody SysRoleEntity sysRoleEntity)
     {
-        SysRoleEntity sysRoleEntity1 = new SysRoleEntity();
+        Boolean judge =false;
         try {
-            sysRoleEntity1 = sysRoleService.addSysRoleByUserId(sysRoleEntity);
+            judge = sysRoleService.addSysRoleByUserId(sysRoleEntity);
         }
         catch (Exception e){
         }
         Map<String,Object> map = new HashMap<>();
-        if(sysRoleEntity1!=null)
+        if(judge==false)
         {
-            map.put("code",200);
-            map.put("msg","新增角色成功");
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增角色ID【"+sysRoleEntity1.getRoleId()+"】状态为"+"成功！", Const.CHANGE_STATE);
+            map.put("code",204);
+            map.put("msg","新增失败");
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"失败！", Const.SYS_MANAGER_LOG,false);
             return map;
         }
-        map.put("code",204);
-        map.put("msg","新增失败");
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"失败！", Const.CHANGE_STATE);
+        map.put("code",200);
+        map.put("msg","新增角色成功");
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"成功！", Const.SYS_MANAGER_LOG,true);
         return map;
     }
-
     @PostMapping("/remove/{roleId}")
     @RequiresPermissions("sys:role:remove")
     public Map<String,Object> methodAddData(@PathVariable Long roleId)
@@ -171,20 +169,18 @@ public class UserRoleController {
             statusNumber = sysRoleService.deleteSysRoleByUserId(roleId);
         }
         catch (Exception e){
-
         }
         Map<String,Object> map = new HashMap<>();
         if(statusNumber>=1)
         {
             map.put("code",200);
             map.put("msg","删除角色成功");
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除角色ID【"+roleId+"】状态为"+"成功！", Const.CHANGE_STATE);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除角色ID【"+roleId+"】", Const.SYS_MANAGER_LOG,true);
             return map;
         }
         map.put("code",204);
         map.put("msg","删除角色失败");
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除角色ID【"+roleId+"】状态为"+"失败！", Const.CHANGE_STATE);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除角色ID【"+roleId+"】", Const.SYS_MANAGER_LOG,false);
         return map;
     }
-
 }
