@@ -27,7 +27,6 @@ public class EntrustController {
 
     @RequestMapping("/addEntrust")
     public Result addEntrust(@RequestBody EntrustAddVo entrust){
-        System.out.println(entrust);
         Boolean isSuccess = entrustService.addEntrust(entrust);
         if(isSuccess){
             return ResultUtil.success();
@@ -36,43 +35,27 @@ public class EntrustController {
         }
     }
     @GetMapping("get_Basics")
-    public Map<String,Object> ReturnBasicsData()
+    public Result ReturnBasicsData()
     {
-        Map<String,Object> map = new HashMap<>();
-        map.put("code",200);
-        map.put("msg","查询数据成功");
-        map.put("data",entrustService.returnEntrustData());
-        return map;
+        return ResultUtil.success(entrustService.returnEntrustData());
     }
     @GetMapping("get_entrusted_unit")
-    public Map<String,Object> methodDispay(Integer companyId)
+    public Result methodDispay(Integer companyId)
     {
-        Map<String,Object> map = new HashMap<>();
         List<TestCustomerJsonEntity> collectList = entrustService.returnTestCustomerEntityList(companyId);
         if(collectList.isEmpty()){
-            map.put("code",201);
-            map.put("msg","用户信息不存在");
-            return map;
+            return ResultUtil.error(201,"用户信息不存在");
         }
-        map.put("code",200);
-        map.put("msg","查询数据成功");
-        map.put("data",collectList);
-        return map;
+            return ResultUtil.success(collectList);
     }
     @PostMapping("add_new_company")
-    public Map<String,Object> methodPost(@RequestBody TestCompanyJsonEntity testCompanyEntity)
+    public Result methodPost(@RequestBody TestCompanyJsonEntity testCompanyEntity)
     {
-        Map<String,Object> map = new HashMap<>();
-        System.out.println("展示数据\t"+testCompanyEntity);
         boolean BooleStatus  = entrustService.addCompanyData(testCompanyEntity);
         if(BooleStatus){
-            map.put("code",200);
-            map.put("msg","增加数据成功");
-            return map;
+            return ResultUtil.success();
         }
-        map.put("code",201);
-        map.put("msg","增加数据失败");
-        return map;
+        return ResultUtil.error(201,"增加数据失败");
     }
 
 

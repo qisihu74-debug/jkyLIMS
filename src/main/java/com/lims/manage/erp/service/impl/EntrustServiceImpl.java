@@ -22,6 +22,10 @@ import java.util.Map;
 public class EntrustServiceImpl implements EntrustService {
     @Autowired
     private EntrustEntityMapper entityMapper;
+    @Autowired
+    TestCompanyDao testCompanyDao;
+    @Autowired
+    TestCustomerDao testCustomerDao;
 
 
     @Override
@@ -35,10 +39,7 @@ public class EntrustServiceImpl implements EntrustService {
         return result;
     }
 
-    @Autowired
-    TestCompanyDao testCompanyDao;
-    @Autowired
-    TestCustomerDao testCustomerDao;
+
 
 
     @Override
@@ -67,7 +68,7 @@ public class EntrustServiceImpl implements EntrustService {
         List<LabelValueVo> arrySeal = new ArrayList<>();
         // 8：设备类型
         List<LabelValueVo> arryEquipment = new ArrayList<>();
-        // 9：支付方式
+        // 11：支付方式
         List<LabelValueVo> arryPayment = new ArrayList<>();
         for(TestInitDataEntity testInitDataEntity:ReturnBasisData){
             LabelValueVo labelValueVo = new LabelValueVo();
@@ -101,6 +102,11 @@ public class EntrustServiceImpl implements EntrustService {
                 labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
                 arrySeal.add(labelValueVo);
             }
+            if(testInitDataEntity.getType()==11){
+                labelValueVo.setLabel(testInitDataEntity.getName());
+                labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
+                arryPayment.add(labelValueVo);
+            }
         }
         map.put("entrustCompany",EntrustCompany);
         map.put("witnessCompany",witnessCompany);
@@ -111,6 +117,7 @@ public class EntrustServiceImpl implements EntrustService {
         map.put("arrySampleAppearance",arrySampleAppearance);
         map.put("arrySeal",arrySeal);
         map.put("arryTeam",arryTeam);
+        map.put("arryPayment",arryPayment);
         return map;
     }
 
