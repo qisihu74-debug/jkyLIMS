@@ -72,40 +72,17 @@ public class EntrustServiceImpl implements EntrustService {
         List<LabelValueVo> arryPayment = new ArrayList<>();
         for(TestInitDataEntity testInitDataEntity:ReturnBasisData){
             LabelValueVo labelValueVo = new LabelValueVo();
-            if(testInitDataEntity.getType()==1){
-                labelValueVo.setLabel(testInitDataEntity.getName());
-                labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
-                arryEntrust.add(labelValueVo);
-            }
-            if(testInitDataEntity.getType()==2){
-                labelValueVo.setLabel(testInitDataEntity.getName());
-                labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
-                arrySampling.add(labelValueVo);
-            }
-            if(testInitDataEntity.getType()==3){
-                labelValueVo.setLabel(testInitDataEntity.getName());
-                labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
-                arryCheckout.add(labelValueVo);
-            }
-            if(testInitDataEntity.getType()==4){
-                labelValueVo.setLabel(testInitDataEntity.getName());
-                labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
-                arryGetReport.add(labelValueVo);
-            }
-            if(testInitDataEntity.getType()==5){
-                labelValueVo.setLabel(testInitDataEntity.getName());
-                labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
-                arrySampleAppearance.add(labelValueVo);
-            }
-            if(testInitDataEntity.getType()==6){
-                labelValueVo.setLabel(testInitDataEntity.getName());
-                labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
-                arrySeal.add(labelValueVo);
-            }
-            if(testInitDataEntity.getType()==11){
-                labelValueVo.setLabel(testInitDataEntity.getName());
-                labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
-                arryPayment.add(labelValueVo);
+            labelValueVo.setLabel(testInitDataEntity.getName());
+            labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
+            switch (testInitDataEntity.getType()) {
+                case 1:  arryEntrust.add(labelValueVo); break;
+                case 2:   arrySampling.add(labelValueVo); break;
+                case 3:   arryCheckout.add(labelValueVo); break;
+                case 4:   arryGetReport.add(labelValueVo); break;
+                case 5:   arrySampleAppearance.add(labelValueVo); break;
+                case 6:   arrySeal.add(labelValueVo); break;
+                case 11:   arryPayment.add(labelValueVo); break;
+                default:break;
             }
         }
         map.put("entrustCompany",EntrustCompany);
