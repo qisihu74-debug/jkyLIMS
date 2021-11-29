@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.TestCompanyDao">
+
+    <select id="selectEntrustCompanyList" resultType="com.lims.manage.erp.vo.LabelValueVo" parameterType="integer">
+        SELECT
+        company_id as value,
+        company_name as label
+        FROM
+        test_company
+        WHERE type =#{TypeId}
+    </select>
+
+    <select id="selectEntrustBasis" resultType="com.lims.manage.erp.entity.TestInitDataEntity">
+        SELECT
+            id,
+            NAME,
+            type,
+            remark
+        FROM
+            test_init_data
+    </select>
+    <select id="selectTestTeam" resultType="com.lims.manage.erp.vo.LabelValueVo">
+            SELECT
+                id as value,
+                NAME as label
+            FROM
+                test_team
+    </select>
+
+    <select id="selectPeopleInformation" resultType="com.lims.manage.erp.entity.TestCustomerJsonEntity" parameterType="integer">
+        SELECT
+            customer_id personId,
+            contacts clientName,
+            phone clientMobilePhone
+        FROM
+            test_customer
+        WHERE
+            company_id = #{companyId}
+    </select>
+
+
+
+</mapper>
