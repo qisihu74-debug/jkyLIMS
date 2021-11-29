@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lims.manage.erp.mapper.SampleEntityMapper" >
+  <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.SampleEntity" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="company_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="sample_name" jdbcType="CHAR" javaType="java.lang.String" />
+      <arg column="sample_code" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="specs" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="batch_number" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="manufacturer" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="sample_origin" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="outward" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="picture" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="
+save_place" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="admin" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="sample_groups" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="quantity_per_group" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="inspector" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="received_date" jdbcType="CHAR" javaType="java.lang.String" />
+      <arg column="sample_requirement" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="generation" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="state" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="check_date" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="remark" jdbcType="VARCHAR" javaType="java.lang.String" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, company_id, sample_name, sample_code, specs, batch_number, manufacturer, sample_origin, 
+    outward, picture, 
+save_place, admin, sample_groups, quantity_per_group, inspector, 
+    received_date, sample_requirement, generation, state, check_date, remark
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from test_sample
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from test_sample
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.lims.manage.erp.entity.SampleEntity" >
+    insert into test_sample (id, company_id, sample_name, 
+      sample_code, specs, batch_number, 
+      manufacturer, sample_origin, outward, 
+      picture, 
+save_place, admin, 
+      sample_groups, quantity_per_group, inspector, 
+      received_date, sample_requirement, generation, 
+      state, check_date, remark
+      )
+    values (#{id,jdbcType=INTEGER}, #{companyId,jdbcType=INTEGER}, #{sampleName,jdbcType=CHAR}, 
+      #{sampleCode,jdbcType=VARCHAR}, #{specs,jdbcType=INTEGER}, #{batchNumber,jdbcType=VARCHAR}, 
+      #{manufacturer,jdbcType=VARCHAR}, #{sampleOrigin,jdbcType=VARCHAR}, #{outward,jdbcType=VARCHAR}, 
+      #{picture,jdbcType=VARCHAR}, #{
+savePlace,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR}, 
+      #{sampleGroups,jdbcType=INTEGER}, #{quantityPerGroup,jdbcType=INTEGER}, #{inspector,jdbcType=VARCHAR}, 
+      #{receivedDate,jdbcType=CHAR}, #{sampleRequirement,jdbcType=VARCHAR}, #{generation,jdbcType=VARCHAR}, 
+      #{state,jdbcType=VARCHAR}, #{checkDate,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.SampleEntity" >
+    insert into test_sample
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="companyId != null" >
+        company_id,
+      </if>
+      <if test="sampleName != null" >
+        sample_name,
+      </if>
+      <if test="sampleCode != null" >
+        sample_code,
+      </if>
+      <if test="specs != null" >
+        specs,
+      </if>
+      <if test="batchNumber != null" >
+        batch_number,
+      </if>
+      <if test="manufacturer != null" >
+        manufacturer,
+      </if>
+      <if test="sampleOrigin != null" >
+        sample_origin,
+      </if>
+      <if test="outward != null" >
+        outward,
+      </if>
+      <if test="picture != null" >
+        picture,
+      </if>
+      <if test="
+savePlace != null" >
+        
+save_place,
+      </if>
+      <if test="admin != null" >
+        admin,
+      </if>
+      <if test="sampleGroups != null" >
+        sample_groups,
+      </if>
+      <if test="quantityPerGroup != null" >
+        quantity_per_group,
+      </if>
+      <if test="inspector != null" >
+        inspector,
+      </if>
+      <if test="receivedDate != null" >
+        received_date,
+      </if>
+      <if test="sampleRequirement != null" >
+        sample_requirement,
+      </if>
+      <if test="generation != null" >
+        generation,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="checkDate != null" >
+        check_date,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="companyId != null" >
+        #{companyId,jdbcType=INTEGER},
+      </if>
+      <if test="sampleName != null" >
+        #{sampleName,jdbcType=CHAR},
+      </if>
+      <if test="sampleCode != null" >
+        #{sampleCode,jdbcType=VARCHAR},
+      </if>
+      <if test="specs != null" >
+        #{specs,jdbcType=INTEGER},
+      </if>
+      <if test="batchNumber != null" >
+        #{batchNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="manufacturer != null" >
+        #{manufacturer,jdbcType=VARCHAR},
+      </if>
+      <if test="sampleOrigin != null" >
+        #{sampleOrigin,jdbcType=VARCHAR},
+      </if>
+      <if test="outward != null" >
+        #{outward,jdbcType=VARCHAR},
+      </if>
+      <if test="picture != null" >
+        #{picture,jdbcType=VARCHAR},
+      </if>
+      <if test="
+savePlace != null" >
+        #{
+savePlace,jdbcType=VARCHAR},
+      </if>
+      <if test="admin != null" >
+        #{admin,jdbcType=VARCHAR},
+      </if>
+      <if test="sampleGroups != null" >
+        #{sampleGroups,jdbcType=INTEGER},
+      </if>
+      <if test="quantityPerGroup != null" >
+        #{quantityPerGroup,jdbcType=INTEGER},
+      </if>
+      <if test="inspector != null" >
+        #{inspector,jdbcType=VARCHAR},
+      </if>
+      <if test="receivedDate != null" >
+        #{receivedDate,jdbcType=CHAR},
+      </if>
+      <if test="sampleRequirement != null" >
+        #{sampleRequirement,jdbcType=VARCHAR},
+      </if>
+      <if test="generation != null" >
+        #{generation,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="checkDate != null" >
+        #{checkDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.SampleEntity" >
+    update test_sample
+    <set >
+      <if test="companyId != null" >
+        company_id = #{companyId,jdbcType=INTEGER},
+      </if>
+      <if test="sampleName != null" >
+        sample_name = #{sampleName,jdbcType=CHAR},
+      </if>
+      <if test="sampleCode != null" >
+        sample_code = #{sampleCode,jdbcType=VARCHAR},
+      </if>
+      <if test="specs != null" >
+        specs = #{specs,jdbcType=INTEGER},
+      </if>
+      <if test="batchNumber != null" >
+        batch_number = #{batchNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="manufacturer != null" >
+        manufacturer = #{manufacturer,jdbcType=VARCHAR},
+      </if>
+      <if test="sampleOrigin != null" >
+        sample_origin = #{sampleOrigin,jdbcType=VARCHAR},
+      </if>
+      <if test="outward != null" >
+        outward = #{outward,jdbcType=VARCHAR},
+      </if>
+      <if test="picture != null" >
+        picture = #{picture,jdbcType=VARCHAR},
+      </if>
+      <if test="
+savePlace != null" >
+        
+save_place = #{
+savePlace,jdbcType=VARCHAR},
+      </if>
+      <if test="admin != null" >
+        admin = #{admin,jdbcType=VARCHAR},
+      </if>
+      <if test="sampleGroups != null" >
+        sample_groups = #{sampleGroups,jdbcType=INTEGER},
+      </if>
+      <if test="quantityPerGroup != null" >
+        quantity_per_group = #{quantityPerGroup,jdbcType=INTEGER},
+      </if>
+      <if test="inspector != null" >
+        inspector = #{inspector,jdbcType=VARCHAR},
+      </if>
+      <if test="receivedDate != null" >
+        received_date = #{receivedDate,jdbcType=CHAR},
+      </if>
+      <if test="sampleRequirement != null" >
+        sample_requirement = #{sampleRequirement,jdbcType=VARCHAR},
+      </if>
+      <if test="generation != null" >
+        generation = #{generation,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="checkDate != null" >
+        check_date = #{checkDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.SampleEntity" >
+    update test_sample
+    set company_id = #{companyId,jdbcType=INTEGER},
+      sample_name = #{sampleName,jdbcType=CHAR},
+      sample_code = #{sampleCode,jdbcType=VARCHAR},
+      specs = #{specs,jdbcType=INTEGER},
+      batch_number = #{batchNumber,jdbcType=VARCHAR},
+      manufacturer = #{manufacturer,jdbcType=VARCHAR},
+      sample_origin = #{sampleOrigin,jdbcType=VARCHAR},
+      outward = #{outward,jdbcType=VARCHAR},
+      picture = #{picture,jdbcType=VARCHAR},
+      
+save_place = #{
+savePlace,jdbcType=VARCHAR},
+      admin = #{admin,jdbcType=VARCHAR},
+      sample_groups = #{sampleGroups,jdbcType=INTEGER},
+      quantity_per_group = #{quantityPerGroup,jdbcType=INTEGER},
+      inspector = #{inspector,jdbcType=VARCHAR},
+      received_date = #{receivedDate,jdbcType=CHAR},
+      sample_requirement = #{sampleRequirement,jdbcType=VARCHAR},
+      generation = #{generation,jdbcType=VARCHAR},
+      state = #{state,jdbcType=VARCHAR},
+      check_date = #{checkDate,jdbcType=TIMESTAMP},
+      remark = #{remark,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
