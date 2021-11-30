@@ -2,6 +2,7 @@ package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
@@ -24,6 +25,13 @@ public interface EntrustService{
      * @return
      */
     List<CheckItemDetailVo> getAllItemByProductId(Integer productId);
+
+    /**
+     * 查询检测项详细信息
+     * @param ids
+     * @return
+     */
+    List<CheckItemInfoVo> getCheckItemInfoVo(List<Integer> ids);
 
     Map<String, List<LabelValueVo>> returnEntrustData();
 

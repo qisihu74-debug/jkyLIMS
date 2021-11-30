@@ -9,6 +9,7 @@ import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ProductItemEntityMapper;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.lims.manage.erp.vo.EntrustAddVo;
@@ -48,8 +49,9 @@ public class EntrustServiceImpl implements EntrustService {
         //存放委托基本信息
         EntrustEntity basisInfo = new EntrustEntity(vo);
         entityMapper.insert(basisInfo);
-        //存放样品信息
+        //更新样品信息
 
+        //新增
 
         result = true;
         return result;
@@ -60,7 +62,10 @@ public class EntrustServiceImpl implements EntrustService {
         return itemEntityMapper.getAllItemByProductId(productId);
     }
 
-
+    @Override
+    public List<CheckItemInfoVo> getCheckItemInfoVo(List<Integer> ids) {
+        return itemEntityMapper.getItemInfo(ids);
+    }
 
 
     @Override

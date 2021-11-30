@@ -272,4 +272,32 @@ logisticsCosts,jdbcType=VARCHAR},
         WHERE
             product_id = #{productId}
     </select>
+
+    <select id="getItemInfo" resultType="com.lims.manage.erp.vo.CheckItemInfoVo">
+        SELECT
+            t1.check_item_id checkItemId,
+            t1.check_item_name checkItemName,
+            t1.product_id productId,
+            t1.check_price checkPrice,
+            t2.method_id methodId,
+            t3.NAME methodName,
+            t4.standard_file_id standardId,
+            t5.CODE standardCode,
+            t5.NAME standardName
+        FROM
+            ( SELECT check_item_id, check_item_name, product_id,check_price FROM test_product_item
+            <if test="checkIds != null">
+                <foreach collection="checkIds" item="id" index="index" open="WHERE check_item_id IN (" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="checkIds == null">
+                WHERE 1 != 1
+            </if>
+                ) t1
+                LEFT JOIN test_product_item_method_rel t2 ON t1.check_item_id = t2.check_item_id
+                LEFT JOIN test_method t3 ON t2.method_id = t3.id
+                LEFT JOIN test_product_item_standard_file_rel t4 ON t1.check_item_id = t4.check_item_id
+                LEFT JOIN test_standard_file t5 ON t4.standard_file_id = t5.id
+    </select>
 </mapper>

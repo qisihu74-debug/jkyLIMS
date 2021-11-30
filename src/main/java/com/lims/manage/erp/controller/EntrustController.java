@@ -5,6 +5,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
+import com.lims.manage.erp.vo.CheckItemParamVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,13 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.service.EntrustService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/entrust/")
@@ -76,5 +73,19 @@ public class EntrustController {
         }
     }
 
+    @RequestMapping("/getItemDetail")
+    public Result getItemDetail(@RequestBody CheckItemParamVo itemIds){
+        System.out.println("星星："+itemIds.getIds());
+        List<Integer> ids = itemIds.getIds();
+        for (int i = 0; i < ids.size(); i++) {
+            System.out.println("星星1："+ids.get(i));
+        }
+        return ResultUtil.success(entrustService.getCheckItemInfoVo(itemIds.getIds()));
+//        if(itemIds == null){
+//            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+//        }else{
+//
+//        }
+    }
 
 }

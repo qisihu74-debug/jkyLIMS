@@ -130,7 +130,9 @@ public class EntrustAddVo {
      * 见证人ID
      */
     private Integer witnessPersonId;
-
+    /**
+     * 样品信息
+     */
     private List<SampleEntity> samples;
 
 
