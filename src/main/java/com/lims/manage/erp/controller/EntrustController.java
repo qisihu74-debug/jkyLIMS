@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
@@ -57,7 +58,11 @@ public class EntrustController {
         }
         return ResultUtil.error(201,"增加数据失败");
     }
-
+    @RequestMapping("get_Sample")
+    public Result ReturnSampleData(SampleEntity sampleEntity)
+    {
+        return ResultUtil.success(entrustService.getSampleDataList(sampleEntity));
+    }
 
 
 

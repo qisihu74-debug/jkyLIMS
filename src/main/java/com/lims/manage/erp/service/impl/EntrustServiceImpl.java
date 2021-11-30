@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TestCompanyDao;
 import com.lims.manage.erp.mapper.TestCustomerDao;
 import com.lims.manage.erp.entity.EntrustEntity;
@@ -26,6 +27,8 @@ public class EntrustServiceImpl implements EntrustService {
     TestCompanyDao testCompanyDao;
     @Autowired
     TestCustomerDao testCustomerDao;
+    @Autowired
+    SampleEntityMapper sampleEntityMapper;
 
 
     @Override
@@ -123,5 +126,11 @@ public class EntrustServiceImpl implements EntrustService {
             return false;
         }
         return false;
+    }
+
+    @Override
+    public List<SampleEntity> getSampleDataList(SampleEntity sampleEntity) {
+
+        return sampleEntityMapper.selectSampleList(sampleEntity);
     }
 }
