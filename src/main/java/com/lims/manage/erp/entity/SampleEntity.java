@@ -1,5 +1,7 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+
 import java.util.Date;
 
 public class SampleEntity {

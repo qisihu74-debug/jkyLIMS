@@ -1,6 +1,9 @@
 package com.lims.manage.erp.vo;
 
+import com.lims.manage.erp.entity.SampleEntity;
+
 import java.util.Date;
+import java.util.List;
 
 public class EntrustAddVo {
     /**
@@ -128,7 +131,7 @@ public class EntrustAddVo {
      */
     private Integer witnessPersonId;
 
-//    private List<>
+    private List<SampleEntity> samples;
 
 
     public String getEntrustmentNo() {

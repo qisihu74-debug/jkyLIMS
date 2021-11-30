@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lims.manage.erp.mapper.ProductItemEntityMapper" >
+  <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.ProductItemEntity" >
+    <constructor >
+      <idArg column="check_item_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="check_item_pid" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="check_item_code" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="product_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="report_model_id" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="check_item_name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="coordinate" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="icon" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="additional_fees" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="
+logistics_costs" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="unit" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="samplestandard" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="sample_count" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="place" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="duration" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="frequency" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="difficulty" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="remark" jdbcType="VARCHAR" javaType="java.lang.String" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    check_item_id, check_item_pid, check_item_code, product_id, report_model_id, check_item_name, 
+    coordinate, icon, additional_fees, 
+logistics_costs, unit, samplestandard, sample_count, 
+    place, duration, frequency, difficulty, remark
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from test_product_item
+    where check_item_id = #{checkItemId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from test_product_item
+    where check_item_id = #{checkItemId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.lims.manage.erp.entity.ProductItemEntity" >
+    insert into test_product_item (check_item_id, check_item_pid, check_item_code, 
+      product_id, report_model_id, check_item_name, 
+      coordinate, icon, additional_fees, 
+      
+logistics_costs, unit, samplestandard, 
+      sample_count, place, duration, 
+      frequency, difficulty, remark
+      )
+    values (#{checkItemId,jdbcType=INTEGER}, #{checkItemPid,jdbcType=INTEGER}, #{checkItemCode,jdbcType=VARCHAR}, 
+      #{productId,jdbcType=INTEGER}, #{reportModelId,jdbcType=VARCHAR}, #{checkItemName,jdbcType=VARCHAR}, 
+      #{coordinate,jdbcType=VARCHAR}, #{icon,jdbcType=VARCHAR}, #{additionalFees,jdbcType=VARCHAR}, 
+      #{
+logisticsCosts,jdbcType=VARCHAR}, #{unit,jdbcType=VARCHAR}, #{samplestandard,jdbcType=VARCHAR}, 
+      #{sampleCount,jdbcType=INTEGER}, #{place,jdbcType=VARCHAR}, #{duration,jdbcType=VARCHAR}, 
+      #{frequency,jdbcType=VARCHAR}, #{difficulty,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ProductItemEntity" >
+    insert into test_product_item
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="checkItemId != null" >
+        check_item_id,
+      </if>
+      <if test="checkItemPid != null" >
+        check_item_pid,
+      </if>
+      <if test="checkItemCode != null" >
+        check_item_code,
+      </if>
+      <if test="productId != null" >
+        product_id,
+      </if>
+      <if test="reportModelId != null" >
+        report_model_id,
+      </if>
+      <if test="checkItemName != null" >
+        check_item_name,
+      </if>
+      <if test="coordinate != null" >
+        coordinate,
+      </if>
+      <if test="icon != null" >
+        icon,
+      </if>
+      <if test="additionalFees != null" >
+        additional_fees,
+      </if>
+      <if test="
+logisticsCosts != null" >
+        
+logistics_costs,
+      </if>
+      <if test="unit != null" >
+        unit,
+      </if>
+      <if test="samplestandard != null" >
+        samplestandard,
+      </if>
+      <if test="sampleCount != null" >
+        sample_count,
+      </if>
+      <if test="place != null" >
+        place,
+      </if>
+      <if test="duration != null" >
+        duration,
+      </if>
+      <if test="frequency != null" >
+        frequency,
+      </if>
+      <if test="difficulty != null" >
+        difficulty,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="checkItemId != null" >
+        #{checkItemId,jdbcType=INTEGER},
+      </if>
+      <if test="checkItemPid != null" >
+        #{checkItemPid,jdbcType=INTEGER},
+      </if>
+      <if test="checkItemCode != null" >
+        #{checkItemCode,jdbcType=VARCHAR},
+      </if>
+      <if test="productId != null" >
+        #{productId,jdbcType=INTEGER},
+      </if>
+      <if test="reportModelId != null" >
+        #{reportModelId,jdbcType=VARCHAR},
+      </if>
+      <if test="checkItemName != null" >
+        #{checkItemName,jdbcType=VARCHAR},
+      </if>
+      <if test="coordinate != null" >
+        #{coordinate,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null" >
+        #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="additionalFees != null" >
+        #{additionalFees,jdbcType=VARCHAR},
+      </if>
+      <if test="
+logisticsCosts != null" >
+        #{
+logisticsCosts,jdbcType=VARCHAR},
+      </if>
+      <if test="unit != null" >
+        #{unit,jdbcType=VARCHAR},
+      </if>
+      <if test="samplestandard != null" >
+        #{samplestandard,jdbcType=VARCHAR},
+      </if>
+      <if test="sampleCount != null" >
+        #{sampleCount,jdbcType=INTEGER},
+      </if>
+      <if test="place != null" >
+        #{place,jdbcType=VARCHAR},
+      </if>
+      <if test="duration != null" >
+        #{duration,jdbcType=VARCHAR},
+      </if>
+      <if test="frequency != null" >
+        #{frequency,jdbcType=VARCHAR},
+      </if>
+      <if test="difficulty != null" >
+        #{difficulty,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.ProductItemEntity" >
+    update test_product_item
+    <set >
+      <if test="checkItemPid != null" >
+        check_item_pid = #{checkItemPid,jdbcType=INTEGER},
+      </if>
+      <if test="checkItemCode != null" >
+        check_item_code = #{checkItemCode,jdbcType=VARCHAR},
+      </if>
+      <if test="productId != null" >
+        product_id = #{productId,jdbcType=INTEGER},
+      </if>
+      <if test="reportModelId != null" >
+        report_model_id = #{reportModelId,jdbcType=VARCHAR},
+      </if>
+      <if test="checkItemName != null" >
+        check_item_name = #{checkItemName,jdbcType=VARCHAR},
+      </if>
+      <if test="coordinate != null" >
+        coordinate = #{coordinate,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null" >
+        icon = #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="additionalFees != null" >
+        additional_fees = #{additionalFees,jdbcType=VARCHAR},
+      </if>
+      <if test="
+logisticsCosts != null" >
+        
+logistics_costs = #{
+logisticsCosts,jdbcType=VARCHAR},
+      </if>
+      <if test="unit != null" >
+        unit = #{unit,jdbcType=VARCHAR},
+      </if>
+      <if test="samplestandard != null" >
+        samplestandard = #{samplestandard,jdbcType=VARCHAR},
+      </if>
+      <if test="sampleCount != null" >
+        sample_count = #{sampleCount,jdbcType=INTEGER},
+      </if>
+      <if test="place != null" >
+        place = #{place,jdbcType=VARCHAR},
+      </if>
+      <if test="duration != null" >
+        duration = #{duration,jdbcType=VARCHAR},
+      </if>
+      <if test="frequency != null" >
+        frequency = #{frequency,jdbcType=VARCHAR},
+      </if>
+      <if test="difficulty != null" >
+        difficulty = #{difficulty,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where check_item_id = #{checkItemId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.ProductItemEntity" >
+    update test_product_item
+    set check_item_pid = #{checkItemPid,jdbcType=INTEGER},
+      check_item_code = #{checkItemCode,jdbcType=VARCHAR},
+      product_id = #{productId,jdbcType=INTEGER},
+      report_model_id = #{reportModelId,jdbcType=VARCHAR},
+      check_item_name = #{checkItemName,jdbcType=VARCHAR},
+      coordinate = #{coordinate,jdbcType=VARCHAR},
+      icon = #{icon,jdbcType=VARCHAR},
+      additional_fees = #{additionalFees,jdbcType=VARCHAR},
+      
+logistics_costs = #{
+logisticsCosts,jdbcType=VARCHAR},
+      unit = #{unit,jdbcType=VARCHAR},
+      samplestandard = #{samplestandard,jdbcType=VARCHAR},
+      sample_count = #{sampleCount,jdbcType=INTEGER},
+      place = #{place,jdbcType=VARCHAR},
+      duration = #{duration,jdbcType=VARCHAR},
+      frequency = #{frequency,jdbcType=VARCHAR},
+      difficulty = #{difficulty,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR}
+    where check_item_id = #{checkItemId,jdbcType=INTEGER}
+  </update>
+
+    <select id="getAllItemByProductId" resultType="com.lims.manage.erp.vo.CheckItemDetailVo" parameterType="java.lang.Integer" >
+        SELECT
+            check_item_id AS checkItemId,
+            check_item_pid AS itemPid,
+            product_id AS productId,
+            check_item_name AS checkItemName
+        FROM
+            test_product_item
+        WHERE
+            product_id = #{productId}
+    </select>
+</mapper>
