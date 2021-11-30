@@ -39,6 +39,29 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     from test_sample
     where id = #{id,jdbcType=INTEGER}
   </select>
+    <select id="selectSampleList" resultType="com.lims.manage.erp.entity.SampleEntity" parameterType="com.lims.manage.erp.entity.SampleEntity">
+        SELECT
+        sample_name,
+        batch_number,
+        manufacturer,
+        sample_requirement
+        FROM
+        test_sample
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="sampleName!=null and sampleName!=''">
+                and sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="batchNumber!=null and batchNumber!=''">
+                and batch_number LIKE CONCAT('%',#{batchNumber},'%')
+            </if>
+            <if test="manufacturer!=null and manufacturer!=''">
+                and manufacturer LIKE CONCAT('%',#{manufacturer},'%')
+            </if>
+            <if test="receivedDate!=null and receivedDate!=''">
+                and sample_requirement LIKE CONCAT('%',#{receivedDate},'%')
+            </if>
+        </trim>
+    </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from test_sample
     where id = #{id,jdbcType=INTEGER}
