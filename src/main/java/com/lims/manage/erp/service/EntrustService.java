@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
