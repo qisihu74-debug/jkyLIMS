@@ -38,13 +38,41 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     from test_sample
     where id = #{id,jdbcType=INTEGER}
   </select>
-    <select id="selectSampleList" resultType="com.lims.manage.erp.entity.SampleEntity" parameterType="com.lims.manage.erp.entity.SampleEntity">
+  <select id="selectSampleListGroup" resultType="com.lims.manage.erp.entity.SampleEntity">
         SELECT
-        product_id,
-        sample_name,
-        batch_number,
-        manufacturer,
-        sample_requirement
+         t2.company_id as companyId, t2.sample_name as sampleName, t2.sample_code as sampleCode,
+         t2.specs as specs, t2.batch_number as batchNumber, t2.manufacturer as manufacturer, t2.sample_origin as sampleOrigin,
+         t2.outward as outward, t2.picture as picture, t2.save_place as savePlace, t2.admin as admin,  t2.sample_groups as sampleGroups,
+         t2.quantity_per_group as quantityPerGroup, t2.inspector as inspector,t2.received_date as receivedDate, t2.sample_requirement as sampleRequirement,
+          t2.generation as generation, t2.state as state, t2.check_date as checkDate, t2.remark as remark,t2.product_id as productId
+        FROM
+        test_entrusted_sample_details_rel AS t1
+        LEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id
+        WHERE t1.entrustment_id =#{entrustmentId}
+    </select>
+  <select id="selectdardFileIds" resultType="integer">
+        SELECT
+        standard_id
+        FROM test_entrusted_sample_standard_rel
+        WHERE sample_id = #{sampleId}
+    </select>
+  <select id="selectSampleCheckItem" resultType="com.lims.manage.erp.vo.CheckItemInfoVo">
+        SELECT
+            t1.check_item_id AS checkItemId,
+            t2.check_item_name AS checkItemName,
+            t1.test_method_id AS methodId
+        FROM
+            test_entrusted_sample_checkitem_rel AS t1
+            LEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id
+        WHERE
+            t1.sample_id =  #{sampleId}
+    </select>
+  <select id="selectSampleList" resultType="com.lims.manage.erp.entity.SampleEntity" parameterType="com.lims.manage.erp.entity.SampleEntity">
+        SELECT
+        id, company_id, sample_name, sample_code, specs, batch_number, manufacturer, sample_origin,
+        outward, picture,
+        save_place, admin, sample_groups, quantity_per_group, inspector,
+        received_date, sample_requirement, generation, state, check_date, remark,product_id
         FROM
         test_sample
         <trim prefix="WHERE" prefixOverrides="AND |OR ">

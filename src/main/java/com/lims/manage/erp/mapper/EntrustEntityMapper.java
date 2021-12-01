@@ -1,10 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustPamentEntity;
-import com.lims.manage.erp.entity.EntrustSampleEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.*;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +15,8 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     Integer selectMaxNo();
+
+    EntrustEntity selectByKeyId(Integer id);
 
     /**
      * 保存委托单下样品信息
@@ -42,4 +41,10 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @param pamentEntity
      */
     void saveEntrustPayRecord(EntrustPamentEntity pamentEntity);
+    /**
+     * 委托历史 查询。
+     * @param entrustHistoryEntity
+     * @return
+     */
+    List<EntrustHistoryEntity> selectEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity);
 }

@@ -1,16 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustPamentEntity;
-import com.lims.manage.erp.entity.EntrustSampleEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.entity.TestCompanyEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.entity.TestInitDataEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ProductItemEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
@@ -262,7 +253,7 @@ public class EntrustServiceImpl implements EntrustService {
         }else{
             newMax = Integer.parseInt(maxNumber);
         }
-        if(details != null){
+        if(details != null && details.size()>0){
             for (int i = 0; i < details.size(); i++) {
                 //生成样品编号
                 StringBuilder code = new StringBuilder("YP-"+sdf.format(now)+"-");
@@ -303,5 +294,28 @@ public class EntrustServiceImpl implements EntrustService {
             result = sampleEntityMapper.insert(sampleEntity);
         }
         return result;
+    }
+
+    @Override
+    public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) {
+
+        return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
+    }
+    @Override
+    public EntrustAddVo getEntrustHistoryDetail(Integer entrustmentId) {
+        EntrustAddVo entrustAddVo = new EntrustAddVo();
+        // 通过委托ID 委托单信息
+        EntrustEntity entrustEntity   = entityMapper.selectByKeyId(entrustmentId);
+        // 通过委托ID 样品集合
+        List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
+        // 样品信息 进行补充 检测依据集合，检测项集合
+        for(SampleEntity sampleEntity:sampleCollection){
+            sampleEntity.setStandardFileIds(sampleEntityMapper.selectdardFileIds(sampleEntity.getId()));
+            sampleEntity.setSampleCheckItem(null);
+                    sampleEntityMapper.selectSampleCheckItem(sampleEntity.getId());
+        }
+        entrustAddVo.setSamples(sampleCollection);
+        System.out.println("展示数据"+entrustAddVo);
+        return entrustAddVo;
     }
 }

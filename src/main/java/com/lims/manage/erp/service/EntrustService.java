@@ -1,10 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.entity.TestSampleJsonEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.vo.*;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
@@ -59,5 +56,18 @@ public interface EntrustService {
      * @return
      */
     Integer addSampleData(SampleAddParamVo addParamVo);
+
+    /**
+     * 历史委托信息
+     * @param entrustHistoryEntity
+     * @return
+     */
+    List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity);
+    /**
+     * 史委托信息 具体详情
+     * @param entrustmentId
+     * @return
+     */
+    EntrustAddVo getEntrustHistoryDetail(Integer entrustmentId);
 
 }

@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,22 @@ public interface SampleEntityMapper {
 
     SampleEntity selectByPrimaryKey(Integer id);
 
+    List<SampleEntity> selectSampleListGroup(Integer entrustmentId);
+
     List<SampleEntity> selectSampleList(SampleEntity record);
+    /**
+     * 样品下检测依据
+     * @param sampleId
+     * @return
+     */
+    List<Integer> selectdardFileIds(Integer sampleId);
+    /**
+     *  检测依据信息
+     * @param sampleId
+     * @return
+     */
+    List<CheckItemInfoVo> selectSampleCheckItem(Integer sampleId);
+
 
     int updateByPrimaryKeySelective(SampleEntity record);
 

@@ -4,7 +4,41 @@
   <select id="selectMaxNo">
     select max(entrustment_no) from test_entrusted
   </select>
+  <select id="selectByKeyId" parameterType="java.lang.Integer" resultType="com.lims.manage.erp.entity.EntrustEntity">
+    select
+    id, entrustment_no, entrust_type, entrust_people, entrust_phone, witness_uint,
+    witness_person, witness_phone, project_name, project_part, sampling_method, check_purpose,
+    report_count, report_type, request_date, payment_method, present_information, acceptance_date,
+     team, state, remark, invalid_reason, operate_user, operate_date, file_url,  is_save
+    from test_entrusted
+    where id = #{id,jdbcType=INTEGER}
+  </select>
 
+  <select id="selectEntrustHistoryList" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity" parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
+    SELECT
+    t1.entrustment_no as entrustmentNo,
+    t3.sample_name as sampleNname,
+    t1.entrust_people as entrustPeople,
+    t1.project_name as projectName
+    FROM
+    test_entrusted AS t1
+    LEFT JOIN test_entrusted_sample_details_rel AS t2 ON t1.id = t2.entrustment_id
+    LEFT JOIN test_sample AS t3 ON t2.sample_id = t3.id
+    <trim prefix="WHERE" prefixOverrides="AND |OR ">
+      <if test="entrustmentNo!=null and entrustmentNo!=''">
+        and t1.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
+      </if>
+      <if test="sampleNname!=null and sampleNname!=''">
+        and t3.sample_name LIKE CONCAT('%',#{sampleNname},'%')
+      </if>
+      <if test="entrustPeople!=null and entrustPeople!=''">
+        and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+      </if>
+      <if test="projectName!=null and projectName!=''">
+        and t1.project_name LIKE CONCAT('%',#{projectName},'%')
+      </if>
+    </trim>
+  </select>
   <insert id="BatchSaveEntrustSample" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
     INSERT into  test_entrusted_sample_details_rel(sample_id,
     entrustment_id

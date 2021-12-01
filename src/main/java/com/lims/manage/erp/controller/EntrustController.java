@@ -1,9 +1,6 @@
 package com.lims.manage.erp.controller;
 
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.entity.TestSampleJsonEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -149,6 +146,20 @@ public class EntrustController {
             System.out.println("文件获取异常:{}"+e);
         }
         return null;
+    }
+    /**
+     * 历史委托
+     * @param entrustHistoryEntity
+     * @return
+     */
+    @RequestMapping("/get_entrust_history")
+    public Result getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity){
+        return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
+    }
+    @RequestMapping("/get_entrust_history_detail")
+    public Result getEntrustHistoryDetail(Integer entrustmentId){
+
+        return ResultUtil.success(entrustService.getEntrustHistoryDetail(entrustmentId));
     }
 
 }
