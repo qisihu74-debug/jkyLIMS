@@ -114,6 +114,10 @@ public class SampleEntity {
      * 判定依据
      */
     private List<Integer> standardFileIds;
+    /**
+     * 样品检测项
+     */
+    private List<SampleItemEntity> sampleCheckItem;
 //    /**
 //     * 样品与检测项
 //     */

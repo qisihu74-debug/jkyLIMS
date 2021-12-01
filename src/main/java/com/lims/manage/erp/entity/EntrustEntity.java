@@ -140,6 +140,10 @@ public class EntrustEntity {
      * 见证人ID
      */
     private Integer witnessPersonId;
+    /**
+     * 总计应收款
+     */
+    private String countPrice;
 
     public EntrustEntity(Long id, Integer entrustmentNo, Integer entrustType, String entrustPeople, String entrustPhone, String witnessUint, String witnessPerson, String witnessPhone, String projectName, String projectPart, Integer samplingMethod, Integer checkPurpose, Integer reportCount, Integer reportType, Date requestDate, Integer paymentMethod, String paymentRecord, String paymentCount, String presentInformation, Date acceptanceDate, Integer team, Integer state, String remark, String invalidReason, Integer operateUser, Date operateDate, String fileUrl, String sealType, String isSave, Integer entrustPeopleId, Integer witnessPersonId) {
         this.id = id;

@@ -1,0 +1,66 @@
+package com.lims.manage.erp.entity;
+
+import lombok.Data;
+
+import java.util.Date;
+
+/**
+ * @author gjl
+ * @version V1.0
+ * @Package com.lims.manage.erp.entity
+ * @desc
+ * @date 2021/12/1 16:07
+ * @Copyright © 河南交科院
+ */
+@Data
+public class SampleItemEntity {
+    /**
+     * 样品id
+     */
+    private Integer sampleId;
+    /**
+     * 检测项id
+     */
+    private Long checkItemId;
+    /**
+     * 仪器id
+     */
+    private Integer instrumentId;
+    /**
+     * 检测依据
+     */
+    private Integer standardFileId;
+    /**
+     * 检测方法id
+     */
+    private Integer testMethodId;
+    /**
+     * 检测样次
+     */
+    private Integer times;
+    /**
+     * 单价
+     */
+    private Integer unitPrice;
+    /**
+     * 开始时间
+     */
+    private Date startTime;
+    /**
+     * 结束时间
+     */
+    private Date endTime;
+    /**
+     * 结果描述
+     */
+    private String result;
+    /**
+     * 检测项检测人
+     */
+    private String testPeople;
+    /**
+     * 是否已审批1.是0否
+     */
+    private String isApproved;
+
+}

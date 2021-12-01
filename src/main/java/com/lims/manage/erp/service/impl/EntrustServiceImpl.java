@@ -1,28 +1,46 @@
 package com.lims.manage.erp.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustPamentEntity;
+import com.lims.manage.erp.entity.EntrustSampleEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.TestCompanyEntity;
+import com.lims.manage.erp.entity.TestCompanyJsonEntity;
+import com.lims.manage.erp.entity.TestCustomerEntity;
+import com.lims.manage.erp.entity.TestCustomerJsonEntity;
+import com.lims.manage.erp.entity.TestInitDataEntity;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.ProductItemEntityMapper;
+import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.TestCompanyDao;
+import com.lims.manage.erp.mapper.TestCustomerDao;
+import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.EntrustService;
-import com.lims.manage.erp.vo.*;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.SampleAddDetailVo;
+import com.lims.manage.erp.vo.SampleAddParamVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -72,9 +90,11 @@ public class EntrustServiceImpl implements EntrustService {
             String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, vo.getFile(), "file:" + code);
             basisInfo.setFileUrl(upload);
         }
-        entityMapper.insert(basisInfo);
+
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
+        int totalMoney = 0;
         List<SampleEntity> samples = vo.getSamples();
+        List<SampleItemEntity> sampleItemList = new ArrayList<>();
         List<EntrustSampleEntity> list = new ArrayList<>();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
         if (!CollectionUtils.isEmpty(samples)){
@@ -90,15 +110,32 @@ public class EntrustServiceImpl implements EntrustService {
                     sampleEntity1.setStandardId(integer);
                     list1.add(sampleEntity1);
                 }
+                //样品下检测项
+                List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
+                //计算检测项总价钱
+                for (SampleItemEntity entity:sampleCheckItem) {
+                    int money = entity.getTimes() * entity.getUnitPrice();
+                    totalMoney = totalMoney+money;
+                }
+                sampleItemList.addAll(sampleCheckItem);
             }
             entityMapper.BatchSaveEntrustSample(list);
             entityMapper.BatchSaveSampleStandard(list1);
         }
-        //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel，上传附件
-
+        //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+        entityMapper.BatchSaveEntrustSampleItem(sampleItemList);
         //更新委托单收费记录信息
-
-
+        if (!StringUtils.isEmpty(vo.getPaymentRecord())){
+            EntrustPamentEntity pamentEntity = new EntrustPamentEntity();
+            pamentEntity.setEntrustmentId(basisInfo.getId());
+            pamentEntity.setPaymentDate(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
+            pamentEntity.setPrice(vo.getPaymentRecord());
+            pamentEntity.setOperator(ShiroUtils.getUserInfo().getUsername());
+            entityMapper.saveEntrustPayRecord(pamentEntity);
+        }
+        //得到总价钱，再保存委托基本信息
+        basisInfo.setPaymentCount(totalMoney+"");
+        entityMapper.insert(basisInfo);
         return true;
     }
 

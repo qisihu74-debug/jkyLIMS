@@ -4,4 +4,47 @@
   <select id="selectMaxNo">
     select max(entrustment_no) from test_entrusted
   </select>
+
+  <insert id="BatchSaveEntrustSample" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
+    INSERT into  test_entrusted_sample_details_rel(sample_id,
+    entrustment_id
+    )
+    VALUES
+    <foreach collection="list" item="item" open="" separator="," close="">
+      (#{item.sampleId},#{item.entrustmentId})
+    </foreach>
+  </insert>
+
+  <insert id="BatchSaveSampleStandard" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
+    INSERT into  test_entrusted_sample_details_rel(sample_id,
+    standard_id
+    )
+    VALUES
+    <foreach collection="list1" item="item" open="" separator="," close="">
+      (#{item.sampleId},#{item.standardId})
+    </foreach>
+  </insert>
+
+  <insert id="BatchSaveEntrustSampleItem" parameterType="com.lims.manage.erp.entity.SampleItemEntity">
+    INSERT into  test_entrusted_sample_checkitem_rel(sample_id,
+    check_item_id,
+    standard_file_id,
+    test_method_id,
+    times,
+    unit_price
+    )
+    VALUES
+    <foreach collection="list1" item="item" open="" separator="," close="">
+      (#{item.sampleId},#{item.checkItemId},#{item.standardFileId},#{item.testMethodId},#{times},#{item.unitPrice})
+    </foreach>
+  </insert>
+
+  <insert id="saveEntrustPayRecord" parameterType="com.lims.manage.erp.entity.EntrustPamentEntity">
+        insert into test_entrusted_payment_record(entrustment_id,
+price,
+payment_date,
+operator
+)
+        values (#{entrustmentId},#{price},#{paymentDate},#{operator})
+  </insert>
 </mapper>

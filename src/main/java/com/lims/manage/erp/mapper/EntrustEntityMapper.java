@@ -2,7 +2,9 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustPamentEntity;
 import com.lims.manage.erp.entity.EntrustSampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -28,4 +30,16 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @param list1
      */
     void BatchSaveSampleStandard(List<EntrustSampleEntity> list1);
+
+    /**
+     * 保存委托样品下检测项信息
+     * @param sampleItemList
+     */
+    void BatchSaveEntrustSampleItem(List<SampleItemEntity> sampleItemList);
+
+    /**
+     * 缴费记录新增
+     * @param pamentEntity
+     */
+    void saveEntrustPayRecord(EntrustPamentEntity pamentEntity);
 }
