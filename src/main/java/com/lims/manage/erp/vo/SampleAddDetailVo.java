@@ -1,6 +1,7 @@
 package com.lims.manage.erp.vo;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class SampleAddDetailVo {
@@ -16,4 +17,6 @@ public class SampleAddDetailVo {
      * 样品照片
      */
     private String picture;
+
+    private MultipartFile files;
 }

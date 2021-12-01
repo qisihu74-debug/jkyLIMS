@@ -93,7 +93,6 @@ public class EntrustServiceImpl implements EntrustService {
         return itemEntityMapper.getItemInfo(ids);
     }
 
-
     @Override
     public  Map<String,List<LabelValueVo>> returnEntrustData() {
 
@@ -207,7 +206,7 @@ public class EntrustServiceImpl implements EntrustService {
         }else{
             newMax = Integer.parseInt(maxNumber);
         }
-        if(details.size()>0){
+        if(details != null){
             for (int i = 0; i < details.size(); i++) {
                 //生成样品编号
                 StringBuilder code = new StringBuilder("YP-"+sdf.format(now)+"-");
@@ -234,11 +233,18 @@ public class EntrustServiceImpl implements EntrustService {
                 }
                 //保存样品图片
 //                String picture = details.get(i).getPicture();
+//                MinIoUtil.upl
                 //保存样品信息
                 SampleEntity sampleEntity = new SampleEntity(addParamVo,details.get(i),productName,sampleCode,null);
                 result = sampleEntityMapper.insert(sampleEntity);
-
             }
+        }else {
+            StringBuilder code = new StringBuilder("YP-"+sdf.format(now)+"-");
+            //生成样品编号
+            String num = String.format("%0" + 4 + "d", newMax+1);
+            StringBuilder sampleCode = code.append(num);
+            SampleEntity sampleEntity = new SampleEntity(addParamVo,null,productName,sampleCode.toString(),null);
+            result = sampleEntityMapper.insert(sampleEntity);
         }
         return result;
     }

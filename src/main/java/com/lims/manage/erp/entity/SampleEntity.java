@@ -126,7 +126,7 @@ public class SampleEntity {
         this.sampleName = sampleName;
         this.sampleCode = sampleCode;
         this.specs = addParamVo.getSpecs();
-        this.batchNumber = detailVo.getBatchNumber();
+        this.batchNumber = detailVo == null ? null:detailVo.getBatchNumber();
         this.manufacturer = addParamVo.getManufacturer();
         this.sampleOrigin = addParamVo.getSampleOrigin();
         this.outward = addParamVo.getOutward();
