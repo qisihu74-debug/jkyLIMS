@@ -3,6 +3,7 @@ package com.lims.manage.erp.entity;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -32,7 +33,7 @@ public class SampleEntity {
     /**
      *规格/等级
      */
-    private Integer specs;
+    private String specs;
     /**
      *批号、编号
      */
@@ -49,10 +50,22 @@ public class SampleEntity {
      *外观
      */
     private String outward;
+    /**照片文件
+     *
+     */
+    private MultipartFile pictureFile;
     /**
      *样品照片
      */
     private String picture;
+    /**
+     * 文件对象
+     */
+    private MultipartFile file;
+    /**
+     * 附件url
+     */
+    private String fileUrl;
     /**
      *保存地点
      */
@@ -98,11 +111,15 @@ public class SampleEntity {
      */
     private String remark;
     /**
+     * 判定依据
+     */
+    private List<Integer> standardFileIds;
+    /**
      * 样品与检测项
      */
     private List<CheckItemInfoVo> sampleCheckItem;
 
-    public SampleEntity(Integer id, Integer companyId, String sampleName, String sampleCode, Integer specs, String batchNumber, String manufacturer, String sampleOrigin, String outward, String picture, String 
+    public SampleEntity(Integer id, Integer companyId, String sampleName, String sampleCode, String specs, String batchNumber, String manufacturer, String sampleOrigin, String outward, String picture, String
 savePlace, String admin, Integer sampleGroups, Integer quantityPerGroup, String inspector, String receivedDate, String sampleRequirement, String generation, String state, Date checkDate, String remark) {
         this.id = id;
         this.companyId = companyId;
@@ -163,11 +180,11 @@ savePlace, String admin, Integer sampleGroups, Integer quantityPerGroup, String 
         this.sampleCode = sampleCode == null ? null : sampleCode.trim();
     }
 
-    public Integer getSpecs() {
+    public String getSpecs() {
         return specs;
     }
 
-    public void setSpecs(Integer specs) {
+    public void setSpecs(String specs) {
         this.specs = specs;
     }
 

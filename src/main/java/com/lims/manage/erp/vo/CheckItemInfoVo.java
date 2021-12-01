@@ -1,5 +1,8 @@
 package com.lims.manage.erp.vo;
 
+import lombok.Data;
+
+@Data
 public class CheckItemInfoVo {
     private Integer checkItemId;
     private String checkItemName;
@@ -10,6 +13,10 @@ public class CheckItemInfoVo {
     private Integer standardId;
     private String standardCode;
     private String standardName;
+    /**
+     * 检测样次
+     */
+    private int times;
 
     public CheckItemInfoVo() {
     }
