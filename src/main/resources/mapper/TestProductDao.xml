@@ -15,4 +15,22 @@
         </if>
     </select>
 
+    <select id="getProductNameById" resultType="java.lang.String" parameterType="int">
+        SELECT
+            product_name productName
+        FROM
+            test_product
+        WHERE
+            product_id = #{productId}
+    </select>
+
+    <select id="getMaxNumber" resultType="java.lang.String" parameterType="string">
+        SELECT
+            MAX( SUBSTR( sample_code,9,4 ) ) maxNum
+        FROM
+            test_sample
+        WHERE
+            sample_code LIKE CONCAT('%-',#{year},'-%')
+    </select>
+
 </mapper>

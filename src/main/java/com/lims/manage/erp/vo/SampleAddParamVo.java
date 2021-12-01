@@ -2,7 +2,6 @@ package com.lims.manage.erp.vo;
 
 import lombok.Data;
 
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -10,7 +9,7 @@ public class SampleAddParamVo {
     /**
      *样品名称
      */
-    private String sampleName;
+    private Integer sampleName;
     /**
      *委托单位
      */
@@ -30,11 +29,11 @@ public class SampleAddParamVo {
     /**
      *规格/等级
      */
-    private Integer specs;
+    private String specs;
     /**
      * 收样时间
      */
-    private Date receivedDate;
+    private String receivedDate;
     /**
      *代表批量
      */

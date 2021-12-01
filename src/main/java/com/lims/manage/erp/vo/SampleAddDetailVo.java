@@ -1,5 +1,8 @@
 package com.lims.manage.erp.vo;
 
+import lombok.Data;
+
+@Data
 public class SampleAddDetailVo {
     /**
      * 序号

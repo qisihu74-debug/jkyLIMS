@@ -21,4 +21,5 @@ public interface SampleEntityMapper {
     int updateByPrimaryKeySelective(SampleEntity record);
 
     int updateByPrimaryKey(SampleEntity record);
+
 }

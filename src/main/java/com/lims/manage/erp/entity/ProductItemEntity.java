@@ -19,8 +19,7 @@ public class ProductItemEntity {
 
     private String additionalFees;
 
-    private String 
-logisticsCosts;
+    private String logisticsCosts;
 
     private String unit;
 
@@ -49,9 +48,7 @@ logisticsCosts, String unit, String samplestandard, Integer sampleCount, String 
         this.coordinate = coordinate;
         this.icon = icon;
         this.additionalFees = additionalFees;
-        this.
-logisticsCosts = 
-logisticsCosts;
+        this.logisticsCosts = logisticsCosts;
         this.unit = unit;
         this.samplestandard = samplestandard;
         this.sampleCount = sampleCount;
