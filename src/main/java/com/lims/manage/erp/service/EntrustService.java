@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
@@ -12,7 +13,7 @@ import com.lims.manage.erp.vo.LabelValueVo;
 import java.util.List;
 import java.util.Map;
 
-public interface EntrustService{
+public interface EntrustService {
     /**
      * 新增委托
      * @param vo

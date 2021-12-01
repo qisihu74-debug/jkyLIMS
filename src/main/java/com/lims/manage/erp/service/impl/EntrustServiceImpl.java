@@ -1,8 +1,11 @@
 package com.lims.manage.erp.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustSampleEntity;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SysMenuEntity;
 import com.lims.manage.erp.entity.TestCompanyEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerEntity;
@@ -12,6 +15,7 @@ import com.lims.manage.erp.entity.TestSampleJsonEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ProductItemEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.SysMenuDao;
 import com.lims.manage.erp.mapper.TestCompanyDao;
 import com.lims.manage.erp.mapper.TestCustomerDao;
 import com.lims.manage.erp.mapper.TestProductDao;
@@ -27,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,7 +88,26 @@ public class EntrustServiceImpl implements EntrustService {
         }
         entityMapper.insert(basisInfo);
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
-
+        List<SampleEntity> samples = vo.getSamples();
+        List<EntrustSampleEntity> list = new ArrayList<>();
+        List<EntrustSampleEntity> list1 = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(samples)){
+            for (SampleEntity sampleEntity:samples) {
+                EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
+                entrustSampleEntity.setEntrustmentId(basisInfo.getId());
+                entrustSampleEntity.setSampleId(sampleEntity.getId());
+                list.add(entrustSampleEntity);
+                List<Integer> standardFileIds = sampleEntity.getStandardFileIds();
+                for (Integer integer:standardFileIds) {
+                    EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
+                    sampleEntity1.setSampleId(sampleEntity.getId());
+                    sampleEntity1.setStandardId(integer);
+                    list1.add(sampleEntity1);
+                }
+            }
+            entityMapper.BatchSaveEntrustSample(list);
+            entityMapper.BatchSaveSampleStandard(list1);
+        }
         //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel，上传附件
 
         //更新委托单收费记录信息
