@@ -15,6 +15,24 @@ import java.util.List;
 @Component
 @Mapper
 public interface TestProductDao {
-
+    /**
+     * 查询产品--模糊查询
+     * @param productName
+     * @return
+     */
     List<LabelValueVo> selectProductList(@Param("productName")String productName);
+
+    /**
+     * 通过产品ID查询产品名称
+     * @param productId
+     * @return
+     */
+    String getProductNameById(Integer productId);
+
+    /**
+     * 查询当前年份最大样品编号
+     * @param year
+     * @return
+     */
+    String getMaxNumber(String year);
 }

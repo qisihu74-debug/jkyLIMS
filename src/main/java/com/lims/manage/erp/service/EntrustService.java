@@ -4,6 +4,9 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
 import com.lims.manage.erp.entity.TestSampleJsonEntity;
+import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.entity.TestCompanyJsonEntity;
+import com.lims.manage.erp.entity.TestCustomerJsonEntity;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
@@ -49,6 +52,11 @@ public interface EntrustService{
 
     List<LabelValueVo> selectProductList(String productName);
 
-    Boolean returnAddSampleData(TestSampleJsonEntity testSampleJsonEntity);
+    /**
+     * 新增样品信息
+     * @param addParamVo
+     * @return
+     */
+    Integer addSampleData(SampleAddParamVo addParamVo);
 
 }

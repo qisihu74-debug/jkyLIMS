@@ -107,15 +107,13 @@ public class EntrustController {
      * @return
      */
     @RequestMapping(value="add_sample", method= RequestMethod.POST)
-//    public Result getAddSampleData(@RequestBody TestSampleJsonEntity testSampleJsonEntity) {
-//
-//        System.out.println("接收信息处理"+testSampleJsonEntity);
-//        return null;
-//    }
     public Result getAddSampleData(@RequestBody SampleAddParamVo samples) {
-
-        System.out.println("接收信息处理"+samples);
-        return null;
+        if(samples == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }else{
+            entrustService.addSampleData(samples);
+            return ResultUtil.success();
+        }
     }
 
     /**
@@ -138,9 +136,5 @@ public class EntrustController {
 //        }
 //        return null;
     }
-
-
-
-
 
 }

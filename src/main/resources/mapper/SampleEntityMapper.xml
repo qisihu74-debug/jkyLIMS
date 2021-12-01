@@ -27,13 +27,13 @@
     </constructor>
   </resultMap>
   <sql id="Base_Column_List" >
-    id, company_id, sample_name, sample_code, specs, batch_number, manufacturer, sample_origin, 
-    outward, picture, 
-save_place, admin, sample_groups, quantity_per_group, inspector, 
+    id, company_id, sample_name, sample_code, specs, batch_number, manufacturer, sample_origin,
+    outward, picture,
+save_place, admin, sample_groups, quantity_per_group, inspector,
     received_date, sample_requirement, generation, state, check_date, remark
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from test_sample
     where id = #{id,jdbcType=INTEGER}
@@ -67,22 +67,22 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.lims.manage.erp.entity.SampleEntity" >
-    insert into test_sample (id, company_id, sample_name, 
-      sample_code, specs, batch_number, 
-      manufacturer, sample_origin, outward, 
-      picture, 
-save_place, admin, 
-      sample_groups, quantity_per_group, inspector, 
-      received_date, sample_requirement, generation, 
+    insert into test_sample (id, company_id, sample_name,product_id,
+      sample_code, specs, batch_number,
+      manufacturer, sample_origin, outward,
+      picture,
+save_place, admin,
+      sample_groups, quantity_per_group, inspector,
+      received_date, sample_requirement, generation,
       state, check_date, remark
       )
-    values (#{id,jdbcType=INTEGER}, #{companyId,jdbcType=INTEGER}, #{sampleName,jdbcType=CHAR}, 
-      #{sampleCode,jdbcType=VARCHAR}, #{specs,jdbcType=INTEGER}, #{batchNumber,jdbcType=VARCHAR}, 
-      #{manufacturer,jdbcType=VARCHAR}, #{sampleOrigin,jdbcType=VARCHAR}, #{outward,jdbcType=VARCHAR}, 
+    values (#{id,jdbcType=INTEGER}, #{companyId,jdbcType=INTEGER}, #{sampleName,jdbcType=CHAR},#{productId,jdbcType=INTEGER},
+      #{sampleCode,jdbcType=VARCHAR}, #{specs,jdbcType=INTEGER}, #{batchNumber,jdbcType=VARCHAR},
+      #{manufacturer,jdbcType=VARCHAR}, #{sampleOrigin,jdbcType=VARCHAR}, #{outward,jdbcType=VARCHAR},
       #{picture,jdbcType=VARCHAR}, #{
-savePlace,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR}, 
-      #{sampleGroups,jdbcType=INTEGER}, #{quantityPerGroup,jdbcType=INTEGER}, #{inspector,jdbcType=VARCHAR}, 
-      #{receivedDate,jdbcType=CHAR}, #{sampleRequirement,jdbcType=VARCHAR}, #{generation,jdbcType=VARCHAR}, 
+savePlace,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR},
+      #{sampleGroups,jdbcType=INTEGER}, #{quantityPerGroup,jdbcType=INTEGER}, #{inspector,jdbcType=VARCHAR},
+      #{receivedDate,jdbcType=CHAR}, #{sampleRequirement,jdbcType=VARCHAR}, #{generation,jdbcType=VARCHAR},
       #{state,jdbcType=VARCHAR}, #{checkDate,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR}
       )
   </insert>
@@ -121,7 +121,7 @@ savePlace,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR},
       </if>
       <if test="
 savePlace != null" >
-        
+
 save_place,
       </if>
       <if test="admin != null" >
@@ -255,7 +255,7 @@ savePlace,jdbcType=VARCHAR},
       </if>
       <if test="
 savePlace != null" >
-        
+
 save_place = #{
 savePlace,jdbcType=VARCHAR},
       </if>
@@ -303,7 +303,7 @@ savePlace,jdbcType=VARCHAR},
       sample_origin = #{sampleOrigin,jdbcType=VARCHAR},
       outward = #{outward,jdbcType=VARCHAR},
       picture = #{picture,jdbcType=VARCHAR},
-      
+
 save_place = #{
 savePlace,jdbcType=VARCHAR},
       admin = #{admin,jdbcType=VARCHAR},

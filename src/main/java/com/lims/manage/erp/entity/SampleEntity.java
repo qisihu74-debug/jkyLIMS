@@ -1,7 +1,7 @@
 package com.lims.manage.erp.entity;
 
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.baomidou.mybatisplus.annotation.TableField;
+import com.lims.manage.erp.vo.SampleAddDetailVo;
+import com.lims.manage.erp.vo.SampleAddParamVo;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -114,34 +114,38 @@ public class SampleEntity {
      * 判定依据
      */
     private List<Integer> standardFileIds;
-    /**
-     * 样品与检测项
-     */
-    private List<CheckItemInfoVo> sampleCheckItem;
+//    /**
+//     * 样品与检测项
+//     */
+//    private List<CheckItemInfoVo> sampleCheckItem;
 
-    public SampleEntity(Integer id, Integer companyId, String sampleName, String sampleCode, String specs, String batchNumber, String manufacturer, String sampleOrigin, String outward, String picture, String
-savePlace, String admin, Integer sampleGroups, Integer quantityPerGroup, String inspector, String receivedDate, String sampleRequirement, String generation, String state, Date checkDate, String remark) {
-        this.id = id;
-        this.companyId = companyId;
+
+    public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo,String sampleName,String sampleCode,String pictureUrl) {
+        this.productId = addParamVo.getSampleName();
+        this.companyId = addParamVo.getCompanyId();
         this.sampleName = sampleName;
         this.sampleCode = sampleCode;
-        this.specs = specs;
-        this.batchNumber = batchNumber;
-        this.manufacturer = manufacturer;
-        this.sampleOrigin = sampleOrigin;
-        this.outward = outward;
-        this.picture = picture;
-        this.savePlace = savePlace;
-        this.admin = admin;
-        this.sampleGroups = sampleGroups;
-        this.quantityPerGroup = quantityPerGroup;
-        this.inspector = inspector;
-        this.receivedDate = receivedDate;
-        this.sampleRequirement = sampleRequirement;
-        this.generation = generation;
-        this.state = state;
-        this.checkDate = checkDate;
-        this.remark = remark;
+        this.specs = addParamVo.getSpecs();
+        this.batchNumber = detailVo.getBatchNumber();
+        this.manufacturer = addParamVo.getManufacturer();
+        this.sampleOrigin = addParamVo.getSampleOrigin();
+        this.outward = addParamVo.getOutward();
+//        this.pictureFile = pictureFile;
+        this.picture = pictureUrl;
+//        this.file = file;
+//        this.fileUrl = fileUrl;
+//        this.savePlace = savePlace;
+//        this.admin = admin;
+        this.sampleGroups = addParamVo.getSampleGroups();
+        this.quantityPerGroup = addParamVo.getQuantityPerGroup();
+        this.inspector = addParamVo.getInspector();
+        this.receivedDate = addParamVo.getReceivedDate();
+        this.sampleRequirement = addParamVo.getSampleRequirement();
+        this.generation = addParamVo.getGeneration();
+//        this.state = state;
+//        this.checkDate = checkDate;
+//        this.remark = remark;
+//        this.standardFileIds = standardFileIds;
     }
 
     public SampleEntity() {
