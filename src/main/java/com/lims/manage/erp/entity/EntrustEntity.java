@@ -177,7 +177,7 @@ public class EntrustEntity {
         this.id = id;
         this.entrustmentNo = vo.getEntrustmentNo();
         this.entrustType = vo.getEntrustType();
-        this.companyId = vo.getCompanyId();
+        this.companyId = vo.getEntrustCompany();
         this.entrustPeople = vo.getEntrustPeople();
         this.entrustPhone = vo.getEntrustPhone();
         this.witnessUint = vo.getWitnessUint();
@@ -204,8 +204,6 @@ public class EntrustEntity {
         this.fileUrl = vo.getFileUrl();
         this.sealTypeId = vo.getSealTypeId();
         this.isSave = vo.getIsSave();
-        this.entrustPeopleId = vo.getEntrustPeopleId();
-        this.witnessPersonId = vo.getWitnessPersonId();
     }
 
     public Integer getId() {

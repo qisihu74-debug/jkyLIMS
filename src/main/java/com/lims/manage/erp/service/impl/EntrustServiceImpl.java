@@ -50,8 +50,8 @@ public class EntrustServiceImpl implements EntrustService {
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean addEntrust(EntrustAddVo vo) {
-        Boolean result = false;
         //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
         entityMapper.insert(basisInfo);
@@ -63,8 +63,8 @@ public class EntrustServiceImpl implements EntrustService {
 
         //更新委托单收费记录信息
 
-        result = true;
-        return result;
+
+        return true;
     }
 
     @Override
