@@ -1,9 +1,12 @@
 package com.lims.manage.erp.entity;
 
+import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
+
 @Data
 public class SampleEntity {
     /**
@@ -94,6 +97,10 @@ public class SampleEntity {
      *备注
      */
     private String remark;
+    /**
+     * 样品与检测项
+     */
+    private List<CheckItemInfoVo> sampleCheckItem;
 
     public SampleEntity(Integer id, Integer companyId, String sampleName, String sampleCode, Integer specs, String batchNumber, String manufacturer, String sampleOrigin, String outward, String picture, String 
 savePlace, String admin, Integer sampleGroups, Integer quantityPerGroup, String inspector, String receivedDate, String sampleRequirement, String generation, String state, Date checkDate, String remark) {

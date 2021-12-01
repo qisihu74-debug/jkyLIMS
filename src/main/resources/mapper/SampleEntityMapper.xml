@@ -13,8 +13,7 @@
       <arg column="sample_origin" jdbcType="VARCHAR" javaType="java.lang.String" />
       <arg column="outward" jdbcType="VARCHAR" javaType="java.lang.String" />
       <arg column="picture" jdbcType="VARCHAR" javaType="java.lang.String" />
-      <arg column="
-save_place" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="save_place" jdbcType="VARCHAR" javaType="java.lang.String" />
       <arg column="admin" jdbcType="VARCHAR" javaType="java.lang.String" />
       <arg column="sample_groups" jdbcType="INTEGER" javaType="java.lang.Integer" />
       <arg column="quantity_per_group" jdbcType="INTEGER" javaType="java.lang.Integer" />

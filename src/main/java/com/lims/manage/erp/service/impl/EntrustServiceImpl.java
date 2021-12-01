@@ -49,7 +49,7 @@ public class EntrustServiceImpl implements EntrustService {
         entityMapper.insert(basisInfo);
         //更新样品信息
 
-        //新增
+        //
 
         result = true;
         return result;

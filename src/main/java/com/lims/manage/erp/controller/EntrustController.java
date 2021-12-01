@@ -9,6 +9,7 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.vo.CheckItemParamVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.SampleAddParamVo;
 import org.apache.commons.lang.StringUtils;
 import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,17 +85,11 @@ public class EntrustController {
 
     @RequestMapping("/getItemDetail")
     public Result getItemDetail(@RequestBody CheckItemParamVo itemIds){
-        System.out.println("星星："+itemIds.getIds());
-        List<Integer> ids = itemIds.getIds();
-        for (int i = 0; i < ids.size(); i++) {
-            System.out.println("星星1："+ids.get(i));
+        if(itemIds == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }else{
+            return ResultUtil.success(entrustService.getCheckItemInfoVo(itemIds.getIds()));
         }
-        return ResultUtil.success(entrustService.getCheckItemInfoVo(itemIds.getIds()));
-//        if(itemIds == null){
-//            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
-//        }else{
-//
-//        }
     }
     /**
      * 样品基本信息--查询产品
@@ -112,13 +107,18 @@ public class EntrustController {
 
     /**
      * 样品基本信息--保存
-     * @param testSampleJsonEntity
+     * @param
      * @return
      */
     @RequestMapping(value="add_sample", method= RequestMethod.POST)
-    public Result getAddSampleData(@RequestBody TestSampleJsonEntity testSampleJsonEntity) {
+//    public Result getAddSampleData(@RequestBody TestSampleJsonEntity testSampleJsonEntity) {
+//
+//        System.out.println("接收信息处理"+testSampleJsonEntity);
+//        return null;
+//    }
+    public Result getAddSampleData(@RequestBody SampleAddParamVo samples) {
 
-        System.out.println("接收信息处理"+testSampleJsonEntity);
+        System.out.println("接收信息处理"+samples);
         return null;
     }
 
