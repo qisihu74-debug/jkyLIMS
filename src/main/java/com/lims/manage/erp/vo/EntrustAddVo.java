@@ -131,7 +131,7 @@ public class EntrustAddVo {
     /**
      * 业务受理人
      */
-    private Integer businessAcceptor;
+    private String businessAcceptor;
     /**
      * 样品信息
      */
