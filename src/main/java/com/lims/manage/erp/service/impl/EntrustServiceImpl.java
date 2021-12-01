@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestCompanyEntity;
@@ -15,10 +16,14 @@ import com.lims.manage.erp.mapper.TestCompanyDao;
 import com.lims.manage.erp.mapper.TestCustomerDao;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.EntrustService;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,12 +59,32 @@ public class EntrustServiceImpl implements EntrustService {
     public Boolean addEntrust(EntrustAddVo vo) {
         //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
+        basisInfo.setId(GenID.getID());
+        //设置委托编号
+        Integer code = null;
+        String currentTime = DateUtil.getTodayString().substring(0,6);
+        //获取当前最大样品编号
+        Integer entrustNum = entityMapper.selectMaxNo();
+        if (entrustNum>0){
+            String substring = entrustNum.toString().substring(0, 6);
+            if (substring.equals(currentTime)){
+                code = entrustNum+1;
+            }else {
+                code = Integer.parseInt(currentTime+"0001");
+            }
+        }else {
+            code = Integer.parseInt(currentTime+"0001");
+        }
+        basisInfo.setEntrustmentNo(code);
+        //附件存在上传附件到服务器
+        if (vo.getFile() != null){
+            String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, vo.getFile(), "file:" + code);
+            basisInfo.setFileUrl(upload);
+        }
         entityMapper.insert(basisInfo);
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
 
         //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel，上传附件
-
-        //存放委托单样品，使用依据信息test_entrusted_sample_standard_file_rel
 
         //更新委托单收费记录信息
 

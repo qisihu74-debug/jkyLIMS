@@ -9,11 +9,11 @@ public class EntrustEntity {
     /**
      * 主键
      */
-    private Integer id;
+    private Long id;
     /**
      * 编号
      */
-    private String entrustmentNo;
+    private Integer entrustmentNo;
     /**
      * 委托方式
      */
@@ -139,7 +139,7 @@ public class EntrustEntity {
      */
     private Integer witnessPersonId;
 
-    public EntrustEntity(Integer id, String entrustmentNo, Integer entrustType, String entrustPeople, String entrustPhone, String witnessUint, String witnessPerson, String witnessPhone, String projectName, String projectPart, Integer samplingMethod, Integer checkPurpose, Integer reportCount, Integer reportType, Date requestDate, Integer paymentMethod, String paymentRecord, String paymentCount, String presentInformation, Date acceptanceDate, Integer team, Integer state, String remark, String invalidReason, Integer operateUser, Date operateDate, String fileUrl, String sealType, String isSave, Integer entrustPeopleId, Integer witnessPersonId) {
+    public EntrustEntity(Long id, Integer entrustmentNo, Integer entrustType, String entrustPeople, String entrustPhone, String witnessUint, String witnessPerson, String witnessPhone, String projectName, String projectPart, Integer samplingMethod, Integer checkPurpose, Integer reportCount, Integer reportType, Date requestDate, Integer paymentMethod, String paymentRecord, String paymentCount, String presentInformation, Date acceptanceDate, Integer team, Integer state, String remark, String invalidReason, Integer operateUser, Date operateDate, String fileUrl, String sealType, String isSave, Integer entrustPeopleId, Integer witnessPersonId) {
         this.id = id;
         this.entrustmentNo = entrustmentNo;
         this.entrustType = entrustType;
@@ -195,7 +195,7 @@ public class EntrustEntity {
         this.reportCount=vo.getReportCount();
         this.paymentMethod=vo.getPaymentMethod();
         this.paymentRecord=vo.getPaymentRecord();
-        this.sealType=vo.getEntrustmentNo();
+        this.sealType=vo.getSealType();
         this.businessAcceptor=vo.getBusinessAcceptor();
         this.acceptanceDate=vo.getAcceptanceDate();
         this.team=vo.getTeam();
@@ -204,20 +204,20 @@ public class EntrustEntity {
 
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public String getEntrustmentNo() {
+    public Integer getEntrustmentNo() {
         return entrustmentNo;
     }
 
-    public void setEntrustmentNo(String entrustmentNo) {
-        this.entrustmentNo = entrustmentNo == null ? null : entrustmentNo.trim();
+    public void setEntrustmentNo(Integer entrustmentNo) {
+        this.entrustmentNo = entrustmentNo;
     }
 
     public Integer getEntrustType() {

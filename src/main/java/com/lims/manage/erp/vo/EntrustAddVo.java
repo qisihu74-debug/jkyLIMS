@@ -11,7 +11,7 @@ public class EntrustAddVo {
     /**
      * 编号
      */
-    private String entrustmentNo;
+    private Integer entrustmentNo;
     /**
      * 委托方式
      */
@@ -123,7 +123,7 @@ public class EntrustAddVo {
     /**
      * 盖章类型25甲级，26，27
      */
-    private Integer sealTypeId;
+    private String sealType;
     /**
      * 是否留样1.保留2.废弃
      */
