@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.TestProductDao">
+
+    <select id="selectProductList" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT
+        product_id value,
+        product_name label
+        FROM
+        test_product
+        WHERE 1=1
+        <if test="productName!=null and productName!=''">
+            and product_name LIKE CONCAT('%',#{productName},'%')
+        </if>
+    </select>
+
+</mapper>

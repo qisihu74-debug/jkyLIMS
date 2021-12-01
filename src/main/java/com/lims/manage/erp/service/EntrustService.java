@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.TestSampleJsonEntity;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
@@ -37,4 +38,9 @@ public interface EntrustService{
     Boolean addCompanyData(TestCompanyJsonEntity testCompanyEntity);
 
     List<SampleEntity> getSampleDataList(SampleEntity sampleEntity);
+
+    List<LabelValueVo> selectProductList(String productName);
+
+    Boolean returnAddSampleData(TestSampleJsonEntity testSampleJsonEntity);
+
 }

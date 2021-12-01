@@ -1,14 +1,19 @@
 package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import lombok.Data;
 
 import java.util.Date;
-
+@Data
 public class SampleEntity {
     /**
      *主键id
      */
     private Integer id;
+    /**
+     *
+     */
+    private Integer productId;
     /**
      *委托单位
      */

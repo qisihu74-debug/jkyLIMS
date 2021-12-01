@@ -1,12 +1,8 @@
 package com.lims.manage.erp.service.impl;
 
 import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.TestCompanyDao;
-import com.lims.manage.erp.mapper.TestCustomerDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.ProductItemEntityMapper;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.LabelValueVo;
@@ -34,6 +30,8 @@ public class EntrustServiceImpl implements EntrustService {
     TestCustomerDao testCustomerDao;
     @Autowired
     SampleEntityMapper sampleEntityMapper;
+    @Autowired
+    TestProductDao testProductDao;
 
     @Autowired
     private ProductItemEntityMapper itemEntityMapper;
@@ -150,5 +148,41 @@ public class EntrustServiceImpl implements EntrustService {
     public List<SampleEntity> getSampleDataList(SampleEntity sampleEntity) {
 
         return sampleEntityMapper.selectSampleList(sampleEntity);
+    }
+
+    @Override
+    public List<LabelValueVo> selectProductList(String productName) {
+
+        return testProductDao.selectProductList(productName);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean returnAddSampleData(TestSampleJsonEntity testSampleJsonEntity) {
+        // 获取样品编号  sampleGroups * quantityPerGroup
+
+        if(testSampleJsonEntity.getSampleGroups()!=null&&testSampleJsonEntity.getQuantityPerGroup()!=null){
+            // 样品组数
+            int number1 = testSampleJsonEntity.getSampleGroups();
+            // 每组样品数
+            int number2 = testSampleJsonEntity.getQuantityPerGroup();
+            int count = number1 * number2;
+            // 方法1：根据年份时间 返回 表最大值 = 0082
+
+            // 根据 组号 * 每组样品数 做下标数据。
+            // 生成样品编号
+            List<String> numberCollection = new ArrayList<>();
+            String NumberStr = "YP-2021-";
+            if(number1 > 1){
+                for(int i =1;number1>=i;i++){
+                    for(int j=1;number2>=j;j++){
+                        numberCollection.add(NumberStr+"008"+i+"-0"+j);
+                    }
+                }
+            }
+            System.out.println(numberCollection);
+
+        }
+        return null;
     }
 }
