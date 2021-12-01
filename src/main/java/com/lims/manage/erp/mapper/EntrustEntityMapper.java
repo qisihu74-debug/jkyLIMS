@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.vo.EntrustAddVo;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     Integer selectMaxNo();
 
-    EntrustEntity selectByKeyId(Integer id);
+    EntrustAddVo selectByKeyId(Integer id);
 
     /**
      * 保存委托单下样品信息

@@ -303,9 +303,8 @@ public class EntrustServiceImpl implements EntrustService {
     }
     @Override
     public EntrustAddVo getEntrustHistoryDetail(Integer entrustmentId) {
-        EntrustAddVo entrustAddVo = new EntrustAddVo();
         // 通过委托ID 委托单信息
-        EntrustEntity entrustEntity   = entityMapper.selectByKeyId(entrustmentId);
+        EntrustAddVo entrustAddVo   = entityMapper.selectByKeyId(entrustmentId);
         // 通过委托ID 样品集合
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
         // 样品信息 进行补充 检测依据集合，检测项集合
@@ -315,7 +314,6 @@ public class EntrustServiceImpl implements EntrustService {
                     sampleEntityMapper.selectSampleCheckItem(sampleEntity.getId());
         }
         entrustAddVo.setSamples(sampleCollection);
-        System.out.println("展示数据"+entrustAddVo);
         return entrustAddVo;
     }
 }

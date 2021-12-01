@@ -4,7 +4,7 @@
   <select id="selectMaxNo">
     select max(entrustment_no) from test_entrusted
   </select>
-  <select id="selectByKeyId" parameterType="java.lang.Integer" resultType="com.lims.manage.erp.entity.EntrustEntity">
+  <select id="selectByKeyId" parameterType="java.lang.Integer" resultType="com.lims.manage.erp.vo.EntrustAddVo">
     select
     id, entrustment_no, entrust_type, entrust_people, entrust_phone, witness_uint,
     witness_person, witness_phone, project_name, project_part, sampling_method, check_purpose,
