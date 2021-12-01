@@ -304,4 +304,9 @@ public class EntrustServiceImpl implements EntrustService {
         }
         return result;
     }
+
+    @Override
+    public List<LabelValueVo> getJudges(Integer productId) {
+        return entityMapper.getJudges(productId);
+    }
 }

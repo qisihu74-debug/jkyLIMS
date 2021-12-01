@@ -5,6 +5,7 @@ import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.EntrustPamentEntity;
 import com.lims.manage.erp.entity.EntrustSampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -42,4 +43,11 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @param pamentEntity
      */
     void saveEntrustPayRecord(EntrustPamentEntity pamentEntity);
+
+    /**
+     * 查询判定依据
+     * @param productId
+     * @return
+     */
+    List<LabelValueVo> getJudges(Integer productId);
 }

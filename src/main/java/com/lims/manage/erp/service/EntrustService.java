@@ -60,4 +60,11 @@ public interface EntrustService {
      */
     Integer addSampleData(SampleAddParamVo addParamVo);
 
+    /**
+     * 查询判定依据
+     * @param productId
+     * @return
+     */
+    List<LabelValueVo> getJudges(Integer productId);
+
 }

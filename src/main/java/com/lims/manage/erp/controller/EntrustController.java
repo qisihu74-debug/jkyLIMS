@@ -150,4 +150,13 @@ public class EntrustController {
         return null;
     }
 
+
+    @RequestMapping("/getJudgeBasis")
+    public Result getJudgeBasis(Integer productId){
+        if(productId == null ){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }else{
+            return ResultUtil.success(entrustService.getJudges(productId));
+        }
+    }
 }
