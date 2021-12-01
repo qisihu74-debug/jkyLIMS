@@ -1,26 +1,31 @@
 package com.lims.manage.erp.entity;
 
 import com.lims.manage.erp.vo.EntrustAddVo;
+import lombok.Data;
 
 import java.util.Date;
-
+@Data
 public class EntrustEntity {
     /**
      * 主键
      */
-    private Integer id;
+    private Long id;
     /**
      * 编号
      */
-    private String entrustmentNo;
+    private Integer entrustmentNo;
     /**
      * 委托方式
      */
     private Integer entrustType;
     /**
+     * 业务受理人
+     */
+    private String businessAcceptor;
+    /**
      * 委托单位ID
      */
-    private Integer companyId;
+    private Integer entrustCompany;
     /**
      * 委托人
      */
@@ -120,7 +125,7 @@ public class EntrustEntity {
     /**
      * 盖章类型25甲级，26，27
      */
-    private Integer sealTypeId;
+    private String sealType;
     /**
      * 是否留样1.保留2.废弃
      */
@@ -134,11 +139,10 @@ public class EntrustEntity {
      */
     private Integer witnessPersonId;
 
-    public EntrustEntity(Integer id, String entrustmentNo, Integer entrustType, Integer companyId, String entrustPeople, String entrustPhone, String witnessUint, String witnessPerson, String witnessPhone, String projectName, String projectPart, Integer samplingMethod, Integer checkPurpose, Integer reportCount, Integer reportType, Date requestDate, Integer paymentMethod, String paymentRecord, String paymentCount, String presentInformation, Date acceptanceDate, Integer team, Integer state, String remark, String invalidReason, Integer operateUser, Date operateDate, String fileUrl, Integer sealTypeId, String isSave, Integer entrustPeopleId, Integer witnessPersonId) {
+    public EntrustEntity(Long id, Integer entrustmentNo, Integer entrustType, String entrustPeople, String entrustPhone, String witnessUint, String witnessPerson, String witnessPhone, String projectName, String projectPart, Integer samplingMethod, Integer checkPurpose, Integer reportCount, Integer reportType, Date requestDate, Integer paymentMethod, String paymentRecord, String paymentCount, String presentInformation, Date acceptanceDate, Integer team, Integer state, String remark, String invalidReason, Integer operateUser, Date operateDate, String fileUrl, String sealType, String isSave, Integer entrustPeopleId, Integer witnessPersonId) {
         this.id = id;
         this.entrustmentNo = entrustmentNo;
         this.entrustType = entrustType;
-        this.companyId = companyId;
         this.entrustPeople = entrustPeople;
         this.entrustPhone = entrustPhone;
         this.witnessUint = witnessUint;
@@ -163,7 +167,7 @@ public class EntrustEntity {
         this.operateUser = operateUser;
         this.operateDate = operateDate;
         this.fileUrl = fileUrl;
-        this.sealTypeId = sealTypeId;
+        this.sealType = sealType;
         this.isSave = isSave;
         this.entrustPeopleId = entrustPeopleId;
         this.witnessPersonId = witnessPersonId;
@@ -174,52 +178,46 @@ public class EntrustEntity {
     }
 
     public EntrustEntity(EntrustAddVo vo){
-        this.id = id;
-        this.entrustmentNo = vo.getEntrustmentNo();
-        this.entrustType = vo.getEntrustType();
-        this.companyId = vo.getEntrustCompany();
-        this.entrustPeople = vo.getEntrustPeople();
-        this.entrustPhone = vo.getEntrustPhone();
-        this.witnessUint = vo.getWitnessUint();
-        this.witnessPerson = vo.getWitnessPerson();
-        this.witnessPhone = vo.getWitnessPhone();
-        this.projectName = vo.getProjectName();
-        this.projectPart = vo.getProjectPart();
-        this.samplingMethod = vo.getSamplingMethod();
-        this.checkPurpose = vo.getCheckPurpose();
-        this.reportCount = vo.getReportCount();
-        this.reportType = vo.getReportType();
-        this.requestDate = vo.getRequestDate();
-        this.paymentMethod = vo.getPaymentMethod();
-        this.paymentRecord = vo.getPaymentRecord();
-        this.paymentCount = vo.getPaymentCount();
-        this.presentInformation = vo.getPresentInformation();
-        this.acceptanceDate = vo.getAcceptanceDate();
-        this.team = vo.getTeam();
-        this.state = vo.getState();
-        this.remark = vo.getRemark();
-        this.invalidReason = vo.getInvalidReason();
-        this.operateUser = vo.getOperateUser();
-        this.operateDate = vo.getOperateDate();
-        this.fileUrl = vo.getFileUrl();
-        this.sealTypeId = vo.getSealTypeId();
-        this.isSave = vo.getIsSave();
+        this.entrustType=vo.getEntrustType();
+        this.samplingMethod=vo.getSamplingMethod();
+        this.reportType=vo.getReportType();
+        this.entrustCompany=vo.getEntrustCompany();
+        this.entrustPeople=vo.getEntrustPeople();
+        this.entrustPhone=vo.getEntrustPhone();
+        this.witnessUint=vo.getWitnessUint();
+        this.witnessPerson=vo.getWitnessPerson();
+        this.witnessPhone=vo.getWitnessPhone();
+        this.projectName=vo.getProjectName();
+        this.projectPart=vo.getProjectPart();
+        this.requestDate=vo.getRequestDate();
+        this.isSave=vo.getIsSave();
+        this.checkPurpose=vo.getCheckPurpose();
+        this.reportCount=vo.getReportCount();
+        this.paymentMethod=vo.getPaymentMethod();
+        this.paymentRecord=vo.getPaymentRecord();
+        this.sealType=vo.getSealType();
+        this.businessAcceptor=vo.getBusinessAcceptor();
+        this.acceptanceDate=vo.getAcceptanceDate();
+        this.team=vo.getTeam();
+        this.fileUrl=vo.getFileUrl();
+        this.remark=vo.getRemark();
+
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public String getEntrustmentNo() {
+    public Integer getEntrustmentNo() {
         return entrustmentNo;
     }
 
-    public void setEntrustmentNo(String entrustmentNo) {
-        this.entrustmentNo = entrustmentNo == null ? null : entrustmentNo.trim();
+    public void setEntrustmentNo(Integer entrustmentNo) {
+        this.entrustmentNo = entrustmentNo;
     }
 
     public Integer getEntrustType() {
@@ -228,14 +226,6 @@ public class EntrustEntity {
 
     public void setEntrustType(Integer entrustType) {
         this.entrustType = entrustType;
-    }
-
-    public Integer getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(Integer companyId) {
-        this.companyId = companyId;
     }
 
     public String getEntrustPeople() {
@@ -430,12 +420,12 @@ public class EntrustEntity {
         this.fileUrl = fileUrl == null ? null : fileUrl.trim();
     }
 
-    public Integer getSealTypeId() {
-        return sealTypeId;
+    public String getSealTypeId() {
+        return sealType;
     }
 
-    public void setSealTypeId(Integer sealTypeId) {
-        this.sealTypeId = sealTypeId;
+    public void setSealTypeId(String sealType) {
+        this.sealType = sealType;
     }
 
     public String getIsSave() {

@@ -5,10 +5,14 @@ import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +48,28 @@ public class EntrustServiceImpl implements EntrustService {
     public Boolean addEntrust(EntrustAddVo vo) {
         //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
+        basisInfo.setId(GenID.getID());
+        //设置委托编号
+        Integer code = null;
+        String currentTime = DateUtil.getTodayString().substring(0,6);
+        //获取当前最大样品编号
+        Integer entrustNum = entityMapper.selectMaxNo();
+        if (entrustNum>0){
+            String substring = entrustNum.toString().substring(0, 6);
+            if (substring.equals(currentTime)){
+                code = entrustNum+1;
+            }else {
+                code = Integer.parseInt(currentTime+"0001");
+            }
+        }else {
+            code = Integer.parseInt(currentTime+"0001");
+        }
+        basisInfo.setEntrustmentNo(code);
+        //附件存在上传附件到服务器
+        if (vo.getFile() != null){
+            String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, vo.getFile(), "file:" + code);
+            basisInfo.setFileUrl(upload);
+        }
         entityMapper.insert(basisInfo);
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
 
@@ -159,60 +185,37 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<LabelValueVo> selectProductList(String productName) {
+
         return testProductDao.selectProductList(productName);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer addSampleData(SampleAddParamVo addParamVo) {
-        int result = 0;
-        //查询产品名称
-        String productName = testProductDao.getProductNameById(addParamVo.getSampleName());
-        //处理详情数据
-        List<SampleAddDetailVo> details = addParamVo.getDetails();
-        //获取数据库当前年份最大的样品编号
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-        Date now = new Date();
-        String maxNumber = testProductDao.getMaxNumber(sdf.format(now));
-        int newMax;
-        if(maxNumber == null){
-            newMax = 0;
-        }else{
-            newMax = Integer.parseInt(maxNumber);
-        }
-        if(details.size()>0){
-            for (int i = 0; i < details.size(); i++) {
-                //生成样品编号
-                StringBuilder code = new StringBuilder("YP-"+sdf.format(now)+"-");
-                String sampleCode ;
-                if(addParamVo.getSampleGroups()>1){
-                    //组数大于1，将前n个命名为
-                    if(i%addParamVo.getQuantityPerGroup() == 0){
-                        newMax = newMax+1;
-                    }
-                    String num = String.format("%0" + 4 + "d", newMax);
-                    StringBuilder prefix = code.append(num);
-                    String suffix = String.format("%0" + 2 + "d", i%addParamVo.getQuantityPerGroup()+1);
-                    sampleCode = prefix + "_" + suffix;
-                }else{
-                    //生成样品编号
-                    String num = String.format("%0" + 4 + "d", newMax+1);
-                    StringBuilder prefix = code.append(num);
-                    String suffix = String.format("%0" + 2 + "d", i+1);
-                    if(addParamVo.getQuantityPerGroup()>1){
-                        sampleCode = prefix + "_" + suffix;
-                    }else{
-                        sampleCode = prefix.toString();
+    public Boolean returnAddSampleData(TestSampleJsonEntity testSampleJsonEntity) {
+        // 获取样品编号  sampleGroups * quantityPerGroup
+
+        if(testSampleJsonEntity.getSampleGroups()!=null&&testSampleJsonEntity.getQuantityPerGroup()!=null){
+            // 样品组数
+            int number1 = testSampleJsonEntity.getSampleGroups();
+            // 每组样品数
+            int number2 = testSampleJsonEntity.getQuantityPerGroup();
+            int count = number1 * number2;
+            // 方法1：根据年份时间 返回 表最大值 = 0082
+
+            // 根据 组号 * 每组样品数 做下标数据。
+            // 生成样品编号
+            List<String> numberCollection = new ArrayList<>();
+            String NumberStr = "YP-2021-";
+            if(number1 > 1){
+                for(int i =1;number1>=i;i++){
+                    for(int j=1;number2>=j;j++){
+                        numberCollection.add(NumberStr+"008"+i+"-0"+j);
                     }
                 }
-                //保存样品图片
-//                String picture = details.get(i).getPicture();
-                //保存样品信息
-                SampleEntity sampleEntity = new SampleEntity(addParamVo,details.get(i),productName,sampleCode,null);
-                result = sampleEntityMapper.insert(sampleEntity);
-
             }
+            System.out.println(numberCollection);
+
         }
-        return result;
+        return null;
     }
 }
