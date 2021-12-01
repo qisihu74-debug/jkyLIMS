@@ -53,7 +53,7 @@ public class SampleEntity {
     /**照片文件
      *
      */
-    private MultipartFile pictureFile;
+    //private MultipartFile pictureFile;
     /**
      *样品照片
      */
@@ -61,7 +61,7 @@ public class SampleEntity {
     /**
      * 文件对象
      */
-    private MultipartFile file;
+    //private MultipartFile file;
     /**
      * 附件url
      */

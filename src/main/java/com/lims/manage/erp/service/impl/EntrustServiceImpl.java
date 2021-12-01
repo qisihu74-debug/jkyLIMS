@@ -309,4 +309,25 @@ public class EntrustServiceImpl implements EntrustService {
     public List<LabelValueVo> getJudges(Integer productId) {
         return entityMapper.getJudges(productId);
     }
+
+    @Override
+    public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) {
+
+        return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
+    }
+    @Override
+    public EntrustAddVo getEntrustHistoryDetail(Integer entrustmentId) {
+        // 通过委托ID 委托单信息
+        EntrustAddVo entrustAddVo   = entityMapper.selectByKeyId(entrustmentId);
+        // 通过委托ID 样品集合
+        List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
+        // 样品信息 进行补充 检测依据集合，检测项集合
+        for(SampleEntity sampleEntity:sampleCollection){
+            sampleEntity.setStandardFileIds(sampleEntityMapper.selectdardFileIds(sampleEntity.getId()));
+            sampleEntity.setSampleCheckItem(null);
+                    sampleEntityMapper.selectSampleCheckItem(sampleEntity.getId());
+        }
+        entrustAddVo.setSamples(sampleCollection);
+        return entrustAddVo;
+    }
 }

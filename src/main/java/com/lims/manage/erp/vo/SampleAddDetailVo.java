@@ -18,5 +18,5 @@ public class SampleAddDetailVo {
      */
     private String picture;
 
-    private MultipartFile files;
+    //private MultipartFile files;
 }

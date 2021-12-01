@@ -5,7 +5,6 @@ import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.EntrustPamentEntity;
 import com.lims.manage.erp.entity.EntrustSampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.vo.LabelValueVo;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +18,8 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     Integer selectMaxNo();
+
+    EntrustAddVo selectByKeyId(Integer id);
 
     /**
      * 保存委托单下样品信息
@@ -50,4 +51,10 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     List<LabelValueVo> getJudges(Integer productId);
+    /**
+     * 委托历史 查询。
+     * @param entrustHistoryEntity
+     * @return
+     */
+    List<EntrustHistoryEntity> selectEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity);
 }

@@ -67,4 +67,17 @@ public interface EntrustService {
      */
     List<LabelValueVo> getJudges(Integer productId);
 
+    /**
+     * 历史委托信息
+     * @param entrustHistoryEntity
+     * @return
+     */
+    List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity);
+    /**
+     * 史委托信息 具体详情
+     * @param entrustmentId
+     * @return
+     */
+    EntrustAddVo getEntrustHistoryDetail(Integer entrustmentId);
+
 }

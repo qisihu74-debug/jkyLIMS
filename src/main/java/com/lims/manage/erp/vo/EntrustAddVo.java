@@ -2,7 +2,6 @@ package com.lims.manage.erp.vo;
 
 import com.lims.manage.erp.entity.SampleEntity;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -15,11 +14,11 @@ public class EntrustAddVo {
     /**
      * 委托方式
      */
-    private Integer entrustType;
+    private String entrustType;
     /**
      * 委托单位
      */
-    private Integer entrustCompany;
+    private String entrustCompany;
     /**
      * 委托人
      */
@@ -51,11 +50,11 @@ public class EntrustAddVo {
     /**
      * 取样方式
      */
-    private Integer samplingMethod;
+    private String samplingMethod;
     /**
      * 检测目的
      */
-    private Integer checkPurpose;
+    private String checkPurpose;
     /**
      * 报告份数
      */
@@ -63,7 +62,7 @@ public class EntrustAddVo {
     /**
      * 取报告方式
      */
-    private Integer reportType;
+    private String reportType;
     /**
      * 要求完成时间
      */
@@ -71,7 +70,7 @@ public class EntrustAddVo {
     /**
      * 支付方式
      */
-    private Integer paymentMethod;
+    private String paymentMethod;
     /**
      * 缴费记录(实际已收费）
      */
@@ -115,7 +114,8 @@ public class EntrustAddVo {
     /**
      * 文件对象
      */
-    private MultipartFile file;
+
+    //private MultipartFile file;
     /**
      * 附件url
      */

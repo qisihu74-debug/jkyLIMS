@@ -1,9 +1,6 @@
 package com.lims.manage.erp.controller;
 
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.entity.TestSampleJsonEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -17,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -29,7 +27,7 @@ public class EntrustController {
     private EntrustService entrustService;
 
     @RequestMapping("/addEntrust")
-    public Result addEntrust(@RequestBody EntrustAddVo entrust){
+    public Result addEntrust(@RequestBody EntrustAddVo entrust, HttpServletRequest request){
         Boolean isSuccess = entrustService.addEntrust(entrust);
         if(isSuccess){
             return ResultUtil.success();
@@ -148,6 +146,20 @@ public class EntrustController {
             System.out.println("文件获取异常:{}"+e);
         }
         return null;
+    }
+    /**
+     * 历史委托
+     * @param entrustHistoryEntity
+     * @return
+     */
+    @RequestMapping("/get_entrust_history")
+    public Result getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity){
+        return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
+    }
+    @RequestMapping("/get_entrust_history_detail")
+    public Result getEntrustHistoryDetail(Integer entrustmentId){
+
+        return ResultUtil.success(entrustService.getEntrustHistoryDetail(entrustmentId));
     }
 
 
