@@ -13,14 +13,12 @@ import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -135,6 +133,21 @@ public class EntrustController {
 //            System.out.println("文件获取异常:{}"+e);
 //        }
 //        return null;
+    }
+
+    // 测试文件
+    @RequestMapping(value="testFile", method= RequestMethod.POST)
+    @ResponseBody
+    public Result getOrcMessage(MultipartHttpServletRequest uploadFile) {
+        InputStream inputStream = null;
+
+        MultipartFile file = uploadFile.getFile("uploadFile1");
+        try {
+            inputStream = file.getInputStream();
+        }catch (IOException e){
+            System.out.println("文件获取异常:{}"+e);
+        }
+        return null;
     }
 
 }
