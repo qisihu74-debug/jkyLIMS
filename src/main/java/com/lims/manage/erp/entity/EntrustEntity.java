@@ -19,7 +19,7 @@ public class EntrustEntity {
     /**
      * 委托方式
      */
-    private Integer entrustType;
+    private String entrustType;
     /**
      * 业务受理人
      */
@@ -27,7 +27,7 @@ public class EntrustEntity {
     /**
      * 委托单位ID
      */
-    private Integer entrustCompany;
+    private String entrustCompany;
     /**
      * 委托人
      */
@@ -59,11 +59,11 @@ public class EntrustEntity {
     /**
      * 取样方式
      */
-    private Integer samplingMethod;
+    private String samplingMethod;
     /**
      * 检测目的
      */
-    private Integer checkPurpose;
+    private String checkPurpose;
     /**
      * 报告份数
      */
@@ -71,7 +71,7 @@ public class EntrustEntity {
     /**
      * 取报告方式
      */
-    private Integer reportType;
+    private String reportType;
     /**
      * 要求完成时间
      */
@@ -79,7 +79,7 @@ public class EntrustEntity {
     /**
      * 支付方式
      */
-    private Integer paymentMethod;
+    private String paymentMethod;
     /**
      * 缴费记录(实际已收费）
      */
@@ -145,7 +145,14 @@ public class EntrustEntity {
      */
     private String countPrice;
 
-    public EntrustEntity(Long id, Integer entrustmentNo, Integer entrustType, String entrustPeople, String entrustPhone, String witnessUint, String witnessPerson, String witnessPhone, String projectName, String projectPart, Integer samplingMethod, Integer checkPurpose, Integer reportCount, Integer reportType, Date requestDate, Integer paymentMethod, String paymentRecord, String paymentCount, String presentInformation, Date acceptanceDate, Integer team, Integer state, String remark, String invalidReason, Integer operateUser, Date operateDate, String fileUrl, String sealType, String isSave, Integer entrustPeopleId, Integer witnessPersonId) {
+    public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,
+                         String witnessUint, String witnessPerson, String witnessPhone, String projectName,
+                         String projectPart, String samplingMethod, String checkPurpose, Integer reportCount,
+                         String reportType, Date requestDate, String paymentMethod, String paymentRecord,
+                         String paymentCount, String presentInformation, Date acceptanceDate, Integer team,
+                         Integer state, String remark, String invalidReason, Integer operateUser, Date operateDate,
+                         String fileUrl, String sealType, String isSave, Integer entrustPeopleId,
+                         Integer witnessPersonId) {
         this.id = id;
         this.entrustmentNo = entrustmentNo;
         this.entrustType = entrustType;
@@ -226,11 +233,11 @@ public class EntrustEntity {
         this.entrustmentNo = entrustmentNo;
     }
 
-    public Integer getEntrustType() {
+    public String getEntrustType() {
         return entrustType;
     }
 
-    public void setEntrustType(Integer entrustType) {
+    public void setEntrustType(String entrustType) {
         this.entrustType = entrustType;
     }
 
@@ -290,19 +297,19 @@ public class EntrustEntity {
         this.projectPart = projectPart == null ? null : projectPart.trim();
     }
 
-    public Integer getSamplingMethod() {
+    public String getSamplingMethod() {
         return samplingMethod;
     }
 
-    public void setSamplingMethod(Integer samplingMethod) {
+    public void setSamplingMethod(String samplingMethod) {
         this.samplingMethod = samplingMethod;
     }
 
-    public Integer getCheckPurpose() {
+    public String getCheckPurpose() {
         return checkPurpose;
     }
 
-    public void setCheckPurpose(Integer checkPurpose) {
+    public void setCheckPurpose(String checkPurpose) {
         this.checkPurpose = checkPurpose;
     }
 
@@ -314,11 +321,11 @@ public class EntrustEntity {
         this.reportCount = reportCount;
     }
 
-    public Integer getReportType() {
+    public String getReportType() {
         return reportType;
     }
 
-    public void setReportType(Integer reportType) {
+    public void setReportType(String reportType) {
         this.reportType = reportType;
     }
 
@@ -330,11 +337,11 @@ public class EntrustEntity {
         this.requestDate = requestDate;
     }
 
-    public Integer getPaymentMethod() {
+    public String getPaymentMethod() {
         return paymentMethod;
     }
 
-    public void setPaymentMethod(Integer paymentMethod) {
+    public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
 
