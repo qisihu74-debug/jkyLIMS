@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -29,7 +30,7 @@ public class EntrustController {
     private EntrustService entrustService;
 
     @RequestMapping("/addEntrust")
-    public Result addEntrust(@RequestBody EntrustAddVo entrust){
+    public Result addEntrust(@RequestBody EntrustAddVo entrust, HttpServletRequest request){
         Boolean isSuccess = entrustService.addEntrust(entrust);
         if(isSuccess){
             return ResultUtil.success();

@@ -1,5 +1,7 @@
 package com.lims.manage.erp.crm;
 
+import com.lims.manage.erp.vo.EntrustAddVo;
+
 /**
  * @author gjl
  * @version V1.0
@@ -10,8 +12,6 @@ package com.lims.manage.erp.crm;
  */
 public class TST {
     public static void main(String[] args) {
-        String code = "123456789ggss";
-        String substring = code.substring(code.length() - 6);
-        System.out.println(substring);
+        EntrustAddVo entrustAddVo = new EntrustAddVo();
     }
 }

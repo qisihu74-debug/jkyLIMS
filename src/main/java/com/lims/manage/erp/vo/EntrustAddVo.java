@@ -2,7 +2,6 @@ package com.lims.manage.erp.vo;
 
 import com.lims.manage.erp.entity.SampleEntity;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -115,7 +114,8 @@ public class EntrustAddVo {
     /**
      * 文件对象
      */
-    private MultipartFile file;
+
+    //private MultipartFile file;
     /**
      * 附件url
      */

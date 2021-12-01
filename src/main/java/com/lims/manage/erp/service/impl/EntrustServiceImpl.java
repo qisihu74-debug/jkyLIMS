@@ -85,11 +85,11 @@ public class EntrustServiceImpl implements EntrustService {
             code = Integer.parseInt(currentTime+"0001");
         }
         basisInfo.setEntrustmentNo(code);
-        //附件存在上传附件到服务器
-        if (vo.getFile() != null){
+        //TODO 附件存在上传附件到服务器（单独接口）
+       /* if (vo.getFile() != null){
             String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, vo.getFile(), "file:" + code);
             basisInfo.setFileUrl(upload);
-        }
+        }*/
 
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
         int totalMoney = 0;
