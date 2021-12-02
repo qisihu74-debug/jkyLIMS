@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
@@ -143,7 +145,6 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public  Map<String,List<LabelValueVo>> returnEntrustData() {
-
         Map<String,List<LabelValueVo>> map = new HashMap<>();
         // type =1 委托单位
        List<LabelValueVo> EntrustCompany = testCompanyDao.selectEntrustCompanyList(1);
@@ -199,7 +200,6 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<TestCustomerJsonEntity> returnTestCustomerEntityList(Integer companyId) {
-
         return testCompanyDao.selectPeopleInformation(companyId);
     }
 
@@ -226,19 +226,18 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<SampleEntity> getSampleDataList(SampleEntity sampleEntity) {
-
         return sampleEntityMapper.selectSampleList(sampleEntity);
     }
 
     @Override
     public List<LabelValueVo> selectProductList(String productName) {
-
         return testProductDao.selectProductList(productName);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer addSampleData(SampleAddParamVo addParamVo) {
+    public Integer addSampleData(SampleAddParamVo addParamVo,MultipartFile file) {
+
         int result = 0;
         //查询产品名称
         String productName = testProductDao.getProductNameById(addParamVo.getSampleName());
@@ -304,7 +303,6 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) {
-
         return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
     }
     @Override

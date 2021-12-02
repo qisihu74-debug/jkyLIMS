@@ -10,6 +10,8 @@ import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -56,7 +58,7 @@ public interface EntrustService {
      * @param addParamVo
      * @return
      */
-    Integer addSampleData(SampleAddParamVo addParamVo);
+    Integer addSampleData(SampleAddParamVo addParamVo,MultipartFile file);
 
     /**
      * 查询判定依据

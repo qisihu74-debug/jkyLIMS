@@ -15,9 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -27,6 +24,12 @@ public class EntrustController {
     @Autowired
     private EntrustService entrustService;
 
+    /**
+     * 新增委托
+     * @param json
+     * @param file
+     * @return
+     */
     @RequestMapping("/addEntrust")
     public Result addEntrust(@RequestParam("json") String json, MultipartFile file){
         EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
@@ -37,37 +40,59 @@ public class EntrustController {
             return ResultUtil.error(678,"新增委托失败！");
         }
     }
+
+    /**
+     *
+     * @return
+     */
     @GetMapping("get_Basics")
-    public Result ReturnBasicsData()
-    {
+    public Result ReturnBasicsData() {
         return ResultUtil.success(entrustService.returnEntrustData());
     }
+
+    /**
+     *
+     * @param companyId
+     * @return
+     */
     @GetMapping("get_entrusted_unit")
-    public Result methodDispay(Integer companyId)
-    {
+    public Result methodDispay(Integer companyId) {
         List<TestCustomerJsonEntity> collectList = entrustService.returnTestCustomerEntityList(companyId);
         if(collectList.isEmpty()){
             return ResultUtil.error(201,"用户信息不存在");
         }
-            return ResultUtil.success(collectList);
+        return ResultUtil.success(collectList);
     }
+
+    /**
+     * 新增客户
+     * @param testCompanyEntity
+     * @return
+     */
     @PostMapping("add_new_company")
-    public Result methodPost(@RequestBody TestCompanyJsonEntity testCompanyEntity)
-    {
+    public Result methodPost(@RequestBody TestCompanyJsonEntity testCompanyEntity) {
         boolean BooleStatus  = entrustService.addCompanyData(testCompanyEntity);
         if(BooleStatus){
             return ResultUtil.success();
         }
         return ResultUtil.error(201,"增加数据失败");
     }
+
+    /**
+     *
+     * @param sampleEntity
+     * @return
+     */
     @RequestMapping("get_Sample")
-    public Result ReturnSampleData(SampleEntity sampleEntity)
-    {
+    public Result ReturnSampleData(SampleEntity sampleEntity) {
         return ResultUtil.success(entrustService.getSampleDataList(sampleEntity));
     }
 
-
-
+    /**
+     * 查询产品所有的检测项
+     * @param productId
+     * @return
+     */
     @RequestMapping("/getAllItem")
     public Result getAllItemByProductId(Integer productId){
         if(productId == null){
@@ -77,6 +102,11 @@ public class EntrustController {
         }
     }
 
+    /**
+     * 查询检测项详情：检测项名称，检测项方法，规格型号，检测依据
+     * @param itemIds
+     * @return
+     */
     @RequestMapping("/getItemDetail")
     public Result getItemDetail(@RequestBody CheckItemParamVo itemIds){
         if(itemIds == null){
@@ -105,11 +135,11 @@ public class EntrustController {
      * @return
      */
     @RequestMapping(value="add_sample", method= RequestMethod.POST)
-    public Result getAddSampleData(@RequestBody SampleAddParamVo samples) {
+    public Result getAddSampleData(@RequestBody SampleAddParamVo samples, @RequestParam("file")MultipartFile file) {
         if(samples == null){
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }else{
-            entrustService.addSampleData(samples);
+            entrustService.addSampleData(samples,file);
             return ResultUtil.success();
         }
     }
@@ -135,22 +165,8 @@ public class EntrustController {
 //        return null;
     }
 
-    // 测试文件
-    @RequestMapping(value="testFile", method= RequestMethod.POST)
-    @ResponseBody
-    public Result getOrcMessage(MultipartHttpServletRequest uploadFile) {
-        InputStream inputStream = null;
-
-        MultipartFile file = uploadFile.getFile("uploadFile1");
-        try {
-            inputStream = file.getInputStream();
-        }catch (IOException e){
-            System.out.println("文件获取异常:{}"+e);
-        }
-        return null;
-    }
     /**
-     * 历史委托
+     * 查询历史委托
      * @param entrustHistoryEntity
      * @return
      */
@@ -158,13 +174,22 @@ public class EntrustController {
     public Result getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity){
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
     }
+
+    /**
+     * 查询历史委托信息详情
+     * @param entrustmentId
+     * @return
+     */
     @RequestMapping("/get_entrust_history_detail")
     public Result getEntrustHistoryDetail(Integer entrustmentId){
-
         return ResultUtil.success(entrustService.getEntrustHistoryDetail(entrustmentId));
     }
 
-
+    /**
+     * 查询产品判定依据
+     * @param productId
+     * @return
+     */
     @RequestMapping("/getJudgeBasis")
     public Result getJudgeBasis(Integer productId){
         if(productId == null ){
