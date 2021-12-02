@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import com.lims.manage.erp.config.MinioConfig;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
@@ -306,7 +307,7 @@ public class EntrustServiceImpl implements EntrustService {
         return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
     }
     @Override
-    public EntrustAddVo getEntrustHistoryDetail(Integer entrustmentId) {
+    public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息
         EntrustAddVo entrustAddVo   = entityMapper.selectByKeyId(entrustmentId);
         // 通过委托ID 样品集合

@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.SampleAddDetailVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import lombok.Data;

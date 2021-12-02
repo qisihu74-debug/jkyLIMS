@@ -19,7 +19,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     Integer selectMaxNo();
 
-    EntrustAddVo selectByKeyId(Integer id);
+    EntrustAddVo selectByKeyId(Long id);
 
     /**
      * 保存委托单下样品信息

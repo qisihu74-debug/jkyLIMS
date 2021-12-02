@@ -78,6 +78,6 @@ public interface EntrustService {
      * @param entrustmentId
      * @return
      */
-    EntrustAddVo getEntrustHistoryDetail(Integer entrustmentId);
+    EntrustAddVo getEntrustHistoryDetail(Long entrustmentId);
 
 }

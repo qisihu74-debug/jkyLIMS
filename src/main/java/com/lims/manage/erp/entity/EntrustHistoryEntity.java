@@ -9,6 +9,7 @@ import lombok.Data;
  */
 @Data
 public class EntrustHistoryEntity {
+    private Long id;
     /**
      * 委托编号
      */

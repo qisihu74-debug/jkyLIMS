@@ -17,7 +17,7 @@ public interface SampleEntityMapper {
 
     SampleEntity selectByPrimaryKey(Integer id);
 
-    List<SampleEntity> selectSampleListGroup(Integer entrustmentId);
+    List<SampleEntity> selectSampleListGroup(Long entrustmentId);
 
     List<SampleEntity> selectSampleList(SampleEntity record);
     /**

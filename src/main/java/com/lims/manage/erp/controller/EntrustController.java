@@ -181,7 +181,7 @@ public class EntrustController {
      * @return
      */
     @RequestMapping("/get_entrust_history_detail")
-    public Result getEntrustHistoryDetail(Integer entrustmentId){
+    public Result getEntrustHistoryDetail(Long entrustmentId){
         return ResultUtil.success(entrustService.getEntrustHistoryDetail(entrustmentId));
     }
 
