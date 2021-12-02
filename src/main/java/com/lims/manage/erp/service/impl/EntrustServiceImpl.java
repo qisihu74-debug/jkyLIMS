@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -56,7 +57,7 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean addEntrust(EntrustAddVo vo) {
+    public Boolean addEntrust(EntrustAddVo vo, MultipartFile file) {
         //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
         basisInfo.setId(GenID.getID());
@@ -65,7 +66,7 @@ public class EntrustServiceImpl implements EntrustService {
         String currentTime = DateUtil.getTodayString().substring(0,6);
         //获取当前最大样品编号
         Integer entrustNum = entityMapper.selectMaxNo();
-        if (entrustNum>0){
+        if (entrustNum !=null && entrustNum>0){
             String substring = entrustNum.toString().substring(0, 6);
             if (substring.equals(currentTime)){
                 code = entrustNum+1;
@@ -77,8 +78,8 @@ public class EntrustServiceImpl implements EntrustService {
         }
         basisInfo.setEntrustmentNo(code);
         //附件存在上传附件到服务器
-        if (vo.getFile() != null){
-            String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, vo.getFile(), "file:" + code);
+        if (file != null){
+            String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, file, "file:" + code);
             basisInfo.setFileUrl(upload);
         }
 
@@ -126,7 +127,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
         //得到总价钱，再保存委托基本信息
         basisInfo.setPaymentCount(totalMoney+"");
-        entityMapper.insert(basisInfo);
+        entityMapper.insertEntrustInfo(basisInfo);
         return true;
     }
 

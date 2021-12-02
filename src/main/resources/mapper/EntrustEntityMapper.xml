@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lims.manage.erp.mapper.EntrustEntityMapper">
-  <select id="selectMaxNo">
-    select max(entrustment_no) from test_entrusted
+  <select id="selectMaxNo" resultType="java.lang.Integer">
+    select max(entrustment_no) from test_entrusted_info
   </select>
   <select id="selectByKeyId" parameterType="java.lang.Integer" resultType="com.lims.manage.erp.vo.EntrustAddVo">
     select
     id, entrustment_no, entrust_type, entrust_people, entrust_phone, witness_uint,
     witness_person, witness_phone, project_name, project_part, sampling_method, check_purpose,
-    report_count, report_type, request_date, payment_method, present_information, acceptance_date,
+    report_count, report_type, request_date, pselectMaxNoayment_method, present_information, acceptance_date,
      team, state, remark, invalid_reason, operate_user, operate_date, file_url,  is_save
-    from test_entrusted
+    from test_entrusted_info
     where id = #{id,jdbcType=INTEGER}
   </select>
 
@@ -21,7 +21,7 @@
     t1.entrust_people as entrustPeople,
     t1.project_name as projectName
     FROM
-    test_entrusted AS t1
+    test_entrusted_info AS t1
     LEFT JOIN test_entrusted_sample_details_rel AS t2 ON t1.id = t2.entrustment_id
     LEFT JOIN test_sample AS t3 ON t2.sample_id = t3.id
     <trim prefix="WHERE" prefixOverrides="AND |OR ">
@@ -50,7 +50,7 @@
   </insert>
 
   <insert id="BatchSaveSampleStandard" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
-    INSERT into  test_entrusted_sample_details_rel(sample_id,
+    INSERT into  test_entrusted_sample_standard_rel(sample_id,
     standard_id
     )
     VALUES
@@ -62,14 +62,14 @@
   <insert id="BatchSaveEntrustSampleItem" parameterType="com.lims.manage.erp.entity.SampleItemEntity">
     INSERT into  test_entrusted_sample_checkitem_rel(sample_id,
     check_item_id,
-    standard_file_id,
-    test_method_id,
+    standard_id,
+    method_id,
     times,
     unit_price
     )
     VALUES
-    <foreach collection="list1" item="item" open="" separator="," close="">
-      (#{item.sampleId},#{item.checkItemId},#{item.standardFileId},#{item.testMethodId},#{times},#{item.unitPrice})
+    <foreach collection="sampleItemList" item="item" open="" separator="," close="">
+      (#{item.sampleId},#{item.checkItemId},#{item.standardId},#{item.methodId},#{item.times},#{item.unitPrice})
     </foreach>
   </insert>
 
@@ -90,4 +90,70 @@ operator
       ( SELECT * FROM test_product_standard_file_rel WHERE product_id = #{productId} ) t1
       LEFT JOIN test_standard_file t2 ON t1.standard_file_id = t2.id where t2.type in (1,3)
   </select>
+
+  <insert id="insertEntrustInfo" parameterType="com.lims.manage.erp.entity.EntrustEntity">
+        insert into test_entrusted_info(id,
+entrustment_no,
+entrust_type,
+entrust_company,
+entrust_people,
+entrust_phone,
+witness_uint,
+witness_person,
+witness_phone,
+project_name,
+project_part,
+sampling_method,
+check_purpose,
+report_count,
+report_type,
+request_date,
+payment_method,
+present_information,
+business_acceptor,
+acceptance_date,
+team,
+state,
+remark,
+invalid_reason,
+operate_user,
+operate_date,
+file_url,
+seal_type,
+is_save,
+count_price
+)
+        values (#{id},
+#{entrustmentNo},
+#{entrustType},
+#{entrustCompany},
+#{entrustPeople},
+#{entrustPhone},
+#{witnessUint},
+#{witnessPerson},
+#{witnessPhone},
+#{projectName},
+#{projectPart},
+#{samplingMethod},
+#{checkPurpose},
+#{reportCount},
+#{reportType},
+#{requestDate},
+#{paymentMethod},
+#{presentInformation},
+#{businessAcceptor},
+#{acceptanceDate},
+#{team},
+#{state},
+#{remark},
+#{invalidReason},
+#{operateUser},
+#{operateDate},
+#{fileUrl},
+#{sealType},
+#{isSave},
+#{countPrice}
+)
+
+  </insert>
 </mapper>

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
+import org.apache.ibatis.annotations.Param;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -30,13 +31,13 @@ public interface EntrustEntityMapper extends BaseMapper {
      * 保存委托单样品，判定依据信息
      * @param list1
      */
-    void BatchSaveSampleStandard(List<EntrustSampleEntity> list1);
+    void BatchSaveSampleStandard(@Param("list1") List<EntrustSampleEntity> list1);
 
     /**
      * 保存委托样品下检测项信息
      * @param sampleItemList
      */
-    void BatchSaveEntrustSampleItem(List<SampleItemEntity> sampleItemList);
+    void BatchSaveEntrustSampleItem(@Param("sampleItemList") List<SampleItemEntity> sampleItemList);
 
     /**
      * 缴费记录新增
@@ -56,4 +57,10 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     List<EntrustHistoryEntity> selectEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity);
+
+    /**
+     * 新增委托信息
+     * @param basisInfo
+     */
+    void insertEntrustInfo(EntrustEntity basisInfo);
 }

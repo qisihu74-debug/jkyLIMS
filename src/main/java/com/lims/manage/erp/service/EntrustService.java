@@ -9,6 +9,7 @@ import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ public interface EntrustService {
      * @param vo
      * @return
      */
-    Boolean addEntrust(EntrustAddVo vo);
+    Boolean addEntrust(EntrustAddVo vo, MultipartFile file);
 
     /**
      * 查询产品检测项

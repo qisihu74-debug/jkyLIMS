@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -27,8 +28,9 @@ public class EntrustController {
     private EntrustService entrustService;
 
     @RequestMapping("/addEntrust")
-    public Result addEntrust(@RequestBody EntrustAddVo entrust, HttpServletRequest request){
-        Boolean isSuccess = entrustService.addEntrust(entrust);
+    public Result addEntrust(@RequestParam("json") String json, MultipartFile file){
+        EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
+        Boolean isSuccess = entrustService.addEntrust(entrust,file);
         if(isSuccess){
             return ResultUtil.success();
         }else{

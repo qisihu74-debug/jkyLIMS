@@ -113,11 +113,6 @@ public class EntrustAddVo {
      */
     private Date operateDate;
     /**
-     * 文件对象
-     */
-
-    private MultipartFile file;
-    /**
      * 附件url
      */
     private String fileUrl;

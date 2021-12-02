@@ -1,12 +1,10 @@
 package com.lims.manage.erp.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import lombok.Data;
 
 import java.util.Date;
 @Data
-@TableName("test_entrusted")
 public class EntrustEntity {
     /**
      * 主键

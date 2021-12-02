@@ -29,11 +29,11 @@ public class SampleItemEntity {
     /**
      * 检测依据
      */
-    private Integer standardFileId;
+    private Integer standardId;
     /**
      * 检测方法id
      */
-    private Integer testMethodId;
+    private Integer methodId;
     /**
      * 检测样次
      */
