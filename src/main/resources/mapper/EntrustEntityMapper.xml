@@ -18,7 +18,7 @@
     SELECT
     t1.id as id,
     t1.entrustment_no as entrustmentNo,
-    t3.sample_name as sampleNname,
+    t3.sample_name as sampleName,
     t1.entrust_people as entrustPeople,
     t1.project_name as projectName
     FROM
