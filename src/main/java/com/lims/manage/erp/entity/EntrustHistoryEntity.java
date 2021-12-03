@@ -17,7 +17,7 @@ public class EntrustHistoryEntity {
     /**
      * 样品
      */
-    private String sampleNname;
+    private String sampleName;
     /**
      * 委托人
      */
@@ -27,9 +27,9 @@ public class EntrustHistoryEntity {
      */
     private String projectName;
 
-    public EntrustHistoryEntity(String entrustmentNo, String sampleNname, String entrustPeople, String projectName) {
+    public EntrustHistoryEntity(String entrustmentNo, String sampleName, String entrustPeople, String projectName) {
         this.entrustmentNo = entrustmentNo;
-        this.sampleNname = sampleNname;
+        this.sampleName = sampleName;
         this.entrustPeople = entrustPeople;
         this.projectName = projectName;
     }
@@ -43,11 +43,11 @@ public class EntrustHistoryEntity {
     }
 
     public String getSampleNname() {
-        return sampleNname;
+        return sampleName;
     }
 
     public void setSampleNname(String sampleNname) {
-        this.sampleNname = sampleNname;
+        this.sampleName = sampleNname;
     }
 
     public String getEntrustPeople() {
