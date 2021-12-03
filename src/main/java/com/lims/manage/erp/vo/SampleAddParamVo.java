@@ -62,5 +62,9 @@ public class SampleAddParamVo {
      * 每个样品的批次，照片
      */
     private List<SampleAddDetailVo> details;
+    /**
+     * 外观描述
+     */
+    private String outwardDescribe;
 
 }

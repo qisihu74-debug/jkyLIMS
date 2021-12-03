@@ -49,6 +49,11 @@ public interface EntrustService {
      */
     Boolean addCompanyData(TestCompanyJsonEntity testCompanyEntity);
 
+    /**
+     * 查询样品列表
+     * @param sampleEntity
+     * @return
+     */
     List<SampleEntity> getSampleDataList(SampleEntity sampleEntity);
 
     List<LabelValueVo> selectProductList(String productName);

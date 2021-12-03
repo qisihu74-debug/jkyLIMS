@@ -123,6 +123,10 @@ public class SampleEntity {
 //     * 样品与检测项
 //     */
 //    private List<CheckItemInfoVo> sampleCheckItem;
+    /**
+     * 外观描述
+     */
+    private String outwardDescribe;
 
 
     public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo,String sampleName,String sampleCode,String pictureUrl) {
@@ -147,6 +151,7 @@ public class SampleEntity {
         this.receivedDate = addParamVo.getReceivedDate();
         this.sampleRequirement = addParamVo.getSampleRequirement();
         this.generation = addParamVo.getGeneration();
+        this.outwardDescribe = addParamVo.getOutwardDescribe();
 //        this.state = state;
 //        this.checkDate = checkDate;
 //        this.remark = remark;
@@ -323,5 +328,13 @@ public class SampleEntity {
 
     public void setRemark(String remark) {
         this.remark = remark == null ? null : remark.trim();
+    }
+
+    public String getOutwardDescribe() {
+        return outwardDescribe;
+    }
+
+    public void setOutwardDescribe(String outwardDescribe) {
+        this.outwardDescribe = outwardDescribe;
     }
 }
