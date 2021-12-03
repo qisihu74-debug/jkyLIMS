@@ -346,4 +346,51 @@ savePlace,jdbcType=VARCHAR},
       remark = #{remark,jdbcType=VARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+    <select id="selectSampleList2" resultType="com.lims.manage.erp.vo.SampleDetailVo" parameterType="com.lims.manage.erp.entity.SampleEntity">
+        SELECT
+        t1.id id,
+        t1.company_id companyId,
+        t2.company_name companyName,
+        t1.product_id productId,
+        t1.sample_name sampleName,
+        t1.sample_code sampleCode,
+        t1.specs specs,
+        t1.batch_number batchNumber,
+        t1.manufacturer manufacturer,
+        t1.sample_origin sampleOrigin,
+        t1.outward outward,
+        t1.picture picture,
+        t1.save_place savePlace,
+        t1.admin admin,
+        t1.sample_groups sampleGroups,
+        t1.quantity_per_group quantityPerGroup,
+        t1.inspector inspector,
+        t1.received_date receivedDate,
+        t1.sample_requirement sampleRequirement,
+        t1.generation generation,
+        t1.state state,
+        t1.check_date checkDate,
+        t1.remark remark
+        FROM
+        test_sample t1
+        LEFT JOIN test_company t2 ON t1.company_id = t2.company_id
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="sampleName!=null and sampleName!=''">
+                and sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="sampleName!=null and sampleName!=''">
+                and sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="batchNumber!=null and batchNumber!=''">
+                and batch_number LIKE CONCAT('%',#{batchNumber},'%')
+            </if>
+            <if test="manufacturer!=null and manufacturer!=''">
+                and manufacturer LIKE CONCAT('%',#{manufacturer},'%')
+            </if>
+            <if test="receivedDate!=null and receivedDate!=''">
+                and sample_requirement LIKE CONCAT('%',#{receivedDate},'%')
+            </if>
+        </trim>
+    </select>
 </mapper>
