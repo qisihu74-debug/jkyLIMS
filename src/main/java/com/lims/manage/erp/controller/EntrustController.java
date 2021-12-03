@@ -1,7 +1,11 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.TestCompanyJsonEntity;
+import com.lims.manage.erp.entity.TestCustomerJsonEntity;
+import com.lims.manage.erp.entity.TestSampleJsonEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -11,11 +15,17 @@ import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;

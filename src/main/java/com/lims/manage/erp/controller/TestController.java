@@ -16,6 +16,7 @@ import org.flowable.task.api.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
@@ -61,8 +62,21 @@ public class TestController {
         map.put("description", reason);
 
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("holidayRequest", map);
-        return "提交成功,流程ID为：" + processInstance.getId();
+        return "提交成功,流程ID为：" + processInstance.getId()+" 任务id为:"+processInstance.getProcessInstanceId();
     }
+
+    /**
+     * 查看任务信息
+     */
+    @RequestMapping(value = "show")
+    @ResponseBody
+    public Object show(String taskId){
+        Map<String, Object> processVariables = taskService.getVariables(taskId);
+        System.out.println(processVariables);
+        return processVariables;
+    }
+
+
 
     /**
      * 获取指定用户组流程任务列表
