@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import com.lims.manage.erp.config.MinioConfig;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
@@ -24,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
@@ -143,7 +146,6 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public  Map<String,List<LabelValueVo>> returnEntrustData() {
-
         Map<String,List<LabelValueVo>> map = new HashMap<>();
         // type =1 委托单位
        List<LabelValueVo> EntrustCompany = testCompanyDao.selectEntrustCompanyList(1);
@@ -199,7 +201,6 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<TestCustomerJsonEntity> returnTestCustomerEntityList(Integer companyId) {
-
         return testCompanyDao.selectPeopleInformation(companyId);
     }
 
@@ -226,19 +227,18 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<SampleEntity> getSampleDataList(SampleEntity sampleEntity) {
-
         return sampleEntityMapper.selectSampleList(sampleEntity);
     }
 
     @Override
     public List<LabelValueVo> selectProductList(String productName) {
-
         return testProductDao.selectProductList(productName);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer addSampleData(SampleAddParamVo addParamVo) {
+    public Integer addSampleData(SampleAddParamVo addParamVo,MultipartFile[] file) {
+
         int result = 0;
         //查询产品名称
         String productName = testProductDao.getProductNameById(addParamVo.getSampleName());
@@ -280,10 +280,30 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                 }
                 //保存样品图片
-//                String picture = details.get(i).getPicture();
-//                MinIoUtil.upl
+
+                MultipartFile multipartFile = null;
+                int pictureName = i + 1;
+                String suffix = "";
+                if(file.length>0){//有上传文件
+                    for (int j = 0; j < file.length; j++) {
+                        String originalFilename = file[j].getOriginalFilename();
+                        String[] split = originalFilename.split("\\.");
+                        if((pictureName+"").equals(split[0])){
+                            suffix = split[1];
+                            multipartFile = file[j];
+                            break;
+                        }
+                    }
+                }
+                String pictureUrl = null;
+                if(!"".equals(suffix)){
+                    pictureUrl = sampleCode + "." + suffix;
+                }
+                if(multipartFile != null){
+                    MinIoUtil.upload("test-sample",multipartFile,pictureUrl);
+                }
                 //保存样品信息
-                SampleEntity sampleEntity = new SampleEntity(addParamVo,details.get(i),productName,sampleCode,null);
+                SampleEntity sampleEntity = new SampleEntity(addParamVo,details.get(i),productName,sampleCode,pictureUrl);
                 result = sampleEntityMapper.insert(sampleEntity);
             }
         }else {
@@ -304,11 +324,10 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) {
-
         return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
     }
     @Override
-    public EntrustAddVo getEntrustHistoryDetail(Integer entrustmentId) {
+    public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息
         EntrustAddVo entrustAddVo   = entityMapper.selectByKeyId(entrustmentId);
         // 通过委托ID 样品集合

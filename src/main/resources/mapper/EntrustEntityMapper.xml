@@ -4,18 +4,19 @@
   <select id="selectMaxNo" resultType="java.lang.Integer">
     select max(entrustment_no) from test_entrusted_info
   </select>
-  <select id="selectByKeyId" parameterType="java.lang.Integer" resultType="com.lims.manage.erp.vo.EntrustAddVo">
-    select
+  <select id="selectByKeyId" resultType="com.lims.manage.erp.vo.EntrustAddVo">
+		select
     id, entrustment_no, entrust_type, entrust_people, entrust_phone, witness_uint,
     witness_person, witness_phone, project_name, project_part, sampling_method, check_purpose,
-    report_count, report_type, request_date, pselectMaxNoayment_method, present_information, acceptance_date,
+    report_count, report_type, request_date, payment_method, present_information, acceptance_date,
      team, state, remark, invalid_reason, operate_user, operate_date, file_url,  is_save
     from test_entrusted_info
-    where id = #{id,jdbcType=INTEGER}
+    where id = #{id}
   </select>
 
   <select id="selectEntrustHistoryList" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity" parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
     SELECT
+    t1.id as id,
     t1.entrustment_no as entrustmentNo,
     t3.sample_name as sampleNname,
     t1.entrust_people as entrustPeople,

@@ -60,7 +60,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         SELECT
             t1.check_item_id AS checkItemId,
             t2.check_item_name AS checkItemName,
-            t1.test_method_id AS methodId
+            t1.method_id AS methodId
         FROM
             test_entrusted_sample_checkitem_rel AS t1
             LEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id
