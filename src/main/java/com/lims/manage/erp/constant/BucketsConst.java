@@ -12,21 +12,21 @@ public class BucketsConst {
     /**
      * 报告模板文件通名
      */
-    public static final String buckets_report = "reportTemplate";
+    public static final String buckets_report = "report-template";
     /**
      * 委托单附件资料通名
      */
-    public static final String buckets_entrust_enclosure = "entrustEnclosure";
+    public static final String buckets_entrust_enclosure = "entrust-enclosure";
     /**
      * 样品附件文件通名
      */
-    public static final String buckets_sample_enclosure = "sampleEnclosure";
+    public static final String buckets_sample_enclosure = "sample-enclosure";
     /**
      * 样品图片文件通名
      */
-    public static final String buckets_sample_picture = "samplePicture";
+    public static final String buckets_sample_picture = "sample-picture";
     /**
      * 原始记录文件通名
      */
-    public static final String buckets_original_record = "originalRecord";
+    public static final String buckets_original_record = "original-record";
 }

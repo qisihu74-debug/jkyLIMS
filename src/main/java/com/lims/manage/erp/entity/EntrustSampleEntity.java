@@ -12,7 +12,6 @@ import lombok.Data;
  * @Copyright © 河南交科院
  */
 @Data
-@TableName("test_entrusted_sample_details_rel")
 public class EntrustSampleEntity {
     /**
      * 样品id

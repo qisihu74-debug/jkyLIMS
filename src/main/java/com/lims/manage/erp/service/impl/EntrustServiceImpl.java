@@ -107,11 +107,13 @@ public class EntrustServiceImpl implements EntrustService {
                 entrustSampleEntity.setSampleId(sampleEntity.getId());
                 list.add(entrustSampleEntity);
                 List<Integer> standardFileIds = sampleEntity.getStandardFileIds();
-                for (Integer integer:standardFileIds) {
-                    EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
-                    sampleEntity1.setSampleId(sampleEntity.getId());
-                    sampleEntity1.setStandardId(integer);
-                    list1.add(sampleEntity1);
+                if (!CollectionUtils.isEmpty(standardFileIds)){
+                    for (Integer integer:standardFileIds) {
+                        EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
+                        sampleEntity1.setSampleId(sampleEntity.getId());
+                        sampleEntity1.setStandardId(integer);
+                        list1.add(sampleEntity1);
+                    }
                 }
                 //样品下检测项
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
@@ -122,14 +124,20 @@ public class EntrustServiceImpl implements EntrustService {
                 }
                 sampleItemList.addAll(sampleCheckItem);
             }
-            entityMapper.BatchSaveEntrustSample(list);
-            entityMapper.BatchSaveSampleStandard(list1);
+            if (!CollectionUtils.isEmpty(list)){
+                entityMapper.BatchSaveEntrustSample(list);
+            }
+            if (!CollectionUtils.isEmpty(list1)){
+                entityMapper.BatchSaveSampleStandard(list1);
+            }
         }
         //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
         for (SampleItemEntity entity:sampleItemList) {
             entity.setEntrustId(basisInfo.getId());
         }
-        entityMapper.BatchSaveEntrustSampleItem(sampleItemList);
+        if (!CollectionUtils.isEmpty(sampleItemList)){
+            entityMapper.BatchSaveEntrustSampleItem(sampleItemList);
+        }
         //更新委托单收费记录信息
         if (!StringUtils.isEmpty(vo.getPaymentRecord())){
             EntrustPamentEntity pamentEntity = new EntrustPamentEntity();

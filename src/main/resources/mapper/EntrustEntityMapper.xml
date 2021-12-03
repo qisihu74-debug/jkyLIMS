@@ -71,7 +71,7 @@
     )
     VALUES
     <foreach collection="sampleItemList" item="item" open="" separator="," close="">
-      (#{item.sampleId},#{item.checkItemId},#{item.standardId},#{item.methodId},#{item.times},#{item.unitPrice})
+      (#{item.sampleId},#{item.entrustId},#{item.checkItemId},#{item.standardId},#{item.methodId},#{item.times},#{item.unitPrice})
     </foreach>
   </insert>
 
