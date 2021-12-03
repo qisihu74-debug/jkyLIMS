@@ -21,13 +21,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -44,7 +41,7 @@ public class EntrustController {
      * @return
      */
     @RequestMapping("/addEntrust")
-    public Result addEntrust(@RequestParam("json") String json, MultipartFile file){
+    public Result addEntrust(@RequestParam("json") String json, MultipartFile[] file){
         EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
         Boolean isSuccess = entrustService.addEntrust(entrust,file);
         if(isSuccess){

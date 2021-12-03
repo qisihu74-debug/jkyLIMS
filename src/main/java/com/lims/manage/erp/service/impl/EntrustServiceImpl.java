@@ -12,6 +12,7 @@ import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.ImgUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -60,7 +63,7 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean addEntrust(EntrustAddVo vo, MultipartFile file) {
+    public Boolean addEntrust(EntrustAddVo vo, MultipartFile[] file) {
         //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
         basisInfo.setId(GenID.getID());
@@ -82,8 +85,13 @@ public class EntrustServiceImpl implements EntrustService {
         basisInfo.setEntrustmentNo(code);
         //附件存在上传附件到服务器
         if (file != null){
-            String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, file, "file:" + code);
-            basisInfo.setFileUrl(upload);
+            StringBuilder stringBuilder = new StringBuilder();
+            for (MultipartFile multipartFile :file) {
+                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, "file:" + code);
+                stringBuilder.append(upload);
+                stringBuilder.append(",");
+            }
+            basisInfo.setFileUrl(stringBuilder.toString());
         }
 
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
@@ -118,6 +126,9 @@ public class EntrustServiceImpl implements EntrustService {
             entityMapper.BatchSaveSampleStandard(list1);
         }
         //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+        for (SampleItemEntity entity:sampleItemList) {
+            entity.setEntrustId(basisInfo.getId());
+        }
         entityMapper.BatchSaveEntrustSampleItem(sampleItemList);
         //更新委托单收费记录信息
         if (!StringUtils.isEmpty(vo.getPaymentRecord())){

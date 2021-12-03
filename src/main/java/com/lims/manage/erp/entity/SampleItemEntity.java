@@ -19,6 +19,10 @@ public class SampleItemEntity {
      */
     private Integer sampleId;
     /**
+     * 委托单id
+     */
+    private Long entrustId;
+    /**
      * 检测项id
      */
     private Long checkItemId;

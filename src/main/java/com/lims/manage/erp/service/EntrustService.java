@@ -22,7 +22,7 @@ public interface EntrustService {
      * @param vo
      * @return
      */
-    Boolean addEntrust(EntrustAddVo vo, MultipartFile file);
+    Boolean addEntrust(EntrustAddVo vo, MultipartFile[] file);
 
     /**
      * 查询产品检测项

@@ -62,6 +62,7 @@
 
   <insert id="BatchSaveEntrustSampleItem" parameterType="com.lims.manage.erp.entity.SampleItemEntity">
     INSERT into  test_entrusted_sample_checkitem_rel(sample_id,
+    entrust_id,
     check_item_id,
     standard_id,
     method_id,
