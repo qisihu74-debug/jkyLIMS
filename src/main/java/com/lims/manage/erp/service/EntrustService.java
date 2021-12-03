@@ -58,7 +58,7 @@ public interface EntrustService {
      * @param addParamVo
      * @return
      */
-    Integer addSampleData(SampleAddParamVo addParamVo,MultipartFile file);
+    Integer addSampleData(SampleAddParamVo addParamVo,MultipartFile[] file);
 
     /**
      * 查询判定依据

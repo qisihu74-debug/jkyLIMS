@@ -237,7 +237,7 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer addSampleData(SampleAddParamVo addParamVo,MultipartFile file) {
+    public Integer addSampleData(SampleAddParamVo addParamVo,MultipartFile[] file) {
 
         int result = 0;
         //查询产品名称
@@ -280,10 +280,30 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                 }
                 //保存样品图片
-//                String picture = details.get(i).getPicture();
-//                MinIoUtil.upl
+
+                MultipartFile multipartFile = null;
+                int pictureName = i + 1;
+                String suffix = "";
+                if(file.length>0){//有上传文件
+                    for (int j = 0; j < file.length; j++) {
+                        String originalFilename = file[j].getOriginalFilename();
+                        String[] split = originalFilename.split("\\.");
+                        if((pictureName+"").equals(split[0])){
+                            suffix = split[1];
+                            multipartFile = file[j];
+                            break;
+                        }
+                    }
+                }
+                String pictureUrl = null;
+                if(!"".equals(suffix)){
+                    pictureUrl = sampleCode + "." + suffix;
+                }
+                if(multipartFile != null){
+                    MinIoUtil.upload("test-sample",multipartFile,pictureUrl);
+                }
                 //保存样品信息
-                SampleEntity sampleEntity = new SampleEntity(addParamVo,details.get(i),productName,sampleCode,null);
+                SampleEntity sampleEntity = new SampleEntity(addParamVo,details.get(i),productName,sampleCode,pictureUrl);
                 result = sampleEntityMapper.insert(sampleEntity);
             }
         }else {

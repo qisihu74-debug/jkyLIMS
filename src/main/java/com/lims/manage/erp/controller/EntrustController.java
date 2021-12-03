@@ -135,13 +135,20 @@ public class EntrustController {
      * @return
      */
     @RequestMapping(value="add_sample", method= RequestMethod.POST)
-    public Result getAddSampleData(@RequestBody SampleAddParamVo samples, @RequestParam("file")MultipartFile file) {
-        if(samples == null){
-            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
-        }else{
-            entrustService.addSampleData(samples,file);
-            return ResultUtil.success();
-        }
+//    public Result getAddSampleData(@RequestBody SampleAddParamVo samples, @RequestParam("file")MultipartFile file) {
+    public Result getAddSampleData(@RequestParam("json") String json,MultipartFile[] file) {
+        SampleAddParamVo samples = JSON.parseObject(json, SampleAddParamVo.class);
+//        System.out.println("产品信息："+samples.toString());
+//        for (int i = 0; i < file.length; i++) {
+//            System.out.println("样品文件信息"+file[i].getOriginalFilename());
+//        }
+        entrustService.addSampleData(samples,file);
+        return ResultUtil.success();
+//        if(samples == null){
+//            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+//        }else{
+//
+//        }
     }
 
     /**
