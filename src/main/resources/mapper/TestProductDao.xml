@@ -9,7 +9,7 @@
         product_name label
         FROM
         test_product
-        WHERE 1=1
+        WHERE is_valid=1
         <if test="productName!=null and productName!=''">
             and product_name LIKE CONCAT('%',#{productName},'%')
         </if>
