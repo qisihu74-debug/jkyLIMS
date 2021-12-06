@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
+import com.lims.manage.erp.vo.SampleDetailParamVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
@@ -27,7 +28,12 @@ public interface SampleEntityMapper {
      */
     List<SampleEntity> selectSampleList(SampleEntity record);
 
-    List<SampleDetailVo> selectSampleList2(SampleEntity record);
+    /**
+     * 根据查询条件查询样品列表
+     * @param record
+     * @return
+     */
+    List<SampleDetailVo> selectSampleList2(SampleEntity paramVo);
     /**
      * 样品下检测依据
      * @param sampleId

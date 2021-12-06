@@ -10,10 +10,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
-import com.lims.manage.erp.vo.CheckItemParamVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.SampleAddParamVo;
+import com.lims.manage.erp.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -97,6 +94,12 @@ public class EntrustController {
     public Result ReturnSampleData(SampleEntity sampleEntity) {
 //        return ResultUtil.success(entrustService.getSampleDataList(sampleEntity));
         return ResultUtil.success(entrustService.getSampleDataList(sampleEntity));
+    }
+
+    @RequestMapping("/getSampleDetail")
+    public Result getSampleDetail(@RequestBody SampleEntity paramVo) {
+        System.out.println("参数："+paramVo);
+        return ResultUtil.success(entrustService.selectSampleList2(paramVo));
     }
 
     /**

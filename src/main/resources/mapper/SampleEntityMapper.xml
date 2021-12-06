@@ -376,21 +376,26 @@ savePlace,jdbcType=VARCHAR},
         test_sample t1
         LEFT JOIN test_company t2 ON t1.company_id = t2.company_id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            <if test="sampleName!=null and sampleName!=''">
-                and sample_name LIKE CONCAT('%',#{sampleName},'%')
-            </if>
-            <if test="sampleName!=null and sampleName!=''">
-                and sample_name LIKE CONCAT('%',#{sampleName},'%')
-            </if>
-            <if test="batchNumber!=null and batchNumber!=''">
-                and batch_number LIKE CONCAT('%',#{batchNumber},'%')
+            <if test="productId!=null">
+                and product_id = #{productId}
             </if>
             <if test="manufacturer!=null and manufacturer!=''">
                 and manufacturer LIKE CONCAT('%',#{manufacturer},'%')
             </if>
-            <if test="receivedDate!=null and receivedDate!=''">
-                and sample_requirement LIKE CONCAT('%',#{receivedDate},'%')
+            <if test="batchNumber!=null and batchNumber!=''">
+                and batch_number LIKE CONCAT('%',#{batchNumber},'%')
             </if>
+            <if test="receivedDate!=null and receivedDate!=''">
+                and received_date=#{receivedDate}
+            </if>
+            <if test="state!=null and state!=''">
+                and state=#{state}
+            </if>
+<!--            <if test="states != null">-->
+<!--                <foreach collection="states" item="state" index="index" open="WHERE state IN (" close=")" separator=",">-->
+<!--                    #{state}-->
+<!--                </foreach>-->
+<!--            </if>-->
         </trim>
     </select>
 </mapper>

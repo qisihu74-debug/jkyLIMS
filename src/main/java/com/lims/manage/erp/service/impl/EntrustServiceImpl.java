@@ -15,12 +15,7 @@ import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.ImgUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.CheckItemDetailVo;
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.SampleAddDetailVo;
-import com.lims.manage.erp.vo.SampleAddParamVo;
+import com.lims.manage.erp.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -252,6 +247,11 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public List<SampleEntity> getSampleDataList(SampleEntity sampleEntity) {
         return sampleEntityMapper.selectSampleList(sampleEntity);
+    }
+
+    @Override
+    public List<SampleDetailVo> selectSampleList2(SampleEntity paramVo) {
+        return sampleEntityMapper.selectSampleList2(paramVo);
     }
 
     @Override
