@@ -251,7 +251,16 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<SampleDetailVo> selectSampleList2(SampleEntity paramVo) {
-        return sampleEntityMapper.selectSampleList2(paramVo);
+        List<SampleDetailVo> sampleDetailVos = sampleEntityMapper.selectSampleList2(paramVo);
+//        for (SampleDetailVo detail:sampleDetailVos) {
+//            String picture = detail.getPicture();
+//            if(picture != null){
+////                String fileUrl = MinIoUtil.getFileUrl("test-sample", picture);
+//                String url = MinIoUtil.getUrl("test-sample", picture);
+//                detail.setPicture(url);
+//            }
+//        }
+        return sampleDetailVos;
     }
 
     @Override
@@ -319,13 +328,15 @@ public class EntrustServiceImpl implements EntrustService {
                         }
                     }
                 }
-                String pictureUrl = null;
+                String pictureFileName = null;
                 if(!"".equals(suffix)){
-                    pictureUrl = sampleCode + "." + suffix;
+                    pictureFileName = sampleCode + "." + suffix;
                 }
+                String pictureUrl = null;
                 if(multipartFile != null){
-                    MinIoUtil.upload("test-sample",multipartFile,pictureUrl);
+                    pictureUrl = MinIoUtil.upload("test-sample", multipartFile, pictureFileName);
                 }
+                System.out.println("图片："+pictureUrl);
                 //保存样品信息
                 SampleEntity sampleEntity = new SampleEntity(addParamVo,details.get(i),productName,sampleCode,pictureUrl);
                 result = sampleEntityMapper.insert(sampleEntity);
