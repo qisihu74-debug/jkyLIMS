@@ -57,6 +57,10 @@ public class Const {
      */
     public static final String UPDATE_USERINFO = "9";
     /**
+     * 委托发布
+     */
+    public static final String ENTRUST_PUBLISH = "10";
+    /**
      * 默认密码
      */
     public static final String DEFAULT_PASSWORD = "111111";

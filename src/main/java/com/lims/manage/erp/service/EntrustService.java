@@ -90,4 +90,10 @@ public interface EntrustService {
      */
     EntrustAddVo getEntrustHistoryDetail(Long entrustmentId);
 
+    /**
+     * 委托发布
+     * @param entity
+     * @return
+     */
+    Boolean publishTask(TaskEntity entity);
 }

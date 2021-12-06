@@ -1,18 +1,31 @@
 package com.lims.manage.erp.service.impl;
 
-import com.lims.manage.erp.config.MinioConfig;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.EntrustPamentEntity;
+import com.lims.manage.erp.entity.EntrustSampleEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TaskEntity;
+import com.lims.manage.erp.entity.TestCompanyEntity;
+import com.lims.manage.erp.entity.TestCompanyJsonEntity;
+import com.lims.manage.erp.entity.TestCustomerEntity;
+import com.lims.manage.erp.entity.TestCustomerJsonEntity;
+import com.lims.manage.erp.entity.TestInitDataEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ProductItemEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
 import com.lims.manage.erp.mapper.TestCompanyDao;
 import com.lims.manage.erp.mapper.TestCustomerDao;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.EntrustService;
+import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.ImgUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
@@ -21,16 +34,15 @@ import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.SampleAddDetailVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,11 +50,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
 
+    Logger logger = LoggerFactory.getLogger(EntrustServiceImpl.class);
     @Autowired
     private EntrustEntityMapper entityMapper;
     @Autowired
@@ -53,9 +65,13 @@ public class EntrustServiceImpl implements EntrustService {
     SampleEntityMapper sampleEntityMapper;
     @Autowired
     TestProductDao testProductDao;
-
+    @Autowired
+    private TaskMapper taskMapper;
     @Autowired
     private ProductItemEntityMapper itemEntityMapper;
+    @Autowired
+    private TeamMapper teamMapper;
+
     /**
      * 新增委托任务
      * @param vo
@@ -364,5 +380,44 @@ public class EntrustServiceImpl implements EntrustService {
         }
         entrustAddVo.setSamples(sampleCollection);
         return entrustAddVo;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean publishTask(TaskEntity entity) {
+        //根据委托单生成任务单
+        entity.setId(GenID.getID());
+        //设置任务编号由团队代码（单字符英文字母）+年月(4字符)+“-”+三位流水号（3字符），如A2108-015。
+        //团队编号这部分在团队表中，任务编号生成时不考虑，展示时拼接上即可
+        //获取当前最大样品编号
+        Integer code = null;
+        Integer entrustNum = taskMapper.selectMaxNo();
+        String currentTime = DateUtil.getTodayString().substring(2,6);
+        if (entrustNum !=null && entrustNum>0){
+            String substring = entrustNum.toString().substring(2, 6);
+            if (substring.equals(currentTime)){
+                code = entrustNum+1;
+            }else {
+                code = Integer.parseInt(currentTime+"001");
+            }
+        }else {
+            code = Integer.parseInt(currentTime+"001");
+        }
+        entity.setCode(code.toString());
+        if (!StringUtils.isEmpty(entity.getTeamId())){
+            //设置接收人为团队副团长
+            List<SysUserEntity> userEntity = teamMapper.getUsersByTid(entity.getTeamId());
+            for (SysUserEntity sysUserEntity:userEntity) {
+                if (sysUserEntity.getPosition().equals(Const.SYS_MANAGER_LOG)){
+                    entity.setReceiver(sysUserEntity.getUsername());
+                }
+            }
+            entity.setReceiveTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
+        }
+        //任务单保存
+        taskMapper.insert(entity);
+        //更新委托单状态
+        taskMapper.updateEntrustById(entity.getEntrustmentId());
+        return true;
     }
 }

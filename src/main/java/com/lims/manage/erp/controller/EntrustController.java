@@ -3,6 +3,7 @@ package com.lims.manage.erp.controller;
 import com.alibaba.fastjson.JSON;
 import com.lims.manage.erp.entity.EntrustHistoryEntity;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
 import com.lims.manage.erp.entity.TestSampleJsonEntity;
@@ -10,11 +11,17 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
+import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.CheckItemParamVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +40,8 @@ public class EntrustController {
 
     @Autowired
     private EntrustService entrustService;
+    @Autowired
+    private LogManagerService logManagerService;
 
     /**
      * 新增委托
@@ -41,6 +50,7 @@ public class EntrustController {
      * @return
      */
     @RequestMapping("/addEntrust")
+    @RequiresPermissions("entrust:entrust:addEntrust")
     public Result addEntrust(@RequestParam("json") String json, MultipartFile[] file){
         EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
         Boolean isSuccess = entrustService.addEntrust(entrust,file);
@@ -209,6 +219,44 @@ public class EntrustController {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }else{
             return ResultUtil.success(entrustService.getJudges(productId));
+        }
+    }
+
+    /**
+     * 委托单发布，转为任务
+     * @param entity
+     * @return
+     */
+    @PostMapping("publishTask")
+    @RequiresPermissions("entrust:task:publishTask")
+    public Result publishTask(@RequestBody TaskEntity entity){
+        if (entity.getEntrustmentId() == null){
+            return ResultUtil.error(-1,"缺少必要参数");
+        }
+        //核查委托单位、委托人、委托人联系方式、样品信息、检测项信息是否完整
+        EntrustAddVo vo = entrustService.getEntrustHistoryDetail(entity.getEntrustmentId());
+        if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())
+                || StringUtils.isEmpty(vo.getEntrustPhone())){
+            return ResultUtil.error(-1,"请检查委托人信息是否完整！");
+        }
+        List<SampleEntity> samples = vo.getSamples();
+        if (CollectionUtils.isEmpty(samples)){
+            return ResultUtil.error(-1,"请检查委托单样品信息是否完整！");
+        }
+        if (!CollectionUtils.isEmpty(samples)){
+            for (SampleEntity sampleEntity:samples) {
+                if (CollectionUtils.isEmpty(sampleEntity.getSampleCheckItem())){
+                    return ResultUtil.error(-1,"请检查委托单样品下检测项信息是否完整！");
+                }
+            }
+        }
+        Boolean flag = entrustService.publishTask(entity);
+        if (flag){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"账户："+ShiroUtils.getUserInfo().getUsername()+"发布任务成功编号为："+vo.getEntrustmentNo(),
+                    Const.ENTRUST_PUBLISH,true);
+            return ResultUtil.success("委托发布成功！");
+        }else {
+            return ResultUtil.error(-1,"委托发布失败！");
         }
     }
 }

@@ -67,6 +67,11 @@ public class SysUserEntity implements Serializable {
 	 * 中文名
 	 */
 	private String name;
+	/**
+	 * 职位
+	 */
+	@TableField(exist = false)
+	private String position;
 
 	public SysUserEntity() {
 	}

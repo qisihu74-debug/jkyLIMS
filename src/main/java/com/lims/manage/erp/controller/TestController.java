@@ -76,7 +76,19 @@ public class TestController {
         return processVariables;
     }
 
+    /**
+     * 获取审批管理列表
+     */
+    @GetMapping(value = "/taskList")
+    @ResponseBody
+    public Object taskList(String userId) {
+        List<Task> tasks = taskService.createTaskQuery().taskAssignee(userId).orderByTaskCreateTime().desc().list();
+        for (Task task : tasks) {
+        }
+        System.out.println(tasks.toString());
 
+        return tasks.toString();
+    }
 
     /**
      * 获取指定用户组流程任务列表
