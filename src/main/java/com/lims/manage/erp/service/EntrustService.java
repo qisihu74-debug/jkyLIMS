@@ -57,6 +57,13 @@ public interface EntrustService {
     List<SampleEntity> getSampleDataList(SampleEntity sampleEntity);
 
     /**
+     * 查询样品列表
+     * @param paramVo
+     * @return
+     */
+    List<SampleDetailVo> selectSampleList2(SampleEntity paramVo);
+
+    /**
      * 查询产品--模糊查询
      * @param productName
      * @return

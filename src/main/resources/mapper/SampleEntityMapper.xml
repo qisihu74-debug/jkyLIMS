@@ -44,19 +44,31 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
          t2.specs as specs, t2.batch_number as batchNumber, t2.manufacturer as manufacturer, t2.sample_origin as sampleOrigin,
          t2.outward as outward, t2.picture as picture, t2.save_place as savePlace, t2.admin as admin,  t2.sample_groups as sampleGroups,
          t2.quantity_per_group as quantityPerGroup, t2.inspector as inspector,t2.received_date as receivedDate, t2.sample_requirement as sampleRequirement,
-          t2.generation as generation, t2.state as state, t2.check_date as checkDate, t2.remark as remark,t2.product_id as productId
+          t2.generation as generation, t2.state as state, t2.check_date as checkDate, t2.remark as remark,t2.product_id as productId,
+          t1.sample_id as id
         FROM
         test_entrusted_sample_details_rel AS t1
         LEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id
         WHERE t1.entrustment_id =#{entrustmentId}
     </select>
-  <select id="selectdardFileIds" resultType="integer">
+    <select id="selectTestStandardList" resultType="com.lims.manage.erp.vo.JudgmentBasisVo">
         SELECT
-        standard_id
-        FROM test_entrusted_sample_standard_rel
-        WHERE sample_id = #{sampleId}
+            t2.check_item_name AS checkItemName,
+            t1.times as times,
+            t1.unit_price as unitPrice,
+             t3.code as standard,
+            t3.name as name
+        FROM
+            test_entrusted_sample_checkitem_rel AS t1
+            LEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id
+						LEFT JOIN test_standard_file as t3 ON t1.standard_id = t3.id
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+        <if test="entrustmentId!=0 and entrustmentId!=''">
+            and t1.entrust_id =  #{entrustmentId}
+        </if>
+        </trim>
     </select>
-  <select id="selectSampleCheckItem" resultType="com.lims.manage.erp.vo.CheckItemInfoVo">
+  <select id="selectSampleCheckItem" resultType="com.lims.manage.erp.entity.SampleItemEntity">
         SELECT
             t1.check_item_id AS checkItemId,
             t2.check_item_name AS checkItemName,
@@ -64,8 +76,14 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         FROM
             test_entrusted_sample_checkitem_rel AS t1
             LEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id
-        WHERE
-            t1.sample_id =  #{sampleId}
+      <trim prefix="WHERE" prefixOverrides="AND |OR ">
+      <if test="sampleId!=0 and sampleId!=''">
+          and t1.sample_id =  #{sampleId}
+      </if>
+      <if test="entrustmentId!=0 and entrustmentId!=''">
+          and t1.entrust_id  =  #{entrustmentId}
+      </if>
+      </trim>
     </select>
   <select id="selectSampleList" resultType="com.lims.manage.erp.entity.SampleEntity" parameterType="com.lims.manage.erp.entity.SampleEntity">
         SELECT
@@ -376,21 +394,26 @@ savePlace,jdbcType=VARCHAR},
         test_sample t1
         LEFT JOIN test_company t2 ON t1.company_id = t2.company_id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            <if test="sampleName!=null and sampleName!=''">
-                and sample_name LIKE CONCAT('%',#{sampleName},'%')
-            </if>
-            <if test="sampleName!=null and sampleName!=''">
-                and sample_name LIKE CONCAT('%',#{sampleName},'%')
-            </if>
-            <if test="batchNumber!=null and batchNumber!=''">
-                and batch_number LIKE CONCAT('%',#{batchNumber},'%')
+            <if test="productId!=null">
+                and product_id = #{productId}
             </if>
             <if test="manufacturer!=null and manufacturer!=''">
                 and manufacturer LIKE CONCAT('%',#{manufacturer},'%')
             </if>
-            <if test="receivedDate!=null and receivedDate!=''">
-                and sample_requirement LIKE CONCAT('%',#{receivedDate},'%')
+            <if test="batchNumber!=null and batchNumber!=''">
+                and batch_number LIKE CONCAT('%',#{batchNumber},'%')
             </if>
+            <if test="receivedDate!=null and receivedDate!=''">
+                and received_date=#{receivedDate}
+            </if>
+            <if test="state!=null and state!=''">
+                and state=#{state}
+            </if>
+<!--            <if test="states != null">-->
+<!--                <foreach collection="states" item="state" index="index" open="WHERE state IN (" close=")" separator=",">-->
+<!--                    #{state}-->
+<!--                </foreach>-->
+<!--            </if>-->
         </trim>
     </select>
 </mapper>

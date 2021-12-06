@@ -28,6 +28,9 @@ import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.*;
+import org.bytedeco.opencv.presets.opencv_core;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
@@ -50,6 +53,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.*;
+import java.util.zip.ZipEntry;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -271,6 +276,20 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    public List<SampleDetailVo> selectSampleList2(SampleEntity paramVo) {
+        List<SampleDetailVo> sampleDetailVos = sampleEntityMapper.selectSampleList2(paramVo);
+//        for (SampleDetailVo detail:sampleDetailVos) {
+//            String picture = detail.getPicture();
+//            if(picture != null){
+////                String fileUrl = MinIoUtil.getFileUrl("test-sample", picture);
+//                String url = MinIoUtil.getUrl("test-sample", picture);
+//                detail.setPicture(url);
+//            }
+//        }
+        return sampleDetailVos;
+    }
+
+    @Override
     public List<LabelValueVo> selectProductList(String productName) {
         return testProductDao.selectProductList(productName);
     }
@@ -335,13 +354,15 @@ public class EntrustServiceImpl implements EntrustService {
                         }
                     }
                 }
-                String pictureUrl = null;
+                String pictureFileName = null;
                 if(!"".equals(suffix)){
-                    pictureUrl = sampleCode + "." + suffix;
+                    pictureFileName = sampleCode + "." + suffix;
                 }
+                String pictureUrl = null;
                 if(multipartFile != null){
-                    MinIoUtil.upload("test-sample",multipartFile,pictureUrl);
+                    pictureUrl = MinIoUtil.upload("test-sample", multipartFile, pictureFileName);
                 }
+                System.out.println("图片："+pictureUrl);
                 //保存样品信息
                 SampleEntity sampleEntity = new SampleEntity(addParamVo,details.get(i),productName,sampleCode,pictureUrl);
                 result = sampleEntityMapper.insert(sampleEntity);
@@ -368,15 +389,14 @@ public class EntrustServiceImpl implements EntrustService {
     }
     @Override
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
-        // 通过委托ID 委托单信息
+        // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo   = entityMapper.selectByKeyId(entrustmentId);
-        // 通过委托ID 样品集合
+        // 通过委托ID 样品集合 → test_sample
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
         // 样品信息 进行补充 检测依据集合，检测项集合
         for(SampleEntity sampleEntity:sampleCollection){
-            sampleEntity.setStandardFileIds(sampleEntityMapper.selectdardFileIds(sampleEntity.getId()));
-            sampleEntity.setSampleCheckItem(null);
-                    sampleEntityMapper.selectSampleCheckItem(sampleEntity.getId());
+            // 样品下 检测项、检测依据 补充。
+            sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(),entrustmentId));
         }
         entrustAddVo.setSamples(sampleCollection);
         return entrustAddVo;

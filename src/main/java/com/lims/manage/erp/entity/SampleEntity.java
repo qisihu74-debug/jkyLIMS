@@ -1,6 +1,7 @@
 package com.lims.manage.erp.entity;
 
 import com.lims.manage.erp.vo.CheckItemInfoVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
 import com.lims.manage.erp.vo.SampleAddDetailVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import lombok.Data;
@@ -127,6 +128,13 @@ public class SampleEntity {
      * 外观描述
      */
     private String outwardDescribe;
+
+    /**
+     *样品下检测项、检测依据、总价
+     */
+    List<JudgmentBasisVo> judgmentBasisVos;
+
+
 
 
     public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo,String sampleName,String sampleCode,String pictureUrl) {

@@ -14,11 +14,13 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.*;
 import com.lims.manage.erp.vo.CheckItemParamVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -109,6 +111,12 @@ public class EntrustController {
         return ResultUtil.success(entrustService.getSampleDataList(sampleEntity));
     }
 
+    @RequestMapping("/getSampleDetail")
+    public Result getSampleDetail(@RequestBody SampleEntity paramVo) {
+        System.out.println("参数："+paramVo);
+        return ResultUtil.success(entrustService.selectSampleList2(paramVo));
+    }
+
     /**
      * 查询产品所有的检测项
      * @param productId
@@ -190,10 +198,13 @@ public class EntrustController {
 
     /**
      * 查询历史委托
+     * 1、角色过滤 “客户代表”、“市场部业务员”
+     * 2、“客户”指定自身委托
      * @param entrustHistoryEntity
      * @return
      */
     @RequestMapping("/get_entrust_history")
+//    @RequiresPermissions("test:entrust:get_entrust_history")
     public Result getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity){
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
     }
@@ -258,5 +269,16 @@ public class EntrustController {
         }else {
             return ResultUtil.error(-1,"委托发布失败！");
         }
+    }
+
+    /**
+     * 委托单任务待发布列表
+     * @param entrustHistoryEntity
+     * @return
+     */
+    @RequestMapping("/releasedList")
+//    @RequiresPermissions("test:entrust:releasedList")
+    public Result getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity){
+        return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
     }
 }
