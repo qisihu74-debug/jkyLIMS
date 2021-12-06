@@ -16,6 +16,8 @@ import com.lims.manage.erp.util.ImgUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.*;
+import org.bytedeco.opencv.presets.opencv_core;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,11 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipEntry;
 
 @Service
@@ -363,15 +361,14 @@ public class EntrustServiceImpl implements EntrustService {
     }
     @Override
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
-        // 通过委托ID 委托单信息
+        // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo   = entityMapper.selectByKeyId(entrustmentId);
-        // 通过委托ID 样品集合
+        // 通过委托ID 样品集合 → test_sample
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
         // 样品信息 进行补充 检测依据集合，检测项集合
         for(SampleEntity sampleEntity:sampleCollection){
-            sampleEntity.setStandardFileIds(sampleEntityMapper.selectdardFileIds(sampleEntity.getId()));
-            sampleEntity.setSampleCheckItem(null);
-                    sampleEntityMapper.selectSampleCheckItem(sampleEntity.getId());
+            // 样品下 检测项、检测依据 补充。
+            sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(),entrustmentId));
         }
         entrustAddVo.setSamples(sampleCollection);
         return entrustAddVo;

@@ -66,5 +66,9 @@ public class SampleItemEntity {
      * 是否已审批1.是0否
      */
     private String isApproved;
+    /**
+     * 检测项名称
+     */
+    private String checkItemName;
 
 }

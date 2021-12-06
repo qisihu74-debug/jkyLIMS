@@ -1,10 +1,13 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.SampleDetailParamVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
 import org.mapstruct.Mapper;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,24 +31,24 @@ public interface SampleEntityMapper {
      */
     List<SampleEntity> selectSampleList(SampleEntity record);
 
+//    List<SampleDetailVo> selectSampleList2(SampleEntity record);
+
     /**
      * 根据查询条件查询样品列表
-     * @param record
+     * @param paramVo
      * @return
      */
     List<SampleDetailVo> selectSampleList2(SampleEntity paramVo);
     /**
      * 样品下检测依据
-     * @param sampleId
-     * @return
      */
-    List<Integer> selectdardFileIds(Integer sampleId);
+    List<JudgmentBasisVo> selectTestStandardList(@Param(value = "sampleId") Integer sampleId,@Param(value = "entrustmentId") Long entrustmentId);
     /**
      *  检测依据信息
      * @param sampleId
      * @return
      */
-    List<CheckItemInfoVo> selectSampleCheckItem(Integer sampleId);
+    List<SampleItemEntity> selectSampleCheckItem(@Param(value = "sampleId") Integer sampleId,@Param(value = "entrustmentId") Long entrustmentId);
 
 
     int updateByPrimaryKeySelective(SampleEntity record);

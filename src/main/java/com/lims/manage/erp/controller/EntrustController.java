@@ -11,6 +11,11 @@ import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.CheckItemParamVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.SampleAddParamVo;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -183,10 +188,13 @@ public class EntrustController {
 
     /**
      * 查询历史委托
+     * 1、角色过滤 “客户代表”、“市场部业务员”
+     * 2、“客户”指定自身委托
      * @param entrustHistoryEntity
      * @return
      */
     @RequestMapping("/get_entrust_history")
+//    @RequiresPermissions("test:entrust:get_entrust_history")
     public Result getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity){
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
     }
@@ -213,5 +221,16 @@ public class EntrustController {
         }else{
             return ResultUtil.success(entrustService.getJudges(productId));
         }
+    }
+
+    /**
+     * 委托单任务待发布列表
+     * @param entrustHistoryEntity
+     * @return
+     */
+    @RequestMapping("/releasedList")
+//    @RequiresPermissions("test:entrust:releasedList")
+    public Result getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity){
+        return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
     }
 }
