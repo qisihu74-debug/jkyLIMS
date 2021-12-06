@@ -52,11 +52,12 @@
 
   <insert id="BatchSaveSampleStandard" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
     INSERT into  test_entrusted_sample_standard_rel(sample_id,
-    standard_id
+    standard_id,
+    entrustment_id
     )
     VALUES
     <foreach collection="list1" item="item" open="" separator="," close="">
-      (#{item.sampleId},#{item.standardId})
+      (#{item.sampleId},#{item.standardId},#{item.entrustmentId})
     </foreach>
   </insert>
 

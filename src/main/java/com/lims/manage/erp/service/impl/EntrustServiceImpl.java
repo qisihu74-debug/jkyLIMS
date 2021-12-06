@@ -93,8 +93,10 @@ public class EntrustServiceImpl implements EntrustService {
                 stringBuilder.append(",");
             }
             String fileUrl = stringBuilder.toString();
-            String substring = fileUrl.substring(0, fileUrl.length() - 1);
-            basisInfo.setFileUrl(substring);
+            if (!StringUtils.isEmpty(fileUrl)){
+                String substring = fileUrl.substring(0, fileUrl.length() - 1);
+                basisInfo.setFileUrl(substring);
+            }
         }
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
         int totalMoney = 0;
@@ -114,6 +116,7 @@ public class EntrustServiceImpl implements EntrustService {
                         EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
                         sampleEntity1.setSampleId(sampleEntity.getId());
                         sampleEntity1.setStandardId(integer);
+                        sampleEntity1.setEntrustmentId(basisInfo.getId());
                         list1.add(sampleEntity1);
                     }
                 }
