@@ -87,13 +87,15 @@ public class EntrustServiceImpl implements EntrustService {
         if (file != null){
             StringBuilder stringBuilder = new StringBuilder();
             for (MultipartFile multipartFile :file) {
-                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, "file:" + code);
+                String name = multipartFile.getOriginalFilename();
+                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code+"=>"+name);
                 stringBuilder.append(upload);
                 stringBuilder.append(",");
             }
-            basisInfo.setFileUrl(stringBuilder.toString());
+            String fileUrl = stringBuilder.toString();
+            String substring = fileUrl.substring(0, fileUrl.length() - 1);
+            basisInfo.setFileUrl(substring);
         }
-
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
         int totalMoney = 0;
         List<SampleEntity> samples = vo.getSamples();
