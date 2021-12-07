@@ -1,19 +1,9 @@
 package com.lims.manage.erp.service.impl;
 
+import com.google.common.collect.Maps;
+import com.lims.manage.erp.config.MinioConfig;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustHistoryEntity;
-import com.lims.manage.erp.entity.EntrustPamentEntity;
-import com.lims.manage.erp.entity.EntrustSampleEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TaskEntity;
-import com.lims.manage.erp.entity.TestCompanyEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.entity.TestInitDataEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ProductItemEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
@@ -23,6 +13,7 @@ import com.lims.manage.erp.mapper.TestCompanyDao;
 import com.lims.manage.erp.mapper.TestCustomerDao;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.EntrustService;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
@@ -30,6 +21,9 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
 import com.lims.manage.erp.vo.*;
+import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.bytedeco.opencv.presets.opencv_core;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
@@ -40,12 +34,22 @@ import com.lims.manage.erp.vo.SampleAddParamVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -77,6 +81,11 @@ public class EntrustServiceImpl implements EntrustService {
     @Autowired
     private TeamMapper teamMapper;
 
+    public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDispositionFormData("attachment", new String(fileName.getBytes("UTF-8"), "iso-8859-1"));
+        return headers;
+    }
     /**
      * 新增委托任务
      * @param vo
@@ -187,7 +196,17 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<CheckItemInfoVo> getCheckItemInfoVo(List<Integer> ids) {
-        return itemEntityMapper.getItemInfo(ids);
+        return itemEntityMapper.getItemInfo2(ids);
+    }
+
+    @Override
+    public Map<String,List<LabelValueVo>> getItemMethodStandard(Integer id) {
+        Map<String,List<LabelValueVo>> result = Maps.newHashMap();
+        List<LabelValueVo> itemMethod = itemEntityMapper.getItemMethod(id);
+        List<LabelValueVo> itemStandard = itemEntityMapper.getItemStandard(id);
+        result.put("itemMethod",itemMethod);
+        result.put("itemStandard",itemStandard);
+        return result;
     }
 
     @Override
@@ -278,16 +297,7 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<SampleDetailVo> selectSampleList2(SampleEntity paramVo) {
-        List<SampleDetailVo> sampleDetailVos = sampleEntityMapper.selectSampleList2(paramVo);
-//        for (SampleDetailVo detail:sampleDetailVos) {
-//            String picture = detail.getPicture();
-//            if(picture != null){
-////                String fileUrl = MinIoUtil.getFileUrl("test-sample", picture);
-//                String url = MinIoUtil.getUrl("test-sample", picture);
-//                detail.setPicture(url);
-//            }
-//        }
-        return sampleDetailVos;
+        return sampleEntityMapper.selectSampleList2(paramVo);
     }
 
     @Override
@@ -442,5 +452,69 @@ public class EntrustServiceImpl implements EntrustService {
         //更新委托单状态
         taskMapper.updateEntrustById(entity.getEntrustmentId());
         return true;
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getSampleTagInfo(Integer sampleId) {
+        SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
+        HashMap<String, SampleDetailVo> result = Maps.newHashMap();
+        String fileName ="";
+        if(sampleTagInfo != null ){
+            fileName = sampleTagInfo.getSampleCode()+"样品标签.xlsx";
+            result.put("result",sampleTagInfo);
+        }else{
+            return null;
+        }
+        XLSTransformer transformer = new XLSTransformer();
+        InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        HttpHeaders headers = null;
+        try {
+            headers = getHttpHeaders("");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        byte[] bytes = null;
+        Workbook sheets = null;
+        try {
+            sheets = transformer.transformXLS(fileStream, result);
+            try {
+                sheets.write(outputStream);
+                bytes = outputStream.toByteArray();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (InvalidFormatException e) {
+            e.printStackTrace();
+        }
+        if(bytes != null ){
+            return new ResponseEntity<>(bytes, headers, HttpStatus.CREATED);
+        }else{
+            return null;
+        }
+    }
+
+    @Override
+    public String getSampleTagInfo2(Integer sampleId) {
+        SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
+        if(sampleTagInfo == null){
+            return null;
+        }else{
+            String fileName =sampleTagInfo.getSampleCode()+"样品标签.xlsx";
+            String fileUrl = null;
+            HashMap<String, SampleDetailVo> result = Maps.newHashMap();
+            result.put("result",sampleTagInfo);
+            XLSTransformer transformer = new XLSTransformer();
+            InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
+            try {
+                transformer.transformXLS(fileStream,result);
+                fileUrl = MinIoUtil.upload("test-sample-template", fileName, fileStream, "application/octet-stream");
+            } catch (InvalidFormatException e) {
+                e.printStackTrace();
+            }
+            return fileUrl;
+        }
     }
 }

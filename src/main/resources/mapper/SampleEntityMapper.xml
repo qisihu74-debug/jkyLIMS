@@ -416,4 +416,16 @@ savePlace,jdbcType=VARCHAR},
 <!--            </if>-->
         </trim>
     </select>
+
+    <select id="getSampleTagInfo" resultType="com.lims.manage.erp.vo.SampleDetailVo">
+        SELECT
+            sample_code sampleCode,
+            sample_name sampleName,
+            specs,
+            outward
+        FROM
+            test_sample
+        WHERE
+            id = #{sampleId}
+    </select>
 </mapper>

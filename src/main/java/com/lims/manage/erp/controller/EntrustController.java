@@ -23,6 +23,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,9 +33,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
@@ -144,6 +150,16 @@ public class EntrustController {
             return ResultUtil.success(entrustService.getCheckItemInfoVo(itemIds.getIds()));
         }
     }
+
+    @RequestMapping("/getItemMethodStandard")
+    public Result getItemMethodStandard(Integer itemId){
+        if(itemId == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }else{
+            return ResultUtil.success(entrustService.getItemMethodStandard(itemId));
+        }
+    }
+
     /**
      * 样品基本信息--查询产品
      * @param productName
@@ -164,7 +180,6 @@ public class EntrustController {
      * @return
      */
     @RequestMapping(value="add_sample", method= RequestMethod.POST)
-//    public Result getAddSampleData(@RequestBody SampleAddParamVo samples, @RequestParam("file")MultipartFile file) {
     public Result getAddSampleData(@RequestParam("json") String json,MultipartFile[] file) {
         SampleAddParamVo samples = JSON.parseObject(json, SampleAddParamVo.class);
         if(samples == null){
@@ -280,5 +295,31 @@ public class EntrustController {
 //    @RequiresPermissions("test:entrust:releasedList")
     public Result getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity){
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
+    }
+
+    /**
+     * 下载样品标签
+     * @param sampleId
+     * @return
+     */
+    @RequestMapping("/downloadSampleTag")
+    public ResponseEntity<byte[]> downloadSampleTag(Integer sampleId){
+        ResponseEntity<byte[]> sampleTagInfo = entrustService.getSampleTagInfo(sampleId);
+        if( sampleTagInfo == null ){
+            return new ResponseEntity<byte[]>(null,null, HttpStatus.NOT_FOUND);
+        }else{
+            return sampleTagInfo;
+        }
+//        if(sampleId == null ){
+//            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+//        }else{
+//
+//        }
+    }
+
+    @RequestMapping("/downloadSampleTag2")
+    public Result downloadSampleTag2(Integer sampleId){
+        String sampleTagInfo2 = entrustService.getSampleTagInfo2(sampleId);
+        return ResultUtil.success(sampleTagInfo2);
     }
 }

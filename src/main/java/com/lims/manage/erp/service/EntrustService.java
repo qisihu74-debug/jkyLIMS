@@ -9,6 +9,7 @@ import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +38,13 @@ public interface EntrustService {
      * @return
      */
     List<CheckItemInfoVo> getCheckItemInfoVo(List<Integer> ids);
+
+    /**
+     * 查询检测项 方法 依据
+     * @param id
+     * @return
+     */
+    Map<String,List<LabelValueVo>> getItemMethodStandard(Integer id);
 
     Map<String, List<LabelValueVo>> returnEntrustData();
 
@@ -96,6 +104,20 @@ public interface EntrustService {
      * @return
      */
     EntrustAddVo getEntrustHistoryDetail(Long entrustmentId);
+
+    /**
+     * 查询样品标签信息
+     * @param sampleId
+     * @return
+     */
+    ResponseEntity<byte[]> getSampleTagInfo(Integer sampleId);
+
+    /**
+     * 查询样品标签信息--文件服务器
+     * @param sampleId
+     * @return
+     */
+    String getSampleTagInfo2(Integer sampleId);
 
     /**
      * 委托发布

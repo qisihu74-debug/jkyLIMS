@@ -55,4 +55,11 @@ public interface SampleEntityMapper {
 
     int updateByPrimaryKey(SampleEntity record);
 
+    /**
+     * 查询样品标签信息
+     * @param sampleId
+     * @return
+     */
+    SampleDetailVo getSampleTagInfo(Integer sampleId);
+
 }

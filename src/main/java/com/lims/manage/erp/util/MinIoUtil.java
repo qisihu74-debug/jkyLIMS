@@ -183,6 +183,15 @@ public class MinIoUtil {
     public static String getUrl(String bucketName, String fileName) {
         return minioClient.getObjectUrl(bucketName,fileName);
     }
-
+    /**
+     * 获取minio文件的输入流
+     * @param bucketName 桶名
+     * @param fileName  文件名
+     * @return
+     */
+    @SneakyThrows(Exception.class)
+    public static InputStream getFileStream(String bucketName, String fileName) {
+        return minioClient.getObject(bucketName,fileName);
+    }
 
 }

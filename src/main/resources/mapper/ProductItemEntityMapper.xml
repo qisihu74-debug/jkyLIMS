@@ -300,4 +300,39 @@ logisticsCosts,jdbcType=VARCHAR},
                 LEFT JOIN test_product_item_standard_file_rel t4 ON t1.check_item_id = t4.check_item_id
                 LEFT JOIN test_standard_file t5 ON t4.standard_file_id = t5.id
     </select>
+
+    <select id="getItemInfo2" resultType="com.lims.manage.erp.vo.CheckItemInfoVo">
+        SELECT
+            check_item_id checkItemId,
+            check_item_name checkItemName,
+            product_id productId,
+            check_price checkPrice
+        FROM
+            test_product_item
+        <if test="checkIds != null">
+            <foreach collection="checkIds" item="id" index="index" open="WHERE check_item_id IN (" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getItemMethod" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT
+            t1.method_id value,
+	        t2.name label
+        FROM
+            test_product_item_method_rel t1
+            LEFT JOIN test_method t2 ON t1.method_id = t2.id where check_item_id = #{itemId}
+    </select>
+    <select id="getItemStandard" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT
+            standard_file_id value,
+	        CONCAT(code,"《",name,"》") label
+        FROM
+            test_product_item_standard_file_rel t1
+            LEFT JOIN test_standard_file t2 ON t1.standard_file_id = t2.id
+        WHERE
+            check_item_id =  #{itemId}
+    </select>
+
 </mapper>

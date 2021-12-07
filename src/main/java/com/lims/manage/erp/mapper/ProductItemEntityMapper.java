@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.lims.manage.erp.entity.ProductItemEntity;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Param;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
@@ -36,6 +37,26 @@ public interface ProductItemEntityMapper {
      * @return
      */
     List<CheckItemInfoVo> getItemInfo(@Param("checkIds")List<Integer> checkIds);
+
+    /**
+     * 查询检测项方法
+     * @param itemId
+     * @return
+     */
+    List<LabelValueVo> getItemMethod(Integer itemId);
+
+    /**
+     * 查询检测项检测依据
+     * @param itemId
+     * @return
+     */
+    List<LabelValueVo> getItemStandard(Integer itemId);
+    /**
+     * 查询检测项详细信息
+     * @param checkIds
+     * @return
+     */
+    List<CheckItemInfoVo> getItemInfo2(@Param("checkIds")List<Integer> checkIds);
 
 
 }
