@@ -29,4 +29,10 @@ public class BucketsConst {
      * 原始记录文件通名
      */
     public static final String buckets_original_record = "original-record";
+    /**
+     * 委托单
+     */
+    public static final String buckets_entrust_template = "entrust-template";
+
+
 }

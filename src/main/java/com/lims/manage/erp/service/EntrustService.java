@@ -9,11 +9,13 @@ import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -144,4 +146,11 @@ public interface EntrustService {
      * @return
      */
     Boolean publishTask(TaskEntity entity);
+
+    /**
+     * 填充数据
+     * @param detail
+     * @param object
+     */
+    XWPFDocument downloadEntrust(EntrustAddVo detail, InputStream object);
 }

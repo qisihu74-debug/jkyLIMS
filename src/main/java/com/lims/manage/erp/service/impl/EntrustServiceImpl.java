@@ -1,9 +1,20 @@
 package com.lims.manage.erp.service.impl;
 
 import com.google.common.collect.Maps;
-import com.lims.manage.erp.config.MinioConfig;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.EntrustPamentEntity;
+import com.lims.manage.erp.entity.EntrustSampleEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TaskEntity;
+import com.lims.manage.erp.entity.TestCompanyEntity;
+import com.lims.manage.erp.entity.TestCompanyJsonEntity;
+import com.lims.manage.erp.entity.TestCustomerEntity;
+import com.lims.manage.erp.entity.TestCustomerJsonEntity;
+import com.lims.manage.erp.entity.TestInitDataEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ProductItemEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
@@ -13,25 +24,26 @@ import com.lims.manage.erp.mapper.TestCompanyDao;
 import com.lims.manage.erp.mapper.TestCustomerDao;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.EntrustService;
-import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.*;
-import com.lims.manage.erp.vo.*;
-import net.sf.jxls.transformer.XLSTransformer;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Workbook;
-import io.minio.ObjectStat;
-import org.bytedeco.opencv.presets.opencv_core;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.SampleAddDetailVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
+import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,14 +55,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,8 +67,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.*;
-import java.util.zip.ZipEntry;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -594,6 +601,36 @@ public class EntrustServiceImpl implements EntrustService {
         //更新委托单状态
         taskMapper.updateEntrustById(entity.getEntrustmentId());
         return true;
+    }
+
+    @Override
+    public XWPFDocument downloadEntrust(EntrustAddVo detail, InputStream object) {
+        XWPFDocument doc = null;
+        try {
+            //TODO 设置模板数据
+            doc = new XWPFDocument(object);
+            List<XWPFTable> tables = doc.getTables();
+            List<XWPFTableRow> rows;
+            List<XWPFTableCell> cells;
+            for (XWPFTable table : tables) {
+                //表格属性
+                CTTblPr pr = table.getCTTbl().getTblPr();
+                //获取表格对应的行
+                rows = table.getRows();
+                for (XWPFTableRow row : rows) {
+                    //获取行对应的单元格
+                    cells = row.getTableCells();
+                    for (XWPFTableCell cell : cells) {
+                        System.out.println(cell.getText());;
+                    }
+                }
+            }
+
+
+        }catch (Exception e){
+            logger.error("设置委托单信息到模板异常:{}",e);
+        }
+        return doc;
     }
 
     @Override

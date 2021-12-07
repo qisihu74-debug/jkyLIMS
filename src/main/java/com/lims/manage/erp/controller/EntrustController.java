@@ -1,6 +1,7 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.EntrustHistoryEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TaskEntity;
@@ -13,14 +14,16 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.*;
 import com.lims.manage.erp.vo.CheckItemParamVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
+import io.minio.MinioClient;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,15 +36,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/entrust/")
 public class EntrustController {
@@ -361,4 +365,27 @@ public class EntrustController {
         String sampleTagInfo2 = entrustService.getSampleTagInfo2(sampleId);
         return ResultUtil.success(sampleTagInfo2);
     }
+
+    /**
+     * 委托单下载
+     * @param entrustId
+     * @return
+     */
+    @RequestMapping("downloadEntrust")
+    public void downloadEntrust(Long entrustId,HttpServletResponse response){
+        String fileName = "BD20210021.docx";
+        try {
+            MinioClient client = MinIoUtil.minioClient;
+            InputStream object = client.getObject(BucketsConst.buckets_entrust_template, fileName);
+            //填充数据
+            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
+            XWPFDocument document = entrustService.downloadEntrust(detail, object);
+            OutputStream outputStream = response.getOutputStream();
+            document.write(outputStream);
+            outputStream.close();
+        } catch (Exception ex) {
+            log.info("导出失败：", ex.getMessage());
+        }
+    }
+
 }
