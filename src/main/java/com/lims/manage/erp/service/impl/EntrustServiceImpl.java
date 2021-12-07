@@ -110,7 +110,7 @@ public class EntrustServiceImpl implements EntrustService {
             for (MultipartFile multipartFile :file) {
                 String name = multipartFile.getOriginalFilename();
                 String[] strings = name.split(".");
-                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code+strings[strings.length-1]);
+                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code+"."+strings[strings.length-1]);
                 stringBuilder.append(upload);
                 stringBuilder.append(",");
             }
