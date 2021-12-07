@@ -414,7 +414,7 @@ public class EntrustServiceImpl implements EntrustService {
         Integer entrustNum = taskMapper.selectMaxNo();
         String currentTime = DateUtil.getTodayString().substring(2,6);
         if (entrustNum !=null && entrustNum>0){
-            String substring = entrustNum.toString().substring(2, 6);
+            String substring = entrustNum.toString().substring(0, 4);
             if (substring.equals(currentTime)){
                 code = entrustNum+1;
             }else {
@@ -427,12 +427,14 @@ public class EntrustServiceImpl implements EntrustService {
         if (!StringUtils.isEmpty(entity.getTeamId())){
             //设置接收人为团队副团长
             List<SysUserEntity> userEntity = teamMapper.getUsersByTid(entity.getTeamId());
-            for (SysUserEntity sysUserEntity:userEntity) {
-                if (sysUserEntity.getPosition().equals(Const.SYS_MANAGER_LOG)){
-                    entity.setReceiver(sysUserEntity.getUsername());
+            if (!CollectionUtils.isEmpty(userEntity)){
+                for (SysUserEntity sysUserEntity:userEntity) {
+                    if (sysUserEntity.getPosition().equals(Const.SYS_MANAGER_LOG)){
+                        entity.setReceiver(sysUserEntity.getUsername());
+                    }
                 }
+                entity.setReceiveTime(new java.sql.Date(System.currentTimeMillis()));
             }
-            entity.setReceiveTime(new java.sql.Date(System.currentTimeMillis()));
         }
         //任务单保存
         taskMapper.save(entity);

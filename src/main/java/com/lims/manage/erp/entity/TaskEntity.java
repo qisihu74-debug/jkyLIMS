@@ -34,12 +34,12 @@ public class TaskEntity {
     /**
      * 下单时间
      */
-    @DateTimeFormat
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date orderTime;
     /**
      * 要求完成时间
      */
-    @DateTimeFormat
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date requiredCompletionTime;
     /**
      * 团队id
@@ -52,6 +52,6 @@ public class TaskEntity {
     /**
      * 接收时间
      */
-    @DateTimeFormat
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date receiveTime;
 }

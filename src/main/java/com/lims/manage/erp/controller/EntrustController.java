@@ -256,7 +256,7 @@ public class EntrustController {
         }
         if (!CollectionUtils.isEmpty(samples)){
             for (SampleEntity sampleEntity:samples) {
-                if (CollectionUtils.isEmpty(sampleEntity.getSampleCheckItem())){
+                if (CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())){
                     return ResultUtil.error(-1,"请检查委托单样品下检测项信息是否完整！");
                 }
             }
