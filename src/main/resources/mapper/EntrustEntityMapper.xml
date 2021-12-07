@@ -137,7 +137,8 @@ operate_date,
 file_url,
 seal_type,
 is_save,
-count_price
+count_price,
+adress
 )
         values (#{id},
 #{entrustmentNo},
@@ -168,7 +169,8 @@ count_price
 #{fileUrl},
 #{sealType},
 #{isSave},
-#{countPrice}
+#{countPrice},
+#{adress}
 )
 
   </insert>

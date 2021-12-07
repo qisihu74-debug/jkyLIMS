@@ -181,7 +181,9 @@ public class EntrustServiceImpl implements EntrustService {
             pamentEntity.setEntrustmentId(basisInfo.getId());
             pamentEntity.setPaymentDate(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
             pamentEntity.setPrice(vo.getPaymentRecord());
-            pamentEntity.setOperator(ShiroUtils.getUserInfo().getUsername());
+            if (ShiroUtils.getUserInfo() != null){
+                pamentEntity.setOperator(ShiroUtils.getUserInfo().getUsername());
+            }
             entityMapper.saveEntrustPayRecord(pamentEntity);
         }
         //得到总价钱，再保存委托基本信息
