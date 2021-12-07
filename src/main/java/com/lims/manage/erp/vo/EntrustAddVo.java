@@ -9,6 +9,10 @@ import java.util.List;
 @Data
 public class EntrustAddVo {
     /**
+     * 委托单id
+     */
+    private Long id;
+    /**
      * 编号
      */
     private Integer entrustmentNo;

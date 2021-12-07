@@ -24,6 +24,7 @@ import com.lims.manage.erp.vo.*;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
+import io.minio.ObjectStat;
 import org.bytedeco.opencv.presets.opencv_core;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
@@ -186,6 +187,56 @@ public class EntrustServiceImpl implements EntrustService {
         //得到总价钱，再保存委托基本信息
         basisInfo.setPaymentCount(totalMoney+"");
         entityMapper.insertEntrustInfo(basisInfo);
+        return true;
+    }
+
+    /**
+     * 修改委托
+     * @param vo
+     * @param file
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateEntrust(EntrustAddVo vo, MultipartFile[] file) {
+        EntrustEntity basisInfo = new EntrustEntity(vo);
+        Integer code =  vo.getEntrustmentNo();
+        //附件存在上传附件到服务器
+        if (file != null){
+            StringBuilder stringBuilder = new StringBuilder();
+            for (MultipartFile multipartFile :file) {
+                String name = multipartFile.getOriginalFilename();
+                String[] strings = name.split("\\.");
+                // 去清除 MinIo 桶数据。
+               MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure,code+"."+strings[strings.length-1]);
+                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code+"."+strings[strings.length-1]);
+                stringBuilder.append(upload);
+                stringBuilder.append(",");
+            }
+            String fileUrl = stringBuilder.toString();
+            if (!StringUtils.isEmpty(fileUrl)){
+                String substring = fileUrl.substring(0, fileUrl.length() - 1);
+                basisInfo.setFileUrl(substring);
+            }
+        }
+        // 遍历 样品信息 获取价格。
+        //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
+        int totalMoney = 0;
+        List<SampleEntity> samples = vo.getSamples();
+        List<SampleItemEntity> sampleItemList = new ArrayList<>();
+        List<EntrustSampleEntity> list = new ArrayList<>();
+        List<EntrustSampleEntity> list1 = new ArrayList<>();
+        List<Integer>  newSamplesId =null;
+        if(!CollectionUtils.isEmpty(samples)){
+            for(SampleEntity sampleEntity:samples){
+                newSamplesId.add(sampleEntity.getId());
+            }
+        }
+        List<Integer>  removeSamplesId =  entityMapper.getSampleIdSet(basisInfo.getId());
+
+
+        //存放委托基本信息==》test_entrusted
+        entityMapper.updateEntrustInfo(basisInfo);
         return true;
     }
 
@@ -398,6 +449,13 @@ public class EntrustServiceImpl implements EntrustService {
     public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) {
         return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
     }
+
+    @Override
+    public List<EntrustHistoryEntity> getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity) {
+        entrustHistoryEntity.setState(0);
+        return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
+    }
+
     @Override
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info

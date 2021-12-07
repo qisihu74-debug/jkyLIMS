@@ -44,5 +44,9 @@ public class EntrustHistoryEntity {
      * 业务受理人
      */
     private String businessAcceptor;
+    /**
+     * 任务状态
+     */
+    private Integer state;
 
 }

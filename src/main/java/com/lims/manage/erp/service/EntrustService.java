@@ -26,6 +26,11 @@ public interface EntrustService {
     Boolean addEntrust(EntrustAddVo vo, MultipartFile[] file);
 
     /**
+     * 修改委托
+     */
+    Boolean updateEntrust(EntrustAddVo vo, MultipartFile[] file);
+
+    /**
      * 查询产品检测项
      * @param productId
      * @return
@@ -98,6 +103,12 @@ public interface EntrustService {
      * @return
      */
     List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity);
+    /**
+     * 委托单任务待发布列表
+     * @param entrustHistoryEntity
+     * @return
+     */
+    List<EntrustHistoryEntity> getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity);
     /**
      * 史委托信息 具体详情
      * @param entrustmentId

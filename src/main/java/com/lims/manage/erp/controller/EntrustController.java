@@ -70,6 +70,24 @@ public class EntrustController {
     }
 
     /**
+     * 修改委托
+     * @param json
+     * @param file
+     * @return
+     */
+    @RequestMapping("/updateEntrust")
+//    @RequiresPermissions("entrust:entrust:updateEntrust")
+    public Result updateEntrust(@RequestParam("json") String json, MultipartFile[] file){
+        EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
+        Boolean isSuccess = entrustService.updateEntrust(entrust,file);
+        if(isSuccess){
+            return ResultUtil.success();
+        }else{
+            return ResultUtil.error(678,"修改委托失败！");
+        }
+    }
+
+    /**
      *
      * @return
      */
@@ -219,7 +237,7 @@ public class EntrustController {
      * @return
      */
     @RequestMapping("/get_entrust_history")
-//    @RequiresPermissions("test:entrust:get_entrust_history")
+    @RequiresPermissions("test:entrust:get_entrust_history")
     public Result getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity){
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
     }
@@ -292,9 +310,9 @@ public class EntrustController {
      * @return
      */
     @RequestMapping("/releasedList")
-//    @RequiresPermissions("test:entrust:releasedList")
+    @RequiresPermissions("test:entrust:releasedList")
     public Result getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity){
-        return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
+        return ResultUtil.success(entrustService.getEntrustReleasedList(entrustHistoryEntity));
     }
 
     /**

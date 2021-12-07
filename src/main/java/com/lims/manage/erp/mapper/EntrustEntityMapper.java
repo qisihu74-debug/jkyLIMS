@@ -70,4 +70,11 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     int updateEntrustInfo(EntrustEntity basisInfo);
+
+    /**
+     * 根据委托编号 获取 存储的样品id 集合
+     */
+    List<Integer> getSampleIdSet(Long entrustmentId);
+
+
 }

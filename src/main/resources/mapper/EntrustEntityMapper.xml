@@ -175,33 +175,39 @@ count_price
   <update id="updateEntrustInfo" parameterType="com.lims.manage.erp.entity.EntrustEntity" >
     UPDATE test_entrusted_info
     <trim prefix="SET" suffixOverrides=",">
-      <if test="entrustType != null entrustType!=''">entrust_type=#{entrustType},</if>
-      <if test="businessAcceptor != null businessAcceptor!=''">username=#{businessAcceptor},</if>
-      <if test="entrustCompany != null entrustCompany!=''">entrust_company=#{entrustCompany},</if>
-      <if test="entrustPeople != null entrustPeople!=''">entrust_people=#{entrustPeople},</if>
-      <if test="entrustPhone != null entrustPhone!=''">entrust_phone=#{entrustPhone},</if>
-      <if test="witnessUint != null witnessUint!=''">witness_uint=#{witnessUint},</if>
-      <if test="witnessPerson != null witnessPerson!=''">witness_person=#{witnessPerson},</if>
-      <if test="witnessPhone != null witnessPhone!=''">witness_phone=#{witnessPhone},</if>
-      <if test="projectName != null projectName!=''">project_name=#{projectName},</if>
-      <if test="samplingMethod != null samplingMethod!=''">sampling_method=#{samplingMethod},</if>
-      <if test="projectPart != null projectPart!=''">project_part=#{projectPart},</if>
-      <if test="checkPurpose != null checkPurpose!=''">check_purpose=#{checkPurpose},</if>
+      <if test="entrustType!=null and entrustType!=''">entrust_type=#{entrustType},</if>
+      <if test="businessAcceptor!=null and businessAcceptor!=''">username=#{businessAcceptor},</if>
+      <if test="entrustCompany != null and entrustCompany!=''">entrust_company=#{entrustCompany},</if>
+      <if test="entrustPeople != null and entrustPeople!=''">entrust_people=#{entrustPeople},</if>
+      <if test="entrustPhone != null and entrustPhone!=''">entrust_phone=#{entrustPhone},</if>
+      <if test="witnessUint != null and witnessUint!=''">witness_uint=#{witnessUint},</if>
+      <if test="witnessPerson != null and witnessPerson!=''">witness_person=#{witnessPerson},</if>
+      <if test="witnessPhone != null and witnessPhone!=''">witness_phone=#{witnessPhone},</if>
+      <if test="projectName != null and projectName!=''">project_name=#{projectName},</if>
+      <if test="samplingMethod != null and samplingMethod!=''">sampling_method=#{samplingMethod},</if>
+      <if test="projectPart != null and projectPart!=''">project_part=#{projectPart},</if>
+      <if test="checkPurpose != null and checkPurpose!=''">check_purpose=#{checkPurpose},</if>
       <if test="reportCount != null">report_count=#{reportCount},</if>
-      <if test="reportType != null reportType!=''">report_type=#{reportType},</if>
+      <if test="reportType != null and reportType!=''">report_type=#{reportType},</if>
       <if test="requestDate != null">request_date=#{requestDate},</if>
-      <if test="paymentMethod != null paymentMethod!=''">payment_method=#{paymentMethod},</if>
-      <if test="paymentCount != null paymentCount!=''">count_price=#{paymentCount},</if>
-      <if test="presentInformation != null presentInformation!=''">present_information=#{presentInformation},</if>
+      <if test="paymentMethod != null and paymentMethod!=''">payment_method=#{paymentMethod},</if>
+      <if test="paymentCount != null and paymentCount!=''">count_price=#{paymentCount},</if>
+      <if test="presentInformation != null and presentInformation!=''">present_information=#{presentInformation},</if>
       <if test="acceptanceDate != null">acceptance_date=#{acceptanceDate},</if>
       <if test="team != null">team=#{team},</if>
       <if test="state != null">state=#{state},</if>
-      <if test="remark != null remark!=''">remark=#{remark},</if>
-      <if test="fileUrl != null fileUrl!=''">file_url=#{fileUrl},</if>
-      <if test="sealType != null sealType!=''">seal_type=#{sealType},</if>
-      <if test="isSave != null isSave!=''">is_save=#{isSave},</if>
-      <if test="countPrice != null countPrice!=''">count_price=#{countPrice},</if>
+      <if test="remark != null and remark!=''">remark=#{remark},</if>
+      <if test="fileUrl != null and fileUrl!=''">file_url=#{fileUrl},</if>
+      <if test="sealType != null and sealType!=''">seal_type=#{sealType},</if>
+      <if test="isSave != null and isSave!=''">is_save=#{isSave},</if>
+      <if test="countPrice != null and countPrice!=''">count_price=#{countPrice},</if>
     </trim>
-    where id = #{id} and entrustment_no = {entrustmentNo}
+    where id = #{id} and entrustment_no = #{entrustmentNo}
   </update>
+  <select id="getSampleIdSet" resultType="integer">
+    SELECT sample_id
+      FROM
+      test_entrusted_sample_details_rel
+      WHERE entrustment_id = #{entrustmentId}
+  </select>
 </mapper>

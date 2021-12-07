@@ -189,6 +189,8 @@ public class EntrustEntity {
     }
 
     public EntrustEntity(EntrustAddVo vo){
+        this.id=vo.getId();
+        this.entrustmentNo=vo.getEntrustmentNo();
         this.entrustType=vo.getEntrustType();
         this.samplingMethod=vo.getSamplingMethod();
         this.reportType=vo.getReportType();
@@ -214,6 +216,8 @@ public class EntrustEntity {
         this.remark=vo.getRemark();
 
     }
+
+
 
     public Long getId() {
         return id;
