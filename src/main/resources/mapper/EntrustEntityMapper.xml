@@ -6,14 +6,13 @@
   </select>
   <select id="selectByKeyId" resultType="com.lims.manage.erp.vo.EntrustAddVo">
 		select
-    id, entrustment_no, entrust_type, entrust_people, entrust_phone, witness_uint,
+    id, entrustment_no, entrust_type,entrust_company, entrust_people, entrust_phone, witness_uint,
     witness_person, witness_phone, project_name, project_part, sampling_method, check_purpose,
     report_count, report_type, request_date, payment_method, present_information, acceptance_date,
      team, state, remark, invalid_reason, operate_user, operate_date, file_url,  is_save
     from test_entrusted_info
     where id = #{id}
   </select>
-
   <select id="selectEntrustHistoryList" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity" parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
     SELECT
     t1.id As id,
@@ -48,6 +47,9 @@
       </if>
       <if test="entrustCompany!=null and entrustCompany!=''">
         and  t1.entrust_company LIKE CONCAT('%',#{entrustCompany},'%')
+      </if>
+      <if test="state!=null">
+        and  t1.state = #{state}
       </if>
     </trim>
   </select>
@@ -170,4 +172,36 @@ count_price
 )
 
   </insert>
+  <update id="updateEntrustInfo" parameterType="com.lims.manage.erp.entity.EntrustEntity" >
+    UPDATE test_entrusted_info
+    <trim prefix="SET" suffixOverrides=",">
+      <if test="entrustType != null entrustType!=''">entrust_type=#{entrustType},</if>
+      <if test="businessAcceptor != null businessAcceptor!=''">username=#{businessAcceptor},</if>
+      <if test="entrustCompany != null entrustCompany!=''">entrust_company=#{entrustCompany},</if>
+      <if test="entrustPeople != null entrustPeople!=''">entrust_people=#{entrustPeople},</if>
+      <if test="entrustPhone != null entrustPhone!=''">entrust_phone=#{entrustPhone},</if>
+      <if test="witnessUint != null witnessUint!=''">witness_uint=#{witnessUint},</if>
+      <if test="witnessPerson != null witnessPerson!=''">witness_person=#{witnessPerson},</if>
+      <if test="witnessPhone != null witnessPhone!=''">witness_phone=#{witnessPhone},</if>
+      <if test="projectName != null projectName!=''">project_name=#{projectName},</if>
+      <if test="samplingMethod != null samplingMethod!=''">sampling_method=#{samplingMethod},</if>
+      <if test="projectPart != null projectPart!=''">project_part=#{projectPart},</if>
+      <if test="checkPurpose != null checkPurpose!=''">check_purpose=#{checkPurpose},</if>
+      <if test="reportCount != null">report_count=#{reportCount},</if>
+      <if test="reportType != null reportType!=''">report_type=#{reportType},</if>
+      <if test="requestDate != null">request_date=#{requestDate},</if>
+      <if test="paymentMethod != null paymentMethod!=''">payment_method=#{paymentMethod},</if>
+      <if test="paymentCount != null paymentCount!=''">count_price=#{paymentCount},</if>
+      <if test="presentInformation != null presentInformation!=''">present_information=#{presentInformation},</if>
+      <if test="acceptanceDate != null">acceptance_date=#{acceptanceDate},</if>
+      <if test="team != null">team=#{team},</if>
+      <if test="state != null">state=#{state},</if>
+      <if test="remark != null remark!=''">remark=#{remark},</if>
+      <if test="fileUrl != null fileUrl!=''">file_url=#{fileUrl},</if>
+      <if test="sealType != null sealType!=''">seal_type=#{sealType},</if>
+      <if test="isSave != null isSave!=''">is_save=#{isSave},</if>
+      <if test="countPrice != null countPrice!=''">count_price=#{countPrice},</if>
+    </trim>
+    where id = #{id} and entrustment_no = {entrustmentNo}
+  </update>
 </mapper>

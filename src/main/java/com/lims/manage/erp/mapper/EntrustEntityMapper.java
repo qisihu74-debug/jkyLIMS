@@ -63,4 +63,11 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @param basisInfo
      */
     void insertEntrustInfo(EntrustEntity basisInfo);
+
+    /**
+     * 修改委托信息
+     * @param basisInfo
+     * @return
+     */
+    int updateEntrustInfo(EntrustEntity basisInfo);
 }
