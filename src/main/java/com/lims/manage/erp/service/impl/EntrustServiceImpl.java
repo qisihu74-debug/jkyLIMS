@@ -432,10 +432,10 @@ public class EntrustServiceImpl implements EntrustService {
                     entity.setReceiver(sysUserEntity.getUsername());
                 }
             }
-            entity.setReceiveTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
+            entity.setReceiveTime(new java.sql.Date(System.currentTimeMillis()));
         }
         //任务单保存
-        taskMapper.insert(entity);
+        taskMapper.save(entity);
         //更新委托单状态
         taskMapper.updateEntrustById(entity.getEntrustmentId());
         return true;

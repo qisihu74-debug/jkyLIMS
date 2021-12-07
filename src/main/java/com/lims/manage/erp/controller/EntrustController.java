@@ -52,7 +52,7 @@ public class EntrustController {
      * @return
      */
     @RequestMapping("/addEntrust")
-    @RequiresPermissions("entrust:entrust:addEntrust")
+    //@RequiresPermissions("entrust:entrust:addEntrust")
     public Result addEntrust(@RequestParam("json") String json, MultipartFile[] file){
         EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
         Boolean isSuccess = entrustService.addEntrust(entrust,file);
@@ -239,7 +239,7 @@ public class EntrustController {
      * @return
      */
     @PostMapping("publishTask")
-    @RequiresPermissions("entrust:task:publishTask")
+    //@RequiresPermissions("entrust:task:publishTask")
     public Result publishTask(@RequestBody TaskEntity entity){
         if (entity.getEntrustmentId() == null){
             return ResultUtil.error(-1,"缺少必要参数");

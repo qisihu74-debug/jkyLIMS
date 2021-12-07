@@ -5,4 +5,33 @@
     <select id="selectMaxNo" resultType="java.lang.String">
         select Max(code) from test_task
     </select>
+
+    <insert id="save" parameterType="com.lims.manage.erp.entity.TaskEntity">
+        INSERT INTO test_task (
+	id,
+	code,
+	entrustment_id,
+	orderer,
+	order_time,
+	required_completion_time,
+	team_id,
+	receiver,
+	receive_time
+)
+VALUES
+	(
+		#{id},
+		#{code},
+		#{entrustmentId},
+		#{orderer},
+		#{orderTime},
+		#{requiredCompletionTime},
+		#{teamId},
+		#{receiver},
+		#{receiveTime})
+    </insert>
+
+    <update id="updateEntrustById">
+        update test_entrusted_info set state=1 where id=#{entrustmentId}
+    </update>
 </mapper>

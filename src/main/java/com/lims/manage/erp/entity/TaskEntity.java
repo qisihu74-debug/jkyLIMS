@@ -1,8 +1,9 @@
 package com.lims.manage.erp.entity;
 
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 
 /**
  * @author gjl
@@ -33,11 +34,13 @@ public class TaskEntity {
     /**
      * 下单时间
      */
-    private Timestamp orderTime;
+    @DateTimeFormat
+    private Date orderTime;
     /**
      * 要求完成时间
      */
-    private Timestamp requiredCompletionTime;
+    @DateTimeFormat
+    private Date requiredCompletionTime;
     /**
      * 团队id
      */
@@ -49,5 +52,6 @@ public class TaskEntity {
     /**
      * 接收时间
      */
-    private Timestamp receiveTime;
+    @DateTimeFormat
+    private Date receiveTime;
 }

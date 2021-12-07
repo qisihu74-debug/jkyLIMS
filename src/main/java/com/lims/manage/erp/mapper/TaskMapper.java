@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.lims.manage.erp.entity.TaskEntity;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -27,4 +28,10 @@ public interface TaskMapper extends BaseMapper {
      * @param entrustmentId
      */
     void updateEntrustById(Long entrustmentId);
+
+    /**
+     * 保存任务单
+     * @param entity
+     */
+    void save(TaskEntity entity);
 }
