@@ -441,6 +441,88 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    public Integer updateSampleData(SampleAddParamVo addParamVo, MultipartFile[] file) {
+        int result = 0;
+        //查询产品名称
+        String productName = testProductDao.getProductNameById(addParamVo.getSampleName());
+        //处理详情数据
+        List<SampleAddDetailVo> details = addParamVo.getDetails();
+        //获取数据库当前年份最大的样品编号
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+        Date now = new Date();
+        String maxNumber = testProductDao.getMaxNumber(sdf.format(now));
+        int newMax;
+        if(maxNumber == null){
+            newMax = 0;
+        }else{
+            newMax = Integer.parseInt(maxNumber);
+        }
+        if(details != null){
+            for (int i = 0; i < details.size(); i++) {
+                //生成样品编号
+                StringBuilder code = new StringBuilder("YP-"+sdf.format(now)+"-");
+                String sampleCode ;
+                if(addParamVo.getSampleGroups()>1){
+                    //组数大于1，将前n个命名为
+                    if(i%addParamVo.getQuantityPerGroup() == 0){
+                        newMax = newMax+1;
+                    }
+                    String num = String.format("%0" + 4 + "d", newMax);
+                    StringBuilder prefix = code.append(num);
+                    String suffix = String.format("%0" + 2 + "d", i%addParamVo.getQuantityPerGroup()+1);
+                    sampleCode = prefix + "_" + suffix;
+                }else{
+                    //生成样品编号
+                    String num = String.format("%0" + 4 + "d", newMax+1);
+                    StringBuilder prefix = code.append(num);
+                    String suffix = String.format("%0" + 2 + "d", i+1);
+                    if(addParamVo.getQuantityPerGroup()>1){
+                        sampleCode = prefix + "_" + suffix;
+                    }else{
+                        sampleCode = prefix.toString();
+                    }
+                }
+                //保存样品图片
+
+                MultipartFile multipartFile = null;
+                int pictureName = i + 1;
+                String suffix = "";
+                if(file.length>0){//有上传文件
+                    for (int j = 0; j < file.length; j++) {
+                        String originalFilename = file[j].getOriginalFilename();
+                        String[] split = originalFilename.split("\\.");
+                        if((pictureName+"").equals(split[0])){
+                            suffix = split[1];
+                            multipartFile = file[j];
+                            break;
+                        }
+                    }
+                }
+                String pictureFileName = null;
+                if(!"".equals(suffix)){
+                    pictureFileName = sampleCode + "." + suffix;
+                }
+                String pictureUrl = null;
+                if(multipartFile != null){
+                    pictureUrl = MinIoUtil.upload("test-sample", multipartFile, pictureFileName);
+                }
+                System.out.println("图片："+pictureUrl);
+                //保存样品信息
+                SampleEntity sampleEntity = new SampleEntity(addParamVo,details.get(i),productName,sampleCode,pictureUrl);
+                result = sampleEntityMapper.insert(sampleEntity);
+            }
+        }else {
+            StringBuilder code = new StringBuilder("YP-"+sdf.format(now)+"-");
+            //生成样品编号
+            String num = String.format("%0" + 4 + "d", newMax+1);
+            StringBuilder sampleCode = code.append(num);
+            SampleEntity sampleEntity = new SampleEntity(addParamVo,null,productName,sampleCode.toString(),null);
+            result = sampleEntityMapper.insert(sampleEntity);
+        }
+        return result;
+    }
+
+    @Override
     public List<LabelValueVo> getJudges(Integer productId) {
         return entityMapper.getJudges(productId);
     }

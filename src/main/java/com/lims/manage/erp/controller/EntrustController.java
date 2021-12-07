@@ -169,6 +169,11 @@ public class EntrustController {
         }
     }
 
+    /**
+     * 查询检测项 方法 依据
+     * @param id
+     * @return
+     */
     @RequestMapping("/getItemMethodStandard")
     public Result getItemMethodStandard(Integer itemId){
         if(itemId == null){
@@ -199,6 +204,22 @@ public class EntrustController {
      */
     @RequestMapping(value="add_sample", method= RequestMethod.POST)
     public Result getAddSampleData(@RequestParam("json") String json,MultipartFile[] file) {
+        SampleAddParamVo samples = JSON.parseObject(json, SampleAddParamVo.class);
+        if(samples == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }else{
+            entrustService.addSampleData(samples, file);
+            return ResultUtil.success();
+        }
+    }
+
+    /**
+     * 样品基本信息--修改
+     * @param
+     * @return
+     */
+    @RequestMapping(value="update_sample", method= RequestMethod.POST)
+    public Result updateSampleData(@RequestParam("json") String json,MultipartFile[] file) {
         SampleAddParamVo samples = JSON.parseObject(json, SampleAddParamVo.class);
         if(samples == null){
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
