@@ -182,7 +182,7 @@ public class EntrustServiceImpl implements EntrustService {
         if (!StringUtils.isEmpty(vo.getPaymentRecord())){
             EntrustPamentEntity pamentEntity = new EntrustPamentEntity();
             pamentEntity.setEntrustmentId(basisInfo.getId());
-            pamentEntity.setPaymentDate(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
+            pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
             pamentEntity.setPrice(vo.getPaymentRecord());
             pamentEntity.setOperator(ShiroUtils.getUserInfo().getUsername());
             entityMapper.saveEntrustPayRecord(pamentEntity);
@@ -237,6 +237,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 刪除的样品id集合
         List<Integer>  removeSamplesId =  entityMapper.getSampleIdSet(basisInfo.getId());
+        //
         // 新增的id集合
         List<Integer> addNumber = new ArrayList<>();
         Map<Integer,String> map = new HashMap<>();
@@ -492,6 +493,12 @@ public class EntrustServiceImpl implements EntrustService {
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo   = entityMapper.selectByKeyId(entrustmentId);
+        // 通过委托单id 获取缴费记录 依据id 同价价格
+        entrustAddVo.setPaymentRecord(entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId));
+        // -- 支付方式。
+        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
+        // 联系地址
+        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
         // 通过委托ID 样品集合 → test_sample
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
         // 样品信息 进行补充 检测依据集合，检测项集合
@@ -553,26 +560,56 @@ public class EntrustServiceImpl implements EntrustService {
     public XWPFDocument downloadEntrust(EntrustAddVo detail, InputStream object) {
         XWPFDocument doc = null;
         try {
-            //TODO 设置模板数据
             doc = new XWPFDocument(object);
             List<XWPFTable> tables = doc.getTables();
             List<XWPFTableRow> rows;
-            List<XWPFTableCell> cells;
-            for (XWPFTable table : tables) {
-                //表格属性
-                CTTblPr pr = table.getCTTbl().getTblPr();
-                //获取表格对应的行
-                rows = table.getRows();
-                for (XWPFTableRow row : rows) {
-                    //获取行对应的单元格
-                    cells = row.getTableCells();
-                    for (XWPFTableCell cell : cells) {
-                        System.out.println(cell.getText());;
-                    }
-                }
+            XWPFTable table = tables.get(0);
+            //表格属性
+            CTTblPr pr = table.getCTTbl().getTblPr();
+            //获取表格对应的行
+            rows = table.getRows();
+            //TODO 设置模板数据
+            rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
+            rows.get(4).getTableCells().get(2).setText(detail.getWitnessUint());//见证单位
+            rows.get(5).getTableCells().get(2).setText(detail.getProjectPart());//工程部位
+            rows.get(6).getTableCells().get(2).setText(detail.getProjectName());//工程名称
+            //设置样品信息
+            List<SampleEntity> samples = detail.getSamples();
+            int sampleIndex=8;
+            int index =1;
+            for (int i = 0;i<samples.size();i++) {
+                rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getSampleName());//样品名称
+                rows.get(sampleIndex).getTableCells().get(index+1).setText(samples.get(i).getSpecs());//规格等级
+                rows.get(sampleIndex).getTableCells().get(index+2).setText(samples.get(i).getBatchNumber());//批号/编号
+                rows.get(sampleIndex).getTableCells().get(index+3).setText(samples.get(i).getSampleGroups().toString());//样品数量
+                rows.get(sampleIndex).getTableCells().get(index+4).setText(samples.get(i).getGeneration());//代表批量
+                rows.get(sampleIndex).getTableCells().get(index+5).setText(samples.get(i).getManufacturer());//样品产地/生产厂家
+                sampleIndex = sampleIndex+1;
             }
-
-
+            //设置其它信息
+            String ss = "";
+            rows.get(14).getTableCells().get(2).setText(ss);//提供资料
+            rows.get(15).getTableCells().get(2).setText(ss);//取样方式
+            rows.get(15).getTableCells().get(4).setText(ss);//检验目的
+            rows.get(15).getTableCells().get(6).setText(ss);//产品标准
+            rows.get(16).getTableCells().get(2).setText(ss);//检验项目及检测依据
+            rows.get(17).getTableCells().get(2).setText(ss);//报告分数
+            rows.get(17).getTableCells().get(4).setText(ss);//取报告方式
+            rows.get(17).getTableCells().get(6).setText(ss);//收报告单位
+            rows.get(18).getTableCells().get(2).setText(ss);//联系地址
+            rows.get(18).getTableCells().get(4).setText(ss);//联系人
+            rows.get(18).getTableCells().get(6).setText(ss);//联系方式
+            rows.get(19).getTableCells().get(2).setText(ss);//委托人
+            rows.get(19).getTableCells().get(4).setText(ss);//委托人电话
+            rows.get(19).getTableCells().get(6).setText(ss);//见证人
+            rows.get(20).getTableCells().get(2).setText(ss);//样品状态
+            rows.get(20).getTableCells().get(4).setText(ss);//样品保留
+            rows.get(21).getTableCells().get(2).setText(ss);//检验收费
+            rows.get(21).getTableCells().get(4).setText(ss);//支付方式
+            rows.get(21).getTableCells().get(6).setText(ss);//本次交费
+            rows.get(22).getTableCells().get(2).setText(ss);//完成期限
+            rows.get(22).getTableCells().get(4).setText(ss);//业务受理人
+            rows.get(22).getTableCells().get(6).setText(ss);//受理日期
         }catch (Exception e){
             logger.error("设置委托单信息到模板异常:{}",e);
         }
