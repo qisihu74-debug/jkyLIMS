@@ -219,13 +219,11 @@ public class EntrustController {
      * @return
      */
     @RequestMapping(value="update_sample", method= RequestMethod.POST)
-    public Result updateSampleData(@RequestParam("json") String json,MultipartFile[] file) {
-        SampleAddParamVo samples = JSON.parseObject(json, SampleAddParamVo.class);
-        if(samples == null){
+    public Result updateSampleData(@RequestBody SampleEntity sampleEntity) {
+        if(sampleEntity == null){
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }else{
-            entrustService.addSampleData(samples, file);
-            return ResultUtil.success();
+            return ResultUtil.success(entrustService.updateSampleInfo(sampleEntity));
         }
     }
 

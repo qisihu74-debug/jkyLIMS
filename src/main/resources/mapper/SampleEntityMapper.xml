@@ -299,11 +299,8 @@ savePlace,jdbcType=VARCHAR},
       <if test="picture != null" >
         picture = #{picture,jdbcType=VARCHAR},
       </if>
-      <if test="
-savePlace != null" >
-
-save_place = #{
-savePlace,jdbcType=VARCHAR},
+      <if test="savePlace != null" >
+        save_place = #{savePlace,jdbcType=VARCHAR},
       </if>
       <if test="admin != null" >
         admin = #{admin,jdbcType=VARCHAR},
@@ -337,6 +334,34 @@ savePlace,jdbcType=VARCHAR},
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateSampleInfo" parameterType="com.lims.manage.erp.entity.SampleEntity" >
+      update test_sample
+      <set >
+          <if test="specs != null" >
+              specs = #{specs,jdbcType=INTEGER},
+          </if>
+          <if test="generation != null" >
+              generation = #{generation,jdbcType=VARCHAR},
+          </if>
+          <if test="manufacturer != null" >
+              manufacturer = #{manufacturer,jdbcType=VARCHAR},
+          </if>
+          <if test="sampleOrigin != null" >
+              sample_origin = #{sampleOrigin,jdbcType=VARCHAR},
+          </if>
+          <if test="receivedDate != null" >
+              received_date = #{receivedDate,jdbcType=CHAR},
+          </if>
+          <if test="sampleRequirement != null" >
+              sample_requirement = #{sampleRequirement,jdbcType=VARCHAR},
+          </if>
+          <if test="outward != null" >
+              outward = #{outward,jdbcType=VARCHAR},
+          </if>
+      </set>
+      where insert_flag = #{insertFlag,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.SampleEntity" >
     update test_sample
@@ -389,7 +414,8 @@ savePlace,jdbcType=VARCHAR},
         t1.generation generation,
         t1.state state,
         t1.check_date checkDate,
-        t1.remark remark
+        t1.remark remark,
+        t1.insert_flag insertFlag
         FROM
         test_sample t1
         LEFT JOIN test_company t2 ON t1.company_id = t2.company_id

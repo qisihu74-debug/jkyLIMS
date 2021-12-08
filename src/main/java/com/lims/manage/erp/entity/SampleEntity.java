@@ -128,6 +128,10 @@ public class SampleEntity {
      * 外观描述
      */
     private String outwardDescribe;
+    /**
+     * 外观描述
+     */
+    private String insertFlag;
 
     /**
      *样品下检测项、检测依据、总价
@@ -137,7 +141,7 @@ public class SampleEntity {
 
 
 
-    public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo,String sampleName,String sampleCode,String pictureUrl) {
+    public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo,String sampleName,String sampleCode,String pictureUrl,String insertFlag) {
         this.productId = addParamVo.getSampleName();
         this.companyId = addParamVo.getCompanyId();
         this.sampleName = sampleName;
@@ -160,6 +164,7 @@ public class SampleEntity {
         this.sampleRequirement = addParamVo.getSampleRequirement();
         this.generation = addParamVo.getGeneration();
         this.outwardDescribe = addParamVo.getOutwardDescribe();
+        this.insertFlag = insertFlag;
 //        this.state = state;
 //        this.checkDate = checkDate;
 //        this.remark = remark;
@@ -344,5 +349,13 @@ public class SampleEntity {
 
     public void setOutwardDescribe(String outwardDescribe) {
         this.outwardDescribe = outwardDescribe;
+    }
+
+    public String getInsertFlag() {
+        return insertFlag;
+    }
+
+    public void setInsertFlag(String insertFlag) {
+        this.insertFlag = insertFlag;
     }
 }
