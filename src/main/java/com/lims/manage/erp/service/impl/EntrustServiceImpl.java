@@ -29,14 +29,7 @@ import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.CheckItemDetailVo;
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.SampleAddDetailVo;
-import com.lims.manage.erp.vo.SampleAddParamVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.*;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -526,6 +519,8 @@ public class EntrustServiceImpl implements EntrustService {
         for(SampleEntity sampleEntity:sampleCollection){
             // 样品下 检测项、检测依据 补充。
             sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(),entrustmentId));
+            // 补充样品下 依据集合
+            sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId()));
         }
         entrustAddVo.setSamples(sampleCollection);
         return entrustAddVo;

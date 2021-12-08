@@ -2,10 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.lims.manage.erp.vo.SampleDetailParamVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.*;
 import org.mapstruct.Mapper;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Component;
@@ -23,7 +20,6 @@ public interface SampleEntityMapper {
     SampleEntity selectByPrimaryKey(Integer id);
 
     List<SampleEntity> selectSampleListGroup(Long entrustmentId);
-
     /**
      * 查询样品信息
      * @param record
@@ -81,4 +77,5 @@ public interface SampleEntityMapper {
      */
     int addSampleEntity(@Param(value = "sampleId") Integer sampleId,@Param(value = "entrustmentId") Long entrustmentId);
 
+    List<Integer> getSampleBasisSet(@Param(value = "sampleId") Integer sampleId);
 }
