@@ -580,7 +580,29 @@ public class EntrustServiceImpl implements EntrustService {
                 sampleIndex = sampleIndex+1;
             }
             //设置其它信息
-
+            String ss = "";
+            rows.get(14).getTableCells().get(2).setText(ss);//提供资料
+            rows.get(15).getTableCells().get(2).setText(ss);//取样方式
+            rows.get(15).getTableCells().get(4).setText(ss);//检验目的
+            rows.get(15).getTableCells().get(6).setText(ss);//产品标准
+            rows.get(16).getTableCells().get(2).setText(ss);//检验项目及检测依据
+            rows.get(17).getTableCells().get(2).setText(ss);//报告分数
+            rows.get(17).getTableCells().get(4).setText(ss);//取报告方式
+            rows.get(17).getTableCells().get(6).setText(ss);//收报告单位
+            rows.get(18).getTableCells().get(2).setText(ss);//联系地址
+            rows.get(18).getTableCells().get(4).setText(ss);//联系人
+            rows.get(18).getTableCells().get(6).setText(ss);//联系方式
+            rows.get(19).getTableCells().get(2).setText(ss);//委托人
+            rows.get(19).getTableCells().get(4).setText(ss);//委托人电话
+            rows.get(19).getTableCells().get(6).setText(ss);//见证人
+            rows.get(20).getTableCells().get(2).setText(ss);//样品状态
+            rows.get(20).getTableCells().get(4).setText(ss);//样品保留
+            rows.get(21).getTableCells().get(2).setText(ss);//检验收费
+            rows.get(21).getTableCells().get(4).setText(ss);//支付方式
+            rows.get(21).getTableCells().get(6).setText(ss);//本次交费
+            rows.get(22).getTableCells().get(2).setText(ss);//完成期限
+            rows.get(22).getTableCells().get(4).setText(ss);//业务受理人
+            rows.get(22).getTableCells().get(6).setText(ss);//受理日期
         }catch (Exception e){
             logger.error("设置委托单信息到模板异常:{}",e);
         }
