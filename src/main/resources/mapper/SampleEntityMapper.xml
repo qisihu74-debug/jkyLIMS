@@ -58,7 +58,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         t1.times AS times,
         t1.unit_price AS checkPrice,
         t1.standard_id AS standardId,
-        CONCAT(t3.CODE,t3.NAME) As standardName,
+        CONCAT(t3.CODE,"《",t3.NAME,"》") As standardName,
         t1.method_id AS methodId,
         t4.name AS methodName
         FROM

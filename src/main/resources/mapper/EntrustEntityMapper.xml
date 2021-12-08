@@ -10,13 +10,13 @@
     witness_person, witness_phone, project_name, project_part, sampling_method, check_purpose,
     report_count, report_type, request_date, payment_method, present_information, acceptance_date,
      team, state, remark, invalid_reason, operate_user, operate_date, file_url,  is_save,
-    business_acceptor,seal_type
+    business_acceptor,seal_type,count_price AS paymentCount
     from test_entrusted_info
     where id = #{id}
   </select>
   <select id="selectEntrustHistoryList" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity" parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
     SELECT
-    t1.id As id,
+    DISTINCT t1.id As id,
     t1.entrustment_no As entrustmentNo,
     t1.entrust_company As entrustCompany,
     t1.entrust_people As entrustPeople,
@@ -53,6 +53,7 @@
         and  t1.state = #{state}
       </if>
     </trim>
+    ORDER BY t1.entrustment_no
   </select>
   <insert id="BatchSaveEntrustSample" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
     INSERT into  test_entrusted_sample_details_rel(sample_id,
