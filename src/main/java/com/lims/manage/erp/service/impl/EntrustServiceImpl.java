@@ -187,7 +187,7 @@ public class EntrustServiceImpl implements EntrustService {
             entityMapper.saveEntrustPayRecord(pamentEntity);
         }
         //得到总价钱，再保存委托基本信息
-        basisInfo.setPaymentCount(totalMoney+"");
+        basisInfo.setCountPrice(totalMoney+"");
         entityMapper.insertEntrustInfo(basisInfo);
         return true;
     }
