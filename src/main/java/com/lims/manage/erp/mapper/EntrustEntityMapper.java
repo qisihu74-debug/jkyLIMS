@@ -89,6 +89,10 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     String getEntrustingParty(Long entrustmentId);
 
-
-
+    /**
+     * 获取产品下的标准文件名称
+     * @param productId
+     * @return
+     */
+    List<String> getStatndardByPId(Integer productId);
 }

@@ -237,4 +237,15 @@ adress
     LEFT JOIN test_company as t2 ON t1.entrust_company = t2.company_name
     WHERE t1.id = #{entrustmentId}
   </select>
+
+  <select id="getStatndardByPId" resultType="java.util.ArrayList">
+    SELECT
+	s. NAME
+FROM
+	test_standard_file s
+LEFT JOIN test_product_standard_file_rel sf ON s.id = sf.standard_file_id
+WHERE
+	sf.product_id = #{productId}
+AND s.type IN (2, 3)
+  </select>
 </mapper>

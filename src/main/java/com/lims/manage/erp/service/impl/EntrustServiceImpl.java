@@ -136,7 +136,6 @@ public class EntrustServiceImpl implements EntrustService {
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
         int totalMoney = 0;
         List<SampleEntity> samples = vo.getSamples();
-        List<SampleItemEntity> sampleItemList = new ArrayList<>();
         List<EntrustSampleEntity> list = new ArrayList<>();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
         if (!CollectionUtils.isEmpty(samples)){
@@ -162,7 +161,11 @@ public class EntrustServiceImpl implements EntrustService {
                     int money = entity.getTimes() * entity.getUnitPrice();
                     totalMoney = totalMoney+money;
                 }
-                sampleItemList.addAll(sampleCheckItem);
+                //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+                for (SampleItemEntity entity:sampleCheckItem) {
+                    entity.setEntrustId(basisInfo.getId());
+                }
+                entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
             }
             if (!CollectionUtils.isEmpty(list)){
                 entityMapper.BatchSaveEntrustSample(list);
@@ -171,13 +174,8 @@ public class EntrustServiceImpl implements EntrustService {
                 entityMapper.BatchSaveSampleStandard(list1);
             }
         }
-        //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
-        for (SampleItemEntity entity:sampleItemList) {
-            entity.setEntrustId(basisInfo.getId());
-        }
-        if (!CollectionUtils.isEmpty(sampleItemList)){
-            entityMapper.BatchSaveEntrustSampleItem(sampleItemList);
-        }
+
+
         //更新委托单收费记录信息
         if (!StringUtils.isEmpty(vo.getPaymentRecord())){
             EntrustPamentEntity pamentEntity = new EntrustPamentEntity();
@@ -588,10 +586,12 @@ public class EntrustServiceImpl implements EntrustService {
             }
             //设置其它信息
             String ss = "";
-            rows.get(14).getTableCells().get(2).setText(ss);//提供资料
-            rows.get(15).getTableCells().get(2).setText(ss);//取样方式
-            rows.get(15).getTableCells().get(4).setText(ss);//检验目的
-            rows.get(15).getTableCells().get(6).setText(ss);//产品标准
+            rows.get(14).getTableCells().get(2).setText(detail.getPresentInformation());//提供资料
+            rows.get(15).getTableCells().get(2).setText(detail.getSamplingMethod());//取样方式
+            rows.get(15).getTableCells().get(4).setText(detail.getCheckPurpose());//检验目的
+            Integer productId = samples.get(0).getProductId();
+            /*List<String> list = entityMapper.getStatndardByPId(productId);
+            rows.get(15).getTableCells().get(6).setText(name);//产品标准
             rows.get(16).getTableCells().get(2).setText(ss);//检验项目及检测依据
             rows.get(17).getTableCells().get(2).setText(ss);//报告分数
             rows.get(17).getTableCells().get(4).setText(ss);//取报告方式
@@ -609,7 +609,7 @@ public class EntrustServiceImpl implements EntrustService {
             rows.get(21).getTableCells().get(6).setText(ss);//本次交费
             rows.get(22).getTableCells().get(2).setText(ss);//完成期限
             rows.get(22).getTableCells().get(4).setText(ss);//业务受理人
-            rows.get(22).getTableCells().get(6).setText(ss);//受理日期
+            rows.get(22).getTableCells().get(6).setText(ss);//受理日期*/
         }catch (Exception e){
             logger.error("设置委托单信息到模板异常:{}",e);
         }
