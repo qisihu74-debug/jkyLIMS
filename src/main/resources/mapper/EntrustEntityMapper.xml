@@ -237,6 +237,18 @@ adress
     LEFT JOIN test_company as t2 ON t1.entrust_company = t2.company_name
     WHERE t1.id = #{entrustmentId}
   </select>
+  <delete id="removeTestEntrustedSampleDetailsRel">
+    DELETE FROM test_entrusted_sample_details_rel WHERE entrustment_id = #{entrustmentId}
+  </delete>
+  <delete id="removeTestEntrustedSampleStandardRel">
+    DELETE FROM test_entrusted_sample_standard_rel WHERE entrustment_id = #{entrustmentId}
+  </delete>
+  <delete id="removeTestEntrustedPaymentRecordInfo">
+    DELETE FROM test_entrusted_payment_record_info WHERE entrustment_id = #{entrustmentId}
+  </delete>
+  <delete id="removeTestEntrustedSampleCheckitemRel">
+    DELETE FROM test_entrusted_sample_checkitem_rel WHERE  entrust_id = #{entrustmentId}
+  </delete>
 
   <select id="getStatndardByPId" resultType="java.util.ArrayList">
     SELECT

@@ -32,7 +32,7 @@ public class JudgmentBasisVo {
     /**
      * 检测单价
      */
-    private String checkParice;
+    private String checkPrice;
     /**
      * 总价
      */

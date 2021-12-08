@@ -88,6 +88,23 @@ public interface EntrustEntityMapper extends BaseMapper {
      * 通过委托单id 获取联系地址
      */
     String getEntrustingParty(Long entrustmentId);
+    /**
+     * 删除样品id
+     */
+    int removeTestEntrustedSampleDetailsRel(Long entrustmentId);
+    /**
+     * 删除判定依据id
+     */
+    int removeTestEntrustedSampleStandardRel(Long entrustmentId);
+    /**
+     * 删除缴费
+     */
+    int removeTestEntrustedPaymentRecordInfo(Long entrustmentId);
+    /**
+     * 样品下检测依据
+     */
+    int removeTestEntrustedSampleCheckitemRel(Long entrustmentId);
+
 
     /**
      * 获取产品下的标准文件名称
