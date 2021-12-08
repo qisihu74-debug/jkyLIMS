@@ -10,17 +10,21 @@ import lombok.Data;
 @Data
 public class JudgmentBasisVo {
     /**
-     * 依据
+     * 依据名称
      */
-    private String standard;
+    private String standardName;
     /**
-     * 名称
+     * 依据id
      */
-    private String name;
+    private Integer standardId;
     /**
      * 检测名称
      */
     private String checkItemName;
+    /**
+     * 检测id
+     */
+    private Integer checkItemId;
     /**
      *检测次数
      */
@@ -28,9 +32,17 @@ public class JudgmentBasisVo {
     /**
      * 检测单价
      */
-    private String unitPrice;
+    private String checkParice;
     /**
      * 总价
      */
     private String totalPrice;
+    /**
+     * 方法id
+     */
+    private Integer methodId;
+    /**
+     * 方法名
+     */
+    private String methodName;
 }

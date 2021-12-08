@@ -56,10 +56,29 @@ public interface SampleEntityMapper {
     int updateByPrimaryKey(SampleEntity record);
 
     /**
+     * 更新样品基础信息
+     * @param record
+     * @return
+     */
+    int updateSampleInfo(SampleEntity record);
+
+    /**
      * 查询样品标签信息
      * @param sampleId
      * @return
      */
     SampleDetailVo getSampleTagInfo(Integer sampleId);
+
+    /**
+     * 删除test_entrusted_sample_details_rel
+     * @return
+     */
+    int removeSamplesId(@Param(value = "sampleId") Integer sampleId,@Param(value = "entrustmentId") Long entrustmentId);
+
+    /**
+     * 保存test_entrusted_sample_details_rel
+     * @return
+     */
+    int addSampleEntity(@Param(value = "sampleId") Integer sampleId,@Param(value = "entrustmentId") Long entrustmentId);
 
 }

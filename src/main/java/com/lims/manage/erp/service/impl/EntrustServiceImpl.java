@@ -62,11 +62,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -188,9 +184,7 @@ public class EntrustServiceImpl implements EntrustService {
             pamentEntity.setEntrustmentId(basisInfo.getId());
             pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
             pamentEntity.setPrice(vo.getPaymentRecord());
-            if (ShiroUtils.getUserInfo() != null){
-                pamentEntity.setOperator(ShiroUtils.getUserInfo().getUsername());
-            }
+            pamentEntity.setOperator(ShiroUtils.getUserInfo().getUsername());
             entityMapper.saveEntrustPayRecord(pamentEntity);
         }
         //得到总价钱，再保存委托基本信息
@@ -241,9 +235,38 @@ public class EntrustServiceImpl implements EntrustService {
                 newSamplesId.add(sampleEntity.getId());
             }
         }
+        // 刪除的样品id集合
         List<Integer>  removeSamplesId =  entityMapper.getSampleIdSet(basisInfo.getId());
-
-
+        // 新增的id集合
+        List<Integer> addNumber = new ArrayList<>();
+        Map<Integer,String> map = new HashMap<>();
+        Iterator<Integer> dataIter = removeSamplesId.iterator();
+        while (dataIter.hasNext()) {
+            Integer dataNumber = dataIter.next();
+            map.put(dataNumber,"t1");
+            for(Integer number1:newSamplesId){
+                if(number1.equals(dataNumber)){
+                    dataIter.remove();
+                }
+            }
+        }
+        for (Integer number1 : newSamplesId) {
+            if(map.get(number1)==null){
+                addNumber.add(number1);
+            }
+        }
+        // 新增表 test_entrusted_sample_details_rel
+        if(!addNumber.isEmpty()){
+            for(Integer number1:addNumber){
+                sampleEntityMapper.addSampleEntity(number1,basisInfo.getId());
+            }
+        }
+        // 删除表 test_entrusted_sample_details_rel
+        if(!removeSamplesId.isEmpty()){
+            for(Integer number2:removeSamplesId){
+                sampleEntityMapper.removeSamplesId(number2,basisInfo.getId());
+            }
+        }
         //存放委托基本信息==》test_entrusted
         entityMapper.updateEntrustInfo(basisInfo);
         return true;
@@ -370,6 +393,7 @@ public class EntrustServiceImpl implements EntrustService {
     public Integer addSampleData(SampleAddParamVo addParamVo,MultipartFile[] file) {
 
         int result = 0;
+        String insertFlag = System.currentTimeMillis()+"";
         //查询产品名称
         String productName = testProductDao.getProductNameById(addParamVo.getSampleName());
         //处理详情数据
@@ -433,9 +457,8 @@ public class EntrustServiceImpl implements EntrustService {
                 if(multipartFile != null){
                     pictureUrl = MinIoUtil.upload("test-sample", multipartFile, pictureFileName);
                 }
-                System.out.println("图片："+pictureUrl);
                 //保存样品信息
-                SampleEntity sampleEntity = new SampleEntity(addParamVo,details.get(i),productName,sampleCode,pictureUrl);
+                SampleEntity sampleEntity = new SampleEntity(addParamVo,details.get(i),productName,sampleCode,pictureUrl,insertFlag);
                 result = sampleEntityMapper.insert(sampleEntity);
             }
         }else {
@@ -443,89 +466,7 @@ public class EntrustServiceImpl implements EntrustService {
             //生成样品编号
             String num = String.format("%0" + 4 + "d", newMax+1);
             StringBuilder sampleCode = code.append(num);
-            SampleEntity sampleEntity = new SampleEntity(addParamVo,null,productName,sampleCode.toString(),null);
-            result = sampleEntityMapper.insert(sampleEntity);
-        }
-        return result;
-    }
-
-    @Override
-    public Integer updateSampleData(SampleAddParamVo addParamVo, MultipartFile[] file) {
-        int result = 0;
-        //查询产品名称
-        String productName = testProductDao.getProductNameById(addParamVo.getSampleName());
-        //处理详情数据
-        List<SampleAddDetailVo> details = addParamVo.getDetails();
-        //获取数据库当前年份最大的样品编号
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-        Date now = new Date();
-        String maxNumber = testProductDao.getMaxNumber(sdf.format(now));
-        int newMax;
-        if(maxNumber == null){
-            newMax = 0;
-        }else{
-            newMax = Integer.parseInt(maxNumber);
-        }
-        if(details != null){
-            for (int i = 0; i < details.size(); i++) {
-                //生成样品编号
-                StringBuilder code = new StringBuilder("YP-"+sdf.format(now)+"-");
-                String sampleCode ;
-                if(addParamVo.getSampleGroups()>1){
-                    //组数大于1，将前n个命名为
-                    if(i%addParamVo.getQuantityPerGroup() == 0){
-                        newMax = newMax+1;
-                    }
-                    String num = String.format("%0" + 4 + "d", newMax);
-                    StringBuilder prefix = code.append(num);
-                    String suffix = String.format("%0" + 2 + "d", i%addParamVo.getQuantityPerGroup()+1);
-                    sampleCode = prefix + "_" + suffix;
-                }else{
-                    //生成样品编号
-                    String num = String.format("%0" + 4 + "d", newMax+1);
-                    StringBuilder prefix = code.append(num);
-                    String suffix = String.format("%0" + 2 + "d", i+1);
-                    if(addParamVo.getQuantityPerGroup()>1){
-                        sampleCode = prefix + "_" + suffix;
-                    }else{
-                        sampleCode = prefix.toString();
-                    }
-                }
-                //保存样品图片
-
-                MultipartFile multipartFile = null;
-                int pictureName = i + 1;
-                String suffix = "";
-                if(file.length>0){//有上传文件
-                    for (int j = 0; j < file.length; j++) {
-                        String originalFilename = file[j].getOriginalFilename();
-                        String[] split = originalFilename.split("\\.");
-                        if((pictureName+"").equals(split[0])){
-                            suffix = split[1];
-                            multipartFile = file[j];
-                            break;
-                        }
-                    }
-                }
-                String pictureFileName = null;
-                if(!"".equals(suffix)){
-                    pictureFileName = sampleCode + "." + suffix;
-                }
-                String pictureUrl = null;
-                if(multipartFile != null){
-                    pictureUrl = MinIoUtil.upload("test-sample", multipartFile, pictureFileName);
-                }
-                System.out.println("图片："+pictureUrl);
-                //保存样品信息
-                SampleEntity sampleEntity = new SampleEntity(addParamVo,details.get(i),productName,sampleCode,pictureUrl);
-                result = sampleEntityMapper.insert(sampleEntity);
-            }
-        }else {
-            StringBuilder code = new StringBuilder("YP-"+sdf.format(now)+"-");
-            //生成样品编号
-            String num = String.format("%0" + 4 + "d", newMax+1);
-            StringBuilder sampleCode = code.append(num);
-            SampleEntity sampleEntity = new SampleEntity(addParamVo,null,productName,sampleCode.toString(),null);
+            SampleEntity sampleEntity = new SampleEntity(addParamVo,null,productName,sampleCode.toString(),null,insertFlag);
             result = sampleEntityMapper.insert(sampleEntity);
         }
         return result;
@@ -601,6 +542,11 @@ public class EntrustServiceImpl implements EntrustService {
         //更新委托单状态
         taskMapper.updateEntrustById(entity.getEntrustmentId());
         return true;
+    }
+
+    @Override
+    public int updateSampleInfo(SampleEntity record) {
+        return sampleEntityMapper.updateSampleInfo(record);
     }
 
     @Override

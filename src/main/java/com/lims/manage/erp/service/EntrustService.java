@@ -93,14 +93,6 @@ public interface EntrustService {
     Integer addSampleData(SampleAddParamVo addParamVo,MultipartFile[] file);
 
     /**
-     * 修改样品信息
-     * @param addParamVo
-     * @param file
-     * @return
-     */
-    Integer updateSampleData(SampleAddParamVo addParamVo,MultipartFile[] file);
-
-    /**
      * 查询判定依据
      * @param productId
      * @return
@@ -146,6 +138,13 @@ public interface EntrustService {
      * @return
      */
     Boolean publishTask(TaskEntity entity);
+
+    /**
+     * 修改样品信息
+     * @param record
+     * @return
+     */
+    int updateSampleInfo(SampleEntity record);
 
     /**
      * 填充数据

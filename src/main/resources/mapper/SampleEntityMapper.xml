@@ -53,15 +53,19 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     </select>
     <select id="selectTestStandardList" resultType="com.lims.manage.erp.vo.JudgmentBasisVo">
         SELECT
-            t2.check_item_name AS checkItemName,
-            t1.times as times,
-            t1.unit_price as unitPrice,
-             t3.code as standard,
-            t3.name as name
+        t2.check_item_id AS checkItemId,
+        t2.check_item_name AS checkItemName,
+        t1.times AS times,
+        t1.unit_price AS checkParice,
+        t1.standard_id AS standardId,
+        CONCAT(t3.CODE,t3.NAME) As standardName,
+        t1.method_id AS methodId,
+        t4.name AS methodName
         FROM
-            test_entrusted_sample_checkitem_rel AS t1
-            LEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id
-						LEFT JOIN test_standard_file as t3 ON t1.standard_id = t3.id
+        test_entrusted_sample_checkitem_rel AS t1
+        LEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id
+        LEFT JOIN test_standard_file AS t3 ON t1.standard_id = t3.id
+        LEFT JOIN test_method As t4 ON t4.id = t1.method_id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
         <if test="entrustmentId!=0 and entrustmentId!=''">
             and t1.entrust_id =  #{entrustmentId}
@@ -299,11 +303,8 @@ savePlace,jdbcType=VARCHAR},
       <if test="picture != null" >
         picture = #{picture,jdbcType=VARCHAR},
       </if>
-      <if test="
-savePlace != null" >
-
-save_place = #{
-savePlace,jdbcType=VARCHAR},
+      <if test="savePlace != null" >
+        save_place = #{savePlace,jdbcType=VARCHAR},
       </if>
       <if test="admin != null" >
         admin = #{admin,jdbcType=VARCHAR},
@@ -337,6 +338,34 @@ savePlace,jdbcType=VARCHAR},
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateSampleInfo" parameterType="com.lims.manage.erp.entity.SampleEntity" >
+      update test_sample
+      <set >
+          <if test="specs != null" >
+              specs = #{specs,jdbcType=INTEGER},
+          </if>
+          <if test="generation != null" >
+              generation = #{generation,jdbcType=VARCHAR},
+          </if>
+          <if test="manufacturer != null" >
+              manufacturer = #{manufacturer,jdbcType=VARCHAR},
+          </if>
+          <if test="sampleOrigin != null" >
+              sample_origin = #{sampleOrigin,jdbcType=VARCHAR},
+          </if>
+          <if test="receivedDate != null" >
+              received_date = #{receivedDate,jdbcType=CHAR},
+          </if>
+          <if test="sampleRequirement != null" >
+              sample_requirement = #{sampleRequirement,jdbcType=VARCHAR},
+          </if>
+          <if test="outward != null" >
+              outward = #{outward,jdbcType=VARCHAR},
+          </if>
+      </set>
+      where insert_flag = #{insertFlag,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.SampleEntity" >
     update test_sample
@@ -389,7 +418,8 @@ savePlace,jdbcType=VARCHAR},
         t1.generation generation,
         t1.state state,
         t1.check_date checkDate,
-        t1.remark remark
+        t1.remark remark,
+        t1.insert_flag insertFlag
         FROM
         test_sample t1
         LEFT JOIN test_company t2 ON t1.company_id = t2.company_id
@@ -431,4 +461,10 @@ savePlace,jdbcType=VARCHAR},
         WHERE
             id = #{sampleId}
     </select>
+    <delete id="removeSamplesId" >
+    DELETE FROM test_entrusted_sample_details_rel WHERE entrustment_id = #{entrustmentId} and sample_id =#{sampleId}
+  </delete>
+    <insert id="addSampleEntity">
+        INSERT into test_entrusted_sample_details_rel(id,sample_id,entrustment_id) VALUES(id,#{sampleId},#{entrustmentId})
+    </insert>
 </mapper>
