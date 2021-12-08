@@ -157,17 +157,19 @@ public class EntrustServiceImpl implements EntrustService {
                 }
                 //样品下检测项
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
-                //计算检测项总价钱
-                for (SampleItemEntity entity:sampleCheckItem) {
-                    int money = entity.getTimes() * entity.getUnitPrice();
-                    totalMoney = totalMoney+money;
+                if (!CollectionUtils.isEmpty(sampleCheckItem)){
+                    //计算检测项总价钱
+                    for (SampleItemEntity entity:sampleCheckItem) {
+                        int money = entity.getTimes() * entity.getUnitPrice();
+                        totalMoney = totalMoney+money;
+                    }
+                    //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+                    for (SampleItemEntity entity:sampleCheckItem) {
+                        entity.setSampleId(sampleEntity.getId());
+                        entity.setEntrustId(basisInfo.getId());
+                    }
+                    entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
                 }
-                //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
-                for (SampleItemEntity entity:sampleCheckItem) {
-                    entity.setSampleId(sampleEntity.getId());
-                    entity.setEntrustId(basisInfo.getId());
-                }
-                entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
             }
             if (!CollectionUtils.isEmpty(list)){
                 entityMapper.BatchSaveEntrustSample(list);
