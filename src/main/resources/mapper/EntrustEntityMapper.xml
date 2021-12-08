@@ -180,7 +180,7 @@ adress
     UPDATE test_entrusted_info
     <trim prefix="SET" suffixOverrides=",">
       <if test="entrustType!=null and entrustType!=''">entrust_type=#{entrustType},</if>
-      <if test="businessAcceptor!=null and businessAcceptor!=''">username=#{businessAcceptor},</if>
+      <if test="businessAcceptor!=null and businessAcceptor!=''">business_acceptor=#{businessAcceptor},</if>
       <if test="entrustCompany != null and entrustCompany!=''">entrust_company=#{entrustCompany},</if>
       <if test="entrustPeople != null and entrustPeople!=''">entrust_people=#{entrustPeople},</if>
       <if test="entrustPhone != null and entrustPhone!=''">entrust_phone=#{entrustPhone},</if>
@@ -191,11 +191,12 @@ adress
       <if test="samplingMethod != null and samplingMethod!=''">sampling_method=#{samplingMethod},</if>
       <if test="projectPart != null and projectPart!=''">project_part=#{projectPart},</if>
       <if test="checkPurpose != null and checkPurpose!=''">check_purpose=#{checkPurpose},</if>
+      <if test="samplingMethod != null and samplingMethod!=''">sampling_method=#{samplingMethod},</if>
       <if test="reportCount != null">report_count=#{reportCount},</if>
       <if test="reportType != null and reportType!=''">report_type=#{reportType},</if>
       <if test="requestDate != null">request_date=#{requestDate},</if>
       <if test="paymentMethod != null and paymentMethod!=''">payment_method=#{paymentMethod},</if>
-      <if test="paymentCount != null and paymentCount!=''">count_price=#{paymentCount},</if>
+<!--      <if test="paymentCount != null and paymentCount!=''">count_price=#{paymentCount},</if>-->
       <if test="presentInformation != null and presentInformation!=''">present_information=#{presentInformation},</if>
       <if test="acceptanceDate != null">acceptance_date=#{acceptanceDate},</if>
       <if test="team != null">team=#{team},</if>
