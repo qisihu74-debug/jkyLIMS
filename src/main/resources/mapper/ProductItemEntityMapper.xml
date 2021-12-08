@@ -40,24 +40,24 @@ logistics_costs, unit, samplestandard, sample_count,
     delete from test_product_item
     where check_item_id = #{checkItemId,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.lims.manage.erp.entity.ProductItemEntity" >
-    insert into test_product_item (check_item_id, check_item_pid, check_item_code, 
-      product_id, report_model_id, check_item_name, 
-      coordinate, icon, additional_fees, 
-      
-logistics_costs, unit, samplestandard, 
-      sample_count, place, duration, 
-      frequency, difficulty, remark
-      )
-    values (#{checkItemId,jdbcType=INTEGER}, #{checkItemPid,jdbcType=INTEGER}, #{checkItemCode,jdbcType=VARCHAR}, 
-      #{productId,jdbcType=INTEGER}, #{reportModelId,jdbcType=VARCHAR}, #{checkItemName,jdbcType=VARCHAR}, 
-      #{coordinate,jdbcType=VARCHAR}, #{icon,jdbcType=VARCHAR}, #{additionalFees,jdbcType=VARCHAR}, 
-      #{
-logisticsCosts,jdbcType=VARCHAR}, #{unit,jdbcType=VARCHAR}, #{samplestandard,jdbcType=VARCHAR}, 
-      #{sampleCount,jdbcType=INTEGER}, #{place,jdbcType=VARCHAR}, #{duration,jdbcType=VARCHAR}, 
-      #{frequency,jdbcType=VARCHAR}, #{difficulty,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}
-      )
-  </insert>
+<!--  <insert id="insert" parameterType="com.lims.manage.erp.entity.ProdpluginsuctItemEntity" >-->
+<!--    insert into test_product_item (check_item_id, check_item_pid, check_item_code, -->
+<!--      product_id, report_model_id, check_item_name, -->
+<!--      coordinate, icon, additional_fees, -->
+<!--      -->
+<!--logistics_costs, unit, samplestandard, -->
+<!--      sample_count, place, duration, -->
+<!--      frequency, difficulty, remark-->
+<!--      )-->
+<!--    values (#{checkItemId,jdbcType=INTEGER}, #{checkItemPid,jdbcType=INTEGER}, #{checkItemCode,jdbcType=VARCHAR}, -->
+<!--      #{productId,jdbcType=INTEGER}, #{reportModelId,jdbcType=VARCHAR}, #{checkItemName,jdbcType=VARCHAR}, -->
+<!--      #{coordinate,jdbcType=VARCHAR}, #{icon,jdbcType=VARCHAR}, #{additionalFees,jdbcType=VARCHAR}, -->
+<!--      #{-->
+<!--logisticsCosts,jdbcType=VARCHAR}, #{unit,jdbcType=VARCHAR}, #{samplestandard,jdbcType=VARCHAR}, -->
+<!--      #{sampleCount,jdbcType=INTEGER}, #{place,jdbcType=VARCHAR}, #{duration,jdbcType=VARCHAR}, -->
+<!--      #{frequency,jdbcType=VARCHAR}, #{difficulty,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}-->
+<!--      )-->
+<!--  </insert>-->
   <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ProductItemEntity" >
     insert into test_product_item
     <trim prefix="(" suffix=")" suffixOverrides="," >

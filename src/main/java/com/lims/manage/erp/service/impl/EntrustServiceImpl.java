@@ -261,6 +261,7 @@ public class EntrustServiceImpl implements EntrustService {
                     entity.setSampleId(sampleEntity.getId());
                     entity.setEntrustId(basisInfo.getId());
                 }
+
                 entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
             }
             if (!CollectionUtils.isEmpty(list)){
@@ -277,7 +278,7 @@ public class EntrustServiceImpl implements EntrustService {
             pamentEntity.setEntrustmentId(basisInfo.getId());
             pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
             pamentEntity.setPrice(vo.getPaymentRecord());
-            pamentEntity.setOperator(ShiroUtils.getUserInfo().getUsername());
+//            pamentEntity.setOperator(ShiroUtils.getUserInfo().getUsername());
             entityMapper.saveEntrustPayRecord(pamentEntity);
         }
         //得到总价钱，再保存委托基本信息
@@ -510,7 +511,7 @@ public class EntrustServiceImpl implements EntrustService {
         // 通过委托单id 获取缴费记录 依据id 同价价格
         entrustAddVo.setPaymentRecord(entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId));
         // -- 支付方式。
-        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
+//        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
         // 联系地址
 //        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
         // 通过委托ID 样品集合 → test_sample

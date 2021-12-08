@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class SampleEntity {
     /**
-     *主键id
+     * 主键id
      */
     private Integer id;
     /**
@@ -21,35 +21,35 @@ public class SampleEntity {
      */
     private Integer productId;
     /**
-     *委托单位
+     * 委托单位
      */
     private Integer companyId;
     /**
-     *样品名称
+     * 样品名称
      */
     private String sampleName;
     /**
-     *样品编号
+     * 样品编号
      */
     private String sampleCode;
     /**
-     *规格/等级
+     * 规格/等级
      */
     private String specs;
     /**
-     *批号、编号
+     * 批号、编号
      */
     private String batchNumber;
     /**
-     *生产厂家
+     * 生产厂家
      */
     private String manufacturer;
     /**
-     *样品产地
+     * 样品产地
      */
     private String sampleOrigin;
     /**
-     *外观
+     * 外观
      */
     private String outward;
     /**照片文件
@@ -57,7 +57,7 @@ public class SampleEntity {
      */
     //private MultipartFile pictureFile;
     /**
-     *样品照片
+     * 样品照片
      */
     private String picture;
     /**
@@ -69,47 +69,47 @@ public class SampleEntity {
      */
     private String fileUrl;
     /**
-     *保存地点
+     * 保存地点
      */
     private String savePlace;
     /**
-     *管理员
+     * 管理员
      */
     private String admin;
     /**
-     *样品组数
+     * 样品组数
      */
     private Integer sampleGroups;
     /**
-     *每组样品数
+     * 每组样品数
      */
     private Integer quantityPerGroup;
     /**
-     *验收员
+     * 验收员
      */
     private String inspector;
     /**
-     *接收日期
+     * 接收日期
      */
     private String receivedDate;
     /**
-     *样品要求
+     * 样品要求
      */
     private String sampleRequirement;
     /**
-     *代表批量
+     * 代表批量
      */
     private String generation;
     /**
-     *样品状态
+     * 样品状态
      */
     private String state;
     /**
-     *检验时间
+     * 检验时间
      */
     private Date checkDate;
     /**
-     *备注
+     * 备注
      */
     private String remark;
     /**
@@ -134,20 +134,18 @@ public class SampleEntity {
     private String insertFlag;
 
     /**
-     *样品下检测项、检测依据、总价
+     * 样品下检测项、检测依据、总价
      */
     List<JudgmentBasisVo> judgmentBasisVos;
 
 
-
-
-    public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo,String sampleName,String sampleCode,String pictureUrl,String insertFlag) {
+    public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo, String sampleName, String sampleCode, String pictureUrl, String insertFlag) {
         this.productId = addParamVo.getSampleName();
         this.companyId = addParamVo.getCompanyId();
         this.sampleName = sampleName;
         this.sampleCode = sampleCode;
         this.specs = addParamVo.getSpecs();
-        this.batchNumber = detailVo == null ? null:detailVo.getBatchNumber();
+        this.batchNumber = detailVo == null ? null : detailVo.getBatchNumber();
         this.manufacturer = addParamVo.getManufacturer();
         this.sampleOrigin = addParamVo.getSampleOrigin();
         this.outward = addParamVo.getOutward();

@@ -85,7 +85,7 @@ public class EntrustController {
         EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
         Boolean isSuccess = entrustService.updateEntrust(entrust,file);
         if(isSuccess){
-            return ResultUtil.success();
+            return ResultUtil.success("成功");
         }else{
             return ResultUtil.error(678,"修改委托失败！");
         }
