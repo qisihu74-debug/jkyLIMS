@@ -62,11 +62,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -235,15 +231,44 @@ public class EntrustServiceImpl implements EntrustService {
         List<SampleItemEntity> sampleItemList = new ArrayList<>();
         List<EntrustSampleEntity> list = new ArrayList<>();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
-        List<Integer>  newSamplesId =null;
+        List<Integer>  newSamplesId =new ArrayList<>();
         if(!CollectionUtils.isEmpty(samples)){
             for(SampleEntity sampleEntity:samples){
                 newSamplesId.add(sampleEntity.getId());
             }
         }
+        // 刪除的样品id集合
         List<Integer>  removeSamplesId =  entityMapper.getSampleIdSet(basisInfo.getId());
-
-
+        // 新增的id集合
+        List<Integer> addNumber = new ArrayList<>();
+        Map<Integer,String> map = new HashMap<>();
+        Iterator<Integer> dataIter = removeSamplesId.iterator();
+        while (dataIter.hasNext()) {
+            Integer dataNumber = dataIter.next();
+            map.put(dataNumber,"t1");
+            for(Integer number1:newSamplesId){
+                if(number1.equals(dataNumber)){
+                    dataIter.remove();
+                }
+            }
+        }
+        for (Integer number1 : newSamplesId) {
+            if(map.get(number1)==null){
+                addNumber.add(number1);
+            }
+        }
+        // 新增表 test_entrusted_sample_details_rel
+        if(!addNumber.isEmpty()){
+            for(Integer number1:addNumber){
+                sampleEntityMapper.addSampleEntity(number1,basisInfo.getId());
+            }
+        }
+        // 删除表 test_entrusted_sample_details_rel
+        if(!removeSamplesId.isEmpty()){
+            for(Integer number2:removeSamplesId){
+                sampleEntityMapper.removeSamplesId(number2,basisInfo.getId());
+            }
+        }
         //存放委托基本信息==》test_entrusted
         entityMapper.updateEntrustInfo(basisInfo);
         return true;

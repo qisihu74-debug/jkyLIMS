@@ -212,4 +212,5 @@ adress
       test_entrusted_sample_details_rel
       WHERE entrustment_id = #{entrustmentId}
   </select>
+
 </mapper>
