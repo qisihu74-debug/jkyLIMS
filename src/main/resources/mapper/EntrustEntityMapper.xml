@@ -90,12 +90,12 @@
   </insert>
 
   <insert id="saveEntrustPayRecord" parameterType="com.lims.manage.erp.entity.EntrustPamentEntity">
-        insert into test_entrusted_payment_record(entrustment_id,
+        insert into test_entrusted_payment_record_info(entrustment_id,
 price,
-payment_date,
+time,
 operator
 )
-        values (#{entrustmentId},#{price},#{paymentDate},#{operator})
+        values (#{entrustmentId},#{price},#{time},#{operator})
   </insert>
 
   <select id="getJudges" parameterType="java.lang.Integer" resultType="com.lims.manage.erp.vo.LabelValueVo">

@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -25,7 +26,7 @@ public class EntrustPamentEntity {
     /**
      * 缴费时间
      */
-    private Timestamp paymentDate;
+    private Timestamp time;
     /**
      * 操作人
      */

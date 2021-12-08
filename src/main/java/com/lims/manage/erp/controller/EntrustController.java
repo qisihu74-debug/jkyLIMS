@@ -380,6 +380,9 @@ public class EntrustController {
             //填充数据
             EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
+            response.reset();
+            response.setContentType("application/x-msdownload");
+            response.setHeader("Content-Disposition", "attachment;fileName="+"委托单.doxc");
             OutputStream outputStream = response.getOutputStream();
             document.write(outputStream);
             outputStream.close();

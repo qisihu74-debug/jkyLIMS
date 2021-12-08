@@ -186,7 +186,7 @@ public class EntrustServiceImpl implements EntrustService {
         if (!StringUtils.isEmpty(vo.getPaymentRecord())){
             EntrustPamentEntity pamentEntity = new EntrustPamentEntity();
             pamentEntity.setEntrustmentId(basisInfo.getId());
-            pamentEntity.setPaymentDate(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
+            pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
             pamentEntity.setPrice(vo.getPaymentRecord());
             if (ShiroUtils.getUserInfo() != null){
                 pamentEntity.setOperator(ShiroUtils.getUserInfo().getUsername());
@@ -607,7 +607,6 @@ public class EntrustServiceImpl implements EntrustService {
     public XWPFDocument downloadEntrust(EntrustAddVo detail, InputStream object) {
         XWPFDocument doc = null;
         try {
-            //TODO 设置模板数据
             doc = new XWPFDocument(object);
             List<XWPFTable> tables = doc.getTables();
             List<XWPFTableRow> rows;
@@ -617,16 +616,15 @@ public class EntrustServiceImpl implements EntrustService {
                 CTTblPr pr = table.getCTTbl().getTblPr();
                 //获取表格对应的行
                 rows = table.getRows();
-                for (XWPFTableRow row : rows) {
-                    //获取行对应的单元格
-                    cells = row.getTableCells();
-                    for (XWPFTableCell cell : cells) {
-                        System.out.println(cell.getText());;
-                    }
-                }
+                //TODO 设置模板数据
+                rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());
+
+
+
+
+
+
             }
-
-
         }catch (Exception e){
             logger.error("设置委托单信息到模板异常:{}",e);
         }
