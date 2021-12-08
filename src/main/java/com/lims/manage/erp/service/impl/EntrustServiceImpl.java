@@ -556,21 +556,31 @@ public class EntrustServiceImpl implements EntrustService {
             doc = new XWPFDocument(object);
             List<XWPFTable> tables = doc.getTables();
             List<XWPFTableRow> rows;
-            List<XWPFTableCell> cells;
-            for (XWPFTable table : tables) {
-                //表格属性
-                CTTblPr pr = table.getCTTbl().getTblPr();
-                //获取表格对应的行
-                rows = table.getRows();
-                //TODO 设置模板数据
-                rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());
-
-
-
-
-
-
+            XWPFTable table = tables.get(0);
+            //表格属性
+            CTTblPr pr = table.getCTTbl().getTblPr();
+            //获取表格对应的行
+            rows = table.getRows();
+            //TODO 设置模板数据
+            rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
+            rows.get(4).getTableCells().get(2).setText(detail.getWitnessUint());//见证单位
+            rows.get(5).getTableCells().get(2).setText(detail.getProjectPart());//工程部位
+            rows.get(6).getTableCells().get(2).setText(detail.getProjectName());//工程名称
+            //设置样品信息
+            List<SampleEntity> samples = detail.getSamples();
+            int sampleIndex=8;
+            int index =1;
+            for (int i = 0;i<samples.size();i++) {
+                rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getSampleName());//样品名称
+                rows.get(sampleIndex).getTableCells().get(index+1).setText(samples.get(i).getSpecs());//规格等级
+                rows.get(sampleIndex).getTableCells().get(index+2).setText(samples.get(i).getBatchNumber());//批号/编号
+                rows.get(sampleIndex).getTableCells().get(index+3).setText(samples.get(i).getSampleGroups().toString());//样品数量
+                rows.get(sampleIndex).getTableCells().get(index+4).setText(samples.get(i).getGeneration());//代表批量
+                rows.get(sampleIndex).getTableCells().get(index+5).setText(samples.get(i).getManufacturer());//样品产地/生产厂家
+                sampleIndex = sampleIndex+1;
             }
+            //设置其它信息
+
         }catch (Exception e){
             logger.error("设置委托单信息到模板异常:{}",e);
         }
