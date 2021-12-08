@@ -9,7 +9,8 @@
     id, entrustment_no, entrust_type,entrust_company, entrust_people, entrust_phone, witness_uint,
     witness_person, witness_phone, project_name, project_part, sampling_method, check_purpose,
     report_count, report_type, request_date, payment_method, present_information, acceptance_date,
-     team, state, remark, invalid_reason, operate_user, operate_date, file_url,  is_save
+     team, state, remark, invalid_reason, operate_user, operate_date, file_url,  is_save,
+    business_acceptor,seal_type
     from test_entrusted_info
     where id = #{id}
   </select>
@@ -213,4 +214,27 @@ adress
       WHERE entrustment_id = #{entrustmentId}
   </select>
 
+  <select id="getTestEntrustedPaymentRecordInfoPrice" resultType="string">
+    SELECT
+    sum(price)
+    FROM
+    test_entrusted_payment_record_info
+    WHERE entrustment_id = #{entrustmentId}
+  </select>
+  <select id="getTestEntrustedInfoMethodName" resultType="string">
+    SELECT
+    t2.name
+    FROM
+    test_entrusted_info as t1
+    LEFT JOIN test_init_data as t2 ON t1.payment_method = t2.id
+    WHERE t1.id =  #{entrustmentId}
+  </select>
+  <select id="getEntrustingParty" resultType="string">
+    SELECT
+    t2.address
+    FROM
+    test_entrusted_info as t1
+    LEFT JOIN test_company as t2 ON t1.entrust_company = t2.company_name
+    WHERE t1.id = #{entrustmentId}
+  </select>
 </mapper>

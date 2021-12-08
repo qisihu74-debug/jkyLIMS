@@ -76,5 +76,19 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     List<Integer> getSampleIdSet(Long entrustmentId);
 
+    /**
+     * 通过委托单id 获取缴费记录
+     */
+    String getTestEntrustedPaymentRecordInfoPrice(Long entrustmentId);
+    /**
+     *  通过委托单id 支付方式
+     */
+    String getTestEntrustedInfoMethodName(Long entrustmentId);
+    /**
+     * 通过委托单id 获取联系地址
+     */
+    String getEntrustingParty(Long entrustmentId);
+
+
 
 }

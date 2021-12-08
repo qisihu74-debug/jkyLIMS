@@ -237,6 +237,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 刪除的样品id集合
         List<Integer>  removeSamplesId =  entityMapper.getSampleIdSet(basisInfo.getId());
+        //
         // 新增的id集合
         List<Integer> addNumber = new ArrayList<>();
         Map<Integer,String> map = new HashMap<>();
@@ -492,6 +493,12 @@ public class EntrustServiceImpl implements EntrustService {
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo   = entityMapper.selectByKeyId(entrustmentId);
+        // 通过委托单id 获取缴费记录 依据id 同价价格
+        entrustAddVo.setPaymentRecord(entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId));
+        // -- 支付方式。
+        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
+        // 联系地址
+        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
         // 通过委托ID 样品集合 → test_sample
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
         // 样品信息 进行补充 检测依据集合，检测项集合
