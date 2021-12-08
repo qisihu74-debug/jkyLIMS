@@ -635,7 +635,7 @@ public class EntrustServiceImpl implements EntrustService {
                         stringBuilder1.append(",");
                     }
                 }
-                String substring = stringBuilder1.toString().substring(0, stringBuilder.length() - 1);
+                String substring = stringBuilder1.toString().substring(0, stringBuilder1.length() - 1);
                 rows.get(16).getTableCells().get(2).setText(substring);//检验项目及检测依据
             }
             rows.get(17).getTableCells().get(2).setText(detail.getReportCount().toString());//报告分数
