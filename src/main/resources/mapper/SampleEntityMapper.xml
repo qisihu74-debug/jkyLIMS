@@ -56,7 +56,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         t2.check_item_id AS checkItemId,
         t2.check_item_name AS checkItemName,
         t1.times AS times,
-        t1.unit_price AS checkParice,
+        t1.unit_price AS checkPrice,
         t1.standard_id AS standardId,
         CONCAT(t3.CODE,t3.NAME) As standardName,
         t1.method_id AS methodId,
@@ -67,6 +67,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         LEFT JOIN test_standard_file AS t3 ON t1.standard_id = t3.id
         LEFT JOIN test_method As t4 ON t4.id = t1.method_id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
+        <if test="sampleId!=0 and sampleId!=''">
+            and t1.sample_id =  #{sampleId}
+        </if>
         <if test="entrustmentId!=0 and entrustmentId!=''">
             and t1.entrust_id =  #{entrustmentId}
         </if>
