@@ -23,6 +23,7 @@ import com.lims.manage.erp.vo.SampleAddParamVo;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +41,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -260,7 +263,7 @@ public class EntrustController {
      * @return
      */
     @RequestMapping("/get_entrust_history")
-    @RequiresPermissions("test:entrust:get_entrust_history")
+//    @RequiresPermissions("test:entrust:get_entrust_history")
     public Result getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity){
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
     }
@@ -344,18 +347,25 @@ public class EntrustController {
      * @return
      */
     @RequestMapping("/downloadSampleTag")
-    public ResponseEntity<byte[]> downloadSampleTag(Integer sampleId){
-        ResponseEntity<byte[]> sampleTagInfo = entrustService.getSampleTagInfo(sampleId);
-        if( sampleTagInfo == null ){
-            return new ResponseEntity<byte[]>(null,null, HttpStatus.NOT_FOUND);
-        }else{
-            return sampleTagInfo;
+    public void downloadSampleTag(Integer sampleId,HttpServletResponse response){
+        String fileName = "样品标签.xlsx";
+        Workbook sampleTagInfo = entrustService.getSampleTagInfo(sampleId);
+
+        response.reset();
+        response.setContentType("application/x-msdownload");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName="+fileName);
+        try {
+            fileName = URLEncoder.encode(fileName,"UTF-8");
+            OutputStream outputStream = response.getOutputStream();
+            sampleTagInfo.write(outputStream);
+            outputStream.close();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-//        if(sampleId == null ){
-//            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
-//        }else{
-//
-//        }
+
     }
 
     @RequestMapping("/downloadSampleTag2")

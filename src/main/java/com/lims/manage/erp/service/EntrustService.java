@@ -9,6 +9,7 @@ import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -123,7 +124,7 @@ public interface EntrustService {
      * @param sampleId
      * @return
      */
-    ResponseEntity<byte[]> getSampleTagInfo(Integer sampleId);
+    Workbook getSampleTagInfo(Integer sampleId);
 
     /**
      * 查询样品标签信息--文件服务器

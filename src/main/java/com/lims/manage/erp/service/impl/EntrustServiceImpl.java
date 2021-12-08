@@ -251,18 +251,20 @@ public class EntrustServiceImpl implements EntrustService {
                 }
                 //样品下检测项
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
-                //计算检测项总价钱
-                for (SampleItemEntity entity:sampleCheckItem) {
-                    int money = entity.getTimes() * entity.getUnitPrice();
-                    totalMoney = totalMoney+money;
-                }
-                //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
-                for (SampleItemEntity entity:sampleCheckItem) {
-                    entity.setSampleId(sampleEntity.getId());
-                    entity.setEntrustId(basisInfo.getId());
-                }
+                if (!CollectionUtils.isEmpty(sampleCheckItem)){
+                    //计算检测项总价钱
+                    for (SampleItemEntity entity:sampleCheckItem) {
+                        int money = entity.getTimes() * entity.getUnitPrice();
+                        totalMoney = totalMoney+money;
+                    }
+                    //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+                    for (SampleItemEntity entity:sampleCheckItem) {
+                        entity.setSampleId(sampleEntity.getId());
+                        entity.setEntrustId(basisInfo.getId());
+                    }
 
-                entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
+                    entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
+                }
             }
             if (!CollectionUtils.isEmpty(list)){
                 entityMapper.BatchSaveEntrustSample(list);
@@ -665,7 +667,7 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public ResponseEntity<byte[]> getSampleTagInfo(Integer sampleId) {
+    public Workbook getSampleTagInfo(Integer sampleId) {
         SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
         HashMap<String, SampleDetailVo> result = Maps.newHashMap();
         String fileName ="";
@@ -677,33 +679,41 @@ public class EntrustServiceImpl implements EntrustService {
         }
         XLSTransformer transformer = new XLSTransformer();
         InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        HttpHeaders headers = null;
+        Workbook workbook = null;
         try {
-            headers = getHttpHeaders("");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        byte[] bytes = null;
-        Workbook sheets = null;
-        try {
-            sheets = transformer.transformXLS(fileStream, result);
-            try {
-                sheets.write(outputStream);
-                bytes = outputStream.toByteArray();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            workbook = transformer.transformXLS(fileStream, result);
         } catch (InvalidFormatException e) {
             e.printStackTrace();
         }
-        if(bytes != null ){
-            return new ResponseEntity<>(bytes, headers, HttpStatus.CREATED);
-        }else{
-            return null;
-        }
+        return workbook;
+
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//
+//        HttpHeaders headers = null;
+//        try {
+//            headers = getHttpHeaders("");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+//        byte[] bytes = null;
+//        Workbook sheets = null;
+//        try {
+//            sheets = transformer.transformXLS(fileStream, result);
+//            try {
+//                sheets.write(outputStream);
+//                bytes = outputStream.toByteArray();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        } catch (InvalidFormatException e) {
+//            e.printStackTrace();
+//        }
+//        if(bytes != null ){
+//            return new ResponseEntity<>(bytes, headers, HttpStatus.CREATED);
+//        }else{
+//            return null;
+//        }
     }
 
     @Override

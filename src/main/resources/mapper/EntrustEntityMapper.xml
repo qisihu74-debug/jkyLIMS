@@ -53,7 +53,7 @@
         and  t1.state = #{state}
       </if>
     </trim>
-    ORDER BY t1.entrustment_no
+    ORDER BY t1.entrustment_no  DESC
   </select>
   <insert id="BatchSaveEntrustSample" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
     INSERT into  test_entrusted_sample_details_rel(sample_id,
