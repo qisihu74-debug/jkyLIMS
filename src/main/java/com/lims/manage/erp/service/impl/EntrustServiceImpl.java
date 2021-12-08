@@ -523,7 +523,7 @@ public class EntrustServiceImpl implements EntrustService {
             // 样品下 检测项、检测依据 补充。
             sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(),entrustmentId));
             // 补充样品下 依据集合
-            sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId()));
+            sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(),entrustAddVo.getId()));
         }
         entrustAddVo.setSamples(sampleCollection);
         return entrustAddVo;

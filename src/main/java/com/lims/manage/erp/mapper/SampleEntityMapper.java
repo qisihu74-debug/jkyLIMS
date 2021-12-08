@@ -77,5 +77,5 @@ public interface SampleEntityMapper {
      */
     int addSampleEntity(@Param(value = "sampleId") Integer sampleId,@Param(value = "entrustmentId") Long entrustmentId);
 
-    List<Integer> getSampleBasisSet(@Param(value = "sampleId") Integer sampleId);
+    List<Integer> getSampleBasisSet(@Param(value = "sampleId") Integer sampleId,@Param(value = "entrustmentId") Long entrustmentId);
 }
