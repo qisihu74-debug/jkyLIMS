@@ -238,9 +238,9 @@ adress
     WHERE t1.id = #{entrustmentId}
   </select>
 
-  <select id="getStatndardByPId" resultType="java.util.ArrayList">
+  <select id="getStatndardByPId" resultType="String">
     SELECT
-	s. NAME
+	s.name
 FROM
 	test_standard_file s
 LEFT JOIN test_product_standard_file_rel sf ON s.id = sf.standard_file_id

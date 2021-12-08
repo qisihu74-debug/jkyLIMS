@@ -32,6 +32,7 @@ import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.SampleAddDetailVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
@@ -566,7 +567,7 @@ public class EntrustServiceImpl implements EntrustService {
             CTTblPr pr = table.getCTTbl().getTblPr();
             //获取表格对应的行
             rows = table.getRows();
-            //TODO 设置模板数据
+            //设置模板数据
             rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
             rows.get(4).getTableCells().get(2).setText(detail.getWitnessUint());//见证单位
             rows.get(5).getTableCells().get(2).setText(detail.getProjectPart());//工程部位
@@ -590,26 +591,55 @@ public class EntrustServiceImpl implements EntrustService {
             rows.get(15).getTableCells().get(2).setText(detail.getSamplingMethod());//取样方式
             rows.get(15).getTableCells().get(4).setText(detail.getCheckPurpose());//检验目的
             Integer productId = samples.get(0).getProductId();
-            /*List<String> list = entityMapper.getStatndardByPId(productId);
-            rows.get(15).getTableCells().get(6).setText(name);//产品标准
-            rows.get(16).getTableCells().get(2).setText(ss);//检验项目及检测依据
-            rows.get(17).getTableCells().get(2).setText(ss);//报告分数
-            rows.get(17).getTableCells().get(4).setText(ss);//取报告方式
-            rows.get(17).getTableCells().get(6).setText(ss);//收报告单位
-            rows.get(18).getTableCells().get(2).setText(ss);//联系地址
-            rows.get(18).getTableCells().get(4).setText(ss);//联系人
-            rows.get(18).getTableCells().get(6).setText(ss);//联系方式
-            rows.get(19).getTableCells().get(2).setText(ss);//委托人
-            rows.get(19).getTableCells().get(4).setText(ss);//委托人电话
-            rows.get(19).getTableCells().get(6).setText(ss);//见证人
-            rows.get(20).getTableCells().get(2).setText(ss);//样品状态
-            rows.get(20).getTableCells().get(4).setText(ss);//样品保留
-            rows.get(21).getTableCells().get(2).setText(ss);//检验收费
-            rows.get(21).getTableCells().get(4).setText(ss);//支付方式
-            rows.get(21).getTableCells().get(6).setText(ss);//本次交费
-            rows.get(22).getTableCells().get(2).setText(ss);//完成期限
-            rows.get(22).getTableCells().get(4).setText(ss);//业务受理人
-            rows.get(22).getTableCells().get(6).setText(ss);//受理日期*/
+            List<String> list = entityMapper.getStatndardByPId(productId);
+            StringBuilder stringBuilder = new StringBuilder();
+            if (!CollectionUtils.isEmpty(list)){
+                for (String s:list) {
+                    stringBuilder.append(s);
+                    stringBuilder.append(",");
+                }
+                String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
+                rows.get(15).getTableCells().get(6).setText(substring);//产品标准
+            }
+            StringBuilder stringBuilder1 = new StringBuilder();
+            if (!CollectionUtils.isEmpty(samples)){
+                for (SampleEntity entity :samples) {
+                    List<JudgmentBasisVo> sampleCheckItem = entity.getJudgmentBasisVos();
+                    for (JudgmentBasisVo itemEntity:sampleCheckItem) {
+                        String name = itemEntity.getCheckItemName();
+                        stringBuilder1.append(name);
+                        stringBuilder1.append("(");
+                        //TODO 检测项的检测依据
+                        stringBuilder1.append("GB2021-2001");
+                        stringBuilder1.append(")");
+                        stringBuilder1.append(",");
+                    }
+                }
+                String substring = stringBuilder1.toString().substring(0, stringBuilder.length() - 1);
+                rows.get(16).getTableCells().get(2).setText(substring);//检验项目及检测依据
+            }
+            rows.get(17).getTableCells().get(2).setText(detail.getReportCount().toString());//报告分数
+            rows.get(17).getTableCells().get(4).setText(detail.getReportType());//取报告方式
+            rows.get(17).getTableCells().get(6).setText("待添加");//收报告单位
+            rows.get(18).getTableCells().get(2).setText(detail.getAdress());//联系地址
+            rows.get(18).getTableCells().get(4).setText("待添加");//联系人
+            rows.get(18).getTableCells().get(6).setText("待添加");//联系方式
+            rows.get(19).getTableCells().get(2).setText(detail.getEntrustPeople());//委托人
+            rows.get(19).getTableCells().get(4).setText(detail.getEntrustPhone());//委托人电话
+            rows.get(19).getTableCells().get(6).setText(detail.getWitnessPerson());//见证人
+            SampleEntity sampleEntity = samples.get(0);
+            if (sampleEntity != null){
+                String s = sampleEntity.getSampleName() + "(" + sampleEntity.getSpecs() + "," + sampleEntity.getOutward() + ")";
+                rows.get(20).getTableCells().get(2).setText(s);//样品状态
+            }
+            rows.get(20).getTableCells().get(4).setText(detail.getIsSave().equals("1")?"保留":"废弃");//样品保留
+            rows.get(21).getTableCells().get(2).setText(detail.getPaymentCount());//检验收费
+            rows.get(21).getTableCells().get(4).setText(detail.getPaymentMethod());//支付方式
+            //TODO 本次缴费统计缴费记录表
+            rows.get(21).getTableCells().get(6).setText(detail.getPaymentRecord());//本次交费
+            rows.get(22).getTableCells().get(2).setText(detail.getRequestDate().toString());//完成期限
+            rows.get(22).getTableCells().get(4).setText(detail.getBusinessAcceptor());//业务受理人
+            rows.get(22).getTableCells().get(6).setText(detail.getAcceptanceDate().toString());//受理日期
         }catch (Exception e){
             logger.error("设置委托单信息到模板异常:{}",e);
         }
