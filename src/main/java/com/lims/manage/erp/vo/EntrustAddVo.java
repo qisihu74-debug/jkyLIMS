@@ -136,5 +136,9 @@ public class EntrustAddVo {
      * 样品信息
      */
     private List<SampleEntity> samples;
+    /**
+     * 邮寄地址
+     */
+    private String adress;
 
 }

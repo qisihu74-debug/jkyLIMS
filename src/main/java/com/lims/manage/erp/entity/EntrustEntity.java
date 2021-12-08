@@ -142,6 +142,10 @@ public class EntrustEntity {
      * 总计应收款
      */
     private String countPrice;
+    /**
+     * 邮寄地址
+     */
+    private String adress;
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,
                          String witnessUint, String witnessPerson, String witnessPhone, String projectName,
@@ -214,7 +218,7 @@ public class EntrustEntity {
         this.team=vo.getTeam();
         this.fileUrl=vo.getFileUrl();
         this.remark=vo.getRemark();
-
+        this.adress = vo.getAdress();
     }
 
 
