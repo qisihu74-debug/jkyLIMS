@@ -127,9 +127,10 @@ public class SampleController {
     public void downloadSampleTag(Integer sampleId, HttpServletResponse response) {
         SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
         HashMap<String, SampleDetailVo> result = Maps.newHashMap();
-        String fileName = "";
+        StringBuilder fileName = new StringBuilder("");
         if (sampleTagInfo != null) {
-            fileName = sampleTagInfo.getSampleCode() + "样品标签.xlsx";
+            fileName.append(sampleTagInfo.getSampleCode());
+            fileName.append("样品标签.xlsx");
             result.put("result", sampleTagInfo);
         }
         XLSTransformer transformer = new XLSTransformer();
@@ -140,8 +141,8 @@ public class SampleController {
             response.reset();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
-            fileName = URLEncoder.encode(fileName, "UTF-8");
+            String fileName2 = URLEncoder.encode(fileName.toString(), "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName2);
             OutputStream outputStream = response.getOutputStream();
             workbook.write(outputStream);
             outputStream.close();
