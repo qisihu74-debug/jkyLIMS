@@ -134,6 +134,11 @@ public class SampleServiceImpl implements SampleService {
     }
 
     @Override
+    public int updateSampleInfo(SampleEntity record) {
+        return sampleEntityMapper.updateSampleInfo(record);
+    }
+
+    @Override
     public Workbook getSampleTagInfo(Integer sampleId) {
         SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
         HashMap<String, SampleDetailVo> result = Maps.newHashMap();

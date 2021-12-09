@@ -51,6 +51,14 @@ public interface SampleService {
     List<SampleDetailVo> selectSampleList2(SampleEntity sampleEntity);
 
     /**
+     * 修改样品信息
+     *
+     * @param record
+     * @return
+     */
+    int updateSampleInfo(SampleEntity record);
+
+    /**
      * 查询样品标签信息
      *
      * @param sampleId

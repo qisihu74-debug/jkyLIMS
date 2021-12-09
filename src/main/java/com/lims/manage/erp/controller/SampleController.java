@@ -96,6 +96,20 @@ public class SampleController {
     }
 
     /**
+     * 样品基本信息--修改
+     * @param
+     * @return
+     */
+    @RequestMapping(value="updateSample", method= RequestMethod.POST)
+    public Result updateSampleData(@RequestBody SampleEntity sampleEntity) {
+        if(sampleEntity == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }else{
+            return ResultUtil.success(sampleService.updateSampleInfo(sampleEntity));
+        }
+    }
+
+    /**
      * 下载样品标签
      *
      * @param sampleId

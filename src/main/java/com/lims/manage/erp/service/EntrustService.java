@@ -85,13 +85,6 @@ public interface EntrustService {
     Boolean publishTask(TaskEntity entity);
 
     /**
-     * 修改样品信息
-     * @param record
-     * @return
-     */
-    int updateSampleInfo(SampleEntity record);
-
-    /**
      * 填充数据
      * @param detail
      * @param object

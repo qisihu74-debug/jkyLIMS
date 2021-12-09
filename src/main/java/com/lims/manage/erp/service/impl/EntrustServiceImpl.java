@@ -462,11 +462,6 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public int updateSampleInfo(SampleEntity record) {
-        return sampleEntityMapper.updateSampleInfo(record);
-    }
-
-    @Override
     public XWPFDocument downloadEntrust(EntrustAddVo detail, InputStream object) {
         XWPFDocument doc = null;
         try {

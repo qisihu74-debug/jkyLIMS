@@ -160,20 +160,6 @@ public class EntrustController {
     }
 
     /**
-     * 样品基本信息--修改
-     * @param
-     * @return
-     */
-    @RequestMapping(value="update_sample", method= RequestMethod.POST)
-    public Result updateSampleData(@RequestBody SampleEntity sampleEntity) {
-        if(sampleEntity == null){
-            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
-        }else{
-            return ResultUtil.success(entrustService.updateSampleInfo(sampleEntity));
-        }
-    }
-
-    /**
      * 查询历史委托
      * 1、角色过滤 “客户代表”、“市场部业务员”
      * 2、“客户”指定自身委托
