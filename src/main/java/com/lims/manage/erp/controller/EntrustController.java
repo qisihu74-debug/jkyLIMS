@@ -132,37 +132,6 @@ public class EntrustController {
     }
 
     /**
-     *
-     * @param sampleEntity
-     * @return
-     */
-    @RequestMapping("get_Sample")
-    public Result ReturnSampleData(SampleEntity sampleEntity) {
-//        return ResultUtil.success(entrustService.getSampleDataList(sampleEntity));
-        return ResultUtil.success(entrustService.getSampleDataList(sampleEntity));
-    }
-
-    @RequestMapping("/getSampleDetail")
-    public Result getSampleDetail(@RequestBody SampleEntity paramVo) {
-        System.out.println("参数："+paramVo);
-        return ResultUtil.success(entrustService.selectSampleList2(paramVo));
-    }
-
-    /**
-     * 查询产品所有的检测项
-     * @param productId
-     * @return
-     */
-    @RequestMapping("/getAllItem")
-    public Result getAllItemByProductId(Integer productId){
-        if(productId == null){
-            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
-        }else{
-            return ResultUtil.success(entrustService.getAllItemByProductId(productId));
-        }
-    }
-
-    /**
      * 查询检测项详情：检测项名称，检测项方法，规格型号，检测依据
      * @param itemIds
      * @return
@@ -178,7 +147,7 @@ public class EntrustController {
 
     /**
      * 查询检测项 方法 依据
-     * @param id
+     * @param itemId
      * @return
      */
     @RequestMapping("/getItemMethodStandard")
@@ -187,36 +156,6 @@ public class EntrustController {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }else{
             return ResultUtil.success(entrustService.getItemMethodStandard(itemId));
-        }
-    }
-
-    /**
-     * 样品基本信息--查询产品
-     * @param productName
-     * @return
-     */
-    @RequestMapping("/get_sample_product_name")
-    public Result getAllItemByProductName(String productName){
-        List<LabelValueVo> dataList = entrustService.selectProductList(productName);
-        if(dataList.isEmpty()){
-            return ResultUtil.error(ResultEnum.DATA_IS_NULL.getCode(),ResultEnum.DATA_IS_NULL.getMsg());
-        }
-       return ResultUtil.success(dataList);
-    }
-
-    /**
-     * 样品基本信息--保存
-     * @param
-     * @return
-     */
-    @RequestMapping(value="add_sample", method= RequestMethod.POST)
-    public Result getAddSampleData(@RequestParam("json") String json,MultipartFile[] file) {
-        SampleAddParamVo samples = JSON.parseObject(json, SampleAddParamVo.class);
-        if(samples == null){
-            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
-        }else{
-            entrustService.addSampleData(samples, file);
-            return ResultUtil.success();
         }
     }
 
@@ -232,27 +171,6 @@ public class EntrustController {
         }else{
             return ResultUtil.success(entrustService.updateSampleInfo(sampleEntity));
         }
-    }
-
-    /**
-     * 样样品的基本信息-图片信息保存
-     * @param testSampleJsonEntity
-     * @return
-     */
-    @RequestMapping(value="sample_add_picture", method= RequestMethod.POST)
-    public Result getAddSamplePhotoData(TestSampleJsonEntity testSampleJsonEntity,MultipartHttpServletRequest uploadFile) {
-
-        System.out.println("接收信息处理"+testSampleJsonEntity);
-        return null;
-//        InputStream inputStream = null;
-//
-//        MultipartFile file = uploadFile.getFile("uploadFile1");
-//        try {
-//            inputStream = file.getInputStream();
-//        }catch (IOException e){
-//            System.out.println("文件获取异常:{}"+e);
-//        }
-//        return null;
     }
 
     /**
@@ -276,20 +194,6 @@ public class EntrustController {
     @RequestMapping("/get_entrust_history_detail")
     public Result getEntrustHistoryDetail(Long entrustmentId){
         return ResultUtil.success(entrustService.getEntrustHistoryDetail(entrustmentId));
-    }
-
-    /**
-     * 查询产品判定依据
-     * @param productId
-     * @return
-     */
-    @RequestMapping("/getJudgeBasis")
-    public Result getJudgeBasis(Integer productId){
-        if(productId == null ){
-            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
-        }else{
-            return ResultUtil.success(entrustService.getJudges(productId));
-        }
     }
 
     /**
@@ -339,39 +243,6 @@ public class EntrustController {
     @RequiresPermissions("test:entrust:releasedList")
     public Result getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity){
         return ResultUtil.success(entrustService.getEntrustReleasedList(entrustHistoryEntity));
-    }
-
-    /**
-     * 下载样品标签
-     * @param sampleId
-     * @return
-     */
-    @RequestMapping("/downloadSampleTag")
-    public void downloadSampleTag(Integer sampleId,HttpServletResponse response){
-        String fileName = "样品标签.xlsx";
-        Workbook sampleTagInfo = entrustService.getSampleTagInfo(sampleId);
-
-        response.reset();
-        response.setContentType("application/x-msdownload");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment;fileName="+fileName);
-        try {
-            fileName = URLEncoder.encode(fileName,"UTF-8");
-            OutputStream outputStream = response.getOutputStream();
-            sampleTagInfo.write(outputStream);
-            outputStream.close();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @RequestMapping("/downloadSampleTag2")
-    public Result downloadSampleTag2(Integer sampleId){
-        String sampleTagInfo2 = entrustService.getSampleTagInfo2(sampleId);
-        return ResultUtil.success(sampleTagInfo2);
     }
 
     /**

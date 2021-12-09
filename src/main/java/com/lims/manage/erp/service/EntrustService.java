@@ -34,13 +34,6 @@ public interface EntrustService {
     Boolean updateEntrust(EntrustAddVo vo, MultipartFile[] file);
 
     /**
-     * 查询产品检测项
-     * @param productId
-     * @return
-     */
-    List<CheckItemDetailVo> getAllItemByProductId(Integer productId);
-
-    /**
      * 查询检测项详细信息
      * @param ids
      * @return
@@ -66,41 +59,6 @@ public interface EntrustService {
     Boolean addCompanyData(TestCompanyJsonEntity testCompanyEntity);
 
     /**
-     * 查询样品列表
-     * @param sampleEntity
-     * @return
-     */
-    List<SampleEntity> getSampleDataList(SampleEntity sampleEntity);
-
-    /**
-     * 查询样品列表
-     * @param paramVo
-     * @return
-     */
-    List<SampleDetailVo> selectSampleList2(SampleEntity paramVo);
-
-    /**
-     * 查询产品--模糊查询
-     * @param productName
-     * @return
-     */
-    List<LabelValueVo> selectProductList(String productName);
-
-    /**
-     * 新增样品信息
-     * @param addParamVo
-     * @return
-     */
-    Integer addSampleData(SampleAddParamVo addParamVo,MultipartFile[] file);
-
-    /**
-     * 查询判定依据
-     * @param productId
-     * @return
-     */
-    List<LabelValueVo> getJudges(Integer productId);
-
-    /**
      * 历史委托信息
      * @param entrustHistoryEntity
      * @return
@@ -118,20 +76,6 @@ public interface EntrustService {
      * @return
      */
     EntrustAddVo getEntrustHistoryDetail(Long entrustmentId);
-
-    /**
-     * 查询样品标签信息
-     * @param sampleId
-     * @return
-     */
-    Workbook getSampleTagInfo(Integer sampleId);
-
-    /**
-     * 查询样品标签信息--文件服务器
-     * @param sampleId
-     * @return
-     */
-    String getSampleTagInfo2(Integer sampleId);
 
     /**
      * 委托发布

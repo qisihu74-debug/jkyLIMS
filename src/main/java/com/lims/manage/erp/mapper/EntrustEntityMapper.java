@@ -46,12 +46,6 @@ public interface EntrustEntityMapper extends BaseMapper {
     void saveEntrustPayRecord(EntrustPamentEntity pamentEntity);
 
     /**
-     * 查询判定依据
-     * @param productId
-     * @return
-     */
-    List<LabelValueVo> getJudges(Integer productId);
-    /**
      * 委托历史 查询。
      * @param entrustHistoryEntity
      * @return
