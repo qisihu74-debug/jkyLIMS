@@ -35,6 +35,14 @@ public interface SampleService {
     List<SampleEntity> getSampleDataList(SampleEntity sampleEntity);
 
     /**
+     * 查询样品组基本信息
+     *
+     * @param sampleEntity
+     * @return
+     */
+    SampleDetailVo getSampleGroupInfo(String insertFlag);
+
+    /**
      * 查询样品信息--带委托单位名称
      *
      * @param sampleEntity

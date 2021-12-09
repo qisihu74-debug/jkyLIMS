@@ -31,6 +31,14 @@ public interface SampleEntityMapper {
     List<SampleEntity> selectSampleList(SampleEntity record);
 
     /**
+     * 查询样品组基本信息
+     *
+     * @param insertFlag
+     * @return
+     */
+    SampleDetailVo getSampleGroupInfo(String insertFlag);
+
+    /**
      * 根据查询条件查询样品列表
      *
      * @param paramVo

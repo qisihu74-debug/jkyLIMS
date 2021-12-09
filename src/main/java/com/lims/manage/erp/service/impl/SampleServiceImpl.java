@@ -124,6 +124,11 @@ public class SampleServiceImpl implements SampleService {
     }
 
     @Override
+    public SampleDetailVo getSampleGroupInfo(String insertFlag) {
+        return sampleEntityMapper.getSampleGroupInfo(insertFlag);
+    }
+
+    @Override
     public List<SampleDetailVo> selectSampleList2(SampleEntity sampleEntity) {
         return sampleEntityMapper.selectSampleList2(sampleEntity);
     }

@@ -74,6 +74,17 @@ public class SampleController {
     }
 
     /**
+     * 查询样品组基本信息
+     *
+     * @param insertFlag
+     * @return
+     */
+    @RequestMapping("/getSampleGroupInfo")
+    public Result getSampleGroupInfo(String insertFlag) {
+        return ResultUtil.success(sampleService.getSampleGroupInfo(insertFlag));
+    }
+
+    /**
      * 样品的查询列表--带单位名称
      *
      * @param paramVo
@@ -122,4 +133,6 @@ public class SampleController {
             return ResultUtil.success(productService.getAllItemByProductId(productId));
         }
     }
+
+
 }
