@@ -64,5 +64,5 @@ public interface SampleService {
      * @param sampleId
      * @return
      */
-    Workbook getSampleTagInfo(Integer sampleId);
+    SampleDetailVo getSampleTagInfo(Integer sampleId);
 }

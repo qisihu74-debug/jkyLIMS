@@ -139,52 +139,7 @@ public class SampleServiceImpl implements SampleService {
     }
 
     @Override
-    public Workbook getSampleTagInfo(Integer sampleId) {
-        SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
-        HashMap<String, SampleDetailVo> result = Maps.newHashMap();
-        String fileName = "";
-        if (sampleTagInfo != null) {
-            fileName = sampleTagInfo.getSampleCode() + "样品标签.xlsx";
-            result.put("result", sampleTagInfo);
-        } else {
-            return null;
-        }
-        XLSTransformer transformer = new XLSTransformer();
-        InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
-        Workbook workbook = null;
-        try {
-            workbook = transformer.transformXLS(fileStream, result);
-        } catch (InvalidFormatException e) {
-            e.printStackTrace();
-        }
-        return workbook;
-
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//
-//        HttpHeaders headers = null;
-//        try {
-//            headers = getHttpHeaders("");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-//        byte[] bytes = null;
-//        Workbook sheets = null;
-//        try {
-//            sheets = transformer.transformXLS(fileStream, result);
-//            try {
-//                sheets.write(outputStream);
-//                bytes = outputStream.toByteArray();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        } catch (InvalidFormatException e) {
-//            e.printStackTrace();
-//        }
-//        if(bytes != null ){
-//            return new ResponseEntity<>(bytes, headers, HttpStatus.CREATED);
-//        }else{
-//            return null;
-//        }
+    public SampleDetailVo getSampleTagInfo(Integer sampleId) {
+        return sampleEntityMapper.getSampleTagInfo(sampleId);
     }
 }

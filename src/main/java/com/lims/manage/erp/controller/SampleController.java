@@ -1,14 +1,19 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.ProductService;
 import com.lims.manage.erp.service.SampleService;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.SampleAddParamVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +21,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.util.HashMap;
 
 @Slf4j
 @RestController
@@ -97,14 +104,15 @@ public class SampleController {
 
     /**
      * 样品基本信息--修改
+     *
      * @param
      * @return
      */
-    @RequestMapping(value="updateSample", method= RequestMethod.POST)
+    @RequestMapping(value = "updateSample", method = RequestMethod.POST)
     public Result updateSampleData(@RequestBody SampleEntity sampleEntity) {
-        if(sampleEntity == null){
-            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
-        }else{
+        if (sampleEntity == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
             return ResultUtil.success(sampleService.updateSampleInfo(sampleEntity));
         }
     }
@@ -117,18 +125,27 @@ public class SampleController {
      */
     @RequestMapping("/downloadSampleTag")
     public void downloadSampleTag(Integer sampleId, HttpServletResponse response) {
-        String fileName = "样品标签.xlsx";
-        Workbook sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
-        response.reset();
-        response.setContentType("application/x-msdownload");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
+        SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
+        HashMap<String, SampleDetailVo> result = Maps.newHashMap();
+        String fileName = "";
+        if (sampleTagInfo != null) {
+            fileName = sampleTagInfo.getSampleCode() + "样品标签.xlsx";
+            result.put("result", sampleTagInfo);
+        }
+        XLSTransformer transformer = new XLSTransformer();
+        InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
+        Workbook workbook = null;
         try {
+            workbook = transformer.transformXLS(fileStream, result);
+            response.reset();
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
             fileName = URLEncoder.encode(fileName, "UTF-8");
             OutputStream outputStream = response.getOutputStream();
-            sampleTagInfo.write(outputStream);
+            workbook.write(outputStream);
             outputStream.close();
-        } catch (IOException e) {
+        } catch (IOException | InvalidFormatException e) {
             e.printStackTrace();
         }
     }
