@@ -61,7 +61,7 @@ public class SampleController {
      * @return
      */
     @RequestMapping("/getSampleList")
-    public Result getSampleList(@RequestBody SampleEntity paramVo) {
+    public Result getSampleList(@RequestBody SampleDetailVo paramVo) {
         if (paramVo == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {

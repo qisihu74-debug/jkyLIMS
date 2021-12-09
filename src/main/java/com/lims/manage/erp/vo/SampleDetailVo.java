@@ -6,4 +6,6 @@ import lombok.Data;
 @Data
 public class SampleDetailVo extends SampleEntity {
     private String companyName;
+    private String beginDate;
+    private String endDate;
 }

@@ -1,6 +1,5 @@
 package com.lims.manage.erp.service.impl;
 
-import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
@@ -10,17 +9,12 @@ import com.lims.manage.erp.vo.SampleAddDetailVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
 import com.lims.manage.erp.vo.SamplePublicInfoVo;
-import net.sf.jxls.transformer.XLSTransformer;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -114,7 +108,12 @@ public class SampleServiceImpl implements SampleService {
     }
 
     @Override
-    public List<SamplePublicInfoVo> getSamplePublicInfos(SampleEntity paramVo) {
+    public List<SamplePublicInfoVo> getSamplePublicInfos(SampleDetailVo paramVo) {
+        if (paramVo.getReceivedDate() != null) {
+            String[] split = paramVo.getReceivedDate().split("~");
+            paramVo.setBeginDate(split[0]);
+            paramVo.setEndDate(split[1]);
+        }
         return sampleEntityMapper.getSamplePublicInfos(paramVo);
     }
 

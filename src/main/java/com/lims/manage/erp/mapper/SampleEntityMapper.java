@@ -102,7 +102,7 @@ public interface SampleEntityMapper {
      * @param paramVo
      * @return
      */
-    List<SamplePublicInfoVo> getSamplePublicInfos(SampleEntity paramVo);
+    List<SamplePublicInfoVo> getSamplePublicInfos(SampleDetailVo paramVo);
 
     /**
      * 查询当前年份最大样品编号
