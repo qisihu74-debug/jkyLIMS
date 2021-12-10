@@ -82,7 +82,7 @@
                t1.orderer,
                t1.order_time,
                t1.required_completion_time,
-               666                                  cost,
+               t2.count_price                       cost,
                t2.sampling_method,
                t2.check_purpose,
                t2.present_information,
