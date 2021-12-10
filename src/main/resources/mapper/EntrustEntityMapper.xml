@@ -249,7 +249,7 @@ mailbox
       <if test="sealType != null and sealType!=''">seal_type=#{sealType},</if>
       <if test="isSave != null and isSave!=''">is_save=#{isSave},</if>
       <if test="countPrice != null and countPrice!=''">count_price=#{countPrice},</if>
-      <if test="adress != null and adress!=''">adress=#{adress},</if>
+      <if test="address != null and adfress!=''">address=#{address},</if>
       <if test="addressee != null and addressee!=''">adress=#{addressee},</if>
       <if test="mobile != null and mobile!=''">adress=#{mobile},</if>
       <if test="mailbox != null and mailbox!=''">adress=#{mailbox},</if>
