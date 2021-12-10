@@ -1,7 +1,9 @@
 package com.lims.manage.erp.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lims.manage.erp.entity.SampleEntity;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
@@ -71,6 +73,8 @@ public class EntrustAddVo {
     /**
      * 要求完成时间
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date requestDate;
     /**
      * 支付方式
@@ -91,6 +95,8 @@ public class EntrustAddVo {
     /**
      * 受理日期
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date acceptanceDate;
     /**
      * 指定检测团队
@@ -115,6 +121,8 @@ public class EntrustAddVo {
     /**
      * 作废操作日期
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date operateDate;
     /**
      * 附件url
