@@ -194,8 +194,8 @@ public class EntrustController {
         }
         Boolean flag = entrustService.publishTask(entity);
         if (flag){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"账户："+ShiroUtils.getUserInfo().getUsername()+"发布任务成功编号为："+vo.getEntrustmentNo(),
-                    Const.ENTRUST_PUBLISH,true);
+            /*logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"账户："+ShiroUtils.getUserInfo().getUsername()+"发布任务成功编号为："+vo.getEntrustmentNo(),
+                    Const.ENTRUST_PUBLISH,true);*/
             return ResultUtil.success("委托发布成功！");
         }else {
             return ResultUtil.error(-1,"委托发布失败！");
