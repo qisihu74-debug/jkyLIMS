@@ -25,6 +25,7 @@ WHERE
         sort
     FROM
         sys_function
+    where is_valid = 0
     ORDER BY
         function_pid,
         sort ASC

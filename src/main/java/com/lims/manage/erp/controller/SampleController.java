@@ -6,6 +6,7 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ProductService;
 import com.lims.manage.erp.service.SampleService;
 import com.lims.manage.erp.util.MinIoUtil;
@@ -31,6 +32,8 @@ import java.util.HashMap;
 @RequestMapping("/sample/")
 public class SampleController {
 
+    @Autowired
+    private LogManagerService logManagerService;
     @Autowired
     private SampleService sampleService;
     @Autowired

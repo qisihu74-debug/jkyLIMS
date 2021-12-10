@@ -80,6 +80,7 @@ public class UserLoginController {
         map.put("code",200);
         map.put("msg","登录成功");
         map.put("token", ShiroUtils.getSession().getId().toString());
+        map.put("userInfo", ShiroUtils.getUserInfo());
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"登陆成功!", Const.LOGIN_LOG,true);
         return map;
     }

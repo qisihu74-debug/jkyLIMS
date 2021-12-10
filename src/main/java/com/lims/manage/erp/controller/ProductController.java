@@ -3,6 +3,7 @@ package com.lims.manage.erp.controller;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ProductService;
 import com.lims.manage.erp.vo.LabelValueVo;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,9 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private LogManagerService logManagerService;
 
     /**
      * 样品基本信息--查询产品
