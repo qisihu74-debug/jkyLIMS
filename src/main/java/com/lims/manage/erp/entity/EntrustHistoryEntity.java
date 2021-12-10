@@ -1,6 +1,8 @@
 package com.lims.manage.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -21,13 +23,13 @@ public class EntrustHistoryEntity {
      */
     private String entrustmentNo;
     /**
-     * 样品名称
-     */
-    private String sampleName;
-    /**
      * 委托人
      */
     private String entrustPeople;
+    /**
+     * 委托公司
+     */
+    private String entrustCompany;
     /**
      * 工程名称
      */
@@ -35,11 +37,8 @@ public class EntrustHistoryEntity {
     /**
      * 受理日期
      */
-    private Date requestDate;
-    /**
-     * 委托公司
-     */
-    private String entrustCompany;
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private Date acceptanceDate;
     /**
      * 业务受理人
      */
@@ -48,5 +47,16 @@ public class EntrustHistoryEntity {
      * 任务状态
      */
     private Integer state;
+    /**
+     * 范围 开始受理日期
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private Date startDate;
+    /**
+     * 结束受理日期
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private Date endingDate;
+
 
 }

@@ -388,6 +388,7 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) {
+        entrustHistoryEntity.setState(0);
         return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
     }
 
