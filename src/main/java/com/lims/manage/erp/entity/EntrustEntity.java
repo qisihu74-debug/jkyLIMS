@@ -1,7 +1,9 @@
 package com.lims.manage.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 @Data
@@ -73,6 +75,8 @@ public class EntrustEntity {
     /**
      * 要求完成时间
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date requestDate;
     /**
      * 支付方式
@@ -93,6 +97,8 @@ public class EntrustEntity {
     /**
      * 受理日期
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date acceptanceDate;
     /**
      * 指定检测团队
@@ -113,10 +119,12 @@ public class EntrustEntity {
     /**
      * 作废操作人
      */
-    private Integer operateUser;
+    private Long operateUser;
     /**
      * 作废操作日期
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date operateDate;
     /**
      * 附件url
@@ -165,7 +173,7 @@ public class EntrustEntity {
                          String projectPart, String samplingMethod, String checkPurpose, Integer reportCount,
                          String reportType, Date requestDate, String paymentMethod, String paymentRecord,
                          String paymentCount, String presentInformation, Date acceptanceDate, Integer team,
-                         Integer state, String remark, String invalidReason, Integer operateUser, Date operateDate,
+                         Integer state, String remark, String invalidReason, Long operateUser, Date operateDate,
                          String fileUrl, String sealType, String isSave, Integer entrustPeopleId,
                          Integer witnessPersonId) {
         this.id = id;
@@ -431,11 +439,11 @@ public class EntrustEntity {
         this.invalidReason = invalidReason == null ? null : invalidReason.trim();
     }
 
-    public Integer getOperateUser() {
+    public Long getOperateUser() {
         return operateUser;
     }
 
-    public void setOperateUser(Integer operateUser) {
+    public void setOperateUser(Long operateUser) {
         this.operateUser = operateUser;
     }
 

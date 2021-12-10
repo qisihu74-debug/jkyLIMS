@@ -251,8 +251,17 @@ mailbox
       <if test="addressee != null and addressee!=''">adress=#{addressee},</if>
       <if test="mobile != null and mobile!=''">adress=#{mobile},</if>
       <if test="mailbox != null and mailbox!=''">adress=#{mailbox},</if>
+      <if test="operateUser != null">operate_user=#{operateUser},</if>
+      <if test="operateDate != null">operate_date=#{operateDate},</if>
     </trim>
-    where id = #{id} and entrustment_no = #{entrustmentNo}
+    <trim prefix="WHERE" prefixOverrides="AND |OR ">
+    <if test="id!=null">
+      and id = #{id}
+   </if>
+    <if test="entrustmentNo!=null">
+      and entrustment_no = #{entrustmentNo}
+    </if>
+    </trim>
   </update>
   <select id="getSampleIdSet" resultType="integer">
     SELECT sample_id

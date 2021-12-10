@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -74,6 +75,24 @@ public class EntrustController {
         }else{
             return ResultUtil.error(678,"修改委托失败！");
         }
+    }
+
+    /**
+     * 废弃委托单信息
+     * @return
+     */
+    @PostMapping("/abandonEntrust")
+    public Result abandonEntrust(@RequestBody EntrustEntity entrustEntity){
+        // 获取当前登录用户id。
+        Date date = new Date();
+        entrustEntity.setOperateUser(ShiroUtils.getUserInfo().getUserId());
+        entrustEntity.setOperateDate(date);
+         Boolean flag = entrustService.abandonEntrust(entrustEntity);
+         if(flag){
+             return ResultUtil.success("成功");
+         }
+        return ResultUtil.error(678,"作废委托失败！");
+
     }
 
     /**

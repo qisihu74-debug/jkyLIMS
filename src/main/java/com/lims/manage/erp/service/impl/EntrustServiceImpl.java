@@ -281,6 +281,13 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    public Boolean abandonEntrust(EntrustEntity entrustEntity) {
+        entrustEntity.setState(144);
+        entityMapper.updateEntrustInfo(entrustEntity);
+        return true;
+    }
+
+    @Override
     public List<CheckItemInfoVo> getCheckItemInfoVo(List<Integer> ids) {
         return itemEntityMapper.getItemInfo2(ids);
     }
