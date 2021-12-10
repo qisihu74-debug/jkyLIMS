@@ -207,7 +207,7 @@ public class EntrustController {
      * @return
      */
     @RequestMapping("/releasedList")
-    @RequiresPermissions("test:entrust:releasedList")
+//    @RequiresPermissions("test:entrust:releasedList")
     public Result getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity){
         return ResultUtil.success(entrustService.getEntrustReleasedList(entrustHistoryEntity));
     }

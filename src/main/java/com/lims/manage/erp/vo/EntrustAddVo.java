@@ -139,6 +139,18 @@ public class EntrustAddVo {
     /**
      * 邮寄地址
      */
-    private String adress;
+    private String address;
+    /**
+     * 收件人
+     */
+    private String addressee;
+    /**
+     * 收件人电话
+     */
+    private String mobile;
+    /**
+     * 邮箱地址
+     */
+    private String mailbox;
 
 }

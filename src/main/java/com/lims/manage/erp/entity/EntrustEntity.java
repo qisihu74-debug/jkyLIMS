@@ -145,7 +145,20 @@ public class EntrustEntity {
     /**
      * 邮寄地址
      */
-    private String adress;
+    private String address;
+    /**
+     * 收件人
+     */
+    private String addressee;
+    /**
+     * 收件人电话
+     */
+    private String mobile;
+    /**
+     * 邮箱地址
+     */
+    private String mailbox;
+
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,
                          String witnessUint, String witnessPerson, String witnessPhone, String projectName,
@@ -218,7 +231,10 @@ public class EntrustEntity {
         this.team=vo.getTeam();
         this.fileUrl=vo.getFileUrl();
         this.remark=vo.getRemark();
-        this.adress = vo.getAdress();
+        this.address = vo.getAddress();
+        this.addressee = vo.getAddressee();
+        this.mobile=vo.getMobile();
+        this.mailbox=vo.getMailbox();
     }
 
 
