@@ -69,7 +69,7 @@ public interface EntrustService {
      * @param entrustHistoryEntity
      * @return
      */
-    List<EntrustHistoryEntity> getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity);
+    List<EntrustHistoryTaskEntity> getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity);
     /**
      * 史委托信息 具体详情
      * @param entrustmentId
