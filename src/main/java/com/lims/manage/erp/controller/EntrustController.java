@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.text.ParseException;
 import java.util.List;
 
 @Slf4j
@@ -149,7 +150,7 @@ public class EntrustController {
      */
     @RequestMapping("/get_entrust_history")
 //    @RequiresPermissions("test:entrust:get_entrust_history")
-    public Result getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity){
+    public Result getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
     }
 
@@ -208,7 +209,7 @@ public class EntrustController {
      */
     @RequestMapping("/releasedList")
 //    @RequiresPermissions("test:entrust:releasedList")
-    public Result getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity){
+    public Result getEntrustReleasedList(EntrustHistoryTaskEntity entrustHistoryEntity) throws ParseException {
         return ResultUtil.success(entrustService.getEntrustReleasedList(entrustHistoryEntity));
     }
 

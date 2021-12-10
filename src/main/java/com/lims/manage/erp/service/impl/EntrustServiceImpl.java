@@ -43,6 +43,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -375,14 +377,39 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) {
+    public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
         entrustHistoryEntity.setState(0);
+        if(entrustHistoryEntity.getDateInterval()!=null){
+            String[] strArry = entrustHistoryEntity.getDateInterval().split("~");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            for (int i =0;i<=strArry.length-1;i++){
+                if(i==0){
+                    entrustHistoryEntity.setStartDate(dateFormat.parse(strArry[i]));
+                }
+                if(i==1){
+                    entrustHistoryEntity.setEndingDate(dateFormat.parse(strArry[i]));
+                }
+            }
+        }
         return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
     }
 
     @Override
-    public List<EntrustHistoryTaskEntity> getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity) {
+    public List<EntrustHistoryTaskEntity> getEntrustReleasedList(EntrustHistoryTaskEntity entrustHistoryEntity) throws ParseException {
         entrustHistoryEntity.setState(0);
+        if(entrustHistoryEntity.getDateInterval()!=null){
+            String[] strArry = entrustHistoryEntity.getDateInterval().split("~");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            for (int i =0;i<=strArry.length-1;i++){
+                if(i==0){
+                    entrustHistoryEntity.setStartDate(dateFormat.parse(strArry[i]));
+                }
+                if(i==1){
+                    entrustHistoryEntity.setEndingDate(dateFormat.parse(strArry[i]));
+                }
+            }
+        }
+
         return entityMapper.selectEntrustReleasedList(entrustHistoryEntity);
     }
 
