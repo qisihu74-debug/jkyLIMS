@@ -117,7 +117,7 @@ public class EntrustAddVo {
     /**
      * 作废操作人
      */
-    private Integer operateUser;
+    private Long operateUser;
     /**
      * 作废操作日期
      */

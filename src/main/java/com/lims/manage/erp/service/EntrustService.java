@@ -33,6 +33,10 @@ public interface EntrustService {
      * 修改委托
      */
     Boolean updateEntrust(EntrustAddVo vo, MultipartFile[] file);
+    /**
+     * 实现作废
+     */
+    Boolean abandonEntrust(EntrustEntity entrustEntity);
 
     /**
      * 查询检测项详细信息
