@@ -51,6 +51,12 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     List<EntrustHistoryEntity> selectEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity);
+    /**
+     * 委托单任务待发布列表
+     * @param entrustHistoryEntity
+     * @return
+     */
+    List<EntrustHistoryTaskEntity> selectEntrustReleasedList(EntrustHistoryTaskEntity entrustHistoryEntity);
 
     /**
      * 新增委托信息

@@ -10,7 +10,7 @@
     witness_person, witness_phone, project_name, project_part, sampling_method, check_purpose,
     report_count, report_type, request_date, payment_method, present_information, acceptance_date,
      team, state, remark, invalid_reason, operate_user, operate_date, file_url,  is_save,
-    business_acceptor,seal_type,count_price AS paymentCount
+    business_acceptor,seal_type,count_price AS paymentCount,address,addressee,mobile,mailbox
     from test_entrusted_info
     where id = #{id}
   </select>
@@ -56,6 +56,50 @@
       </if>
     </trim>
     ORDER BY entrustment_no  DESC
+  </select>
+  <select id="selectEntrustReleasedList" resultType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity" parameterType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity">
+    SELECT
+    DISTINCT t1.id AS id,
+    t1.entrustment_no AS entrustment_no,
+    t1.entrust_company AS entrust_company,
+    t1.entrust_people AS entrust_people,
+    t1.business_acceptor AS business_acceptor,
+    t1.acceptance_date AS acceptance_date,
+    CONCAT(t3.sample_name,"(",")") AS sampleStatus
+    FROM
+    test_entrusted_info as t1
+    LEFT JOIN test_entrusted_sample_details_rel as t2 ON t1.id = t2.entrustment_id
+    LEFT JOIN test_sample as t3 ON t3.id = t2.sample_id
+    <trim prefix="WHERE" prefixOverrides="AND |OR ">
+      <if test="entrustmentNo!=null and entrustmentNo!=''">
+        and t1.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
+      </if>
+      <if test="entrustCompany!=null and entrustCompany!=''">
+        and t1.entrust_company LIKE CONCAT('%',#{entrustCompany},'%')
+      </if>
+      <if test="entrustPeople!=null and entrustPeople!=''">
+        and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+      </if>
+      <if test="projectName!=null and projectName!=''">
+        and t1.project_name LIKE CONCAT('%',#{projectName},'%')
+      </if>
+      <if test="entrustPeople!=null and entrustPeople!=''">
+        and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+      </if>
+      <if test="businessAcceptor!=null and businessAcceptor!=''">
+        and  t1.business_acceptor LIKE CONCAT('%',#{businessAcceptor},'%')
+      </if>
+      <if test="startDate!=null">
+        and <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>
+      </if>
+      <if test="endingDate!=null">
+        and <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
+      </if>
+      <if test="state!=null">
+        and  t1.state = #{state}
+      </if>
+    </trim>
+    ORDER BY t1.entrustment_no  DESC
   </select>
   <insert id="BatchSaveEntrustSample" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
     INSERT into  test_entrusted_sample_details_rel(sample_id,
@@ -124,7 +168,6 @@ present_information,
 business_acceptor,
 acceptance_date,
 team,
-state,
 remark,
 invalid_reason,
 operate_user,
@@ -159,7 +202,6 @@ mailbox
 #{businessAcceptor},
 #{acceptanceDate},
 #{team},
-#{state},
 #{remark},
 #{invalidReason},
 #{operateUser},
@@ -170,7 +212,7 @@ mailbox
 #{countPrice},
 #{address},
 #{addressee},
-#{addresseeMobile},
+#{mobile},
 #{mailbox}
 )
 
@@ -205,6 +247,10 @@ mailbox
       <if test="sealType != null and sealType!=''">seal_type=#{sealType},</if>
       <if test="isSave != null and isSave!=''">is_save=#{isSave},</if>
       <if test="countPrice != null and countPrice!=''">count_price=#{countPrice},</if>
+      <if test="address != null and adfress!=''">address=#{address},</if>
+      <if test="addressee != null and addressee!=''">adress=#{addressee},</if>
+      <if test="mobile != null and mobile!=''">adress=#{mobile},</if>
+      <if test="mailbox != null and mailbox!=''">adress=#{mailbox},</if>
     </trim>
     where id = #{id} and entrustment_no = #{entrustmentNo}
   </update>

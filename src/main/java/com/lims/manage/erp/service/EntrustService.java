@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -63,13 +64,13 @@ public interface EntrustService {
      * @param entrustHistoryEntity
      * @return
      */
-    List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity);
+    List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException;
     /**
      * 委托单任务待发布列表
      * @param entrustHistoryEntity
      * @return
      */
-    List<EntrustHistoryEntity> getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity);
+    List<EntrustHistoryTaskEntity> getEntrustReleasedList(EntrustHistoryTaskEntity entrustHistoryEntity) throws ParseException;
     /**
      * 史委托信息 具体详情
      * @param entrustmentId

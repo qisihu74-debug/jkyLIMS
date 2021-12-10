@@ -2,19 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustHistoryEntity;
-import com.lims.manage.erp.entity.EntrustPamentEntity;
-import com.lims.manage.erp.entity.EntrustSampleEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TaskEntity;
-import com.lims.manage.erp.entity.TestCompanyEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.entity.TestInitDataEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ProductItemEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
@@ -55,6 +43,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -387,15 +377,40 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) {
+    public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
         entrustHistoryEntity.setState(0);
+        if(entrustHistoryEntity.getDateInterval()!=null){
+            String[] strArry = entrustHistoryEntity.getDateInterval().split("~");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            for (int i =0;i<=strArry.length-1;i++){
+                if(i==0){
+                    entrustHistoryEntity.setStartDate(dateFormat.parse(strArry[i]));
+                }
+                if(i==1){
+                    entrustHistoryEntity.setEndingDate(dateFormat.parse(strArry[i]));
+                }
+            }
+        }
         return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
     }
 
     @Override
-    public List<EntrustHistoryEntity> getEntrustReleasedList(EntrustHistoryEntity entrustHistoryEntity) {
+    public List<EntrustHistoryTaskEntity> getEntrustReleasedList(EntrustHistoryTaskEntity entrustHistoryEntity) throws ParseException {
         entrustHistoryEntity.setState(0);
-        return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
+        if(entrustHistoryEntity.getDateInterval()!=null){
+            String[] strArry = entrustHistoryEntity.getDateInterval().split("~");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            for (int i =0;i<=strArry.length-1;i++){
+                if(i==0){
+                    entrustHistoryEntity.setStartDate(dateFormat.parse(strArry[i]));
+                }
+                if(i==1){
+                    entrustHistoryEntity.setEndingDate(dateFormat.parse(strArry[i]));
+                }
+            }
+        }
+
+        return entityMapper.selectEntrustReleasedList(entrustHistoryEntity);
     }
 
     @Override
