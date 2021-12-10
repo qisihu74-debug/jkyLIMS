@@ -527,7 +527,7 @@ public class EntrustServiceImpl implements EntrustService {
             rows.get(17).getTableCells().get(2).setText(detail.getReportCount().toString());//报告分数
             rows.get(17).getTableCells().get(4).setText(detail.getReportType());//取报告方式
             rows.get(17).getTableCells().get(6).setText("待添加");//收报告单位
-            rows.get(18).getTableCells().get(2).setText(detail.getAdress());//联系地址
+            rows.get(18).getTableCells().get(2).setText(detail.getAddress());//联系地址
             rows.get(18).getTableCells().get(4).setText("待添加");//联系人
             rows.get(18).getTableCells().get(6).setText("待添加");//联系方式
             rows.get(19).getTableCells().get(2).setText(detail.getEntrustPeople());//委托人

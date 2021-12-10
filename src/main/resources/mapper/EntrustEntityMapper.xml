@@ -131,7 +131,10 @@ file_url,
 seal_type,
 is_save,
 count_price,
-adress
+address,
+addressee,
+mobile,
+mailbox
 )
         values (#{id},
 #{entrustmentNo},
@@ -163,7 +166,10 @@ adress
 #{sealType},
 #{isSave},
 #{countPrice},
-#{adress}
+#{address},
+#{addressee},
+#{addresseeMobile},
+#{mailbox}
 )
 
   </insert>
