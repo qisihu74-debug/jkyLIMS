@@ -253,7 +253,7 @@ mailbox
       <if test="mailbox != null and mailbox!=''">adress=#{mailbox},</if>
       <if test="operateUser != null">operate_user=#{operateUser},</if>
       <if test="operateDate != null">operate_date=#{operateDate},</if>
-      <if test="invalidReason != null and invalidReason！=''">invalid_reason=#{invalidReason},</if>
+      <if test="invalidReason != null and invalidReason!=''">invalid_reason=#{invalidReason},</if>
     </trim>
     <trim prefix="WHERE" prefixOverrides="AND |OR ">
     <if test="id!=null">

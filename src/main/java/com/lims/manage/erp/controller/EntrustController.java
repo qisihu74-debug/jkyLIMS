@@ -85,7 +85,9 @@ public class EntrustController {
     public Result abandonEntrust(@RequestBody EntrustEntity entrustEntity){
         // 获取当前登录用户id。
         Date date = new Date();
-        entrustEntity.setOperateUser(ShiroUtils.getUserInfo().getUserId());
+        if (ShiroUtils.getUserInfo() != null){
+            entrustEntity.setOperateUser(ShiroUtils.getUserInfo().getUserId());
+        }
         entrustEntity.setOperateDate(date);
          Boolean flag = entrustService.abandonEntrust(entrustEntity);
          if(flag){
