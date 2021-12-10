@@ -57,7 +57,7 @@
     </trim>
     ORDER BY entrustment_no  DESC
   </select>
-  <select id="selectEntrustReleasedList" resultType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity" parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
+  <select id="selectEntrustReleasedList" resultType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity" parameterType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity">
     SELECT
     DISTINCT t1.id AS id,
     t1.entrustment_no AS entrustment_no,

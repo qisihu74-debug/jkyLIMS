@@ -37,8 +37,8 @@ public class EntrustHistoryEntity {
     /**
      * 受理日期
      */
-    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern ="yyyy-MM-dd HH:mm:ss" , timezone ="GMT+8")
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date acceptanceDate;
     /**
      * 业务受理人
@@ -51,13 +51,17 @@ public class EntrustHistoryEntity {
     /**
      * 范围 开始受理日期
      */
-    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private Date startDate;
     /**
      * 结束受理日期
      */
-    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private Date endingDate;
+    /**
+     * 日期区间
+     */
+    private String dateInterval;
 
 
 }
