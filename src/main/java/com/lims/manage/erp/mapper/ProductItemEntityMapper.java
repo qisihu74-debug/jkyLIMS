@@ -4,8 +4,8 @@ import com.lims.manage.erp.entity.ProductItemEntity;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.LabelValueVo;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

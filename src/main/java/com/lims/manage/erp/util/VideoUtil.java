@@ -1,3 +1,4 @@
+/*
 package com.lims.manage.erp.util;
 
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+*/
 /**
  * @author gjl
  * @version V1.0
@@ -20,15 +22,18 @@ import java.util.Map;
  * @desc
  * @date 2021/10/29 10:16
  * @Copyright © 河南交科院
- */
+ *//*
+
 public class VideoUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(VideoUtil.class);
-    /**
+    */
+/**
      * 通过Javacv的方式获取视频截图
      *
      * @param deviceFile 视频文件路径
      * @return Map<String, Object>
-     */
+     *//*
+
 
     public static Map<String, Object> getScreenshot(File deviceFile) {
         try {
@@ -104,13 +109,15 @@ public class VideoUtil {
         }
     }
 
-    /**
+    */
+/**
      * 根据视频旋转度来调整图片
      *
      * @param src   BufferedImage
      * @param angel angel	视频旋转度
      * @return BufferedImage
-     */
+     *//*
+
     public static BufferedImage rotate(BufferedImage src, int angel) {
         int src_width = src.getWidth(null);
         int src_height = src.getHeight(null);
@@ -126,13 +133,15 @@ public class VideoUtil {
     }
 
 
-    /**
+    */
+/**
      * 计算图片旋转大小
      *
      * @param src   Rectangle
      * @param angel int
      * @return Rectangle
-     */
+     *//*
+
     public static Rectangle calcRotatedSize(Rectangle src, int angel) {
         if (angel >= 90) {
             if (angel / 90 % 2 == 1) {
@@ -155,3 +164,4 @@ public class VideoUtil {
     }
 
 }
+*/

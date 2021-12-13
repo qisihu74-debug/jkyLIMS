@@ -43,11 +43,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!--用来渲染页面 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web-services</artifactId>
@@ -62,13 +57,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
-        <!--devtools-->
-        <!--<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>-->
+
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -135,12 +124,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- StringUtilS工具 -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.5</version>
-        </dependency>
+
         <!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -158,41 +142,13 @@
             <artifactId>httpcore</artifactId>
             <version>4.4.4</version>
         </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.9.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
-        </dependency>
 
-<!--        &lt;!&ndash; https://mvnrepository.com/artifact/org.apache.poi/poi &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.poi</groupId>-->
-<!--            <artifactId>poi</artifactId>-->
-<!--            <version>4.0.0</version>-->
-<!--        </dependency>-->
-<!--        &lt;!&ndash; https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.poi</groupId>-->
-<!--            <artifactId>poi-ooxml</artifactId>-->
-<!--            <version>4.0.0</version>-->
-<!--        </dependency>-->
-<!--        &lt;!&ndash; https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml-schemas &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.poi</groupId>-->
-<!--            <artifactId>poi-ooxml-schemas</artifactId>-->
-<!--            <version>4.0.0</version>-->
-<!--        </dependency>-->
         <!--视频截取依赖-->
-        <dependency>
+        <!--<dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv-platform</artifactId>
             <version>1.5.3</version>
-        </dependency>
+        </dependency>-->
         <!--文件管理服务minio -->
         <dependency>
             <groupId>io.minio</groupId>
@@ -214,11 +170,6 @@
             </exclusions>
         </dependency>
         <!-- 连接fastdfs文件系统 -->
-        <!--<dependency>
-            <groupId>net.oschina.zcx7878</groupId>
-            <artifactId>fastdfs-client-java</artifactId>
-            <version>1.27.0.0</version>
-        </dependency>-->
         <!-- simpleimage -->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -284,111 +235,11 @@
             <version>1.2.60</version>
         </dependency>
         <!--文件服务器依赖fastdfs -->
-        <!--  <dependency>
-              <groupId>org.csource</groupId>
-              <artifactId>fastdfs-client-java</artifactId>
-              <version>1.27-SNAPSHOT</version>
-          </dependency>-->
+
         <!--监控+refresh配置-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <!--<dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-config</artifactId>
-            <version>2.1.3.RELEASE</version>
-        </dependency>-->
-        <dependency>
-            <groupId>com.aliyun</groupId>
-            <artifactId>ocr20191230</artifactId>
-            <version>1.0.3</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>credentials-java</artifactId>
-                    <groupId>com.aliyun</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>tea-util</artifactId>
-                    <groupId>com.aliyun</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>tea-rpc-util</artifactId>
-                    <groupId>com.aliyun</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>tea</artifactId>
-                    <groupId>com.aliyun</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>tea-openapi</artifactId>
-                    <groupId>com.aliyun</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>endpoint-util</artifactId>
-                    <groupId>com.aliyun</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>tea-rpc</artifactId>
-                    <groupId>com.aliyun</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.json-lib</groupId>
-            <artifactId>json-lib</artifactId>
-            <version>2.4</version>
-            <classifier>jdk15</classifier>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-beanutils</artifactId>
-                    <groupId>commons-beanutils</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-collections</artifactId>
-                    <groupId>commons-collections</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>ezmorph</artifactId>
-                    <groupId>net.sf.ezmorph</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-logging</artifactId>
-                    <groupId>commons-logging</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.7.0</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-logging</artifactId>
-                    <groupId>commons-logging</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.5</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.ezmorph</groupId>
-            <artifactId>ezmorph</artifactId>
-            <version>1.0.3</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-lang</artifactId>
-                    <groupId>commons-lang</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!--钉钉依赖 -->
@@ -455,23 +306,7 @@
             <artifactId>druid</artifactId>
             <version>1.1.9</version>
         </dependency>
-        <!-- swagger -->
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>2.9.2</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>guava</artifactId>
-                    <groupId>com.google.guava</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>2.9.2</version>
-        </dependency>
+
         <!-- lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -479,36 +314,6 @@
             <optional>true</optional>
         </dependency>
 
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>webjars-locator-core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-compress</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-lang3</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>bootstrap</artifactId>
-            <version>3.3.7</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jquery</artifactId>
-                    <groupId>org.webjars</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>jquery</artifactId>
-            <version>3.1.1</version>
-        </dependency>
         <dependency>
             <groupId>net.sf.jxls</groupId>
             <artifactId>jxls-core</artifactId>
@@ -564,12 +369,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
-                    <!--<relocations>
-                        <relocation>
-                            <pattern>redis.clients.jedis</pattern>
-                            <shadedPattern>shaded.clients.jedis</shadedPattern>
-                        </relocation>
-                    </relocations>-->
                 </configuration>
             </plugin>
 

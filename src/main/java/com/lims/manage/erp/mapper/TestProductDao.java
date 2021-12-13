@@ -1,8 +1,8 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.vo.LabelValueVo;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
