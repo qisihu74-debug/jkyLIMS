@@ -1,11 +1,15 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
+import com.lims.manage.erp.entity.EntrustPamentEntity;
+import com.lims.manage.erp.entity.EntrustSampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.LabelValueVo;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

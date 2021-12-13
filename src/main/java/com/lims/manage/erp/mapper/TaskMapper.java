@@ -5,9 +5,9 @@ import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import org.apache.ibatis.annotations.Mapper;
 import com.lims.manage.erp.vo.TaskListParamVo;
 import com.lims.manage.erp.vo.TaskListVo;
-import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

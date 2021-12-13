@@ -5,7 +5,7 @@ import com.lims.manage.erp.entity.TestCompanyEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
 import com.lims.manage.erp.entity.TestInitDataEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
-import org.mapstruct.Mapper;
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.vo.DingDeptVo;
 import com.lims.manage.erp.vo.LabelValueVo;
-import org.mapstruct.Mapper;
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

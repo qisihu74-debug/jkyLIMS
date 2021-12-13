@@ -4,7 +4,7 @@ import com.lims.manage.erp.entity.SysFunction;
 import com.lims.manage.erp.entity.SysMenuEntity;
 import com.lims.manage.erp.entity.SysRoleFunction;
 import com.lims.manage.erp.entity.SysRoleMenuEntity;
-import org.mapstruct.Mapper;
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

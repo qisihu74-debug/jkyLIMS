@@ -1,19 +1,15 @@
 package com.lims.manage.erp.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
+import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;

@@ -3,7 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.vo.UserInfoVo;
-import org.mapstruct.Mapper;
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
 /**
