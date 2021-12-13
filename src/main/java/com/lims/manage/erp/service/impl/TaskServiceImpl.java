@@ -16,7 +16,7 @@ public class TaskServiceImpl implements TaskService {
     private TaskMapper taskMapper;
 
     @Override
-    public List<TaskDetailInfoVo> getTaskDetailInfo(Long taskId) {
+    public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
         return taskMapper.getTaskDetailInfo(taskId);
     }
 

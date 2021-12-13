@@ -13,7 +13,7 @@ public interface TaskService {
      *
      * @return
      */
-    List<TaskDetailInfoVo> getTaskDetailInfo(Long taskId);
+    TaskDetailInfoVo getTaskDetailInfo(Long taskId);
 
     /**
      * 查询任务列表
