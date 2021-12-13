@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.TaskListParamVo;
 
 import java.util.List;
 
@@ -11,5 +12,5 @@ public interface TaskService {
      *
      * @return
      */
-    List<TaskDetailInfoVo> getTaskDetailInfo();
+    List<TaskDetailInfoVo> getTaskDetailInfo(TaskListParamVo paramVo);
 }

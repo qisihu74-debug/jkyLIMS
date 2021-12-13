@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.TaskListParamVo;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -46,5 +47,5 @@ public interface TaskMapper extends BaseMapper {
      *
      * @return
      */
-    List<TaskDetailInfoVo> getTaskDetailInfo();
+    List<TaskDetailInfoVo> getTaskDetailInfo(TaskListParamVo paramVo);
 }

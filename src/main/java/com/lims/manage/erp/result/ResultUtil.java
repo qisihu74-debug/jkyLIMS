@@ -14,6 +14,16 @@ public class ResultUtil {
         result.setData(object);
         return result;
     }
+
+    /**成功且带数据，执行成功的结果**/
+    public static Result success(String msg,Object object){
+        Result result = new Result();
+        result.setCode(ResultEnum.SUCCESS.getCode());
+        result.setMsg(msg);
+        result.setData(object);
+        return result;
+    }
+
     /**成功但不带数据**/
     public static Result success(){
 

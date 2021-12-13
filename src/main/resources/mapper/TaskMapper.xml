@@ -75,52 +75,64 @@
         </collection>
     </resultMap>
 
-
     <select id="getTaskDetailInfo" resultMap="taskResultMap">
         SELECT t1.id,
-               t1.code,
-               t1.orderer,
-               t1.order_time,
-               t1.required_completion_time,
-               t2.count_price                       cost,
-               t2.sampling_method,
-               t2.check_purpose,
-               t2.present_information,
-               t2.file_url,
-               t3.sample_id,
-               t4.sample_name,
-               t4.product_id,
-               t4.sample_code,
-               t4.specs,
-               t4.batch_number,
-               t4.generation,
-               t4.sample_groups,
-               t4.quantity_per_group,
-               t4.sample_origin,
-               t4.manufacturer,
-               t4.received_date,
-               t4.inspector,
-               t4.sample_requirement,
-               t4.outward,
-               t4.picture,
-               t5.check_item_id,
-               t8.check_item_name,
-               t5.method_id,
-               t7.name,
-               t5.standard_id,
-               CONCAT(t6.code, '《', t6.`name`, '》') standard_name,
-               t5.times,
-               t5.unit_price
+        t1.code,
+        t1.orderer,
+        t1.order_time,
+        t1.required_completion_time,
+        t2.count_price cost,
+        t2.sampling_method,
+        t2.check_purpose,
+        t2.present_information,
+        t2.file_url,
+        t3.sample_id,
+        t4.sample_name,
+        t4.product_id,
+        t4.sample_code,
+        t4.specs,
+        t4.batch_number,
+        t4.generation,
+        t4.sample_groups,
+        t4.quantity_per_group,
+        t4.sample_origin,
+        t4.manufacturer,
+        t4.received_date,
+        t4.inspector,
+        t4.sample_requirement,
+        t4.outward,
+        t4.picture,
+        t5.check_item_id,
+        t8.check_item_name,
+        t5.method_id,
+        t7.name,
+        t5.standard_id,
+        CONCAT(t6.code, '《', t6.`name`, '》') standard_name,
+        t5.times,
+        t5.unit_price
         FROM test_task t1
-                 LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
-                 LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
-                 LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
-                 LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.entrustment_id = t5.entrust_id
-            AND t4.id = t5.sample_id
-                 LEFT JOIN test_standard_file t6 ON t5.standard_id = t6.id
-                 LEFT JOIN test_method t7 ON t5.method_id = t7.id
-                 left join test_product_item t8 on t5.check_item_id = t8.check_item_id
-        WHERE t1.state = 0
+        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+        LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
+        LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
+        LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.entrustment_id = t5.entrust_id
+        AND t4.id = t5.sample_id
+        LEFT JOIN test_standard_file t6 ON t5.standard_id = t6.id
+        LEFT JOIN test_method t7 ON t5.method_id = t7.id
+        left join test_product_item t8 on t5.check_item_id = t8.check_item_id
+        <trim prefix="WHERE" prefixOverrides="AND | OR ">
+            <if test="taskCode!=null and taskCode!=''">
+                and t1.code LIKE CONCAT('%',#{taskCode},'%')
+            </if>
+            <if test="sampleName!=null and sampleName!=''">
+                and t4.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="state!=null and state!=''">
+                and t1.state=#{state}
+            </if>
+            <if test="teamId!=null and teamId!=''">
+                and t1.team_id=#{teamId}
+            </if>
+        </trim>
     </select>
 
 </mapper>
