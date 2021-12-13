@@ -1,5 +1,7 @@
 package com.lims.manage.erp.service;
 
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TaskTestTeamEntity;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import com.lims.manage.erp.vo.TaskListParamVo;
 import com.lims.manage.erp.vo.TaskListVo;
@@ -22,4 +24,13 @@ public interface TaskService {
      * @return
      */
     List<TaskListVo> getTaskList(TaskListParamVo paramVo);
+    List<TaskDetailInfoVo> getTaskDetailInfo();
+    /**
+     * 副团长抢单并 派发 团队人员 操作
+     */
+    Boolean postGrabASingle(TaskTestEntity taskTestEntity);
+    /**
+     * 返回 团队成员姓名
+     */
+    List<TaskTestTeamEntity> getTeamUserName(Long UserLong);
 }
