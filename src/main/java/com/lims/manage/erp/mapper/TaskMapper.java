@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import org.apache.ibatis.annotations.Mapper;
+import com.lims.manage.erp.vo.TaskListParamVo;
+import com.lims.manage.erp.vo.TaskListVo;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -42,9 +44,17 @@ public interface TaskMapper extends BaseMapper {
     void save(TaskEntity entity);
 
     /**
-     * 查询任务列表
+     * 查询任务详情
      *
      * @return
      */
-    List<TaskDetailInfoVo> getTaskDetailInfo();
+    TaskDetailInfoVo getTaskDetailInfo(Long taskId);
+
+    /**
+     * 查询任务列表
+     *
+     * @param paramVo
+     * @return
+     */
+    List<TaskListVo> getTaskList(TaskListParamVo paramVo);
 }
