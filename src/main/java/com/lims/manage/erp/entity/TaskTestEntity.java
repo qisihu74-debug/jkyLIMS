@@ -84,4 +84,5 @@ public class TaskTestEntity {
      * 状态0未抢单，1.已抢单，2已领样,3实验中，4实验完成
      */
     private Integer state;
+
 }

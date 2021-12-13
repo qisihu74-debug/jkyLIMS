@@ -24,7 +24,8 @@ public interface TaskService {
      * @return
      */
     List<TaskListVo> getTaskList(TaskListParamVo paramVo);
-    List<TaskDetailInfoVo> getTaskDetailInfo();
+
+//    List<TaskDetailInfoVo> getTaskDetailInfo();
     /**
      * 副团长抢单并 派发 团队人员 操作
      */

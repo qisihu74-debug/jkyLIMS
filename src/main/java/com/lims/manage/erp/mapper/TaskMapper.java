@@ -69,10 +69,11 @@ public interface TaskMapper extends BaseMapper {
     TaskTestTeamEntity selectTeamCode(Long userid);
 
     /**
-     * 根据团队id 返回 要不用户集合
+     * 根据团队id 返回 用户集合
      * @param id
      * @return
      */
     List<TaskTestTeamEntity> selectTeamList(Integer id);
+
     List<TaskListVo> getTaskList(TaskListParamVo paramVo);
 }
