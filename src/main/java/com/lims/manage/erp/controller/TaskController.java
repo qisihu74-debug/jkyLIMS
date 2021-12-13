@@ -18,21 +18,33 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
+    /**
+     * 查询任务详情
+     *
+     * @param taskId
+     * @return
+     */
     @RequestMapping("/getTaskDetailInfo")
     public Result getTaskDetailInfo(Long taskId) {
         if (taskId == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
-            return ResultUtil.success("查询任务列表成功！",taskService.getTaskDetailInfo(taskId));
+            return ResultUtil.success("查询任务详情成功！", taskService.getTaskDetailInfo(taskId));
         }
     }
 
+    /**
+     * 查询任务列表
+     *
+     * @param paramVo
+     * @return
+     */
     @RequestMapping("/getTaskList")
     public Result getTaskInfo(@RequestBody TaskListParamVo paramVo) {
         if (paramVo == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
-            return ResultUtil.success("查询任务列表成功！",taskService.getTaskList(paramVo));
+            return ResultUtil.success("查询任务列表成功！", taskService.getTaskList(paramVo));
         }
     }
 }
