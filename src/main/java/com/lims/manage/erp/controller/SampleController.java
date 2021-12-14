@@ -84,6 +84,7 @@ public class SampleController {
      */
     @RequestMapping("/getSampleList2")
     public Result getSampleList2(SampleEntity sampleEntity) {
+        System.out.println("getSampleList2"+sampleEntity);
         return ResultUtil.success(sampleService.getSampleDataList(sampleEntity));
     }
 
