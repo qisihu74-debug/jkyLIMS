@@ -1,7 +1,26 @@
 package com.lims.manage.erp.util;
 
 
-import java.awt.Color;
+import com.alibaba.simpleimage.ImageFormat;
+import com.alibaba.simpleimage.ImageWrapper;
+import com.alibaba.simpleimage.SimpleImageException;
+import com.alibaba.simpleimage.analyze.search.cluster.impl.Point;
+import com.alibaba.simpleimage.render.CropParameter;
+import com.alibaba.simpleimage.render.ScaleParameter;
+import com.alibaba.simpleimage.render.ScaleParameter.Algorithm;
+import com.alibaba.simpleimage.render.WatermarkParameter;
+import com.alibaba.simpleimage.render.WriteParameter;
+import com.alibaba.simpleimage.util.ImageCropHelper;
+import com.alibaba.simpleimage.util.ImageDrawHelper;
+import com.alibaba.simpleimage.util.ImageReadHelper;
+import com.alibaba.simpleimage.util.ImageScaleHelper;
+import com.alibaba.simpleimage.util.ImageWriteHelper;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.imageio.ImageIO;
+import javax.media.jai.PlanarImage;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -19,24 +38,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import javax.imageio.ImageIO;
-import javax.media.jai.PlanarImage;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import com.alibaba.simpleimage.ImageFormat;
-import com.alibaba.simpleimage.ImageWrapper;
-import com.alibaba.simpleimage.SimpleImageException;
-import com.alibaba.simpleimage.analyze.search.cluster.impl.Point;
-import com.alibaba.simpleimage.render.CropParameter;
-import com.alibaba.simpleimage.render.ScaleParameter;
-import com.alibaba.simpleimage.render.ScaleParameter.Algorithm;
-import com.alibaba.simpleimage.render.WatermarkParameter;
-import com.alibaba.simpleimage.render.WriteParameter;
-import com.alibaba.simpleimage.util.ImageCropHelper;
-import com.alibaba.simpleimage.util.ImageDrawHelper;
-import com.alibaba.simpleimage.util.ImageReadHelper;
-import com.alibaba.simpleimage.util.ImageScaleHelper;
-import com.alibaba.simpleimage.util.ImageWriteHelper;
 
 /**
  * @author gjl
