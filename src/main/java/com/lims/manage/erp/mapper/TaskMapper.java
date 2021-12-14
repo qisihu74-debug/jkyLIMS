@@ -4,12 +4,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
-import com.lims.manage.erp.vo.ReceiveSampleListVo;
-import com.lims.manage.erp.vo.LabelValueTeamVo;
-import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
-import com.lims.manage.erp.vo.TaskListParamVo;
-import com.lims.manage.erp.vo.TaskListVo;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -90,8 +86,17 @@ public interface TaskMapper extends BaseMapper {
 
     /**
      * 根据id 判断任务 state 状态
+     *
      * @param id
      * @return
      */
     Integer getJudgmentTaskList(Long id);
+
+    /**
+     * 修改任务的领样人、领样时间
+     *
+     * @param paramVo
+     * @return
+     */
+    Integer updateSampler(ReceiveSampleParamVo paramVo);
 }

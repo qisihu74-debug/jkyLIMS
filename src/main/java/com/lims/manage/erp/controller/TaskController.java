@@ -7,6 +7,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.LabelValueTeamVo;
+import com.lims.manage.erp.vo.ReceiveSampleParamVo;
 import com.lims.manage.erp.vo.TaskListParamVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,6 +111,21 @@ public class TaskController {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             return ResultUtil.success("查询领样列表成功！", taskService.getSampleList(paramVo));
+        }
+    }
+
+    /**
+     * 领样
+     *
+     * @param paramVo
+     * @return
+     */
+    @RequestMapping("/receiveSample")
+    public Result receiveSample(@RequestBody ReceiveSampleParamVo paramVo) {
+        if (paramVo == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            return ResultUtil.success("领样成功！", taskService.receiveSample(paramVo));
         }
     }
 

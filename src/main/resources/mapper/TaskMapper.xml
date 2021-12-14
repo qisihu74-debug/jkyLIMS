@@ -150,21 +150,19 @@
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
         LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
         LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
-<!--        <trim prefix="WHERE t1.state = 1" prefixOverrides="AND | OR ">-->
-        <trim prefix="WHERE t1.state = 1">
-            <if test="taskCode!=null and taskCode!=''">
-                and t1.code LIKE CONCAT('%',#{taskCode},'%')
-            </if>
-            <if test="sampleName!=null and sampleName!=''">
-                and t4.sample_name LIKE CONCAT('%',#{sampleName},'%')
-            </if>
-            <if test="beginDate!=null and beginDate!=''">
-                and str_to_date( t1.receive_time, '%Y-%m-%d' ) &gt;= str_to_date( #{beginDate}, '%Y-%m-%d' )
-            </if>
-            <if test="endDate!=null and endDate!=''">
-                and str_to_date( t1.receive_time, '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}, '%Y-%m-%d' )
-            </if>
-        </trim>
+        WHERE t1.state = 1
+        <if test="taskCode!=null and taskCode!=''">
+            and t1.code LIKE CONCAT('%',#{taskCode},'%')
+        </if>
+        <if test="sampleName!=null and sampleName!=''">
+            and t4.sample_name LIKE CONCAT('%',#{sampleName},'%')
+        </if>
+        <if test="beginDate!=null and beginDate!=''">
+            and str_to_date( t1.receive_time, '%Y-%m-%d' ) &gt;= str_to_date( #{beginDate}, '%Y-%m-%d' )
+        </if>
+        <if test="endDate!=null and endDate!=''">
+            and str_to_date( t1.receive_time, '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}, '%Y-%m-%d' )
+        </if>
     </select>
 
     <select id="getTaskList" resultType="com.lims.manage.erp.vo.TaskListVo"
@@ -236,11 +234,17 @@
     </select>
 
     <select id="getJudgmentTaskList" resultType="integer">
-        SELECT
-        state
-        FROM
-        test_task
+        SELECT state
+        FROM test_task
         WHERE id = #{id}
     </select>
+
+    <update id="updateSampler" parameterType="com.lims.manage.erp.vo.ReceiveSampleParamVo">
+        update test_task
+        set sampler               = #{sampler,jdbcType=INTEGER},
+            sample_receiving_time = #{sampleReceivingTime,jdbcType=TIMESTAMP},
+            state                 = #{state,jdbcType=INTEGER}
+        where id = #{taskId,jdbcType=BIGINT}
+    </update>
 
 </mapper>
