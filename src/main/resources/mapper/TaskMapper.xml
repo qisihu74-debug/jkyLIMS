@@ -154,5 +154,53 @@
             </if>
         </trim>
     </select>
+    <update id="updateTestTask" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
+        UPDATE  test_task
+        <trim prefix="SET" suffixOverrides=",">
+        <if test="state!=null">state=#{state},</if>
+        <if test="taskCode!=null and taskCode!=''">task_code=#{taskCode},</if>
+        <if test="teamId!=null">team_id=#{teamId},</if>
+        <if test="inspector!=null and inspector!=''">inspector=#{inspector},</if>
+        <if test="recorder!=null and recorder!=''">recorder=#{recorder},</if>
+        <if test="reviewer!=null and reviewer!=''">reviewer=#{reviewer},</if>
+        <if test="reportProducer!=null and reportProducer!=''">report_producer=#{reportProducer},</if>
+        <if test="receiver!=null and receiver!=''">receiver=#{receiver},</if>
+        <if test="receiveTime!=null">receive_time=#{receiveTime},</if>
+        </trim>
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+        <if test="id!=null">
+            and id = #{id}
+        </if>
+        </trim>
+    </update>
+    <select id="selectTeamCode" resultType="com.lims.manage.erp.entity.TaskTestTeamEntity">
+        SELECT
+        t1.id AS id,
+        t1.code AS code
+        FROM
+        test_team AS t1
+        LEFT JOIN test_user_team_rel AS t2 ON t1.id = t2.team_id
+        WHERE t2.user_id = #{userid}
+    </select>
+
+    <select id="selectTeamList" resultType="com.lims.manage.erp.vo.LabelValueTeamVo">
+        SELECT
+        t4.name AS label,
+		t4.name AS value
+        FROM
+        test_team AS t1
+        LEFT JOIN test_user_team_rel AS t2 ON t1.id = t2.team_id
+				LEFT JOIN sys_user AS t3 ON t3.user_id = t2.user_id
+        LEFT JOIN sys_ding_user AS t4 ON t3.user_id = t4.userid
+        WHERE 1=1 and t1.id = #{id}  and  t4.name is not NULL
+    </select>
+
+    <select id="getJudgmentTaskList" resultType="integer">
+        SELECT
+        state
+        FROM
+        test_task
+        WHERE id = #{id}
+    </select>
 
 </mapper>

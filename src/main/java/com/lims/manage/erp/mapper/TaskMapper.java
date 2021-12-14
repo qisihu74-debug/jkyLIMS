@@ -2,6 +2,9 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TaskEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TaskTestTeamEntity;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import org.apache.ibatis.annotations.Mapper;
 import com.lims.manage.erp.vo.TaskListParamVo;
@@ -56,5 +59,29 @@ public interface TaskMapper extends BaseMapper {
      * @param paramVo
      * @return
      */
+    List<TaskDetailInfoVo> getTaskDetailInfo();
+    /**
+     * 修改任务信息
+     */
+    int updateTestTask(TaskTestEntity taskTestEntity);
+    /**
+     * 根据用户id 查询 团队 名
+     */
+    TaskTestTeamEntity selectTeamCode(Long userid);
+
+    /**
+     * 根据团队id 返回 用户集合
+     * @param id
+     * @return
+     */
+    List<LabelValueTeamVo> selectTeamList(Integer id);
+
     List<TaskListVo> getTaskList(TaskListParamVo paramVo);
+
+    /**
+     * 根据id 判断任务 state 状态
+     * @param id
+     * @return
+     */
+    Integer getJudgmentTaskList(Long id);
 }
