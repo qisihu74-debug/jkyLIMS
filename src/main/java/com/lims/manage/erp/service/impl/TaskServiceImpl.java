@@ -39,20 +39,20 @@ public class TaskServiceImpl implements TaskService {
         // 抢单
         taskTestEntity.setState(1);
         // 根据角色查询团队名
-        if(taskTestEntity.getReceiver()!=null){
+        if (taskTestEntity.getReceiver() != null) {
             // 任务编号 团队名称+编号=任务编号
             TaskTestTeamEntity dataTeam = taskMapper.selectTeamCode(Long.parseLong(taskTestEntity.getReceiver()));
-            if(dataTeam==null){
+            if (dataTeam == null) {
                 return false;
             }
             String strDate = taskTestEntity.getCode();
-            String str1 = strDate.substring(0,4);
-            String str2=strDate.substring(strDate.length()-3);
+            String str1 = strDate.substring(0, 4);
+            String str2 = strDate.substring(strDate.length() - 3);
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(str1);
             stringBuilder.append("-");
             stringBuilder.append(str2);
-            taskTestEntity.setTaskCode(dataTeam.getCode()+stringBuilder);
+            taskTestEntity.setTaskCode(dataTeam.getCode() + stringBuilder);
             taskTestEntity.setTeamId(String.valueOf(dataTeam.getId()));
             // 抢单时间
             java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
@@ -62,12 +62,21 @@ public class TaskServiceImpl implements TaskService {
         }
         return false;
     }
+
     @Override
     public List<LabelValueTeamVo> getTeamUserName(Long UserLong) {
         TaskTestTeamEntity dataTeam = taskMapper.selectTeamCode(UserLong);
-        if(dataTeam!=null){
-             return taskMapper.selectTeamList(dataTeam.getId());
+        if (dataTeam != null) {
+            return taskMapper.selectTeamList(dataTeam.getId());
         }
         return null;
+    }
+
+    @Override
+    public Boolean getJudgmentTaskList(Long id) {
+        if (taskMapper.getJudgmentTaskList(id) == 0) {
+            return true;
+        }
+        return false;
     }
 }

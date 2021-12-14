@@ -27,12 +27,19 @@ public interface TaskService {
     List<TaskListVo> getTaskList(TaskListParamVo paramVo);
 
 //    List<TaskDetailInfoVo> getTaskDetailInfo();
+
     /**
      * 副团长抢单并 派发 团队人员 操作
      */
     Boolean postGrabASingle(TaskTestEntity taskTestEntity);
+
     /**
      * 返回 团队成员姓名
      */
     List<LabelValueTeamVo> getTeamUserName(Long UserLong);
+
+    /**
+     * 判断任务单 状态 state ==0 是空闲
+     */
+    Boolean getJudgmentTaskList(Long id);
 }

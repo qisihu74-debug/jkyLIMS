@@ -77,4 +77,11 @@ public interface TaskMapper extends BaseMapper {
     List<LabelValueTeamVo> selectTeamList(Integer id);
 
     List<TaskListVo> getTaskList(TaskListParamVo paramVo);
+
+    /**
+     * 根据id 判断任务 state 状态
+     * @param id
+     * @return
+     */
+    Integer getJudgmentTaskList(Long id);
 }

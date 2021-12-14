@@ -47,37 +47,40 @@ public class TaskController {
      * @return
      */
     @PostMapping("postGrabASingle")
-    public Result postGrabASingle(@RequestBody TaskTestEntity taskTestEntity)
-    {
-        if (ShiroUtils.getUserInfo() != null){
+    public Result postGrabASingle(@RequestBody TaskTestEntity taskTestEntity) {
+        if (ShiroUtils.getUserInfo() != null) {
             // 抢单人
             Long strLong = ShiroUtils.getUserInfo().getUserId();
             String str1 = String.valueOf(strLong);
             taskTestEntity.setReceiver(str1);
         }
-        Boolean flag = taskService.postGrabASingle(taskTestEntity);
-        if(flag){
-            return ResultUtil.success("抢单成功");
+        Boolean taskStatus = taskService.getJudgmentTaskList(taskTestEntity.getId());
+        if(taskStatus){
+            Boolean flag = taskService.postGrabASingle(taskTestEntity);
+            if (flag) {
+                return ResultUtil.success("抢单成功");
+            }
+            return ResultUtil.error(678, "抢单失败！");
         }
-        return ResultUtil.error(678,"抢单失败！");
+        return ResultUtil.error(678, "当前任务单已经被抢！");
     }
 
     /**
      * 返回 团队姓名
+     *
      * @return
      */
     @RequestMapping("getTeamUserName")
-    public Result getTeamUserName()
-    {
-        if (ShiroUtils.getUserInfo()!= null){
+    public Result getTeamUserName() {
+        if (ShiroUtils.getUserInfo() != null) {
             // 抢单人
             List<LabelValueTeamVo> returnList = taskService.getTeamUserName(ShiroUtils.getUserInfo().getUserId());
-            if(returnList.isEmpty()){
-                return ResultUtil.error(204,"数据为空！");
+            if (returnList.isEmpty()) {
+                return ResultUtil.error(204, "数据为空！");
             }
             return ResultUtil.success(returnList);
         }
-        return ResultUtil.error(204,"数据为空！");
+        return ResultUtil.error(204, "数据为空！");
     }
 
 

@@ -195,4 +195,12 @@
         WHERE 1=1 and t1.id = #{id}  and  t4.name is not NULL
     </select>
 
+    <select id="getJudgmentTaskList" resultType="integer">
+        SELECT
+        state
+        FROM
+        test_task
+        WHERE id = #{id}
+    </select>
+
 </mapper>
