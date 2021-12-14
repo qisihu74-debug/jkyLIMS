@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.vo.ReceiveSampleListVo;
 import com.lims.manage.erp.vo.LabelValueTeamVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import com.lims.manage.erp.vo.TaskListParamVo;
@@ -31,6 +32,17 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<TaskListVo> getTaskList(TaskListParamVo paramVo) {
         return taskMapper.getTaskList(paramVo);
+    }
+
+    @Override
+    public List<ReceiveSampleListVo> getSampleList(TaskListParamVo paramVo) {
+        String receiveTime = paramVo.getReceiveTime();
+        if (receiveTime != null) {
+            String[] split = receiveTime.split("~");
+            paramVo.setBeginDate(split[0]);
+            paramVo.setEndDate(split[1]);
+        }
+        return taskMapper.getSampleList(paramVo);
     }
 
     @Override

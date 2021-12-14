@@ -476,27 +476,25 @@ savePlace,jdbcType=VARCHAR},
     </select>
 
     <select id="getSampleGroupInfo" resultType="com.lims.manage.erp.vo.SampleDetailVo">
-        SELECT DISTINCT
-        t1.company_id companyId,
-        t2.company_name companyName,
-        t1.product_id productId,
-        t1.sample_name sampleName,
-        t1.specs specs,
-        t1.manufacturer manufacturer,
-        t1.sample_origin sampleOrigin,
-        t1.outward outward,
-        t1.save_place savePlace,
-        t1.admin admin,
-        t1.sample_groups sampleGroups,
-        t1.quantity_per_group quantityPerGroup,
-        t1.inspector inspector,
-        t1.received_date receivedDate,
-        t1.sample_requirement sampleRequirement,
-        t1.generation generation,
-        t1.insert_flag insertFlag
-        FROM
-        test_sample t1
-        LEFT JOIN test_company t2 ON t1.company_id = t2.company_id
+        SELECT DISTINCT t1.company_id         companyId,
+                        t2.company_name       companyName,
+                        t1.product_id         productId,
+                        t1.sample_name        sampleName,
+                        t1.specs              specs,
+                        t1.manufacturer       manufacturer,
+                        t1.sample_origin      sampleOrigin,
+                        t1.outward            outward,
+                        t1.save_place         savePlace,
+                        t1.admin              admin,
+                        t1.sample_groups      sampleGroups,
+                        t1.quantity_per_group quantityPerGroup,
+                        t1.inspector          inspector,
+                        t1.received_date      receivedDate,
+                        t1.sample_requirement sampleRequirement,
+                        t1.generation         generation,
+                        t1.insert_flag        insertFlag
+        FROM test_sample t1
+                 LEFT JOIN test_company t2 ON t1.company_id = t2.company_id
         where insert_flag = #{insertFlag}
     </select>
 
@@ -593,7 +591,8 @@ savePlace,jdbcType=VARCHAR},
         test_sample t1
         LEFT JOIN test_company t2 ON t1.company_id = t2.company_id
         ) t1
-        LEFT JOIN ( SELECT id, sample_code, batch_number, picture, insert_flag FROM test_sample ) t2 ON t1.insert_flag = t2.insert_flag
+        LEFT JOIN ( SELECT id, sample_code, batch_number, picture, insert_flag FROM test_sample ) t2 ON t1.insert_flag =
+        t2.insert_flag
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
             <if test="productId!=null">
                 and product_id = #{productId}
@@ -627,11 +626,8 @@ savePlace,jdbcType=VARCHAR},
     </select>
 
     <select id="getMaxNumber" resultType="java.lang.String" parameterType="string">
-        SELECT
-            MAX( SUBSTR( sample_code,9,4 ) ) maxNum
-        FROM
-            test_sample
-        WHERE
-            sample_code LIKE CONCAT('%-',#{year},'-%')
+        SELECT MAX(SUBSTR(sample_code, 9, 4)) maxNum
+        FROM test_sample
+        WHERE sample_code LIKE CONCAT('%-', #{year}, '-%')
     </select>
 </mapper>

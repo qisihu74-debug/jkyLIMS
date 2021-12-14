@@ -2,6 +2,7 @@ package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
+import com.lims.manage.erp.vo.ReceiveSampleListVo;
 import com.lims.manage.erp.vo.LabelValueTeamVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import com.lims.manage.erp.vo.TaskListParamVo;
@@ -25,6 +26,14 @@ public interface TaskService {
      * @return
      */
     List<TaskListVo> getTaskList(TaskListParamVo paramVo);
+
+    /**
+     * 查询领样列表
+     *
+     * @param paramVo
+     * @return
+     */
+    List<ReceiveSampleListVo> getSampleList(TaskListParamVo paramVo);
 
 //    List<TaskDetailInfoVo> getTaskDetailInfo();
 
