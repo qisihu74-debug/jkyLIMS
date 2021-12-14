@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import com.lims.manage.erp.vo.TaskListParamVo;
 import com.lims.manage.erp.vo.TaskListVo;
@@ -54,7 +55,7 @@ public class TaskServiceImpl implements TaskService {
         return true;
     }
     @Override
-    public List<TaskTestTeamEntity> getTeamUserName(Long UserLong) {
+    public List<LabelValueTeamVo> getTeamUserName(Long UserLong) {
         TaskTestTeamEntity dataTeam = taskMapper.selectTeamCode(UserLong);
         if(dataTeam!=null){
              return taskMapper.selectTeamList(dataTeam.getId());

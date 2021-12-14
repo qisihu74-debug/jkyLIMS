@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import org.apache.ibatis.annotations.Mapper;
 import com.lims.manage.erp.vo.TaskListParamVo;
@@ -73,7 +74,7 @@ public interface TaskMapper extends BaseMapper {
      * @param id
      * @return
      */
-    List<TaskTestTeamEntity> selectTeamList(Integer id);
+    List<LabelValueTeamVo> selectTeamList(Integer id);
 
     List<TaskListVo> getTaskList(TaskListParamVo paramVo);
 }

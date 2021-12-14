@@ -6,6 +6,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
 import com.lims.manage.erp.vo.TaskListParamVo;
 import com.lims.manage.erp.util.ShiroUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +71,7 @@ public class TaskController {
     {
         if (ShiroUtils.getUserInfo()!= null){
             // 抢单人
-            List<TaskTestTeamEntity> returnList = taskService.getTeamUserName(ShiroUtils.getUserInfo().getUserId());
+            List<LabelValueTeamVo> returnList = taskService.getTeamUserName(ShiroUtils.getUserInfo().getUserId());
             if(returnList.isEmpty()){
                 return ResultUtil.error(204,"数据为空！");
             }

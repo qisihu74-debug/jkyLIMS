@@ -2,6 +2,7 @@ package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import com.lims.manage.erp.vo.TaskListParamVo;
 import com.lims.manage.erp.vo.TaskListVo;
@@ -33,5 +34,5 @@ public interface TaskService {
     /**
      * 返回 团队成员姓名
      */
-    List<TaskTestTeamEntity> getTeamUserName(Long UserLong);
+    List<LabelValueTeamVo> getTeamUserName(Long UserLong);
 }
