@@ -33,7 +33,7 @@
         set state=1
         where id = #{entrustmentId}
     </update>
-
+    <!--任务列表结果集-->
     <resultMap id="taskResultMap" type="com.lims.manage.erp.vo.TaskDetailInfoVo">
         <result property="taskId" column="id"></result>
         <result property="taskCode" column="code"></result>
@@ -72,6 +72,20 @@
                 <result property="times" column="times"></result>
                 <result property="checkPrice" column="unit_price"></result>
             </collection>
+        </collection>
+    </resultMap>
+    <!--样品列表结果集-->
+    <resultMap id="sampleResultMap" type="com.lims.manage.erp.vo.ReceiveSampleListVo">
+        <result property="taskId" column="taskId"></result>
+        <result property="taskCode" column="taskCode"></result>
+        <result property="requiredTime" column="requiredTime"></result>
+        <result property="receiveTime" column="receiveTime"></result>
+        <result property="sampleName" column="sampleName"></result>
+        <collection property="sampleList" ofType="com.lims.manage.erp.vo.SamplePrivateInfoVo">
+            <id property="id" column="sampleId"></id>
+            <result property="sampleCode" column="sampeCode"></result>
+            <result property="batchNumber" column="batchNumber"></result>
+            <result property="picture" column="picture"></result>
         </collection>
     </resultMap>
 
@@ -122,9 +136,38 @@
         where t1.id = #{taskId}
     </select>
 
+    <select id="getSampleList" resultMap="sampleResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
+        SELECT t1.id taskId,
+        IFNULL(t1.task_code, t1.CODE) taskCode,
+        t1.required_completion_time requiredTime,
+        t1.receive_time receiveTime,
+        t4.sample_name sampleName,
+        t4.id sampleId,
+        t4.sample_code sampeCode,
+        t4.batch_number batchNumber,
+        t4.picture
+        FROM test_task t1
+        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+        LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
+        LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
+        WHERE t1.state = 1
+        <if test="taskCode!=null and taskCode!=''">
+            and t1.code LIKE CONCAT('%',#{taskCode},'%')
+        </if>
+        <if test="sampleName!=null and sampleName!=''">
+            and t4.sample_name LIKE CONCAT('%',#{sampleName},'%')
+        </if>
+        <if test="beginDate!=null and beginDate!=''">
+            and str_to_date( t1.receive_time, '%Y-%m-%d' ) &gt;= str_to_date( #{beginDate}, '%Y-%m-%d' )
+        </if>
+        <if test="endDate!=null and endDate!=''">
+            and str_to_date( t1.receive_time, '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}, '%Y-%m-%d' )
+        </if>
+    </select>
+
     <select id="getTaskList" resultType="com.lims.manage.erp.vo.TaskListVo"
             parameterType="com.lims.manage.erp.vo.TaskListParamVo">
-        SELECT
+        SELECT DISTINCT
         t1.id taskId,
         IFNULL( t1.task_code, t1.CODE ) taskCode,
         t1.required_completion_time requiredCompletionTime,
@@ -149,54 +192,55 @@
             <if test="state!=null">
                 and t1.state=#{state}
             </if>
-            <if test="teamId!=null and teamId!=''">
-                and t1.team_id=#{teamId}
-            </if>
         </trim>
     </select>
     <update id="updateTestTask" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
-        UPDATE  test_task
+        UPDATE test_task
         <trim prefix="SET" suffixOverrides=",">
-        <if test="state!=null">state=#{state},</if>
-        <if test="taskCode!=null and taskCode!=''">task_code=#{taskCode},</if>
-        <if test="teamId!=null">team_id=#{teamId},</if>
-        <if test="inspector!=null and inspector!=''">inspector=#{inspector},</if>
-        <if test="recorder!=null and recorder!=''">recorder=#{recorder},</if>
-        <if test="reviewer!=null and reviewer!=''">reviewer=#{reviewer},</if>
-        <if test="reportProducer!=null and reportProducer!=''">report_producer=#{reportProducer},</if>
-        <if test="receiver!=null and receiver!=''">receiver=#{receiver},</if>
-        <if test="receiveTime!=null">receive_time=#{receiveTime},</if>
+            <if test="state!=null">state=#{state},</if>
+            <if test="taskCode!=null and taskCode!=''">task_code=#{taskCode},</if>
+            <if test="teamId!=null">team_id=#{teamId},</if>
+            <if test="inspector!=null and inspector!=''">inspector=#{inspector},</if>
+            <if test="recorder!=null and recorder!=''">recorder=#{recorder},</if>
+            <if test="reviewer!=null and reviewer!=''">reviewer=#{reviewer},</if>
+            <if test="reportProducer!=null and reportProducer!=''">report_producer=#{reportProducer},</if>
+            <if test="receiver!=null and receiver!=''">receiver=#{receiver},</if>
+            <if test="receiveTime!=null">receive_time=#{receiveTime},</if>
         </trim>
         where id = #{id}
     </update>
     <select id="selectTeamCode" resultType="com.lims.manage.erp.entity.TaskTestTeamEntity">
-        SELECT
-        t1.id AS id,
-        t1.code AS code
-        FROM
-        test_team AS t1
-        LEFT JOIN test_user_team_rel AS t2 ON t1.id = t2.team_id
+        SELECT t1.id   AS id,
+               t1.code AS code
+        FROM test_team AS t1
+                 LEFT JOIN test_user_team_rel AS t2 ON t1.id = t2.team_id
         WHERE t2.user_id = #{userid}
     </select>
 
     <select id="selectTeamList" resultType="com.lims.manage.erp.vo.LabelValueTeamVo">
-        SELECT
-        t4.name AS label,
-		t4.name AS value
+        SELECT t4.name AS label,
+               t4.name AS value
         FROM
-        test_team AS t1
-        LEFT JOIN test_user_team_rel AS t2 ON t1.id = t2.team_id
-				LEFT JOIN sys_user AS t3 ON t3.user_id = t2.user_id
-        LEFT JOIN sys_ding_user AS t4 ON t3.user_id = t4.userid
-        WHERE 1=1 and t1.id = #{id}  and  t4.name is not NULL
+            test_team AS t1
+            LEFT JOIN test_user_team_rel AS t2
+        ON t1.id = t2.team_id
+            LEFT JOIN sys_user AS t3 ON t3.user_id = t2.user_id
+            LEFT JOIN sys_ding_user AS t4 ON t3.user_id = t4.userid
+        WHERE 1=1 and t1.id = #{id} and t4.name is not NULL
     </select>
 
     <select id="getJudgmentTaskList" resultType="integer">
-        SELECT
-        state
-        FROM
-        test_task
+        SELECT state
+        FROM test_task
         WHERE id = #{id}
     </select>
+
+    <update id="updateSampler" parameterType="com.lims.manage.erp.vo.ReceiveSampleParamVo">
+        update test_task
+        set sampler               = #{sampler,jdbcType=INTEGER},
+            sample_receiving_time = #{sampleReceivingTime,jdbcType=TIMESTAMP},
+            state                 = #{state,jdbcType=INTEGER}
+        where id = #{taskId,jdbcType=BIGINT}
+    </update>
 
 </mapper>

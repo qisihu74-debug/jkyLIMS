@@ -4,18 +4,11 @@ import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.TaskService;
-import com.lims.manage.erp.vo.LabelValueTeamVo;
-import com.lims.manage.erp.vo.TaskDetailInfoVo;
-import com.lims.manage.erp.vo.TaskListParamVo;
-import com.lims.manage.erp.vo.TaskListVo;
+import com.lims.manage.erp.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 
 @Service
@@ -31,6 +24,23 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<TaskListVo> getTaskList(TaskListParamVo paramVo) {
         return taskMapper.getTaskList(paramVo);
+    }
+
+    @Override
+    public List<ReceiveSampleListVo> getSampleList(TaskListParamVo paramVo) {
+        String receiveTime = paramVo.getReceiveTime();
+        if (receiveTime != null) {
+            String[] split = receiveTime.split("~");
+            paramVo.setBeginDate(split[0]);
+            paramVo.setEndDate(split[1]);
+        }
+        return taskMapper.getSampleList(paramVo);
+    }
+
+    @Override
+    public int receiveSample(ReceiveSampleParamVo paramVo) {
+        paramVo.setState(2);
+        return taskMapper.updateSampler(paramVo);
     }
 
     @Override

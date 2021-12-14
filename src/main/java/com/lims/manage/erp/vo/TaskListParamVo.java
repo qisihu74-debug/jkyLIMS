@@ -8,4 +8,8 @@ public class TaskListParamVo {
     private String sampleName;
     private Integer state;
     private Integer teamId;
+    private String receiveTime;
+
+    private String beginDate;
+    private String endDate;
 }

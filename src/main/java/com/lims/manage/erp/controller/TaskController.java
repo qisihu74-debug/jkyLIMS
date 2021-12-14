@@ -1,17 +1,16 @@
 package com.lims.manage.erp.controller;
 
 import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TaskTestTeamEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TaskService;
-import com.lims.manage.erp.vo.LabelValueTeamVo;
-import com.lims.manage.erp.vo.TaskListParamVo;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
+import com.lims.manage.erp.vo.ReceiveSampleParamVo;
+import com.lims.manage.erp.vo.TaskListParamVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +42,7 @@ public class TaskController {
 
     /**
      * 副团长抢单
+     *
      * @param taskTestEntity
      * @return
      */
@@ -55,7 +55,7 @@ public class TaskController {
             taskTestEntity.setReceiver(str1);
         }
         Boolean taskStatus = taskService.getJudgmentTaskList(taskTestEntity.getId());
-        if(taskStatus){
+        if (taskStatus) {
             Boolean flag = taskService.postGrabASingle(taskTestEntity);
             if (flag) {
                 return ResultUtil.success("抢单成功");
@@ -75,7 +75,7 @@ public class TaskController {
         if (ShiroUtils.getUserInfo() != null) {
             // 抢单人
             List<LabelValueTeamVo> returnList = taskService.getTeamUserName(ShiroUtils.getUserInfo().getUserId());
-            if (returnList.isEmpty()) {
+            if (returnList != null && returnList.isEmpty()) {
                 return ResultUtil.error(204, "数据为空！");
             }
             return ResultUtil.success(returnList);
@@ -99,12 +99,34 @@ public class TaskController {
         }
     }
 
+    /**
+     * 查询领样列表
+     *
+     * @param paramVo
+     * @return
+     */
     @RequestMapping("/getSampleList")
     public Result getSampleList(@RequestBody TaskListParamVo paramVo) {
         if (paramVo == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
-            return ResultUtil.success("查询任务列表成功！", taskService.getTaskList(paramVo));
+            return ResultUtil.success("查询领样列表成功！", taskService.getSampleList(paramVo));
         }
     }
+
+    /**
+     * 领样
+     *
+     * @param paramVo
+     * @return
+     */
+    @RequestMapping("/receiveSample")
+    public Result receiveSample(@RequestBody ReceiveSampleParamVo paramVo) {
+        if (paramVo == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            return ResultUtil.success("领样成功！", taskService.receiveSample(paramVo));
+        }
+    }
+
 }
