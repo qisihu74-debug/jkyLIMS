@@ -36,7 +36,7 @@ public interface SampleService {
     /**
      * 查询样品组基本信息
      *
-     * @param sampleEntity
+     * @param insertFlag
      * @return
      */
     SampleDetailVo getSampleGroupInfo(String insertFlag);
