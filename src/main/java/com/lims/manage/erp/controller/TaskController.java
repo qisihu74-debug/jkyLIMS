@@ -158,15 +158,6 @@ public class TaskController {
             response.setHeader("Content-Disposition", "attachment;fileName="+fileName);
             OutputStream outputStream = response.getOutputStream();
             document.write(outputStream);
-
-// 1.2 文件字节输出流
-            FileOutputStream fos = new FileOutputStream("D:\\SDE\\simple.docx");//表示我们要复制出来的目标文件
-
-            document.write(fos);
-// 3 关闭
-            fos.close();
-            System.out.println("执行完毕");
-
             outputStream.close();
 
         }

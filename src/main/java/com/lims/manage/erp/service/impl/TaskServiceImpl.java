@@ -128,26 +128,23 @@ public class TaskServiceImpl implements TaskService {
             StringBuilder stringBuilder = new StringBuilder();
             for(int i =0;i<sampleDetailList.size();i++){
                 SampleDetailVo sampleDetailVo = sampleDetailList.get(i);
+                // 补充表格数据 样品名称
+                rows.get(i+1).getTableCells().get(0).setText( sampleDetailVo.getSampleName());
+                // 规格/等级
+                rows.get(i+1).getTableCells().get(1).setText( sampleDetailVo.getSpecs());
+                // 批号/编号
+                rows.get(i+1).getTableCells().get(2).setText( sampleDetailVo.getBatchNumber());
+                // 样品数量
+                rows.get(i+1).getTableCells().get(3).setText( sampleDetailVo.getGeneration());
+                // 样品产地
+                rows.get(i+1).getTableCells().get(4).setText( sampleDetailVo.getSampleOrigin());
+                //样品编号
+                rows.get(i+1).getTableCells().get(5).setText( sampleDetailVo.getSampleCode());
+                // 备注
+                rows.get(i+1).getTableCells().get(6).setText( sampleDetailVo.getRemark());
                 for(CheckItemInfoVo checkItemInfoVo:sampleDetailVo.getCheckItemInfoList()){
                     stringBuilder.append(checkItemInfoVo.getCheckItemName()+"("+checkItemInfoVo.getStandardName()+")"+",");
-                    // 补充表格数据 样品名称
-                    rows.get(i+1).getTableCells().get(0).setText( sampleDetailVo.getSampleName());
-                    // 规格/等级
-                    rows.get(i+1).getTableCells().get(1).setText( sampleDetailVo.getSpecs());
-                    // 批号/编号
-                    rows.get(i+1).getTableCells().get(2).setText( sampleDetailVo.getBatchNumber());
-                    // 样品数量
-                    rows.get(i+1).getTableCells().get(3).setText( sampleDetailVo.getGeneration());
-                    // 样品产地
-                    rows.get(i+1).getTableCells().get(4).setText( sampleDetailVo.getSampleOrigin());
-                    //样品编号
-                    rows.get(i+1).getTableCells().get(5).setText( sampleDetailVo.getSampleCode());
-                    // 备注
-                    rows.get(i+1).getTableCells().get(6).setText( sampleDetailVo.getRemark());
                 }
-                System.out.println(sampleDetailVo.getSampleName() + sampleDetailVo.getSpecs() +
-                        sampleDetailVo.getBatchNumber() + sampleDetailVo.getSampleOrigin() +
-                        sampleDetailVo.getSampleCode() + sampleDetailVo.getRemark());
             }
             // 提供资料
             rows.get(6).getTableCells().get(0).setText(taskDetailInfoVo.getPresentInformation());
