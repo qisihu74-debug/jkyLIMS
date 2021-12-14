@@ -33,6 +33,10 @@ public class BucketsConst {
      * 委托单
      */
     public static final String buckets_entrust_template = "entrust-template";
+    /**
+     * 任务单
+     */
+    public static final String buckets_task_template = "task-template";
 
 
 }

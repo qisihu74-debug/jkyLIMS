@@ -207,11 +207,7 @@
             <if test="receiver!=null and receiver!=''">receiver=#{receiver},</if>
             <if test="receiveTime!=null">receive_time=#{receiveTime},</if>
         </trim>
-        <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            <if test="id!=null">
-                and id = #{id}
-            </if>
-        </trim>
+        where id = #{id}
     </update>
     <select id="selectTeamCode" resultType="com.lims.manage.erp.entity.TaskTestTeamEntity">
         SELECT t1.id   AS id,
