@@ -45,14 +45,22 @@ public class TaskServiceImpl implements TaskService {
             if(dataTeam==null){
                 return false;
             }
-            taskTestEntity.setTaskCode(dataTeam.getCode()+taskTestEntity.getCode());
+            String strDate = taskTestEntity.getCode();
+            String str1 = strDate.substring(0,4);
+            String str2=strDate.substring(strDate.length()-3);
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(str1);
+            stringBuilder.append("-");
+            stringBuilder.append(str2);
+            taskTestEntity.setTaskCode(dataTeam.getCode()+stringBuilder);
             taskTestEntity.setTeamId(String.valueOf(dataTeam.getId()));
+            // 抢单时间
+            java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
+            taskTestEntity.setReceiveTime(currentDate);
+            taskMapper.updateTestTask(taskTestEntity);
+            return true;
         }
-        // 抢单时间
-        java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
-        taskTestEntity.setReceiveTime(currentDate);
-        taskMapper.updateTestTask(taskTestEntity);
-        return true;
+        return false;
     }
     @Override
     public List<LabelValueTeamVo> getTeamUserName(Long UserLong) {
