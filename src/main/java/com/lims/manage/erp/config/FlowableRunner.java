@@ -1,5 +1,6 @@
 package com.lims.manage.erp.config;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.io.Resources;
 import com.lims.manage.erp.service.FlowableService;
 import com.lims.manage.erp.util.FileAndFolderUtil;
@@ -37,8 +38,13 @@ public class FlowableRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         //支持多个bpmn文件自动部署
         Resource resource1 = new ClassPathResource("processes//");
-        File file = resource1.getFile();
-        //ClassPathResource resource = new ClassPathResource("processes" + File.separator);
+        File file = null;
+        try {
+            file = resource1.getFile();
+            log.debug("processes文件对象获取成功:{}", JSON.toJSONString(file));
+        }catch (Exception e){
+            log.error("processes文件对象内容失败:{}", e);
+        }
         if (file != null){
             String[] Strings = file.list();
             //部署过的流行不在重复部署
