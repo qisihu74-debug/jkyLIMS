@@ -91,7 +91,7 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean addEntrust(EntrustAddVo vo, MultipartFile[] file) {
+    public synchronized Boolean addEntrust(EntrustAddVo vo, MultipartFile[] file) {
         //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
         basisInfo.setId(GenID.getID());
