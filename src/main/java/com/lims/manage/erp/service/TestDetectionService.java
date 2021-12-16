@@ -28,4 +28,8 @@ public interface TestDetectionService {
      * 实验完成-依据检测项主键 展示 所属仪器列表
      */
     List<TestInstrumentEntity> getInstrumentTestItem(Integer checkItemId);
+    /**
+     * 试验完成-依据检测项 设置最新的 依据主键
+     */
+    Boolean postIds(SampleItemInstrumentEntity sampleItemInstrumentEntity);
 }

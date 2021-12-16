@@ -16,6 +16,17 @@ public class SampleItemInstrumentEntity extends SampleItemEntity{
      * 检测项id
      */
     private Integer itemId;
+    /**
+     * 检测项 状态
+     */
+    private Integer state;
+    /**
+     * 原始记录上传url
+     */
+    private String originUrl;
+    /**
+     * 检测项 下 仪器id
+     */
     List<Integer> ids;
 
 }

@@ -19,12 +19,15 @@
         <trim prefix="SET" suffixOverrides=",">
         <if test="startTime!=null">start_time=#{startTime},</if>
         <if test="isApproved!=null and isApproved!=''">is_approved=#{isApproved},</if>
+        <if test="state!=null">state=#{state},</if>
+        <if test="endTime!=null">end_time=#{endTime},</if>
+        <if test="result!=null and result!=''">result=#{result},</if>
         </trim>
          WHERE id = #{itemId}
     </update>
     <insert id="addItemInstrumentMiddleRel" parameterType="com.lims.manage.erp.entity.TestChItemInstrumentMiddleEntity"
             useGeneratedKeys="true" keyProperty="id">
-        INSERT into test_product_item_instrument_middle_rel (id_item,intrusment_id) VALUES(#{sidItem},#{intrusmentId})
+        INSERT into test_product_item_instrument_middle_rel (id_item,intrusment_id,start_time) VALUES(#{sidItem},#{intrusmentId},#{startTime})
     </insert>
     <select id="getTestEntrustedSampleCheckitemRelDetail" resultType="com.lims.manage.erp.entity.SampleItemInstrumentEntity" >
         SELECT
@@ -32,7 +35,9 @@
         start_time,
         end_time,
         result,
-        test_people
+        test_people,
+        state,
+        origin_url
         FROM
         test_entrusted_sample_checkitem_rel
         WHERE  id = #{id}
@@ -51,5 +56,8 @@
         LEFT JOIN test_instrument as t3 ON t3.id = t1.intrusment_id
         WHERE t2.id = #{checkItemId}
     </select>
+    <update id="updateItemInstrumentMiddleRel" parameterType="com.lims.manage.erp.entity.TestChItemInstrumentMiddleEntity">
+        UPDATE test_product_item_instrument_middle_rel set end_time = #{endTime} WHERE id_item = #{sidItem}
+    </update>
 
 </mapper>

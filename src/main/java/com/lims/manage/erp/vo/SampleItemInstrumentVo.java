@@ -14,6 +14,8 @@ import java.util.List;
 @Data
 public class SampleItemInstrumentVo {
     private Date startTime;
+    private Date endTime;
+    private String result;
     private Long taskId;
     List<SampleItemInstrumentEntity> itemInstrumentEntityList;
 }

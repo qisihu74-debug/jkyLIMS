@@ -3,7 +3,7 @@ package com.lims.manage.erp.entity;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.sql.Date;
+import java.util.Date;
 
 /**
  * @Author: DLC

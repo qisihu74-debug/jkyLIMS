@@ -55,11 +55,11 @@ public class TestDetectionController {
     @RequestMapping("/end_test")
     public Result PostEndTest(@RequestBody SampleItemInstrumentVo sampleItemInstrumentVo)
     {
-        Boolean flag = testDetectionService.PostOnTest(sampleItemInstrumentVo);
+        Boolean flag = testDetectionService.PostEndTest(sampleItemInstrumentVo);
         if(flag){
             return ResultUtil.success("成功！！！");
         }
-        return ResultUtil.error(204, "失败");
+        return ResultUtil.error(204, "检测项未全部开始检 获取 原始记录 是否上传");
     }
 
     /**
@@ -74,6 +74,17 @@ public class TestDetectionController {
             return ResultUtil.error(204, "数据为空！");
         }
         return ResultUtil.success(dataCollect);
+    }
+
+    /**
+     * 试验完成-依据检测项 设置最新的 依据主键
+     * @param sampleItemInstrumentEntity
+     * @return
+     */
+    @RequestMapping("/postIds")
+    public Result postIds(SampleItemInstrumentEntity sampleItemInstrumentEntity) {
+
+        return null;
     }
 
 
