@@ -84,5 +84,13 @@ public class TaskTestEntity {
      * 状态0未抢单，1.已抢单，2已领样,3实验中，4实验完成
      */
     private Integer state;
+    /**
+     * 开始检测时间
+     */
+    private Date startDetectionTime;
+    /**
+     * 完成检测时间
+     */
+    private Date endDetectionTime;
 
 }

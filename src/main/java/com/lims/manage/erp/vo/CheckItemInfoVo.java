@@ -2,6 +2,9 @@ package com.lims.manage.erp.vo;
 
 import lombok.Data;
 
+/**
+ * 来自表 test_entrusted_sample_checkitem_rel
+ */
 @Data
 public class CheckItemInfoVo {
     private Integer itemId;

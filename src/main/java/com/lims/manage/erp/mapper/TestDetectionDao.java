@@ -31,5 +31,13 @@ public interface TestDetectionDao {
      * 新增 检测项id 多个仪器id
      */
     int addItemInstrumentMiddleRel(TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity);
+    /**
+     * 根据检测项 主键  获取（test_entrusted_sample_checkitem_rel）详情信息
+     *
+     */
+    SampleItemInstrumentEntity getTestEntrustedSampleCheckitemRelDetail(Integer id);
+
+
+
 
 }

@@ -54,6 +54,10 @@ public interface TaskMapper extends BaseMapper {
      * 修改任务信息
      */
     int updateTestTask(TaskTestEntity taskTestEntity);
+    /**
+     * 查询任务单详情
+     */
+    TaskTestEntity getTaskOrders(Long taskId);
 
     /**
      * 根据用户id 查询 团队 名

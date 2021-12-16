@@ -25,5 +25,16 @@
             useGeneratedKeys="true" keyProperty="id">
         INSERT into test_product_item_instrument_middle_rel (id_item,intrusment_id) VALUES(#{sidItem},#{intrusmentId})
     </insert>
+    <select id="getTestEntrustedSampleCheckitemRelDetail" resultType="com.lims.manage.erp.entity.SampleItemInstrumentEntity" >
+        SELECT
+        id AS itemId,
+        start_time,
+        end_time,
+        result,
+        test_people
+        FROM
+        test_entrusted_sample_checkitem_rel
+        WHERE  id = #{id}
+    </select>
 
 </mapper>

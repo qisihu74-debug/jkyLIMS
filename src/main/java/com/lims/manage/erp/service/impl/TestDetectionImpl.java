@@ -39,20 +39,30 @@ public class TestDetectionImpl implements TestDetectionService {
         }
         for (SampleItemInstrumentEntity sampleItemInstrumentEntity : data.getItemInstrumentEntityList()) {
             sampleItemInstrumentEntity.setStartTime(data.getStartTime());
-            // 检测项 开始时间更新
-            testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
-            // 检测项下 仪器表 新增
-            TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
-            testChItemInstrumentMiddleEntity.setSidItem(sampleItemInstrumentEntity.getItemId());
-            for (Integer id : sampleItemInstrumentEntity.getIds()) {
-                testChItemInstrumentMiddleEntity.setIntrusmentId(id);
-                testDetectionDao.addItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
+            // 判断 test_entrusted_sample_checkitem_rel 中 start_time 是否为空
+            SampleItemInstrumentEntity sampleItemInstrumentEntity1 =   testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(sampleItemInstrumentEntity.getItemId());
+            if(sampleItemInstrumentEntity1.getStartTime()==null){
+                // 检测项 开始时间更新
+                testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
+                // 检测项下 仪器表 新增
+                TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
+                testChItemInstrumentMiddleEntity.setSidItem(sampleItemInstrumentEntity.getItemId());
+                for (Integer id : sampleItemInstrumentEntity.getIds()) {
+                    testChItemInstrumentMiddleEntity.setIntrusmentId(id);
+                    testDetectionDao.addItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
+                }
             }
-            TaskTestEntity taskTestEntity = new TaskTestEntity();
-            taskTestEntity.setId(data.getTaskId());
-            // 任务单状态 == 实验中
-            taskTestEntity.setState(3);
-            taskMapper.updateTestTask(taskTestEntity);
+            // 根据 任务单id  开始检测时间 判定是否为空
+            TaskTestEntity taskTestEntity = taskMapper.getTaskOrders(data.getTaskId());
+            if(taskTestEntity.getStartDetectionTime()==null){
+                taskTestEntity.setId(data.getTaskId());
+                // 任务单状态 == 实验中
+                taskTestEntity.setState(3);
+                // 开始试验时间
+                java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
+                taskTestEntity.setStartDetectionTime(currentDate);
+                taskMapper.updateTestTask(taskTestEntity);
+            }
         }
         return true;
     }
