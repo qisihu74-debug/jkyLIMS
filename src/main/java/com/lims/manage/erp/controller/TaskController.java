@@ -1,20 +1,20 @@
 package com.lims.manage.erp.controller;
 
+import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TaskService;
-import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.vo.LabelValueTeamVo;
-import com.lims.manage.erp.vo.ReceiveSampleParamVo;
-import com.lims.manage.erp.vo.TaskDetailInfoVo;
-import com.lims.manage.erp.vo.TaskListParamVo;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,9 +23,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -51,6 +54,7 @@ public class TaskController {
 
     /**
      * 副团长抢单
+     *
      * @param taskTestEntity
      * @return
      */
@@ -137,31 +141,62 @@ public class TaskController {
         }
     }
 
+    /**
+     * 下载原始记录
+     *
+     * @param paramVo
+     * @param response
+     */
+    @RequestMapping("/downloadOriginalRecord")
+    public void downloadOriginalRecord(@RequestBody OriginalRecordParamVo paramVo, HttpServletResponse response) {
+        OriginalRecordDataVo originalData = taskService.getOriginalData(paramVo);
+        Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
+        result.put("result", originalData);
+        //从文件服务器获取文件流
+        String originalTemplate = taskService.getOriginalTemplate(paramVo.getCheckItemId());
+        String[] split = originalTemplate.split("/");
+        System.out.println(split.length + "没意思");
+        XLSTransformer transformer = new XLSTransformer();
+        InputStream fileStream = MinIoUtil.getFileStream("original-record-template", originalTemplate);
+        Workbook workbook = null;
+        try {
+            workbook = transformer.transformXLS(fileStream, result);
+            response.reset();
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("UTF-8");
+            String fileName2 = URLEncoder.encode(split[2], "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName2);
+            OutputStream outputStream = response.getOutputStream();
+            workbook.write(outputStream);
+            outputStream.close();
+        } catch (IOException | InvalidFormatException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 下载任务通知单
+     *
      * @param taskId
      * @param response
      */
     @RequestMapping("downloadEntrust")
-    public void downloadEntrust(Long taskId, HttpServletResponse response){
+    public void downloadEntrust(Long taskId, HttpServletResponse response) {
         String fileName = "taskOrder.docx";
         try {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
             TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfo(taskId);
-            XWPFDocument document = taskService.downloadEntrust(taskDetailInfo,object);
+            XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
             response.reset();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            fileName = URLEncoder.encode(fileName,"UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName="+fileName);
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
             OutputStream outputStream = response.getOutputStream();
             document.write(outputStream);
             outputStream.close();
-
-        }
-        catch (Exception ex){
+        } catch (Exception ex) {
             log.info("导出失败：", ex.getMessage());
         }
     }
