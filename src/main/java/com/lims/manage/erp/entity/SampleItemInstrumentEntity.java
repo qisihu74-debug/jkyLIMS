@@ -1,0 +1,19 @@
+package com.lims.manage.erp.entity;
+
+import lombok.Data;
+
+import java.util.List;
+
+/**
+ * @Author: DLC
+ * @Date: 2021/12/15 16:23
+ *  检测项 下仪器信息
+ */
+@Data
+public class SampleItemInstrumentEntity extends SampleItemEntity{
+    /**
+     * 检测项id
+     */
+    private Integer itemId;
+    List<Integer> ids;
+}

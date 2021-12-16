@@ -71,6 +71,7 @@
                 <result property="standardName" column="standard_name"></result>
                 <result property="times" column="times"></result>
                 <result property="checkPrice" column="unit_price"></result>
+                <result property="itemId" column="itemId"></result>
             </collection>
         </collection>
     </resultMap>
@@ -123,7 +124,8 @@
                t5.standard_id,
                CONCAT(t6.code, '《', t6.`name`, '》') standard_name,
                t5.times,
-               t5.unit_price
+               t5.unit_price,
+               t5.id AS itemId
         FROM test_task t1
                  LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
                  LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id

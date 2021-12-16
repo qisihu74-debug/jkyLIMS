@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class CheckItemInfoVo {
+    private Integer itemId;
     private Integer checkItemId;
     private String checkItemName;
     private Integer productId;
