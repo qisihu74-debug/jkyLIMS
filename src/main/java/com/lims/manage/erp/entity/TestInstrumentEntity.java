@@ -30,4 +30,13 @@ public class TestInstrumentEntity {
      * 型号
      */
     private String model;
+
+    /**
+     * 来自 test_product_item_instrument_middle_rel 下 主键
+     */
+    private Integer itemInstrumentMiddleId;
+    /**
+     * 来自 test_product_item_instrument_middle_rel 下 id_item
+     */
+    private Integer idItem;
 }

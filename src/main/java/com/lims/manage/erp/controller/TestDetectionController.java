@@ -47,4 +47,35 @@ public class TestDetectionController {
         return ResultUtil.error(204, "失败");
     }
 
+    /**
+     * 结束试验。
+     * @param sampleItemInstrumentVo
+     * @return
+     */
+    @RequestMapping("/end_test")
+    public Result PostEndTest(@RequestBody SampleItemInstrumentVo sampleItemInstrumentVo)
+    {
+        Boolean flag = testDetectionService.PostOnTest(sampleItemInstrumentVo);
+        if(flag){
+            return ResultUtil.success("成功！！！");
+        }
+        return ResultUtil.error(204, "失败");
+    }
+
+    /**
+     * 实验完成-依据检测项主键 展示 所属仪器列表
+     * @param idItem
+     * @return
+     */
+    @RequestMapping("/getInstrumentTestItem")
+    public Result getInstrumentTestItem(Integer idItem) {
+        List<TestInstrumentEntity> dataCollect = testDetectionService.getInstrumentTestItem(idItem);
+        if (dataCollect.isEmpty()) {
+            return ResultUtil.error(204, "数据为空！");
+        }
+        return ResultUtil.success(dataCollect);
+    }
+
+
+
 }

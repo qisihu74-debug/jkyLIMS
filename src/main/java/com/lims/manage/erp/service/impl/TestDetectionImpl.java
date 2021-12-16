@@ -42,6 +42,8 @@ public class TestDetectionImpl implements TestDetectionService {
             // 判断 test_entrusted_sample_checkitem_rel 中 start_time 是否为空
             SampleItemInstrumentEntity sampleItemInstrumentEntity1 =   testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(sampleItemInstrumentEntity.getItemId());
             if(sampleItemInstrumentEntity1.getStartTime()==null){
+                // 检测项 状态 =1 审批
+                sampleItemInstrumentEntity.setIsApproved("1");
                 // 检测项 开始时间更新
                 testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
                 // 检测项下 仪器表 新增
@@ -65,5 +67,16 @@ public class TestDetectionImpl implements TestDetectionService {
             }
         }
         return true;
+    }
+
+    @Override
+    public Boolean PostEndTest(SampleItemInstrumentVo data) {
+
+        return null;
+    }
+
+    @Override
+    public List<TestInstrumentEntity> getInstrumentTestItem(Integer checkItemId) {
+        return testDetectionDao.getInstrumentTestItem(checkItemId);
     }
 }

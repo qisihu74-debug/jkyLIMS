@@ -36,6 +36,10 @@ public interface TestDetectionDao {
      *
      */
     SampleItemInstrumentEntity getTestEntrustedSampleCheckitemRelDetail(Integer id);
+    /**
+     * 实验完成-依据检测项主键 展示 所属仪器列表
+     */
+    List<TestInstrumentEntity> getInstrumentTestItem(Integer checkItemId);
 
 
 

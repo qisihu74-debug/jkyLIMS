@@ -18,6 +18,7 @@
         UPDATE test_entrusted_sample_checkitem_rel
         <trim prefix="SET" suffixOverrides=",">
         <if test="startTime!=null">start_time=#{startTime},</if>
+        <if test="isApproved!=null and isApproved!=''">is_approved=#{isApproved},</if>
         </trim>
          WHERE id = #{itemId}
     </update>
@@ -35,6 +36,20 @@
         FROM
         test_entrusted_sample_checkitem_rel
         WHERE  id = #{id}
+    </select>
+    <select id="getInstrumentTestItem" resultType="com.lims.manage.erp.entity.TestInstrumentEntity">
+        SELECT
+        t1.id AS itemInstrumentMiddleId,
+        t1.id_item AS idItem,
+        t1.intrusment_id,
+        t3.name,
+        t3.code,
+        t3.model
+        FROM
+        test_product_item_instrument_middle_rel AS t1
+        LEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.id_item = t2 .id
+        LEFT JOIN test_instrument as t3 ON t3.id = t1.intrusment_id
+        WHERE t2.id = #{checkItemId}
     </select>
 
 </mapper>

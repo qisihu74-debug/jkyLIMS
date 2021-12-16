@@ -14,5 +14,18 @@ public interface TestDetectionService {
 
     List<TestInstrumentEntity> getTheInstrument(Integer checkItemId);
 
+    /**
+     * 开始试验
+     * @param data
+     * @return
+     */
     Boolean PostOnTest(SampleItemInstrumentVo data);
+    /**
+     * 结束试验
+     */
+    Boolean PostEndTest(SampleItemInstrumentVo data);
+    /**
+     * 实验完成-依据检测项主键 展示 所属仪器列表
+     */
+    List<TestInstrumentEntity> getInstrumentTestItem(Integer checkItemId);
 }
