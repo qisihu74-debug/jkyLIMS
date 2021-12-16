@@ -2,7 +2,10 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.SamplePublicInfoVo;
+import com.lims.manage.erp.vo.TemplateSampleVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Component;
@@ -111,4 +114,12 @@ public interface SampleEntityMapper {
      * @return
      */
     String getMaxNumber(String year);
+
+    /**
+     * 查询原始记录模板表头样品信息
+     *
+     * @param sampleId
+     * @return
+     */
+    TemplateSampleVo getOriginalSampleInfo(Integer sampleId);
 }

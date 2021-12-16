@@ -636,4 +636,18 @@ savePlace,jdbcType=VARCHAR},
         FROM test_sample
         WHERE sample_code LIKE CONCAT('%-', #{year}, '-%')
     </select>
+
+    <select id="getOriginalSampleInfo" resultType="com.lims.manage.erp.vo.TemplateSampleVo">
+        SELECT
+            sample_name sampleName,
+            sample_code sampleNumber,
+            quantity_per_group sampleQuantity,
+            outward sampleDesc,
+            received_date sampleTime
+        FROM
+            test_sample
+        WHERE
+            id = #{sampleId}
+    </select>
+
 </mapper>

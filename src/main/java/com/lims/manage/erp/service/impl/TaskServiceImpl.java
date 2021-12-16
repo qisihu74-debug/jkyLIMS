@@ -1,33 +1,30 @@
 package com.lims.manage.erp.service.impl;
 
+import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
+import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.vo.*;
-import com.lims.manage.erp.vo.*;
-import javafx.scene.control.TableRow;
 import lombok.SneakyThrows;
-import org.apache.poi.xwpf.usermodel.*;
-import org.apache.xmlbeans.XmlException;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRow;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
-import java.sql.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
+import java.io.InputStream;
 import java.util.List;
 
 @Service
 public class TaskServiceImpl implements TaskService {
     @Autowired
     private TaskMapper taskMapper;
+    @Autowired
+    private SampleEntityMapper sampleEntityMapper;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -118,32 +115,32 @@ public class TaskServiceImpl implements TaskService {
 
             // 遍历 样品数据
             List<SampleDetailVo> sampleDetailList = taskDetailInfoVo.getSampleDetailList();
-            if(sampleDetailList.size()>1){
-                for(int i =1;i<sampleDetailList.size();i++){
+            if (sampleDetailList.size() > 1) {
+                for (int i = 1; i < sampleDetailList.size(); i++) {
                 }
             }
             //获取表格对应的行
             rows = table.getRows();
             //                表格逐行赋值
             StringBuilder stringBuilder = new StringBuilder();
-            for(int i =0;i<sampleDetailList.size();i++){
+            for (int i = 0; i < sampleDetailList.size(); i++) {
                 SampleDetailVo sampleDetailVo = sampleDetailList.get(i);
                 // 补充表格数据 样品名称
-                rows.get(i+1).getTableCells().get(0).setText( sampleDetailVo.getSampleName());
+                rows.get(i + 1).getTableCells().get(0).setText(sampleDetailVo.getSampleName());
                 // 规格/等级
-                rows.get(i+1).getTableCells().get(1).setText( sampleDetailVo.getSpecs());
+                rows.get(i + 1).getTableCells().get(1).setText(sampleDetailVo.getSpecs());
                 // 批号/编号
-                rows.get(i+1).getTableCells().get(2).setText( sampleDetailVo.getBatchNumber());
+                rows.get(i + 1).getTableCells().get(2).setText(sampleDetailVo.getBatchNumber());
                 // 样品数量
-                rows.get(i+1).getTableCells().get(3).setText( sampleDetailVo.getGeneration());
+                rows.get(i + 1).getTableCells().get(3).setText(sampleDetailVo.getGeneration());
                 // 样品产地
-                rows.get(i+1).getTableCells().get(4).setText( sampleDetailVo.getSampleOrigin());
+                rows.get(i + 1).getTableCells().get(4).setText(sampleDetailVo.getSampleOrigin());
                 //样品编号
-                rows.get(i+1).getTableCells().get(5).setText( sampleDetailVo.getSampleCode());
+                rows.get(i + 1).getTableCells().get(5).setText(sampleDetailVo.getSampleCode());
                 // 备注
-                rows.get(i+1).getTableCells().get(6).setText( sampleDetailVo.getRemark());
-                for(CheckItemInfoVo checkItemInfoVo:sampleDetailVo.getCheckItemInfoList()){
-                    stringBuilder.append(checkItemInfoVo.getCheckItemName()+"("+checkItemInfoVo.getStandardName()+")"+",");
+                rows.get(i + 1).getTableCells().get(6).setText(sampleDetailVo.getRemark());
+                for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+                    stringBuilder.append(checkItemInfoVo.getCheckItemName() + "(" + checkItemInfoVo.getStandardName() + ")" + ",");
                 }
             }
             // 提供资料
@@ -161,9 +158,37 @@ public class TaskServiceImpl implements TaskService {
             // 本单产值
             rows.get(9).getTableCells().get(3).setText("待补充");
             return doc;
-        }catch (Exception e){
-            System.out.println("设置委托单信息到模板异常:"+e);
+        } catch (Exception e) {
+            System.out.println("设置委托单信息到模板异常:" + e);
         }
         return doc;
+    }
+
+    @Override
+    public OriginalRecordDataVo getOriginalData(OriginalRecordParamVo paramVo) {
+
+        //生成记录编号
+        String recordNumber = "JL-C2105-108-04";
+        //获取委托单信息
+        EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
+        //获取样品信息
+        TemplateSampleVo sampleVo = sampleEntityMapper.getOriginalSampleInfo(paramVo.getSampleId());
+        //获取检测依据
+        String checkBasis = taskMapper.getCheckBasis(paramVo.getCheckItemId(), entrustBaseInfo.getId(), paramVo.getSampleId());
+        //获取判定依据
+        List<String> judgeBasisList = taskMapper.getJudgeBasis(paramVo.getSampleId(), entrustBaseInfo.getId());
+        StringBuilder judgeBasis = new StringBuilder("");
+        if (judgeBasisList != null && !judgeBasisList.isEmpty()) {
+            for (int i = 0; i < judgeBasisList.size(); i++) {
+                judgeBasis.append(judgeBasisList.get(i) + "\n");
+            }
+        }
+        OriginalRecordDataVo result = new OriginalRecordDataVo(recordNumber, entrustBaseInfo, sampleVo, checkBasis, judgeBasis.toString());
+        return result;
+    }
+
+    @Override
+    public String getOriginalTemplate(Integer checkItemId) {
+        return taskMapper.getOriginalTemplate(checkItemId);
     }
 }

@@ -3,8 +3,6 @@ package com.lims.manage.erp.service;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import com.lims.manage.erp.entity.TaskTestTeamEntity;
-import com.lims.manage.erp.vo.*;
 
 import java.io.InputStream;
 import java.util.List;
@@ -58,6 +56,22 @@ public interface TaskService {
      * 判断任务单 状态 state ==0 是空闲
      */
     Boolean getJudgmentTaskList(Long id);
+
+    /**
+     * 查询原始记录表头信息
+     *
+     * @param paramVo
+     * @return
+     */
+    OriginalRecordDataVo getOriginalData(OriginalRecordParamVo paramVo);
+
+    /**
+     * 查询原始记录模板
+     *
+     * @param checkItemId
+     * @return
+     */
+    String getOriginalTemplate(Integer checkItemId);
     /**
      * 填充数据
      */

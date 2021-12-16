@@ -1,9 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lims.manage.erp.entity.TaskEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TaskTestTeamEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
@@ -103,4 +101,38 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     Integer updateSampler(ReceiveSampleParamVo paramVo);
+
+    /**
+     * 查询原始记录基本停息
+     *
+     * @param taskId
+     * @return
+     */
+    EntrustEntity getEntrustBaseInfo(Long taskId);
+
+    /**
+     * 查询检测项检测依据
+     *
+     * @param checkItemId
+     * @param entrustId
+     * @return
+     */
+    String getCheckBasis(Integer checkItemId, Long entrustId, Integer sampleId);
+
+    /**
+     * 查询判定依据
+     *
+     * @param sampleId
+     * @param entrustId
+     * @return
+     */
+    List<String> getJudgeBasis(Integer sampleId, Long entrustId);
+
+    /**
+     * 查询原始记录模板名称
+     *
+     * @param checkItemId
+     * @return
+     */
+    String getOriginalTemplate(Integer checkItemId);
 }
