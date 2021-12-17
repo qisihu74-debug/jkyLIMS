@@ -30,6 +30,7 @@ public class TestDetectionImpl implements TestDetectionService {
     @Autowired
     TaskMapper taskMapper;
 
+
     @Override
     public List<TestInstrumentEntity> getTheInstrument(Integer checkItemId) {
         return testDetectionDao.selectTheInstrument(checkItemId);
@@ -61,16 +62,16 @@ public class TestDetectionImpl implements TestDetectionService {
                     }
                 }
             }
-            // 根据 任务单id  开始检测时间 判定是否为空
-            TaskTestEntity taskTestEntity = taskMapper.getTaskOrders(data.getTaskId());
-            if (taskTestEntity.getStartDetectionTime() == null) {
-                taskTestEntity.setId(data.getTaskId());
-                // 任务单状态 == 实验中
-                taskTestEntity.setState(3);
-                // 开始试验时间
-                taskTestEntity.setStartDetectionTime(data.getStartTime());
-                taskMapper.updateTestTask(taskTestEntity);
-            }
+        }
+        // 根据 任务单id  开始检测时间 判定是否为空
+        TaskTestEntity taskTestEntity = taskMapper.getTaskOrders(data.getTaskId());
+        if (taskTestEntity.getStartDetectionTime() == null) {
+            taskTestEntity.setId(data.getTaskId());
+            // 任务单状态 == 实验中
+            taskTestEntity.setState(3);
+            // 开始试验时间
+            taskTestEntity.setStartDetectionTime(data.getStartTime());
+            taskMapper.updateTestTask(taskTestEntity);
         }
         return true;
     }
@@ -124,6 +125,35 @@ public class TestDetectionImpl implements TestDetectionService {
         taskTestEntity.setEndDetectionTime(new Date());
         taskMapper.updateTestTask(taskTestEntity);
         return true;
+    }
+
+    /**
+     * 返回信息
+     * @param dataGather
+     * @param TaskId
+     * @param itemId
+     * @return
+     */
+    @Override
+    public Boolean getTestDetails(TaskDetailInfoVo dataGather, Long TaskId, Integer itemId) {
+        SampleItemInstrumentEntity CheckItemDetail = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
+        System.out.println(CheckItemDetail);
+        return null;
+    }
+
+    @Override
+    public Boolean Postreview(Integer itemId) {
+        // 依据检测项 主键
+        SampleItemInstrumentEntity CheckItemDetail = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
+        if(CheckItemDetail.getState()!=2){
+            // 说明未复核
+            SampleItemInstrumentEntity sampleItemInstrumentEntity = new SampleItemInstrumentEntity();
+            sampleItemInstrumentEntity.setState(2);
+            sampleItemInstrumentEntity.setItemId(itemId);
+            testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
+            return true;
+        }
+        return false;
     }
 
 }

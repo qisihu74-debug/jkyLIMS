@@ -70,6 +70,20 @@ public class TestDetectionController {
         }
         return ResultUtil.error(204, "检测项状态改变失败");
     }
+    /**
+     *  依据检测项id 复核
+     */
+    @RequestMapping("/review")
+    public Result Postreview(Integer itemId)
+    {
+        Boolean DetailStatus = testDetectionService.Postreview(itemId);
+        if(DetailStatus){
+            return ResultUtil.success("修改完成！！！");
+        }
+        return ResultUtil.error(204, "检测项状态改变失败");
+    }
+
+
 
 
 

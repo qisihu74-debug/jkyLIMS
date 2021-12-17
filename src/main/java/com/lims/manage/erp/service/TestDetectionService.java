@@ -28,4 +28,17 @@ public interface TestDetectionService {
      * 获取任务详情数据 判断任务是否结束
      */
     Boolean JudgmentTaskDetail(TaskDetailInfoVo dataGather,Long TaskId);
+
+    /**
+     *  返回 单个 检测项 详情
+     * @param dataGather
+     * @param TaskId
+     * @param itemId
+     * @return
+     */
+    Boolean getTestDetails(TaskDetailInfoVo dataGather,Long TaskId,Integer itemId);
+    /**
+     * 依据检测项id 变成 复核
+     */
+    Boolean Postreview(Integer itemId);
 }

@@ -28,5 +28,9 @@ public class SampleItemInstrumentEntity extends SampleItemEntity{
      * 检测项 下 仪器id
      */
     List<Integer> ids;
+    /**
+     * 检测项 名称
+     */
+    private String checkItemName;
 
 }
