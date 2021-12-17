@@ -3,6 +3,7 @@ package com.lims.manage.erp.service;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.vo.SampleItemInstrumentVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
 
 import java.util.List;
 
@@ -13,7 +14,6 @@ import java.util.List;
 public interface TestDetectionService {
 
     List<TestInstrumentEntity> getTheInstrument(Integer checkItemId);
-
     /**
      * 开始试验
      * @param data
@@ -23,13 +23,9 @@ public interface TestDetectionService {
     /**
      * 结束试验
      */
-    Boolean PostEndTest(SampleItemInstrumentVo data);
+    Boolean PostEndTest1(SampleItemInstrumentVo data);
     /**
-     * 实验完成-依据检测项主键 展示 所属仪器列表
+     * 获取任务详情数据 判断任务是否结束
      */
-    List<TestInstrumentEntity> getInstrumentTestItem(Integer checkItemId);
-    /**
-     * 试验完成-依据检测项 设置最新的 依据主键
-     */
-    Boolean postIds(SampleItemInstrumentEntity sampleItemInstrumentEntity);
+    Boolean JudgmentTaskDetail(TaskDetailInfoVo dataGather,Long TaskId);
 }

@@ -7,7 +7,10 @@ import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestDetectionDao;
 import com.lims.manage.erp.service.TestDetectionService;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
 import com.lims.manage.erp.vo.SampleItemInstrumentVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import org.flowable.common.engine.impl.util.CollectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,8 +44,8 @@ public class TestDetectionImpl implements TestDetectionService {
         for (SampleItemInstrumentEntity sampleItemInstrumentEntity : data.getItemInstrumentEntityList()) {
             sampleItemInstrumentEntity.setStartTime(data.getStartTime());
             // 判断 test_entrusted_sample_checkitem_rel 中 start_time 是否为空
-            SampleItemInstrumentEntity sampleItemInstrumentEntity1 =   testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(sampleItemInstrumentEntity.getItemId());
-            if(sampleItemInstrumentEntity1.getStartTime()==null){
+            SampleItemInstrumentEntity sampleItemInstrumentEntity1 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(sampleItemInstrumentEntity.getItemId());
+            if (sampleItemInstrumentEntity1.getStartTime() == null || sampleItemInstrumentEntity1.getState()==0 ) {
                 // 检测项 状态 =1 检测中
                 sampleItemInstrumentEntity.setState(1);
                 // 检测项 开始时间更新
@@ -51,7 +54,7 @@ public class TestDetectionImpl implements TestDetectionService {
                 TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
                 testChItemInstrumentMiddleEntity.setSidItem(sampleItemInstrumentEntity.getItemId());
                 testChItemInstrumentMiddleEntity.setStartTime(data.getStartTime());
-                if(CollectionUtil.isNotEmpty(sampleItemInstrumentEntity.getIds())){
+                if (CollectionUtil.isNotEmpty(sampleItemInstrumentEntity.getIds())) {
                     for (Integer id : sampleItemInstrumentEntity.getIds()) {
                         testChItemInstrumentMiddleEntity.setIntrusmentId(id);
                         testDetectionDao.addItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
@@ -60,7 +63,7 @@ public class TestDetectionImpl implements TestDetectionService {
             }
             // 根据 任务单id  开始检测时间 判定是否为空
             TaskTestEntity taskTestEntity = taskMapper.getTaskOrders(data.getTaskId());
-            if(taskTestEntity.getStartDetectionTime()==null){
+            if (taskTestEntity.getStartDetectionTime() == null) {
                 taskTestEntity.setId(data.getTaskId());
                 // 任务单状态 == 实验中
                 taskTestEntity.setState(3);
@@ -74,50 +77,53 @@ public class TestDetectionImpl implements TestDetectionService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized Boolean PostEndTest(SampleItemInstrumentVo data) {
-        if(data.getEndTime()==null){
+    public synchronized Boolean PostEndTest1(SampleItemInstrumentVo data) {
+        if (data.getEndTime() == null) {
             data.setEndTime(new Date());
         }
         // 遍历检测项 判断状态
-        for(SampleItemInstrumentEntity sampleItemInstrumentEntity:data.getItemInstrumentEntityList()){
-            SampleItemInstrumentEntity dataDisplay = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(sampleItemInstrumentEntity.getItemId());
-            // 检测项未 全部开检 并且 原始记录 未上传
-            if(dataDisplay.getState()==0 || dataDisplay.getOriginUrl()==null)
-            {
-                return false;
-            }
+        for (SampleItemInstrumentEntity sampleItemInstrumentEntity : data.getItemInstrumentEntityList()) {
             // 检测项 结束时间更新
             sampleItemInstrumentEntity.setEndTime(data.getEndTime());
+            // 试验完成
+            sampleItemInstrumentEntity.setState(2);
+            // 检测结论
+            sampleItemInstrumentEntity.setResult(data.getResult());
             testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
             // 存放 仪器的使用记录
-            if(CollectionUtil.isNotEmpty(sampleItemInstrumentEntity.getIds())){
+            // 根据检测项 主键 获取 仪器id
+            List<TestChItemInstrumentMiddleEntity> getCollection = testDetectionDao.getInstrumentCollection(sampleItemInstrumentEntity.getItemId());
+            if (CollectionUtil.isNotEmpty(getCollection)) {
                 TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
+                // 依据检测项主键 统一 更新。
                 testChItemInstrumentMiddleEntity.setEndTime(data.getEndTime());
                 testChItemInstrumentMiddleEntity.setSidItem(sampleItemInstrumentEntity.getItemId());
                 testDetectionDao.updateItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
             }
-
         }
-        // 更新任务单状态
-        TaskTestEntity taskTestEntity = new TaskTestEntity();
-        taskTestEntity.setId(data.getTaskId());
-        // 任务单 == 4 试验完成
-        taskTestEntity.setState(4);
-        taskTestEntity.setEndDetectionTime(data.getEndTime());
-        taskMapper.updateTestTask(taskTestEntity);
         return true;
     }
 
     @Override
-    public List<TestInstrumentEntity> getInstrumentTestItem(Integer checkItemId) {
-        return testDetectionDao.getInstrumentTestItem(checkItemId);
+    @Transactional(rollbackFor = Exception.class)
+    public synchronized Boolean JudgmentTaskDetail(TaskDetailInfoVo dataGather, Long TaskId) {
+        for (SampleDetailVo sampleDetailVo : dataGather.getSampleDetailList()) {
+            for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+                SampleItemInstrumentEntity dataDisplay = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(checkItemInfoVo.getItemId());
+                // 检测项未 全部开检 并且 原始记录 未上传
+                if (dataDisplay.getState() != 2 && dataDisplay.getOriginUrl() == null) {
+                    return false;
+                }
+            }
+        }
+        // 更新任务单状态
+        TaskTestEntity taskTestEntity = new TaskTestEntity();
+        taskTestEntity.setId(TaskId);
+        // 任务单 == 4 试验完成
+        taskTestEntity.setState(4);
+        taskTestEntity.setEndDetectionTime(new Date());
+        taskMapper.updateTestTask(taskTestEntity);
+        return true;
     }
 
-    @Override
-    public Boolean postIds(SampleItemInstrumentEntity sampleItemInstrumentEntity) {
-        // 根据检测项 主键 获取 旧数据
-        List<TestInstrumentEntity> dataAssemble = testDetectionDao.getInstrumentTestItem(sampleItemInstrumentEntity.getItemId());
-        // 检测项 新数据
-        return null;
-    }
 }

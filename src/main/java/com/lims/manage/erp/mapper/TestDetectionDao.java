@@ -44,6 +44,10 @@ public interface TestDetectionDao {
      * 实验完成-依据检测项主键 展示 所属仪器列表
      */
     List<TestInstrumentEntity> getInstrumentTestItem(Integer checkItemId);
+    /**
+     * 根据检测项主键 获取仪器信息
+     */
+    List<TestChItemInstrumentMiddleEntity> getInstrumentCollection(Integer sidItem);
 
 
 

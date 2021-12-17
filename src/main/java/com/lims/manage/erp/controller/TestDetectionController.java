@@ -6,9 +6,11 @@ import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.SampleItemInstrumentVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import com.lims.manage.erp.vo.TaskListParamVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +28,11 @@ public class TestDetectionController {
 
     @Autowired
     TestDetectionService testDetectionService;
+    @Autowired
+    private TaskService taskService;
 
     @RequestMapping("/getTheInstrument")
     public Result getTheInstrument(Integer checkItemId) {
-
         List<TestInstrumentEntity> dataCollect = testDetectionService.getTheInstrument(checkItemId);
         if (dataCollect.isEmpty()) {
             return ResultUtil.error(204, "数据为空！");
@@ -53,38 +56,19 @@ public class TestDetectionController {
      * @return
      */
     @RequestMapping("/end_test")
-    public Result PostEndTest(@RequestBody SampleItemInstrumentVo sampleItemInstrumentVo)
+    public Result PostEndTest1(@RequestBody SampleItemInstrumentVo sampleItemInstrumentVo)
     {
-        Boolean flag = testDetectionService.PostEndTest(sampleItemInstrumentVo);
+        Boolean flag = testDetectionService.PostEndTest1(sampleItemInstrumentVo);
         if(flag){
-            return ResultUtil.success("成功！！！");
+            // 更新任务单状态 需要 对所有的 样品信息 下 检测项 进行判断 ==2的话 更新。
+            TaskDetailInfoVo dataGather = taskService.getTaskDetailInfo(sampleItemInstrumentVo.getTaskId());
+            Boolean DetailStatus = testDetectionService.JudgmentTaskDetail(dataGather,sampleItemInstrumentVo.getTaskId());
+            if(DetailStatus){
+                return ResultUtil.success("任务单完成！！！");
+            }
+            return ResultUtil.success( "任务单下 检测项未全部开始检 或者 原始记录未全部上传");
         }
-        return ResultUtil.error(204, "检测项未全部开始检 获取 原始记录 是否上传");
-    }
-
-    /**
-     * 实验完成-依据检测项主键 展示 所属仪器列表
-     * @param idItem
-     * @return
-     */
-    @RequestMapping("/getInstrumentTestItem")
-    public Result getInstrumentTestItem(Integer idItem) {
-        List<TestInstrumentEntity> dataCollect = testDetectionService.getInstrumentTestItem(idItem);
-        if (dataCollect.isEmpty()) {
-            return ResultUtil.error(204, "数据为空！");
-        }
-        return ResultUtil.success(dataCollect);
-    }
-
-    /**
-     * 试验完成-依据检测项 设置最新的 依据主键
-     * @param sampleItemInstrumentEntity
-     * @return
-     */
-    @RequestMapping("/postIds")
-    public Result postIds(SampleItemInstrumentEntity sampleItemInstrumentEntity) {
-
-        return null;
+        return ResultUtil.error(204, "检测项状态改变失败");
     }
 
 

@@ -59,5 +59,17 @@
     <update id="updateItemInstrumentMiddleRel" parameterType="com.lims.manage.erp.entity.TestChItemInstrumentMiddleEntity">
         UPDATE test_product_item_instrument_middle_rel set end_time = #{endTime} WHERE id_item = #{sidItem}
     </update>
+    <select id="getInstrumentCollection" resultType="com.lims.manage.erp.entity.TestChItemInstrumentMiddleEntity">
+            SELECT
+                id,
+                id_item as sidItem,
+                intrusment_id as intrusmentId,
+                start_time,
+                end_time
+            FROM
+                test_product_item_instrument_middle_rel
+                WHERE id_item = #{sidItem}
+
+    </select>
 
 </mapper>
