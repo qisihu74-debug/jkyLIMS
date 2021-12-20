@@ -76,7 +76,7 @@ public class TestDetectionController {
             if (DetailStatus) {
                 return ResultUtil.success("任务单完成！！！");
             }
-            return ResultUtil.success("任务单下 检测项未全部开始检 或者 原始记录未全部上传");
+            return ResultUtil.success("缺少必要参数未上传！！！","整体任务单未结束");
         }
         return ResultUtil.error(204, "检测项状态改变失败");
     }

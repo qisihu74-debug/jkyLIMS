@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +40,11 @@ public class TestDetectionImpl implements TestDetectionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public synchronized Boolean PostOnTest(SampleItemInstrumentVo data) {
+        SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd");
+        String stringDate = format.format(data.getStartTime());
+        if(stringDate.equals("1970-01-01")){
+            data.setStartTime(new Date());
+        }
         if (data.getStartTime() == null) {
             data.setStartTime(new Date());
         }
@@ -79,6 +85,11 @@ public class TestDetectionImpl implements TestDetectionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public synchronized Boolean PostEndTest1(SampleItemInstrumentVo data) {
+        SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd");
+        String stringDate = format.format(data.getEndTime());
+        if(stringDate.equals("1970-01-01")){
+            data.setEndTime(new Date());
+        }
         if (data.getEndTime() == null) {
             data.setEndTime(new Date());
         }
@@ -111,6 +122,11 @@ public class TestDetectionImpl implements TestDetectionService {
         for (SampleDetailVo sampleDetailVo : dataGather.getSampleDetailList()) {
             for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
                 SampleItemInstrumentEntity dataDisplay = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(checkItemInfoVo.getItemId());
+                // 附件不上传的话 返回 状态为 state ==1
+                if(dataDisplay.getState() == 2 && dataDisplay.getOriginUrl() == null){
+                    dataDisplay.setState(1);
+                    testDetectionDao.updateSampleItemInstrumentEntity(dataDisplay);
+                }
                 // 检测项未 全部开检 并且 原始记录 未上传
                 if (dataDisplay.getState() != 2 && dataDisplay.getOriginUrl() == null) {
                     return false;
