@@ -6,6 +6,7 @@ import com.lims.manage.erp.entity.TaskTestTeamEntity;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.*;
 import lombok.SneakyThrows;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -15,6 +16,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
@@ -165,18 +167,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public OriginalRecordDataVo getOriginalData(OriginalRecordParamVo paramVo) {
-
+    public OriginalRecordDataVo getOriginalData(Long taskId,Integer sampleId,Integer checkItemId) {
         //生成记录编号
         String recordNumber = "JL-C2105-108-04";
         //获取委托单信息
-        EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
+        EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(taskId);
         //获取样品信息
-        TemplateSampleVo sampleVo = sampleEntityMapper.getOriginalSampleInfo(paramVo.getSampleId());
+        TemplateSampleVo sampleVo = sampleEntityMapper.getOriginalSampleInfo(sampleId);
         //获取检测依据
-        String checkBasis = taskMapper.getCheckBasis(paramVo.getCheckItemId(), entrustBaseInfo.getId(), paramVo.getSampleId());
+        String checkBasis = taskMapper.getCheckBasis(checkItemId, entrustBaseInfo.getId(), sampleId);
         //获取判定依据
-        List<String> judgeBasisList = taskMapper.getJudgeBasis(paramVo.getSampleId(), entrustBaseInfo.getId());
+        List<String> judgeBasisList = taskMapper.getJudgeBasis(sampleId, entrustBaseInfo.getId());
         StringBuilder judgeBasis = new StringBuilder("");
         if (judgeBasisList != null && !judgeBasisList.isEmpty()) {
             for (int i = 0; i < judgeBasisList.size(); i++) {
@@ -190,5 +191,23 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public String getOriginalTemplate(Integer checkItemId) {
         return taskMapper.getOriginalTemplate(checkItemId);
+    }
+
+    @Override
+    public int uploadOriginalRecord(OriginalRecordParamVo paramVo, MultipartFile file) {
+        //获取委托单信息
+        EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
+        String upload = MinIoUtil.upload("upload-original-record", file, entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + file.getOriginalFilename());
+        return taskMapper.updateOriginalFile(upload,entrustBaseInfo.getId(),paramVo.getSampleId(),paramVo.getCheckItemId());
+    }
+
+    @Override
+    public ReviewVo getReviewInfo(Integer itemId) {
+        return taskMapper.getReviewInfo(itemId);
+    }
+
+    @Override
+    public int passorno(Integer itemId, Integer state,String opinion) {
+        return taskMapper.updateState(itemId,state,opinion);
     }
 }

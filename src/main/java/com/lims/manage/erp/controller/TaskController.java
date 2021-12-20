@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.TaskTestEntity;
@@ -17,10 +18,8 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -144,18 +143,22 @@ public class TaskController {
     /**
      * 下载原始记录
      *
-     * @param paramVo
+     * @param taskId
+     * @param sampleId
+     * @param checkItemId
      * @param response
      */
-    @RequestMapping("/downloadOriginalRecord")
-    public void downloadOriginalRecord(@RequestBody OriginalRecordParamVo paramVo, HttpServletResponse response) {
-        OriginalRecordDataVo originalData = taskService.getOriginalData(paramVo);
+    @RequestMapping(value = "/downloadOriginalRecord")
+    public void downloadOriginalRecord(Long taskId,
+                                       Integer sampleId,
+                                       Integer checkItemId,
+                                       HttpServletResponse response) {
+        OriginalRecordDataVo originalData = taskService.getOriginalData(taskId, sampleId, checkItemId);
         Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
         result.put("result", originalData);
         //从文件服务器获取文件流
-        String originalTemplate = taskService.getOriginalTemplate(paramVo.getCheckItemId());
+        String originalTemplate = taskService.getOriginalTemplate(checkItemId);
         String[] split = originalTemplate.split("/");
-        System.out.println(split.length + "没意思");
         XLSTransformer transformer = new XLSTransformer();
         InputStream fileStream = MinIoUtil.getFileStream("original-record-template", originalTemplate);
         Workbook workbook = null;
@@ -200,4 +203,41 @@ public class TaskController {
             log.info("导出失败：", ex.getMessage());
         }
     }
+
+    /**
+     * 上传原始记录
+     *
+     * @param json
+     * @param file
+     * @return
+     */
+    @RequestMapping("/uploadOriginalRecord")
+    public Result uploadOriginalRecord(@RequestParam("json") String json, MultipartFile file) {
+        OriginalRecordParamVo paramVo = JSON.parseObject(json, OriginalRecordParamVo.class);
+        int i = taskService.uploadOriginalRecord(paramVo, file);
+        if (i > 0) {
+            return ResultUtil.success("上传原始记录成功！", i);
+        } else {
+            return ResultUtil.error(101, "上传原始记录失败！");
+        }
+    }
+
+    @RequestMapping("/review")
+    public Result review(Integer itemId) {
+        if (itemId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            return ResultUtil.success(taskService.getReviewInfo(itemId));
+        }
+    }
+
+    @RequestMapping("/passorno")
+    public Result passorno(Integer itemId,Integer state,String opinion) {
+        if (itemId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            return ResultUtil.success(taskService.passorno(itemId,state,opinion));
+        }
+    }
+
 }

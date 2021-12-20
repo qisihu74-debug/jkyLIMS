@@ -52,6 +52,7 @@ public interface TaskMapper extends BaseMapper {
      * 修改任务信息
      */
     int updateTestTask(TaskTestEntity taskTestEntity);
+
     /**
      * 查询任务单详情
      */
@@ -135,4 +136,31 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     String getOriginalTemplate(Integer checkItemId);
+
+    /**
+     * 更新上传的原始记录文件地址
+     *
+     * @param originalUrl
+     * @param entrustId
+     * @param sampleId
+     * @param checkItemId
+     * @return
+     */
+    int updateOriginalFile(String originalUrl, Long entrustId, Integer sampleId, Integer checkItemId);
+
+    /**
+     * 查询复合数据
+     *
+     * @param itemId
+     * @return
+     */
+    ReviewVo getReviewInfo(Integer itemId);
+
+    /**
+     * @param itemId
+     * @param state
+     * @return
+     */
+    int updateState(Integer itemId, Integer state,String opinion);
+
 }
