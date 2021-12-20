@@ -3,6 +3,7 @@ package com.lims.manage.erp.service;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
@@ -63,7 +64,7 @@ public interface TaskService {
      * @param paramVo
      * @return
      */
-    OriginalRecordDataVo getOriginalData(OriginalRecordParamVo paramVo);
+    OriginalRecordDataVo getOriginalData(Long taskId, Integer sampleId, Integer checkItemId);
 
     /**
      * 查询原始记录模板
@@ -72,8 +73,33 @@ public interface TaskService {
      * @return
      */
     String getOriginalTemplate(Integer checkItemId);
+
     /**
      * 填充数据
      */
     XWPFDocument downloadEntrust(TaskDetailInfoVo taskDetailInfoVo, InputStream object);
+
+    /**
+     * 上传原始记录
+     *
+     * @param paramVo
+     * @param file
+     * @return
+     */
+    int uploadOriginalRecord(OriginalRecordParamVo paramVo, MultipartFile file);
+
+    /**
+     * @param itemId
+     * @return
+     */
+    ReviewVo getReviewInfo(Integer itemId);
+
+    /**
+     * 通过或驳回
+     *
+     * @param itemId
+     * @param state
+     * @return
+     */
+    int passorno(Integer itemId, Integer state,String opinion);
 }

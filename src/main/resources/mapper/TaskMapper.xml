@@ -72,6 +72,9 @@
                 <result property="times" column="times"></result>
                 <result property="checkPrice" column="unit_price"></result>
                 <result property="itemId" column="itemId"></result>
+                <result property="state" column="state"></result>
+                <result property="originUrl" column="originUrl"></result>
+                <result property="opinion" column="opinion"></result>
             </collection>
         </collection>
     </resultMap>
@@ -125,7 +128,10 @@
                CONCAT(t6.code, '《', t6.`name`, '》') standard_name,
                t5.times,
                t5.unit_price,
-               t5.id AS itemId
+               t5.id         AS                     itemId,
+               t5.state      AS                     state,
+               t5.origin_url AS                     originUrl,
+               t5.opinion
         FROM test_task t1
                  LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
                  LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
@@ -214,14 +220,12 @@
         where id = #{id}
     </update>
     <select id="getTaskOrders" resultType="com.lims.manage.erp.entity.TaskTestEntity">
-        SELECT
-        id,
-        code,
-        start_detection_time,
-        end_detection_time,
-        state
-        FROM
-        test_task
+        SELECT id,
+               code,
+               start_detection_time,
+               end_detection_time,
+               state
+        FROM test_task
         WHERE id = #{taskId}
     </select>
     <select id="selectTeamCode" resultType="com.lims.manage.erp.entity.TaskTestTeamEntity">
@@ -291,4 +295,28 @@
         FROM test_original_record_template
         WHERE check_item_id = #{checkItemId}
     </select>
+
+    <update id="updateOriginalFile" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
+        update test_entrusted_sample_checkitem_rel
+        set origin_url = #{originalUrl,jdbcType=VARCHAR}
+        where entrust_id = #{entrustId,jdbcType=BIGINT}
+          and sample_id = #{sampleId,jdbcType=INTEGER}
+          and check_item_id = #{checkItemId,jdbcType=INTEGER}
+    </update>
+
+    <select id="getReviewInfo" resultType="com.lims.manage.erp.vo.ReviewVo">
+        SELECT start_time,
+               end_time,
+               result,
+               origin_url
+        FROM test_entrusted_sample_checkitem_rel
+        WHERE id = #{itemId}
+    </select>
+
+    <update id="updateState">
+        update test_entrusted_sample_checkitem_rel
+        set state   = #{state,jdbcType=INTEGER},
+            opinion = #{opinion}
+        where id = #{itemId,jdbcType=INTEGER}
+    </update>
 </mapper>

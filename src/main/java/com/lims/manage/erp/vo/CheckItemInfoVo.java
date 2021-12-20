@@ -17,6 +17,9 @@ public class CheckItemInfoVo {
     private Integer standardId;
     private String standardCode;
     private String standardName;
+    private Integer state;
+    private String originUrl;
+    private String opinion;
     /**
      * 检测样次
      */
@@ -25,7 +28,7 @@ public class CheckItemInfoVo {
     public CheckItemInfoVo() {
     }
 
-    public CheckItemInfoVo(Integer checkItemId, String checkItemName, Integer productId, String checkPrice, Integer methodId, String methodName, Integer standardId, String standardCode, String standardName) {
+    public CheckItemInfoVo(Integer checkItemId, String checkItemName, Integer productId, String checkPrice, Integer methodId, String methodName, Integer standardId, String standardCode, String standardName, Integer state,String originUrl,String opinion) {
         this.checkItemId = checkItemId;
         this.checkItemName = checkItemName;
         this.productId = productId;
@@ -35,6 +38,9 @@ public class CheckItemInfoVo {
         this.standardId = standardId;
         this.standardCode = standardCode;
         this.standardName = standardName;
+        this.state = state;
+        this.originUrl = originUrl;
+        this.opinion = opinion;
     }
 
     public Integer getCheckItemId() {
@@ -109,10 +115,51 @@ public class CheckItemInfoVo {
         this.standardName = standardName;
     }
 
+    public Integer getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Integer itemId) {
+        this.itemId = itemId;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
+    }
+
+    public int getTimes() {
+        return times;
+    }
+
+    public void setTimes(int times) {
+        this.times = times;
+    }
+
+    public String getOriginUrl() {
+        return originUrl;
+    }
+
+    public void setOriginUrl(String originUrl) {
+        this.originUrl = originUrl;
+    }
+
+    public String getOpinion() {
+        return opinion;
+    }
+
+    public void setOpinion(String opinion) {
+        this.opinion = opinion;
+    }
+
     @Override
     public String toString() {
         return "CheckItemInfoVo{" +
-                "checkItemId=" + checkItemId +
+                "itemId=" + itemId +
+                ", checkItemId=" + checkItemId +
                 ", checkItemName='" + checkItemName + '\'' +
                 ", productId=" + productId +
                 ", checkPrice='" + checkPrice + '\'' +
@@ -121,6 +168,10 @@ public class CheckItemInfoVo {
                 ", standardId=" + standardId +
                 ", standardCode='" + standardCode + '\'' +
                 ", standardName='" + standardName + '\'' +
+                ", state=" + state +
+                ", originUrl='" + originUrl + '\'' +
+                ", opinion='" + opinion + '\'' +
+                ", times=" + times +
                 '}';
     }
 }
