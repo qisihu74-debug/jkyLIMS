@@ -1,21 +1,17 @@
 package com.lims.manage.erp.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.result.Result;
-import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
-import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.SampleItemInstrumentVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
-import com.lims.manage.erp.vo.TaskListParamVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
