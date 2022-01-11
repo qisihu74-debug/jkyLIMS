@@ -52,7 +52,7 @@ public class TestDetectionImpl implements TestDetectionService {
             sampleItemInstrumentEntity.setStartTime(data.getStartTime());
             // 判断 test_entrusted_sample_checkitem_rel 中 start_time 是否为空
             SampleItemInstrumentEntity sampleItemInstrumentEntity1 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(sampleItemInstrumentEntity.getItemId());
-            if (sampleItemInstrumentEntity1.getStartTime() == null || sampleItemInstrumentEntity1.getState()==0 ) {
+            if (sampleItemInstrumentEntity1.getStartTime() == null || sampleItemInstrumentEntity1.getState()==0 ||sampleItemInstrumentEntity1.getState()==4) {
                 // 检测项 状态 =1 检测中
                 sampleItemInstrumentEntity.setState(1);
                 // 检测项 开始时间更新
