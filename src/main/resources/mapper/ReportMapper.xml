@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.ReportMapper">
+
+    <select id="getReportList" resultType="com.lims.manage.erp.vo.ReportListVo">
+        SELECT DISTINCT t1.id,
+                        t2.task_code,
+                        t4.sample_name,
+                        t1.count_price,
+                        t1.request_date
+        FROM test_entrusted_info t1
+                 LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
+                 LEFT JOIN test_entrusted_sample_details_rel t3 ON t1.id = t3.entrustment_id
+                 LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
+                 left join test_entrusted_sample_checkitem_rel t5 on t1.id = t5.entrust_id and t4.id = t5.sample_id
+        where t2.task_code is not null
+          and t5.state = 3
+    </select>
+</mapper>
