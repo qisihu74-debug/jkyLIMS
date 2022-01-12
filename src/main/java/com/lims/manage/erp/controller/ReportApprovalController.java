@@ -45,7 +45,6 @@ public class ReportApprovalController {
 
     /**
      * 抢单
-     *
      * @param id
      * @return
      */
@@ -56,6 +55,9 @@ public class ReportApprovalController {
         }
         //1、 获取抢单人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error(678, "token已经过期");
+        }
         String name = reportApprovalMapper.getUserName(userInfo.getUserId());
         if (name == null) {
             return ResultUtil.error(678, "账号未配置使用人");
@@ -71,12 +73,59 @@ public class ReportApprovalController {
         //3、进行抢单
         reportApprovalVo.setVerifyer(name);
         reportApprovalVo.setId(id);
+        reportApprovalVo.setState(3);
         Boolean flag = reportApprovalService.applyfor_monad(reportApprovalVo);
         if (flag) {
             return ResultUtil.success("抢单成功");
         }
         return ResultUtil.error(678, "抢单失败");
     }
+
+    /**
+     * 审批数据
+     * @param id
+     * @param peroration
+     * @param reason
+     * @return
+     */
+    @PostMapping("approval_data")
+    public Result approval_data(@Param(value = "id") Long id,@Param(value = "peroration")Integer peroration,@Param(value = "reason")String reason) {
+        if (id == null) {
+            return ResultUtil.error(678, "任务单主键不能为空");
+        }
+        if(peroration==null){
+            return ResultUtil.error(678, "审批信息不能为空");
+        }
+        if(peroration!=1&&peroration!=0){
+            return ResultUtil.error(678, "审批信息有误");
+        }
+        //1、 获取抢单人信息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error(678, "token已经过期");
+        }
+        String name = reportApprovalMapper.getUserName(userInfo.getUserId());
+        if (name == null) {
+            return ResultUtil.error(678, "账号未配置使用人");
+        }
+        //2、 查询任务单号 是否被抢。
+        ReportApprovalVo reportApprovalVo = reportApprovalMapper.getReportApprovalDetail(id);
+        if (reportApprovalVo == null) {
+            return ResultUtil.error(678, "此任务单号不存在");
+        }
+        if(reportApprovalVo.getVerifyer()==null){
+            return ResultUtil.error(678, "请先抢单");
+        }
+        if (!reportApprovalVo.getVerifyer().equals(name)) {
+            return ResultUtil.error(678, "审批失败，审批人与抢单人不一致");
+        }
+        Boolean flag = reportApprovalService.approval_data(id,peroration,reason);
+        if (flag) {
+            return ResultUtil.success("审批成功");
+        }
+        return ResultUtil.error(678, "审批失败");
+    }
+
 
 
 }

@@ -46,10 +46,16 @@ public class ReportApprovalVo {
     /**
      * 审批时间
      */
-    private Date verifyTime;
+    @DateTimeFormat(pattern="yyyy-MM-dd hh:mm:ss")
+    @JsonFormat(pattern ="yyyy-MM-dd hh:mm:ss" , timezone ="GMT+8")
+    private Date verifyerTime;
     /**
      * 报告单状态（0=未抢单 1=已抢单）
      */
     private Integer state;
+    /**
+     * 驳回原因
+     */
+    private String reason;
 
 }

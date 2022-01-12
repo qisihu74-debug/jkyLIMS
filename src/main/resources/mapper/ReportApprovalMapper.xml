@@ -5,33 +5,37 @@
 
     <select id="getReportApprovalList" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
         SELECT
-            t1.id as id,
-            t1.task_code as taskCode,
-            t1.required_completion_time as requiredCompletionTime,
-            t1.state as state,
-            t1.verifyer as verifyer,
-            t2.count_price as cost,
-            t4.sample_name as sampleName
+        id,
+        sample_name,
+        price AS cost,
+        required_completion_time,
+        task_code,
+        state,
+        applicant,
+        verifyer,
+        verifyer_time
         FROM
-            test_task as t1
-            LEFT JOIN test_entrusted_info as t2 ON t1.entrustment_id = t2.id
-            LEFT JOIN test_entrusted_sample_details_rel as t3 ON t3.entrustment_id = t1.entrustment_id
-            LEFT JOIN test_sample as t4 ON t4.id = t3.sample_id
-        WHERE
-            1=1
+        test_report_record
+        WHERE 1=1
+        and  (state = 1 or state =3)
             <if test="search!=null and search!=''">
-                and t1.task_code like CONCAT('%',#{search},'%')
+                and task_code like CONCAT('%',#{search},'%')
             </if>
---             and t1.state =7
-        group by t1.id,t4.product_id
     </select>
 
     <select id="getReportApprovalDetail" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
-        SELECT id,task_code,verifyer,verify_time FROM test_task WHERE id =#{id}
+        SELECT id,task_code,verifyer,verifyer_time FROM test_report_record WHERE id =#{id}
     </select>
 
     <update id="updateReportApprovalDetail" parameterType="com.lims.manage.erp.vo.ReportApprovalVo">
-        UPDATE test_task set verifyer=#{verifyer},verify_time = #{verifyTime} WHERE id =#{id}
+        UPDATE test_report_record
+        <trim prefix="SET" suffixOverrides=",">
+        <if test="state!=null">state=#{state},</if>
+        verifyer=#{verifyer},
+            verifyer_time = #{verifyerTime},
+        <if test="reason!=null and reason!=''">apply_reason=#{reason},</if>
+        </trim>
+        WHERE id =#{id}
     </update>
 
     <select id="getUserName" resultType="string">

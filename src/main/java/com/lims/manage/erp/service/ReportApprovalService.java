@@ -26,4 +26,13 @@ public interface ReportApprovalService {
      */
     Boolean applyfor_monad(ReportApprovalVo reportApprovalVo);
 
+    /**
+     * 进行审批
+     * @param id
+     * @param peroration
+     * @param reason
+     * @return
+     */
+    Boolean approval_data( Long id,Integer peroration,String reason);
+
 }
