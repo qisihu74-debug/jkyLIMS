@@ -1,0 +1,20 @@
+package com.lims.manage.erp.service.impl;
+
+import com.lims.manage.erp.mapper.ReportMapper;
+import com.lims.manage.erp.service.ReportService;
+import com.lims.manage.erp.vo.ReportListVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ReportServiceImpl implements ReportService {
+    @Autowired
+    private ReportMapper reportMapper;
+
+    @Override
+    public List<ReportListVo> getReportList() {
+        return reportMapper.getReportList();
+    }
+}
