@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lims.manage.erp.mapper.ReportRecordEntityMapper" >
+  <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.ReportRecordEntity" >
+    <constructor >
+      <idArg column="id" jdbcType="BIGINT" javaType="java.lang.Long" />
+      <arg column="entrustment_id" jdbcType="BIGINT" javaType="java.lang.Long" />
+      <arg column="report_code" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="sample_name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="price" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="required_completion_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="task_code" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="state" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="number" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="report_type" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="verifyer_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="issuer_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="seal_type" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="apply_reason" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="issu_reason" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="verifyer" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="issuer" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="applicant" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="
+
+sealer" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="seal_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="report_manager" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="report_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="addressee" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="waybill" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="operate_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, entrustment_id, report_code, sample_name, price, required_completion_time, task_code, 
+    state, number, report_type, verifyer_time, issuer_time, seal_type, apply_reason, 
+    issu_reason, verifyer, issuer, applicant, 
+
+sealer, seal_time, report_manager, 
+    report_time, addressee, waybill, operate_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from test_report_record
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from test_report_record
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.lims.manage.erp.entity.ReportRecordEntity" >
+    insert into test_report_record (id, entrustment_id, report_code, 
+      sample_name, price, required_completion_time, 
+      task_code, state, number, 
+      report_type, verifyer_time, issuer_time, 
+      seal_type, apply_reason, issu_reason, 
+      verifyer, issuer, applicant, 
+      
+
+sealer, seal_time, report_manager, 
+      report_time, addressee, waybill, 
+      operate_time)
+    values (#{id,jdbcType=BIGINT}, #{entrustmentId,jdbcType=BIGINT}, #{reportCode,jdbcType=VARCHAR}, 
+      #{sampleName,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{requiredCompletionTime,jdbcType=TIMESTAMP}, 
+      #{taskCode,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR}, #{number,jdbcType=INTEGER}, 
+      #{reportType,jdbcType=VARCHAR}, #{verifyerTime,jdbcType=TIMESTAMP}, #{issuerTime,jdbcType=TIMESTAMP}, 
+      #{sealType,jdbcType=VARCHAR}, #{applyReason,jdbcType=VARCHAR}, #{issuReason,jdbcType=VARCHAR}, 
+      #{verifyer,jdbcType=VARCHAR}, #{issuer,jdbcType=VARCHAR}, #{applicant,jdbcType=VARCHAR}, 
+      #{
+
+sealer,jdbcType=VARCHAR}, #{sealTime,jdbcType=TIMESTAMP}, #{reportManager,jdbcType=VARCHAR}, 
+      #{reportTime,jdbcType=TIMESTAMP}, #{addressee,jdbcType=VARCHAR}, #{waybill,jdbcType=VARCHAR}, 
+      #{operateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordEntity" >
+    insert into test_report_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="entrustmentId != null" >
+        entrustment_id,
+      </if>
+      <if test="reportCode != null" >
+        report_code,
+      </if>
+      <if test="sampleName != null" >
+        sample_name,
+      </if>
+      <if test="price != null" >
+        price,
+      </if>
+      <if test="requiredCompletionTime != null" >
+        required_completion_time,
+      </if>
+      <if test="taskCode != null" >
+        task_code,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="reportType != null" >
+        report_type,
+      </if>
+      <if test="verifyerTime != null" >
+        verifyer_time,
+      </if>
+      <if test="issuerTime != null" >
+        issuer_time,
+      </if>
+      <if test="sealType != null" >
+        seal_type,
+      </if>
+      <if test="applyReason != null" >
+        apply_reason,
+      </if>
+      <if test="issuReason != null" >
+        issu_reason,
+      </if>
+      <if test="verifyer != null" >
+        verifyer,
+      </if>
+      <if test="issuer != null" >
+        issuer,
+      </if>
+      <if test="applicant != null" >
+        applicant,
+      </if>
+      <if test="
+
+sealer != null" >
+        
+
+sealer,
+      </if>
+      <if test="sealTime != null" >
+        seal_time,
+      </if>
+      <if test="reportManager != null" >
+        report_manager,
+      </if>
+      <if test="reportTime != null" >
+        report_time,
+      </if>
+      <if test="addressee != null" >
+        addressee,
+      </if>
+      <if test="waybill != null" >
+        waybill,
+      </if>
+      <if test="operateTime != null" >
+        operate_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="entrustmentId != null" >
+        #{entrustmentId,jdbcType=BIGINT},
+      </if>
+      <if test="reportCode != null" >
+        #{reportCode,jdbcType=VARCHAR},
+      </if>
+      <if test="sampleName != null" >
+        #{sampleName,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null" >
+        #{price,jdbcType=VARCHAR},
+      </if>
+      <if test="requiredCompletionTime != null" >
+        #{requiredCompletionTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="taskCode != null" >
+        #{taskCode,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=INTEGER},
+      </if>
+      <if test="reportType != null" >
+        #{reportType,jdbcType=VARCHAR},
+      </if>
+      <if test="verifyerTime != null" >
+        #{verifyerTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="issuerTime != null" >
+        #{issuerTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sealType != null" >
+        #{sealType,jdbcType=VARCHAR},
+      </if>
+      <if test="applyReason != null" >
+        #{applyReason,jdbcType=VARCHAR},
+      </if>
+      <if test="issuReason != null" >
+        #{issuReason,jdbcType=VARCHAR},
+      </if>
+      <if test="verifyer != null" >
+        #{verifyer,jdbcType=VARCHAR},
+      </if>
+      <if test="issuer != null" >
+        #{issuer,jdbcType=VARCHAR},
+      </if>
+      <if test="applicant != null" >
+        #{applicant,jdbcType=VARCHAR},
+      </if>
+      <if test="
+
+sealer != null" >
+        #{
+
+sealer,jdbcType=VARCHAR},
+      </if>
+      <if test="sealTime != null" >
+        #{sealTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reportManager != null" >
+        #{reportManager,jdbcType=VARCHAR},
+      </if>
+      <if test="reportTime != null" >
+        #{reportTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="addressee != null" >
+        #{addressee,jdbcType=VARCHAR},
+      </if>
+      <if test="waybill != null" >
+        #{waybill,jdbcType=VARCHAR},
+      </if>
+      <if test="operateTime != null" >
+        #{operateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.ReportRecordEntity" >
+    update test_report_record
+    <set >
+      <if test="entrustmentId != null" >
+        entrustment_id = #{entrustmentId,jdbcType=BIGINT},
+      </if>
+      <if test="reportCode != null" >
+        report_code = #{reportCode,jdbcType=VARCHAR},
+      </if>
+      <if test="sampleName != null" >
+        sample_name = #{sampleName,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=VARCHAR},
+      </if>
+      <if test="requiredCompletionTime != null" >
+        required_completion_time = #{requiredCompletionTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="taskCode != null" >
+        task_code = #{taskCode,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=INTEGER},
+      </if>
+      <if test="reportType != null" >
+        report_type = #{reportType,jdbcType=VARCHAR},
+      </if>
+      <if test="verifyerTime != null" >
+        verifyer_time = #{verifyerTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="issuerTime != null" >
+        issuer_time = #{issuerTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sealType != null" >
+        seal_type = #{sealType,jdbcType=VARCHAR},
+      </if>
+      <if test="applyReason != null" >
+        apply_reason = #{applyReason,jdbcType=VARCHAR},
+      </if>
+      <if test="issuReason != null" >
+        issu_reason = #{issuReason,jdbcType=VARCHAR},
+      </if>
+      <if test="verifyer != null" >
+        verifyer = #{verifyer,jdbcType=VARCHAR},
+      </if>
+      <if test="issuer != null" >
+        issuer = #{issuer,jdbcType=VARCHAR},
+      </if>
+      <if test="applicant != null" >
+        applicant = #{applicant,jdbcType=VARCHAR},
+      </if>
+      <if test="
+
+sealer != null" >
+        
+
+sealer = #{
+
+sealer,jdbcType=VARCHAR},
+      </if>
+      <if test="sealTime != null" >
+        seal_time = #{sealTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reportManager != null" >
+        report_manager = #{reportManager,jdbcType=VARCHAR},
+      </if>
+      <if test="reportTime != null" >
+        report_time = #{reportTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="addressee != null" >
+        addressee = #{addressee,jdbcType=VARCHAR},
+      </if>
+      <if test="waybill != null" >
+        waybill = #{waybill,jdbcType=VARCHAR},
+      </if>
+      <if test="operateTime != null" >
+        operate_time = #{operateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.ReportRecordEntity" >
+    update test_report_record
+    set entrustment_id = #{entrustmentId,jdbcType=BIGINT},
+      report_code = #{reportCode,jdbcType=VARCHAR},
+      sample_name = #{sampleName,jdbcType=VARCHAR},
+      price = #{price,jdbcType=VARCHAR},
+      required_completion_time = #{requiredCompletionTime,jdbcType=TIMESTAMP},
+      task_code = #{taskCode,jdbcType=VARCHAR},
+      state = #{state,jdbcType=VARCHAR},
+      number = #{number,jdbcType=INTEGER},
+      report_type = #{reportType,jdbcType=VARCHAR},
+      verifyer_time = #{verifyerTime,jdbcType=TIMESTAMP},
+      issuer_time = #{issuerTime,jdbcType=TIMESTAMP},
+      seal_type = #{sealType,jdbcType=VARCHAR},
+      apply_reason = #{applyReason,jdbcType=VARCHAR},
+      issu_reason = #{issuReason,jdbcType=VARCHAR},
+      verifyer = #{verifyer,jdbcType=VARCHAR},
+      issuer = #{issuer,jdbcType=VARCHAR},
+      applicant = #{applicant,jdbcType=VARCHAR},
+      
+
+sealer = #{
+
+sealer,jdbcType=VARCHAR},
+      seal_time = #{sealTime,jdbcType=TIMESTAMP},
+      report_manager = #{reportManager,jdbcType=VARCHAR},
+      report_time = #{reportTime,jdbcType=TIMESTAMP},
+      addressee = #{addressee,jdbcType=VARCHAR},
+      waybill = #{waybill,jdbcType=VARCHAR},
+      operate_time = #{operateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>
