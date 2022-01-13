@@ -1,5 +1,6 @@
 package com.lims.manage.erp.mapper;
 
+import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
@@ -15,5 +16,13 @@ public interface ReportMapper {
      * @return
      */
     List<ReportListVo> getReportList();
+
+    /**
+     * 查询委托单--报告制作详情
+     *
+     * @param id
+     * @return
+     */
+    ReportDetailVo getReportDetail(Long id);
 
 }
