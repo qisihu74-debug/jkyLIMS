@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
 
@@ -20,4 +21,14 @@ public interface ReportService {
      * @return
      */
     ReportDetailVo getReportDetail(Long id);
+
+    /**
+     * 待盖章和历史盖章列表查询
+     * @param type
+     * @param search
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    PageInfo sealList(String type, String search, Integer pageNum, Integer pageSize);
 }
