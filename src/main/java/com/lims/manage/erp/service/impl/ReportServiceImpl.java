@@ -2,6 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import com.lims.manage.erp.mapper.ReportMapper;
 import com.lims.manage.erp.service.ReportService;
+import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,5 +17,10 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<ReportListVo> getReportList() {
         return reportMapper.getReportList();
+    }
+
+    @Override
+    public ReportDetailVo getReportDetail(Long id) {
+        return reportMapper.getReportDetail(id);
     }
 }

@@ -19,9 +19,24 @@ public class ReportController {
     @Autowired
     private ReportService reportService;
 
+    /**
+     * 查询可制作报告任务单列表
+     *
+     * @return
+     */
     @GetMapping("/list")
     public Result getSampleList() {
-        return ResultUtil.success("获取可制作报告任务单成功！",reportService.getReportList());
+        return ResultUtil.success("获取可制作报告任务单成功！", reportService.getReportList());
+    }
+
+    /**
+     * 报告生成--编辑按钮
+     *
+     * @return
+     */
+    @GetMapping("/edit")
+    public Result edit(Long id) {
+        return ResultUtil.success("获取可制作报告任务单成功！", reportService.getReportDetail(id));
     }
 
 }

@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
 
 import java.util.List;
@@ -11,4 +12,12 @@ public interface ReportService {
      * @return
      */
     List<ReportListVo> getReportList();
+
+    /**
+     * 查询委托单--报告制作详情
+     *
+     * @param id
+     * @return
+     */
+    ReportDetailVo getReportDetail(Long id);
 }
