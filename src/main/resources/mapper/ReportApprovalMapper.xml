@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.ReportApprovalMapper">
+
+    <select id="getReportApprovalList" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
+        SELECT
+        id,
+        sample_name,
+        price AS cost,
+        required_completion_time,
+        task_code,
+        state,
+        applicant,
+        verifyer,
+        verifyer_time
+        FROM
+        test_report_record
+        WHERE 1=1
+        and  (state = 1 or state =3)
+            <if test="search!=null and search!=''">
+                and task_code like CONCAT('%',#{search},'%')
+            </if>
+    </select>
+
+    <select id="getReportApprovalDetail" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
+        SELECT id,task_code,verifyer,verifyer_time FROM test_report_record WHERE id =#{id}
+    </select>
+
+    <update id="updateReportApprovalDetail" parameterType="com.lims.manage.erp.vo.ReportApprovalVo">
+        UPDATE test_report_record
+        <trim prefix="SET" suffixOverrides=",">
+        <if test="state!=null">state=#{state},</if>
+        verifyer=#{verifyer},
+            verifyer_time = #{verifyerTime},
+        <if test="reason!=null and reason!=''">apply_reason=#{reason},</if>
+        </trim>
+        WHERE id =#{id}
+    </update>
+
+    <select id="getUserName" resultType="string">
+        SELECT t2.name
+        FROM sys_user as t1
+        LEFT JOIN sys_ding_user as t2 ON t1.ding_user_id = t2.userid
+        WHERE t1.user_id = #{userId}
+    </select>
+
+</mapper>
