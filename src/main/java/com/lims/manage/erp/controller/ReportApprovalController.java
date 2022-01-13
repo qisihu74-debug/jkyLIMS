@@ -70,6 +70,10 @@ public class ReportApprovalController {
         if (reportApprovalVo.getVerifyer() != null) {
             return ResultUtil.error(678, "此任务单号已经被抢");
         }
+        // 效验报告单状态
+        if(reportApprovalVo.getState()!=1){
+            return ResultUtil.error(678, "此任务单号状态不对");
+        }
         //3、进行抢单
         reportApprovalVo.setVerifyer(name);
         reportApprovalVo.setId(id);
@@ -119,12 +123,32 @@ public class ReportApprovalController {
         if (!reportApprovalVo.getVerifyer().equals(name)) {
             return ResultUtil.error(678, "审批失败，审批人与抢单人不一致");
         }
+        // 效验报告单状态
+        if(reportApprovalVo.getState()!=3){
+            return ResultUtil.error(678, "此任务单号状态不对");
+        }
         Boolean flag = reportApprovalService.approval_data(id,peroration,reason);
         if (flag) {
             return ResultUtil.success("审批成功");
         }
         return ResultUtil.error(678, "审批失败");
     }
+
+    /**
+     * 报告审批历史查询列表
+     * @param search
+     * @return
+     */
+    @GetMapping("/applyfor_history")
+    public Result applyfor_history(String search) {
+
+        List<ReportApprovalVo> list = reportApprovalService.applyfor_history(search);
+        if(!list.isEmpty()){
+            return ResultUtil.success(list);
+        }
+        return ResultUtil.success("查询数据为空");
+    }
+
 
 
 

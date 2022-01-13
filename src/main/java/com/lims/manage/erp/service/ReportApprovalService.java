@@ -35,4 +35,11 @@ public interface ReportApprovalService {
      */
     Boolean approval_data( Long id,Integer peroration,String reason);
 
+    /**
+     * 报告审批历史查询
+     * @param search
+     * @return
+     */
+    List<ReportApprovalVo> applyfor_history(String search);
+
 }

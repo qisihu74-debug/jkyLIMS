@@ -26,7 +26,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     public List<ReportApprovalVo> getApplyforList(String search, Integer state) {
 
 //        state 报告状态（默认是 0=未抢单 1=已抢单）
-        if (state == null || state > 2) {
+        if (state == null || state > 2 || state == 0) {
             state = 0;
         } else {
             state = 1;
@@ -72,7 +72,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             //通过 4.签发待抢单
             state = 4;
             ReportApprovalVo data = reportApprovalMapper.getReportApprovalDetail(id);
-            reportApprovalVo.setVerifyerTime(data.getVerifyerTime());
+            reportApprovalVo.setVerifyerTime(new Date());
             reportApprovalVo.setVerifyer(data.getVerifyer());
         }
         if (peroration == 1) {
@@ -89,5 +89,11 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<ReportApprovalVo> applyfor_history(String search) {
+
+        return reportApprovalMapper.getReportApprovalHistory(search);
     }
 }
