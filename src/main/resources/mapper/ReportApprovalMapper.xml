@@ -24,7 +24,7 @@
     </select>
 
     <select id="getReportApprovalDetail" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
-        SELECT id,task_code,verifyer,verifyer_time,state FROM test_report_record WHERE id =#{id}
+        SELECT id,task_code,verifyer,verifyer_time,state,issuer FROM test_report_record WHERE id =#{id}
     </select>
 
     <update id="updateReportApprovalDetail" parameterType="com.lims.manage.erp.vo.ReportApprovalVo">
@@ -151,4 +151,36 @@
         where t3.entrustment_id = #{id}
     </select>
 
+    <select id="getgetVerifyList" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
+        SELECT
+        id,
+        sample_name,
+        price AS cost,
+        required_completion_time,
+        task_code,
+        state,
+        applicant,
+        verifyer,
+        verifyer_time
+        FROM
+        test_report_record
+        WHERE 1=1
+        <if test="state!=null and state!=''">
+            and  state = #{state}
+        </if>
+        <if test="search!=null and search!=''">
+            and task_code like CONCAT('%',#{search},'%')
+        </if>
+    </select>
+    <update id="updateVerifyMonad" parameterType="com.lims.manage.erp.vo.ReportApprovalVo">
+        UPDATE test_report_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="state!=null">state=#{state},</if>
+            issuer=#{issuer},
+            issuer_time = #{issuerTime},
+            <if test="reason!=null and reason!=''">issu_reason=#{reason},</if>
+            <if test="sealType!=null and sealType!=''">seal_type=#{sealType},</if>
+        </trim>
+        WHERE id =#{id}
+    </update>
 </mapper>

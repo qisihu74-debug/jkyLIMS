@@ -57,5 +57,20 @@ public class ReportApprovalVo {
      * 驳回原因
      */
     private String reason;
+    /**
+     * 签发人
+     */
+    private String issuer;
+    /**
+     * 签发时间
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd hh:mm:ss")
+    @JsonFormat(pattern ="yyyy-MM-dd hh:mm:ss" , timezone ="GMT+8")
+    private Date issuerTime;
+
+    /**
+     * 印章类型
+     */
+    private String sealType;
 
 }

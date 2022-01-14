@@ -108,22 +108,77 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
          * 获取任务单详情
          */
        taskDetailInfoVo =  reportApprovalMapper.getTaskDetail(id);
-       // 通过委托id 获取样品信息 及以下的 处理。
-        List<SampleDetailVo> sampleDetailVoList  = reportApprovalMapper.getSampleDetailLis(taskDetailInfoVo.getEntrustmentId());
-        for(SampleDetailVo sampleDetailVo:sampleDetailVoList){
-            if(!sampleDetailVo.getCheckItemInfoList().isEmpty()) {
-                for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
-                    if (!checkItemInfoVo.getTestInstrumentEntityList().isEmpty()) {
-                        String InstrumentName = "";
-                        for (TestInstrumentEntity testInstrumentEntity : checkItemInfoVo.getTestInstrumentEntityList()) {
-                            InstrumentName += testInstrumentEntity.getName()+"、";
-                        }
-                        checkItemInfoVo.setIntrusmentName(InstrumentName);
-                    }
-                }
-            }
-        }
-        taskDetailInfoVo.setSampleDetailList(sampleDetailVoList);
+       if(taskDetailInfoVo.getEntrustmentId()!=null){
+           // 通过委托id 获取样品信息 及以下的 处理。
+           List<SampleDetailVo> sampleDetailVoList  = reportApprovalMapper.getSampleDetailLis(taskDetailInfoVo.getEntrustmentId());
+           for(SampleDetailVo sampleDetailVo:sampleDetailVoList){
+               if(!sampleDetailVo.getCheckItemInfoList().isEmpty()) {
+                   for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+                       if (!checkItemInfoVo.getTestInstrumentEntityList().isEmpty()) {
+                           String InstrumentName = "";
+                           for (TestInstrumentEntity testInstrumentEntity : checkItemInfoVo.getTestInstrumentEntityList()) {
+                               InstrumentName += testInstrumentEntity.getName()+"、";
+                           }
+                           checkItemInfoVo.setIntrusmentName(InstrumentName);
+                       }
+                   }
+               }
+           }
+           taskDetailInfoVo.setSampleDetailList(sampleDetailVoList);
+       }
         return taskDetailInfoVo;
+    }
+
+    @Override
+    public List<ReportApprovalVo> getVerify_list(String search, Integer state) {
+        //        state 报告状态（默认是 0=未抢单 1=已抢单）
+        if (state == null || state > 2 || state == 0) {
+            //4.签发待抢单，
+            state = 4;
+        } else {
+            //5.签发已抢单
+            state = 5;
+        }
+        return  reportApprovalMapper.getgetVerifyList(search,state);
+    }
+
+    @Override
+    public Boolean verify_monad(ReportApprovalVo reportApprovalVo) {
+        reportApprovalVo.setIssuerTime(new Date());
+        Integer status = reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
+        if(status==1){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean verify_data(ReportApprovalVo reportApprovalVo1) {
+        //        0是通过 1 是驳回
+        // 报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
+        Integer state = 0;
+        ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
+        if (reportApprovalVo1.getState() == 0) {
+            //通过6已签
+            state = 6;
+            ReportApprovalVo data = reportApprovalMapper.getReportApprovalDetail(reportApprovalVo1.getId());
+            reportApprovalVo.setIssuerTime(new Date());
+            reportApprovalVo.setIssuer(data.getIssuer());
+        }
+        if (reportApprovalVo1.getState() == 1) {
+            // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填
+            state = 0;
+            reportApprovalVo.setIssuerTime(null);
+            reportApprovalVo.setIssuer(null);
+        }
+        reportApprovalVo.setId(reportApprovalVo1.getId());
+        reportApprovalVo.setReason(reportApprovalVo1.getReason());
+        reportApprovalVo.setState(state);
+        reportApprovalVo.setSealType(reportApprovalVo1.getSealType());
+        Integer status = reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
+        if(status==1){
+            return true;
+        }
+        return false;
     }
 }

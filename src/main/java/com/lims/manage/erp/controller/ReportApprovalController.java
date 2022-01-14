@@ -174,6 +174,123 @@ public class ReportApprovalController {
         return ResultUtil.success("查询任务详情成功！", reportApprovalService.getDetails(id));
     }
 
+    /**
+     * 报告签发列表
+     * @param search
+     * @param state
+     * @return
+     */
+    @GetMapping("/verify_list")
+    public Result verify_list(String search, Integer state) {
+
+        List<ReportApprovalVo> list = reportApprovalService.getVerify_list(search, state);
+        if(!list.isEmpty()){
+            return ResultUtil.success(list);
+        }
+        return ResultUtil.success(list);
+    }
+
+    /**
+     * 签发抢单
+     * @param reportApprovalVo1
+     * @return
+     */
+    @PostMapping("verify_monad")
+    public Result verify_monad(@RequestBody ReportApprovalVo reportApprovalVo1) {
+
+        if(reportApprovalVo1==null){
+            return ResultUtil.error(678, "缺少必填参数");
+        }
+        if (reportApprovalVo1.getId() == null) {
+            return ResultUtil.error(678, "任务单主键不能为空");
+        }
+        Long id = reportApprovalVo1.getId();
+        //1、 获取抢单人信息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error(678, "token已经过期");
+        }
+        String name = reportApprovalMapper.getUserName(userInfo.getUserId());
+        if (name == null) {
+            return ResultUtil.error(678, "账号未配置使用人");
+        }
+        //2、 查询任务单号 是否被抢。
+        ReportApprovalVo reportApprovalVo = reportApprovalMapper.getReportApprovalDetail(id);
+        if (reportApprovalVo == null) {
+            return ResultUtil.error(678, "此任务单号不存在");
+        }
+        if (reportApprovalVo.getIssuer() != null) {
+            return ResultUtil.error(678, "此任务单号已经被抢");
+        }
+        // 效验报告单状态
+        if(reportApprovalVo.getState()!=4){
+            return ResultUtil.error(678, "此任务单号状态不对");
+        }
+        //3、签发人进行抢单
+        reportApprovalVo.setIssuer(name);
+        reportApprovalVo.setId(id);
+        reportApprovalVo.setState(5);
+        Boolean flag = reportApprovalService.verify_monad(reportApprovalVo);
+        if (flag) {
+            return ResultUtil.success("抢单成功");
+        }
+        return ResultUtil.error(678, "抢单失败");
+    }
+
+    /**
+     * 签发报告
+     * @param reportApprovalVo1
+     * @return
+     */
+    @PostMapping("verify_data")
+    public Result verify_data(@RequestBody ReportApprovalVo reportApprovalVo1){
+        if(reportApprovalVo1==null){
+            return ResultUtil.error(678, "缺少必填参数");
+        }
+        if (reportApprovalVo1.getId() == null) {
+            return ResultUtil.error(678, "任务单主键不能为空");
+        }
+        if(reportApprovalVo1.getState()==null){
+            return ResultUtil.error(678, "审批信息不能为空");
+        }
+        if(reportApprovalVo1.getState()!=1&&reportApprovalVo1.getState()!=0){
+            return ResultUtil.error(678, "审批信息有误");
+        }
+        if(reportApprovalVo1.getSealType()==null){
+            return ResultUtil.error(678, "印章不能为空");
+        }
+        //1、 获取抢单人信息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error(678, "token已经过期");
+        }
+        String name = reportApprovalMapper.getUserName(userInfo.getUserId());
+        if (name == null) {
+            return ResultUtil.error(678, "账号未配置使用人");
+        }
+        //2、 查询任务单号 是否被抢。
+        ReportApprovalVo reportApprovalVo = reportApprovalMapper.getReportApprovalDetail(reportApprovalVo1.getId());
+        if (reportApprovalVo == null) {
+            return ResultUtil.error(678, "此任务单号不存在");
+        }
+        if(reportApprovalVo.getVerifyer()==null){
+            return ResultUtil.error(678, "请先抢单");
+        }
+        if (!reportApprovalVo.getVerifyer().equals(name)) {
+            return ResultUtil.error(678, "审批失败，审批人与抢单人不一致");
+        }
+        // 签发报告单状态 应该是已经抢单 state =5
+        if(reportApprovalVo.getState()!=5){
+            return ResultUtil.error(678, "此任务单号状态不对");
+        }
+        Boolean flag = reportApprovalService.verify_data(reportApprovalVo1);
+        if (flag) {
+            return ResultUtil.success("审批成功");
+        }
+        return ResultUtil.error(678, "审批失败");
+    }
+
+
 
 
 

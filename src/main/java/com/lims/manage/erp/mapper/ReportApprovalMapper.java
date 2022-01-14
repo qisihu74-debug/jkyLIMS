@@ -52,6 +52,21 @@ public interface ReportApprovalMapper {
     List<SampleDetailVo> getSampleDetailLis(Long id);
 
 
+    /**
+     * 查询 报告签发信息
+     * @param search
+     * @param state
+     * @return
+     */
+    List<ReportApprovalVo> getgetVerifyList(@Param("search")String search,@Param("state")Integer state);
+
+    /**
+     * 签发抢单
+     */
+    int updateVerifyMonad(ReportApprovalVo reportApprovalVo);
+
+
+
 
 
 
