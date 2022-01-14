@@ -13,7 +13,7 @@
             <id property="sampleId" column="sample_id"></id>
             <result property="productId" column="product_id"></result>
             <result property="sampleCode" column="sample_code"></result>
-            <result property="sampleName" column="sampleName"></result>
+            <result property="sampleName" column="sample_name1"></result>
             <result property="specs" column="specs"></result>
             <!--            <result property="standard" column="batch_number"></result>-->
             <result property="outward" column="outward"></result>
@@ -40,7 +40,7 @@
                t1.request_date,
                t3.sample_id,
                t4.sample_code,
-               t4.sample_name,
+               t4.sample_name sample_name1,
                t4.specs,
                t4.outward,
                t4.product_id,
