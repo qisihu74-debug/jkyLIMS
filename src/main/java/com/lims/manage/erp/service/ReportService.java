@@ -3,6 +3,7 @@ package com.lims.manage.erp.service;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
@@ -50,14 +51,17 @@ public interface ReportService {
 
     /**
      * 获取要盖的印章
+     *
      * @param list
      * @param id
      * @return
      */
-    Boolean seal(List<String> list,Long id);
+    Boolean seal(List<String> list, Long id);
 
     /**
      * 报告预览
+     *
+     * @param map
      * @param detailEntityList
      * @param object
      * @param sealUrls
@@ -67,6 +71,7 @@ public interface ReportService {
 
     /**
      * 根据报告编号获取报告模板地址、印章地址
+     *
      * @param reportCode
      * @return
      */
@@ -74,6 +79,7 @@ public interface ReportService {
 
     /**
      * 根据报告编号获取委托单id
+     *
      * @param reportCode
      * @return
      */
@@ -81,8 +87,17 @@ public interface ReportService {
 
     /**
      * 查询报告的详细信息
+     *
      * @param reportCode
      * @return
      */
     List<ReportRecordDetailEntity> getReportDetailByCode(String reportCode);
+
+    /**
+     * 查询产品下的报告
+     *
+     * @param productId
+     * @return
+     */
+    List<ReportTemplateEntity> getReportTemplateList(String productId);
 }

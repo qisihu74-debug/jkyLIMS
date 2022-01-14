@@ -95,31 +95,33 @@ public class ReportController {
 
     /**
      * 盖章
+     *
      * @param list
      * @param id
      * @return
      */
     @PostMapping("seal")
-    public Result seal(@RequestParam("list") List<String> list,@RequestParam("id") Long id){
-        if (CollectionUtils.isEmpty(list)){
+    public Result seal(@RequestParam("list") List<String> list, @RequestParam("id") Long id) {
+        if (CollectionUtils.isEmpty(list)) {
             return ResultUtil.error("缺少必要的参数！");
         }
-        Boolean flag = reportService.seal(list,id);
-        if (flag){
+        Boolean flag = reportService.seal(list, id);
+        if (flag) {
             return ResultUtil.success("获取印章成功!");
-        }else {
+        } else {
             return ResultUtil.error("获取印章失败！");
         }
     }
 
     /**
      * 报告预览
+     *
      * @param reportCode
      * @return
      */
     @GetMapping("preview")
-    public Result preview(String reportCode, HttpServletResponse response){
-        if (StringUtils.isEmpty(reportCode)){
+    public Result preview(String reportCode, HttpServletResponse response) {
+        if (StringUtils.isEmpty(reportCode)) {
             return ResultUtil.error("缺少必要参数！");
         }
         try {
@@ -127,10 +129,10 @@ public class ReportController {
             ReportRecordEntity entity = reportService.getUrlByCode(reportCode);
             String reportName = "";
             String reportUrl = entity.getReportUrl();
-            if (StringUtils.isNotEmpty(reportUrl)){
-                reportName = reportUrl.substring(reportUrl.lastIndexOf("/")+1);
+            if (StringUtils.isNotEmpty(reportUrl)) {
+                reportName = reportUrl.substring(reportUrl.lastIndexOf("/") + 1);
             }
-            Map<String,Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>();
             //查询报告详细信息
             List<ReportRecordDetailEntity> detailEntityList = reportService.getReportDetailByCode(reportCode);
             MinioClient client = MinIoUtil.minioClient;
@@ -139,12 +141,12 @@ public class ReportController {
             Long entrustId = reportService.getEntrustIdByCode(reportCode);
             EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             String sealUrl = entity.getSealUrl();
-            XWPFDocument document = reportService.preview(detailEntityList,detail, object,sealUrl.split(","));
+            XWPFDocument document = reportService.preview(detailEntityList, detail, object, sealUrl.split(","));
             response.reset();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            reportName = URLEncoder.encode(reportName,"UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName="+reportName);
+            reportName = URLEncoder.encode(reportName, "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + reportName);
             OutputStream outputStream = response.getOutputStream();
             document.write(outputStream);
             outputStream.close();
@@ -152,5 +154,16 @@ public class ReportController {
             log.info("报告预览失败：", ex.getMessage());
         }
         return null;
+    }
+
+    /**
+     * 查询产品报告模板
+     *
+     * @param productId
+     * @return
+     */
+    @GetMapping("/getTemplateList")
+    public Result getTemplateList(String productId) {
+        return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList(productId));
     }
 }

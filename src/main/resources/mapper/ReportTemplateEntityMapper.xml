@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lims.manage.erp.mapper.ReportTemplateEntityMapper">
+    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.ReportTemplateEntity">
+        <constructor>
+            <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="report_code" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="product_id" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="report_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="report_file_uri" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="is_available" jdbcType="VARCHAR" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , report_code, product_id, report_name, report_file_uri, is_available
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from test_report_template
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete
+        from test_report_template
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.lims.manage.erp.entity.ReportTemplateEntity">
+        insert into test_report_template (id, report_code, product_id,
+                                          report_name, report_file_uri, is_available)
+        values (#{id,jdbcType=INTEGER}, #{reportCode,jdbcType=VARCHAR}, #{productId,jdbcType=VARCHAR},
+                #{reportName,jdbcType=VARCHAR}, #{reportFileUri,jdbcType=VARCHAR}, #{isAvailable,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportTemplateEntity">
+        insert into test_report_template
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="reportCode != null">
+                report_code,
+            </if>
+            <if test="productId != null">
+                product_id,
+            </if>
+            <if test="reportName != null">
+                report_name,
+            </if>
+            <if test="reportFileUri != null">
+                report_file_uri,
+            </if>
+            <if test="isAvailable != null">
+                is_available,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="reportCode != null">
+                #{reportCode,jdbcType=VARCHAR},
+            </if>
+            <if test="productId != null">
+                #{productId,jdbcType=VARCHAR},
+            </if>
+            <if test="reportName != null">
+                #{reportName,jdbcType=VARCHAR},
+            </if>
+            <if test="reportFileUri != null">
+                #{reportFileUri,jdbcType=VARCHAR},
+            </if>
+            <if test="isAvailable != null">
+                #{isAvailable,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.ReportTemplateEntity">
+        update test_report_template
+        <set>
+            <if test="reportCode != null">
+                report_code = #{reportCode,jdbcType=VARCHAR},
+            </if>
+            <if test="productId != null">
+                product_id = #{productId,jdbcType=VARCHAR},
+            </if>
+            <if test="reportName != null">
+                report_name = #{reportName,jdbcType=VARCHAR},
+            </if>
+            <if test="reportFileUri != null">
+                report_file_uri = #{reportFileUri,jdbcType=VARCHAR},
+            </if>
+            <if test="isAvailable != null">
+                is_available = #{isAvailable,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.ReportTemplateEntity">
+        update test_report_template
+        set report_code     = #{reportCode,jdbcType=VARCHAR},
+            product_id      = #{productId,jdbcType=VARCHAR},
+            report_name     = #{reportName,jdbcType=VARCHAR},
+            report_file_uri = #{reportFileUri,jdbcType=VARCHAR},
+            is_available    = #{isAvailable,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <select id="getReportTemplateList" resultType="com.lims.manage.erp.entity.ReportTemplateEntity" parameterType="java.lang.String">
+        select
+        *
+        from test_report_template
+        where product_id = #{productId,jdbcType=VARCHAR}
+    </select>
+</mapper>

@@ -4,9 +4,8 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.mapper.ReportMapper;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
+import com.lims.manage.erp.entity.ReportTemplateEntity;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.GenID;
@@ -29,6 +28,8 @@ public class ReportServiceImpl implements ReportService {
     private ReportMapper reportMapper;
     @Autowired
     private ReportRecordEntityMapper entityMapper;
+    @Autowired
+    private ReportTemplateEntityMapper templateEntityMapper;
 
     @Autowired
     private ReportRecordEntityMapper recordEntityMapper;
@@ -48,6 +49,20 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     @Override
     public Boolean preserve(ReportPreserveVo vo) {
+        long recordId = GenID.getID();
+        Boolean isOver = false;
+        List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
+        for (ReportRecordDetailEntity e : checkInfos) {
+            e.setRecordId(recordId);
+            if (e.getJudgeResult() != null) {
+                isOver = true;
+            }
+            int insert1 = recordDetailEntityMapper.insert(e);
+            if (insert1 < 1) {
+                return false;
+            }
+
+        }
         ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
         if (vo.getIsOver()) {
             reportRecordEntity.setState("1");
@@ -55,20 +70,13 @@ public class ReportServiceImpl implements ReportService {
             reportRecordEntity.setState("2");
         }
         reportRecordEntity.setReportCode("ZX-2021-SW-1471");
-        long recordId = GenID.getID();
+
         reportRecordEntity.setId(recordId);
         int insert = recordEntityMapper.insert(reportRecordEntity);
         if (insert < 1) {
             return false;
         }
-        List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
-        for (ReportRecordDetailEntity e : checkInfos) {
-            e.setRecordId(recordId);
-            int insert1 = recordDetailEntityMapper.insert(e);
-            if (insert1 < 1) {
-                return false;
-            }
-        }
+
         return true;
     }
 
@@ -114,5 +122,10 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<ReportRecordDetailEntity> getReportDetailByCode(String reportCode) {
         return recordDetailEntityMapper.getReportDetailByCode(reportCode);
+    }
+
+    @Override
+    public List<ReportTemplateEntity> getReportTemplateList(String productId) {
+        return templateEntityMapper.getReportTemplateList(productId);
     }
 }

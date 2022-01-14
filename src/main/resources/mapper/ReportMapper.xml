@@ -23,6 +23,7 @@
                 <id property="checkItemId" column="check_item_id"></id>
                 <result property="state" column="state"></result>
                 <result property="checkItemName" column="check_item_name"></result>
+                <result property="specsContent" column="specs_content"></result>
                 <result property="checkResult" column="check_result"></result>
                 <result property="judgeResult" column="judge_result"></result>
                 <result property="coordinate" column="coordinate"></result>
@@ -51,6 +52,7 @@
                t5.state,
                t6.check_item_id,
                t6.check_item_name,
+               t9.specs_content,
                t9.check_result,
                t9.judge_result,
                t6.coordinate,
