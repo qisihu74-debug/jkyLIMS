@@ -5,6 +5,8 @@
 
     <resultMap id="reportDetailMap" type="com.lims.manage.erp.vo.ReportDetailVo">
         <result property="id" column="id"></result>
+        <result property="reportCount" column="report_count"></result>
+        <result property="reportType" column="report_type"></result>
         <result property="taskCode" column="task_code"></result>
         <result property="sampleName" column="sample_name"></result>
         <result property="countPrice" column="count_price"></result>
@@ -34,6 +36,8 @@
 
     <select id="getReportDetail" resultMap="reportDetailMap">
         SELECT t1.id,
+               t1.report_count,
+               t1.report_type,
                t2.task_code,
                t4.sample_name,
                t1.count_price,
