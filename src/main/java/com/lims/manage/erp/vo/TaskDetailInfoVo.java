@@ -22,6 +22,10 @@ public class TaskDetailInfoVo {
      * 委托id
      */
     private Long entrustmentId;
+    /**
+     * 判定依据
+     */
+    private String judgmentBasis;
     private String fileUrl;//下载附件
     private List<SampleDetailVo> sampleDetailList;//样品信息
 
