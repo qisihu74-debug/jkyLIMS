@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.mapper.ReportMapper;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.vo.ReportDetailVo;
@@ -18,6 +19,8 @@ import java.util.List;
 public class ReportServiceImpl implements ReportService {
     @Autowired
     private ReportMapper reportMapper;
+    @Autowired
+    private ReportRecordEntityMapper entityMapper;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -32,7 +35,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo sealList(String type, String search, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum,pageSize);
-        List<ReportRecordEntity> list = reportMapper.getSealList(type,search);
+        List<ReportRecordEntity> list = entityMapper.getSealList(type,search);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
