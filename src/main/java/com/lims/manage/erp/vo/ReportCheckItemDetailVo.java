@@ -9,5 +9,8 @@ public class ReportCheckItemDetailVo {
     private Long checkItemId;
     private Integer state;
     private String checkItemName;
+    private String checkResult;
+    private String judgeResult;
+    private String coordinate;
     private List<ReportSpecsContentVo> specsContents;
 }

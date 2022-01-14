@@ -21,6 +21,9 @@
                 <id property="checkItemId" column="check_item_id"></id>
                 <result property="state" column="state"></result>
                 <result property="checkItemName" column="check_item_name"></result>
+                <result property="checkResult" column="check_result"></result>
+                <result property="judgeResult" column="judge_result"></result>
+                <result property="coordinate" column="coordinate"></result>
                 <collection property="specsContents" ofType="com.lims.manage.erp.vo.ReportSpecsContentVo">
                     <result property="value" column="value"></result>
                     <result property="label" column="label"></result>
@@ -44,6 +47,9 @@
                t5.state,
                t6.check_item_id,
                t6.check_item_name,
+               t9.check_result,
+               t9.judge_result,
+               t6.coordinate,
                t7.specs_content value,
 	CONCAT(t7.check_basis_code,":",t7.condition_value) label
         FROM
@@ -56,6 +62,8 @@
             AND t4.id = t5.sample_id
             LEFT JOIN test_product_item t6 ON t5.check_item_id = t6.check_item_id
             LEFT JOIN test_report_qualifcation t7 ON t6.check_item_id = t7.check_item_id
+            left join test_report_record t8 on t1.id = t8.entrustment_id
+            left join test_report_record_detail t9 on t8.id = t9.record_id
         WHERE t1.id = #{id}
     </select>
 

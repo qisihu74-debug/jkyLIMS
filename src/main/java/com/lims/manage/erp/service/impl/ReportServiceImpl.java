@@ -9,6 +9,7 @@ import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.service.ReportService;
+import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
@@ -46,12 +47,17 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     @Override
     public Boolean preserve(ReportPreserveVo vo) {
-        int insert = recordEntityMapper.insert(new ReportRecordEntity(vo));
+        ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
+        reportRecordEntity.setReportCode("ZX-2021-SW-1471");
+        long recordId = GenID.getID();
+        reportRecordEntity.setId(recordId);
+        int insert = recordEntityMapper.insert(reportRecordEntity);
         if (insert < 1) {
             return false;
         }
         List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
         for (ReportRecordDetailEntity e : checkInfos) {
+            e.setRecordId(recordId);
             int insert1 = recordDetailEntityMapper.insert(e);
             if (insert1 < 1) {
                 return false;
