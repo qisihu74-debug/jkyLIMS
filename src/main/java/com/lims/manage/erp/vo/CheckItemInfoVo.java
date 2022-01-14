@@ -1,6 +1,12 @@
 package com.lims.manage.erp.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lims.manage.erp.entity.TestInstrumentEntity;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * 来自表 test_entrusted_sample_checkitem_rel
@@ -20,6 +26,26 @@ public class CheckItemInfoVo {
     private Integer state;
     private String originUrl;
     private String opinion;
+    /**
+     * 仪器设备
+     */
+    private List<TestInstrumentEntity> testInstrumentEntityList;
+    /**
+     * 开始检测时间
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
+    private Date startTime;
+    /**
+     * 结束检测时间
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
+    private Date endTime;
+    /**
+     * 设备仪器名称
+     */
+    private String intrusmentName;
     /**
      * 检测样次
      */
@@ -155,6 +181,30 @@ public class CheckItemInfoVo {
         this.opinion = opinion;
     }
 
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getIntrusmentName() {
+        return intrusmentName;
+    }
+
+    public void setIntrusmentName(String intrusmentName) {
+        this.intrusmentName = intrusmentName;
+    }
+
     @Override
     public String toString() {
         return "CheckItemInfoVo{" +
@@ -171,6 +221,9 @@ public class CheckItemInfoVo {
                 ", state=" + state +
                 ", originUrl='" + originUrl + '\'' +
                 ", opinion='" + opinion + '\'' +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", intrusmentName='" + intrusmentName + '\'' +
                 ", times=" + times +
                 '}';
     }

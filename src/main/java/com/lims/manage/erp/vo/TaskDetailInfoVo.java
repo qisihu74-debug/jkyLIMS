@@ -14,6 +14,15 @@ public class TaskDetailInfoVo {
     private String samplingMethod;//取样方式
     private String checkPurpose;//检验目的
     private String presentInformation;//提供资料
+    /**
+     * 委托编号
+     */
+    private String entrustmentNo;
+    /**
+     * 委托id
+     */
+    private Long entrustmentId;
     private String fileUrl;//下载附件
     private List<SampleDetailVo> sampleDetailList;//样品信息
+
 }

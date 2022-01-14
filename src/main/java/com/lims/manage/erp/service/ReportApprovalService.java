@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.vo.ReportApprovalVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ public interface ReportApprovalService {
      * @param reason
      * @return
      */
-    Boolean approval_data( Long id,Integer peroration,String reason);
+    Boolean approval_data(ReportApprovalVo reportApprovalVo1);
 
     /**
      * 报告审批历史查询
@@ -41,5 +42,14 @@ public interface ReportApprovalService {
      * @return
      */
     List<ReportApprovalVo> applyfor_history(String search);
+
+    /**
+     * 查看详情
+     * @param id
+     * @return
+     */
+    TaskDetailInfoVo getDetails(Long id);
+
+
 
 }

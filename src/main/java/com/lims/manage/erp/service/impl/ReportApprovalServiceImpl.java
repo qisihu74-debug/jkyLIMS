@@ -1,8 +1,12 @@
 package com.lims.manage.erp.service.impl;
 
+import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.service.ReportApprovalService;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.ReportApprovalVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,25 +68,25 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean approval_data(Long id, Integer peroration, String reason) {
+    public Boolean approval_data(ReportApprovalVo reportApprovalVo1) {
 //        0是通过 1 是驳回
         Integer state = 0;
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
-        if (peroration == 0) {
+        if (reportApprovalVo1.getState() == 0) {
             //通过 4.签发待抢单
             state = 4;
-            ReportApprovalVo data = reportApprovalMapper.getReportApprovalDetail(id);
+            ReportApprovalVo data = reportApprovalMapper.getReportApprovalDetail(reportApprovalVo1.getId());
             reportApprovalVo.setVerifyerTime(new Date());
             reportApprovalVo.setVerifyer(data.getVerifyer());
         }
-        if (peroration == 1) {
+        if (reportApprovalVo1.getState() == 1) {
             // 驳回 对抢单人清空 抢单时间清空 状态改变 如果有备注 选填
             state = 0;
             reportApprovalVo.setVerifyerTime(null);
             reportApprovalVo.setVerifyer(null);
         }
-        reportApprovalVo.setId(id);
-        reportApprovalVo.setReason(reason);
+        reportApprovalVo.setId(reportApprovalVo1.getId());
+        reportApprovalVo.setReason(reportApprovalVo1.getReason());
         reportApprovalVo.setState(state);
         Integer status = reportApprovalMapper.updateReportApprovalDetail(reportApprovalVo);
         if (status == 1) {
@@ -95,5 +99,31 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     public List<ReportApprovalVo> applyfor_history(String search) {
 
         return reportApprovalMapper.getReportApprovalHistory(search);
+    }
+
+    @Override
+    public TaskDetailInfoVo getDetails(Long id) {
+        TaskDetailInfoVo taskDetailInfoVo = new TaskDetailInfoVo();
+        /**
+         * 获取任务单详情
+         */
+       taskDetailInfoVo =  reportApprovalMapper.getTaskDetail(id);
+       // 通过委托id 获取样品信息 及以下的 处理。
+        List<SampleDetailVo> sampleDetailVoList  = reportApprovalMapper.getSampleDetailLis(taskDetailInfoVo.getEntrustmentId());
+        for(SampleDetailVo sampleDetailVo:sampleDetailVoList){
+            if(!sampleDetailVo.getCheckItemInfoList().isEmpty()) {
+                for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+                    if (!checkItemInfoVo.getTestInstrumentEntityList().isEmpty()) {
+                        String InstrumentName = "";
+                        for (TestInstrumentEntity testInstrumentEntity : checkItemInfoVo.getTestInstrumentEntityList()) {
+                            InstrumentName += testInstrumentEntity.getName()+"、";
+                        }
+                        checkItemInfoVo.setIntrusmentName(InstrumentName);
+                    }
+                }
+            }
+        }
+        taskDetailInfoVo.setSampleDetailList(sampleDetailVoList);
+        return taskDetailInfoVo;
     }
 }
