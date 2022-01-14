@@ -4,7 +4,11 @@ import com.lims.manage.erp.entity.ReportRecordEntity;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Component;
 
+@Mapper
+@Component
 public interface ReportRecordEntityMapper {
     int deleteByPrimaryKey(Long id);
 

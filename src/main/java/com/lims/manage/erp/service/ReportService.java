@@ -3,6 +3,7 @@ package com.lims.manage.erp.service;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportPreserveVo;
 
 import java.util.List;
 
@@ -23,7 +24,16 @@ public interface ReportService {
     ReportDetailVo getReportDetail(Long id);
 
     /**
+     * 保存信息
+     *
+     * @param vo
+     * @return
+     */
+    Boolean preserve(ReportPreserveVo vo);
+
+    /**
      * 待盖章和历史盖章列表查询
+     *
      * @param type
      * @param search
      * @param pageNum
