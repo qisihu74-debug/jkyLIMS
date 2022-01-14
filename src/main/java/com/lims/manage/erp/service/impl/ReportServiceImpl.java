@@ -48,6 +48,11 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean preserve(ReportPreserveVo vo) {
         ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
+        if (vo.getIsOver()) {
+            reportRecordEntity.setState("1");
+        } else {
+            reportRecordEntity.setState("2");
+        }
         reportRecordEntity.setReportCode("ZX-2021-SW-1471");
         long recordId = GenID.getID();
         reportRecordEntity.setId(recordId);
@@ -68,22 +73,22 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo sealList(String type, String search, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum,pageSize);
-        List<ReportRecordEntity> list = entityMapper.getSealList(type,search);
+        PageHelper.startPage(pageNum, pageSize);
+        List<ReportRecordEntity> list = entityMapper.getSealList(type, search);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
 
     @Override
-    public Boolean seal(List<String> list,Long id) {
+    public Boolean seal(List<String> list, Long id) {
         //TODO 根据印章类型，请求契约所的印章
 
         //上传印章图片到文件服务器
         String img1 = "http://192.168.2.35:9000/seal-cns-cma/cns.jpg";
         String img2 = "http://192.168.2.35:9000/seal-cns-cma/cma.jpg";
-        String url = img1+","+img2;
+        String url = img1 + "," + img2;
         //更新url数据到表test_report_record
-        entityMapper.updateImgByid(id,url);
+        entityMapper.updateImgByid(id, url);
         return true;
     }
 

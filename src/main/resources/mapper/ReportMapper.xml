@@ -63,7 +63,7 @@
             LEFT JOIN test_product_item t6 ON t5.check_item_id = t6.check_item_id
             LEFT JOIN test_report_qualifcation t7 ON t6.check_item_id = t7.check_item_id
             left join test_report_record t8 on t1.id = t8.entrustment_id
-            left join test_report_record_detail t9 on t8.id = t9.record_id
+            left join test_report_record_detail t9 on t8.id = t9.record_id and t5.check_item_id = t9.check_item_id
         WHERE t1.id = #{id}
     </select>
 

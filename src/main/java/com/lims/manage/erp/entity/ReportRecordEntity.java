@@ -113,7 +113,7 @@ public class ReportRecordEntity {
 
     public ReportRecordEntity(ReportPreserveVo vo) {
         this.id = vo.getId() == null ? null : vo.getId();
-        this.entrustmentId = vo.getId() == null ? null : vo.getId();
+        this.entrustmentId = vo.getEntrustmentId() == null ? null : vo.getEntrustmentId();
         this.reportCode = vo.getReportCode() == null ? null : vo.getReportCode();
         this.sampleName = vo.getSampleName() == null ? null : vo.getSampleName();
         this.price = vo.getPrice() == null ? null : vo.getPrice();
