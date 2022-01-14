@@ -60,7 +60,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo sealList(String type, String search, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum,pageSize);
-        List<ReportRecordEntity> list = reportMapper.getSealList(type, search);
+        List<ReportRecordEntity> list = entityMapper.getSealList(type,search);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
