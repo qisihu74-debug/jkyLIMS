@@ -36,4 +36,11 @@ public class ResultUtil {
         result.setMsg(msg);
         return result;
     }
+
+    /**失败**/
+    public static Result error(String msg){
+        Result result = new Result();
+        result.setMsg(msg);
+        return result;
+    }
 }

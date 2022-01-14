@@ -355,4 +355,35 @@ sealer,jdbcType=VARCHAR},
       operate_time = #{operateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=BIGINT}
   </update>
+
+  <select id="getSealList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+	id,
+	report_code,
+	sample_name,
+	required_completion_time,
+	number,
+	issuer_time,
+	seal_type,
+	sealer,
+	seal_time
+FROM
+	test_report_record
+WHERE 1=1
+	<if test='type == "1"'>
+      AND state = 6
+    </if>
+    <if test='type == "2"'>
+      AND state = 7
+    </if>
+    <if test="search != null and search != ''">
+      AND report_code = #{search}
+    </if>
+  </select>
+
+  <update id="updateImgByid">
+    update test_report_record
+        set seal_url=#{url}
+        where id=#{id}
+  </update>
 </mapper>
