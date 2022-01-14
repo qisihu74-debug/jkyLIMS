@@ -10,5 +10,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ReportPreserveVo extends ReportRecordEntity {
+    private Boolean isOver;
     private List<ReportRecordDetailEntity> checkInfos;
 }

@@ -5,6 +5,8 @@
 
     <resultMap id="reportDetailMap" type="com.lims.manage.erp.vo.ReportDetailVo">
         <result property="id" column="id"></result>
+        <result property="reportCount" column="report_count"></result>
+        <result property="reportType" column="report_type"></result>
         <result property="taskCode" column="task_code"></result>
         <result property="sampleName" column="sample_name"></result>
         <result property="countPrice" column="count_price"></result>
@@ -34,6 +36,8 @@
 
     <select id="getReportDetail" resultMap="reportDetailMap">
         SELECT t1.id,
+               t1.report_count,
+               t1.report_type,
                t2.task_code,
                t4.sample_name,
                t1.count_price,
@@ -63,7 +67,7 @@
             LEFT JOIN test_product_item t6 ON t5.check_item_id = t6.check_item_id
             LEFT JOIN test_report_qualifcation t7 ON t6.check_item_id = t7.check_item_id
             left join test_report_record t8 on t1.id = t8.entrustment_id
-            left join test_report_record_detail t9 on t8.id = t9.record_id
+            left join test_report_record_detail t9 on t8.id = t9.record_id and t5.check_item_id = t9.check_item_id
         WHERE t1.id = #{id}
     </select>
 
