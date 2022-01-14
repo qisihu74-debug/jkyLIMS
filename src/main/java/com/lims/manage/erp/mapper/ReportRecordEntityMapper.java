@@ -29,4 +29,11 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     List<ReportRecordEntity> getSealList(@Param("type") String type, @Param("search") String search);
+
+    /**
+     * 更新url
+     * @param id
+     * @param url
+     */
+    void updateImgByid(Long id, String url);
 }

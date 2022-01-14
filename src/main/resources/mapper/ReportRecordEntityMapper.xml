@@ -380,4 +380,10 @@ WHERE 1=1
       AND report_code = #{search}
     </if>
   </select>
+
+  <update id="updateImgByid">
+    update test_report_record
+        set seal_url=#{url}
+        where id=#{id}
+  </update>
 </mapper>
