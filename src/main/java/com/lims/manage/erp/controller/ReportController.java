@@ -3,9 +3,12 @@ package com.lims.manage.erp.controller;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.MinIoUtil;
@@ -34,6 +37,8 @@ public class ReportController {
     private LogManagerService logManagerService;
     @Autowired
     private ReportService reportService;
+    @Autowired
+    private EntrustService entrustService;
 
     /**
      * 查询可制作报告任务单列表
@@ -94,8 +99,8 @@ public class ReportController {
      * @param id
      * @return
      */
-    @GetMapping("seal")
-    public Result seal(@RequestParam("list") List<String> list,Long id){
+    @PostMapping("seal")
+    public Result seal(@RequestParam("list") List<String> list,@RequestParam("id") Long id){
         if (CollectionUtils.isEmpty(list)){
             return ResultUtil.error("缺少必要的参数！");
         }
@@ -109,31 +114,37 @@ public class ReportController {
 
     /**
      * 报告预览
-     * @param type
      * @param reportCode
      * @return
      */
     @GetMapping("preview")
-    public Result preview(String type, String reportCode, HttpServletResponse response){
-        if (StringUtils.isEmpty(type) || StringUtils.isEmpty(reportCode)){
+    public Result preview(String reportCode, HttpServletResponse response){
+        if (StringUtils.isEmpty(reportCode)){
             return ResultUtil.error("缺少必要参数！");
         }
-        //TODO 根据报告模板url获取文件名
-        //查询报告信息
-        //获取文件名称
-        String fileName = "";
         try {
-            MinioClient client = MinIoUtil.minioClient;
-            InputStream object = client.getObject(BucketsConst.buckets_report, fileName);
-            //TODO 填充数据
+            //根据报告模板url获取文件名
+            ReportRecordEntity entity = reportService.getUrlByCode(reportCode);
+            String reportName = "";
+            String reportUrl = entity.getReportUrl();
+            if (StringUtils.isNotEmpty(reportUrl)){
+                reportName = reportUrl.substring(reportUrl.lastIndexOf("/")+1);
+            }
             Map<String,Object> map = new HashMap<>();
-            //EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
-            XWPFDocument document = reportService.preview(map, object);
+            //查询报告详细信息
+            List<ReportRecordDetailEntity> detailEntityList = reportService.getReportDetailByCode(reportCode);
+            MinioClient client = MinIoUtil.minioClient;
+            InputStream object = client.getObject(BucketsConst.buckets_report, reportName);
+            //填充数据
+            Long entrustId = reportService.getEntrustIdByCode(reportCode);
+            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
+            String sealUrl = entity.getSealUrl();
+            XWPFDocument document = reportService.preview(detailEntityList,detail, object,sealUrl.split(","));
             response.reset();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            fileName = URLEncoder.encode(fileName,"UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName="+fileName);
+            reportName = URLEncoder.encode(reportName,"UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName="+reportName);
             OutputStream outputStream = response.getOutputStream();
             document.write(outputStream);
             outputStream.close();

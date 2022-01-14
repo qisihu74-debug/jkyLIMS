@@ -10,6 +10,7 @@ import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
@@ -88,8 +89,25 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public XWPFDocument preview(Map<String, Object> map, InputStream object) {
+    public XWPFDocument preview(List<ReportRecordDetailEntity> detailEntityList, EntrustAddVo detail, InputStream object, String[] sealUrls) {
+
+
 
         return null;
+    }
+
+    @Override
+    public ReportRecordEntity getUrlByCode(String reportCode) {
+        return entityMapper.getUrlByCode(reportCode);
+    }
+
+    @Override
+    public Long getEntrustIdByCode(String reportCode) {
+        return entityMapper.getEntrustIdByCode(reportCode);
+    }
+
+    @Override
+    public List<ReportRecordDetailEntity> getReportDetailByCode(String reportCode) {
+        return recordDetailEntityMapper.getReportDetailByCode(reportCode);
     }
 }

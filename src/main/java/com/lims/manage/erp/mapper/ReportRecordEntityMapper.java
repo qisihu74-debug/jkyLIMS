@@ -36,4 +36,18 @@ public interface ReportRecordEntityMapper {
      * @param url
      */
     void updateImgByid(Long id, String url);
+
+    /**
+     * 获取模板url、印章url
+     * @param reportCode
+     * @return
+     */
+    ReportRecordEntity getUrlByCode(String reportCode);
+
+    /**
+     * 根据报告编号获取委托单id
+     * @param reportCode
+     * @return
+     */
+    Long getEntrustIdByCode(String reportCode);
 }

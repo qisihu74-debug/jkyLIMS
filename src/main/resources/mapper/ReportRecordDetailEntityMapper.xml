@@ -128,4 +128,22 @@
       coordinate = #{coordinate,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
+
+  <select id="getReportDetailByCode" resultType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        SELECT
+	rrd.id,
+	rrd.record_id,
+	rrd.check_item_id,
+	rrd.check_item_name,
+	rrd.specs_content,
+	rrd.check_result,
+	rrd.judge_result,
+	rrd.coordinate
+
+FROM
+	test_report_record rr
+LEFT JOIN test_report_record_detail rrd ON rr.id = rrd.record_id
+WHERE
+	rr.report_code = #{reportCode}
+  </select>
 </mapper>

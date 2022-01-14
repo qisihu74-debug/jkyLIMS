@@ -107,6 +107,14 @@ public class ReportRecordEntity {
      *操作时间，报告发出后录入数据时的时间
      */
     private Date operateTime;
+    /**
+     * 报告模板url
+     */
+    private String reportUrl;
+    /**
+     * 印章url
+     */
+    private String sealUrl;
 
     public ReportRecordEntity() {
     }

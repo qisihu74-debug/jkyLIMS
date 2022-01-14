@@ -17,14 +17,8 @@ import java.util.List;
  */
 public class TST {
     public static void main(String[] args) {
-        EntrustAddVo entrustAddVo = new EntrustAddVo();
-        entrustAddVo.setAcceptanceDate(new Date(System.currentTimeMillis()));
-        entrustAddVo.setBusinessAcceptor("111");
-        entrustAddVo.setCheckPurpose("111");
-        entrustAddVo.setEntrustCompany("111");
-        entrustAddVo.setEntrustPeople("李四");
-        entrustAddVo.setEntrustType("www");
-        entrustAddVo.setIsSave("11");
-        entrustAddVo.setPaymentMethod("3w2q3e");
+        String reportUrl = "http://192.168.2.35:9000/seal-cns-cma/cns.jpg";
+        String image = reportUrl.substring(reportUrl.lastIndexOf("/")+1);
+        System.out.println("==========="+image);
     }
 }

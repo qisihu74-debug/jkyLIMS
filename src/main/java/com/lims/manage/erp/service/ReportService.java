@@ -1,6 +1,9 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
@@ -55,9 +58,31 @@ public interface ReportService {
 
     /**
      * 报告预览
-     * @param map
+     * @param detailEntityList
      * @param object
+     * @param sealUrls
      * @return
      */
-    XWPFDocument preview(Map<String, Object> map, InputStream object);
+    XWPFDocument preview(List<ReportRecordDetailEntity> detailEntityList, EntrustAddVo detail, InputStream object, String[] sealUrls);
+
+    /**
+     * 根据报告编号获取报告模板地址、印章地址
+     * @param reportCode
+     * @return
+     */
+    ReportRecordEntity getUrlByCode(String reportCode);
+
+    /**
+     * 根据报告编号获取委托单id
+     * @param reportCode
+     * @return
+     */
+    Long getEntrustIdByCode(String reportCode);
+
+    /**
+     * 查询报告的详细信息
+     * @param reportCode
+     * @return
+     */
+    List<ReportRecordDetailEntity> getReportDetailByCode(String reportCode);
 }
