@@ -26,6 +26,10 @@ public class TaskDetailInfoVo {
      * 判定依据
      */
     private String judgmentBasis;
+    /**
+     * 报告用章
+     */
+    private String sealType;
     private String fileUrl;//下载附件
     private List<SampleDetailVo> sampleDetailList;//样品信息
 

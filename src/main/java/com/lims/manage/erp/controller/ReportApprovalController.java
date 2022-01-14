@@ -256,7 +256,7 @@ public class ReportApprovalController {
         if(reportApprovalVo1.getState()!=1&&reportApprovalVo1.getState()!=0){
             return ResultUtil.error(678, "审批信息有误");
         }
-        if(reportApprovalVo1.getSealType()==null){
+        if(reportApprovalVo1.getSealType()==null||reportApprovalVo1.getSealType().equals("")){
             return ResultUtil.error(678, "印章不能为空");
         }
         //1、 获取抢单人信息
@@ -285,10 +285,26 @@ public class ReportApprovalController {
         }
         Boolean flag = reportApprovalService.verify_data(reportApprovalVo1);
         if (flag) {
-            return ResultUtil.success("审批成功");
+            return ResultUtil.success("签发成功");
         }
-        return ResultUtil.error(678, "审批失败");
+        return ResultUtil.error(678, "签发失败");
     }
+
+    /**
+     * 报告审批历史查询列表
+     * @param search
+     * @return
+     */
+    @GetMapping("/verify_history")
+    public Result verify_history(String search) {
+
+        List<ReportApprovalVo> list = reportApprovalService.verify_history(search);
+        if(!list.isEmpty()){
+            return ResultUtil.success(list);
+        }
+        return ResultUtil.success(list);
+    }
+
 
 
 

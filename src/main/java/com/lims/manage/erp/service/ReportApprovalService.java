@@ -29,9 +29,6 @@ public interface ReportApprovalService {
 
     /**
      * 进行审批
-     * @param id
-     * @param peroration
-     * @param reason
      * @return
      */
     Boolean approval_data(ReportApprovalVo reportApprovalVo1);
@@ -71,6 +68,13 @@ public interface ReportApprovalService {
      * @return
      */
     Boolean verify_data(ReportApprovalVo reportApprovalVo);
+
+    /**
+     * 报告签发历史记录
+     * @param search
+     * @return
+     */
+    List<ReportApprovalVo> verify_history(String search);
 
 
 

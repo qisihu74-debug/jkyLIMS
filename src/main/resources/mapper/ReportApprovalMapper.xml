@@ -73,7 +73,8 @@
         t2.entrust_type checkPurpose,
         t2.sampling_method AS samplingMethod,
         t2.entrustment_no AS entrustmentNo,
-        t1.entrustment_id AS entrustmentId
+        t1.entrustment_id AS entrustmentId,
+        t1.seal_type AS sealType
         FROM
             test_report_record AS t1
             LEFT JOIN test_entrusted_info AS t2 on t2.id = t1.entrustment_id
@@ -160,7 +161,8 @@
         task_code,
         state,
         applicant,
-        verifyer,
+        issuer,
+        issuer_time,
         verifyer_time
         FROM
         test_report_record

@@ -70,6 +70,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean approval_data(ReportApprovalVo reportApprovalVo1) {
 //        0是通过 1 是驳回
+//         报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
         Integer state = 0;
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
         if (reportApprovalVo1.getState() == 0) {
@@ -81,7 +82,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         }
         if (reportApprovalVo1.getState() == 1) {
             // 驳回 对抢单人清空 抢单时间清空 状态改变 如果有备注 选填
-            state = 0;
+            state = 1;
             reportApprovalVo.setVerifyerTime(null);
             reportApprovalVo.setVerifyer(null);
         }
@@ -158,6 +159,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         // 报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
         Integer state = 0;
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
+        reportApprovalVo.setSealType(reportApprovalVo1.getSealType());
         if (reportApprovalVo1.getState() == 0) {
             //通过6已签
             state = 6;
@@ -166,19 +168,25 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalVo.setIssuer(data.getIssuer());
         }
         if (reportApprovalVo1.getState() == 1) {
-            // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填
-            state = 0;
+            // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填 清除信息 退回上一步
+            state = 4;
             reportApprovalVo.setIssuerTime(null);
             reportApprovalVo.setIssuer(null);
+            reportApprovalVo.setSealType(null);
         }
         reportApprovalVo.setId(reportApprovalVo1.getId());
         reportApprovalVo.setReason(reportApprovalVo1.getReason());
         reportApprovalVo.setState(state);
-        reportApprovalVo.setSealType(reportApprovalVo1.getSealType());
         Integer status = reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
         if(status==1){
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<ReportApprovalVo> verify_history(String search) {
+
+        return  reportApprovalMapper.getgetVerifyList(search,6);
     }
 }
