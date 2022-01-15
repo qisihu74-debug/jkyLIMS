@@ -50,7 +50,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean preserve(ReportPreserveVo vo) {
         long recordId = GenID.getID();
-        Boolean isOver = false;
+        boolean isOver = false;
         List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
         for (ReportRecordDetailEntity e : checkInfos) {
             e.setRecordId(recordId);
@@ -64,7 +64,7 @@ public class ReportServiceImpl implements ReportService {
 
         }
         ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
-        if (vo.getIsOver()) {
+        if (isOver) {
             reportRecordEntity.setState("1");
         } else {
             reportRecordEntity.setState("2");
@@ -76,7 +76,6 @@ public class ReportServiceImpl implements ReportService {
         if (insert < 1) {
             return false;
         }
-
         return true;
     }
 
@@ -103,7 +102,6 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public XWPFDocument preview(List<ReportRecordDetailEntity> detailEntityList, EntrustAddVo detail, InputStream object, String[] sealUrls) {
-
 
 
         return null;
