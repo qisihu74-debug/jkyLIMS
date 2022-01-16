@@ -3,6 +3,7 @@ package com.lims.manage.erp.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -29,6 +30,7 @@ public class ReportRecordEntity {
     /**
      * 要求完成时间
      */
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date requiredCompletionTime;
     /**
      * 任务编号
@@ -48,63 +50,63 @@ public class ReportRecordEntity {
      */
     private String reportType;
     /**
-     *审批时间
+     * 审批时间
      */
     private Date verifyerTime;
     /**
-     *签发时间
+     * 签发时间
      */
     private Date issuerTime;
     /**
-     *盖章类型
+     * 盖章类型
      */
     private String sealType;
     /**
-     *审批驳回原因
+     * 审批驳回原因
      */
     private String applyReason;
     /**
-     *签发驳回原因
+     * 签发驳回原因
      */
     private String issuReason;
     /**
-     *审核人姓名
+     * 审核人姓名
      */
     private String verifyer;
     /**
-     *签发人
+     * 签发人
      */
     private String issuer;
     /**
-     *报告提交申请人
+     * 报告提交申请人
      */
     private String applicant;
     /**
-     *盖章人
+     * 盖章人
      */
     private String sealer;
     /**
-     *盖章时间
+     * 盖章时间
      */
     private Date sealTime;
     /**
-     *报告发出人
+     * 报告发出人
      */
     private String reportManager;
     /**
-     *报告发出时间
+     * 报告发出时间
      */
     private Date reportTime;
     /**
-     *领取报告人员
+     * 领取报告人员
      */
     private String addressee;
     /**
-     *运单编号
+     * 运单编号
      */
     private String waybill;
     /**
-     *操作时间，报告发出后录入数据时的时间
+     * 操作时间，报告发出后录入数据时的时间
      */
     private Date operateTime;
     /**

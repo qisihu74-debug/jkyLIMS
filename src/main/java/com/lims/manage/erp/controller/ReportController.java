@@ -15,16 +15,23 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import io.minio.MinioClient;
+import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.xmlpull.v1.XmlPullParserException;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +46,8 @@ public class ReportController {
     private ReportService reportService;
     @Autowired
     private EntrustService entrustService;
+
+    private MinioClient client = MinIoUtil.minioClient;
 
     /**
      * 查询可制作报告任务单列表
@@ -135,7 +144,7 @@ public class ReportController {
             Map<String, Object> map = new HashMap<>();
             //查询报告详细信息
             List<ReportRecordDetailEntity> detailEntityList = reportService.getReportDetailByCode(reportCode);
-            MinioClient client = MinIoUtil.minioClient;
+//            MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(BucketsConst.buckets_report, reportName);
             //填充数据
             Long entrustId = reportService.getEntrustIdByCode(reportCode);
@@ -154,6 +163,41 @@ public class ReportController {
             log.info("报告预览失败：", ex.getMessage());
         }
         return null;
+    }
+
+    /**
+     * 预览报告模板
+     *
+     * @param reportCode
+     * @param response
+     */
+    @RequestMapping("previewTemplate")
+    public void previewTemplate(String reportCode, HttpServletResponse response) {
+        System.out.println("文件路径：" + reportCode);
+        try {
+            // 调用statObject()来判断对象是否存在。
+            // 如果不存在, statObject()抛出异常,
+            // 否则则代表对象存在。
+            client.statObject("report-pdf", reportCode + ".pdf");
+            // 获取"myobject"的输入流。
+            InputStream in = client.getObject("report-pdf", reportCode + ".pdf");
+            //使用response,将pdf文件以流的方式发送的前端浏览器上
+            ServletOutputStream outputStream = response.getOutputStream();
+            int i = IOUtils.copy(in, outputStream);   // copy流数据,i为字节数
+            in.close();
+            outputStream.close();
+            System.out.println("流已关闭,可预览,该文件字节大小：" + i);
+        } catch (MinioException e) {
+            System.out.println("Error occurred: " + e);
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
