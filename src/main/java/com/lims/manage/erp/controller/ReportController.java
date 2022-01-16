@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.mapper.ReportMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -51,8 +52,8 @@ public class ReportController {
     private ReportService reportService;
     @Autowired
     private EntrustService entrustService;
-
-    private MinioClient client = MinIoUtil.minioClient;
+    @Autowired
+    private ReportMapper reportMapper;
 
     /**
      * 查询可制作报告任务单列表
@@ -63,6 +64,28 @@ public class ReportController {
     public Result getSampleList() {
         return ResultUtil.success("获取可制作报告任务单成功！", reportService.getReportList());
     }
+
+    /**
+     * 查询报告生成列表--历史查询
+     * @param search
+     * @return
+     */
+    @GetMapping("/list_history")
+    public Result getlist_history(String search) {
+        return ResultUtil.success("获取历史任务单成功！", reportService.getReportList_history(search));
+    }
+
+    /**
+     * 查询报告生成列表--历史查询_详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/list_history_details")
+    public Result getlist_history_details(Long id) {
+        return ResultUtil.success("获取历史任务单成功！", reportMapper.getReportDetailHistory(id));
+    }
+
+
 
     /**
      * 报告生成--编辑按钮
@@ -135,6 +158,7 @@ public class ReportController {
      */
     @GetMapping("preview")
     public Result preview(String reportCode, HttpServletResponse response) {
+        MinioClient client = MinIoUtil.minioClient;
         if (StringUtils.isEmpty(reportCode)) {
             return ResultUtil.error("缺少必要参数！");
         }
@@ -179,6 +203,7 @@ public class ReportController {
     @RequestMapping("previewTemplate")
     public void previewTemplate(String reportCode, HttpServletResponse response) {
         System.out.println("文件路径：" + reportCode);
+        MinioClient client = MinIoUtil.minioClient;
         try {
             // 调用statObject()来判断对象是否存在。
             // 如果不存在, statObject()抛出异常,

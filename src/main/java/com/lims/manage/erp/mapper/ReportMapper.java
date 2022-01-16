@@ -1,10 +1,8 @@
 package com.lims.manage.erp.mapper;
 
-import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,4 +24,13 @@ public interface ReportMapper {
      * @return
      */
     ReportDetailVo getReportDetail(Long id);
+
+    List<ReportListVo> getReportList_history(ReportListVo reportListVo);
+
+    /**
+     * 获取历史详情
+     * @param id
+     * @return
+     */
+    ReportDetailVo getReportDetailHistory(Long id);
 }

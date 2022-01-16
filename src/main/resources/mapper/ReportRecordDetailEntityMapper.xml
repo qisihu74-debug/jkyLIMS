@@ -165,7 +165,7 @@
                 coordinate = #{coordinate,jdbcType=VARCHAR},
             </if>
         </set>
-        where id = #{record_id,jdbcType=BIGINT} and check_item_id = #{checkItemId,jdbcType=BIGINT}
+        where record_id = #{recordId,jdbcType=BIGINT} and check_item_id = #{checkItemId,jdbcType=BIGINT}
     </update>
 
 

@@ -42,6 +42,14 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public List<ReportListVo> getReportList_history(String search) {
+
+        ReportListVo reportListVo = new ReportListVo();
+        reportListVo.setTaskCode(search);
+        return reportMapper.getReportList_history(reportListVo);
+    }
+
+    @Override
     public ReportDetailVo getReportDetail(Long id) {
         return reportMapper.getReportDetail(id);
     }

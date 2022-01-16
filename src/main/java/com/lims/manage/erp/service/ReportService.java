@@ -23,6 +23,13 @@ public interface ReportService {
     List<ReportListVo> getReportList();
 
     /**
+     * 查询历史记录
+     * @param search
+     * @return
+     */
+    List<ReportListVo> getReportList_history(String search);
+
+    /**
      * 查询委托单--报告制作详情
      *
      * @param id
