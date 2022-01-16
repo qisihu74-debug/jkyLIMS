@@ -248,7 +248,7 @@ public class ReportController {
         return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList(productId));
     }
 
-    @PostMapping("download")
+    @GetMapping("download")
     public String downReport(Long id,String code, HttpServletResponse response) {
         ReportRecordEntity reportRecordEntity = reportService.selectByEntrustId(id);
         //从文件服务器拉取文件
