@@ -1,149 +1,172 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper" >
-  <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.ReportRecordDetailEntity" >
-    <constructor >
-      <idArg column="id" jdbcType="BIGINT" javaType="java.lang.Long" />
-      <arg column="record_id" jdbcType="BIGINT" javaType="java.lang.Long" />
-      <arg column="check_item_id" jdbcType="BIGINT" javaType="java.lang.Long" />
-      <arg column="check_item_name" jdbcType="VARCHAR" javaType="java.lang.String" />
-      <arg column="specs_content" jdbcType="VARCHAR" javaType="java.lang.String" />
-      <arg column="check_result" jdbcType="VARCHAR" javaType="java.lang.String" />
-      <arg column="judge_result" jdbcType="VARCHAR" javaType="java.lang.String" />
-      <arg column="coordinate" jdbcType="VARCHAR" javaType="java.lang.String" />
-    </constructor>
-  </resultMap>
-  <sql id="Base_Column_List" >
-    id, record_id, check_item_id, check_item_name, specs_content, check_result, judge_result, 
+<mapper namespace="com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper">
+    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        <constructor>
+            <idArg column="id" jdbcType="BIGINT" javaType="java.lang.Long"/>
+            <arg column="record_id" jdbcType="BIGINT" javaType="java.lang.Long"/>
+            <arg column="check_item_id" jdbcType="BIGINT" javaType="java.lang.Long"/>
+            <arg column="check_item_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="specs_content" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="check_result" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="judge_result" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="coordinate" jdbcType="VARCHAR" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , record_id, check_item_id, check_item_name, specs_content, check_result, judge_result,
     coordinate
-  </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select 
-    <include refid="Base_Column_List" />
-    from test_report_record_detail
-    where id = #{id,jdbcType=BIGINT}
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
-    delete from test_report_record_detail
-    where id = #{id,jdbcType=BIGINT}
-  </delete>
-  <insert id="insert" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity" >
-    insert into test_report_record_detail (id, record_id, check_item_id, 
-      check_item_name, specs_content, check_result, 
-      judge_result, coordinate)
-    values (#{id,jdbcType=BIGINT}, #{recordId,jdbcType=BIGINT}, #{checkItemId,jdbcType=BIGINT}, 
-      #{checkItemName,jdbcType=VARCHAR}, #{specsContent,jdbcType=VARCHAR}, #{checkResult,jdbcType=VARCHAR}, 
-      #{judgeResult,jdbcType=VARCHAR}, #{coordinate,jdbcType=VARCHAR})
-  </insert>
-  <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity" >
-    insert into test_report_record_detail
-    <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="id != null" >
-        id,
-      </if>
-      <if test="recordId != null" >
-        record_id,
-      </if>
-      <if test="checkItemId != null" >
-        check_item_id,
-      </if>
-      <if test="checkItemName != null" >
-        check_item_name,
-      </if>
-      <if test="specsContent != null" >
-        specs_content,
-      </if>
-      <if test="checkResult != null" >
-        check_result,
-      </if>
-      <if test="judgeResult != null" >
-        judge_result,
-      </if>
-      <if test="coordinate != null" >
-        coordinate,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="id != null" >
-        #{id,jdbcType=BIGINT},
-      </if>
-      <if test="recordId != null" >
-        #{recordId,jdbcType=BIGINT},
-      </if>
-      <if test="checkItemId != null" >
-        #{checkItemId,jdbcType=BIGINT},
-      </if>
-      <if test="checkItemName != null" >
-        #{checkItemName,jdbcType=VARCHAR},
-      </if>
-      <if test="specsContent != null" >
-        #{specsContent,jdbcType=VARCHAR},
-      </if>
-      <if test="checkResult != null" >
-        #{checkResult,jdbcType=VARCHAR},
-      </if>
-      <if test="judgeResult != null" >
-        #{judgeResult,jdbcType=VARCHAR},
-      </if>
-      <if test="coordinate != null" >
-        #{coordinate,jdbcType=VARCHAR},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity" >
-    update test_report_record_detail
-    <set >
-      <if test="recordId != null" >
-        record_id = #{recordId,jdbcType=BIGINT},
-      </if>
-      <if test="checkItemId != null" >
-        check_item_id = #{checkItemId,jdbcType=BIGINT},
-      </if>
-      <if test="checkItemName != null" >
-        check_item_name = #{checkItemName,jdbcType=VARCHAR},
-      </if>
-      <if test="specsContent != null" >
-        specs_content = #{specsContent,jdbcType=VARCHAR},
-      </if>
-      <if test="checkResult != null" >
-        check_result = #{checkResult,jdbcType=VARCHAR},
-      </if>
-      <if test="judgeResult != null" >
-        judge_result = #{judgeResult,jdbcType=VARCHAR},
-      </if>
-      <if test="coordinate != null" >
-        coordinate = #{coordinate,jdbcType=VARCHAR},
-      </if>
-    </set>
-    where id = #{id,jdbcType=BIGINT}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity" >
-    update test_report_record_detail
-    set record_id = #{recordId,jdbcType=BIGINT},
-      check_item_id = #{checkItemId,jdbcType=BIGINT},
-      check_item_name = #{checkItemName,jdbcType=VARCHAR},
-      specs_content = #{specsContent,jdbcType=VARCHAR},
-      check_result = #{checkResult,jdbcType=VARCHAR},
-      judge_result = #{judgeResult,jdbcType=VARCHAR},
-      coordinate = #{coordinate,jdbcType=VARCHAR}
-    where id = #{id,jdbcType=BIGINT}
-  </update>
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from test_report_record_detail
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from test_report_record_detail
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        insert into test_report_record_detail (id, record_id, check_item_id,
+                                               check_item_name, specs_content, check_result,
+                                               judge_result, coordinate)
+        values (#{id,jdbcType=BIGINT}, #{recordId,jdbcType=BIGINT}, #{checkItemId,jdbcType=BIGINT},
+                #{checkItemName,jdbcType=VARCHAR}, #{specsContent,jdbcType=VARCHAR}, #{checkResult,jdbcType=VARCHAR},
+                #{judgeResult,jdbcType=VARCHAR}, #{coordinate,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        insert into test_report_record_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="recordId != null">
+                record_id,
+            </if>
+            <if test="checkItemId != null">
+                check_item_id,
+            </if>
+            <if test="checkItemName != null">
+                check_item_name,
+            </if>
+            <if test="specsContent != null">
+                specs_content,
+            </if>
+            <if test="checkResult != null">
+                check_result,
+            </if>
+            <if test="judgeResult != null">
+                judge_result,
+            </if>
+            <if test="coordinate != null">
+                coordinate,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="recordId != null">
+                #{recordId,jdbcType=BIGINT},
+            </if>
+            <if test="checkItemId != null">
+                #{checkItemId,jdbcType=BIGINT},
+            </if>
+            <if test="checkItemName != null">
+                #{checkItemName,jdbcType=VARCHAR},
+            </if>
+            <if test="specsContent != null">
+                #{specsContent,jdbcType=VARCHAR},
+            </if>
+            <if test="checkResult != null">
+                #{checkResult,jdbcType=VARCHAR},
+            </if>
+            <if test="judgeResult != null">
+                #{judgeResult,jdbcType=VARCHAR},
+            </if>
+            <if test="coordinate != null">
+                #{coordinate,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        update test_report_record_detail
+        <set>
+            <if test="recordId != null">
+                record_id = #{recordId,jdbcType=BIGINT},
+            </if>
+            <if test="checkItemId != null">
+                check_item_id = #{checkItemId,jdbcType=BIGINT},
+            </if>
+            <if test="checkItemName != null">
+                check_item_name = #{checkItemName,jdbcType=VARCHAR},
+            </if>
+            <if test="specsContent != null">
+                specs_content = #{specsContent,jdbcType=VARCHAR},
+            </if>
+            <if test="checkResult != null">
+                check_result = #{checkResult,jdbcType=VARCHAR},
+            </if>
+            <if test="judgeResult != null">
+                judge_result = #{judgeResult,jdbcType=VARCHAR},
+            </if>
+            <if test="coordinate != null">
+                coordinate = #{coordinate,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        update test_report_record_detail
+        set record_id       = #{recordId,jdbcType=BIGINT},
+            check_item_id   = #{checkItemId,jdbcType=BIGINT},
+            check_item_name = #{checkItemName,jdbcType=VARCHAR},
+            specs_content   = #{specsContent,jdbcType=VARCHAR},
+            check_result    = #{checkResult,jdbcType=VARCHAR},
+            judge_result    = #{judgeResult,jdbcType=VARCHAR},
+            coordinate      = #{coordinate,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
 
-  <select id="getReportDetailByCode" resultType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
-        SELECT
-	rrd.id,
-	rrd.record_id,
-	rrd.check_item_id,
-	rrd.check_item_name,
-	rrd.specs_content,
-	rrd.check_result,
-	rrd.judge_result,
-	rrd.coordinate
+    <select id="getReportDetailByCode" resultType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        SELECT rrd.id,
+               rrd.record_id,
+               rrd.check_item_id,
+               rrd.check_item_name,
+               rrd.specs_content,
+               rrd.check_result,
+               rrd.judge_result,
+               rrd.coordinate
 
-FROM
-	test_report_record rr
-LEFT JOIN test_report_record_detail rrd ON rr.id = rrd.record_id
-WHERE
-	rr.report_code = #{reportCode}
-  </select>
+        FROM test_report_record rr
+                 LEFT JOIN test_report_record_detail rrd ON rr.id = rrd.record_id
+        WHERE rr.report_code = #{reportCode}
+    </select>
+
+    <update id="updateByRecordIdSelective" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        update test_report_record_detail
+        <set>
+            <if test="checkItemName != null">
+                check_item_name = #{checkItemName,jdbcType=VARCHAR},
+            </if>
+            <if test="specsContent != null">
+                specs_content = #{specsContent,jdbcType=VARCHAR},
+            </if>
+            <if test="checkResult != null">
+                check_result = #{checkResult,jdbcType=VARCHAR},
+            </if>
+            <if test="judgeResult != null">
+                judge_result = #{judgeResult,jdbcType=VARCHAR},
+            </if>
+            <if test="coordinate != null">
+                coordinate = #{coordinate,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{record_id,jdbcType=BIGINT} and check_item_id = #{checkItemId,jdbcType=BIGINT}
+    </update>
+
+
 </mapper>

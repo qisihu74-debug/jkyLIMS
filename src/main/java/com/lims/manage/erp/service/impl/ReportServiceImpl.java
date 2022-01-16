@@ -49,34 +49,52 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     @Override
     public Boolean preserve(ReportPreserveVo vo) {
-        long recordId = GenID.getID();
-        boolean isOver = false;
-        List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
-        for (ReportRecordDetailEntity e : checkInfos) {
-            e.setRecordId(recordId);
-            if (e.getJudgeResult() != null) {
-                isOver = true;
+        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
+        if (reportRecordEntity1 != null) {
+            String state = "1";
+            List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
+            for (ReportRecordDetailEntity e : checkInfos) {
+                e.setRecordId(reportRecordEntity1.getId());
+                if (e.getJudgeResult() == null) {
+                    state = "2";
+                }
+                int insert1 = recordDetailEntityMapper.updateByRecordIdSelective(e);
+                if (insert1 < 1) {
+                    return false;
+                }
             }
-            int insert1 = recordDetailEntityMapper.insert(e);
-            if (insert1 < 1) {
+            reportRecordEntity1.setState(state);
+            int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
+            if (update < 1) {
                 return false;
             }
-
-        }
-        ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
-        if (isOver) {
-            reportRecordEntity.setState("1");
+            return true;
         } else {
-            reportRecordEntity.setState("2");
-        }
-        reportRecordEntity.setReportCode("ZX-2021-SW-1471");
+            long recordId = GenID.getID();
+            String state = "1";
+            List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
+            for (ReportRecordDetailEntity e : checkInfos) {
+                e.setRecordId(recordId);
+                if (e.getJudgeResult() == null) {
+                    state = "2";
+                }
+                int insert1 = recordDetailEntityMapper.insert(e);
+                if (insert1 < 1) {
+                    return false;
+                }
 
-        reportRecordEntity.setId(recordId);
-        int insert = recordEntityMapper.insert(reportRecordEntity);
-        if (insert < 1) {
-            return false;
+            }
+            ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
+            reportRecordEntity.setState(state);
+            reportRecordEntity.setReportCode("ZX-2021-SW-1471");
+
+            reportRecordEntity.setId(recordId);
+            int insert = recordEntityMapper.insert(reportRecordEntity);
+            if (insert < 1) {
+                return false;
+            }
+            return true;
         }
-        return true;
     }
 
     @Override

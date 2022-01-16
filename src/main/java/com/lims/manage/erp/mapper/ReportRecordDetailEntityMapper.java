@@ -27,4 +27,13 @@ public interface ReportRecordDetailEntityMapper {
      * @return
      */
     List<ReportRecordDetailEntity> getReportDetailByCode(String reportCode);
+
+    /**
+     * 更新检测项数据
+     * @param record
+     * @return
+     */
+    int updateByRecordIdSelective(ReportRecordDetailEntity record);
+
+
 }

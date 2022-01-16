@@ -50,4 +50,14 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     Long getEntrustIdByCode(String reportCode);
+
+    /**
+     * 查询是否存在委托单信息
+     * @param entrustId
+     * @return
+     */
+    ReportRecordEntity selectByEntrustId(Long entrustId);
+
+    int updateByEntrustIdSelective(ReportRecordEntity record);
+
 }
