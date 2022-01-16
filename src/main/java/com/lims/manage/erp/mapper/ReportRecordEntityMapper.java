@@ -58,6 +58,11 @@ public interface ReportRecordEntityMapper {
      */
     ReportRecordEntity selectByEntrustId(Long entrustId);
 
+    /**
+     * 更新报告状态
+     * @param record
+     * @return
+     */
     int updateByEntrustIdSelective(ReportRecordEntity record);
 
 }

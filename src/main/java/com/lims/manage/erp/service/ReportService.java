@@ -107,4 +107,19 @@ public interface ReportService {
      * @return
      */
     List<ReportTemplateEntity> getReportTemplateList(String productId);
+
+    /**
+     * 查询存在委托单报告信息
+     * @param entrustId
+     * @return
+     */
+    ReportRecordEntity selectByEntrustId(Long entrustId);
+
+    /**
+     * 根据recordId获取检测项信息
+     *
+     * @param recordId
+     * @return
+     */
+    List<ReportRecordDetailEntity> getCheckInfoByRecordId(Long recordId);
 }

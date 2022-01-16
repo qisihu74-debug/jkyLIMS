@@ -168,5 +168,10 @@
         where record_id = #{recordId,jdbcType=BIGINT} and check_item_id = #{checkItemId,jdbcType=BIGINT}
     </update>
 
+    <select id="getCheckInfoByRecordId" resultType="com.lims.manage.erp.entity.ReportRecordDetailEntity" parameterType="java.lang.Long">
+        select *
+        from test_report_record_detail
+        where record_id = #{recordId,jdbcType=BIGINT}
+    </select>
 
 </mapper>
