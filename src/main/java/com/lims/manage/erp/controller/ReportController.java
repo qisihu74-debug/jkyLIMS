@@ -91,7 +91,7 @@ public class ReportController {
      */
     @GetMapping("/list_history_details")
     public Result getlist_history_details(Long id) {
-        return ResultUtil.success("获取历史任务单成功！", reportMapper.getReportDetailHistory(id));
+        return ResultUtil.success("获取历史任务单成功！", reportService.getReportList_history_details(id));
     }
 
 
@@ -181,7 +181,7 @@ public class ReportController {
             Map<String, Object> map = new HashMap<>();
             //查询报告详细信息
             List<ReportRecordDetailEntity> detailEntityList = reportService.getReportDetailByCode(reportCode);
-//            MinioClient client = MinIoUtil.minioClient;
+            MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(BucketsConst.buckets_report, reportName);
             //填充数据
             Long entrustId = reportService.getEntrustIdByCode(reportCode);
@@ -215,6 +215,7 @@ public class ReportController {
             // 调用statObject()来判断对象是否存在。
             // 如果不存在, statObject()抛出异常,
             // 否则则代表对象存在。
+            MinioClient client = MinIoUtil.minioClient;
             client.statObject("report-pdf", reportCode + ".pdf");
             // 获取"myobject"的输入流。
             InputStream in = client.getObject("report-pdf", reportCode + ".pdf");

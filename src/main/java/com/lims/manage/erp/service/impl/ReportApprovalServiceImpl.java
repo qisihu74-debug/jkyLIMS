@@ -109,6 +109,9 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
          * 获取任务单详情
          */
        taskDetailInfoVo =  reportApprovalMapper.getTaskDetail(id);
+       if(taskDetailInfoVo==null){
+           return taskDetailInfoVo;
+       }
        if(taskDetailInfoVo.getEntrustmentId()!=null){
            // 通过委托id 获取样品信息 及以下的 处理。
            List<SampleDetailVo> sampleDetailVoList  = reportApprovalMapper.getSampleDetailLis(taskDetailInfoVo.getEntrustmentId());

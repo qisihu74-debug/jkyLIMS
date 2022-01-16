@@ -1,7 +1,9 @@
 package com.lims.manage.erp.mapper;
 
+import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
 import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -33,4 +35,8 @@ public interface ReportMapper {
      * @return
      */
     ReportDetailVo getReportDetailHistory(Long id);
+
+    List<ReportSampleDetailVo> getReportHeadDetails(Long id);
+
+    List<ReportCheckItemDetailVo> getReportCheckItemList(Long id);
 }

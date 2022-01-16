@@ -9,18 +9,17 @@ import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.ReportDetailVo;
-import com.lims.manage.erp.vo.ReportListVo;
-import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class ReportServiceImpl implements ReportService {
@@ -47,6 +46,74 @@ public class ReportServiceImpl implements ReportService {
         ReportListVo reportListVo = new ReportListVo();
         reportListVo.setTaskCode(search);
         return reportMapper.getReportList_history(reportListVo);
+    }
+
+    @Override
+    public ReportSampleDetailVo getReportList_history_details(Long id) {
+        ReportSampleDetailVo reportSampleDetailVo = new ReportSampleDetailVo();
+        // 获取报告头部信息
+        List<ReportSampleDetailVo> list = reportMapper.getReportHeadDetails(id);
+        // 获取样品编号
+        Set<String> setSampleCode = new HashSet<>();
+        // 获取外观
+        Set<String> setOutwarde = new HashSet<>();
+        // 规格等级
+        Set<String> setSpecs = new HashSet<>();
+        // 判定依据
+        Set<String> setStandard = new HashSet<>();
+        // 处理信息
+        for(ReportSampleDetailVo reportSampleDetailVo1:list){
+            if(reportSampleDetailVo1.getSampleCode()!=null&&!reportSampleDetailVo1.getSampleCode().equals("")){
+                setSampleCode.add(reportSampleDetailVo1.getSampleCode());
+            }
+           if(reportSampleDetailVo1.getOutward()!=null&&!reportSampleDetailVo1.getOutward().equals("")){
+               setOutwarde.add(reportSampleDetailVo1.getOutward());
+           }
+           if(reportSampleDetailVo1.getSpecs()!=null&&!reportSampleDetailVo1.getSpecs().equals("")){
+               setSpecs.add(reportSampleDetailVo1.getSpecs());
+           }
+           if(reportSampleDetailVo1.getStandard()!=null&&!reportSampleDetailVo1.getStandard().equals("")){
+               setStandard.add(reportSampleDetailVo1.getStandard());
+           }
+        }
+        for(String str1:setSampleCode){
+            if(reportSampleDetailVo.getSampleCode()==null){
+                reportSampleDetailVo.setSampleCode(str1+"、");
+            }
+            else {
+                reportSampleDetailVo.setSampleCode(reportSampleDetailVo.getSampleCode()+str1+"、");
+            }
+        }
+        for(String str2:setOutwarde){
+            if(reportSampleDetailVo.getOutward()==null){
+                reportSampleDetailVo.setOutward(str2+"、");
+            }
+            else{
+                reportSampleDetailVo.setOutward(reportSampleDetailVo.getOutward()+str2+"、");
+            }
+
+        }
+        for (String str3:setSpecs){
+            if(reportSampleDetailVo.getSpecs()==null){
+                reportSampleDetailVo.setSpecs(str3+"、");
+            }
+            else {
+                reportSampleDetailVo.setSpecs(reportSampleDetailVo.getSpecs()+str3+"、");
+            }
+        }
+        for(String str4:setStandard){
+            if(reportSampleDetailVo.getStandard()==null){
+                reportSampleDetailVo.setStandard(str4+"、");
+            }
+            else {
+                reportSampleDetailVo.setStandard(reportSampleDetailVo.getStandard()+str4+"、");
+            }
+
+        }
+        // 获取检测项
+        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemList(id);
+        reportSampleDetailVo.setCheckItems(checkItemList);
+        return reportSampleDetailVo;
     }
 
     @Override
