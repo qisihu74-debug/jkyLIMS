@@ -19,10 +19,15 @@ import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.POIXMLDocument;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.flowable.common.engine.impl.util.CollectionUtil;
+import org.jodconverter.DocumentConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -51,8 +56,10 @@ public class ReportController {
     private ReportService reportService;
     @Autowired
     private EntrustService entrustService;
+    @Autowired
+    private DocumentConverter converter;  //用于转换
 
-    private MinioClient client = MinIoUtil.minioClient;
+    Logger logger = LoggerFactory.getLogger(ReportController.class);
 
     /**
      * 查询可制作报告任务单列表
@@ -135,6 +142,7 @@ public class ReportController {
      */
     @GetMapping("preview")
     public Result preview(String reportCode, HttpServletResponse response) {
+        MinioClient client = MinIoUtil.minioClient;
         if (StringUtils.isEmpty(reportCode)) {
             return ResultUtil.error("缺少必要参数！");
         }
@@ -179,6 +187,7 @@ public class ReportController {
     @RequestMapping("previewTemplate")
     public void previewTemplate(String reportCode, HttpServletResponse response) {
         System.out.println("文件路径：" + reportCode);
+        MinioClient client = MinIoUtil.minioClient;
         try {
             // 调用statObject()来判断对象是否存在。
             // 如果不存在, statObject()抛出异常,
@@ -216,22 +225,116 @@ public class ReportController {
         return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList(productId));
     }
 
-//    @PostMapping("download")
-//    public String downReport(@RequestBody ReportDownParamVo checkData, HttpServletResponse response) {
-////        ReportDownParamVo reportDownParamVo = JSONObject.parseObject(JSON.toJSONString(checkData), ReportDownParamVo.class);
-////        System.out.println("参数"+checkData);
-//        //从文件服务器拉取文件
-//        HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-//        String location = req.getServletContext().getRealPath("/file/");
-//        long template = System.currentTimeMillis();
-//        String templateTemp = location+template+".docx";
+    @PostMapping("download")
+    public String downReport(Long id,String code, HttpServletResponse response) {
+        ReportRecordEntity reportRecordEntity = reportService.selectByEntrustId(id);
+        //从文件服务器拉取文件
+        MinioClient client = MinIoUtil.minioClient;
+        HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        String location = req.getServletContext().getRealPath("/file/");
+        long template = System.currentTimeMillis();
+        String templateTemp = location + template + ".docx";
+        try {
+            client.statObject("report-word", code + ".docx");
+            InputStream in = client.getObject("report-word", code + ".docx");
+            OutputStream out = new FileOutputStream(templateTemp);
+            IOUtils.copy(in, out);
+            in.close();
+            out.close();
+        } catch (MinioException e) {
+            System.out.println("Error occurred: " + e);
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
+        //写入数据
+        List<ReportRecordDetailEntity> checkItemList = reportService.getCheckInfoByRecordId(reportRecordEntity.getId());
+        XWPFDocument doc = null;
+        try {
+            OPCPackage pack = POIXMLDocument.openPackage(templateTemp);
+            doc = new XWPFDocument(pack);
+            if (CollectionUtil.isNotEmpty(checkItemList)) {
+                //处理表格
+                Iterator<XWPFTable> it = doc.getTablesIterator();
+                //表格索引
+                int i = 1;
+                //获取表格信息
+                while (it.hasNext()) {
+                    XWPFTable table = it.next();
+                    List<XWPFTableRow> rows = table.getRows();
+                    //存放检测数据
+                    for (ReportRecordDetailEntity item : checkItemList) {
+                        int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
+                        int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
+                        int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
+                        if (i == page) {
+                            rows.get(row).getCell(column + 1).removeParagraph(0);
+                            rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
+                            rows.get(row).getCell(column + 2).removeParagraph(0);
+                            rows.get(row).getCell(column + 2).setText(item.getCheckResult());
+                            rows.get(row).getCell(column + 3).removeParagraph(0);
+                            rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
+                        }
+                    }
+                    i++;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //生成写入数据后的文档
+        String wordTemp = location + reportRecordEntity.getReportCode() + ".docx";
+        try {
+            FileOutputStream fopts = new FileOutputStream(wordTemp);
+            doc.write(fopts);
+            fopts.close();
+        } catch (Exception e) {
+            logger.error("word文档生成异常:{}", e);
+        }
+        //将word转换成pdf
+        File file = new File(wordTemp);//需要转换的文件
+        String pdfPath = location; //pdf文件生成保存的路径
+        long pdfName = System.currentTimeMillis();
+        String fileType = ".pdf"; //pdf文件后缀
+        String pdfTemp = pdfPath + reportRecordEntity.getReportCode() + fileType;  //将这三个拼接起来,就是我们最后生成文件保存的完整访问路径了
+        try {
+            File newFile = new File(location);//转换之后文件生成的地址
+            if (!newFile.exists()) {
+                newFile.mkdirs();
+            }
+            //文件转换
+            converter.convert(file).to(new File(pdfTemp)).execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //将PDF文件上传至文件服务器
+        try {
+            client.putObject("report-download", reportRecordEntity.getReportCode() + fileType, pdfTemp);
+        } catch (MinioException e) {
+            System.out.println("Error occurred: " + e);
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
+        //下载pdf文件
 //        try {
-//            minioClient.statObject("report-word", checkData.getCode()+".docx");
-//            InputStream in = minioClient.getObject("report-word", checkData.getCode() + ".docx");
-//            OutputStream out = new FileOutputStream(templateTemp);
-//            IOUtils.copy(in, out);
+//            minioClient.statObject("report-download", pdfName+fileType);
+//            InputStream in = minioClient.getObject("report-download", pdfName+fileType);
+//            ServletOutputStream outputStream = response.getOutputStream();
+//            int i = IOUtils.copy(in, outputStream);
 //            in.close();
-//            out.close();
+//            outputStream.close();
+//            System.out.println("流已关闭,可下载,该文件字节大小："+i);
 //        } catch (MinioException e) {
 //            System.out.println("Error occurred: " + e);
 //        } catch (XmlPullParserException e) {
@@ -243,122 +346,28 @@ public class ReportController {
 //        } catch (InvalidKeyException e) {
 //            e.printStackTrace();
 //        }
-//        //写入数据
-//        XWPFDocument doc = null;
-//        try {
-//            OPCPackage pack = POIXMLDocument.openPackage(templateTemp);
-//            doc = new XWPFDocument(pack);
-//            if (CollectionUtil.isNotEmpty(checkData.getCheckData())) {
-//                //处理表格
-//                Iterator<XWPFTable> it = doc.getTablesIterator();
-//                //表格索引
-//                int i = 1;
-//                //获取表格信息
-//                while (it.hasNext()) {
-//                    XWPFTable table = it.next();
-//                    List<XWPFTableRow> rows = table.getRows();
-//                    //存放检测数据
-//                    for (ReportCheckDataVo item: checkData.getCheckData()) {
-//                        int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
-//                        int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
-//                        int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
-//                        if(i == page){
-//                            rows.get(row).getCell(column+1).removeParagraph(0);
-//                            rows.get(row).getCell(column+1).setText(item.getStandard());
-//                            rows.get(row).getCell(column+2).removeParagraph(0);
-//                            rows.get(row).getCell(column+2).setText(item.getCheckResult());
-//                            rows.get(row).getCell(column+3).removeParagraph(0);
-//                            rows.get(row).getCell(column+3).setText(item.getResultJudgement());
-//                        }
-//                    }
-//                    i++;
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        //生成写入数据后的文档
-//        long word = System.currentTimeMillis();
-//        String wordTemp = location+word+".docx";
-//        try {
-//            FileOutputStream fopts = new FileOutputStream(wordTemp);
-//            doc.write(fopts);
-//            fopts.close();
-//        }catch (Exception e){
-//            logger.error("word文档生成异常:{}",e);
-//        }
-//        //将word转换成pdf
-//        File file = new File(wordTemp);//需要转换的文件
-//        String pdfPath=location; //pdf文件生成保存的路径
-//        long pdfName = System.currentTimeMillis();
-//        String fileType=".pdf"; //pdf文件后缀
-//        String pdfTemp=pdfPath+pdfName+fileType;  //将这三个拼接起来,就是我们最后生成文件保存的完整访问路径了
-//        try {
-//            File newFile = new File(location);//转换之后文件生成的地址
-//            if (!newFile.exists()) {
-//                newFile.mkdirs();
-//            }
-//            //文件转换
-//            converter.convert(file).to(new File(pdfTemp)).execute();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        //将PDF文件上传至文件服务器
-//        try {
-//            minioClient.putObject("report-download",  pdfName+fileType, pdfTemp);
-//        } catch(MinioException e) {
-//            System.out.println("Error occurred: " + e);
-//        } catch (XmlPullParserException e) {
-//            e.printStackTrace();
-//        } catch (NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (InvalidKeyException e) {
-//            e.printStackTrace();
-//        }
-//        //下载pdf文件
-////        try {
-////            minioClient.statObject("report-download", pdfName+fileType);
-////            InputStream in = minioClient.getObject("report-download", pdfName+fileType);
-////            ServletOutputStream outputStream = response.getOutputStream();
-////            int i = IOUtils.copy(in, outputStream);
-////            in.close();
-////            outputStream.close();
-////            System.out.println("流已关闭,可下载,该文件字节大小："+i);
-////        } catch (MinioException e) {
-////            System.out.println("Error occurred: " + e);
-////        } catch (XmlPullParserException e) {
-////            e.printStackTrace();
-////        } catch (NoSuchAlgorithmException e) {
-////            e.printStackTrace();
-////        } catch (IOException e) {
-////            e.printStackTrace();
-////        } catch (InvalidKeyException e) {
-////            e.printStackTrace();
-////        }
-//        String url = null;
-//        try {
-//            url = minioClient.presignedGetObject("report-download", pdfName+fileType, 60 * 60 * 24);
-//            System.out.println(url);
-//        } catch(MinioException e) {
-//            System.out.println("Error occurred: " + e);
-//        } catch (XmlPullParserException e) {
-//            e.printStackTrace();
-//        } catch (NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (InvalidKeyException e) {
-//            e.printStackTrace();
-//        }
-//        //删除临时文件
-//        File templateFile = new File(templateTemp);
-//        templateFile.delete();
-//        File wordFile = new File(wordTemp);
-//        wordFile.delete();
-//        File pdfFile = new File(pdfTemp);
-//        pdfFile.delete();
-//        return url;
-//    }
+        String url = null;
+        try {
+            url = client.presignedGetObject("report-download", reportRecordEntity.getReportCode() + fileType, 60 * 60 * 24);
+            System.out.println(url);
+        } catch (MinioException e) {
+            System.out.println("Error occurred: " + e);
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
+        //删除临时文件
+        File templateFile = new File(templateTemp);
+        templateFile.delete();
+        File wordFile = new File(wordTemp);
+        wordFile.delete();
+        File pdfFile = new File(pdfTemp);
+        pdfFile.delete();
+        return url;
+    }
 }

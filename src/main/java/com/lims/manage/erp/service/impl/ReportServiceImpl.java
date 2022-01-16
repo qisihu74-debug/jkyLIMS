@@ -144,4 +144,14 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportTemplateEntity> getReportTemplateList(String productId) {
         return templateEntityMapper.getReportTemplateList(productId);
     }
+
+    @Override
+    public ReportRecordEntity selectByEntrustId(Long entrustId) {
+        return recordEntityMapper.selectByEntrustId(entrustId);
+    }
+
+    @Override
+    public List<ReportRecordDetailEntity> getCheckInfoByRecordId(Long recordId) {
+        return recordDetailEntityMapper.getCheckInfoByRecordId(recordId);
+    }
 }

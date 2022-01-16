@@ -23,6 +23,7 @@ public interface ReportRecordDetailEntityMapper {
 
     /**
      * 根据报告编号获取报下的详细信息
+     *
      * @param reportCode
      * @return
      */
@@ -30,10 +31,17 @@ public interface ReportRecordDetailEntityMapper {
 
     /**
      * 更新检测项数据
+     *
      * @param record
      * @return
      */
     int updateByRecordIdSelective(ReportRecordDetailEntity record);
 
-
+    /**
+     * 根据recordId获取检测项信息
+     *
+     * @param recordId
+     * @return
+     */
+    List<ReportRecordDetailEntity> getCheckInfoByRecordId(Long recordId);
 }
