@@ -487,4 +487,15 @@ public class ReportController {
         return ResultUtil.success(pageInfo);
     }
 
+    /**
+     * 是否可以审批
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/isApprove")
+    public Result isApprove(Long id) {
+        return ResultUtil.success(reportService.isApprove(id));
+    }
+
 }

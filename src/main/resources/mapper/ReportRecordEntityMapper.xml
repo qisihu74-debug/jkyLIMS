@@ -456,4 +456,14 @@
             AND report_type = #{reportType}
         </if>
     </select>
+
+    <select id="isApprove" resultType="java.lang.String">
+        SELECT
+            state
+        FROM
+            test_report_record
+        WHERE
+            entrustment_id = 1638965471248101
+    </select>
+
 </mapper>

@@ -152,4 +152,6 @@ public interface ReportService {
      * @return
      */
     PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize,String type);
+
+    Boolean isApprove(Long id);
 }
