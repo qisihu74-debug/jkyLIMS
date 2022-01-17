@@ -75,6 +75,7 @@ public class ReportServiceImpl implements ReportService {
            if(reportSampleDetailVo1.getStandard()!=null&&!reportSampleDetailVo1.getStandard().equals("")){
                setStandard.add(reportSampleDetailVo1.getStandard());
            }
+            reportSampleDetailVo.setSampleName(reportSampleDetailVo1.getSampleName());
         }
         for(String str1:setSampleCode){
             if(reportSampleDetailVo.getSampleCode()==null){

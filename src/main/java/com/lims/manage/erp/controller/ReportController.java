@@ -27,6 +27,7 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.flowable.common.engine.impl.util.CollectionUtil;
 import org.jodconverter.DocumentConverter;
+import org.jodconverter.office.utils.Lo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +62,6 @@ public class ReportController {
     private DocumentConverter converter;  //用于转换
 
     Logger logger = LoggerFactory.getLogger(ReportController.class);
-    @Autowired
-    private ReportMapper reportMapper;
 
     /**
      * 查询可制作报告任务单列表
@@ -137,6 +136,18 @@ public class ReportController {
         }
         PageInfo pageInfo = reportService.sealList(type, search, pageNum, pageSize);
         return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * 根据任务单id 回显数据
+     * @param id
+     * @return
+     */
+    @GetMapping("getDetail")
+    public Result getDetail(Long id)
+    {
+
+        return null;
     }
 
     /**

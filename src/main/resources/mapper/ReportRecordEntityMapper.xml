@@ -361,6 +361,24 @@ sealer,jdbcType=VARCHAR},
         </if>
     </select>
 
+    <select id="getDetail" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+        report_type,
+        report_time,
+        addressee,
+        report_phone,
+        report_mailing_address,
+        waybill,
+        report_manager,
+        operate_time,
+        email,
+        id
+        FROM
+        test_report_record
+        WHERE
+        id = #{id}
+    </select>
+
     <update id="updateImgByid">
         update test_report_record
         set seal_url=#{url}

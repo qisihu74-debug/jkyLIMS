@@ -60,6 +60,8 @@ public interface ReportService {
      */
     PageInfo sealList(String type, String search, Integer pageNum, Integer pageSize);
 
+
+
     /**
      * 获取要盖的印章
      *

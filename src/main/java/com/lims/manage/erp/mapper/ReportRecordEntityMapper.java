@@ -30,6 +30,8 @@ public interface ReportRecordEntityMapper {
      */
     List<ReportRecordEntity> getSealList(@Param("type") String type, @Param("search") String search);
 
+
+    ReportRecordEntity getDetail(Long id);
     /**
      * 更新url
      * @param id

@@ -33,4 +33,10 @@ public class TaskDetailInfoVo {
     private String fileUrl;//下载附件
     private List<SampleDetailVo> sampleDetailList;//样品信息
 
+    public TaskDetailInfoVo(Long taskId) {
+        this.taskId = taskId;
+    }
+
+    public TaskDetailInfoVo() {
+    }
 }

@@ -104,13 +104,12 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 
     @Override
     public TaskDetailInfoVo getDetails(Long id) {
-        TaskDetailInfoVo taskDetailInfoVo = new TaskDetailInfoVo();
         /**
          * 获取任务单详情
          */
-       taskDetailInfoVo =  reportApprovalMapper.getTaskDetail(id);
+        TaskDetailInfoVo taskDetailInfoVo =  reportApprovalMapper.getTaskDetail(id);
        if(taskDetailInfoVo==null){
-           return taskDetailInfoVo;
+           return new TaskDetailInfoVo(id);
        }
        if(taskDetailInfoVo.getEntrustmentId()!=null){
            // 通过委托id 获取样品信息 及以下的 处理。

@@ -117,8 +117,20 @@ public class ReportRecordEntity {
      * 印章url
      */
     private String sealUrl;
-
+    /**
+     * 电子邮箱
+     */
     private String email;
+    /**
+     * 收件电话
+     */
+    private String reportPhone;
+
+    /**
+     *邮寄地址
+     */
+    private String reportMailingAddress;
+
 
     public ReportRecordEntity() {
     }
@@ -150,4 +162,5 @@ public class ReportRecordEntity {
         this.waybill = vo.getWaybill() == null ? null : vo.getWaybill();
         this.operateTime = vo.getOperateTime() == null ? null : vo.getOperateTime();
     }
+
 }

@@ -147,6 +147,7 @@ WHERE
 
     <select id="getReportCheckItemList" resultType="com.lims.manage.erp.vo.ReportCheckItemDetailVo">
 	  SELECT
+	        t2.id as checkItemId,
             t2.check_item_name as checkItemName,
             t2.specs_content as specsContent,
             t2.check_result checkResult,
