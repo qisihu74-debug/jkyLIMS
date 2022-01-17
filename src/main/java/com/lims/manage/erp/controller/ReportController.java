@@ -6,6 +6,8 @@ import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.mapper.ReportMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -14,6 +16,7 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import io.minio.MinioClient;
@@ -44,6 +47,7 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -59,6 +63,8 @@ public class ReportController {
     private EntrustService entrustService;
     @Autowired
     private DocumentConverter converter;  //用于转换
+    @Autowired
+    private ReportApprovalMapper reportApprovalMapper;
 
     Logger logger = LoggerFactory.getLogger(ReportController.class);
 
@@ -145,8 +151,40 @@ public class ReportController {
     @GetMapping("getDetail")
     public Result getDetail(Long id)
     {
+        if(id==null){
+            return ResultUtil.error("缺少必要的参数！");
+        }
+        return ResultUtil.success(reportService.getDetail(id));
+    }
 
-        return null;
+    /**
+     * 报告邮寄编辑
+     * @param reportRecordEntity
+     * @return
+     */
+    @PostMapping("saveMessage")
+    public Result saveMessage(@RequestBody ReportRecordEntity reportRecordEntity){
+        if(reportRecordEntity.getId()==null){
+            return ResultUtil.error("缺少必要的参数！");
+        }
+        //1、 获取抢单人信息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error(678, "token已经过期");
+        }
+        String name = reportApprovalMapper.getUserName(userInfo.getUserId());
+        if (name == null) {
+            return ResultUtil.error(678, "账号未配置使用人");
+        }
+        // 报告操作人
+        reportRecordEntity.setReportManager(name);
+        // 操作时间
+        reportRecordEntity.setOperateTime(new Date());
+        Boolean flag =  reportService.saveMessage(reportRecordEntity);
+        if(flag){
+            return ResultUtil.success("编辑报告信息成功!");
+        }
+        return ResultUtil.error("编辑报告信息失败!");
     }
 
     /**
@@ -188,7 +226,6 @@ public class ReportController {
             if (StringUtils.isNotEmpty(reportUrl)) {
                 reportName = reportUrl.substring(reportUrl.lastIndexOf("/") + 1);
             }
-            Map<String, Object> map = new HashMap<>();
             //查询报告详细信息
             List<ReportRecordDetailEntity> detailEntityList = reportService.getReportDetailByCode(reportCode);
             MinioClient client = MinIoUtil.minioClient;
@@ -197,7 +234,8 @@ public class ReportController {
             Long entrustId = reportService.getEntrustIdByCode(reportCode);
             EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             String sealUrl = entity.getSealUrl();
-            XWPFDocument document = reportService.preview(detailEntityList, detail, object, sealUrl.split(","));
+            XWPFDocument document = reportService.preview(reportCode,detailEntityList, detail, object, sealUrl.split(","));
+            //TODO pdf转换、设置盖章
             response.reset();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
@@ -296,7 +334,6 @@ public class ReportController {
         //写入数据
         List<ReportRecordDetailEntity> checkItemList = reportService.getCheckInfoByRecordId(reportRecordEntity.getId());
         XWPFDocument doc = null;
-
         try {
             OPCPackage pack = POIXMLDocument.openPackage(templateTemp);
             doc = new XWPFDocument(pack);

@@ -303,6 +303,15 @@
             <if test="operateTime != null">
                 operate_time = #{operateTime,jdbcType=TIMESTAMP},
             </if>
+            <if test="email != null">
+                email = #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="reportPhone != null">
+                report_phone = #{reportPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="reportMailingAddress != null">
+                report_mailing_address = #{reportMailingAddress,jdbcType=VARCHAR},
+            </if>
         </set>
         where id = #{id,jdbcType=BIGINT}
     </update>
@@ -361,18 +370,22 @@
     </select>
 
     <select id="getDetail" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
-        SELECT report_type,
-               report_time,
-               addressee,
-               report_phone,
-               report_mailing_address,
-               waybill,
-               report_manager,
-               operate_time,
-               email,
-               id
-        FROM test_report_record
-        WHERE id = #{id}
+        SELECT
+        report_type,
+        report_time,
+        addressee,
+        report_phone,
+        report_mailing_address,
+        waybill,
+        report_manager,
+        operate_time,
+        email,
+        id,
+        entrustment_id
+        FROM
+        test_report_record
+        WHERE
+        id = #{id}
     </select>
 
     <update id="updateImgByid">

@@ -50,13 +50,14 @@ public class ReportApprovalController {
 
     /**
      * 抢单
+     *
      * @param reportApprovalVo1
      * @return
      */
     @PostMapping("applyfor_monad")
     public Result applyfor_monad(@RequestBody ReportApprovalVo reportApprovalVo1) {
 
-        if(reportApprovalVo1==null){
+        if (reportApprovalVo1 == null) {
             return ResultUtil.error(678, "缺少必填参数");
         }
         if (reportApprovalVo1.getId() == null) {
@@ -65,7 +66,7 @@ public class ReportApprovalController {
         Long id = reportApprovalVo1.getId();
         //1、 获取抢单人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error(678, "token已经过期");
         }
         String name = reportApprovalMapper.getUserName(userInfo.getUserId());
@@ -81,7 +82,7 @@ public class ReportApprovalController {
             return ResultUtil.error(678, "此任务单号已经被抢");
         }
         // 效验报告单状态
-        if(reportApprovalVo.getState()!=1){
+        if (reportApprovalVo.getState() != 1) {
             return ResultUtil.error(678, "此任务单号状态不对");
         }
         //3、进行抢单
@@ -98,26 +99,27 @@ public class ReportApprovalController {
 
     /**
      * 审批数据
+     *
      * @param reportApprovalVo1
      * @return
      */
     @PostMapping("approval_data")
-    public Result approval_data(@RequestBody ReportApprovalVo reportApprovalVo1){
-        if(reportApprovalVo1==null){
+    public Result approval_data(@RequestBody ReportApprovalVo reportApprovalVo1) {
+        if (reportApprovalVo1 == null) {
             return ResultUtil.error(678, "缺少必填参数");
         }
         if (reportApprovalVo1.getId() == null) {
             return ResultUtil.error(678, "任务单主键不能为空");
         }
-        if(reportApprovalVo1.getState()==null){
+        if (reportApprovalVo1.getState() == null) {
             return ResultUtil.error(678, "审批信息不能为空");
         }
-        if(reportApprovalVo1.getState()!=1&&reportApprovalVo1.getState()!=0){
+        if (reportApprovalVo1.getState() != 1 && reportApprovalVo1.getState() != 0) {
             return ResultUtil.error(678, "审批信息有误");
         }
         //1、 获取抢单人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error(678, "token已经过期");
         }
         String name = reportApprovalMapper.getUserName(userInfo.getUserId());
@@ -129,14 +131,14 @@ public class ReportApprovalController {
         if (reportApprovalVo == null) {
             return ResultUtil.error(678, "此任务单号不存在");
         }
-        if(reportApprovalVo.getVerifyer()==null){
+        if (reportApprovalVo.getVerifyer() == null) {
             return ResultUtil.error(678, "请先抢单");
         }
         if (!reportApprovalVo.getVerifyer().equals(name)) {
             return ResultUtil.error(678, "审批失败，审批人与抢单人不一致");
         }
         // 效验报告单状态
-        if(reportApprovalVo.getState()!=3){
+        if (reportApprovalVo.getState() != 3) {
             return ResultUtil.error(678, "此任务单号状态不对");
         }
         Boolean flag = reportApprovalService.approval_data(reportApprovalVo1);
@@ -148,6 +150,7 @@ public class ReportApprovalController {
 
     /**
      * 报告审批历史查询列表
+     *
      * @param search
      * @return
      */
@@ -155,7 +158,7 @@ public class ReportApprovalController {
     public Result applyfor_history(String search) {
 
         List<ReportApprovalVo> list = reportApprovalService.applyfor_history(search);
-        if(!list.isEmpty()){
+        if (!list.isEmpty()) {
             return ResultUtil.success(list);
         }
         return ResultUtil.success(list);
@@ -163,12 +166,13 @@ public class ReportApprovalController {
 
     /**
      * 根据报告id 查询详情
+     *
      * @param id
      * @return
      */
     @GetMapping("/applyfor_details")
     public Result applyfor_details(Long id) {
-        if(id==null){
+        if (id == null) {
             return ResultUtil.error(678, "任务单主键不能为空");
         }
         return ResultUtil.success("查询任务详情成功！", reportApprovalService.getDetails(id));
@@ -176,6 +180,7 @@ public class ReportApprovalController {
 
     /**
      * 报告签发列表
+     *
      * @param search
      * @param state
      * @return
@@ -184,7 +189,7 @@ public class ReportApprovalController {
     public Result verify_list(String search, Integer state) {
 
         List<ReportApprovalVo> list = reportApprovalService.getVerify_list(search, state);
-        if(!list.isEmpty()){
+        if (!list.isEmpty()) {
             return ResultUtil.success(list);
         }
         return ResultUtil.success(list);
@@ -192,13 +197,14 @@ public class ReportApprovalController {
 
     /**
      * 签发抢单
+     *
      * @param reportApprovalVo1
      * @return
      */
     @PostMapping("verify_monad")
     public Result verify_monad(@RequestBody ReportApprovalVo reportApprovalVo1) {
 
-        if(reportApprovalVo1==null){
+        if (reportApprovalVo1 == null) {
             return ResultUtil.error(678, "缺少必填参数");
         }
         if (reportApprovalVo1.getId() == null) {
@@ -207,7 +213,7 @@ public class ReportApprovalController {
         Long id = reportApprovalVo1.getId();
         //1、 获取抢单人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error(678, "token已经过期");
         }
         String name = reportApprovalMapper.getUserName(userInfo.getUserId());
@@ -223,7 +229,7 @@ public class ReportApprovalController {
             return ResultUtil.error(678, "此任务单号已经被抢");
         }
         // 效验报告单状态
-        if(reportApprovalVo.getState()!=4){
+        if (reportApprovalVo.getState() != 4) {
             return ResultUtil.error(678, "此任务单号状态不对");
         }
         //3、签发人进行抢单
@@ -239,29 +245,32 @@ public class ReportApprovalController {
 
     /**
      * 签发报告
+     *
      * @param reportApprovalVo1
      * @return
      */
     @PostMapping("verify_data")
-    public Result verify_data(@RequestBody ReportApprovalVo reportApprovalVo1){
-        if(reportApprovalVo1==null){
+    public Result verify_data(@RequestBody ReportApprovalVo reportApprovalVo1) {
+        if (reportApprovalVo1 == null) {
             return ResultUtil.error(678, "缺少必填参数");
         }
         if (reportApprovalVo1.getId() == null) {
             return ResultUtil.error(678, "任务单主键不能为空");
         }
-        if(reportApprovalVo1.getState()==null){
+        if (reportApprovalVo1.getState() == null) {
             return ResultUtil.error(678, "审批信息不能为空");
         }
-        if(reportApprovalVo1.getState()!=1&&reportApprovalVo1.getState()!=0){
+        if (reportApprovalVo1.getState() != 1 && reportApprovalVo1.getState() != 0) {
             return ResultUtil.error(678, "审批信息有误");
         }
-        if(reportApprovalVo1.getSealType()==null||reportApprovalVo1.getSealType().equals("")){
-            return ResultUtil.error(678, "印章不能为空");
+        if (reportApprovalVo1.getState() == 0) {
+            if (reportApprovalVo1.getSealType() == null || reportApprovalVo1.getSealType().equals("")) {
+                return ResultUtil.error(678, "印章不能为空");
+            }
         }
         //1、 获取抢单人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error(678, "token已经过期");
         }
         String name = reportApprovalMapper.getUserName(userInfo.getUserId());
@@ -273,14 +282,14 @@ public class ReportApprovalController {
         if (reportApprovalVo == null) {
             return ResultUtil.error(678, "此任务单号不存在");
         }
-        if(reportApprovalVo.getVerifyer()==null){
+        if (reportApprovalVo.getVerifyer() == null) {
             return ResultUtil.error(678, "请先抢单");
         }
         if (!reportApprovalVo.getVerifyer().equals(name)) {
             return ResultUtil.error(678, "审批失败，审批人与抢单人不一致");
         }
         // 签发报告单状态 应该是已经抢单 state =5
-        if(reportApprovalVo.getState()!=5){
+        if (reportApprovalVo.getState() != 5) {
             return ResultUtil.error(678, "此任务单号状态不对");
         }
         Boolean flag = reportApprovalService.verify_data(reportApprovalVo1);
@@ -292,6 +301,7 @@ public class ReportApprovalController {
 
     /**
      * 报告审批历史查询列表
+     *
      * @param search
      * @return
      */
@@ -299,16 +309,11 @@ public class ReportApprovalController {
     public Result verify_history(String search) {
 
         List<ReportApprovalVo> list = reportApprovalService.verify_history(search);
-        if(!list.isEmpty()){
+        if (!list.isEmpty()) {
             return ResultUtil.success(list);
         }
         return ResultUtil.success(list);
     }
-
-
-
-
-
 
 
 }

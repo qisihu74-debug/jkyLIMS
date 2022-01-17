@@ -42,6 +42,20 @@ public interface ReportService {
     ReportDetailVo getReportDetail(Long id);
 
     /**
+     * 报告邮寄编辑数据回显
+     * @param id
+     * @return
+     */
+    ReportRecordEntity getDetail(Long id);
+
+    /**
+     * 报告邮寄编辑
+     * @param reportRecordEntity
+     * @return
+     */
+    Boolean saveMessage(ReportRecordEntity reportRecordEntity);
+
+    /**
      * 保存信息
      *
      * @param vo
@@ -74,13 +88,13 @@ public interface ReportService {
     /**
      * 报告预览
      *
-     * @param map
+     * @param reportCode
      * @param detailEntityList
      * @param object
      * @param sealUrls
      * @return
      */
-    XWPFDocument preview(List<ReportRecordDetailEntity> detailEntityList, EntrustAddVo detail, InputStream object, String[] sealUrls);
+    XWPFDocument preview(String reportCode,List<ReportRecordDetailEntity> detailEntityList, EntrustAddVo detail, InputStream object, String[] sealUrls);
 
     /**
      * 根据报告编号获取报告模板地址、印章地址
