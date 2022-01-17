@@ -74,13 +74,13 @@ public interface ReportService {
     /**
      * 报告预览
      *
-     * @param map
+     * @param reportCode
      * @param detailEntityList
      * @param object
      * @param sealUrls
      * @return
      */
-    XWPFDocument preview(List<ReportRecordDetailEntity> detailEntityList, EntrustAddVo detail, InputStream object, String[] sealUrls);
+    XWPFDocument preview(String reportCode,List<ReportRecordDetailEntity> detailEntityList, EntrustAddVo detail, InputStream object, String[] sealUrls);
 
     /**
      * 根据报告编号获取报告模板地址、印章地址

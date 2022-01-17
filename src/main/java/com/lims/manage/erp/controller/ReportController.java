@@ -189,7 +189,6 @@ public class ReportController {
             if (StringUtils.isNotEmpty(reportUrl)) {
                 reportName = reportUrl.substring(reportUrl.lastIndexOf("/") + 1);
             }
-            Map<String, Object> map = new HashMap<>();
             //查询报告详细信息
             List<ReportRecordDetailEntity> detailEntityList = reportService.getReportDetailByCode(reportCode);
             MinioClient client = MinIoUtil.minioClient;
@@ -198,7 +197,8 @@ public class ReportController {
             Long entrustId = reportService.getEntrustIdByCode(reportCode);
             EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             String sealUrl = entity.getSealUrl();
-            XWPFDocument document = reportService.preview(detailEntityList, detail, object, sealUrl.split(","));
+            XWPFDocument document = reportService.preview(reportCode,detailEntityList, detail, object, sealUrl.split(","));
+            //TODO pdf转换、设置盖章
             response.reset();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");

@@ -2,20 +2,29 @@ package com.lims.manage.erp.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
+import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.vo.*;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +32,7 @@ import java.util.Set;
 
 @Service
 public class ReportServiceImpl implements ReportService {
+    Logger logger = LoggerFactory.getLogger(ReportServiceImpl.class);
     @Autowired
     private ReportMapper reportMapper;
     @Autowired
@@ -195,10 +205,119 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public XWPFDocument preview(List<ReportRecordDetailEntity> detailEntityList, EntrustAddVo detail, InputStream object, String[] sealUrls) {
+    public XWPFDocument preview(String reportCode,List<ReportRecordDetailEntity> detailEntityList, EntrustAddVo detail, InputStream object, String[] sealUrls) {
+        XWPFDocument doc = null;
+        Map<String,Object> map = new HashMap();
+        try {
+            doc = new XWPFDocument(object);
+            //检测项所属table定义集合
+            Map<Integer,List<ReportRecordDetailEntity>> listMap = new HashMap();
+            for (ReportRecordDetailEntity entity:detailEntityList) {
+                String[] split = entity.getCoordinate().split(",");
+                Integer key = Integer.valueOf(split[0]);
+                if (listMap.get(key) == null){
+                    List<ReportRecordDetailEntity> list = Lists.newArrayList();
+                    list.add(entity);
+                    listMap.put(key,list);
+                }else {
+                    List<ReportRecordDetailEntity> list = listMap.get(key);
+                    list.add(entity);
+                    listMap.put(key,list);
+                }
+                map.put(split[0],"index");//map作为下面的循环table的索引
+            }
+            int size = map.keySet().size();
+            List<XWPFTable> tables = doc.getTables();
+            List<XWPFTableRow> rows;
+            for (int i=0;i<size;i++) {
+                XWPFTable table = tables.get(i);
+                //第一个table包含表头、后面的table只有检测项数据
+                //获取表格对应的行
+                rows = table.getRows();
+                List<ReportRecordDetailEntity> list = listMap.get(i + 1);//检测项
+                if (i==0){
+                    //设置模板数据
+                    rows.get(3).getTableCells().get(1).setText("河南省公路工程实验检测中心有限公司");//检测单位
+                    rows.get(3).getTableCells().get(2).setText(reportCode);//报告编号
+                    rows.get(4).getTableCells().get(1).setText(detail.getEntrustCompany());//委托单位
+                    rows.get(4).getTableCells().get(2).setText(detail.getProjectName());//工程名称
+                    rows.get(5).getTableCells().get(1).setText(detail.getProjectPart());//工程部位
+                    //设置样品信息
+                    List<SampleEntity> samples = detail.getSamples();
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (SampleEntity sampleEntity :samples) {
+                        stringBuilder.append("样品名称：");
+                        stringBuilder.append(sampleEntity.getSampleName());
+                        stringBuilder.append(";");
+                        stringBuilder.append("样品编号：");
+                        stringBuilder.append(sampleEntity.getSampleCode());
+                        stringBuilder.append(";");
+                        stringBuilder.append("样品数量:");
+                        stringBuilder.append(sampleEntity.getSampleGroups());
+                        stringBuilder.append("片;");
+                        stringBuilder.append("样品状态:");
+                        stringBuilder.append(sampleEntity.getState());
+                        stringBuilder.append(";");
+                        stringBuilder.append("收样时间:");
+                        stringBuilder.append(sampleEntity.getReceivedDate());
+                        stringBuilder.append(";");
+                    }
+                    String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
+                    rows.get(6).getTableCells().get(1).setText(substring);
+                    //检测依据
+
+                    //判定依据
+
+                    //检测日期
+
+                    //主要仪器设备名称及编号
+
+                    //委托编号
+
+                    //检测类别
+
+                    //批号
+
+                    //生成厂家
+
+                    //规格等级
+
+                    //代表数量
 
 
-        return null;
+                    //根据坐标设置检测项
+                    for (ReportRecordDetailEntity entity :list) {
+                        //获取坐标
+                        String[] split = entity.getCoordinate().split(",");
+                        Integer x = Integer.valueOf(split[1]);
+                        Integer y = Integer.valueOf(split[2]);
+                        //设置技术指标
+                        rows.get(x).getTableCells().get(y+1).setText(entity.getSpecsContent());
+                        //设置检测结果
+                        rows.get(x).getTableCells().get(y+2).setText(entity.getCheckResult());
+                        //设置判定结果
+                        rows.get(x).getTableCells().get(y+3).setText(entity.getJudgeResult());
+                    }
+                }else {
+                    //根据坐标设置检测项
+                    for (ReportRecordDetailEntity entity :list) {
+                        //获取坐标
+                        String[] split = entity.getCoordinate().split(",");
+                        Integer x = Integer.valueOf(split[1]);
+                        Integer y = Integer.valueOf(split[2]);
+                        //设置技术指标
+                        rows.get(x).getTableCells().get(y+1).setText(entity.getSpecsContent());
+                        //设置检测结果
+                        rows.get(x).getTableCells().get(y+2).setText(entity.getCheckResult());
+                        //设置判定结果
+                        rows.get(x).getTableCells().get(y+3).setText(entity.getJudgeResult());
+                    }
+                }
+            }
+        }catch (Exception e){
+            logger.error("报告查看异常:{}",e);
+        }
+        return doc;
     }
 
     @Override
