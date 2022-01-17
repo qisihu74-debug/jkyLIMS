@@ -42,6 +42,20 @@ public interface ReportService {
     ReportDetailVo getReportDetail(Long id);
 
     /**
+     * 报告邮寄编辑数据回显
+     * @param id
+     * @return
+     */
+    ReportRecordEntity getDetail(Long id);
+
+    /**
+     * 报告邮寄编辑
+     * @param reportRecordEntity
+     * @return
+     */
+    Boolean saveMessage(ReportRecordEntity reportRecordEntity);
+
+    /**
      * 保存信息
      *
      * @param vo

@@ -1,6 +1,7 @@
 package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -96,6 +97,8 @@ public class ReportRecordEntity {
     /**
      * 报告发出时间
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date reportTime;
     /**
      * 领取报告人员
@@ -108,6 +111,8 @@ public class ReportRecordEntity {
     /**
      * 操作时间，报告发出后录入数据时的时间
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date operateTime;
     /**
      * 报告模板url
@@ -130,7 +135,10 @@ public class ReportRecordEntity {
      *邮寄地址
      */
     private String reportMailingAddress;
-
+    /**
+     * 报告生成时间（state=1时）
+     */
+    private Date reportCompleteTime;
 
     public ReportRecordEntity() {
     }

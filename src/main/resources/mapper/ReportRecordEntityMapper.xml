@@ -35,7 +35,8 @@
         , entrustment_id, report_code, sample_name, price, required_completion_time, task_code,
     state, number, report_type, verifyer_time, issuer_time, seal_type, apply_reason, 
     issu_reason, verifyer, issuer, applicant, sealer, seal_time, report_manager,
-    report_time, addressee, waybill, operate_time
+    report_time, addressee, waybill, operate_time,email,report_phone,report_mailing_address,
+    report_complete_time
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -57,7 +58,8 @@
                                         verifyer, issuer, applicant,
                                         sealer, seal_time, report_manager,
                                         report_time, addressee, waybill,
-                                        operate_time)
+                                        operate_time, email, report_phone,
+                                        report_mailing_address, report_complete_time)
         values (#{id,jdbcType=BIGINT}, #{entrustmentId,jdbcType=BIGINT}, #{reportCode,jdbcType=VARCHAR},
                 #{sampleName,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{requiredCompletionTime,jdbcType=TIMESTAMP},
                 #{taskCode,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR}, #{number,jdbcType=INTEGER},
@@ -66,7 +68,8 @@
                 #{verifyer,jdbcType=VARCHAR}, #{issuer,jdbcType=VARCHAR}, #{applicant,jdbcType=VARCHAR},
                 #{sealer,jdbcType=VARCHAR}, #{sealTime,jdbcType=TIMESTAMP}, #{reportManager,jdbcType=VARCHAR},
                 #{reportTime,jdbcType=TIMESTAMP}, #{addressee,jdbcType=VARCHAR}, #{waybill,jdbcType=VARCHAR},
-                #{operateTime,jdbcType=TIMESTAMP})
+                #{operateTime,jdbcType=TIMESTAMP}, #{email,jdbcType=VARCHAR}, #{report_phone,jdbcType=VARCHAR},
+                #{reportMailingAddress,jdbcType=VARCHAR}, #{reportCompleteTime,jdbcType=TIMESTAMP})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordEntity">
         insert into test_report_record
@@ -300,6 +303,15 @@
             <if test="operateTime != null">
                 operate_time = #{operateTime,jdbcType=TIMESTAMP},
             </if>
+            <if test="email != null">
+                email = #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="reportPhone != null">
+                report_phone = #{reportPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="reportMailingAddress != null">
+                report_mailing_address = #{reportMailingAddress,jdbcType=VARCHAR},
+            </if>
         </set>
         where id = #{id,jdbcType=BIGINT}
     </update>
@@ -322,11 +334,7 @@
             verifyer                 = #{verifyer,jdbcType=VARCHAR},
             issuer                   = #{issuer,jdbcType=VARCHAR},
             applicant                = #{applicant,jdbcType=VARCHAR},
-
-
-            sealer                   = #{
-
-sealer,jdbcType=VARCHAR},
+            sealer                   = #{sealer,jdbcType=VARCHAR},
             seal_time                = #{sealTime,jdbcType=TIMESTAMP},
             report_manager           = #{reportManager,jdbcType=VARCHAR},
             report_time              = #{reportTime,jdbcType=TIMESTAMP},
@@ -372,7 +380,8 @@ sealer,jdbcType=VARCHAR},
         report_manager,
         operate_time,
         email,
-        id
+        id,
+        entrustment_id
         FROM
         test_report_record
         WHERE
@@ -410,6 +419,9 @@ sealer,jdbcType=VARCHAR},
         <set>
             <if test="state != null">
                 state = #{state,jdbcType=VARCHAR},
+            </if>
+            <if test="reportCompleteTime != null">
+                state = #{reportCompleteTime,jdbcType=TIMESTAMP},
             </if>
         </set>
         where id = #{id,jdbcType=BIGINT}

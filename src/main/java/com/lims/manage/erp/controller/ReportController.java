@@ -5,6 +5,8 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.mapper.ReportMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -13,6 +15,7 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import io.minio.MinioClient;
@@ -43,10 +46,7 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -60,6 +60,8 @@ public class ReportController {
     private EntrustService entrustService;
     @Autowired
     private DocumentConverter converter;  //用于转换
+    @Autowired
+    private ReportApprovalMapper reportApprovalMapper;
 
     Logger logger = LoggerFactory.getLogger(ReportController.class);
 
@@ -146,10 +148,41 @@ public class ReportController {
     @GetMapping("getDetail")
     public Result getDetail(Long id)
     {
-
-        return null;
+        if(id==null){
+            return ResultUtil.error("缺少必要的参数！");
+        }
+        return ResultUtil.success(reportService.getDetail(id));
     }
 
+    /**
+     * 报告邮寄编辑
+     * @param reportRecordEntity
+     * @return
+     */
+    @PostMapping("saveMessage")
+    public Result saveMessage(@RequestBody ReportRecordEntity reportRecordEntity){
+        if(reportRecordEntity.getId()==null){
+            return ResultUtil.error("缺少必要的参数！");
+        }
+        //1、 获取抢单人信息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error(678, "token已经过期");
+        }
+        String name = reportApprovalMapper.getUserName(userInfo.getUserId());
+        if (name == null) {
+            return ResultUtil.error(678, "账号未配置使用人");
+        }
+        // 报告操作人
+        reportRecordEntity.setReportManager(name);
+        // 操作时间
+        reportRecordEntity.setOperateTime(new Date());
+        Boolean flag =  reportService.saveMessage(reportRecordEntity);
+        if(flag){
+            return ResultUtil.success("编辑报告信息成功!");
+        }
+        return ResultUtil.error("编辑报告信息失败!");
+    }
     /**
      * 盖章
      *
