@@ -126,4 +126,14 @@ public interface ReportService {
      * @return
      */
     List<ReportRecordDetailEntity> getCheckInfoByRecordId(Long recordId);
+
+    /**
+     * 待邮寄报告列表及已发出报告历史列表查询
+     * @param search
+     * @param reportType
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize);
 }

@@ -394,4 +394,17 @@ public class ReportController {
         pdfFile.delete();
         return url;
     }
+
+    /**
+     * 待邮寄报告列表及已发出报告历史列表查询
+     * @param search
+     * @param reportType
+     * @return
+     */
+    @GetMapping("sendList")
+    public Result sendList(String search,String reportType,Integer pageNum,Integer pageSize){
+        PageInfo pageInfo = reportService.getSendList(search,reportType,pageNum,pageSize);
+        return ResultUtil.success(pageInfo);
+    }
+
 }

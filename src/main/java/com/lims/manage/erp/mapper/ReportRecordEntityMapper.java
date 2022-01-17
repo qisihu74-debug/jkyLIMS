@@ -65,4 +65,11 @@ public interface ReportRecordEntityMapper {
      */
     int updateByEntrustIdSelective(ReportRecordEntity record);
 
+    /**
+     * 待邮寄报告列表及已发出报告历史列表查询
+     * @param search
+     * @param reportType
+     * @return
+     */
+    List<ReportRecordEntity> getSendList(String search, String reportType);
 }

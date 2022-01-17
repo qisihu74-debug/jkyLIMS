@@ -229,4 +229,12 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportRecordDetailEntity> getCheckInfoByRecordId(Long recordId) {
         return recordDetailEntityMapper.getCheckInfoByRecordId(recordId);
     }
+
+    @Override
+    public PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<ReportRecordEntity> list = entityMapper.getSendList(search,reportType);
+        PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
+        return pageInfo;
+    }
 }

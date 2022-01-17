@@ -397,4 +397,31 @@ sealer,jdbcType=VARCHAR},
         where id = #{id,jdbcType=BIGINT}
     </update>
 
+    <select id="getSealList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+        id,
+        report_code,
+        sample_name,
+        number,
+        report_type,
+        report_time,
+        addressee,
+        waybill,
+        email
+        FROM
+        test_report_record
+        WHERE 1=1
+        <if test='type == "1"'>
+            AND state = 7
+        </if>
+        <if test='type == "2"'>
+            AND state = 8
+        </if>
+        <if test="search != null and search != ''">
+            AND report_code = #{search}
+        </if>
+        <if test="reportType != null and reportType != ''">
+            AND report_type = #{reportType}
+        </if>
+    </select>
 </mapper>
