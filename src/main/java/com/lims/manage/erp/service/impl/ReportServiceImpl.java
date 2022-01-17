@@ -10,6 +10,7 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.service.ReportService;
+import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.vo.*;
 import org.apache.commons.collections.map.HashedMap;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.io.InputStream;
 import java.sql.Timestamp;
@@ -311,25 +313,38 @@ public class ReportServiceImpl implements ReportService {
                     String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
                     rows.get(6).getTableCells().get(1).setText(substring);
                     //检测依据
-
-                    //判定依据
-
+                    if (!CollectionUtils.isEmpty(samples)){
+                        StringBuilder stringBuilder1 = new StringBuilder();
+                        for (SampleEntity entity :samples) {
+                            List<JudgmentBasisVo> sampleCheckItem = entity.getJudgmentBasisVos();
+                            for (JudgmentBasisVo itemEntity:sampleCheckItem) {
+                                //TODO 根据类型区分检测依据和判定依据
+                                Integer standardId = itemEntity.getStandardId();
+                                //查询处理
+                                stringBuilder1.append("GB/T 2012-1");
+                                stringBuilder1.append(",");
+                            }
+                        }
+                        String substring1 = stringBuilder1.toString().substring(0, stringBuilder1.length() - 1);
+                        rows.get(7).getTableCells().get(1).setText(substring1);//检验依据
+                        rows.get(7).getTableCells().get(2).setText(substring1);//判定依据
+                    }
                     //检测日期
-
+                    rows.get(8).getTableCells().get(1).setText(DateUtil.formatDate(detail.getOperateDate()));
                     //主要仪器设备名称及编号
-
+                    rows.get(9).getTableCells().get(1).setText("");
                     //委托编号
-
+                    rows.get(10).getTableCells().get(1).setText(detail.getEntrustmentNo()+"");
                     //检测类别
-
+                    rows.get(10).getTableCells().get(2).setText(detail.getEntrustType());
                     //批号
-
+                    rows.get(11).getTableCells().get(1).setText(samples.get(0).getBatchNumber());
                     //生成厂家
-
+                    rows.get(11).getTableCells().get(2).setText(samples.get(0).getManufacturer());
                     //规格等级
-
+                    rows.get(12).getTableCells().get(1).setText(samples.get(0).getSpecs());
                     //代表数量
-
+                    rows.get(12).getTableCells().get(2).setText(samples.get(0).getGeneration());
 
                     //根据坐标设置检测项
                     for (ReportRecordDetailEntity entity :list) {
