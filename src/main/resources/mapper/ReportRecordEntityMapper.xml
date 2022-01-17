@@ -466,4 +466,12 @@
             entrustment_id = #{id}
     </select>
 
+    <select id="getReportList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+        entrustment_id,
+        state
+        FROM
+        test_report_record
+    </select>
+
 </mapper>

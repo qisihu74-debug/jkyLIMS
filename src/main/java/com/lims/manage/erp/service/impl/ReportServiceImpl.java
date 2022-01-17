@@ -52,7 +52,32 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<ReportListVo> getReportList() {
-        return reportMapper.getReportList();
+        // 报告生成列表
+        List<ReportListVo> reportList = reportMapper.getReportList();
+        // 已经生成的 报告列表
+        List<ReportRecordEntity> list = recordEntityMapper.getReportList();
+        //                        0 审批灰色 1 是可以审批
+        Integer state =0;
+        for(ReportListVo reportListVo:reportList){
+            for(ReportRecordEntity reportRecordEntity:list){
+                // 如果test_report_report 的 EntrustmentId = reportListVo.getId()
+                if(reportRecordEntity.getEntrustmentId().equals(reportListVo.getId())){
+                    if(reportRecordEntity.getState().equals("1")){
+                        // 报告已完成
+                        reportListVo.setState(1);
+                    }
+                    if(reportRecordEntity.getState().equals("2")){
+                        // 报告已完成
+                        reportListVo.setState(0);
+                    }
+                }
+                if(reportListVo.getState()==null){
+                    reportListVo.setState(0);
+                }
+            }
+        }
+
+        return reportList;
     }
 
     @Override
