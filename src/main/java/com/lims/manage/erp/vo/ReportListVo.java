@@ -12,5 +12,5 @@ public class ReportListVo {
     /**
      * 报告生成时间
      */
-    private String operateTime;
+    private String reportCompleteTime;
 }

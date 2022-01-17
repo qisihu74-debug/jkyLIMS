@@ -97,7 +97,7 @@
          sample_name as sampleName,
          price as countPrice,
          required_completion_time as requestDate,
-        operate_time as operateTime
+         report_complete_time as reportCompleteTime
          FROM
          test_report_record
          WHERE state !=2
