@@ -35,6 +35,8 @@ public class ReportServiceImpl implements ReportService {
     private ReportRecordEntityMapper recordEntityMapper;
     @Autowired
     private ReportRecordDetailEntityMapper recordDetailEntityMapper;
+    @Autowired
+    private EntrustEntityMapper entrustEntityMapper;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -63,52 +65,48 @@ public class ReportServiceImpl implements ReportService {
         // 判定依据
         Set<String> setStandard = new HashSet<>();
         // 处理信息
-        for(ReportSampleDetailVo reportSampleDetailVo1:list){
-            if(reportSampleDetailVo1.getSampleCode()!=null&&!reportSampleDetailVo1.getSampleCode().equals("")){
+        for (ReportSampleDetailVo reportSampleDetailVo1 : list) {
+            if (reportSampleDetailVo1.getSampleCode() != null && !reportSampleDetailVo1.getSampleCode().equals("")) {
                 setSampleCode.add(reportSampleDetailVo1.getSampleCode());
             }
-           if(reportSampleDetailVo1.getOutward()!=null&&!reportSampleDetailVo1.getOutward().equals("")){
-               setOutwarde.add(reportSampleDetailVo1.getOutward());
-           }
-           if(reportSampleDetailVo1.getSpecs()!=null&&!reportSampleDetailVo1.getSpecs().equals("")){
-               setSpecs.add(reportSampleDetailVo1.getSpecs());
-           }
-           if(reportSampleDetailVo1.getStandard()!=null&&!reportSampleDetailVo1.getStandard().equals("")){
-               setStandard.add(reportSampleDetailVo1.getStandard());
-           }
+            if (reportSampleDetailVo1.getOutward() != null && !reportSampleDetailVo1.getOutward().equals("")) {
+                setOutwarde.add(reportSampleDetailVo1.getOutward());
+            }
+            if (reportSampleDetailVo1.getSpecs() != null && !reportSampleDetailVo1.getSpecs().equals("")) {
+                setSpecs.add(reportSampleDetailVo1.getSpecs());
+            }
+            if (reportSampleDetailVo1.getStandard() != null && !reportSampleDetailVo1.getStandard().equals("")) {
+                setStandard.add(reportSampleDetailVo1.getStandard());
+            }
             reportSampleDetailVo.setSampleName(reportSampleDetailVo1.getSampleName());
         }
-        for(String str1:setSampleCode){
-            if(reportSampleDetailVo.getSampleCode()==null){
-                reportSampleDetailVo.setSampleCode(str1+"、");
-            }
-            else {
-                reportSampleDetailVo.setSampleCode(reportSampleDetailVo.getSampleCode()+str1+"、");
+        for (String str1 : setSampleCode) {
+            if (reportSampleDetailVo.getSampleCode() == null) {
+                reportSampleDetailVo.setSampleCode(str1 + "、");
+            } else {
+                reportSampleDetailVo.setSampleCode(reportSampleDetailVo.getSampleCode() + str1 + "、");
             }
         }
-        for(String str2:setOutwarde){
-            if(reportSampleDetailVo.getOutward()==null){
-                reportSampleDetailVo.setOutward(str2+"、");
-            }
-            else{
-                reportSampleDetailVo.setOutward(reportSampleDetailVo.getOutward()+str2+"、");
+        for (String str2 : setOutwarde) {
+            if (reportSampleDetailVo.getOutward() == null) {
+                reportSampleDetailVo.setOutward(str2 + "、");
+            } else {
+                reportSampleDetailVo.setOutward(reportSampleDetailVo.getOutward() + str2 + "、");
             }
 
         }
-        for (String str3:setSpecs){
-            if(reportSampleDetailVo.getSpecs()==null){
-                reportSampleDetailVo.setSpecs(str3+"、");
-            }
-            else {
-                reportSampleDetailVo.setSpecs(reportSampleDetailVo.getSpecs()+str3+"、");
+        for (String str3 : setSpecs) {
+            if (reportSampleDetailVo.getSpecs() == null) {
+                reportSampleDetailVo.setSpecs(str3 + "、");
+            } else {
+                reportSampleDetailVo.setSpecs(reportSampleDetailVo.getSpecs() + str3 + "、");
             }
         }
-        for(String str4:setStandard){
-            if(reportSampleDetailVo.getStandard()==null){
-                reportSampleDetailVo.setStandard(str4+"、");
-            }
-            else {
-                reportSampleDetailVo.setStandard(reportSampleDetailVo.getStandard()+str4+"、");
+        for (String str4 : setStandard) {
+            if (reportSampleDetailVo.getStandard() == null) {
+                reportSampleDetailVo.setStandard(str4 + "、");
+            } else {
+                reportSampleDetailVo.setStandard(reportSampleDetailVo.getStandard() + str4 + "、");
             }
 
         }
@@ -121,6 +119,48 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ReportDetailVo getReportDetail(Long id) {
         return reportMapper.getReportDetail(id);
+    }
+
+    @Override
+    public ReportRecordEntity getDetail(Long id) {
+        // 查询报告单信息
+        ReportRecordEntity reportDetail = recordEntityMapper.getDetail(id);
+        EntrustAddVo entrustData = new EntrustAddVo();
+        if (reportDetail.getReportType() == null) {
+            // 根据委托单id 获取 委托单信息下 报告方式、领报告人、收件电话、邮寄地址、邮箱
+            entrustData = entrustEntityMapper.selectByKeyId(reportDetail.getEntrustmentId());
+            // 报告发出方式
+            if (entrustData.getReportType() != null && !entrustData.getReportType().equals("")) {
+                reportDetail.setReportType(entrustData.getReportType());
+            }
+            // 领报告人
+            if (entrustData.getAddressee() != null && !entrustData.getAddressee().equals("")) {
+                reportDetail.setAddressee(entrustData.getAddressee());
+            }
+            // 收件电话
+            if (entrustData.getMobile() != null && !entrustData.getMobile().equals("")) {
+                reportDetail.setReportPhone(entrustData.getMobile());
+            }
+            // 邮寄地址
+            if (entrustData.getAddress() != null && !entrustData.getAddress().equals("")) {
+                reportDetail.setReportMailingAddress(entrustData.getAddress());
+            }
+            // 邮箱
+            if (entrustData.getMailbox() != null && !entrustData.getMailbox().equals("")) {
+                reportDetail.setEmail(entrustData.getMailbox());
+            }
+        }
+        return reportDetail;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Boolean saveMessage(ReportRecordEntity reportRecordEntity) {
+        Integer status = entityMapper.updateByPrimaryKeySelective(reportRecordEntity);
+        if(status==1){
+            return true;
+        }
+        return false;
     }
 
     @Transactional
@@ -141,7 +181,7 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
             reportRecordEntity1.setState(state);
-            if("1".equals(state)){
+            if ("1".equals(state)) {
                 reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
             }
             int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
@@ -165,7 +205,7 @@ public class ReportServiceImpl implements ReportService {
             }
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
             reportRecordEntity.setState(state);
-            if("1".equals(state)){
+            if ("1".equals(state)) {
                 reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
             }
             //生成报告编号
@@ -238,9 +278,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize,String type) {
-        PageHelper.startPage(pageNum,pageSize);
-        List<ReportRecordEntity> list = entityMapper.getSendList(search,reportType,type);
+    public PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize, String type) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<ReportRecordEntity> list = entityMapper.getSendList(search, reportType, type);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
