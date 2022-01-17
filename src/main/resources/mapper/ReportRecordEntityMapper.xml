@@ -397,7 +397,7 @@ sealer,jdbcType=VARCHAR},
         where id = #{id,jdbcType=BIGINT}
     </update>
 
-    <select id="getSealList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+    <select id="getSendList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         SELECT
         id,
         report_code,

@@ -71,5 +71,5 @@ public interface ReportRecordEntityMapper {
      * @param reportType
      * @return
      */
-    List<ReportRecordEntity> getSendList(String search, String reportType,String type);
+    List<ReportRecordEntity> getSendList(@Param("search") String search, @Param("reportType") String reportType,@Param("type") String type);
 }
