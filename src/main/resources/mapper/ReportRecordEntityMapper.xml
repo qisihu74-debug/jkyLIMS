@@ -407,7 +407,9 @@ sealer,jdbcType=VARCHAR},
         report_time,
         addressee,
         waybill,
-        email
+        email,
+        report_manager,
+        operate_time
         FROM
         test_report_record
         WHERE 1=1
