@@ -118,6 +118,8 @@ public class ReportRecordEntity {
      */
     private String sealUrl;
 
+    private String email;
+
     public ReportRecordEntity() {
     }
 
