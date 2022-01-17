@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.mapper.ReportMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -43,10 +44,8 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -260,6 +259,13 @@ public class ReportController {
         return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList(productId));
     }
 
+    /**
+     * 下载报告
+     * @param id
+     * @param code
+     * @param response
+     * @return
+     */
     @GetMapping("download")
     public String downReport(Long id,String code, HttpServletResponse response) {
         ReportRecordEntity reportRecordEntity = reportService.selectByEntrustId(id);
@@ -290,6 +296,7 @@ public class ReportController {
         //写入数据
         List<ReportRecordDetailEntity> checkItemList = reportService.getCheckInfoByRecordId(reportRecordEntity.getId());
         XWPFDocument doc = null;
+
         try {
             OPCPackage pack = POIXMLDocument.openPackage(templateTemp);
             doc = new XWPFDocument(pack);
@@ -302,6 +309,48 @@ public class ReportController {
                 while (it.hasNext()) {
                     XWPFTable table = it.next();
                     List<XWPFTableRow> rows = table.getRows();
+                    //存放表头信息
+                    EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
+                    if(i==1){
+                        rows.get(0).getCell(1).removeParagraph(0);
+                        rows.get(0).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
+                        rows.get(0).getCell(3).removeParagraph(0);
+                        rows.get(0).getCell(3).setText(entrustHistoryDetail.getProjectName());
+                        rows.get(1).getCell(1).removeParagraph(0);
+                        rows.get(1).getCell(1).setText(entrustHistoryDetail.getProjectPart());
+                        //样品信息
+                        SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
+                        rows.get(2).getCell(1).removeParagraph(0);
+                        rows.get(2).getCell(1).setText("样品名称："+(sampleEntity.getSampleName() == null?"——":sampleEntity.getSampleName())
+                        + "样品编号："+(sampleEntity.getSampleCode()==null?"——":sampleEntity.getSampleCode())
+                        + "样品数量："+(sampleEntity.getQuantityPerGroup()==null?"——":sampleEntity.getQuantityPerGroup())
+                        + "样品状态："+(sampleEntity.getOutward()==null?"——":sampleEntity.getOutward())
+                        + "收样时间："+(sampleEntity.getReceivedDate()==null?"——":sampleEntity.getReceivedDate()));
+                        //检测依据
+                        //判定依据
+                        //检测日期
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
+                        rows.get(4).getCell(1).removeParagraph(0);
+                        rows.get(4).getCell(1).setText(sdf.format(entrustHistoryDetail.getAcceptanceDate())+"~"
+                                +sdf.format(reportRecordEntity.getReportCompleteTime() == null?sdf.format(new Date()):reportRecordEntity.getReportCompleteTime()));
+                        //主要仪器
+                        //委托编号
+                        //检测类别
+                        rows.get(6).getCell(3).removeParagraph(0);
+                        rows.get(6).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
+                        //批号
+                        rows.get(7).getCell(1).removeParagraph(0);
+                        rows.get(7).getCell(1).setText(sampleEntity.getBatchNumber()==null?"——":sampleEntity.getBatchNumber());
+                        //生产厂家
+                        rows.get(7).getCell(3).removeParagraph(0);
+                        rows.get(7).getCell(3).setText(sampleEntity.getManufacturer()==null?"——":sampleEntity.getManufacturer());
+                        //规格等级
+                        rows.get(8).getCell(1).removeParagraph(0);
+                        rows.get(8).getCell(1).setText(sampleEntity.getSpecs()==null?"——":sampleEntity.getSpecs());
+                        //代表数量
+                        rows.get(8).getCell(3).removeParagraph(0);
+                        rows.get(8).getCell(3).setText(sampleEntity.getGeneration()==null?"——":sampleEntity.getGeneration());
+                    }
                     //存放检测数据
                     for (ReportRecordDetailEntity item : checkItemList) {
                         int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
