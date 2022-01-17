@@ -315,5 +315,14 @@ public class ReportApprovalController {
         return ResultUtil.success(list);
     }
 
+    @GetMapping("download")
+    public Result downloadData(Long checkItemId)
+    {
+        if(checkItemId==null){
+            return ResultUtil.error(678, "缺少必要参数");
+        }
+        // 根据检测项 下载数据
+        return ResultUtil.success( reportApprovalMapper.getCheckItemUrl(checkItemId));
+    }
 
 }

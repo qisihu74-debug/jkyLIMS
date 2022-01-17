@@ -68,7 +68,7 @@
                 #{verifyer,jdbcType=VARCHAR}, #{issuer,jdbcType=VARCHAR}, #{applicant,jdbcType=VARCHAR},
                 #{sealer,jdbcType=VARCHAR}, #{sealTime,jdbcType=TIMESTAMP}, #{reportManager,jdbcType=VARCHAR},
                 #{reportTime,jdbcType=TIMESTAMP}, #{addressee,jdbcType=VARCHAR}, #{waybill,jdbcType=VARCHAR},
-                #{operateTime,jdbcType=TIMESTAMP}, #{email,jdbcType=VARCHAR}, #{report_phone,jdbcType=VARCHAR},
+                #{operateTime,jdbcType=TIMESTAMP}, #{email,jdbcType=VARCHAR}, #{reportPhone,jdbcType=VARCHAR},
                 #{reportMailingAddress,jdbcType=VARCHAR}, #{reportCompleteTime,jdbcType=TIMESTAMP})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordEntity">
@@ -421,7 +421,7 @@
                 state = #{state,jdbcType=VARCHAR},
             </if>
             <if test="reportCompleteTime != null">
-                state = #{reportCompleteTime,jdbcType=TIMESTAMP},
+                report_complete_time = #{reportCompleteTime,jdbcType=TIMESTAMP},
             </if>
         </set>
         where id = #{id,jdbcType=BIGINT}

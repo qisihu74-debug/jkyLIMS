@@ -65,6 +65,11 @@ public interface ReportApprovalMapper {
      */
     int updateVerifyMonad(ReportApprovalVo reportApprovalVo);
 
+    /**
+     * 根据检测项 获取 检测项所属的 URL连接
+     */
+    @Select("SELECT origin_url  FROM `test_entrusted_sample_checkitem_rel` WHERE id =#{id}")
+    String getCheckItemUrl(Long id);
 
 
 
