@@ -5,9 +5,9 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
-import com.lims.manage.erp.mapper.ReportMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -30,7 +30,6 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.flowable.common.engine.impl.util.CollectionUtil;
 import org.jodconverter.DocumentConverter;
-import org.jodconverter.office.utils.Lo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +45,10 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -77,6 +79,7 @@ public class ReportController {
 
     /**
      * 查询报告生成列表--历史查询
+     *
      * @param search
      * @return
      */
@@ -87,6 +90,7 @@ public class ReportController {
 
     /**
      * 查询报告生成列表--历史查询_详情
+     *
      * @param id
      * @return
      */
@@ -94,7 +98,6 @@ public class ReportController {
     public Result getlist_history_details(Long id) {
         return ResultUtil.success("获取历史任务单成功！", reportService.getReportList_history_details(id));
     }
-
 
 
     /**
@@ -142,13 +145,13 @@ public class ReportController {
 
     /**
      * 根据任务单id 回显数据
+     *
      * @param id
      * @return
      */
     @GetMapping("getDetail")
-    public Result getDetail(Long id)
-    {
-        if(id==null){
+    public Result getDetail(Long id) {
+        if (id == null) {
             return ResultUtil.error("缺少必要的参数！");
         }
         return ResultUtil.success(reportService.getDetail(id));
@@ -156,17 +159,18 @@ public class ReportController {
 
     /**
      * 报告邮寄编辑
+     *
      * @param reportRecordEntity
      * @return
      */
     @PostMapping("saveMessage")
-    public Result saveMessage(@RequestBody ReportRecordEntity reportRecordEntity){
-        if(reportRecordEntity.getId()==null){
+    public Result saveMessage(@RequestBody ReportRecordEntity reportRecordEntity) {
+        if (reportRecordEntity.getId() == null) {
             return ResultUtil.error("缺少必要的参数！");
         }
         //1、 获取抢单人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error(678, "token已经过期");
         }
         String name = reportApprovalMapper.getUserName(userInfo.getUserId());
@@ -177,12 +181,13 @@ public class ReportController {
         reportRecordEntity.setReportManager(name);
         // 操作时间
         reportRecordEntity.setOperateTime(new Date());
-        Boolean flag =  reportService.saveMessage(reportRecordEntity);
-        if(flag){
+        Boolean flag = reportService.saveMessage(reportRecordEntity);
+        if (flag) {
             return ResultUtil.success("编辑报告信息成功!");
         }
         return ResultUtil.error("编辑报告信息失败!");
     }
+
     /**
      * 盖章
      *
@@ -222,7 +227,6 @@ public class ReportController {
             if (StringUtils.isNotEmpty(reportUrl)) {
                 reportName = reportUrl.substring(reportUrl.lastIndexOf("/") + 1);
             }
-            Map<String, Object> map = new HashMap<>();
             //查询报告详细信息
             List<ReportRecordDetailEntity> detailEntityList = reportService.getReportDetailByCode(reportCode);
             MinioClient client = MinIoUtil.minioClient;
@@ -231,7 +235,8 @@ public class ReportController {
             Long entrustId = reportService.getEntrustIdByCode(reportCode);
             EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             String sealUrl = entity.getSealUrl();
-            XWPFDocument document = reportService.preview(detailEntityList, detail, object, sealUrl.split(","));
+            XWPFDocument document = reportService.preview(reportCode, detailEntityList, detail, object, sealUrl.split(","));
+            //TODO pdf转换、设置盖章
             response.reset();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
@@ -293,8 +298,16 @@ public class ReportController {
         return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList(productId));
     }
 
+    /**
+     * 下载报告
+     *
+     * @param id
+     * @param code
+     * @param response
+     * @return
+     */
     @GetMapping("download")
-    public String downReport(Long id,String code, HttpServletResponse response) {
+    public String downReport(Long id, String code, HttpServletResponse response) {
         ReportRecordEntity reportRecordEntity = reportService.selectByEntrustId(id);
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
@@ -335,6 +348,48 @@ public class ReportController {
                 while (it.hasNext()) {
                     XWPFTable table = it.next();
                     List<XWPFTableRow> rows = table.getRows();
+                    //存放表头信息
+                    EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
+                    if (i == 1) {
+                        rows.get(0).getCell(1).removeParagraph(0);
+                        rows.get(0).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
+                        rows.get(0).getCell(3).removeParagraph(0);
+                        rows.get(0).getCell(3).setText(entrustHistoryDetail.getProjectName());
+                        rows.get(1).getCell(1).removeParagraph(0);
+                        rows.get(1).getCell(1).setText(entrustHistoryDetail.getProjectPart());
+                        //样品信息
+                        SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
+                        rows.get(2).getCell(1).removeParagraph(0);
+                        rows.get(2).getCell(1).setText("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
+                                + "样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
+                                + "样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
+                                + "样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
+                                + "收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                        //检测依据
+                        //判定依据
+                        //检测日期
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
+                        rows.get(4).getCell(1).removeParagraph(0);
+                        rows.get(4).getCell(1).setText(sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
+                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? sdf.format(new Date()) : reportRecordEntity.getReportCompleteTime()));
+                        //主要仪器
+                        //委托编号
+                        //检测类别
+                        rows.get(6).getCell(3).removeParagraph(0);
+                        rows.get(6).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
+                        //批号
+                        rows.get(7).getCell(1).removeParagraph(0);
+                        rows.get(7).getCell(1).setText(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
+                        //生产厂家
+                        rows.get(7).getCell(3).removeParagraph(0);
+                        rows.get(7).getCell(3).setText(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+                        //规格等级
+                        rows.get(8).getCell(1).removeParagraph(0);
+                        rows.get(8).getCell(1).setText(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
+                        //代表数量
+                        rows.get(8).getCell(3).removeParagraph(0);
+                        rows.get(8).getCell(3).setText(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
+                    }
                     //存放检测数据
                     for (ReportRecordDetailEntity item : checkItemList) {
                         int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
@@ -394,26 +449,6 @@ public class ReportController {
         } catch (InvalidKeyException e) {
             e.printStackTrace();
         }
-        //下载pdf文件
-//        try {
-//            minioClient.statObject("report-download", pdfName+fileType);
-//            InputStream in = minioClient.getObject("report-download", pdfName+fileType);
-//            ServletOutputStream outputStream = response.getOutputStream();
-//            int i = IOUtils.copy(in, outputStream);
-//            in.close();
-//            outputStream.close();
-//            System.out.println("流已关闭,可下载,该文件字节大小："+i);
-//        } catch (MinioException e) {
-//            System.out.println("Error occurred: " + e);
-//        } catch (XmlPullParserException e) {
-//            e.printStackTrace();
-//        } catch (NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (InvalidKeyException e) {
-//            e.printStackTrace();
-//        }
         String url = null;
         try {
             url = client.presignedGetObject("report-download", reportRecordEntity.getReportCode() + fileType, 60 * 60 * 24);
@@ -441,13 +476,14 @@ public class ReportController {
 
     /**
      * 待邮寄报告列表及已发出报告历史列表查询
+     *
      * @param search
      * @param reportType
      * @return
      */
     @GetMapping("sendList")
-    public Result sendList(String search,String reportType,Integer pageNum,Integer pageSize,String type){
-        PageInfo pageInfo = reportService.getSendList(search,reportType,pageNum,pageSize,type);
+    public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type) {
+        PageInfo pageInfo = reportService.getSendList(search, reportType, pageNum, pageSize, type);
         return ResultUtil.success(pageInfo);
     }
 
