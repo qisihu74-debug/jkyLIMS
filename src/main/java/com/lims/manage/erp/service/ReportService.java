@@ -135,5 +135,5 @@ public interface ReportService {
      * @param pageSize
      * @return
      */
-    PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize);
+    PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize,String type);
 }

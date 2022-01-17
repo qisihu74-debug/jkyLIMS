@@ -231,9 +231,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize) {
+    public PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize,String type) {
         PageHelper.startPage(pageNum,pageSize);
-        List<ReportRecordEntity> list = entityMapper.getSendList(search,reportType);
+        List<ReportRecordEntity> list = entityMapper.getSendList(search,reportType,type);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }

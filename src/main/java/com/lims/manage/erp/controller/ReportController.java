@@ -402,8 +402,8 @@ public class ReportController {
      * @return
      */
     @GetMapping("sendList")
-    public Result sendList(String search,String reportType,Integer pageNum,Integer pageSize){
-        PageInfo pageInfo = reportService.getSendList(search,reportType,pageNum,pageSize);
+    public Result sendList(String search,String reportType,Integer pageNum,Integer pageSize,String type){
+        PageInfo pageInfo = reportService.getSendList(search,reportType,pageNum,pageSize,type);
         return ResultUtil.success(pageInfo);
     }
 
