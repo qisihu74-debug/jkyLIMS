@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -140,6 +141,9 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
             reportRecordEntity1.setState(state);
+            if("1".equals(state)){
+                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
+            }
             int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
             if (update < 1) {
                 return false;
@@ -158,12 +162,14 @@ public class ReportServiceImpl implements ReportService {
                 if (insert1 < 1) {
                     return false;
                 }
-
             }
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
             reportRecordEntity.setState(state);
+            if("1".equals(state)){
+                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
+            }
+            //生成报告编号
             reportRecordEntity.setReportCode("ZX-2021-SW-1471");
-
             reportRecordEntity.setId(recordId);
             int insert = recordEntityMapper.insert(reportRecordEntity);
             if (insert < 1) {

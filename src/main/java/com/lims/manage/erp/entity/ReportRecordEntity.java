@@ -130,7 +130,10 @@ public class ReportRecordEntity {
      *邮寄地址
      */
     private String reportMailingAddress;
-
+    /**
+     * 报告生成时间（state=1时）
+     */
+    private Date reportCompleteTime;
 
     public ReportRecordEntity() {
     }
