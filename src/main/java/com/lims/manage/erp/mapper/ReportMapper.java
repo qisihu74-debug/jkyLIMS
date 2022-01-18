@@ -39,4 +39,25 @@ public interface ReportMapper {
     List<ReportSampleDetailVo> getReportHeadDetails(Long id);
 
     List<ReportCheckItemDetailVo> getReportCheckItemList(Long id);
+
+    /**
+     * 查询判定依据
+     * @param id
+     * @return
+     */
+    List<String> getJudgeBasis(Long id);
+
+    /**
+     * 查询检测依据
+     * @param id
+     * @return
+     */
+    List<String> getCheckBasis(Long id);
+
+    /**
+     * 查询设备
+     * @param id
+     * @return
+     */
+    List<String> getEquipment(Long id);
 }

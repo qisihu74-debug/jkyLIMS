@@ -467,4 +467,49 @@ public class ReportServiceImpl implements ReportService {
         }
         return false;
     }
+
+    @Override
+    public String getJudgeBasis(Long id) {
+        StringBuilder result = new StringBuilder("");
+        List<String> judgeBasis = reportMapper.getJudgeBasis(id);
+        if(!CollectionUtils.isEmpty(judgeBasis)){
+            for (int i = 0; i < judgeBasis.size(); i++) {
+                result.append(judgeBasis.get(i));
+                if(judgeBasis.size()-1!=i){
+                    result.append(",");
+                }
+            }
+        }
+        return result.toString();
+    }
+
+    @Override
+    public String getCheckBasis(Long id) {
+        StringBuilder result = new StringBuilder("");
+        List<String> checkBasis = reportMapper.getCheckBasis(id);
+        if(!CollectionUtils.isEmpty(checkBasis)){
+            for (int i = 0; i < checkBasis.size(); i++) {
+                result.append(checkBasis.get(i));
+                if(checkBasis.size()-1!=i){
+                    result.append(",");
+                }
+            }
+        }
+        return result.toString();
+    }
+
+    @Override
+    public String getEquipment(Long id) {
+        StringBuilder result = new StringBuilder("");
+        List<String> equipment = reportMapper.getEquipment(id);
+        if(!CollectionUtils.isEmpty(equipment)){
+            for (int i = 0; i < equipment.size(); i++) {
+                result.append(equipment.get(i));
+                if(equipment.size()-1!=i){
+                    result.append(",");
+                }
+            }
+        }
+        return result.toString();
+    }
 }
