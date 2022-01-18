@@ -64,7 +64,7 @@ public class ReportServiceImpl implements ReportService {
                         reportListVo.setState(1);
                     }
                     // 报告完成 已经提交
-                    if(reportRecordEntity.getState().equals("1")&&reportRecordEntity.getReportCompleteTime()!=null){
+                    if(reportRecordEntity.getReportCompleteTime()!=null){
                         reportList.remove(i);
                     }
                     if(reportRecordEntity.getState().equals("2")){
