@@ -6,6 +6,7 @@ import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.jodconverter.office.utils.Lo;
 
 import java.io.InputStream;
 import java.util.List;
@@ -18,6 +19,13 @@ public interface ReportService {
      * @return
      */
     List<ReportListVo> getReportList();
+
+    /**
+     * 提交审批
+     * @param id
+     * @return
+     */
+    Boolean getReportSubmit(Long id);
 
     /**
      * 查询历史记录
@@ -152,4 +160,6 @@ public interface ReportService {
      * @return
      */
     PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize,String type);
+
+    Boolean isApprove(Long id);
 }

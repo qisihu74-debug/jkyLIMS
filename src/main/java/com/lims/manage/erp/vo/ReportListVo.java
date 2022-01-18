@@ -13,4 +13,9 @@ public class ReportListVo {
      * 报告生成时间
      */
     private String reportCompleteTime;
+    /**
+     * state 状态
+     */
+    private Integer state;
+
 }

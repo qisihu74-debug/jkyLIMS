@@ -27,11 +27,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.InputStream;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class ReportServiceImpl implements ReportService {
@@ -52,7 +48,51 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<ReportListVo> getReportList() {
-        return reportMapper.getReportList();
+        // 报告生成列表
+        List<ReportListVo> reportList = reportMapper.getReportList();
+        // 已经生成的 报告列表
+        List<ReportRecordEntity> list = recordEntityMapper.getReportList();
+        //                        0 审批灰色 1 是可以审批
+        Iterator<ReportListVo> iterator = reportList.iterator();
+        while (iterator.hasNext()){
+            ReportListVo reportListVo=iterator.next();
+            for(ReportRecordEntity reportRecordEntity:list){
+                // 如果test_report_report 的 EntrustmentId = reportListVo.getId()
+                if(reportRecordEntity.getEntrustmentId().equals(reportListVo.getId())){
+                    // state =1 并且 没有提交审批
+                    if(reportRecordEntity.getState().equals("1")&&reportRecordEntity.getReportCompleteTime()==null){
+                        // 报告已完成
+                        reportListVo.setState(1);
+                    }
+                    // 报告完成 已经提交
+                    if(reportRecordEntity.getReportCompleteTime()!=null){
+                        iterator.remove();
+                    }
+                    if(reportRecordEntity.getState().equals("2")){
+                        // 报告已完成
+                        reportListVo.setState(0);
+                    }
+                }
+                if(reportListVo.getState()==null){
+                    reportListVo.setState(0);
+                }
+            }
+        }
+        return reportList;
+    }
+
+    @Transactional
+    @Override
+    public Boolean getReportSubmit(Long id) {
+        // 根据委托单id 查询报告信息 state=1
+        ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
+        if(reportData.getState().equals("1")){
+            // 修改状态
+            reportData.setReportCompleteTime(new Date());
+             recordEntityMapper.updateByEntrustIdSelective(reportData);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -169,7 +209,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean saveMessage(ReportRecordEntity reportRecordEntity) {
         Integer status = entityMapper.updateByPrimaryKeySelective(reportRecordEntity);
-        if(status==1){
+        if (status == 1) {
             return true;
         }
         return false;
@@ -193,9 +233,9 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
             reportRecordEntity1.setState(state);
-            if ("1".equals(state)) {
-                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
-            }
+//            if ("1".equals(state)) {
+//                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
+//            }
             int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
             if (update < 1) {
                 return false;
@@ -217,9 +257,9 @@ public class ReportServiceImpl implements ReportService {
             }
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
             reportRecordEntity.setState(state);
-            if ("1".equals(state)) {
-                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
-            }
+//            if ("1".equals(state)) {
+//                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
+//            }
             //生成报告编号
             reportRecordEntity.setReportCode("ZX-2021-SW-1471");
             reportRecordEntity.setId(recordId);
@@ -253,37 +293,37 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public XWPFDocument preview(String reportCode,List<ReportRecordDetailEntity> detailEntityList, EntrustAddVo detail, InputStream object, String[] sealUrls) {
+    public XWPFDocument preview(String reportCode, List<ReportRecordDetailEntity> detailEntityList, EntrustAddVo detail, InputStream object, String[] sealUrls) {
         XWPFDocument doc = null;
-        Map<String,Object> map = new HashMap();
+        Map<String, Object> map = new HashMap();
         try {
             doc = new XWPFDocument(object);
             //检测项所属table定义集合
-            Map<Integer,List<ReportRecordDetailEntity>> listMap = new HashMap();
-            for (ReportRecordDetailEntity entity:detailEntityList) {
+            Map<Integer, List<ReportRecordDetailEntity>> listMap = new HashMap();
+            for (ReportRecordDetailEntity entity : detailEntityList) {
                 String[] split = entity.getCoordinate().split(",");
                 Integer key = Integer.valueOf(split[0]);
-                if (listMap.get(key) == null){
+                if (listMap.get(key) == null) {
                     List<ReportRecordDetailEntity> list = Lists.newArrayList();
                     list.add(entity);
-                    listMap.put(key,list);
-                }else {
+                    listMap.put(key, list);
+                } else {
                     List<ReportRecordDetailEntity> list = listMap.get(key);
                     list.add(entity);
-                    listMap.put(key,list);
+                    listMap.put(key, list);
                 }
-                map.put(split[0],"index");//map作为下面的循环table的索引
+                map.put(split[0], "index");//map作为下面的循环table的索引
             }
             int size = map.keySet().size();
             List<XWPFTable> tables = doc.getTables();
             List<XWPFTableRow> rows;
-            for (int i=0;i<size;i++) {
+            for (int i = 0; i < size; i++) {
                 XWPFTable table = tables.get(i);
                 //第一个table包含表头、后面的table只有检测项数据
                 //获取表格对应的行
                 rows = table.getRows();
                 List<ReportRecordDetailEntity> list = listMap.get(i + 1);//检测项
-                if (i==0){
+                if (i == 0) {
                     //设置模板数据
                     rows.get(3).getTableCells().get(1).setText("河南省公路工程实验检测中心有限公司");//检测单位
                     rows.get(3).getTableCells().get(2).setText(reportCode);//报告编号
@@ -293,7 +333,7 @@ public class ReportServiceImpl implements ReportService {
                     //设置样品信息
                     List<SampleEntity> samples = detail.getSamples();
                     StringBuilder stringBuilder = new StringBuilder();
-                    for (SampleEntity sampleEntity :samples) {
+                    for (SampleEntity sampleEntity : samples) {
                         stringBuilder.append("样品名称：");
                         stringBuilder.append(sampleEntity.getSampleName());
                         stringBuilder.append(";");
@@ -347,36 +387,36 @@ public class ReportServiceImpl implements ReportService {
                     rows.get(12).getTableCells().get(2).setText(samples.get(0).getGeneration());
 
                     //根据坐标设置检测项
-                    for (ReportRecordDetailEntity entity :list) {
+                    for (ReportRecordDetailEntity entity : list) {
                         //获取坐标
                         String[] split = entity.getCoordinate().split(",");
                         Integer x = Integer.valueOf(split[1]);
                         Integer y = Integer.valueOf(split[2]);
                         //设置技术指标
-                        rows.get(x).getTableCells().get(y+1).setText(entity.getSpecsContent());
+                        rows.get(x).getTableCells().get(y + 1).setText(entity.getSpecsContent());
                         //设置检测结果
-                        rows.get(x).getTableCells().get(y+2).setText(entity.getCheckResult());
+                        rows.get(x).getTableCells().get(y + 2).setText(entity.getCheckResult());
                         //设置判定结果
-                        rows.get(x).getTableCells().get(y+3).setText(entity.getJudgeResult());
+                        rows.get(x).getTableCells().get(y + 3).setText(entity.getJudgeResult());
                     }
-                }else {
+                } else {
                     //根据坐标设置检测项
-                    for (ReportRecordDetailEntity entity :list) {
+                    for (ReportRecordDetailEntity entity : list) {
                         //获取坐标
                         String[] split = entity.getCoordinate().split(",");
                         Integer x = Integer.valueOf(split[1]);
                         Integer y = Integer.valueOf(split[2]);
                         //设置技术指标
-                        rows.get(x).getTableCells().get(y+1).setText(entity.getSpecsContent());
+                        rows.get(x).getTableCells().get(y + 1).setText(entity.getSpecsContent());
                         //设置检测结果
-                        rows.get(x).getTableCells().get(y+2).setText(entity.getCheckResult());
+                        rows.get(x).getTableCells().get(y + 2).setText(entity.getCheckResult());
                         //设置判定结果
-                        rows.get(x).getTableCells().get(y+3).setText(entity.getJudgeResult());
+                        rows.get(x).getTableCells().get(y + 3).setText(entity.getJudgeResult());
                     }
                 }
             }
-        }catch (Exception e){
-            logger.error("报告查看异常:{}",e);
+        } catch (Exception e) {
+            logger.error("报告查看异常:{}", e);
         }
         return doc;
     }
@@ -417,5 +457,14 @@ public class ReportServiceImpl implements ReportService {
         List<ReportRecordEntity> list = entityMapper.getSendList(search, reportType, type);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
+    }
+
+    @Override
+    public Boolean isApprove(Long id) {
+        String approve = entityMapper.isApprove(id);
+        if ("1".equals(approve)) {
+            return true;
+        }
+        return false;
     }
 }

@@ -74,4 +74,14 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     List<ReportRecordEntity> getSendList(@Param("search") String search, @Param("reportType") String reportType,@Param("type") String type);
+
+    String isApprove(Long id);
+
+    /**
+     * 遍历报告信息 获取 委托id 和 状态
+     * @return
+     */
+    List<ReportRecordEntity> getReportList();
+
+    ReportRecordEntity getReportEntrust(Long entrustId);
 }
