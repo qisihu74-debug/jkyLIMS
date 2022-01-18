@@ -331,14 +331,19 @@ public class ReportApprovalController {
         return ResultUtil.success(list);
     }
 
+    /**
+     * 根据检测项 下载原始数据
+     * @param id
+     * @return
+     */
     @GetMapping("download")
-    public Result downloadData(Long id)
+    public String downloadData(Long id)
     {
         if(id==null){
-            return ResultUtil.error(678, "缺少必要参数");
+           return null;
         }
-        // 根据检测项 下载数据
-        return ResultUtil.success( reportApprovalMapper.getCheckItemUrl(id));
+        // 根据检测项 下载原始数据
+        return reportApprovalMapper.getCheckItemUrl(id);
     }
 
 }
