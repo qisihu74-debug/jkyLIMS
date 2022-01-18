@@ -390,7 +390,8 @@ public class ReportController {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
                         rows.get(4).getCell(1).removeParagraph(0);
                         rows.get(4).getCell(1).setText(sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
-                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? sdf.format(new Date()) : reportRecordEntity.getReportCompleteTime()));
+                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime())
+                        );
                         //主要仪器
                         //委托编号
                         //检测类别
