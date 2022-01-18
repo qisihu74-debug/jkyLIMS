@@ -162,4 +162,26 @@ public interface ReportService {
     PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize,String type);
 
     Boolean isApprove(Long id);
+
+    /**
+     * 查询判定依据
+     * @param id
+     * @return
+     */
+    String getJudgeBasis(Long id);
+
+    /**
+     * 查询检测依据
+     * @param id
+     * @return
+     */
+    String getCheckBasis(Long id);
+
+    /**
+     * 查询设备
+     * @param id
+     * @return
+     */
+    String getEquipment(Long id);
+
 }

@@ -385,14 +385,26 @@ public class ReportController {
                                 + "样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
                                 + "收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                         //检测依据
+                        String checkBasis = reportService.getCheckBasis(id);
+                        rows.get(3).getCell(1).removeParagraph(0);
+                        rows.get(3).getCell(1).setText(checkBasis.equals("")?"——":checkBasis);
                         //判定依据
+                        String judgeBasis = reportService.getJudgeBasis(id);
+                        rows.get(3).getCell(3).removeParagraph(0);
+                        rows.get(3).getCell(3).setText(judgeBasis.equals("")?"——":judgeBasis);
                         //检测日期
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
                         rows.get(4).getCell(1).removeParagraph(0);
                         rows.get(4).getCell(1).setText(sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
-                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? sdf.format(new Date()) : reportRecordEntity.getReportCompleteTime()));
+                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime())
+                        );
                         //主要仪器
+                        String equipment = reportService.getEquipment(id);
+                        rows.get(5).getCell(1).removeParagraph(0);
+                        rows.get(5).getCell(1).setText(equipment.equals("")?"——":equipment);
                         //委托编号
+                        rows.get(6).getCell(1).removeParagraph(0);
+                        rows.get(6).getCell(1).setText(entrustHistoryDetail.getEntrustmentNo()+"");
                         //检测类别
                         rows.get(6).getCell(3).removeParagraph(0);
                         rows.get(6).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());

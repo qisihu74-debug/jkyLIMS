@@ -21,7 +21,8 @@
             <!--            <result property="standard" column="batch_number"></result>-->
             <result property="outward" column="outward"></result>
             <collection property="checkItems" ofType="com.lims.manage.erp.vo.ReportCheckItemDetailVo">
-                <id property="checkItemId" column="check_item_id"></id>
+                <id property="id" column="id_item"></id>
+                <result property="checkItemId" column="check_item_id"></result>
                 <result property="state" column="state"></result>
                 <result property="checkItemName" column="check_item_name"></result>
                 <result property="specsContent" column="specs_content"></result>
@@ -51,6 +52,7 @@
             t4.specs,
             t4.outward,
             t4.product_id,
+            t5.id id_item,
             t5.state,
             t6.check_item_id,
             t6.check_item_name,
@@ -159,5 +161,37 @@ WHERE
         WHERE
             t1.state !=2
             and t1.id = #{id}
+    </select>
+
+    <select id="getJudgeBasis" resultType="java.lang.String">
+        SELECT
+            CONCAT(t2.code,"《",t2.name,"》" )
+        FROM
+            test_entrusted_sample_standard_rel t1
+                LEFT JOIN test_standard_file t2 ON t1.standard_id = t2.id
+        WHERE
+            t1.entrustment_id = #{id}
+    </select>
+
+    <select id="getCheckBasis" resultType="java.lang.String">
+        SELECT
+            CONCAT(t2.code,"《",t2.name,"》" )
+        FROM
+            test_entrusted_sample_checkitem_rel t1
+                LEFT JOIN test_standard_file t2 ON t1.standard_id = t2.id
+        WHERE
+            t1.entrust_id = #{id}
+    </select>
+
+    <select id="getEquipment" resultType="java.lang.String">
+        SELECT
+            CONCAT( t3.NAME, "（", t3.model, "）" )
+        FROM
+            test_entrusted_sample_checkitem_rel t1
+                LEFT JOIN test_product_item_instrument_middle_rel t2 ON t1.id = t2.id_item
+                LEFT JOIN test_instrument t3 ON t2.intrusment_id = t3.id
+        WHERE
+            t3.NAME IS NOT NULL
+          AND t1.entrust_id = #{id}
     </select>
 </mapper>
