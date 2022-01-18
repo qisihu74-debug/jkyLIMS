@@ -53,8 +53,9 @@ public class ReportServiceImpl implements ReportService {
         // 已经生成的 报告列表
         List<ReportRecordEntity> list = recordEntityMapper.getReportList();
         //                        0 审批灰色 1 是可以审批
-        for(int i=0;i<reportList.size();i++){
-            ReportListVo reportListVo=reportList.get(i);
+        Iterator<ReportListVo> iterator = reportList.iterator();
+        while (iterator.hasNext()){
+            ReportListVo reportListVo=iterator.next();
             for(ReportRecordEntity reportRecordEntity:list){
                 // 如果test_report_report 的 EntrustmentId = reportListVo.getId()
                 if(reportRecordEntity.getEntrustmentId().equals(reportListVo.getId())){
@@ -65,7 +66,7 @@ public class ReportServiceImpl implements ReportService {
                     }
                     // 报告完成 已经提交
                     if(reportRecordEntity.getReportCompleteTime()!=null){
-                        reportList.remove(i);
+                        iterator.remove();
                     }
                     if(reportRecordEntity.getState().equals("2")){
                         // 报告已完成
@@ -77,7 +78,6 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
         }
-
         return reportList;
     }
 
