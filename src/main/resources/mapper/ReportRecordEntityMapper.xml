@@ -469,9 +469,21 @@
     <select id="getReportList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         SELECT
         entrustment_id,
-        state
+        state,
+        report_complete_time
         FROM
         test_report_record
+    </select>
+
+    <select id="getReportEntrust" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+        id,
+        entrustment_id,
+        state,
+        report_complete_time
+        FROM
+        test_report_record
+        where entrustment_id=#{entrustId}
     </select>
 
 </mapper>

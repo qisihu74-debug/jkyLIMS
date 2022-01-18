@@ -27,11 +27,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.InputStream;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class ReportServiceImpl implements ReportService {
@@ -57,14 +53,19 @@ public class ReportServiceImpl implements ReportService {
         // 已经生成的 报告列表
         List<ReportRecordEntity> list = recordEntityMapper.getReportList();
         //                        0 审批灰色 1 是可以审批
-        Integer state =0;
-        for(ReportListVo reportListVo:reportList){
+        for(int i=0;i<reportList.size();i++){
+            ReportListVo reportListVo=reportList.get(i);
             for(ReportRecordEntity reportRecordEntity:list){
                 // 如果test_report_report 的 EntrustmentId = reportListVo.getId()
                 if(reportRecordEntity.getEntrustmentId().equals(reportListVo.getId())){
-                    if(reportRecordEntity.getState().equals("1")){
+                    // state =1 并且 没有提交审批
+                    if(reportRecordEntity.getState().equals("1")&&reportRecordEntity.getReportCompleteTime()==null){
                         // 报告已完成
                         reportListVo.setState(1);
+                    }
+                    // 报告完成 已经提交
+                    if(reportRecordEntity.getState().equals("1")&&reportRecordEntity.getReportCompleteTime()!=null){
+                        reportList.remove(i);
                     }
                     if(reportRecordEntity.getState().equals("2")){
                         // 报告已完成
@@ -78,6 +79,20 @@ public class ReportServiceImpl implements ReportService {
         }
 
         return reportList;
+    }
+
+    @Transactional
+    @Override
+    public Boolean getReportSubmit(Long id) {
+        // 根据委托单id 查询报告信息 state=1
+        ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
+        if(reportData.getState().equals("1")){
+            // 修改状态
+            reportData.setReportCompleteTime(new Date());
+             recordEntityMapper.updateByEntrustIdSelective(reportData);
+            return true;
+        }
+        return false;
     }
 
     @Override

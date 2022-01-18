@@ -67,7 +67,7 @@ public class ReportApprovalController {
         //1、 获取抢单人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
-            return ResultUtil.error(678, "token已经过期");
+            return ResultUtil.error(678, "token已经过期，请退出重新登录");
         }
         String name = reportApprovalMapper.getUserName(userInfo.getUserId());
         if (name == null) {
@@ -120,7 +120,7 @@ public class ReportApprovalController {
         //1、 获取抢单人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
-            return ResultUtil.error(678, "token已经过期");
+            return ResultUtil.error(678, "token已经过期，请退出重新登录");
         }
         String name = reportApprovalMapper.getUserName(userInfo.getUserId());
         if (name == null) {
@@ -163,6 +163,22 @@ public class ReportApprovalController {
         }
         return ResultUtil.success(list);
     }
+
+    /**
+     * 根据报告id 查询历史审批详情
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/applyfor_details_history")
+    public Result applyfor_details_history(Long id) {
+        if (id == null) {
+            return ResultUtil.error(678, "任务单主键不能为空");
+        }
+        return ResultUtil.success("查询任务详情成功！", reportApprovalService.getDetails(id));
+    }
+
+
 
     /**
      * 根据报告id 查询详情
@@ -214,7 +230,7 @@ public class ReportApprovalController {
         //1、 获取抢单人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
-            return ResultUtil.error(678, "token已经过期");
+            return ResultUtil.error(678, "token已经过期，请退出重新登录");
         }
         String name = reportApprovalMapper.getUserName(userInfo.getUserId());
         if (name == null) {
@@ -271,7 +287,7 @@ public class ReportApprovalController {
         //1、 获取抢单人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
-            return ResultUtil.error(678, "token已经过期");
+            return ResultUtil.error(678, "token已经过期，请退出重新登录");
         }
         String name = reportApprovalMapper.getUserName(userInfo.getUserId());
         if (name == null) {

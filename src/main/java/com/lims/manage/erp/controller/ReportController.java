@@ -30,6 +30,7 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.flowable.common.engine.impl.util.CollectionUtil;
 import org.jodconverter.DocumentConverter;
+import org.jodconverter.office.utils.Lo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,24 @@ public class ReportController {
     @GetMapping("/list")
     public Result getSampleList() {
         return ResultUtil.success("获取可制作报告任务单成功！", reportService.getReportList());
+    }
+
+    /**
+     * 提交审批
+     * @param id
+     * @return
+     */
+    @GetMapping("/report_submit")
+    public Result getReportSubmit(Long id)
+    {
+        if(id==null){
+            return ResultUtil.error("缺少必要参数！");
+        }
+       Boolean flag = reportService.getReportSubmit(id);
+        if(flag){
+            return ResultUtil.success("提交审批成功");
+        }
+        return ResultUtil.error("提交审批失败");
     }
 
     /**

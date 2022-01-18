@@ -82,4 +82,6 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     List<ReportRecordEntity> getReportList();
+
+    ReportRecordEntity getReportEntrust(Long entrustId);
 }

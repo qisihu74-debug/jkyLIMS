@@ -17,6 +17,7 @@
         FROM
         test_report_record
         WHERE 1=1
+        and report_complete_time is not NULL
         and  (state = 1 or state =3)
             <if test="search!=null and search!=''">
                 and task_code like CONCAT('%',#{search},'%')
