@@ -6,6 +6,7 @@ import java.util.List;
 
 @Data
 public class ReportCheckItemDetailVo {
+    private Long id;
     private Long checkItemId;
     private Integer state;
     private String checkItemName;
