@@ -218,9 +218,9 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
             reportRecordEntity1.setState(state);
-            if ("1".equals(state)) {
-                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
-            }
+//            if ("1".equals(state)) {
+//                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
+//            }
             int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
             if (update < 1) {
                 return false;
@@ -242,9 +242,9 @@ public class ReportServiceImpl implements ReportService {
             }
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
             reportRecordEntity.setState(state);
-            if ("1".equals(state)) {
-                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
-            }
+//            if ("1".equals(state)) {
+//                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
+//            }
             //生成报告编号
             reportRecordEntity.setReportCode("ZX-2021-SW-1471");
             reportRecordEntity.setId(recordId);
