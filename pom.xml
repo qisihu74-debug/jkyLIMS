@@ -235,7 +235,11 @@
             <version>1.2.60</version>
         </dependency>
         <!--文件服务器依赖fastdfs -->
-
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itextpdf</artifactId>
+            <version>5.5.13.2</version>
+        </dependency>
         <!--监控+refresh配置-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
