@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Author: DLC
@@ -107,28 +105,43 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         /**
          * 获取任务单详情
          */
-        TaskDetailInfoVo taskDetailInfoVo =  reportApprovalMapper.getTaskDetail(id);
-       if(taskDetailInfoVo==null){
-           return new TaskDetailInfoVo(id);
-       }
-       if(taskDetailInfoVo.getEntrustmentId()!=null){
-           // 通过委托id 获取样品信息 及以下的 处理。
-           List<SampleDetailVo> sampleDetailVoList  = reportApprovalMapper.getSampleDetailLis(taskDetailInfoVo.getEntrustmentId());
-           for(SampleDetailVo sampleDetailVo:sampleDetailVoList){
-               if(!sampleDetailVo.getCheckItemInfoList().isEmpty()) {
-                   for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
-                       if (!checkItemInfoVo.getTestInstrumentEntityList().isEmpty()) {
-                           String InstrumentName = "";
-                           for (TestInstrumentEntity testInstrumentEntity : checkItemInfoVo.getTestInstrumentEntityList()) {
-                               InstrumentName += testInstrumentEntity.getName()+"、";
-                           }
-                           checkItemInfoVo.setIntrusmentName(InstrumentName);
-                       }
-                   }
-               }
-           }
-           taskDetailInfoVo.setSampleDetailList(sampleDetailVoList);
-       }
+        TaskDetailInfoVo taskDetailInfoVo = reportApprovalMapper.getTaskDetail(id);
+        if (taskDetailInfoVo == null) {
+            return new TaskDetailInfoVo(id);
+        }
+        if (taskDetailInfoVo.getEntrustmentId() != null) {
+            // 通过委托id 获取样品信息 及以下的 处理。
+            List<SampleDetailVo> sampleDetailVoList = reportApprovalMapper.getSampleDetailLis(taskDetailInfoVo.getEntrustmentId());
+            for (SampleDetailVo sampleDetailVo : sampleDetailVoList) {
+                if (!sampleDetailVo.getCheckItemInfoList().isEmpty()) {
+                    for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+                        if (!checkItemInfoVo.getTestInstrumentEntityList().isEmpty()) {
+                            String InstrumentName = "";
+                            for (TestInstrumentEntity testInstrumentEntity : checkItemInfoVo.getTestInstrumentEntityList()) {
+                                InstrumentName += testInstrumentEntity.getName() + "、";
+                            }
+                            checkItemInfoVo.setIntrusmentName(InstrumentName);
+                        }
+                    }
+                }
+            }
+            // 处理checkItemId 相同的话 进行保留其中一个。
+            if (!sampleDetailVoList.isEmpty()) {
+                HashMap<Integer, SampleDetailVo> map = new HashMap<>();
+                for (SampleDetailVo data : sampleDetailVoList) {
+                    for (CheckItemInfoVo checkItemInfoVo : data.getCheckItemInfoList()) {
+                        map.put(checkItemInfoVo.getCheckItemId(), data);
+                    }
+                }
+                Collection<SampleDetailVo> values = map.values();
+                Iterator<SampleDetailVo> returnData = values.iterator();
+                List<SampleDetailVo> list = new ArrayList<>();
+                while (returnData.hasNext()) {
+                    list.add(returnData.next());
+                }
+                taskDetailInfoVo.setSampleDetailList(list);
+            }
+        }
         return taskDetailInfoVo;
     }
 
@@ -142,14 +155,14 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             //5.签发已抢单
             state = 5;
         }
-        return  reportApprovalMapper.getVerifyList(search,state);
+        return reportApprovalMapper.getVerifyList(search, state);
     }
 
     @Override
     public Boolean verify_monad(ReportApprovalVo reportApprovalVo) {
         reportApprovalVo.setIssuerTime(new Date());
         Integer status = reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
-        if(status==1){
+        if (status == 1) {
             return true;
         }
         return false;
@@ -179,7 +192,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         reportApprovalVo.setReason(reportApprovalVo1.getReason());
         reportApprovalVo.setState(state);
         Integer status = reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
-        if(status==1){
+        if (status == 1) {
             return true;
         }
         return false;
@@ -188,6 +201,6 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     @Override
     public List<ReportApprovalVo> verifyHistory(String search) {
 
-        return  reportApprovalMapper.getVerifyHistory(search);
+        return reportApprovalMapper.getVerifyHistory(search);
     }
 }
