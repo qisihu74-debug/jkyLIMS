@@ -132,6 +132,10 @@ public class SampleEntity {
      * 外观描述
      */
     private String insertFlag;
+    /**
+     * 0为未使用，1为已使用
+     */
+    private Integer isUse;
 
     /**
      * 样品下检测项、检测依据、总价
@@ -163,6 +167,7 @@ public class SampleEntity {
         this.generation = addParamVo.getGeneration();
         this.outwardDescribe = addParamVo.getOutwardDescribe();
         this.insertFlag = insertFlag;
+        this.isUse = 0;
 //        this.state = state;
 //        this.checkDate = checkDate;
 //        this.remark = remark;

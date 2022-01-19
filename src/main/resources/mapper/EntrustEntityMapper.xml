@@ -317,4 +317,11 @@ WHERE
 	sf.product_id = #{productId}
 AND s.type IN (2, 3)
   </select>
+
+  <select id="getSampleId" resultType="java.lang.Integer">
+    SELECT
+      sample_id
+    FROM
+      test_entrusted_sample_details_rel where entrustment_id = #{entrustmentId}
+  </select>
 </mapper>
