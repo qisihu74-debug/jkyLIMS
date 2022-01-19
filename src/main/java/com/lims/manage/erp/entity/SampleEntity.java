@@ -167,6 +167,7 @@ public class SampleEntity {
         this.generation = addParamVo.getGeneration();
         this.outwardDescribe = addParamVo.getOutwardDescribe();
         this.insertFlag = insertFlag;
+        this.isUse = 0;
 //        this.state = state;
 //        this.checkDate = checkDate;
 //        this.remark = remark;
