@@ -74,7 +74,7 @@ public interface ReportApprovalService {
      * @param search
      * @return
      */
-    List<ReportApprovalVo> verify_history(String search);
+    List<ReportApprovalVo> verifyHistory(String search);
 
 
 

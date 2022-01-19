@@ -142,7 +142,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             //5.签发已抢单
             state = 5;
         }
-        return  reportApprovalMapper.getgetVerifyList(search,state);
+        return  reportApprovalMapper.getVerifyList(search,state);
     }
 
     @Override
@@ -165,9 +165,8 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         if (reportApprovalVo1.getState() == 0) {
             //通过6已签
             state = 6;
-            ReportApprovalVo data = reportApprovalMapper.getReportApprovalDetail(reportApprovalVo1.getId());
             reportApprovalVo.setIssuerTime(new Date());
-            reportApprovalVo.setIssuer(data.getIssuer());
+            reportApprovalVo.setIssuer(reportApprovalVo1.getIssuer());
         }
         if (reportApprovalVo1.getState() == 1) {
             // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填 清除信息 退回上一步
@@ -187,8 +186,8 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     }
 
     @Override
-    public List<ReportApprovalVo> verify_history(String search) {
+    public List<ReportApprovalVo> verifyHistory(String search) {
 
-        return  reportApprovalMapper.getgetVerifyList(search,6);
+        return  reportApprovalMapper.getVerifyHistory(search);
     }
 }

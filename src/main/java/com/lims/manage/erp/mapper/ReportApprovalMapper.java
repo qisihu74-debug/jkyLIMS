@@ -58,7 +58,14 @@ public interface ReportApprovalMapper {
      * @param state
      * @return
      */
-    List<ReportApprovalVo> getgetVerifyList(@Param("search")String search,@Param("state")Integer state);
+    List<ReportApprovalVo> getVerifyList(@Param("search")String search,@Param("state")Integer state);
+
+    /**
+     * 查询签发 历史
+     * @param search
+     * @return
+     */
+    List<ReportApprovalVo> getVerifyHistory(@Param("search")String search);
 
     /**
      * 签发抢单
