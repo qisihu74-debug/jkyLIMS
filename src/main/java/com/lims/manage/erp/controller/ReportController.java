@@ -1,5 +1,7 @@
 package com.lims.manage.erp.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
@@ -215,11 +217,12 @@ public class ReportController {
      * @return
      */
     @PostMapping("seal")
-    public Result seal(@RequestParam("list") List<String> list, @RequestParam("id") Long id) {
-        if (CollectionUtils.isEmpty(list)) {
+    public Result seal(@RequestParam("list") String list, @RequestParam("id") Long id) {
+        if (StringUtils.isEmpty(list)) {
             return ResultUtil.error("缺少必要的参数！");
         }
-        Boolean flag = reportService.seal(list, id);
+        List<String> list1= JSONArray.parseArray(list, String.class);
+        Boolean flag = reportService.seal(list1, id);
         if (flag) {
             return ResultUtil.success("获取印章成功!");
         } else {
