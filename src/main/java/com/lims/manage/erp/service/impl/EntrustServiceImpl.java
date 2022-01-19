@@ -134,6 +134,7 @@ public class EntrustServiceImpl implements EntrustService {
         List<EntrustSampleEntity> list1 = new ArrayList<>();
         if (!CollectionUtils.isEmpty(samples)){
             for (SampleEntity sampleEntity:samples) {
+                int i = sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
                 EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                 entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                 entrustSampleEntity.setSampleId(sampleEntity.getId());
@@ -221,6 +222,13 @@ public class EntrustServiceImpl implements EntrustService {
 //        List<Integer>  removeSamplesId =  entityMapper.getSampleIdSet(basisInfo.getId());
         // 删除样品id
         entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
+        //修改样品为未使用
+        List<Integer> sampleIds = entityMapper.getSampleId(basisInfo.getId());
+        if(!CollectionUtils.isEmpty(sampleIds)){
+            for (Integer sampleId : sampleIds) {
+                sampleEntityMapper.updateSampleUse(sampleId, 0);
+            }
+        }
         // 删除判定依据id
         entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
         // 删除缴费信息
@@ -294,6 +302,12 @@ public class EntrustServiceImpl implements EntrustService {
     public Boolean abandonEntrust(EntrustEntity entrustEntity) {
         entrustEntity.setState(144);
         entityMapper.updateEntrustInfo(entrustEntity);
+        List<Integer> sampleIds = entityMapper.getSampleId(entrustEntity.getId());
+        if(!CollectionUtils.isEmpty(sampleIds)){
+            for (Integer sampleId : sampleIds) {
+                sampleEntityMapper.updateSampleUse(sampleId, 0);
+            }
+        }
         return true;
     }
 

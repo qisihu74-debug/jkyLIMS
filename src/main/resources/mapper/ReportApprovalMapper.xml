@@ -16,12 +16,13 @@
         verifyer_time
         FROM
         test_report_record
-        WHERE 1=1
-        and report_complete_time is not NULL
+        WHERE
+        report_complete_time is not NULL
         and  (state = 1 or state =3)
             <if test="search!=null and search!=''">
                 and task_code like CONCAT('%',#{search},'%')
             </if>
+        ORDER BY report_complete_time desc
     </select>
 
     <select id="getReportApprovalDetail" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
@@ -60,10 +61,11 @@
         FROM
             test_report_record
         WHERE
-            state = 4
+        verifyer_time is not NULL
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
         </if>
+        ORDER BY verifyer_time desc
     </select>
 
     <select id="getTaskDetail" resultType="com.lims.manage.erp.vo.TaskDetailInfoVo">
@@ -154,7 +156,7 @@
         where t3.entrustment_id = #{id}
     </select>
 
-    <select id="getgetVerifyList" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
+    <select id="getVerifyList" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
         SELECT
         id,
         sample_name,
@@ -168,13 +170,34 @@
         verifyer_time
         FROM
         test_report_record
-        WHERE 1=1
+        WHERE  verifyer_time is not NULL
         <if test="state!=null and state!=''">
             and  state = #{state}
         </if>
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
         </if>
+        order by verifyer_time desc
+    </select>
+    <select id="getVerifyHistory" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
+        SELECT
+        id,
+        sample_name,
+        price AS cost,
+        required_completion_time,
+        task_code,
+        state,
+        applicant,
+        issuer,
+        issuer_time,
+        verifyer_time
+        FROM
+        test_report_record
+        WHERE  issuer_time is not NULL
+        <if test="search!=null and search!=''">
+            and task_code like CONCAT('%',#{search},'%')
+        </if>
+        order by issuer_time desc
     </select>
     <update id="updateVerifyMonad" parameterType="com.lims.manage.erp.vo.ReportApprovalVo">
         UPDATE test_report_record

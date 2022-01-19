@@ -116,4 +116,11 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     List<String> getStatndardByPId(Integer productId);
+
+    /**
+     * 查询委托下的样品ID
+     * @param entrustmentId
+     * @return
+     */
+    List<Integer> getSampleId(Long entrustmentId);
 }

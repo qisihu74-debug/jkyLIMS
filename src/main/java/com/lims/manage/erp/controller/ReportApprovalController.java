@@ -304,6 +304,7 @@ public class ReportApprovalController {
         if (!reportApprovalVo.getVerifyer().equals(name)) {
             return ResultUtil.error(678, "审批失败，审批人与抢单人不一致");
         }
+        reportApprovalVo1.setIssuer(name);
         // 签发报告单状态 应该是已经抢单 state =5
         if (reportApprovalVo.getState() != 5) {
             return ResultUtil.error(678, "此任务单号状态不对");
@@ -316,7 +317,7 @@ public class ReportApprovalController {
     }
 
     /**
-     * 报告审批历史查询列表
+     * 报告签发历史查询列表
      *
      * @param search
      * @return
@@ -324,7 +325,7 @@ public class ReportApprovalController {
     @GetMapping("/verify_history")
     public Result verify_history(String search) {
 
-        List<ReportApprovalVo> list = reportApprovalService.verify_history(search);
+        List<ReportApprovalVo> list = reportApprovalService.verifyHistory(search);
         if (!list.isEmpty()) {
             return ResultUtil.success(list);
         }

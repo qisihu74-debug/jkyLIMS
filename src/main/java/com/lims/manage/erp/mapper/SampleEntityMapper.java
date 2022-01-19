@@ -122,4 +122,12 @@ public interface SampleEntityMapper {
      * @return
      */
     TemplateSampleVo getOriginalSampleInfo(Integer sampleId);
+
+    /**
+     * 修改样品是否使用
+     * @param sampleId
+     * @param isUse
+     * @return
+     */
+    int updateSampleUse(Integer sampleId,Integer isUse);
 }
