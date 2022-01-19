@@ -8,6 +8,7 @@ import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SealReqEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.result.Result;
@@ -49,6 +50,7 @@ import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -211,18 +213,17 @@ public class ReportController {
 
     /**
      * 盖章
-     *
-     * @param list
-     * @param id
+     * @param entity
      * @return
      */
     @PostMapping("seal")
-    public Result seal(@RequestParam("list") String list, @RequestParam("id") Long id) {
-        if (StringUtils.isEmpty(list)) {
+    public Result seal(@RequestBody SealReqEntity entity) {
+        if (StringUtils.isEmpty(entity.getList())) {
             return ResultUtil.error("缺少必要的参数！");
         }
-        List<String> list1= JSONArray.parseArray(list, String.class);
-        Boolean flag = reportService.seal(list1, id);
+        String[] split = entity.getList().split(",");
+        List<String> list = Arrays.asList(split);
+        Boolean flag = reportService.seal(list, entity.getId());
         if (flag) {
             return ResultUtil.success("获取印章成功!");
         } else {
