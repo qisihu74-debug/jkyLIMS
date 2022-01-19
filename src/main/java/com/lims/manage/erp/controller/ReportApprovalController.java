@@ -298,11 +298,11 @@ public class ReportApprovalController {
         if (reportApprovalVo == null) {
             return ResultUtil.error(678, "此任务单号不存在");
         }
-        if (reportApprovalVo.getVerifyer() == null) {
+        if (reportApprovalVo.getIssuer() == null) {
             return ResultUtil.error(678, "请先抢单");
         }
-        if (!reportApprovalVo.getVerifyer().equals(name)) {
-            return ResultUtil.error(678, "审批失败，审批人与抢单人不一致");
+        if (!reportApprovalVo.getIssuer().equals(name)) {
+            return ResultUtil.error(678, "签发失败，审批人与抢单人不一致");
         }
         reportApprovalVo1.setIssuer(name);
         // 签发报告单状态 应该是已经抢单 state =5

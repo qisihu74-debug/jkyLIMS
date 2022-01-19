@@ -107,6 +107,7 @@
          <if test="taskCode!=null and taskCode!=''">
              and task_code  LIKE CONCAT('%',#{taskCode},'%')
          </if>
+         order by report_complete_time desc
         </select>
 
     <select id="getReportDetailHistory" resultMap="reportDetailMap">
