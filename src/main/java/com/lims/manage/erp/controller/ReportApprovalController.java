@@ -49,7 +49,7 @@ public class ReportApprovalController {
 
 
     /**
-     * 抢单
+     * 审批抢单
      *
      * @param reportApprovalVo1
      * @return

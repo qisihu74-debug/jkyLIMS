@@ -55,8 +55,8 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean applyfor_monad(ReportApprovalVo reportApprovalVo) {
-
-        reportApprovalVo.setVerifyerTime(new Date());
+        // 抢单不记录 抢单时间
+        reportApprovalVo.setVerifyerTime(null);
         Integer status = reportApprovalMapper.updateReportApprovalDetail(reportApprovalVo);
         if (status == 1) {
             return true;
@@ -147,7 +147,8 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 
     @Override
     public Boolean verify_monad(ReportApprovalVo reportApprovalVo) {
-        reportApprovalVo.setIssuerTime(new Date());
+        // 签发抢单 不记录签发时间
+        reportApprovalVo.setIssuerTime(null);
         Integer status = reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
         if (status == 1) {
             return true;
