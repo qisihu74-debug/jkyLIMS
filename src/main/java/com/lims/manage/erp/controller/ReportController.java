@@ -11,6 +11,7 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SealReqEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -69,6 +70,8 @@ public class ReportController {
     private DocumentConverter converter;  //用于转换
     @Autowired
     private ReportApprovalMapper reportApprovalMapper;
+    @Autowired
+    private ReportRecordEntityMapper recordEntityMapper;
 
     Logger logger = LoggerFactory.getLogger(ReportController.class);
 
@@ -91,9 +94,26 @@ public class ReportController {
     public Result getReportSubmit(Long id)
     {
         if(id==null){
-            return ResultUtil.error("缺少必要参数！");
+            return ResultUtil.error(678,"缺少必要参数！");
         }
-       Boolean flag = reportService.getReportSubmit(id);
+        // 查询是否提交审批
+        ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
+        if(reportData==null){
+            return ResultUtil.error(678,"参数错误！");
+        }
+        if(reportData.getReportCompleteTime()!=null){
+            return ResultUtil.error(678,"报告已提交审批！");
+        }
+        //1、 获取提交报告人信息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error(678, "token已经过期，请退出重新登录");
+        }
+        String name = reportApprovalMapper.getUserName(userInfo.getUserId());
+        if (name == null) {
+            return ResultUtil.error(678, "账号未配置使用人");
+        }
+       Boolean flag = reportService.getReportSubmit(id,name);
         if(flag){
             return ResultUtil.success("提交审批成功");
         }

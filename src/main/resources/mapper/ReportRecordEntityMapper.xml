@@ -420,6 +420,9 @@
             <if test="state != null">
                 state = #{state,jdbcType=VARCHAR},
             </if>
+            <if test="applicant != null and applicant!=''">
+                applicant = #{applicant,jdbcType=VARCHAR},
+            </if>
             <if test="reportCompleteTime != null">
                 report_complete_time = #{reportCompleteTime,jdbcType=TIMESTAMP},
             </if>

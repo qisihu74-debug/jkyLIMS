@@ -83,12 +83,13 @@ public class ReportServiceImpl implements ReportService {
 
     @Transactional
     @Override
-    public Boolean getReportSubmit(Long id) {
+    public Boolean getReportSubmit(Long id,String name) {
         // 根据委托单id 查询报告信息 state=1
         ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
         if(reportData.getState().equals("1")){
             // 修改状态
             reportData.setReportCompleteTime(new Date());
+            reportData.setApplicant(name);
              recordEntityMapper.updateByEntrustIdSelective(reportData);
             return true;
         }

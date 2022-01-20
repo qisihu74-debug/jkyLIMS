@@ -23,9 +23,10 @@ public interface ReportService {
     /**
      * 提交审批
      * @param id
+     * @param name 报告提交申请人
      * @return
      */
-    Boolean getReportSubmit(Long id);
+    Boolean getReportSubmit(Long id,String name);
 
     /**
      * 查询历史记录
