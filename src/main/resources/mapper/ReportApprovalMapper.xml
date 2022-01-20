@@ -126,8 +126,10 @@
 
     </resultMap>
 
-    <select id="getSampleDetailLis" resultMap="taskResultMap">
+
+    <select id="getSampleDetailList" resultMap="taskResultMap">
         SELECT
+               t4.id as sample_id,
                t4.sample_name,
                t4.sample_code,
                t4.specs,
@@ -143,7 +145,8 @@
                  t5.start_time,
                  t5.end_time,
                  t5.id as check_item_id,
-                 t10.name AS instrumentName
+                 t10.name AS instrumentName,
+                 t10.id
                 FROM test_entrusted_sample_details_rel t3
                  LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
                  LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t3.entrustment_id = t5.entrust_id

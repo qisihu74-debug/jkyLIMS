@@ -46,10 +46,11 @@ public interface ReportApprovalMapper {
      */
     TaskDetailInfoVo getTaskDetail(Long id);
 
+
     /**
      * 获取委托id 获取样品信息 以及检测信息
      */
-    List<SampleDetailVo> getSampleDetailLis(Long id);
+    List<SampleDetailVo> getSampleDetailList(Long id);
 
 
     /**

@@ -109,9 +109,10 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         if (taskDetailInfoVo == null) {
             return new TaskDetailInfoVo(id);
         }
+        // 样品展示  样品的检测项信息展示
         if (taskDetailInfoVo.getEntrustmentId() != null) {
             // 通过委托id 获取样品信息 及以下的 处理。
-            List<SampleDetailVo> sampleDetailVoList = reportApprovalMapper.getSampleDetailLis(taskDetailInfoVo.getEntrustmentId());
+            List<SampleDetailVo> sampleDetailVoList = reportApprovalMapper.getSampleDetailList(taskDetailInfoVo.getEntrustmentId());
             for (SampleDetailVo sampleDetailVo : sampleDetailVoList) {
                 if (!sampleDetailVo.getCheckItemInfoList().isEmpty()) {
                     for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
@@ -125,25 +126,11 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
                     }
                 }
             }
-            // 处理checkItemId 相同的话 进行保留其中一个。
-            if (!sampleDetailVoList.isEmpty()) {
-                HashMap<Integer, SampleDetailVo> map = new HashMap<>();
-                for (SampleDetailVo data : sampleDetailVoList) {
-                    for (CheckItemInfoVo checkItemInfoVo : data.getCheckItemInfoList()) {
-                        map.put(checkItemInfoVo.getCheckItemId(), data);
-                    }
-                }
-                Collection<SampleDetailVo> values = map.values();
-                Iterator<SampleDetailVo> returnData = values.iterator();
-                List<SampleDetailVo> list = new ArrayList<>();
-                while (returnData.hasNext()) {
-                    list.add(returnData.next());
-                }
-                taskDetailInfoVo.setSampleDetailList(list);
-            }
+            taskDetailInfoVo.setSampleDetailList(sampleDetailVoList);
         }
         return taskDetailInfoVo;
     }
+
 
     @Override
     public List<ReportApprovalVo> getVerify_list(String search, Integer state) {

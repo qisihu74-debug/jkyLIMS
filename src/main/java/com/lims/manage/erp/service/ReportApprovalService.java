@@ -41,11 +41,12 @@ public interface ReportApprovalService {
     List<ReportApprovalVo> applyfor_history(String search);
 
     /**
-     * 查看详情
+     * 查看报告详情
      * @param id
      * @return
      */
     TaskDetailInfoVo getDetails(Long id);
+
 
     /**
      * 报告签发列表
