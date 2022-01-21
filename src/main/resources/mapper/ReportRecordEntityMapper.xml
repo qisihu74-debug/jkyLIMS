@@ -434,6 +434,7 @@
     <select id="getSendList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         SELECT
         id,
+        entrustment_id As entrustmentId,
         report_code,
         sample_name,
         number,
