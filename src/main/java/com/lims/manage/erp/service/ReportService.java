@@ -81,7 +81,7 @@ public interface ReportService {
      * @param pageSize
      * @return
      */
-    PageInfo sealList(String type, String search, Integer pageNum, Integer pageSize);
+    PageInfo sealList(String type, String search, Integer pageNum, Integer pageSize,String reportType);
 
 
 

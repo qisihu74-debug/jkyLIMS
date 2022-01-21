@@ -181,11 +181,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("sealList")
-    public Result sealList(String type, String search, Integer pageNum, Integer pageSize) {
+    public Result sealList(String type, String search, Integer pageNum, Integer pageSize,String reportType) {
         if (StringUtils.isEmpty(type) || pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少必要的参数！");
         }
-        PageInfo pageInfo = reportService.sealList(type, search, pageNum, pageSize);
+        PageInfo pageInfo = reportService.sealList(type, search, pageNum, pageSize,reportType);
         return ResultUtil.success(pageInfo);
     }
 

@@ -367,6 +367,9 @@
         <if test="search != null and search != ''">
             AND report_code = #{search}
         </if>
+        <if test="reportType != null and reportType != ''">
+            AND report_type = #{reportType}
+        </if>
     </select>
 
     <select id="getDetail" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
