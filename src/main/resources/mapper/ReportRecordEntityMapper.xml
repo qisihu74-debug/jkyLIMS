@@ -489,4 +489,13 @@
         where entrustment_id=#{entrustId}
     </select>
 
+    <select id="getMaxCode" resultType="java.lang.Integer">
+        SELECT
+            MAX( SUBSTR( report_code, 12 ) )
+        FROM
+            test_report_record
+        WHERE
+            report_code LIKE CONCAT('%',#{year},'%')
+    </select>
+
 </mapper>
