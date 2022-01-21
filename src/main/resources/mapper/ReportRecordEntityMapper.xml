@@ -443,7 +443,9 @@
         waybill,
         email,
         report_manager,
-        operate_time
+        operate_time,
+        report_mailing_address,
+        report_phone
         FROM
         test_report_record
         WHERE  state = 7 or state = 8

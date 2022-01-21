@@ -1,6 +1,6 @@
 package com.lims.manage.erp.entity;
 
-import org.json.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 import com.lims.manage.erp.vo.JudgmentBasisVo;
 import com.lims.manage.erp.vo.SampleAddDetailVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;

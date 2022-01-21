@@ -210,6 +210,8 @@ public class ReportServiceImpl implements ReportService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean saveMessage(ReportRecordEntity reportRecordEntity) {
+        // 8已邮寄
+        reportRecordEntity.setState("8");
         Integer status = entityMapper.updateByPrimaryKeySelective(reportRecordEntity);
         if (status == 1) {
             return true;

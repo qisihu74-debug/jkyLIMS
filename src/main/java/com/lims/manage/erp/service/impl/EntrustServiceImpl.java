@@ -1,5 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.EntrustEntity;
@@ -36,8 +38,6 @@ import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -833,28 +833,16 @@ public class EntrustServiceImpl implements EntrustService {
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
             List<JudgmentBasisVo> listJson = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
-//            sampleEntity.setJudgmentBasisVos(listJson);
-            StringBuilder stringBuilder = new StringBuilder();
-            if (!listJson.isEmpty()) {
-                for (JudgmentBasisVo judgmentBasisVo : listJson) {
-                    stringBuilder.append(judgmentBasisVo);
-                }
-            }
-            JSONObject judgmentBasisVoStr = new JSONObject();
-            judgmentBasisVoStr.put("judgmentBasisVoStr",stringBuilder.toString());
-            sampleEntity.setJudgmentBasisVoStr(judgmentBasisVoStr);
+            Map map = new HashMap();
+            map.put("judgmentBasisVoStr", listJson);
+            JSONObject jsonObject = new JSONObject(map);
+            sampleEntity.setJudgmentBasisVoStr(jsonObject);
             // 补充样品下 依据集合
-            stringBuilder.delete(0,stringBuilder.length());
-            List<JudgmentBasisVo> standardList  = sampleEntityMapper.getSampleBasisList(sampleEntity.getId(), entrustAddVo.getId());
-            if(!standardList.isEmpty())
-            {
-                for(JudgmentBasisVo judgmentBasisVo:standardList){
-                    stringBuilder.append(judgmentBasisVo);
-                }
-            }
-            JSONObject standardFileIdStr = new JSONObject();
-            standardFileIdStr.put("standardFileIdStr",stringBuilder.toString());
-            sampleEntity.setStandardFileIdStr(standardFileIdStr);
+            List<JudgmentBasisVo> standardList = sampleEntityMapper.getSampleBasisList(sampleEntity.getId(), entrustAddVo.getId());
+            Map map1 = new HashMap();
+            map1.put("standardFileIdStr", standardList);
+            JSONObject jsonObject1 = new JSONObject(map1);
+            sampleEntity.setStandardFileIdStr(jsonObject1);
         }
         entrustAddVo.setSamples(sampleCollection);
         return entrustAddVo;

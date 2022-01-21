@@ -591,6 +591,7 @@ public class ReportController {
      */
     @GetMapping("sendList")
     public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type) {
+        logger.info("分页参数pageNum:{},pageSize:{}",pageNum,pageSize);
         PageInfo pageInfo = reportService.getSendList(search, reportType, pageNum, pageSize, type);
         return ResultUtil.success(pageInfo);
     }
