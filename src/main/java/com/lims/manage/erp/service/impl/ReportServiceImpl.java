@@ -27,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -262,7 +263,15 @@ public class ReportServiceImpl implements ReportService {
 //                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
 //            }
             //生成报告编号
-            reportRecordEntity.setReportCode("ZX-2021-SW-1471");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+            String year = sdf.format(new Date());
+            Integer maxCode = recordEntityMapper.getMaxCode(year);
+            if(maxCode == null){
+                reportRecordEntity.setReportCode("ZX-"+year+"-JC-0001");
+            }else{
+                int newCode = maxCode + 1;
+                reportRecordEntity.setReportCode("ZX-"+year+"-JC-"+newCode);
+            }
             reportRecordEntity.setId(recordId);
             int insert = recordEntityMapper.insert(reportRecordEntity);
             if (insert < 1) {
