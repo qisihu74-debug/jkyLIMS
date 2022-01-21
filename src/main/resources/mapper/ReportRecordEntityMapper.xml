@@ -434,6 +434,7 @@
     <select id="getSendList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         SELECT
         id,
+        entrustment_id As entrustmentId,
         report_code,
         sample_name,
         number,
@@ -448,7 +449,13 @@
         report_phone
         FROM
         test_report_record
-        WHERE  state = 7 or state = 8
+        WHERE 1=1
+        <if test='type == "1"'>
+            AND state = 7
+        </if>
+        <if test='type == "2"'>
+            AND state = 8
+        </if>
         <if test="search != null and search != ''">
             AND report_code = #{search}
         </if>
