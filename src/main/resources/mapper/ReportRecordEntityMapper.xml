@@ -391,6 +391,7 @@
     <update id="updateImgByid">
         update test_report_record
         set seal_url=#{url}
+        AND
         set state = '7'
         where id = #{id}
     </update>
