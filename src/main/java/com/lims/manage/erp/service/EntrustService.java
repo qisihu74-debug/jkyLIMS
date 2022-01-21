@@ -10,6 +10,7 @@ import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.json.JSONException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -26,9 +27,34 @@ public interface EntrustService {
     Boolean addEntrust(EntrustAddVo vo, MultipartFile[] file);
 
     /**
+     * 新增委托测试丁
+     * @param vo
+     * @return
+     */
+    Boolean addEntrustTest(EntrustAddVo vo, MultipartFile[] file);
+
+    /**
+     * 新增委托测试丁 new
+     * @param vo
+     * @return
+     */
+    Integer addEntrustTestNew(EntrustAddVo vo, MultipartFile[] file);
+
+    /**
+     * 新增委托测试下样品信息
+     * @param vo
+     * @return
+     */
+    Boolean addEntrustTestNewSample(EntrustAddVo vo);
+
+    /**
      * 修改委托
      */
     Boolean updateEntrust(EntrustAddVo vo, MultipartFile[] file);
+    /**
+     * 修改委托测试
+     */
+    Boolean updateEntrustTest(EntrustAddVo vo, MultipartFile[] file);
     /**
      * 实现作废
      */
@@ -77,6 +103,13 @@ public interface EntrustService {
      * @return
      */
     EntrustAddVo getEntrustHistoryDetail(Long entrustmentId);
+
+    /**
+     * 历史委托信息 具体详情 测试
+     * @param entrustmentId
+     * @return
+     */
+    EntrustAddVo getEntrustHistoryDetailTest(Long entrustmentId) throws JSONException;
 
     /**
      * 委托发布

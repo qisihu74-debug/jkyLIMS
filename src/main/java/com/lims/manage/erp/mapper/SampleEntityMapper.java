@@ -99,6 +99,8 @@ public interface SampleEntityMapper {
 
     List<Integer> getSampleBasisSet(@Param(value = "sampleId") Integer sampleId, @Param(value = "entrustmentId") Long entrustmentId);
 
+    List<JudgmentBasisVo> getSampleBasisList(@Param(value = "sampleId") Integer sampleId, @Param(value = "entrustmentId") Long entrustmentId);
+
     /**
      * 查询样品公用信息
      *

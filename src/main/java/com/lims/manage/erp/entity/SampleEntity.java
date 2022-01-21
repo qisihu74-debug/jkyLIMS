@@ -1,11 +1,10 @@
 package com.lims.manage.erp.entity;
 
-import com.lims.manage.erp.vo.CheckItemInfoVo;
+import org.json.JSONObject;
 import com.lims.manage.erp.vo.JudgmentBasisVo;
 import com.lims.manage.erp.vo.SampleAddDetailVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -117,6 +116,13 @@ public class SampleEntity {
      */
     private List<Integer> standardFileIds;
     /**
+     * 判定依据 JSON 格式
+     */
+    private JSONObject standardFileIdStr;
+    /**
+     * 样品依据 ID 和名称
+     */
+    /**
      * 样品检测项
      */
     private List<SampleItemEntity> sampleCheckItem;
@@ -141,6 +147,11 @@ public class SampleEntity {
      * 样品下检测项、检测依据、总价
      */
     List<JudgmentBasisVo> judgmentBasisVos;
+
+    /**
+     * 样品下检测项、检测依据、总价 String 表示
+     */
+   private  JSONObject judgmentBasisVoStr;
 
 
     public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo, String sampleName, String sampleCode, String pictureUrl, String insertFlag) {

@@ -14,6 +14,15 @@
     from test_entrusted_info
     where id = #{id}
   </select>
+  <select id="getByData" resultType="com.lims.manage.erp.vo.EntrustAddVo">
+    SELECT
+	id,
+	entrustment_no
+    FROM
+        test_entrusted_info
+    WHERE
+        entrustment_no = #{code}
+  </select>
   <select id="selectEntrustHistoryList" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity" parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
     SELECT
     id,

@@ -57,7 +57,7 @@ public class SampleController {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             sampleService.addSampleData(samples, file);
-            return ResultUtil.success();
+            return ResultUtil.success("保存样品成功！");
         }
     }
 

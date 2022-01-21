@@ -26,6 +26,13 @@ public interface EntrustEntityMapper extends BaseMapper {
     EntrustAddVo selectByKeyId(Long id);
 
     /**
+     * 通过委托编号 获取委托单id 是否存在
+     * @param code
+     * @return
+     */
+    EntrustAddVo getByData(Integer code);
+
+    /**
      * 保存委托单下样品信息
      * @param list
      */
