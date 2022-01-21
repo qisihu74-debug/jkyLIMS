@@ -1,5 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.EntrustEntity;
@@ -84,8 +86,10 @@ public class EntrustServiceImpl implements EntrustService {
         headers.setContentDispositionFormData("attachment", new String(fileName.getBytes("UTF-8"), "iso-8859-1"));
         return headers;
     }
+
     /**
      * 新增委托任务
+     *
      * @param vo
      * @return
      */
@@ -97,32 +101,32 @@ public class EntrustServiceImpl implements EntrustService {
         basisInfo.setId(GenID.getID());
         //设置委托编号
         Integer code = null;
-        String currentTime = DateUtil.getTodayString().substring(0,6);
+        String currentTime = DateUtil.getTodayString().substring(0, 6);
         //获取当前最大样品编号
         Integer entrustNum = entityMapper.selectMaxNo();
-        if (entrustNum !=null && entrustNum>0){
+        if (entrustNum != null && entrustNum > 0) {
             String substring = entrustNum.toString().substring(0, 6);
-            if (substring.equals(currentTime)){
-                code = entrustNum+1;
-            }else {
-                code = Integer.parseInt(currentTime+"0001");
+            if (substring.equals(currentTime)) {
+                code = entrustNum + 1;
+            } else {
+                code = Integer.parseInt(currentTime + "0001");
             }
-        }else {
-            code = Integer.parseInt(currentTime+"0001");
+        } else {
+            code = Integer.parseInt(currentTime + "0001");
         }
         basisInfo.setEntrustmentNo(code);
         //附件存在上传附件到服务器
-        if (file != null){
+        if (file != null) {
             StringBuilder stringBuilder = new StringBuilder();
-            for (MultipartFile multipartFile :file) {
+            for (MultipartFile multipartFile : file) {
                 String name = multipartFile.getOriginalFilename();
                 String[] strings = name.split("\\.");
-                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code+"."+strings[strings.length-1]);
+                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code + "." + strings[strings.length - 1]);
                 stringBuilder.append(upload);
                 stringBuilder.append(",");
             }
             String fileUrl = stringBuilder.toString();
-            if (!StringUtils.isEmpty(fileUrl)){
+            if (!StringUtils.isEmpty(fileUrl)) {
                 String substring = fileUrl.substring(0, fileUrl.length() - 1);
                 basisInfo.setFileUrl(substring);
             }
@@ -132,16 +136,16 @@ public class EntrustServiceImpl implements EntrustService {
         List<SampleEntity> samples = vo.getSamples();
         List<EntrustSampleEntity> list = new ArrayList<>();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(samples)){
-            for (SampleEntity sampleEntity:samples) {
+        if (!CollectionUtils.isEmpty(samples)) {
+            for (SampleEntity sampleEntity : samples) {
                 int i = sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
                 EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                 entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                 entrustSampleEntity.setSampleId(sampleEntity.getId());
                 list.add(entrustSampleEntity);
                 List<Integer> standardFileIds = sampleEntity.getStandardFileIds();
-                if (!CollectionUtils.isEmpty(standardFileIds)){
-                    for (Integer integer:standardFileIds) {
+                if (!CollectionUtils.isEmpty(standardFileIds)) {
+                    for (Integer integer : standardFileIds) {
                         EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
                         sampleEntity1.setSampleId(sampleEntity.getId());
                         sampleEntity1.setStandardId(integer);
@@ -151,31 +155,31 @@ public class EntrustServiceImpl implements EntrustService {
                 }
                 //样品下检测项
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
-                if (!CollectionUtils.isEmpty(sampleCheckItem)){
+                if (!CollectionUtils.isEmpty(sampleCheckItem)) {
                     //计算检测项总价钱
-                    for (SampleItemEntity entity:sampleCheckItem) {
+                    for (SampleItemEntity entity : sampleCheckItem) {
                         int money = entity.getTimes() * entity.getUnitPrice();
-                        totalMoney = totalMoney+money;
+                        totalMoney = totalMoney + money;
                     }
                     //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
-                    for (SampleItemEntity entity:sampleCheckItem) {
+                    for (SampleItemEntity entity : sampleCheckItem) {
                         entity.setSampleId(sampleEntity.getId());
                         entity.setEntrustId(basisInfo.getId());
                     }
                     entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
                 }
             }
-            if (!CollectionUtils.isEmpty(list)){
+            if (!CollectionUtils.isEmpty(list)) {
                 entityMapper.BatchSaveEntrustSample(list);
             }
-            if (!CollectionUtils.isEmpty(list1)){
+            if (!CollectionUtils.isEmpty(list1)) {
                 entityMapper.BatchSaveSampleStandard(list1);
             }
         }
 
 
         //更新委托单收费记录信息
-        if (!StringUtils.isEmpty(vo.getPaymentRecord())){
+        if (!StringUtils.isEmpty(vo.getPaymentRecord())) {
             EntrustPamentEntity pamentEntity = new EntrustPamentEntity();
             pamentEntity.setEntrustmentId(basisInfo.getId());
             pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
@@ -184,13 +188,231 @@ public class EntrustServiceImpl implements EntrustService {
             entityMapper.saveEntrustPayRecord(pamentEntity);
         }
         //得到总价钱，再保存委托基本信息
-        basisInfo.setCountPrice(totalMoney+"");
+        basisInfo.setCountPrice(totalMoney + "");
         entityMapper.insertEntrustInfo(basisInfo);
         return true;
     }
 
     /**
+     * 新增委托 测试
+     *
+     * @param vo
+     * @param file
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean addEntrustTest(EntrustAddVo vo, MultipartFile[] file) {
+        //存放委托基本信息==》test_entrusted
+        EntrustEntity basisInfo = new EntrustEntity(vo);
+        basisInfo.setId(GenID.getID());
+        //设置委托编号
+        Integer code = null;
+        String currentTime = DateUtil.getTodayString().substring(0, 6);
+        //获取当前最大样品编号
+        Integer entrustNum = entityMapper.selectMaxNo();
+        if (entrustNum != null && entrustNum > 0) {
+            String substring = entrustNum.toString().substring(0, 6);
+            if (substring.equals(currentTime)) {
+                code = entrustNum + 1;
+            } else {
+                code = Integer.parseInt(currentTime + "0001");
+            }
+        } else {
+            code = Integer.parseInt(currentTime + "0001");
+        }
+        basisInfo.setEntrustmentNo(code);
+        //附件存在上传附件到服务器
+        if (file != null) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (MultipartFile multipartFile : file) {
+                String name = multipartFile.getOriginalFilename();
+                String[] strings = name.split("\\.");
+                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code + "." + strings[strings.length - 1]);
+                stringBuilder.append(upload);
+                stringBuilder.append(",");
+            }
+            String fileUrl = stringBuilder.toString();
+            if (!StringUtils.isEmpty(fileUrl)) {
+                String substring = fileUrl.substring(0, fileUrl.length() - 1);
+                basisInfo.setFileUrl(substring);
+            }
+        }
+        //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
+        int totalMoney = 0;
+        List<SampleEntity> samples = vo.getSamples();
+        List<EntrustSampleEntity> list = new ArrayList<>();
+        List<EntrustSampleEntity> list1 = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(samples)) {
+            for (SampleEntity sampleEntity : samples) {
+                int i = sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
+                EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
+                entrustSampleEntity.setEntrustmentId(basisInfo.getId());
+                entrustSampleEntity.setSampleId(sampleEntity.getId());
+                list.add(entrustSampleEntity);
+                List<Integer> standardFileIds = sampleEntity.getStandardFileIds();
+                if (!CollectionUtils.isEmpty(standardFileIds)) {
+                    for (Integer integer : standardFileIds) {
+                        EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
+                        sampleEntity1.setSampleId(sampleEntity.getId());
+                        sampleEntity1.setStandardId(integer);
+                        sampleEntity1.setEntrustmentId(basisInfo.getId());
+                        list1.add(sampleEntity1);
+                    }
+                }
+                //样品下检测项
+                List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
+                if (!CollectionUtils.isEmpty(sampleCheckItem)) {
+                    //计算检测项总价钱
+                    for (SampleItemEntity entity : sampleCheckItem) {
+                        int money = entity.getTimes() * entity.getUnitPrice();
+                        totalMoney = totalMoney + money;
+                    }
+                    //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+                    for (SampleItemEntity entity : sampleCheckItem) {
+                        entity.setSampleId(sampleEntity.getId());
+                        entity.setEntrustId(basisInfo.getId());
+                    }
+                    entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
+                }
+            }
+            if (!CollectionUtils.isEmpty(list)) {
+                entityMapper.BatchSaveEntrustSample(list);
+            }
+            if (!CollectionUtils.isEmpty(list1)) {
+                entityMapper.BatchSaveSampleStandard(list1);
+            }
+        }
+
+
+        //更新委托单收费记录信息
+        if (!StringUtils.isEmpty(vo.getPaymentRecord())) {
+            EntrustPamentEntity pamentEntity = new EntrustPamentEntity();
+            pamentEntity.setEntrustmentId(basisInfo.getId());
+            pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
+            pamentEntity.setPrice(vo.getPaymentRecord());
+//            pamentEntity.setOperator(ShiroUtils.getUserInfo().getUsername());
+            entityMapper.saveEntrustPayRecord(pamentEntity);
+        }
+        //得到总价钱，再保存委托基本信息
+        basisInfo.setCountPrice(totalMoney + "");
+        entityMapper.insertEntrustInfo(basisInfo);
+        return true;
+    }
+
+    /**
+     * 实现对委托单信息单独保存
+     *
+     * @param vo
+     * @param file
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Integer addEntrustTestNew(EntrustAddVo vo, MultipartFile[] file) {
+        //存放委托基本信息==》test_entrusted
+        EntrustEntity basisInfo = new EntrustEntity(vo);
+        basisInfo.setId(GenID.getID());
+        //设置委托编号
+        Integer code = null;
+        String currentTime = DateUtil.getTodayString().substring(0, 6);
+        //获取当前最大样品编号
+        Integer entrustNum = entityMapper.selectMaxNo();
+        if (entrustNum != null && entrustNum > 0) {
+            String substring = entrustNum.toString().substring(0, 6);
+            if (substring.equals(currentTime)) {
+                code = entrustNum + 1;
+            } else {
+                code = Integer.parseInt(currentTime + "0001");
+            }
+        } else {
+            code = Integer.parseInt(currentTime + "0001");
+        }
+        basisInfo.setEntrustmentNo(code);
+        //附件存在上传附件到服务器
+        if (file != null) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (MultipartFile multipartFile : file) {
+                String name = multipartFile.getOriginalFilename();
+                String[] strings = name.split("\\.");
+                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code + "." + strings[strings.length - 1]);
+                stringBuilder.append(upload);
+                stringBuilder.append(",");
+            }
+            String fileUrl = stringBuilder.toString();
+            if (!StringUtils.isEmpty(fileUrl)) {
+                String substring = fileUrl.substring(0, fileUrl.length() - 1);
+                basisInfo.setFileUrl(substring);
+            }
+        }
+        entityMapper.insertEntrustInfo(basisInfo);
+        // 成功后 返回委托编号
+        return code;
+    }
+
+    /**
+     * 新增委托测试下样品信息 单独保存
+     *
+     * @param vo
+     * @return
+     */
+    @Override
+    public Boolean addEntrustTestNewSample(EntrustAddVo vo) {
+        EntrustEntity basisInfo = new EntrustEntity(vo);
+        //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
+        int totalMoney = 0;
+        List<SampleEntity> samples = vo.getSamples();
+        List<EntrustSampleEntity> list = new ArrayList<>();
+        List<EntrustSampleEntity> list1 = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(samples)) {
+            for (SampleEntity sampleEntity : samples) {
+                int i = sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
+                EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
+                entrustSampleEntity.setEntrustmentId(basisInfo.getId());
+                entrustSampleEntity.setSampleId(sampleEntity.getId());
+                list.add(entrustSampleEntity);
+                List<Integer> standardFileIds = sampleEntity.getStandardFileIds();
+                if (!CollectionUtils.isEmpty(standardFileIds)) {
+                    for (Integer integer : standardFileIds) {
+                        EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
+                        sampleEntity1.setSampleId(sampleEntity.getId());
+                        sampleEntity1.setStandardId(integer);
+                        sampleEntity1.setEntrustmentId(basisInfo.getId());
+                        list1.add(sampleEntity1);
+                    }
+                }
+                //样品下检测项
+                List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
+                if (!CollectionUtils.isEmpty(sampleCheckItem)) {
+                    //计算检测项总价钱
+                    for (SampleItemEntity entity : sampleCheckItem) {
+                        int money = entity.getTimes() * entity.getUnitPrice();
+                        totalMoney = totalMoney + money;
+                    }
+                    //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+                    for (SampleItemEntity entity : sampleCheckItem) {
+                        entity.setSampleId(sampleEntity.getId());
+                        entity.setEntrustId(basisInfo.getId());
+                    }
+                    entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
+                }
+            }
+            if (!CollectionUtils.isEmpty(list)) {
+                entityMapper.BatchSaveEntrustSample(list);
+            }
+            if (!CollectionUtils.isEmpty(list1)) {
+                entityMapper.BatchSaveSampleStandard(list1);
+            }
+        }
+        //得到总价钱，再保存委托基本信息
+        basisInfo.setCountPrice(totalMoney + "");
+        entityMapper.updateEntrustInfo(basisInfo);
+        return true;
+    }
+
+    /**
      * 修改委托
+     *
      * @param vo
      * @param file
      * @return
@@ -199,21 +421,21 @@ public class EntrustServiceImpl implements EntrustService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateEntrust(EntrustAddVo vo, MultipartFile[] file) {
         EntrustEntity basisInfo = new EntrustEntity(vo);
-        Integer code =  vo.getEntrustmentNo();
+        Integer code = vo.getEntrustmentNo();
         //附件存在上传附件到服务器
-        if (file != null){
+        if (file != null) {
             StringBuilder stringBuilder = new StringBuilder();
-            for (MultipartFile multipartFile :file) {
+            for (MultipartFile multipartFile : file) {
                 String name = multipartFile.getOriginalFilename();
                 String[] strings = name.split("\\.");
                 // 去清除 MinIo 桶数据。
-               MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure,code+"."+strings[strings.length-1]);
-                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code+"."+strings[strings.length-1]);
+                MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure, code + "." + strings[strings.length - 1]);
+                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code + "." + strings[strings.length - 1]);
                 stringBuilder.append(upload);
                 stringBuilder.append(",");
             }
             String fileUrl = stringBuilder.toString();
-            if (!StringUtils.isEmpty(fileUrl)){
+            if (!StringUtils.isEmpty(fileUrl)) {
                 String substring = fileUrl.substring(0, fileUrl.length() - 1);
                 basisInfo.setFileUrl(substring);
             }
@@ -224,7 +446,7 @@ public class EntrustServiceImpl implements EntrustService {
         entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
         //修改样品为未使用
         List<Integer> sampleIds = entityMapper.getSampleId(basisInfo.getId());
-        if(!CollectionUtils.isEmpty(sampleIds)){
+        if (!CollectionUtils.isEmpty(sampleIds)) {
             for (Integer sampleId : sampleIds) {
                 sampleEntityMapper.updateSampleUse(sampleId, 0);
             }
@@ -241,15 +463,15 @@ public class EntrustServiceImpl implements EntrustService {
         List<SampleEntity> samples = vo.getSamples();
         List<EntrustSampleEntity> list = new ArrayList<>();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(samples)){
-            for (SampleEntity sampleEntity:samples) {
+        if (!CollectionUtils.isEmpty(samples)) {
+            for (SampleEntity sampleEntity : samples) {
                 EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                 entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                 entrustSampleEntity.setSampleId(sampleEntity.getId());
                 list.add(entrustSampleEntity);
                 List<Integer> standardFileIds = sampleEntity.getStandardFileIds();
-                if (!CollectionUtils.isEmpty(standardFileIds)){
-                    for (Integer integer:standardFileIds) {
+                if (!CollectionUtils.isEmpty(standardFileIds)) {
+                    for (Integer integer : standardFileIds) {
                         EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
                         sampleEntity1.setSampleId(sampleEntity.getId());
                         sampleEntity1.setStandardId(integer);
@@ -259,14 +481,14 @@ public class EntrustServiceImpl implements EntrustService {
                 }
                 //样品下检测项
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
-                if (!CollectionUtils.isEmpty(sampleCheckItem)){
+                if (!CollectionUtils.isEmpty(sampleCheckItem)) {
                     //计算检测项总价钱
-                    for (SampleItemEntity entity:sampleCheckItem) {
+                    for (SampleItemEntity entity : sampleCheckItem) {
                         int money = entity.getTimes() * entity.getUnitPrice();
-                        totalMoney = totalMoney+money;
+                        totalMoney = totalMoney + money;
                     }
                     //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
-                    for (SampleItemEntity entity:sampleCheckItem) {
+                    for (SampleItemEntity entity : sampleCheckItem) {
                         entity.setSampleId(sampleEntity.getId());
                         entity.setEntrustId(basisInfo.getId());
                     }
@@ -274,16 +496,16 @@ public class EntrustServiceImpl implements EntrustService {
                     entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
                 }
             }
-            if (!CollectionUtils.isEmpty(list)){
+            if (!CollectionUtils.isEmpty(list)) {
                 entityMapper.BatchSaveEntrustSample(list);
             }
-            if (!CollectionUtils.isEmpty(list1)){
+            if (!CollectionUtils.isEmpty(list1)) {
                 entityMapper.BatchSaveSampleStandard(list1);
             }
         }
 
         //更新委托单收费记录信息
-        if (!StringUtils.isEmpty(vo.getPaymentRecord())){
+        if (!StringUtils.isEmpty(vo.getPaymentRecord())) {
             EntrustPamentEntity pamentEntity = new EntrustPamentEntity();
             pamentEntity.setEntrustmentId(basisInfo.getId());
             pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
@@ -292,7 +514,120 @@ public class EntrustServiceImpl implements EntrustService {
             entityMapper.saveEntrustPayRecord(pamentEntity);
         }
         //得到总价钱，再保存委托基本信息
-        basisInfo.setPaymentCount(totalMoney+"");
+        basisInfo.setPaymentCount(totalMoney + "");
+        //存放委托基本信息==》test_entrusted
+        entityMapper.updateEntrustInfo(basisInfo);
+        return true;
+    }
+
+    /**
+     * 修改委托测试
+     *
+     * @param vo
+     * @param file
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateEntrustTest(EntrustAddVo vo, MultipartFile[] file) {
+        EntrustEntity basisInfo = new EntrustEntity(vo);
+        Integer code = vo.getEntrustmentNo();
+        //附件存在上传附件到服务器
+        if (file != null) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (MultipartFile multipartFile : file) {
+                String name = multipartFile.getOriginalFilename();
+                String[] strings = name.split("\\.");
+                // 去清除 MinIo 桶数据。 获取原本的 桶信息 进行删除
+                if (vo.getId() != null) {
+
+                }
+                MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure, code + "." + strings[strings.length - 1]);
+                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code + "." + strings[strings.length - 1]);
+                stringBuilder.append(upload);
+                stringBuilder.append(",");
+            }
+            String fileUrl = stringBuilder.toString();
+            if (!StringUtils.isEmpty(fileUrl)) {
+                String substring = fileUrl.substring(0, fileUrl.length() - 1);
+                basisInfo.setFileUrl(substring);
+            }
+        }
+        // 刪除的样品id集合
+//        List<Integer>  removeSamplesId =  entityMapper.getSampleIdSet(basisInfo.getId());
+        // 删除样品id
+        entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
+        //修改样品为未使用
+        List<Integer> sampleIds = entityMapper.getSampleId(basisInfo.getId());
+        if (!CollectionUtils.isEmpty(sampleIds)) {
+            for (Integer sampleId : sampleIds) {
+                sampleEntityMapper.updateSampleUse(sampleId, 0);
+            }
+        }
+        // 删除判定依据id
+        entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
+        // 删除缴费信息
+        entityMapper.removeTestEntrustedPaymentRecordInfo(basisInfo.getId());
+        // 样品下检测依据
+        entityMapper.removeTestEntrustedSampleCheckitemRel(basisInfo.getId());
+
+        //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
+        int totalMoney = 0;
+        List<SampleEntity> samples = vo.getSamples();
+        List<EntrustSampleEntity> list = new ArrayList<>();
+        List<EntrustSampleEntity> list1 = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(samples)) {
+            for (SampleEntity sampleEntity : samples) {
+                EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
+                entrustSampleEntity.setEntrustmentId(basisInfo.getId());
+                entrustSampleEntity.setSampleId(sampleEntity.getId());
+                list.add(entrustSampleEntity);
+                List<Integer> standardFileIds = sampleEntity.getStandardFileIds();
+                if (!CollectionUtils.isEmpty(standardFileIds)) {
+                    for (Integer integer : standardFileIds) {
+                        EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
+                        sampleEntity1.setSampleId(sampleEntity.getId());
+                        sampleEntity1.setStandardId(integer);
+                        sampleEntity1.setEntrustmentId(basisInfo.getId());
+                        list1.add(sampleEntity1);
+                    }
+                }
+                //样品下检测项
+                List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
+                if (!CollectionUtils.isEmpty(sampleCheckItem)) {
+                    //计算检测项总价钱
+                    for (SampleItemEntity entity : sampleCheckItem) {
+                        int money = entity.getTimes() * entity.getUnitPrice();
+                        totalMoney = totalMoney + money;
+                    }
+                    //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+                    for (SampleItemEntity entity : sampleCheckItem) {
+                        entity.setSampleId(sampleEntity.getId());
+                        entity.setEntrustId(basisInfo.getId());
+                    }
+
+                    entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
+                }
+            }
+            if (!CollectionUtils.isEmpty(list)) {
+                entityMapper.BatchSaveEntrustSample(list);
+            }
+            if (!CollectionUtils.isEmpty(list1)) {
+                entityMapper.BatchSaveSampleStandard(list1);
+            }
+        }
+
+        //更新委托单收费记录信息
+        if (!StringUtils.isEmpty(vo.getPaymentRecord())) {
+            EntrustPamentEntity pamentEntity = new EntrustPamentEntity();
+            pamentEntity.setEntrustmentId(basisInfo.getId());
+            pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
+            pamentEntity.setPrice(vo.getPaymentRecord());
+//            pamentEntity.setOperator(ShiroUtils.getUserInfo().getUsername());
+            entityMapper.saveEntrustPayRecord(pamentEntity);
+        }
+        //得到总价钱，再保存委托基本信息
+        basisInfo.setPaymentCount(totalMoney + "");
         //存放委托基本信息==》test_entrusted
         entityMapper.updateEntrustInfo(basisInfo);
         return true;
@@ -303,7 +638,7 @@ public class EntrustServiceImpl implements EntrustService {
         entrustEntity.setState(144);
         entityMapper.updateEntrustInfo(entrustEntity);
         List<Integer> sampleIds = entityMapper.getSampleId(entrustEntity.getId());
-        if(!CollectionUtils.isEmpty(sampleIds)){
+        if (!CollectionUtils.isEmpty(sampleIds)) {
             for (Integer sampleId : sampleIds) {
                 sampleEntityMapper.updateSampleUse(sampleId, 0);
             }
@@ -317,23 +652,23 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public Map<String,List<LabelValueVo>> getItemMethodStandard(Integer id) {
-        Map<String,List<LabelValueVo>> result = Maps.newHashMap();
+    public Map<String, List<LabelValueVo>> getItemMethodStandard(Integer id) {
+        Map<String, List<LabelValueVo>> result = Maps.newHashMap();
         List<LabelValueVo> itemMethod = itemEntityMapper.getItemMethod(id);
         List<LabelValueVo> itemStandard = itemEntityMapper.getItemStandard(id);
-        result.put("itemMethod",itemMethod);
-        result.put("itemStandard",itemStandard);
+        result.put("itemMethod", itemMethod);
+        result.put("itemStandard", itemStandard);
         return result;
     }
 
     @Override
-    public  Map<String,List<LabelValueVo>> returnEntrustData() {
-        Map<String,List<LabelValueVo>> map = new HashMap<>();
+    public Map<String, List<LabelValueVo>> returnEntrustData() {
+        Map<String, List<LabelValueVo>> map = new HashMap<>();
         // type =1 委托单位
-       List<LabelValueVo> EntrustCompany = testCompanyDao.selectEntrustCompanyList(1);
+        List<LabelValueVo> EntrustCompany = testCompanyDao.selectEntrustCompanyList(1);
         // type =2 见证单位
         List<LabelValueVo> witnessCompany = testCompanyDao.selectEntrustCompanyList(2);
-        List<TestInitDataEntity> ReturnBasisData  = testCompanyDao.selectEntrustBasis();
+        List<TestInitDataEntity> ReturnBasisData = testCompanyDao.selectEntrustBasis();
         // 团队信息
         List<LabelValueVo> arryTeam = testCompanyDao.selectTestTeam();
 //        1 = 委托方式： 2=取样方式 ： 3=检测目的：4 ： 取报告方式 5：样品外观  6：签章类型： 7：用户来源： 8：设备类型  9：支付方式
@@ -353,31 +688,46 @@ public class EntrustServiceImpl implements EntrustService {
         List<LabelValueVo> arryEquipment = new ArrayList<>();
         // 11：支付方式
         List<LabelValueVo> arryPayment = new ArrayList<>();
-        for(TestInitDataEntity testInitDataEntity:ReturnBasisData){
+        for (TestInitDataEntity testInitDataEntity : ReturnBasisData) {
             LabelValueVo labelValueVo = new LabelValueVo();
             labelValueVo.setLabel(testInitDataEntity.getName());
             labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
             switch (testInitDataEntity.getType()) {
-                case 1:  arryEntrust.add(labelValueVo); break;
-                case 2:   arrySampling.add(labelValueVo); break;
-                case 3:   arryCheckout.add(labelValueVo); break;
-                case 4:   arryGetReport.add(labelValueVo); break;
-                case 5:   arrySampleAppearance.add(labelValueVo); break;
-                case 6:   arrySeal.add(labelValueVo); break;
-                case 11:   arryPayment.add(labelValueVo); break;
-                default:break;
+                case 1:
+                    arryEntrust.add(labelValueVo);
+                    break;
+                case 2:
+                    arrySampling.add(labelValueVo);
+                    break;
+                case 3:
+                    arryCheckout.add(labelValueVo);
+                    break;
+                case 4:
+                    arryGetReport.add(labelValueVo);
+                    break;
+                case 5:
+                    arrySampleAppearance.add(labelValueVo);
+                    break;
+                case 6:
+                    arrySeal.add(labelValueVo);
+                    break;
+                case 11:
+                    arryPayment.add(labelValueVo);
+                    break;
+                default:
+                    break;
             }
         }
-        map.put("entrustCompany",EntrustCompany);
-        map.put("witnessCompany",witnessCompany);
-        map.put("arryEntrust",arryEntrust);
-        map.put("arrySampling",arrySampling);
-        map.put("arryCheckout",arryCheckout);
-        map.put("arryGetReport",arryGetReport);
-        map.put("arrySampleAppearance",arrySampleAppearance);
-        map.put("arrySeal",arrySeal);
-        map.put("arryTeam",arryTeam);
-        map.put("arryPayment",arryPayment);
+        map.put("entrustCompany", EntrustCompany);
+        map.put("witnessCompany", witnessCompany);
+        map.put("arryEntrust", arryEntrust);
+        map.put("arrySampling", arrySampling);
+        map.put("arryCheckout", arryCheckout);
+        map.put("arryGetReport", arryGetReport);
+        map.put("arrySampleAppearance", arrySampleAppearance);
+        map.put("arrySeal", arrySeal);
+        map.put("arryTeam", arryTeam);
+        map.put("arryPayment", arryPayment);
         return map;
     }
 
@@ -393,15 +743,15 @@ public class EntrustServiceImpl implements EntrustService {
         testCompanyEntity1.setCompanyName(testCompanyEntity.getCompanyName());
         testCompanyEntity1.setType(testCompanyEntity.getType());
         int statusNumber = testCompanyDao.insert(testCompanyEntity1);
-        if(statusNumber>=1){
+        if (statusNumber >= 1) {
             TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
             testCustomerEntity.setCompanyId(testCompanyEntity1.getCompanyId());
             testCustomerEntity.setContacts(testCompanyEntity.getContacts());
             testCustomerEntity.setPhone(testCompanyEntity.getContactWay());
-           int addCustomer = testCustomerDao.insertTestCustomer(testCustomerEntity);
-           if(addCustomer>=1){
-               return true;
-           }
+            int addCustomer = testCustomerDao.insertTestCustomer(testCustomerEntity);
+            if (addCustomer >= 1) {
+                return true;
+            }
             return false;
         }
         return false;
@@ -410,14 +760,14 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
         entrustHistoryEntity.setState(0);
-        if(entrustHistoryEntity.getDateInterval()!=null){
+        if (entrustHistoryEntity.getDateInterval() != null) {
             String[] strArry = entrustHistoryEntity.getDateInterval().split("~");
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            for (int i =0;i<=strArry.length-1;i++){
-                if(i==0){
+            for (int i = 0; i <= strArry.length - 1; i++) {
+                if (i == 0) {
                     entrustHistoryEntity.setStartDate(dateFormat.parse(strArry[i]));
                 }
-                if(i==1){
+                if (i == 1) {
                     entrustHistoryEntity.setEndingDate(dateFormat.parse(strArry[i]));
                 }
             }
@@ -428,14 +778,14 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public List<EntrustHistoryTaskEntity> getEntrustReleasedList(EntrustHistoryTaskEntity entrustHistoryEntity) throws ParseException {
         entrustHistoryEntity.setState(0);
-        if(entrustHistoryEntity.getDateInterval()!=null){
+        if (entrustHistoryEntity.getDateInterval() != null) {
             String[] strArry = entrustHistoryEntity.getDateInterval().split("~");
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            for (int i =0;i<=strArry.length-1;i++){
-                if(i==0){
+            for (int i = 0; i <= strArry.length - 1; i++) {
+                if (i == 0) {
                     entrustHistoryEntity.setStartDate(dateFormat.parse(strArry[i]));
                 }
-                if(i==1){
+                if (i == 1) {
                     entrustHistoryEntity.setEndingDate(dateFormat.parse(strArry[i]));
                 }
             }
@@ -447,7 +797,7 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info
-        EntrustAddVo entrustAddVo   = entityMapper.selectByKeyId(entrustmentId);
+        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         // 通过委托单id 获取缴费记录 依据id 同价价格
         entrustAddVo.setPaymentRecord(entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId));
         // -- 支付方式。
@@ -457,11 +807,42 @@ public class EntrustServiceImpl implements EntrustService {
         // 通过委托ID 样品集合 → test_sample
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
         // 样品信息 进行补充 检测依据集合，检测项集合
-        for(SampleEntity sampleEntity:sampleCollection){
+        for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
-            sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(),entrustmentId));
+            sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
             // 补充样品下 依据集合
-            sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(),entrustAddVo.getId()));
+            sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
+        }
+        entrustAddVo.setSamples(sampleCollection);
+        return entrustAddVo;
+    }
+
+    @Override
+    public EntrustAddVo getEntrustHistoryDetailTest(Long entrustmentId) throws JSONException {
+        // 通过委托ID 委托单信息 → test_entrusted_info
+        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
+        // 通过委托单id 获取缴费记录 依据id 同价价格
+        entrustAddVo.setPaymentRecord(entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId));
+        // -- 支付方式。
+//        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
+        // 联系地址
+//        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
+        // 通过委托ID 样品集合 → test_sample
+        List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
+        // 样品信息 进行补充 检测依据集合，检测项集合
+        for (SampleEntity sampleEntity : sampleCollection) {
+            // 样品下 检测项、检测依据 补充。
+            List<JudgmentBasisVo> listJson = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
+            Map map = new HashMap();
+            map.put("judgmentBasisVoStr", listJson);
+            JSONObject jsonObject = new JSONObject(map);
+            sampleEntity.setJudgmentBasisVoStr(jsonObject);
+            // 补充样品下 依据集合
+            List<JudgmentBasisVo> standardList = sampleEntityMapper.getSampleBasisList(sampleEntity.getId(), entrustAddVo.getId());
+            Map map1 = new HashMap();
+            map1.put("standardFileIdStr", standardList);
+            JSONObject jsonObject1 = new JSONObject(map1);
+            sampleEntity.setStandardFileIdStr(jsonObject1);
         }
         entrustAddVo.setSamples(sampleCollection);
         return entrustAddVo;
@@ -477,24 +858,24 @@ public class EntrustServiceImpl implements EntrustService {
         //获取当前最大样品编号
         Integer code = null;
         Integer entrustNum = taskMapper.selectMaxNo();
-        String currentTime = DateUtil.getTodayString().substring(2,6);
-        if (entrustNum !=null && entrustNum>0){
+        String currentTime = DateUtil.getTodayString().substring(2, 6);
+        if (entrustNum != null && entrustNum > 0) {
             String substring = entrustNum.toString().substring(0, 4);
-            if (substring.equals(currentTime)){
-                code = entrustNum+1;
-            }else {
-                code = Integer.parseInt(currentTime+"001");
+            if (substring.equals(currentTime)) {
+                code = entrustNum + 1;
+            } else {
+                code = Integer.parseInt(currentTime + "001");
             }
-        }else {
-            code = Integer.parseInt(currentTime+"001");
+        } else {
+            code = Integer.parseInt(currentTime + "001");
         }
         entity.setCode(code.toString());
-        if (!StringUtils.isEmpty(entity.getTeamId())){
+        if (!StringUtils.isEmpty(entity.getTeamId())) {
             //设置接收人为团队副团长
             List<SysUserEntity> userEntity = teamMapper.getUsersByTid(entity.getTeamId());
-            if (!CollectionUtils.isEmpty(userEntity)){
-                for (SysUserEntity sysUserEntity:userEntity) {
-                    if (sysUserEntity.getPosition().equals(Const.SYS_MANAGER_LOG)){
+            if (!CollectionUtils.isEmpty(userEntity)) {
+                for (SysUserEntity sysUserEntity : userEntity) {
+                    if (sysUserEntity.getPosition().equals(Const.SYS_MANAGER_LOG)) {
                         entity.setReceiver(sysUserEntity.getUsername());
                     }
                 }
@@ -527,16 +908,16 @@ public class EntrustServiceImpl implements EntrustService {
             rows.get(6).getTableCells().get(2).setText(detail.getProjectName());//工程名称
             //设置样品信息
             List<SampleEntity> samples = detail.getSamples();
-            int sampleIndex=8;
-            int index =1;
-            for (int i = 0;i<samples.size();i++) {
+            int sampleIndex = 8;
+            int index = 1;
+            for (int i = 0; i < samples.size(); i++) {
                 rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getSampleName());//样品名称
-                rows.get(sampleIndex).getTableCells().get(index+1).setText(samples.get(i).getSpecs());//规格等级
-                rows.get(sampleIndex).getTableCells().get(index+2).setText(samples.get(i).getBatchNumber());//批号/编号
-                rows.get(sampleIndex).getTableCells().get(index+3).setText(samples.get(i).getSampleGroups().toString());//样品数量
-                rows.get(sampleIndex).getTableCells().get(index+4).setText(samples.get(i).getGeneration());//代表批量
-                rows.get(sampleIndex).getTableCells().get(index+5).setText(samples.get(i).getManufacturer());//样品产地/生产厂家
-                sampleIndex = sampleIndex+1;
+                rows.get(sampleIndex).getTableCells().get(index + 1).setText(samples.get(i).getSpecs());//规格等级
+                rows.get(sampleIndex).getTableCells().get(index + 2).setText(samples.get(i).getBatchNumber());//批号/编号
+                rows.get(sampleIndex).getTableCells().get(index + 3).setText(samples.get(i).getSampleGroups().toString());//样品数量
+                rows.get(sampleIndex).getTableCells().get(index + 4).setText(samples.get(i).getGeneration());//代表批量
+                rows.get(sampleIndex).getTableCells().get(index + 5).setText(samples.get(i).getManufacturer());//样品产地/生产厂家
+                sampleIndex = sampleIndex + 1;
             }
             //设置其它信息
             String ss = "";
@@ -546,8 +927,8 @@ public class EntrustServiceImpl implements EntrustService {
             Integer productId = samples.get(0).getProductId();
             List<String> list = entityMapper.getStatndardByPId(productId);
             StringBuilder stringBuilder = new StringBuilder();
-            if (!CollectionUtils.isEmpty(list)){
-                for (String s:list) {
+            if (!CollectionUtils.isEmpty(list)) {
+                for (String s : list) {
                     stringBuilder.append(s);
                     stringBuilder.append(",");
                 }
@@ -555,10 +936,10 @@ public class EntrustServiceImpl implements EntrustService {
                 rows.get(15).getTableCells().get(6).setText(substring);//产品标准
             }
             StringBuilder stringBuilder1 = new StringBuilder();
-            if (!CollectionUtils.isEmpty(samples)){
-                for (SampleEntity entity :samples) {
+            if (!CollectionUtils.isEmpty(samples)) {
+                for (SampleEntity entity : samples) {
                     List<JudgmentBasisVo> sampleCheckItem = entity.getJudgmentBasisVos();
-                    for (JudgmentBasisVo itemEntity:sampleCheckItem) {
+                    for (JudgmentBasisVo itemEntity : sampleCheckItem) {
                         String name = itemEntity.getCheckItemName();
                         stringBuilder1.append(name);
                         stringBuilder1.append("(");
@@ -581,11 +962,11 @@ public class EntrustServiceImpl implements EntrustService {
             rows.get(19).getTableCells().get(4).setText(detail.getEntrustPhone());//委托人电话
             rows.get(19).getTableCells().get(6).setText(detail.getWitnessPerson());//见证人
             SampleEntity sampleEntity = samples.get(0);
-            if (sampleEntity != null){
+            if (sampleEntity != null) {
                 String s = sampleEntity.getSampleName() + "(" + sampleEntity.getSpecs() + "," + sampleEntity.getOutward() + ")";
                 rows.get(20).getTableCells().get(2).setText(s);//样品状态
             }
-            rows.get(20).getTableCells().get(4).setText(detail.getIsSave().equals("1")?"保留":"废弃");//样品保留
+            rows.get(20).getTableCells().get(4).setText(detail.getIsSave().equals("1") ? "保留" : "废弃");//样品保留
             rows.get(21).getTableCells().get(2).setText(detail.getPaymentCount());//检验收费
             rows.get(21).getTableCells().get(4).setText(detail.getPaymentMethod());//支付方式
             //TODO 本次缴费统计缴费记录表
@@ -593,8 +974,8 @@ public class EntrustServiceImpl implements EntrustService {
             rows.get(22).getTableCells().get(2).setText(detail.getRequestDate().toString());//完成期限
             rows.get(22).getTableCells().get(4).setText(detail.getBusinessAcceptor());//业务受理人
             rows.get(22).getTableCells().get(6).setText(detail.getAcceptanceDate().toString());//受理日期
-        }catch (Exception e){
-            logger.error("设置委托单信息到模板异常:{}",e);
+        } catch (Exception e) {
+            logger.error("设置委托单信息到模板异常:{}", e);
         }
         return doc;
     }
