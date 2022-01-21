@@ -4,12 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.ReportRecordDetailEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SealReqEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.result.Result;
@@ -18,14 +15,16 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
+import com.lims.manage.erp.util.ImageToPdfUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import io.minio.MinioClient;
-import io.minio.errors.MinioException;
+import io.minio.errors.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.POIXMLDocument;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -43,11 +42,15 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.xmlpull.v1.XmlPullParserException;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URLEncoder;
+import java.nio.channels.FileChannel;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -479,7 +482,7 @@ public class ReportController {
         String pdfPath = location; //pdf文件生成保存的路径
         long pdfName = System.currentTimeMillis();
         String fileType = ".pdf"; //pdf文件后缀
-        String pdfTemp = pdfPath + reportRecordEntity.getReportCode() + fileType;  //将这三个拼接起来,就是我们最后生成文件保存的完整访问路径了
+        String pdfTemp = pdfPath + pdfName + fileType;  //将这三个拼接起来,就是我们最后生成文件保存的完整访问路径了
         try {
             File newFile = new File(location);//转换之后文件生成的地址
             if (!newFile.exists()) {
@@ -490,9 +493,59 @@ public class ReportController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        //盖章
+        String sealUrl = reportRecordEntity.getSealUrl();
+        List<ImagePro> imagePros = Lists.newArrayList();
+        if(!StringUtils.isEmpty(sealUrl) || sealUrl != null){
+            String[] split = sealUrl.split(",");
+            for (int i = 0; i < split.length; i++) {
+                String imgFilePath = location + split[i];
+                try {
+                    InputStream input = client.getObject("seal-cns-cma", split[i]);
+                    int index;
+                    byte[] bytes = new byte[1024];
+                    FileOutputStream downloadFile = new FileOutputStream(imgFilePath);
+                    while ((index = input.read(bytes)) != -1) {
+                        downloadFile.write(bytes, 0, index);
+                        downloadFile.flush();
+                    }
+                    input.close();
+                    downloadFile.close();
+                    ImagePro pro = new ImagePro(100*(i+1),100,15F,imgFilePath);
+                    imagePros.add(pro);
+                } catch (InvalidBucketNameException e) {
+                    e.printStackTrace();
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                } catch (InsufficientDataException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InvalidKeyException e) {
+                    e.printStackTrace();
+                } catch (NoResponseException e) {
+                    e.printStackTrace();
+                } catch (XmlPullParserException e) {
+                    e.printStackTrace();
+                } catch (ErrorResponseException e) {
+                    e.printStackTrace();
+                } catch (InternalException e) {
+                    e.printStackTrace();
+                } catch (InvalidArgumentException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        //盖章后的PDF
+        String pdfTemp2 = pdfPath + reportRecordEntity.getReportCode() + fileType;  //将这三个拼接起来,就是我们最后生成文件保存的完整访问路径了
+        try {
+            ImageToPdfUtils.writeToPdf(pdfTemp,pdfTemp2,imagePros);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         //将PDF文件上传至文件服务器
         try {
-            client.putObject("report-download", reportRecordEntity.getReportCode() + fileType, pdfTemp);
+            client.putObject("report-download", reportRecordEntity.getReportCode() + fileType, pdfTemp2);
         } catch (MinioException e) {
             System.out.println("Error occurred: " + e);
         } catch (XmlPullParserException e) {

@@ -36,7 +36,7 @@
     state, number, report_type, verifyer_time, issuer_time, seal_type, apply_reason, 
     issu_reason, verifyer, issuer, applicant, sealer, seal_time, report_manager,
     report_time, addressee, waybill, operate_time,email,report_phone,report_mailing_address,
-    report_complete_time
+    report_complete_time,seal_url
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -445,13 +445,7 @@
         operate_time
         FROM
         test_report_record
-        WHERE 1=1
-        <if test='type == "1"'>
-            AND state = 7
-        </if>
-        <if test='type == "2"'>
-            AND state = 8
-        </if>
+        WHERE  state = 7 or state = 8
         <if test="search != null and search != ''">
             AND report_code = #{search}
         </if>
@@ -487,6 +481,15 @@
         FROM
         test_report_record
         where entrustment_id=#{entrustId}
+    </select>
+
+    <select id="getMaxCode" resultType="java.lang.Integer">
+        SELECT
+            MAX( SUBSTR( report_code, 12 ) )
+        FROM
+            test_report_record
+        WHERE
+            report_code LIKE CONCAT('%',#{year},'%')
     </select>
 
 </mapper>

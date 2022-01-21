@@ -84,4 +84,11 @@ public interface ReportRecordEntityMapper {
     List<ReportRecordEntity> getReportList();
 
     ReportRecordEntity getReportEntrust(Long entrustId);
+
+    /**
+     * 查询当前年 最大报告编号
+     * @param year
+     * @return
+     */
+    Integer getMaxCode(String year);
 }
