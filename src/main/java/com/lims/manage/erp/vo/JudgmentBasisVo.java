@@ -9,6 +9,15 @@ import lombok.Data;
  */
 @Data
 public class JudgmentBasisVo {
+
+    /**
+     * 委托单id
+     */
+    private Long id;
+    /**
+     * 样品id
+     */
+    private Integer sampleId;
     /**
      * 依据名称
      */

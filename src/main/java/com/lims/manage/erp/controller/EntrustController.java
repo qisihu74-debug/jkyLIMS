@@ -90,52 +90,6 @@ public class EntrustController {
         }
     }
 
-    /**
-     * 新增委托 1.21
-     * @param json
-     * @param file
-     * @return
-     */
-    @PostMapping("/addEntrust_test_new")
-    public Result addEntrustTestNew(@RequestParam("json") String json, MultipartFile[] file){
-        EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
-       Integer  code  = entrustService.addEntrustTestNew(entrust,file);
-        if(code!=null){
-            return ResultUtil.success("新建委托成功",code);
-        }else{
-            return ResultUtil.error(678,"新增委托失败！");
-        }
-    }
-
-    /**
-     * 新增委托信息下样品信息
-     * @param entrustAddVo
-     * @return
-     */
-    @PostMapping("/addEntrust_test_new_sample")
-    public Result addEntrustTestNewSample(@RequestBody EntrustAddVo entrustAddVo ){
-        if(entrustAddVo==null){
-            return ResultUtil.error(678,"信息不能为空！");
-        }
-        if(entrustAddVo.getEntrustmentNo()==null){
-            return ResultUtil.error(678,"缺少必填参数！");
-        }
-        // 根据委托单编号 查询委托单id 是否存在
-        EntrustAddVo entrustData = entrustEntityMapper.getByData(entrustAddVo.getEntrustmentNo());
-        if(entrustData==null||entrustData.getId()==null){
-            return ResultUtil.error(678,"委托单基本信息保存失败！");
-        }
-        entrustAddVo.setId(entrustData.getId());
-
-        Boolean  falg  = entrustService.addEntrustTestNewSample(entrustAddVo);
-        if(falg){
-            return ResultUtil.success("新建委托成功");
-        }else{
-            return ResultUtil.error(678,"新增委托单下样品信息失败！");
-        }
-    }
-
-
 
     /**
      * 修改委托
@@ -156,20 +110,36 @@ public class EntrustController {
     }
 
     /**
-     * 修改委托测试丁
+     * 修改委托测试丁 new
      * @param json
      * @param file
      * @return
      */
-    @RequestMapping("/updateEntrust_Test")
+    @RequestMapping("/updateEntrust_test_new")
 //    @RequiresPermissions("entrust:entrust:updateEntrust")
-    public Result updateEntrustTest(@RequestParam("json") String json, MultipartFile[] file){
+    public Result updateEntrustTestNew(@RequestParam("json") String json, MultipartFile[] file){
         EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
-        Boolean isSuccess = entrustService.updateEntrustTest(entrust,file);
+        Boolean isSuccess = entrustService.updateEntrustTestNew(entrust,file);
         if(isSuccess){
-            return ResultUtil.success("修改成功");
+            return ResultUtil.success("修改委托成功");
         }else{
             return ResultUtil.error(678,"修改委托失败！");
+        }
+    }
+
+    /**
+     * 修改委托样品信息
+     * @param json
+     * @return
+     */
+    @PostMapping("/updateEntrust_test_new_sample")
+//    @RequiresPermissions("entrust:entrust:updateEntrust")
+    public Result updateEntrustTestNewSample(@RequestBody  EntrustAddVo entrust){
+        Boolean isSuccess = entrustService.updateEntrustTestNewSample(entrust);
+        if(isSuccess){
+            return ResultUtil.success("修改委托下样品成功");
+        }else{
+            return ResultUtil.error(678,"修改委托下样品失败！");
         }
     }
 
@@ -283,12 +253,12 @@ public class EntrustController {
 
     /**
      * 查询历史委托信息详情 测试
-     * @param entrustmentId
+     * @param id
      * @return
      */
-    @RequestMapping("/get_entrust_history_detail_test")
-    public Result getEntrustHistoryDetailTest(Long entrustmentId) throws JSONException {
-        return ResultUtil.success(entrustService.getEntrustHistoryDetailTest(entrustmentId));
+    @GetMapping("/get_entrust_history_detail_test")
+    public Result getEntrustHistoryDetailTest(Long id){
+        return ResultUtil.success(entrustService.getEntrustHistoryDetailTest(id));
     }
 
     /**

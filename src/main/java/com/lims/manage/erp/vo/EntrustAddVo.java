@@ -85,6 +85,10 @@ public class EntrustAddVo {
      */
     private String paymentRecord;
     /**
+     * 缴费记录回显数据
+     */
+    private String paymentRecordShow;
+    /**
      * 应收总计
      */
     private String paymentCount;

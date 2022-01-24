@@ -246,7 +246,7 @@ mailbox
       <if test="reportType != null and reportType!=''">report_type=#{reportType},</if>
       <if test="requestDate != null">request_date=#{requestDate},</if>
       <if test="paymentMethod != null and paymentMethod!=''">payment_method=#{paymentMethod},</if>
-<!--      <if test="paymentCount != null and paymentCount!=''">count_price=#{paymentCount},</if>-->
+      <if test="paymentCount != null and paymentCount!=''">count_price=#{paymentCount},</if>
       <if test="presentInformation != null and presentInformation!=''">present_information=#{presentInformation},</if>
       <if test="acceptanceDate != null">acceptance_date=#{acceptanceDate},</if>
       <if test="team != null">team=#{team},</if>

@@ -33,28 +33,25 @@ public interface EntrustService {
      */
     Boolean addEntrustTest(EntrustAddVo vo, MultipartFile[] file);
 
-    /**
-     * 新增委托测试丁 new
-     * @param vo
-     * @return
-     */
-    Integer addEntrustTestNew(EntrustAddVo vo, MultipartFile[] file);
 
-    /**
-     * 新增委托测试下样品信息
-     * @param vo
-     * @return
-     */
-    Boolean addEntrustTestNewSample(EntrustAddVo vo);
+
+
 
     /**
      * 修改委托
      */
     Boolean updateEntrust(EntrustAddVo vo, MultipartFile[] file);
+
     /**
-     * 修改委托测试
+     * 修改委托测试 new
      */
-    Boolean updateEntrustTest(EntrustAddVo vo, MultipartFile[] file);
+    Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file);
+
+    /**
+     * 修改委托样品测试 new
+     */
+    Boolean updateEntrustTestNewSample(EntrustAddVo vo);
+
     /**
      * 实现作废
      */
@@ -109,7 +106,7 @@ public interface EntrustService {
      * @param entrustmentId
      * @return
      */
-    EntrustAddVo getEntrustHistoryDetailTest(Long entrustmentId) throws JSONException;
+    EntrustAddVo getEntrustHistoryDetailTest(Long entrustmentId);
 
     /**
      * 委托发布

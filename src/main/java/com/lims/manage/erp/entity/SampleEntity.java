@@ -1,6 +1,5 @@
 package com.lims.manage.erp.entity;
 
-import com.alibaba.fastjson.JSONObject;
 import com.lims.manage.erp.vo.JudgmentBasisVo;
 import com.lims.manage.erp.vo.SampleAddDetailVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
@@ -118,7 +117,7 @@ public class SampleEntity {
     /**
      * 判定依据 JSON 格式
      */
-    private JSONObject standardFileIdStr;
+    private List<JudgmentBasisVo> standardFileIdStr;
     /**
      * 样品依据 ID 和名称
      */
@@ -146,12 +145,12 @@ public class SampleEntity {
     /**
      * 样品下检测项、检测依据、总价
      */
-    List<JudgmentBasisVo> judgmentBasisVos;
+    private List<JudgmentBasisVo> judgmentBasisVos;
 
     /**
      * 样品下检测项、检测依据、总价 String 表示
      */
-   private  JSONObject judgmentBasisVoStr;
+   private  List<JudgmentBasisVo> judgmentBasisVoStr;
 
 
     public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo, String sampleName, String sampleCode, String pictureUrl, String insertFlag) {
