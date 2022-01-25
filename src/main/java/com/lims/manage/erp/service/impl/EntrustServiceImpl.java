@@ -891,9 +891,9 @@ public class EntrustServiceImpl implements EntrustService {
             rows.get(21).getTableCells().get(4).setText(detail.getPaymentMethod());//支付方式
             //TODO 本次缴费统计缴费记录表
             rows.get(21).getTableCells().get(6).setText(detail.getPaymentRecord());//本次交费
-            rows.get(22).getTableCells().get(2).setText(detail.getRequestDate().toString());//完成期限
+            rows.get(22).getTableCells().get(2).setText(DateUtil.formatDate(detail.getRequestDate()));//完成期限
             rows.get(22).getTableCells().get(4).setText(detail.getBusinessAcceptor());//业务受理人
-            rows.get(22).getTableCells().get(6).setText(detail.getAcceptanceDate().toString());//受理日期
+            rows.get(22).getTableCells().get(6).setText(DateUtil.formatDate(detail.getAcceptanceDate()));//受理日期
         } catch (Exception e) {
             logger.error("设置委托单信息到模板异常:{}", e);
         }
