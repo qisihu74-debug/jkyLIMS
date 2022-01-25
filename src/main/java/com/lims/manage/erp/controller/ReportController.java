@@ -43,6 +43,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.xmlpull.v1.XmlPullParserException;
 
 import javax.imageio.ImageIO;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -358,7 +359,9 @@ public class ReportController {
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
         HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String location = req.getServletContext().getRealPath("/file/");
+        String location = new String("src/main/resources/static/file/");
+//        String location = req.getServletContext().getRealPath("/resources/file/");
+//        String location = req.getServletContext().getContextPath()+"/static/file/";
         long template = System.currentTimeMillis();
         String templateTemp = location + template + ".docx";
         try {
