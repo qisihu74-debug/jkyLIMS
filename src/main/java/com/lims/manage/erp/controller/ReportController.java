@@ -397,56 +397,56 @@ public class ReportController {
                     //存放表头信息
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 1) {
-                        rows.get(0).getCell(1).removeParagraph(0);
-                        rows.get(0).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
-                        rows.get(0).getCell(3).removeParagraph(0);
-                        rows.get(0).getCell(3).setText(entrustHistoryDetail.getProjectName());
-                        rows.get(1).getCell(1).removeParagraph(0);
-                        rows.get(1).getCell(1).setText(entrustHistoryDetail.getProjectPart());
+                        rows.get(4).getCell(1).removeParagraph(0);
+                        rows.get(4).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
+                        rows.get(4).getCell(3).removeParagraph(0);
+                        rows.get(4).getCell(3).setText(entrustHistoryDetail.getProjectName());
+                        rows.get(5).getCell(1).removeParagraph(0);
+                        rows.get(5).getCell(1).setText(entrustHistoryDetail.getProjectPart());
                         //样品信息
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
-                        rows.get(2).getCell(1).removeParagraph(0);
-                        rows.get(2).getCell(1).setText("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
+                        rows.get(6).getCell(1).removeParagraph(0);
+                        rows.get(6).getCell(1).setText("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
                                 + "样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
                                 + "样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
                                 + "样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
                                 + "收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                         //检测依据
                         String checkBasis = reportService.getCheckBasis(id);
-                        rows.get(3).getCell(1).removeParagraph(0);
-                        rows.get(3).getCell(1).setText(checkBasis.equals("")?"——":checkBasis);
+                        rows.get(7).getCell(1).removeParagraph(0);
+                        rows.get(7).getCell(1).setText(checkBasis.equals("")?"——":checkBasis);
                         //判定依据
                         String judgeBasis = reportService.getJudgeBasis(id);
-                        rows.get(3).getCell(3).removeParagraph(0);
-                        rows.get(3).getCell(3).setText(judgeBasis.equals("")?"——":judgeBasis);
+                        rows.get(7).getCell(3).removeParagraph(0);
+                        rows.get(7).getCell(3).setText(judgeBasis.equals("")?"——":judgeBasis);
                         //检测日期
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-                        rows.get(4).getCell(1).removeParagraph(0);
-                        rows.get(4).getCell(1).setText(sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
+                        rows.get(8).getCell(1).removeParagraph(0);
+                        rows.get(8).getCell(1).setText(sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
                                 + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime())
                         );
                         //主要仪器
                         String equipment = reportService.getEquipment(id);
-                        rows.get(5).getCell(1).removeParagraph(0);
-                        rows.get(5).getCell(1).setText(equipment.equals("")?"——":equipment);
+                        rows.get(9).getCell(1).removeParagraph(0);
+                        rows.get(9).getCell(1).setText(equipment.equals("")?"——":equipment);
                         //委托编号
-                        rows.get(6).getCell(1).removeParagraph(0);
-                        rows.get(6).getCell(1).setText(entrustHistoryDetail.getEntrustmentNo()+"");
+                        rows.get(10).getCell(1).removeParagraph(0);
+                        rows.get(10).getCell(1).setText(entrustHistoryDetail.getEntrustmentNo()+"");
                         //检测类别
-                        rows.get(6).getCell(3).removeParagraph(0);
-                        rows.get(6).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
+                        rows.get(10).getCell(3).removeParagraph(0);
+                        rows.get(10).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
                         //批号
-                        rows.get(7).getCell(1).removeParagraph(0);
-                        rows.get(7).getCell(1).setText(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
+                        rows.get(11).getCell(1).removeParagraph(0);
+                        rows.get(11).getCell(1).setText(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
                         //生产厂家
-                        rows.get(7).getCell(3).removeParagraph(0);
-                        rows.get(7).getCell(3).setText(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+                        rows.get(11).getCell(3).removeParagraph(0);
+                        rows.get(11).getCell(3).setText(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
                         //规格等级
-                        rows.get(8).getCell(1).removeParagraph(0);
-                        rows.get(8).getCell(1).setText(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
+                        rows.get(12).getCell(1).removeParagraph(0);
+                        rows.get(12).getCell(1).setText(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
                         //代表数量
-                        rows.get(8).getCell(3).removeParagraph(0);
-                        rows.get(8).getCell(3).setText(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
+                        rows.get(12).getCell(3).removeParagraph(0);
+                        rows.get(12).getCell(3).setText(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
                     }
                     //存放检测数据
                     for (ReportRecordDetailEntity item : checkItemList) {
