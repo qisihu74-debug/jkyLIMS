@@ -538,14 +538,19 @@ public class ReportController {
         }
         //盖章后的PDF
         String pdfTemp2 = pdfPath + reportRecordEntity.getReportCode() + fileType;  //将这三个拼接起来,就是我们最后生成文件保存的完整访问路径了
-        try {
-            ImageToPdfUtils.writeToPdf(pdfTemp,pdfTemp2,imagePros);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         //将PDF文件上传至文件服务器
         try {
-            client.putObject("report-download", reportRecordEntity.getReportCode() + fileType, pdfTemp2);
+            if(CollectionUtils.isEmpty(imagePros)){
+                client.putObject("report-download", reportRecordEntity.getReportCode() + fileType, pdfTemp);
+            }else{
+                ImageToPdfUtils.writeToPdf(pdfTemp,pdfTemp2,imagePros);
+                client.putObject("report-download", reportRecordEntity.getReportCode() + fileType, pdfTemp2);
+            }
         } catch (MinioException e) {
             System.out.println("Error occurred: " + e);
         } catch (XmlPullParserException e) {
@@ -555,6 +560,8 @@ public class ReportController {
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
         String url = null;
