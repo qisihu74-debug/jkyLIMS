@@ -456,7 +456,10 @@ public class EntrustServiceImpl implements EntrustService {
     public Boolean updateEntrustTestNewSample(EntrustAddVo vo) {
         EntrustEntity basisInfo = new EntrustEntity(vo);
         // 删除样品id
-        entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
+        // 统计是否存在
+        if (entityMapper.countSampleDetailsRel(basisInfo.getId()) > 0) {
+            entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
+        }
         //修改样品为未使用
         List<Integer> sampleIds = entityMapper.getSampleId(basisInfo.getId());
         if (!CollectionUtils.isEmpty(sampleIds)) {
@@ -465,11 +468,15 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         // 删除判定依据id
-        entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
+        if (entityMapper.countSampleStandardRel(basisInfo.getId()) > 0) {
+            entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
+        }
         // 删除缴费信息
-        entityMapper.removeTestEntrustedPaymentRecordInfo(basisInfo.getId());
+//        entityMapper.removeTestEntrustedPaymentRecordInfo(basisInfo.getId());
         // 样品下检测依据
-        entityMapper.removeTestEntrustedSampleCheckitemRel(basisInfo.getId());
+        if (entityMapper.countSampleCheckitemRel(basisInfo.getId()) > 0) {
+            entityMapper.removeTestEntrustedSampleCheckitemRel(basisInfo.getId());
+        }
 
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
         int totalMoney = 0;
@@ -499,7 +506,7 @@ public class EntrustServiceImpl implements EntrustService {
                 if (!CollectionUtils.isEmpty(sampleCheckItem)) {
                     //计算检测项总价钱
                     for (JudgmentBasisVo entity : sampleCheckItem) {
-                        if (!entity.getCheckPrice().equals("") || entity.getCheckPrice() != null) {
+                        if (entity.getCheckPrice() != null && !entity.getCheckPrice().equals("")) {
                             int money = entity.getTimes() * Integer.parseInt(entity.getCheckPrice());
                             totalMoney = totalMoney + money;
                         }
@@ -515,17 +522,17 @@ public class EntrustServiceImpl implements EntrustService {
                         SampleItemEntity sampleItemEntity = new SampleItemEntity();
                         sampleItemEntity.setSampleId(entity.getSampleId());
                         sampleItemEntity.setEntrustId(entity.getId());
-                        if (entity.getMethodId() != null &&entity.getMethodId() >= 0 ) {
+                        if (entity.getMethodId() != null && entity.getMethodId() >= 0) {
                             sampleItemEntity.setMethodId(entity.getMethodId());
                         }
-                        if ( entity.getCheckItemId() != null &&entity.getCheckItemId() >= 0 ) {
+                        if (entity.getCheckItemId() != null && entity.getCheckItemId() >= 0) {
                             sampleItemEntity.setCheckItemId(entity.getCheckItemId().longValue());
                         }
-                        if ( entity.getStandardId() != null &&entity.getStandardId() >= 0 ) {
+                        if (entity.getStandardId() != null && entity.getStandardId() >= 0) {
                             sampleItemEntity.setStandardId(entity.getStandardId().intValue());
                         }
                         sampleItemEntity.setTimes(entity.getTimes());
-                        if (entity.getCheckPrice() != null&&!entity.getCheckPrice().equals("") ) {
+                        if (entity.getCheckPrice() != null && !entity.getCheckPrice().equals("")) {
                             sampleItemEntity.setUnitPrice(Integer.parseInt(entity.getCheckPrice()));
                         }
                         sampleItemList.add(sampleItemEntity);
@@ -542,7 +549,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
 
 
-        if(totalMoney!=0){
+        if (totalMoney != 0) {
             //得到总价钱，再保存委托基本信息
             basisInfo.setPaymentCount(totalMoney + "");
             //存放委托基本信息==》test_entrusted

@@ -10,6 +10,7 @@ import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -99,10 +100,26 @@ public interface EntrustEntityMapper extends BaseMapper {
      * 通过委托单id 获取联系地址
      */
     String getEntrustingParty(Long entrustmentId);
+
+    /**
+     * 查询样品id 是否存在
+     * @param entrustmentId
+     * @return
+     */
+    @Select("SELECT count(*) FROM test_entrusted_sample_details_rel WHERE entrustment_id= #{entrustmentId}")
+    Integer countSampleDetailsRel(Long entrustmentId);
     /**
      * 删除样品id
      */
     int removeTestEntrustedSampleDetailsRel(Long entrustmentId);
+
+    /**
+     * 查询依据id 是否存在
+     * @param entrustmentId
+     * @return
+     */
+    @Select("SELECT count(*) FROM test_entrusted_sample_standard_rel WHERE entrustment_id = #{entrustmentId}")
+    Integer countSampleStandardRel(Long entrustmentId);
     /**
      * 删除判定依据id
      */
@@ -111,6 +128,14 @@ public interface EntrustEntityMapper extends BaseMapper {
      * 删除缴费
      */
     int removeTestEntrustedPaymentRecordInfo(Long entrustmentId);
+
+    /**
+     * 判断样品下检测依据
+     * @param entrustmentId
+     * @return
+     */
+    @Select("SELECT count(*) FROM test_entrusted_sample_checkitem_rel WHERE  entrust_id = #{entrustmentId}")
+    Integer countSampleCheckitemRel(Long entrustmentId);
     /**
      * 样品下检测依据
      */

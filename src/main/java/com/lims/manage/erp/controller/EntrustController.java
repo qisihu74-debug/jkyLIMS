@@ -129,7 +129,7 @@ public class EntrustController {
 
     /**
      * 修改委托样品信息
-     * @param json
+     * @param
      * @return
      */
     @PostMapping("/updateEntrust_test_new_sample")
