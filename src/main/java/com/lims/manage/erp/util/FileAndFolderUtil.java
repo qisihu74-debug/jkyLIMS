@@ -2,12 +2,23 @@ package com.lims.manage.erp.util;
 
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.io.SAXReader;
+
+import org.apache.poi.xwpf.converter.pdf.PdfConverter;
+import org.apache.poi.xwpf.converter.pdf.PdfOptions;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.docx4j.Docx4J;
+import org.docx4j.fonts.IdentityPlusMapper;
+import org.docx4j.fonts.Mapper;
+import org.docx4j.fonts.PhysicalFonts;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +100,7 @@ public class FileAndFolderUtil {
         return lsFileName;
     }
 
-    public static String transFile2Str(String strFilePath){
+  /*  public static String transFile2Str(String strFilePath){
 
         //创建SAXReader对象
         SAXReader reader = new SAXReader();
@@ -105,7 +116,7 @@ public class FileAndFolderUtil {
         String documentStr = document.asXML();
         return documentStr;
 
-    }
+    }*/
 
     /**
      * 获取文件夹下文件名称列表
@@ -117,4 +128,56 @@ public class FileAndFolderUtil {
         return getFileName(strFolderPath, strSuffix, true);
     }
 
+    /**
+     * 将inputStream转化为file
+     * @param is
+     */
+    public static File inputStream2File (InputStream is) throws IOException {
+        OutputStream os = null;
+        File file = new File("");
+        try {
+            os = new FileOutputStream(file);
+            int len = 0;
+            byte[] buffer = new byte[8192];
+
+            while ((len = is.read(buffer)) != -1) {
+                os.write(buffer, 0, len);
+            }
+        } finally {
+            os.close();
+            is.close();
+        }
+        return file;
+    }
+
+    /**
+     * document对象转pdf
+     * @param document
+     * @param outUrl
+     * @throws Exception
+     */
+    public static void docxToPdf(XWPFDocument document, String outUrl ) throws Exception {
+        OutputStream outStream=getOutFileStream(outUrl);
+        PdfOptions options = PdfOptions.create();
+        PdfConverter.getInstance().convert(document, outStream, options);
+    }
+
+    /**
+     * 输出文件路径
+     * @param outputFilePath
+     * @return
+     * @throws IOException
+     */
+    protected static OutputStream getOutFileStream(String outputFilePath) throws IOException{
+        File outFile = new File(outputFilePath);
+        try{
+            //Make all directories up to specified
+            outFile.getParentFile().mkdirs();
+        } catch (NullPointerException e){
+            //Ignore error since it means not parent directories
+        }
+        outFile.createNewFile();
+        FileOutputStream oStream = new FileOutputStream(outFile);
+        return oStream;
+    }
 }
