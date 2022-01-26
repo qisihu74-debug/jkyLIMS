@@ -171,10 +171,9 @@ public class FileAndFolderUtil {
     protected static OutputStream getOutFileStream(String outputFilePath) throws IOException{
         File outFile = new File(outputFilePath);
         try{
-            //Make all directories up to specified
             outFile.getParentFile().mkdirs();
         } catch (NullPointerException e){
-            //Ignore error since it means not parent directories
+            logger.error("转换文件获取输出流异常:{}",e);
         }
         outFile.createNewFile();
         FileOutputStream oStream = new FileOutputStream(outFile);
