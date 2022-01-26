@@ -15,6 +15,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
+import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.ImageToPdfUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -615,6 +616,25 @@ public class ReportController {
     @GetMapping("/isApprove")
     public Result isApprove(Long id) {
         return ResultUtil.success(reportService.isApprove(id));
+    }
+
+    /**
+     * 测试
+     * @param entrustId
+     */
+    @GetMapping("testPdf")
+    public void testPdf(Long entrustId){
+        String fileName = "BD20210021.docx";
+        try {
+            MinioClient client = MinIoUtil.minioClient;
+            InputStream object = client.getObject(BucketsConst.buckets_entrust_template, fileName);
+            //填充数据
+            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
+            XWPFDocument document = entrustService.downloadEntrust(detail, object);
+            FileAndFolderUtil.docxToPdf(document,"D:\\VPS\\test.pdf");
+        }catch (Exception e){
+            logger.error("转换失败:{}",e);
+        }
     }
 
 }

@@ -1,9 +1,12 @@
 package com.lims.manage.erp.crm;
 
+import com.lims.manage.erp.entity.ImagePro;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SysFunction;
+import com.lims.manage.erp.util.ImageToPdfUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -17,8 +20,15 @@ import java.util.List;
  */
 public class TST {
     public static void main(String[] args) {
-        String reportUrl = "http://192.168.2.35:9000/seal-cns-cma/cns.jpg";
-        String image = reportUrl.substring(reportUrl.lastIndexOf("/")+1);
-        System.out.println("==========="+image);
+        try {
+            //ImageToPdfUtils.insertImageToPdf("D:\\AAAct\\ZX-2021-SW-1471.pdf","D:\\AAAct\\tupian.pdf","D:\\AAAct\\tupian.jpg");
+            List<ImagePro> imagePros = new ArrayList<>();
+            imagePros.add(new ImagePro(130, 48, 15, "D:\\\\AAAct\\\\tupian.jpg"));
+            ImageToPdfUtils.writeToPdf("D:\\AAAct\\ZX-2021-SW-1471.pdf","D:\\AAAct\\tupian.pdf",imagePros);
+        }catch (Exception e){
+            System.out.println("图片导入pdf成功!");
+        }
+
+
     }
 }

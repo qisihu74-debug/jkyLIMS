@@ -1,8 +1,13 @@
 package com.lims.manage.erp.util;
 
 
+import org.apache.poi.xwpf.converter.pdf.PdfConverter;
+import org.apache.poi.xwpf.converter.pdf.PdfOptions;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,17 +15,6 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.poi.xwpf.converter.pdf.PdfConverter;
-import org.apache.poi.xwpf.converter.pdf.PdfOptions;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.docx4j.Docx4J;
-import org.docx4j.fonts.IdentityPlusMapper;
-import org.docx4j.fonts.Mapper;
-import org.docx4j.fonts.PhysicalFonts;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author gjl
