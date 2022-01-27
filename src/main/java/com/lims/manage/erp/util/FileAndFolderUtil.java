@@ -4,9 +4,17 @@ package com.lims.manage.erp.util;
 import org.apache.poi.xwpf.converter.pdf.PdfConverter;
 import org.apache.poi.xwpf.converter.pdf.PdfOptions;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.docx4j.Docx4J;
+import org.docx4j.fonts.IdentityPlusMapper;
+import org.docx4j.fonts.Mapper;
+import org.docx4j.fonts.PhysicalFonts;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -123,25 +131,50 @@ public class FileAndFolderUtil {
     }
 
     /**
-     * 将inputStream转化为file
-     * @param is
+     * docx文档转换为PDF
+     * @param pdfPath PDF文档存储路径
+     * @param document
+     * @throws Exception 可能为Docx4JException, FileNotFoundException, IOException等
      */
-    public static File inputStream2File (InputStream is) throws IOException {
-        OutputStream os = null;
-        File file = new File("");
+    public static void convertDocxToPdf(XWPFDocument document, String pdfPath) throws Exception {
+        //XWPFDocument转inputstream
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        document.write(b);
+        InputStream inputStream = new ByteArrayInputStream(b.toByteArray());
+        FileOutputStream fileOutputStream = null;
         try {
-            os = new FileOutputStream(file);
-            int len = 0;
-            byte[] buffer = new byte[8192];
-
-            while ((len = is.read(buffer)) != -1) {
-                os.write(buffer, 0, len);
-            }
-        } finally {
-            os.close();
-            is.close();
+            fileOutputStream = new FileOutputStream(new File(pdfPath));
+            WordprocessingMLPackage mlPackage = WordprocessingMLPackage.load(inputStream);
+            setFontMapper(mlPackage);
+            Docx4J.toPDF(mlPackage, new FileOutputStream(new File(pdfPath)));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return file;
+    }
+
+    /**
+     * 设置字体
+     * @param mlPackage
+     * @throws Exception
+     */
+    private static void setFontMapper(WordprocessingMLPackage mlPackage) throws Exception {
+        Mapper fontMapper = new IdentityPlusMapper();
+        fontMapper.put("隶书", PhysicalFonts.get("LiSu"));
+        fontMapper.put("宋体", PhysicalFonts.get("SimSun"));
+        fontMapper.put("微软雅黑", PhysicalFonts.get("Microsoft Yahei"));
+        fontMapper.put("黑体", PhysicalFonts.get("SimHei"));
+        fontMapper.put("楷体", PhysicalFonts.get("KaiTi"));
+        fontMapper.put("新宋体", PhysicalFonts.get("NSimSun"));
+        fontMapper.put("华文行楷", PhysicalFonts.get("STXingkai"));
+        fontMapper.put("华文仿宋", PhysicalFonts.get("STFangsong"));
+        fontMapper.put("宋体扩展", PhysicalFonts.get("simsun-extB"));
+        fontMapper.put("仿宋", PhysicalFonts.get("FangSong"));
+        fontMapper.put("仿宋_GB2312", PhysicalFonts.get("FangSong_GB2312"));
+        fontMapper.put("幼圆", PhysicalFonts.get("YouYuan"));
+        fontMapper.put("华文宋体", PhysicalFonts.get("STSong"));
+        fontMapper.put("华文中宋", PhysicalFonts.get("STZhongsong"));
+
+        mlPackage.setFontMapper(fontMapper);
     }
 
     /**
@@ -151,9 +184,12 @@ public class FileAndFolderUtil {
      * @throws Exception
      */
     public static void docxToPdf(XWPFDocument document, String outUrl ) throws Exception {
-        OutputStream outStream=getOutFileStream(outUrl);
+        /*OutputStream outStream=getOutFileStream(outUrl);
         PdfOptions options = PdfOptions.create();
-        PdfConverter.getInstance().convert(document, outStream, options);
+        PdfConverter.getInstance().convert(document, outStream, options);*/
+        PdfOptions options = PdfOptions.create();
+        OutputStream out = new FileOutputStream(new File(outUrl));
+        PdfConverter.getInstance().convert(document, out, options);
     }
 
     /**

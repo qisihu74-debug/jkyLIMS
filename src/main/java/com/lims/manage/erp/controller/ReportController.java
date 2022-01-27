@@ -631,10 +631,28 @@ public class ReportController {
             //填充数据
             EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
-            FileAndFolderUtil.docxToPdf(document,"D:\\VPS\\test.pdf");
+            FileAndFolderUtil.docxToPdf(document,"D:\\VPS\\11.pdf");
+            document.close();
         }catch (Exception e){
             logger.error("转换失败:{}",e);
         }
     }
+
+    /**
+     * 测试
+     */
+    @GetMapping("test")
+    public void test(){
+        try {
+            MinioClient client = MinIoUtil.minioClient;
+            InputStream object = client.getObject(BucketsConst.buckets_entrust_template, "1122.docx");
+            XWPFDocument document = new XWPFDocument(object);
+            FileAndFolderUtil.docxToPdf(document,"D:\\VPS\\222.pdf");
+            document.close();
+        }catch (Exception e){
+            logger.error("转换失败:{}",e);
+        }
+    }
+
 
 }
