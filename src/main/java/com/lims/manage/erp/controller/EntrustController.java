@@ -20,6 +20,7 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.CheckItemParamVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -337,4 +338,21 @@ public class EntrustController {
         }
     }
 
+    /**
+     * 查询委托单位上一次工程名称、工程部位
+     * @param name
+     * @return
+     */
+    @GetMapping("/getHistoryData")
+    public Result getHistoryData(String name){
+        if(name == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }else{
+            HistoryEntrustDataVo historyData = entrustService.getHistoryData(name);
+            if(historyData == null){
+                historyData = new HistoryEntrustDataVo();
+            }
+            return ResultUtil.success(historyData);
+        }
+    }
 }

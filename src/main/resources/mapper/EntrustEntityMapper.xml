@@ -333,4 +333,17 @@ AND s.type IN (2, 3)
     FROM
       test_entrusted_sample_details_rel where entrustment_id = #{entrustmentId}
   </select>
+
+  <select id="getHistoryData" resultType="com.lims.manage.erp.vo.HistoryEntrustDataVo">
+    SELECT
+      project_name,
+      project_part
+    FROM
+      test_entrusted_info
+    WHERE
+      entrust_company = #{name}
+    ORDER BY
+      acceptance_date DESC
+      LIMIT 1
+  </select>
 </mapper>

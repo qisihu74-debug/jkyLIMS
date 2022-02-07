@@ -8,6 +8,7 @@ import com.lims.manage.erp.entity.EntrustPamentEntity;
 import com.lims.manage.erp.entity.EntrustSampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -155,4 +156,11 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     List<Integer> getSampleId(Long entrustmentId);
+
+    /**
+     * 查询委托单位上一次工程名称、工程部位
+     * @param name
+     * @return
+     */
+    HistoryEntrustDataVo getHistoryData(String name);
 }
