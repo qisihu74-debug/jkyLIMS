@@ -337,4 +337,17 @@ public class EntrustController {
         }
     }
 
+    /**
+     * 查询委托单位上一次工程名称、工程部位
+     * @param name
+     * @return
+     */
+    @GetMapping("/getHistoryData")
+    public Result getHistoryData(String name){
+        if(name == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }else{
+            return ResultUtil.success(entrustService.getHistoryData(name));
+        }
+    }
 }

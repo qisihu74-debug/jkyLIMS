@@ -9,6 +9,7 @@ import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.web.multipart.MultipartFile;
@@ -121,4 +122,11 @@ public interface EntrustService {
      * @param object
      */
     XWPFDocument downloadEntrust(EntrustAddVo detail, InputStream object);
+
+    /**
+     * 查询委托单位上一次工程名称、工程部位
+     * @param name
+     * @return
+     */
+    List<HistoryEntrustDataVo> getHistoryData(String name);
 }
