@@ -201,6 +201,8 @@
                 and t1.state=#{state}
             </if>
         </trim>
+        ORDER BY
+        t2.entrustment_no DESC
     </select>
     <update id="updateTestTask" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
         UPDATE test_task
