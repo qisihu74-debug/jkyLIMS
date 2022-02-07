@@ -54,7 +54,7 @@ public class UserMenuController {
      * @Return Map<String,Object> 返回结果
      */
     @RequestMapping("/getUserInfoList")
-    @RequiresPermissions("sys:user:info")
+    //@RequiresPermissions("sys:user:info")
     public Map<String,Object> getUserInfoList(){
         Map<String,Object> map = new HashMap<>();
         List<SysUserEntity> sysUserEntityList = sysUserService.list();
@@ -69,7 +69,7 @@ public class UserMenuController {
      * @Return Map<String,Object> 返回结果
      */
     @RequestMapping("/getRoleInfoList")
-    @RequiresPermissions("sys:role:info")
+    //@RequiresPermissions("sys:role:info")
     public Map<String,Object> getRoleInfoList(){
         Map<String,Object> map = new HashMap<>();
         List<SysRoleEntity> sysRoleEntityList = sysRoleService.list();
@@ -84,7 +84,7 @@ public class UserMenuController {
      * @Return Map<String,Object>
      */
     @RequestMapping("/getMenuInfoList")
-    @RequiresPermissions("sys:menu:info")
+    //@RequiresPermissions("sys:menu:info")
     public Map<String,Object> getMenuInfoList(){
         Map<String,Object> map = new HashMap<>();
         List<SysMenuEntity> sysMenuEntityList = sysMenuService.list();
@@ -99,7 +99,7 @@ public class UserMenuController {
      * @Return Map<String,Object>
      */
     @RequestMapping("/getInfoAll")
-    @RequiresPermissions("sys:info:all")
+    //@RequiresPermissions("sys:info:all")
     public Map<String,Object> getInfoAll(){
         Map<String,Object> map = new HashMap<>();
         List<SysUserEntity> sysUserEntityList = sysUserService.list();
@@ -118,7 +118,7 @@ public class UserMenuController {
      * @Return Map<String,Object>
      */
     @RequestMapping("/testRole")
-    @RequiresPermissions("aa:cc:dd")
+    //@RequiresPermissions("aa:cc:dd")
     public Map<String,Object> testRole(){
         Map<String,Object> map = new HashMap<>();
 
@@ -155,7 +155,7 @@ public class UserMenuController {
      * @return
      */
     @GetMapping("detail")
-    @RequiresPermissions("sys:menu:detail")
+    //@RequiresPermissions("sys:menu:detail")
     public Result getFuncAndMenuByRoleId(Long roleId){
         if (roleId == null){
             return ResultUtil.error(-1,"缺少必要的参数！");
@@ -170,7 +170,7 @@ public class UserMenuController {
      * @return
      */
     @PostMapping("grant")
-    @RequiresPermissions("sys:menu:grant")
+    //@RequiresPermissions("sys:menu:grant")
     public Result grant(@RequestBody SysRoleFuncMenuEntity entity){
         if (entity.getRoleId() == null){
             return ResultUtil.error(-1,"请选择授权的角色！");
@@ -198,7 +198,7 @@ public class UserMenuController {
      * @return
      */
     @PostMapping("add")
-    @RequiresPermissions("sys:menu:add")
+    //@RequiresPermissions("sys:menu:add")
     public Result add(@RequestBody SysMenuEntity entity){
         if (entity.getFuctionId() == null){
             return ResultUtil.error(-1,"请选择权限所属菜单");

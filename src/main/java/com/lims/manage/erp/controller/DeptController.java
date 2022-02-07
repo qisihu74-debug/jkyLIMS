@@ -17,7 +17,7 @@ public class DeptController {
      * 查询全部组织架构信息
      */
     @RequestMapping("/getAllDept")
-    @RequiresPermissions("sys:dept:list")
+    //@RequiresPermissions("sys:dept:list")
     public Result getAllDept(){
         return ResultUtil.success(deptService.getAllDept());
     }

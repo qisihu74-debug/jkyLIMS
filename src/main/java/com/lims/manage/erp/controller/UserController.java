@@ -57,7 +57,7 @@ public class UserController {
      * @return
      */
     @RequestMapping("list")
-    @RequiresPermissions("sys:user:list")
+    //@RequiresPermissions("sys:user:list")
     public Result getList(@RequestBody UserInfoParamVo vo){
         return ResultUtil.success(sysUserService.getUserInfos(vo));
     }
@@ -68,7 +68,7 @@ public class UserController {
      * @return
      */
     @RequestMapping("/addUser")
-    @RequiresPermissions("sys:user:insert")
+    //@RequiresPermissions("sys:user:insert")
     @Transactional(rollbackFor = Exception.class)
     public Result addUser(@RequestBody RegisterUserInfoVo vo){
         // 随机生成盐值
@@ -98,7 +98,7 @@ public class UserController {
      * @return
      */
     @RequestMapping("/changeState")
-    @RequiresPermissions("sys:user:changestate")
+    //@RequiresPermissions("sys:user:changestate")
     public Result changeState(@RequestBody SysUserEntity userEntity){
         if(userEntity == null){
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
@@ -119,7 +119,7 @@ public class UserController {
      * @return
      */
     @RequestMapping("/resetPassword")
-    @RequiresPermissions("sys:user:resetpassword")
+    //@RequiresPermissions("sys:user:resetpassword")
     public Result resetPassword(@RequestBody SysUserEntity userEntity){
         // 随机生成盐值
         String salt = RandomStringUtils.randomAlphanumeric(20);
@@ -142,7 +142,7 @@ public class UserController {
      * @return
      */
     @RequestMapping("/updatePassword")
-    @RequiresPermissions("sys:user:updatepassword")
+    //@RequiresPermissions("sys:user:updatepassword")
     public Result updatePassword(@RequestBody SysUserEntity userEntity){
         //验证旧密码
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
