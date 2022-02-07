@@ -34,18 +34,13 @@ public class AsposeUtil {
             FileOutputStream os = new FileOutputStream(file);
             //XWPFDocument->Document
             ByteArrayOutputStream b = new ByteArrayOutputStream();
-            document.write(b); // doc should be a XWPFDocument
+            document.write(b);
             InputStream inputStream = new ByteArrayInputStream(b.toByteArray());
             Document doc = new Document(inputStream);
-            /*for (Section sect : doc.getSections()) {
-                removeWatermarkFromHeader(sect, HeaderFooterType.HEADER_PRIMARY);
-                removeWatermarkFromHeader(sect, HeaderFooterType.HEADER_FIRST);
-                removeWatermarkFromHeader(sect, HeaderFooterType.HEADER_EVEN);
-            }*/
             doc.save(os, SaveFormat.PDF);
             os.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("word转pdf失败:{}",e);
         }
     }
 
