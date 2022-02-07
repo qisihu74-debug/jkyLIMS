@@ -162,5 +162,5 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @param name
      * @return
      */
-    List<HistoryEntrustDataVo> getHistoryData(String name);
+    HistoryEntrustDataVo getHistoryData(String name);
 }

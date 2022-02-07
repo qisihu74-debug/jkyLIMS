@@ -898,7 +898,7 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public List<HistoryEntrustDataVo> getHistoryData(String name) {
+    public HistoryEntrustDataVo getHistoryData(String name) {
         return entityMapper.getHistoryData(name);
     }
 

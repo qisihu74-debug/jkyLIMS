@@ -128,5 +128,5 @@ public interface EntrustService {
      * @param name
      * @return
      */
-    List<HistoryEntrustDataVo> getHistoryData(String name);
+    HistoryEntrustDataVo getHistoryData(String name);
 }
