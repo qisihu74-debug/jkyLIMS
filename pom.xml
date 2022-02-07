@@ -301,7 +301,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-
         <!--钉钉依赖 -->
         <dependency>
             <groupId>com.aliyun</groupId>
@@ -402,7 +401,6 @@
             <version>4.2.2</version>
         </dependency>
     </dependencies>
-
     <build>
         <!-- 钉钉依赖资源lib包-->
         <resources>
@@ -461,5 +459,7 @@
         </plugins>
         <finalName>jkyErp</finalName>
     </build>
+
+
 
 </project>

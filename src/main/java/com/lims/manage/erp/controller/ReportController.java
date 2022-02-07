@@ -15,6 +15,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
+import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.ImageToPdfUtils;
 import com.lims.manage.erp.util.MinIoUtil;
@@ -631,7 +632,7 @@ public class ReportController {
             //填充数据
             EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
-            FileAndFolderUtil.docxToPdf(document,"D:\\VPS\\11.pdf");
+            FileAndFolderUtil.convertDocxToPdf(document,"D:/VPS/11.pdf");
             document.close();
         }catch (Exception e){
             logger.error("转换失败:{}",e);
@@ -645,9 +646,9 @@ public class ReportController {
     public void test(){
         try {
             MinioClient client = MinIoUtil.minioClient;
-            InputStream object = client.getObject(BucketsConst.buckets_entrust_template, "1122.docx");
+            InputStream object = client.getObject(BucketsConst.buckets_entrust_template, "BGLQ21001F.docx");
             XWPFDocument document = new XWPFDocument(object);
-            FileAndFolderUtil.docxToPdf(document,"D:\\VPS\\222.pdf");
+            AsposeUtil.word2pdf(document,"D:\\VPS\\22.pdf");
             document.close();
         }catch (Exception e){
             logger.error("转换失败:{}",e);
