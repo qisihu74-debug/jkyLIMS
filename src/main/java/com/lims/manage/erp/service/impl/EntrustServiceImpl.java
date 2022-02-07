@@ -31,10 +31,7 @@ import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -898,6 +895,11 @@ public class EntrustServiceImpl implements EntrustService {
             logger.error("设置委托单信息到模板异常:{}", e);
         }
         return doc;
+    }
+
+    @Override
+    public HistoryEntrustDataVo getHistoryData(String name) {
+        return entityMapper.getHistoryData(name);
     }
 
 }

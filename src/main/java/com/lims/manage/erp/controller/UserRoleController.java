@@ -42,7 +42,7 @@ public class UserRoleController {
      * @Return Map<String,Object> 返回结果
      */
     @RequestMapping("/getAdminInfo")
-    @RequiresRoles("ADMIN")
+    //@RequiresRoles("ADMIN")
     public Map<String,Object> getAdminInfo(){
         Map<String,Object> map = new HashMap<>();
         map.put("code",200);
@@ -57,7 +57,7 @@ public class UserRoleController {
      * @Return Map<String,Object> 返回结果
      */
     @RequestMapping("/getUserInfo")
-    @RequiresRoles("USER")
+    //@RequiresRoles("USER")
     public Map<String,Object> getUserInfo(){
         Map<String,Object> map = new HashMap<>();
         map.put("code",200);
@@ -72,7 +72,7 @@ public class UserRoleController {
      * @Return Map<String,Object> 返回结果
      */
     @RequestMapping("/getRoleInfo")
-    @RequiresRoles(value={"ADMIN","USER"},logical = Logical.OR)
+    //@RequiresRoles(value={"ADMIN","USER"},logical = Logical.OR)
     @RequiresUser
     public Map<String,Object> getRoleInfo(){
         Map<String,Object> map = new HashMap<>();
@@ -104,7 +104,7 @@ public class UserRoleController {
      * @return
      */
     @GetMapping("/list")
-    @RequiresPermissions("sys:role:list")
+    //@RequiresPermissions("sys:role:list")
     public Map<String,Object> mehtodStr(SysRoleEntity sysRoleEntity)
     {
         Map<String,Object> map = new HashMap<>();
@@ -114,7 +114,7 @@ public class UserRoleController {
         return map;
     }
     @PostMapping("/edit")
-    @RequiresPermissions("sys:role:edit")
+    //@RequiresPermissions("sys:role:edit")
     public Map<String,Object> methodEditData(@RequestBody SysRoleEntity sysRoleEntity)
     {
         int statusNumber=0;
@@ -137,7 +137,7 @@ public class UserRoleController {
         return map;
     }
     @PostMapping("/add")
-    @RequiresPermissions("sys:role:add")
+    //@RequiresPermissions("sys:role:add")
     public Map<String,Object> methodAddData(@RequestBody SysRoleEntity sysRoleEntity)
     {
         Boolean judge =false;
@@ -160,7 +160,7 @@ public class UserRoleController {
         return map;
     }
     @PostMapping("/remove/{roleId}")
-    @RequiresPermissions("sys:role:remove")
+    //@RequiresPermissions("sys:role:remove")
     public Map<String,Object> methodAddData(@PathVariable Long roleId)
     {
         System.out.println("获取需要删除的id\t"+roleId);
