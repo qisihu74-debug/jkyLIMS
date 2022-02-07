@@ -1,10 +1,13 @@
 package com.lims.manage.erp.util;
 
 
+import com.aspose.words.License;
+import com.aspose.words.SaveFormat;
+import com.lowagie.text.pdf.BaseFont;
+import fr.opensagres.xdocreport.itext.extension.font.IFontProvider;
 import org.apache.poi.xwpf.converter.pdf.PdfConverter;
 import org.apache.poi.xwpf.converter.pdf.PdfOptions;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.docx4j.Docx4J;
 import org.docx4j.fonts.IdentityPlusMapper;
 import org.docx4j.fonts.Mapper;
 import org.docx4j.fonts.PhysicalFonts;
@@ -12,9 +15,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.awt.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -102,24 +103,6 @@ public class FileAndFolderUtil {
         return lsFileName;
     }
 
-  /*  public static String transFile2Str(String strFilePath){
-
-        //创建SAXReader对象
-        SAXReader reader = new SAXReader();
-        //读取文件 转换成Document
-        Document document = null;
-        try {
-            document = reader.read(new File(getClassPath() + strFilePath));
-        } catch (DocumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        //document转换为String字符串
-        String documentStr = document.asXML();
-        return documentStr;
-
-    }*/
-
     /**
      * 获取文件夹下文件名称列表
      * @param strFolderPath
@@ -136,7 +119,7 @@ public class FileAndFolderUtil {
      * @param document
      * @throws Exception 可能为Docx4JException, FileNotFoundException, IOException等
      */
-    public static void convertDocxToPdf(XWPFDocument document, String pdfPath) throws Exception {
+    /*public static void convertDocxToPdf(XWPFDocument document, String pdfPath) throws Exception {
         //XWPFDocument转inputstream
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         document.write(b);
@@ -150,7 +133,7 @@ public class FileAndFolderUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     /**
      * 设置字体
@@ -183,10 +166,7 @@ public class FileAndFolderUtil {
      * @param outUrl
      * @throws Exception
      */
-    public static void docxToPdf(XWPFDocument document, String outUrl ) throws Exception {
-        /*OutputStream outStream=getOutFileStream(outUrl);
-        PdfOptions options = PdfOptions.create();
-        PdfConverter.getInstance().convert(document, outStream, options);*/
+    public static void docxToPdf(XWPFDocument document, String outUrl) throws Exception {
         PdfOptions options = PdfOptions.create();
         OutputStream out = new FileOutputStream(new File(outUrl));
         PdfConverter.getInstance().convert(document, out, options);
@@ -208,5 +188,60 @@ public class FileAndFolderUtil {
         outFile.createNewFile();
         FileOutputStream oStream = new FileOutputStream(outFile);
         return oStream;
+    }
+
+    /**
+     * docx 转成 pdf
+     * @param outUrl 输出pdf文件名称
+     * @param document 操作目录
+     * @throws Exception
+     */
+    public static void convertDocxToPdf(XWPFDocument document, String outUrl) {
+        OutputStream target = null;
+        try {
+            // 输出目标
+            target = new FileOutputStream(outUrl);
+            // 转换配置
+            PdfOptions options = PdfOptions.create();
+            // 兼容中文配置
+            options.fontProvider(new IFontProvider() {
+                @Override
+                public com.lowagie.text.Font getFont(String familyName, String encoding, float size, int style, Color color) {
+                    try {
+                        BaseFont bfChinese = BaseFont.createFont("C:/Windows/Fonts/simhei.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+                        //BaseFont bfChinese = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
+                        com.lowagie.text.Font fontChinese = new com.lowagie.text.Font(bfChinese, size, style, color);
+                        if (familyName != null) {
+                            fontChinese.setFamily(familyName);
+                        }
+                        return fontChinese;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+            });
+            // 转换成pdf
+            PdfConverter.getInstance().convert(document, target, options);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // 关闭流
+            close(target);
+        }
+    }
+
+    /**
+     * 关闭输出流
+     * @param os
+     */
+    private static void close(OutputStream os) {
+        if (os != null) {
+            try {
+                os.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
