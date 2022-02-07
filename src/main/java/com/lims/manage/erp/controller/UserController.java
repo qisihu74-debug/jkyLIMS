@@ -158,6 +158,13 @@ public class UserController {
     @RequestMapping("/resetPassword")
 //    @RequiresPermissions("sys:user:resetpassword")
     public Result resetPassword(@RequestBody SysUserEntity userEntity){
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token 已失效");
+        }
+        if(userEntity.getUserId()==null){
+            return ResultUtil.error("用户ID不能为空");
+        }
         // 随机生成盐值
         String salt = RandomStringUtils.randomAlphanumeric(20);
         String password = SHA256Util.sha256(Const.DEFAULT_PASSWORD, salt);
