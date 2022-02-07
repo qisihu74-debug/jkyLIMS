@@ -42,15 +42,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 
     /**
      * 根据用户名查询实体
+     *
      * @Author gjl
      * @CreateTime 2021/11/09 16:30
-     * @Param  username 用户名
+     * @Param username 用户名
      * @Return SysUserEntity 用户实体
      */
     @Override
     public SysUserEntity selectUserByName(String username) {
         QueryWrapper<SysUserEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(SysUserEntity::getUsername,username);
+        queryWrapper.lambda().eq(SysUserEntity::getUsername, username);
         return this.baseMapper.selectOne(queryWrapper);
     }
 
@@ -58,9 +59,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     public List<SysUserTreeEntity> selectUserList(String deptId) {
         List<SysUserTreeEntity> returnList = new ArrayList<>();
         // 依据部门id
-        if (deptId != null && deptId!="") {
+        if (deptId != null && deptId != "") {
             List<SysUserTreeEntity> datalist = sysUserDao.selectUserinfoList(null);
-            DingDeptEntity dingDeptEntity  = deptDao.selectById(deptId);
+            DingDeptEntity dingDeptEntity = deptDao.selectById(deptId);
             for (SysUserTreeEntity data : datalist) {
                 data.setUserDept(dingDeptEntity.getName());
                 StringBuffer stringBuffer = new StringBuffer("");
@@ -84,8 +85,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 
     @Override
     public List<SysUserTreeEntity> selectUserLikeList(SysUserTreeEntity sysUserTreeEntity) {
-        if(sysUserTreeEntity.getState()!=null){
-            if(!sysUserTreeEntity.getState().equals("NORMAL")&&!sysUserTreeEntity.getState().equals("PROHIBIT")) {
+        if (sysUserTreeEntity.getState() != null) {
+            if (!sysUserTreeEntity.getState().equals("NORMAL") && !sysUserTreeEntity.getState().equals("PROHIBIT")) {
                 sysUserTreeEntity.setState(null);
             }
         }
@@ -114,24 +115,24 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     @Override
     public List<UserInfoVo> getUserInfos(UserInfoParamVo vo) {
         List<UserInfoVo> userInfos = sysUserDao.getUserInfos(vo);
-        if(!userInfos.isEmpty()){
-            for (UserInfoVo userInfoVo: userInfos) {
+        if (!userInfos.isEmpty()) {
+            for (UserInfoVo userInfoVo : userInfos) {
                 List<LabelValueVo> department = Lists.newArrayList();
                 String departmentId = userInfoVo.getDepartmentId();
                 String replace;
-                if(departmentId != null && departmentId.contains("[")){
+                if (departmentId != null && departmentId.contains("[")) {
                     replace = departmentId.replace("[", "").replace("]", "");
-                }else{
+                } else {
                     replace = departmentId;
                 }
-                if(replace != null && replace.contains(",")){
+                if (replace != null && replace.contains(",")) {
                     String[] split = replace.split(",");
                     for (int i = 0; i < split.length; i++) {
                         String deptId = split[i].trim();
                         LabelValueVo departmentInfo = deptDao.getRoleInfoById(Long.parseLong(deptId));
                         department.add(departmentInfo);
                     }
-                }else if(replace != null && !replace.contains(",")){
+                } else if (replace != null && !replace.contains(",")) {
                     LabelValueVo departmentInfo = deptDao.getRoleInfoById(Long.parseLong(replace));
                     department.add(departmentInfo);
                 }
@@ -145,34 +146,35 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateUserInfo(UserInfoVo vo) {
         Boolean flag = false;
-        System.out.println("用户信息："+vo.toString());
+        System.out.println("用户信息：" + vo.toString());
         //更新sys_user
         sysUserDao.updateUserInfo(vo);
 //        //更新sys_ding_user
 //        dingUsertDao.updateDingUserInfo(vo);
         //删除旧权限
         sysUserRoleDao.removeOldRole(vo.getUserId());
-        //增加新权限
-        List<SysUserRoleEntity> newRoles = Lists.newArrayList();
-        if(vo.getRoleIds().contains(",")){
-            String[] split = vo.getRoleIds().split(",");
-            for (int i = 0; i < split.length; i++) {
+        if (vo.getRoleIds() != null && !vo.getRoleIds().isEmpty()) {
+            //增加新权限
+            List<SysUserRoleEntity> newRoles = Lists.newArrayList();
+            if (vo.getRoleIds().contains(",")) {
+                String[] split = vo.getRoleIds().split(",");
+                for (int i = 0; i < split.length; i++) {
+                    SysUserRoleEntity entity = new SysUserRoleEntity();
+                    entity.setUserId(Long.parseLong(vo.getUserId()));
+                    entity.setRoleId(Long.parseLong(split[i].trim()));
+                    newRoles.add(entity);
+                }
+            } else {
                 SysUserRoleEntity entity = new SysUserRoleEntity();
                 entity.setUserId(Long.parseLong(vo.getUserId()));
-                entity.setRoleId(Long.parseLong(split[i].trim()));
+                entity.setRoleId(Long.parseLong(vo.getRoleIds().trim()));
                 newRoles.add(entity);
             }
-        }else{
-            SysUserRoleEntity entity = new SysUserRoleEntity();
-            entity.setUserId(Long.parseLong(vo.getUserId()));
-            entity.setRoleId(Long.parseLong(vo.getRoleIds().trim()));
-            newRoles.add(entity);
-        }
-        for (SysUserRoleEntity entity: newRoles) {
-            sysUserRoleDao.insertNewRole(entity);
+            for (SysUserRoleEntity entity : newRoles) {
+                sysUserRoleDao.insertNewRole(entity);
+            }
         }
         flag = true;
         return flag;
     }
-
 }

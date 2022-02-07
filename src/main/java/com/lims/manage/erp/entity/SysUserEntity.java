@@ -88,4 +88,11 @@ public class SysUserEntity implements Serializable {
 		this.department = vo.getDeptId();
 		this.name = vo.getName();
 	}
+
+	public SysUserEntity(Long userId, String username, String password, String salt) {
+		this.userId = userId;
+		this.username = username;
+		this.password = password;
+		this.salt = salt;
+	}
 }
