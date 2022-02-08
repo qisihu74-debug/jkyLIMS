@@ -19,7 +19,7 @@ WHERE
 
 	<select id="getList" resultType="com.lims.manage.erp.entity.TreeFunction">
         SELECT
-        function_id,
+        DISTINCT function_id,
         NAME AS treeName,
         function_pid,
         sort

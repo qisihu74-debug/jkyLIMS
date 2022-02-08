@@ -239,7 +239,7 @@ public class UserController {
         if(vo.getMobile()==null){
             return ResultUtil.error("手机号不能为空");
         }
-        if(vo.getUserId()==null||vo.getUserId().equals("")){
+        if(vo.getUserId()==null){
             return ResultUtil.error("缺少必填参数");
         }
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -248,7 +248,7 @@ public class UserController {
         }
         // 用户修改时，当前账号不能与其他账号重复
         // 获取用户名 为空 发生改变
-        if(sysUserDao.getOldData(vo.getUsername(),Long.parseLong(vo.getUserId()))==null){
+        if(sysUserDao.getOldData(vo.getUsername(),vo.getUserId())==null){
             if(sysUserDao.getOne(vo.getUsername())!=null){
                 return ResultUtil.error("当前账号已存在");
             }

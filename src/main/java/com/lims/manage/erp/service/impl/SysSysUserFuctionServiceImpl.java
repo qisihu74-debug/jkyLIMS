@@ -8,8 +8,10 @@ import com.lims.manage.erp.mapper.SysRoleDao;
 import com.lims.manage.erp.mapper.SysRoleFuncMenuDao;
 import com.lims.manage.erp.mapper.SysUserFuctionDao;
 import com.lims.manage.erp.service.SysUserFuctionService;
+import com.lims.manage.erp.vo.SysRoleFuncMenuVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -60,9 +62,14 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
     }
 
     @Override
+    public List<TreeFunction> GetListPeer() {
+        return fuctionDao.getList();
+    }
+
+    @Override
     public List<TreeFunction> GetListUpgrade(Long userid) {
         List<TreeFunction> dataList = returnListUpgrade(userid);
-        if(dataList.isEmpty()) {
+        if(dataList==null||dataList.isEmpty()) {
             System.out.println("此用户不包含菜单信息，请配置");
             return null;
         }
@@ -88,6 +95,31 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
         }
         return bigTree;
     }
+
+    @Override
+    public List<Long> getRoleMenu(Long roleId) {
+
+        return sysRoleFuncMenuDao.getFunctionIdByRoleIdS(roleId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean grant(SysRoleFuncMenuVo entity) {
+        Boolean flag = false;
+        List<SysRoleFunction> roleFunctions = new ArrayList<>();
+        for (Long id:entity.getList()) {
+            SysRoleFunction sysRoleFunction = new SysRoleFunction();
+            sysRoleFunction.setRoleId(entity.getRoleId());
+            sysRoleFunction.setFunctionId(id);
+            roleFunctions.add(sysRoleFunction);
+        }
+        //角色菜单重新更新
+        sysRoleFuncMenuDao.delFuncByRoleId(entity.getRoleId());
+        sysRoleFuncMenuDao.insertBatchRoleFunc(roleFunctions);
+        flag = true;
+        return flag;
+    }
+
     /**
      * 1、用户拥有 多个角色 2、多个角色下 展示具体菜单项ID
      * @param userid

@@ -2,6 +2,7 @@ package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.entity.SysFunction;
 import com.lims.manage.erp.entity.TreeFunction;
+import com.lims.manage.erp.vo.SysRoleFuncMenuVo;
 
 import java.util.List;
 
@@ -24,10 +25,28 @@ public interface SysUserFuctionService {
 
     List<TreeFunction> GetList();
 
+    List<TreeFunction> GetListPeer();
+
     /**
      * 依据 用户ID 展示所属菜单项。
      * @param userid
      * @return
      */
     List<TreeFunction> GetListUpgrade(Long userid);
+
+    /**
+     * 查询角色现有权限
+     * @param roleId
+     * @return
+     */
+    List<Long> getRoleMenu(Long roleId);
+
+    /**
+     * 角色授权
+     * @param
+     * @return
+     */
+    Boolean grant(SysRoleFuncMenuVo entity);
+
+
 }

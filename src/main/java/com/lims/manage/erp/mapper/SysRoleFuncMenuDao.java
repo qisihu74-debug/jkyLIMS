@@ -5,6 +5,7 @@ import com.lims.manage.erp.entity.SysMenuEntity;
 import com.lims.manage.erp.entity.SysRoleFunction;
 import com.lims.manage.erp.entity.SysRoleMenuEntity;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -50,7 +51,7 @@ public interface SysRoleFuncMenuDao {
      * 授权保存角色菜单
      * @param roleFunctions
      */
-    void insertBatchRoleFunc(List<SysRoleFunction> roleFunctions);
+    void insertBatchRoleFunc(@Param("roleFunctions") List<SysRoleFunction> roleFunctions);
 
     /**
      * 授权保存角色权限
@@ -82,4 +83,11 @@ public interface SysRoleFuncMenuDao {
      * @return
      */
     List<SysRoleFunction> selectSetMenu(Long userId);
+
+    /**
+     * 查询角色已有权限
+     * @param roleId
+     * @return
+     */
+    List<Long> getFunctionIdByRoleIdS(Long roleId);
 }

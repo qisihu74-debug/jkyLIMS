@@ -21,4 +21,15 @@ public class DeptController {
     public Result getAllDept(){
         return ResultUtil.success(deptService.getAllDept());
     }
+
+    /**
+     * 获取部门信息 无层级
+     * @return
+     */
+    @RequestMapping("/getAllDepartment")
+    //@RequiresPermissions("sys:dept:list")
+    public Result getAllDepartment (){
+        return ResultUtil.success(deptService.list());
+    }
+
 }

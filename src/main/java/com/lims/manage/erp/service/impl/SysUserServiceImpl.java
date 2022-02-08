@@ -146,28 +146,30 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateUserInfo(UserInfoVo vo) {
         Boolean flag = false;
-        System.out.println("用户信息：" + vo.toString());
+        // 处理部门信息
+        if(vo.getDepartmentIdLong()!=null&&vo.getDepartmentIdLong().size()>0){
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("[");
+            for(Long deptId:vo.getDepartmentIdLong())
+            {
+                stringBuilder.append(""+deptId+",");
+            }
+            stringBuilder.append("]");
+            vo.setDepartmentId(stringBuilder.toString());
+        }
         //更新sys_user
         sysUserDao.updateUserInfo(vo);
 //        //更新sys_ding_user
 //        dingUsertDao.updateDingUserInfo(vo);
         //删除旧权限
         sysUserRoleDao.removeOldRole(vo.getUserId());
-        if (vo.getRoleIds() != null && !vo.getRoleIds().isEmpty()) {
-            //增加新权限
+        if (vo.getRoleIdsLong() != null && vo.getRoleIdsLong().size()>0) {
             List<SysUserRoleEntity> newRoles = Lists.newArrayList();
-            if (vo.getRoleIds().contains(",")) {
-                String[] split = vo.getRoleIds().split(",");
-                for (int i = 0; i < split.length; i++) {
-                    SysUserRoleEntity entity = new SysUserRoleEntity();
-                    entity.setUserId(Long.parseLong(vo.getUserId()));
-                    entity.setRoleId(Long.parseLong(split[i].trim()));
-                    newRoles.add(entity);
-                }
-            } else {
+            //增加新权限
+            for (Long roleId:vo.getRoleIdsLong()){
                 SysUserRoleEntity entity = new SysUserRoleEntity();
-                entity.setUserId(Long.parseLong(vo.getUserId()));
-                entity.setRoleId(Long.parseLong(vo.getRoleIds().trim()));
+                entity.setUserId(vo.getUserId());
+                entity.setRoleId(roleId);
                 newRoles.add(entity);
             }
             for (SysUserRoleEntity entity : newRoles) {
