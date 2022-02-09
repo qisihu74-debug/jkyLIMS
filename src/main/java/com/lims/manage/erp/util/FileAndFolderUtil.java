@@ -15,7 +15,11 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -243,5 +247,22 @@ public class FileAndFolderUtil {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * 流转化
+     * @param outputStream
+     * @return
+     */
+    public static InputStream convertIo(ServletOutputStream outputStream){
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        byte[] bytes = b.toByteArray();
+        try {
+            outputStream.write(bytes);
+        }catch (Exception e){
+            logger.error("流转换失败:{}",e);
+        }
+        InputStream inputStream = new ByteArrayInputStream(bytes);
+        return inputStream;
     }
 }
