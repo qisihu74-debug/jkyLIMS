@@ -60,7 +60,7 @@ public class DingUserJob {
         }
         //保存数据
         //根据userid去重
-        //userList = userList.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(DingUserEntity :: getUserid))), ArrayList::new));
+        userList = userList.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(DingUserEntity :: getUserid))), ArrayList::new));
         service.saveOrUpdateBatch(userList);
     }
 }

@@ -137,7 +137,7 @@ public class AccessTokenSingleton {
                         DingUserEntity taobaoUser = new DingUserEntity();
                         taobaoUser.setActive((rsp.getUserlist().get(j).getActive())?1:0);
                         taobaoUser.setAvatar(rsp.getUserlist().get(j).getAvatar());
-                        taobaoUser.setDepartment(rsp.getUserlist().get(j).getDepartment().toString());
+                        taobaoUser.setDepartment(rsp.getUserlist().get(j).getDepartment().toString().replace("[", "").replace("]", ""));
                         taobaoUser.setDingid(rsp.getUserlist().get(j).getDingId());
                         taobaoUser.setEmail(rsp.getUserlist().get(j).getEmail());
                         taobaoUser.setExtattr(rsp.getUserlist().get(j).getExtattr());
@@ -165,7 +165,7 @@ public class AccessTokenSingleton {
             logger.error("获取人员数据异常:{}",e);
         }
         //处理多个部门
-        List<DingUserEntity> newList = Lists.newArrayList();
+        /*List<DingUserEntity> newList = Lists.newArrayList();
         for (DingUserEntity entity:list) {
             String department = entity.getDepartment();
             if (department.contains(",")){
@@ -178,8 +178,8 @@ public class AccessTokenSingleton {
                 entity.setDepartment(department.replace("[","").replace("]",""));
                 newList.add(entity);
             }
-        }
-        return  newList;
+        }*/
+        return list;
     }
 
 }
