@@ -10,6 +10,7 @@ import com.dingtalk.api.request.OapiUserListbypageRequest;
 import com.dingtalk.api.response.OapiDepartmentListResponse;
 import com.dingtalk.api.response.OapiGettokenResponse;
 import com.dingtalk.api.response.OapiUserListbypageResponse;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.entity.DingUserEntity;
 import com.taobao.api.ApiException;
@@ -163,7 +164,22 @@ public class AccessTokenSingleton {
         } catch (ApiException e) {
             logger.error("获取人员数据异常:{}",e);
         }
-        return  list;
+        //处理多个部门
+        List<DingUserEntity> newList = Lists.newArrayList();
+        for (DingUserEntity entity:list) {
+            String department = entity.getDepartment();
+            if (department.contains(",")){
+                String[] split = department.replace("[", "").replace("]", "").split(",");
+                for (String deptId:split) {
+                    entity.setDepartment(deptId);
+                    newList.add(entity);
+                }
+            }else {
+                entity.setDepartment(department.replace("[","").replace("]",""));
+                newList.add(entity);
+            }
+        }
+        return  newList;
     }
 
 }
