@@ -64,4 +64,8 @@ public class Const {
      * 默认密码
      */
     public static final String DEFAULT_PASSWORD = "111111";
+    /**
+     * 人员管理日志
+     */
+    public static final String PERSON_LOG = "11";
 }

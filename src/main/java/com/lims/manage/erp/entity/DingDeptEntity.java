@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -26,4 +27,9 @@ public class DingDeptEntity {
      * 部门父级id
      */
     private Long parentId;
+    /**
+     * 父部门名称
+     */
+    @TableField(exist = false)
+    private String parentName;
 }

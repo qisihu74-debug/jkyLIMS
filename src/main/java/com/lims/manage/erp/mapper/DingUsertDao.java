@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.vo.UserInfoVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author gjl
@@ -23,4 +26,21 @@ public interface DingUsertDao extends BaseMapper<DingUserEntity> {
      * @return
      */
     Boolean updateDingUserInfo(UserInfoVo vo);
+
+    /**
+     * 获取人员信息
+     */
+    List<DingUserEntity> getAllUser();
+
+    /**
+     * 根据条件 获取人员信息
+     */
+    List<DingUserEntity> getAllUserTerm(@Param(value = "search") String search);
+
+    /**
+     * 修改人员信息
+     * @param personEntity
+     * @return
+     */
+    int updatePerson(DingUserEntity personEntity);
 }

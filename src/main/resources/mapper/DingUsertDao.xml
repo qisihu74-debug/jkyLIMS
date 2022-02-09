@@ -14,4 +14,55 @@
             userid = #{userId}
     </update>
 
+    <select id="getAllUser" resultType="com.lims.manage.erp.entity.DingUserEntity">
+        SELECT
+            userid,
+            NAME,
+            mobile,
+            position,
+            department,
+            orgemail,
+            jobnumber
+        FROM
+            sys_ding_user
+    </select>
+
+    <select id="getAllUserTerm" resultType="com.lims.manage.erp.entity.DingUserEntity">
+        SELECT
+            userid,
+            NAME,
+            mobile,
+            position,
+            department,
+            orgemail,
+            jobnumber
+        FROM
+            sys_ding_user
+        where 1=1
+        <if test="search!=null and search!=''">
+            and (
+            name LIKE CONCAT('%',#{search},'%') or
+            mobile LIKE CONCAT('%',#{search},'%') or
+            position LIKE CONCAT('%',#{search},'%') or
+            orgemail LIKE CONCAT('%',#{search},'%') or
+            jobnumber LIKE CONCAT('%',#{search},'%')
+            )
+        </if>
+
+    </select>
+
+    <!-- 更新人员信息 -->
+    <update id="updatePerson" parameterType="com.lims.manage.erp.entity.DingUserEntity">
+        update sys_ding_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name!=null and name!=''">name=#{name},</if>
+            <if test="position!=null and position!=''">position=#{position},</if>
+            <if test="mobile!=null and mobile!=''">mobile=#{mobile},</if>
+            <if test="jobnumber!=null and jobnumber!=''">jobnumber=#{jobnumber},</if>
+            <if test="orgemail!=null and orgemail!=''">jobnumber=#{orgemail},</if>
+            <if test="department!=null and department!=''">department=#{department},</if>
+        </trim>
+        where userid = #{userid}
+    </update>
+
 </mapper>
