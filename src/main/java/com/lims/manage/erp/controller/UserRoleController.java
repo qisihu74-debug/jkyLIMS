@@ -1,6 +1,9 @@
 package com.lims.manage.erp.controller;
 
 import com.lims.manage.erp.entity.SysRoleEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -89,13 +92,14 @@ public class UserRoleController {
      */
     @RequestMapping("/getLogout")
     @RequiresUser
-    public Map<String,Object> getLogout(){
+    public Result getLogout(){
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         //登出Shiro会帮我们清理掉Session和Cache
         ShiroUtils.logout();
-        Map<String,Object> map = new HashMap<>();
-        map.put("code",200);
-        map.put("msg","登出");
-        return map;
+        return ResultUtil.success("退出");
     }
 
     /**
@@ -105,18 +109,18 @@ public class UserRoleController {
      */
     @GetMapping("/list")
     //@RequiresPermissions("sys:role:list")
-    public Map<String,Object> mehtodStr(SysRoleEntity sysRoleEntity)
+    public Result mehtodStr(SysRoleEntity sysRoleEntity)
     {
-        Map<String,Object> map = new HashMap<>();
-        map.put("data",sysRoleService.selectSysRoleList(sysRoleEntity));
-        map.put("code",200);
-        map.put("msg","查看角色成功");
-        return map;
+        return ResultUtil.success(sysRoleService.selectSysRoleList(sysRoleEntity));
     }
     @PostMapping("/edit")
     //@RequiresPermissions("sys:role:edit")
-    public Map<String,Object> methodEditData(@RequestBody SysRoleEntity sysRoleEntity)
+    public Result methodEditData(@RequestBody SysRoleEntity sysRoleEntity)
     {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         int statusNumber=0;
         try {
             statusNumber = sysRoleService.updateSysRoleByUserId(sysRoleEntity);
@@ -126,20 +130,20 @@ public class UserRoleController {
         Map<String,Object> map = new HashMap<>();
         if(statusNumber>=1)
         {
-            map.put("code",200);
-            map.put("msg","修改角色成功");
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"成功！", Const.SYS_MANAGER_LOG,true);
-            return map;
+            return ResultUtil.success("修改角色成功");
         }
-        map.put("code",204);
-        map.put("msg","修改失败");
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"失败！", Const.SYS_MANAGER_LOG,false);
-        return map;
+        return ResultUtil.error("修改角色失败");
     }
     @PostMapping("/add")
     //@RequiresPermissions("sys:role:add")
-    public Map<String,Object> methodAddData(@RequestBody SysRoleEntity sysRoleEntity)
+    public Result methodAddData(@RequestBody SysRoleEntity sysRoleEntity)
     {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         Boolean judge =false;
         try {
             judge = sysRoleService.addSysRoleByUserId(sysRoleEntity);
@@ -149,21 +153,20 @@ public class UserRoleController {
         Map<String,Object> map = new HashMap<>();
         if(judge==false)
         {
-            map.put("code",204);
-            map.put("msg","新增失败");
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"失败！", Const.SYS_MANAGER_LOG,false);
-            return map;
+            return ResultUtil.error("新增失败");
         }
-        map.put("code",200);
-        map.put("msg","新增角色成功");
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"成功！", Const.SYS_MANAGER_LOG,true);
-        return map;
+        return ResultUtil.success("新增角色成功");
     }
     @PostMapping("/remove/{roleId}")
     //@RequiresPermissions("sys:role:remove")
-    public Map<String,Object> methodAddData(@PathVariable Long roleId)
+    public Result methodAddData(@PathVariable Long roleId)
     {
-        System.out.println("获取需要删除的id\t"+roleId);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         int statusNumber=0;
         try {
             statusNumber = sysRoleService.deleteSysRoleByUserId(roleId);
@@ -173,14 +176,10 @@ public class UserRoleController {
         Map<String,Object> map = new HashMap<>();
         if(statusNumber>=1)
         {
-            map.put("code",200);
-            map.put("msg","删除角色成功");
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除角色ID【"+roleId+"】", Const.SYS_MANAGER_LOG,true);
-            return map;
+            return ResultUtil.success("删除角色成功");
         }
-        map.put("code",204);
-        map.put("msg","删除角色失败");
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除角色ID【"+roleId+"】", Const.SYS_MANAGER_LOG,false);
-        return map;
+        return ResultUtil.error("删除角色失败");
     }
 }

@@ -3,6 +3,8 @@ package com.lims.manage.erp.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.lims.manage.erp.vo.RegisterUserInfoVo;
 import lombok.Data;
 
@@ -20,6 +22,7 @@ public class SysUserEntity implements Serializable {
 	/**
 	 * 用户ID
 	 */
+	@JsonSerialize(using = ToStringSerializer.class)
 	@TableId
 	private Long userId;
 	/**
@@ -87,5 +90,12 @@ public class SysUserEntity implements Serializable {
 		this.email = vo.getEmail();
 		this.department = vo.getDeptId();
 		this.name = vo.getName();
+	}
+
+	public SysUserEntity(Long userId, String username, String password, String salt) {
+		this.userId = userId;
+		this.username = username;
+		this.password = password;
+		this.salt = salt;
 	}
 }

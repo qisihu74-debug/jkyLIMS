@@ -52,4 +52,21 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
 
     List<SysUserTreeEntity> selectUserinfoList(SysUserTreeEntity sysUserTreeEntity);
 
+    /**
+     * 查询用户名称是否存在
+     * @param username
+     * @return
+     */
+    @Select("SELECT username FROM sys_user WHERE username = #{username} LIMIT 1")
+    SysUserEntity getOne(String username);
+
+    /**
+     * 判断 username 是否改变
+     * @param username
+     * @param userId
+     * @return
+     */
+    @Select("SELECT username FROM sys_user WHERE username = #{username} and user_id = #{userId} LIMIT 1")
+    SysUserEntity getOldData(String username,Long userId);
+
 }

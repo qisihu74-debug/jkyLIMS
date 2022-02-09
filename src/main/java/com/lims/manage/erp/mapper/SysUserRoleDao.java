@@ -20,7 +20,7 @@ public interface SysUserRoleDao extends BaseMapper<SysUserRoleEntity> {
      * @param userId
      * @return
      */
-    Boolean removeOldRole(String userId);
+    Boolean removeOldRole(Long userId);
 
     /**
      * 插入新角色

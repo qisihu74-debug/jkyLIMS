@@ -87,7 +87,8 @@
             mobile = #{mobile},
             email = #{email},
             department = #{departmentId},
-            note = #{note}
+            note = #{note},
+            username = #{username}
         WHERE
             user_id = #{userId}
     </update>
