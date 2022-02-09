@@ -97,6 +97,19 @@ FROM sys_menu
 			user_id = #{userId}
 	</select>
 
+	<select id="selectSetMenuPid" resultType="com.lims.manage.erp.entity.SysRoleFunctionParent" >
+		SELECT
+			DISTINCT t2.function_id functionId,
+			t2.role_id roleId,
+			t3.function_pid functionPid
+		FROM
+			sys_user_role AS t1
+			LEFT JOIN sys_role_function AS t2 ON t1.role_id = t2.role_id
+			LEFT JOIN sys_function AS t3 ON t3.function_id = t2.function_id
+		WHERE
+			user_id = #{userId}
+	</select>
+
 	<select id="getFunctionIdByRoleIdS" resultType="java.lang.Long" parameterType="java.lang.Long">
         SELECT DISTINCT function_id
         FROM sys_role_function

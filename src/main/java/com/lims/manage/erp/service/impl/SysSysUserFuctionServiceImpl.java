@@ -1,9 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
-import com.lims.manage.erp.entity.SysFunction;
-import com.lims.manage.erp.entity.SysRoleEntity;
-import com.lims.manage.erp.entity.SysRoleFunction;
-import com.lims.manage.erp.entity.TreeFunction;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.SysRoleDao;
 import com.lims.manage.erp.mapper.SysRoleFuncMenuDao;
 import com.lims.manage.erp.mapper.SysUserFuctionDao;
@@ -126,19 +123,28 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
      * @return
      */
     public  List<TreeFunction> returnListUpgrade(Long userid){
-        List<SysRoleFunction> menuIdList = sysRoleFuncMenuDao.selectSetMenu(userid);
+        List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userid);
         if(menuIdList.isEmpty()){
             System.out.println("此用户不包含菜单信息，请配置");
             return null;
         }
         // 得到用户id下 所属菜单。
         Map<Long, SysRoleFunction> map = new HashMap<>();
-        for(SysRoleFunction sysRoleFunction:menuIdList) {
+        for(SysRoleFunctionParent sysRoleFunction:menuIdList) {
             map.put(sysRoleFunction.getFunctionId(),sysRoleFunction);
         }
         // 菜单ID信息 展示所有 去除 functionIdSet
         List<TreeFunction> dataList = fuctionDao.getList();
         Iterator<TreeFunction> iterator = dataList.iterator();
+        // 保留父级id 存放到map中
+        for(TreeFunction treeFunction:dataList){
+            for(SysRoleFunctionParent sysRoleFunction:menuIdList){
+                if(treeFunction.getFunctionId().equals(sysRoleFunction.getFunctionPid())){
+                    // 主要取决于key 不要求vlue数值的准确性
+                    map.put(treeFunction.getFunctionId(),sysRoleFunction);
+                }
+            }
+        }
         while (iterator.hasNext()) {
             TreeFunction item = iterator.next();
             SysRoleFunction removeEntity =  map.get(item.getFunctionId());

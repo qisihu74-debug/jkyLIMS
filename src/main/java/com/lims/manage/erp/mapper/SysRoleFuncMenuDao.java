@@ -1,9 +1,6 @@
 package com.lims.manage.erp.mapper;
 
-import com.lims.manage.erp.entity.SysFunction;
-import com.lims.manage.erp.entity.SysMenuEntity;
-import com.lims.manage.erp.entity.SysRoleFunction;
-import com.lims.manage.erp.entity.SysRoleMenuEntity;
+import com.lims.manage.erp.entity.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -83,6 +80,13 @@ public interface SysRoleFuncMenuDao {
      * @return
      */
     List<SysRoleFunction> selectSetMenu(Long userId);
+
+    /**
+     * 通过用户id 得到 角色所属的 菜单项集合包括父级id。
+     * @param userId
+     * @return
+     */
+    List<SysRoleFunctionParent> selectSetMenuPid(Long userId);
 
     /**
      * 查询角色已有权限
