@@ -59,10 +59,15 @@
             <if test="position!=null and position!=''">position=#{position},</if>
             <if test="mobile!=null and mobile!=''">mobile=#{mobile},</if>
             <if test="jobnumber!=null and jobnumber!=''">jobnumber=#{jobnumber},</if>
-            <if test="orgemail!=null and orgemail!=''">jobnumber=#{orgemail},</if>
-            <if test="department!=null and department!=''">department=#{department},</if>
+            <if test="orgemail!=null and orgemail!=''">orgemail=#{orgemail},</if>
+            <if test="orgemail!=null and orgemail!=''">orgemail=#{orgemail},</if>
+            <if test="email!=null and email!=''">email=#{email},</if>
         </trim>
         where userid = #{userid}
     </update>
+
+    <delete id="deletePerson">
+        delete from sys_ding_user where userid = #{userid}
+    </delete>
 
 </mapper>

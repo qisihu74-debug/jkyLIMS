@@ -54,6 +54,14 @@ public interface DeptDao extends BaseMapper<DingDeptEntity> {
             "            ) SELECT * FROM td ORDER BY td.id")
     List<DingDeptEntity> sonList(Long id);
 
+
+    @Select("WITH RECURSIVE cte AS (\n" +
+            "            SELECT a.id, a.parent_id,a.name FROM sys_dept a WHERE a.id=#{id} \n" +
+            "            UNION ALL\n" +
+            "            SELECT k.id, k.parent_id,k.name FROM sys_dept k INNER JOIN cte c ON c.parent_id = k.id\n" +
+            "            )SELECT id,name,parent_id FROM cte")
+    List<DingDeptEntity> parentList(Long id);
+
     /**
      * 根据当前登陆管理员id获取管理员所属部门及子级别=部门idj集合
      * @param userId

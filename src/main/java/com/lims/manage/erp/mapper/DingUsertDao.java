@@ -43,4 +43,11 @@ public interface DingUsertDao extends BaseMapper<DingUserEntity> {
      * @return
      */
     int updatePerson(DingUserEntity personEntity);
+
+    /**
+     * 实现人员删除
+     * @param userid
+     * @return
+     */
+    int deletePerson(String userid);
 }

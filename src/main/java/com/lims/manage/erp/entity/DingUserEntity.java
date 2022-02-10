@@ -1,11 +1,13 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.lims.manage.erp.vo.RegisterUserInfoVo;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author gjl
@@ -41,6 +43,12 @@ public class DingUserEntity {
     @TableId(value = "userid")
     private String userid;
     private String workplace;
+
+    /**
+     * 用户id集合 供传递数值
+     */
+    @TableField(exist = false)
+    private List<String> ids;
 
     public DingUserEntity() {
     }

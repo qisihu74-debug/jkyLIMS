@@ -1,5 +1,9 @@
 package com.lims.manage.erp.util;
 
+import org.apache.commons.lang.RandomStringUtils;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,6 +37,20 @@ public class GenID {
 
         return s.substring(0, 8) + s.substring(9, 13) + s.substring(14, 18)
                 + s.substring(19, 23) + s.substring(24);
+    }
+
+    /**
+     * 设置String类型 依据时间生成的主键
+     * @return
+     */
+    public static String getOrderNum() {
+        //时间（精确到毫秒）
+        DateTimeFormatter ofPattern = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+        String localDate = LocalDateTime.now().format(ofPattern);
+        //3位随机数
+        String randomNumeric = RandomStringUtils.randomNumeric(3);
+        String orderNum = localDate + randomNumeric;
+        return orderNum;
     }
 
     public static void main(String[] args) {
