@@ -75,6 +75,10 @@ public class SysUserEntity implements Serializable {
 	 */
 	@TableField(exist = false)
 	private String position;
+	/**
+	 * 钉钉用户id
+	 */
+	private String dingUserId;
 
 	public SysUserEntity() {
 	}

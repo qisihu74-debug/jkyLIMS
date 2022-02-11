@@ -49,6 +49,8 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     public Boolean add(DingDeptEntity entity) {
         entity.setId(GenID.getID());
         try {
+            entity.setTime(new Date());
+            entity.setUpdateTime(new Date());
             this.baseMapper.insert(entity);
             return true;
         } catch (Exception e) {
@@ -65,6 +67,29 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     }
 
     @Override
+    public Boolean getDeptCode(String code) {
+        LambdaQueryWrapper<DingDeptEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.and(wrapper -> wrapper.eq(DingDeptEntity::getCode, code));
+        DingDeptEntity data = this.baseMapper.selectOne(queryWrapper);
+        if(data!=null){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean getDeptExists(String code, Long id) {
+        LambdaQueryWrapper<DingDeptEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.and(wrapper -> wrapper.eq(DingDeptEntity::getCode, code));
+        queryWrapper.and(wrapper -> wrapper.eq(DingDeptEntity::getId, id));
+        DingDeptEntity data = this.baseMapper.selectOne(queryWrapper);
+        if(data==null){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public DingDeptEntity selectByPid(long l) {
         LambdaQueryWrapper<DingDeptEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(DingDeptEntity::getParentId, 0L);
@@ -75,6 +100,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     @Override
     public Boolean edit(DingDeptEntity entity) {
         try {
+            entity.setUpdateTime(new Date());
             this.baseMapper.updateById(entity);
             return true;
         } catch (Exception e) {

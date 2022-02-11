@@ -2,7 +2,11 @@ package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.util.Date;
 
 /**
  * @author gjl
@@ -32,4 +36,28 @@ public class DingDeptEntity {
      */
     @TableField(exist = false)
     private String parentName;
+
+    /**
+     * 部门编号
+     */
+    private String code;
+
+    /**
+     * 部门职责
+     */
+    private String duty;
+
+    /**
+     * 创建时间
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd HH:mm:ss" , timezone ="GMT+8")
+    private Date time;
+
+    /**
+     * 修改时间
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd HH:mm:ss" , timezone ="GMT+8")
+    private Date updateTime;
 }

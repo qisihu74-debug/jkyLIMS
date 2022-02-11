@@ -10,7 +10,7 @@ public class DingDeptVo {
     /**
      * 部门id
      */
-    private Integer id;
+    private Long id;
     /**
      * 部门名称
      */
@@ -18,7 +18,7 @@ public class DingDeptVo {
     /**
      * 部门父级id
      */
-    private int parentId;
+    private Long parentId;
     /**
      * 子部门
      */

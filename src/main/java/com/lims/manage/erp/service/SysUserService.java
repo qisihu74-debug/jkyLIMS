@@ -72,5 +72,20 @@ public interface SysUserService extends IService<SysUserEntity> {
      * @return
      */
     Boolean updateUserInfo(UserInfoVo vo);
+
+    /**
+     * 验证 账号与使用人 是否变动
+     * @param userId
+     * @param dingUserId
+     * @return
+     */
+    Boolean getTheUser(Long userId,String dingUserId);
+
+    /**
+     * 验证账号 是否拥有使用人
+     * @param dingUserId
+     * @return
+     */
+    Boolean getTheUserList(String dingUserId);
 }
 

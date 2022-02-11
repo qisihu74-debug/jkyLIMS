@@ -51,14 +51,22 @@
         DISTINCT t1.id id,
         t1.parent_id parentId,
         t1.name name,
-        t2.name parentName
+        t2.name parentName,
+        t1.code code,
+        t1.duty duty,
+        t1.time time,
+        t1.update_time updateTime
         FROM
         sys_dept as t1 LEFT JOIN
         sys_dept as t2 ON t1.parent_id = t2.id
         WHERE 1=1
         <if test="search!=null and search!=''">
-            and t1.name LIKE CONCAT('%',#{search,jdbcType=VARCHAR},'%')
+            and ( t1.name LIKE CONCAT('%',#{search,jdbcType=VARCHAR},'%')
+            or t1.code LIKE CONCAT('%',#{search,jdbcType=VARCHAR},'%')
+            or t1.duty LIKE CONCAT('%',#{search,jdbcType=VARCHAR},'%')
+            )
         </if>
+        ORDER BY updateTime desc
     </select>
 
 </mapper>

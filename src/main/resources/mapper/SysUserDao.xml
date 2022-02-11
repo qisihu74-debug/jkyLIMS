@@ -51,21 +51,22 @@
 
     <select id="getUserInfos" resultMap="resultUserInfo" parameterType="com.lims.manage.erp.vo.UserInfoParamVo">
         SELECT
-        t1.user_id,
-        username,
-        state,
+        DISTINCT t1.user_id,
+        t1.username,
+        t1.state,
         t1.create_time,
-        note,
-        name,
-        mobile,
-        email,
-        department,
+        t1.note,
+        t1.mobile,
+        t1.email,
+        t1.department,
         t3.role_id,
-        role_name
+        t4.role_name,
+        t5.NAME
         FROM
         sys_user t1
         left join sys_user_role t3 on t1.user_id = t3.user_id
         left join sys_role t4 on t3.role_id = t4.role_id
+        LEFT JOIN sys_ding_user t5 ON t5.userid = t1.ding_user_id
         where 1=1
         <if test="username != null and username != ''">
             and t1.username like CONCAT('%',#{username},'%')
@@ -88,7 +89,8 @@
             email = #{email},
             department = #{departmentId},
             note = #{note},
-            username = #{username}
+            username = #{username},
+            ding_user_id = #{dingUserId}
         WHERE
             user_id = #{userId}
     </update>

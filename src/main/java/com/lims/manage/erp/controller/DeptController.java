@@ -49,17 +49,23 @@ public class DeptController {
         if (userInfo == null) {
             return ResultUtil.error("token已过期！");
         }
+        // 验证部门编号
+        if (entity.getCode() != null) {
+            if (deptService.getDeptCode(entity.getCode())) {
+                return ResultUtil.error("部门编号已存在，请重新输入！");
+            }
+        }
         DingDeptEntity deptEntity = deptService.getDeptByName(entity.getName());
         if (deptEntity != null) {
             return ResultUtil.error("部门已经存在！");
         }
-        Boolean flag = deptService.add(entity);
-        if (entity.getParentId() == 0L) {
-            DingDeptEntity byPid = deptService.selectByPid(0L);
-            if (byPid != null) {
-                return ResultUtil.error("顶级部门已存在！");
-            }
+        DingDeptEntity byPid = deptService.selectByPid(0L);
+        if (entity.getParentId() == null && byPid == null) {
+            entity.setParentId(0L);
+        } else if (entity.getParentId() == null && byPid != null) {
+            return ResultUtil.error("请选择上级部门！");
         }
+        Boolean flag = deptService.add(entity);
         if (flag) {
             logManagerService.addOpSysLog(userInfo, "管理员：" + userInfo.getUsername() + "添加部门：" + entity.getName() + "成功",
                     Const.DEPT_LOG, true);
@@ -88,9 +94,19 @@ public class DeptController {
         if (userInfo == null) {
             return ResultUtil.error("token已过期！");
         }
+
         DingDeptEntity bean = deptService.getById(entity.getId());
         if (bean == null) {
             return ResultUtil.error("所选中部门不存在！");
+        }
+        // 验证部门编号
+        if (entity.getCode() != null) {
+            // 验证是否变动
+            if (deptService.getDeptExists(entity.getCode(), entity.getId())) {
+                if (deptService.getDeptCode(entity.getCode())) {
+                    return ResultUtil.error("部门编号已存在，请重新输入！");
+                }
+            }
         }
         DingDeptEntity deptEntity = deptService.getDeptByName(entity.getName());
         if ((!bean.getName().equals(entity.getName())) && deptEntity != null) {

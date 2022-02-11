@@ -62,36 +62,38 @@ public class UserController {
     private SysUserDao sysUserDao;
 
     /**
-     *获取用户列表
+     * 获取用户列表
+     *
      * @return
      */
     @PostMapping("list")
 //    @RequiresPermissions("sys:user:list")
-    public Result getList(@RequestBody UserInfoParamVo vo){
+    public Result getList(@RequestBody UserInfoParamVo vo) {
         return ResultUtil.success(sysUserService.getUserInfos(vo));
     }
 
     /**
      * 用户新增
+     *
      * @param vo
      * @return
      */
     @RequestMapping("/addUser")
 //    @RequiresPermissions("sys:user:insert")
     @Transactional(rollbackFor = Exception.class)
-    public Result addUser(@RequestBody RegisterUserInfoVo vo){
-        if(vo.getUsername()==null){
+    public Result addUser(@RequestBody RegisterUserInfoVo vo) {
+        if (vo.getUsername() == null) {
             return ResultUtil.error("登陆账号不能为空");
         }
-        if(vo.getMobile()==null){
+        if (vo.getMobile() == null) {
             return ResultUtil.error("手机号不能为空");
         }
         // 用户新增，账号不能重复
-        if(sysUserDao.getOne(vo.getUsername())!=null){
+        if (sysUserDao.getOne(vo.getUsername()) != null) {
             return ResultUtil.error("当前账号已存在");
         }
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token已过期，请重新登录");
         }
         // 随机生成盐值
@@ -100,69 +102,71 @@ public class UserController {
         // 默认账号正常启动
         vo.setState("NORMAL");
         //存放sys_user数据
-        SysUserEntity entity = new SysUserEntity(vo,password,salt,new Timestamp(new Date(System.currentTimeMillis()).getTime()));
+        SysUserEntity entity = new SysUserEntity(vo, password, salt, new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         sysUserService.save(entity);
 //        //存放sys_ding_user数据
 //        DingUserEntity dingUserEntity = new DingUserEntity(entity.getUserId().toString(),vo);
 //        dingUserService.save(dingUserEntity);
         //存放sys_user_role数据
-        if(vo.getRoleIds()!=null&&!vo.getRoleIds().isEmpty()){
+        if (vo.getRoleIds() != null && !vo.getRoleIds().isEmpty()) {
             List<Long> roleIds = vo.getRoleIds();
-            for (Long id:roleIds) {
+            for (Long id : roleIds) {
                 SysUserRoleEntity roleEntity = new SysUserRoleEntity();
                 roleEntity.setUserId(entity.getUserId());
                 roleEntity.setRoleId(id);
                 sysUserRoleService.save(roleEntity);
             }
         }
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增用户【"+vo.getUsername()+"】成功！", Const.CREATE_USER,true);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "新增用户【" + vo.getUsername() + "】成功！", Const.CREATE_USER, true);
         return ResultUtil.success();
     }
 
     /**
      * 更改用户状态（启用/停用账号）
+     *
      * @param userEntity
      * @return
      */
     @RequestMapping("/changeState")
 //    @RequiresPermissions("sys:user:changestate")
-    public Result changeState(@RequestBody SysUserEntity userEntity){
-        if(userEntity == null){
-            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
+    public Result changeState(@RequestBody SysUserEntity userEntity) {
+        if (userEntity == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }
-        if(userEntity.getUserId()==null){
+        if (userEntity.getUserId() == null) {
             return ResultUtil.error("用户ID不能为空");
         }
-        if(userEntity.getState()==null){
+        if (userEntity.getState() == null) {
             return ResultUtil.error("状态不能为空");
         }
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token已过期，请重新登录");
         }
         Boolean isSuccess = sysUserService.updateUserState(userEntity);
-        if(isSuccess){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】状态为"+userEntity.getState()+"成功！", Const.CHANGE_STATE,true);
+        if (isSuccess) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改用户【" + userEntity.getUsername() + "】状态为" + userEntity.getState() + "成功！", Const.CHANGE_STATE, true);
             return ResultUtil.success();
-        }else{
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】状态为"+userEntity.getState()+"失败！", Const.CHANGE_STATE,false);
-            return ResultUtil.error(ResultEnum.CHANGE_USER_STATE.getCode(),ResultEnum.CHANGE_USER_STATE.getMsg());
+        } else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改用户【" + userEntity.getUsername() + "】状态为" + userEntity.getState() + "失败！", Const.CHANGE_STATE, false);
+            return ResultUtil.error(ResultEnum.CHANGE_USER_STATE.getCode(), ResultEnum.CHANGE_USER_STATE.getMsg());
         }
     }
 
     /**
      * 重置密码
+     *
      * @param userEntity
      * @return
      */
     @RequestMapping("/resetPassword")
 //    @RequiresPermissions("sys:user:resetpassword")
-    public Result resetPassword(@RequestBody SysUserEntity userEntity){
+    public Result resetPassword(@RequestBody SysUserEntity userEntity) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
             return ResultUtil.error("token 已失效");
         }
-        if(userEntity.getUserId()==null){
+        if (userEntity.getUserId() == null) {
             return ResultUtil.error("用户ID不能为空");
         }
         // 随机生成盐值
@@ -171,23 +175,24 @@ public class UserController {
         userEntity.setPassword(password);
         userEntity.setSalt(salt);
         Boolean isSuccess = sysUserService.resetPassword(userEntity);
-        if(isSuccess){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+userEntity.getUsername()+"】密码成功", Const.RESET_PASSWORD,true);
+        if (isSuccess) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改用户【" + userEntity.getUsername() + "】密码成功", Const.RESET_PASSWORD, true);
             return ResultUtil.success();
-        }else{
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"重置用户【"+userEntity.getUsername()+"】密码失败", Const.RESET_PASSWORD,false);
-            return ResultUtil.error(ResultEnum.RESET_PASSWORD.getCode(),ResultEnum.RESET_PASSWORD.getMsg());
+        } else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "重置用户【" + userEntity.getUsername() + "】密码失败", Const.RESET_PASSWORD, false);
+            return ResultUtil.error(ResultEnum.RESET_PASSWORD.getCode(), ResultEnum.RESET_PASSWORD.getMsg());
         }
     }
 
     /**
      * 修改密码
+     *
      * @param
      * @return
      */
     @RequestMapping("/updatePassword")
 //    @RequiresPermissions("sys:user:updatepassword")
-    public Result updatePassword(@RequestBody SysUserPasswordVo sysUserPasswordVo){
+    public Result updatePassword(@RequestBody SysUserPasswordVo sysUserPasswordVo) {
         //验证旧密码
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
@@ -217,58 +222,73 @@ public class UserController {
         String newpassword = SHA256Util.sha256(sysUserPasswordVo.getNewPassword(), salt);
         SysUserEntity userEntity = new SysUserEntity(userInfo.getUserId(), sysUserPasswordVo.getUsername(), newpassword, salt);
         Boolean isSuccess = sysUserService.resetPassword(userEntity);
-        if(isSuccess){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改密码成功", Const.UPDATE_PASSWORD,true);
+        if (isSuccess) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改密码成功", Const.UPDATE_PASSWORD, true);
             return ResultUtil.success();
-        }else{
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改密码失败", Const.UPDATE_PASSWORD,false);
-            return ResultUtil.error(ResultEnum.UPDATE_PASSWORD.getCode(),ResultEnum.UPDATE_PASSWORD.getMsg());
+        } else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改密码失败", Const.UPDATE_PASSWORD, false);
+            return ResultUtil.error(ResultEnum.UPDATE_PASSWORD.getCode(), ResultEnum.UPDATE_PASSWORD.getMsg());
         }
     }
 
     /**
-     *更新用户信息
+     * 更新用户信息
+     *
      * @return
      */
     @RequestMapping("/updateUserInfo")
 //    @RequiresPermissions("sys:user:updateuserinfo")
-    public Result updateUserInfo(@RequestBody UserInfoVo vo){
-        if(vo.getUsername()==null){
+    public Result updateUserInfo(@RequestBody UserInfoVo vo) {
+        if (vo.getUsername() == null) {
             return ResultUtil.error("登陆账号不能为空");
         }
-        if(vo.getMobile()==null){
+        if (vo.getMobile() == null) {
             return ResultUtil.error("手机号不能为空");
         }
-        if(vo.getUserId()==null){
+        if (vo.getUserId() == null) {
             return ResultUtil.error("缺少必填参数");
         }
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token已过期，请重新登录");
+        }
+        if (vo.getDingUserId() != null) {
+            // 查询此账号是否存在
+            if (dingUserService.getById(vo.getDingUserId()) == null) {
+                return ResultUtil.error("查无此人！");
+            }
+            // 钉钉用户id 是否被其他账号使用
+            Boolean flag = sysUserService.getTheUser(vo.getUserId(), vo.getDingUserId());
+            // =true 使用人变动
+            if (flag) {
+                // 钉钉用户id 存在其他使用人
+                if (!sysUserService.getTheUserList(vo.getDingUserId())) {
+                    return ResultUtil.error("使用人 已拥有账号");
+                }
+            }
         }
         // 用户修改时，当前账号不能与其他账号重复
         // 获取用户名 为空 发生改变
-        if(sysUserDao.getOldData(vo.getUsername(),vo.getUserId())==null){
-            if(sysUserDao.getOne(vo.getUsername())!=null){
+        if (sysUserDao.getOldData(vo.getUsername(), vo.getUserId()) == null) {
+            if (sysUserDao.getOne(vo.getUsername()) != null) {
                 return ResultUtil.error("当前账号已存在");
             }
             Boolean isSuccess = sysUserService.updateUserInfo(vo);
-            if(isSuccess){
-                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+vo.getUsername()+"】信息成功！", Const.UPDATE_USERINFO,true);
+            if (isSuccess) {
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改用户【" + vo.getUsername() + "】信息成功！", Const.UPDATE_USERINFO, true);
                 return ResultUtil.success();
-            }else{
-                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+vo.getUsername()+"】信息失败！", Const.UPDATE_USERINFO,false);
-                return ResultUtil.error(ResultEnum.UPDATE_USERINFO.getCode(),ResultEnum.UPDATE_USERINFO.getMsg());
+            } else {
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改用户【" + vo.getUsername() + "】信息失败！", Const.UPDATE_USERINFO, false);
+                return ResultUtil.error(ResultEnum.UPDATE_USERINFO.getCode(), ResultEnum.UPDATE_USERINFO.getMsg());
             }
-        }
-        else {
+        } else {
             Boolean isSuccess = sysUserService.updateUserInfo(vo);
-            if(isSuccess){
-                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+vo.getUsername()+"】信息成功！", Const.UPDATE_USERINFO,true);
+            if (isSuccess) {
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改用户【" + vo.getUsername() + "】信息成功！", Const.UPDATE_USERINFO, true);
                 return ResultUtil.success();
-            }else{
-                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改用户【"+vo.getUsername()+"】信息失败！", Const.UPDATE_USERINFO,false);
-                return ResultUtil.error(ResultEnum.UPDATE_USERINFO.getCode(),ResultEnum.UPDATE_USERINFO.getMsg());
+            } else {
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改用户【" + vo.getUsername() + "】信息失败！", Const.UPDATE_USERINFO, false);
+                return ResultUtil.error(ResultEnum.UPDATE_USERINFO.getCode(), ResultEnum.UPDATE_USERINFO.getMsg());
             }
         }
     }

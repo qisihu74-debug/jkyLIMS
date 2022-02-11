@@ -179,4 +179,26 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
         flag = true;
         return flag;
     }
+
+    @Override
+    public Boolean getTheUser(Long userId,String dingUserId) {
+        QueryWrapper<SysUserEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(SysUserEntity::getDingUserId, dingUserId).eq(SysUserEntity::getUserId, userId);
+        SysUserEntity data = this.baseMapper.selectOne(queryWrapper);
+        if(data==null){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean getTheUserList(String dingUserId) {
+        QueryWrapper<SysUserEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(SysUserEntity::getDingUserId, dingUserId);
+        List<SysUserEntity> data = this.baseMapper.selectList(queryWrapper);
+        if(data!=null&&data.size()>0){
+            return false;
+        }
+        return true;
+    }
 }

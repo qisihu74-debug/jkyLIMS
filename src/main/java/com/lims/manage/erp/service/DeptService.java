@@ -39,6 +39,21 @@ public interface DeptService extends IService<DingDeptEntity> {
     DingDeptEntity getDeptByName(String name);
 
     /**
+     * 验证部门编号
+     * @param code
+     * @return  存在=true 不存在= false
+     */
+    Boolean getDeptCode(String code);
+
+    /**
+     * 验证部门编号是否改变
+     * @param code
+     * @param id
+     * @return 改变=true 没改变=false
+     */
+    Boolean getDeptExists(String code,Long id);
+
+    /**
      * 获取顶级部门信息
      * @param l
      * @return

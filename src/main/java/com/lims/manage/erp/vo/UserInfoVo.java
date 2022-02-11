@@ -32,4 +32,8 @@ public class UserInfoVo {
      * 角色id集合
      */
     private List<Long> roleIdsLong;
+    /**
+     * 钉钉用户id
+     */
+    private String dingUserId;
 }
