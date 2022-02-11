@@ -97,11 +97,18 @@ public interface DeptService extends IService<DingDeptEntity> {
     Boolean updatePersonDetails(DingUserEntity personEntity);
 
     /**
-     * 查询 当前工号是否存在
+     * 用户新增时 查询 当前工号是否存在
      * @param personEntity
      * @return
      */
     Boolean getSelectOne(DingUserEntity personEntity);
+
+    /**
+     * 用户编辑时 查询 当前工号是否变动
+     * @param personEntity
+     * @return true变动 false没变
+     */
+    Boolean getSelectOneEdit(DingUserEntity personEntity);
 
     /**
      * 保存人员

@@ -51,8 +51,8 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
         try {
             this.baseMapper.insert(entity);
             return true;
-        }catch (Exception e){
-            logger.error("部门新增失败:{}",e);
+        } catch (Exception e) {
+            logger.error("部门新增失败:{}", e);
             return false;
         }
     }
@@ -60,14 +60,14 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     @Override
     public DingDeptEntity getDeptByName(String name) {
         LambdaQueryWrapper<DingDeptEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.and(wrapper ->wrapper.eq(DingDeptEntity::getName,name));
+        queryWrapper.and(wrapper -> wrapper.eq(DingDeptEntity::getName, name));
         return this.baseMapper.selectOne(queryWrapper);
     }
 
     @Override
     public DingDeptEntity selectByPid(long l) {
         LambdaQueryWrapper<DingDeptEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(DingDeptEntity::getParentId,0L);
+        queryWrapper.eq(DingDeptEntity::getParentId, 0L);
         DingDeptEntity deptEntity = deptDao.selectOne(queryWrapper);
         return deptEntity;
     }
@@ -77,7 +77,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
         try {
             this.baseMapper.updateById(entity);
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("更新部门失败:{}", e);
             return false;
         }
@@ -88,12 +88,12 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
         LambdaUpdateWrapper<DingDeptEntity> lambdaUpdate = Wrappers.lambdaUpdate();
 //        lambdaUpdate.d(DingDeptEntity::getIsDelete,"1")
 //                .eq(DingDeptEntity::getId,id);
-        lambdaUpdate.eq(DingDeptEntity::getId,id);
+        lambdaUpdate.eq(DingDeptEntity::getId, id);
         try {
             this.baseMapper.delete(lambdaUpdate);
             return true;
-        }catch (Exception e){
-            logger.error("删除部门失败:{}",e);
+        } catch (Exception e) {
+            logger.error("删除部门失败:{}", e);
             return false;
         }
     }
@@ -158,30 +158,32 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
             DingUserEntity dingUserEntity = it.next();
             int flagbit = 0;
             StringBuilder stringBuilder = new StringBuilder();
-            if (dingUserEntity.getDepartment() != null) {
+            if (dingUserEntity.getDepartment() != null&&!dingUserEntity.getDepartment().equals("")) {
                 String[] strings = dingUserEntity.getDepartment().split(",");
                 for (int i = 0; i < strings.length; i++) {
                     for (Long deptId : depts) {
                         if (deptId.equals((Long.parseLong(strings[i].trim())))) {
                             flagbit++;
-                            stringBuilder.append((Long.parseLong(strings[i].trim()))+",");
+                            stringBuilder.append((Long.parseLong(strings[i].trim())) + ",");
                         }
                     }
                 }
                 if (flagbit == 0) {
                     it.remove();
                 }
-                stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-                dingUserEntity.setDepartment(stringBuilder.toString());
-            } else {
-                it.remove();
+                if(stringBuilder.length()>0){
+                    dingUserEntity.setDepartment(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+                }
+                else {
+                    dingUserEntity.setDepartment(null);
+                }
             }
         }
         List<DingDeptEntity> deptAllList = deptDao.getAllList(null);
         // 2、并对人员所属部门 拼接部门信息。
         for (DingUserEntity dingUserEntity : personList) {
             StringBuilder stringBuilder = new StringBuilder();
-            if (dingUserEntity.getDepartment() != null) {
+            if (dingUserEntity.getDepartment() != null&&!dingUserEntity.getDepartment().equals("")) {
                 String[] strings = dingUserEntity.getDepartment().split(",");
                 for (int i = 0; i < strings.length; i++) {
                     for (DingDeptEntity deptEntity : deptAllList) {
@@ -190,8 +192,12 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
                         }
                     }
                 }
-                stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-                dingUserEntity.setWorkplace(stringBuilder.toString());
+                if(stringBuilder.length()>0){
+                    dingUserEntity.setWorkplace(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+                }
+                else {
+                    dingUserEntity.setWorkplace(null);
+                }
             }
         }
         PagingToolVo pagingVo = new PagingToolVo();
@@ -239,9 +245,21 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     @Override
     public Boolean getSelectOne(DingUserEntity personEntity) {
         LambdaQueryWrapper<DingUserEntity> lambdaWrapper = new LambdaQueryWrapper<>();
-        lambdaWrapper.eq(DingUserEntity::getJobnumber,personEntity.getJobnumber());
+        lambdaWrapper.eq(DingUserEntity::getJobnumber, personEntity.getJobnumber());
         DingUserEntity tableData = dingUsertDao.selectOne(lambdaWrapper);
-        if(tableData==null){
+        if (tableData == null) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean getSelectOneEdit(DingUserEntity personEntity) {
+        LambdaQueryWrapper<DingUserEntity> lambdaWrapper = new LambdaQueryWrapper<>();
+        lambdaWrapper.eq(DingUserEntity::getJobnumber, personEntity.getJobnumber())
+        .eq(DingUserEntity::getUserid, personEntity.getUserid());
+        DingUserEntity tableData = dingUsertDao.selectOne(lambdaWrapper);
+        if (tableData == null) {
             return true;
         }
         return false;

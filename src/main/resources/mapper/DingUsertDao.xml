@@ -60,7 +60,7 @@
             <if test="mobile!=null and mobile!=''">mobile=#{mobile},</if>
             <if test="jobnumber!=null and jobnumber!=''">jobnumber=#{jobnumber},</if>
             <if test="orgemail!=null and orgemail!=''">orgemail=#{orgemail},</if>
-            <if test="orgemail!=null and orgemail!=''">orgemail=#{orgemail},</if>
+            <if test="department!=null and department!=''">department=#{department},</if>
             <if test="email!=null and email!=''">email=#{email},</if>
         </trim>
         where userid = #{userid}

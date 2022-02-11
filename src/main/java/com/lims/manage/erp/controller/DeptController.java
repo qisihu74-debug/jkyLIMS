@@ -45,6 +45,10 @@ public class DeptController {
         if (StringUtils.isEmpty(entity.getName())) {
             return ResultUtil.error("部门名称为空");
         }
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token已过期！");
+        }
         DingDeptEntity deptEntity = deptService.getDeptByName(entity.getName());
         if (deptEntity != null) {
             return ResultUtil.error("部门已经存在！");
@@ -55,10 +59,6 @@ public class DeptController {
             if (byPid != null) {
                 return ResultUtil.error("顶级部门已存在！");
             }
-        }
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if (userInfo == null) {
-            return ResultUtil.error("token已过期！");
         }
         if (flag) {
             logManagerService.addOpSysLog(userInfo, "管理员：" + userInfo.getUsername() + "添加部门：" + entity.getName() + "成功",
@@ -84,6 +84,10 @@ public class DeptController {
         if (entity.getId() == null) {
             return ResultUtil.error("缺少必要参数");
         }
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token已过期！");
+        }
         DingDeptEntity bean = deptService.getById(entity.getId());
         if (bean == null) {
             return ResultUtil.error("所选中部门不存在！");
@@ -92,11 +96,6 @@ public class DeptController {
         if ((!bean.getName().equals(entity.getName())) && deptEntity != null) {
             return ResultUtil.error("部门已经存在！");
         }
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if (userInfo == null) {
-            return ResultUtil.error("token已过期！");
-        }
-
         Boolean flag = deptService.edit(entity);
         if (flag) {
             logManagerService.addOpSysLog(userInfo, "管理员：" + userInfo.getUsername() + "编辑部门:" + bean.getName() + "成功",
@@ -119,6 +118,10 @@ public class DeptController {
         if (id == null) {
             return ResultUtil.error("缺少必要的参数");
         }
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token已过期！");
+        }
         //判断部门是否有下级部门，或者部门下是否有人员信息，如果存在请先处理后进行删除
         PagingToolVo pageInfo = deptService.personList(id, Const.LOGIN_LOG_OUT, Const.PAGE_NUM, Const.PAGE_SIZE, null);
         if (!CollectionUtils.isEmpty(pageInfo.getList()) && pageInfo.getList().size() > 0) {
@@ -127,10 +130,6 @@ public class DeptController {
         List<DingDeptEntity> deptEntities = deptService.sonList(id);
         if (!CollectionUtils.isEmpty(deptEntities) && deptEntities.size() > 1) {
             return ResultUtil.error("部门下存在子集部门，请先处理后再进行删除操作！");
-        }
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if (userInfo == null) {
-            return ResultUtil.error("token已过期！");
         }
         Boolean flag = deptService.delete(id);
         if (flag) {
@@ -238,10 +237,19 @@ public class DeptController {
         if (personEntity.getMobile() == null) {
             return ResultUtil.error("手机号为空");
         }
-        if(personEntity.getJobnumber()!=null){
-            // 验证工号是否重复
-            if(!deptService.getSelectOne(personEntity)){
-                return ResultUtil.error("工号已存在");
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token已过期！");
+        }
+        Boolean flag = deptService.updatePersonDetails(personEntity);
+        if (personEntity.getJobnumber() != null) {
+            // 修改时 查询工号是否变动
+            if (deptService.getSelectOneEdit(personEntity)) {
+                // 变动时
+                // 验证工号是否重复
+                if (!deptService.getSelectOne(personEntity)) {
+                    return ResultUtil.error("工号已存在");
+                }
             }
         }
         // 获取用户信息
@@ -249,11 +257,6 @@ public class DeptController {
         if (tableEntity == null) {
             return ResultUtil.error("修改失败，此人员信息为空");
         }
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if (userInfo == null) {
-            return ResultUtil.error("token已过期！");
-        }
-        Boolean flag = deptService.updatePersonDetails(personEntity);
         if (flag) {
             logManagerService.addOpSysLog(userInfo, "管理员：" + userInfo.getUsername() + "修改用户：" + personEntity.getUserid() + "成功",
                     Const.PERSON_LOG, true);
@@ -275,15 +278,21 @@ public class DeptController {
         if (personEntity.getDepartment() == null) {
             return ResultUtil.error("所属组织不能为空");
         }
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token已经过期！");
+        }
+        if (personEntity.getJobnumber() != null) {
+            // 验证工号是否重复
+            if (!deptService.getSelectOne(personEntity)) {
+                return ResultUtil.error("工号已存在");
+            }
+        }
         // 新增时 判断 部门id 是否存在
 //        DeptEntity Department = deptService.getDeptById(personEntity.getDeptId());
 //        if (Department == null) {
 //            return ResultUtil.error("所属部门id不存在");
 //        }
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if (userInfo == null) {
-            return ResultUtil.error("token已经过期！");
-        }
         Boolean flag = deptService.addPersonDetails(personEntity);
         if (flag) {
             logManagerService.addOpSysLog(userInfo, "管理员：" + userInfo.getUsername() + "添加用户：" + personEntity.getName() + "成功",
