@@ -37,11 +37,12 @@ public class UserFuctionController {
 
     /**
      * 获取当前登录用户的菜单列表
+     *
      * @param request
      * @return
      */
     @GetMapping("getFunction")
-    public Result getFunction(ServletRequest request){
+    public Result getFunction(ServletRequest request) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         List<SysFunction> list = sysUserFuctionService.getFunctionByuserId(userInfo.getUserId());
         return ResultUtil.success(list);
@@ -49,26 +50,27 @@ public class UserFuctionController {
 
     /**
      * 查询所有权限
+     *
      * @return
      */
     @GetMapping("getAllMenu")
-    public List<TreeFunction> getMenuDisplay()
-    {
+    public List<TreeFunction> getMenuDisplay() {
         return sysUserFuctionService.GetList();
     }
 
     /**
      * 查询所有权限_同级展示信息
+     *
      * @return
      */
     @GetMapping("getAllMenu_peer")
-    public Result getMenuDisplayPeer()
-    {
+    public Result getMenuDisplayPeer() {
         return ResultUtil.success(sysUserFuctionService.GetListPeer());
     }
 
     /**
      * 查询角色已有权限
+     *
      * @param roleId
      * @return
      */
@@ -80,13 +82,17 @@ public class UserFuctionController {
 
     // 暂时未做限制 直接放行 优化。
     @GetMapping("getMenuDisplayNew")
-    public Result getMenuDisplayNew()
-    {
+    public Result getMenuDisplayNew() {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        return ResultUtil.success(sysUserFuctionService.GetListUpgrade(userInfo.getUserId()));
+        List<TreeFunction> dataList = sysUserFuctionService.GetListUpgrade(userInfo.getUserId());
+        if (dataList != null && dataList.size() > 0 && !dataList.isEmpty()) {
+            return ResultUtil.success(dataList);
+        }
+        return ResultUtil.error("使用人角色未配置菜单");
+
     }
 
     /**
@@ -106,7 +112,7 @@ public class UserFuctionController {
             return ResultUtil.error(-1, "请选择授权的菜单！");
         }
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
         Boolean flag = sysUserFuctionService.grant(entity);
@@ -122,8 +128,6 @@ public class UserFuctionController {
             return ResultUtil.error(-1, "授权失败");
         }
     }
-
-
 
 
 }
