@@ -26,7 +26,7 @@
         WHERE id = 1
     </select>
 
-    <select id="getNextDept" resultMap="NodeTreeResult" parameterType="java.lang.Integer">
+    <select id="getNextDept" resultMap="NodeTreeResult" parameterType="java.lang.Long">
         SELECT
             id,
             name,
