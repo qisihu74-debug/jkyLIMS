@@ -3,10 +3,12 @@ package com.lims.manage.erp.controller;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.segments.MergeSegments;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserRoleEntity;
 import com.lims.manage.erp.mapper.SysUserDao;
+import com.lims.manage.erp.mapper.SysUserRoleDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -15,6 +17,7 @@ import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.SysUserRoleService;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.SHA256Util;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.RegisterUserInfoVo;
@@ -22,16 +25,15 @@ import com.lims.manage.erp.vo.SysUserPasswordVo;
 import com.lims.manage.erp.vo.UserInfoParamVo;
 import com.lims.manage.erp.vo.UserInfoVo;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -60,6 +62,8 @@ public class UserController {
 
     @Autowired
     private SysUserDao sysUserDao;
+    @Autowired
+    private SysUserRoleDao sysUserRoleDao;
 
     /**
      * 获取用户列表
@@ -73,6 +77,17 @@ public class UserController {
     }
 
     /**
+     * 查询人员信息
+     *
+     * @param search
+     * @return
+     */
+    @GetMapping("getUserList")
+    public Result personList(String search) {
+        return ResultUtil.success(sysUserService.personList(search));
+    }
+
+    /**
      * 用户新增
      *
      * @param vo
@@ -81,7 +96,7 @@ public class UserController {
     @RequestMapping("/addUser")
 //    @RequiresPermissions("sys:user:insert")
     @Transactional(rollbackFor = Exception.class)
-    public Result addUser(@RequestBody RegisterUserInfoVo vo) {
+    public Result addUser(@RequestBody UserInfoVo vo) {
         if (vo.getUsername() == null) {
             return ResultUtil.error("登陆账号不能为空");
         }
@@ -96,30 +111,58 @@ public class UserController {
         if (userInfo == null) {
             return ResultUtil.error("token已过期，请重新登录");
         }
-        if(vo.getDeptId()!=null){
-            vo.setDeptId("["+vo.getDeptId()+"]");
+        // 查询使用人 是否已经被占用账号
+        if(vo.getDingUserId()!=null){
+            // 钉钉用户id 存在其他使用人
+            if (!sysUserService.getTheUserList(vo.getDingUserId())) {
+                return ResultUtil.error("使用人 已拥有账号");
+            }
         }
+        RegisterUserInfoVo userInfoVo = new RegisterUserInfoVo();
+        // 处理部门信息
+        if (vo.getDepartmentIdLong() != null && vo.getDepartmentIdLong().size() > 0) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("[");
+            for (Long deptId : vo.getDepartmentIdLong()) {
+                stringBuilder.append("" + deptId + ",");
+            }
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+            stringBuilder.append("]");
+            userInfoVo.setDeptId(stringBuilder.toString());
+        }
+
+        userInfoVo.setUsername(vo.getUsername());
+        userInfoVo.setMobile(vo.getMobile());
+        userInfoVo.setEmail(vo.getEmail());
         // 随机生成盐值
         String salt = RandomStringUtils.randomAlphanumeric(20);
         String password = SHA256Util.sha256(Const.DEFAULT_PASSWORD, salt);
         // 默认账号正常启动
         vo.setState("NORMAL");
         //存放sys_user数据
-        SysUserEntity entity = new SysUserEntity(vo, password, salt, new Timestamp(new Date(System.currentTimeMillis()).getTime()));
+        SysUserEntity entity = new SysUserEntity(userInfoVo, password, salt, new Timestamp(new Date(System.currentTimeMillis()).getTime()));
+        if (vo.getDingUserId() != null) {
+            entity.setDingUserId(vo.getDingUserId());
+        }
+        entity.setUserId(GenID.getID());
         sysUserService.save(entity);
+        // 角色信息
+        if (vo.getRoleIdsLong() != null && vo.getRoleIdsLong().size() > 0) {
+            List<SysUserRoleEntity> newRoles = Lists.newArrayList();
+            //增加新权限
+            for (Long roleId:vo.getRoleIdsLong()){
+                SysUserRoleEntity roleEntity = new SysUserRoleEntity();
+                roleEntity.setUserId(entity.getUserId());
+                roleEntity.setRoleId(roleId);
+                newRoles.add(roleEntity);
+            }
+            for (SysUserRoleEntity roleEntity : newRoles) {
+                sysUserRoleDao.insertNewRole(roleEntity);
+            }
+        }
 //        //存放sys_ding_user数据
 //        DingUserEntity dingUserEntity = new DingUserEntity(entity.getUserId().toString(),vo);
 //        dingUserService.save(dingUserEntity);
-        //存放sys_user_role数据
-        if (vo.getRoleIds() != null && !vo.getRoleIds().isEmpty()) {
-            List<Long> roleIds = vo.getRoleIds();
-            for (Long id : roleIds) {
-                SysUserRoleEntity roleEntity = new SysUserRoleEntity();
-                roleEntity.setUserId(entity.getUserId());
-                roleEntity.setRoleId(id);
-                sysUserRoleService.save(roleEntity);
-            }
-        }
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "新增用户【" + vo.getUsername() + "】成功！", Const.CREATE_USER, true);
         return ResultUtil.success();
     }
@@ -212,7 +255,7 @@ public class UserController {
         }
         // 旧密码
         SysUserEntity oldData = sysUserDao.getUserInformation(sysUserPasswordVo.getUsername());
-        if(oldData==null){
+        if (oldData == null) {
             return ResultUtil.error("此账号不存在");
         }
         if (!oldData.getUsername().equals(sysUserPasswordVo.getUsername())) {
@@ -300,27 +343,25 @@ public class UserController {
     }
 
     @PostMapping("delete")
-    public Result deleteUser(@RequestBody SysUserEntity sysUserEntity){
-        if(sysUserEntity.getUserId()==null){
+    public Result deleteUser(@RequestBody SysUserEntity sysUserEntity) {
+        if (sysUserEntity.getUserId() == null) {
             return ResultUtil.error("未选中需要删除的人员id");
         }
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
         boolean statusflag = false;
         try {
             statusflag = sysUserService.removeById(sysUserEntity.getUserId());
+        } catch (Exception e) {
+
         }
-        catch (Exception e){
-            
-        }
-        if(statusflag)
-        {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除系统用户ID【"+sysUserEntity.getUserId()+"】", Const.SYS_MANAGER_LOG,true);
+        if (statusflag) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "删除系统用户ID【" + sysUserEntity.getUserId() + "】", Const.SYS_MANAGER_LOG, true);
             return ResultUtil.success("删除角色成功");
         }
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除系统用户ID【"+sysUserEntity.getUserId()+"】", Const.SYS_MANAGER_LOG,false);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "删除系统用户ID【" + sysUserEntity.getUserId() + "】", Const.SYS_MANAGER_LOG, false);
         return ResultUtil.error("删除角色失败");
     }
 

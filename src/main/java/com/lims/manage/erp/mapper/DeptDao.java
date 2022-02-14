@@ -97,4 +97,10 @@ public interface DeptDao extends BaseMapper<DingDeptEntity> {
             "FROM\n" +
             "\ttd")
     List<Long> getChirdDeptsByUser(Long userId);
+
+    @Select("SELECT\n" +
+            "id\n" +
+            "FROM\n" +
+            "sys_dept")
+    List<Long> getDeptLong();
 }

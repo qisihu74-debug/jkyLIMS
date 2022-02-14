@@ -100,7 +100,7 @@ public class DeptController {
             return ResultUtil.error("所选中部门不存在！");
         }
         // 验证部门编号
-        if (entity.getCode() != null) {
+        if (entity.getCode() != null&&entity.getCode().length()>0) {
             // 验证是否变动
             if (deptService.getDeptExists(entity.getCode(), entity.getId())) {
                 if (deptService.getDeptCode(entity.getCode())) {
@@ -257,7 +257,6 @@ public class DeptController {
         if (userInfo == null) {
             return ResultUtil.error("token已过期！");
         }
-        Boolean flag = deptService.updatePersonDetails(personEntity);
         if (personEntity.getJobnumber() != null) {
             // 修改时 查询工号是否变动
             if (deptService.getSelectOneEdit(personEntity)) {
@@ -273,6 +272,7 @@ public class DeptController {
         if (tableEntity == null) {
             return ResultUtil.error("修改失败，此人员信息为空");
         }
+        Boolean flag = deptService.updatePersonDetails(personEntity);
         if (flag) {
             logManagerService.addOpSysLog(userInfo, "管理员：" + userInfo.getUsername() + "修改用户：" + personEntity.getUserid() + "成功",
                     Const.PERSON_LOG, true);

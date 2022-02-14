@@ -77,5 +77,8 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
     @Select("SELECT username FROM sys_user WHERE username = #{username} and user_id = #{userId} LIMIT 1")
     SysUserEntity getOldData(String username,Long userId);
 
+    @Select("")
+    List<SysUserEntity> getPersonList(String search);
+
 
 }

@@ -108,6 +108,7 @@ FROM sys_menu
 			LEFT JOIN sys_function AS t3 ON t3.function_id = t2.function_id
 		WHERE
 			user_id = #{userId}
+			order by t3.sort asc
 	</select>
 
 	<select id="getFunctionIdByRoleIdS" resultType="java.lang.Long" parameterType="java.lang.Long">

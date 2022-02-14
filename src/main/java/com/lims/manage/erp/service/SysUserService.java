@@ -2,6 +2,7 @@ package com.lims.manage.erp.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserTreeEntity;
 import com.lims.manage.erp.vo.RegisterUserInfoVo;
@@ -87,5 +88,12 @@ public interface SysUserService extends IService<SysUserEntity> {
      * @return
      */
     Boolean getTheUserList(String dingUserId);
+
+    /**
+     * 查询人员信息
+     * @param search
+     * @return
+     */
+    List<DingUserEntity> personList(String search);
 }
 

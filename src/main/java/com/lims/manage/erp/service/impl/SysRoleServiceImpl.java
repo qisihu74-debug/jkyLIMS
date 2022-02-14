@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.SysRoleEntity;
 import com.lims.manage.erp.mapper.SysRoleDao;
 import com.lims.manage.erp.service.SysRoleService;
+import com.lims.manage.erp.util.GenID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +44,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleDao, SysRoleEntity> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addSysRoleByUserId(SysRoleEntity sysRoleEntity) {
+        sysRoleEntity.setRoleId(GenID.getID());
        int statusNumber = baseMapper.insert(sysRoleEntity);
        if(statusNumber==1){
            return true;

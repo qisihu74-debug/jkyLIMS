@@ -30,4 +30,8 @@ public class RegisterUserInfoVo {
     private String email;
     private String state;
     private String note;
+    /**
+     * 钉钉用户id
+     */
+    private String dingUserId;
 }

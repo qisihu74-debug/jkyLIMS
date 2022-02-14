@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.api.client.util.Lists;
-import com.lims.manage.erp.entity.DingDeptEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.SysUserRoleEntity;
-import com.lims.manage.erp.entity.SysUserTreeEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.DeptDao;
 import com.lims.manage.erp.mapper.DingUsertDao;
 import com.lims.manage.erp.mapper.SysUserDao;
@@ -21,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -200,5 +198,61 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
             return false;
         }
         return true;
+    }
+
+    @Override
+    public  List<DingUserEntity> personList(String search) {
+        // 获取全部部门信息 主键
+        List<Long> depts = deptDao.getDeptLong();
+// 1、依据部门id 下 获取人员信息
+        List<DingUserEntity> personList = dingUsertDao.getAllUserTerm(search);
+        Iterator<DingUserEntity> it = personList.iterator();
+        while (it.hasNext()) {
+            DingUserEntity dingUserEntity = it.next();
+            int flagbit = 0;
+            StringBuilder stringBuilder = new StringBuilder();
+            if (dingUserEntity.getDepartment() != null&&!dingUserEntity.getDepartment().equals("")) {
+                String[] strings = dingUserEntity.getDepartment().split(",");
+                for (int i = 0; i < strings.length; i++) {
+                    for (Long deptId : depts) {
+                        if (deptId.equals((Long.parseLong(strings[i].trim())))) {
+                            flagbit++;
+                            stringBuilder.append((Long.parseLong(strings[i].trim())) + ",");
+                        }
+                    }
+                }
+                if (flagbit == 0) {
+                    it.remove();
+                }
+                if(stringBuilder.length()>0){
+                    dingUserEntity.setDepartment(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+                }
+                else {
+                    dingUserEntity.setDepartment(null);
+                }
+            }
+        }
+        List<DingDeptEntity> deptAllList = deptDao.getAllList(null);
+        // 2、并对人员所属部门 拼接部门信息。
+        for (DingUserEntity dingUserEntity : personList) {
+            StringBuilder stringBuilder = new StringBuilder();
+            if (dingUserEntity.getDepartment() != null&&!dingUserEntity.getDepartment().equals("")) {
+                String[] strings = dingUserEntity.getDepartment().split(",");
+                for (int i = 0; i < strings.length; i++) {
+                    for (DingDeptEntity deptEntity : deptAllList) {
+                        if (deptEntity.getId().equals((Long.parseLong(strings[i].trim())))) {
+                            stringBuilder.append(deptEntity.getName() + "、");
+                        }
+                    }
+                }
+                if(stringBuilder.length()>0){
+                    dingUserEntity.setWorkplace(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+                }
+                else {
+                    dingUserEntity.setWorkplace(null);
+                }
+            }
+        }
+        return personList;
     }
 }
