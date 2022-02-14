@@ -400,6 +400,12 @@
             <artifactId>jodconverter-local</artifactId>
             <version>4.2.2</version>
         </dependency>
+
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.11.0</version>
+        </dependency>
     </dependencies>
     <build>
         <!-- 钉钉依赖资源lib包-->
@@ -452,9 +458,22 @@
                 </configuration>
             </plugin>
 
-            <plugin>
+            <!--<plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>UTF-8</encoding>
+                    <compilerArguments>
+                        <extdirs>${project.basedir}/src/lib</extdirs>
+                    </compilerArguments>
+                </configuration>
             </plugin>
         </plugins>
         <finalName>jkyErp</finalName>

@@ -1,8 +1,6 @@
 package com.lims.manage.erp.util;
 
 
-import com.aspose.words.License;
-import com.aspose.words.SaveFormat;
 import com.lowagie.text.pdf.BaseFont;
 import fr.opensagres.xdocreport.itext.extension.font.IFontProvider;
 import org.apache.poi.xwpf.converter.pdf.PdfConverter;
@@ -16,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
