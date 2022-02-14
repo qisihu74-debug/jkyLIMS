@@ -2,6 +2,8 @@ package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -20,6 +22,7 @@ public class SysRoleEntity implements Serializable {
 	/**
 	 * 角色ID
 	 */
+	@JsonSerialize(using = ToStringSerializer.class)
 	@TableId
 	private Long roleId;
 	/**
