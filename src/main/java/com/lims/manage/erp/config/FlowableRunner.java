@@ -52,6 +52,7 @@ public class FlowableRunner implements ApplicationRunner {
             if (Strings!=null && Strings.length>1){
                 for (String s:Strings) {
                     String path = "processes\\"+s;
+                    log.info("部署xml路径为:{}",path);
                     if (list.contains(path)){
                         continue;
                     }else {
