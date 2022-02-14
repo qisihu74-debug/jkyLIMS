@@ -96,6 +96,9 @@ public class UserController {
         if (userInfo == null) {
             return ResultUtil.error("token已过期，请重新登录");
         }
+        if(vo.getDeptId()!=null){
+            vo.setDeptId("["+vo.getDeptId()+"]");
+        }
         // 随机生成盐值
         String salt = RandomStringUtils.randomAlphanumeric(20);
         String password = SHA256Util.sha256(Const.DEFAULT_PASSWORD, salt);
@@ -208,7 +211,10 @@ public class UserController {
             return ResultUtil.error("新密码为空");
         }
         // 旧密码
-        SysUserEntity oldData = sysUserDao.selectById(userInfo.getUserId());
+        SysUserEntity oldData = sysUserDao.getUserInformation(sysUserPasswordVo.getUsername());
+        if(oldData==null){
+            return ResultUtil.error("此账号不存在");
+        }
         if (!oldData.getUsername().equals(sysUserPasswordVo.getUsername())) {
             return ResultUtil.error("用户名不匹配");
         }
@@ -220,7 +226,7 @@ public class UserController {
         // 随机生成盐值
         String salt = RandomStringUtils.randomAlphanumeric(20);
         String newpassword = SHA256Util.sha256(sysUserPasswordVo.getNewPassword(), salt);
-        SysUserEntity userEntity = new SysUserEntity(userInfo.getUserId(), sysUserPasswordVo.getUsername(), newpassword, salt);
+        SysUserEntity userEntity = new SysUserEntity(oldData.getUserId(), sysUserPasswordVo.getUsername(), newpassword, salt);
         Boolean isSuccess = sysUserService.resetPassword(userEntity);
         if (isSuccess) {
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改密码成功", Const.UPDATE_PASSWORD, true);
@@ -291,6 +297,31 @@ public class UserController {
                 return ResultUtil.error(ResultEnum.UPDATE_USERINFO.getCode(), ResultEnum.UPDATE_USERINFO.getMsg());
             }
         }
+    }
+
+    @PostMapping("delete")
+    public Result deleteUser(@RequestBody SysUserEntity sysUserEntity){
+        if(sysUserEntity.getUserId()==null){
+            return ResultUtil.error("未选中需要删除的人员id");
+        }
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
+        boolean statusflag = false;
+        try {
+            statusflag = sysUserService.removeById(sysUserEntity.getUserId());
+        }
+        catch (Exception e){
+            
+        }
+        if(statusflag)
+        {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除系统用户ID【"+sysUserEntity.getUserId()+"】", Const.SYS_MANAGER_LOG,true);
+            return ResultUtil.success("删除角色成功");
+        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除系统用户ID【"+sysUserEntity.getUserId()+"】", Const.SYS_MANAGER_LOG,false);
+        return ResultUtil.error("删除角色失败");
     }
 
 }

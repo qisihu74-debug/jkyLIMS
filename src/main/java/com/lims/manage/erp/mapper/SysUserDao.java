@@ -61,6 +61,14 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
     SysUserEntity getOne(String username);
 
     /**
+     * 根据用户名 获取密码 秘钥 和用户名
+     * @param username
+     * @return
+     */
+    @Select("SELECT user_id,username,salt,password FROM sys_user WHERE username = #{username} LIMIT 1")
+    SysUserEntity getUserInformation(String username);
+
+    /**
      * 判断 username 是否改变
      * @param username
      * @param userId
