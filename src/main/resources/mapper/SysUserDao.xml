@@ -72,13 +72,13 @@
             and t1.username like CONCAT('%',#{username},'%')
         </if>
         <if test="mobile != null and mobile != ''">
-            and mobile like CONCAT('%',#{mobile},'%')
+            and t1.mobile like CONCAT('%',#{mobile},'%')
         </if>
         <if test="deptId != null and deptId != ''">
-            and department like CONCAT('%',#{deptId},'%')
+            and t1.department like CONCAT('%',#{deptId},'%')
         </if>
         <if test="state != null and state != ''">
-            and state = #{state}
+            and t1.state = #{state}
         </if>
     </select>
 
