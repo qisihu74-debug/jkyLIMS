@@ -240,4 +240,28 @@ public class TaskController {
         }
     }
 
+    @GetMapping("/getPersonInfo")
+    public Result getPersonInfo(Long taskId) {
+        PersonInfoVo personInfo = null;
+        if (taskId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            personInfo = taskService.getPersonInfo(taskId);
+            return ResultUtil.success(personInfo);
+        }
+    }
+
+    @RequestMapping("/updatePersonInfo")
+    public Result updatePersonInfo(@RequestBody PersonInfoVo vo) {
+        if (vo == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            int i = taskService.updatePersonInfo(vo);
+            if(i>0){
+                return ResultUtil.success("修改人员信息成功！",i);
+            }
+            return ResultUtil.error("修改人员信息失败！");
+        }
+    }
+
 }
