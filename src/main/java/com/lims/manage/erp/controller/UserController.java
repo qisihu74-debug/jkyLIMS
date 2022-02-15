@@ -112,7 +112,7 @@ public class UserController {
             return ResultUtil.error("token已过期，请重新登录");
         }
         // 查询使用人 是否已经被占用账号
-        if(vo.getDingUserId()!=null){
+        if(vo.getDingUserId()!=null&&vo.getDingUserId().length()!=0){
             // 钉钉用户id 存在其他使用人
             if (!sysUserService.getTheUserList(vo.getDingUserId())) {
                 return ResultUtil.error("使用人 已拥有账号");
@@ -138,12 +138,13 @@ public class UserController {
         String salt = RandomStringUtils.randomAlphanumeric(20);
         String password = SHA256Util.sha256(Const.DEFAULT_PASSWORD, salt);
         // 默认账号正常启动
-        vo.setState("NORMAL");
+        userInfoVo.setState("NORMAL");
         //存放sys_user数据
         SysUserEntity entity = new SysUserEntity(userInfoVo, password, salt, new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         if (vo.getDingUserId() != null) {
             entity.setDingUserId(vo.getDingUserId());
         }
+        entity.setTime(new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         entity.setUserId(GenID.getID());
         sysUserService.save(entity);
         // 角色信息
@@ -189,6 +190,7 @@ public class UserController {
         if (userInfo == null) {
             return ResultUtil.error("token已过期，请重新登录");
         }
+        userEntity.setTime(new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         Boolean isSuccess = sysUserService.updateUserState(userEntity);
         if (isSuccess) {
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改用户【" + userEntity.getUsername() + "】状态为" + userEntity.getState() + "成功！", Const.CHANGE_STATE, true);
@@ -220,6 +222,7 @@ public class UserController {
         String password = SHA256Util.sha256(Const.DEFAULT_PASSWORD, salt);
         userEntity.setPassword(password);
         userEntity.setSalt(salt);
+        userEntity.setTime(new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         Boolean isSuccess = sysUserService.resetPassword(userEntity);
         if (isSuccess) {
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改用户【" + userEntity.getUsername() + "】密码成功", Const.RESET_PASSWORD, true);
@@ -270,6 +273,7 @@ public class UserController {
         String salt = RandomStringUtils.randomAlphanumeric(20);
         String newpassword = SHA256Util.sha256(sysUserPasswordVo.getNewPassword(), salt);
         SysUserEntity userEntity = new SysUserEntity(oldData.getUserId(), sysUserPasswordVo.getUsername(), newpassword, salt);
+        userEntity.setTime(new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         Boolean isSuccess = sysUserService.resetPassword(userEntity);
         if (isSuccess) {
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改密码成功", Const.UPDATE_PASSWORD, true);
@@ -301,10 +305,10 @@ public class UserController {
         if (userInfo == null) {
             return ResultUtil.error("token已过期，请重新登录");
         }
-        if (vo.getDingUserId() != null) {
+        if (vo.getDingUserId() != null&&vo.getDingUserId().length()>0) {
             // 查询此账号是否存在
             if (dingUserService.getById(vo.getDingUserId()) == null) {
-                return ResultUtil.error("查无此人！");
+                return ResultUtil.error("使用人不存在！，请重新选择使用人");
             }
             // 钉钉用户id 是否被其他账号使用
             Boolean flag = sysUserService.getTheUser(vo.getUserId(), vo.getDingUserId());
@@ -316,6 +320,8 @@ public class UserController {
                 }
             }
         }
+        // 修改时间
+        vo.setTime(new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         // 用户修改时，当前账号不能与其他账号重复
         // 获取用户名 为空 发生改变
         if (sysUserDao.getOldData(vo.getUsername(), vo.getUserId()) == null) {
@@ -346,6 +352,10 @@ public class UserController {
     public Result deleteUser(@RequestBody SysUserEntity sysUserEntity) {
         if (sysUserEntity.getUserId() == null) {
             return ResultUtil.error("未选中需要删除的人员id");
+        }
+        // 查询此账号是否存在
+        if (sysUserService.getById(sysUserEntity.getUserId()) == null) {
+            return ResultUtil.error("账号为空");
         }
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {

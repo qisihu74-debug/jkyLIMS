@@ -128,11 +128,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
                     for (int i = 0; i < split.length; i++) {
                         String deptId = split[i].trim();
                         LabelValueVo departmentInfo = deptDao.getRoleInfoById(Long.parseLong(deptId));
-                        department.add(departmentInfo);
+                        if(departmentInfo!=null){
+                            department.add(departmentInfo);
+                        }
                     }
                 } else if (replace != null && !replace.contains(",")) {
                     LabelValueVo departmentInfo = deptDao.getRoleInfoById(Long.parseLong(replace));
-                    department.add(departmentInfo);
+                    if(departmentInfo!=null){
+                        department.add(departmentInfo);
+                    }
                 }
                 userInfoVo.setDepartment(department);
             }
