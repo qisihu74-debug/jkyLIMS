@@ -93,22 +93,22 @@ public class ReportController {
 
     /**
      * 提交审批
+     *
      * @param id
      * @return
      */
     @GetMapping("/report_submit")
-    public Result getReportSubmit(Long id)
-    {
-        if(id==null){
-            return ResultUtil.error(678,"缺少必要参数！");
+    public Result getReportSubmit(Long id) {
+        if (id == null) {
+            return ResultUtil.error(678, "缺少必要参数！");
         }
         // 查询是否提交审批
         ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
-        if(reportData==null){
-            return ResultUtil.error(678,"参数错误！");
+        if (reportData == null) {
+            return ResultUtil.error(678, "参数错误！");
         }
-        if(reportData.getReportCompleteTime()!=null){
-            return ResultUtil.error(678,"报告已提交审批！");
+        if (reportData.getReportCompleteTime() != null) {
+            return ResultUtil.error(678, "报告已提交审批！");
         }
         //1、 获取提交报告人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -119,8 +119,8 @@ public class ReportController {
         if (name == null) {
             return ResultUtil.error(678, "账号未配置使用人");
         }
-       Boolean flag = reportService.getReportSubmit(id,name);
-        if(flag){
+        Boolean flag = reportService.getReportSubmit(id, name);
+        if (flag) {
             return ResultUtil.success("提交审批成功");
         }
         return ResultUtil.error("提交审批失败");
@@ -184,11 +184,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("sealList")
-    public Result sealList(String type, String search, Integer pageNum, Integer pageSize,String reportType) {
+    public Result sealList(String type, String search, Integer pageNum, Integer pageSize, String reportType) {
         if (StringUtils.isEmpty(type) || pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少必要的参数！");
         }
-        PageInfo pageInfo = reportService.sealList(type, search, pageNum, pageSize,reportType);
+        PageInfo pageInfo = reportService.sealList(type, search, pageNum, pageSize, reportType);
         return ResultUtil.success(pageInfo);
     }
 
@@ -239,6 +239,7 @@ public class ReportController {
 
     /**
      * 盖章
+     *
      * @param entity
      * @return
      */
@@ -419,11 +420,11 @@ public class ReportController {
                         //检测依据
                         String checkBasis = reportService.getCheckBasis(id);
                         rows.get(7).getCell(1).removeParagraph(0);
-                        rows.get(7).getCell(1).setText(checkBasis.equals("")?"——":checkBasis);
+                        rows.get(7).getCell(1).setText(checkBasis.equals("") ? "——" : checkBasis);
                         //判定依据
                         String judgeBasis = reportService.getJudgeBasis(id);
                         rows.get(7).getCell(3).removeParagraph(0);
-                        rows.get(7).getCell(3).setText(judgeBasis.equals("")?"——":judgeBasis);
+                        rows.get(7).getCell(3).setText(judgeBasis.equals("") ? "——" : judgeBasis);
                         //检测日期
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
                         rows.get(8).getCell(1).removeParagraph(0);
@@ -433,10 +434,10 @@ public class ReportController {
                         //主要仪器
                         String equipment = reportService.getEquipment(id);
                         rows.get(9).getCell(1).removeParagraph(0);
-                        rows.get(9).getCell(1).setText(equipment.equals("")?"——":equipment);
+                        rows.get(9).getCell(1).setText(equipment.equals("") ? "——" : equipment);
                         //委托编号
                         rows.get(10).getCell(1).removeParagraph(0);
-                        rows.get(10).getCell(1).setText(entrustHistoryDetail.getEntrustmentNo()+"");
+                        rows.get(10).getCell(1).setText(entrustHistoryDetail.getEntrustmentNo() + "");
                         //检测类别
                         rows.get(10).getCell(3).removeParagraph(0);
                         rows.get(10).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
@@ -501,7 +502,7 @@ public class ReportController {
         //盖章
         String sealUrl = reportRecordEntity.getSealUrl();
         List<ImagePro> imagePros = Lists.newArrayList();
-        if(!StringUtils.isEmpty(sealUrl) || sealUrl != null){
+        if (!StringUtils.isEmpty(sealUrl) || sealUrl != null) {
             String[] split = sealUrl.split(",");
             for (int i = 0; i < split.length; i++) {
                 String imgFilePath = location + split[i];
@@ -516,7 +517,7 @@ public class ReportController {
                     }
                     input.close();
                     downloadFile.close();
-                    ImagePro pro = new ImagePro(100*(i+1),100,15F,imgFilePath);
+                    ImagePro pro = new ImagePro(100 * (i + 1), 100, 15F, imgFilePath);
                     imagePros.add(pro);
                 } catch (InvalidBucketNameException e) {
                     e.printStackTrace();
@@ -550,10 +551,10 @@ public class ReportController {
 //        }
         //将PDF文件上传至文件服务器
         try {
-            if(CollectionUtils.isEmpty(imagePros)){
+            if (CollectionUtils.isEmpty(imagePros)) {
                 client.putObject("report-download", reportRecordEntity.getReportCode() + fileType, pdfTemp);
-            }else{
-                ImageToPdfUtils.writeToPdf(pdfTemp,pdfTemp2,imagePros);
+            } else {
+                ImageToPdfUtils.writeToPdf(pdfTemp, pdfTemp2, imagePros);
                 client.putObject("report-download", reportRecordEntity.getReportCode() + fileType, pdfTemp2);
             }
         } catch (MinioException e) {
@@ -594,6 +595,112 @@ public class ReportController {
         return url;
     }
 
+    @GetMapping("download2")
+    public void downReport2(Long id, String code,HttpServletResponse response) {
+        ReportRecordEntity reportRecordEntity = reportService.selectByEntrustId(id);
+        //从文件服务器拉取文件
+        MinioClient client = MinIoUtil.minioClient;
+        XWPFDocument doc = null;
+        try {
+            client.statObject("report-word", code + ".docx");
+            InputStream object = client.getObject("report-word", code + ".docx");
+            doc = new XWPFDocument(object);
+            //写入数据
+            List<ReportRecordDetailEntity> checkItemList = reportService.getCheckInfoByRecordId(reportRecordEntity.getId());
+            if (CollectionUtil.isNotEmpty(checkItemList)) {
+                //处理表格
+                Iterator<XWPFTable> it = doc.getTablesIterator();
+                //表格索引
+                int i = 1;
+                //获取表格信息
+                while (it.hasNext()) {
+                    XWPFTable table = it.next();
+                    List<XWPFTableRow> rows = table.getRows();
+                    //存放表头信息
+                    EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
+                    if (i == 1) {
+                        rows.get(4).getCell(1).removeParagraph(0);
+                        rows.get(4).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
+                        rows.get(4).getCell(3).removeParagraph(0);
+                        rows.get(4).getCell(3).setText(entrustHistoryDetail.getProjectName());
+                        rows.get(5).getCell(1).removeParagraph(0);
+                        rows.get(5).getCell(1).setText(entrustHistoryDetail.getProjectPart());
+                        //样品信息
+                        SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
+                        rows.get(6).getCell(1).removeParagraph(0);
+                        rows.get(6).getCell(1).setText("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
+                                + "样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
+                                + "样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
+                                + "样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
+                                + "收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                        //检测依据
+                        String checkBasis = reportService.getCheckBasis(id);
+                        rows.get(7).getCell(1).removeParagraph(0);
+                        rows.get(7).getCell(1).setText(checkBasis.equals("") ? "——" : checkBasis);
+                        //判定依据
+                        String judgeBasis = reportService.getJudgeBasis(id);
+                        rows.get(7).getCell(3).removeParagraph(0);
+                        rows.get(7).getCell(3).setText(judgeBasis.equals("") ? "——" : judgeBasis);
+                        //检测日期
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
+                        rows.get(8).getCell(1).removeParagraph(0);
+                        rows.get(8).getCell(1).setText(sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
+                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime())
+                        );
+                        //主要仪器
+                        String equipment = reportService.getEquipment(id);
+                        rows.get(9).getCell(1).removeParagraph(0);
+                        rows.get(9).getCell(1).setText(equipment.equals("") ? "——" : equipment);
+                        //委托编号
+                        rows.get(10).getCell(1).removeParagraph(0);
+                        rows.get(10).getCell(1).setText(entrustHistoryDetail.getEntrustmentNo() + "");
+                        //检测类别
+                        rows.get(10).getCell(3).removeParagraph(0);
+                        rows.get(10).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
+                        //批号
+                        rows.get(11).getCell(1).removeParagraph(0);
+                        rows.get(11).getCell(1).setText(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
+                        //生产厂家
+                        rows.get(11).getCell(3).removeParagraph(0);
+                        rows.get(11).getCell(3).setText(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+                        //规格等级
+                        rows.get(12).getCell(1).removeParagraph(0);
+                        rows.get(12).getCell(1).setText(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
+                        //代表数量
+                        rows.get(12).getCell(3).removeParagraph(0);
+                        rows.get(12).getCell(3).setText(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
+                    }
+                    //存放检测数据
+                    for (ReportRecordDetailEntity item : checkItemList) {
+                        int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
+                        int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
+                        int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
+                        if (i == page) {
+                            rows.get(row).getCell(column + 1).removeParagraph(0);
+                            rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
+                            rows.get(row).getCell(column + 2).removeParagraph(0);
+                            rows.get(row).getCell(column + 2).setText(item.getCheckResult());
+                            rows.get(row).getCell(column + 3).removeParagraph(0);
+                            rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
+                        }
+                    }
+                    i++;
+                }
+            }
+            AsposeUtil.word2pdf2(doc,response,reportRecordEntity,client);
+        } catch (MinioException e) {
+            System.out.println("Error occurred: " + e);
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * 待邮寄报告列表及已发出报告历史列表查询
      *
@@ -603,7 +710,7 @@ public class ReportController {
      */
     @GetMapping("sendList")
     public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type) {
-        logger.info("分页参数pageNum:{},pageSize:{}",pageNum,pageSize);
+        logger.info("分页参数pageNum:{},pageSize:{}", pageNum, pageSize);
         PageInfo pageInfo = reportService.getSendList(search, reportType, pageNum, pageSize, type);
         return ResultUtil.success(pageInfo);
     }
@@ -621,10 +728,11 @@ public class ReportController {
 
     /**
      * 测试
+     *
      * @param entrustId
      */
     @GetMapping("testPdf")
-    public void testPdf(Long entrustId){
+    public void testPdf(Long entrustId) {
         String fileName = "BD20210021.docx";
         try {
             MinioClient client = MinIoUtil.minioClient;
@@ -632,10 +740,10 @@ public class ReportController {
             //填充数据
             EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
-            FileAndFolderUtil.convertDocxToPdf(document,"D:/VPS/11.pdf");
+            FileAndFolderUtil.convertDocxToPdf(document, "D:/VPS/11.pdf");
             document.close();
-        }catch (Exception e){
-            logger.error("转换失败:{}",e);
+        } catch (Exception e) {
+            logger.error("转换失败:{}", e);
         }
     }
 
@@ -643,15 +751,15 @@ public class ReportController {
      * 测试
      */
     @GetMapping("test")
-    public void test(){
+    public void test() {
         try {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(BucketsConst.buckets_entrust_template, "BGLQ21001F.docx");
             XWPFDocument document = new XWPFDocument(object);
-            AsposeUtil.word2pdf(document,"D:\\VPS\\22.pdf");
+            AsposeUtil.word2pdf(document, "D:\\VPS\\22.pdf");
             document.close();
-        }catch (Exception e){
-            logger.error("转换失败:{}",e);
+        } catch (Exception e) {
+            logger.error("转换失败:{}", e);
         }
     }
 

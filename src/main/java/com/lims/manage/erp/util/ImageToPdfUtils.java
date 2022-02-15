@@ -19,6 +19,7 @@ import com.itextpdf.text.pdf.parser.TextRenderInfo;
 import com.lims.manage.erp.entity.ImagePro;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.servlet.ServletOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -80,6 +81,38 @@ public class ImageToPdfUtils {
               img.setBorderColor(BaseColor.WHITE); img.scaleToFit(100072);//大小
               img.setRotationDegrees(-30);//旋转
              */
+                //图片的位置（坐标）
+                image.setAbsolutePosition(imagePro.getX(), imagePro.getY());
+                image.scaleToFit(200, 200);
+                image.scalePercent(imagePro.getScalePercent());//依照比例缩放. 调整缩放,控制图片大小
+                content.addImage(image);
+            }
+            content.setFontAndSize(base, 8);
+            content.endText();
+        }
+        stamper.close();
+        reader.close();
+    }
+
+    public static void writeToPdf2(InputStream is, ServletOutputStream fileOutputStream, List<ImagePro> imagePros)
+            throws Exception {
+        //append 追加
+        BufferedOutputStream bos = new BufferedOutputStream(fileOutputStream);
+        PdfReader reader = new PdfReader(is);
+        PdfStamper stamper = new PdfStamper(reader, bos);
+        int total = reader.getNumberOfPages() + 1;
+        PdfContentByte content;
+        BaseFont base = BaseFont.createFont("c:\\windows\\fonts\\SIMHEI.TTF", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+        PdfGState gs = new PdfGState();
+        for (int i = 1; i < total; i++) {
+            content = stamper.getUnderContent(i);//在内容下方加水印
+            gs.setFillOpacity(0.2f);
+            content.beginText();
+            //字体大小
+            content.setFontAndSize(base, 10.5F);
+            for (ImagePro imagePro : imagePros) {
+                //添加图片
+                Image image = Image.getInstance(imagePro.getImgPath());
                 //图片的位置（坐标）
                 image.setAbsolutePosition(imagePro.getX(), imagePro.getY());
                 image.scaleToFit(200, 200);
