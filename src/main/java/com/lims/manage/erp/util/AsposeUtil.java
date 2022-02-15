@@ -104,6 +104,34 @@ public class AsposeUtil {
         }
     }
 
+    public static void word2pdf3(XWPFDocument document,HttpServletResponse response, ReportRecordEntity reportRecordEntity) {
+        getLicense();
+        try {
+            //XWPFDocument->Document
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
+            ByteArrayOutputStream b1 = new ByteArrayOutputStream();
+            document.write(b);
+            InputStream inputStream = new ByteArrayInputStream(b.toByteArray());
+            Document doc = new Document(inputStream);
+            doc.save(b1, SaveFormat.PDF);
+            String sealUrl = reportRecordEntity.getSealUrl();
+            List<ImagePro> imagePros = Lists.newArrayList();
+            if (!StringUtils.isEmpty(sealUrl) || sealUrl != null) {
+                String[] split = sealUrl.split(",");
+                for (int i = 0; i < split.length; i++) {
+                    ImagePro pro = new ImagePro(100 * (i + 1), 100, 15F, split[i]);
+                    imagePros.add(pro);
+                }
+            }
+            InputStream inputStream1 = new ByteArrayInputStream(b1.toByteArray());
+            ImageToPdfUtils.writeToPdf3(inputStream1,response.getOutputStream(),imagePros);
+            b.close();
+            b1.close();
+        } catch (Exception e) {
+            logger.error("word转pdf失败:{}",e);
+        }
+    }
+
     /**
      * 设置license
      * @return

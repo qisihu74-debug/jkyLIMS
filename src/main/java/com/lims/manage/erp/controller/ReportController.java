@@ -356,8 +356,8 @@ public class ReportController {
      * @param response
      * @return
      */
-    @GetMapping("download")
-    public String downReport(Long id, String code, HttpServletResponse response) {
+    @GetMapping("download2")
+    public String downReport2(Long id, String code, HttpServletResponse response) {
         ReportRecordEntity reportRecordEntity = reportService.selectByEntrustId(id);
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
@@ -595,8 +595,8 @@ public class ReportController {
         return url;
     }
 
-    @GetMapping("download2")
-    public void downReport2(Long id, String code,HttpServletResponse response) {
+    @GetMapping("download")
+    public void downReport(Long id, String code,HttpServletResponse response) {
         ReportRecordEntity reportRecordEntity = reportService.selectByEntrustId(id);
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
@@ -687,7 +687,7 @@ public class ReportController {
                     i++;
                 }
             }
-            AsposeUtil.word2pdf2(doc,response,reportRecordEntity,client);
+            AsposeUtil.word2pdf3(doc,response,reportRecordEntity);
         } catch (MinioException e) {
             System.out.println("Error occurred: " + e);
         } catch (XmlPullParserException e) {
