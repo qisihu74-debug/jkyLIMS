@@ -183,7 +183,10 @@
         t2.count_price cost,
         t4.sample_name sampleName,
         t4.product_id,
-        t1.state
+        t1.state,
+        t1.recorder,
+        t1.reviewer,
+        t1.report_producer reportProducer
         FROM
         test_task t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
@@ -320,5 +323,23 @@
         set state   = #{state,jdbcType=INTEGER},
             opinion = #{opinion}
         where id = #{itemId,jdbcType=INTEGER}
+    </update>
+
+    <select id="getPersonInfo" resultType="com.lims.manage.erp.vo.PersonInfoVo">
+        SELECT inspector,
+               recorder,
+               reviewer,
+               report_producer reportProducer
+        FROM test_task
+        WHERE id = #{taskId}
+    </select>
+
+    <update id="updatePersonInfo" parameterType="com.lims.manage.erp.vo.PersonInfoVo">
+        update test_task
+        set inspector       = #{inspector,jdbcType=INTEGER},
+            recorder        = #{recorder,jdbcType=VARCHAR},
+            reviewer        = #{reviewer,jdbcType=VARCHAR},
+            report_producer = #{reportProducer,jdbcType=VARCHAR}
+        where id = #{taskId,jdbcType=INTEGER}
     </update>
 </mapper>

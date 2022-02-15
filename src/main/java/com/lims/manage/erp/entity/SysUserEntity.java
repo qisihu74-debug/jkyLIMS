@@ -79,6 +79,10 @@ public class SysUserEntity implements Serializable {
 	 * 钉钉用户id
 	 */
 	private String dingUserId;
+	/**
+	 * 更新时间
+	 */
+	private Timestamp time;
 
 	public SysUserEntity() {
 	}

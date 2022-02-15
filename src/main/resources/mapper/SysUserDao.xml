@@ -40,12 +40,12 @@
     </resultMap>
 
     <update id="updateUserState">
-        UPDATE sys_user SET state=#{state} WHERE user_id = #{userId}
+        UPDATE sys_user SET state=#{state},time=#{time} WHERE user_id = #{userId}
     </update>
 
     <update id="resetPassword">
         UPDATE sys_user
-        SET PASSWORD = #{password}, salt = #{salt}
+        SET PASSWORD = #{password}, salt = #{salt},time=#{time}
         WHERE
             user_id = #{userId}
     </update>
@@ -82,7 +82,7 @@
         <if test="state != null and state != ''">
             and t1.state = #{state}
         </if>
-        order by t1.create_time desc
+        order by t1.time desc
     </select>
 
     <update id="updateUserInfo" parameterType="com.lims.manage.erp.vo.UserInfoVo">
@@ -93,7 +93,8 @@
             department = #{departmentId},
             note = #{note},
             username = #{username},
-            ding_user_id = #{dingUserId}
+            ding_user_id = #{dingUserId},
+            time = #{time}
         WHERE
             user_id = #{userId}
     </update>

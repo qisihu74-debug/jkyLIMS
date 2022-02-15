@@ -60,8 +60,9 @@ public interface TaskService {
 
     /**
      * 查询原始记录表头信息
-     *
-     * @param paramVo
+     * @param taskId
+     * @param sampleId
+     * @param checkItemId
      * @return
      */
     OriginalRecordDataVo getOriginalData(Long taskId, Integer sampleId, Integer checkItemId);
@@ -102,4 +103,18 @@ public interface TaskService {
      * @return
      */
     int passorno(Integer itemId, Integer state,String opinion);
+
+    /**
+     * 查询任务下检测人、记录人、复核人、报告制作人信息
+     * @param taskId
+     * @return
+     */
+    PersonInfoVo getPersonInfo(Long taskId);
+
+    /**
+     * 修改人员信息
+     * @param vo
+     * @return
+     */
+    int updatePersonInfo(PersonInfoVo vo);
 }
