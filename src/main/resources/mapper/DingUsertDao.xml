@@ -35,7 +35,8 @@
             position,
             department,
             orgemail,
-            jobnumber
+            jobnumber,
+            email
         FROM
             sys_ding_user
         where 1=1
