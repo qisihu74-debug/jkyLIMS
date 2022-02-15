@@ -12,4 +12,7 @@ public class TaskListVo {
     private String cost;//本单费用
     private String requiredCompletionTime;//完成日期
     private Integer state;//完成日期
+    private String recorder;
+    private String reviewer;
+    private String reportProducer;
 }

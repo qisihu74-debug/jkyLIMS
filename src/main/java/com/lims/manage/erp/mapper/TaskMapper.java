@@ -163,4 +163,18 @@ public interface TaskMapper extends BaseMapper {
      */
     int updateState(Integer itemId, Integer state,String opinion);
 
+    /**
+     * 查询任务下检测人、记录人、复核人、报告制作人信息
+     * @param taskId
+     * @return
+     */
+    PersonInfoVo getPersonInfo(Long taskId);
+
+    /**
+     * 修改人员信息
+     * @param vo
+     * @return
+     */
+    int updatePersonInfo(PersonInfoVo vo);
+
 }

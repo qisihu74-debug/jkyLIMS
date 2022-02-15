@@ -210,4 +210,14 @@ public class TaskServiceImpl implements TaskService {
     public int passorno(Integer itemId, Integer state,String opinion) {
         return taskMapper.updateState(itemId,state,opinion);
     }
+
+    @Override
+    public PersonInfoVo getPersonInfo(Long taskId) {
+        return taskMapper.getPersonInfo(taskId);
+    }
+
+    @Override
+    public int updatePersonInfo(PersonInfoVo vo) {
+        return taskMapper.updatePersonInfo(vo);
+    }
 }
