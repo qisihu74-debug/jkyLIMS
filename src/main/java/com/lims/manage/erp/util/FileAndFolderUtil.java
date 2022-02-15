@@ -262,4 +262,32 @@ public class FileAndFolderUtil {
         InputStream inputStream = new ByteArrayInputStream(bytes);
         return inputStream;
     }
+
+    /**
+     * InputStream转OutputStream
+     * @param in
+     * @return
+     * @throws Exception
+     */
+    public static ByteArrayOutputStream parseIn(InputStream in) throws Exception {
+        ByteArrayOutputStream swapStream = new ByteArrayOutputStream();
+        int ch;
+        while ((ch = in.read()) != -1) {
+            swapStream.write(ch);
+        }
+        return swapStream;
+    }
+
+    /**
+     * outputStream转InputStream
+     * @param out
+     * @return
+     * @throws Exception
+     */
+    public static ByteArrayInputStream parseOut(final OutputStream out) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos = (ByteArrayOutputStream) out;
+        final ByteArrayInputStream swapStream = new ByteArrayInputStream(baos.toByteArray());
+        return swapStream;
+    }
 }

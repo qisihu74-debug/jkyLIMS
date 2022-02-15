@@ -74,15 +74,33 @@ public class AsposeUtil {
             document.write(b);
             InputStream inputStream = new ByteArrayInputStream(b.toByteArray());
             Document doc = new Document(inputStream);
-            doc.save(outputStream, SaveFormat.PDF);
-            InputStream inputStream1 = FileAndFolderUtil.convertIo(outputStream);
-            ImageToPdfUtils.writeToPdf2(inputStream1, outputStream, imagePros);
+            doc.save(outputStream, SaveFormat.PDF);// TODO 得到pdf输入流
+            //TODO 获取到pdf输入流
+            OutputStream pdfStream = ImageToPdfUtils.writeToPdf2(inputStream, outputStream, imagePros);
+            response.reset();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             response.setHeader("Content-Disposition", "attachment;fileName=aaa.pdf");
+            //OutputStream放入HttpServletResponse
+            ByteArrayInputStream in = null;
+            //输出pdf
+            in = FileAndFolderUtil.parseOut(pdfStream);
+            outputStream = response.getOutputStream();
+            //获取要下载的文件输入流
+            int len = 0;
+            //创建数据缓冲区
+            byte[] buffer = new byte[1024];
+            //将FileInputStream流写入到buffer缓冲区
+            while ((len = in.read(buffer)) > 0) {
+                //使用OutputStream将缓冲区的数据输出到浏览器
+                outputStream.write(buffer, 0, len);
+            }
+            outputStream.flush();
+            in.close();
             outputStream.close();
-        } catch (Exception e) {
-            logger.error("word转pdf失败:{}",e);
+            document.close();
+        }catch (Exception e){
+            logger.error("下载失败:{}",e);
         }
     }
 

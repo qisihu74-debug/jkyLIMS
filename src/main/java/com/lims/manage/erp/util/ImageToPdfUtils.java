@@ -21,11 +21,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.ServletOutputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,12 +96,20 @@ public class ImageToPdfUtils {
         reader.close();
     }
 
-    public static void writeToPdf2(InputStream is, ServletOutputStream fileOutputStream, List<ImagePro> imagePros)
+    public static OutputStream writeToPdf2(InputStream is, ServletOutputStream fileOutputStream, List<ImagePro> imagePros)
             throws Exception {
         //append 追加
-        BufferedOutputStream bos = new BufferedOutputStream(fileOutputStream);
+        //ServletOutputStream转OutputStream
+        OutputStream outputStream = new ByteArrayOutputStream();
+        InputStream inputStream = FileAndFolderUtil.convertIo(fileOutputStream);
+        try {
+            outputStream = FileAndFolderUtil.parseIn(inputStream);
+        }catch (Exception e){
+            log.info("流转换异常:{}",e);
+        }
+        //BufferedOutputStream bos = new BufferedOutputStream(fileOutputStream);
         PdfReader reader = new PdfReader(is);
-        PdfStamper stamper = new PdfStamper(reader, bos);
+        PdfStamper stamper = new PdfStamper(reader, outputStream);
         int total = reader.getNumberOfPages() + 1;
         PdfContentByte content;
         BaseFont base = BaseFont.createFont("c:\\windows\\fonts\\SIMHEI.TTF", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
@@ -124,6 +134,7 @@ public class ImageToPdfUtils {
         }
         stamper.close();
         reader.close();
+        return outputStream;
     }
 
     /**
