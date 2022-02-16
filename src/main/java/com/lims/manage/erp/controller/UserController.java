@@ -307,8 +307,12 @@ public class UserController {
         }
         if (vo.getDingUserId() != null&&vo.getDingUserId().length()>0) {
             // 查询此账号是否存在
-            if (dingUserService.getById(vo.getDingUserId()) == null) {
+            DingUserEntity sysDingUserData = dingUserService.getById(vo.getDingUserId());
+            if (sysDingUserData== null) {
                 return ResultUtil.error("使用人不存在！，请重新选择使用人");
+            }
+            if(sysDingUserData.getName()!=null&&!sysDingUserData.getName().isEmpty()){
+                vo.setName(sysDingUserData.getName());
             }
             // 钉钉用户id 是否被其他账号使用
             Boolean flag = sysUserService.getTheUser(vo.getUserId(), vo.getDingUserId());

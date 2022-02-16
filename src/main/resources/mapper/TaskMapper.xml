@@ -249,7 +249,7 @@
             LEFT JOIN test_user_team_rel AS t2
         ON t1.id = t2.team_id
             LEFT JOIN sys_user AS t3 ON t3.user_id = t2.user_id
-            LEFT JOIN sys_ding_user AS t4 ON t3.user_id = t4.userid
+            LEFT JOIN sys_ding_user AS t4 ON t3.ding_user_id = t4.userid
         WHERE 1=1 and t1.id = #{id} and t4.name is not NULL
     </select>
 
