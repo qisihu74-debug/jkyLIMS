@@ -135,7 +135,7 @@ public class EntrustServiceImpl implements EntrustService {
         List<EntrustSampleEntity> list1 = new ArrayList<>();
         if (!CollectionUtils.isEmpty(samples)) {
             for (SampleEntity sampleEntity : samples) {
-                int i = sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
+                sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
                 EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                 entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                 entrustSampleEntity.setSampleId(sampleEntity.getId());
@@ -242,7 +242,7 @@ public class EntrustServiceImpl implements EntrustService {
         List<EntrustSampleEntity> list1 = new ArrayList<>();
         if (!CollectionUtils.isEmpty(samples)) {
             for (SampleEntity sampleEntity : samples) {
-                int i = sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
+                sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
                 EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                 entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                 entrustSampleEntity.setSampleId(sampleEntity.getId());
@@ -486,7 +486,7 @@ public class EntrustServiceImpl implements EntrustService {
                 entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                 entrustSampleEntity.setSampleId(sampleEntity.getId());
                 list.add(entrustSampleEntity);
-                int i = sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
+                sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
                 // 样品依据
                 List<JudgmentBasisVo> standardFileIds = sampleEntity.getStandardFileIdStr();
                 if (!CollectionUtils.isEmpty(standardFileIds)) {

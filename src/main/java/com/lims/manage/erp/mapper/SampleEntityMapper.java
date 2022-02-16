@@ -8,7 +8,7 @@ import com.lims.manage.erp.vo.SamplePublicInfoVo;
 import com.lims.manage.erp.vo.TemplateSampleVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Update;
-import org.springframework.data.repository.query.Param;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -133,5 +133,5 @@ public interface SampleEntityMapper {
      * @return
      */
     @Update("update test_sample set is_use=#{isUse} where id = #{sampleId}")
-    int updateSampleUse(Integer sampleId,Integer isUse);
+    void updateSampleUse(@Param("sampleId") Integer sampleId, @Param("isUse") Integer isUse);
 }
