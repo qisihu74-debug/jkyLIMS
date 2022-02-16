@@ -9,6 +9,7 @@ public class ReportListVo {
     private String sampleName;
     private String countPrice;
     private String requestDate;
+    private String reportUrl;
     /**
      * 报告生成时间
      */
