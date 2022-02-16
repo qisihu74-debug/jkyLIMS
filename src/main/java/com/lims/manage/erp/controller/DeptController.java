@@ -99,6 +99,12 @@ public class DeptController {
         if (bean == null) {
             return ResultUtil.error("所选中部门不存在！");
         }
+        // 顶级部门所属上级不能修改
+        if(entity.getParentId()!=null){
+            if(bean.getParentId().equals(0L)&&!entity.getParentId().equals(0L)){
+                return ResultUtil.error("顶级部门所属上级不能修改！");
+            }
+        }
         // 验证部门编号
         if (entity.getCode() != null&&entity.getCode().length()>0) {
             // 验证是否变动
