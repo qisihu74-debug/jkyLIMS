@@ -131,6 +131,39 @@ public class AsposeUtil {
             logger.error("word转pdf失败:{}",e);
         }
     }
+    public static ByteArrayOutputStream word2pdf4(XWPFDocument document) {
+        getLicense();
+        ByteArrayOutputStream b1 = null;
+        try {
+            //XWPFDocument->Document
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
+            b1 = new ByteArrayOutputStream();
+            document.write(b);
+            InputStream inputStream = new ByteArrayInputStream(b.toByteArray());
+            Document doc = new Document(inputStream);
+            doc.save(b1, SaveFormat.PDF);
+//            String sealUrl = reportRecordEntity.getSealUrl();
+//            List<ImagePro> imagePros = Lists.newArrayList();
+//            if (!StringUtils.isEmpty(sealUrl) || sealUrl != null) {
+//                String[] split = sealUrl.split(",");
+//                for (int i = 0; i < split.length; i++) {
+//                    ImagePro pro = new ImagePro(100 * (i + 1), 100, 15F, split[i]);
+//                    imagePros.add(pro);
+//                }
+//            }
+//            InputStream inputStream1 = new ByteArrayInputStream(b1.toByteArray());
+//            ByteArrayOutputStream b2 = new ByteArrayOutputStream();
+//            ByteArrayOutputStream b3 = ImageToPdfUtils.writeToPdf4(inputStream1, b2, imagePros);
+//            InputStream inputStream2 = new ByteArrayInputStream(b3.toByteArray());
+//            String upload = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream2, "application/octet-stream");
+
+            b.close();
+
+        } catch (Exception e) {
+            logger.error("word转pdf失败:{}",e);
+        }
+        return b1;
+    }
 
     /**
      * 设置license
