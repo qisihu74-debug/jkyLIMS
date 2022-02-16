@@ -60,4 +60,6 @@ public interface ReportMapper {
      * @return
      */
     List<String> getEquipment(Long id);
+
+    int updateReportUrl(Long id,String url);
 }

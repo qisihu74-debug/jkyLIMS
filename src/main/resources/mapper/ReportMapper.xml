@@ -195,4 +195,14 @@ WHERE
             t3.NAME IS NOT NULL
           AND t1.entrust_id = #{id}
     </select>
+
+    <update id="updateReportUrl">
+        update test_report_record
+        <set>
+            <if test="url != null">
+                report_url = #{url,jdbcType=VARCHAR}
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
 </mapper>

@@ -524,4 +524,9 @@ public class ReportServiceImpl implements ReportService {
         }
         return result.toString();
     }
+
+    @Override
+    public int updateReportUrl(Long id, String url) {
+        return reportMapper.updateReportUrl(id,url);
+    }
 }
