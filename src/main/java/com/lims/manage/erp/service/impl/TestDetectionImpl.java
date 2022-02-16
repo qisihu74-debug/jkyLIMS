@@ -11,7 +11,7 @@ import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
 import com.lims.manage.erp.vo.SampleItemInstrumentVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
-import org.flowable.common.engine.impl.util.CollectionUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,7 +61,7 @@ public class TestDetectionImpl implements TestDetectionService {
                 TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
                 testChItemInstrumentMiddleEntity.setSidItem(sampleItemInstrumentEntity.getItemId());
                 testChItemInstrumentMiddleEntity.setStartTime(data.getStartTime());
-                if (CollectionUtil.isNotEmpty(sampleItemInstrumentEntity.getIds())) {
+                if (CollectionUtils.isNotEmpty(sampleItemInstrumentEntity.getIds())) {
                     for (Integer id : sampleItemInstrumentEntity.getIds()) {
                         testChItemInstrumentMiddleEntity.setIntrusmentId(id);
                         testDetectionDao.addItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
@@ -113,7 +113,7 @@ public class TestDetectionImpl implements TestDetectionService {
             // 存放 仪器的使用记录
             // 根据检测项 主键 获取 仪器id
             List<TestChItemInstrumentMiddleEntity> getCollection = testDetectionDao.getInstrumentCollection(sampleItemInstrumentEntity.getItemId());
-            if (CollectionUtil.isNotEmpty(getCollection)) {
+            if (CollectionUtils.isNotEmpty(getCollection)) {
                 TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
                 // 依据检测项主键 统一 更新。
                 testChItemInstrumentMiddleEntity.setEndTime(data.getEndTime());

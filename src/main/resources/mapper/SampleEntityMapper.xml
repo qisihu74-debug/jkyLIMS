@@ -661,7 +661,7 @@ savePlace,jdbcType=VARCHAR},
             id = #{sampleId}
     </select>
 
-    <update id="updateSampleUse">
+    <!--<update id="updateSampleUse">
         update test_sample
         <set>
             <if test="isUse != null">
@@ -669,6 +669,6 @@ savePlace,jdbcType=VARCHAR},
             </if>
         </set>
         where id = #{sampleId,jdbcType=INTEGER}
-    </update>
+    </update>-->
 
 </mapper>

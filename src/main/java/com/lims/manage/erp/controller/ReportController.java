@@ -19,11 +19,11 @@ import com.lims.manage.erp.vo.ReportPreserveVo;
 import io.minio.MinioClient;
 import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
-import org.flowable.common.engine.impl.util.CollectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -347,7 +347,7 @@ public class ReportController {
             doc = new XWPFDocument(object);
             //写入数据
             List<ReportRecordDetailEntity> checkItemList = reportService.getCheckInfoByRecordId(reportRecordEntity.getId());
-            if (CollectionUtil.isNotEmpty(checkItemList)) {
+            if (CollectionUtils.isNotEmpty(checkItemList)) {
                 //处理表格
                 Iterator<XWPFTable> it = doc.getTablesIterator();
                 //表格索引

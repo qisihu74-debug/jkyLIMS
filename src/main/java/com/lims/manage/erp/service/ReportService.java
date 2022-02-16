@@ -4,13 +4,15 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.ReportDetailVo;
+import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.jodconverter.office.utils.Lo;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 public interface ReportService {
     /**

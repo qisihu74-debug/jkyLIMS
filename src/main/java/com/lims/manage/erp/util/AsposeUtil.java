@@ -8,20 +8,18 @@ import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.ImagePro;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import io.minio.MinioClient;
-import io.minio.errors.*;
-import org.apache.commons.io.IOUtils;
-import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xmlpull.v1.XmlPullParserException;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.net.URLEncoder;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
