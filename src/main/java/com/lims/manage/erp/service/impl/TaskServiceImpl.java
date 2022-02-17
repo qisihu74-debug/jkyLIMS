@@ -9,6 +9,7 @@ import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.*;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -22,6 +23,7 @@ import java.io.InputStream;
 import java.util.List;
 
 @Service
+@Slf4j
 public class TaskServiceImpl implements TaskService {
     @Autowired
     private TaskMapper taskMapper;
@@ -175,7 +177,9 @@ public class TaskServiceImpl implements TaskService {
         //获取样品信息
         TemplateSampleVo sampleVo = sampleEntityMapper.getOriginalSampleInfo(sampleId);
         //获取检测依据
+        log.debug("执行上一行完成---------------");
         String checkBasis = taskMapper.getCheckBasis(checkItemId, entrustBaseInfo.getId(), sampleId);
+        log.debug("执行下一行完成--------------");
         //获取判定依据
         List<String> judgeBasisList = taskMapper.getJudgeBasis(sampleId, entrustBaseInfo.getId());
         StringBuilder judgeBasis = new StringBuilder("");
