@@ -10,7 +10,7 @@
     witness_person, witness_phone, project_name, project_part, sampling_method, check_purpose,
     report_count, report_type, request_date, payment_method, present_information, acceptance_date,
      team, state, remark, invalid_reason, operate_user, operate_date, file_url,  is_save,
-    business_acceptor,seal_type,count_price AS paymentCount,address,addressee,mobile,mailbox
+    business_acceptor,seal_type,count_price AS paymentCount,address,addressee,mobile,mailbox,file_url_str
     from test_entrusted_info
     where id = #{id}
   </select>
@@ -188,7 +188,8 @@ count_price,
 address,
 addressee,
 mobile,
-mailbox
+mailbox,
+file_url_str
 )
         values (#{id},
 #{entrustmentNo},
@@ -222,7 +223,8 @@ mailbox
 #{address},
 #{addressee},
 #{mobile},
-#{mailbox}
+#{mailbox},
+#{fileUrlStr}
 )
 
   </insert>
@@ -263,6 +265,7 @@ mailbox
       <if test="operateUser != null">operate_user=#{operateUser},</if>
       <if test="operateDate != null">operate_date=#{operateDate},</if>
       <if test="invalidReason != null and invalidReason!=''">invalid_reason=#{invalidReason},</if>
+      <if test="fileUrlStr != null and fileUrlStr!=''">file_url_str=#{fileUrlStr},</if>
     </trim>
     <trim prefix="WHERE" prefixOverrides="AND |OR ">
     <if test="id!=null">

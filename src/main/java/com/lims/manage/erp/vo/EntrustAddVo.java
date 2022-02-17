@@ -164,5 +164,9 @@ public class EntrustAddVo {
      * 邮箱地址
      */
     private String mailbox;
+    /**
+     * 上传附件url原始名称
+     */
+    private String fileUrlStr;
 
 }

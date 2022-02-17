@@ -292,6 +292,7 @@ public class UserController {
     @RequestMapping("/updateUserInfo")
 //    @RequiresPermissions("sys:user:updateuserinfo")
     public Result updateUserInfo(@RequestBody UserInfoVo vo) {
+
         if (vo.getUsername() == null) {
             return ResultUtil.error("登陆账号不能为空");
         }

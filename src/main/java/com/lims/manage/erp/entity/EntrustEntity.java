@@ -170,6 +170,10 @@ public class EntrustEntity {
      * 邮箱地址
      */
     private String mailbox;
+    /**
+     * 上传附件url原始名称
+     */
+    private String fileUrlStr;
 
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,

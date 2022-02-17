@@ -251,6 +251,7 @@
             LEFT JOIN sys_user AS t3 ON t3.user_id = t2.user_id
             LEFT JOIN sys_ding_user AS t4 ON t3.ding_user_id = t4.userid
         WHERE 1=1 and t1.id = #{id} and t4.name is not NULL
+
     </select>
 
     <select id="getJudgmentTaskList" resultType="integer">

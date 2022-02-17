@@ -32,6 +32,7 @@ import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.*;
+import io.minio.errors.MinioException;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -199,7 +200,8 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean addEntrustTest(EntrustAddVo vo, MultipartFile[] file) {
+    public synchronized Boolean addEntrustTest(EntrustAddVo vo, MultipartFile[] file) {
+
         //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
         basisInfo.setId(GenID.getID());
@@ -222,17 +224,26 @@ public class EntrustServiceImpl implements EntrustService {
         //附件存在上传附件到服务器
         if (file != null) {
             StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringfileUrlStr = new StringBuilder();
             for (MultipartFile multipartFile : file) {
                 String name = multipartFile.getOriginalFilename();
                 String[] strings = name.split("\\.");
                 String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code + "." + strings[strings.length - 1]);
                 stringBuilder.append(upload);
                 stringBuilder.append(",");
+                // 存放上传文件的名称带后缀如：（委托文档资料.pdf,原始文档.docx）
+                stringfileUrlStr.append(name);
+                stringfileUrlStr.append(",");
             }
             String fileUrl = stringBuilder.toString();
             if (!StringUtils.isEmpty(fileUrl)) {
                 String substring = fileUrl.substring(0, fileUrl.length() - 1);
                 basisInfo.setFileUrl(substring);
+            }
+            String fileUrlStr = stringfileUrlStr.toString();
+            if (!StringUtils.isEmpty(fileUrlStr)) {
+                String substring = fileUrlStr.substring(0, fileUrlStr.length() - 1);
+                basisInfo.setFileUrlStr(substring);
             }
         }
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
@@ -296,6 +307,7 @@ public class EntrustServiceImpl implements EntrustService {
         //得到总价钱，再保存委托基本信息
         basisInfo.setCountPrice(totalMoney + "");
         entityMapper.insertEntrustInfo(basisInfo);
+        long endTime = System.currentTimeMillis();
         return true;
     }
 
@@ -413,25 +425,47 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file) {
+    public synchronized Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file) {
         EntrustEntity basisInfo = new EntrustEntity(vo);
         Integer code = vo.getEntrustmentNo();
         //附件存在上传附件到服务器
         if (file != null) {
+            // 查询委托单下 文件信息(entrustData.getFileUrl(),entrustData.getFileUrlStr(),获取后缀进行删除操作)
+            EntrustAddVo entrustData = entityMapper.selectByKeyId(basisInfo.getId());
+            if (entrustData.getFileUrl() != null && !entrustData.getFileUrl().isEmpty()) {
+                // 去清除 MinIo 桶数据。
+                try {
+                    String[] strings2 = entrustData.getFileUrlStr().split(",");
+                    for (int i = 0; i < strings2.length; i++) {
+                        String[] strings3 = strings2[i].split("\\.");
+                        MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure, code + "." + strings3[strings2.length - 1]);
+                    }
+                } catch (Exception e) {
+                    logger.info("修改委托下清除 MinIo 桶数据 出错");
+                }
+            }
+
             StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringfileUrlStr = new StringBuilder();
             for (MultipartFile multipartFile : file) {
                 String name = multipartFile.getOriginalFilename();
                 String[] strings = name.split("\\.");
-                // 去清除 MinIo 桶数据。
-                MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure, code + "." + strings[strings.length - 1]);
                 String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code + "." + strings[strings.length - 1]);
                 stringBuilder.append(upload);
                 stringBuilder.append(",");
+                // 存放上传文件的名称带后缀如：（委托文档资料.pdf,原始文档.docx）
+                stringfileUrlStr.append(name);
+                stringfileUrlStr.append(",");
             }
             String fileUrl = stringBuilder.toString();
             if (!StringUtils.isEmpty(fileUrl)) {
                 String substring = fileUrl.substring(0, fileUrl.length() - 1);
                 basisInfo.setFileUrl(substring);
+            }
+            String fileUrlStr = stringfileUrlStr.toString();
+            if (!StringUtils.isEmpty(fileUrlStr)) {
+                String substring = fileUrlStr.substring(0, fileUrlStr.length() - 1);
+                basisInfo.setFileUrlStr(substring);
             }
         }
         //更新委托单收费记录信息
@@ -838,9 +872,9 @@ public class EntrustServiceImpl implements EntrustService {
             }
             //设置其它信息
             String ss = "";
-            rows.get(14).getTableCells().get(2).setText(detail.getPresentInformation()==null?"--":detail.getPresentInformation());//提供资料
-            rows.get(15).getTableCells().get(2).setText(detail.getSamplingMethod()==null?"--":detail.getSamplingMethod());//取样方式
-            rows.get(15).getTableCells().get(4).setText(detail.getCheckPurpose()==null?"--":detail.getCheckPurpose());//检验目的
+            rows.get(14).getTableCells().get(2).setText(detail.getPresentInformation() == null ? "--" : detail.getPresentInformation());//提供资料
+            rows.get(15).getTableCells().get(2).setText(detail.getSamplingMethod() == null ? "--" : detail.getSamplingMethod());//取样方式
+            rows.get(15).getTableCells().get(4).setText(detail.getCheckPurpose() == null ? "--" : detail.getCheckPurpose());//检验目的
             Integer productId = samples.get(0).getProductId();
             List<String> list = entityMapper.getStatndardByPId(productId);
             StringBuilder stringBuilder = new StringBuilder();
@@ -850,7 +884,7 @@ public class EntrustServiceImpl implements EntrustService {
                     stringBuilder.append(",");
                 }
                 String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
-                rows.get(15).getTableCells().get(6).setText(substring==null?"--":substring);//产品标准
+                rows.get(15).getTableCells().get(6).setText(substring == null ? "--" : substring);//产品标准
             }
             StringBuilder stringBuilder1 = new StringBuilder();
             if (!CollectionUtils.isEmpty(samples)) {
@@ -867,29 +901,29 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                 }
                 String substring = stringBuilder1.toString().substring(0, stringBuilder1.length() - 1);
-                rows.get(16).getTableCells().get(2).setText(substring==null?"--":substring);//检验项目及检测依据
+                rows.get(16).getTableCells().get(2).setText(substring == null ? "--" : substring);//检验项目及检测依据
             }
             rows.get(17).getTableCells().get(2).setText(detail.getReportCount().toString());//报告分数
-            rows.get(17).getTableCells().get(4).setText(detail.getReportType()==null?"--":detail.getReportType());//取报告方式
+            rows.get(17).getTableCells().get(4).setText(detail.getReportType() == null ? "--" : detail.getReportType());//取报告方式
             rows.get(17).getTableCells().get(6).setText("待添加");//收报告单位
-            rows.get(18).getTableCells().get(2).setText(detail.getAddress()==null?"--":detail.getAddress());//联系地址
+            rows.get(18).getTableCells().get(2).setText(detail.getAddress() == null ? "--" : detail.getAddress());//联系地址
             rows.get(18).getTableCells().get(4).setText("待添加");//联系人
             rows.get(18).getTableCells().get(6).setText("待添加");//联系方式
-            rows.get(19).getTableCells().get(2).setText(detail.getEntrustPeople()==null?"--":detail.getEntrustPeople());//委托人
-            rows.get(19).getTableCells().get(4).setText(detail.getEntrustPhone()==null?"--":detail.getEntrustPhone());//委托人电话
-            rows.get(19).getTableCells().get(6).setText(detail.getWitnessPerson()==null?"--":detail.getWitnessPerson());//见证人
+            rows.get(19).getTableCells().get(2).setText(detail.getEntrustPeople() == null ? "--" : detail.getEntrustPeople());//委托人
+            rows.get(19).getTableCells().get(4).setText(detail.getEntrustPhone() == null ? "--" : detail.getEntrustPhone());//委托人电话
+            rows.get(19).getTableCells().get(6).setText(detail.getWitnessPerson() == null ? "--" : detail.getWitnessPerson());//见证人
             SampleEntity sampleEntity = samples.get(0);
             if (sampleEntity != null) {
                 String s = sampleEntity.getSampleName() + "(" + sampleEntity.getSpecs() + "," + sampleEntity.getOutward() + ")";
-                rows.get(20).getTableCells().get(2).setText(s==null?"--":s);//样品状态
+                rows.get(20).getTableCells().get(2).setText(s == null ? "--" : s);//样品状态
             }
             rows.get(20).getTableCells().get(4).setText(detail.getIsSave().equals("1") ? "保留" : "废弃");//样品保留
-            rows.get(21).getTableCells().get(2).setText(detail.getPaymentCount()==null?"--":detail.getPaymentCount());//检验收费
-            rows.get(21).getTableCells().get(4).setText(detail.getPaymentMethod()==null?"--":detail.getPaymentMethod());//支付方式
+            rows.get(21).getTableCells().get(2).setText(detail.getPaymentCount() == null ? "--" : detail.getPaymentCount());//检验收费
+            rows.get(21).getTableCells().get(4).setText(detail.getPaymentMethod() == null ? "--" : detail.getPaymentMethod());//支付方式
             //TODO 本次缴费统计缴费记录表
-            rows.get(21).getTableCells().get(6).setText(detail.getPaymentRecord()==null?"--":detail.getPaymentRecord());//本次交费
+            rows.get(21).getTableCells().get(6).setText(detail.getPaymentRecord() == null ? "--" : detail.getPaymentRecord());//本次交费
             rows.get(22).getTableCells().get(2).setText(DateUtil.formatDate(detail.getRequestDate()));//完成期限
-            rows.get(22).getTableCells().get(4).setText(detail.getBusinessAcceptor()==null?"--":detail.getBusinessAcceptor());//业务受理人
+            rows.get(22).getTableCells().get(4).setText(detail.getBusinessAcceptor() == null ? "--" : detail.getBusinessAcceptor());//业务受理人
             rows.get(22).getTableCells().get(6).setText(DateUtil.formatDate(detail.getAcceptanceDate()));//受理日期
         } catch (Exception e) {
             logger.error("设置委托单信息到模板异常:{}", e);
