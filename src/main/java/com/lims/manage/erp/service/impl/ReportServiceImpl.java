@@ -296,8 +296,8 @@ public class ReportServiceImpl implements ReportService {
         //TODO 根据印章类型，请求契约所的印章
 
         //上传印章图片到文件服务器
-        String img1 = "http://192.168.2.35:9000/seal-cns-cma/cns.jpg";
-        String img2 = "http://192.168.2.35:9000/seal-cns-cma/cma.jpg";
+        String img1 = "http://121.89.242.0:9000/seal-cns-cma/cns.jpg";
+        String img2 = "http://121.89.242.0:9000/seal-cns-cma/cma.jpg";
         String url = img1 + "," + img2;
         //更新url数据到表test_report_record
         entityMapper.updateImgByid(id, url);
