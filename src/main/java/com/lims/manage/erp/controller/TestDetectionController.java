@@ -42,7 +42,7 @@ public class TestDetectionController {
 
     @RequestMapping("/start_test")
     public Result PostOnTest(@RequestBody SampleItemInstrumentVo sampleItemInstrumentVo) {
-        Boolean flag = testDetectionService.PostOnTest(sampleItemInstrumentVo);
+        Boolean flag = testDetectionService.postStartTest(sampleItemInstrumentVo);
         if (flag) {
             return ResultUtil.success("成功！！！");
         }
@@ -70,7 +70,7 @@ public class TestDetectionController {
         }
         sampleItemInstrumentVo.setItemInstrumentEntityList(list);
 
-        Boolean flag = testDetectionService.PostEndTest1(sampleItemInstrumentVo);
+        Boolean flag = testDetectionService.postEndTest(sampleItemInstrumentVo);
         if(flag) {
             // 更新任务单状态 需要 对所有的 样品信息 下 检测项 进行判断 ==2的话 更新。
             TaskDetailInfoVo dataGather = taskService.getTaskDetailInfo(sampleItemInstrumentVo.getTaskId());

@@ -255,7 +255,8 @@ public class TaskServiceImpl implements TaskService {
                 sampleItemInstrumentEntity.setOpinion(opinion);
                 sampleItemInstrumentEntity.setOriginUrl(null);
                 sampleItemInstrumentEntity.setFileUrlStr(null);
-                testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
+                sampleItemInstrumentEntity.setEndTime(null);
+                testDetectionDao.updateTaskPassorno(sampleItemInstrumentEntity);
                 // 删除设备仪器
                 testDetectionDao.deleteInstrument(itemId);
                 return 1;

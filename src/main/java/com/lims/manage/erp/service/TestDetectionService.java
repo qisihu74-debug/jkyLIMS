@@ -19,11 +19,11 @@ public interface TestDetectionService {
      * @param data
      * @return
      */
-    Boolean PostOnTest(SampleItemInstrumentVo data);
+    Boolean postStartTest(SampleItemInstrumentVo data);
     /**
      * 结束试验
      */
-    Boolean PostEndTest1(SampleItemInstrumentVo data);
+    Boolean postEndTest(SampleItemInstrumentVo data);
     /**
      * 获取任务详情数据 判断任务是否结束
      */

@@ -14,10 +14,11 @@
         LEFT JOIN test_product_item_instrument_type_rel as t2 ON t1.type_id = t2.intrusment_type_id
         WHERE t2.check_item_id = #{checkItemId}
     </select>
-    <update id="updateSampleItemInstrumentEntity" parameterType="com.lims.manage.erp.entity.SampleItemInstrumentEntity">
+    <update id="updateTaskPassorno" parameterType="com.lims.manage.erp.entity.SampleItemInstrumentEntity">
         UPDATE test_entrusted_sample_checkitem_rel
         <trim prefix="SET" suffixOverrides=",">
             start_time=#{startTime},
+            end_time=#{endTime},
         <if test="isApproved!=null and isApproved!=''">is_approved=#{isApproved},</if>
         <if test="state!=null">state=#{state},</if>
         <if test="endTime!=null">end_time=#{endTime},</if>
@@ -27,6 +28,18 @@
             file_url_str=#{fileUrlStr},
         </trim>
          WHERE id = #{itemId}
+    </update>
+    <update id="updateSampleItemInstrumentEntity" parameterType="com.lims.manage.erp.entity.SampleItemInstrumentEntity">
+        UPDATE test_entrusted_sample_checkitem_rel
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="isApproved!=null and isApproved!=''">is_approved=#{isApproved},</if>
+            <if test="state!=null">state=#{state},</if>
+            <if test="startTime!=null">start_time=#{startTime},</if>
+            <if test="endTime!=null">end_time=#{endTime},</if>
+            <if test="result!=null and result!=''">result=#{result},</if>
+            <if test="opinion!=null and opinion!=''">opinion=#{opinion},</if>
+        </trim>
+        WHERE id = #{itemId}
     </update>
     <insert id="addItemInstrumentMiddleRel" parameterType="com.lims.manage.erp.entity.TestChItemInstrumentMiddleEntity"
             useGeneratedKeys="true" keyProperty="id">

@@ -39,7 +39,7 @@ public class TestDetectionImpl implements TestDetectionService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized Boolean PostOnTest(SampleItemInstrumentVo data) {
+    public synchronized Boolean postStartTest(SampleItemInstrumentVo data) {
         SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd");
         String stringDate = format.format(data.getStartTime());
         if(stringDate.equals("1970-01-01")){
@@ -84,7 +84,7 @@ public class TestDetectionImpl implements TestDetectionService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized Boolean PostEndTest1(SampleItemInstrumentVo data) {
+    public synchronized Boolean postEndTest(SampleItemInstrumentVo data) {
         SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd");
         String stringDate = format.format(data.getEndTime());
         if(stringDate.equals("1970-01-01")){

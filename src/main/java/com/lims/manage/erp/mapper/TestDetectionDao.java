@@ -24,6 +24,11 @@ public interface TestDetectionDao {
      */
     List<TestInstrumentEntity> selectTheInstrument(Integer checkItemId);
     /**
+     * 针对（/task/passorno） 进行 修改检测项 内容
+     * start_time =null,origin_url=null,file_url_str=null
+     */
+    int updateTaskPassorno(SampleItemInstrumentEntity sampleItemInstrumentEntity);
+    /**
      * 进行 修改检测项
      */
     int updateSampleItemInstrumentEntity(SampleItemInstrumentEntity sampleItemInstrumentEntity);
