@@ -54,6 +54,7 @@ public class SampleController {
     @RequestMapping(value = "/addSample", method = RequestMethod.POST)
     public Result getAddSampleData(@RequestParam("json") String json, MultipartFile[] file) {
         SampleAddParamVo samples = JSON.parseObject(json, SampleAddParamVo.class);
+        log.debug("样品新增参数:{}",json);
         if (samples == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {

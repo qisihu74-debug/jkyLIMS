@@ -195,7 +195,7 @@
         LEFT JOIN test_team t5 ON t1.team_id = t5.id
         <trim prefix="WHERE" prefixOverrides="AND | OR ">
             <if test="taskCode!=null and taskCode!=''">
-                and t1.code LIKE CONCAT('%',#{taskCode},'%')
+                and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
             </if>
             <if test="sampleName!=null and sampleName!=''">
                 and t4.sample_name LIKE CONCAT('%',#{sampleName},'%')
@@ -304,7 +304,8 @@
 
     <update id="updateOriginalFile" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
         update test_entrusted_sample_checkitem_rel
-        set origin_url = #{originalUrl,jdbcType=VARCHAR}
+        set origin_url = #{originalUrl,jdbcType=VARCHAR},
+        file_url_str = #{fileUrlStr,jdbcType=VARCHAR}
         where entrust_id = #{entrustId,jdbcType=BIGINT}
           and sample_id = #{sampleId,jdbcType=INTEGER}
           and check_item_id = #{checkItemId,jdbcType=INTEGER}
