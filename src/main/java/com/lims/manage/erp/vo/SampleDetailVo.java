@@ -10,6 +10,8 @@ public class SampleDetailVo extends SampleEntity {
     private String companyName;
     private String beginDate;
     private String endDate;
+    private Integer pageNum;
+    private Integer pageSize;
     private List<String> standardName;
     private List<CheckItemInfoVo> checkItemInfoList;
 }

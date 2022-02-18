@@ -2,10 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.SamplePublicInfoVo;
-import com.lims.manage.erp.vo.TemplateSampleVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.Param;
@@ -109,6 +106,10 @@ public interface SampleEntityMapper {
      * @return
      */
     List<SamplePublicInfoVo> getSamplePublicInfos(SampleDetailVo paramVo);
+
+    List<SamplePublicInfoVo> getSamplePublicInfos1(SampleDetailVo paramVo);
+
+    List<SamplePrivateInfoVo> getSamplePrivateInfos1(List<String> insertFlag);
 
     /**
      * 查询当前年份最大样品编号

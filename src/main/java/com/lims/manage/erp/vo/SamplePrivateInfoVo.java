@@ -11,4 +11,5 @@ public class SamplePrivateInfoVo {
     private String sampleCode;
     private String batchNumber;
     private String picture;
+    private String insertFlag;
 }

@@ -1,14 +1,14 @@
 package com.lims.manage.erp.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.SampleService;
 import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.vo.SampleAddDetailVo;
-import com.lims.manage.erp.vo.SampleAddParamVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.SamplePublicInfoVo;
+import com.lims.manage.erp.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -115,6 +115,35 @@ public class SampleServiceImpl implements SampleService {
             paramVo.setEndDate(split[1]);
         }
         return sampleEntityMapper.getSamplePublicInfos(paramVo);
+    }
+
+    @Override
+    public PageInfo getSamplePublicInfos2(SampleDetailVo paramVo) {
+        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        if (paramVo.getReceivedDate() != null) {
+            String[] split = paramVo.getReceivedDate().split("~");
+            paramVo.setBeginDate(split[0]);
+            paramVo.setEndDate(split[1]);
+        }
+        List<SamplePublicInfoVo> list = sampleEntityMapper.getSamplePublicInfos1(paramVo);
+        List<String> insertFlags = Lists.newArrayList();
+        for (SamplePublicInfoVo vo:list) {
+            insertFlags.add(vo.getInsertFlag());
+        }
+        List<SamplePrivateInfoVo> samplePrivateInfos1 = sampleEntityMapper.getSamplePrivateInfos1(insertFlags);
+        for (SamplePublicInfoVo vo:list) {
+            String insertFlag = vo.getInsertFlag();
+            List<SamplePrivateInfoVo> childNode = Lists.newArrayList();
+            for (SamplePrivateInfoVo privateInfoVo: samplePrivateInfos1) {
+                String insertFlag1 = privateInfoVo.getInsertFlag();
+                if(insertFlag.equals(insertFlag1)){
+                    childNode.add(privateInfoVo);
+                }
+            }
+            vo.setChildNode(childNode);
+        }
+        PageInfo<SamplePublicInfoVo> pageInfo = new PageInfo<>(list);
+        return pageInfo;
     }
 
     @Override
