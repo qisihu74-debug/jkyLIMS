@@ -347,6 +347,7 @@
     <select id="getSealList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         SELECT
         id,
+        entrustment_id,
         report_code,
         sample_name,
         required_completion_time,
