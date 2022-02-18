@@ -354,9 +354,10 @@
         issuer_time,
         seal_type,
         sealer,
-        seal_time
+        seal_time,
+        t2.product_id
         FROM
-        test_report_record
+        test_report_record t1 LEFT JOIN test_product t2 ON t1.sample_name = t2.product_name
         WHERE 1=1
         <if test='type == "0"'>
             AND state = 6
