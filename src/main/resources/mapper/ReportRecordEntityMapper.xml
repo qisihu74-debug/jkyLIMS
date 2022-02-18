@@ -362,7 +362,7 @@
             AND state = 6
         </if>
         <if test='type == "1"'>
-            AND state = 7
+            AND state >=7
         </if>
         <if test="search != null and search != ''">
             AND report_code = #{search}
