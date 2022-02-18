@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
@@ -24,6 +25,8 @@ public interface SampleService {
      * @return
      */
     List<SamplePublicInfoVo> getSamplePublicInfos(SampleDetailVo paramVo);
+
+    PageInfo getSamplePublicInfos2(SampleDetailVo paramVo);
 
     /**
      * 新增委托时样品的查询列表

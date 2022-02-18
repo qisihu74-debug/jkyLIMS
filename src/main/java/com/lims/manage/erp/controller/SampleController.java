@@ -69,13 +69,30 @@ public class SampleController {
      * @param paramVo
      * @return
      */
-    @RequestMapping("/getSampleList")
+    @RequestMapping("/getSampleList1")
     public Result getSampleList(@RequestBody SampleDetailVo paramVo) {
         if (paramVo == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             return ResultUtil.success(sampleService.getSamplePublicInfos(paramVo));
         }
+    }
+
+    /**
+     * 查询样品信息列表--分页
+     * @param paramVo
+     * @return
+     */
+    @RequestMapping("/getSampleList")
+    public Result getSampleList1(@RequestBody SampleDetailVo paramVo) {
+        if (paramVo.getPageNum() == null || paramVo.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        if (paramVo == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+
+        return ResultUtil.success(sampleService.getSamplePublicInfos2(paramVo));
     }
 
     /**
