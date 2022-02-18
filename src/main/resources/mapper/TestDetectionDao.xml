@@ -35,6 +35,22 @@
     <delete id="deleteInstrument">
         delete from test_product_item_instrument_middle_rel where id_item =#{itemId}
     </delete>
+    <select id="getTestEntrustedSampleCheckitemRelDetailIf" resultType="com.lims.manage.erp.entity.SampleItemInstrumentEntity" >
+         SELECT
+        t1.id AS itemId,
+        t1.start_time AS startTime,
+        t1.end_time AS endTime,
+        t1.result AS result,
+        t1.test_people testPeople,
+        t1.state As state,
+        t1.origin_url As originUrl,
+        t1.file_url_str as fileUrlStr
+        FROM
+        test_entrusted_sample_checkitem_rel as t1
+                WHERE  t1.entrust_id = #{entrustId}
+				and t1.sample_id = #{sampleId}
+				and t1.check_item_id = #{checkItemId}
+    </select>
     <select id="getTestEntrustedSampleCheckitemRelDetail" resultType="com.lims.manage.erp.entity.SampleItemInstrumentEntity" >
          SELECT
         t1.id AS itemId,

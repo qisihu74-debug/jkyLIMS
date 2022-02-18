@@ -42,6 +42,15 @@ public interface TestDetectionDao {
      * 更新仪器 结束时间
      */
     int updateItemInstrumentMiddleRel(TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity);
+
+    /**
+     * 根据必要条件查询 任务单信息
+     * @param entrustId
+     * @param sampleId
+     * @param checkItemId
+     * @return
+     */
+    SampleItemInstrumentEntity getTestEntrustedSampleCheckitemRelDetailIf(Long entrustId, Integer sampleId, Integer checkItemId);
     /**
      * 根据检测项 主键  获取（test_entrusted_sample_checkitem_rel）详情信息
      *

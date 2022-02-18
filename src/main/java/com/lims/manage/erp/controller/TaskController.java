@@ -216,6 +216,9 @@ public class TaskController {
         OriginalRecordParamVo paramVo = JSON.parseObject(json, OriginalRecordParamVo.class);
         int i = taskService.uploadOriginalRecord(paramVo, file);
         if (i > 0) {
+            if(i==2){
+                return ResultUtil.error("文件已存在");
+            }
             return ResultUtil.success("上传原始记录成功！", i);
         } else {
             return ResultUtil.error(101, "上传原始记录失败！");

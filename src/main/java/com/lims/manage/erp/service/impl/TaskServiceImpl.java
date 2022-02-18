@@ -209,13 +209,19 @@ public class TaskServiceImpl implements TaskService {
     public int uploadOriginalRecord(OriginalRecordParamVo paramVo, MultipartFile file) {
         //获取委托单信息
         EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
+        // 获取检测项详细信息 判断文件是否上传
+        SampleItemInstrumentEntity sampleItemInstrumentEntity = testDetectionDao.getTestEntrustedSampleCheckitemRelDetailIf(entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId());
+        if(sampleItemInstrumentEntity.getOriginUrl()!=null){
+            // 文件已经存在
+            return 2;
+        }
         String upload = "";
         String fileUrlStr = "";
         if (file != null) {
             String name = file.getOriginalFilename();
             String[] strings = name.split("\\.");
             upload = MinIoUtil.upload("upload-original-record", file, entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + "." + strings[strings.length - 1]);
-            fileUrlStr = entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + paramVo.getCheckItemId() + "." + strings[strings.length - 1];
+            fileUrlStr = entrustBaseInfo.getId() + "-" + paramVo.getSampleId() +"-"+ paramVo.getCheckItemId() + "." + strings[strings.length - 1];
         }
 
         return taskMapper.updateOriginalFile(upload, entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId(), fileUrlStr);
