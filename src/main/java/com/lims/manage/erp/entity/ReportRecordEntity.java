@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lims.manage.erp.vo.ReportPreserveVo;
@@ -139,6 +140,8 @@ public class ReportRecordEntity {
      * 报告生成时间（state=1时）
      */
     private Date reportCompleteTime;
+    @TableField(exist = false)
+    private Integer productId;
 
     public ReportRecordEntity() {
     }
