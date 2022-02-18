@@ -1,10 +1,8 @@
 package com.lims.manage.erp.service.impl;
 
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TaskTestTeamEntity;
+import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestDetectionDao;
@@ -37,6 +35,8 @@ public class TaskServiceImpl implements TaskService {
     private SampleEntityMapper sampleEntityMapper;
     @Autowired
     private TestDetectionDao testDetectionDao;
+    @Autowired
+    private ReportRecordEntityMapper reportRecordEntityMapper;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -233,11 +233,20 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public int passorno(Integer itemId, Integer state, String opinion) {
+    public String passorno(Integer itemId, Integer state, String opinion) {
         // 驳回=4，通过=3，撤回=1
         if (state != null) {
             if (state == 1) {
                 SampleItemInstrumentEntity sampleItemInstrumentEntity2 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
+                // 检测项 撤回时 考虑 （盖章的话） test_report_record state = '7'
+                // 通过委托单id 获取报告test_report_record state 状态
+                ReportRecordEntity reportRecordEntity = reportRecordEntityMapper.selectByEntrustId(sampleItemInstrumentEntity2.getEntrustId());
+                if(reportRecordEntity!=null&&reportRecordEntity.getState()!=null){
+                    if(Integer.parseInt(reportRecordEntity.getState())==7&&Integer.parseInt(reportRecordEntity.getState())>7){
+                        return "撤回失败！此报告已经盖章";
+                    }
+                }
+
                 if (sampleItemInstrumentEntity2.getOriginUrl() != null && !sampleItemInstrumentEntity2.getOriginUrl().isEmpty()) {
                     // 去清除 MinIo 桶数据。
                     try {
@@ -259,10 +268,14 @@ public class TaskServiceImpl implements TaskService {
                 testDetectionDao.updateTaskPassorno(sampleItemInstrumentEntity);
                 // 删除设备仪器
                 testDetectionDao.deleteInstrument(itemId);
-                return 1;
+                return "撤回成功，检测项回到初始状态";
             }
         }
-        return taskMapper.updateState(itemId, state, opinion);
+        int status = taskMapper.updateState(itemId, state, opinion);
+        if(status>0){
+            return "成功";
+        }
+        return "失败";
     }
 
     @Override

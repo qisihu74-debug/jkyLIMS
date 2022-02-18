@@ -102,7 +102,7 @@ public interface TaskService {
      * @param state
      * @return
      */
-    int passorno(Integer itemId, Integer state,String opinion);
+    String passorno(Integer itemId, Integer state,String opinion);
 
     /**
      * 查询任务下检测人、记录人、复核人、报告制作人信息
