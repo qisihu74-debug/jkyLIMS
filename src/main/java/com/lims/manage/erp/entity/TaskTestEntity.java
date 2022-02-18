@@ -92,5 +92,9 @@ public class TaskTestEntity {
      * 完成检测时间
      */
     private Date endDetectionTime;
+    /**
+     * 文件附件
+     */
+    private String fileUrlStr;
 
 }

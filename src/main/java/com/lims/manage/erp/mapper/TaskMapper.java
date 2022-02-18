@@ -146,7 +146,7 @@ public interface TaskMapper extends BaseMapper {
      * @param checkItemId
      * @return
      */
-    int updateOriginalFile(String originalUrl, Long entrustId, Integer sampleId, Integer checkItemId);
+    int updateOriginalFile(String originalUrl, Long entrustId, Integer sampleId, Integer checkItemId,String fileUrlStr);
 
     /**
      * 查询复合数据

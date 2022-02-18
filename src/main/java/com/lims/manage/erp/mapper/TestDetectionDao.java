@@ -31,6 +31,13 @@ public interface TestDetectionDao {
      * 新增 检测项id 多个仪器id
      */
     int addItemInstrumentMiddleRel(TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity);
+
+    /**
+     * 根据检测项主键删除 所属设备仪器
+     * @param itemId
+     * @return
+     */
+    int deleteInstrument(Integer itemId);
     /**
      * 更新仪器 结束时间
      */

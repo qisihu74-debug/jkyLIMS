@@ -62,7 +62,7 @@
         t1.department,
         t3.role_id,
         t4.role_name,
-        t5.NAME,
+        t1.NAME,
         t1.ding_user_id
         FROM
         sys_user t1

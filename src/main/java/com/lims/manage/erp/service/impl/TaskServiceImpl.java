@@ -1,10 +1,13 @@
 package com.lims.manage.erp.service.impl;
 
+import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TestDetectionDao;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.*;
@@ -14,6 +17,8 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +30,13 @@ import java.util.List;
 @Service
 @Slf4j
 public class TaskServiceImpl implements TaskService {
+    Logger logger = LoggerFactory.getLogger(TaskServiceImpl.class);
     @Autowired
     private TaskMapper taskMapper;
     @Autowired
     private SampleEntityMapper sampleEntityMapper;
+    @Autowired
+    private TestDetectionDao testDetectionDao;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -169,7 +177,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public OriginalRecordDataVo getOriginalData(Long taskId,Integer sampleId,Integer checkItemId) {
+    public OriginalRecordDataVo getOriginalData(Long taskId, Integer sampleId, Integer checkItemId) {
         //生成记录编号
         String recordNumber = "JL-C2105-108-04";
         //获取委托单信息
@@ -201,8 +209,16 @@ public class TaskServiceImpl implements TaskService {
     public int uploadOriginalRecord(OriginalRecordParamVo paramVo, MultipartFile file) {
         //获取委托单信息
         EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
-        String upload = MinIoUtil.upload("upload-original-record", file, entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + file.getOriginalFilename());
-        return taskMapper.updateOriginalFile(upload,entrustBaseInfo.getId(),paramVo.getSampleId(),paramVo.getCheckItemId());
+        String upload = "";
+        String fileUrlStr = "";
+        if (file != null) {
+            String name = file.getOriginalFilename();
+            String[] strings = name.split("\\.");
+            upload = MinIoUtil.upload("upload-original-record", file, entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + "." + strings[strings.length - 1]);
+            fileUrlStr = entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + paramVo.getCheckItemId() + "." + strings[strings.length - 1];
+        }
+
+        return taskMapper.updateOriginalFile(upload, entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId(), fileUrlStr);
     }
 
     @Override
@@ -211,8 +227,35 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public int passorno(Integer itemId, Integer state,String opinion) {
-        return taskMapper.updateState(itemId,state,opinion);
+    public int passorno(Integer itemId, Integer state, String opinion) {
+        // 驳回=4，通过=3，撤回=1
+        if (state != null) {
+            if (state == 1) {
+                SampleItemInstrumentEntity sampleItemInstrumentEntity2 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
+                if (sampleItemInstrumentEntity2.getOriginUrl() != null && !sampleItemInstrumentEntity2.getOriginUrl().isEmpty()) {
+                    // 去清除 MinIo 桶数据。
+                    try {
+                        MinIoUtil.deleteFile("upload-original-record", sampleItemInstrumentEntity2.getFileUrlStr());
+                    } catch (Exception e) {
+                        logger.info("修改委托下清除 MinIo 桶数据 出错");
+                    }
+                }
+                SampleItemInstrumentEntity sampleItemInstrumentEntity = new SampleItemInstrumentEntity();
+                // 待检状态 =0
+                sampleItemInstrumentEntity.setState(0);
+                // 检测项 开始时间更新
+                sampleItemInstrumentEntity.setStartTime(null);
+                sampleItemInstrumentEntity.setItemId(itemId);
+                sampleItemInstrumentEntity.setOpinion(opinion);
+                sampleItemInstrumentEntity.setOriginUrl(null);
+                sampleItemInstrumentEntity.setFileUrlStr(null);
+                testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
+                // 删除设备仪器
+                testDetectionDao.deleteInstrument(itemId);
+                return 1;
+            }
+        }
+        return taskMapper.updateState(itemId, state, opinion);
     }
 
     @Override

@@ -32,5 +32,14 @@ public class SampleItemInstrumentEntity extends SampleItemEntity{
      * 检测项 名称
      */
     private String checkItemName;
+    /**
+     *
+     */
+    private String opinion;
+
+    /**
+     * 文件附件
+     */
+    private String fileUrlStr;
 
 }

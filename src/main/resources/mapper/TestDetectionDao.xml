@@ -17,11 +17,14 @@
     <update id="updateSampleItemInstrumentEntity" parameterType="com.lims.manage.erp.entity.SampleItemInstrumentEntity">
         UPDATE test_entrusted_sample_checkitem_rel
         <trim prefix="SET" suffixOverrides=",">
-        <if test="startTime!=null">start_time=#{startTime},</if>
+            start_time=#{startTime},
         <if test="isApproved!=null and isApproved!=''">is_approved=#{isApproved},</if>
         <if test="state!=null">state=#{state},</if>
         <if test="endTime!=null">end_time=#{endTime},</if>
         <if test="result!=null and result!=''">result=#{result},</if>
+        <if test="opinion!=null and opinion!=''">opinion=#{opinion},</if>
+            origin_url=#{originUrl},
+            file_url_str=#{fileUrlStr},
         </trim>
          WHERE id = #{itemId}
     </update>
@@ -29,6 +32,9 @@
             useGeneratedKeys="true" keyProperty="id">
         INSERT into test_product_item_instrument_middle_rel (id_item,intrusment_id,start_time) VALUES(#{sidItem},#{intrusmentId},#{startTime})
     </insert>
+    <delete id="deleteInstrument">
+        delete from test_product_item_instrument_middle_rel where id_item =#{itemId}
+    </delete>
     <select id="getTestEntrustedSampleCheckitemRelDetail" resultType="com.lims.manage.erp.entity.SampleItemInstrumentEntity" >
          SELECT
         t1.id AS itemId,
@@ -38,7 +44,8 @@
         t1.result AS result,
         t1.test_people testPeople,
         t1.state As state,
-        t1.origin_url As originUrl
+        t1.origin_url As originUrl,
+        t1.file_url_str as fileUrlStr
         FROM
         test_entrusted_sample_checkitem_rel as t1
         LEFT JOIN test_product_item as t2 ON t1.check_item_id = t2.check_item_id
