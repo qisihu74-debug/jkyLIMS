@@ -221,6 +221,10 @@ public class EntrustServiceImpl implements EntrustService {
             code = Integer.parseInt(currentTime + "0001");
         }
         basisInfo.setEntrustmentNo(code);
+        // 通过委托编号 查询是否存在
+        if(entityMapper.getByData(basisInfo.getEntrustmentNo())!=null){
+            return false;
+        }
         //附件存在上传附件到服务器
         if (file != null) {
             StringBuilder stringBuilder = new StringBuilder();
