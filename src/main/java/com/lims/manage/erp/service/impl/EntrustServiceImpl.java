@@ -210,6 +210,10 @@ public class EntrustServiceImpl implements EntrustService {
         String currentTime = DateUtil.getTodayString().substring(0, 6);
         //获取当前最大样品编号
         Integer entrustNum = entityMapper.selectMaxNo();
+        // 通过委托编号 查询是否存在
+        if(entityMapper.getByData(entrustNum)!=null){
+            return false;
+        }
         if (entrustNum != null && entrustNum > 0) {
             String substring = entrustNum.toString().substring(0, 6);
             if (substring.equals(currentTime)) {
