@@ -139,6 +139,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                 and company_id = #{companyId}
             </if>
         </trim>
+        order by insert_flag desc
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
         delete

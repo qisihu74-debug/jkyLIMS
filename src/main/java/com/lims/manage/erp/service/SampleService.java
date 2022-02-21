@@ -36,6 +36,8 @@ public interface SampleService {
      */
     List<SampleEntity> getSampleDataList(SampleEntity sampleEntity);
 
+    PageInfo getSampleDataList2(SampleEntity sampleEntity);
+
     /**
      * 查询样品组基本信息
      *

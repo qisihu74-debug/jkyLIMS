@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.lims.manage.erp.vo.JudgmentBasisVo;
 import com.lims.manage.erp.vo.SampleAddDetailVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
@@ -141,6 +142,10 @@ public class SampleEntity {
      * 0为未使用，1为已使用
      */
     private Integer isUse;
+    @TableField(exist = false)
+    private Integer pageNum;
+    @TableField(exist = false)
+    private Integer pageSize;
 
     /**
      * 样品下检测项、检测依据、总价
@@ -370,5 +375,21 @@ public class SampleEntity {
 
     public void setInsertFlag(String insertFlag) {
         this.insertFlag = insertFlag;
+    }
+
+    public Integer getPageNum() {
+        return pageNum;
+    }
+
+    public void setPageNum(Integer pageNum) {
+        this.pageNum = pageNum;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 }
