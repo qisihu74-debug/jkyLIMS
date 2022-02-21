@@ -173,8 +173,9 @@ public class ImageToPdfUtils {
         PdfStamper stamper = new PdfStamper(reader, outputStream);
         int total = reader.getNumberOfPages() + 1;
         PdfContentByte content;
-        BaseFont base = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.EMBEDDED);
+//        BaseFont base = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.EMBEDDED);
 //        BaseFont base = BaseFont.createFont("c:\\windows\\fonts\\SIMHEI.TTF", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+        BaseFont base = BaseFont.createFont("/usr/share/fonts/simhei.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
         PdfGState gs = new PdfGState();
         for (int i = 1; i < total; i++) {
             content = stamper.getUnderContent(i);//在内容下方加水印
