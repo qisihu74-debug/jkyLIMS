@@ -11,9 +11,7 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,16 +118,20 @@ public class TaskServiceImpl implements TaskService {
             doc = new XWPFDocument(object);
             List<XWPFTable> tables = doc.getTables();
             List<XWPFTableRow> rows;
+            // 第一列整体表格
             XWPFTable table = tables.get(0);
+            // 第二列整体表格
+            XWPFTable table1 = tables.get(1);
+            List<XWPFTableRow> rows1;
+            rows1 = table1.getRows();
             //表格属性
             CTTblPr pr = table.getCTTbl().getTblPr();
             //表头部分
 
             // 遍历 样品数据
             List<SampleDetailVo> sampleDetailList = taskDetailInfoVo.getSampleDetailList();
-            if (sampleDetailList.size() > 1) {
-                for (int i = 1; i < sampleDetailList.size(); i++) {
-                }
+            if(taskDetailInfoVo.getSampleDetailList()==null||taskDetailInfoVo.getSampleDetailList().isEmpty()){
+                return doc;
             }
             //获取表格对应的行
             rows = table.getRows();
@@ -168,7 +170,7 @@ public class TaskServiceImpl implements TaskService {
             // 要求检验完成日期
             rows.get(9).getTableCells().get(1).setText(taskDetailInfoVo.getRequiredCompletionTime());
             // 本单产值
-            rows.get(9).getTableCells().get(3).setText("待补充");
+            rows.get(9).getTableCells().get(3).setText(taskDetailInfoVo.getCost());
             return doc;
         } catch (Exception e) {
             System.out.println("设置委托单信息到模板异常:" + e);
@@ -242,7 +244,7 @@ public class TaskServiceImpl implements TaskService {
                 // 通过委托单id 获取报告test_report_record state 状态
                 ReportRecordEntity reportRecordEntity = reportRecordEntityMapper.selectByEntrustId(sampleItemInstrumentEntity2.getEntrustId());
                 if(reportRecordEntity!=null&&reportRecordEntity.getState()!=null){
-                    if(Integer.parseInt(reportRecordEntity.getState())==7&&Integer.parseInt(reportRecordEntity.getState())>7){
+                    if(Integer.parseInt(reportRecordEntity.getState())==7&&Integer.parseInt(reportRecordEntity.getState())>=7){
                         return "撤回失败！此报告已经盖章";
                     }
                 }
