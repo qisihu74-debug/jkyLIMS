@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.HomeAfficheDao">
+
+    <insert id="addHomeAffiche" parameterType="com.lims.manage.erp.entity.HomeAfficheEntity">
+        insert into home_affiche (id,spreadhead,subheading,file_url,file_url_name,content_detail,create_time,update_time,issuer_name,issuer_user_id)
+        values (#{id},#{spreadhead},#{subheading},#{fileUrl},#{fileUrlName},#{contentDetail},#{createTime},#{updateTime},#{issuerName},#{issuerUserId})
+    </insert>
+
+    <select id="announceHistory" resultType="com.lims.manage.erp.entity.HomeAfficheEntity">
+        select
+        spreadhead,subheading,file_url,file_url_name,content_detail,issuer_name
+        from
+        home_affiche
+        ORDER BY create_time desc
+    </select>
+</mapper>

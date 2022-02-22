@@ -37,6 +37,10 @@ public class BucketsConst {
      * 任务单
      */
     public static final String buckets_task_template = "task-template";
+    /**
+     * 公告文件
+     */
+    public static final String buckets_affiche_template="affiche-template";
 
 
 }
