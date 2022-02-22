@@ -152,6 +152,14 @@ public class SampleServiceImpl implements SampleService {
     }
 
     @Override
+    public PageInfo getSampleDataList2(SampleEntity sampleEntity) {
+        PageHelper.startPage(sampleEntity.getPageNum(), sampleEntity.getPageSize());
+        List<SampleEntity> list = sampleEntityMapper.selectSampleList(sampleEntity);
+        PageInfo<SampleEntity> pageInfo = new PageInfo<>(list);
+        return pageInfo;
+    }
+
+    @Override
     public SampleDetailVo getSampleGroupInfo(String insertFlag) {
         return sampleEntityMapper.getSampleGroupInfo(insertFlag);
     }

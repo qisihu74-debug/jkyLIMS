@@ -102,9 +102,12 @@ public class SampleController {
      * @return
      */
     @RequestMapping("/getSampleList2")
-    public Result getSampleList2(SampleEntity sampleEntity) {
+    public Result getSampleList2(@RequestBody SampleEntity sampleEntity) {
         System.out.println("getSampleList2"+sampleEntity);
-        return ResultUtil.success(sampleService.getSampleDataList(sampleEntity));
+        if (sampleEntity.getPageNum() == null || sampleEntity.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success(sampleService.getSampleDataList2(sampleEntity));
     }
 
     /**
