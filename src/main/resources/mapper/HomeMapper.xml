@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.HomeMapper">
+
+    <select id="getAllTask" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM test_entrusted_info
+        WHERE str_to_date(request_date, '%Y-%m-%d') = str_to_date(date_format(now(), '%Y-%m-%d'), '%Y-%m-%d')
+          and state != 144
+    </select>
+
+    <select id="getCompleteTask" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM test_entrusted_info
+        WHERE str_to_date(request_date, '%Y-%m-%d') = str_to_date(date_format(now(), '%Y-%m-%d'), '%Y-%m-%d')
+          and state = 200
+    </select>
+
+    <select id="getIncompleteTask" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM test_entrusted_info
+        WHERE str_to_date(request_date, '%Y-%m-%d') = str_to_date(date_format(now(), '%Y-%m-%d'), '%Y-%m-%d')
+          and state != 144 and state = 200
+    </select>
+
+    <select id="getOutputValue" resultType="java.lang.Integer">
+        SELECT SUM(count_price) value
+        FROM
+            test_entrusted_info
+        WHERE
+            str_to_date( request_date
+            , '%Y-%m-%d' ) = str_to_date( date_format(now()
+            , '%Y-%m-%d')
+            , '%Y-%m-%d' )
+          and state != 144
+    </select>
+
+    <select id="outputValueStatistics" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT str_to_date(request_date, '%Y-%m-%d') label,
+               SUM(count_price) VALUE
+        FROM
+            test_entrusted_info
+        WHERE
+            str_to_date( request_date
+            , '%Y-%m-%d' ) &gt;= str_to_date( #{beginDate}
+            , '%Y-%m-%d' )
+          AND str_to_date( request_date
+            , '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}
+            , '%Y-%m-%d' )
+          AND state != 144
+        GROUP BY
+            str_to_date( request_date, '%Y-%m-%d' )
+        ORDER BY
+            str_to_date( request_date, '%Y-%m-%d' )
+    </select>
+
+    <select id="outputValueStatisticsYear" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT SUBSTR(str_to_date(request_date, '%Y-%m-%d'), 1, 7) label,
+               SUM(count_price) VALUE
+        FROM
+            test_entrusted_info
+        WHERE
+            str_to_date( request_date
+            , '%Y-%m-%d' ) >= str_to_date( #{beginDate}
+            , '%Y-%m-%d' )
+          AND str_to_date( request_date
+            , '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}
+            , '%Y-%m-%d' )
+          AND state != 144
+        GROUP BY
+            SUBSTR( str_to_date( request_date, '%Y-%m-%d' ), 1, 7 )
+        ORDER BY
+            SUBSTR( str_to_date( request_date, '%Y-%m-%d' ), 1, 7 )
+    </select>
+
+</mapper>
