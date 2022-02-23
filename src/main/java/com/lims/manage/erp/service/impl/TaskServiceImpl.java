@@ -37,7 +37,13 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
-        return taskMapper.getTaskDetailInfo(taskId);
+        // 处理 委托单的文件链接
+        TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfo(taskId);
+        if(taskDetailInfoVo.getFileUrl()!=null){
+            String[] array = taskDetailInfoVo.getFileUrl().split(",");
+            taskDetailInfoVo.setArray(array);
+        }
+        return taskDetailInfoVo;
     }
 
     @Override
