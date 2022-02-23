@@ -82,9 +82,25 @@ public class HomeServiceImpl implements HomeService {
                 j++;
                 dateList.add(dateFormat.format(cal.getTime()));
             }
+        }else if(flag == 3){
+            Calendar cal = Calendar.getInstance();// 获得当前日期对象
+            cal.setTime(new Date(System.currentTimeMillis()));
+            int year = cal.get(Calendar.YEAR);
+            for (int i = 1; i <= 12; i++) {
+                if(i<10){
+                    dateList.add(year + "-0" + i);
+                }else{
+                    dateList.add(year+"-"+i);
+                }
+            }
         }
         List<LabelValueVo> result = Lists.newArrayList();
-        List<LabelValueVo> temp = homeMapper.outputValueStatistics(dateList.get(0), dateList.get(dateList.size()-1));
+        List<LabelValueVo> temp;
+        if(flag==3){
+            temp = homeMapper.outputValueStatisticsYear(dateList.get(0)+"-01", dateList.get(dateList.size()-1)+"-31");
+        }else{
+            temp = homeMapper.outputValueStatistics(dateList.get(0), dateList.get(dateList.size()-1));
+        }
         for (String s : dateList) {
             LabelValueVo vo = null;
             for (LabelValueVo labelValueVo : temp) {

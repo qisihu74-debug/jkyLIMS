@@ -38,8 +38,16 @@ public interface HomeMapper {
     Integer getOutputValue();
 
     /**
-     * 产值分析
+     * 产值分析--周、月维度
      * @return
      */
     List<LabelValueVo> outputValueStatistics(String beginDate,String endDate);
+
+    /**
+     * 产值分析--年维度
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    List<LabelValueVo> outputValueStatisticsYear(String beginDate,String endDate);
 }

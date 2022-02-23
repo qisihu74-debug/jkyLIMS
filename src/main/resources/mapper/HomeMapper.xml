@@ -37,19 +37,41 @@
     </select>
 
     <select id="outputValueStatistics" resultType="com.lims.manage.erp.vo.LabelValueVo">
-        SELECT
-        str_to_date( request_date, '%Y-%m-%d' ) label,
-        SUM( count_price ) VALUE
+        SELECT str_to_date(request_date, '%Y-%m-%d') label,
+               SUM(count_price) VALUE
         FROM
-        test_entrusted_info
+            test_entrusted_info
         WHERE
-        str_to_date( request_date, '%Y-%m-%d' ) &gt;= str_to_date( #{beginDate}, '%Y-%m-%d' )
-        AND str_to_date( request_date, '%Y-%m-%d' )&lt;= str_to_date( #{endDate}, '%Y-%m-%d' )
-        AND state != 144
+            str_to_date( request_date
+            , '%Y-%m-%d' ) &gt;= str_to_date( #{beginDate}
+            , '%Y-%m-%d' )
+          AND str_to_date( request_date
+            , '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}
+            , '%Y-%m-%d' )
+          AND state != 144
         GROUP BY
-        str_to_date( request_date, '%Y-%m-%d' )
+            str_to_date( request_date, '%Y-%m-%d' )
         ORDER BY
-        str_to_date( request_date, '%Y-%m-%d' )
+            str_to_date( request_date, '%Y-%m-%d' )
+    </select>
+
+    <select id="outputValueStatisticsYear" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT SUBSTR(str_to_date(request_date, '%Y-%m-%d'), 1, 7) label,
+               SUM(count_price) VALUE
+        FROM
+            test_entrusted_info
+        WHERE
+            str_to_date( request_date
+            , '%Y-%m-%d' ) >= str_to_date( #{beginDate}
+            , '%Y-%m-%d' )
+          AND str_to_date( request_date
+            , '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}
+            , '%Y-%m-%d' )
+          AND state != 144
+        GROUP BY
+            SUBSTR( str_to_date( request_date, '%Y-%m-%d' ), 1, 7 )
+        ORDER BY
+            SUBSTR( str_to_date( request_date, '%Y-%m-%d' ), 1, 7 )
     </select>
 
 </mapper>
