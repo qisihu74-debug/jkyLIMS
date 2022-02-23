@@ -335,7 +335,6 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean seal(List<String> list, Long id) {
         //TODO 根据印章类型，请求契约所的印章
-
         //qiYueSuoHnadler.creatFile();
 
 
