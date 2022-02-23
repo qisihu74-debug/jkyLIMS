@@ -95,11 +95,11 @@
 
     <select id="getTaskDetailInfo" resultMap="taskResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT t1.id,
-               IFNULL(t1.task_code, t1.code)        code,
+               IFNULL(t1.task_code, t1.code)                        code,
                t1.orderer,
-               t1.order_time,
-               t1.required_completion_time,
-               t2.count_price                       cost,
+               DATE_FORMAT(t1.order_time, '%Y-%m-%d')               order_time,
+               DATE_FORMAT(t1.required_completion_time, '%Y-%m-%d') required_completion_time,
+               t2.count_price                                       cost,
                t2.sampling_method,
                t2.check_purpose,
                t2.present_information,
@@ -125,12 +125,12 @@
                t5.method_id,
                t7.name,
                t5.standard_id,
-               CONCAT(t6.code, '《', t6.`name`, '》') standard_name,
+               CONCAT(t6.code, '《', t6.`name`, '》')                 standard_name,
                t5.times,
                t5.unit_price,
-               t5.id         AS                     itemId,
-               t5.state      AS                     state,
-               t5.origin_url AS                     originUrl,
+               t5.id         AS                                     itemId,
+               t5.state      AS                                     state,
+               t5.origin_url AS                                     originUrl,
                t5.opinion
         FROM test_task t1
                  LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
@@ -178,7 +178,7 @@
         SELECT DISTINCT
         t1.id taskId,
         IFNULL( t1.task_code, t1.CODE ) taskCode,
-        t1.required_completion_time requiredCompletionTime,
+        DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
         t1.inspector,
         t2.count_price cost,
         t4.sample_name sampleName,
@@ -305,8 +305,8 @@
 
     <update id="updateOriginalFile" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
         update test_entrusted_sample_checkitem_rel
-        set origin_url = #{originalUrl,jdbcType=VARCHAR},
-        file_url_str = #{fileUrlStr,jdbcType=VARCHAR}
+        set origin_url   = #{originalUrl,jdbcType=VARCHAR},
+            file_url_str = #{fileUrlStr,jdbcType=VARCHAR}
         where entrust_id = #{entrustId,jdbcType=BIGINT}
           and sample_id = #{sampleId,jdbcType=INTEGER}
           and check_item_id = #{checkItemId,jdbcType=INTEGER}
