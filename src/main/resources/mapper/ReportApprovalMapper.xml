@@ -71,7 +71,7 @@
     <select id="getTaskDetail" resultType="com.lims.manage.erp.vo.TaskDetailInfoVo">
         SELECT
         t1.price AS cost,
-        t1.required_completion_time AS requiredCompletionTime,
+        DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') AS requiredCompletionTime,
         t1.task_code AS taskCode,
         t2.entrust_type checkPurpose,
         t2.sampling_method AS samplingMethod,
