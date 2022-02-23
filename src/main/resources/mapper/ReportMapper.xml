@@ -186,6 +186,9 @@
             <if test="url != null">
                 report_url = #{url,jdbcType=VARCHAR}
             </if>
+            <if test="code != null">
+                template = #{code,jdbcType=VARCHAR}
+            </if>
         </set>
         where id = #{id,jdbcType=INTEGER}
     </update>

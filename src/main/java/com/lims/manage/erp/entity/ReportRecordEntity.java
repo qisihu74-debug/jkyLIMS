@@ -140,6 +140,10 @@ public class ReportRecordEntity {
      * 报告生成时间（state=1时）
      */
     private Date reportCompleteTime;
+    /**
+     * 报告模板名称
+     */
+    private String templateName;
     @TableField(exist = false)
     private Integer productId;
 
