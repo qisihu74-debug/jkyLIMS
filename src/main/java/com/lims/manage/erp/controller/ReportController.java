@@ -2,9 +2,11 @@ package com.lims.manage.erp.controller;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
-import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.SealReqEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.result.Result;
@@ -13,33 +15,37 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.util.*;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import io.minio.MinioClient;
 import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.xmlpull.v1.XmlPullParserException;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 @Slf4j
@@ -336,118 +342,11 @@ public class ReportController {
      */
     @GetMapping("download")
     public String downReport(Long id, String code, HttpServletResponse response) {
-        ReportRecordEntity reportRecordEntity = reportService.selectByEntrustId(id);
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
-        XWPFDocument doc = null;
-        String url = null;
+        String url = "";
         try {
-            client.statObject("report-word", code + ".docx");
-            InputStream object = client.getObject("report-word", code + ".docx");
-            doc = new XWPFDocument(object);
-            //写入数据
-            List<ReportRecordDetailEntity> checkItemList = reportService.getCheckInfoByRecordId(reportRecordEntity.getId());
-            if (CollectionUtils.isNotEmpty(checkItemList)) {
-                //处理表格
-                Iterator<XWPFTable> it = doc.getTablesIterator();
-                //表格索引
-                int i = 1;
-                //获取表格信息
-                while (it.hasNext()) {
-                    XWPFTable table = it.next();
-                    List<XWPFTableRow> rows = table.getRows();
-                    //存放表头信息
-                    EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
-                    if (i == 1) {
-                        rows.get(4).getCell(1).removeParagraph(0);
-                        rows.get(4).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
-                        rows.get(4).getCell(3).removeParagraph(0);
-                        rows.get(4).getCell(3).setText(entrustHistoryDetail.getProjectName());
-                        rows.get(5).getCell(1).removeParagraph(0);
-                        rows.get(5).getCell(1).setText(entrustHistoryDetail.getProjectPart());
-                        //样品信息
-                        SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
-                        rows.get(6).getCell(1).removeParagraph(0);
-                        rows.get(6).getCell(1).setText("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
-                                + "样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
-                                + "样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
-                                + "样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
-                                + "收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
-                        //检测依据
-                        String checkBasis = reportService.getCheckBasis(id);
-                        rows.get(7).getCell(1).removeParagraph(0);
-                        rows.get(7).getCell(1).setText(checkBasis.equals("") ? "——" : checkBasis);
-                        //判定依据
-                        String judgeBasis = reportService.getJudgeBasis(id);
-                        rows.get(7).getCell(3).removeParagraph(0);
-                        rows.get(7).getCell(3).setText(judgeBasis.equals("") ? "——" : judgeBasis);
-                        //检测日期
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-                        rows.get(8).getCell(1).removeParagraph(0);
-                        rows.get(8).getCell(1).setText(sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
-                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime())
-                        );
-                        //主要仪器
-                        String equipment = reportService.getEquipment(id);
-                        rows.get(9).getCell(1).removeParagraph(0);
-                        rows.get(9).getCell(1).setText(equipment.equals("") ? "——" : equipment);
-                        //委托编号
-                        rows.get(10).getCell(1).removeParagraph(0);
-                        rows.get(10).getCell(1).setText(entrustHistoryDetail.getEntrustmentNo() + "");
-                        //检测类别
-                        rows.get(10).getCell(3).removeParagraph(0);
-                        rows.get(10).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
-                        //批号
-                        rows.get(11).getCell(1).removeParagraph(0);
-                        rows.get(11).getCell(1).setText(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
-                        //生产厂家
-                        rows.get(11).getCell(3).removeParagraph(0);
-                        rows.get(11).getCell(3).setText(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
-                        //规格等级
-                        rows.get(12).getCell(1).removeParagraph(0);
-                        rows.get(12).getCell(1).setText(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
-                        //代表数量
-                        rows.get(12).getCell(3).removeParagraph(0);
-                        rows.get(12).getCell(3).setText(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
-                    }
-                    //存放检测数据
-                    for (ReportRecordDetailEntity item : checkItemList) {
-                        int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
-                        int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
-                        int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
-                        if (i == page) {
-                            rows.get(row).getCell(column + 1).removeParagraph(0);
-                            rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
-                            rows.get(row).getCell(column + 2).removeParagraph(0);
-                            rows.get(row).getCell(column + 2).setText(item.getCheckResult());
-                            rows.get(row).getCell(column + 3).removeParagraph(0);
-                            rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
-                        }
-                    }
-                    i++;
-                }
-            }
-            ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
-            //盖章
-            String sealUrl = reportRecordEntity.getSealUrl();
-            List<ImagePro> imagePros = Lists.newArrayList();
-            if (!StringUtils.isEmpty(sealUrl) || sealUrl != null) {
-                String[] split = sealUrl.split(",");
-                for (int i = 0; i < split.length; i++) {
-                    ImagePro pro = new ImagePro(100 * (i + 1), 100, 15F, split[i]);
-                    imagePros.add(pro);
-                }
-            }
-            InputStream inputStream1 = new ByteArrayInputStream(b1.toByteArray());
-            ByteArrayOutputStream b2 = new ByteArrayOutputStream();
-            ByteArrayOutputStream b3 = ImageToPdfUtils.writeToPdf4(inputStream1, b2, imagePros);
-            InputStream inputStream = FileAndFolderUtil.parseOut(b3);
-            url = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream, "application/octet-stream");
-            reportService.updateReportUrl(reportRecordEntity.getId(), url);
-
-//            ServletOutputStream outputStream = response.getOutputStream();
-//            FileAndFolderUtil.parseIn(inputStream)
-
+        url = reportService.downLoad(client,code,id);
         } catch (MinioException e) {
             System.out.println("Error occurred: " + e);
         } catch (XmlPullParserException e) {
