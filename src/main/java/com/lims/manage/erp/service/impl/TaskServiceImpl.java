@@ -2,10 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TestDetectionDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.*;
@@ -35,6 +32,8 @@ public class TaskServiceImpl implements TaskService {
     private TestDetectionDao testDetectionDao;
     @Autowired
     private ReportRecordEntityMapper reportRecordEntityMapper;
+    @Autowired
+    private EntrustEntityMapper entrustEntityMapper;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -60,6 +59,11 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public int receiveSample(ReceiveSampleParamVo paramVo) {
         paramVo.setState(2);
+        // 根据任务单主键 获取委托单主键
+        EntrustEntity entrustEntity  = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
+        if(entrustEntity!=null){
+            taskMapper.updateEntrustById(entrustEntity.getId(),2);
+        }
         return taskMapper.updateSampler(paramVo);
     }
 
@@ -225,12 +229,23 @@ public class TaskServiceImpl implements TaskService {
             upload = MinIoUtil.upload("upload-original-record", file, entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + "." + strings[strings.length - 1]);
             fileUrlStr = entrustBaseInfo.getId() + "-" + paramVo.getSampleId() +"-"+ paramVo.getCheckItemId() + "." + strings[strings.length - 1];
         }
-
+        // 根据任务单主键 获取委托单主键
+        if(entrustBaseInfo!=null){
+            if(entrustBaseInfo.getState()<5){
+                taskMapper.updateEntrustById(entrustBaseInfo.getId(),5);
+            }
+        }
         return taskMapper.updateOriginalFile(upload, entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId(), fileUrlStr);
     }
 
+    /**
+     * 检测项复核数据
+     * @param itemId
+     * @return
+     */
     @Override
     public ReviewVo getReviewInfo(Integer itemId) {
+        // 根据检测项主键 获取委托单主键
         return taskMapper.getReviewInfo(itemId);
     }
 
@@ -271,6 +286,16 @@ public class TaskServiceImpl implements TaskService {
                 // 删除设备仪器
                 testDetectionDao.deleteInstrument(itemId);
                 return "撤回成功，检测项回到初始状态";
+            }
+            if(state==3){
+                // 检测项复核通过
+                SampleItemInstrumentEntity sampleItemInstrumentEntity2 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
+                if(sampleItemInstrumentEntity2!=null&&sampleItemInstrumentEntity2.getEntrustId()!=null){
+                    EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(sampleItemInstrumentEntity2.getEntrustId());
+                    if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<6){
+                        taskMapper.updateEntrustById(entrustBaseInfo.getId(),6);
+                    }
+                }
             }
         }
         int status = taskMapper.updateState(itemId, state, opinion);

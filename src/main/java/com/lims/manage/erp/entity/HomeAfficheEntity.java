@@ -22,10 +22,6 @@ public class HomeAfficheEntity {
      */
     private String spreadhead;
     /**
-     * 副标题
-     */
-    private String subheading;
-    /**
      * 文件链接
      */
     private String fileUrl;

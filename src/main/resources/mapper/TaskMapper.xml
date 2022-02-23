@@ -30,7 +30,7 @@
 
     <update id="updateEntrustById">
         update test_entrusted_info
-        set state=1
+        set state=#{state}
         where id = #{entrustmentId}
     </update>
     <!--任务列表结果集-->
@@ -271,7 +271,8 @@
     <select id="getEntrustBaseInfo" resultType="com.lims.manage.erp.entity.EntrustEntity">
         SELECT t2.id,
                t2.project_name,
-               t2.project_part
+               t2.project_part,
+               t2.state
         FROM test_task t1
                  LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
         where t1.id = #{taskId}

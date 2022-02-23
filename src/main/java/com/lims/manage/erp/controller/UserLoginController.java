@@ -56,8 +56,12 @@ public class UserLoginController {
         try{
             //验证身份和登陆
             Subject subject = SecurityUtils.getSubject();
+            if(sysUserEntity.getUsername()==null||sysUserEntity.getPassword()==null){
+                map.put("code",500);
+                map.put("msg","用户或者密码都不能为空");
+                return map;
+            }
             UsernamePasswordToken token = new UsernamePasswordToken(sysUserEntity.getUsername(), sysUserEntity.getPassword());
-
             //进行登录操作
             subject.login(token);
         }catch (IncorrectCredentialsException e) {

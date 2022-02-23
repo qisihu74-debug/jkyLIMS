@@ -32,7 +32,7 @@ public interface TaskMapper extends BaseMapper {
      *
      * @param entrustmentId
      */
-    void updateEntrustById(Long entrustmentId);
+    void updateEntrustById(Long entrustmentId,Integer state);
 
     /**
      * 保存任务单

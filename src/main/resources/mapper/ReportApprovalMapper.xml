@@ -85,6 +85,17 @@
             t1.id = #{id}
     </select>
 
+    <select id="getEntrustAddVoDetail" resultType="com.lims.manage.erp.vo.EntrustAddVo">
+        SELECT
+            t2.id as id,
+            t2.state as state
+        FROM
+            test_report_record AS t1
+            LEFT JOIN test_entrusted_info AS t2 ON t1.entrustment_id = t2.id
+        WHERE
+            t1.id = #{taskId}
+    </select>
+
     <!--任务列表结果集-->
     <resultMap id="taskResultMap" type="com.lims.manage.erp.vo.SampleDetailVo">
         <id property="id" column="sample_id"></id>

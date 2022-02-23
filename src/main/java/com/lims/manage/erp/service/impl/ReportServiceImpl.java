@@ -46,6 +46,10 @@ public class ReportServiceImpl implements ReportService {
     private ReportRecordDetailEntityMapper recordDetailEntityMapper;
     @Autowired
     private EntrustEntityMapper entrustEntityMapper;
+    @Autowired
+    private TaskMapper taskMapper;
+    @Autowired
+    ReportApprovalMapper reportApprovalMapper;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -82,6 +86,12 @@ public class ReportServiceImpl implements ReportService {
         return reportList;
     }
 
+    /**
+     * 提交审批
+     * @param id
+     * @param name 报告提交申请人
+     * @return
+     */
     @Transactional
     @Override
     public Boolean getReportSubmit(Long id,String name) {
@@ -92,6 +102,11 @@ public class ReportServiceImpl implements ReportService {
             reportData.setReportCompleteTime(new Date());
             reportData.setApplicant(name);
              recordEntityMapper.updateByEntrustIdSelective(reportData);
+            // 根据任务单主键 获取委托单主键 更改委托单状态
+            EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(id);
+            if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<7){
+                taskMapper.updateEntrustById(entrustBaseInfo.getId(),7);
+            }
             return true;
         }
         return false;
@@ -214,6 +229,11 @@ public class ReportServiceImpl implements ReportService {
         reportRecordEntity.setState("8");
         Integer status = entityMapper.updateByPrimaryKeySelective(reportRecordEntity);
         if (status == 1) {
+            // 根据任务单主键 获取委托单主键 更改委托单状态
+            EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(reportRecordEntity.getId());
+            if(entrustAddVo.getState()!=null&&entrustAddVo.getState()<200){
+                taskMapper.updateEntrustById(entrustAddVo.getId(),200);
+            }
             return true;
         }
         return false;
@@ -301,6 +321,13 @@ public class ReportServiceImpl implements ReportService {
         String url = img1 + "," + img2;
         //更新url数据到表test_report_record
         entityMapper.updateImgByid(id, url);
+
+        // 根据任务单主键 获取委托单主键 更改委托单状态
+        EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(id);
+        if(entrustAddVo.getState()!=null&&entrustAddVo.getState()<10){
+            taskMapper.updateEntrustById(entrustAddVo.getId(),10);
+        }
+
         return true;
     }
 

@@ -4,13 +4,13 @@
 <mapper namespace="com.lims.manage.erp.mapper.HomeAfficheDao">
 
     <insert id="addHomeAffiche" parameterType="com.lims.manage.erp.entity.HomeAfficheEntity">
-        insert into home_affiche (id,spreadhead,subheading,file_url,file_url_name,content_detail,create_time,update_time,issuer_name,issuer_user_id)
-        values (#{id},#{spreadhead},#{subheading},#{fileUrl},#{fileUrlName},#{contentDetail},#{createTime},#{updateTime},#{issuerName},#{issuerUserId})
+        insert into home_affiche (id,spreadhead,file_url,file_url_name,content_detail,create_time,update_time,issuer_name,issuer_user_id)
+        values (#{id},#{spreadhead},#{fileUrl},#{fileUrlName},#{contentDetail},#{createTime},#{updateTime},#{issuerName},#{issuerUserId})
     </insert>
 
     <select id="announceHistory" resultType="com.lims.manage.erp.entity.HomeAfficheEntity">
         select
-        spreadhead,subheading,file_url,file_url_name,content_detail,issuer_name
+        spreadhead,file_url,file_url_name,content_detail,issuer_name
         from
         home_affiche
         ORDER BY create_time desc

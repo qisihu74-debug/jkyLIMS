@@ -189,7 +189,8 @@ address,
 addressee,
 mobile,
 mailbox,
-file_url_str
+file_url_str,
+state
 )
         values (#{id},
 #{entrustmentNo},
@@ -224,7 +225,8 @@ file_url_str
 #{addressee},
 #{mobile},
 #{mailbox},
-#{fileUrlStr}
+#{fileUrlStr},
+#{state}
 )
 
   </insert>

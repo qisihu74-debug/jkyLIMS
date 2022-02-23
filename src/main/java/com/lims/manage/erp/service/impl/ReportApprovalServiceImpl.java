@@ -1,12 +1,11 @@
 package com.lims.manage.erp.service.impl;
 
 import com.lims.manage.erp.entity.TestInstrumentEntity;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.ReportApprovalService;
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.lims.manage.erp.vo.ReportApprovalVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +21,11 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 
     @Autowired
     ReportApprovalMapper reportApprovalMapper;
+    @Autowired
+    EntrustEntityMapper entrustEntityMapper;
+    @Autowired
+    TaskMapper taskMapper;
+
 
 
     @Override
@@ -77,6 +81,11 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             ReportApprovalVo data = reportApprovalMapper.getReportApprovalDetail(reportApprovalVo1.getId());
             reportApprovalVo.setVerifyerTime(new Date());
             reportApprovalVo.setVerifyer(data.getVerifyer());
+            // 根据任务单主键 获取委托单主键 更改委托单状态
+            EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(reportApprovalVo1.getId());
+            if(entrustAddVo.getState()!=null&&entrustAddVo.getState()<8){
+                taskMapper.updateEntrustById(entrustAddVo.getId(),8);
+            }
         }
         if (reportApprovalVo1.getState() == 1) {
             // 驳回 对抢单人清空 抢单时间清空 状态改变 如果有备注 选填
@@ -168,6 +177,13 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             state = 6;
             reportApprovalVo.setIssuerTime(new Date());
             reportApprovalVo.setIssuer(reportApprovalVo1.getIssuer());
+
+            // 根据任务单主键 获取委托单主键 更改委托单状态
+            EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(reportApprovalVo1.getId());
+            if(entrustAddVo.getState()!=null&&entrustAddVo.getState()<9){
+                taskMapper.updateEntrustById(entrustAddVo.getId(),9);
+            }
+
         }
         if (reportApprovalVo1.getState() == 1) {
             // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填 清除信息 退回上一步

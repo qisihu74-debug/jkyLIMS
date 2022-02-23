@@ -310,6 +310,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
         //得到总价钱，再保存委托基本信息
         basisInfo.setCountPrice(totalMoney + "");
+        basisInfo.setState(0);
         entityMapper.insertEntrustInfo(basisInfo);
         return true;
     }
@@ -839,7 +840,7 @@ public class EntrustServiceImpl implements EntrustService {
         //任务单保存
         taskMapper.save(entity);
         //更新委托单状态
-        taskMapper.updateEntrustById(entity.getEntrustmentId());
+        taskMapper.updateEntrustById(entity.getEntrustmentId(),1);
         return true;
     }
 
