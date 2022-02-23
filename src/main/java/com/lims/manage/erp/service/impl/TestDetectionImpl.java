@@ -1,9 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
-import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TestChItemInstrumentMiddleEntity;
-import com.lims.manage.erp.entity.TestInstrumentEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestDetectionDao;
 import com.lims.manage.erp.service.TestDetectionService;
@@ -78,6 +75,11 @@ public class TestDetectionImpl implements TestDetectionService {
             // 开始试验时间
             taskTestEntity.setStartDetectionTime(data.getStartTime());
             taskMapper.updateTestTask(taskTestEntity);
+            // 根据任务单主键 获取委托单主键
+            EntrustEntity entrustEntity  = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
+            if(entrustEntity!=null&&entrustEntity.getState()<3){
+                taskMapper.updateEntrustById(entrustEntity.getId(),3);
+            }
         }
         return true;
     }
@@ -148,6 +150,11 @@ public class TestDetectionImpl implements TestDetectionService {
         taskTestEntity.setState(4);
         taskTestEntity.setEndDetectionTime(new Date());
         taskMapper.updateTestTask(taskTestEntity);
+        // 根据任务单主键 获取委托单主键
+        EntrustEntity entrustEntity  = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
+        if(entrustEntity!=null&&entrustEntity.getState()<4){
+            taskMapper.updateEntrustById(entrustEntity.getId(),4);
+        }
         return true;
     }
 

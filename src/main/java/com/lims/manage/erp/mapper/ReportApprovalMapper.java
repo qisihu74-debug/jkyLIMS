@@ -1,5 +1,6 @@
 package com.lims.manage.erp.mapper;
 
+import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportApprovalVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
@@ -46,6 +47,13 @@ public interface ReportApprovalMapper {
      */
     TaskDetailInfoVo getTaskDetail(Long id);
 
+
+    /**
+     * 通过任务单id 获取检测项 主键以及状态
+     * @param taskId
+     * @return
+     */
+    EntrustAddVo getEntrustAddVoDetail(Long taskId);
 
     /**
      * 获取委托id 获取样品信息 以及检测信息

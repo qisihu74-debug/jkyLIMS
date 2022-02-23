@@ -2,18 +2,13 @@ package com.lims.manage.erp.service.impl;
 
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TestDetectionDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +32,8 @@ public class TaskServiceImpl implements TaskService {
     private TestDetectionDao testDetectionDao;
     @Autowired
     private ReportRecordEntityMapper reportRecordEntityMapper;
+    @Autowired
+    private EntrustEntityMapper entrustEntityMapper;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -62,6 +59,11 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public int receiveSample(ReceiveSampleParamVo paramVo) {
         paramVo.setState(2);
+        // 根据任务单主键 获取委托单主键
+        EntrustEntity entrustEntity  = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
+        if(entrustEntity!=null){
+            taskMapper.updateEntrustById(entrustEntity.getId(),2);
+        }
         return taskMapper.updateSampler(paramVo);
     }
 
@@ -120,16 +122,20 @@ public class TaskServiceImpl implements TaskService {
             doc = new XWPFDocument(object);
             List<XWPFTable> tables = doc.getTables();
             List<XWPFTableRow> rows;
+            // 第一列整体表格
             XWPFTable table = tables.get(0);
+            // 第二列整体表格
+            XWPFTable table1 = tables.get(1);
+            List<XWPFTableRow> rows1;
+            rows1 = table1.getRows();
             //表格属性
             CTTblPr pr = table.getCTTbl().getTblPr();
             //表头部分
 
             // 遍历 样品数据
             List<SampleDetailVo> sampleDetailList = taskDetailInfoVo.getSampleDetailList();
-            if (sampleDetailList.size() > 1) {
-                for (int i = 1; i < sampleDetailList.size(); i++) {
-                }
+            if(taskDetailInfoVo.getSampleDetailList()==null||taskDetailInfoVo.getSampleDetailList().isEmpty()){
+                return doc;
             }
             //获取表格对应的行
             rows = table.getRows();
@@ -168,7 +174,7 @@ public class TaskServiceImpl implements TaskService {
             // 要求检验完成日期
             rows.get(9).getTableCells().get(1).setText(taskDetailInfoVo.getRequiredCompletionTime());
             // 本单产值
-            rows.get(9).getTableCells().get(3).setText("待补充");
+            rows.get(9).getTableCells().get(3).setText(taskDetailInfoVo.getCost());
             return doc;
         } catch (Exception e) {
             System.out.println("设置委托单信息到模板异常:" + e);
@@ -223,12 +229,23 @@ public class TaskServiceImpl implements TaskService {
             upload = MinIoUtil.upload("upload-original-record", file, entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + "." + strings[strings.length - 1]);
             fileUrlStr = entrustBaseInfo.getId() + "-" + paramVo.getSampleId() +"-"+ paramVo.getCheckItemId() + "." + strings[strings.length - 1];
         }
-
+        // 根据任务单主键 获取委托单主键
+        if(entrustBaseInfo!=null){
+            if(entrustBaseInfo.getState()<5){
+                taskMapper.updateEntrustById(entrustBaseInfo.getId(),5);
+            }
+        }
         return taskMapper.updateOriginalFile(upload, entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId(), fileUrlStr);
     }
 
+    /**
+     * 检测项复核数据
+     * @param itemId
+     * @return
+     */
     @Override
     public ReviewVo getReviewInfo(Integer itemId) {
+        // 根据检测项主键 获取委托单主键
         return taskMapper.getReviewInfo(itemId);
     }
 
@@ -242,7 +259,7 @@ public class TaskServiceImpl implements TaskService {
                 // 通过委托单id 获取报告test_report_record state 状态
                 ReportRecordEntity reportRecordEntity = reportRecordEntityMapper.selectByEntrustId(sampleItemInstrumentEntity2.getEntrustId());
                 if(reportRecordEntity!=null&&reportRecordEntity.getState()!=null){
-                    if(Integer.parseInt(reportRecordEntity.getState())==7&&Integer.parseInt(reportRecordEntity.getState())>7){
+                    if(Integer.parseInt(reportRecordEntity.getState())==7&&Integer.parseInt(reportRecordEntity.getState())>=7){
                         return "撤回失败！此报告已经盖章";
                     }
                 }
@@ -269,6 +286,16 @@ public class TaskServiceImpl implements TaskService {
                 // 删除设备仪器
                 testDetectionDao.deleteInstrument(itemId);
                 return "撤回成功，检测项回到初始状态";
+            }
+            if(state==3){
+                // 检测项复核通过
+                SampleItemInstrumentEntity sampleItemInstrumentEntity2 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
+                if(sampleItemInstrumentEntity2!=null&&sampleItemInstrumentEntity2.getEntrustId()!=null){
+                    EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(sampleItemInstrumentEntity2.getEntrustId());
+                    if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<6){
+                        taskMapper.updateEntrustById(entrustBaseInfo.getId(),6);
+                    }
+                }
             }
         }
         int status = taskMapper.updateState(itemId, state, opinion);
