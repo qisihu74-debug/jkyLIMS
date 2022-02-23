@@ -434,12 +434,6 @@
             <artifactId>words-pdf</artifactId>
             <version>2.0</version>
         </dependency>
-        <!--契约所-->
-        <dependency>
-            <groupId>net.qiyuesuo.sdk</groupId>
-            <artifactId>private-sdk</artifactId>
-            <version>4.1.0</version>
-        </dependency>
     </dependencies>
     <repositories>
         <repository>
