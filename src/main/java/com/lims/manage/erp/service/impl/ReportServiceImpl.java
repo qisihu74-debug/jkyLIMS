@@ -7,6 +7,7 @@ import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.job.QiYueSuoHnadler;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.service.ReportService;
@@ -46,6 +47,8 @@ public class ReportServiceImpl implements ReportService {
     private ReportRecordDetailEntityMapper recordDetailEntityMapper;
     @Autowired
     private EntrustEntityMapper entrustEntityMapper;
+    @Autowired
+    private QiYueSuoHnadler qiYueSuoHnadler;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -294,6 +297,9 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean seal(List<String> list, Long id) {
         //TODO 根据印章类型，请求契约所的印章
+
+        qiYueSuoHnadler.creatFile();
+
 
         //上传印章图片到文件服务器
         String img1 = "http://121.89.242.0:9000/seal-cns-cma/cns.jpg";
