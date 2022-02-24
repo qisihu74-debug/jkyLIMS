@@ -107,7 +107,7 @@ public class MinIoUtil {
     public static String upload(String bucketName, String fileName, InputStream stream,String contentType) {
         createBucket(bucketName);
         minioClient.putObject(bucketName, fileName, stream, stream.available(),contentType);
-        return getFileUrl(bucketName, fileName);
+        return getUrl(bucketName, fileName);
     }
 
     /**
