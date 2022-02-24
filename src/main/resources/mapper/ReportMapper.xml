@@ -82,7 +82,7 @@
                         t2.task_code,
                         t4.sample_name,
                         t1.count_price,
-                        t1.request_date
+                        DATE_FORMAT(t1.request_date, '%Y-%m-%d') request_date
         FROM test_entrusted_info t1
                  LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
                  LEFT JOIN test_entrusted_sample_details_rel t3 ON t1.id = t3.entrustment_id
