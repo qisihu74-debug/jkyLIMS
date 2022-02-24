@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.DigestUtils;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -55,31 +56,11 @@ public class QiYueSuoHnadler {
         stringBuilder.append(qiYueSuoEntity.getAppSecret());
         stringBuilder.append(0);
         stringBuilder.append(GenID.getUUID());
-        String md5Str = getMD5Str(stringBuilder.toString());
+        String md5Str = DigestUtils.md5DigestAsHex(stringBuilder.toString().getBytes());
         headers.put("token",md5Str);
         //请求契约锁接口（请求方式由契约锁接口约定）
         Pair<Integer, String> form = HttpClientUtil.postForm(qiYueSuoEntity.getUrl(), params, headers);
         return null;
     }
-
-    /**
-     * md5加密
-     * @param str
-     * @return
-     */
-    public String getMD5Str(String str) {
-        byte[] digest = null;
-        try {
-            MessageDigest md5 = MessageDigest.getInstance("md5");
-            digest  = md5.digest(str.getBytes("utf-8"));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        //16是表示转换为16进制数
-        String md5Str = new BigInteger(1, digest).toString(16);
-        return md5Str;
-    }
-
+    
 }

@@ -4,14 +4,20 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.ImagePro;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.ReportMapper;
+import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
+import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
+import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
@@ -19,14 +25,15 @@ import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.ImageToPdfUtils;
 import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
+import com.lims.manage.erp.vo.ReportDetailVo;
+import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
-import io.minio.errors.ErrorResponseException;
-import io.minio.errors.InsufficientDataException;
-import io.minio.errors.InternalException;
-import io.minio.errors.InvalidArgumentException;
-import io.minio.errors.InvalidBucketNameException;
-import io.minio.errors.NoResponseException;
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -36,16 +43,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class ReportServiceImpl implements ReportService {
@@ -335,13 +346,29 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean seal(List<String> list, Long id) {
         //TODO 根据印章类型，请求契约所的印章
-        //qiYueSuoHnadler.creatFile();
+        String url = "";
+        MinioClient client = MinIoUtil.minioClient;
+        Long entrustId = taskMapper.getEntrustIdByTaskId(id);
+        String code = recordEntityMapper.getReportModelNameById(entrustId);
+        try {
+            url = downLoad(client,code,entrustId);
+        }catch (Exception e){
+            logger.error("盖章下载报告文件失败:{}",e);
+        }
+        if (StringUtils.isNotEmpty(url)){
+            File file = null;
+            try {
+                file = FileAndFolderUtil.getFile(url);
+            }catch (Exception e){
+                logger.error("将报告地址转为File文件失败:{}",e);
+            }
+            if (file != null){
+                qiYueSuoHnadler.creatFile(file,code,"pdf",null,null,null);
+            }
+        }
 
 
-        //上传印章图片到文件服务器
-        String img1 = "http://121.89.242.0:9000/seal-cns-cma/cns.jpg";
-        String img2 = "http://121.89.242.0:9000/seal-cns-cma/cma.jpg";
-        String url = img1 + "," + img2;
+
         //更新url数据到表test_report_record
         entityMapper.updateImgByid(id, url);
 

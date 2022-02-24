@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 @Mapper
@@ -91,4 +92,12 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     Integer getMaxCode(String year);
+
+    /**
+     * 根据委托单id查询所用报告模板名称
+     * @param entrustId
+     * @return
+     */
+    @Select("select template_name from test_report_record where entrustment_id = #{entrustId}")
+    String getReportModelNameById(@Param("entrustId") Long entrustId);
 }
