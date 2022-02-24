@@ -720,7 +720,6 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
-        entrustHistoryEntity.setState(0);
         if (entrustHistoryEntity.getDateInterval() != null) {
             String[] strArry = entrustHistoryEntity.getDateInterval().split("~");
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
