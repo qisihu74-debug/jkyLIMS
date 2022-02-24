@@ -323,7 +323,7 @@ state
 
   <select id="getStatndardByPId" resultType="String">
     SELECT
-	s.name
+	s.code
 FROM
 	test_standard_file s
 LEFT JOIN test_product_standard_file_rel sf ON s.id = sf.standard_file_id

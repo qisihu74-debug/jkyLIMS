@@ -184,7 +184,10 @@
         update test_report_record
         <set>
             <if test="url != null">
-                report_url = #{url,jdbcType=VARCHAR}
+                report_url = #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                template_name = #{code,jdbcType=VARCHAR}
             </if>
         </set>
         where id = #{id,jdbcType=INTEGER}

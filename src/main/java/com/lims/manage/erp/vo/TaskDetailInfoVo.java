@@ -31,6 +31,10 @@ public class TaskDetailInfoVo {
      */
     private String sealType;
     private String fileUrl;//下载附件
+    /**
+     * url
+     */
+    private String[] array;
     private List<SampleDetailVo> sampleDetailList;//样品信息
 
     public TaskDetailInfoVo(Long taskId) {

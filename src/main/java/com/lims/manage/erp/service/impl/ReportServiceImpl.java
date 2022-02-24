@@ -603,8 +603,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public int updateReportUrl(Long id, String url) {
-        return reportMapper.updateReportUrl(id,url);
+    public int updateReportUrl(Long id, String url,String code) {
+        return reportMapper.updateReportUrl(id,url,code);
     }
 
     @Override
@@ -712,7 +712,7 @@ public class ReportServiceImpl implements ReportService {
         InputStream inputStream = FileAndFolderUtil.parseOut(b3);
         String url = "";
         url = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream, "application/octet-stream");
-        updateReportUrl(reportRecordEntity.getId(), url);
+        updateReportUrl(reportRecordEntity.getId(), url,code);
 //            ServletOutputStream outputStream = response.getOutputStream();
 //            FileAndFolderUtil.parseIn(inputStream)
         return url;

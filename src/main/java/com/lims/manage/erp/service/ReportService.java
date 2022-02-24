@@ -198,7 +198,7 @@ public interface ReportService {
      */
     String getEquipment(Long id);
 
-    int updateReportUrl(Long id,String url);
+    int updateReportUrl(Long id,String url,String code);
 
     /**
      * 报告下载
