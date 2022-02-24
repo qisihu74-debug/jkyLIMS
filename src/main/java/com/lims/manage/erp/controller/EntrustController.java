@@ -240,9 +240,9 @@ public class EntrustController {
 //    @RequiresPermissions("test:entrust:get_entrust_history")
     public Result getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
         if (entrustHistoryEntity.getState() == null) {
-            return ResultUtil.error("必填参数不能为空");
+            entrustHistoryEntity.setState(0);
         }
-        if(entrustHistoryEntity.getState()!=0||entrustHistoryEntity.getState()!=144){
+        if(entrustHistoryEntity.getState()!=0&&entrustHistoryEntity.getState()!=144){
             return ResultUtil.error("必填参数状态有误");
         }
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
