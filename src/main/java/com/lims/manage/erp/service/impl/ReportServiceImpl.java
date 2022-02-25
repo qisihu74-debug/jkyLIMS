@@ -697,26 +697,19 @@ public class ReportServiceImpl implements ReportService {
         }
         ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
         //盖章
-        String sealUrl = reportRecordEntity.getSealUrl();
-        List<ImagePro> imagePros = com.google.api.client.util.Lists.newArrayList();
-        if (!StringUtils.isEmpty(sealUrl) && sealUrl != null) {
-            String[] split = sealUrl.split(",");
-            for (int i = 0; i < split.length; i++) {
-                ImagePro pro = new ImagePro(100 * (i + 1), 100, 15F, split[i]);
-                imagePros.add(pro);
-            }
-        }
-        InputStream inputStream1 = new ByteArrayInputStream(b1.toByteArray());
-        ByteArrayOutputStream b2 = new ByteArrayOutputStream();
-        ByteArrayOutputStream b3;
-        InputStream inputStream;
-        if(imagePros.size()>0){
-            b3 = ImageToPdfUtils.writeToPdf4(inputStream1, b2, imagePros);
-            inputStream = FileAndFolderUtil.parseOut(b3);
-        }else{
-            inputStream = inputStream1;
-        }
-//        InputStream inputStream = FileAndFolderUtil.parseOut(b3);
+//        String sealUrl = reportRecordEntity.getSealUrl();
+//        List<ImagePro> imagePros = com.google.api.client.util.Lists.newArrayList();
+//        if (!StringUtils.isEmpty(sealUrl) || sealUrl != null) {
+//            String[] split = sealUrl.split(",");
+//            for (int i = 0; i < split.length; i++) {
+//                ImagePro pro = new ImagePro(100 * (i + 1), 100, 15F, split[i]);
+//                imagePros.add(pro);
+//            }
+//        }
+//        InputStream inputStream1 = new ByteArrayInputStream(b1.toByteArray());
+//        ByteArrayOutputStream b2 = new ByteArrayOutputStream();
+//        ByteArrayOutputStream b3 = ImageToPdfUtils.writeToPdf4(inputStream1, b2, imagePros);
+        InputStream inputStream = FileAndFolderUtil.parseOut(b1);
         String url = "";
         url = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream, "application/octet-stream");
         updateReportUrl(reportRecordEntity.getId(), url,code);

@@ -467,6 +467,7 @@
         <if test="reportType != null and reportType != ''">
             AND report_type = #{reportType}
         </if>
+        order by operate_time desc
     </select>
 
     <select id="isApprove" resultType="java.lang.String">
