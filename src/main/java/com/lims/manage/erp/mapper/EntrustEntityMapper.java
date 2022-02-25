@@ -47,6 +47,19 @@ public interface EntrustEntityMapper extends BaseMapper {
     void BatchSaveSampleStandard(@Param("list1") List<EntrustSampleEntity> list1);
 
     /**
+     * 通过委托单id 获取样品依据信息集合
+     * @param entrustmentId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "t2.code as judgmentBasis\n" +
+            "FROM\n" +
+            "test_entrusted_sample_standard_rel as t1 \n" +
+            "LEFT JOIN test_standard_file as t2 ON t1.standard_id = t2.id\n" +
+            "WHERE t1.entrustment_id = #{entrustmentId} and t2.code is not null\n")
+    List<String> getSampleStandard(Long entrustmentId);
+
+    /**
      * 保存委托样品下检测项信息
      * @param sampleItemList
      */

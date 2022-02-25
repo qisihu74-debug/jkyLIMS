@@ -1,6 +1,5 @@
 package com.lims.manage.erp.service.impl;
 
-import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TaskService;
@@ -39,10 +38,22 @@ public class TaskServiceImpl implements TaskService {
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
         // 处理 委托单的文件链接
         TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfo(taskId);
-        if(taskDetailInfoVo.getFileUrl()!=null){
+        if (taskDetailInfoVo.getFileUrl() != null) {
             String[] array = taskDetailInfoVo.getFileUrl().split(",");
             taskDetailInfoVo.setArray(array);
         }
+        // 获取文件附件
+        Long entrustId = taskMapper.getEntrustIdByTaskId(taskId);
+        List<String> strings = entrustEntityMapper.getSampleStandard(entrustId);
+        StringBuilder stringBuilder = new StringBuilder();
+        if(strings!=null&&!strings.isEmpty()){
+            for(String str:strings){
+            stringBuilder.append(str);
+            stringBuilder.append(",");
+            }
+            taskDetailInfoVo.setJudgmentBasis(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
+        }
+
         return taskDetailInfoVo;
     }
 
@@ -66,9 +77,9 @@ public class TaskServiceImpl implements TaskService {
     public int receiveSample(ReceiveSampleParamVo paramVo) {
         paramVo.setState(2);
         // 根据任务单主键 获取委托单主键
-        EntrustEntity entrustEntity  = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
-        if(entrustEntity!=null){
-            taskMapper.updateEntrustById(entrustEntity.getId(),2);
+        EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
+        if (entrustEntity != null) {
+            taskMapper.updateEntrustById(entrustEntity.getId(), 2);
         }
         return taskMapper.updateSampler(paramVo);
     }
@@ -138,9 +149,27 @@ public class TaskServiceImpl implements TaskService {
             CTTblPr pr = table.getCTTbl().getTblPr();
             //表头部分
 
+            // 获取委托单印章
+            if (taskDetailInfoVo.getSealType() != null) {
+                switch (taskDetailInfoVo.getSealType()) {
+                    case "综合甲级":
+                        rows1.get(14).getTableCells().get(1).setText("☑"+"综合甲级"+"□"+"CMA"+"□"+"CNAS");
+                        break;
+                    case "CMA":
+                        rows1.get(14).getTableCells().get(1).setText("□"+"综合甲级"+"☑"+"CMA"+"□"+"CNAS");
+                        break;
+                    case "CNAS":
+                        rows1.get(14).getTableCells().get(1).setText("□"+"综合甲级"+"□"+"CMA"+"☑"+"CNAS");
+                        break;
+                    default:
+                        rows1.get(14).getTableCells().get(1).setText("□"+"综合甲级"+"□"+"CMA"+"□"+"CNAS");
+                        break;
+                }
+            }
+
             // 遍历 样品数据
             List<SampleDetailVo> sampleDetailList = taskDetailInfoVo.getSampleDetailList();
-            if(taskDetailInfoVo.getSampleDetailList()==null||taskDetailInfoVo.getSampleDetailList().isEmpty()){
+            if (taskDetailInfoVo.getSampleDetailList() == null || taskDetailInfoVo.getSampleDetailList().isEmpty()) {
                 return doc;
             }
             //获取表格对应的行
@@ -174,7 +203,7 @@ public class TaskServiceImpl implements TaskService {
             // 检验目的
             rows.get(7).getTableCells().get(3).setText(taskDetailInfoVo.getCheckPurpose());
             // 产品标准
-            rows.get(7).getTableCells().get(5).setText("待补充");
+            rows.get(7).getTableCells().get(5).setText(taskDetailInfoVo.getJudgmentBasis());
             // 检测项目及检验依据
             rows.get(8).getTableCells().get(1).setText(stringBuilder.toString());
             // 要求检验完成日期
@@ -223,7 +252,7 @@ public class TaskServiceImpl implements TaskService {
         EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
         // 获取检测项详细信息 判断文件是否上传
         SampleItemInstrumentEntity sampleItemInstrumentEntity = testDetectionDao.getTestEntrustedSampleCheckitemRelDetailIf(entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId());
-        if(sampleItemInstrumentEntity.getOriginUrl()!=null){
+        if (sampleItemInstrumentEntity.getOriginUrl() != null) {
             // 文件已经存在
             return 2;
         }
@@ -233,12 +262,12 @@ public class TaskServiceImpl implements TaskService {
             String name = file.getOriginalFilename();
             String[] strings = name.split("\\.");
             upload = MinIoUtil.upload("upload-original-record", file, entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + "." + strings[strings.length - 1]);
-            fileUrlStr = entrustBaseInfo.getId() + "-" + paramVo.getSampleId() +"-"+ paramVo.getCheckItemId() + "." + strings[strings.length - 1];
+            fileUrlStr = entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + "." + strings[strings.length - 1];
         }
         // 根据任务单主键 获取委托单主键
-        if(entrustBaseInfo!=null){
-            if(entrustBaseInfo.getState()<5){
-                taskMapper.updateEntrustById(entrustBaseInfo.getId(),5);
+        if (entrustBaseInfo != null) {
+            if (entrustBaseInfo.getState() < 5) {
+                taskMapper.updateEntrustById(entrustBaseInfo.getId(), 5);
             }
         }
         return taskMapper.updateOriginalFile(upload, entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId(), fileUrlStr);
@@ -246,6 +275,7 @@ public class TaskServiceImpl implements TaskService {
 
     /**
      * 检测项复核数据
+     *
      * @param itemId
      * @return
      */
@@ -264,8 +294,8 @@ public class TaskServiceImpl implements TaskService {
                 // 检测项 撤回时 考虑 （盖章的话） test_report_record state = '7'
                 // 通过委托单id 获取报告test_report_record state 状态
                 ReportRecordEntity reportRecordEntity = reportRecordEntityMapper.selectByEntrustId(sampleItemInstrumentEntity2.getEntrustId());
-                if(reportRecordEntity!=null&&reportRecordEntity.getState()!=null){
-                    if(Integer.parseInt(reportRecordEntity.getState())==7&&Integer.parseInt(reportRecordEntity.getState())>=7){
+                if (reportRecordEntity != null && reportRecordEntity.getState() != null) {
+                    if (Integer.parseInt(reportRecordEntity.getState()) == 7 && Integer.parseInt(reportRecordEntity.getState()) >= 7) {
                         return "撤回失败！此报告已经盖章";
                     }
                 }
@@ -293,19 +323,19 @@ public class TaskServiceImpl implements TaskService {
                 testDetectionDao.deleteInstrument(itemId);
                 return "撤回成功，检测项回到初始状态";
             }
-            if(state==3){
+            if (state == 3) {
                 // 检测项复核通过
                 SampleItemInstrumentEntity sampleItemInstrumentEntity2 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
-                if(sampleItemInstrumentEntity2!=null&&sampleItemInstrumentEntity2.getEntrustId()!=null){
+                if (sampleItemInstrumentEntity2 != null && sampleItemInstrumentEntity2.getEntrustId() != null) {
                     EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(sampleItemInstrumentEntity2.getEntrustId());
-                    if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<6){
-                        taskMapper.updateEntrustById(entrustBaseInfo.getId(),6);
+                    if (entrustBaseInfo.getState() != null && entrustBaseInfo.getState() < 6) {
+                        taskMapper.updateEntrustById(entrustBaseInfo.getId(), 6);
                     }
                 }
             }
         }
         int status = taskMapper.updateState(itemId, state, opinion);
-        if(status>0){
+        if (status > 0) {
             return "成功";
         }
         return "失败";
