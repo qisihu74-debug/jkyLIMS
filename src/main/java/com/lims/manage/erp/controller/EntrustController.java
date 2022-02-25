@@ -242,7 +242,7 @@ public class EntrustController {
         if (entrustHistoryEntity.getState() == null) {
             entrustHistoryEntity.setState(0);
         }
-        if(entrustHistoryEntity.getState()!=0&&entrustHistoryEntity.getState()!=144){
+        if(entrustHistoryEntity.getState()!=0&&entrustHistoryEntity.getState()!=144&&entrustHistoryEntity.getState()!=1){
             return ResultUtil.error("必填参数状态有误");
         }
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
