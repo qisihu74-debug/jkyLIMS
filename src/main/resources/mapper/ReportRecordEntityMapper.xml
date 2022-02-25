@@ -372,6 +372,7 @@
         <if test="reportType != null and reportType != ''">
             AND report_type = #{reportType}
         </if>
+        order by issuer_time desc
     </select>
 
     <select id="getDetail" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
@@ -466,6 +467,7 @@
         <if test="reportType != null and reportType != ''">
             AND report_type = #{reportType}
         </if>
+        order by operate_time desc
     </select>
 
     <select id="isApprove" resultType="java.lang.String">

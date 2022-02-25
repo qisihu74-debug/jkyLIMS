@@ -239,6 +239,12 @@ public class EntrustController {
     @RequestMapping("/get_entrust_history")
 //    @RequiresPermissions("test:entrust:get_entrust_history")
     public Result getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
+        if (entrustHistoryEntity.getState() == null) {
+            entrustHistoryEntity.setState(0);
+        }
+        if(entrustHistoryEntity.getState()!=0&&entrustHistoryEntity.getState()!=144){
+            return ResultUtil.error("必填参数状态有误");
+        }
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
     }
 
