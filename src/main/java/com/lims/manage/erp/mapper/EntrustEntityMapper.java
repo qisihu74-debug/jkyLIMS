@@ -9,6 +9,7 @@ import com.lims.manage.erp.entity.EntrustSampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.HistoryEntrustDataVo;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -176,4 +177,12 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     HistoryEntrustDataVo getHistoryData(String name);
+
+    /**
+     * 根据检测项ID查询可以做的团队
+     * @param checkItemId
+     * @return
+     */
+    List<LabelValueVo> getDept(Integer checkItemId);
+
 }

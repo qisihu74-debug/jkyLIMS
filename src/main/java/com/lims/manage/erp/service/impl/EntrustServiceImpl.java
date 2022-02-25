@@ -778,6 +778,11 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    public List<LabelValueVo> getDept(Integer checkItemId) {
+        return entityMapper.getDept(checkItemId);
+    }
+
+    @Override
     public EntrustAddVo getEntrustHistoryDetailTest(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
