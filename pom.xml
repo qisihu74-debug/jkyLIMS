@@ -129,7 +129,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
+            <version>4.5.5</version>
             <exclusions>
                 <exclusion>
                     <artifactId>httpcore</artifactId>
@@ -433,6 +433,12 @@
             <groupId>com.aspose</groupId>
             <artifactId>words-pdf</artifactId>
             <version>2.0</version>
+        </dependency>
+        <!--httpclient-->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.4</version>
         </dependency>
     </dependencies>
     <repositories>

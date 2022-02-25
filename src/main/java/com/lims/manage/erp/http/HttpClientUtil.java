@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -85,6 +86,10 @@ public class HttpClientUtil {
      */
     public static Pair<Integer,String> postForm(String url, Map<String, String> params, Map<String,String> headers) {
         return httpClientOperate.doPostForm(url,params,headers);
+    }
+
+    public static Pair<Integer, String> postFormIncludeFile(String url, Map<String, String> params, Map<String, File> files,Map<String, String> headers) {
+        return httpClientOperate.httpPost(url, params, files, headers);
     }
 
 }

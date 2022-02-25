@@ -394,4 +394,15 @@ AND s.type IN (2, 3)
       acceptance_date DESC
       LIMIT 1
   </select>
+
+  <select id="getDept" resultType="com.lims.manage.erp.vo.LabelValueVo">
+    SELECT
+      t2.id VALUE,
+	t2.NAME label
+    FROM
+      test_check_item_team_rel t1
+      LEFT JOIN test_team t2 ON t1.team_id = t2.id
+    WHERE
+      t1.check_item_id = #{checkItemId}
+  </select>
 </mapper>

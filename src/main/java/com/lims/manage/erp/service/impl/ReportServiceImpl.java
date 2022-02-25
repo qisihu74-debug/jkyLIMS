@@ -10,6 +10,7 @@ import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
@@ -363,7 +364,11 @@ public class ReportServiceImpl implements ReportService {
                 logger.error("将报告地址转为File文件失败:{}",e);
             }
             if (file != null){
-                qiYueSuoHnadler.creatFile(file,code,"pdf",null,null,null);
+                QiYueSuoResponse response = qiYueSuoHnadler.creatFile(file, code, "pdf", null, null, null);
+                if (response != null && response.getCode() == 0){
+                    //根据委托id存储文档id
+
+                }
             }
         }
 

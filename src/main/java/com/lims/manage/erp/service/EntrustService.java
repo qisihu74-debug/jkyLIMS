@@ -103,6 +103,13 @@ public interface EntrustService {
     EntrustAddVo getEntrustHistoryDetail(Long entrustmentId);
 
     /**
+     * 根据检测项ID查询可以做的团队
+     * @param checkItemId
+     * @return
+     */
+    List<LabelValueVo> getDept(Integer checkItemId);
+
+    /**
      * 历史委托信息 具体详情 测试
      * @param entrustmentId
      * @return

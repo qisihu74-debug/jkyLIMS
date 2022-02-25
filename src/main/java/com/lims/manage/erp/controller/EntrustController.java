@@ -259,6 +259,16 @@ public class EntrustController {
     }
 
     /**
+     * 根据检测项ID查询可以做该检测项的团队
+     * @param checkItemId
+     * @return
+     */
+    @GetMapping("/getDept")
+    public Result getDept(Integer checkItemId){
+        return ResultUtil.success(entrustService.getDept(checkItemId));
+    }
+
+    /**
      * 查询历史委托信息详情 测试
      * @param id
      * @return
