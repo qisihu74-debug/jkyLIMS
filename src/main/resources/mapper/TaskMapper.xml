@@ -45,6 +45,7 @@
         <result property="checkPurpose" column="check_purpose"></result>
         <result property="presentInformation" column="present_information"></result>
         <result property="fileUrl" column="file_url"></result>
+        <result property="sealType" column="seal_type"></result>
         <collection property="sampleDetailList" ofType="com.lims.manage.erp.vo.SampleDetailVo">
             <id property="id" column="sample_id"></id>
             <result property="sampleCode" column="sample_code"></result>
@@ -104,6 +105,7 @@
                t2.check_purpose,
                t2.present_information,
                t2.file_url,
+               t2.seal_type,
                t3.sample_id,
                t4.sample_name,
                t4.product_id,
