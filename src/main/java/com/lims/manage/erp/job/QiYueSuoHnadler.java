@@ -1,5 +1,7 @@
 package com.lims.manage.erp.job;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.http.HttpClientUtil;
 import com.lims.manage.erp.http.HttpResponse;
@@ -46,21 +48,28 @@ public class QiYueSuoHnadler {
                                   String waterMarks,Float width,Float height){
         //请求参数设置
         Map<String, String> params = new HashMap<>();
-        params.put("file",file.toString());
         params.put("title",title);
         params.put("fileType",fileType);
+        //文件参数设置
+        Map<String, File> files = new HashMap<>();
+        files.put("file",file);
         //headers参数设置（MD5进行加密，token加密秘钥 Md5(appToken+appSercert+timestamp+nonce)timestamp当前系统时间不允许偏差超过15分钟、nonce取值UUID）
         Map<String,String> headers = new HashMap<>();
         StringBuilder stringBuilder = new StringBuilder(100);
         stringBuilder.append(qiYueSuoEntity.getAppToken());
         stringBuilder.append(qiYueSuoEntity.getAppSecret());
         stringBuilder.append(0);
-        stringBuilder.append(GenID.getUUID());
         String md5Str = DigestUtils.md5DigestAsHex(stringBuilder.toString().getBytes());
-        headers.put("token",md5Str);
+        headers.put("x-qys-accesstoken",qiYueSuoEntity.getAppToken());
+        headers.put("x-qys-timestamp","0");
+        headers.put("x-qys-signature",md5Str);
+        headers.put("Content-Type","multipart/form-data");
         //请求契约锁接口（请求方式由契约锁接口约定）
-        Pair<Integer, String> form = HttpClientUtil.postForm(qiYueSuoEntity.getUrl(), params, headers);
+        String url = qiYueSuoEntity.getUrl() + qiYueSuoEntity.getCreateInterface();
+        Pair<Integer, String> stringPair = HttpClientUtil.postFormIncludeFile(url, params, files, headers);
+        log.debug("响应信息:{}", JSON.toJSONString(stringPair));
+        System.out.println("\u8BF7\u6C42\u5931\u8D25");
         return null;
     }
-    
+
 }
