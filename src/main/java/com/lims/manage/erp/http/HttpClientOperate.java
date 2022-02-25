@@ -29,9 +29,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -215,60 +217,6 @@ public class HttpClientOperate {
     /**
      * 发送post请求form表单参数带File对象
      * @param url
-     * @param file
-     * @param params
-     * @param headers
-     * @return
-     */
-    public Pair<Integer, String> doPostFormIncludeFile(String url, File file, Map<String, String> params, Map<String, String> headers) {
-        //创建HttpClient 请求
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        //创建 HttpPost
-        HttpPost httpPost = new HttpPost(url);
-        httpPost.setConfig(getRequestConfig());
-        //创建上传文件的表单
-        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
-        //添加普通参数
-        params.forEach((k, v) ->entityBuilder.addTextBody(k, v));
-        //添加上传的文件参数
-        file = new File("C:\\Users\\Administrator\\Downloads\\BGLQ23002F.pdf");
-        entityBuilder.addPart("file", new FileBody(file, ContentType.MULTIPART_FORM_DATA,file.getName()));
-        //添加headers
-        headers.forEach((k, v) ->httpPost.addHeader(k,v));
-        //设置编码
-        //entityBuilder.setCharset(Charset.forName("UTF-8"));
-        HttpEntity httpEntity = entityBuilder.build();
-        httpPost.setEntity(httpEntity);
-        //执行post 请求
-        CloseableHttpResponse response = null;
-        try {
-            response = httpClient.execute(httpPost);
-            httpEntity = response.getEntity();
-            String res = EntityUtils.toString(httpEntity, Consts.ISO_8859_1);
-            if (log.isDebugEnabled()) {
-                log.debug("res={}", res);
-            }
-            return new ImmutablePair<>(response.getStatusLine().getStatusCode(), res);
-        } catch (Exception e) {
-            log.error("post json请求出错:", e);
-            return new ImmutablePair<>(-1, null);
-        } finally {
-            try {
-                if (httpEntity != null) {
-                    EntityUtils.consume(httpEntity);
-                }
-                if (response != null) {
-                    response.close();
-                }
-            } catch (Exception e) {
-                log.error("关闭HTTP连接时报错", e);
-            }
-        }
-    }
-
-    /**
-     * 发送post请求form表单参数带File对象
-     * @param url
      * @param params
      * @param files
      * @param headers
@@ -307,10 +255,8 @@ public class HttpClientOperate {
             //使用 httpEntity 后 Content-Type会自动被设置成 multipart/form-data
             httpPost.setEntity(httpEntity);
             //执行发送post请求
-            httpPost.setProtocolVersion(HttpVersion.HTTP_1_1);
+            httpPost.setProtocolVersion(HttpVersion.HTTP_1_0);
             resp = client.execute(httpPost);
-            byte[] byteData = EntityUtils.toByteArray(resp.getEntity());
-            String s = new String(byteData,Charset.forName("ISO-8859-1"));
             respondBody = EntityUtils.toString(resp.getEntity());
         } catch (IOException | ParseException e) {
             //日志信息及异常处理
@@ -327,5 +273,17 @@ public class HttpClientOperate {
             }
         }
         return new ImmutablePair<>(resp.getStatusLine().getStatusCode(), respondBody);
+    }
+
+    public static String getStringFromStream(InputStream in) throws IOException {
+        StringBuilder buffer = new StringBuilder();
+        BufferedReader reader = null;
+        reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+            buffer.append(line + "\n");
+        }
+        reader.close();
+        return buffer.toString();
     }
 }

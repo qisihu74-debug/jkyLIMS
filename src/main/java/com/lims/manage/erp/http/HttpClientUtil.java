@@ -88,10 +88,6 @@ public class HttpClientUtil {
         return httpClientOperate.doPostForm(url,params,headers);
     }
 
-    public static Pair<Integer,String> postFormIncludeFile(String url, File file, Map<String, String> params, Map<String,String> headers) {
-        return httpClientOperate.doPostFormIncludeFile(url, file, params,headers);
-    }
-
     public static Pair<Integer, String> postFormIncludeFile(String url, Map<String, String> params, Map<String, File> files,Map<String, String> headers) {
         return httpClientOperate.httpPost(url, params, files, headers);
     }

@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.http.HttpClientUtil;
 import com.lims.manage.erp.http.HttpResponse;
-import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.http.QiYueSuoResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +40,7 @@ public class QiYueSuoHnadler {
      * @param height （非必传）高（文件尺寸，单位：mm）
      * @return
      */
-    public HttpResponse creatFile(File file,String title,String fileType,
+    public QiYueSuoResponse creatFile(File file,String title,String fileType,
                                   String waterMarks,Float width,Float height){
         //请求参数设置
         Map<String, String> params = new HashMap<>();
@@ -63,13 +59,16 @@ public class QiYueSuoHnadler {
         headers.put("x-qys-accesstoken",qiYueSuoEntity.getAppToken());
         headers.put("x-qys-timestamp","0");
         headers.put("x-qys-signature",md5Str);
-        headers.put("Content-Type","multipart/form-data");
         //请求契约锁接口（请求方式由契约锁接口约定）
         String url = qiYueSuoEntity.getUrl() + qiYueSuoEntity.getCreateInterface();
         Pair<Integer, String> stringPair = HttpClientUtil.postFormIncludeFile(url, params, files, headers);
         log.debug("响应信息:{}", JSON.toJSONString(stringPair));
-        System.out.println("\u8BF7\u6C42\u5931\u8D25");
-        return null;
+        JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(stringPair));
+        QiYueSuoResponse response = null;
+        if (stringPair.getKey() == 200){
+            response = JSONObject.parseObject(jsonObject.get(200).toString(), QiYueSuoResponse.class);
+        }
+        return response;
     }
 
 }
