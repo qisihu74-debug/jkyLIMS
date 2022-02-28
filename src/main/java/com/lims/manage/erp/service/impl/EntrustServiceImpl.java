@@ -222,7 +222,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
         basisInfo.setEntrustmentNo(code);
         // 通过委托编号 查询是否存在
-        if(entityMapper.getByData(basisInfo.getEntrustmentNo())!=null){
+        if (entityMapper.getByData(basisInfo.getEntrustmentNo()) != null) {
             return false;
         }
         //附件存在上传附件到服务器
@@ -732,6 +732,10 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
         }
+        // 获取状态
+        if (entrustHistoryEntity.getState() == 1) {
+            return entityMapper.selectEntrustHistoryListRelease_of(entrustHistoryEntity);
+        }
         return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
     }
 
@@ -769,12 +773,31 @@ public class EntrustServiceImpl implements EntrustService {
         // 样品信息 进行补充 检测依据集合，检测项集合
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
-            sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
+            // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
+            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144) {
+                List<JudgmentBasisVo> list = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
+                if (list != null && !list.isEmpty()) {
+                    // 根据检测项id 查询 默认匹配部门信息
+                    for (JudgmentBasisVo data : list) {
+                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
+                        data.setTestingRoom(strings.toString());
+                    }
+                    sampleEntity.setJudgmentBasisVos(list);
+                }
+            } else {
+                sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
+            }
+
             // 补充样品下 依据集合
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
         }
         entrustAddVo.setSamples(sampleCollection);
         return entrustAddVo;
+    }
+
+    @Override
+    public List<LabelValueVo> getDept(Integer checkItemId) {
+        return entityMapper.getDept(checkItemId);
     }
 
     @Override
@@ -839,7 +862,7 @@ public class EntrustServiceImpl implements EntrustService {
         //任务单保存
         taskMapper.save(entity);
         //更新委托单状态
-        taskMapper.updateEntrustById(entity.getEntrustmentId(),1);
+        taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
         return true;
     }
 
@@ -908,10 +931,10 @@ public class EntrustServiceImpl implements EntrustService {
             }
             rows.get(17).getTableCells().get(2).setText(detail.getReportCount().toString());//报告分数
             rows.get(17).getTableCells().get(4).setText(detail.getReportType() == null ? "--" : detail.getReportType());//取报告方式
-            rows.get(17).getTableCells().get(6).setText(detail.getAddress()== null ? "--" :detail.getAddress() );//收报告单位
+            rows.get(17).getTableCells().get(6).setText(detail.getAddress() == null ? "--" : detail.getAddress());//收报告单位
             rows.get(18).getTableCells().get(2).setText(detail.getAddress() == null ? "--" : detail.getAddress());//联系地址
-            rows.get(18).getTableCells().get(4).setText(detail.getAddressee()== null ? "--" :detail.getAddressee());//联系人
-            rows.get(18).getTableCells().get(6).setText(detail.getMobile()== null ? "--" :detail.getMobile());//联系方式
+            rows.get(18).getTableCells().get(4).setText(detail.getAddressee() == null ? "--" : detail.getAddressee());//联系人
+            rows.get(18).getTableCells().get(6).setText(detail.getMobile() == null ? "--" : detail.getMobile());//联系方式
             rows.get(19).getTableCells().get(2).setText(detail.getEntrustPeople() == null ? "--" : detail.getEntrustPeople());//委托人
             rows.get(19).getTableCells().get(4).setText(detail.getEntrustPhone() == null ? "--" : detail.getEntrustPhone());//委托人电话
             rows.get(19).getTableCells().get(6).setText(detail.getWitnessPerson() == null ? "--" : detail.getWitnessPerson());//见证人

@@ -242,7 +242,7 @@ public class EntrustController {
         if (entrustHistoryEntity.getState() == null) {
             entrustHistoryEntity.setState(0);
         }
-        if(entrustHistoryEntity.getState()!=0&&entrustHistoryEntity.getState()!=144){
+        if(entrustHistoryEntity.getState()!=0&&entrustHistoryEntity.getState()!=144&&entrustHistoryEntity.getState()!=1){
             return ResultUtil.error("必填参数状态有误");
         }
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
@@ -256,6 +256,16 @@ public class EntrustController {
     @RequestMapping("/get_entrust_history_detail")
     public Result getEntrustHistoryDetail(Long entrustmentId){
         return ResultUtil.success(entrustService.getEntrustHistoryDetail(entrustmentId));
+    }
+
+    /**
+     * 根据检测项ID查询可以做该检测项的团队
+     * @param checkItemId
+     * @return
+     */
+    @GetMapping("/getDept")
+    public Result getDept(Integer checkItemId){
+        return ResultUtil.success(entrustService.getDept(checkItemId));
     }
 
     /**
