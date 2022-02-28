@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.TestInstrumentDao">
+
+    <resultMap type="com.lims.manage.erp.entity.TestInstrument" id="TestInstrumentMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="typeId" column="type_id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="laboratoryId" column="laboratory_id" jdbcType="INTEGER"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="oldCode" column="old_code" jdbcType="VARCHAR"/>
+        <result property="manufacturer" column="manufacturer" jdbcType="VARCHAR"/>
+        <result property="model" column="model" jdbcType="VARCHAR"/>
+        <result property="serialNumber" column="serial_number" jdbcType="VARCHAR"/>
+        <result property="price" column="price" jdbcType="VARCHAR"/>
+        <result property="picture" column="picture" jdbcType="VARCHAR"/>
+        <result property="incorporatedDate" column="incorporated_date" jdbcType="TIMESTAMP"/>
+        <result property="appraisalDate" column="appraisal_date" jdbcType="TIMESTAMP"/>
+        <result property="isPort" column="is_port" jdbcType="VARCHAR"/>
+        <result property="level" column="level" jdbcType="VARCHAR"/>
+        <result property="validityDate" column="validity_date" jdbcType="TIMESTAMP"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="checkPrice" column="check_price" jdbcType="VARCHAR"/>
+        <result property="specs" column="specs" jdbcType="VARCHAR"/>
+        <result property="range" column="range" jdbcType="VARCHAR"/>
+        <result property="contractUrl" column="contract_url" jdbcType="VARCHAR"/>
+        <result property="invoiceUrl" column="invoice_url" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="deviceAdmin" column="device_admin" jdbcType="VARCHAR"/>
+        <result property="pricePerHour" column="price_per_hour" jdbcType="VARCHAR"/>
+        <result property="traceabilityMode" column="traceability_mode" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <resultMap type="com.lims.manage.erp.vo.TestInstrumentVo" id="TestInstrumentVoMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="typeId" column="type_id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="laboratoryId" column="laboratory_id" jdbcType="INTEGER"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="oldCode" column="old_code" jdbcType="VARCHAR"/>
+        <result property="manufacturer" column="manufacturer" jdbcType="VARCHAR"/>
+        <result property="model" column="model" jdbcType="VARCHAR"/>
+        <result property="serialNumber" column="serial_number" jdbcType="VARCHAR"/>
+        <result property="price" column="price" jdbcType="VARCHAR"/>
+        <result property="picture" column="picture" jdbcType="VARCHAR"/>
+        <result property="incorporatedDate" column="incorporated_date" jdbcType="TIMESTAMP"/>
+        <result property="appraisalDate" column="appraisal_date" jdbcType="TIMESTAMP"/>
+        <result property="isPort" column="is_port" jdbcType="VARCHAR"/>
+        <result property="level" column="level" jdbcType="VARCHAR"/>
+        <result property="validityDate" column="validity_date" jdbcType="TIMESTAMP"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="checkPrice" column="check_price" jdbcType="VARCHAR"/>
+        <result property="specs" column="specs" jdbcType="VARCHAR"/>
+        <result property="range" column="range" jdbcType="VARCHAR"/>
+        <result property="contractUrl" column="contract_url" jdbcType="VARCHAR"/>
+        <result property="invoiceUrl" column="invoice_url" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="deviceAdmin" column="device_admin" jdbcType="VARCHAR"/>
+        <result property="pricePerHour" column="price_per_hour" jdbcType="VARCHAR"/>
+        <result property="traceabilityMode" column="traceability_mode" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="laboratoryName" column="laboratoryName" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="getPageList" resultMap="TestInstrumentVoMap">
+        select i.*,l.name as laboratoryName
+        from JKERP.test_instrument i
+        left join JKERP.test_laboratory l
+        on i.laboratory_id=l.id
+        ${ew.customSqlsegment}
+    </select>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into JKERP.test_instrument(type_id, name, laboratory_id, code, old_code, manufacturer, model, serial_number, price, picture, incorporated_date, appraisal_date, is_port, level, validity_date, content, check_price, specs, range, contract_url, invoice_url, remark, device_admin, price_per_hour, traceability_mode, status, del_flag, create_time, update_time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.typeId}, #{entity.name}, #{entity.laboratoryId}, #{entity.code}, #{entity.oldCode}, #{entity.manufacturer}, #{entity.model}, #{entity.serialNumber}, #{entity.price}, #{entity.picture}, #{entity.incorporatedDate}, #{entity.appraisalDate}, #{entity.isPort}, #{entity.level}, #{entity.validityDate}, #{entity.content}, #{entity.checkPrice}, #{entity.specs}, #{entity.range}, #{entity.contractUrl}, #{entity.invoiceUrl}, #{entity.remark}, #{entity.deviceAdmin}, #{entity.pricePerHour}, #{entity.traceabilityMode}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into JKERP.test_instrument(type_id, name, laboratory_id, code, old_code, manufacturer, model, serial_number, price, picture, incorporated_date, appraisal_date, is_port, level, validity_date, content, check_price, specs, range, contract_url, invoice_url, remark, device_admin, price_per_hour, traceability_mode, status, del_flag, create_time, update_time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.typeId}, #{entity.name}, #{entity.laboratoryId}, #{entity.code}, #{entity.oldCode}, #{entity.manufacturer}, #{entity.model}, #{entity.serialNumber}, #{entity.price}, #{entity.picture}, #{entity.incorporatedDate}, #{entity.appraisalDate}, #{entity.isPort}, #{entity.level}, #{entity.validityDate}, #{entity.content}, #{entity.checkPrice}, #{entity.specs}, #{entity.range}, #{entity.contractUrl}, #{entity.invoiceUrl}, #{entity.remark}, #{entity.deviceAdmin}, #{entity.pricePerHour}, #{entity.traceabilityMode}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime})
+        </foreach>
+        on duplicate key update
+         type_id = values(type_id) , name = values(name) , laboratory_id = values(laboratory_id) , code = values(code) , old_code = values(old_code) , manufacturer = values(manufacturer) , model = values(model) , serial_number = values(serial_number) , price = values(price) , picture = values(picture) , incorporated_date = values(incorporated_date) , appraisal_date = values(appraisal_date) , is_port = values(is_port) , level = values(level) , validity_date = values(validity_date) , content = values(content) , check_price = values(check_price) , specs = values(specs) , range = values(range) , contract_url = values(contract_url) , invoice_url = values(invoice_url) , remark = values(remark) , device_admin = values(device_admin) , price_per_hour = values(price_per_hour) , traceability_mode = values(traceability_mode) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time)     </insert>
+
+</mapper>
+
