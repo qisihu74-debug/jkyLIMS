@@ -34,7 +34,10 @@ public class TaskVo {
     private Integer state;
 
 
-    private Integer issueReport;
+//    private Integer issueReport;
+    private String issueReport;
+
+    private String orderer;
 
 
     /**

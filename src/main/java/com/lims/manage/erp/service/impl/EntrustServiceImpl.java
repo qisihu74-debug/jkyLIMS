@@ -28,10 +28,7 @@ import com.lims.manage.erp.mapper.TestCompanyDao;
 import com.lims.manage.erp.mapper.TestCustomerDao;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.EntrustService;
-import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import io.minio.errors.MinioException;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -877,8 +874,8 @@ public class EntrustServiceImpl implements EntrustService {
             if(!deptIds.contains(vo.getDeptId())){
                 deptIds.add(vo.getDeptId());
             }
-            Integer issueReport = vo.getIssueReport();
-            if(issueReport == 1){
+            String issueReport = vo.getIssueReport();
+            if("是".equals(issueReport)){
                 dept = vo.getDeptId();
             }
         }
@@ -903,25 +900,20 @@ public class EntrustServiceImpl implements EntrustService {
             vo.setEntrustmentId(entity.getEntrustmentId());
             vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
             vo.setState(1);
+            vo.setOrderer(ShiroUtils.getUserInfo().getName());
             if(deptId.equals(dept)){
-                vo.setIssueReport(1);
+                vo.setIssueReport("是");
             }else{
-                vo.setIssueReport(0);
+                vo.setIssueReport("否");
             }
             vos.add(vo);
-        }
-
-        for (int i = 0; i < vos.size(); i++) {
-            System.out.println("任务对象："+vos.get(i));
-        }
-
-        for (int i = 0; i < entity.getCheckItemDeptVoList().size(); i++) {
-            System.out.println("检测项信息："+entity.getCheckItemDeptVoList().get(i));
         }
         //任务单保存
         taskMapper.batchSave(vos);
         //更新检测项信息
         taskMapper.batchUpdateCheckItem(entity.getCheckItemDeptVoList());
+        //更新委托单状态
+        taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
         return true;
     }
 

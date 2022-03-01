@@ -48,11 +48,12 @@
         entrustment_id,
         required_completion_time,
         state,
-        issue_report
+        issue_report,
+        orderer
         )
         VALUES
         <foreach collection="vos" item="vo" separator=",">
-            (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},#{vo.state}, #{vo.issueReport})
+            (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},#{vo.state}, #{vo.issueReport}, #{vo.orderer})
         </foreach>
     </insert>
 
