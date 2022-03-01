@@ -203,4 +203,5 @@ public interface TaskMapper extends BaseMapper {
     Long getEntrustIdByTaskId(@Param("id") Long id);
 
     int batchUpdateCheckItem(@Param("list") List<CheckItemDeptVo> list);
+
 }
