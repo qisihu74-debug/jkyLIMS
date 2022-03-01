@@ -11,28 +11,31 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 实验室管理(TestLaboratory)表实体类
+ * 设备仪器检定记录表(TestInstrumentAppraisalRecord)表实体类
  *
  * @author makejava
- * @since 2022-02-25 10:08:36
+ * @since 2022-03-01 11:47:25
  */
 @SuppressWarnings("serial")
-public class TestLaboratory extends Model<TestLaboratory> {
+public class TestInstrumentAppraisalRecord extends Model<TestInstrumentAppraisalRecord> {
+    //主键id
     @TableId(type = IdType.AUTO)
     private Integer id;
-    //实验室名称
+    //设备名称
+    @TableField("`name`")
     private String name;
-    //实验室编码
+    //设备编号
     @TableField("`code`")
     private String code;
-    //实验室管理员
-    private String administintor;
-    //实验室所在位置
-    private String position;
-    //联系方式
-    private String phone;
-    //照片
-    private String picture;
+    //鉴定日期
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date appraisalDate;
+    //经办人
+    private String operate;
+    //鉴定结果
+    private String appraisalResult;
+    //相关资料
+    private String fileUrl;
     // 0,启用，1,冻结
     private String status;
     //0默认未删除,1删除
@@ -71,36 +74,36 @@ public class TestLaboratory extends Model<TestLaboratory> {
         this.code = code;
     }
 
-    public String getAdministintor() {
-        return administintor;
+    public Date getAppraisalDate() {
+        return appraisalDate;
     }
 
-    public void setAdministintor(String administintor) {
-        this.administintor = administintor;
+    public void setAppraisalDate(Date appraisalDate) {
+        this.appraisalDate = appraisalDate;
     }
 
-    public String getPosition() {
-        return position;
+    public String getOperate() {
+        return operate;
     }
 
-    public void setPosition(String position) {
-        this.position = position;
+    public void setOperate(String operate) {
+        this.operate = operate;
     }
 
-    public String getPhone() {
-        return phone;
+    public String getAppraisalResult() {
+        return appraisalResult;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setAppraisalResult(String appraisalResult) {
+        this.appraisalResult = appraisalResult;
     }
 
-    public String getPicture() {
-        return picture;
+    public String getFileUrl() {
+        return fileUrl;
     }
 
-    public void setPicture(String picture) {
-        this.picture = picture;
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
     }
 
     public String getStatus() {

@@ -2,7 +2,6 @@ package com.lims.manage.erp.entity;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -11,28 +10,18 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 实验室管理(TestLaboratory)表实体类
+ * 仪器大类(TestInstrumentType)表实体类
  *
  * @author makejava
- * @since 2022-02-25 10:08:36
+ * @since 2022-03-01 09:14:39
  */
 @SuppressWarnings("serial")
-public class TestLaboratory extends Model<TestLaboratory> {
+public class TestInstrumentType extends Model<TestInstrumentType> {
+    //仪器ID
     @TableId(type = IdType.AUTO)
     private Integer id;
-    //实验室名称
+    //仪器大类名称
     private String name;
-    //实验室编码
-    @TableField("`code`")
-    private String code;
-    //实验室管理员
-    private String administintor;
-    //实验室所在位置
-    private String position;
-    //联系方式
-    private String phone;
-    //照片
-    private String picture;
     // 0,启用，1,冻结
     private String status;
     //0默认未删除,1删除
@@ -45,7 +34,6 @@ public class TestLaboratory extends Model<TestLaboratory> {
     private Date updateTime;
     //备注
     private String remark;
-
 
     public Integer getId() {
         return id;
@@ -61,46 +49,6 @@ public class TestLaboratory extends Model<TestLaboratory> {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getAdministintor() {
-        return administintor;
-    }
-
-    public void setAdministintor(String administintor) {
-        this.administintor = administintor;
-    }
-
-    public String getPosition() {
-        return position;
-    }
-
-    public void setPosition(String position) {
-        this.position = position;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getPicture() {
-        return picture;
-    }
-
-    public void setPicture(String picture) {
-        this.picture = picture;
     }
 
     public String getStatus() {

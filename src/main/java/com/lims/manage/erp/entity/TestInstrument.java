@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -42,8 +44,10 @@ public class TestInstrument extends Model<TestInstrument> {
     //仪器图片
     private String picture;
     //入编日期
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date incorporatedDate;
     //最新一次鉴定日期
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date appraisalDate;
     //有无串口0没有1有
     private String isPort;
@@ -51,6 +55,7 @@ public class TestInstrument extends Model<TestInstrument> {
     @TableField("`level`")
     private String level;
     //有效期
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date validityDate;
     //服务内容
     private String content;
@@ -78,10 +83,11 @@ public class TestInstrument extends Model<TestInstrument> {
     //0默认未删除,1删除
     private Integer delFlag;
     //注册时间
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
     //更新时间
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
-
 
     public Integer getId() {
         return id;

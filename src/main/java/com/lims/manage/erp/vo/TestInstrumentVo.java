@@ -3,6 +3,7 @@ package com.lims.manage.erp.vo;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Date;
@@ -34,8 +35,10 @@ public class TestInstrumentVo {
     //仪器图片
     private String picture;
     //入编日期
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date incorporatedDate;
     //最新一次鉴定日期
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date appraisalDate;
     //有无串口0没有1有
     private String isPort;
@@ -43,6 +46,7 @@ public class TestInstrumentVo {
     @TableField("`level`")
     private String level;
     //有效期
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date validityDate;
     //服务内容
     private String content;
@@ -70,8 +74,10 @@ public class TestInstrumentVo {
     //0默认未删除,1删除
     private Integer delFlag;
     //注册时间
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
     //更新时间
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
     //所在实验室名称
     private String laboratoryName;

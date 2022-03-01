@@ -76,6 +76,7 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         queryWrapper.eq("laboratory_id",testInstrument.getLaboratoryId());
         queryWrapper.eq("name",testInstrument.getName());
         queryWrapper.ne("id",testInstrument.getId());
+        queryWrapper.eq("del_flag",0);
         if (this.list(queryWrapper).size()>0){
             return ResultUtil.error("该实验室已有该设备！");
         }

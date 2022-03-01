@@ -33,7 +33,7 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
         if (testLaboratory.getName()==null){
             return ResultUtil.error("实验室名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestLaboratory>().eq("name",testLaboratory.getName()))!=null){
+        if (this.getOne(new QueryWrapper<TestLaboratory>().eq("name",testLaboratory.getName()).eq("del_flag",0))!=null){
             return ResultUtil.error("实验室名称重复");
         }
         testLaboratory.setStatus("0");
@@ -55,7 +55,7 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
         if (testLaboratory.getName()==null){
             return ResultUtil.error("实验室名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestLaboratory>().eq("name",testLaboratory.getName()).ne("id",testLaboratory.getId()))!=null){
+        if (this.getOne(new QueryWrapper<TestLaboratory>().eq("name",testLaboratory.getName()).eq("del_flag",0).ne("id",testLaboratory.getId()))!=null){
             return ResultUtil.error("实验室名称重复");
         }
         testLaboratory.setUpdateTime(new Date());
