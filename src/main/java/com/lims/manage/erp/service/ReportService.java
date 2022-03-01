@@ -229,11 +229,27 @@ public interface ReportService {
      * @param name
      * @param contact
      */
-    void downloadQysFile(Long entrustId, Long contractId, String name, String contact);
+    byte[] downloadQysFile(Long entrustId, Long contractId, String name, String contact);
 
     /**
      * 契约锁报告签署完成时调用的回调函数
      * @param contractId
      */
     void callback(Long contractId);
+
+    /**
+     * 获取契约锁部门列表
+     * @param tenantType
+     * @param companyName
+     * @return
+     */
+    QiYueSuoResponse deptList(String tenantType, String companyName);
+
+    /**
+     * 获取部门在契约锁的印章列表
+     * @param category
+     * @param companyName
+     * @return
+     */
+    QiYueSuoResponse sealListOfQys(String category, String companyName);
 }

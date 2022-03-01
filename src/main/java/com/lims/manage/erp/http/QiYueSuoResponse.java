@@ -1,5 +1,6 @@
 package com.lims.manage.erp.http;
 
+import com.lims.manage.erp.entity.QiYueSuoSealEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,4 +36,8 @@ public class QiYueSuoResponse {
     private String signUrl;
 
     private List<QiYueSuoDocment> result;
+    /**
+     * 印章列表
+     */
+    private List<QiYueSuoSealEntity> list;
 }

@@ -724,9 +724,10 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void downloadQysFile(Long enstustId, Long contractId, String name, String contact) {
-        qiYueSuoHnadler.downloadQysFile(contractId,name,contact);
+    public byte[] downloadQysFile(Long enstustId, Long contractId, String name, String contact) {
+        byte[] inputStream = qiYueSuoHnadler.downloadQysFile(contractId, name, contact);
         entityMapper.updateState(enstustId,"5");
+        return inputStream;
     }
 
     @Override
@@ -739,6 +740,16 @@ public class ReportServiceImpl implements ReportService {
         //更新报告状态
         entityMapper.updateFileState(contractId,"4");
         logger.debug("接收契约锁回调参数进行数据更新完成！");
+    }
+
+    @Override
+    public QiYueSuoResponse deptList(String tenantType, String companyName) {
+        return qiYueSuoHnadler.getDeptListOfQYS(tenantType,companyName);
+    }
+
+    @Override
+    public QiYueSuoResponse sealListOfQys(String category, String companyName) {
+        return qiYueSuoHnadler.sealList(category,companyName);
     }
 
 }
