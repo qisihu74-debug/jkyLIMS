@@ -10,7 +10,7 @@
 
     <select id="announceHistory" resultType="com.lims.manage.erp.entity.HomeAfficheEntity">
         select
-        spreadhead,file_url,file_url_name,content_detail,issuer_name
+        id,spreadhead,file_url,file_url_name,content_detail,issuer_name,create_time,update_time
         from
         home_affiche
         ORDER BY create_time desc
