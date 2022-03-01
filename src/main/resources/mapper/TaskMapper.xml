@@ -7,7 +7,19 @@
         from test_task
     </select>
 
-    <insert id="save" parameterType="com.lims.manage.erp.entity.TaskEntity">
+    <select id="selectMaxNoByCode" resultType="java.lang.Integer">
+        SELECT Max(CODE)
+        FROM test_task
+        where task_code like CONCAT(#{code}, '%')
+    </select>
+
+    <select id="getTeamCode" resultType="java.lang.String">
+        SELECT code
+        FROM test_team
+        where id = #{deptId}
+    </select>
+
+    <insert id="save" parameterType="com.lims.manage.erp.vo.TaskVo">
         INSERT INTO test_task (id,
                                code,
                                entrustment_id,
@@ -26,6 +38,23 @@
                 #{teamId},
                 #{receiver},
                 #{receiveTime})
+    </insert>
+
+    <insert id="batchSave" parameterType="com.lims.manage.erp.vo.TaskVo">
+        INSERT INTO test_task (id,
+        dept_id,
+        code,
+        task_code,
+        entrustment_id,
+        required_completion_time,
+        state,
+        issue_report,
+        orderer
+        )
+        VALUES
+        <foreach collection="vos" item="vo" separator=",">
+            (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},#{vo.state}, #{vo.issueReport}, #{vo.orderer})
+        </foreach>
     </insert>
 
     <update id="updateEntrustById">
@@ -348,5 +377,16 @@
             reviewer        = #{reviewer,jdbcType=VARCHAR},
             report_producer = #{reportProducer,jdbcType=VARCHAR}
         where id = #{taskId,jdbcType=INTEGER}
+    </update>
+
+    <update id="batchUpdateCheckItem" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update test_entrusted_sample_checkitem_rel
+            <set>
+                dept_id = ${item.deptId},
+                distribution_date = current_timestamp()
+            </set>
+            where id = ${item.id}
+        </foreach>
     </update>
 </mapper>

@@ -96,5 +96,9 @@ public class TaskTestEntity {
      * 文件附件
      */
     private String fileUrlStr;
+    /**
+     * 是否出具报告：0、不出具；1、出具
+     */
+    private Integer issueReport;
 
 }

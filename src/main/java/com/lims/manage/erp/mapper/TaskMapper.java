@@ -29,6 +29,10 @@ public interface TaskMapper extends BaseMapper {
      */
     Integer selectMaxNo();
 
+    Integer selectMaxNoByCode(String code);
+
+    String getTeamCode(Long deptId);
+
     /**
      * 更新委托单状态
      *
@@ -42,6 +46,17 @@ public interface TaskMapper extends BaseMapper {
      * @param entity
      */
     void save(TaskEntity entity);
+
+    /**
+     * 保存任务单--分配任务
+     * @param entity
+     */
+    void save(TaskVo entity);
+    /**
+     * 保存任务单--分配任务
+     * @param vos
+     */
+    void batchSave(@Param("vos")List<TaskVo> vos);
 
     /**
      * 查询任务详情
@@ -186,5 +201,7 @@ public interface TaskMapper extends BaseMapper {
      */
     @Select("select entrustment_id from test_task where id = #{id}")
     Long getEntrustIdByTaskId(@Param("id") Long id);
+
+    int batchUpdateCheckItem(@Param("list") List<CheckItemDeptVo> list);
 
 }
