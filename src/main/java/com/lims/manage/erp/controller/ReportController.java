@@ -3,10 +3,12 @@ package com.lims.manage.erp.controller;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SealReqEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.result.Result;
@@ -30,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -222,24 +225,73 @@ public class ReportController {
     }
 
     /**
-     * 盖章
-     *
-     * @param entity
+     * 向契约锁发起盖章合同申请
+     * @param entrustId
      * @return
      */
-    @PostMapping("seal")
-    public Result seal(@RequestBody SealReqEntity entity) {
-        if (StringUtils.isEmpty(entity.getList())) {
+    @GetMapping("sealApprove")
+    public Result seal(Long entrustId) {
+        if (entrustId == null) {
             return ResultUtil.error("缺少必要的参数！");
         }
-        String[] split = entity.getList().split(",");
-        List<String> list = Arrays.asList(split);
-        Boolean flag = reportService.seal(list, entity.getId());
+        Boolean flag = reportService.seal(entrustId);
         if (flag) {
-            return ResultUtil.success("获取印章成功!");
+            return ResultUtil.success("向契约锁发起盖章合同申请成功!");
         } else {
-            return ResultUtil.error("获取印章失败！");
+            return ResultUtil.error("向契约锁发起盖章合同申请失败！");
         }
+    }
+
+    /**
+     * 创建合同
+     * @param reqBean
+     * @return
+     */
+    @PostMapping("createbycategory")
+    public Result createbycategory(@RequestBody QiYueSuoReqBean reqBean) {
+        if (reqBean == null){
+            return ResultUtil.error("缺少必要的参数");
+        }
+        QiYueSuoResponse response = reportService.createbycategory(reqBean);
+        if (response != null && response.getCode() == 0) {
+            return ResultUtil.success("向契约锁发起报告制作申请成功!");
+        } else {
+            return ResultUtil.error("向契约锁发起报告制作申请失败："+response.getMessage());
+        }
+    }
+
+    /**
+     * 报告合同签署url获取
+     * @param reqBean
+     * @return
+     */
+    @PostMapping("signurl")
+    public Result signurl(@RequestBody QiYueSuoReqBean reqBean){
+        if (reqBean == null){
+            return ResultUtil.error("缺少必要的参数");
+        }
+        QiYueSuoResponse response = reportService.signurl(reqBean);
+        if (response != null && response.getCode() == 0) {
+            return ResultUtil.success("向契约锁发起报告签署url申请成功!");
+        } else {
+            return ResultUtil.error("向契约锁发起报告签署url申请失败："+response.getMessage());
+        }
+    }
+
+    /**
+     * 契约锁报告下载
+     * @param contractId
+     * @param name
+     * @param contact
+     * @return
+     */
+    @GetMapping("downloadQysFile")
+    public Result downloadQysFile(Long entrustId, Long contractId,String name,String contact){
+        if (contractId == null || StringUtils.isEmpty(name) || StringUtils.isEmpty(contact)){
+            return ResultUtil.error("缺少必要参数");
+        }
+        reportService.downloadQysFile(entrustId,contractId,name,contact);
+        return null;
     }
 
     /**

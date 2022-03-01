@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
 @Mapper
@@ -100,4 +101,55 @@ public interface ReportRecordEntityMapper {
      */
     @Select("select template_name from test_report_record where entrustment_id = #{entrustId}")
     String getReportModelNameById(@Param("entrustId") Long entrustId);
+
+    /**
+     * 根据委托单id更新契约锁响应的docId和本业务状态
+     * @param docId
+     * @param entrustId
+     * @param state
+     */
+    @Update("update test_report_record set qys_docment_id=#{docId},qys_state=#{state} where entrustment_id=#{entrustId}")
+    void updateDocIdAndState(@Param("entrustId") Long entrustId, @Param("docId") Long docId, @Param("state") String state);
+
+    /**
+     * 根据委托单id更新契约锁响应的contractId和本业务状态
+     * @param entrustId
+     * @param contractId
+     * @param state
+     */
+    @Update("update test_report_record set contract_id=#{contractId},qys_state=#{state} where entrustment_id=#{entrustId}")
+    void updateContractIdAndState(@Param("entrustId") Long entrustId, @Param("contractId") Long contractId, @Param("state") String state);
+
+    /**
+     * 根据委托单id更新，报告签署url地址和状态
+     * @param entrustId
+     * @param signUrl
+     * @param state
+     */
+    @Update("update test_report_record set sign_url=#{signUrl},qys_state=#{state} where entrustment_id=#{entrustId}")
+    void updateUrlAndState(@Param("entrustId") Long entrustId, @Param("signUrl") String signUrl, @Param("state") String state);
+
+    /**
+     * 下载契约锁报告状态更新
+     * @param enstustId
+     * @param state
+     */
+    @Update("update test_report_record set qys_state=#{state} where entrustment_id=#{entrustId}")
+    void updateState(@Param("entrustId") Long enstustId, @Param("state") String state);
+
+    /**
+     * 根据contractId更新状态
+     * @param contractId
+     * @param state
+     */
+    @Update("update test_report_record set qys_state=#{state} where contract_id=#{contractId}")
+    void updateFileState(@Param("contractId") Long contractId, @Param("state") String state);
+
+    /**
+     * 根据合同id获取委托单id
+     * @param contractId
+     * @return
+     */
+    @Select("select entrustment_id from test_report_record where contract_id=#{contractId}")
+    Long getEntrustIdByCid(@Param("contractId") Long contractId);
 }

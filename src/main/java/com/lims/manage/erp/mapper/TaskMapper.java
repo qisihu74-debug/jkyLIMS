@@ -186,4 +186,5 @@ public interface TaskMapper extends BaseMapper {
      */
     @Select("select entrustment_id from test_task where id = #{id}")
     Long getEntrustIdByTaskId(@Param("id") Long id);
+
 }
