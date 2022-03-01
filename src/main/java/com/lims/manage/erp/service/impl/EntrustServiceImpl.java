@@ -896,7 +896,7 @@ public class EntrustServiceImpl implements EntrustService {
             String codeStr = code + "";
             vo.setDeptId(deptId);
             vo.setCode(codeStr);
-            vo.setTaskCode(teamCode+codeStr.substring(0,3)+"-"+codeStr.substring(4,7));
+            vo.setTaskCode(teamCode+codeStr.substring(0,4)+"-"+codeStr.substring(4,7));
             vo.setEntrustmentId(entity.getEntrustmentId());
             vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
             vo.setState(1);
