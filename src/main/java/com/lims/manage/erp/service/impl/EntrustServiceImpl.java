@@ -2,6 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.EntrustEntity;
@@ -863,6 +864,64 @@ public class EntrustServiceImpl implements EntrustService {
         taskMapper.save(entity);
         //更新委托单状态
         taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
+        return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean distributionTask(TaskVo entity) {
+        List<Long> deptIds = Lists.newArrayList();
+        List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
+        Long dept = null;
+        for (CheckItemDeptVo vo: checkItemDeptVoList) {
+            if(!deptIds.contains(vo.getDeptId())){
+                deptIds.add(vo.getDeptId());
+            }
+            Integer issueReport = vo.getIssueReport();
+            if(issueReport == 1){
+                dept = vo.getDeptId();
+            }
+        }
+        //创建任务对象
+        List<TaskVo> vos = Lists.newArrayList();
+        for (Long deptId:deptIds) {
+            TaskVo vo = new TaskVo();
+            vo.setId(GenID.getID());
+            String teamCode = taskMapper.getTeamCode(deptId);
+            Integer integer = taskMapper.selectMaxNoByCode(teamCode);
+            Integer code = null;
+            if(integer == null){
+                String currentTime = DateUtil.getTodayString().substring(2, 6);
+                code = Integer.parseInt(currentTime+"001");
+            }else{
+                code = integer+1;
+            }
+            String codeStr = code + "";
+            vo.setDeptId(deptId);
+            vo.setCode(codeStr);
+            vo.setTaskCode(teamCode+codeStr.substring(0,3)+"-"+codeStr.substring(4,7));
+            vo.setEntrustmentId(entity.getEntrustmentId());
+            vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
+            vo.setState(1);
+            if(deptId.equals(dept)){
+                vo.setIssueReport(1);
+            }else{
+                vo.setIssueReport(0);
+            }
+            vos.add(vo);
+        }
+
+        for (int i = 0; i < vos.size(); i++) {
+            System.out.println("任务对象："+vos.get(i));
+        }
+
+        for (int i = 0; i < entity.getCheckItemDeptVoList().size(); i++) {
+            System.out.println("检测项信息："+entity.getCheckItemDeptVoList().get(i));
+        }
+        //任务单保存
+        taskMapper.batchSave(vos);
+        //更新检测项信息
+        taskMapper.batchUpdateCheckItem(entity.getCheckItemDeptVoList());
         return true;
     }
 
