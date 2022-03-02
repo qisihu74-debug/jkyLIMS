@@ -36,6 +36,8 @@ public class TaskServiceImpl implements TaskService {
     private ReportRecordEntityMapper reportRecordEntityMapper;
     @Autowired
     private EntrustEntityMapper entrustEntityMapper;
+    @Autowired
+    private SysRoleDao sysRoleDao;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -49,25 +51,25 @@ public class TaskServiceImpl implements TaskService {
         Long entrustId = taskMapper.getEntrustIdByTaskId(taskId);
         List<String> strings = entrustEntityMapper.getSampleStandard(entrustId);
         StringBuilder stringBuilder = new StringBuilder();
-        if(strings!=null&&!strings.isEmpty()){
-            for(String str:strings){
-            stringBuilder.append(str);
-            stringBuilder.append(",");
+        if (strings != null && !strings.isEmpty()) {
+            for (String str : strings) {
+                stringBuilder.append(str);
+                stringBuilder.append(",");
             }
-            taskDetailInfoVo.setJudgmentBasis(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
+            taskDetailInfoVo.setJudgmentBasis(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
         }
 
         return taskDetailInfoVo;
     }
 
     @Override
-    public TaskDetailInfoVo getTaskDetailInfoTwo(Long taskId,String [] deptIds) {
+    public TaskDetailInfoVo getTaskDetailInfoTwo(Long taskId, String[] deptIds) {
         TaskListParamVo paramVo = new TaskListParamVo();
         paramVo.setTaskId(taskId);
-        if(deptIds!=null){
+        if (deptIds != null) {
             // 根据部门id 遍历包含下级部门信息
             List<Long> ids = new ArrayList<>();
-            for(int i=0;i<deptIds.length;i++){
+            for (int i = 0; i < deptIds.length; i++) {
                 ids.add(Long.valueOf(deptIds[i]));
             }
             paramVo.setDeptIds(ids);
@@ -82,12 +84,12 @@ public class TaskServiceImpl implements TaskService {
         Long entrustId = taskMapper.getEntrustIdByTaskId(taskId);
         List<String> strings = entrustEntityMapper.getSampleStandard(entrustId);
         StringBuilder stringBuilder = new StringBuilder();
-        if(strings!=null&&!strings.isEmpty()){
-            for(String str:strings){
+        if (strings != null && !strings.isEmpty()) {
+            for (String str : strings) {
                 stringBuilder.append(str);
                 stringBuilder.append(",");
             }
-            taskDetailInfoVo.setJudgmentBasis(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
+            taskDetailInfoVo.setJudgmentBasis(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
         }
 
         return taskDetailInfoVo;
@@ -103,48 +105,67 @@ public class TaskServiceImpl implements TaskService {
 
         // 返回团队id集合 根据人员id
         List<TeamTreeStructureEntity> dataDepts = taskMapper.getTeamDeptVo(userId);
-        if(dataDepts!=null&&!dataDepts.isEmpty())
-        {
+        if (dataDepts != null && !dataDepts.isEmpty()) {
             Set<Long> deptIds = new HashSet<>();
-            for(TeamTreeStructureEntity data:dataDepts){
+            for (TeamTreeStructureEntity data : dataDepts) {
                 deptIds.add(data.getId());
-                if(data.getSId()!=null){
+                if (data.getSId() != null) {
                     deptIds.add(data.getSId());
                 }
             }
             StringBuilder stringBuilder = new StringBuilder();
-            for(Long detId :deptIds){
+            for (Long detId : deptIds) {
                 stringBuilder.append(detId);
                 stringBuilder.append(",");
             }
-            return stringBuilder.deleteCharAt(stringBuilder.length()-1).toString();
+            return stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString();
         }
         return null;
     }
 
     /**
      * 查询领样列表
+     *
      * @param paramVo
      * @param deptIds
      * @return
      */
     @Override
-    public List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo,String [] deptIds) {
-        if(deptIds!=null){
+    public List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo, String[] deptIds) {
+        if (deptIds != null) {
             // 根据部门id 遍历包含下级部门信息
             List<Long> ids = new ArrayList<>();
-            for(int i=0;i<deptIds.length;i++){
+            for (int i = 0; i < deptIds.length; i++) {
                 ids.add(Long.valueOf(deptIds[i]));
             }
             paramVo.setDeptIds(ids);
         }
-        if(paramVo.getState()==0){
-            return taskMapper.getTaskListTwo(paramVo);
+        List<TaskListVo> dataList = new ArrayList<>();
+        if (paramVo.getState() == 0) {
+            dataList = taskMapper.getTaskListTwo(paramVo);
         }
-        if(paramVo.getState()==1){
-            return taskMapper.getTaskListTwoGreater(paramVo);
+        if (paramVo.getState() == 2) {
+            dataList = taskMapper.getTaskListTwo(paramVo);
+
         }
-        return null;
+        if (paramVo.getState() == 1) {
+            dataList = taskMapper.getTaskListTwoGreater(paramVo);
+        }
+        if (dataList != null && !dataList.isEmpty()) {
+            for (TaskListVo data : dataList) {
+                if (data.getInspector() != null) {
+                    String[] strings2 = data.getInspector().split(",");
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (int i = 0; i < strings2.length; i++) {
+                        String[] strings3 = strings2[i].split("&");
+                        stringBuilder.append(strings3[0]);
+                        stringBuilder.append(",");
+                    }
+                    data.setInspector(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+                }
+            }
+        }
+        return dataList;
     }
 
     @Override
@@ -203,11 +224,11 @@ public class TaskServiceImpl implements TaskService {
     public Boolean postGrabASingleTwo(TaskTestEntity taskTestEntity) {
         // 抢单
         taskTestEntity.setState(1);
-            // 抢单时间
-            java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
-            taskTestEntity.setReceiveTime(currentDate);
-            taskMapper.updateTestTask(taskTestEntity);
-            return true;
+        // 抢单时间
+        java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
+        taskTestEntity.setReceiveTime(currentDate);
+        taskMapper.updateTestTask(taskTestEntity);
+        return true;
     }
 
     @Override
@@ -224,22 +245,25 @@ public class TaskServiceImpl implements TaskService {
         TeamVo teamVo = new TeamVo();
         // 返回团队id集合 根据人员id
         List<TeamTreeStructureEntity> dataDepts = taskMapper.getTeamDeptVo(UserLong);
-        if(dataDepts!=null&&!dataDepts.isEmpty())
-        {
+        if (dataDepts != null && !dataDepts.isEmpty()) {
             Set<Long> deptIds = new HashSet<>();
-           for(TeamTreeStructureEntity data:dataDepts){
-               deptIds.add(data.getId());
-               if(data.getSId()!=null){
-                   deptIds.add(data.getSId());
-               }
-           }
-           // 团队id集合 返回人员信息
+            for (TeamTreeStructureEntity data : dataDepts) {
+                deptIds.add(data.getId());
+                if (data.getSId() != null) {
+                    deptIds.add(data.getSId());
+                }
+            }
+            // 团队id集合 返回人员信息
             List<LabelValueVo> teamVos = taskMapper.getMemberInformation(deptIds);
             teamVo.setTeamVo(teamVos);
         }
         // 复核人集合
+
+        teamVo.setReviewVo(null);
         // 审批人集合
+        teamVo.setApproverVo(null);
         // 签发人集合
+        teamVo.setSignerVo(null);
         return teamVo;
     }
 
@@ -273,16 +297,16 @@ public class TaskServiceImpl implements TaskService {
             if (taskDetailInfoVo.getSealType() != null) {
                 switch (taskDetailInfoVo.getSealType()) {
                     case "综合甲级":
-                        rows1.get(14).getTableCells().get(1).setText("☑"+"综合甲级"+"□"+"CMA"+"□"+"CNAS");
+                        rows1.get(14).getTableCells().get(1).setText("☑" + "综合甲级" + "□" + "CMA" + "□" + "CNAS");
                         break;
                     case "CMA":
-                        rows1.get(14).getTableCells().get(1).setText("□"+"综合甲级"+"☑"+"CMA"+"□"+"CNAS");
+                        rows1.get(14).getTableCells().get(1).setText("□" + "综合甲级" + "☑" + "CMA" + "□" + "CNAS");
                         break;
                     case "CNAS":
-                        rows1.get(14).getTableCells().get(1).setText("□"+"综合甲级"+"□"+"CMA"+"☑"+"CNAS");
+                        rows1.get(14).getTableCells().get(1).setText("□" + "综合甲级" + "□" + "CMA" + "☑" + "CNAS");
                         break;
                     default:
-                        rows1.get(14).getTableCells().get(1).setText("□"+"综合甲级"+"□"+"CMA"+"□"+"CNAS");
+                        rows1.get(14).getTableCells().get(1).setText("□" + "综合甲级" + "□" + "CMA" + "□" + "CNAS");
                         break;
                 }
             }
