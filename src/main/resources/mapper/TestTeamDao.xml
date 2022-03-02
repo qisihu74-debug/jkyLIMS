@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.TestTeamDao">
+
+    <resultMap type="com.lims.manage.erp.entity.TestTeam" id="TestTeamMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="pid" column="pid" jdbcType="INTEGER"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="teamLead" column="team_lead" jdbcType="VARCHAR"/>
+        <result property="teamLead1" column="team_lead1" jdbcType="VARCHAR"/>
+        <result property="leadTel" column="lead_tel" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into JKERP.test_team(name, pid, code, team_lead, team_lead1, lead_tel, status, del_flag, create_time, update_time, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.name}, #{entity.pid}, #{entity.code}, #{entity.teamLead}, #{entity.teamLead1}, #{entity.leadTel}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into JKERP.test_team(name, pid, code, team_lead, team_lead1, lead_tel, status, del_flag, create_time, update_time, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.name}, #{entity.pid}, #{entity.code}, #{entity.teamLead}, #{entity.teamLead1}, #{entity.leadTel}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+        </foreach>
+        on duplicate key update
+         name = values(name) , pid = values(pid) , code = values(code) , team_lead = values(team_lead) , team_lead1 = values(team_lead1) , lead_tel = values(lead_tel) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , remark = values(remark)     </insert>
+
+</mapper>
+
