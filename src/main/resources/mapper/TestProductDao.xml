@@ -36,4 +36,83 @@
                "客户提供"
         FROM DUAL
     </select>
+
+
+    <resultMap type="com.lims.manage.erp.entity.TestProductItem" id="TestProductItemMap">
+        <result property="checkItemId" column="check_item_id" jdbcType="INTEGER"/>
+        <result property="checkItemPid" column="check_item_pid" jdbcType="INTEGER"/>
+        <result property="checkItemCode" column="check_item_code" jdbcType="VARCHAR"/>
+        <result property="productId" column="product_id" jdbcType="INTEGER"/>
+        <result property="reportModelId" column="report_model_id" jdbcType="VARCHAR"/>
+        <result property="checkItemName" column="check_item_name" jdbcType="VARCHAR"/>
+        <result property="coordinate" column="coordinate" jdbcType="VARCHAR"/>
+        <result property="icon" column="icon" jdbcType="VARCHAR"/>
+        <result property="additionalFees" column="additional_fees" jdbcType="VARCHAR"/>
+        <result property="unit" column="unit" jdbcType="VARCHAR"/>
+        <result property="sampleCount" column="sample_count" jdbcType="INTEGER"/>
+        <result property="place" column="place" jdbcType="VARCHAR"/>
+        <result property="duration" column="duration" jdbcType="VARCHAR"/>
+        <result property="frequency" column="frequency" jdbcType="VARCHAR"/>
+        <result property="difficulty" column="difficulty" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="checkPrice" column="check_price" jdbcType="VARCHAR"/>
+        <result property="isAvailable" column="is_available" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="logisticsCosts" column="logistics_costs" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap type="com.lims.manage.erp.vo.TestProductVo" id="TestProductVoMap">
+        <result property="checkItemId" column="check_item_id" jdbcType="INTEGER"/>
+        <result property="checkItemPid" column="check_item_pid" jdbcType="INTEGER"/>
+        <result property="checkItemCode" column="check_item_code" jdbcType="VARCHAR"/>
+        <result property="productId" column="product_id" jdbcType="INTEGER"/>
+        <result property="reportModelId" column="report_model_id" jdbcType="VARCHAR"/>
+        <result property="checkItemName" column="check_item_name" jdbcType="VARCHAR"/>
+        <result property="coordinate" column="coordinate" jdbcType="VARCHAR"/>
+        <result property="icon" column="icon" jdbcType="VARCHAR"/>
+        <result property="additionalFees" column="additional_fees" jdbcType="VARCHAR"/>
+        <result property="unit" column="unit" jdbcType="VARCHAR"/>
+        <result property="sampleCount" column="sample_count" jdbcType="INTEGER"/>
+        <result property="place" column="place" jdbcType="VARCHAR"/>
+        <result property="duration" column="duration" jdbcType="VARCHAR"/>
+        <result property="frequency" column="frequency" jdbcType="VARCHAR"/>
+        <result property="difficulty" column="difficulty" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="checkPrice" column="check_price" jdbcType="VARCHAR"/>
+        <result property="isAvailable" column="is_available" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="logisticsCosts" column="logistics_costs" jdbcType="VARCHAR"/>
+        <result property="productTypeName" column="productTypeName" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="getPageList" resultMap="TestProductVoMap">
+        select p.*,t.product_type_name as productTypeName
+        from JKERP.test_product p
+                 left join JKERP.test_product_type t
+                           on p.product_type_id=t.product_type_id
+            ${ew.customSqlsegment}
+    </select>
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="checkItemId" useGeneratedKeys="true">
+        insert into JKERP.test_product_item(check_item_pid, check_item_code, product_id, report_model_id, check_item_name, coordinate, icon, additional_fees, unit, sample_count, place, duration, frequency, difficulty, remark, check_price, is_available, status, del_flag, create_time, update_time, logistics_costs)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.checkItemPid}, #{entity.checkItemCode}, #{entity.productId}, #{entity.reportModelId}, #{entity.checkItemName}, #{entity.coordinate}, #{entity.icon}, #{entity.additionalFees}, #{entity.unit}, #{entity.sampleCount}, #{entity.place}, #{entity.duration}, #{entity.frequency}, #{entity.difficulty}, #{entity.remark}, #{entity.checkPrice}, #{entity.isAvailable}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.logisticsCosts})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="checkItemId" useGeneratedKeys="true">
+        insert into JKERP.test_product_item(check_item_pid, check_item_code, product_id, report_model_id, check_item_name, coordinate, icon, additional_fees, unit, sample_count, place, duration, frequency, difficulty, remark, check_price, is_available, status, del_flag, create_time, update_time, logistics_costs)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.checkItemPid}, #{entity.checkItemCode}, #{entity.productId}, #{entity.reportModelId}, #{entity.checkItemName}, #{entity.coordinate}, #{entity.icon}, #{entity.additionalFees}, #{entity.unit}, #{entity.sampleCount}, #{entity.place}, #{entity.duration}, #{entity.frequency}, #{entity.difficulty}, #{entity.remark}, #{entity.checkPrice}, #{entity.isAvailable}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.logisticsCosts})
+        </foreach>
+        on duplicate key update
+        check_item_pid = values(check_item_pid) , check_item_code = values(check_item_code) , product_id = values(product_id) , report_model_id = values(report_model_id) , check_item_name = values(check_item_name) , coordinate = values(coordinate) , icon = values(icon) , additional_fees = values(additional_fees) , unit = values(unit) , sample_count = values(sample_count) , place = values(place) , duration = values(duration) , frequency = values(frequency) , difficulty = values(difficulty) , remark = values(remark) , check_price = values(check_price) , is_available = values(is_available) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , logistics_costs = values(logistics_costs)     </insert>
 </mapper>

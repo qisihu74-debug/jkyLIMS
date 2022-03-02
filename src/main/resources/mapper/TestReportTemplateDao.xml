@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.TestReportTemplateDao">
+
+    <resultMap type="com.lims.manage.erp.entity.TestReportTemplate" id="TestReportTemplateMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="reportCode" column="report_code" jdbcType="VARCHAR"/>
+        <result property="productId" column="product_id" jdbcType="VARCHAR"/>
+        <result property="reportName" column="report_name" jdbcType="VARCHAR"/>
+        <result property="reportFileUri" column="report_file_uri" jdbcType="VARCHAR"/>
+        <result property="isAvailable" column="is_available" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into JKERP.test_report_template(report_code, product_id, report_name, report_file_uri, is_available, status, del_flag, create_time, update_time, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.reportCode}, #{entity.productId}, #{entity.reportName}, #{entity.reportFileUri}, #{entity.isAvailable}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into JKERP.test_report_template(report_code, product_id, report_name, report_file_uri, is_available, status, del_flag, create_time, update_time, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.reportCode}, #{entity.productId}, #{entity.reportName}, #{entity.reportFileUri}, #{entity.isAvailable}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+        </foreach>
+        on duplicate key update
+         report_code = values(report_code) , product_id = values(product_id) , report_name = values(report_name) , report_file_uri = values(report_file_uri) , is_available = values(is_available) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , remark = values(remark)     </insert>
+
+</mapper>
+
