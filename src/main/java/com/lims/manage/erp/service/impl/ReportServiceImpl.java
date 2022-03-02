@@ -25,6 +25,7 @@ import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.WordUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.JudgmentBasisVo;
 import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
@@ -575,6 +576,16 @@ public class ReportServiceImpl implements ReportService {
         ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
         List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
+            //设置报告首页参数
+            EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
+            Map<String, String> textMap = new HashMap<>();
+            textMap.put("code",reportRecordEntity.getReportCode());
+            textMap.put("page",doc.getTables().size()+"");
+            textMap.put("sampleName",reportRecordEntity.getSampleName());
+            textMap.put("dept",entrustAddVo.getEntrustCompany());
+            textMap.put("part",entrustAddVo.getProjectPart());
+            textMap.put("checkType",entrustAddVo.getCheckPurpose());
+            WordUtils.changeText(doc, textMap);
             //处理表格
             Iterator<XWPFTable> it = doc.getTablesIterator();
             //表格索引
