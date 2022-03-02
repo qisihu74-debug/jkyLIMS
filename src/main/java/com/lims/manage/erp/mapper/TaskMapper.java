@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author gjl
@@ -66,6 +67,13 @@ public interface TaskMapper extends BaseMapper {
     TaskDetailInfoVo getTaskDetailInfo(Long taskId);
 
     /**
+     * 查询任务详情二次开发
+     *
+     * @return
+     */
+    TaskDetailInfoVo getTaskDetailInfoTwo(TaskListParamVo paramVo);
+
+    /**
      * 修改任务信息
      */
     int updateTestTask(TaskTestEntity taskTestEntity);
@@ -79,6 +87,16 @@ public interface TaskMapper extends BaseMapper {
      * 根据用户id 查询 团队 名
      */
     TaskTestTeamEntity selectTeamCode(Long userid);
+
+    /**
+     * 根据人员id 获取 部门信息 和 关联的下级部门信息
+     */
+    List<TeamTreeStructureEntity> getTeamDeptVo(Long userid);
+
+    /**
+     *  根据团队id 查询人员信息列表
+     */
+    List<LabelValueVo> getMemberInformation(@Param(value = "deptIds") Set<Long> deptIds);
 
     /**
      * 根据团队id 返回 用户集合
@@ -95,6 +113,21 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     List<TaskListVo> getTaskList(TaskListParamVo paramVo);
+
+    /**
+     * 查询任务列表
+     *
+     * @param paramVo
+     * @return
+     */
+    List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo);
+
+    /**
+     * 查询任务列表 并且 state>=1
+     * @param paramVo
+     * @return
+     */
+    List<TaskListVo> getTaskListTwoGreater(TaskListParamVo paramVo);
 
     /**
      * 查询领样列表

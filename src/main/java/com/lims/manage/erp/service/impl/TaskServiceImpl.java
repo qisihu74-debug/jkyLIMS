@@ -17,7 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -58,8 +61,90 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public TaskDetailInfoVo getTaskDetailInfoTwo(Long taskId,String [] deptIds) {
+        TaskListParamVo paramVo = new TaskListParamVo();
+        paramVo.setTaskId(taskId);
+        if(deptIds!=null){
+            // 根据部门id 遍历包含下级部门信息
+            List<Long> ids = new ArrayList<>();
+            for(int i=0;i<deptIds.length;i++){
+                ids.add(Long.valueOf(deptIds[i]));
+            }
+            paramVo.setDeptIds(ids);
+        }
+        // 处理 委托单的文件链接
+        TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfoTwo(paramVo);
+        if (taskDetailInfoVo.getFileUrl() != null) {
+            String[] array = taskDetailInfoVo.getFileUrl().split(",");
+            taskDetailInfoVo.setArray(array);
+        }
+        // 获取文件附件
+        Long entrustId = taskMapper.getEntrustIdByTaskId(taskId);
+        List<String> strings = entrustEntityMapper.getSampleStandard(entrustId);
+        StringBuilder stringBuilder = new StringBuilder();
+        if(strings!=null&&!strings.isEmpty()){
+            for(String str:strings){
+                stringBuilder.append(str);
+                stringBuilder.append(",");
+            }
+            taskDetailInfoVo.setJudgmentBasis(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
+        }
+
+        return taskDetailInfoVo;
+    }
+
+    @Override
     public List<TaskListVo> getTaskList(TaskListParamVo paramVo) {
         return taskMapper.getTaskList(paramVo);
+    }
+
+    @Override
+    public String getDeptIds(Long userId) {
+
+        // 返回团队id集合 根据人员id
+        List<TeamTreeStructureEntity> dataDepts = taskMapper.getTeamDeptVo(userId);
+        if(dataDepts!=null&&!dataDepts.isEmpty())
+        {
+            Set<Long> deptIds = new HashSet<>();
+            for(TeamTreeStructureEntity data:dataDepts){
+                deptIds.add(data.getId());
+                if(data.getSId()!=null){
+                    deptIds.add(data.getSId());
+                }
+            }
+            StringBuilder stringBuilder = new StringBuilder();
+            for(Long detId :deptIds){
+                stringBuilder.append(detId);
+                stringBuilder.append(",");
+            }
+            return stringBuilder.deleteCharAt(stringBuilder.length()-1).toString();
+        }
+        return null;
+    }
+
+    /**
+     * 查询领样列表
+     * @param paramVo
+     * @param deptIds
+     * @return
+     */
+    @Override
+    public List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo,String [] deptIds) {
+        if(deptIds!=null){
+            // 根据部门id 遍历包含下级部门信息
+            List<Long> ids = new ArrayList<>();
+            for(int i=0;i<deptIds.length;i++){
+                ids.add(Long.valueOf(deptIds[i]));
+            }
+            paramVo.setDeptIds(ids);
+        }
+        if(paramVo.getState()==0){
+            return taskMapper.getTaskListTwo(paramVo);
+        }
+        if(paramVo.getState()==1){
+            return taskMapper.getTaskListTwoGreater(paramVo);
+        }
+        return null;
     }
 
     @Override
@@ -115,12 +200,47 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public Boolean postGrabASingleTwo(TaskTestEntity taskTestEntity) {
+        // 抢单
+        taskTestEntity.setState(1);
+            // 抢单时间
+            java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
+            taskTestEntity.setReceiveTime(currentDate);
+            taskMapper.updateTestTask(taskTestEntity);
+            return true;
+    }
+
+    @Override
     public List<LabelValueTeamVo> getTeamUserName(Long UserLong) {
         TaskTestTeamEntity dataTeam = taskMapper.selectTeamCode(UserLong);
         if (dataTeam != null) {
             return taskMapper.selectTeamList(dataTeam.getId());
         }
         return null;
+    }
+
+    @Override
+    public TeamVo getTeamUserNameTwo(Long UserLong) {
+        TeamVo teamVo = new TeamVo();
+        // 返回团队id集合 根据人员id
+        List<TeamTreeStructureEntity> dataDepts = taskMapper.getTeamDeptVo(UserLong);
+        if(dataDepts!=null&&!dataDepts.isEmpty())
+        {
+            Set<Long> deptIds = new HashSet<>();
+           for(TeamTreeStructureEntity data:dataDepts){
+               deptIds.add(data.getId());
+               if(data.getSId()!=null){
+                   deptIds.add(data.getSId());
+               }
+           }
+           // 团队id集合 返回人员信息
+            List<LabelValueVo> teamVos = taskMapper.getMemberInformation(deptIds);
+            teamVo.setTeamVo(teamVos);
+        }
+        // 复核人集合
+        // 审批人集合
+        // 签发人集合
+        return teamVo;
     }
 
     @Override

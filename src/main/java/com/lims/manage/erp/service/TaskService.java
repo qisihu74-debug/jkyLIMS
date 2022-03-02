@@ -18,12 +18,34 @@ public interface TaskService {
     TaskDetailInfoVo getTaskDetailInfo(Long taskId);
 
     /**
+     * 查询任务详情 二次
+     *
+     * @return
+     */
+    TaskDetailInfoVo getTaskDetailInfoTwo(Long taskId,String [] deptIds);
+
+    /**
      * 查询任务列表
      *
      * @param paramVo
      * @return
      */
     List<TaskListVo> getTaskList(TaskListParamVo paramVo);
+
+    /**
+     * 根据人员id 获取部门集合id集合
+     * @param userId
+     * @return
+     */
+    String getDeptIds(Long userId);
+
+    /**
+     * 查询任务列表
+     *
+     * @param paramVo
+     * @return
+     */
+    List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo,String [] deptIds);
 
     /**
      * 查询领样列表
@@ -49,9 +71,19 @@ public interface TaskService {
     Boolean postGrabASingle(TaskTestEntity taskTestEntity);
 
     /**
+     * 副团长抢单并 派发 团队人员 操作
+     */
+    Boolean postGrabASingleTwo(TaskTestEntity taskTestEntity);
+
+    /**
      * 返回 团队成员姓名
      */
     List<LabelValueTeamVo> getTeamUserName(Long UserLong);
+
+    /**
+     * 返回 团队成员姓名
+     */
+    TeamVo getTeamUserNameTwo(Long UserLong);
 
     /**
      * 判断任务单 状态 state ==0 是空闲

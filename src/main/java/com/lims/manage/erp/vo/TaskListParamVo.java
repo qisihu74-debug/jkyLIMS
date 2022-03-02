@@ -2,8 +2,14 @@ package com.lims.manage.erp.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class TaskListParamVo {
+    /**
+     * 报告单 主键
+     */
+    private Long taskId;
     private String taskCode;
     private String sampleName;
     private Integer state;
@@ -12,4 +18,8 @@ public class TaskListParamVo {
 
     private String beginDate;
     private String endDate;
+    /**
+     * 科室id集合
+     */
+    private List<Long> deptIds;
 }
