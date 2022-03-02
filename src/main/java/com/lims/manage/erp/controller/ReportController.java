@@ -3,10 +3,11 @@ package com.lims.manage.erp.controller;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.SealReqEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.result.Result;
@@ -44,7 +45,6 @@ import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -222,24 +222,116 @@ public class ReportController {
     }
 
     /**
-     * 盖章
-     *
-     * @param entity
+     * 向契约锁发起盖章合同申请
+     * @param entrustId
      * @return
      */
-    @PostMapping("seal")
-    public Result seal(@RequestBody SealReqEntity entity) {
-        if (StringUtils.isEmpty(entity.getList())) {
+    @GetMapping("sealApprove")
+    public Result seal(Long entrustId) {
+        if (entrustId == null) {
             return ResultUtil.error("缺少必要的参数！");
         }
-        String[] split = entity.getList().split(",");
-        List<String> list = Arrays.asList(split);
-        Boolean flag = reportService.seal(list, entity.getId());
+        Boolean flag = reportService.seal(entrustId);
         if (flag) {
-            return ResultUtil.success("获取印章成功!");
+            return ResultUtil.success("向契约锁发起盖章合同申请成功!");
         } else {
-            return ResultUtil.error("获取印章失败！");
+            return ResultUtil.error("向契约锁发起盖章合同申请失败！");
         }
+    }
+
+    /**
+     * 创建合同
+     * @param reqBean
+     * @return
+     */
+    @PostMapping("createbycategory")
+    public Result createbycategory(@RequestBody QiYueSuoReqBean reqBean) {
+        if (reqBean == null){
+            return ResultUtil.error("缺少必要的参数");
+        }
+        QiYueSuoResponse response = reportService.createbycategory(reqBean);
+        if (response != null && response.getCode() == 0) {
+            return ResultUtil.success("向契约锁发起报告制作申请成功!");
+        } else {
+            return ResultUtil.error("向契约锁发起报告制作申请失败："+response.getMessage());
+        }
+    }
+
+    /**
+     * 报告合同签署url获取
+     * @param reqBean
+     * @return
+     */
+    @PostMapping("signurl")
+    public Result signurl(@RequestBody QiYueSuoReqBean reqBean){
+        if (reqBean == null){
+            return ResultUtil.error("缺少必要的参数");
+        }
+        QiYueSuoResponse response = reportService.signurl(reqBean);
+        if (response != null && response.getCode() == 0) {
+            return ResultUtil.success("向契约锁发起报告签署url申请成功!");
+        } else {
+            return ResultUtil.error("向契约锁发起报告签署url申请失败："+response.getMessage());
+        }
+    }
+
+    /**
+     * 契约锁部门列表获取
+     * @param tenantType
+     * @param companyName
+     * @return
+     */
+    @GetMapping("deptList")
+    public Result deptList(String tenantType, String companyName){
+        QiYueSuoResponse response = reportService.deptList(tenantType,companyName);
+        if (response != null && response.getCode() == 0) {
+            return ResultUtil.success(response);
+        } else {
+            return ResultUtil.error("获取公司在契约锁注册的部门列表失败："+response.getMessage());
+        }
+    }
+
+    /**
+     * 印章列表获取
+     * @param category 印章类型PHYSICS("物理签章"),ELECTRONIC("电子签章"),不传默认查询电子章
+     * @param companyName
+     * @return
+     */
+    @GetMapping("sealListOfQys")
+    public Result sealListOfQys(String category, String companyName){
+        if (StringUtils.isEmpty(companyName)){
+            return ResultUtil.error("缺少必要的参数");
+        }
+        QiYueSuoResponse response = reportService.sealListOfQys(category,companyName);
+        if (response != null && response.getCode() == 0) {
+            return ResultUtil.success(response);
+        } else {
+            return ResultUtil.error("获取公司在契约锁的印章列表失败："+response.getMessage());
+        }
+    }
+
+    /**
+     * 契约锁报告下载
+     * @param contractId
+     * @param name
+     * @param contact
+     * @return
+     */
+    @GetMapping("downloadQysFile")
+    public Result downloadQysFile(Long entrustId, Long contractId,String name,String contact,HttpServletResponse response){
+        if (contractId == null || StringUtils.isEmpty(name) || StringUtils.isEmpty(contact)){
+            return ResultUtil.error("缺少必要参数");
+        }
+        byte[] bytes = reportService.downloadQysFile(entrustId, contractId, name, contact);
+        try {
+            OutputStream outputStream = response.getOutputStream();
+            outputStream.write(bytes);
+            outputStream.close();
+            outputStream.close();
+        }catch (Exception e){
+            logger.error("下载契约锁报告文档失败:{}",e);
+        }
+        return null;
     }
 
     /**

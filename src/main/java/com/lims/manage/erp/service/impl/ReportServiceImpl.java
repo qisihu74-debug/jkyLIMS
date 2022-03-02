@@ -4,12 +4,12 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.ImagePro;
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
@@ -24,7 +24,6 @@ import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.ImageToPdfUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.JudgmentBasisVo;
@@ -34,7 +33,6 @@ import com.lims.manage.erp.vo.ReportListVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
-import org.apache.commons.io.FileUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -45,11 +43,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -342,48 +338,6 @@ public class ReportServiceImpl implements ReportService {
         List<ReportRecordEntity> list = entityMapper.getSealList(type, search,reportType);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
-    }
-
-    @Override
-    public Boolean seal(List<String> list, Long id) {
-        //TODO 根据印章类型，请求契约所的印章
-        String url = "";
-        MinioClient client = MinIoUtil.minioClient;
-        Long entrustId = taskMapper.getEntrustIdByTaskId(id);
-        String code = recordEntityMapper.getReportModelNameById(entrustId);
-        try {
-            url = downLoad(client,code,entrustId);
-        }catch (Exception e){
-            logger.error("盖章下载报告文件失败:{}",e);
-        }
-        if (StringUtils.isNotEmpty(url)){
-            File file = null;
-            try {
-                file = FileAndFolderUtil.getFile(url);
-            }catch (Exception e){
-                logger.error("将报告地址转为File文件失败:{}",e);
-            }
-            if (file != null){
-                QiYueSuoResponse response = qiYueSuoHnadler.creatFile(file, code, "pdf", null, null, null);
-                if (response != null && response.getCode() == 0){
-                    //根据委托id存储文档id
-
-                }
-            }
-        }
-
-
-
-        //更新url数据到表test_report_record
-        entityMapper.updateImgByid(id, url);
-
-        // 根据任务单主键 获取委托单主键 更改委托单状态
-        EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(id);
-        if(entrustAddVo.getState()!=null&&entrustAddVo.getState()<10){
-            taskMapper.updateEntrustById(entrustAddVo.getId(),10);
-        }
-
-        return true;
     }
 
     @Override
@@ -721,6 +675,81 @@ public class ReportServiceImpl implements ReportService {
 //            ServletOutputStream outputStream = response.getOutputStream();
 //            FileAndFolderUtil.parseIn(inputStream)
         return url;
+    }
+
+    @Override
+    public Boolean seal(Long entrustId) {
+        //step1 根据文件类型创建合同文档
+        String url = "";
+        MinioClient client = MinIoUtil.minioClient;
+        String code = recordEntityMapper.getReportModelNameById(entrustId);
+        try {
+            url = downLoad(client,code,entrustId);
+        }catch (Exception e){
+            logger.error("盖章下载报告文件失败:{}",e);
+        }
+        if (StringUtils.isNotEmpty(url)){
+            File file = null;
+            try {
+                file = FileAndFolderUtil.getFile(url);
+            }catch (Exception e){
+                logger.error("将报告地址转为File文件失败:{}",e);
+            }
+            if (file != null){
+                QiYueSuoResponse response = qiYueSuoHnadler.creatFile(file, code, "pdf", null, null, null);
+                if (response != null && response.getCode() == 0){
+                    //根据委托id存储文档id
+                    List<QiYueSuoDocment> result = response.getResult();
+                    entityMapper.updateDocIdAndState(entrustId,result.get(0).getDocumentId(),"1");
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
+        QiYueSuoResponse response = qiYueSuoHnadler.createbycategory(reqBean);
+        //根据委托id存储文档id
+        entityMapper.updateContractIdAndState(reqBean.getEntrustId(),response.getContractId(),"2");
+        return response;
+    }
+
+    @Override
+    public QiYueSuoResponse signurl(QiYueSuoReqBean reqBean) {
+        QiYueSuoResponse response = qiYueSuoHnadler.signurl(reqBean);
+        //根据委托更新报告签署url
+        entityMapper.updateUrlAndState(reqBean.getEntrustId(),response.getSignUrl(),"3");
+        return response;
+    }
+
+    @Override
+    public byte[] downloadQysFile(Long enstustId, Long contractId, String name, String contact) {
+        byte[] inputStream = qiYueSuoHnadler.downloadQysFile(contractId, name, contact);
+        entityMapper.updateState(enstustId,"5");
+        return inputStream;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void callback(Long contractId) {
+        //根据contractId查询任务id
+        Long entrustId = entityMapper.getEntrustIdByCid(contractId);
+        //更新状态，更新
+        taskMapper.updateEntrustById(entrustId,10);
+        //更新报告状态
+        entityMapper.updateFileState(contractId,"4");
+        logger.debug("接收契约锁回调参数进行数据更新完成！");
+    }
+
+    @Override
+    public QiYueSuoResponse deptList(String tenantType, String companyName) {
+        return qiYueSuoHnadler.getDeptListOfQYS(tenantType,companyName);
+    }
+
+    @Override
+    public QiYueSuoResponse sealListOfQys(String category, String companyName) {
+        return qiYueSuoHnadler.sealList(category,companyName);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.lims.manage.erp.http;
 
+import com.lims.manage.erp.entity.QiYueSuoSealEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,5 +26,18 @@ public class QiYueSuoResponse {
 
     private String message;
 
+    /**
+     * 合同id
+     */
+    private Long contractId;
+    /**
+     * 报告合同签署url
+     */
+    private String signUrl;
+
     private List<QiYueSuoDocment> result;
+    /**
+     * 印章列表
+     */
+    private List<QiYueSuoSealEntity> list;
 }

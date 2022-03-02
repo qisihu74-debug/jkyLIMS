@@ -18,9 +18,7 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.CheckItemParamVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.HistoryEntrustDataVo;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -242,7 +240,7 @@ public class EntrustController {
         if (entrustHistoryEntity.getState() == null) {
             entrustHistoryEntity.setState(0);
         }
-        if(entrustHistoryEntity.getState()!=0&&entrustHistoryEntity.getState()!=144){
+        if(entrustHistoryEntity.getState()!=0&&entrustHistoryEntity.getState()!=144&&entrustHistoryEntity.getState()!=1){
             return ResultUtil.error("必填参数状态有误");
         }
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
@@ -256,6 +254,16 @@ public class EntrustController {
     @RequestMapping("/get_entrust_history_detail")
     public Result getEntrustHistoryDetail(Long entrustmentId){
         return ResultUtil.success(entrustService.getEntrustHistoryDetail(entrustmentId));
+    }
+
+    /**
+     * 根据检测项ID查询可以做该检测项的团队
+     * @param checkItemId
+     * @return
+     */
+    @GetMapping("/getDept")
+    public Result getDept(Integer checkItemId){
+        return ResultUtil.success(entrustService.getDept(checkItemId));
     }
 
     /**
@@ -303,6 +311,46 @@ public class EntrustController {
             return ResultUtil.success("委托发布成功！");
         }else {
             return ResultUtil.error(-1,"委托发布失败！");
+        }
+    }
+
+
+    @PostMapping("distributionTask")
+    public Result distributionTask(@RequestBody TaskVo entity){
+        if (entity.getEntrustmentId() == null){
+            return ResultUtil.error(-1,"缺少必要参数");
+        }
+        //核查委托单位、委托人、委托人联系方式、样品信息、检测项信息是否完整
+        EntrustAddVo vo = entrustService.getEntrustHistoryDetail(entity.getEntrustmentId());
+        if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())
+                || StringUtils.isEmpty(vo.getEntrustPhone())){
+            return ResultUtil.error(-1,"请检查委托人信息是否完整！");
+        }
+        List<SampleEntity> samples = vo.getSamples();
+        if (CollectionUtils.isEmpty(samples)){
+            return ResultUtil.error(-1,"请检查委托单样品信息是否完整！");
+        }
+        if (!CollectionUtils.isEmpty(samples)){
+            for (SampleEntity sampleEntity:samples) {
+                if (CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())){
+                    return ResultUtil.error(-1,"请检查委托单样品下检测项信息是否完整！");
+                }
+            }
+        }
+        if(!CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())){
+            for (CheckItemDeptVo checkItemDeptVo:entity.getCheckItemDeptVoList()) {
+                if(checkItemDeptVo.getDeptId() == null){
+                    return ResultUtil.error(-1,"请确认所有检测项是否分配科室！");
+                }
+            }
+        }
+        Boolean flag = entrustService.distributionTask(entity);
+        if (flag){
+            /*logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"账户："+ShiroUtils.getUserInfo().getUsername()+"发布任务成功编号为："+vo.getEntrustmentNo(),
+                    Const.ENTRUST_PUBLISH,true);*/
+            return ResultUtil.success("委托分配成功！");
+        }else {
+            return ResultUtil.error(-1,"委托分配失败！");
         }
     }
 

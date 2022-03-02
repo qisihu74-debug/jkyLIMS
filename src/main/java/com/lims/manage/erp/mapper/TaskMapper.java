@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author gjl
@@ -29,6 +30,10 @@ public interface TaskMapper extends BaseMapper {
      */
     Integer selectMaxNo();
 
+    Integer selectMaxNoByCode(String code);
+
+    String getTeamCode(Long deptId);
+
     /**
      * 更新委托单状态
      *
@@ -44,11 +49,29 @@ public interface TaskMapper extends BaseMapper {
     void save(TaskEntity entity);
 
     /**
+     * 保存任务单--分配任务
+     * @param entity
+     */
+    void save(TaskVo entity);
+    /**
+     * 保存任务单--分配任务
+     * @param vos
+     */
+    void batchSave(@Param("vos")List<TaskVo> vos);
+
+    /**
      * 查询任务详情
      *
      * @return
      */
     TaskDetailInfoVo getTaskDetailInfo(Long taskId);
+
+    /**
+     * 查询任务详情二次开发
+     *
+     * @return
+     */
+    TaskDetailInfoVo getTaskDetailInfoTwo(TaskListParamVo paramVo);
 
     /**
      * 修改任务信息
@@ -66,6 +89,16 @@ public interface TaskMapper extends BaseMapper {
     TaskTestTeamEntity selectTeamCode(Long userid);
 
     /**
+     * 根据人员id 获取 部门信息 和 关联的下级部门信息
+     */
+    List<TeamTreeStructureEntity> getTeamDeptVo(Long userid);
+
+    /**
+     *  根据团队id 查询人员信息列表
+     */
+    List<LabelValueVo> getMemberInformation(@Param(value = "deptIds") Set<Long> deptIds);
+
+    /**
      * 根据团队id 返回 用户集合
      *
      * @param id
@@ -80,6 +113,21 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     List<TaskListVo> getTaskList(TaskListParamVo paramVo);
+
+    /**
+     * 查询任务列表
+     *
+     * @param paramVo
+     * @return
+     */
+    List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo);
+
+    /**
+     * 查询任务列表 并且 state>=1
+     * @param paramVo
+     * @return
+     */
+    List<TaskListVo> getTaskListTwoGreater(TaskListParamVo paramVo);
 
     /**
      * 查询领样列表
@@ -186,4 +234,7 @@ public interface TaskMapper extends BaseMapper {
      */
     @Select("select entrustment_id from test_task where id = #{id}")
     Long getEntrustIdByTaskId(@Param("id") Long id);
+
+    int batchUpdateCheckItem(@Param("list") List<CheckItemDeptVo> list);
+
 }

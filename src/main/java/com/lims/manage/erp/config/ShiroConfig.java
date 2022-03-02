@@ -65,12 +65,18 @@ public class ShiroConfig {
         shiroFilterFactoryBean.setSecurityManager(securityManager);
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         // 注意过滤器配置顺序不能颠倒
-       /* filterChainDefinitionMap.put("/userLogin/**", "anon");
-        filterChainDefinitionMap.put("/guest/**", "anon");
-        filterChainDefinitionMap.put("/flowable/**", "anon");*/
-        filterChainDefinitionMap.put("/**", "anon");
+        filterChainDefinitionMap.put("/userLogin/**", "anon");
+        filterChainDefinitionMap.put("/qiyuesuo/**", "anon");
+        //#静态资源放行
+        filterChainDefinitionMap.put("/css/**","anon");
+        filterChainDefinitionMap.put("/img/**","anon");
+        filterChainDefinitionMap.put("/js/**","anon");
+        filterChainDefinitionMap.put("/**/favicon.ico","anon");
+        filterChainDefinitionMap.put("/**/index.html","anon");
+
         // 配置shiro默认登录界面地址，前后端分离中登录界面跳转应由前端路由控制，后台仅返回json数据
-        shiroFilterFactoryBean.setLoginUrl("/userLogin/unauth");
+        shiroFilterFactoryBean.setLoginUrl("/index.html");
+        filterChainDefinitionMap.put("/**", "authc");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         return shiroFilterFactoryBean;
 }

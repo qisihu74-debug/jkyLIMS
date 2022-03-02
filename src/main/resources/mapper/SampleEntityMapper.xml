@@ -69,7 +69,8 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
 
     <select id="selectTestStandardList" resultType="com.lims.manage.erp.vo.JudgmentBasisVo">
         SELECT
-        t1.id as sampleId,
+        t1.id as id,
+        t1.sample_id as sampleId,
         t2.check_item_id AS checkItemId,
         t2.check_item_name AS checkItemName,
         t1.times AS times,
@@ -77,12 +78,14 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         t1.standard_id AS standardId,
         CONCAT(t3.CODE,'《',t3.NAME,'》') As standardName,
         t1.method_id AS methodId,
-        t4.name AS methodName
+        t4.name AS methodName,
+        t5.name as testingRoom
         FROM
         test_entrusted_sample_checkitem_rel AS t1
         LEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id
         LEFT JOIN test_standard_file AS t3 ON t1.standard_id = t3.id
         LEFT JOIN test_method As t4 ON t4.id = t1.method_id
+        LEFT JOIN test_team as t5 ON t5.id = t1.dept_id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
             <if test="sampleId!=0 and sampleId!=''">
                 and t1.sample_id = #{sampleId}

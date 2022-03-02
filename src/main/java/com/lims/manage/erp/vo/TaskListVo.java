@@ -15,4 +15,8 @@ public class TaskListVo {
     private String recorder;
     private String reviewer;
     private String reportProducer;
+    /**
+     * 是否出具报告
+     */
+    private String issueReport;
 }

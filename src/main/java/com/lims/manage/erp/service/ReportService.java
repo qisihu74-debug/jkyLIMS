@@ -1,9 +1,11 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
+import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
@@ -100,12 +102,10 @@ public interface ReportService {
 
     /**
      * 获取要盖的印章
-     *
-     * @param list
-     * @param id
+     * @param entrustId
      * @return
      */
-    Boolean seal(List<String> list, Long id);
+    Boolean seal(Long entrustId);
 
     /**
      * 报告预览
@@ -208,4 +208,48 @@ public interface ReportService {
      * @param id
      */
     String downLoad(MinioClient client, String code, Long id) throws Exception;
+
+    /**
+     * 创建合同
+     * @param reqBean
+     * @return
+     */
+    QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean);
+
+    /**
+     * 合同报告签署url获取
+     * @param reqBean
+     * @return
+     */
+    QiYueSuoResponse signurl(QiYueSuoReqBean reqBean);
+
+    /**
+     * 下载契约锁报告文档
+     * @param contractId
+     * @param name
+     * @param contact
+     */
+    byte[] downloadQysFile(Long entrustId, Long contractId, String name, String contact);
+
+    /**
+     * 契约锁报告签署完成时调用的回调函数
+     * @param contractId
+     */
+    void callback(Long contractId);
+
+    /**
+     * 获取契约锁部门列表
+     * @param tenantType
+     * @param companyName
+     * @return
+     */
+    QiYueSuoResponse deptList(String tenantType, String companyName);
+
+    /**
+     * 获取部门在契约锁的印章列表
+     * @param category
+     * @param companyName
+     * @return
+     */
+    QiYueSuoResponse sealListOfQys(String category, String companyName);
 }

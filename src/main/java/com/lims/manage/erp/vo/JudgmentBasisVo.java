@@ -54,4 +54,8 @@ public class JudgmentBasisVo {
      * 方法名
      */
     private String methodName;
+    /**
+     * 检测室
+     */
+    private String testingRoom;
 }

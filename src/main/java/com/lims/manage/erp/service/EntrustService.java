@@ -7,10 +7,7 @@ import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
 import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.HistoryEntrustDataVo;
-import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -103,6 +100,13 @@ public interface EntrustService {
     EntrustAddVo getEntrustHistoryDetail(Long entrustmentId);
 
     /**
+     * 根据检测项ID查询可以做的团队
+     * @param checkItemId
+     * @return
+     */
+    List<LabelValueVo> getDept(Integer checkItemId);
+
+    /**
      * 历史委托信息 具体详情 测试
      * @param entrustmentId
      * @return
@@ -115,6 +119,13 @@ public interface EntrustService {
      * @return
      */
     Boolean publishTask(TaskEntity entity);
+
+    /**
+     * 分配任务
+     * @param entity
+     * @return
+     */
+    Boolean distributionTask(TaskVo entity);
 
     /**
      * 填充数据

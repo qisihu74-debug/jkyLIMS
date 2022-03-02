@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletOutputStream;
 import java.awt.*;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -335,5 +336,28 @@ public class FileAndFolderUtil {
         }
 
         return file;
+    }
+
+    /**
+     * 输入流转字节流
+     * @param inputStream
+     * @return
+     */
+    public static byte[] inputStramToByte(InputStream inputStream){
+        InputStream bufferedInputStream =new BufferedInputStream(inputStream);
+        ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+        byte[] buffer=null;
+        int len=0;
+        byte []buf=new byte[2048];
+        try {
+            while((len=bufferedInputStream.read(buf))!=-1){
+                byteArrayOutputStream.write(buf, 0, len);
+            }
+            byteArrayOutputStream.flush();
+        }catch (Exception e){
+            logger.error("inputstream转字节流失败:{}",e);
+        }
+        buffer=byteArrayOutputStream.toByteArray();
+        return buffer;
     }
 }

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -43,6 +44,15 @@ public class HttpClientUtil {
      */
     public static Pair<Integer,String> get(String url,Map<String, String> params,Map<String, String> headerMap) {
         return httpClientOperate.doGet(url,params,headerMap);
+    }
+
+    /**
+     *
+     * @param url
+     * @return
+     */
+    public static byte[] getZip(String url, Map<String, String> params, Map<String, String> headerMap) {
+        return httpClientOperate.doGetZip(url,params,headerMap);
     }
 
     /**

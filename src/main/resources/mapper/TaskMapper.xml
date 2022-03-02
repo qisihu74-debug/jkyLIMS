@@ -7,7 +7,19 @@
         from test_task
     </select>
 
-    <insert id="save" parameterType="com.lims.manage.erp.entity.TaskEntity">
+    <select id="selectMaxNoByCode" resultType="java.lang.Integer">
+        SELECT Max(CODE)
+        FROM test_task
+        where task_code like CONCAT(#{code}, '%')
+    </select>
+
+    <select id="getTeamCode" resultType="java.lang.String">
+        SELECT code
+        FROM test_team
+        where id = #{deptId}
+    </select>
+
+    <insert id="save" parameterType="com.lims.manage.erp.vo.TaskVo">
         INSERT INTO test_task (id,
                                code,
                                entrustment_id,
@@ -26,6 +38,23 @@
                 #{teamId},
                 #{receiver},
                 #{receiveTime})
+    </insert>
+
+    <insert id="batchSave" parameterType="com.lims.manage.erp.vo.TaskVo">
+        INSERT INTO test_task (id,
+        dept_id,
+        code,
+        task_code,
+        entrustment_id,
+        required_completion_time,
+        state,
+        issue_report,
+        orderer
+        )
+        VALUES
+        <foreach collection="vos" item="vo" separator=",">
+            (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},#{vo.state}, #{vo.issueReport}, #{vo.orderer})
+        </foreach>
     </insert>
 
     <update id="updateEntrustById">
@@ -145,6 +174,64 @@
                  left join test_product_item t8 on t5.check_item_id = t8.check_item_id
         where t1.id = #{taskId}
     </select>
+    <select id="getTaskDetailInfoTwo" resultMap="taskResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
+        SELECT t1.id,
+               IFNULL(t1.task_code, t1.code)                        code,
+               t1.orderer,
+               DATE_FORMAT(t1.order_time, '%Y-%m-%d')               order_time,
+               DATE_FORMAT(t1.required_completion_time, '%Y-%m-%d') required_completion_time,
+               t2.count_price                                       cost,
+               t2.sampling_method,
+               t2.check_purpose,
+               t2.present_information,
+               t2.file_url,
+               t2.seal_type,
+               t3.sample_id,
+               t4.sample_name,
+               t4.product_id,
+               t4.sample_code,
+               t4.specs,
+               t4.batch_number,
+               t4.generation,
+               t4.sample_groups,
+               t4.quantity_per_group,
+               t4.sample_origin,
+               t4.manufacturer,
+               t4.received_date,
+               t4.inspector,
+               t4.sample_requirement,
+               t4.outward,
+               t4.picture,
+               t5.check_item_id,
+               t8.check_item_name,
+               t5.method_id,
+               t7.name,
+               t5.standard_id,
+               CONCAT(t6.code, '《', t6.`name`, '》')                 standard_name,
+               t5.times,
+               t5.unit_price,
+               t5.id         AS                                     itemId,
+               t5.state      AS                                     state,
+               t5.origin_url AS                                     originUrl,
+               t5.opinion
+        FROM test_task t1
+                 LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+                 LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
+                 LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
+                 LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.entrustment_id = t5.entrust_id
+                 LEFT JOIN test_team as t9 ON t9.id = t5.dept_id
+            AND t4.id = t5.sample_id
+                 LEFT JOIN test_standard_file t6 ON t5.standard_id = t6.id
+                 LEFT JOIN test_method t7 ON t5.method_id = t7.id
+                 left join test_product_item t8 on t5.check_item_id = t8.check_item_id
+        where t1.id = #{taskId}
+        <if test="deptIds!=null">
+            and t9.id in
+            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+    </select>
 
     <select id="getSampleList" resultMap="sampleResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT t1.id taskId,
@@ -211,6 +298,91 @@
         t1.required_completion_time asc,
         t2.entrustment_no asc
     </select>
+    <select id="getTaskListTwo" resultType="com.lims.manage.erp.vo.TaskListVo"
+            parameterType="com.lims.manage.erp.vo.TaskListParamVo">
+        SELECT DISTINCT
+        t1.id taskId,
+        IFNULL( t1.task_code, t1.CODE ) taskCode,
+        DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
+        t1.inspector,
+        t2.count_price cost,
+        t4.sample_name sampleName,
+        t4.product_id,
+        t1.state,
+        t1.recorder,
+        t1.reviewer,
+        t1.report_producer reportProducer,
+        t1.issue_report issueReport
+        FROM
+        test_task t1
+        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+        LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
+        LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
+        LEFT JOIN test_team t5 ON t1.team_id = t5.id
+        <trim prefix="WHERE" prefixOverrides="AND | OR ">
+            <if test="deptIds!=null">
+                and t1.dept_id in
+                <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="taskCode!=null and taskCode!=''">
+                and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
+            </if>
+            <if test="sampleName!=null and sampleName!=''">
+                and t4.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="state!=null">
+                and t1.state=#{state}
+            </if>
+        </trim>
+        ORDER BY
+        t1.required_completion_time asc,
+        t2.entrustment_no asc
+    </select>
+
+    <select id="getTaskListTwoGreater" resultType="com.lims.manage.erp.vo.TaskListVo"
+            parameterType="com.lims.manage.erp.vo.TaskListParamVo">
+        SELECT DISTINCT
+        t1.id taskId,
+        IFNULL( t1.task_code, t1.CODE ) taskCode,
+        DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
+        t1.inspector,
+        t2.count_price cost,
+        t4.sample_name sampleName,
+        t4.product_id,
+        t1.state,
+        t1.recorder,
+        t1.reviewer,
+        t1.report_producer reportProducer,
+        t1.issue_report issueReport
+        FROM
+        test_task t1
+        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+        LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
+        LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
+        LEFT JOIN test_team t5 ON t1.team_id = t5.id
+        <trim prefix="WHERE" prefixOverrides="AND | OR ">
+            <if test="deptIds!=null">
+                and t1.dept_id in
+                <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="taskCode!=null and taskCode!=''">
+                and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
+            </if>
+            <if test="sampleName!=null and sampleName!=''">
+                and t4.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="state!=null">
+                and t1.state <![CDATA[ >= #{state} ]]>
+            </if>
+        </trim>
+        ORDER BY
+        t1.required_completion_time asc,
+        t2.entrustment_no asc
+    </select>
     <update id="updateTestTask" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
         UPDATE test_task
         <trim prefix="SET" suffixOverrides=",">
@@ -220,11 +392,16 @@
             <if test="inspector!=null and inspector!=''">inspector=#{inspector},</if>
             <if test="recorder!=null and recorder!=''">recorder=#{recorder},</if>
             <if test="reviewer!=null and reviewer!=''">reviewer=#{reviewer},</if>
+<!--            <if test="inspectorId!=null and inspectorId!=''">inspector_id=#{inspectorId},</if>-->
+<!--            <if test="recorderId!=null and recorderId!=''">recorder_id=#{recorderId},</if>-->
+<!--            <if test="reviewerId!=null and reviewerId!=''">reviewer_id=#{reviewerId},</if>-->
             <if test="reportProducer!=null and reportProducer!=''">report_producer=#{reportProducer},</if>
             <if test="receiver!=null and receiver!=''">receiver=#{receiver},</if>
             <if test="receiveTime!=null">receive_time=#{receiveTime},</if>
             <if test="startDetectionTime!=null">start_detection_time=#{startDetectionTime},</if>
             <if test="endDetectionTime!=null">end_detection_time=#{endDetectionTime},</if>
+            <if test="verifyer!=null and verifyer!=''">verifyer=#{verifyer},</if>
+            <if test="signer!=null and signer!=''">signer=#{signer},</if>
         </trim>
         where id = #{id}
     </update>
@@ -243,6 +420,33 @@
         FROM test_team AS t1
                  LEFT JOIN test_user_team_rel AS t2 ON t1.id = t2.team_id
         WHERE t2.user_id = #{userid}
+    </select>
+
+    <select id="getTeamDeptVo" resultType="com.lims.manage.erp.entity.TeamTreeStructureEntity" >
+        SELECT
+        t1.id as id,
+        t1.name as name,
+        t3.name as sname,
+        t3.id as sId
+        FROM
+        test_team AS t1
+        LEFT JOIN  test_team as t3 ON t1.id = t3.pid
+        LEFT JOIN test_user_team_rel AS t2 ON t1.id = t2.team_id
+        WHERE t2.user_id = #{userid}
+    </select>
+    <select id="getMemberInformation" resultType="com.lims.manage.erp.vo.LabelValueVo" >
+        SELECT
+	t3.NAME AS label,
+	t3.user_id AS VALUE
+    FROM
+    test_team as t1
+    LEFT JOIN test_user_team_rel as t2 ON t1.id = t2.team_id
+    LEFT JOIN sys_user as t3 ON t3.user_id = t2.user_id
+    WHERE t1.id in
+        <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    and t3.name is not NULL
     </select>
 
     <select id="selectTeamList" resultType="com.lims.manage.erp.vo.LabelValueTeamVo">
@@ -348,5 +552,16 @@
             reviewer        = #{reviewer,jdbcType=VARCHAR},
             report_producer = #{reportProducer,jdbcType=VARCHAR}
         where id = #{taskId,jdbcType=INTEGER}
+    </update>
+
+    <update id="batchUpdateCheckItem" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update test_entrusted_sample_checkitem_rel
+            <set>
+                dept_id = ${item.deptId},
+                distribution_date = current_timestamp()
+            </set>
+            where id = ${item.id}
+        </foreach>
     </update>
 </mapper>

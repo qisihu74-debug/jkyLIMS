@@ -16,4 +16,29 @@ public class QiYueSuoDocment {
      * 文档id
      */
     private Long documentId;
+    /**
+     * 部门id
+     */
+    private Long id;
+    /**
+     * 部门名称
+     */
+    private String name;
+    /**
+     * 租户类型
+     */
+    private String tenantType;
+    /**
+     * 状态
+     */
+    private String status;
+    /**
+     * 上级部门id
+     */
+    private Long parentId;
+    /**
+     *
+     */
+    private Boolean certified;
+
 }

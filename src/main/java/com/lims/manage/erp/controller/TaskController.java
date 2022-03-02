@@ -3,6 +3,7 @@ package com.lims.manage.erp.controller;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -52,6 +53,34 @@ public class TaskController {
     }
 
     /**
+     * 查询任务详情二次开发
+     *
+     * @param taskId
+     * @return
+     */
+    @RequestMapping("/getTaskDetailInfo_two")
+    public Result getTaskDetailInfo_two(Long taskId) {
+        if (taskId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            // 验证登录人信息 和部门 存入
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            if(userInfo==null){
+                return ResultUtil.error("token 已过期！");
+            }
+
+            // 根据账号 查询有可能包含多个科室 以及下级科室信息
+            String dept = taskService.getDeptIds(userInfo.getUserId());
+            // 科室id集合
+            String [] deptIds = new String[]{};
+            if(dept!=null){
+                deptIds = dept.split(",");
+            }
+            return ResultUtil.success("查询任务详情成功！", taskService.getTaskDetailInfoTwo(taskId,deptIds));
+        }
+    }
+
+    /**
      * 副团长抢单
      *
      * @param taskTestEntity
@@ -68,6 +97,31 @@ public class TaskController {
         Boolean taskStatus = taskService.getJudgmentTaskList(taskTestEntity.getId());
         if (taskStatus) {
             Boolean flag = taskService.postGrabASingle(taskTestEntity);
+            if (flag) {
+                return ResultUtil.success("抢单成功");
+            }
+            return ResultUtil.error(678, "抢单失败！");
+        }
+        return ResultUtil.error(678, "当前任务单已经被抢！");
+    }
+
+    /**
+     * 领取任务单
+     *
+     * @param taskTestEntity
+     * @return
+     */
+    @PostMapping("postGrabASingle_two")
+    public Result postGrabASingle_two(@RequestBody TaskTestEntity taskTestEntity) {
+        if (ShiroUtils.getUserInfo() != null) {
+            // 抢单人
+            Long strLong = ShiroUtils.getUserInfo().getUserId();
+            String str1 = String.valueOf(strLong);
+            taskTestEntity.setReceiver(str1);
+        }
+        Boolean taskStatus = taskService.getJudgmentTaskList(taskTestEntity.getId());
+        if (taskStatus) {
+            Boolean flag = taskService.postGrabASingleTwo(taskTestEntity);
             if (flag) {
                 return ResultUtil.success("抢单成功");
             }
@@ -94,6 +148,21 @@ public class TaskController {
         return ResultUtil.error(502, "token过期！");
     }
 
+    /**
+     * 返回 团队姓名
+     *
+     * @return
+     */
+    @RequestMapping("getTeamUserName_two")
+    public Result getTeamUserName_two() {
+        if (ShiroUtils.getUserInfo() != null) {
+            // 领取人
+            TeamVo returnList = taskService.getTeamUserNameTwo(ShiroUtils.getUserInfo().getUserId());
+            return ResultUtil.success(returnList);
+        }
+        return ResultUtil.error(502, "token过期！");
+    }
+
 
     /**
      * 查询任务列表
@@ -107,6 +176,35 @@ public class TaskController {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             return ResultUtil.success("查询任务列表成功！", taskService.getTaskList(paramVo));
+        }
+    }
+
+    /**
+     * 查询任务列表二次
+     *根据科室进行展示数据
+     * @param paramVo
+     * @return
+     */
+    @PostMapping(value = "/getTaskList_two")
+    public Result getTaskInfo_two(@RequestBody TaskListParamVo paramVo) {
+
+        if (paramVo == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            // 验证登录人信息 和部门 存入
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            if(userInfo==null){
+                return ResultUtil.error("token 已过期！");
+            }
+
+            // 根据账号 查询有可能包含多个科室 以及下级科室信息
+            String dept = taskService.getDeptIds(userInfo.getUserId());
+            // 科室id集合
+            String [] deptIds = new String[]{};
+            if(dept!=null){
+                deptIds = dept.split(",");
+            }
+            return ResultUtil.success("查询任务列表成功！", taskService.getTaskListTwo(paramVo,deptIds));
         }
     }
 
@@ -190,6 +288,45 @@ public class TaskController {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
             TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfo(taskId);
+            XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
+            response.reset();
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("UTF-8");
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
+            OutputStream outputStream = response.getOutputStream();
+            document.write(outputStream);
+            document.close();
+            outputStream.close();
+        } catch (Exception ex) {
+            log.info("导出失败：", ex.getMessage());
+        }
+    }
+
+    /**
+     * 下载任务通知单
+     *
+     * @param taskId
+     * @param response
+     */
+    @RequestMapping("downloadEntrust_two")
+    public void downloadEntrust_two(Long taskId, HttpServletResponse response) {
+        String fileName = "taskOrder.docx";
+        try {
+            MinioClient client = MinIoUtil.minioClient;
+            InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            if(userInfo==null){
+                log.info("token 已过期！");
+            }
+            // 根据账号 查询有可能包含多个科室 以及下级科室信息
+            String dept = taskService.getDeptIds(userInfo.getUserId());
+            // 科室id集合
+            String [] deptIds = new String[]{};
+            if(dept!=null){
+                deptIds = dept.split(",");
+            }
+            TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId,deptIds);
             XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
             response.reset();
             response.setContentType("application/x-msdownload");

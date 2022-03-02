@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -51,6 +52,18 @@ public interface SampleEntityMapper {
      * 样品下检测依据
      */
     List<JudgmentBasisVo> selectTestStandardList(@Param(value = "sampleId") Integer sampleId, @Param(value = "entrustmentId") Long entrustmentId);
+
+    /**
+     * 根据检测项id 查询 默认匹配部门信息
+     */
+    @Select("SELECT\n" +
+            "t1.name\n" +
+            "FROM\n" +
+            "test_team as t1\n" +
+            "LEFT JOIN test_check_item_team_rel as t2 ON t1.id = t2.team_id\n" +
+            "WHERE t2.check_item_id = #{checkItemId} ")
+    List<String> getTeamNameStrings(Integer checkItemId);
+
 
     /**
      * 检测依据信息
