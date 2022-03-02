@@ -101,4 +101,13 @@ public class TaskTestEntity {
      */
     private Integer issueReport;
 
+    /**
+     * 审核人
+     */
+    private String verifyer;
+    /**
+     * 签发人
+     */
+    private String signer;
+
 }

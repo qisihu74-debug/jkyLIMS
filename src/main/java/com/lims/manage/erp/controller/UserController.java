@@ -146,6 +146,15 @@ public class UserController {
         }
         entity.setTime(new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         entity.setUserId(GenID.getID());
+
+        // 查询此账号是否存在
+        DingUserEntity sysDingUserData = dingUserService.getById(vo.getDingUserId());
+        if (sysDingUserData== null) {
+            return ResultUtil.error("使用人不存在！，请重新选择使用人");
+        }
+        if(sysDingUserData.getName()!=null&&!sysDingUserData.getName().isEmpty()){
+            entity.setName(sysDingUserData.getName());
+        }
         sysUserService.save(entity);
         // 角色信息
         if (vo.getRoleIdsLong() != null && vo.getRoleIdsLong().size() > 0) {

@@ -392,11 +392,16 @@
             <if test="inspector!=null and inspector!=''">inspector=#{inspector},</if>
             <if test="recorder!=null and recorder!=''">recorder=#{recorder},</if>
             <if test="reviewer!=null and reviewer!=''">reviewer=#{reviewer},</if>
+<!--            <if test="inspectorId!=null and inspectorId!=''">inspector_id=#{inspectorId},</if>-->
+<!--            <if test="recorderId!=null and recorderId!=''">recorder_id=#{recorderId},</if>-->
+<!--            <if test="reviewerId!=null and reviewerId!=''">reviewer_id=#{reviewerId},</if>-->
             <if test="reportProducer!=null and reportProducer!=''">report_producer=#{reportProducer},</if>
             <if test="receiver!=null and receiver!=''">receiver=#{receiver},</if>
             <if test="receiveTime!=null">receive_time=#{receiveTime},</if>
             <if test="startDetectionTime!=null">start_detection_time=#{startDetectionTime},</if>
             <if test="endDetectionTime!=null">end_detection_time=#{endDetectionTime},</if>
+            <if test="verifyer!=null and verifyer!=''">verifyer=#{verifyer},</if>
+            <if test="signer!=null and signer!=''">signer=#{signer},</if>
         </trim>
         where id = #{id}
     </update>

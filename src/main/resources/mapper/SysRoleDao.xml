@@ -38,4 +38,15 @@
 
     </select>
 
+    <select id="selectSysyRoleName" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        select
+        t1.name AS label,
+        t1.user_id AS VALUE
+        FROM
+        sys_user as t1
+        LEFT JOIN sys_user_role as t2 ON t1.user_id = t2.user_id
+        LEFT JOIN sys_role as t3 ON t3.role_id = t2.role_id
+        WHERE t3.role_name = #{roleName}
+    </select>
+
 </mapper>
