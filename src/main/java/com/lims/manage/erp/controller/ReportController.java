@@ -6,7 +6,6 @@ import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.SealReqEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
@@ -32,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +45,6 @@ import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -279,6 +276,41 @@ public class ReportController {
     }
 
     /**
+     * 契约锁部门列表获取
+     * @param tenantType
+     * @param companyName
+     * @return
+     */
+    @GetMapping("deptList")
+    public Result deptList(String tenantType, String companyName){
+        QiYueSuoResponse response = reportService.deptList(tenantType,companyName);
+        if (response != null && response.getCode() == 0) {
+            return ResultUtil.success(response);
+        } else {
+            return ResultUtil.error("获取公司在契约锁注册的部门列表失败："+response.getMessage());
+        }
+    }
+
+    /**
+     * 印章列表获取
+     * @param category 印章类型PHYSICS("物理签章"),ELECTRONIC("电子签章"),不传默认查询电子章
+     * @param companyName
+     * @return
+     */
+    @GetMapping("sealListOfQys")
+    public Result sealListOfQys(String category, String companyName){
+        if (StringUtils.isEmpty(companyName)){
+            return ResultUtil.error("缺少必要的参数");
+        }
+        QiYueSuoResponse response = reportService.sealListOfQys(category,companyName);
+        if (response != null && response.getCode() == 0) {
+            return ResultUtil.success(response);
+        } else {
+            return ResultUtil.error("获取公司在契约锁的印章列表失败："+response.getMessage());
+        }
+    }
+
+    /**
      * 契约锁报告下载
      * @param contractId
      * @param name
@@ -286,11 +318,19 @@ public class ReportController {
      * @return
      */
     @GetMapping("downloadQysFile")
-    public Result downloadQysFile(Long entrustId, Long contractId,String name,String contact){
+    public Result downloadQysFile(Long entrustId, Long contractId,String name,String contact,HttpServletResponse response){
         if (contractId == null || StringUtils.isEmpty(name) || StringUtils.isEmpty(contact)){
             return ResultUtil.error("缺少必要参数");
         }
-        reportService.downloadQysFile(entrustId,contractId,name,contact);
+        byte[] bytes = reportService.downloadQysFile(entrustId, contractId, name, contact);
+        try {
+            OutputStream outputStream = response.getOutputStream();
+            outputStream.write(bytes);
+            outputStream.close();
+            outputStream.close();
+        }catch (Exception e){
+            logger.error("下载契约锁报告文档失败:{}",e);
+        }
         return null;
     }
 

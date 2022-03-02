@@ -8,5 +8,5 @@ public class CheckItemDeptVo {
     private Integer id;
     private Long deptId;
     private Date distributionDate;
-    private Integer issueReport;
+    private String issueReport;
 }

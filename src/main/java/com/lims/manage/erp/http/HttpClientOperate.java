@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -107,6 +108,64 @@ public class HttpClientOperate {
                 log.error("关闭HTTP连接时报错:", e);
             }
         }
+    }
+
+    /**
+     * get请求
+     *
+     * @param url
+     * @return
+     * @throws ClientProtocolException
+     * @throws IOException
+     */
+    public byte[] doGetZip(String url, Map<String, String> params, Map<String, String> headerMap) {
+        CloseableHttpResponse response = null;
+        HttpEntity httpEntity = null;
+        //请求
+        try {
+            //设置参数
+            URIBuilder uriBuilder = new URIBuilder(url);
+            if (params != null) {
+                for (Map.Entry<String,String> entry: params.entrySet()) {
+                    uriBuilder.setParameter(entry.getKey(), entry.getValue());
+                }
+            }
+            url = uriBuilder.build().toString();
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.setConfig(getRequestConfig());
+            //设置HeaderMap
+            //header 参数
+            if (!CollectionUtils.isEmpty(headerMap)) {
+                for (SingletonMap.Entry<String,String> entry: headerMap.entrySet()) {
+                    httpGet.addHeader(entry.getKey(), entry.getValue());
+                }
+            }
+            response = this.getHttpClient().execute(httpGet);
+            HttpEntity entity = response.getEntity();
+            InputStream inputStream = entity.getContent();
+            ByteArrayOutputStream swapStream = new ByteArrayOutputStream();
+            byte[] buff = new byte[100]; int rc = 0;
+
+            while ((rc = inputStream.read(buff, 0, 100)) > 0) {
+                swapStream.write(buff, 0, rc);
+            }
+            byte[] in2b = swapStream.toByteArray();
+            return in2b;
+        } catch (Exception e) {
+            log.error("get请求出错:{}", e.getMessage());
+        } finally {
+            try {
+                if (httpEntity != null) {
+                    EntityUtils.consume(httpEntity);
+                }
+                if (response != null) {
+                    response.close();
+                }
+            } catch (Exception e) {
+                log.error("关闭HTTP连接时报错:", e);
+            }
+        }
+        return null;
     }
 
     /**

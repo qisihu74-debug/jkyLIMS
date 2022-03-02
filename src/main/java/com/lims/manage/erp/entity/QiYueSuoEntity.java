@@ -65,5 +65,11 @@ public class QiYueSuoEntity {
      */
     @Value("${qiyuesuo.Download}")
     private String downloadInterface;
+    /**
+     * 部门列表
+     */
+    @Value("${qiyuesuo.dept}")
+    private String deptInterface;
+
 
 }

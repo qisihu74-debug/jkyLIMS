@@ -7,15 +7,22 @@ import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.http.HttpClientUtil;
 import com.lims.manage.erp.http.HttpResponse;
 import com.lims.manage.erp.http.QiYueSuoResponse;
+import io.micrometer.core.ipc.http.HttpSender;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 /**
  * @author gjl
@@ -74,34 +81,37 @@ public class QiYueSuoHnadler {
         Map<String, String> headers = getHeaders();
         //请求契约锁接口（请求方式由契约锁接口约定）
         String url = qiYueSuoEntity.getUrl() + qiYueSuoEntity.getAddInterface();
+        //TODO 如果是盖多个章，需要action结构里多个对象，不能将多个参数放入sealIds
         //Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, JSON.toJSONString(reqBean), headers);
+        QiYueSuoResponse deptListOfQYS = getDeptListOfQYS("COMPANY", "河南省交通科学技术研究院有限公司");
+        //TODO 获取到部门列表设置sealOwner参数
+
+        //TODO 获取印章列表获取sealIds参数
+
         String boday = "{\n" +
-                " \"subject\":\"郭家林测试\",\n" +
-                " \"categoryId\":\"2934717410113839636\",\n" +
-                " \"send\":true,\n" +
-                " \"documents\":[\"2935804354351297472\"],\n" +
-                " \"tenantName\":\"河南省交通科学技术研究院有限公司\",\n" +
-                " \"creatorName\":\"郭家林\",\n" +
-                " \"creatorContact\":\"18337165257\",\n" +
-                " \"signatories\":[\n" +
-                "  {\n" +
-                "   \"tenantType\":\"COMPANY\",\n" +
-                "   \"tenantName\":\"河南省交通科学技术研究院有限公司\",\n" +
+                " \"subject\": \"郭家林测试\",\n" +
+                " \"categoryId\": \"2934717410113839636\",\n" +
+                " \"send\": true,\n" +
+                " \"documents\": [\"2936115323254304790\"],\n" +
+                " \"tenantName\": \"河南省公路工程试验检测中心有限公司\",\n" +
+                " \"creatorName\": \"郭家林\",\n" +
+                " \"creatorContact\": \"18337165257\",\n" +
+                " \"signatories\": [{\n" +
+                "  \"tenantType\": \"COMPANY\",\n" +
+                "  \"tenantName\": \"河南省公路工程试验检测中心有限公司\",\n" +
+                "  \"serialNo\": \"1\",\n" +
+                "  \"actions\": [{\n" +
+                "   \"type\": \"CORPORATE\",\n" +
+                "   \"name\": \"企业签章\",\n" +
                 "   \"serialNo\": \"1\",\n" +
-                "   \"actions\":[\n" +
-                "   {\"type\": \"COMPANY\",\n" +
-                "             \"name\": \"企业签章\",\n" +
-                "             \"serialNo\": \"1\",\n" +
-                "             \"actionOperators\":\n" +
-                "             [{\n" +
-                "             \"operatorName\":\"郭家林\",\n" +
-                "             \"operatorContact\":\"18337165257\"\n" +
-                "             \n" +
-                "             }]\n" +
-                "   } \n" +
-                "    ]\n" +
-                "  }\n" +
-                "  ]\n" +
+                "   \"sealIds\": \"[2934033400316387595]\",\n" +
+                "   \"actionOperators\": [{\n" +
+                "    \"operatorName\": \"郭家林\",\n" +
+                "    \"operatorContact\": \"18337165257\"\n" +
+                "\n" +
+                "   }]\n" +
+                "  }]\n" +
+                " }]\n" +
                 "}";
         Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, boday, headers);
         log.debug("契约锁创建文档响应信息:{}", JSON.toJSONString(stringPair));
@@ -125,8 +135,8 @@ public class QiYueSuoHnadler {
         String url = qiYueSuoEntity.getUrl() + qiYueSuoEntity.getSignInterface();
         //Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, JSON.toJSONString(reqBean), headers);
         String boday = "{\n" +
-                "    \"contractId\": 2935804690889667524,\n" +
-                "    \"tenantName\": \"河南省交通科学技术研究院有限公司\",\n" +
+                "    \"contractId\": 2936126231317803041,\n" +
+                "    \"tenantName\": \"河南省公路工程试验检测中心有限公司\",\n" +
                 "    \"tenantType\": \"COMPANY\",\n" +
                 "    \"contact\":\"18337165257\",\n" +
                 "    \"receiverName\":\"郭家林\"\n" +
@@ -148,7 +158,7 @@ public class QiYueSuoHnadler {
      * @param name
      * @param contact
      */
-    public void downloadQysFile(Long contractId, String name, String contact) {
+    public byte[] downloadQysFile(Long contractId, String name, String contact) {
         //设置请求头
         Map<String, String> headers = getHeaders();
         //请求契约锁接口（请求方式由契约锁接口约定）
@@ -159,7 +169,56 @@ public class QiYueSuoHnadler {
         map.put("contractId",contractId+"");
         map.put("name",name);
         map.put("contact",contact);
+        byte[] inputStream = HttpClientUtil.getZip(url,map,headers);
+        return inputStream;
+    }
+
+    /**
+     * 获取契约锁部门列表
+     * @param tenantType
+     * @param companyName
+     */
+    public QiYueSuoResponse getDeptListOfQYS(String tenantType, String companyName) {
+        //设置请求头
+        Map<String, String> headers = getHeaders();
+        //请求契约锁接口（请求方式由契约锁接口约定）
+        String url = qiYueSuoEntity.getUrl() + qiYueSuoEntity.getDeptInterface();
+        //设置请求参数
+        Map<String,String> map = new HashMap();
+        map.put("tenantType",tenantType);
+        map.put("companyName",companyName);
         Pair<Integer, String> stringPair = HttpClientUtil.get(url,map,headers);
+        log.debug("契约锁获取部门信息列表成功:{}", JSON.toJSONString(stringPair));
+        JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(stringPair));
+        QiYueSuoResponse response = null;
+        if (stringPair.getKey() == 200){
+            response = JSONObject.parseObject(jsonObject.get(200).toString(), QiYueSuoResponse.class);
+        }
+        return response;
+    }
+
+    /**
+     * 获取契约锁部门印章列表
+     * @param category 印章类型PHYSICS("物理签章"),ELECTRONIC("电子签章"),不传默认查询电子章
+     * @param companyName
+     */
+    public QiYueSuoResponse sealList(String category, String companyName) {
+        //设置请求头
+        Map<String, String> headers = getHeaders();
+        //请求契约锁接口（请求方式由契约锁接口约定）
+        String url = qiYueSuoEntity.getUrl() + qiYueSuoEntity.getListInterface();
+        //设置请求参数
+        Map<String,String> map = new HashMap();
+        map.put("category",category);
+        map.put("companyName",companyName);
+        Pair<Integer, String> stringPair = HttpClientUtil.get(url,map,headers);
+        log.debug("获取契约锁本公司印章列表成功:{}", JSON.toJSONString(stringPair));
+        JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(stringPair));
+        QiYueSuoResponse response = null;
+        if (stringPair.getKey() == 200){
+            response = JSONObject.parseObject(jsonObject.get(200).toString(), QiYueSuoResponse.class);
+        }
+        return response;
     }
 
     public Map<String,String> getHeaders(){
