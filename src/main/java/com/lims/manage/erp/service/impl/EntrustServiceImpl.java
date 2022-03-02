@@ -869,14 +869,15 @@ public class EntrustServiceImpl implements EntrustService {
     public Boolean distributionTask(TaskVo entity) {
         List<Long> deptIds = Lists.newArrayList();
         List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
-        Long dept = null;
+//        Long dept = null;
+        List<Long> dept = Lists.newArrayList();
         for (CheckItemDeptVo vo: checkItemDeptVoList) {
             if(!deptIds.contains(vo.getDeptId())){
                 deptIds.add(vo.getDeptId());
             }
             String issueReport = vo.getIssueReport();
             if("是".equals(issueReport)){
-                dept = vo.getDeptId();
+                dept.add(vo.getDeptId());
             }
         }
         //创建任务对象
@@ -899,9 +900,10 @@ public class EntrustServiceImpl implements EntrustService {
             vo.setTaskCode(teamCode+codeStr.substring(0,4)+"-"+codeStr.substring(4,7));
             vo.setEntrustmentId(entity.getEntrustmentId());
             vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
-            vo.setState(1);
+            vo.setState(0);
             vo.setOrderer(ShiroUtils.getUserInfo().getName());
-            if(deptId.equals(dept)){
+//            if(deptId.equals(dept)){
+            if(dept.contains(deptId)){
                 vo.setIssueReport("是");
             }else{
                 vo.setIssueReport("否");
