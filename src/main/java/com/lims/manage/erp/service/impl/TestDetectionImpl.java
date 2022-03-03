@@ -37,9 +37,9 @@ public class TestDetectionImpl implements TestDetectionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public synchronized Boolean postStartTest(SampleItemInstrumentVo data) {
-        SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         String stringDate = format.format(data.getStartTime());
-        if(stringDate.equals("1970-01-01")){
+        if (stringDate.equals("1970-01-01")) {
             data.setStartTime(new Date());
         }
         if (data.getStartTime() == null) {
@@ -49,7 +49,7 @@ public class TestDetectionImpl implements TestDetectionService {
             sampleItemInstrumentEntity.setStartTime(data.getStartTime());
             // 判断 test_entrusted_sample_checkitem_rel 中 start_time 是否为空
             SampleItemInstrumentEntity sampleItemInstrumentEntity1 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(sampleItemInstrumentEntity.getItemId());
-            if (sampleItemInstrumentEntity1.getStartTime() == null || sampleItemInstrumentEntity1.getState()==0 ||sampleItemInstrumentEntity1.getState()==4) {
+            if (sampleItemInstrumentEntity1.getStartTime() == null || sampleItemInstrumentEntity1.getState() == 0 || sampleItemInstrumentEntity1.getState() == 4) {
                 // 检测项 状态 =1 检测中
                 sampleItemInstrumentEntity.setState(1);
                 // 检测项 开始时间更新
@@ -76,20 +76,52 @@ public class TestDetectionImpl implements TestDetectionService {
             taskTestEntity.setStartDetectionTime(data.getStartTime());
             taskMapper.updateTestTask(taskTestEntity);
             // 根据任务单主键 获取委托单主键
-            EntrustEntity entrustEntity  = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
-            if(entrustEntity!=null&&entrustEntity.getState()<3){
-                taskMapper.updateEntrustById(entrustEntity.getId(),3);
+            EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
+            if (entrustEntity != null && entrustEntity.getState() < 3) {
+                taskMapper.updateEntrustById(entrustEntity.getId(), 3);
             }
         }
         return true;
     }
 
     @Override
+    public Boolean VerifyTheLogin(Long userId, Long taskId) {
+        TaskTestEntity data = taskMapper.getTaskOrders(taskId);
+        if (data.getInspector() != null) {
+            String[] strings2 = data.getInspector().split(",");
+            for (int i = 0; i < strings2.length; i++) {
+                String[] strings3 = strings2[i].split("&");
+                if(userId.equals(Long.parseLong(strings3[1]))){
+                    return true;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean reviewTheLogin(Long userId, Long taskId) {
+        TaskTestEntity data = taskMapper.getTaskOrders(taskId);
+        if (data.getReviewer() != null) {
+            String[] strings2 = data.getReviewer().split(",");
+            for (int i = 0; i < strings2.length; i++) {
+                String[] strings3 = strings2[i].split("&");
+                if(userId.equals(Long.parseLong(strings3[1]))){
+                    return true;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public synchronized Boolean postEndTest(SampleItemInstrumentVo data) {
-        SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         String stringDate = format.format(data.getEndTime());
-        if(stringDate.equals("1970-01-01")){
+        if (stringDate.equals("1970-01-01")) {
             data.setEndTime(new Date());
         }
         if (data.getEndTime() == null) {
@@ -104,11 +136,11 @@ public class TestDetectionImpl implements TestDetectionService {
             // 检测结论
             sampleItemInstrumentEntity.setResult(data.getResult());
             // 查询 当前检测项状态 文件是否上传
-            SampleItemInstrumentEntity checkItemData =  testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(sampleItemInstrumentEntity.getItemId());
-            if(checkItemData==null){
+            SampleItemInstrumentEntity checkItemData = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(sampleItemInstrumentEntity.getItemId());
+            if (checkItemData == null) {
                 return false;
             }
-            if(checkItemData.getOriginUrl()==null){
+            if (checkItemData.getOriginUrl() == null) {
                 return false;
             }
             testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
@@ -133,7 +165,7 @@ public class TestDetectionImpl implements TestDetectionService {
             for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
                 SampleItemInstrumentEntity dataDisplay = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(checkItemInfoVo.getItemId());
                 // 附件不上传的话 返回 状态为 state ==1
-                if(dataDisplay.getState() == 2 && dataDisplay.getOriginUrl() == null){
+                if (dataDisplay.getState() == 2 && dataDisplay.getOriginUrl() == null) {
                     dataDisplay.setState(1);
                     testDetectionDao.updateSampleItemInstrumentEntity(dataDisplay);
                 }
@@ -151,15 +183,16 @@ public class TestDetectionImpl implements TestDetectionService {
         taskTestEntity.setEndDetectionTime(new Date());
         taskMapper.updateTestTask(taskTestEntity);
         // 根据任务单主键 获取委托单主键
-        EntrustEntity entrustEntity  = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
-        if(entrustEntity!=null&&entrustEntity.getState()<4){
-            taskMapper.updateEntrustById(entrustEntity.getId(),4);
+        EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
+        if (entrustEntity != null && entrustEntity.getState() < 4) {
+            taskMapper.updateEntrustById(entrustEntity.getId(), 4);
         }
         return true;
     }
 
     /**
      * 返回信息
+     *
      * @param dataGather
      * @param TaskId
      * @param itemId
@@ -176,7 +209,7 @@ public class TestDetectionImpl implements TestDetectionService {
     public Boolean Postreview(Integer itemId) {
         // 依据检测项 主键
         SampleItemInstrumentEntity CheckItemDetail = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
-        if(CheckItemDetail.getState()!=2){
+        if (CheckItemDetail.getState() != 2) {
             // 说明未复核
             SampleItemInstrumentEntity sampleItemInstrumentEntity = new SampleItemInstrumentEntity();
             sampleItemInstrumentEntity.setState(2);

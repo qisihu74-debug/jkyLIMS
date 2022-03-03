@@ -5,10 +5,12 @@ import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.service.TestDetectionService;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
@@ -36,6 +38,10 @@ import java.util.Map;
 public class TaskController {
     @Autowired
     private TaskService taskService;
+    @Autowired
+    TestDetectionService testDetectionService;
+    @Autowired
+    private TaskMapper taskMapper;
 
     /**
      * 查询任务详情
@@ -189,7 +195,7 @@ public class TaskController {
     @PostMapping(value = "/getTaskList_two")
     public Result getTaskInfo_two(@RequestBody TaskListParamVo paramVo) {
 
-        if (paramVo == null) {
+        if (paramVo == null||paramVo.getState()==null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             // 验证登录人信息 和部门 存入
@@ -197,7 +203,6 @@ public class TaskController {
             if (userInfo == null) {
                 return ResultUtil.error("token 已过期！");
             }
-
             // 根据账号 查询有可能包含多个科室 以及下级科室信息
             String dept = taskService.getDeptIds(userInfo.getUserId());
             // 科室id集合
@@ -344,6 +349,15 @@ public class TaskController {
     @RequestMapping("/uploadOriginalRecord")
     public Result uploadOriginalRecord(@RequestParam("json") String json, MultipartFile file) {
         OriginalRecordParamVo paramVo = JSON.parseObject(json, OriginalRecordParamVo.class);
+        // 验证登录人userId 是否具备上传原始记录资格
+        // 验证登录人信息 和部门 存入
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token 已过期！");
+        }
+        if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),paramVo.getTaskId())==false){
+            return ResultUtil.error("登录人没有被派发检测资格");
+        }
         int i = taskService.uploadOriginalRecord(paramVo, file);
         if (i > 0) {
             if (i == 2) {
@@ -366,9 +380,27 @@ public class TaskController {
 
     @RequestMapping("/passorno")
     public Result passorno(Integer itemId, Integer state, String opinion) {
-        if (itemId == null) {
+        if (itemId == null || itemId == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
+            // 验证登录人userId 是否具备操作资格
+            // 验证登录人信息 和部门 存入
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            if (userInfo == null) {
+                return ResultUtil.error("token 已过期！");
+            }
+            // 通过检测项主键 获取test_task Id
+            Long taskId = taskMapper.getReturnTaskId(itemId);
+            if(state==1){
+                if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),taskId)==false){
+                    return ResultUtil.error("登录人没有被派发检测资格");
+                }
+            }
+            if(state==3||state==4){
+                if(testDetectionService.reviewTheLogin(userInfo.getUserId(),taskId)==false){
+                    return ResultUtil.error("登录人没有被派发复核资格");
+                }
+            }
             return ResultUtil.success(taskService.passorno(itemId, state, opinion));
         }
     }

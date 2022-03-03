@@ -416,7 +416,9 @@
                code,
                start_detection_time,
                end_detection_time,
-               state
+               state,
+               inspector,
+               reviewer
         FROM test_task
         WHERE id = #{taskId}
     </select>

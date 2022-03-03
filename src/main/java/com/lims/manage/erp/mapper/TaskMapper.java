@@ -245,4 +245,27 @@ public interface TaskMapper extends BaseMapper {
 
     int batchUpdateCheckItem(@Param("list") List<CheckItemDeptVo> list);
 
+    /**
+     * 通过检测项id 获取test_task 任务单id
+     * @param itemId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tt1.id \n" +
+            "FROM\n" +
+            "\ttest_task AS t1\n" +
+            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.entrustment_id = t2.entrust_id \n" +
+            "WHERE\n" +
+            "\tt2.id = #{itemId} \n" +
+            "\tAND t1.dept_id  in (\n" +
+            "SELECT\n" +
+            "\tt2.dept_id \n" +
+            "FROM\n" +
+            "\ttest_task AS t1\n" +
+            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.entrustment_id = t2.entrust_id \n" +
+            "WHERE\n" +
+            "\tt2.id = #{itemId} \n" +
+            "\t)")
+    Long getReturnTaskId(@Param("itemId")Integer itemId);
+
 }

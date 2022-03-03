@@ -118,16 +118,9 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public String getDeptIds(Long userId) {
 
-        // 返回团队id集合 根据人员id
-        List<TeamTreeStructureEntity> dataDepts = taskMapper.getTeamDeptVo(userId);
-        if (dataDepts != null && !dataDepts.isEmpty()) {
-            Set<Long> deptIds = new HashSet<>();
-            for (TeamTreeStructureEntity data : dataDepts) {
-                deptIds.add(data.getId());
-                if (data.getSId() != null) {
-                    deptIds.add(data.getSId());
-                }
-            }
+        // 根据人员id 返回团队id集合
+        List<Long> deptIds = teamMapper.getUserTeamIds(userId);
+        if (deptIds != null && !deptIds.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
             for (Long detId : deptIds) {
                 stringBuilder.append(detId);
@@ -139,7 +132,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     /**
-     * 查询领样列表
+     * 查询任务列表列表
      *
      * @param paramVo
      * @param deptIds
@@ -158,12 +151,8 @@ public class TaskServiceImpl implements TaskService {
             paramVo.setDeptIds(null);
         }
         List<TaskListVo> dataList = new ArrayList<>();
-        if (paramVo.getState() == 0) {
+        if (paramVo.getState() != null && paramVo.getState() != 1 ) {
             dataList = taskMapper.getTaskListTwo(paramVo);
-        }
-        if (paramVo.getState() == 2) {
-            dataList = taskMapper.getTaskListTwo(paramVo);
-
         }
         if (paramVo.getState() == 1) {
             paramVo.setDeptIds(null);

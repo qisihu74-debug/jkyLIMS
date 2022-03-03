@@ -67,7 +67,9 @@ public class ShiroConfig {
         // 注意过滤器配置顺序不能颠倒
         filterChainDefinitionMap.put("/userLogin/**", "anon");
         filterChainDefinitionMap.put("/qiyuesuo/**", "anon");
+        // 过滤前端 a标签附带的路径
         filterChainDefinitionMap.put("/task/downloadEntrust_two", "anon");
+        filterChainDefinitionMap.put("/task/downloadOriginalRecord", "anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");
