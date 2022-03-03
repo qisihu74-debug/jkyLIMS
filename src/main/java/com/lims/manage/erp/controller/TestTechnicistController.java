@@ -2,12 +2,19 @@ package com.lims.manage.erp.controller;
 
 
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.entity.TestTechnicist;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestTechnicistService;
+import com.lims.manage.erp.vo.TestTeamVo;
+import com.lims.manage.erp.vo.TestTechnicistVo;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -15,7 +22,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 技术人员(TestTechnicist)表控制层
+ * 技术人员(TestTechnicistVo)表控制层
  *
  * @author makejava
  * @since 2022-02-23 09:14:41
@@ -33,12 +40,31 @@ public class TestTechnicistController extends ApiController {
      * 分页查询所有数据
      *
      * @param page 分页对象
-     * @param testTechnicist 查询实体
+     * @param testTechnicistVo 查询实体
      * @return 所有数据
      */
-    @GetMapping
-    public R selectAll(Page<TestTechnicist> page, TestTechnicist testTechnicist) {
-        return success(this.testTechnicistService.page(page, new QueryWrapper<>(testTechnicist)));
+    @GetMapping("/list")
+    public Result selectAll(Page<TestTechnicistVo> page, TestTechnicistVo testTechnicistVo) {
+        QueryWrapper<TestTechnicist> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("i.del_flag",0);
+        if (testTechnicistVo.getUserId()!=null&&testTechnicistVo.getUserId()!=""){
+            queryWrapper.eq("i.user_id",testTechnicistVo.getUserId());
+        }
+        if (testTechnicistVo.getTeamId()!=null&&testTechnicistVo.getTeamId()!=0){
+            queryWrapper.eq("i.team_id",testTechnicistVo.getTeamId());
+        }
+        queryWrapper.orderByDesc("i.create_time");
+        IPage<TestTechnicistVo> teamIPage = this.testTechnicistService.getListPage(page, queryWrapper);
+        return ResultUtil.success(teamIPage);
+    }
+
+    /**
+     * 查询用户列表
+     * @return
+     */
+    @GetMapping("/userList")
+    public Result selectUserList() {
+        return ResultUtil.success(this.testTechnicistService.getUserList());
     }
 
     /**
@@ -48,8 +74,13 @@ public class TestTechnicistController extends ApiController {
      * @return 单条数据
      */
     @GetMapping("{id}")
-    public R selectOne(@PathVariable Serializable id) {
-        return success(this.testTechnicistService.getById(id));
+    public Result selectOne(@PathVariable Serializable id) {
+        if (id!=""&&id!=null){
+            return ResultUtil.success(this.testTechnicistService.getById(id));
+        }else {
+            return ResultUtil.error("参数为空");
+        }
+
     }
 
     /**
@@ -58,9 +89,12 @@ public class TestTechnicistController extends ApiController {
      * @param testTechnicist 实体对象
      * @return 新增结果
      */
-    @PostMapping
-    public R insert(@RequestBody TestTechnicist testTechnicist) {
-        return success(this.testTechnicistService.save(testTechnicist));
+    @PostMapping("/add")
+    public Result insert(@RequestBody TestTechnicist testTechnicist) {
+        if (StrUtil.isEmptyIfStr(testTechnicist)){
+            return ResultUtil.error("数据为空");
+        }
+        return this.testTechnicistService.addTestTechnicist(testTechnicist);
     }
 
     /**
@@ -69,9 +103,12 @@ public class TestTechnicistController extends ApiController {
      * @param testTechnicist 实体对象
      * @return 修改结果
      */
-    @PutMapping
-    public R update(@RequestBody TestTechnicist testTechnicist) {
-        return success(this.testTechnicistService.updateById(testTechnicist));
+    @PostMapping("/edit")
+    public Result update(@RequestBody TestTechnicist testTechnicist) {
+        if (StrUtil.isEmptyIfStr(testTechnicist)){
+            return ResultUtil.error("数据为空");
+        }
+        return this.testTechnicistService.updTestTechnicist(testTechnicist);
     }
 
     /**
@@ -80,9 +117,13 @@ public class TestTechnicistController extends ApiController {
      * @param idList 主键结合
      * @return 删除结果
      */
-    @DeleteMapping
-    public R delete(@RequestParam("idList") List<Long> idList) {
-        return success(this.testTechnicistService.removeByIds(idList));
+    @PostMapping("/del")
+    public Result delete(@RequestBody List<Long> idList) {
+        if (idList.size()!=0){
+            return this.testTechnicistService.delTestTechnicist(idList);
+        }else {
+            return ResultUtil.error("数据为空");
+        }
     }
 }
 

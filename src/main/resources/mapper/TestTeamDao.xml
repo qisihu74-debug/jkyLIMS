@@ -17,6 +17,26 @@
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <resultMap type="com.lims.manage.erp.vo.TestTeamVo" id="TestTeamVoMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="pid" column="pid" jdbcType="INTEGER"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="teamLead" column="team_lead" jdbcType="VARCHAR"/>
+        <result property="teamLead1" column="team_lead1" jdbcType="VARCHAR"/>
+        <result property="leadTel" column="lead_tel" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="technicistCount" column="technicistCount" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="getListPage" resultMap="TestTeamVoMap">
+        select t.*,(select count(0) from JKERP.test_technicist i where t.id=i.team_id and i.del_flag=0 ) as technicistCount from JKERP.test_team t
+            ${ew.customSqlsegment}
+    </select>
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
         insert into JKERP.test_team(name, pid, code, team_lead, team_lead1, lead_tel, status, del_flag, create_time, update_time, remark)

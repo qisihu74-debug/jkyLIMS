@@ -18,6 +18,36 @@
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <resultMap type="com.lims.manage.erp.vo.TestTechnicistVo" id="TestTechnicistVOMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="userId" column="user_id" jdbcType="VARCHAR"/>
+        <result property="teamId" column="team_id" jdbcType="INTEGER"/>
+        <result property="postName" column="post_name" jdbcType="VARCHAR"/>
+        <result property="postGrade" column="post_grade" jdbcType="VARCHAR"/>
+        <result property="certificateName" column="certificate_name" jdbcType="VARCHAR"/>
+        <result property="certificateUrl" column="certificate_url" jdbcType="VARCHAR"/>
+        <result property="skill" column="skill" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="userName" column="userName" jdbcType="VARCHAR"/>
+        <result property="teamName" column="teamName" jdbcType="VARCHAR"/>
+    </resultMap>
+
+
+    <select id="getListPage" resultMap="TestTechnicistVOMap">
+        select i.*,
+        (select u.name from JKERP.sys_user u where i.user_id=u.user_id)as userName,
+        (select t.name from JKERP.test_team t where i.team_id=t.id and t.del_flag=0  ) as teamName
+        from JKERP.test_technicist i
+        ${ew.customSqlsegment}
+    </select>
+
+    <select id="getUserList" resultType="com.lims.manage.erp.entity.SysUserEntity">
+        select user_id,name from JKERP.sys_user;
+    </select>
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
         insert into JKERP.test_technicist(user_id, team_id, post_name, post_grade, certificate_name, certificate_url, skill, status, del_flag, create_time, update_time, remark)
