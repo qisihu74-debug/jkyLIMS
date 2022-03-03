@@ -260,6 +260,13 @@
         <if test="endDate!=null and endDate!=''">
             and str_to_date( t1.receive_time, '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}, '%Y-%m-%d' )
         </if>
+        <if test="deptIds!=null">
+            and t1.dept_id in
+            <foreach collection="deptIds" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+
         order by t1.receive_time desc
     </select>
 

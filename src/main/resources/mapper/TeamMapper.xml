@@ -3,14 +3,36 @@
 
 <mapper namespace="com.lims.manage.erp.mapper.TeamMapper">
     <select id="getUsersByTid" resultType="com.lims.manage.erp.entity.SysUserEntity">
-        SELECT
-	u.position AS position,
-	u.username AS username
-FROM
-	test_team t
-LEFT JOIN test_user_team_rel tr ON t.id = tr.team_id
-LEFT JOIN sys_user u ON tr.user_id = u.user_id
-WHERE
-	t.id = 1
+        SELECT u.position AS position,u.username AS username
+        FROM
+            test_team t
+            LEFT JOIN test_user_team_rel tr
+        ON t.id = tr.team_id
+            LEFT JOIN sys_user u ON tr.user_id = u.user_id
+        WHERE
+            t.id = 1
+    </select>
+
+    <select id="getUserTeamIds" resultType="java.lang.Long">
+        SELECT id
+        FROM (
+                 SELECT t1.id,
+                        t1.NAME,
+                        t1.del_flag,
+                        CASE
+                            WHEN
+                                find_in_set(pid, @pids) > 0
+                                THEN @pids := concat(@pids, ',', id)
+                            ELSE 0
+                            END ischild
+                 FROM (SELECT id, pid, NAME, del_flag FROM test_team ORDER BY pid, id) t1,
+                      (SELECT @pids := ( SELECT team_id FROM test_user_team_rel WHERE user_id = #{userId} )) t2
+             ) t3
+        WHERE ischild != 0
+	AND del_flag = 0
+        UNION ALL
+        SELECT team_id
+        FROM test_user_team_rel
+        WHERE user_id = #{userId}
     </select>
 </mapper>
