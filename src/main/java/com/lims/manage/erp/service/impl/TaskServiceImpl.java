@@ -38,8 +38,6 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     private EntrustEntityMapper entrustEntityMapper;
     @Autowired
-    private SysRoleDao sysRoleDao;
-    @Autowired
     private TeamMapper teamMapper;
 
     @Override
@@ -183,7 +181,7 @@ public class TaskServiceImpl implements TaskService {
             paramVo.setEndDate(split[1]);
         }
         paramVo.setDeptIds(userTeamIds);
-        return taskMapper.getSampleList(paramVo);
+            return taskMapper.getSampleList(paramVo);
     }
 
     @Override

@@ -12,20 +12,9 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.ReportApprovalMapper;
-import com.lims.manage.erp.mapper.ReportMapper;
-import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
-import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.util.AsposeUtil;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.FileAndFolderUtil;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.WordUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.JudgmentBasisVo;
 import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
@@ -80,6 +69,8 @@ public class ReportServiceImpl implements ReportService {
     ReportApprovalMapper reportApprovalMapper;
     @Autowired
     EntrustServiceImpl entrustService;
+    @Autowired
+    private TeamMapper teamMapper;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -114,6 +105,11 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         return reportList;
+    }
+
+    @Override
+    public List<ReportListVo> makeReport() {
+        return reportMapper.getReportList2(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
     }
 
     /**
