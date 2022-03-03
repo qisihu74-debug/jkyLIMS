@@ -70,10 +70,21 @@ public class ReportController {
      *
      * @return
      */
-    @GetMapping("/list")
-    public Result getSampleList() {
+    @GetMapping("/list1")
+    public Result getSampleList1() {
         return ResultUtil.success("获取可制作报告任务单成功！", reportService.getReportList());
     }
+
+    /**
+     * 查询可制作报告任务单列表--科室
+     *
+     * @return
+     */
+    @GetMapping("/list")
+    public Result getSampleList() {
+        return ResultUtil.success("获取可制作报告任务单成功！", reportService.makeReport());
+    }
+
 
     /**
      * 提交审批
