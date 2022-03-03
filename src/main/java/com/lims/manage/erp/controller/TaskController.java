@@ -65,18 +65,18 @@ public class TaskController {
         } else {
             // 验证登录人信息 和部门 存入
             SysUserEntity userInfo = ShiroUtils.getUserInfo();
-            if(userInfo==null){
+            if (userInfo == null) {
                 return ResultUtil.error("token 已过期！");
             }
 
             // 根据账号 查询有可能包含多个科室 以及下级科室信息
             String dept = taskService.getDeptIds(userInfo.getUserId());
             // 科室id集合
-            String [] deptIds = new String[]{};
-            if(dept!=null){
+            String[] deptIds = new String[]{};
+            if (dept != null) {
                 deptIds = dept.split(",");
             }
-            return ResultUtil.success("查询任务详情成功！", taskService.getTaskDetailInfoTwo(taskId,deptIds));
+            return ResultUtil.success("查询任务详情成功！", taskService.getTaskDetailInfoTwo(taskId, deptIds));
         }
     }
 
@@ -181,7 +181,8 @@ public class TaskController {
 
     /**
      * 查询任务列表二次
-     *根据科室进行展示数据
+     * 根据科室进行展示数据
+     *
      * @param paramVo
      * @return
      */
@@ -193,18 +194,20 @@ public class TaskController {
         } else {
             // 验证登录人信息 和部门 存入
             SysUserEntity userInfo = ShiroUtils.getUserInfo();
-            if(userInfo==null){
+            if (userInfo == null) {
                 return ResultUtil.error("token 已过期！");
             }
 
             // 根据账号 查询有可能包含多个科室 以及下级科室信息
             String dept = taskService.getDeptIds(userInfo.getUserId());
             // 科室id集合
-            String [] deptIds = new String[]{};
-            if(dept!=null){
+            String[] deptIds = new String[]{};
+            if (dept != null) {
                 deptIds = dept.split(",");
+            } else {
+                return ResultUtil.error("账号使用人未配置科室人员");
             }
-            return ResultUtil.success("查询任务列表成功！", taskService.getTaskListTwo(paramVo,deptIds));
+            return ResultUtil.success("查询任务列表成功！", taskService.getTaskListTwo(paramVo, deptIds));
         }
     }
 
@@ -309,24 +312,13 @@ public class TaskController {
      * @param taskId
      * @param response
      */
-    @RequestMapping("downloadEntrust_two")
+    @GetMapping("downloadEntrust_two")
     public void downloadEntrust_two(Long taskId, HttpServletResponse response) {
         String fileName = "taskOrder.docx";
         try {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
-            SysUserEntity userInfo = ShiroUtils.getUserInfo();
-            if(userInfo==null){
-                log.info("token 已过期！");
-            }
-            // 根据账号 查询有可能包含多个科室 以及下级科室信息
-            String dept = taskService.getDeptIds(userInfo.getUserId());
-            // 科室id集合
-            String [] deptIds = new String[]{};
-            if(dept!=null){
-                deptIds = dept.split(",");
-            }
-            TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId,deptIds);
+            TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId, null);
             XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
             response.reset();
             response.setContentType("application/x-msdownload");
@@ -354,7 +346,7 @@ public class TaskController {
         OriginalRecordParamVo paramVo = JSON.parseObject(json, OriginalRecordParamVo.class);
         int i = taskService.uploadOriginalRecord(paramVo, file);
         if (i > 0) {
-            if(i==2){
+            if (i == 2) {
                 return ResultUtil.error("文件已存在");
             }
             return ResultUtil.success("上传原始记录成功！", i);
@@ -373,11 +365,11 @@ public class TaskController {
     }
 
     @RequestMapping("/passorno")
-    public Result passorno(Integer itemId,Integer state,String opinion) {
+    public Result passorno(Integer itemId, Integer state, String opinion) {
         if (itemId == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
-            return ResultUtil.success(taskService.passorno(itemId,state,opinion));
+            return ResultUtil.success(taskService.passorno(itemId, state, opinion));
         }
     }
 
@@ -398,8 +390,8 @@ public class TaskController {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             int i = taskService.updatePersonInfo(vo);
-            if(i>0){
-                return ResultUtil.success("修改人员信息成功！",i);
+            if (i > 0) {
+                return ResultUtil.success("修改人员信息成功！", i);
             }
             return ResultUtil.error("修改人员信息失败！");
         }

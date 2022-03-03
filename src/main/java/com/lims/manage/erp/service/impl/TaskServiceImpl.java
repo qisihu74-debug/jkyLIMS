@@ -75,6 +75,18 @@ public class TaskServiceImpl implements TaskService {
             }
             paramVo.setDeptIds(ids);
         }
+        else {
+            // 查询任务单 所属部门id
+            Long deptId = taskMapper.getTaskDept(taskId);
+            if(deptId==null){
+                paramVo.setDeptIds(null);
+            }
+            else {
+                List<Long> ids = new ArrayList<>();
+                ids.add(deptId);
+                paramVo.setDeptIds(ids);
+            }
+        }
         // 处理 委托单的文件链接
         TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfoTwo(paramVo);
         if (taskDetailInfoVo.getFileUrl() != null) {
@@ -133,13 +145,15 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo, String[] deptIds) {
-        if (deptIds != null) {
+        if (deptIds != null && deptIds.length >= 1) {
             // 根据部门id 遍历包含下级部门信息
             List<Long> ids = new ArrayList<>();
             for (int i = 0; i < deptIds.length; i++) {
                 ids.add(Long.valueOf(deptIds[i]));
             }
             paramVo.setDeptIds(ids);
+        } else {
+            paramVo.setDeptIds(null);
         }
         List<TaskListVo> dataList = new ArrayList<>();
         if (paramVo.getState() == 0) {
@@ -150,6 +164,7 @@ public class TaskServiceImpl implements TaskService {
 
         }
         if (paramVo.getState() == 1) {
+            paramVo.setDeptIds(null);
             dataList = taskMapper.getTaskListTwoGreater(paramVo);
         }
         if (dataList != null && !dataList.isEmpty()) {
