@@ -176,7 +176,7 @@
     </select>
     <select id="getTaskDetailInfoTwo" resultMap="taskResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT t1.id,
-               IFNULL(t1.task_code, t1.code)                        code,
+               t1.task_code                        code,
                t1.orderer,
                DATE_FORMAT(t1.order_time, '%Y-%m-%d')               order_time,
                DATE_FORMAT(t1.required_completion_time, '%Y-%m-%d') required_completion_time,
@@ -232,7 +232,6 @@
             </foreach>
         </if>
     </select>
-
     <select id="getSampleList" resultMap="sampleResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT t1.id taskId,
         IFNULL(t1.task_code, t1.CODE) taskCode,
@@ -302,7 +301,7 @@
             parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT DISTINCT
         t1.id taskId,
-        IFNULL( t1.task_code, t1.CODE ) taskCode,
+        t1.task_code taskCode,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
         t1.inspector,
         t2.count_price cost,
@@ -345,7 +344,7 @@
             parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT DISTINCT
         t1.id taskId,
-        IFNULL( t1.task_code, t1.CODE ) taskCode,
+        t1.task_code taskCode,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
         t1.inspector,
         t2.count_price cost,

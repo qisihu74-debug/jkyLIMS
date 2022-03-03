@@ -74,6 +74,14 @@ public interface TaskMapper extends BaseMapper {
     TaskDetailInfoVo getTaskDetailInfoTwo(TaskListParamVo paramVo);
 
     /**
+     * 根据任务id 获取所属部门信息
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT dept_id FROM test_task WHERE id = #{taskId}")
+    Long getTaskDept(Long taskId);
+
+    /**
      * 修改任务信息
      */
     int updateTestTask(TaskTestEntity taskTestEntity);
