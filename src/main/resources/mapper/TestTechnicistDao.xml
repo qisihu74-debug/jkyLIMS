@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.TestTechnicistDao">
+
+    <resultMap type="com.lims.manage.erp.entity.TestTechnicist" id="TestTechnicistMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="userId" column="user_id" jdbcType="VARCHAR"/>
+        <result property="teamId" column="team_id" jdbcType="INTEGER"/>
+        <result property="postName" column="post_name" jdbcType="VARCHAR"/>
+        <result property="postGrade" column="post_grade" jdbcType="VARCHAR"/>
+        <result property="certificateName" column="certificate_name" jdbcType="VARCHAR"/>
+        <result property="certificateUrl" column="certificate_url" jdbcType="VARCHAR"/>
+        <result property="skill" column="skill" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into JKERP.test_technicist(user_id, team_id, post_name, post_grade, certificate_name, certificate_url, skill, status, del_flag, create_time, update_time, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.userId}, #{entity.teamId}, #{entity.postName}, #{entity.postGrade}, #{entity.certificateName}, #{entity.certificateUrl}, #{entity.skill}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into JKERP.test_technicist(user_id, team_id, post_name, post_grade, certificate_name, certificate_url, skill, status, del_flag, create_time, update_time, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.userId}, #{entity.teamId}, #{entity.postName}, #{entity.postGrade}, #{entity.certificateName}, #{entity.certificateUrl}, #{entity.skill}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+        </foreach>
+        on duplicate key update
+         user_id = values(user_id) , team_id = values(team_id) , post_name = values(post_name) , post_grade = values(post_grade) , certificate_name = values(certificate_name) , certificate_url = values(certificate_url) , skill = values(skill) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , remark = values(remark)     </insert>
+
+</mapper>
+

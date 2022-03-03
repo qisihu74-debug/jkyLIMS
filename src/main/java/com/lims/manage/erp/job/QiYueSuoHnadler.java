@@ -5,24 +5,16 @@ import com.alibaba.fastjson.JSONObject;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.http.HttpClientUtil;
-import com.lims.manage.erp.http.HttpResponse;
 import com.lims.manage.erp.http.QiYueSuoResponse;
-import io.micrometer.core.ipc.http.HttpSender;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
 
 /**
  * @author gjl
@@ -92,7 +84,7 @@ public class QiYueSuoHnadler {
                 " \"subject\": \"郭家林测试\",\n" +
                 " \"categoryId\": \"2934717410113839636\",\n" +
                 " \"send\": true,\n" +
-                " \"documents\": [\"2936115323254304790\"],\n" +
+                " \"documents\": [\"2936458894712991949\"],\n" +
                 " \"tenantName\": \"河南省公路工程试验检测中心有限公司\",\n" +
                 " \"creatorName\": \"郭家林\",\n" +
                 " \"creatorContact\": \"18337165257\",\n" +
@@ -135,10 +127,11 @@ public class QiYueSuoHnadler {
         String url = qiYueSuoEntity.getUrl() + qiYueSuoEntity.getSignInterface();
         //Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, JSON.toJSONString(reqBean), headers);
         String boday = "{\n" +
-                "    \"contractId\": 2936126231317803041,\n" +
+                "    \"contractId\": 2936459304039313617,\n" +
                 "    \"tenantName\": \"河南省公路工程试验检测中心有限公司\",\n" +
                 "    \"tenantType\": \"COMPANY\",\n" +
                 "    \"contact\":\"18337165257\",\n" +
+                "    \"expireTime\":259200,\n" +
                 "    \"receiverName\":\"郭家林\"\n" +
                 "   \n" +
                 "}";
@@ -221,6 +214,10 @@ public class QiYueSuoHnadler {
         return response;
     }
 
+    /**
+     * 设置契约锁请求头
+     * @return
+     */
     public Map<String,String> getHeaders(){
         //headers参数设置（MD5进行加密，token加密秘钥 Md5(appToken+appSercert+timestamp+nonce)timestamp当前系统时间不允许偏差超过15分钟、nonce取值UUID）
         Map<String,String> headers = new HashMap<>();

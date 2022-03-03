@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,10 @@ public class TaskServiceImpl implements TaskService {
     private ReportRecordEntityMapper reportRecordEntityMapper;
     @Autowired
     private EntrustEntityMapper entrustEntityMapper;
-
+    @Autowired
+    private SysRoleDao sysRoleDao;
+    @Autowired
+    private TeamMapper teamMapper;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -184,12 +188,16 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<ReceiveSampleListVo> getSampleList(TaskListParamVo paramVo) {
+        //查询用户团队及子团队ID
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        //根据团队信息查询样品信息
         String receiveTime = paramVo.getReceiveTime();
         if (receiveTime != null) {
             String[] split = receiveTime.split("~");
             paramVo.setBeginDate(split[0]);
             paramVo.setEndDate(split[1]);
         }
+        paramVo.setDeptIds(userTeamIds);
         return taskMapper.getSampleList(paramVo);
     }
 
