@@ -3,11 +3,13 @@ package com.lims.manage.erp.controller;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.SampleItemInstrumentVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import com.lims.manage.erp.vo.*;
@@ -42,6 +44,38 @@ public class TestDetectionController {
 
     @RequestMapping("/start_test")
     public Result PostOnTest(@RequestBody SampleItemInstrumentVo sampleItemInstrumentVo) {
+        // 验证登录人userId 是否具备开始检测资格
+        // 验证登录人信息 和部门 存入
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token 已过期！");
+        }
+        if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),sampleItemInstrumentVo.getTaskId())==false){
+            return ResultUtil.error("登录人没有被派发检测资格");
+        }
+        Boolean flag = testDetectionService.postStartTest(sampleItemInstrumentVo);
+        if (flag) {
+            return ResultUtil.success("成功！！！");
+        }
+        return ResultUtil.error(204, "失败");
+    }
+
+    /**
+     * 开始试验二次开发
+     * @param sampleItemInstrumentVo
+     * @return
+     */
+    @RequestMapping("/start_test_two")
+    public Result PostOnTestTwo(@RequestBody SampleItemInstrumentVo sampleItemInstrumentVo) {
+        // 验证登录人userId 是否具备开始检测资格
+        // 验证登录人信息 和部门 存入
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token 已过期！");
+        }
+       if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),sampleItemInstrumentVo.getTaskId())==false){
+           return ResultUtil.error("登录人没有被派发检测资格");
+       }
         Boolean flag = testDetectionService.postStartTest(sampleItemInstrumentVo);
         if (flag) {
             return ResultUtil.success("成功！！！");
@@ -51,8 +85,7 @@ public class TestDetectionController {
 
     /**
      * 结束试验。
-     *
-     * @param sampleItemInstrumentVo
+     * @param
      * @return
      */
     @RequestMapping("/end_test")
@@ -70,10 +103,20 @@ public class TestDetectionController {
         }
         sampleItemInstrumentVo.setItemInstrumentEntityList(list);
 
+        // 验证登录人userId 是否具备结束检测资格
+        // 验证登录人信息 和部门 存入
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token 已过期！");
+        }
+        if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),sampleItemInstrumentVo.getTaskId())==false){
+            return ResultUtil.error("登录人没有被派发检测资格");
+        }
+
         Boolean flag = testDetectionService.postEndTest(sampleItemInstrumentVo);
         if(flag) {
             // 更新任务单状态 需要 对所有的 样品信息 下 检测项 进行判断 ==2的话 更新。
-            TaskDetailInfoVo dataGather = taskService.getTaskDetailInfo(sampleItemInstrumentVo.getTaskId());
+            TaskDetailInfoVo dataGather = taskService.getTaskDetailInfoTwo(sampleItemInstrumentVo.getTaskId(),null);
             Boolean DetailStatus = testDetectionService.JudgmentTaskDetail(dataGather, sampleItemInstrumentVo.getTaskId());
             if (DetailStatus) {
                 return ResultUtil.success("任务单完成！！！");

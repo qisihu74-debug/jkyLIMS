@@ -162,8 +162,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                 #{productId,jdbcType=INTEGER},
                 #{sampleCode,jdbcType=VARCHAR}, #{specs,jdbcType=INTEGER}, #{batchNumber,jdbcType=VARCHAR},
                 #{manufacturer,jdbcType=VARCHAR}, #{sampleOrigin,jdbcType=VARCHAR}, #{outward,jdbcType=VARCHAR},
-                #{picture,jdbcType=VARCHAR}, #{
-savePlace,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR},
+                #{picture,jdbcType=VARCHAR}, #{savePlace,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR},
                 #{sampleGroups,jdbcType=INTEGER}, #{quantityPerGroup,jdbcType=INTEGER}, #{inspector,jdbcType=VARCHAR},
                 #{receivedDate,jdbcType=CHAR}, #{sampleRequirement,jdbcType=VARCHAR}, #{generation,jdbcType=VARCHAR},
                 #{state,jdbcType=VARCHAR}, #{checkDate,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR},
@@ -202,9 +201,7 @@ savePlace,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR},
             <if test="picture != null">
                 picture,
             </if>
-            <if test="
-savePlace != null">
-
+            <if test="savePlace != null">
                 save_place,
             </if>
             <if test="admin != null">
@@ -269,10 +266,8 @@ savePlace != null">
             <if test="picture != null">
                 #{picture,jdbcType=VARCHAR},
             </if>
-            <if test="
-savePlace != null">
-                #{
-        savePlace,jdbcType=VARCHAR},
+            <if test="savePlace != null">
+                #{savePlace,jdbcType=VARCHAR},
             </if>
             <if test="admin != null">
                 #{admin,jdbcType=VARCHAR},
@@ -411,9 +406,7 @@ savePlace != null">
             sample_origin      = #{sampleOrigin,jdbcType=VARCHAR},
             outward            = #{outward,jdbcType=VARCHAR},
             picture            = #{picture,jdbcType=VARCHAR},
-
-            save_place         = #{
-savePlace,jdbcType=VARCHAR},
+            save_place         = #{savePlace,jdbcType=VARCHAR},
             admin              = #{admin,jdbcType=VARCHAR},
             sample_groups      = #{sampleGroups,jdbcType=INTEGER},
             quantity_per_group = #{quantityPerGroup,jdbcType=INTEGER},

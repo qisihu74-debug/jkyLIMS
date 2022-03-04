@@ -12,8 +12,7 @@
       <arg column="coordinate" jdbcType="VARCHAR" javaType="java.lang.String" />
       <arg column="icon" jdbcType="VARCHAR" javaType="java.lang.String" />
       <arg column="additional_fees" jdbcType="VARCHAR" javaType="java.lang.String" />
-      <arg column="
-logistics_costs" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="logistics_costs" jdbcType="VARCHAR" javaType="java.lang.String" />
       <arg column="unit" jdbcType="VARCHAR" javaType="java.lang.String" />
       <arg column="samplestandard" jdbcType="VARCHAR" javaType="java.lang.String" />
       <arg column="sample_count" jdbcType="INTEGER" javaType="java.lang.Integer" />
@@ -88,10 +87,8 @@ logistics_costs, unit, samplestandard, sample_count,
       <if test="additionalFees != null" >
         additional_fees,
       </if>
-      <if test="
-logisticsCosts != null" >
-        
-logistics_costs,
+      <if test="logisticsCosts != null" >
+        logistics_costs,
       </if>
       <if test="unit != null" >
         unit,
@@ -146,10 +143,8 @@ logistics_costs,
       <if test="additionalFees != null" >
         #{additionalFees,jdbcType=VARCHAR},
       </if>
-      <if test="
-logisticsCosts != null" >
-        #{
-logisticsCosts,jdbcType=VARCHAR},
+      <if test="logisticsCosts != null" >
+        #{logisticsCosts,jdbcType=VARCHAR},
       </if>
       <if test="unit != null" >
         #{unit,jdbcType=VARCHAR},
@@ -204,11 +199,8 @@ logisticsCosts,jdbcType=VARCHAR},
       <if test="additionalFees != null" >
         additional_fees = #{additionalFees,jdbcType=VARCHAR},
       </if>
-      <if test="
-logisticsCosts != null" >
-        
-logistics_costs = #{
-logisticsCosts,jdbcType=VARCHAR},
+      <if test="logisticsCosts != null" >
+        logistics_costs = #{logisticsCosts,jdbcType=VARCHAR},
       </if>
       <if test="unit != null" >
         unit = #{unit,jdbcType=VARCHAR},
@@ -247,9 +239,7 @@ logisticsCosts,jdbcType=VARCHAR},
       coordinate = #{coordinate,jdbcType=VARCHAR},
       icon = #{icon,jdbcType=VARCHAR},
       additional_fees = #{additionalFees,jdbcType=VARCHAR},
-      
-logistics_costs = #{
-logisticsCosts,jdbcType=VARCHAR},
+      logistics_costs = #{logisticsCosts,jdbcType=VARCHAR},
       unit = #{unit,jdbcType=VARCHAR},
       samplestandard = #{samplestandard,jdbcType=VARCHAR},
       sample_count = #{sampleCount,jdbcType=INTEGER},

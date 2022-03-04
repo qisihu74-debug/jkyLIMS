@@ -20,6 +20,22 @@ public interface TestDetectionService {
      * @return
      */
     Boolean postStartTest(SampleItemInstrumentVo data);
+
+    /**
+     * 验证登录人userId 是否具备开始检测资格
+     * @param userId
+     * @param taskId
+     * @return true 具备 false 不具备
+     */
+    Boolean VerifyTheLogin(Long userId,Long taskId);
+
+    /**
+     * 验证登录人userId 是否具备开始复核资格
+     * @param userId
+     * @param taskId
+     * @return
+     */
+    Boolean reviewTheLogin(Long userId,Long taskId);
     /**
      * 结束试验
      */

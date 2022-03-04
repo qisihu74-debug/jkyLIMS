@@ -25,4 +25,11 @@ public interface TeamMapper extends BaseMapper {
      * @return
      */
     List<SysUserEntity> getUsersByTid(String teamId);
+
+    /**
+     * 查询用户所在的团队ID
+     * @param userId
+     * @return
+     */
+    List<Long> getUserTeamIds(Long userId);
 }

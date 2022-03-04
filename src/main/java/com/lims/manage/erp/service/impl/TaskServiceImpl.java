@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +38,7 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     private EntrustEntityMapper entrustEntityMapper;
     @Autowired
-    private SysRoleDao sysRoleDao;
+    private TeamMapper teamMapper;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -74,6 +75,18 @@ public class TaskServiceImpl implements TaskService {
             }
             paramVo.setDeptIds(ids);
         }
+        else {
+            // 查询任务单 所属部门id
+            Long deptId = taskMapper.getTaskDept(taskId);
+            if(deptId==null){
+                paramVo.setDeptIds(null);
+            }
+            else {
+                List<Long> ids = new ArrayList<>();
+                ids.add(deptId);
+                paramVo.setDeptIds(ids);
+            }
+        }
         // 处理 委托单的文件链接
         TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfoTwo(paramVo);
         if (taskDetailInfoVo.getFileUrl() != null) {
@@ -103,16 +116,9 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public String getDeptIds(Long userId) {
 
-        // 返回团队id集合 根据人员id
-        List<TeamTreeStructureEntity> dataDepts = taskMapper.getTeamDeptVo(userId);
-        if (dataDepts != null && !dataDepts.isEmpty()) {
-            Set<Long> deptIds = new HashSet<>();
-            for (TeamTreeStructureEntity data : dataDepts) {
-                deptIds.add(data.getId());
-                if (data.getSId() != null) {
-                    deptIds.add(data.getSId());
-                }
-            }
+        // 根据人员id 返回团队id集合
+        List<Long> deptIds = teamMapper.getUserTeamIds(userId);
+        if (deptIds != null && !deptIds.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
             for (Long detId : deptIds) {
                 stringBuilder.append(detId);
@@ -124,7 +130,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     /**
-     * 查询领样列表
+     * 查询任务列表列表
      *
      * @param paramVo
      * @param deptIds
@@ -132,23 +138,22 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo, String[] deptIds) {
-        if (deptIds != null) {
+        if (deptIds != null && deptIds.length >= 1) {
             // 根据部门id 遍历包含下级部门信息
             List<Long> ids = new ArrayList<>();
             for (int i = 0; i < deptIds.length; i++) {
                 ids.add(Long.valueOf(deptIds[i]));
             }
             paramVo.setDeptIds(ids);
+        } else {
+            paramVo.setDeptIds(null);
         }
         List<TaskListVo> dataList = new ArrayList<>();
-        if (paramVo.getState() == 0) {
+        if (paramVo.getState() != null && paramVo.getState() != 1 ) {
             dataList = taskMapper.getTaskListTwo(paramVo);
-        }
-        if (paramVo.getState() == 2) {
-            dataList = taskMapper.getTaskListTwo(paramVo);
-
         }
         if (paramVo.getState() == 1) {
+            paramVo.setDeptIds(null);
             dataList = taskMapper.getTaskListTwoGreater(paramVo);
         }
         if (dataList != null && !dataList.isEmpty()) {
@@ -170,13 +175,17 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<ReceiveSampleListVo> getSampleList(TaskListParamVo paramVo) {
+        //查询用户团队及子团队ID
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        //根据团队信息查询样品信息
         String receiveTime = paramVo.getReceiveTime();
         if (receiveTime != null) {
             String[] split = receiveTime.split("~");
             paramVo.setBeginDate(split[0]);
             paramVo.setEndDate(split[1]);
         }
-        return taskMapper.getSampleList(paramVo);
+        paramVo.setDeptIds(userTeamIds);
+            return taskMapper.getSampleList(paramVo);
     }
 
     @Override

@@ -71,10 +71,21 @@ public class ReportController {
      *
      * @return
      */
-    @GetMapping("/list")
-    public Result getSampleList() {
+    @GetMapping("/list1")
+    public Result getSampleList1() {
         return ResultUtil.success("获取可制作报告任务单成功！", reportService.getReportList());
     }
+
+    /**
+     * 查询可制作报告任务单列表--科室
+     *
+     * @return
+     */
+    @GetMapping("/list")
+    public Result getSampleList() {
+        return ResultUtil.success("获取可制作报告任务单成功！", reportService.makeReport());
+    }
+
 
     /**
      * 提交审批
@@ -136,6 +147,16 @@ public class ReportController {
 
     /**
      * 报告生成--编辑按钮
+     *
+     * @return
+     */
+    @GetMapping("/edit1")
+    public Result edit1(Long id) {
+        return ResultUtil.success("查询委托单信息成功！", reportService.getReportDetail(id));
+    }
+
+    /**
+     * 报告生成--编辑按钮--科室
      *
      * @return
      */
