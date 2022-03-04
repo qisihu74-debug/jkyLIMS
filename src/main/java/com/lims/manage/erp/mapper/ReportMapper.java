@@ -41,7 +41,7 @@ public interface ReportMapper {
      * @param id
      * @return
      */
-    ReportDetailVo getReportDetail(Long id,List<Long> deptIds);
+    ReportDetailVo getReportDetail(Long taskId,List<Long> deptIds);
 
     ReportDetailVo getAllReportDetail(Long id);
 

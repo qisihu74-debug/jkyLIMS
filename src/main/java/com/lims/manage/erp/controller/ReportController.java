@@ -161,8 +161,8 @@ public class ReportController {
      * @return
      */
     @GetMapping("/edit")
-    public Result edit(Long id) {
-        return ResultUtil.success("查询委托单信息成功！", reportService.getReportDetail(id));
+    public Result edit(Long taskId) {
+        return ResultUtil.success("查询委托单信息成功！", reportService.getReportDetail(taskId));
     }
 
     /**

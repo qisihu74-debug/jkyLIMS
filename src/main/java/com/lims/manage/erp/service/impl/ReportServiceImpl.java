@@ -219,9 +219,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ReportDetailVo getReportDetail(Long id) {
+    public ReportDetailVo getReportDetail(Long taskId) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        return reportMapper.getReportDetail(id,userTeamIds);
+        return reportMapper.getReportDetail(taskId,userTeamIds);
     }
 
     @Override

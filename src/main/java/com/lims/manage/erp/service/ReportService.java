@@ -78,7 +78,7 @@ public interface ReportService {
      * @param id
      * @return
      */
-    ReportDetailVo getReportDetail(Long id);
+    ReportDetailVo getReportDetail(Long taskId);
 
     /**
      * 报告邮寄编辑数据回显
