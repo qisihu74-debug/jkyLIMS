@@ -69,6 +69,14 @@ public interface ReportService {
      * @param id
      * @return
      */
+    ReportDetailVo getReportDetail1(Long id);
+
+    /**
+     * 查询委托单--报告制作详情--科室
+     *
+     * @param id
+     * @return
+     */
     ReportDetailVo getReportDetail(Long id);
 
     /**

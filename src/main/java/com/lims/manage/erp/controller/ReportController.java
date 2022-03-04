@@ -149,6 +149,16 @@ public class ReportController {
      *
      * @return
      */
+    @GetMapping("/edit1")
+    public Result edit1(Long id) {
+        return ResultUtil.success("查询委托单信息成功！", reportService.getReportDetail(id));
+    }
+
+    /**
+     * 报告生成--编辑按钮--科室
+     *
+     * @return
+     */
     @GetMapping("/edit")
     public Result edit(Long id) {
         return ResultUtil.success("查询委托单信息成功！", reportService.getReportDetail(id));
