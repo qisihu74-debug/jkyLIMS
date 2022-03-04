@@ -43,6 +43,8 @@ public interface ReportMapper {
      */
     ReportDetailVo getReportDetail(Long id,List<Long> deptIds);
 
+    ReportDetailVo getAllReportDetail(Long id);
+
     List<ReportListVo> getReportList_history(ReportListVo reportListVo);
 
     /**
