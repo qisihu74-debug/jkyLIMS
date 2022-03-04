@@ -774,11 +774,11 @@ public class ReportServiceImpl implements ReportService {
                 if (qiYueSuoSealEntity.getName().contains(s)){
                     newList.add(qiYueSuoSealEntity);
                 }
-                //检验检测专用章（室内试验）、检验检测专用章（外业检测）作为通用章返回
-                if (qiYueSuoSealEntity.getName().equals("检验检测专用章（室内试验）" )
-                        || qiYueSuoSealEntity.getName().equals("检验检测专用章（外业检测）")){
-                    newList.add(qiYueSuoSealEntity);
-                }
+            }
+            //检验检测专用章（室内试验）、检验检测专用章（外业检测）作为通用章返回
+            if (qiYueSuoSealEntity.getName().equals("检验检测专用章（室内试验）" )
+                    || qiYueSuoSealEntity.getName().equals("检验检测专用章（外业检测）")){
+                newList.add(qiYueSuoSealEntity);
             }
         }
         qiYueSuoResponse.setList(newList);
