@@ -86,6 +86,16 @@ public class ReportController {
         return ResultUtil.success("获取可制作报告任务单成功！", reportService.makeReport());
     }
 
+    /**
+     * 查询可制作报告任务单列表--科室
+     *
+     * @return
+     */
+    @GetMapping("/reportDownloadList")
+    public Result reportDownloadList() {
+        return ResultUtil.success("获取可制作报告任务单成功！", reportService.makeReport());
+    }
+
 
     /**
      * 提交审批

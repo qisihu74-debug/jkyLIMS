@@ -163,6 +163,8 @@ public class ReportRecordEntity {
      */
     private String signUrl;
 
+    private Long taskId;
+
     public ReportRecordEntity() {
     }
 
@@ -192,6 +194,7 @@ public class ReportRecordEntity {
         this.addressee = vo.getAddressee() == null ? null : vo.getAddressee();
         this.waybill = vo.getWaybill() == null ? null : vo.getWaybill();
         this.operateTime = vo.getOperateTime() == null ? null : vo.getOperateTime();
+        this.taskId = vo.getTaskId() == null ? null : vo.getTaskId();
     }
 
 }

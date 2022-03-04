@@ -43,6 +43,12 @@ public interface ReportService {
     List<ReportListVo> makeReport();
 
     /**
+     * 报告下载列表--科室权限
+     * @return
+     */
+    List<ReportListVo> reportDownloadList();
+
+    /**
      * 提交审批
      * @param id
      * @param name 报告提交申请人

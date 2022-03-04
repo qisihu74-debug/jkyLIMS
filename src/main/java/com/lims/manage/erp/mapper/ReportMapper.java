@@ -28,6 +28,13 @@ public interface ReportMapper {
     List<ReportListVo> getReportList2(@Param("deptIds") List<Long> deptIds);
 
     /**
+     * 查询下载报告列表--科室
+     *
+     * @return
+     */
+    List<ReportListVo> getReportList3(@Param("deptIds") List<Long> deptIds);
+
+    /**
      * 查询委托单--报告制作详情
      *
      * @param id
