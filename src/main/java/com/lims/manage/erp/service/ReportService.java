@@ -2,6 +2,7 @@ package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
+import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
@@ -110,7 +111,7 @@ public interface ReportService {
      * @param pageSize
      * @return
      */
-    PageInfo sealList(String type, String search, Integer pageNum, Integer pageSize,String reportType);
+    PageInfo sealList(String type, String search, Integer pageNum, Integer pageSize,String reportType,String state);
 
 
 
@@ -119,7 +120,7 @@ public interface ReportService {
      * @param entrustId
      * @return
      */
-    Boolean seal(Long entrustId);
+    Boolean seal(Long entrustId,String title,String fileType);
 
     /**
      * 报告预览
@@ -235,7 +236,7 @@ public interface ReportService {
      * @param reqBean
      * @return
      */
-    QiYueSuoResponse signurl(QiYueSuoReqBean reqBean);
+    QiYueSuoResponse signurl(QiYueSuoSeaLBean reqBean);
 
     /**
      * 下载契约锁报告文档
@@ -265,5 +266,5 @@ public interface ReportService {
      * @param companyName
      * @return
      */
-    QiYueSuoResponse sealListOfQys(String category, String companyName);
+    QiYueSuoResponse sealListOfQys(String category, String companyName, String sealType);
 }

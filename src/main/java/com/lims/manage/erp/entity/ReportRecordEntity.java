@@ -146,6 +146,22 @@ public class ReportRecordEntity {
     private String templateName;
     @TableField(exist = false)
     private Integer productId;
+    /**
+     * 契约锁文档标识
+     */
+    private Long qysDocmentId;
+    /**
+     * 契约锁报告状态1合同待发起,2合同待创建，3合同待签署，4合同待盖章，5合同待下载，6已下载
+     */
+    private String qysState;
+    /**
+     * 契约锁合同id
+     */
+    private Long contractId;
+    /**
+     * 契约锁合同盖章url地址
+     */
+    private String signUrl;
 
     public ReportRecordEntity() {
     }

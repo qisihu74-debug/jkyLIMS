@@ -356,18 +356,25 @@
         seal_type,
         sealer,
         seal_time,
-        t2.product_id
+        t2.product_id,
+        qys_docment_id,
+        qys_state,
+        contract_id,
+        sign_url
         FROM
         test_report_record t1 LEFT JOIN test_product t2 ON t1.sample_name = t2.product_name
         WHERE 1=1
-        <if test='type == "0"'>
-            AND state = 6
-        </if>
         <if test='type == "1"'>
-            AND state >=7
+            AND state = 6 and qys_state &lt;= 4
+        </if>
+        <if test='type == "2"'>
+            AND state >=7 and qys_state > 4
         </if>
         <if test="search != null and search != ''">
             AND report_code = #{search}
+        </if>
+        <if test="state != null and state != ''">
+            AND qys_state = #{state}
         </if>
         <if test="reportType != null and reportType != ''">
             AND report_type = #{reportType}

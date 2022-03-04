@@ -18,10 +18,9 @@ public class QiYueSuoReqBean {
      */
     private String subject;
     /**
-     * true
+     * 印章类型PHYSICS("物理签章"),ELECTRONIC("电子签章"),不传默认查询电子章
      */
-    private boolean ordinal;
-    private String sn;
+    private String category;
     /**
      *(契约锁提供)用印流程ID-> 2934717410113839636
      */
@@ -46,9 +45,6 @@ public class QiYueSuoReqBean {
      * 发起方名称
      */
     private String tenantName;
-    private boolean extraSign;
-    private boolean mustSign;
-    private boolean autoCreateCounterSign;
     /**
      * 签署方，为空时在合同签署完成后需要调用接口“封存合同”主动结束合同
      */
@@ -101,11 +97,10 @@ public class QiYueSuoReqBean {
              * 设置签署动作顺序为1,2,2时，表示第一个先签署，后两个同时签署
              */
             private String serialNo;
-            private long sealId;
             /**
              * 指定印章，格式：[123123123213,123213213213]
              */
-            private String sealIds;
+            private List<String> sealIds;
             /**
              * 签章所属组织ID，发起方生效，默认为发起方关联的组织
              */
@@ -114,18 +109,6 @@ public class QiYueSuoReqBean {
              *操作人信息
              */
             private String[] actionOperators;
-            private List<Locations> locations;
-
-            @Data
-            public static class Locations{
-                private String documentId;
-                private String rectType;
-                private int page;
-                private double offsetX;
-                private double offsetY;
-                private String actionName;
-            }
-
         }
     }
 }

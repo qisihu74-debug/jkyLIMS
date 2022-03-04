@@ -71,5 +71,7 @@ public class QiYueSuoEntity {
     @Value("${qiyuesuo.dept}")
     private String deptInterface;
 
+    @Value("${qiyuesuo.categoryId}")
+    private String categoryId;
 
 }
