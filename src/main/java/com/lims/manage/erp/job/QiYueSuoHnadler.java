@@ -70,6 +70,8 @@ public class QiYueSuoHnadler {
      * @return
      */
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
+        //设置用印流程id
+        reqBean.setCategoryId(qiYueSuoEntity.getCategoryId());
         //设置请求头
         Map<String, String> headers = getHeaders();
         //请求契约锁接口（请求方式由契约锁接口约定）
