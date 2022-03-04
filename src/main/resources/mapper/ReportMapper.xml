@@ -116,7 +116,7 @@
             left join test_report_record_detail t9 on t8.id = t9.record_id and t5.check_item_id = t9.check_item_id
         WHERE t2.id = #{taskId}
         <if test="deptIds!=null">
-            and t2.dept_id in
+            and t5.dept_id in
             <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
                 #{id}
             </foreach>
