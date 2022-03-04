@@ -80,14 +80,29 @@ public class UserFuctionController {
         return ResultUtil.success("查询角色菜单权限成功！", sysUserFuctionService.getRoleMenu(roleId));
     }
 
-    // 暂时未做限制 直接放行 优化。
-    @GetMapping("getMenuDisplayNew")
+    // 暂时未做限制 直接放行 优化。 废弃
+    @GetMapping("getMenuDisplayNew0000")
     public Result getMenuDisplayNew() {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
         List<TreeFunction> dataList = sysUserFuctionService.GetListUpgrade(userInfo.getUserId());
+        if (dataList != null && dataList.size() > 0 && !dataList.isEmpty()) {
+            return ResultUtil.success(dataList);
+        }
+        return ResultUtil.error("使用人角色未配置菜单");
+
+    }
+
+    // 暂时未做限制 直接放行 优化。
+    @GetMapping("getMenuDisplayNew")
+    public Result getMenuDisplayNew1() {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token 已过期！");
+        }
+        List<TreeFunction> dataList = sysUserFuctionService.GetListUpgrade1(userInfo.getUserId());
         if (dataList != null && dataList.size() > 0 && !dataList.isEmpty()) {
             return ResultUtil.success(dataList);
         }
