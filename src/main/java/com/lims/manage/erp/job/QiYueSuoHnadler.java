@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
+import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.http.HttpClientUtil;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -73,18 +74,12 @@ public class QiYueSuoHnadler {
         Map<String, String> headers = getHeaders();
         //请求契约锁接口（请求方式由契约锁接口约定）
         String url = qiYueSuoEntity.getUrl() + qiYueSuoEntity.getAddInterface();
-        //TODO 如果是盖多个章，需要action结构里多个对象，不能将多个参数放入sealIds
-        //Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, JSON.toJSONString(reqBean), headers);
-        QiYueSuoResponse deptListOfQYS = getDeptListOfQYS("COMPANY", "河南省交通科学技术研究院有限公司");
-        //TODO 获取到部门列表设置sealOwner参数
-
-        //TODO 获取印章列表获取sealIds参数
-
-        String boday = "{\n" +
+        Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, JSON.toJSONString(reqBean), headers);
+        /*String boday = "{\n" +
                 " \"subject\": \"郭家林测试\",\n" +
                 " \"categoryId\": \"2934717410113839636\",\n" +
                 " \"send\": true,\n" +
-                " \"documents\": [\"2936458894712991949\"],\n" +
+                " \"documents\": [\"2937185813062447621\"],\n" +
                 " \"tenantName\": \"河南省公路工程试验检测中心有限公司\",\n" +
                 " \"creatorName\": \"郭家林\",\n" +
                 " \"creatorContact\": \"18337165257\",\n" +
@@ -92,20 +87,22 @@ public class QiYueSuoHnadler {
                 "  \"tenantType\": \"COMPANY\",\n" +
                 "  \"tenantName\": \"河南省公路工程试验检测中心有限公司\",\n" +
                 "  \"serialNo\": \"1\",\n" +
-                "  \"actions\": [{\n" +
+                "  \"actions\": [\n" +
+                "  {\n" +
                 "   \"type\": \"CORPORATE\",\n" +
                 "   \"name\": \"企业签章\",\n" +
                 "   \"serialNo\": \"1\",\n" +
-                "   \"sealIds\": \"[2934033400316387595]\",\n" +
+                "   \"sealIds\": \"[2934033400316387595,2937178885881422636]\",\n" +
                 "   \"actionOperators\": [{\n" +
                 "    \"operatorName\": \"郭家林\",\n" +
                 "    \"operatorContact\": \"18337165257\"\n" +
                 "\n" +
                 "   }]\n" +
-                "  }]\n" +
+                "  }\n" +
+                "  ]\n" +
                 " }]\n" +
                 "}";
-        Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, boday, headers);
+        Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, boday, headers);*/
         log.debug("契约锁创建文档响应信息:{}", JSON.toJSONString(stringPair));
         JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(stringPair));
         QiYueSuoResponse response = null;
@@ -120,14 +117,14 @@ public class QiYueSuoHnadler {
      * @param reqBean
      * @return
      */
-    public QiYueSuoResponse signurl(QiYueSuoReqBean reqBean) {
+    public QiYueSuoResponse signurl(QiYueSuoSeaLBean reqBean) {
         //设置请求头
         Map<String, String> headers = getHeaders();
         //请求契约锁接口（请求方式由契约锁接口约定）
         String url = qiYueSuoEntity.getUrl() + qiYueSuoEntity.getSignInterface();
-        //Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, JSON.toJSONString(reqBean), headers);
-        String boday = "{\n" +
-                "    \"contractId\": 2936459304039313617,\n" +
+        Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, JSON.toJSONString(reqBean), headers);
+        /*String boday = "{\n" +
+                "    \"contractId\": 2937186016335196683,\n" +
                 "    \"tenantName\": \"河南省公路工程试验检测中心有限公司\",\n" +
                 "    \"tenantType\": \"COMPANY\",\n" +
                 "    \"contact\":\"18337165257\",\n" +
@@ -135,7 +132,7 @@ public class QiYueSuoHnadler {
                 "    \"receiverName\":\"郭家林\"\n" +
                 "   \n" +
                 "}";
-        Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, boday, headers);
+        Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, boday, headers);*/
         log.debug("契约锁获取报告签署响应信息:{}", JSON.toJSONString(stringPair));
         JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(stringPair));
         QiYueSuoResponse response = null;
