@@ -81,7 +81,7 @@ public class UserFuctionController {
     }
 
     // 暂时未做限制 直接放行 优化。 废弃
-    @GetMapping("getMenuDisplayNew0000")
+    @GetMapping("getMenuDisplayNew2")
     public Result getMenuDisplayNew() {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
@@ -95,7 +95,7 @@ public class UserFuctionController {
 
     }
 
-    // 暂时未做限制 直接放行 优化。
+    //  优化 菜单展示。
     @GetMapping("getMenuDisplayNew")
     public Result getMenuDisplayNew1() {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
