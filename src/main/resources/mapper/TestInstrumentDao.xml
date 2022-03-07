@@ -67,13 +67,16 @@
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
         <result property="laboratoryName" column="laboratoryName" jdbcType="VARCHAR"/>
+        <result property="typeName" column="typeName" jdbcType="VARCHAR"/>
     </resultMap>
 
     <select id="getPageList" resultMap="TestInstrumentVoMap">
-        select i.*,l.name as laboratoryName
+        select i.*,l.name as laboratoryName,t.name as typeName
         from JKERP.test_instrument i
         left join JKERP.test_laboratory l
         on i.laboratory_id=l.id
+        left join JKERP.test_instrument_type t
+        on i.type_id=t.id
         ${ew.customSqlsegment}
     </select>
 

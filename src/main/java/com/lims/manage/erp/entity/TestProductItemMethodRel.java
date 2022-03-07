@@ -4,40 +4,34 @@ package com.lims.manage.erp.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 技术人员(TestTechnicistVo)表实体类
+ * 检测项的检测方法(TestProductItemMethodRel)表实体类
  *
  * @author makejava
- * @since 2022-02-23 09:14:43
+ * @since 2022-03-02 15:15:27
  */
 @SuppressWarnings("serial")
-public class TestTechnicist extends Model<TestTechnicist> {
+public class TestProductItemMethodRel extends Model<TestProductItemMethodRel> {
     @TableId(type = IdType.AUTO)
     private Integer id;
-    //用户编号
-    private String userId;
-    //团队编号
-    private Integer teamId;
-    //技术职称
-    private String postName;
-    //职称等级
-    private String postGrade;
-    //证书名称
-    private String certificateName;
-    //证书图片
-    private String certificateUrl;
-    //专业技能
-    private String skill;
+    //检测项id
+    private Integer checkItemId;
+    //检测方法id
+    private Integer methodId;
     // 0,启用，1,冻结
     private String status;
     //0默认未删除,1删除
     private Integer delFlag;
     //注册时间
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
     //更新时间
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
     //备注
     private String remark;
@@ -51,60 +45,20 @@ public class TestTechnicist extends Model<TestTechnicist> {
         this.id = id;
     }
 
-    public String getUserId() {
-        return userId;
+    public Integer getCheckItemId() {
+        return checkItemId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setCheckItemId(Integer checkItemId) {
+        this.checkItemId = checkItemId;
     }
 
-    public Integer getTeamId() {
-        return teamId;
+    public Integer getMethodId() {
+        return methodId;
     }
 
-    public void setTeamId(Integer teamId) {
-        this.teamId = teamId;
-    }
-
-    public String getPostName() {
-        return postName;
-    }
-
-    public void setPostName(String postName) {
-        this.postName = postName;
-    }
-
-    public String getPostGrade() {
-        return postGrade;
-    }
-
-    public void setPostGrade(String postGrade) {
-        this.postGrade = postGrade;
-    }
-
-    public String getCertificateName() {
-        return certificateName;
-    }
-
-    public void setCertificateName(String certificateName) {
-        this.certificateName = certificateName;
-    }
-
-    public String getCertificateUrl() {
-        return certificateUrl;
-    }
-
-    public void setCertificateUrl(String certificateUrl) {
-        this.certificateUrl = certificateUrl;
-    }
-
-    public String getSkill() {
-        return skill;
-    }
-
-    public void setSkill(String skill) {
-        this.skill = skill;
+    public void setMethodId(Integer methodId) {
+        this.methodId = methodId;
     }
 
     public String getStatus() {

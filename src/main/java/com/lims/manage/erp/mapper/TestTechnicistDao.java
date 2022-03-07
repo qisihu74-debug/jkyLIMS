@@ -2,12 +2,19 @@ package com.lims.manage.erp.mapper;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.vo.TestTeamVo;
+import com.lims.manage.erp.vo.TestTechnicistVo;
 import org.apache.ibatis.annotations.Param;
 import com.lims.manage.erp.entity.TestTechnicist;
 
 /**
- * 技术人员(TestTechnicist)表数据库访问层
+ * 技术人员(TestTechnicistVo)表数据库访问层
  *
  * @author makejava
  * @since 2022-02-23 09:14:43
@@ -17,7 +24,7 @@ public interface TestTechnicistDao extends BaseMapper<TestTechnicist> {
 /**
 * 批量新增数据（MyBatis原生foreach方法）
 *
-* @param entities List<TestTechnicist> 实例对象列表
+* @param entities List<TestTechnicistVo> 实例对象列表
 * @return 影响行数
 */
 int insertBatch(@Param("entities") List<TestTechnicist> entities);
@@ -25,11 +32,12 @@ int insertBatch(@Param("entities") List<TestTechnicist> entities);
 /**
 * 批量新增或按主键更新数据（MyBatis原生foreach方法）
 *
-* @param entities List<TestTechnicist> 实例对象列表
+* @param entities List<TestTechnicistVo> 实例对象列表
 * @return 影响行数
 * @throws org.springframework.jdbc.BadSqlGrammarException 入参是空List的时候会抛SQL语句错误的异常，请自行校验入参
 */
 int insertOrUpdateBatch(@Param("entities") List<TestTechnicist> entities);
-
+    IPage<TestTechnicistVo> getListPage(IPage<TestTechnicistVo> page, @Param(Constants.WRAPPER) Wrapper<TestTechnicist> queryWrapper);
+    List<SysUserEntity> getUserList();
 }
 
