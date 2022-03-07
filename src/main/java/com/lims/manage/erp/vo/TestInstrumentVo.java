@@ -81,4 +81,6 @@ public class TestInstrumentVo {
     private Date updateTime;
     //所在实验室名称
     private String laboratoryName;
+    //仪器大类名称
+    private String typeName;
 }

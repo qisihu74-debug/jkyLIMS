@@ -6,35 +6,28 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 团队管理(TestTeamVo)表实体类
+ * 产品分类(TestProductType)表实体类
  *
  * @author makejava
- * @since 2022-02-23 09:14:46
+ * @since 2022-03-02 10:03:13
  */
 @SuppressWarnings("serial")
-@Data
-public class TestTeam extends Model<TestTeam> {
-
+public class TestProductType extends Model<TestProductType> {
+    //产品类型Id
     @TableId(type = IdType.AUTO)
-    private Integer id;
-    //团队名称
-    private String name;
-    //父级团队
-    private Integer pid;
-    //团队代码
+    private Integer productTypeId;
+    //产品类型名称
+    private String productTypeName;
+    //是否可用
+    private Integer isValid;
+    //产品类型编号
+    @TableField("`code`")
     private String code;
-    //团队领导
-    private String teamLead;
-    //团队副领导
-    private String teamLead1;
-    //团队领导电话
-    private String leadTel;
     // 0,启用，1,冻结
     private String status;
     //0默认未删除,1删除
@@ -48,28 +41,29 @@ public class TestTeam extends Model<TestTeam> {
     //备注
     private String remark;
 
-    public Integer getId() {
-        return id;
+
+    public Integer getProductTypeId() {
+        return productTypeId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setProductTypeId(Integer productTypeId) {
+        this.productTypeId = productTypeId;
     }
 
-    public String getName() {
-        return name;
+    public String getProductTypeName() {
+        return productTypeName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setProductTypeName(String productTypeName) {
+        this.productTypeName = productTypeName;
     }
 
-    public Integer getPid() {
-        return pid;
+    public Integer getIsValid() {
+        return isValid;
     }
 
-    public void setPid(Integer pid) {
-        this.pid = pid;
+    public void setIsValid(Integer isValid) {
+        this.isValid = isValid;
     }
 
     public String getCode() {
@@ -78,30 +72,6 @@ public class TestTeam extends Model<TestTeam> {
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public String getTeamLead() {
-        return teamLead;
-    }
-
-    public void setTeamLead(String teamLead) {
-        this.teamLead = teamLead;
-    }
-
-    public String getTeamLead1() {
-        return teamLead1;
-    }
-
-    public void setTeamLead1(String teamLead1) {
-        this.teamLead1 = teamLead1;
-    }
-
-    public String getLeadTel() {
-        return leadTel;
-    }
-
-    public void setLeadTel(String leadTel) {
-        this.leadTel = leadTel;
     }
 
     public String getStatus() {
@@ -151,7 +121,7 @@ public class TestTeam extends Model<TestTeam> {
      */
     @Override
     protected Serializable pkVal() {
-        return this.id;
+        return this.productTypeId;
     }
     }
 

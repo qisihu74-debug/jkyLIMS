@@ -2,39 +2,28 @@ package com.lims.manage.erp.entity;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 团队管理(TestTeamVo)表实体类
+ * 检测方法(TestMethod)表实体类
  *
  * @author makejava
- * @since 2022-02-23 09:14:46
+ * @since 2022-03-02 10:04:05
  */
 @SuppressWarnings("serial")
-@Data
-public class TestTeam extends Model<TestTeam> {
-
+public class TestMethod extends Model<TestMethod> {
+    //实验方法id
     @TableId(type = IdType.AUTO)
     private Integer id;
-    //团队名称
+    //实验方法名称
     private String name;
-    //父级团队
-    private Integer pid;
-    //团队代码
-    private String code;
-    //团队领导
-    private String teamLead;
-    //团队副领导
-    private String teamLead1;
-    //团队领导电话
-    private String leadTel;
+    //备注
+    private String remark;
     // 0,启用，1,冻结
     private String status;
     //0默认未删除,1删除
@@ -45,8 +34,7 @@ public class TestTeam extends Model<TestTeam> {
     //更新时间
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
-    //备注
-    private String remark;
+
 
     public Integer getId() {
         return id;
@@ -64,44 +52,12 @@ public class TestTeam extends Model<TestTeam> {
         this.name = name;
     }
 
-    public Integer getPid() {
-        return pid;
+    public String getRemark() {
+        return remark;
     }
 
-    public void setPid(Integer pid) {
-        this.pid = pid;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getTeamLead() {
-        return teamLead;
-    }
-
-    public void setTeamLead(String teamLead) {
-        this.teamLead = teamLead;
-    }
-
-    public String getTeamLead1() {
-        return teamLead1;
-    }
-
-    public void setTeamLead1(String teamLead1) {
-        this.teamLead1 = teamLead1;
-    }
-
-    public String getLeadTel() {
-        return leadTel;
-    }
-
-    public void setLeadTel(String leadTel) {
-        this.leadTel = leadTel;
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
     public String getStatus() {
@@ -134,14 +90,6 @@ public class TestTeam extends Model<TestTeam> {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
     }
 
     /**

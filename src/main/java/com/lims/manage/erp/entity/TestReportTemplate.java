@@ -4,40 +4,41 @@ package com.lims.manage.erp.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 技术人员(TestTechnicistVo)表实体类
+ * (TestReportTemplate)表实体类
  *
  * @author makejava
- * @since 2022-02-23 09:14:43
+ * @since 2022-03-02 16:22:09
  */
 @SuppressWarnings("serial")
-public class TestTechnicist extends Model<TestTechnicist> {
+public class TestReportTemplate extends Model<TestReportTemplate> {
+    //报告模板id
     @TableId(type = IdType.AUTO)
     private Integer id;
-    //用户编号
-    private String userId;
-    //团队编号
-    private Integer teamId;
-    //技术职称
-    private String postName;
-    //职称等级
-    private String postGrade;
-    //证书名称
-    private String certificateName;
-    //证书图片
-    private String certificateUrl;
-    //专业技能
-    private String skill;
+    //报告编号
+    private String reportCode;
+    //产品id
+    private String productId;
+    //产品名称
+    private String reportName;
+    //报告模板文件路径
+    private String reportFileUri;
+    //是否可用1.可用，0不可用
+    private String isAvailable;
     // 0,启用，1,冻结
     private String status;
     //0默认未删除,1删除
     private Integer delFlag;
     //注册时间
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
     //更新时间
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
     //备注
     private String remark;
@@ -51,60 +52,44 @@ public class TestTechnicist extends Model<TestTechnicist> {
         this.id = id;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getReportCode() {
+        return reportCode;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setReportCode(String reportCode) {
+        this.reportCode = reportCode;
     }
 
-    public Integer getTeamId() {
-        return teamId;
+    public String getProductId() {
+        return productId;
     }
 
-    public void setTeamId(Integer teamId) {
-        this.teamId = teamId;
+    public void setProductId(String productId) {
+        this.productId = productId;
     }
 
-    public String getPostName() {
-        return postName;
+    public String getReportName() {
+        return reportName;
     }
 
-    public void setPostName(String postName) {
-        this.postName = postName;
+    public void setReportName(String reportName) {
+        this.reportName = reportName;
     }
 
-    public String getPostGrade() {
-        return postGrade;
+    public String getReportFileUri() {
+        return reportFileUri;
     }
 
-    public void setPostGrade(String postGrade) {
-        this.postGrade = postGrade;
+    public void setReportFileUri(String reportFileUri) {
+        this.reportFileUri = reportFileUri;
     }
 
-    public String getCertificateName() {
-        return certificateName;
+    public String getIsAvailable() {
+        return isAvailable;
     }
 
-    public void setCertificateName(String certificateName) {
-        this.certificateName = certificateName;
-    }
-
-    public String getCertificateUrl() {
-        return certificateUrl;
-    }
-
-    public void setCertificateUrl(String certificateUrl) {
-        this.certificateUrl = certificateUrl;
-    }
-
-    public String getSkill() {
-        return skill;
-    }
-
-    public void setSkill(String skill) {
-        this.skill = skill;
+    public void setIsAvailable(String isAvailable) {
+        this.isAvailable = isAvailable;
     }
 
     public String getStatus() {
