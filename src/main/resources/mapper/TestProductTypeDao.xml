@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.TestProductTypeDao">
+
+    <resultMap type="com.lims.manage.erp.entity.TestProductType" id="TestProductTypeMap">
+        <result property="productTypeId" column="product_type_id" jdbcType="INTEGER"/>
+        <result property="productTypeName" column="product_type_name" jdbcType="VARCHAR"/>
+        <result property="isValid" column="is_valid" jdbcType="INTEGER"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="productTypeId" useGeneratedKeys="true">
+        insert into JKERP.test_product_type(product_type_name, is_valid, code, status, del_flag, create_time, update_time, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.productTypeName}, #{entity.isValid}, #{entity.code}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="productTypeId" useGeneratedKeys="true">
+        insert into JKERP.test_product_type(product_type_name, is_valid, code, status, del_flag, create_time, update_time, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.productTypeName}, #{entity.isValid}, #{entity.code}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+        </foreach>
+        on duplicate key update
+         product_type_name = values(product_type_name) , is_valid = values(is_valid) , code = values(code) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , remark = values(remark)     </insert>
+
+</mapper>
+

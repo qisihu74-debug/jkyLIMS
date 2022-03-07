@@ -1,4 +1,4 @@
-package com.lims.manage.erp.entity;
+package com.lims.manage.erp.vo;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -19,7 +19,7 @@ import java.util.Date;
  */
 @SuppressWarnings("serial")
 @Data
-public class TestTeam extends Model<TestTeam> {
+public class TestTeamVo extends Model<TestTeamVo> {
 
     @TableId(type = IdType.AUTO)
     private Integer id;
@@ -47,6 +47,24 @@ public class TestTeam extends Model<TestTeam> {
     private Date updateTime;
     //备注
     private String remark;
+    //人员数量
+    private Integer technicistCount;
+
+    @TableField(exist = false)
+    private long size = 10;
+    /**
+     * 当前页
+     */
+    @TableField(exist = false)
+    private long current = 1;
+
+    public Integer getTechnicistCount() {
+        return technicistCount;
+    }
+
+    public void setTechnicistCount(Integer technicistCount) {
+        this.technicistCount = technicistCount;
+    }
 
     public Integer getId() {
         return id;
