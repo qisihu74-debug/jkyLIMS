@@ -86,6 +86,16 @@ public class ReportController {
         return ResultUtil.success("获取可制作报告任务单成功！", reportService.makeReport());
     }
 
+    /**
+     * 查询可制作报告任务单列表--科室
+     *
+     * @return
+     */
+    @GetMapping("/reportDownloadList")
+    public Result reportDownloadList() {
+        return ResultUtil.success("获取可制作报告任务单成功！", reportService.makeReport());
+    }
+
 
     /**
      * 提交审批
@@ -161,8 +171,8 @@ public class ReportController {
      * @return
      */
     @GetMapping("/edit")
-    public Result edit(Long id) {
-        return ResultUtil.success("查询委托单信息成功！", reportService.getReportDetail(id));
+    public Result edit(Long taskId) {
+        return ResultUtil.success("查询委托单信息成功！", reportService.getReportDetail(taskId));
     }
 
     /**

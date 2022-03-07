@@ -35,6 +35,13 @@ public interface SysUserFuctionService {
     List<TreeFunction> GetListUpgrade(Long userid);
 
     /**
+     * 依据 用户ID 展示所属菜单项。
+     * @param userid
+     * @return
+     */
+    List<TreeFunction> GetListUpgrade1(Long userid);
+
+    /**
      * 查询角色现有权限
      * @param roleId
      * @return

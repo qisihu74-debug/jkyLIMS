@@ -114,6 +114,10 @@ public class ReportServiceImpl implements ReportService {
         return reportMapper.getReportList2(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
     }
 
+    public List<ReportListVo> reportDownloadList() {
+        return reportMapper.getReportList2(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+    }
+
     /**
      * 提交审批
      * @param id
@@ -219,9 +223,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ReportDetailVo getReportDetail(Long id) {
+    public ReportDetailVo getReportDetail(Long taskId) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        return reportMapper.getReportDetail(id,userTeamIds);
+        return reportMapper.getReportDetail(taskId,userTeamIds);
     }
 
     @Override
@@ -276,6 +280,7 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     @Override
     public Boolean preserve(ReportPreserveVo vo) {
+//        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
         ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
         if (reportRecordEntity1 != null) {
             String state = "1";
