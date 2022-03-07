@@ -39,6 +39,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -729,6 +730,11 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
+        //设置文档标识
+        ReportRecordEntity entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        List<String> docs = new ArrayList<>();
+        docs.add(entity.getQysDocmentId()+"");
+        reqBean.setDocuments(docs);
         QiYueSuoResponse response = qiYueSuoHnadler.createbycategory(reqBean);
         //根据委托id存储文档id
         entityMapper.updateContractIdAndState(reqBean.getEntrustId(),response.getContractId(),"3");
@@ -737,6 +743,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public QiYueSuoResponse signurl(QiYueSuoSeaLBean reqBean) {
+        //设置合同标识
+        ReportRecordEntity entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        reqBean.setContractId(entity.getContractId());
         QiYueSuoResponse response = qiYueSuoHnadler.signurl(reqBean);
         //根据委托更新报告签署url
         entityMapper.updateUrlAndState(reqBean.getEntrustId(),response.getSignUrl(),"4");
