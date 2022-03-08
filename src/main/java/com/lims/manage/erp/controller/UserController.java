@@ -16,10 +16,7 @@ import com.lims.manage.erp.service.DingUserService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.SysUserRoleService;
 import com.lims.manage.erp.service.SysUserService;
-import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.SHA256Util;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.RegisterUserInfoVo;
 import com.lims.manage.erp.vo.SysUserPasswordVo;
 import com.lims.manage.erp.vo.UserInfoParamVo;
@@ -103,6 +100,20 @@ public class UserController {
         if (vo.getMobile() == null) {
             return ResultUtil.error("手机号不能为空");
         }
+        // 效验账号格式
+        if (!AccountValidatorUtil.isUsername(vo.getUsername())) {
+            return ResultUtil.error("用户名不符合定义 字母开头应大于五位");
+        }
+        // 效验手机号格式
+        if (!AccountValidatorUtil.isMobile(vo.getMobile())) {
+            return ResultUtil.error("手机号不符合通用定义");
+        }
+        // 效验emal
+        if (vo.getEmail() != null) {
+            if (!AccountValidatorUtil.isEmail(vo.getEmail())) {
+                return ResultUtil.error("emal不符合通用定义");
+            }
+        }
         // 用户新增，账号不能重复
         if (sysUserDao.getOne(vo.getUsername()) != null) {
             return ResultUtil.error("当前账号已存在");
@@ -112,7 +123,7 @@ public class UserController {
             return ResultUtil.error("token已过期，请重新登录");
         }
         // 查询使用人 是否已经被占用账号
-        if(vo.getDingUserId()!=null&&vo.getDingUserId().length()!=0){
+        if (vo.getDingUserId() != null && vo.getDingUserId().length() != 0) {
             // 钉钉用户id 存在其他使用人
             if (!sysUserService.getTheUserList(vo.getDingUserId())) {
                 return ResultUtil.error("使用人 已拥有账号");
@@ -149,10 +160,10 @@ public class UserController {
 
         // 查询此账号是否存在
         DingUserEntity sysDingUserData = dingUserService.getById(vo.getDingUserId());
-        if (sysDingUserData== null) {
+        if (sysDingUserData == null) {
             return ResultUtil.error("使用人不存在！，请重新选择使用人");
         }
-        if(sysDingUserData.getName()!=null&&!sysDingUserData.getName().isEmpty()){
+        if (sysDingUserData.getName() != null && !sysDingUserData.getName().isEmpty()) {
             entity.setName(sysDingUserData.getName());
         }
         sysUserService.save(entity);
@@ -160,7 +171,7 @@ public class UserController {
         if (vo.getRoleIdsLong() != null && vo.getRoleIdsLong().size() > 0) {
             List<SysUserRoleEntity> newRoles = Lists.newArrayList();
             //增加新权限
-            for (Long roleId:vo.getRoleIdsLong()){
+            for (Long roleId : vo.getRoleIdsLong()) {
                 SysUserRoleEntity roleEntity = new SysUserRoleEntity();
                 roleEntity.setUserId(entity.getUserId());
                 roleEntity.setRoleId(roleId);
@@ -265,6 +276,10 @@ public class UserController {
         if (sysUserPasswordVo.getNewPassword() == null) {
             return ResultUtil.error("新密码为空");
         }
+        // 效验新密码
+        if (!AccountValidatorUtil.isPassword(sysUserPasswordVo.getNewPassword())) {
+            return ResultUtil.error("密码和数字组成大于等于6位");
+        }
         // 旧密码
         SysUserEntity oldData = sysUserDao.getUserInformation(sysUserPasswordVo.getUsername());
         if (oldData == null) {
@@ -311,17 +326,31 @@ public class UserController {
         if (vo.getUserId() == null) {
             return ResultUtil.error("缺少必填参数");
         }
+        // 效验账号格式
+        if (!AccountValidatorUtil.isUsername(vo.getUsername())) {
+            return ResultUtil.error("用户名不符合定义 字母开头应大于五位");
+        }
+        // 效验手机号格式
+        if (!AccountValidatorUtil.isMobile(vo.getMobile())) {
+            return ResultUtil.error("手机号不符合通用定义");
+        }
+        // 效验emal
+        if (vo.getEmail() != null) {
+            if (!AccountValidatorUtil.isEmail(vo.getEmail())) {
+                return ResultUtil.error("emal不符合通用定义");
+            }
+        }
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
             return ResultUtil.error("token已过期，请重新登录");
         }
-        if (vo.getDingUserId() != null&&vo.getDingUserId().length()>0) {
+        if (vo.getDingUserId() != null && vo.getDingUserId().length() > 0) {
             // 查询此账号是否存在
             DingUserEntity sysDingUserData = dingUserService.getById(vo.getDingUserId());
-            if (sysDingUserData== null) {
+            if (sysDingUserData == null) {
                 return ResultUtil.error("使用人不存在！，请重新选择使用人");
             }
-            if(sysDingUserData.getName()!=null&&!sysDingUserData.getName().isEmpty()){
+            if (sysDingUserData.getName() != null && !sysDingUserData.getName().isEmpty()) {
                 vo.setName(sysDingUserData.getName());
             }
             // 钉钉用户id 是否被其他账号使用

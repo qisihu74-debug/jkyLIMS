@@ -94,8 +94,6 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
 
     @Override
     public List<TreeFunction> GetListUpgrade1(Long userid) {
-        long startTime = System.currentTimeMillis();
-
         List<TreeFunction> dataList = returnListUpgrade1(userid);
         if (dataList == null || dataList.isEmpty()) {
             System.out.println("此用户不包含菜单信息，请配置");
@@ -120,8 +118,6 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
                 bigTree.add(treeEntity);
             }
         }
-        long EndTime = System.currentTimeMillis();
-        System.out.println("运行了"+(EndTime-startTime));
         return bigTree;
     }
 
@@ -233,10 +229,10 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
             }
         }
         for (TreeFunction data : dataList) {
-            if (map.get(data.getFunctionId()) != null && map.get(data.getFunctionPid())==null) {
+            if (map.get(data.getFunctionId()) != null && map.get(data.getFunctionPid()) == null) {
                 SysRoleFunction removeEntity = new SysRoleFunction();
                 removeEntity.setId(0L);
-                map.put(data.getFunctionPid(),removeEntity);
+                map.put(data.getFunctionPid(), removeEntity);
             }
         }
         // 菜单ID信息 展示所有 去除 functionIdSet
