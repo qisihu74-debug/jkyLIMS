@@ -176,7 +176,7 @@
     </select>
     <select id="getTaskDetailInfoTwo" resultMap="taskResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT t1.id,
-               IFNULL(t1.task_code, t1.code)                        code,
+               t1.task_code                        code,
                t1.orderer,
                DATE_FORMAT(t1.order_time, '%Y-%m-%d')               order_time,
                DATE_FORMAT(t1.required_completion_time, '%Y-%m-%d') required_completion_time,
@@ -232,7 +232,6 @@
             </foreach>
         </if>
     </select>
-
     <select id="getSampleList" resultMap="sampleResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT t1.id taskId,
         IFNULL(t1.task_code, t1.CODE) taskCode,
@@ -260,6 +259,13 @@
         <if test="endDate!=null and endDate!=''">
             and str_to_date( t1.receive_time, '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}, '%Y-%m-%d' )
         </if>
+        <if test="deptIds!=null">
+            and t1.dept_id in
+            <foreach collection="deptIds" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+
         order by t1.receive_time desc
     </select>
 
@@ -302,7 +308,7 @@
             parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT DISTINCT
         t1.id taskId,
-        IFNULL( t1.task_code, t1.CODE ) taskCode,
+        t1.task_code taskCode,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
         t1.inspector,
         t2.count_price cost,
@@ -337,15 +343,15 @@
             </if>
         </trim>
         ORDER BY
-        t1.required_completion_time asc,
-        t2.entrustment_no asc
+        t1.required_completion_time desc,
+        t2.entrustment_no desc
     </select>
 
     <select id="getTaskListTwoGreater" resultType="com.lims.manage.erp.vo.TaskListVo"
             parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT DISTINCT
         t1.id taskId,
-        IFNULL( t1.task_code, t1.CODE ) taskCode,
+        t1.task_code taskCode,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
         t1.inspector,
         t2.count_price cost,
@@ -380,8 +386,8 @@
             </if>
         </trim>
         ORDER BY
-        t1.required_completion_time asc,
-        t2.entrustment_no asc
+        t1.required_completion_time desc,
+        t2.entrustment_no desc
     </select>
     <update id="updateTestTask" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
         UPDATE test_task
@@ -410,7 +416,9 @@
                code,
                start_detection_time,
                end_detection_time,
-               state
+               state,
+               inspector,
+               reviewer
         FROM test_task
         WHERE id = #{taskId}
     </select>

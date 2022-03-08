@@ -2,6 +2,7 @@ package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
+import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
@@ -12,19 +13,9 @@ import com.lims.manage.erp.vo.ReportListVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
-import io.minio.errors.ErrorResponseException;
-import io.minio.errors.InsufficientDataException;
-import io.minio.errors.InternalException;
-import io.minio.errors.InvalidArgumentException;
-import io.minio.errors.InvalidBucketNameException;
-import io.minio.errors.NoResponseException;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public interface ReportService {
@@ -34,6 +25,18 @@ public interface ReportService {
      * @return
      */
     List<ReportListVo> getReportList();
+
+    /**
+     * 查询可制作报告列表--科室权限
+     * @return
+     */
+    List<ReportListVo> makeReport();
+
+    /**
+     * 报告下载列表--科室权限
+     * @return
+     */
+    List<ReportListVo> reportDownloadList();
 
     /**
      * 提交审批
@@ -63,7 +66,15 @@ public interface ReportService {
      * @param id
      * @return
      */
-    ReportDetailVo getReportDetail(Long id);
+    ReportDetailVo getReportDetail1(Long id);
+
+    /**
+     * 查询委托单--报告制作详情--科室
+     *
+     * @param id
+     * @return
+     */
+    ReportDetailVo getReportDetail(Long taskId);
 
     /**
      * 报告邮寄编辑数据回显
@@ -96,7 +107,7 @@ public interface ReportService {
      * @param pageSize
      * @return
      */
-    PageInfo sealList(String type, String search, Integer pageNum, Integer pageSize,String reportType);
+    PageInfo sealList(String type, String search, Integer pageNum, Integer pageSize,String reportType,String state);
 
 
 
@@ -105,7 +116,7 @@ public interface ReportService {
      * @param entrustId
      * @return
      */
-    Boolean seal(Long entrustId);
+    Boolean seal(Long entrustId,String title,String fileType);
 
     /**
      * 报告预览
@@ -221,7 +232,7 @@ public interface ReportService {
      * @param reqBean
      * @return
      */
-    QiYueSuoResponse signurl(QiYueSuoReqBean reqBean);
+    QiYueSuoResponse signurl(QiYueSuoSeaLBean reqBean);
 
     /**
      * 下载契约锁报告文档
@@ -251,5 +262,5 @@ public interface ReportService {
      * @param companyName
      * @return
      */
-    QiYueSuoResponse sealListOfQys(String category, String companyName);
+    QiYueSuoResponse sealListOfQys(String category, String companyName, String sealType);
 }

@@ -5,6 +5,7 @@ import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
 import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,12 +21,36 @@ public interface ReportMapper {
     List<ReportListVo> getReportList();
 
     /**
+     * 查询可制作报告列表--科室
+     *
+     * @return
+     */
+    List<ReportListVo> getReportList2(@Param("deptIds") List<Long> deptIds);
+
+    /**
+     * 查询下载报告列表--科室
+     *
+     * @return
+     */
+    List<ReportListVo> getReportList3(@Param("deptIds") List<Long> deptIds);
+
+    /**
      * 查询委托单--报告制作详情
      *
      * @param id
      * @return
      */
-    ReportDetailVo getReportDetail(Long id);
+    ReportDetailVo getReportDetail1(Long id);
+
+    /**
+     * 查询委托单--报告制作详情--科室
+     *
+     * @param id
+     * @return
+     */
+    ReportDetailVo getReportDetail(Long taskId,List<Long> deptIds);
+
+    ReportDetailVo getAllReportDetail(Long id);
 
     List<ReportListVo> getReportList_history(ReportListVo reportListVo);
 

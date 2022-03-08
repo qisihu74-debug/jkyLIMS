@@ -59,7 +59,7 @@
                                         sealer, seal_time, report_manager,
                                         report_time, addressee, waybill,
                                         operate_time, email, report_phone,
-                                        report_mailing_address, report_complete_time)
+                                        report_mailing_address, report_complete_time,task_id)
         values (#{id,jdbcType=BIGINT}, #{entrustmentId,jdbcType=BIGINT}, #{reportCode,jdbcType=VARCHAR},
                 #{sampleName,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{requiredCompletionTime,jdbcType=TIMESTAMP},
                 #{taskCode,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR}, #{number,jdbcType=INTEGER},
@@ -69,7 +69,8 @@
                 #{sealer,jdbcType=VARCHAR}, #{sealTime,jdbcType=TIMESTAMP}, #{reportManager,jdbcType=VARCHAR},
                 #{reportTime,jdbcType=TIMESTAMP}, #{addressee,jdbcType=VARCHAR}, #{waybill,jdbcType=VARCHAR},
                 #{operateTime,jdbcType=TIMESTAMP}, #{email,jdbcType=VARCHAR}, #{reportPhone,jdbcType=VARCHAR},
-                #{reportMailingAddress,jdbcType=VARCHAR}, #{reportCompleteTime,jdbcType=TIMESTAMP})
+                #{reportMailingAddress,jdbcType=VARCHAR}, #{reportCompleteTime,jdbcType=TIMESTAMP},
+                #{taskId,jdbcType=BIGINT})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordEntity">
         insert into test_report_record
@@ -356,18 +357,25 @@
         seal_type,
         sealer,
         seal_time,
-        t2.product_id
+        t2.product_id,
+        qys_docment_id,
+        qys_state,
+        contract_id,
+        sign_url
         FROM
         test_report_record t1 LEFT JOIN test_product t2 ON t1.sample_name = t2.product_name
         WHERE 1=1
-        <if test='type == "0"'>
-            AND state = 6
-        </if>
         <if test='type == "1"'>
-            AND state >=7
+            AND state = 6 and qys_state &lt;= 4
+        </if>
+        <if test='type == "2"'>
+            AND state >=7 and qys_state > 4
         </if>
         <if test="search != null and search != ''">
             AND report_code = #{search}
+        </if>
+        <if test="state != null and state != ''">
+            AND qys_state = #{state}
         </if>
         <if test="reportType != null and reportType != ''">
             AND report_type = #{reportType}
@@ -418,6 +426,14 @@
         <include refid="Base_Column_List"/>
         FROM test_report_record
         where entrustment_id = #{entrustId,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectByTaskId" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
+            parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM test_report_record
+        where task_id = #{taskId,jdbcType=BIGINT}
     </select>
 
     <update id="updateByEntrustIdSelective" parameterType="com.lims.manage.erp.entity.ReportRecordEntity">

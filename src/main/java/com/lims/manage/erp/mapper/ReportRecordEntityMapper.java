@@ -30,7 +30,8 @@ public interface ReportRecordEntityMapper {
      * @param type
      * @return
      */
-    List<ReportRecordEntity> getSealList(@Param("type") String type, @Param("search") String search,@Param("reportType") String reportType);
+    List<ReportRecordEntity> getSealList(@Param("type") String type, @Param("search") String search,
+                                         @Param("reportType") String reportType,@Param("state") String state);
 
 
     ReportRecordEntity getDetail(Long id);
@@ -61,6 +62,13 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     ReportRecordEntity selectByEntrustId(Long entrustId);
+
+    /**
+     * 查询是否存在委托单信息--根据任务ID
+     * @param taskId
+     * @return
+     */
+    ReportRecordEntity selectByTaskId(Long taskId);
 
     /**
      * 更新报告状态
@@ -152,4 +160,7 @@ public interface ReportRecordEntityMapper {
      */
     @Select("select entrustment_id from test_report_record where contract_id=#{contractId}")
     Long getEntrustIdByCid(@Param("contractId") Long contractId);
+
+    @Select("select qys_docment_id,contract_id,sign_url,qys_state from test_report_record where entrustment_id=#{entrustId}")
+    ReportRecordEntity selectMessageByEntrustId(@Param("entrustId") long entrustId);
 }

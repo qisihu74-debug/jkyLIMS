@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
+import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -70,10 +71,31 @@ public class ReportController {
      *
      * @return
      */
-    @GetMapping("/list")
-    public Result getSampleList() {
+    @GetMapping("/list1")
+    public Result getSampleList1() {
         return ResultUtil.success("获取可制作报告任务单成功！", reportService.getReportList());
     }
+
+    /**
+     * 查询可制作报告任务单列表--科室
+     *
+     * @return
+     */
+    @GetMapping("/list")
+    public Result getSampleList() {
+        return ResultUtil.success("获取可制作报告任务单成功！", reportService.makeReport());
+    }
+
+    /**
+     * 查询可制作报告任务单列表--科室
+     *
+     * @return
+     */
+    @GetMapping("/reportDownloadList")
+    public Result reportDownloadList() {
+        return ResultUtil.success("获取可制作报告任务单成功！", reportService.makeReport());
+    }
+
 
     /**
      * 提交审批
@@ -138,9 +160,19 @@ public class ReportController {
      *
      * @return
      */
-    @GetMapping("/edit")
-    public Result edit(Long id) {
+    @GetMapping("/edit1")
+    public Result edit1(Long id) {
         return ResultUtil.success("查询委托单信息成功！", reportService.getReportDetail(id));
+    }
+
+    /**
+     * 报告生成--编辑按钮--科室
+     *
+     * @return
+     */
+    @GetMapping("/edit")
+    public Result edit(Long taskId) {
+        return ResultUtil.success("查询委托单信息成功！", reportService.getReportDetail(taskId));
     }
 
     /**
@@ -165,14 +197,15 @@ public class ReportController {
      * @param search
      * @param pageNum
      * @param pageSize
+     * @param state 1合同待发起,2合同待创建，3合同待签署，4合同待盖章，5合同待下载
      * @return
      */
     @GetMapping("sealList")
-    public Result sealList(String type, String search, Integer pageNum, Integer pageSize, String reportType) {
+    public Result sealList(String type, String search, Integer pageNum, Integer pageSize, String reportType,String state) {
         if (StringUtils.isEmpty(type) || pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少必要的参数！");
         }
-        PageInfo pageInfo = reportService.sealList(type, search, pageNum, pageSize, reportType);
+        PageInfo pageInfo = reportService.sealList(type, search, pageNum, pageSize, reportType,state);
         return ResultUtil.success(pageInfo);
     }
 
@@ -227,11 +260,14 @@ public class ReportController {
      * @return
      */
     @GetMapping("sealApprove")
-    public Result seal(Long entrustId) {
+    public Result seal(Long entrustId,String title,String fileType) {
         if (entrustId == null) {
             return ResultUtil.error("缺少必要的参数！");
         }
-        Boolean flag = reportService.seal(entrustId);
+        if (StringUtils.isEmpty(title) || StringUtils.isEmpty(fileType)){
+            return ResultUtil.error("缺少合同发起参数！");
+        }
+        Boolean flag = reportService.seal(entrustId,title,fileType);
         if (flag) {
             return ResultUtil.success("向契约锁发起盖章合同申请成功!");
         } else {
@@ -263,7 +299,7 @@ public class ReportController {
      * @return
      */
     @PostMapping("signurl")
-    public Result signurl(@RequestBody QiYueSuoReqBean reqBean){
+    public Result signurl(@RequestBody QiYueSuoSeaLBean reqBean){
         if (reqBean == null){
             return ResultUtil.error("缺少必要的参数");
         }
@@ -298,11 +334,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("sealListOfQys")
-    public Result sealListOfQys(String category, String companyName){
+    public Result sealListOfQys(String category, String companyName,String sealType){
         if (StringUtils.isEmpty(companyName)){
             return ResultUtil.error("缺少必要的参数");
         }
-        QiYueSuoResponse response = reportService.sealListOfQys(category,companyName);
+        QiYueSuoResponse response = reportService.sealListOfQys(category,companyName,sealType);
         if (response != null && response.getCode() == 0) {
             return ResultUtil.success(response);
         } else {
