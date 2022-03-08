@@ -70,6 +70,7 @@ public class ShiroConfig {
         // 过滤前端 a标签附带的路径
         filterChainDefinitionMap.put("/task/downloadEntrust_two", "anon");
         filterChainDefinitionMap.put("/task/downloadOriginalRecord", "anon");
+        filterChainDefinitionMap.put("/report/downloadQysFile","anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");

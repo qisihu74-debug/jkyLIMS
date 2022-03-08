@@ -132,7 +132,9 @@ public class HttpClientOperate {
             }
             url = uriBuilder.build().toString();
             HttpGet httpGet = new HttpGet(url);
-            httpGet.setConfig(getRequestConfig());
+            //设置请求超时时间和 sockect 超时时间
+            RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(200000).setSocketTimeout(200000000).build();
+            httpGet.setConfig(requestConfig);
             //设置HeaderMap
             //header 参数
             if (!CollectionUtils.isEmpty(headerMap)) {
