@@ -55,115 +55,120 @@ public class EntrustController {
 
     /**
      * 新增委托
+     *
      * @param json
      * @param file
      * @return
      */
     @RequestMapping("/addEntrust")
     //@RequiresPermissions("entrust:entrust:addEntrust")
-    public Result addEntrust(@RequestParam("json") String json, MultipartFile[] file){
-        EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
-        Boolean isSuccess = entrustService.addEntrust(entrust,file);
-        if(isSuccess){
+    public Result addEntrust(@RequestParam("json") String json, MultipartFile[] file) {
+        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
+        Boolean isSuccess = entrustService.addEntrust(entrust, file);
+        if (isSuccess) {
             return ResultUtil.success();
-        }else{
-            return ResultUtil.error(678,"新增委托失败！");
+        } else {
+            return ResultUtil.error(678, "新增委托失败！");
         }
     }
 
     /**
      * 新增委托 测试丁
+     *
      * @param json
      * @param file
      * @return
      */
     @RequestMapping("/addEntrust_Test")
     //@RequiresPermissions("entrust:entrust:addEntrust")
-    public Result addEntrustTest(@RequestParam("json") String json, MultipartFile[] file){
-        EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
-        Boolean isSuccess = entrustService.addEntrustTest(entrust,file);
-        if(isSuccess){
+    public Result addEntrustTest(@RequestParam("json") String json, MultipartFile[] file) {
+        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
+        Boolean isSuccess = entrustService.addEntrustTest(entrust, file);
+        if (isSuccess) {
             return ResultUtil.success("新建委托成功");
-        }else{
-            return ResultUtil.error(678,"新增委托失败！");
+        } else {
+            return ResultUtil.error(678, "新增委托失败！");
         }
     }
 
 
     /**
      * 修改委托
+     *
      * @param json
      * @param file
      * @return
      */
     @RequestMapping("/updateEntrust")
 //    @RequiresPermissions("entrust:entrust:updateEntrust")
-    public Result updateEntrust(@RequestParam("json") String json, MultipartFile[] file){
-        EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
-        Boolean isSuccess = entrustService.updateEntrust(entrust,file);
-        if(isSuccess){
+    public Result updateEntrust(@RequestParam("json") String json, MultipartFile[] file) {
+        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
+        Boolean isSuccess = entrustService.updateEntrust(entrust, file);
+        if (isSuccess) {
             return ResultUtil.success("修改成功");
-        }else{
-            return ResultUtil.error(678,"修改委托失败！");
+        } else {
+            return ResultUtil.error(678, "修改委托失败！");
         }
     }
 
     /**
      * 修改委托测试丁 new
+     *
      * @param json
      * @param file
      * @return
      */
     @RequestMapping("/updateEntrust_test_new")
 //    @RequiresPermissions("entrust:entrust:updateEntrust")
-    public Result updateEntrustTestNew(@RequestParam("json") String json, MultipartFile[] file){
-        EntrustAddVo entrust = JSON.parseObject(json,EntrustAddVo.class);
-        Boolean isSuccess = entrustService.updateEntrustTestNew(entrust,file);
-        if(isSuccess){
+    public Result updateEntrustTestNew(@RequestParam("json") String json, MultipartFile[] file) {
+        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
+        Boolean isSuccess = entrustService.updateEntrustTestNew(entrust, file);
+        if (isSuccess) {
             return ResultUtil.success("修改委托成功");
-        }else{
-            return ResultUtil.error(678,"修改委托失败！");
+        } else {
+            return ResultUtil.error(678, "修改委托失败！");
         }
     }
 
     /**
      * 修改委托样品信息
+     *
      * @param
      * @return
      */
     @PostMapping("/updateEntrust_test_new_sample")
 //    @RequiresPermissions("entrust:entrust:updateEntrust")
-    public Result updateEntrustTestNewSample(@RequestBody  EntrustAddVo entrust){
+    public Result updateEntrustTestNewSample(@RequestBody EntrustAddVo entrust) {
         Boolean isSuccess = entrustService.updateEntrustTestNewSample(entrust);
-        if(isSuccess){
+        if (isSuccess) {
             return ResultUtil.success("修改委托下样品成功");
-        }else{
-            return ResultUtil.error(678,"修改委托下样品失败！");
+        } else {
+            return ResultUtil.error(678, "修改委托下样品失败！");
         }
     }
 
     /**
      * 废弃委托单信息
+     *
      * @return
      */
     @PostMapping("/abandonEntrust")
-    public Result abandonEntrust(@RequestBody EntrustEntity entrustEntity){
+    public Result abandonEntrust(@RequestBody EntrustEntity entrustEntity) {
         // 获取当前登录用户id。
         Date date = new Date();
-        if (ShiroUtils.getUserInfo() != null){
+        if (ShiroUtils.getUserInfo() != null) {
             entrustEntity.setOperateUser(ShiroUtils.getUserInfo().getUserId());
         }
         entrustEntity.setOperateDate(date);
-         Boolean flag = entrustService.abandonEntrust(entrustEntity);
-         if(flag){
-             return ResultUtil.success("成功");
-         }
-        return ResultUtil.error(678,"作废委托失败！");
+        Boolean flag = entrustService.abandonEntrust(entrustEntity);
+        if (flag) {
+            return ResultUtil.success("成功");
+        }
+        return ResultUtil.error(678, "作废委托失败！");
 
     }
 
     /**
-     *
      * @return
      */
     @GetMapping("get_Basics")
@@ -172,57 +177,88 @@ public class EntrustController {
     }
 
     /**
-     *
      * @param companyId
      * @return
      */
     @GetMapping("get_entrusted_unit")
     public Result methodDispay(Integer companyId) {
         List<TestCustomerJsonEntity> collectList = entrustService.returnTestCustomerEntityList(companyId);
-        if(collectList.isEmpty()){
-            return ResultUtil.error(201,"用户信息不存在");
+        if (collectList.isEmpty()) {
+            return ResultUtil.error(201, "用户信息不存在");
         }
         return ResultUtil.success(collectList);
     }
 
     /**
      * 新增客户
+     *
      * @param testCompanyEntity
      * @return
      */
     @PostMapping("add_new_company")
     public Result methodPost(@RequestBody TestCompanyJsonEntity testCompanyEntity) {
-        boolean BooleStatus  = entrustService.addCompanyData(testCompanyEntity);
-        if(BooleStatus){
+        if (testCompanyEntity.getCompanyName() != null && testCompanyEntity.getType() != null) {
+            if (entrustEntityMapper.getCompanyName(testCompanyEntity.getCompanyName(), Integer.parseInt(testCompanyEntity.getType())) != null) {
+                return ResultUtil.error(201, "单位名称已存在");
+            }
+        } else {
+            return ResultUtil.error(201, "缺少必填参数");
+        }
+        boolean BooleStatus = entrustService.addCompanyData(testCompanyEntity);
+        if (BooleStatus) {
             return ResultUtil.success();
         }
-        return ResultUtil.error(201,"增加数据失败");
+        return ResultUtil.error(201, "增加数据失败");
+    }
+
+    /**
+     * 新增委托单位
+     *
+     * @param testCompanyEntity
+     * @return
+     */
+    @PostMapping("add_new_company_two")
+    public Result methodPostTwo(@RequestBody TestCompanyJsonEntity testCompanyEntity) {
+        if (testCompanyEntity.getCompanyName() != null && testCompanyEntity.getType() != null) {
+            if (entrustEntityMapper.getCompanyName(testCompanyEntity.getCompanyName(), Integer.parseInt(testCompanyEntity.getType())) != null) {
+                return ResultUtil.error(201, "单位名称已存在");
+            }
+        } else {
+            return ResultUtil.error(201, "缺少必填参数");
+        }
+        boolean BooleStatus = entrustService.addCompanyDataTwo(testCompanyEntity);
+        if (BooleStatus) {
+            return ResultUtil.success();
+        }
+        return ResultUtil.error(201, "增加数据失败");
     }
 
     /**
      * 查询检测项详情：检测项名称，检测项方法，规格型号，检测依据
+     *
      * @param itemIds
      * @return
      */
     @RequestMapping("/getItemDetail")
-    public Result getItemDetail(@RequestBody CheckItemParamVo itemIds){
-        if(itemIds == null){
-            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
-        }else{
+    public Result getItemDetail(@RequestBody CheckItemParamVo itemIds) {
+        if (itemIds == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
             return ResultUtil.success(entrustService.getCheckItemInfoVo(itemIds.getIds()));
         }
     }
 
     /**
      * 查询检测项 方法 依据
+     *
      * @param itemId
      * @return
      */
     @RequestMapping("/getItemMethodStandard")
-    public Result getItemMethodStandard(Integer itemId){
-        if(itemId == null){
-            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
-        }else{
+    public Result getItemMethodStandard(Integer itemId) {
+        if (itemId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
             return ResultUtil.success(entrustService.getItemMethodStandard(itemId));
         }
     }
@@ -231,6 +267,7 @@ public class EntrustController {
      * 查询历史委托
      * 1、角色过滤 “客户代表”、“市场部业务员”
      * 2、“客户”指定自身委托
+     *
      * @param entrustHistoryEntity
      * @return
      */
@@ -240,7 +277,7 @@ public class EntrustController {
         if (entrustHistoryEntity.getState() == null) {
             entrustHistoryEntity.setState(0);
         }
-        if(entrustHistoryEntity.getState()!=0&&entrustHistoryEntity.getState()!=144&&entrustHistoryEntity.getState()!=1){
+        if (entrustHistoryEntity.getState() != 0 && entrustHistoryEntity.getState() != 144 && entrustHistoryEntity.getState() != 1) {
             return ResultUtil.error("必填参数状态有误");
         }
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
@@ -248,114 +285,119 @@ public class EntrustController {
 
     /**
      * 查询历史委托信息详情
+     *
      * @param entrustmentId
      * @return
      */
     @RequestMapping("/get_entrust_history_detail")
-    public Result getEntrustHistoryDetail(Long entrustmentId){
+    public Result getEntrustHistoryDetail(Long entrustmentId) {
         return ResultUtil.success(entrustService.getEntrustHistoryDetail(entrustmentId));
     }
 
     /**
      * 根据检测项ID查询可以做该检测项的团队
+     *
      * @param checkItemId
      * @return
      */
     @GetMapping("/getDept")
-    public Result getDept(Integer checkItemId){
+    public Result getDept(Integer checkItemId) {
         return ResultUtil.success(entrustService.getDept(checkItemId));
     }
 
     /**
      * 查询历史委托信息详情 测试
+     *
      * @param id
      * @return
      */
     @GetMapping("/get_entrust_history_detail_test")
-    public Result getEntrustHistoryDetailTest(Long id){
+    public Result getEntrustHistoryDetailTest(Long id) {
         return ResultUtil.success(entrustService.getEntrustHistoryDetailTest(id));
     }
 
     /**
      * 委托单发布，转为任务
+     *
      * @param entity
      * @return
      */
     @PostMapping("publishTask")
     //@RequiresPermissions("entrust:task:publishTask")
-    public Result publishTask(@RequestBody TaskEntity entity){
-        if (entity.getEntrustmentId() == null){
-            return ResultUtil.error(-1,"缺少必要参数");
+    public Result publishTask(@RequestBody TaskEntity entity) {
+        if (entity.getEntrustmentId() == null) {
+            return ResultUtil.error(-1, "缺少必要参数");
         }
         //核查委托单位、委托人、委托人联系方式、样品信息、检测项信息是否完整
         EntrustAddVo vo = entrustService.getEntrustHistoryDetail(entity.getEntrustmentId());
         if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())
-                || StringUtils.isEmpty(vo.getEntrustPhone())){
-            return ResultUtil.error(-1,"请检查委托人信息是否完整！");
+                || StringUtils.isEmpty(vo.getEntrustPhone())) {
+            return ResultUtil.error(-1, "请检查委托人信息是否完整！");
         }
         List<SampleEntity> samples = vo.getSamples();
-        if (CollectionUtils.isEmpty(samples)){
-            return ResultUtil.error(-1,"请检查委托单样品信息是否完整！");
+        if (CollectionUtils.isEmpty(samples)) {
+            return ResultUtil.error(-1, "请检查委托单样品信息是否完整！");
         }
-        if (!CollectionUtils.isEmpty(samples)){
-            for (SampleEntity sampleEntity:samples) {
-                if (CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())){
-                    return ResultUtil.error(-1,"请检查委托单样品下检测项信息是否完整！");
+        if (!CollectionUtils.isEmpty(samples)) {
+            for (SampleEntity sampleEntity : samples) {
+                if (CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())) {
+                    return ResultUtil.error(-1, "请检查委托单样品下检测项信息是否完整！");
                 }
             }
         }
         Boolean flag = entrustService.publishTask(entity);
-        if (flag){
+        if (flag) {
             /*logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"账户："+ShiroUtils.getUserInfo().getUsername()+"发布任务成功编号为："+vo.getEntrustmentNo(),
                     Const.ENTRUST_PUBLISH,true);*/
             return ResultUtil.success("委托发布成功！");
-        }else {
-            return ResultUtil.error(-1,"委托发布失败！");
+        } else {
+            return ResultUtil.error(-1, "委托发布失败！");
         }
     }
 
 
     @PostMapping("distributionTask")
-    public Result distributionTask(@RequestBody TaskVo entity){
-        if (entity.getEntrustmentId() == null){
-            return ResultUtil.error(-1,"缺少必要参数");
+    public Result distributionTask(@RequestBody TaskVo entity) {
+        if (entity.getEntrustmentId() == null) {
+            return ResultUtil.error(-1, "缺少必要参数");
         }
         //核查委托单位、委托人、委托人联系方式、样品信息、检测项信息是否完整
         EntrustAddVo vo = entrustService.getEntrustHistoryDetail(entity.getEntrustmentId());
         if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())
-                || StringUtils.isEmpty(vo.getEntrustPhone())){
-            return ResultUtil.error(-1,"请检查委托人信息是否完整！");
+                || StringUtils.isEmpty(vo.getEntrustPhone())) {
+            return ResultUtil.error(-1, "请检查委托人信息是否完整！");
         }
         List<SampleEntity> samples = vo.getSamples();
-        if (CollectionUtils.isEmpty(samples)){
-            return ResultUtil.error(-1,"请检查委托单样品信息是否完整！");
+        if (CollectionUtils.isEmpty(samples)) {
+            return ResultUtil.error(-1, "请检查委托单样品信息是否完整！");
         }
-        if (!CollectionUtils.isEmpty(samples)){
-            for (SampleEntity sampleEntity:samples) {
-                if (CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())){
-                    return ResultUtil.error(-1,"请检查委托单样品下检测项信息是否完整！");
+        if (!CollectionUtils.isEmpty(samples)) {
+            for (SampleEntity sampleEntity : samples) {
+                if (CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())) {
+                    return ResultUtil.error(-1, "请检查委托单样品下检测项信息是否完整！");
                 }
             }
         }
-        if(!CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())){
-            for (CheckItemDeptVo checkItemDeptVo:entity.getCheckItemDeptVoList()) {
-                if(checkItemDeptVo.getDeptId() == null){
-                    return ResultUtil.error(-1,"请确认所有检测项是否分配科室！");
+        if (!CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())) {
+            for (CheckItemDeptVo checkItemDeptVo : entity.getCheckItemDeptVoList()) {
+                if (checkItemDeptVo.getDeptId() == null) {
+                    return ResultUtil.error(-1, "请确认所有检测项是否分配科室！");
                 }
             }
         }
         Boolean flag = entrustService.distributionTask(entity);
-        if (flag){
+        if (flag) {
             /*logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"账户："+ShiroUtils.getUserInfo().getUsername()+"发布任务成功编号为："+vo.getEntrustmentNo(),
                     Const.ENTRUST_PUBLISH,true);*/
             return ResultUtil.success("委托分配成功！");
-        }else {
-            return ResultUtil.error(-1,"委托分配失败！");
+        } else {
+            return ResultUtil.error(-1, "委托分配失败！");
         }
     }
 
     /**
      * 委托单任务待发布列表
+     *
      * @param entrustHistoryEntity
      * @return
      */
@@ -367,11 +409,12 @@ public class EntrustController {
 
     /**
      * 委托单下载
+     *
      * @param entrustId
      * @return
      */
     @RequestMapping("downloadEntrust")
-    public void downloadEntrust(Long entrustId,HttpServletResponse response){
+    public void downloadEntrust(Long entrustId, HttpServletResponse response) {
         String fileName = "BD20210021.docx";
         try {
             MinioClient client = MinIoUtil.minioClient;
@@ -382,8 +425,8 @@ public class EntrustController {
             response.reset();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            fileName = URLEncoder.encode(fileName,"UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName="+fileName);
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
             OutputStream outputStream = response.getOutputStream();
             document.write(outputStream);
             outputStream.close();
@@ -394,16 +437,38 @@ public class EntrustController {
 
     /**
      * 查询委托单位上一次工程名称、工程部位
+     *
      * @param name
      * @return
      */
     @GetMapping("/getHistoryData")
-    public Result getHistoryData(String name){
-        if(name == null){
-            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(),ResultEnum.VERIFY_FAIL_NINE.getMsg());
-        }else{
+    public Result getHistoryData(String name) {
+        if (name == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
             HistoryEntrustDataVo historyData = entrustService.getHistoryData(name);
-            if(historyData == null){
+            if (historyData == null) {
+                historyData = new HistoryEntrustDataVo();
+            }
+            return ResultUtil.success(historyData);
+        }
+    }
+
+
+    /**
+     * 查询委托单位上一次项目名称、部位
+     * 包括 unitData 单位联系人集合
+     * @param companyName
+     * @param type
+     * @return
+     */
+    @GetMapping("/getHistoryData_two")
+    public Result getHistoryDataTwo(String companyName,String type) {
+        if (companyName == null||type==null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            HistoryEntrustDataVo historyData = entrustService.getHistoryData(companyName,Integer.parseInt(type));
+            if (historyData == null) {
                 historyData = new HistoryEntrustDataVo();
             }
             return ResultUtil.success(historyData);

@@ -29,6 +29,11 @@ public class TestCompanyEntity implements Serializable {
      */
     private String type;
 
+    /**
+     * 地址
+     */
+    private String address;
+
     public TestCompanyEntity() {
     }
 }

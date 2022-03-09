@@ -125,6 +125,12 @@ public class TaskController {
             String str1 = String.valueOf(strLong);
             taskTestEntity.setReceiver(str1);
         }
+        else {
+            return ResultUtil.error(201, "token已过期！");
+        }
+        if(taskTestEntity.getInspector()==null||taskTestEntity.getRecorder()==null||taskTestEntity.getReviewer()==null||taskTestEntity.getReportProducer()==null){
+            return ResultUtil.error(201, "缺少必填参数！");
+        }
         Boolean taskStatus = taskService.getJudgmentTaskList(taskTestEntity.getId());
         if (taskStatus) {
             Boolean flag = taskService.postGrabASingleTwo(taskTestEntity);
