@@ -238,6 +238,12 @@
         <if test="taskCode!=null and taskCode!=''">
             and task_code LIKE CONCAT('%',#{taskCode},'%')
         </if>
+        <if test="deptIds!=null">
+            and t2.dept_id in
+            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
         order by report_complete_time desc
     </select>
 

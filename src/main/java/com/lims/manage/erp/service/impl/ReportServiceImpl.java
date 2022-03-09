@@ -147,9 +147,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<ReportListVo> getReportList_history(String search) {
-
         ReportListVo reportListVo = new ReportListVo();
         reportListVo.setTaskCode(search);
+        reportListVo.setDeptIds(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
         return reportMapper.getReportList_history(reportListVo);
     }
 
