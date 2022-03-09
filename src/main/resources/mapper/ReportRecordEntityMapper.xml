@@ -369,7 +369,7 @@
             AND state = 6 and qys_state &lt;= 4
         </if>
         <if test='type == "2"'>
-            AND state >=7 and qys_state > 4
+            AND state >=6 and qys_state > 4
         </if>
         <if test="search != null and search != ''">
             AND report_code = #{search}

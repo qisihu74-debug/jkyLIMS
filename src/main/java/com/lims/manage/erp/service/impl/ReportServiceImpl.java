@@ -147,9 +147,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<ReportListVo> getReportList_history(String search) {
-
         ReportListVo reportListVo = new ReportListVo();
         reportListVo.setTaskCode(search);
+        reportListVo.setDeptIds(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
         return reportMapper.getReportList_history(reportListVo);
     }
 
@@ -733,7 +733,7 @@ public class ReportServiceImpl implements ReportService {
         //设置文档标识
         ReportRecordEntity entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
         List<String> docs = new ArrayList<>();
-        docs.add(entity.getQysDocmentId()+"");
+        docs.add(entity.getQysDocmentId());
         reqBean.setDocuments(docs);
         QiYueSuoResponse response = qiYueSuoHnadler.createbycategory(reqBean);
         //根据委托id存储文档id
@@ -745,7 +745,7 @@ public class ReportServiceImpl implements ReportService {
     public QiYueSuoResponse signurl(QiYueSuoSeaLBean reqBean) {
         //设置合同标识
         ReportRecordEntity entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
-        reqBean.setContractId(entity.getContractId());
+        reqBean.setContractId(Long.valueOf(entity.getContractId()));
         QiYueSuoResponse response = qiYueSuoHnadler.signurl(reqBean);
         //根据委托更新报告签署url
         entityMapper.updateUrlAndState(reqBean.getEntrustId(),response.getSignUrl(),"4");
@@ -755,7 +755,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public byte[] downloadQysFile(Long enstustId, Long contractId, String name, String contact) {
         byte[] inputStream = qiYueSuoHnadler.downloadQysFile(contractId, name, contact);
-        entityMapper.updateState(enstustId,"6");
+        //entityMapper.updateState(enstustId,"6");
         return inputStream;
     }
 

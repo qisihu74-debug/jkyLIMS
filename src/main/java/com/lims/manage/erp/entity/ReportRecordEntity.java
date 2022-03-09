@@ -149,7 +149,7 @@ public class ReportRecordEntity {
     /**
      * 契约锁文档标识
      */
-    private Long qysDocmentId;
+    private String qysDocmentId;
     /**
      * 契约锁报告状态1合同待发起,2合同待创建，3合同待签署，4合同待盖章，5合同待下载，6已下载
      */
@@ -157,7 +157,7 @@ public class ReportRecordEntity {
     /**
      * 契约锁合同id
      */
-    private Long contractId;
+    private String contractId;
     /**
      * 契约锁合同盖章url地址
      */
