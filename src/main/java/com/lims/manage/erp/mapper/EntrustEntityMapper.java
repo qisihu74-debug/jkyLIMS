@@ -1,12 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustHistoryEntity;
-import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
-import com.lims.manage.erp.entity.EntrustPamentEntity;
-import com.lims.manage.erp.entity.EntrustSampleEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.HistoryEntrustDataVo;
 import com.lims.manage.erp.vo.LabelValueVo;
@@ -99,6 +94,13 @@ public interface EntrustEntityMapper extends BaseMapper {
     void insertEntrustInfo(EntrustEntity basisInfo);
 
     /**
+     * 通过单位和类型以及联系人和手机号  查看联系人是否存在
+     * @param testCompanyJsonEntity
+     * @return
+     */
+    String GetDelegateInformation(TestCompanyJsonEntity testCompanyJsonEntity);
+
+    /**
      * 修改委托信息
      * @param basisInfo
      * @return
@@ -185,11 +187,52 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     HistoryEntrustDataVo getHistoryData(String name);
 
+
+    /**
+     * 通过单位 和 类型 返回联系人和联系电话
+     * @param name
+     * @param type
+     * @return
+     */
+    List<TestCompanyJsonEntity> getCompanyJsonEntityList(@Param(value = "name") String name, @Param(value = "type")Integer type);
+
+    TestCompanyJsonEntity getCompanyJsonEntitydata(@Param(value = "name") String name, @Param(value = "type")Integer type);
+
+    /**
+     * 通过单位名称和类型 获取主键
+     * @param name
+     * @param type
+     * @return
+     */
+    @Select("\tSELECT\n" +
+            "\tcompany_id\n" +
+            "\tFROM\n" +
+            "\ttest_company\n" +
+            "\tWHERE\n" +
+            "\tcompany_name = #{name} \n" +
+            "\tAND type = #{type} \n" +
+            "\tLIMIT 1")
+    Integer getCompanyId(@Param(value = "name") String name, @Param(value = "type")Integer type);
+
     /**
      * 根据检测项ID查询可以做的团队
      * @param checkItemId
      * @return
      */
     List<LabelValueVo> getDept(Integer checkItemId);
+
+
+    /**
+     * 进行效验单位是否存在
+     * @param companyName
+     * @param type
+     * @return
+     */
+    @Select("SELECT\n" +
+            "company_name\n" +
+            "FROM\n" +
+            "test_company\n" +
+            "WHERE company_name = #{companyName} and type = #{type} LIMIT 1")
+    String getCompanyName(String companyName,Integer type);
 
 }

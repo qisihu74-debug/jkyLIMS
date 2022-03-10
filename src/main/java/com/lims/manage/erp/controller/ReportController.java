@@ -93,7 +93,7 @@ public class ReportController {
      */
     @GetMapping("/reportDownloadList")
     public Result reportDownloadList() {
-        return ResultUtil.success("获取可制作报告任务单成功！", reportService.makeReport());
+        return ResultUtil.success("获取可制作报告任务单成功！", reportService.reportDownloadList());
     }
 
 

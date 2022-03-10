@@ -10,6 +10,7 @@
         FROM
         test_company
         WHERE type =#{TypeId}
+        order by add_time desc
     </select>
 
     <select id="selectEntrustBasis" resultType="com.lims.manage.erp.entity.TestInitDataEntity">

@@ -18,7 +18,7 @@
         test_report_record
         WHERE
         report_complete_time is not NULL
-        and  (state = 1 or state =3)
+        and state =3
             <if test="search!=null and search!=''">
                 and task_code like CONCAT('%',#{search},'%')
             </if>
@@ -185,9 +185,7 @@
         FROM
         test_report_record
         WHERE  verifyer_time is not NULL
-        <if test="state!=null and state!=''">
-            and  state = #{state}
-        </if>
+            and  state = 4
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
         </if>
@@ -208,6 +206,7 @@
         FROM
         test_report_record
         WHERE  issuer_time is not NULL
+        and state = 6
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
         </if>

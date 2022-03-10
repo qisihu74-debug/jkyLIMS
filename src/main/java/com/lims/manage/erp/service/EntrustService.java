@@ -81,6 +81,13 @@ public interface EntrustService {
     Boolean addCompanyData(TestCompanyJsonEntity testCompanyEntity);
 
     /**
+     * 新增委托单位信息 公司名称、地址、类型
+     * @param testCompanyEntity
+     * @return
+     */
+    Boolean addCompanyDataTwo(TestCompanyJsonEntity testCompanyEntity);
+
+    /**
      * 历史委托信息
      * @param entrustHistoryEntity
      * @return
@@ -140,4 +147,14 @@ public interface EntrustService {
      * @return
      */
     HistoryEntrustDataVo getHistoryData(String name);
+
+
+    /**
+     * 查询委托单位上一次项目名称、部位
+     * 包括 unitData 单位联系人集合
+     * @param name
+     * @param type
+     * @return
+     */
+    HistoryEntrustDataVo getHistoryData(String name,Integer type);
 }
