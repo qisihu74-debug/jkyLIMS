@@ -190,8 +190,10 @@
                  LEFT JOIN test_entrusted_sample_details_rel t3 ON t1.id = t3.entrustment_id
                  LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
                  left join test_entrusted_sample_checkitem_rel t5 on t1.id = t5.entrust_id and t4.id = t5.sample_id
+                 left join test_report_record t6 on t2.id = t6.task_id
         where t2.task_code is not null
           and t2.state = 4
+          AND ( t6.state IS NULL OR t6.state = 2 )
         <if test="deptIds!=null">
             and t2.dept_id in
             <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
@@ -224,19 +226,19 @@
 
     <select id="getReportList_history" resultType="com.lims.manage.erp.vo.ReportListVo">
         SELECT
-        id,
-        task_code as taskCode,
-        sample_name as sampleName,
-        price as countPrice,
-        DATE_FORMAT(required_completion_time,'%Y-%m-%d') as requestDate,
-        DATE_FORMAT(report_complete_time,'%Y-%m-%d') as reportCompleteTime,
-        report_url as reportUrl
+        t1.id,
+        t1.task_code as taskCode,
+        t1.sample_name as sampleName,
+        t1.price as countPrice,
+        DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') as requestDate,
+        DATE_FORMAT(t1.report_complete_time,'%Y-%m-%d') as reportCompleteTime,
+        t1.report_url as reportUrl
         FROM
-        test_report_record
-        WHERE state !=2
-        and report_complete_time is not NULL
+        test_report_record t1 left join test_task t2 on t1.task_id = t2.id
+        WHERE t1.state !=2
+        and t1.report_complete_time is not NULL
         <if test="taskCode!=null and taskCode!=''">
-            and task_code LIKE CONCAT('%',#{taskCode},'%')
+            and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
         </if>
         <if test="deptIds!=null">
             and t2.dept_id in
@@ -244,7 +246,7 @@
                 #{id}
             </foreach>
         </if>
-        order by report_complete_time desc
+        order by t1.report_complete_time desc
     </select>
 
     <select id="getReportDetailHistory" resultMap="reportDetailMap">

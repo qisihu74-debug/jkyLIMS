@@ -297,9 +297,9 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
             reportRecordEntity1.setState(state);
-//            if ("1".equals(state)) {
-//                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
-//            }
+            if ("1".equals(state)) {
+                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
+            }
             int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
             if (update < 1) {
                 return false;
@@ -321,9 +321,9 @@ public class ReportServiceImpl implements ReportService {
             }
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
             reportRecordEntity.setState(state);
-//            if ("1".equals(state)) {
-//                reportRecordEntity1.setReportCompleteTime(new Timestamp(System.currentTimeMillis()));
-//            }
+            if ("1".equals(state)) {
+                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
+            }
             //生成报告编号
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
             String year = sdf.format(new Date());
@@ -335,6 +335,7 @@ public class ReportServiceImpl implements ReportService {
                 reportRecordEntity.setReportCode("ZX-"+year+"-JC-"+newCode);
             }
             reportRecordEntity.setId(recordId);
+            reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
             int insert = recordEntityMapper.insert(reportRecordEntity);
             if (insert < 1) {
                 return false;
