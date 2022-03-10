@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.result.Result;
@@ -38,15 +39,30 @@ public class ReportApprovalController {
      * @param state
      * @return
      */
-    @GetMapping("/applyfor")
-    public Result applyfor(String search, Integer state) {
-        List<ReportApprovalVo> list = reportApprovalService.getApplyforList(search, state);
-        if (!list.isEmpty()) {
-            return ResultUtil.success(list);
-        }
-        return ResultUtil.success(list);
-    }
+//    @GetMapping("/applyfor")
+//    public Result applyfor(String search, Integer state) {
+//        List<ReportApprovalVo> list = reportApprovalService.getApplyforList(search, state);
+//        if (!list.isEmpty()) {
+//            return ResultUtil.success(list);
+//        }
+//        return ResultUtil.success(list);
+//    }
 
+    /**
+     * 报告审批列表
+     * @param search
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @GetMapping("/applyfor")
+    public Result applyfor(String search, Integer pageNum, Integer pageSize) {
+        if (pageNum == null || pageSize == null){
+            return ResultUtil.error("缺少分页参数！");
+        }
+        PageInfo pageInfo = reportApprovalService.getApplyforList(search, pageNum,pageSize);
+        return ResultUtil.success(pageInfo);
+    }
 
     /**
      * 审批抢单
@@ -192,14 +208,26 @@ public class ReportApprovalController {
      * @param search
      * @return
      */
-    @GetMapping("/applyfor_history")
-    public Result applyfor_history(String search) {
+//    @GetMapping("/applyfor_history")
+//    public Result applyfor_history(String search) {
+//
+//        List<ReportApprovalVo> list = reportApprovalService.applyfor_history(search);
+//        if (!list.isEmpty()) {
+//            return ResultUtil.success(list);
+//        }
+//        return ResultUtil.success(list);
+//    }
 
-        List<ReportApprovalVo> list = reportApprovalService.applyfor_history(search);
-        if (!list.isEmpty()) {
-            return ResultUtil.success(list);
+    /**
+     * 报告审批历史查询列表
+     */
+    @GetMapping("/applyfor_history")
+    public Result applyfor_history(String search,Integer pageNum,Integer pageSize) {
+        if (pageNum == null || pageSize == null){
+            return ResultUtil.error("缺少分页参数！");
         }
-        return ResultUtil.success(list);
+        PageInfo pageInfo = reportApprovalService.applyfor_history(search, pageNum,pageSize);
+        return ResultUtil.success(pageInfo);
     }
 
     /**
@@ -239,14 +267,30 @@ public class ReportApprovalController {
      * @param state
      * @return
      */
-    @GetMapping("/verify_list")
-    public Result verify_list(String search, Integer state) {
+//    @GetMapping("/verify_list")
+//    public Result verify_list(String search, Integer state) {
+//
+//        List<ReportApprovalVo> list = reportApprovalService.getVerify_list(search, state);
+//        if (!list.isEmpty()) {
+//            return ResultUtil.success(list);
+//        }
+//        return ResultUtil.success(list);
+//    }
 
-        List<ReportApprovalVo> list = reportApprovalService.getVerify_list(search, state);
-        if (!list.isEmpty()) {
-            return ResultUtil.success(list);
+    /**
+     * 报告签发列表
+     * @param search
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @GetMapping("/verify_list")
+    public Result verify_list(String search, Integer pageNum, Integer pageSize) {
+        if (pageNum == null || pageSize == null){
+            return ResultUtil.error("缺少分页参数！");
         }
-        return ResultUtil.success(list);
+        PageInfo pageInfo = reportApprovalService.getVerify_list(search, pageNum, pageSize);
+        return ResultUtil.success(pageInfo);
     }
 
     /**
@@ -402,14 +446,30 @@ public class ReportApprovalController {
      * @param search
      * @return
      */
-    @GetMapping("/verify_history")
-    public Result verify_history(String search) {
+//    @GetMapping("/verify_history")
+//    public Result verify_history(String search) {
+//
+//        List<ReportApprovalVo> list = reportApprovalService.verifyHistory(search);
+//        if (!list.isEmpty()) {
+//            return ResultUtil.success(list);
+//        }
+//        return ResultUtil.success(list);
+//    }
 
-        List<ReportApprovalVo> list = reportApprovalService.verifyHistory(search);
-        if (!list.isEmpty()) {
-            return ResultUtil.success(list);
+    /**
+     * 报告签发历史查询列表
+     * @param search
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @GetMapping("/verify_history")
+    public Result verify_history(String search, Integer pageNum, Integer pageSize) {
+        if (pageNum == null || pageSize == null){
+            return ResultUtil.error("缺少分页参数！");
         }
-        return ResultUtil.success(list);
+        PageInfo pageInfo= reportApprovalService.verifyHistory(search,pageNum,pageSize);
+        return ResultUtil.success(pageInfo);
     }
 
     /**

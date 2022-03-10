@@ -1,4 +1,4 @@
-package com.lims.manage.erp.entity;
+package com.lims.manage.erp.vo;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -17,7 +17,7 @@ import java.util.List;
  * @since 2022-03-02 15:14:51
  */
 @SuppressWarnings("serial")
-public class TestProductItem extends Model<TestProductItem> {
+public class TestProductItemVo extends Model<TestProductItemVo> {
     //检验项目ID
     @TableId(type = IdType.AUTO)
     private Integer checkItemId;
@@ -68,16 +68,15 @@ public class TestProductItem extends Model<TestProductItem> {
     //物流费用
     private String logisticsCosts;
     //检测项检测方法
-    private String methodIds;
+    private List<Integer> methodList;
 
-    public String getMethodIds() {
-        return methodIds;
+    public List<Integer> getMethodList() {
+        return methodList;
     }
 
-    public void setMethodIds(String methodIds) {
-        this.methodIds = methodIds;
+    public void setMethodList(List<Integer> methodList) {
+        this.methodList = methodList;
     }
-
 
     public Integer getCheckItemId() {
         return checkItemId;

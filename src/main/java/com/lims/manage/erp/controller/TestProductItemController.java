@@ -5,18 +5,19 @@ package com.lims.manage.erp.controller;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.lims.manage.erp.entity.TestMethod;
-import com.lims.manage.erp.entity.TestProduct;
 import com.lims.manage.erp.entity.TestProductItem;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestProductItemService;
+import com.lims.manage.erp.vo.TestProductItemVo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -61,8 +62,16 @@ public class TestProductItemController extends ApiController {
     @GetMapping("{id}")
     public Result selectOne(@PathVariable Serializable id) {
         if (id!=null&&id!=""){
-            TestProductItem testMethod=this.testProductItemService.getOne(new QueryWrapper<TestProductItem>().eq("checkItemId",id).eq("del_flag",0));
-            return ResultUtil.success(testMethod);
+            TestProductItem testMethod=this.testProductItemService.getOne(new QueryWrapper<TestProductItem>().eq("check_item_id",id).eq("del_flag",0));
+            TestProductItemVo testProductItemVo=new TestProductItemVo();
+            BeanUtils.copyProperties(testMethod,testProductItemVo);
+            List<String> list = Arrays.asList(testMethod.getMethodIds().split(","));
+            List<Integer> newlist = new ArrayList<>();
+            for(String s:list){
+                newlist.add(Integer.valueOf(s));
+            }
+            testProductItemVo.setMethodList(newlist);
+            return ResultUtil.success(testProductItemVo);
         }else {
             return ResultUtil.error("参数为空");
         }
@@ -75,7 +84,7 @@ public class TestProductItemController extends ApiController {
      * @return 新增结果
      */
     @PostMapping("/add")
-    public Result insert(@RequestBody TestProductItem testProductItem) {
+    public Result insert(@RequestBody TestProductItemVo testProductItem) {
         if (StrUtil.isEmptyIfStr(testProductItem)){
             return ResultUtil.error("数据为空");
         }
@@ -89,7 +98,7 @@ public class TestProductItemController extends ApiController {
      * @return 修改结果
      */
     @PostMapping("/edit")
-    public Result update(@RequestBody TestProductItem testProductItem) {
+    public Result update(@RequestBody TestProductItemVo testProductItem) {
         if (StrUtil.isEmptyIfStr(testProductItem)){
             return ResultUtil.error("数据为空");
         }

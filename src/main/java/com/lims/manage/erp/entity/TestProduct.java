@@ -36,7 +36,16 @@ public class TestProduct extends Model<TestProduct> {
     private Date createTime;
     //更新时间
     private Date updateTime;
+    //产品用途
+    private String productPurpose;
 
+    public String getProductPurpose() {
+        return productPurpose;
+    }
+
+    public void setProductPurpose(String productPurpose) {
+        this.productPurpose = productPurpose;
+    }
 
     public Integer getProductId() {
         return productId;

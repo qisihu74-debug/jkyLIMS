@@ -7,6 +7,9 @@ import com.lims.manage.erp.entity.TestProductItem;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestProductItemService;
+import com.lims.manage.erp.vo.TestProductItemVo;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,19 +26,23 @@ import java.util.List;
 public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, TestProductItem> implements TestProductItemService {
 
     @Override
-    public Result addTestProductItem(TestProductItem testProductItem) {
-        if (testProductItem.getProductId()==null){
-            return ResultUtil.error("产品ID不能为空");
-        }
-        if (testProductItem.getCheckItemName()==null){
+    public Result addTestProductItem(TestProductItemVo testProductItemVo) {
+        if (testProductItemVo.getCheckItemName()==null){
             return ResultUtil.error("检测项目名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestProductItem>().eq("check_item_name",testProductItem.getCheckItemName()))!=null){
+        if (this.getOne(new QueryWrapper<TestProductItem>().eq("del_flag",0).eq("check_item_name",testProductItemVo.getCheckItemName()))!=null){
             return ResultUtil.error("检测项名称重复");
         }
-        testProductItem.setStatus("0");
-        testProductItem.setDelFlag(0);
-        testProductItem.setCreateTime(new Date());
+        testProductItemVo.setStatus("0");
+        testProductItemVo.setDelFlag(0);
+        testProductItemVo.setCreateTime(new Date());
+        TestProductItem testProductItem=new TestProductItem();
+        BeanUtils.copyProperties(testProductItemVo,testProductItem);
+        if (testProductItemVo.getMethodList()!=null&&testProductItemVo.getMethodList().size()!=0){
+            testProductItem.setMethodIds(StringUtils.join(testProductItemVo.getMethodList().toArray(),","));
+        }else {
+            testProductItem.setMethodIds(null);
+        }
         if (this.save(testProductItem)){
             return ResultUtil.success("添加成功!");
         }else {
@@ -44,21 +51,25 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
     }
 
     @Override
-    public Result updTestProductItem(TestProductItem testProductItem) {
-        if (testProductItem.getCheckItemId()==null){
+    public Result updTestProductItem(TestProductItemVo testProductItemVo) {
+        if (testProductItemVo.getCheckItemId()==null) {
             return ResultUtil.error("修改对象ID不能为空");
         }
-        if (testProductItem.getProductId()==null){
-            return ResultUtil.error("产品ID不能为空");
-        }
-        if (testProductItem.getCheckItemName()==null){
+        if (testProductItemVo.getCheckItemName()==null){
             return ResultUtil.error("检测项目名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestProductItem>().eq("del_flag",0).ne("check_item_id",testProductItem.getCheckItemId()).eq("check_item_name",testProductItem.getCheckItemName()))!=null){
+        if (this.getOne(new QueryWrapper<TestProductItem>().eq("del_flag",0).ne("check_item_id",testProductItemVo.getCheckItemId()).eq("check_item_name",testProductItemVo.getCheckItemName()))!=null){
             return ResultUtil.error("检测项名称重复");
         }
-        testProductItem.setUpdateTime(new Date());
-        if (this.save(testProductItem)){
+        testProductItemVo.setUpdateTime(new Date());
+        TestProductItem testProductItem=new TestProductItem();
+        BeanUtils.copyProperties(testProductItemVo,testProductItem);
+        if (testProductItemVo.getMethodList().size()!=0){
+            testProductItem.setMethodIds(StringUtils.join(testProductItemVo.getMethodList().toArray(),","));
+        }else {
+            testProductItem.setMethodIds(null);
+        }
+        if (this.updateById(testProductItem)){
             return ResultUtil.success("修改成功!");
         }else {
             return ResultUtil.error("修改失败，未知异常!");

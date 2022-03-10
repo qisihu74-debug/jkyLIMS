@@ -60,14 +60,12 @@ public interface ReportApprovalMapper {
      */
     List<SampleDetailVo> getSampleDetailList(Long id);
 
-
     /**
      * 查询 报告签发信息
      * @param search
-     * @param state
      * @return
      */
-    List<ReportApprovalVo> getVerifyList(@Param("search")String search,@Param("state")Integer state);
+    List<ReportApprovalVo> getVerifyList(@Param("search")String search);
 
     /**
      * 查询签发 历史

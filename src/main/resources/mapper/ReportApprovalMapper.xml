@@ -18,10 +18,10 @@
         test_report_record
         WHERE
         report_complete_time is not NULL
-        and (state = 1 or state =3)
-        <if test="search!=null and search!=''">
-            and task_code like CONCAT('%',#{search},'%')
-        </if>
+        and state =3
+            <if test="search!=null and search!=''">
+                and task_code like CONCAT('%',#{search},'%')
+            </if>
         ORDER BY report_complete_time desc
     </select>
 
@@ -49,17 +49,17 @@
 
     <select id="getReportApprovalHistory" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
         SELECT
-        id,
-        sample_name,
-        price AS cost,
-        required_completion_time,
-        task_code,
-        state,
-        applicant,
-        verifyer,
-        verifyer_time
+            id,
+            sample_name,
+            price AS cost,
+            required_completion_time,
+            task_code,
+            state,
+            applicant,
+            verifyer,
+            verifyer_time
         FROM
-        test_report_record
+            test_report_record
         WHERE
         verifyer_time is not NULL
         <if test="search!=null and search!=''">
@@ -184,10 +184,8 @@
         verifyer_time
         FROM
         test_report_record
-        WHERE verifyer_time is not NULL
-        <if test="state!=null and state!=''">
-            and state = #{state}
-        </if>
+        WHERE  verifyer_time is not NULL
+            and  state = 4
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
         </if>
@@ -207,7 +205,8 @@
         verifyer_time
         FROM
         test_report_record
-        WHERE issuer_time is not NULL
+        WHERE  issuer_time is not NULL
+        and state = 6
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
         </if>

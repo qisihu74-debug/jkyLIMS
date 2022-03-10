@@ -1,5 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
@@ -54,6 +56,14 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             }
         }
         return returnData;
+    }
+
+    @Override
+    public PageInfo getApplyforList(String search, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalList(search);
+        PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
+        return result;
     }
 
     @Override
@@ -151,6 +161,15 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     }
 
     @Override
+    public PageInfo applyfor_history(String search, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalHistory(search);
+        PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
+        return result;
+    }
+
+
+    @Override
     public TaskDetailInfoVo getDetails(Long id) {
         /**
          * 获取任务单详情
@@ -182,18 +201,27 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     }
 
 
+//    @Override
+//    public List<ReportApprovalVo> getVerify_list(String search, Integer state) {
+//        //        state 报告状态（默认是 0=未抢单 1=已抢单）
+//        if (state == null || state > 2 || state == 0) {
+//            //4.签发待抢单，
+//            state = 4;
+//        } else {
+//            //5.签发已抢单
+//            state = 5;
+//        }
+//        return reportApprovalMapper.getVerifyList(search, state);
+//    }
+
     @Override
-    public List<ReportApprovalVo> getVerify_list(String search, Integer state) {
-        //        state 报告状态（默认是 0=未抢单 1=已抢单）
-        if (state == null || state > 2 || state == 0) {
-            //4.签发待抢单，
-            state = 4;
-        } else {
-            //5.签发已抢单
-            state = 5;
-        }
-        return reportApprovalMapper.getVerifyList(search, state);
+    public PageInfo getVerify_list(String search, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<ReportApprovalVo> list = reportApprovalMapper.getVerifyList(search);
+        PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
+        return result;
     }
+
 
     @Override
     public Boolean verify_monad(ReportApprovalVo reportApprovalVo) {
@@ -291,9 +319,17 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         return false;
     }
 
-    @Override
-    public List<ReportApprovalVo> verifyHistory(String search) {
+//    @Override
+//    public List<ReportApprovalVo> verifyHistory(String search) {
+//
+//        return reportApprovalMapper.getVerifyHistory(search);
+//    }
 
-        return reportApprovalMapper.getVerifyHistory(search);
+    @Override
+    public PageInfo verifyHistory(String search, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<ReportApprovalVo> list = reportApprovalMapper.getVerifyHistory(search);
+        PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
+        return result;
     }
 }
