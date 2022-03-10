@@ -9,6 +9,8 @@ import com.lims.manage.erp.entity.TestProduct;
 import com.lims.manage.erp.entity.TestProduct;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.TestInstrumentVo;
+import com.lims.manage.erp.vo.TestProductItemVo;
+import com.lims.manage.erp.vo.TestProductSelVo;
 import com.lims.manage.erp.vo.TestProductVo;
 
 import java.util.List;
@@ -20,9 +22,11 @@ import java.util.List;
  * @since 2022-03-02 15:00:15
  */
 public interface TestProductService extends IService<TestProduct> {
-    Result addTestProduct(TestProduct testProduct);
-    Result updTestProduct(TestProduct testProduct);
+    Result addTestProduct(TestProductItemVo testProductItemVo);
+    Result updTestProduct(TestProductItemVo testProductItemVo);
     Result delTestProduct(List<Long> idList);
     IPage<TestProductVo> getPageList(Page<TestProductVo> page, QueryWrapper<TestProduct> queryWrapper);
+    TestProductSelVo getTestProductSelVo(TestProduct testProduct);
+    TestProductItemVo getTestProductItemVo(TestProduct testProduct);
 }
 

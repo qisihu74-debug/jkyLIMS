@@ -4,26 +4,27 @@ package com.lims.manage.erp.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.io.Serializable;
-import java.util.Date;
 
 /**
- * 检测项的检测方法(TestProductItemMethodRel)表实体类
+ * 检测项使用的设备(TestProductItemInstrumentTypeRel)表实体类
  *
  * @author makejava
- * @since 2022-03-02 15:15:27
+ * @since 2022-03-08 17:13:36
  */
 @SuppressWarnings("serial")
-public class TestProductItemMethodRel extends Model<TestProductItemMethodRel> {
+public class TestProductItemInstrumentTypeRel extends Model<TestProductItemInstrumentTypeRel> {
     @TableId(type = IdType.AUTO)
     private Integer id;
     //检测项id
     private Integer checkItemId;
-    //检测方法id
-    private Integer methodId;
+    //仪器类型id
+    private Integer intrusmentTypeId;
 
+    public TestProductItemInstrumentTypeRel(Integer checkItemId, Integer intrusmentTypeId) {
+        this.checkItemId = checkItemId;
+        this.intrusmentTypeId = intrusmentTypeId;
+    }
 
     public Integer getId() {
         return id;
@@ -41,20 +42,12 @@ public class TestProductItemMethodRel extends Model<TestProductItemMethodRel> {
         this.checkItemId = checkItemId;
     }
 
-    public Integer getMethodId() {
-        return methodId;
+    public Integer getIntrusmentTypeId() {
+        return intrusmentTypeId;
     }
 
-    public void setMethodId(Integer methodId) {
-        this.methodId = methodId;
-    }
-
-    public TestProductItemMethodRel() {
-    }
-
-    public TestProductItemMethodRel(Integer checkItemId, Integer methodId) {
-        this.checkItemId = checkItemId;
-        this.methodId = methodId;
+    public void setIntrusmentTypeId(Integer intrusmentTypeId) {
+        this.intrusmentTypeId = intrusmentTypeId;
     }
 
     /**
