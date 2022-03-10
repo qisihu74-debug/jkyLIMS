@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.vo.ReportApprovalVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
 
@@ -41,6 +42,15 @@ public interface ReportApprovalService {
     List<ReportApprovalVo> applyfor_history(String search);
 
     /**
+     * 报告审批历史查询
+     * @param search
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    PageInfo applyfor_history(String search, Integer pageNum, Integer pageSize);
+
+    /**
      * 查看报告详情
      * @param id
      * @return
@@ -54,7 +64,16 @@ public interface ReportApprovalService {
      * @param state
      * @return
      */
-    List<ReportApprovalVo> getVerify_list(String search, Integer state);
+    //List<ReportApprovalVo> getVerify_list(String search, Integer state);
+
+    /**
+     * 报告签发列表
+     * @param search
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    PageInfo getVerify_list(String search, Integer pageNum, Integer pageSize);
 
     /**
      * 签发抢单
@@ -75,8 +94,23 @@ public interface ReportApprovalService {
      * @param search
      * @return
      */
-    List<ReportApprovalVo> verifyHistory(String search);
+    //List<ReportApprovalVo> verifyHistory(String search);
 
+    /**
+     * 报告审批列表
+     * @param search
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    PageInfo getApplyforList(String search, Integer pageNum, Integer pageSize);
 
-
+    /**
+     * 报告签发历史记录
+     * @param search
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    PageInfo verifyHistory(String search, Integer pageNum, Integer pageSize);
 }
