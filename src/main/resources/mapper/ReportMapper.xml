@@ -193,7 +193,30 @@
                  left join test_report_record t6 on t2.id = t6.task_id
         where t2.task_code is not null
           and t2.state = 4
-          AND ( t6.state IS NULL OR t6.state = 2 )
+          AND ( t6.state IS NULL OR t6.state in (0,2) )
+        <if test="deptIds!=null">
+            and t2.dept_id in
+            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="reportDownloadList" resultType="com.lims.manage.erp.vo.ReportListVo">
+        SELECT DISTINCT t1.id,
+                        t2.id task_id,
+                        t2.task_code,
+                        t4.sample_name,
+                        t1.count_price,
+                        DATE_FORMAT(t1.request_date, '%Y-%m-%d') request_date
+        FROM test_entrusted_info t1
+                 LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
+                 LEFT JOIN test_entrusted_sample_details_rel t3 ON t1.id = t3.entrustment_id
+                 LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
+                 left join test_entrusted_sample_checkitem_rel t5 on t1.id = t5.entrust_id and t4.id = t5.sample_id
+                 left join test_report_record t6 on t2.id = t6.task_id
+        where t2.issue_report = '是'
+            AND t6.state = 1
         <if test="deptIds!=null">
             and t2.dept_id in
             <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
