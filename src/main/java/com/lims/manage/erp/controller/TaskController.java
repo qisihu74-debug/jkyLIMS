@@ -201,7 +201,7 @@ public class TaskController {
     @PostMapping(value = "/getTaskList_two")
     public Result getTaskInfo_two(@RequestBody TaskListParamVo paramVo) {
 
-        if (paramVo == null||paramVo.getState()==null) {
+        if (paramVo == null||paramVo.getState()==null||paramVo.getPageNum()==null||paramVo.getPageSize()==null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             // 验证登录人信息 和部门 存入
@@ -318,7 +318,7 @@ public class TaskController {
     }
 
     /**
-     * 下载任务通知单
+     * 下载任务通知单——二次开发
      *
      * @param taskId
      * @param response

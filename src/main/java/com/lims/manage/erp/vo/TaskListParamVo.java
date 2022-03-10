@@ -22,4 +22,6 @@ public class TaskListParamVo {
      * 科室id集合
      */
     private List<Long> deptIds;
+    private Integer pageNum;
+    private Integer pageSize;
 }

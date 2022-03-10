@@ -1,5 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TaskService;
@@ -127,14 +129,15 @@ public class TaskServiceImpl implements TaskService {
     }
 
     /**
-     * 查询任务列表列表
+     * 查询任务列表列表 并设置
      *
      * @param paramVo
      * @param deptIds
      * @return
      */
     @Override
-    public List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo, String[] deptIds) {
+    public PageInfo getTaskListTwo(TaskListParamVo paramVo, String[] deptIds) {
+        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
         if (deptIds != null && deptIds.length >= 1) {
             // 根据部门id 遍历包含下级部门信息
             List<Long> ids = new ArrayList<>();
@@ -167,7 +170,8 @@ public class TaskServiceImpl implements TaskService {
                 }
             }
         }
-        return dataList;
+        PageInfo<TaskListVo> result = new PageInfo<>(dataList);
+        return result;
     }
 
     @Override
@@ -379,14 +383,6 @@ public class TaskServiceImpl implements TaskService {
         rows.get(9).getTableCells().get(1).setText(taskDetailInfoVo.getRequiredCompletionTime());
         // 本单产值
         rows.get(9).getTableCells().get(3).setText(taskDetailInfoVo.getCost());
-            //1创建
-            FileWriter fw = new FileWriter("D:\\filePath\\output.docx");
-            //2写入
-            fw.write(doc.toString());
-//         3刷新
-            fw.flush();
-//         4释放
-            fw.close();
         return doc;
     } catch(
     Exception e)
