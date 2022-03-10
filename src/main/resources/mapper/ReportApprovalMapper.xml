@@ -18,10 +18,10 @@
         test_report_record
         WHERE
         report_complete_time is not NULL
-        and  (state = 1 or state =3)
-            <if test="search!=null and search!=''">
-                and task_code like CONCAT('%',#{search},'%')
-            </if>
+        and (state = 1 or state =3)
+        <if test="search!=null and search!=''">
+            and task_code like CONCAT('%',#{search},'%')
+        </if>
         ORDER BY report_complete_time desc
     </select>
 
@@ -32,10 +32,10 @@
     <update id="updateReportApprovalDetail" parameterType="com.lims.manage.erp.vo.ReportApprovalVo">
         UPDATE test_report_record
         <trim prefix="SET" suffixOverrides=",">
-        <if test="state!=null">state=#{state},</if>
-        verifyer=#{verifyer},
+            <if test="state!=null">state=#{state},</if>
+            verifyer=#{verifyer},
             verifyer_time = #{verifyerTime},
-        <if test="reason!=null and reason!=''">apply_reason=#{reason},</if>
+            <if test="reason!=null and reason!=''">apply_reason=#{reason},</if>
         </trim>
         WHERE id =#{id}
     </update>
@@ -49,17 +49,17 @@
 
     <select id="getReportApprovalHistory" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
         SELECT
-            id,
-            sample_name,
-            price AS cost,
-            required_completion_time,
-            task_code,
-            state,
-            applicant,
-            verifyer,
-            verifyer_time
+        id,
+        sample_name,
+        price AS cost,
+        required_completion_time,
+        task_code,
+        state,
+        applicant,
+        verifyer,
+        verifyer_time
         FROM
-            test_report_record
+        test_report_record
         WHERE
         verifyer_time is not NULL
         <if test="search!=null and search!=''">
@@ -184,9 +184,9 @@
         verifyer_time
         FROM
         test_report_record
-        WHERE  verifyer_time is not NULL
+        WHERE verifyer_time is not NULL
         <if test="state!=null and state!=''">
-            and  state = #{state}
+            and state = #{state}
         </if>
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
@@ -207,7 +207,7 @@
         verifyer_time
         FROM
         test_report_record
-        WHERE  issuer_time is not NULL
+        WHERE issuer_time is not NULL
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
         </if>
@@ -220,6 +220,20 @@
             issuer=#{issuer},
             issuer_time = #{issuerTime},
             <if test="reason!=null and reason!=''">issu_reason=#{reason},</if>
+            <if test="sealType!=null and sealType!=''">seal_type=#{sealType},</if>
+        </trim>
+        WHERE id =#{id}
+    </update>
+    <update id="updateExaminationAndApprovalMonad" parameterType="com.lims.manage.erp.vo.ReportApprovalVo">
+        UPDATE test_report_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="state!=null">state=#{state},</if>
+            verifyer=#{verifyer},
+            verifyer_time = #{verifyerTime},
+            issuer=#{issuer},
+            issuer_time = #{issuerTime},
+            <if test="issuReason!=null and issuReason!=''">issu_reason=#{issuReason},</if>
+            <if test="applyReason!=null and applyReason!=''">apply_reason=#{applyReason},</if>
             <if test="sealType!=null and sealType!=''">seal_type=#{sealType},</if>
         </trim>
         WHERE id =#{id}

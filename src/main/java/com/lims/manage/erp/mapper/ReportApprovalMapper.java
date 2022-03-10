@@ -82,6 +82,13 @@ public interface ReportApprovalMapper {
     int updateVerifyMonad(ReportApprovalVo reportApprovalVo);
 
     /**
+     * 被驳回后修改状态state = 0  （审批 签发被清除）
+     * @param reportApprovalVo
+     * @return
+     */
+    int updateExaminationAndApprovalMonad(ReportApprovalVo reportApprovalVo);
+
+    /**
      * 根据检测项 获取 检测项所属的 URL连接
      */
     @Select("SELECT origin_url  FROM `test_entrusted_sample_checkitem_rel` WHERE id =#{id}")

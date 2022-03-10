@@ -72,5 +72,13 @@ public class ReportApprovalVo {
      * 印章类型
      */
     private String sealType;
+    /**
+     * 签发驳回原因
+     */
+    private String issuReason;
+    /**
+     * 审批驳回原因
+     */
+    private String applyReason;
 
 }

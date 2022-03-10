@@ -34,6 +34,12 @@ public interface ReportApprovalService {
     Boolean approval_data(ReportApprovalVo reportApprovalVo1);
 
     /**
+     * 进行审批——二次
+     * @return
+     */
+    Boolean approval_data_two(ReportApprovalVo reportApprovalVo1);
+
+    /**
      * 报告审批历史查询
      * @param search
      * @return
@@ -69,6 +75,13 @@ public interface ReportApprovalService {
      * @return
      */
     Boolean verify_data(ReportApprovalVo reportApprovalVo);
+
+    /**
+     * 签发进行审批二次开发
+     * @param reportApprovalVo
+     * @return
+     */
+    Boolean verify_data_two(ReportApprovalVo reportApprovalVo);
 
     /**
      * 报告签发历史记录
