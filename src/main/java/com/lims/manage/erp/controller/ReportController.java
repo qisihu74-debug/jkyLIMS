@@ -102,6 +102,20 @@ public class ReportController {
         return ResultUtil.success("获取报告下载列表成功！", reportService.reportDownloadList(pageNum,pageSize));
     }
 
+    /**
+     * 查询出具报告的列表--科室权限
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @GetMapping("/reportDownloadListHistory")
+    public Result reportDownloadListHistory(String search,Integer pageNum,Integer pageSize) {
+        if (pageNum == null || pageSize == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success("获取出具报告历史列表成功！", reportService.getReportList_history(search,pageNum,pageSize));
+    }
+
 
     /**
      * 提交审批
