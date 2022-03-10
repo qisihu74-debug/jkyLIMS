@@ -2,6 +2,8 @@ package com.lims.manage.erp.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ReportListVo {
     private Long id;
@@ -19,5 +21,7 @@ public class ReportListVo {
      * state 状态
      */
     private Integer state;
+
+    private List<Long> deptIds;
 
 }

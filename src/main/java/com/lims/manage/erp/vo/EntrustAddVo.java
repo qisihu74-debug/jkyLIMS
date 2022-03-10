@@ -169,4 +169,9 @@ public class EntrustAddVo {
      */
     private String fileUrlStr;
 
+    /**
+     * 用章类型数组形式
+     */
+    private String[] sealTypes;
+
 }

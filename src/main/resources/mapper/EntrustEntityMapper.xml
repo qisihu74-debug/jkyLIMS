@@ -273,6 +273,16 @@ state
 )
 
   </insert>
+  <select id="GetDelegateInformation" resultType="String">
+    SELECT
+    t1.contacts
+    FROM
+    test_customer as t1
+    LEFT JOIN test_company as t2 ON t1.company_id = t2.company_id
+    WHERE
+    t2.company_name = #{companyName} and type = #{type}
+    and t1.contacts = #{contacts} and t1.phone = #{contactWay}
+  </select>
   <update id="updateEntrustInfo" parameterType="com.lims.manage.erp.entity.EntrustEntity" >
     UPDATE test_entrusted_info
     <trim prefix="SET" suffixOverrides=",">
@@ -384,15 +394,40 @@ AND s.type IN (2, 3)
 
   <select id="getHistoryData" resultType="com.lims.manage.erp.vo.HistoryEntrustDataVo">
     SELECT
-      project_name,
-      project_part
+      project_name as projectName,
+      project_part as projectPart
     FROM
       test_entrusted_info
     WHERE
       entrust_company = #{name}
     ORDER BY
-      acceptance_date DESC
+      entrustment_no DESC
       LIMIT 1
+  </select>
+
+  <select id="getCompanyJsonEntityList" resultType="com.lims.manage.erp.entity.TestCompanyJsonEntity">
+    SELECT
+    t1.contacts as contacts,
+    t1.phone as contactWay
+    FROM
+    test_customer as t1
+    LEFT JOIN test_company as t2 ON t1.company_id = t2.company_id
+    WHERE
+    t2.company_name = #{name} and type = #{type}
+    and t1.contacts is not NULL
+  </select>
+
+  <select id="getCompanyJsonEntitydata" resultType="com.lims.manage.erp.entity.TestCompanyJsonEntity">
+    SELECT
+    t2.company_id as companyId,
+    t1.contacts as contacts,
+    t1.phone as contactWay
+    FROM
+    test_customer as t1
+    LEFT JOIN test_company as t2 ON t1.company_id = t2.company_id
+    WHERE
+    t2.company_name = #{name} and type = #{type}
+    LIMIT 1
   </select>
 
   <select id="getDept" resultType="com.lims.manage.erp.vo.LabelValueVo">
