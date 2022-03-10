@@ -82,8 +82,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("/list")
-    public Result getSampleList() {
-        return ResultUtil.success("获取可制作报告任务单成功！", reportService.makeReport());
+    public Result getSampleList(Integer pageNum,Integer pageSize) {
+        if (pageNum == null || pageSize == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success("获取可制作报告任务单成功！", reportService.makeReport(pageNum,pageSize));
     }
 
     /**
@@ -92,8 +95,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("/reportDownloadList")
-    public Result reportDownloadList() {
-        return ResultUtil.success("获取报告下载列表成功！", reportService.reportDownloadList());
+    public Result reportDownloadList(Integer pageNum,Integer pageSize) {
+        if (pageNum == null || pageSize == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success("获取报告下载列表成功！", reportService.reportDownloadList(pageNum,pageSize));
     }
 
 
@@ -139,8 +145,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("/list_history")
-    public Result getlist_history(String search) {
-        return ResultUtil.success("获取历史任务单成功！", reportService.getReportList_history(search));
+    public Result getlist_history(String search,Integer pageNum,Integer pageSize) {
+        if (pageNum == null || pageSize == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success("获取历史任务单成功！", reportService.getReportList_history(search,pageNum,pageSize));
     }
 
     /**
