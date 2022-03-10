@@ -137,7 +137,7 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public PageInfo getTaskListTwo(TaskListParamVo paramVo, String[] deptIds) {
-        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+
         if (deptIds != null && deptIds.length >= 1) {
             // 根据部门id 遍历包含下级部门信息
             List<Long> ids = new ArrayList<>();
@@ -150,26 +150,27 @@ public class TaskServiceImpl implements TaskService {
         }
         List<TaskListVo> dataList = new ArrayList<>();
         if (paramVo.getState() != null && paramVo.getState() != 1) {
+            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
             dataList = taskMapper.getTaskListTwo(paramVo);
         }
         if (paramVo.getState() == 1) {
-            paramVo.setDeptIds(null);
+            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
             dataList = taskMapper.getTaskListTwoGreater(paramVo);
         }
-        if (dataList != null && !dataList.isEmpty()) {
-            for (TaskListVo data : dataList) {
-                if (data.getInspector() != null) {
-                    String[] strings2 = data.getInspector().split(",");
-                    StringBuilder stringBuilder = new StringBuilder();
-                    for (int i = 0; i < strings2.length; i++) {
-                        String[] strings3 = strings2[i].split("&");
-                        stringBuilder.append(strings3[0]);
-                        stringBuilder.append(",");
-                    }
-                    data.setInspector(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
-                }
-            }
-        }
+//        if (dataList != null && !dataList.isEmpty()) {
+//            for (TaskListVo data : dataList) {
+//                if (data.getInspector() != null) {
+//                    String[] strings2 = data.getInspector().split(",");
+//                    StringBuilder stringBuilder = new StringBuilder();
+//                    for (int i = 0; i < strings2.length; i++) {
+//                        String[] strings3 = strings2[i].split("&");
+//                        stringBuilder.append(strings3[0]);
+//                        stringBuilder.append(",");
+//                    }
+//                    data.setInspector(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+//                }
+//            }
+//        }
         PageInfo<TaskListVo> result = new PageInfo<>(dataList);
         return result;
     }
