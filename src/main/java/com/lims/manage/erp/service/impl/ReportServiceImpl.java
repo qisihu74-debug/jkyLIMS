@@ -167,6 +167,16 @@ public class ReportServiceImpl implements ReportService {
         return pageInfo;
     }
 
+    public PageInfo reportDownloadListHistory(String search,Integer pageNum,Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        ReportListVo reportListVo = new ReportListVo();
+        reportListVo.setTaskCode(search);
+        reportListVo.setDeptIds(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+        List<ReportListVo> list = reportMapper.reportDownloadListHistory(reportListVo);
+        PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
+        return pageInfo;
+    }
+
     @Override
     public ReportSampleDetailVo getReportList_history_details(Long id) {
         ReportSampleDetailVo reportSampleDetailVo = new ReportSampleDetailVo();

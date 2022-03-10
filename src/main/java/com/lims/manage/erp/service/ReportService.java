@@ -54,6 +54,8 @@ public interface ReportService {
      */
     PageInfo getReportList_history(String search,Integer pageNum,Integer pageSize);
 
+    PageInfo reportDownloadListHistory(String search,Integer pageNum,Integer pageSize);
+
     /**
      * 获取报告详情
      * @param id
