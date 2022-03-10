@@ -175,7 +175,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<ReceiveSampleListVo> getSampleList(TaskListParamVo paramVo) {
+    public PageInfo getSampleList(TaskListParamVo paramVo) {
         //查询用户团队及子团队ID
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         //根据团队信息查询样品信息
@@ -186,7 +186,10 @@ public class TaskServiceImpl implements TaskService {
             paramVo.setEndDate(split[1]);
         }
         paramVo.setDeptIds(userTeamIds);
-        return taskMapper.getSampleList(paramVo);
+        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        List<ReceiveSampleListVo> dataList = taskMapper.getSampleList(paramVo);
+        PageInfo<ReceiveSampleListVo> result = new PageInfo<>(dataList);
+        return result;
     }
 
     @Override

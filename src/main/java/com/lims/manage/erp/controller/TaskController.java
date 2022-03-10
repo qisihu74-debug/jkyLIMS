@@ -230,7 +230,7 @@ public class TaskController {
      */
     @RequestMapping("/getSampleList")
     public Result getSampleList(@RequestBody TaskListParamVo paramVo) {
-        if (paramVo == null) {
+        if (paramVo == null||paramVo.getPageNum()==null||paramVo.getPageSize()==null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             return ResultUtil.success("查询领样列表成功！", taskService.getSampleList(paramVo));

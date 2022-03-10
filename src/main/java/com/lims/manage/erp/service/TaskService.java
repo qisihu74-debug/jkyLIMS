@@ -54,7 +54,7 @@ public interface TaskService {
      * @param paramVo
      * @return
      */
-    List<ReceiveSampleListVo> getSampleList(TaskListParamVo paramVo);
+    PageInfo getSampleList(TaskListParamVo paramVo);
 
     /**
      * 领样
