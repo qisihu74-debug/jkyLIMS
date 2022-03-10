@@ -1,7 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
+
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
@@ -533,6 +532,41 @@ public class EntrustServiceImpl implements EntrustService {
             }
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
+        // 通过委托单位和类型 查看联系人和手机号是否存在
+        TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
+        if (basisInfo.getEntrustCompany() != null && basisInfo.getEntrustPeople() != null && basisInfo.getEntrustPhone() != null) {
+            testCompanyJsonEntity.setCompanyName(basisInfo.getEntrustCompany());
+            testCompanyJsonEntity.setContacts(basisInfo.getEntrustPeople());
+            testCompanyJsonEntity.setContactWay(basisInfo.getEntrustPhone());
+            testCompanyJsonEntity.setType("1");
+            String entrustCompanystr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
+            if(entrustCompanystr==null){
+                // 保存新的委托联系人姓名 和所属委托单位公司id
+                Integer companyId = entityMapper.getCompanyId(basisInfo.getEntrustCompany(), 1);
+                TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
+                testCustomerEntity.setCompanyId(companyId);
+                testCustomerEntity.setContacts(basisInfo.getEntrustPeople());
+                testCustomerEntity.setPhone(basisInfo.getEntrustPhone());
+                testCustomerDao.insertTestCustomer(testCustomerEntity);
+            }
+        }
+        // 通过见证单位和类型 查看联系人和手机号是否存在
+        if (basisInfo.getWitnessUint() != null && basisInfo.getWitnessPerson() != null && basisInfo.getWitnessPhone() != null) {
+            testCompanyJsonEntity.setCompanyName(basisInfo.getWitnessUint());
+            testCompanyJsonEntity.setContacts(basisInfo.getWitnessPerson());
+            testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
+            testCompanyJsonEntity.setType("2");
+            String WitnessUintstr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
+            if(WitnessUintstr==null){
+                // 保存新的见证联系人姓名 和所属见证单位公司id
+                Integer companyId = entityMapper.getCompanyId(basisInfo.getWitnessUint(), 2);
+                TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
+                testCustomerEntity.setCompanyId(companyId);
+                testCustomerEntity.setContacts(basisInfo.getWitnessPerson());
+                testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
+                testCustomerDao.insertTestCustomer(testCustomerEntity);
+            }
+        }
         entityMapper.updateEntrustInfo(basisInfo);
         return true;
     }
@@ -776,6 +810,7 @@ public class EntrustServiceImpl implements EntrustService {
         testCompanyEntity1.setCompanyName(testCompanyEntity.getCompanyName());
         testCompanyEntity1.setType(testCompanyEntity.getType());
         testCompanyEntity1.setAddress(testCompanyEntity.getAddress());
+        testCompanyEntity1.setAddTime(new java.util.Date());
         testCompanyDao.insert(testCompanyEntity1);
         return true;
     }
