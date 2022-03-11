@@ -7,11 +7,7 @@ import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.http.QiYueSuoResponse;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.ReportDetailVo;
-import com.lims.manage.erp.vo.ReportListVo;
-import com.lims.manage.erp.vo.ReportPreserveVo;
-import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
@@ -74,10 +70,17 @@ public interface ReportService {
     /**
      * 查询委托单--报告制作详情--科室
      *
-     * @param id
+     * @param taskId
      * @return
      */
     ReportDetailVo getReportDetail(Long taskId);
+
+    /**
+     * 根据委托单ID查询所有检测项
+     * @param id
+     * @return
+     */
+    ReportHistoryDetailVo getDetailCheckItem(Long id);
 
     /**
      * 报告邮寄编辑数据回显
