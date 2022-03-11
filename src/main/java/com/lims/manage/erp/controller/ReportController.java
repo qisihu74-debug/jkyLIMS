@@ -113,7 +113,7 @@ public class ReportController {
         if (pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少分页参数！");
         }
-        return ResultUtil.success("获取出具报告历史列表成功！", reportService.getReportList_history(search,pageNum,pageSize));
+        return ResultUtil.success("获取出具报告历史列表成功！", reportService.reportDownloadListHistory(search,pageNum,pageSize));
     }
 
 
