@@ -193,6 +193,8 @@ public class ReportApprovalController {
         if (name == null) {
             return ResultUtil.error(678, "账号未配置使用人");
         }
+        // 通过报告id 和 登录人id和姓名 比对
+
         // 审核人姓名保存
         reportApprovalVo1.setVerifyer(name);
         Boolean flag = reportApprovalService.approval_data_two(reportApprovalVo1);

@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
@@ -301,9 +302,11 @@ public class TaskServiceImpl implements TaskService {
 
         teamVo.setReviewVo(null);
         // 审批人集合
-        teamVo.setApproverVo(null);
+        List<LabelValueVo>  ApproverVo = taskMapper.getRoleInformation(Const.approverStr);
+        teamVo.setApproverVo(ApproverVo);
         // 签发人集合
-        teamVo.setSignerVo(null);
+        List<LabelValueVo>  SignerVo = taskMapper.getRoleInformation(Const.signerStr);
+        teamVo.setSignerVo(SignerVo);
         return teamVo;
     }
 

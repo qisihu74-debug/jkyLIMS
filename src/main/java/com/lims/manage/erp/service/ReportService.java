@@ -44,6 +44,12 @@ public interface ReportService {
     Boolean getReportSubmit(Long id,String name);
 
     /**
+     * 提交审批—— 二次
+     * @return
+     */
+    Boolean getReportSubmit_two(ReportRecordEntity reportRecordEntity);
+
+    /**
      * 查询历史记录
      * @param search
      * @return

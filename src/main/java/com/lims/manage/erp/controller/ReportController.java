@@ -119,23 +119,14 @@ public class ReportController {
 
     /**
      * 提交审批
-     *
-     * @param id
+     * @param
      * @return
      */
     @GetMapping("/report_submit")
-    public Result getReportSubmit(Long id) {
-        if (id == null) {
+    public Result getReportSubmit(ReportRecordEntity reportRecordEntity) {
+        if (reportRecordEntity.getEntrustmentId() == null || reportRecordEntity.getVerifyer()==null || reportRecordEntity.getIssuer()==null || reportRecordEntity.getReportUrl()==null) {
             return ResultUtil.error(678, "缺少必要参数！");
         }
-        // 查询是否提交审批
-//        ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
-//        if (reportData == null) {
-//            return ResultUtil.error(678, "参数错误！");
-//        }
-//        if (reportData.getReportCompleteTime() != null) {
-//            return ResultUtil.error(678, "报告已提交审批！");
-//        }
         //1、 获取提交报告人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
@@ -145,7 +136,8 @@ public class ReportController {
         if (name == null) {
             return ResultUtil.error(678, "账号未配置使用人");
         }
-        Boolean flag = reportService.getReportSubmit(id, name);
+        reportRecordEntity.setApplicant(name);
+        Boolean flag = reportService.getReportSubmit_two(reportRecordEntity);
         if (flag) {
             return ResultUtil.success("提交审批成功");
         }

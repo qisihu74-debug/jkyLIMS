@@ -155,6 +155,11 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     }
 
     @Override
+    public Boolean efficacyApproval(Long taskId) {
+        return null;
+    }
+
+    @Override
     public List<ReportApprovalVo> applyfor_history(String search) {
 
         return reportApprovalMapper.getReportApprovalHistory(search);

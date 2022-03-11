@@ -40,6 +40,8 @@ public interface ReportApprovalService {
      */
     Boolean approval_data_two(ReportApprovalVo reportApprovalVo1);
 
+    Boolean efficacyApproval(Long taskId);
+
     /**
      * 报告审批历史查询
      * @param search

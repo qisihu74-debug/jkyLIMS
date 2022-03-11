@@ -78,6 +78,15 @@ public interface ReportRecordEntityMapper {
     int updateByEntrustIdSelective(ReportRecordEntity record);
 
     /**
+     * 更新报告状态
+     * 根据委托单id 整体修改
+     * @param record
+     * @return
+     */
+    int updateByEntrustId(ReportRecordEntity record);
+
+
+    /**
      * 待邮寄报告列表及已发出报告历史列表查询
      * @param search
      * @param reportType
