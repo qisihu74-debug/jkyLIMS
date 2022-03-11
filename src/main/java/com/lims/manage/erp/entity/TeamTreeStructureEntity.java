@@ -10,6 +10,7 @@ import lombok.Data;
 @Data
 public class TeamTreeStructureEntity {
     private Long id;
+    private Long pid;
     private String name;
     private Long sId;
     private String sname;
