@@ -171,5 +171,5 @@ public interface ReportRecordEntityMapper {
     Long getEntrustIdByCid(@Param("contractId") Long contractId);
 
     @Select("select qys_docment_id,contract_id,sign_url,qys_state from test_report_record where entrustment_id=#{entrustId}")
-    ReportRecordEntity selectMessageByEntrustId(@Param("entrustId") long entrustId);
+    List<ReportRecordEntity> selectMessageByEntrustId(@Param("entrustId") long entrustId);
 }

@@ -783,9 +783,9 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
-        ReportRecordEntity entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        List<ReportRecordEntity> entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
         List<String> docs = new ArrayList<>();
-        docs.add(entity.getQysDocmentId());
+        docs.add(entity.get(0).getQysDocmentId());
         reqBean.setDocuments(docs);
         QiYueSuoResponse response = qiYueSuoHnadler.createbycategory(reqBean);
         //根据委托id存储文档id
@@ -796,8 +796,8 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public QiYueSuoResponse signurl(QiYueSuoSeaLBean reqBean) {
         //设置合同标识
-        ReportRecordEntity entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
-        reqBean.setContractId(Long.valueOf(entity.getContractId()));
+        List<ReportRecordEntity> entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        reqBean.setContractId(Long.valueOf(entity.get(0).getContractId()));
         QiYueSuoResponse response = qiYueSuoHnadler.signurl(reqBean);
         //根据委托更新报告签署url
         entityMapper.updateUrlAndState(reqBean.getEntrustId(),response.getSignUrl(),"4");
