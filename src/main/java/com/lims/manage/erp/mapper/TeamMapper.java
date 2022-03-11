@@ -74,18 +74,21 @@ public interface TeamMapper extends BaseMapper {
 
     /**
      * 获取多个team下的ids
-     * @param newList
+     * @param list
      * @return
      */
-    @Select("SELECT u.user_id \n" +
-            "        FROM\n" +
-            "            test_team t\n" +
-            "            LEFT JOIN test_user_team_rel tr\n" +
-            "        ON t.id = tr.team_id\n" +
-            "            LEFT JOIN sys_user u ON tr.user_id = u.user_id\n" +
-            "        WHERE\n" +
-            "            t.id in #{newList} and u.user_id is not null")
-    List<Long> getUsersByTeams(@Param("newList") List<Long> newList);
+    @Select("SELECT\n" +
+            "\tu.user_id\n" +
+            "FROM\n" +
+            "\ttest_team t\n" +
+            "LEFT JOIN test_user_team_rel tr ON t.id = tr.team_id\n" +
+            "LEFT JOIN sys_user u ON tr.user_id = u.user_id\n" +
+            "WHERE\n" +
+            "\tt.id IN \n" +
+            "< foreach collection = \"list\" item = \"id\" INDEX = \"index\" OPEN = \"(\" CLOSE = \")\" SEPARATOR = \",\" > #{id}\n" +
+            "\t</ foreach >\n" +
+            "AND u.user_id IS NOT NULL")
+    List<Long> getUsersByTeams(@Param("list") List<Long> list);
 
     /**
      * 根据任务单id 获取 部门id 查询部门下人员姓名
