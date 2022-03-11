@@ -110,13 +110,24 @@ public class ReportServiceImpl implements ReportService {
         return reportList;
     }
 
+//    @Override
+//    public List<ReportListVo> makeReport() {
+//        return reportMapper.getReportList2(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+//    }
     @Override
-    public List<ReportListVo> makeReport() {
-        return reportMapper.getReportList2(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+    public PageInfo makeReport(Integer pageNum,Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<ReportListVo> list = reportMapper.getReportList2(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+        PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
+        return pageInfo;
     }
 
-    public List<ReportListVo> reportDownloadList() {
-        return reportMapper.getReportList2(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+
+    public PageInfo reportDownloadList(Integer pageNum,Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<ReportListVo> list = reportMapper.reportDownloadList(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+        PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
+        return pageInfo;
     }
 
     /**
@@ -146,11 +157,24 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ReportListVo> getReportList_history(String search) {
+    public PageInfo getReportList_history(String search,Integer pageNum,Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
         ReportListVo reportListVo = new ReportListVo();
         reportListVo.setTaskCode(search);
         reportListVo.setDeptIds(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
-        return reportMapper.getReportList_history(reportListVo);
+        List<ReportListVo> list = reportMapper.getReportList_history(reportListVo);
+        PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
+        return pageInfo;
+    }
+
+    public PageInfo reportDownloadListHistory(String search,Integer pageNum,Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        ReportListVo reportListVo = new ReportListVo();
+        reportListVo.setTaskCode(search);
+        reportListVo.setDeptIds(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+        List<ReportListVo> list = reportMapper.reportDownloadListHistory(reportListVo);
+        PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
+        return pageInfo;
     }
 
     @Override

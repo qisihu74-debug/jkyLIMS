@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -40,12 +41,12 @@ public interface TaskService {
     String getDeptIds(Long userId);
 
     /**
-     * 查询任务列表
+     * 查询任务列表——并设置分页
      *
      * @param paramVo
      * @return
      */
-    List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo,String [] deptIds);
+    PageInfo getTaskListTwo(TaskListParamVo paramVo, String [] deptIds);
 
     /**
      * 查询领样列表
@@ -53,7 +54,7 @@ public interface TaskService {
      * @param paramVo
      * @return
      */
-    List<ReceiveSampleListVo> getSampleList(TaskListParamVo paramVo);
+    PageInfo getSampleList(TaskListParamVo paramVo);
 
     /**
      * 领样

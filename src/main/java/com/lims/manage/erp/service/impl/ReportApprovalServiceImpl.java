@@ -2,7 +2,6 @@ package com.lims.manage.erp.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
@@ -82,7 +81,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean approval_data(ReportApprovalVo reportApprovalVo1) {
-//        0是通过 1 是驳回
+//       state 0是通过 1 是驳回
 //         报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
         Integer state = 0;
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
@@ -109,6 +108,47 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         reportApprovalVo.setState(state);
         Integer status = reportApprovalMapper.updateReportApprovalDetail(reportApprovalVo);
         if (status == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean approval_data_two(ReportApprovalVo reportApprovalVo1) {
+        //       state 0是通过 1 是驳回
+//         报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
+        Integer state = 0;
+        // 动态修改数据表
+        ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
+        if (reportApprovalVo1.getState() == 0) {
+            //通过 4.签发待抢单
+            state = 4;
+            reportApprovalVo.setVerifyerTime(new Date());
+            reportApprovalVo.setVerifyer(reportApprovalVo1.getVerifyer());
+            // 根据任务单主键 获取委托单主键 更改委托单状态
+            EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(reportApprovalVo1.getId());
+            if(entrustAddVo.getState()!=null&&entrustAddVo.getState()<8){
+                taskMapper.updateEntrustById(entrustAddVo.getId(),8);
+            }
+            reportApprovalVo.setState(state);
+            reportApprovalVo.setId(reportApprovalVo1.getId());
+            reportApprovalMapper.updateReportApprovalDetail(reportApprovalVo);
+            return true;
+        }
+        if (reportApprovalVo1.getState() == 1) {
+            state = 0;
+            reportApprovalVo.setVerifyerTime(null);
+            reportApprovalVo.setVerifyer(null);
+            reportApprovalVo.setState(state);
+            reportApprovalVo.setId(reportApprovalVo1.getId());
+            reportApprovalVo.setReason(reportApprovalVo1.getReason());
+            // 驳回 state=0  test_report_record表修改到驳回状态 。
+            reportApprovalMapper.updateExaminationAndApprovalMonad(reportApprovalVo);
+            // 当前委托单信息 返还至制作报告那一步
+            EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(reportApprovalVo1.getId());
+            if(entrustAddVo.getState()!=null){
+                taskMapper.updateEntrustById(entrustAddVo.getId(),7);
+            }
             return true;
         }
         return false;
@@ -226,6 +266,54 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         reportApprovalVo.setState(state);
         Integer status = reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
         if (status == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean verify_data_two(ReportApprovalVo reportApprovalVo1) {
+        //        0是通过 1 是驳回
+        // 报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
+        Integer state = 0;
+        ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
+
+        if (reportApprovalVo1.getState() == 0) {
+            //通过6已签
+            state = 6;
+            reportApprovalVo.setIssuerTime(new Date());
+            reportApprovalVo.setIssuer(reportApprovalVo1.getIssuer());
+            reportApprovalVo.setSealType(reportApprovalVo1.getSealType());
+
+            // 根据任务单主键 获取委托单主键 更改委托单状态
+            EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(reportApprovalVo1.getId());
+            if(entrustAddVo.getState()!=null&&entrustAddVo.getState()<9){
+                taskMapper.updateEntrustById(entrustAddVo.getId(),9);
+            }
+            reportApprovalVo.setId(reportApprovalVo1.getId());
+            reportApprovalVo.setReason(reportApprovalVo1.getReason());
+            reportApprovalVo.setState(state);
+            reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
+        }
+        if (reportApprovalVo1.getState() == 1) {
+            // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填 清除信息 退回上一步
+            state = 0;
+            // 签发清除
+            reportApprovalVo.setIssuerTime(null);
+            reportApprovalVo.setIssuer(null);
+            reportApprovalVo.setSealType(null);
+            // 审批清除
+            reportApprovalVo.setVerifyerTime(null);
+            reportApprovalVo.setVerifyer(null);
+            reportApprovalVo.setId(reportApprovalVo1.getId());
+            reportApprovalVo.setReason(reportApprovalVo1.getReason());
+            reportApprovalVo.setState(state);
+            reportApprovalMapper.updateExaminationAndApprovalMonad(reportApprovalVo);
+            // 当前委托单信息 返还至制作报告那一步
+            EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(reportApprovalVo1.getId());
+            if(entrustAddVo.getState()!=null){
+                taskMapper.updateEntrustById(entrustAddVo.getId(),7);
+            }
             return true;
         }
         return false;

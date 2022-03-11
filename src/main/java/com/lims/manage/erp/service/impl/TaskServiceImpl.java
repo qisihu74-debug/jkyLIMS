@@ -1,5 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TaskService;
@@ -127,14 +129,15 @@ public class TaskServiceImpl implements TaskService {
     }
 
     /**
-     * 查询任务列表列表
+     * 查询任务列表列表 并设置
      *
      * @param paramVo
      * @param deptIds
      * @return
      */
     @Override
-    public List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo, String[] deptIds) {
+    public PageInfo getTaskListTwo(TaskListParamVo paramVo, String[] deptIds) {
+
         if (deptIds != null && deptIds.length >= 1) {
             // 根据部门id 遍历包含下级部门信息
             List<Long> ids = new ArrayList<>();
@@ -147,31 +150,33 @@ public class TaskServiceImpl implements TaskService {
         }
         List<TaskListVo> dataList = new ArrayList<>();
         if (paramVo.getState() != null && paramVo.getState() != 1) {
+            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
             dataList = taskMapper.getTaskListTwo(paramVo);
         }
         if (paramVo.getState() == 1) {
-            paramVo.setDeptIds(null);
+            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
             dataList = taskMapper.getTaskListTwoGreater(paramVo);
         }
-        if (dataList != null && !dataList.isEmpty()) {
-            for (TaskListVo data : dataList) {
-                if (data.getInspector() != null) {
-                    String[] strings2 = data.getInspector().split(",");
-                    StringBuilder stringBuilder = new StringBuilder();
-                    for (int i = 0; i < strings2.length; i++) {
-                        String[] strings3 = strings2[i].split("&");
-                        stringBuilder.append(strings3[0]);
-                        stringBuilder.append(",");
-                    }
-                    data.setInspector(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
-                }
-            }
-        }
-        return dataList;
+//        if (dataList != null && !dataList.isEmpty()) {
+//            for (TaskListVo data : dataList) {
+//                if (data.getInspector() != null) {
+//                    String[] strings2 = data.getInspector().split(",");
+//                    StringBuilder stringBuilder = new StringBuilder();
+//                    for (int i = 0; i < strings2.length; i++) {
+//                        String[] strings3 = strings2[i].split("&");
+//                        stringBuilder.append(strings3[0]);
+//                        stringBuilder.append(",");
+//                    }
+//                    data.setInspector(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+//                }
+//            }
+//        }
+        PageInfo<TaskListVo> result = new PageInfo<>(dataList);
+        return result;
     }
 
     @Override
-    public List<ReceiveSampleListVo> getSampleList(TaskListParamVo paramVo) {
+    public PageInfo getSampleList(TaskListParamVo paramVo) {
         //查询用户团队及子团队ID
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         //根据团队信息查询样品信息
@@ -182,7 +187,10 @@ public class TaskServiceImpl implements TaskService {
             paramVo.setEndDate(split[1]);
         }
         paramVo.setDeptIds(userTeamIds);
-        return taskMapper.getSampleList(paramVo);
+        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        List<ReceiveSampleListVo> dataList = taskMapper.getSampleList(paramVo);
+        PageInfo<ReceiveSampleListVo> result = new PageInfo<>(dataList);
+        return result;
     }
 
     @Override
@@ -379,14 +387,6 @@ public class TaskServiceImpl implements TaskService {
         rows.get(9).getTableCells().get(1).setText(taskDetailInfoVo.getRequiredCompletionTime());
         // 本单产值
         rows.get(9).getTableCells().get(3).setText(taskDetailInfoVo.getCost());
-            //1创建
-            FileWriter fw = new FileWriter("D:\\filePath\\output.docx");
-            //2写入
-            fw.write(doc.toString());
-//         3刷新
-            fw.flush();
-//         4释放
-            fw.close();
         return doc;
     } catch(
     Exception e)

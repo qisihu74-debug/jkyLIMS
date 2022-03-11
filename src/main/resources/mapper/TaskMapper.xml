@@ -382,7 +382,7 @@
                 and t4.sample_name LIKE CONCAT('%',#{sampleName},'%')
             </if>
             <if test="state!=null">
-                and t1.state <![CDATA[ >= #{state} ]]>
+                and t1.state <![CDATA[ = #{state} ]]>
             </if>
         </trim>
         ORDER BY
