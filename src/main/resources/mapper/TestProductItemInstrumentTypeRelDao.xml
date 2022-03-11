@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.TestProductItemInstrumentTypeRelDao">
+
+    <resultMap type="com.lims.manage.erp.entity.TestProductItemInstrumentTypeRel" id="TestProductItemInstrumentTypeRelMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="checkItemId" column="check_item_id" jdbcType="INTEGER"/>
+        <result property="intrusmentTypeId" column="intrusment_type_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into JKERP.test_product_item_instrument_type_rel(check_item_id, intrusment_type_id)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.checkItemId}, #{entity.intrusmentTypeId})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into JKERP.test_product_item_instrument_type_rel(check_item_id, intrusment_type_id)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.checkItemId}, #{entity.intrusmentTypeId})
+        </foreach>
+        on duplicate key update
+         check_item_id = values(check_item_id) , intrusment_type_id = values(intrusment_type_id)     </insert>
+
+</mapper>
+

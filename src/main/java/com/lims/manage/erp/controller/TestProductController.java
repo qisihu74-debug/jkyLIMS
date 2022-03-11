@@ -12,11 +12,14 @@ import com.lims.manage.erp.entity.TestProduct;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestProductService;
+import com.lims.manage.erp.vo.TestProductItemVo;
 import com.lims.manage.erp.vo.TestProductVo;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,6 +38,45 @@ public class TestProductController extends ApiController {
     private TestProductService testProductService;
 
     /**
+     * 通过主键查询单条数据
+     *
+     * @param id 主键
+     * @return 单条数据
+     */
+    @GetMapping("/selProduct/{id}")
+    public Result selectProductVo(@PathVariable Serializable id) {
+        if (id!=null&&id!=""){
+            TestProduct testProduct=this.testProductService.getOne(new QueryWrapper<TestProduct>().eq("product_id",id));
+            return ResultUtil.success(this.testProductService.getTestProductSelVo(testProduct));
+        }else {
+            return ResultUtil.error("参数为空");
+        }
+    }
+
+
+    /**
+     * 通过主键查询单条数据
+     *
+     * @param id 主键
+     * @return 单条数据
+     */
+    @GetMapping("/upStatus/{id}")
+    public Result updateProductStatus(@PathVariable Serializable id) {
+        if (id!=null&&id!=""){
+            TestProduct testProduct=this.testProductService.getOne(new QueryWrapper<TestProduct>().eq("product_id",id));
+            testProduct.setStatus("0");
+            testProduct.setUpdateTime(new Date());
+            if (this.testProductService.updateById(testProduct)){
+                return ResultUtil.success("成功");
+            }else {
+                return ResultUtil.error(500,"参数为空");
+            }
+        }else {
+            return ResultUtil.error("参数为空");
+        }
+    }
+
+    /**
      * 分页查询所有数据
      *
      * @param page 分页对象
@@ -45,6 +87,7 @@ public class TestProductController extends ApiController {
     public Result selectAll(Page<TestProductVo> page, TestProduct testProduct) {
         QueryWrapper<TestProduct> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("p.del_flag",0);
+        queryWrapper.eq("p.status",0);
         if (testProduct.getProductName()!=null){
             queryWrapper.like("p.product_name",testProduct.getProductName());
         }
@@ -65,7 +108,7 @@ public class TestProductController extends ApiController {
     public Result selectOne(@PathVariable Serializable id) {
         if (id!=null&&id!=""){
             TestProduct testMethod=this.testProductService.getOne(new QueryWrapper<TestProduct>().eq("product_id",id).eq("del_flag",0));
-            return ResultUtil.success(testMethod);
+            return ResultUtil.success(this.testProductService.getTestProductItemVo(testMethod));
         }else {
             return ResultUtil.error("参数为空");
         }
@@ -74,29 +117,27 @@ public class TestProductController extends ApiController {
     /**
      * 新增数据
      *
-     * @param testProduct 实体对象
      * @return 新增结果
      */
     @PostMapping("/add")
-    public Result insert(@RequestBody TestProduct testProduct) {
-        if (StrUtil.isEmptyIfStr(testProduct)){
+    public Result insert(@RequestBody TestProductItemVo testProductItemVo) {
+        if (StrUtil.isEmptyIfStr(testProductItemVo)){
             return ResultUtil.error("数据为空");
         }
-        return this.testProductService.addTestProduct(testProduct);
+        return this.testProductService.addTestProduct(testProductItemVo);
     }
 
     /**
      * 修改数据
      *
-     * @param testProduct 实体对象
      * @return 修改结果
      */
     @PostMapping("/edit")
-    public Result update(@RequestBody TestProduct testProduct) {
-        if (StrUtil.isEmptyIfStr(testProduct)){
+    public Result update(@RequestBody TestProductItemVo testProductItemVo) {
+        if (StrUtil.isEmptyIfStr(testProductItemVo)){
             return ResultUtil.error("数据为空");
         }
-        return this.testProductService.updTestProduct(testProduct);
+        return this.testProductService.updTestProduct(testProductItemVo);
     }
 
     /**

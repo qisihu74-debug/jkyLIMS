@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.TestProductStandardFileRelDao">
+
+    <resultMap type="com.lims.manage.erp.entity.TestProductStandardFileRel" id="TestProductStandardFileRelMap">
+        <result property="productId" column="product_id" jdbcType="INTEGER"/>
+        <result property="standardFileId" column="standard_file_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="productId" useGeneratedKeys="true">
+        insert into JKERP.test_product_standard_file_rel()
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        ()
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="productId" useGeneratedKeys="true">
+        insert into JKERP.test_product_standard_file_rel()
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            ()
+        </foreach>
+        on duplicate key update
+             </insert>
+
+</mapper>
+
