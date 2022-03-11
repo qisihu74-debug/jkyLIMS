@@ -33,9 +33,6 @@ public class TestProductItemMethodRelServiceImpl extends ServiceImpl<TestProduct
         if (this.getOne(new QueryWrapper<TestProductItemMethodRel>().eq("method_id",testProductItemMethodRel.getMethodId()).eq("check_item_id",testProductItemMethodRel.getCheckItemId()))!=null){
             return ResultUtil.error("检测方法重复");
         }
-        testProductItemMethodRel.setStatus("0");
-        testProductItemMethodRel.setDelFlag(0);
-        testProductItemMethodRel.setCreateTime(new Date());
         if (this.save(testProductItemMethodRel)){
             return ResultUtil.success("添加成功!");
         }else {
@@ -54,7 +51,6 @@ public class TestProductItemMethodRelServiceImpl extends ServiceImpl<TestProduct
         if (this.getOne(new QueryWrapper<TestProductItemMethodRel>().eq("method_id",testProductItemMethodRel.getMethodId()).eq("check_item_id",testProductItemMethodRel.getCheckItemId()).eq("del_flag",0).ne("id",testProductItemMethodRel.getId()))!=null){
             return ResultUtil.error("检测方法重复");
         }
-        testProductItemMethodRel.setUpdateTime(new Date());
         if (this.save(testProductItemMethodRel)){
             return ResultUtil.success("修改成功!");
         }else {
@@ -67,8 +63,6 @@ public class TestProductItemMethodRelServiceImpl extends ServiceImpl<TestProduct
         List<TestProductItemMethodRel> testMethods=new ArrayList<>();
         for (Long aLong : idList) {
             TestProductItemMethodRel testMethod=new TestProductItemMethodRel();
-            testMethod.setUpdateTime(new Date());
-            testMethod.setDelFlag(1);
             testMethod.setId(aLong.intValue());
             testMethods.add(testMethod);
         }

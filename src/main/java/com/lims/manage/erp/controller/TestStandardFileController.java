@@ -7,12 +7,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.lims.manage.erp.entity.TestMethod;
-import com.lims.manage.erp.entity.TestProduct;
-import com.lims.manage.erp.entity.TestReportTemplate;
+import com.lims.manage.erp.entity.Patent;
+import com.lims.manage.erp.entity.TestStandardFile;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.TestReportTemplateService;
+import com.lims.manage.erp.service.TestStandardFileService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -20,36 +19,38 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * (TestReportTemplate)表控制层
+ * 检验依据标准表(TestStandardFile)表控制层
  *
  * @author makejava
- * @since 2022-03-02 16:22:06
+ * @since 2022-03-09 10:22:55
  */
 @RestController
-@RequestMapping("testReportTemplate")
-public class TestReportTemplateController extends ApiController {
+@RequestMapping("testStandardFile")
+public class TestStandardFileController extends ApiController {
     /**
      * 服务对象
      */
     @Resource
-    private TestReportTemplateService testReportTemplateService;
+    private TestStandardFileService testStandardFileService;
 
     /**
      * 分页查询所有数据
      *
      * @param page 分页对象
-     * @param testReportTemplate 查询实体
+     * @param testStandardFile 查询实体
      * @return 所有数据
      */
     @GetMapping("/list")
-    public Result selectAll(Page<TestReportTemplate> page, TestReportTemplate testReportTemplate) {
-        QueryWrapper<TestReportTemplate> queryWrapper=new QueryWrapper<>();
+    public Result selectAll(Page<TestStandardFile> page, TestStandardFile testStandardFile) {
+
+        QueryWrapper<TestStandardFile> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("del_flag",0);
-        if (testReportTemplate.getReportName()!=null){
-            queryWrapper.like("report_name",testReportTemplate.getReportName());
+        if (testStandardFile.getName()!=null){
+            queryWrapper.like("name",testStandardFile.getName());
         }
         queryWrapper.orderByDesc("create_time");
-        return ResultUtil.success(this.testReportTemplateService.page(page, queryWrapper));
+        return ResultUtil.success(this.testStandardFileService.page(page, queryWrapper));
+
     }
 
     /**
@@ -61,39 +62,41 @@ public class TestReportTemplateController extends ApiController {
     @GetMapping("{id}")
     public Result selectOne(@PathVariable Serializable id) {
         if (id!=null&&id!=""){
-            TestReportTemplate testMethod=this.testReportTemplateService.getOne(new QueryWrapper<TestReportTemplate>().eq("id",id).eq("del_flag",0));
-            return ResultUtil.success(testMethod);
+            TestStandardFile testStandardFile=this.testStandardFileService.getOne(new QueryWrapper<TestStandardFile>().eq("id",id).eq("status",0));
+            return ResultUtil.success(testStandardFile);
         }else {
             return ResultUtil.error("参数为空");
         }
+
     }
 
     /**
      * 新增数据
      *
-     * @param testReportTemplate 实体对象
+     * @param testStandardFile 实体对象
      * @return 新增结果
      */
     @PostMapping("/add")
-    public Result insert(@RequestBody TestReportTemplate testReportTemplate) {
-        if (StrUtil.isEmptyIfStr(testReportTemplate)){
+    public Result insert(@RequestBody TestStandardFile testStandardFile) {
+        if (StrUtil.isEmptyIfStr(testStandardFile)){
             return ResultUtil.error("数据为空");
         }
-        return this.testReportTemplateService.addReportTemplate(testReportTemplate);
+        return this.testStandardFileService.addTestStandardFile(testStandardFile);
     }
 
     /**
      * 修改数据
      *
-     * @param testReportTemplate 实体对象
+     * @param testStandardFile 实体对象
      * @return 修改结果
      */
     @PostMapping("/edit")
-    public Result update(@RequestBody TestReportTemplate testReportTemplate) {
-        if (StrUtil.isEmptyIfStr(testReportTemplate)){
+    public Result update(@RequestBody TestStandardFile testStandardFile) {
+
+        if (StrUtil.isEmptyIfStr(testStandardFile)){
             return ResultUtil.error("数据为空");
         }
-        return this.testReportTemplateService.updReportTemplate(testReportTemplate);
+        return this.testStandardFileService.updTestStandardFile(testStandardFile);
     }
 
     /**
@@ -105,7 +108,7 @@ public class TestReportTemplateController extends ApiController {
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {
         if (idList.size()!=0){
-            return this.testReportTemplateService.delReportTemplate(idList);
+            return this.testStandardFileService.delTestStandardFile(idList);
         }else {
             return ResultUtil.error("数据为空");
         }

@@ -17,13 +17,7 @@ import com.lims.manage.erp.job.QiYueSuoHnadler;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
-import com.lims.manage.erp.vo.ReportDetailVo;
-import com.lims.manage.erp.vo.ReportListVo;
-import com.lims.manage.erp.vo.ReportPreserveVo;
-import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
@@ -267,6 +261,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public ReportHistoryDetailVo getDetailCheckItem(Long id) {
+        return reportMapper.getDetailCheckItem(id);
+    }
+
+    @Override
     public ReportRecordEntity getDetail(Long id) {
         // 查询报告单信息
         ReportRecordEntity reportDetail = recordEntityMapper.getDetail(id);
@@ -359,7 +358,7 @@ public class ReportServiceImpl implements ReportService {
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
             reportRecordEntity.setState(state);
             if ("1".equals(state)) {
-                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
+                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
             }
             //生成报告编号
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy");

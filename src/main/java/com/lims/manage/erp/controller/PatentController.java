@@ -7,12 +7,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.entity.Patent;
 import com.lims.manage.erp.entity.TestMethod;
-import com.lims.manage.erp.entity.TestProduct;
-import com.lims.manage.erp.entity.TestReportTemplate;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.TestReportTemplateService;
+import com.lims.manage.erp.service.PatentService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -20,36 +20,38 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * (TestReportTemplate)表控制层
+ * (Patent)表控制层
  *
  * @author makejava
- * @since 2022-03-02 16:22:06
+ * @since 2022-03-08 10:40:13
  */
 @RestController
-@RequestMapping("testReportTemplate")
-public class TestReportTemplateController extends ApiController {
+@RequestMapping("patent")
+//@Transactional
+public class PatentController extends ApiController {
     /**
      * 服务对象
      */
     @Resource
-    private TestReportTemplateService testReportTemplateService;
+    private PatentService patentService;
 
     /**
      * 分页查询所有数据
      *
      * @param page 分页对象
-     * @param testReportTemplate 查询实体
+     * @param patent 查询实体
      * @return 所有数据
      */
     @GetMapping("/list")
-    public Result selectAll(Page<TestReportTemplate> page, TestReportTemplate testReportTemplate) {
-        QueryWrapper<TestReportTemplate> queryWrapper=new QueryWrapper<>();
+    public Result selectAll(Page<Patent> page, Patent patent) {
+
+        QueryWrapper<Patent> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("del_flag",0);
-        if (testReportTemplate.getReportName()!=null){
-            queryWrapper.like("report_name",testReportTemplate.getReportName());
+        if (patent.getPatentname()!=null){
+            queryWrapper.like("Patentname",patent.getPatentname());
         }
-        queryWrapper.orderByDesc("create_time");
-        return ResultUtil.success(this.testReportTemplateService.page(page, queryWrapper));
+        queryWrapper.orderByDesc("patenttime");
+        return ResultUtil.success(this.patentService.page(page, queryWrapper));
     }
 
     /**
@@ -61,39 +63,40 @@ public class TestReportTemplateController extends ApiController {
     @GetMapping("{id}")
     public Result selectOne(@PathVariable Serializable id) {
         if (id!=null&&id!=""){
-            TestReportTemplate testMethod=this.testReportTemplateService.getOne(new QueryWrapper<TestReportTemplate>().eq("id",id).eq("del_flag",0));
-            return ResultUtil.success(testMethod);
+            Patent Patent=this.patentService.getOne(new QueryWrapper<Patent>().eq("id",id).eq("start",0));
+            return ResultUtil.success(Patent);
         }else {
             return ResultUtil.error("参数为空");
         }
+
     }
 
     /**
      * 新增数据
      *
-     * @param testReportTemplate 实体对象
+     * @param patent 实体对象
      * @return 新增结果
      */
     @PostMapping("/add")
-    public Result insert(@RequestBody TestReportTemplate testReportTemplate) {
-        if (StrUtil.isEmptyIfStr(testReportTemplate)){
+    public Result insert(@RequestBody Patent patent) {
+        if (StrUtil.isEmptyIfStr(patent)){
             return ResultUtil.error("数据为空");
         }
-        return this.testReportTemplateService.addReportTemplate(testReportTemplate);
+        return this.patentService.addPatent(patent);
     }
 
     /**
      * 修改数据
      *
-     * @param testReportTemplate 实体对象
+     * @param patent 实体对象
      * @return 修改结果
      */
     @PostMapping("/edit")
-    public Result update(@RequestBody TestReportTemplate testReportTemplate) {
-        if (StrUtil.isEmptyIfStr(testReportTemplate)){
+    public Result update(@RequestBody Patent patent) {
+        if (StrUtil.isEmptyIfStr(patent)){
             return ResultUtil.error("数据为空");
         }
-        return this.testReportTemplateService.updReportTemplate(testReportTemplate);
+        return this.patentService.updPatent(patent);
     }
 
     /**
@@ -105,7 +108,7 @@ public class TestReportTemplateController extends ApiController {
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {
         if (idList.size()!=0){
-            return this.testReportTemplateService.delReportTemplate(idList);
+            return this.patentService.delPatent(idList);
         }else {
             return ResultUtil.error("数据为空");
         }

@@ -67,17 +67,6 @@ public class TestProductItem extends Model<TestProductItem> {
     private Date updateTime;
     //物流费用
     private String logisticsCosts;
-    //检测项检测方法
-    private String methodIds;
-
-    public String getMethodIds() {
-        return methodIds;
-    }
-
-    public void setMethodIds(String methodIds) {
-        this.methodIds = methodIds;
-    }
-
 
     public Integer getCheckItemId() {
         return checkItemId;

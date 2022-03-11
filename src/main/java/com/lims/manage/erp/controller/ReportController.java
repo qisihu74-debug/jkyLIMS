@@ -199,6 +199,16 @@ public class ReportController {
     }
 
     /**
+     * 查询当前委托单所有检测项
+     * @param id
+     * @return
+     */
+    @GetMapping("/detail")
+    public Result detail(Long id) {
+        return ResultUtil.success("查询委托单信息成功！", reportService.getDetailCheckItem(id));
+    }
+
+    /**
      * 保存
      *
      * @return
