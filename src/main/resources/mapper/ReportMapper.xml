@@ -301,7 +301,7 @@
 
     <select id="reportDownloadListHistory" resultType="com.lims.manage.erp.vo.ReportListVo">
         SELECT
-        t1.id,
+        t1.entrustment_id id,
         t1.task_code as taskCode,
         t1.sample_name as sampleName,
         t1.price as countPrice,
