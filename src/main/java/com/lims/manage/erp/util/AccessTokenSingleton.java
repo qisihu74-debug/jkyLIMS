@@ -18,9 +18,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * @author gjl
@@ -179,6 +182,8 @@ public class AccessTokenSingleton {
                 newList.add(entity);
             }
         }*/
+        //去重
+        list = list.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(DingUserEntity :: getUserid))), ArrayList::new));
         return list;
     }
 
