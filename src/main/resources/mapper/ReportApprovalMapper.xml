@@ -250,4 +250,19 @@
         </trim>
         WHERE id =#{id}
     </update>
+
+    <update id="updateentrustAndApprovalMonad" parameterType="com.lims.manage.erp.vo.ReportApprovalVo">
+        UPDATE test_report_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="state!=null">state=#{state},</if>
+            verifyer=#{verifyer},
+            verifyer_time = #{verifyerTime},
+            issuer=#{issuer},
+            issuer_time = #{issuerTime},
+            <if test="issuReason!=null and issuReason!=''">issu_reason=#{issuReason},</if>
+            <if test="applyReason!=null and applyReason!=''">apply_reason=#{applyReason},</if>
+            <if test="sealType!=null and sealType!=''">seal_type=#{sealType},</if>
+        </trim>
+        WHERE entrustment_id =#{entrustmentId}
+    </update>
 </mapper>

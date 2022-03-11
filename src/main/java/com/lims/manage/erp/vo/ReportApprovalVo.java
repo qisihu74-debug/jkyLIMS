@@ -18,6 +18,10 @@ public class ReportApprovalVo {
      */
     private Long id;
     /**
+     * 委托单id
+     */
+    private Long entrustmentId;
+    /**
      * 任务单编号
      */
     private String taskCode;

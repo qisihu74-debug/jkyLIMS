@@ -123,10 +123,12 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalVo.setState(state);
             reportApprovalVo.setId(reportApprovalVo1.getId());
             reportApprovalVo.setReason(reportApprovalVo1.getReason());
-            // 驳回 state=0  test_report_record表修改到驳回状态 。
-            reportApprovalMapper.updateExaminationAndApprovalMonad(reportApprovalVo);
+
             // 当前委托单信息 返还至制作报告那一步
             EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(reportApprovalVo1.getId());
+            // 驳回 state=0  test_report_record表修改到驳回状态 。
+            reportApprovalVo.setEntrustmentId(entrustAddVo.getId());
+            reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
             if(entrustAddVo.getState()!=null){
                 taskMapper.updateEntrustById(entrustAddVo.getId(),7);
             }
@@ -290,6 +292,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalVo.setReason(reportApprovalVo1.getReason());
             reportApprovalVo.setState(state);
             reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
+            return true;
         }
         if (reportApprovalVo1.getState() == 1) {
             // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填 清除信息 退回上一步
@@ -304,9 +307,11 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalVo.setId(reportApprovalVo1.getId());
             reportApprovalVo.setReason(reportApprovalVo1.getReason());
             reportApprovalVo.setState(state);
-            reportApprovalMapper.updateExaminationAndApprovalMonad(reportApprovalVo);
             // 当前委托单信息 返还至制作报告那一步
             EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(reportApprovalVo1.getId());
+            reportApprovalVo.setEntrustmentId(entrustAddVo.getId());
+            // 根据委托单id 进行全部修改
+            reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
             if(entrustAddVo.getState()!=null){
                 taskMapper.updateEntrustById(entrustAddVo.getId(),7);
             }

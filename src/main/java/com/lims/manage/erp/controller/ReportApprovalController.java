@@ -427,7 +427,7 @@ public class ReportApprovalController {
         reportApprovalVo1.setIssuer(name);
         Boolean flag = reportApprovalService.verify_data_two(reportApprovalVo1);
         if (flag) {
-            return ResultUtil.success("签发成功");
+            return ResultUtil.success("成功");
         }
         return ResultUtil.error(678, "签发失败");
     }
