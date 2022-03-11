@@ -264,23 +264,6 @@ public class ReportApprovalController {
 
     /**
      * 报告签发列表
-     *
-     * @param search
-     * @param state
-     * @return
-     */
-//    @GetMapping("/verify_list")
-//    public Result verify_list(String search, Integer state) {
-//
-//        List<ReportApprovalVo> list = reportApprovalService.getVerify_list(search, state);
-//        if (!list.isEmpty()) {
-//            return ResultUtil.success(list);
-//        }
-//        return ResultUtil.success(list);
-//    }
-
-    /**
-     * 报告签发列表
      * @param search
      * @param pageNum
      * @param pageSize
@@ -441,22 +424,6 @@ public class ReportApprovalController {
         }
         return ResultUtil.error(678, "签发失败");
     }
-
-    /**
-     * 报告签发历史查询列表
-     *
-     * @param search
-     * @return
-     */
-//    @GetMapping("/verify_history")
-//    public Result verify_history(String search) {
-//
-//        List<ReportApprovalVo> list = reportApprovalService.verifyHistory(search);
-//        if (!list.isEmpty()) {
-//            return ResultUtil.success(list);
-//        }
-//        return ResultUtil.success(list);
-//    }
 
     /**
      * 报告签发历史查询列表

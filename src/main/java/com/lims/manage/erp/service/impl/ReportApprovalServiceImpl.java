@@ -1,18 +1,26 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.api.client.util.Lists;
+import com.lims.manage.erp.entity.DingUserEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TeamTreeStructureEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
 import com.lims.manage.erp.service.ReportApprovalService;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author: DLC
@@ -27,41 +35,14 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     EntrustEntityMapper entrustEntityMapper;
     @Autowired
     TaskMapper taskMapper;
-
-
-
-    @Override
-    public List<ReportApprovalVo> getApplyforList(String search, Integer state) {
-
-//        state 报告状态（默认是 0=未抢单 1=已抢单）
-        if (state == null || state > 2 || state == 0) {
-            state = 0;
-        } else {
-            state = 1;
-        }
-        List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalList(search);
-        List<ReportApprovalVo> returnData = new ArrayList<>();
-        for (ReportApprovalVo reportApprovalVo : list) {
-            if (state == 0) {
-                if (reportApprovalVo.getVerifyer() == null) {
-                    reportApprovalVo.setState(0);
-                    returnData.add(reportApprovalVo);
-                }
-            }
-            if (state == 1) {
-                if (reportApprovalVo.getVerifyer() != null) {
-                    reportApprovalVo.setState(1);
-                    returnData.add(reportApprovalVo);
-                }
-            }
-        }
-        return returnData;
-    }
+    @Autowired
+    private TeamMapper teamMapper;
 
     @Override
     public PageInfo getApplyforList(String search, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalList(search);
+        Set<Long> ids = getNextIdsToTeam();
+        List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalList(search,ids);
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
     }
@@ -155,20 +136,10 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     }
 
     @Override
-    public Boolean efficacyApproval(Long taskId) {
-        return null;
-    }
-
-    @Override
-    public List<ReportApprovalVo> applyfor_history(String search) {
-
-        return reportApprovalMapper.getReportApprovalHistory(search);
-    }
-
-    @Override
     public PageInfo applyfor_history(String search, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalHistory(search);
+        Set<Long> ids = getNextIdsToTeam();
+        List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalHistory(search,ids);
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
     }
@@ -222,7 +193,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     @Override
     public PageInfo getVerify_list(String search, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportApprovalVo> list = reportApprovalMapper.getVerifyList(search);
+        List<ReportApprovalVo> list = reportApprovalMapper.getVerifyList(search,getNextIdsToTeam());
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
     }
@@ -324,17 +295,39 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         return false;
     }
 
-//    @Override
-//    public List<ReportApprovalVo> verifyHistory(String search) {
-//
-//        return reportApprovalMapper.getVerifyHistory(search);
-//    }
-
     @Override
     public PageInfo verifyHistory(String search, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportApprovalVo> list = reportApprovalMapper.getVerifyHistory(search);
+        List<ReportApprovalVo> list = reportApprovalMapper.getVerifyHistory(search,getNextIdsToTeam());
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
+    }
+
+    /**
+     * 获取当前管理员下级科室下所有的人员id
+     * @return
+     */
+    public Set<Long> getNextIdsToTeam(){
+        //获取当前管理账户的id
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        //根据userId获取当前科室id
+        Long teamId = teamMapper.getTeamIdByUid(userId);
+        //获取下级科室id
+        List<TeamTreeStructureEntity> list = teamMapper.getChirds(teamId);
+        List<Long> newList = list.stream().map(TeamTreeStructureEntity->{return TeamTreeStructureEntity.getId();}).collect(Collectors.toList());
+        //获取下级科室下的所有人员ids（不包含本科室除自身外其它人员）
+        List<Long> uids = teamMapper.getUsersByTeams(newList);
+        //获取本科室的人员id
+        List<Long> users = teamMapper.getUsersByTeamId(teamId);
+        Set<Long> ids = new HashSet<>();
+        for (Long id:uids) {
+            for (Long uid:users) {
+                if (!id.equals(uid)){
+                    ids.add(id);
+                }
+            }
+        }
+        ids.add(userId);
+        return ids;
     }
 }
