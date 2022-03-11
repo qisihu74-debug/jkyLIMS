@@ -317,8 +317,8 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     @Override
     public Boolean preserve(ReportPreserveVo vo) {
-//        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
-        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByTaskId(vo.getTaskId());
+        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
+//        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByTaskId(vo.getTaskId());
         if (reportRecordEntity1 != null) {
             String state = "1";
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
