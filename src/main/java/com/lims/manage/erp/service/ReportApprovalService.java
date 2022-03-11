@@ -32,7 +32,16 @@ public interface ReportApprovalService {
      */
     Boolean approval_data_two(ReportApprovalVo reportApprovalVo1);
 
-    Boolean efficacyApproval(Long taskId);
+    /**
+     * 通过报告id 和 登录人id和姓名 比对审批人数据
+     * state =1 审批
+     * state =2 签发
+     * @param taskId
+     * @param userId
+     * @param name
+     * @return
+     */
+    Boolean efficacyApprovalData(Long taskId,Long userId,String name,Integer state);
 
     /**
      * 报告审批历史查询
