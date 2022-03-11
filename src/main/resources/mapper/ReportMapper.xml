@@ -41,6 +41,7 @@
         <result property="sampleName" column="sample_name"></result>
         <collection property="checkItemInfo" ofType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
             <id property="checkItemName" column="check_item_name"></id>
+            <result property="checkItemId" column="check_item_id"></result>
             <result property="specsContent" column="specs_content"></result>
             <result property="checkResult" column="check_result"></result>
             <result property="judgeResult" column="judge_result"></result>
@@ -136,6 +137,7 @@
     <select id="getDetailCheckItem" resultMap="reportCheckMap">
         SELECT
             t1.sample_name,
+            t2.check_item_id,
             t2.check_item_name,
             t2.specs_content,
             t2.check_result,
@@ -232,6 +234,7 @@
                         t2.task_code,
                         t4.sample_name,
                         t1.count_price,
+                        t4.product_id,
                         DATE_FORMAT(t1.request_date, '%Y-%m-%d') request_date
         FROM test_entrusted_info t1
                  LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
@@ -307,7 +310,7 @@
         t1.report_url as reportUrl
         FROM
         test_report_record t1 left join test_task t2 on t1.task_id = t2.id
-        WHERE t1.state =3
+        WHERE t1.state &gt;= 3
         and t1.report_complete_time is not NULL
         <if test="taskCode!=null and taskCode!=''">
             and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
