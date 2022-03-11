@@ -20,7 +20,7 @@ import java.util.Set;
 @Mapper
 public interface ReportApprovalMapper {
 
-    List<ReportApprovalVo> getReportApprovalList(@Param("search")String search,@Param("ids") Set<Long> ids);
+    List<ReportApprovalVo> getReportApprovalList(@Param("search")String search,@Param("ids") Set<Long> list);
 
     ReportApprovalVo getReportApprovalDetail(Long id);
 
@@ -66,14 +66,14 @@ public interface ReportApprovalMapper {
      * @param search
      * @return
      */
-    List<ReportApprovalVo> getVerifyList(@Param("search")String search,@Param("ids") Set<Long> ids);
+    List<ReportApprovalVo> getVerifyList(@Param("search")String search,@Param("ids") Set<Long> list);
 
     /**
      * 查询签发 历史
      * @param search
      * @return
      */
-    List<ReportApprovalVo> getVerifyHistory(@Param("search")String search,@Param("ids") Set<Long> ids);
+    List<ReportApprovalVo> getVerifyHistory(@Param("search")String search,@Param("ids") Set<Long> list);
 
     /**
      * 签发抢单
