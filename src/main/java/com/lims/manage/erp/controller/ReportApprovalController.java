@@ -114,7 +114,7 @@ public class ReportApprovalController {
 
 
     /**
-     * 审批数据
+     * 审批数据——废弃
      *
      * @param reportApprovalVo1
      * @return
@@ -158,6 +158,44 @@ public class ReportApprovalController {
             return ResultUtil.error(678, "此任务单号状态不对");
         }
         Boolean flag = reportApprovalService.approval_data(reportApprovalVo1);
+        if (flag) {
+            return ResultUtil.success("审批成功");
+        }
+        return ResultUtil.error(678, "审批失败");
+    }
+
+    /**
+     * 审批数据——二次开发
+     *
+     * @param reportApprovalVo1
+     * @return
+     */
+    @PostMapping("approval_data_two")
+    public Result approval_data_Two(@RequestBody ReportApprovalVo reportApprovalVo1) {
+        if (reportApprovalVo1 == null) {
+            return ResultUtil.error(678, "缺少必填参数");
+        }
+        if (reportApprovalVo1.getId() == null) {
+            return ResultUtil.error(678, "任务单主键不能为空");
+        }
+        if (reportApprovalVo1.getState() == null) {
+            return ResultUtil.error(678, "审批信息不能为空");
+        }
+        if (reportApprovalVo1.getState() != 1 && reportApprovalVo1.getState() != 0) {
+            return ResultUtil.error(678, "审批信息有误");
+        }
+        //1、 获取审批人信息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error(678, "token已经过期，请退出重新登录");
+        }
+        String name = reportApprovalMapper.getUserName(userInfo.getUserId());
+        if (name == null) {
+            return ResultUtil.error(678, "账号未配置使用人");
+        }
+        // 审核人姓名保存
+        reportApprovalVo1.setVerifyer(name);
+        Boolean flag = reportApprovalService.approval_data_two(reportApprovalVo1);
         if (flag) {
             return ResultUtil.success("审批成功");
         }
@@ -354,6 +392,48 @@ public class ReportApprovalController {
             return ResultUtil.error(678, "此任务单号状态不对");
         }
         Boolean flag = reportApprovalService.verify_data(reportApprovalVo1);
+        if (flag) {
+            return ResultUtil.success("签发成功");
+        }
+        return ResultUtil.error(678, "签发失败");
+    }
+
+    /**
+     * 签发报告——二次开发
+     *
+     * @param reportApprovalVo1
+     * @return
+     */
+    @PostMapping("verify_data_two")
+    public Result verify_data_two(@RequestBody ReportApprovalVo reportApprovalVo1) {
+        if (reportApprovalVo1 == null) {
+            return ResultUtil.error(678, "缺少必填参数");
+        }
+        if (reportApprovalVo1.getId() == null) {
+            return ResultUtil.error(678, "任务单主键不能为空");
+        }
+        if (reportApprovalVo1.getState() == null) {
+            return ResultUtil.error(678, "审批信息不能为空");
+        }
+        if (reportApprovalVo1.getState() != 1 && reportApprovalVo1.getState() != 0) {
+            return ResultUtil.error(678, "审批信息有误");
+        }
+        if (reportApprovalVo1.getState() == 0) {
+            if (reportApprovalVo1.getSealType() == null || reportApprovalVo1.getSealType().equals("")) {
+                return ResultUtil.error(678, "印章不能为空");
+            }
+        }
+        //1、 获取抢单人信息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error(678, "token已经过期，请退出重新登录");
+        }
+        String name = reportApprovalMapper.getUserName(userInfo.getUserId());
+        if (name == null) {
+            return ResultUtil.error(678, "账号未配置使用人");
+        }
+        reportApprovalVo1.setIssuer(name);
+        Boolean flag = reportApprovalService.verify_data_two(reportApprovalVo1);
         if (flag) {
             return ResultUtil.success("签发成功");
         }

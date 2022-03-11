@@ -27,6 +27,8 @@ public interface ReportMapper {
      */
     List<ReportListVo> getReportList2(@Param("deptIds") List<Long> deptIds);
 
+    List<ReportListVo> reportDownloadList(@Param("deptIds") List<Long> deptIds);
+
     /**
      * 查询下载报告列表--科室
      *
@@ -53,6 +55,8 @@ public interface ReportMapper {
     ReportDetailVo getAllReportDetail(Long id);
 
     List<ReportListVo> getReportList_history(ReportListVo reportListVo);
+
+    List<ReportListVo> reportDownloadListHistory(ReportListVo reportListVo);
 
     /**
      * 获取历史详情

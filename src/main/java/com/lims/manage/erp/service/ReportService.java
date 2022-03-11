@@ -30,13 +30,14 @@ public interface ReportService {
      * 查询可制作报告列表--科室权限
      * @return
      */
-    List<ReportListVo> makeReport();
+//    List<ReportListVo> makeReport();
+    PageInfo makeReport(Integer pageNum,Integer pageSize);
 
     /**
      * 报告下载列表--科室权限
      * @return
      */
-    List<ReportListVo> reportDownloadList();
+    PageInfo reportDownloadList(Integer pageNum,Integer pageSize);
 
     /**
      * 提交审批
@@ -51,7 +52,9 @@ public interface ReportService {
      * @param search
      * @return
      */
-    List<ReportListVo> getReportList_history(String search);
+    PageInfo getReportList_history(String search,Integer pageNum,Integer pageSize);
+
+    PageInfo reportDownloadListHistory(String search,Integer pageNum,Integer pageSize);
 
     /**
      * 获取报告详情
