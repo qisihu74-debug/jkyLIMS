@@ -3,7 +3,7 @@ package com.lims.manage.erp.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.google.api.client.util.Lists;
+import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TeamTreeStructureEntity;
@@ -314,7 +314,10 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         Long teamId = teamMapper.getTeamIdByUid(userId);
         //获取下级科室id
         List<TeamTreeStructureEntity> list = teamMapper.getChirds(teamId);
-        List<Long> newList = list.stream().map(TeamTreeStructureEntity->{return TeamTreeStructureEntity.getId();}).collect(Collectors.toList());
+        List<Long> newList = Lists.newArrayList();
+        for (TeamTreeStructureEntity entity:list) {
+            newList.add(entity.getId());
+        }
         //获取下级科室下的所有人员ids（不包含本科室除自身外其它人员）
         List<Long> uids = teamMapper.getUsersByTeams(newList);
         //获取本科室的人员id
