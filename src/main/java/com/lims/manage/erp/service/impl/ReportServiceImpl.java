@@ -164,6 +164,27 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public Boolean getReportSubmit_two(ReportRecordEntity reportData) {
+
+        // 修改状态 提交审批 直接进行改状态 state=3
+        reportData.setReportCompleteTime(new Date());
+        reportData.setState("3");
+        String[] verifyers = reportData.getVerifyer().split("&");
+        reportData.setVerifyer(verifyers[0]);
+        reportData.setVerifyerId(Long.parseLong(verifyers[1]));
+         String[] issuers = reportData.getIssuer().split("&");
+         reportData.setIssuer(issuers[0]);
+         reportData.setIssuerId(Long.parseLong(issuers[1]));
+        recordEntityMapper.updateByEntrustId(reportData);
+        // 根据任务单主键 获取委托单主键 更改委托单状态
+        EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(reportData.getEntrustmentId());
+        if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<7){
+            taskMapper.updateEntrustById(entrustBaseInfo.getId(),7);
+        }
+        return true;
+    }
+
+    @Override
     public PageInfo getReportList_history(String search,Integer pageNum,Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         ReportListVo reportListVo = new ReportListVo();

@@ -136,6 +136,26 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     }
 
     @Override
+    public Boolean efficacyApprovalData(Long taskId, Long userId, String name,Integer state) {
+        // 通过taskId
+        ReportApprovalVo reportData = reportApprovalMapper.getReportApprovalDetail(taskId);
+        if(state==1){
+            if(userId.equals(reportData.getVerifyerId())){
+                return true;
+            }
+            return false;
+        }
+        if(state==2){
+            if(userId.equals(reportData.getIssuerId())){
+                return true;
+            }
+            return false;
+        }
+        return null;
+    }
+
+
+    @Override
     public PageInfo applyfor_history(String search, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         Set<Long> ids = getNextIdsToTeam();

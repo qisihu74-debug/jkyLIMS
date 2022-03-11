@@ -452,6 +452,37 @@
         where id = #{id,jdbcType=BIGINT}
     </update>
 
+    <update id="updateByEntrustId" parameterType="com.lims.manage.erp.entity.ReportRecordEntity">
+        update test_report_record
+        <set>
+            <if test="state != null">
+                state = #{state,jdbcType=VARCHAR},
+            </if>
+            <if test="applicant != null and applicant!=''">
+                applicant = #{applicant,jdbcType=VARCHAR},
+            </if>
+            <if test="reportCompleteTime != null">
+                report_complete_time = #{reportCompleteTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="verifyer != null">
+                verifyer = #{verifyer,jdbcType=VARCHAR},
+            </if>
+            <if test="verifyerId != null">
+                verifyer_id = #{verifyerId},
+            </if>
+            <if test="issuer != null">
+                issuer = #{issuer,jdbcType=VARCHAR},
+            </if>
+            <if test="issuerId != null">
+                issuer_id = #{issuerId},
+            </if>
+            <if test="reportUrl != null">
+                report_url = #{reportUrl,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where entrustment_id = #{entrustmentId,jdbcType=BIGINT}
+    </update>
+
     <select id="getSendList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         SELECT
         id,

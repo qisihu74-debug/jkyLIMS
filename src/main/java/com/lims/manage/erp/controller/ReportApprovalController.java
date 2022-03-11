@@ -193,6 +193,10 @@ public class ReportApprovalController {
         if (name == null) {
             return ResultUtil.error(678, "账号未配置使用人");
         }
+        // 通过报告id 和 登录人id和姓名 比对
+        if(!reportApprovalService.efficacyApprovalData(reportApprovalVo1.getId(),userInfo.getUserId(),name,1)){
+            return ResultUtil.error(678, "审批失败！当前登录人不是指定人");
+        }
         // 审核人姓名保存
         reportApprovalVo1.setVerifyer(name);
         Boolean flag = reportApprovalService.approval_data_two(reportApprovalVo1);
@@ -414,6 +418,11 @@ public class ReportApprovalController {
         String name = reportApprovalMapper.getUserName(userInfo.getUserId());
         if (name == null) {
             return ResultUtil.error(678, "账号未配置使用人");
+        }
+//        reportApprovalVo1.setIssuer(name);
+        // 通过报告id 和 登录人id和姓名 比对
+        if(!reportApprovalService.efficacyApprovalData(reportApprovalVo1.getId(),userInfo.getUserId(),name,2)){
+            return ResultUtil.error(678, "签发失败！当前登录人不是指定人");
         }
         reportApprovalVo1.setIssuer(name);
         Boolean flag = reportApprovalService.verify_data_two(reportApprovalVo1);

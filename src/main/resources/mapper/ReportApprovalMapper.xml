@@ -26,7 +26,7 @@
     </select>
 
     <select id="getReportApprovalDetail" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
-        SELECT id,task_code,verifyer,verifyer_time,state,issuer FROM test_report_record WHERE id =#{id}
+        SELECT id,task_code,verifyer,verifyer_id,verifyer_time,state,issuer,issuer_id FROM test_report_record WHERE id =#{id}
     </select>
 
     <update id="updateReportApprovalDetail" parameterType="com.lims.manage.erp.vo.ReportApprovalVo">

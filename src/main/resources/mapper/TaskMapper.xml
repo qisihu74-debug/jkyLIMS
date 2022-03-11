@@ -457,6 +457,21 @@
     and t3.name is not NULL
     </select>
 
+    <select id="getRoleInformation" resultType="com.lims.manage.erp.vo.LabelValueVo" >
+        SELECT
+            t3.user_id value,
+            t3.NAME label
+        FROM
+            sys_role AS t1
+            LEFT JOIN sys_user_role AS t2
+            ON t1.role_id = t2.role_id
+            LEFT JOIN sys_user AS t3
+            ON t3.user_id = t2.user_id
+        WHERE
+            t1.role_name = #{RoleName}
+            AND t3.NAME IS NOT NULL
+    </select>
+
     <select id="selectTeamList" resultType="com.lims.manage.erp.vo.LabelValueTeamVo">
         SELECT t4.name AS label,
                t4.name AS value

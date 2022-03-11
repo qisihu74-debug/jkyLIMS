@@ -74,4 +74,12 @@ public class Const {
      * 部门管理日志
      */
     public static final String DEPT_LOG = "12";
+    /**
+     * 角色名 (approver) 审批人 基于数据库 sys_role 定义
+     */
+    public static final String approverStr = "approver";
+    /**
+     * 角色名 (signer) 签发人 基于数据库 sys_role 定义
+     */
+    public static final String signerStr = "signer";
 }
