@@ -77,17 +77,17 @@ public interface TeamMapper extends BaseMapper {
      * @param list
      * @return
      */
-    @Select("SELECT\n" +
-            "\tu.user_id\n" +
-            "FROM\n" +
-            "\ttest_team t\n" +
-            "LEFT JOIN test_user_team_rel tr ON t.id = tr.team_id\n" +
-            "LEFT JOIN sys_user u ON tr.user_id = u.user_id\n" +
-            "WHERE\n" +
-            "\tt.id IN \n" +
-            "< foreach collection = \"list\" item = \"id\" INDEX = \"index\" OPEN = \"(\" CLOSE = \")\" SEPARATOR = \",\" > #{id}\n" +
-            "\t</ foreach >\n" +
-            "AND u.user_id IS NOT NULL")
+//    @Select("SELECT\n" +
+//            "\tu.user_id\n" +
+//            "FROM\n" +
+//            "\ttest_team t\n" +
+//            "LEFT JOIN test_user_team_rel tr ON t.id = tr.team_id\n" +
+//            "LEFT JOIN sys_user u ON tr.user_id = u.user_id\n" +
+//            "WHERE\n" +
+//            "\tt.id IN \n" +
+//            "< foreach collection = \"list\" item = \"id\" INDEX = \"index\" OPEN = \"(\" CLOSE = \")\" SEPARATOR = \",\" > #{id}\n" +
+//            "\t</ foreach >\n" +
+//            "AND u.user_id IS NOT NULL")
     List<Long> getUsersByTeams(@Param("list") List<Long> list);
 
     /**
