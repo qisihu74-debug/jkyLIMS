@@ -5,6 +5,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.util.ShiroUtils;
+import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,7 +29,7 @@ public class SysOssController  {
 
 
     @PostMapping("postAnnounce")
-    public Result postAnnounce(MultipartFile[] file) {
+    public Result postAnnounce(@RequestPart("file") MultipartFile file) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");

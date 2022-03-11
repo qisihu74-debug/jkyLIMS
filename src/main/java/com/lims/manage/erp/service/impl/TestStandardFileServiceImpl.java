@@ -29,13 +29,8 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
         if (testStandardFile.getName()==null){
             return ResultUtil.error("文件名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestStandardFile>().eq("name",testStandardFile.getName()))!=null){
-            return ResultUtil.error("检测方法名称重复");
-        }
         testStandardFile.setStatus("0");
-
         testStandardFile.setCreateTime(new Date());
-
         if (this.save(testStandardFile)){
             return ResultUtil.success("添加成功!");
         }else {
@@ -52,10 +47,6 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
         if (testStandardFile.getName()==null){
             return ResultUtil.error("名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestStandardFile>().eq("name",testStandardFile.getName()).eq("del_flag",0).ne("id",testStandardFile.getId()))!=null){
-            return ResultUtil.error("检测专利名称重复");
-        }
-
         if (this.updateById(testStandardFile)){
             return ResultUtil.success("修改成功!");
         }else {

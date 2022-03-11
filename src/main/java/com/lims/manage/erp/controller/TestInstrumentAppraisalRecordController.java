@@ -74,7 +74,6 @@ public class TestInstrumentAppraisalRecordController extends ApiController {
         if (StrUtil.isEmptyIfStr(testInstrumentAppraisalRecord)){
             return ResultUtil.error("数据为空");
         }
-        testInstrumentAppraisalRecord.setFileUrl("ceshi");
         return this.testInstrumentAppraisalRecordService.addInstrumentAppraisalRecord(testInstrumentAppraisalRecord);
 
     }
@@ -90,7 +89,6 @@ public class TestInstrumentAppraisalRecordController extends ApiController {
         if (StrUtil.isEmptyIfStr(testInstrumentAppraisalRecord)){
             return ResultUtil.error("数据为空");
         }
-        testInstrumentAppraisalRecord.setFileUrl("ceshi");
         return this.testInstrumentAppraisalRecordService.updInstrumentAppraisalRecord(testInstrumentAppraisalRecord);
     }
 
