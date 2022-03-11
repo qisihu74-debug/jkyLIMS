@@ -193,6 +193,10 @@ public class ReportApprovalController {
         if (name == null) {
             return ResultUtil.error(678, "账号未配置使用人");
         }
+        // 通过报告id 和 登录人id和姓名 比对
+        if(!reportApprovalService.efficacyApprovalData(reportApprovalVo1.getId(),userInfo.getUserId(),name,1)){
+            return ResultUtil.error(678, "审批失败！当前登录人不是指定人");
+        }
         // 审核人姓名保存
         reportApprovalVo1.setVerifyer(name);
         Boolean flag = reportApprovalService.approval_data_two(reportApprovalVo1);
@@ -259,23 +263,6 @@ public class ReportApprovalController {
         }
         return ResultUtil.success("查询任务详情成功！", reportApprovalService.getDetails(id));
     }
-
-    /**
-     * 报告签发列表
-     *
-     * @param search
-     * @param state
-     * @return
-     */
-//    @GetMapping("/verify_list")
-//    public Result verify_list(String search, Integer state) {
-//
-//        List<ReportApprovalVo> list = reportApprovalService.getVerify_list(search, state);
-//        if (!list.isEmpty()) {
-//            return ResultUtil.success(list);
-//        }
-//        return ResultUtil.success(list);
-//    }
 
     /**
      * 报告签发列表
@@ -432,6 +419,11 @@ public class ReportApprovalController {
         if (name == null) {
             return ResultUtil.error(678, "账号未配置使用人");
         }
+//        reportApprovalVo1.setIssuer(name);
+        // 通过报告id 和 登录人id和姓名 比对
+        if(!reportApprovalService.efficacyApprovalData(reportApprovalVo1.getId(),userInfo.getUserId(),name,2)){
+            return ResultUtil.error(678, "签发失败！当前登录人不是指定人");
+        }
         reportApprovalVo1.setIssuer(name);
         Boolean flag = reportApprovalService.verify_data_two(reportApprovalVo1);
         if (flag) {
@@ -439,22 +431,6 @@ public class ReportApprovalController {
         }
         return ResultUtil.error(678, "签发失败");
     }
-
-    /**
-     * 报告签发历史查询列表
-     *
-     * @param search
-     * @return
-     */
-//    @GetMapping("/verify_history")
-//    public Result verify_history(String search) {
-//
-//        List<ReportApprovalVo> list = reportApprovalService.verifyHistory(search);
-//        if (!list.isEmpty()) {
-//            return ResultUtil.success(list);
-//        }
-//        return ResultUtil.success(list);
-//    }
 
     /**
      * 报告签发历史查询列表

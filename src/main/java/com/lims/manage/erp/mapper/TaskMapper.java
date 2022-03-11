@@ -107,6 +107,14 @@ public interface TaskMapper extends BaseMapper {
     List<LabelValueVo> getMemberInformation(@Param(value = "deptIds") Set<Long> deptIds);
 
     /**
+     * 根据角色名称 查询审批 人员信息
+     * @param RoleName
+     * @return
+     */
+    List<LabelValueVo> getRoleInformation(String RoleName);
+
+
+    /**
      * 根据团队id 返回 用户集合
      *
      * @param id

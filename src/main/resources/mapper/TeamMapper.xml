@@ -35,4 +35,20 @@
         FROM test_user_team_rel
         WHERE user_id = #{userId}
     </select>
+
+    <select id="getUsersByTeams" resultType="java.lang.Long">
+        SELECT
+        u.user_id
+        FROM
+        test_team t
+        LEFT JOIN test_user_team_rel tr ON t.id = tr.team_id
+        LEFT JOIN sys_user u ON tr.user_id = u.user_id
+        WHERE
+        t.id IN
+        <foreach collection="list" item="user_id" index="index" open="(" close = ")" separator=",">
+        #{user_id}
+    </foreach>
+        AND u.user_id IS NOT NULL
+
+    </select>
 </mapper>

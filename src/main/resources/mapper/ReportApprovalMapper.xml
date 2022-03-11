@@ -18,7 +18,10 @@
         test_report_record
         WHERE
         report_complete_time is not NULL
-        and state =3
+        and state =3 and verifyer_id in
+        <foreach collection="list" item="verifyer_id" index="index" open="(" close = ")" separator=",">
+            #{verifyer_id}
+        </foreach>
             <if test="search!=null and search!=''">
                 and task_code like CONCAT('%',#{search},'%')
             </if>
@@ -26,7 +29,7 @@
     </select>
 
     <select id="getReportApprovalDetail" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
-        SELECT id,task_code,verifyer,verifyer_time,state,issuer FROM test_report_record WHERE id =#{id}
+        SELECT id,task_code,verifyer,verifyer_id,verifyer_time,state,issuer,issuer_id FROM test_report_record WHERE id =#{id}
     </select>
 
     <update id="updateReportApprovalDetail" parameterType="com.lims.manage.erp.vo.ReportApprovalVo">
@@ -62,6 +65,10 @@
             test_report_record
         WHERE
         verifyer_time is not NULL
+        and verifyer_id in
+        <foreach collection="list" item="verifyer_id" index="index" open="(" close = ")" separator=",">
+            #{verifyer_id}
+        </foreach>
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
         </if>
@@ -185,7 +192,10 @@
         FROM
         test_report_record
         WHERE  verifyer_time is not NULL
-            and  state = 4
+            and  state = 4 and issuer_id in
+        <foreach collection="list" item="issuer_id" index="index" open="(" close = ")" separator=",">
+            #{issuer_id}
+        </foreach>
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
         </if>
@@ -206,7 +216,10 @@
         FROM
         test_report_record
         WHERE  issuer_time is not NULL
-        and state = 6
+        and state = 6 and issuer_id in
+        <foreach collection="list" item="issuer_id" index="index" open="(" close = ")" separator=",">
+            #{issuer_id}
+        </foreach>
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
         </if>

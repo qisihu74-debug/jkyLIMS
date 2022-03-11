@@ -21,6 +21,7 @@ public class ReportListVo {
      * state 状态
      */
     private Integer state;
+    private Integer productId;
 
     private List<Long> deptIds;
 

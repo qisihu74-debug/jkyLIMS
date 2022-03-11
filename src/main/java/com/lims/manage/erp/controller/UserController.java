@@ -62,15 +62,26 @@ public class UserController {
     @Autowired
     private SysUserRoleDao sysUserRoleDao;
 
+//    /**
+//     * 获取用户列表废弃
+//     *
+//     * @return
+//     */
+//    @PostMapping("list_abandon")
+////    @RequiresPermissions("sys:user:list")
+//    public Result getList(@RequestBody UserInfoParamVo vo) {
+//        return ResultUtil.success(sysUserService.getUserInfos(vo));
+//    }
+
     /**
-     * 获取用户列表
+     * 获取用户列表——二次开发
      *
      * @return
      */
     @PostMapping("list")
 //    @RequiresPermissions("sys:user:list")
-    public Result getList(@RequestBody UserInfoParamVo vo) {
-        return ResultUtil.success(sysUserService.getUserInfos(vo));
+    public Result getList_two(@RequestBody UserInfoParamVo vo) {
+        return ResultUtil.success(sysUserService.getUserInfos_two(vo));
     }
 
     /**

@@ -78,6 +78,15 @@ public interface ReportRecordEntityMapper {
     int updateByEntrustIdSelective(ReportRecordEntity record);
 
     /**
+     * 更新报告状态
+     * 根据委托单id 整体修改
+     * @param record
+     * @return
+     */
+    int updateByEntrustId(ReportRecordEntity record);
+
+
+    /**
      * 待邮寄报告列表及已发出报告历史列表查询
      * @param search
      * @param reportType
@@ -162,5 +171,5 @@ public interface ReportRecordEntityMapper {
     Long getEntrustIdByCid(@Param("contractId") Long contractId);
 
     @Select("select qys_docment_id,contract_id,sign_url,qys_state from test_report_record where entrustment_id=#{entrustId}")
-    ReportRecordEntity selectMessageByEntrustId(@Param("entrustId") long entrustId);
+    List<ReportRecordEntity> selectMessageByEntrustId(@Param("entrustId") long entrustId);
 }

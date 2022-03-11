@@ -132,7 +132,40 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
                             department.add(departmentInfo);
                         }
                     }
-                } else if (replace != null && !replace.contains(",")) {
+                } else if (replace != null && !replace.contains(",")&&!"".equals(replace)) {
+                    LabelValueVo departmentInfo = deptDao.getRoleInfoById(Long.parseLong(replace));
+                    if(departmentInfo!=null){
+                        department.add(departmentInfo);
+                    }
+                }
+                userInfoVo.setDepartment(department);
+            }
+        }
+        return userInfos;
+    }
+
+    /**
+     * 获取用户信息列表——二次开发
+     * @param vo
+     * @return
+     */
+    @Override
+    public List<UserInfoVo> getUserInfos_two(UserInfoParamVo vo) {
+        List<UserInfoVo> userInfos = sysUserDao.getUserInfos(vo);
+        if (!userInfos.isEmpty()) {
+            for (UserInfoVo userInfoVo : userInfos) {
+                List<LabelValueVo> department = Lists.newArrayList();
+                String replace = userInfoVo.getDepartmentId();
+                if (replace != null && replace.contains(",")) {
+                    String[] split = replace.split(",");
+                    for (int i = 0; i < split.length; i++) {
+                        String deptId = split[i].trim();
+                        LabelValueVo departmentInfo = deptDao.getRoleInfoById(Long.parseLong(deptId));
+                        if(departmentInfo!=null){
+                            department.add(departmentInfo);
+                        }
+                    }
+                } else if (replace != null && !replace.contains(",")&&!"".equals(replace)) {
                     LabelValueVo departmentInfo = deptDao.getRoleInfoById(Long.parseLong(replace));
                     if(departmentInfo!=null){
                         department.add(departmentInfo);

@@ -44,6 +44,10 @@ public class ReportApprovalVo {
      */
     private String verifyer;
     /**
+     * 审核人id
+     */
+    private Long verifyerId;
+    /**
      * 审批时间
      */
     @DateTimeFormat(pattern="yyyy-MM-dd hh:mm:ss")
@@ -61,6 +65,10 @@ public class ReportApprovalVo {
      * 签发人
      */
     private String issuer;
+    /**
+     * 签发人Id
+     */
+    private Long issuerId;
     /**
      * 签发时间
      */

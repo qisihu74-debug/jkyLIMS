@@ -1,9 +1,6 @@
 package com.lims.manage.erp.mapper;
 
-import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
-import com.lims.manage.erp.vo.ReportDetailVo;
-import com.lims.manage.erp.vo.ReportListVo;
-import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -51,6 +48,13 @@ public interface ReportMapper {
      * @return
      */
     ReportDetailVo getReportDetail(Long taskId,List<Long> deptIds);
+
+    /**
+     * 根据委托单ID查询所有检测项
+     * @param id
+     * @return
+     */
+    ReportHistoryDetailVo getDetailCheckItem(Long id);
 
     ReportDetailVo getAllReportDetail(Long id);
 

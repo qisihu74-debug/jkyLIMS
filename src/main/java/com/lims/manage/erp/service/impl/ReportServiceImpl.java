@@ -17,13 +17,7 @@ import com.lims.manage.erp.job.QiYueSuoHnadler;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
-import com.lims.manage.erp.vo.ReportDetailVo;
-import com.lims.manage.erp.vo.ReportListVo;
-import com.lims.manage.erp.vo.ReportPreserveVo;
-import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
@@ -139,21 +133,55 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     @Override
     public Boolean getReportSubmit(Long id,String name) {
-        // 根据委托单id 查询报告信息 state=1
-        ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
-        if(reportData.getState().equals("1")){
-            // 修改状态
-            reportData.setReportCompleteTime(new Date());
-            reportData.setApplicant(name);
-             recordEntityMapper.updateByEntrustIdSelective(reportData);
-            // 根据任务单主键 获取委托单主键 更改委托单状态
-            EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(id);
-            if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<7){
-                taskMapper.updateEntrustById(entrustBaseInfo.getId(),7);
-            }
-            return true;
+//        // 根据委托单id 查询报告信息 state=1
+//        ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
+//        if(reportData.getState().equals("1")){
+//            // 修改状态
+//            reportData.setReportCompleteTime(new Date());
+//            reportData.setApplicant(name);
+//             recordEntityMapper.updateByEntrustIdSelective(reportData);
+//            // 根据任务单主键 获取委托单主键 更改委托单状态
+//            EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(id);
+//            if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<7){
+//                taskMapper.updateEntrustById(entrustBaseInfo.getId(),7);
+//            }
+//            return true;
+//        }
+//        return false;
+        // 修改状态 提交审批 直接进行改状态 state=3
+        ReportRecordEntity reportData = new ReportRecordEntity();
+        reportData.setReportCompleteTime(new Date());
+        reportData.setApplicant(name);
+        reportData.setState("3");
+        recordEntityMapper.updateByEntrustIdSelective(reportData);
+        // 根据任务单主键 获取委托单主键 更改委托单状态
+        EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(id);
+        if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<7){
+            taskMapper.updateEntrustById(entrustBaseInfo.getId(),7);
         }
-        return false;
+        return true;
+
+    }
+
+    @Override
+    public Boolean getReportSubmit_two(ReportRecordEntity reportData) {
+
+        // 修改状态 提交审批 直接进行改状态 state=3
+        reportData.setReportCompleteTime(new Date());
+        reportData.setState("3");
+        String[] verifyers = reportData.getVerifyer().split("&");
+        reportData.setVerifyer(verifyers[0]);
+        reportData.setVerifyerId(Long.parseLong(verifyers[1]));
+         String[] issuers = reportData.getIssuer().split("&");
+         reportData.setIssuer(issuers[0]);
+         reportData.setIssuerId(Long.parseLong(issuers[1]));
+        recordEntityMapper.updateByEntrustId(reportData);
+        // 根据任务单主键 获取委托单主键 更改委托单状态
+        EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(reportData.getEntrustmentId());
+        if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<7){
+            taskMapper.updateEntrustById(entrustBaseInfo.getId(),7);
+        }
+        return true;
     }
 
     @Override
@@ -254,6 +282,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public ReportHistoryDetailVo getDetailCheckItem(Long id) {
+        return reportMapper.getDetailCheckItem(id);
+    }
+
+    @Override
     public ReportRecordEntity getDetail(Long id) {
         // 查询报告单信息
         ReportRecordEntity reportDetail = recordEntityMapper.getDetail(id);
@@ -346,7 +379,7 @@ public class ReportServiceImpl implements ReportService {
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
             reportRecordEntity.setState(state);
             if ("1".equals(state)) {
-                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
+                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
             }
             //生成报告编号
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -756,9 +789,9 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
-        ReportRecordEntity entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        List<ReportRecordEntity> entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
         List<String> docs = new ArrayList<>();
-        docs.add(entity.getQysDocmentId());
+        docs.add(entity.get(0).getQysDocmentId());
         reqBean.setDocuments(docs);
         QiYueSuoResponse response = qiYueSuoHnadler.createbycategory(reqBean);
         //根据委托id存储文档id
@@ -769,8 +802,8 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public QiYueSuoResponse signurl(QiYueSuoSeaLBean reqBean) {
         //设置合同标识
-        ReportRecordEntity entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
-        reqBean.setContractId(Long.valueOf(entity.getContractId()));
+        List<ReportRecordEntity> entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        reqBean.setContractId(Long.valueOf(entity.get(0).getContractId()));
         QiYueSuoResponse response = qiYueSuoHnadler.signurl(reqBean);
         //根据委托更新报告签署url
         entityMapper.updateUrlAndState(reqBean.getEntrustId(),response.getSignUrl(),"4");

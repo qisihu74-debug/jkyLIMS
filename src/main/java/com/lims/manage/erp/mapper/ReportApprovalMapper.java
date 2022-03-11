@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Author: DLC
@@ -19,7 +20,7 @@ import java.util.List;
 @Mapper
 public interface ReportApprovalMapper {
 
-    List<ReportApprovalVo> getReportApprovalList(@Param("search")String search);
+    List<ReportApprovalVo> getReportApprovalList(@Param("search")String search,@Param("list") Set<Long> list);
 
     ReportApprovalVo getReportApprovalDetail(Long id);
 
@@ -38,7 +39,7 @@ public interface ReportApprovalMapper {
     String getUserName(Long userId);
 
 
-    List<ReportApprovalVo> getReportApprovalHistory(@Param("search")String search);
+    List<ReportApprovalVo> getReportApprovalHistory(@Param("search")String search,@Param("list") Set<Long> list);
 
     /**
      * 任务单详情
@@ -65,14 +66,14 @@ public interface ReportApprovalMapper {
      * @param search
      * @return
      */
-    List<ReportApprovalVo> getVerifyList(@Param("search")String search);
+    List<ReportApprovalVo> getVerifyList(@Param("search")String search,@Param("list") Set<Long> list);
 
     /**
      * 查询签发 历史
      * @param search
      * @return
      */
-    List<ReportApprovalVo> getVerifyHistory(@Param("search")String search);
+    List<ReportApprovalVo> getVerifyHistory(@Param("search")String search,@Param("list") Set<Long> list);
 
     /**
      * 签发抢单

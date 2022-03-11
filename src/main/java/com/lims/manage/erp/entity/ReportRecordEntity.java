@@ -76,9 +76,18 @@ public class ReportRecordEntity {
      */
     private String verifyer;
     /**
+     * 审批人id
+     */
+    private Long verifyerId;
+
+    /**
      * 签发人
      */
     private String issuer;
+    /**
+     * 签发人id
+     */
+    private Long issuerId;
     /**
      * 报告提交申请人
      */

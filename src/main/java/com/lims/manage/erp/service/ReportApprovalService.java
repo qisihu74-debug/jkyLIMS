@@ -14,14 +14,6 @@ import java.util.List;
 public interface ReportApprovalService {
 
     /**
-     * 报告审批列表
-     * @param search
-     * @param state
-     * @return
-     */
-    List<ReportApprovalVo> getApplyforList(String search,Integer state);
-
-    /**
      * 进行抢单
      * @param reportApprovalVo
      * @return
@@ -41,11 +33,15 @@ public interface ReportApprovalService {
     Boolean approval_data_two(ReportApprovalVo reportApprovalVo1);
 
     /**
-     * 报告审批历史查询
-     * @param search
+     * 通过报告id 和 登录人id和姓名 比对审批人数据
+     * state =1 审批
+     * state =2 签发
+     * @param taskId
+     * @param userId
+     * @param name
      * @return
      */
-    List<ReportApprovalVo> applyfor_history(String search);
+    Boolean efficacyApprovalData(Long taskId,Long userId,String name,Integer state);
 
     /**
      * 报告审批历史查询

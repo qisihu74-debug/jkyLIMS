@@ -68,6 +68,13 @@ public interface SysUserService extends IService<SysUserEntity> {
     List<UserInfoVo> getUserInfos(UserInfoParamVo vo);
 
     /**
+     * 获取用户信息列表——二次开发
+     * @param vo
+     * @return
+     */
+    List<UserInfoVo> getUserInfos_two(UserInfoParamVo vo);
+
+    /**
      * 更新用户信息
      * @param vo
      * @return

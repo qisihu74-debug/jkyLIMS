@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
@@ -186,7 +187,15 @@ public class TaskServiceImpl implements TaskService {
             paramVo.setBeginDate(split[0]);
             paramVo.setEndDate(split[1]);
         }
-        paramVo.setDeptIds(userTeamIds);
+        if(userTeamIds.size()>0){
+            paramVo.setDeptIds(userTeamIds);
+        }
+        else
+        {
+            paramVo.setDeptIds(null);
+            return null;
+        }
+
         PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
         List<ReceiveSampleListVo> dataList = taskMapper.getSampleList(paramVo);
         PageInfo<ReceiveSampleListVo> result = new PageInfo<>(dataList);
@@ -202,6 +211,24 @@ public class TaskServiceImpl implements TaskService {
             taskMapper.updateEntrustById(entrustEntity.getId(), 2);
         }
         return taskMapper.updateSampler(paramVo);
+    }
+
+    @Override
+    public Boolean isIntendedEffectReceive(Long taskId, String sampler) {
+        List<String> strings = teamMapper.getTaskIdUserName(taskId);
+        if(strings!=null&&strings.size()>0){
+            for(String userName:strings)
+            {
+                if(userName.equals(sampler)){
+                    // 匹配成功
+                    return true;
+                }
+            }
+            // 领样人不属于此任务单下团队成员
+            return false;
+        }
+        logger.error(taskId+"\t任务单下部门成员为空");
+        return false;
     }
 
     @Override
@@ -275,9 +302,11 @@ public class TaskServiceImpl implements TaskService {
 
         teamVo.setReviewVo(null);
         // 审批人集合
-        teamVo.setApproverVo(null);
+        List<LabelValueVo>  ApproverVo = taskMapper.getRoleInformation(Const.approverStr);
+        teamVo.setApproverVo(ApproverVo);
         // 签发人集合
-        teamVo.setSignerVo(null);
+        List<LabelValueVo>  SignerVo = taskMapper.getRoleInformation(Const.signerStr);
+        teamVo.setSignerVo(SignerVo);
         return teamVo;
     }
 

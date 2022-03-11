@@ -113,28 +113,19 @@ public class ReportController {
         if (pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少分页参数！");
         }
-        return ResultUtil.success("获取出具报告历史列表成功！", reportService.getReportList_history(search,pageNum,pageSize));
+        return ResultUtil.success("获取出具报告历史列表成功！", reportService.reportDownloadListHistory(search,pageNum,pageSize));
     }
 
 
     /**
      * 提交审批
-     *
-     * @param id
+     * @param
      * @return
      */
     @GetMapping("/report_submit")
-    public Result getReportSubmit(Long id) {
-        if (id == null) {
+    public Result getReportSubmit(ReportRecordEntity reportRecordEntity) {
+        if (reportRecordEntity.getEntrustmentId() == null || reportRecordEntity.getVerifyer()==null || reportRecordEntity.getIssuer()==null || reportRecordEntity.getReportUrl()==null) {
             return ResultUtil.error(678, "缺少必要参数！");
-        }
-        // 查询是否提交审批
-        ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
-        if (reportData == null) {
-            return ResultUtil.error(678, "参数错误！");
-        }
-        if (reportData.getReportCompleteTime() != null) {
-            return ResultUtil.error(678, "报告已提交审批！");
         }
         //1、 获取提交报告人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -145,7 +136,8 @@ public class ReportController {
         if (name == null) {
             return ResultUtil.error(678, "账号未配置使用人");
         }
-        Boolean flag = reportService.getReportSubmit(id, name);
+        reportRecordEntity.setApplicant(name);
+        Boolean flag = reportService.getReportSubmit_two(reportRecordEntity);
         if (flag) {
             return ResultUtil.success("提交审批成功");
         }
@@ -196,6 +188,16 @@ public class ReportController {
     @GetMapping("/edit")
     public Result edit(Long taskId) {
         return ResultUtil.success("查询委托单信息成功！", reportService.getReportDetail(taskId));
+    }
+
+    /**
+     * 查询当前委托单所有检测项
+     * @param id
+     * @return
+     */
+    @GetMapping("/detail")
+    public Result detail(Long id) {
+        return ResultUtil.success("查询委托单信息成功！", reportService.getDetailCheckItem(id));
     }
 
     /**
