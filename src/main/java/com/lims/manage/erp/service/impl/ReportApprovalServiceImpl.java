@@ -343,13 +343,8 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         //获取本科室的人员id
         List<Long> users = teamMapper.getUsersByTeamId(teamId);
         Set<Long> ids = new HashSet<>();
-        for (Long id:uids) {
-            for (Long uid:users) {
-                if (!id.equals(uid)){
-                    ids.add(id);
-                }
-            }
-        }
+        uids.removeAll(users);
+        ids.addAll(uids);
         ids.add(userId);
         return ids;
     }
