@@ -186,7 +186,15 @@ public class TaskServiceImpl implements TaskService {
             paramVo.setBeginDate(split[0]);
             paramVo.setEndDate(split[1]);
         }
-        paramVo.setDeptIds(userTeamIds);
+        if(userTeamIds.size()>0){
+            paramVo.setDeptIds(userTeamIds);
+        }
+        else
+        {
+            paramVo.setDeptIds(null);
+            return null;
+        }
+
         PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
         List<ReceiveSampleListVo> dataList = taskMapper.getSampleList(paramVo);
         PageInfo<ReceiveSampleListVo> result = new PageInfo<>(dataList);
@@ -202,6 +210,24 @@ public class TaskServiceImpl implements TaskService {
             taskMapper.updateEntrustById(entrustEntity.getId(), 2);
         }
         return taskMapper.updateSampler(paramVo);
+    }
+
+    @Override
+    public Boolean isIntendedEffectReceive(Long taskId, String sampler) {
+        List<String> strings = teamMapper.getTaskIdUserName(taskId);
+        if(strings!=null&&strings.size()>0){
+            for(String userName:strings)
+            {
+                if(userName.equals(sampler)){
+                    // 匹配成功
+                    return true;
+                }
+            }
+            // 领样人不属于此任务单下团队成员
+            return false;
+        }
+        logger.error(taskId+"\t任务单下部门成员为空");
+        return false;
     }
 
     @Override

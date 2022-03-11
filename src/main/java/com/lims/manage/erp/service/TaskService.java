@@ -64,6 +64,14 @@ public interface TaskService {
      */
     int receiveSample(ReceiveSampleParamVo paramVo);
 
+    /**
+     * 领样人姓名与任务单ID  效验是否属于同一部门
+     * @param taskId 任务单ID
+     * @param sampler 领样人姓名
+     * @return true 成立  flase不成立
+     */
+    Boolean isIntendedEffectReceive(Long taskId,String sampler);
+
 //    List<TaskDetailInfoVo> getTaskDetailInfo();
 
     /**

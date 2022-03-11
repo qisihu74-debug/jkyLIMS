@@ -129,13 +129,13 @@ public class ReportController {
             return ResultUtil.error(678, "缺少必要参数！");
         }
         // 查询是否提交审批
-        ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
-        if (reportData == null) {
-            return ResultUtil.error(678, "参数错误！");
-        }
-        if (reportData.getReportCompleteTime() != null) {
-            return ResultUtil.error(678, "报告已提交审批！");
-        }
+//        ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
+//        if (reportData == null) {
+//            return ResultUtil.error(678, "参数错误！");
+//        }
+//        if (reportData.getReportCompleteTime() != null) {
+//            return ResultUtil.error(678, "报告已提交审批！");
+//        }
         //1、 获取提交报告人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {

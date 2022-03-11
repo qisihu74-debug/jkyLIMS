@@ -139,21 +139,34 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     @Override
     public Boolean getReportSubmit(Long id,String name) {
-        // 根据委托单id 查询报告信息 state=1
-        ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
-        if(reportData.getState().equals("1")){
-            // 修改状态
-            reportData.setReportCompleteTime(new Date());
-            reportData.setApplicant(name);
-             recordEntityMapper.updateByEntrustIdSelective(reportData);
-            // 根据任务单主键 获取委托单主键 更改委托单状态
-            EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(id);
-            if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<7){
-                taskMapper.updateEntrustById(entrustBaseInfo.getId(),7);
-            }
-            return true;
+//        // 根据委托单id 查询报告信息 state=1
+//        ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
+//        if(reportData.getState().equals("1")){
+//            // 修改状态
+//            reportData.setReportCompleteTime(new Date());
+//            reportData.setApplicant(name);
+//             recordEntityMapper.updateByEntrustIdSelective(reportData);
+//            // 根据任务单主键 获取委托单主键 更改委托单状态
+//            EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(id);
+//            if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<7){
+//                taskMapper.updateEntrustById(entrustBaseInfo.getId(),7);
+//            }
+//            return true;
+//        }
+//        return false;
+        // 修改状态 提交审批 直接进行改状态 state=3
+        ReportRecordEntity reportData = new ReportRecordEntity();
+        reportData.setReportCompleteTime(new Date());
+        reportData.setApplicant(name);
+        reportData.setState("3");
+        recordEntityMapper.updateByEntrustIdSelective(reportData);
+        // 根据任务单主键 获取委托单主键 更改委托单状态
+        EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(id);
+        if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<7){
+            taskMapper.updateEntrustById(entrustBaseInfo.getId(),7);
         }
-        return false;
+        return true;
+
     }
 
     @Override

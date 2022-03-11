@@ -135,11 +135,11 @@ public class TaskController {
         if (taskStatus) {
             Boolean flag = taskService.postGrabASingleTwo(taskTestEntity);
             if (flag) {
-                return ResultUtil.success("抢单成功");
+                return ResultUtil.success("领取成功");
             }
-            return ResultUtil.error(678, "抢单失败！");
+            return ResultUtil.error(678, "领取失败！");
         }
-        return ResultUtil.error(678, "当前任务单已经被抢！");
+        return ResultUtil.error(678, "当前任务单已经被领！");
     }
 
     /**
@@ -245,10 +245,16 @@ public class TaskController {
      */
     @RequestMapping("/receiveSample")
     public Result receiveSample(@RequestBody ReceiveSampleParamVo paramVo) {
-        if (paramVo == null) {
+        if (paramVo == null||paramVo.getSampler()==null||"".equals(paramVo.getSampler())||paramVo.getTaskId()==null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
-            return ResultUtil.success("领样成功！", taskService.receiveSample(paramVo));
+            // 领样人姓名与任务单ID  效验是否属于同一部门
+           if(taskService.isIntendedEffectReceive(paramVo.getTaskId(),paramVo.getSampler())){
+                return ResultUtil.success("领样成功！", taskService.receiveSample(paramVo));
+            }
+            else{
+                return ResultUtil.error("领样失败！领样人姓名不属于此任务单下团队成员");
+            }
         }
     }
 

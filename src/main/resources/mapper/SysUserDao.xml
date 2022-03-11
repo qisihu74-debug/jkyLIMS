@@ -59,7 +59,7 @@
         t1.note,
         t1.mobile,
         t1.email,
-        t1.department,
+        t5.department,
         t3.role_id,
         t4.role_name,
         t1.NAME,
@@ -84,6 +84,8 @@
         </if>
         order by t1.time desc
     </select>
+
+
 
     <update id="updateUserInfo" parameterType="com.lims.manage.erp.vo.UserInfoVo">
         UPDATE sys_user
