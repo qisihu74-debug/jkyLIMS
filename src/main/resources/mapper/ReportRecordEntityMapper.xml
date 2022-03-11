@@ -517,7 +517,7 @@
 
     <select id="getMaxCode" resultType="java.lang.Integer">
         SELECT
-            MAX( SUBSTR( report_code, 12 ) )
+            MAX( SUBSTR( report_code FROM 12 )+0 )
         FROM
             test_report_record
         WHERE
