@@ -42,13 +42,11 @@ public class TestStandardFileController extends ApiController {
      */
     @GetMapping("/list")
     public Result selectAll(Page<TestStandardFile> page, TestStandardFile testStandardFile) {
+
         QueryWrapper<TestStandardFile> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("del_flag",0);
         if (testStandardFile.getName()!=null){
             queryWrapper.like("name",testStandardFile.getName());
-        }
-        if (testStandardFile.getType()!=null){
-            queryWrapper.ne("type",testStandardFile.getType());
         }
         queryWrapper.orderByDesc("create_time");
         return ResultUtil.success(this.testStandardFileService.page(page, queryWrapper));

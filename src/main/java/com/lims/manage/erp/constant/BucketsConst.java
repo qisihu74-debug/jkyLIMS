@@ -41,6 +41,8 @@ public class BucketsConst {
      * 公告文件
      */
     public static final String buckets_affiche_template="affiche-template";
-
-
+    /**
+     * 文件资源  File resources
+     */
+    public static final String file_syn="file-resources";
 }

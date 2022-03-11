@@ -45,6 +45,9 @@ public class TestReportTemplateController extends ApiController {
     public Result selectAll(Page<TestReportTemplate> page, TestReportTemplate testReportTemplate) {
         QueryWrapper<TestReportTemplate> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("del_flag",0);
+        if (testReportTemplate.getReportName()!=null){
+            queryWrapper.like("report_name",testReportTemplate.getReportName());
+        }
         queryWrapper.orderByDesc("create_time");
         return ResultUtil.success(this.testReportTemplateService.page(page, queryWrapper));
     }
@@ -58,7 +61,7 @@ public class TestReportTemplateController extends ApiController {
     @GetMapping("{id}")
     public Result selectOne(@PathVariable Serializable id) {
         if (id!=null&&id!=""){
-            TestReportTemplate testMethod=this.testReportTemplateService.getOne(new QueryWrapper<TestReportTemplate>().eq("productId",id).eq("del_flag",0));
+            TestReportTemplate testMethod=this.testReportTemplateService.getOne(new QueryWrapper<TestReportTemplate>().eq("id",id).eq("del_flag",0));
             return ResultUtil.success(testMethod);
         }else {
             return ResultUtil.error("参数为空");
