@@ -123,6 +123,10 @@ public class EntrustAddVo {
      */
     private Long operateUser;
     /**
+     * 作废操作人String
+     */
+    private String operateUserStr;
+    /**
      * 作废操作日期
      */
     @DateTimeFormat(pattern="yyyy-MM-dd")

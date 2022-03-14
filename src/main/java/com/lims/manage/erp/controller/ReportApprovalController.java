@@ -201,7 +201,7 @@ public class ReportApprovalController {
         reportApprovalVo1.setVerifyer(name);
         Boolean flag = reportApprovalService.approval_data_two(reportApprovalVo1);
         if (flag) {
-            return ResultUtil.success("审批成功");
+            return ResultUtil.success("成功");
         }
         return ResultUtil.error(678, "审批失败");
     }
