@@ -103,7 +103,6 @@ public class SampleController {
      */
     @RequestMapping("/getSampleList2")
     public Result getSampleList2(@RequestBody SampleEntity sampleEntity) {
-        System.out.println("getSampleList2"+sampleEntity);
         if (sampleEntity.getPageNum() == null || sampleEntity.getPageSize() == null) {
             return ResultUtil.error("缺少分页参数！");
         }
