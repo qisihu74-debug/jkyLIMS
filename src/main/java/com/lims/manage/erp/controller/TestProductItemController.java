@@ -36,6 +36,14 @@ public class TestProductItemController extends ApiController {
     @Resource
     private TestProductItemService testProductItemService;
 
+    @GetMapping("/getList")
+    public Result getAll(TestProductItem testProductItem) {
+        QueryWrapper<TestProductItem> queryWrapper=new QueryWrapper<>();
+        if (testProductItem.getProductId()!=null){
+            queryWrapper.like("product_id",testProductItem.getProductId());
+        }
+        return ResultUtil.success(this.testProductItemService.list(queryWrapper));
+    }
     /**
      * 分页查询所有数据
      *
