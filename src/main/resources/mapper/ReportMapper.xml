@@ -321,7 +321,7 @@
                 #{id}
             </foreach>
         </if>
-        order by t1.report_complete_time desc
+        order by t1.required_completion_time
     </select>
 
     <select id="getReportDetailHistory" resultMap="reportDetailMap">
