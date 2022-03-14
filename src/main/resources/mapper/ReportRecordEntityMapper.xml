@@ -364,13 +364,7 @@
         sign_url
         FROM
         test_report_record t1 LEFT JOIN test_product t2 ON t1.sample_name = t2.product_name
-        WHERE 1=1
-        <if test='type == "1"'>
-            AND state = 6 and qys_state &lt;= 4
-        </if>
-        <if test='type == "2"'>
-            AND state >=6 and qys_state > 4
-        </if>
+        WHERE state >=6
         <if test="search != null and search != ''">
             AND report_code = #{search}
         </if>

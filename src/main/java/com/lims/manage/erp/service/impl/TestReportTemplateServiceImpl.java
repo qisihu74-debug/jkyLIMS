@@ -24,9 +24,6 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
 
     @Override
     public Result addReportTemplate(TestReportTemplate testReportTemplate) {
-        if (testReportTemplate.getProductId()==null){
-            return ResultUtil.error("产品ID不能为空");
-        }
         testReportTemplate.setStatus("0");
         testReportTemplate.setDelFlag(0);
         testReportTemplate.setCreateTime(new Date());
@@ -41,9 +38,6 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
     public Result updReportTemplate(TestReportTemplate testReportTemplate) {
         if (testReportTemplate.getId()==null){
             return ResultUtil.error("修改对象ID为空");
-        }
-        if (testReportTemplate.getProductId()==null) {
-            return ResultUtil.error("产品ID不能为空");
         }
         testReportTemplate.setUpdateTime(new Date());
         if (this.updateById(testReportTemplate)){
