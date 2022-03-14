@@ -132,9 +132,6 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             <if test="manufacturer!=null and manufacturer!=''">
                 and manufacturer LIKE CONCAT('%',#{manufacturer},'%')
             </if>
-<!--            <if test="sampleRequirement!=null and sampleRequirement!=''">-->
-<!--                and sample_requirement LIKE CONCAT('%',#{sampleRequirement},'%')-->
-<!--            </if>-->
             <if test="beginDate!=null and beginDate!=''">
                 and str_to_date( received_date, '%Y-%m-%d' ) &gt;= str_to_date( #{beginDate}, '%Y-%m-%d' )
             </if>

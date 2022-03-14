@@ -106,6 +106,7 @@ public class SampleController {
         if (sampleEntity.getPageNum() == null || sampleEntity.getPageSize() == null) {
             return ResultUtil.error("缺少分页参数！");
         }
+
         return ResultUtil.success(sampleService.getSampleDataList2(sampleEntity));
     }
 
