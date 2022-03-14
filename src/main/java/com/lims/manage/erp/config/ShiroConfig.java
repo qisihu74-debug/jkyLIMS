@@ -75,6 +75,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/report/previewTemplate","anon");
         filterChainDefinitionMap.put("/report/downloadQysFile","anon");
         filterChainDefinitionMap.put("/report/preview","anon");
+        filterChainDefinitionMap.put("/sample/downloadSampleTag","anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");
