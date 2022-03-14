@@ -250,6 +250,7 @@
                 #{id}
             </foreach>
         </if>
+        order by t1.request_date
     </select>
 
     <select id="getReportList3" resultType="com.lims.manage.erp.vo.ReportListVo">
