@@ -24,7 +24,7 @@ public class TestReportTemplate extends Model<TestReportTemplate> {
     private String reportCode;
     //产品id
     private String productId;
-    //产品名称
+    //报告名称
     private String reportName;
     //报告模板文件路径
     private String reportFileUri;
