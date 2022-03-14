@@ -112,14 +112,12 @@ public interface ReportService {
 
     /**
      * 待盖章和历史盖章列表查询
-     *
-     * @param type
      * @param search
      * @param pageNum
      * @param pageSize
      * @return
      */
-    PageInfo sealList(String type, String search, Integer pageNum, Integer pageSize,String reportType,String state);
+    PageInfo sealList(String search, Integer pageNum, Integer pageSize,String reportType,String state);
 
 
 

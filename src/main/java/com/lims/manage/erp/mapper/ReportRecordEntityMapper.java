@@ -27,10 +27,9 @@ public interface ReportRecordEntityMapper {
     /**
      * 待盖章、已盖章列表查询
      * @param search
-     * @param type
      * @return
      */
-    List<ReportRecordEntity> getSealList(@Param("type") String type, @Param("search") String search,
+    List<ReportRecordEntity> getSealList(@Param("search") String search,
                                          @Param("reportType") String reportType,@Param("state") String state);
 
 
