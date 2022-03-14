@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public interface SysOssService  {
 
-    Map<String,Object> postAnnounce(MultipartFile[] file);
+    Map<String,Object> postAnnounce(MultipartFile file);
 
 }
 
