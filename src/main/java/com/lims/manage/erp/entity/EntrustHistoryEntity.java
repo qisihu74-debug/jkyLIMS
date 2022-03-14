@@ -63,5 +63,14 @@ public class EntrustHistoryEntity {
      */
     private String dateInterval;
 
+    /**
+     * 当前页码
+     */
+    private Integer pageNum;
+
+    /**
+     * 当前展示页数量
+     */
+    private Integer pageSize;
 
 }

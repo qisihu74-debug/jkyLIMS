@@ -82,5 +82,13 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
     @Select("")
     List<SysUserEntity> getPersonList(String search);
 
+    /**
+     * 通过用户ID 获取使用人名称
+     * @param userId
+     * @return
+     */
+    @Select("SELECT name FROM sys_user WHERE user_id = #{userId}")
+    String getSysUserName(Long userId);
+
 
 }

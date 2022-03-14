@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.alibaba.fastjson.JSONException;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.EntrustHistoryEntity;
 import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
@@ -92,13 +93,13 @@ public interface EntrustService {
      * @param entrustHistoryEntity
      * @return
      */
-    List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException;
+    PageInfo getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException;
     /**
      * 委托单任务待发布列表
      * @param entrustHistoryEntity
      * @return
      */
-    List<EntrustHistoryTaskEntity> getEntrustReleasedList(EntrustHistoryTaskEntity entrustHistoryEntity) throws ParseException;
+    PageInfo getEntrustReleasedList(EntrustHistoryTaskEntity entrustHistoryEntity) throws ParseException;
     /**
      * 史委托信息 具体详情
      * @param entrustmentId

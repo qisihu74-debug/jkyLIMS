@@ -120,6 +120,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             state = 0;
             reportApprovalVo.setVerifyerTime(null);
             reportApprovalVo.setVerifyer(null);
+            reportApprovalVo.setVerifyerId(null);
             reportApprovalVo.setState(state);
             reportApprovalVo.setId(reportApprovalVo1.getId());
             reportApprovalVo.setReason(reportApprovalVo1.getReason());
@@ -301,9 +302,11 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalVo.setIssuerTime(null);
             reportApprovalVo.setIssuer(null);
             reportApprovalVo.setSealType(null);
+            reportApprovalVo.setVerifyerId(null);
             // 审批清除
             reportApprovalVo.setVerifyerTime(null);
             reportApprovalVo.setVerifyer(null);
+            reportApprovalVo.setVerifyerId(null);
             reportApprovalVo.setId(reportApprovalVo1.getId());
             reportApprovalVo.setReason(reportApprovalVo1.getReason());
             reportApprovalVo.setState(state);

@@ -274,6 +274,9 @@ public class EntrustController {
     @RequestMapping("/get_entrust_history")
 //    @RequiresPermissions("test:entrust:get_entrust_history")
     public Result getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
+        if (entrustHistoryEntity.getPageNum() == null || entrustHistoryEntity.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数");
+        }
         if (entrustHistoryEntity.getState() == null) {
             entrustHistoryEntity.setState(0);
         }
@@ -404,6 +407,9 @@ public class EntrustController {
     @RequestMapping("/releasedList")
 //    @RequiresPermissions("test:entrust:releasedList")
     public Result getEntrustReleasedList(EntrustHistoryTaskEntity entrustHistoryEntity) throws ParseException {
+        if (entrustHistoryEntity.getPageNum() == null || entrustHistoryEntity.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数");
+        }
         return ResultUtil.success(entrustService.getEntrustReleasedList(entrustHistoryEntity));
     }
 
@@ -458,16 +464,17 @@ public class EntrustController {
     /**
      * 查询委托单位上一次项目名称、部位
      * 包括 unitData 单位联系人集合
+     *
      * @param companyName
      * @param type
      * @return
      */
     @GetMapping("/getHistoryData_two")
-    public Result getHistoryDataTwo(String companyName,String type) {
-        if (companyName == null||type==null) {
+    public Result getHistoryDataTwo(String companyName, String type) {
+        if (companyName == null || type == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
-            HistoryEntrustDataVo historyData = entrustService.getHistoryData(companyName,Integer.parseInt(type));
+            HistoryEntrustDataVo historyData = entrustService.getHistoryData(companyName, Integer.parseInt(type));
             if (historyData == null) {
                 historyData = new HistoryEntrustDataVo();
             }

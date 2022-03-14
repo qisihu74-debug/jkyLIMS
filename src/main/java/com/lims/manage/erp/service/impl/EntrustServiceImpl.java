@@ -1,6 +1,8 @@
 package com.lims.manage.erp.service.impl;
 
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
@@ -18,14 +20,7 @@ import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
 import com.lims.manage.erp.entity.TestInitDataEntity;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.ProductItemEntityMapper;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestCompanyDao;
-import com.lims.manage.erp.mapper.TestCustomerDao;
-import com.lims.manage.erp.mapper.TestProductDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
@@ -75,6 +70,8 @@ public class EntrustServiceImpl implements EntrustService {
     private ProductItemEntityMapper itemEntityMapper;
     @Autowired
     private TeamMapper teamMapper;
+    @Autowired
+    private SysUserDao sysUserDao;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -816,7 +813,7 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public List<EntrustHistoryEntity> getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
+    public PageInfo getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
         if (entrustHistoryEntity.getDateInterval() != null) {
             String[] strArry = entrustHistoryEntity.getDateInterval().split("~");
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -830,14 +827,21 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         // 获取状态
+        List<EntrustHistoryEntity> dataList =new ArrayList<>();
         if (entrustHistoryEntity.getState() == 1) {
-            return entityMapper.selectEntrustHistoryListRelease_of(entrustHistoryEntity);
+            PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+            dataList = entityMapper.selectEntrustHistoryListRelease_of(entrustHistoryEntity);
+            PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
+            return result;
         }
-        return entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
+        PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+        dataList = entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
+        PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
+        return result;
     }
 
     @Override
-    public List<EntrustHistoryTaskEntity> getEntrustReleasedList(EntrustHistoryTaskEntity entrustHistoryEntity) throws ParseException {
+    public PageInfo getEntrustReleasedList(EntrustHistoryTaskEntity entrustHistoryEntity) throws ParseException {
         entrustHistoryEntity.setState(0);
         if (entrustHistoryEntity.getDateInterval() != null) {
             String[] strArry = entrustHistoryEntity.getDateInterval().split("~");
@@ -851,14 +855,20 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
         }
-
-        return entityMapper.selectEntrustReleasedList(entrustHistoryEntity);
+        PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+        List<EntrustHistoryTaskEntity> dataList = entityMapper.selectEntrustReleasedList(entrustHistoryEntity);
+        PageInfo<EntrustHistoryTaskEntity> result = new PageInfo<>(dataList);
+        return result;
     }
 
     @Override
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
+        if(entrustAddVo.getOperateUser()!=null){
+            // 获取做废人id 查询账号姓名
+            entrustAddVo.setOperateUserStr(sysUserDao.getSysUserName(entrustAddVo.getOperateUser()));
+        }
         // 通过委托单id 获取缴费记录 依据id 同价价格
         entrustAddVo.setPaymentRecord(entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId));
         // -- 支付方式。

@@ -248,7 +248,7 @@
         LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
         WHERE t1.state = 1
         <if test="taskCode!=null and taskCode!=''">
-            and t1.code LIKE CONCAT('%',#{taskCode},'%')
+            and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
         </if>
         <if test="sampleName!=null and sampleName!=''">
             and t4.sample_name LIKE CONCAT('%',#{sampleName},'%')

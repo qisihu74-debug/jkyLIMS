@@ -135,6 +135,12 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             <if test="receivedDate!=null and receivedDate!=''">
                 and sample_requirement LIKE CONCAT('%',#{receivedDate},'%')
             </if>
+            <if test="beginDate!=null and beginDate!=''">
+                and str_to_date( received_date, '%Y-%m-%d' ) &gt;= str_to_date( #{beginDate}, '%Y-%m-%d' )
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                and str_to_date( received_date, '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}, '%Y-%m-%d' )
+            </if>
             <if test="productId!=null">
                 and product_id = #{productId}
             </if>
