@@ -223,9 +223,14 @@ public class EntrustServiceImpl implements EntrustService {
         if (file != null) {
             StringBuilder stringBuilder = new StringBuilder();
             StringBuilder stringfileUrlStr = new StringBuilder();
+
+            // 根据file文件数量 规定文件名存储编号规则
+            Integer fileCode = 10;
             for (MultipartFile multipartFile : file) {
+                code=code+(fileCode++);
                 String name = multipartFile.getOriginalFilename();
                 String[] strings = name.split("\\.");
+
                 String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code + "." + strings[strings.length - 1]);
                 stringBuilder.append(upload);
                 stringBuilder.append(",");
@@ -480,7 +485,7 @@ public class EntrustServiceImpl implements EntrustService {
                     String[] strings2 = entrustData.getFileUrlStr().split(",");
                     for (int i = 0; i < strings2.length; i++) {
                         String[] strings3 = strings2[i].split("\\.");
-                        MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure, code + "." + strings3[strings2.length - 1]);
+                        MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure, (code+10+(i+1)) + "." + strings3[strings2.length - 1]);
                     }
                 } catch (Exception e) {
                     logger.info("修改委托下清除 MinIo 桶数据 出错");
@@ -489,7 +494,9 @@ public class EntrustServiceImpl implements EntrustService {
 
             StringBuilder stringBuilder = new StringBuilder();
             StringBuilder stringfileUrlStr = new StringBuilder();
+            Integer fileCode = 10;
             for (MultipartFile multipartFile : file) {
+                code = code+(fileCode++);
                 String name = multipartFile.getOriginalFilename();
                 String[] strings = name.split("\\.");
                 String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code + "." + strings[strings.length - 1]);
