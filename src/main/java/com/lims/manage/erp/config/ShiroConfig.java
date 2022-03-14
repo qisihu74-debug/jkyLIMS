@@ -71,6 +71,10 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/task/downloadEntrust_two", "anon");
         filterChainDefinitionMap.put("/task/downloadOriginalRecord", "anon");
         filterChainDefinitionMap.put("/entrust/downloadEntrust","anon");
+        filterChainDefinitionMap.put("/task/downloadEntrust","anon");
+        filterChainDefinitionMap.put("/report/previewTemplate","anon");
+        filterChainDefinitionMap.put("/report/downloadQysFile","anon");
+        filterChainDefinitionMap.put("/report/preview","anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");
