@@ -154,6 +154,11 @@ public class SampleServiceImpl implements SampleService {
     @Override
     public PageInfo getSampleDataList2(SampleEntity sampleEntity) {
         PageHelper.startPage(sampleEntity.getPageNum(), sampleEntity.getPageSize());
+        if (sampleEntity.getReceivedDate() != null) {
+            String[] split = sampleEntity.getReceivedDate().split("~");
+            sampleEntity.setBeginDate(split[0]);
+            sampleEntity.setEndDate(split[1]);
+        }
         List<SampleEntity> list = sampleEntityMapper.selectSampleList(sampleEntity);
         PageInfo<SampleEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;

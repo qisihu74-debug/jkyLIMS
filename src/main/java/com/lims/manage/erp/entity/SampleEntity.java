@@ -146,6 +146,10 @@ public class SampleEntity {
     private Integer pageNum;
     @TableField(exist = false)
     private Integer pageSize;
+    @TableField(exist = false)
+    private String beginDate;
+    @TableField(exist = false)
+    private String endDate;
 
     /**
      * 样品下检测项、检测依据、总价
