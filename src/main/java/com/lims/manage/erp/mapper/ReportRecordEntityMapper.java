@@ -116,7 +116,7 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     @Select("select template_name from test_report_record where entrustment_id = #{entrustId}")
-    String getReportModelNameById(@Param("entrustId") Long entrustId);
+    List<String> getReportModelNameById(@Param("entrustId") Long entrustId);
 
     /**
      * 根据委托单id更新契约锁响应的docId和本业务状态

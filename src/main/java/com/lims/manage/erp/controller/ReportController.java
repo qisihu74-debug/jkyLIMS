@@ -217,8 +217,6 @@ public class ReportController {
 
     /**
      * 待盖章和历史盖章列表查询
-     *
-     * @param type
      * @param search
      * @param pageNum
      * @param pageSize
