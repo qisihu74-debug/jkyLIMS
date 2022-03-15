@@ -225,9 +225,9 @@ public class EntrustServiceImpl implements EntrustService {
             StringBuilder stringfileUrlStr = new StringBuilder();
 
             // 根据file文件数量 规定文件名存储编号规则
-            Integer fileCode = 10;
+            Integer fileCode = 0;
             for (MultipartFile multipartFile : file) {
-                code=code+(fileCode++);
+                code = code + (fileCode+1);
                 String name = multipartFile.getOriginalFilename();
                 String[] strings = name.split("\\.");
 
@@ -327,7 +327,7 @@ public class EntrustServiceImpl implements EntrustService {
             testCompanyJsonEntity.setContactWay(basisInfo.getEntrustPhone());
             testCompanyJsonEntity.setType("1");
             String entrustCompanystr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
-            if(entrustCompanystr==null){
+            if (entrustCompanystr == null) {
                 // 保存新的委托联系人姓名 和所属委托单位公司id
                 Integer companyId = entityMapper.getCompanyId(basisInfo.getEntrustCompany(), 1);
                 TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
@@ -344,7 +344,7 @@ public class EntrustServiceImpl implements EntrustService {
             testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
             testCompanyJsonEntity.setType("2");
             String WitnessUintstr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
-            if(WitnessUintstr==null){
+            if (WitnessUintstr == null) {
                 // 保存新的见证联系人姓名 和所属见证单位公司id
                 Integer companyId = entityMapper.getCompanyId(basisInfo.getWitnessUint(), 2);
                 TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
@@ -485,7 +485,9 @@ public class EntrustServiceImpl implements EntrustService {
                     String[] strings2 = entrustData.getFileUrlStr().split(",");
                     for (int i = 0; i < strings2.length; i++) {
                         String[] strings3 = strings2[i].split("\\.");
-                        MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure, (code+10+(i+1)) + "." + strings3[strings2.length - 1]);
+                        if (strings3.length >= 2) {
+                            MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure, (code + (i + 1)) + "." + strings3[1]);
+                        }
                     }
                 } catch (Exception e) {
                     logger.info("修改委托下清除 MinIo 桶数据 出错");
@@ -494,9 +496,9 @@ public class EntrustServiceImpl implements EntrustService {
 
             StringBuilder stringBuilder = new StringBuilder();
             StringBuilder stringfileUrlStr = new StringBuilder();
-            Integer fileCode = 10;
+            Integer fileCode = 0;
             for (MultipartFile multipartFile : file) {
-                code = code+(fileCode++);
+                code = code + (fileCode+1);
                 String name = multipartFile.getOriginalFilename();
                 String[] strings = name.split("\\.");
                 String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, code + "." + strings[strings.length - 1]);
@@ -544,7 +546,7 @@ public class EntrustServiceImpl implements EntrustService {
             testCompanyJsonEntity.setContactWay(basisInfo.getEntrustPhone());
             testCompanyJsonEntity.setType("1");
             String entrustCompanystr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
-            if(entrustCompanystr==null){
+            if (entrustCompanystr == null) {
                 // 保存新的委托联系人姓名 和所属委托单位公司id
                 Integer companyId = entityMapper.getCompanyId(basisInfo.getEntrustCompany(), 1);
                 TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
@@ -561,7 +563,7 @@ public class EntrustServiceImpl implements EntrustService {
             testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
             testCompanyJsonEntity.setType("2");
             String WitnessUintstr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
-            if(WitnessUintstr==null){
+            if (WitnessUintstr == null) {
                 // 保存新的见证联系人姓名 和所属见证单位公司id
                 Integer companyId = entityMapper.getCompanyId(basisInfo.getWitnessUint(), 2);
                 TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
@@ -834,7 +836,7 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         // 获取状态
-        List<EntrustHistoryEntity> dataList =new ArrayList<>();
+        List<EntrustHistoryEntity> dataList = new ArrayList<>();
         if (entrustHistoryEntity.getState() == 1) {
             PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
             dataList = entityMapper.selectEntrustHistoryListRelease_of(entrustHistoryEntity);
@@ -872,7 +874,7 @@ public class EntrustServiceImpl implements EntrustService {
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
-        if(entrustAddVo.getOperateUser()!=null){
+        if (entrustAddVo.getOperateUser() != null) {
             // 获取做废人id 查询账号姓名
             entrustAddVo.setOperateUserStr(sysUserDao.getSysUserName(entrustAddVo.getOperateUser()));
         }
@@ -1137,16 +1139,15 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public HistoryEntrustDataVo getHistoryData(String name, Integer type) {
         HistoryEntrustDataVo data = new HistoryEntrustDataVo();
-        HistoryEntrustDataVo jsonData  = entityMapper.getHistoryData(name);
-        if(jsonData!=null){
+        HistoryEntrustDataVo jsonData = entityMapper.getHistoryData(name);
+        if (jsonData != null) {
             data.setProjectName(jsonData.getProjectName());
             data.setProjectPart(jsonData.getProjectPart());
         }
         List<TestCompanyJsonEntity> dataList = entityMapper.getCompanyJsonEntityList(name, type);
-        if(dataList.size()>0){
+        if (dataList.size() > 0) {
             data.setUnitData(dataList);
-        }
-        else{
+        } else {
             data.setUnitData(new ArrayList<TestCompanyJsonEntity>());
         }
         return data;
