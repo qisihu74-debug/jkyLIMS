@@ -471,7 +471,7 @@
                 issuer_id = #{issuerId},
             </if>
             <if test="reportUrl != null">
-                report_url = #{reportUrl,jdbcType=VARCHAR},
+                template_name = #{reportUrl,jdbcType=VARCHAR},
             </if>
         </set>
         where entrustment_id = #{entrustmentId,jdbcType=BIGINT}
