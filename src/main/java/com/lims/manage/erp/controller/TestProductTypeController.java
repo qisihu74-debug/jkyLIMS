@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lims.manage.erp.entity.TestMethod;
+import com.lims.manage.erp.entity.TestProduct;
 import com.lims.manage.erp.entity.TestProductType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
@@ -33,6 +34,13 @@ public class TestProductTypeController extends ApiController {
     @Resource
     private TestProductTypeService testProductTypeService;
 
+    @GetMapping("/getList")
+    public Result getAll(TestProductType productType) {
+        QueryWrapper<TestProductType> queryWrapper=new QueryWrapper<>(productType);
+        queryWrapper.orderByDesc("create_time");
+        queryWrapper.eq("del_flag",0);
+        return ResultUtil.success(this.testProductTypeService.list(queryWrapper));
+    }
     /**
      * 分页查询所有数据
      *

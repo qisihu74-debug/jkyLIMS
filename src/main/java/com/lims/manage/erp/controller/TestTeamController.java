@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.entity.TestSkillList;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
@@ -35,6 +36,14 @@ public class TestTeamController extends ApiController {
     @Resource
     private TestTeamService testTeamService;
 
+
+    @GetMapping("/getList")
+    public Result getAll(TestTeam testTeam) {
+        QueryWrapper<TestTeam> queryWrapper=new QueryWrapper<>(testTeam);
+        queryWrapper.eq("del_flag",0);
+        queryWrapper.orderByDesc("create_time");
+        return ResultUtil.success(this.testTeamService.list(queryWrapper));
+    }
     /**
      * 分页查询所有数据
      *
