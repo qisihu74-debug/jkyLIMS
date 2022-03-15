@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.TestReportQualifcationDao">
+
+    <resultMap type="com.lims.manage.erp.entity.TestReportQualifcation" id="TestReportQualifcationMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="checkItemId" column="check_item_id" jdbcType="INTEGER"/>
+        <result property="checkBasisCode" column="check_basis_code" jdbcType="VARCHAR"/>
+        <result property="countType" column="count_type" jdbcType="VARCHAR"/>
+        <result property="specsContent" column="specs_content" jdbcType="VARCHAR"/>
+        <result property="conditionKey" column="condition_key" jdbcType="VARCHAR"/>
+        <result property="conditionValue" column="condition_value" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap type="com.lims.manage.erp.vo.TestReportQualifcationVo" id="TestReportQualifcationVoMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="checkItemId" column="check_item_id" jdbcType="INTEGER"/>
+        <result property="checkBasisCode" column="check_basis_code" jdbcType="VARCHAR"/>
+        <result property="countType" column="count_type" jdbcType="VARCHAR"/>
+        <result property="specsContent" column="specs_content" jdbcType="VARCHAR"/>
+        <result property="conditionKey" column="condition_key" jdbcType="VARCHAR"/>
+        <result property="conditionValue" column="condition_value" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="checkItemName" column="checkItemName" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="getListPage" resultMap="TestReportQualifcationVoMap">
+        select q.*,p.check_item_name as checkItemName
+        from JKERP.test_report_qualifcation q
+        left join JKERP.test_product_item p
+        on p.check_item_id=q.check_item_id
+        ${ew.customSqlsegment}
+    </select>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into JKERP.test_report_qualifcation(check_item_id, check_basis_code, count_type, specs_content, condition_key, condition_value, status, del_flag, create_time, update_time, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.checkItemId}, #{entity.checkBasisCode}, #{entity.countType}, #{entity.specsContent}, #{entity.conditionKey}, #{entity.conditionValue}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into JKERP.test_report_qualifcation(check_item_id, check_basis_code, count_type, specs_content, condition_key, condition_value, status, del_flag, create_time, update_time, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.checkItemId}, #{entity.checkBasisCode}, #{entity.countType}, #{entity.specsContent}, #{entity.conditionKey}, #{entity.conditionValue}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+        </foreach>
+        on duplicate key update
+         check_item_id = values(check_item_id) , check_basis_code = values(check_basis_code) , count_type = values(count_type) , specs_content = values(specs_content) , condition_key = values(condition_key) , condition_value = values(condition_value) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , remark = values(remark)     </insert>
+
+</mapper>
+

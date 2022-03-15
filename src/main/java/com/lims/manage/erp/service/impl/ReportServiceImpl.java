@@ -764,9 +764,9 @@ public class ReportServiceImpl implements ReportService {
         //step1 根据文件类型创建合同文档
         String url = "";
         MinioClient client = MinIoUtil.minioClient;
-        String code = recordEntityMapper.getReportModelNameById(entrustId);
+        List<String> code = recordEntityMapper.getReportModelNameById(entrustId);
         try {
-            url = downLoad(client,code,entrustId);
+            url = downLoad(client,code.get(0),entrustId);
         }catch (Exception e){
             logger.error("盖章下载报告文件失败:{}",e);
         }

@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lims.manage.erp.entity.TestMethod;
 import com.lims.manage.erp.entity.TestProduct;
 import com.lims.manage.erp.entity.TestReportTemplate;
+import com.lims.manage.erp.entity.TestStandardFile;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestReportTemplateService;
@@ -34,6 +35,13 @@ public class TestReportTemplateController extends ApiController {
     @Resource
     private TestReportTemplateService testReportTemplateService;
 
+    @GetMapping("/getList")
+    public Result getAll(TestReportTemplate testReportTemplate) {
+        QueryWrapper<TestReportTemplate> queryWrapper=new QueryWrapper<>(testReportTemplate);
+        queryWrapper.orderByDesc("create_time");
+        queryWrapper.eq("del_flag",0);
+        return ResultUtil.success(this.testReportTemplateService.list(queryWrapper));
+    }
     /**
      * 分页查询所有数据
      *

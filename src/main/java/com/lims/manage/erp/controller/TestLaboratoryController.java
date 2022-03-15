@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.entity.TestInstrumentType;
 import com.lims.manage.erp.entity.TestLaboratory;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
@@ -36,6 +37,13 @@ public class TestLaboratoryController extends ApiController {
     @Resource
     private TestLaboratoryService testLaboratoryService;
 
+    @GetMapping("/getList")
+    public Result getAll(TestLaboratory testLaboratory) {
+        QueryWrapper<TestLaboratory> queryWrapper=new QueryWrapper<>(testLaboratory);
+        queryWrapper.orderByDesc("create_time");
+        queryWrapper.eq("del_flag",0);
+        return ResultUtil.success(this.testLaboratoryService.list(queryWrapper));
+    }
     /**
      * 分页查询所有数据
      *

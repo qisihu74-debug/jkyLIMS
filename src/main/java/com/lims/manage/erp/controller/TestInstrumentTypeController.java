@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.entity.TestInstrumentType;
+import com.lims.manage.erp.entity.TestMethod;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestInstrumentTypeService;
@@ -33,6 +34,13 @@ public class TestInstrumentTypeController extends ApiController {
     @Resource
     private TestInstrumentTypeService testInstrumentTypeService;
 
+    @GetMapping("/getList")
+    public Result getAll(TestInstrumentType testInstrumentType) {
+        QueryWrapper<TestInstrumentType> queryWrapper=new QueryWrapper<>(testInstrumentType);
+        queryWrapper.orderByDesc("create_time");
+        queryWrapper.eq("del_flag",0);
+        return ResultUtil.success(this.testInstrumentTypeService.list(queryWrapper));
+    }
     /**
      * 分页查询所有数据
      *
