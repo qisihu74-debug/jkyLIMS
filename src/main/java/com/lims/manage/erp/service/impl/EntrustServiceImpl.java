@@ -233,8 +233,8 @@ public class EntrustServiceImpl implements EntrustService {
                 String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, fileCode + "." + strings[strings.length - 1]);
                 stringBuilder.append(upload);
                 stringBuilder.append(",");
-                // 存放上传文件的名称带后缀如：（委托文档资料&文件编号.pdf,原始文档&文件编号.docx）
-                stringfileUrlStr.append(name+"&"+fileCode);
+                // 存放上传文件的名称带后缀如：（文件编号&委托文档资料.pdf,文件编号&原始文档.docx）
+                stringfileUrlStr.append(fileCode+"&"+name);
                 stringfileUrlStr.append(",");
             }
             String fileUrl = stringBuilder.toString();
@@ -486,7 +486,7 @@ public class EntrustServiceImpl implements EntrustService {
                         if (strings3.length >= 2) {
                             String[] strings4 = strings3[0].split("&");
                             // 获取 文件编号
-                             Long fileCode =Long.parseLong(strings4[1]);
+                             Long fileCode =Long.parseLong(strings4[0]);
                             MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure, fileCode + "." + strings3[1]);
                         }
                     }
@@ -504,8 +504,8 @@ public class EntrustServiceImpl implements EntrustService {
                 String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, fileCode + "." + strings[strings.length - 1]);
                 stringBuilder.append(upload);
                 stringBuilder.append(",");
-                // 存放上传文件的名称带后缀如：（委托文档资料&编号.pdf,原始文档&文件编号.docx）
-                stringfileUrlStr.append(name+"&"+fileCode);
+                // 存放上传文件的名称带后缀如：（文件编号&委托文档资料.pdf,文件编号&原始文档.docx）
+                stringfileUrlStr.append(fileCode+"&"+name);
                 stringfileUrlStr.append(",");
             }
             String fileUrl = stringBuilder.toString();
