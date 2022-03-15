@@ -40,8 +40,9 @@ public class TestProductController extends ApiController {
 
     @GetMapping("/getList")
     public Result getAll(TestProduct testProduct) {
-        QueryWrapper<TestProduct> queryWrapper=new QueryWrapper<>();
+        QueryWrapper<TestProduct> queryWrapper=new QueryWrapper<>(testProduct);
         queryWrapper.orderByDesc("create_time");
+        queryWrapper.eq("del_flag",0);
         return ResultUtil.success(this.testProductService.list(queryWrapper));
     }
     /**

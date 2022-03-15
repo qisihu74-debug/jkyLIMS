@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lims.manage.erp.entity.Patent;
+import com.lims.manage.erp.entity.TestProductType;
 import com.lims.manage.erp.entity.TestStandardFile;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
@@ -33,6 +34,16 @@ public class TestStandardFileController extends ApiController {
     @Resource
     private TestStandardFileService testStandardFileService;
 
+    @GetMapping("/getList")
+    public Result getAll(TestStandardFile testStandardFile) {
+        QueryWrapper<TestStandardFile> queryWrapper=new QueryWrapper<>();
+        if (testStandardFile.getType()!=null){
+            queryWrapper.ne("type",testStandardFile.getType());
+        }
+        queryWrapper.eq("del_flag",0);
+        queryWrapper.orderByDesc("create_time");
+        return ResultUtil.success(this.testStandardFileService.list(queryWrapper));
+    }
     /**
      * 分页查询所有数据
      *

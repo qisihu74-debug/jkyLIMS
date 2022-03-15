@@ -42,6 +42,8 @@ public class TestProductItemController extends ApiController {
         if (testProductItem.getProductId()!=null){
             queryWrapper.like("product_id",testProductItem.getProductId());
         }
+        queryWrapper.eq("del_flag",0);
+        queryWrapper.orderByDesc("create_time");
         return ResultUtil.success(this.testProductItemService.list(queryWrapper));
     }
     /**

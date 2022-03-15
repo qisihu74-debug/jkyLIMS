@@ -1,13 +1,9 @@
 package com.lims.manage.erp.controller;
 
-
-
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.lims.manage.erp.entity.TestInstrumentType;
 import com.lims.manage.erp.entity.TestMethod;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
@@ -33,6 +29,13 @@ public class TestMethodController extends ApiController {
     @Resource
     private TestMethodService testMethodService;
 
+    @GetMapping("/getList")
+    public Result getAll(TestMethod testMethod) {
+        QueryWrapper<TestMethod> queryWrapper=new QueryWrapper<>(testMethod);
+        queryWrapper.orderByDesc("create_time");
+        queryWrapper.eq("del_flag",0);
+        return ResultUtil.success(this.testMethodService.list(queryWrapper));
+    }
     /**
      * 分页查询所有数据
      *
