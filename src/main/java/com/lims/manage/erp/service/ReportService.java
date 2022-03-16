@@ -108,6 +108,8 @@ public interface ReportService {
      * @param vo
      * @return
      */
+    Boolean preserve1(ReportPreserveVo vo);
+
     Boolean preserve(ReportPreserveVo vo);
 
     /**
