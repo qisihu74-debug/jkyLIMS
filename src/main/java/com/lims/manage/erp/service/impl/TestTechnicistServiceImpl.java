@@ -11,7 +11,10 @@ import com.lims.manage.erp.mapper.TestTechnicistDao;
 import com.lims.manage.erp.entity.TestTechnicist;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestTechnicistService;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.TestTechnicistVo;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +33,14 @@ import java.util.List;
 public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, TestTechnicist> implements TestTechnicistService {
     @Resource
     private TestTechnicistDao testTechnicistDao;
+    @Resource
+    private LogManagerService logManagerService;
     @Override
     public Result addTestTechnicist(TestTechnicist TestTechnicist) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         if (TestTechnicist.getUserId()==null){
             return ResultUtil.error("用户编号不能为空");
         }
@@ -45,14 +54,20 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
         TestTechnicist.setDelFlag(0);
         TestTechnicist.setCreateTime(new Date());
         if (this.save(TestTechnicist)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加技术人员"+TestTechnicist.getId()+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
             return ResultUtil.success("添加成功!");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加技术人员失败!", Const.TEAM_MANAGEMENT_LOG,false);
             return ResultUtil.error("添加失败，未知异常!");
         }
     }
 
     @Override
     public Result updTestTechnicist(TestTechnicist TestTechnicist) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         if (TestTechnicist.getId()==null){
             return ResultUtil.error("修改对象ID为空");
         }
@@ -67,14 +82,20 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
         }
         TestTechnicist.setUpdateTime(new Date());
         if (this.updateById(TestTechnicist)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改技术人员"+TestTechnicist.getId()+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
             return ResultUtil.success("修改成功!");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改技术人员"+TestTechnicist.getId()+"失败!", Const.TEAM_MANAGEMENT_LOG,false);
             return ResultUtil.error("修改失败，未知异常!");
         }
     }
 
     @Override
     public Result delTestTechnicist(List<Long> idList) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         List<TestTechnicist> testLaboratoryList=new ArrayList<>();
         for (Long aLong : idList) {
             TestTechnicist testLaboratory=new TestTechnicist();
@@ -83,9 +104,12 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
             testLaboratory.setId(aLong.intValue());
             testLaboratoryList.add(testLaboratory);
         }
+        String idStr=idList.toString();
         if (this.updateBatchById(testLaboratoryList)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除技术人员"+idStr+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
             return ResultUtil.success("删除成功");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除技术人员"+idStr+"失败!", Const.TEAM_MANAGEMENT_LOG,false);
             return ResultUtil.error("删除失败");
         }
     }

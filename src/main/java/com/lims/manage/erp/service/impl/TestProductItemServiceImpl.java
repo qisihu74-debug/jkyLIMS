@@ -7,6 +7,8 @@ import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.TestProductItemParamVo;
 import com.lims.manage.erp.vo.TestProductItemSelVo;
 import org.springframework.stereotype.Service;
@@ -45,8 +47,15 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
     /*模板*/
     @Resource
     private TestReportTemplateService testReportTemplateService;
+    /*日志*/
+    @Resource
+    private LogManagerService logManagerService;
     @Override
     public Result addTestProductItem(TestProductItemParamVo testProductItemParamVo) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
                 if (testProductItemParamVo.getTestProductItem().getCheckItemName()==null){
                     return ResultUtil.error("检测项目名称不能为空");
                 }
@@ -75,14 +84,20 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                             testProductItemInstrumentTypeRelService.save(new TestProductItemInstrumentTypeRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),TypeId));
                         }
                     }
+                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品检测项"+testProductItemParamVo.getTestProductItem().getCheckItemId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
                     return ResultUtil.success("添加成功");
                 }else {
+                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品检测项失败!", Const.DETECTION_MANAGEMENT_LOG,false);
                     return ResultUtil.error("添加检查项失败，未知异常!");
                 }
     }
 
     @Override
     public Result updTestProductItem(TestProductItemParamVo testProductItemParamVo) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         if (testProductItemParamVo.getTestProductItem().getCheckItemId()==null){
             return ResultUtil.error("缺少修改对象");
         }
@@ -118,14 +133,20 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                     testProductItemInstrumentTypeRelService.save(new TestProductItemInstrumentTypeRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),TypeId));
                 }
             }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改产品检测项"+testProductItemParamVo.getTestProductItem().getCheckItemId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
             return ResultUtil.success("修改成功");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改产品检测项"+testProductItemParamVo.getTestProductItem().getCheckItemId()+"失败!", Const.DETECTION_MANAGEMENT_LOG,false);
             return ResultUtil.error("修改检查项失败，未知异常!");
         }
     }
 
     @Override
     public Result delTestProductItem(List<Long> idList) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         List<TestProductItem> testMethods=new ArrayList<>();
         for (Long aLong : idList) {
             TestProductItem testMethod=new TestProductItem();
@@ -134,9 +155,12 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
             testMethod.setCheckItemId(aLong.intValue());
             testMethods.add(testMethod);
         }
+        String idStr=idList.toString();
         if (this.updateBatchById(testMethods)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除产品检测项"+idStr+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
             return ResultUtil.success("删除成功");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除产品检测项"+idStr+"失败!", Const.DETECTION_MANAGEMENT_LOG,false);
             return ResultUtil.error("删除失败");
         }
     }
