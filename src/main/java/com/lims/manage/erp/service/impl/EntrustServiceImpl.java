@@ -1022,6 +1022,7 @@ public class EntrustServiceImpl implements EntrustService {
             vo.setEntrustmentId(entity.getEntrustmentId());
             vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
             vo.setState(0);
+            vo.setReportComplete(2);
             vo.setOrderer(ShiroUtils.getUserInfo().getName());
 //            if(deptId.equals(dept)){
             if (dept.contains(deptId)) {

@@ -58,7 +58,7 @@ public class TestInstrumentController extends ApiController {
         QueryWrapper<TestInstrument> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("i.del_flag",0);
         if (testInstrument.getName()!=null){
-            queryWrapper.like("name",testInstrument.getName());
+            queryWrapper.like("i.name",testInstrument.getName());
         }
         queryWrapper.orderByDesc("i.create_time");
         return ResultUtil.success(this.testInstrumentService.getPageList(page, queryWrapper));
