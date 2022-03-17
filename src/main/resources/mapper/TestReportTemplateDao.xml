@@ -18,7 +18,7 @@
 
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_report_template(report_code, product_id, report_name, report_file_uri, is_available, status, del_flag, create_time, update_time, remark)
+        insert into test_report_template(report_code, product_id, report_name, report_file_uri, is_available, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.reportCode}, #{entity.productId}, #{entity.reportName}, #{entity.reportFileUri}, #{entity.isAvailable}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
@@ -26,7 +26,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_report_template(report_code, product_id, report_name, report_file_uri, is_available, status, del_flag, create_time, update_time, remark)
+        insert into test_report_template(report_code, product_id, report_name, report_file_uri, is_available, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.reportCode}, #{entity.productId}, #{entity.reportName}, #{entity.reportFileUri}, #{entity.isAvailable}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})

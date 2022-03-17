@@ -35,15 +35,15 @@
 
     <select id="getListPage" resultMap="TestReportQualifcationVoMap">
         select q.*,p.check_item_name as checkItemName
-        from JKERP.test_report_qualifcation q
-        left join JKERP.test_product_item p
+        from test_report_qualifcation q
+        left join test_product_item p
         on p.check_item_id=q.check_item_id
         ${ew.customSqlsegment}
     </select>
 
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_report_qualifcation(check_item_id, check_basis_code, count_type, specs_content, condition_key, condition_value, status, del_flag, create_time, update_time, remark)
+        insert into test_report_qualifcation(check_item_id, check_basis_code, count_type, specs_content, condition_key, condition_value, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.checkItemId}, #{entity.checkBasisCode}, #{entity.countType}, #{entity.specsContent}, #{entity.conditionKey}, #{entity.conditionValue}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
@@ -51,7 +51,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_report_qualifcation(check_item_id, check_basis_code, count_type, specs_content, condition_key, condition_value, status, del_flag, create_time, update_time, remark)
+        insert into test_report_qualifcation(check_item_id, check_basis_code, count_type, specs_content, condition_key, condition_value, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.checkItemId}, #{entity.checkBasisCode}, #{entity.countType}, #{entity.specsContent}, #{entity.conditionKey}, #{entity.conditionValue}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})

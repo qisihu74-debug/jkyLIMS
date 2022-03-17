@@ -39,18 +39,18 @@
 
     <select id="getListPage" resultMap="TestTechnicistVOMap">
         select i.*,
-        (select u.name from JKERP.sys_user u where i.user_id=u.user_id)as userName,
-        (select t.name from JKERP.test_team t where i.team_id=t.id and t.del_flag=0  ) as teamName
-        from JKERP.test_technicist i
+        (select u.name from sys_user u where i.user_id=u.user_id)as userName,
+        (select t.name from test_team t where i.team_id=t.id and t.del_flag=0  ) as teamName
+        from test_technicist i
         ${ew.customSqlsegment}
     </select>
 
     <select id="getUserList" resultType="com.lims.manage.erp.entity.SysUserEntity">
-        select user_id,name from JKERP.sys_user;
+        select user_id,name from sys_user;
     </select>
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_technicist(user_id, team_id, post_name, post_grade, certificate_name, certificate_url, skill, status, del_flag, create_time, update_time, remark)
+        insert into test_technicist(user_id, team_id, post_name, post_grade, certificate_name, certificate_url, skill, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.userId}, #{entity.teamId}, #{entity.postName}, #{entity.postGrade}, #{entity.certificateName}, #{entity.certificateUrl}, #{entity.skill}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
@@ -58,7 +58,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_technicist(user_id, team_id, post_name, post_grade, certificate_name, certificate_url, skill, status, del_flag, create_time, update_time, remark)
+        insert into test_technicist(user_id, team_id, post_name, post_grade, certificate_name, certificate_url, skill, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.userId}, #{entity.teamId}, #{entity.postName}, #{entity.postGrade}, #{entity.certificateName}, #{entity.certificateUrl}, #{entity.skill}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})

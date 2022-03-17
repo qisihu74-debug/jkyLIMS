@@ -10,7 +10,7 @@
 
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_product_item_instrument_type_rel(check_item_id, intrusment_type_id)
+        insert into test_product_item_instrument_type_rel(check_item_id, intrusment_type_id)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.checkItemId}, #{entity.intrusmentTypeId})
@@ -18,7 +18,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_product_item_instrument_type_rel(check_item_id, intrusment_type_id)
+        insert into test_product_item_instrument_type_rel(check_item_id, intrusment_type_id)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.checkItemId}, #{entity.intrusmentTypeId})

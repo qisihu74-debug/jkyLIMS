@@ -34,12 +34,12 @@
     </resultMap>
 
     <select id="getListPage" resultMap="TestTeamVoMap">
-        select t.*,(select count(0) from JKERP.test_technicist i where t.id=i.team_id and i.del_flag=0 ) as technicistCount from JKERP.test_team t
+        select t.*,(select count(0) from test_technicist i where t.id=i.team_id and i.del_flag=0 ) as technicistCount from test_team t
             ${ew.customSqlsegment}
     </select>
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_team(name, pid, code, team_lead, team_lead1, lead_tel, status, del_flag, create_time, update_time, remark)
+        insert into test_team(name, pid, code, team_lead, team_lead1, lead_tel, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.name}, #{entity.pid}, #{entity.code}, #{entity.teamLead}, #{entity.teamLead1}, #{entity.leadTel}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
@@ -47,7 +47,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_team(name, pid, code, team_lead, team_lead1, lead_tel, status, del_flag, create_time, update_time, remark)
+        insert into test_team(name, pid, code, team_lead, team_lead1, lead_tel, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.name}, #{entity.pid}, #{entity.code}, #{entity.teamLead}, #{entity.teamLead1}, #{entity.leadTel}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})

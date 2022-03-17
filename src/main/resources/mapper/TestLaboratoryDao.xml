@@ -34,12 +34,12 @@
     </resultMap>
 
     <select id="getListPage" resultMap="TestLaboratoryVoMap">
-        select t.*,(select count(0) from JKERP.test_instrument i where t.id=i.laboratory_id and i.del_flag=0 ) as quantity from JKERP.test_laboratory t
+        select t.*,(select count(0) from test_instrument i where t.id=i.laboratory_id and i.del_flag=0 ) as quantity from test_laboratory t
         ${ew.customSqlsegment}
     </select>
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_laboratory(name, code, administintor, position, phone, picture, status, del_flag, create_time, update_time, remark)
+        insert into test_laboratory(name, code, administintor, position, phone, picture, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.name}, #{entity.code}, #{entity.administintor}, #{entity.position}, #{entity.phone}, #{entity.picture}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
@@ -47,7 +47,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_laboratory(name, code, administintor, position, phone, picture, status, del_flag, create_time, update_time, remark)
+        insert into test_laboratory(name, code, administintor, position, phone, picture, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.name}, #{entity.code}, #{entity.administintor}, #{entity.position}, #{entity.phone}, #{entity.picture}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})

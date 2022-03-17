@@ -9,7 +9,7 @@
 
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_instrument_type(name)
+        insert into DateUtiltest_instrument_type(name)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.name})
@@ -17,7 +17,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_instrument_type(name)
+        insert into test_instrument_type(name)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.name})
