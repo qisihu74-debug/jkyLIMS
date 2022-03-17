@@ -6,7 +6,7 @@
         SELECT u.position AS position,u.username AS username
         FROM
             test_team t
-            LEFT JOIN test_user_team_rel tr
+            LEFT JOIN test_technicist tr
         ON t.id = tr.team_id
             LEFT JOIN sys_user u ON tr.user_id = u.user_id
         WHERE
@@ -26,14 +26,15 @@
                             ELSE 0
                             END ischild
                  FROM (SELECT id, pid, NAME, del_flag FROM test_team ORDER BY pid, id) t1,
-                      (SELECT @pids := ( SELECT team_id FROM test_technicist WHERE user_id = #{userId} )) t2
+                      (SELECT @pids := ( SELECT team_id FROM test_technicist WHERE user_id = #{userId} and del_flag = 0 )) t2
              ) t3
         WHERE ischild != 0
 	AND del_flag = 0
         UNION ALL
         SELECT team_id
         FROM test_technicist
-        WHERE user_id = #{userId}
+        WHERE
+        del_flag = 0  AND user_id = #{userId}
     </select>
 
     <select id="getUsersByTeams" resultType="java.lang.Long">
@@ -41,7 +42,7 @@
         u.user_id
         FROM
         test_team t
-        LEFT JOIN test_user_team_rel tr ON t.id = tr.team_id
+        LEFT JOIN test_technicist tr ON t.id = tr.team_id
         LEFT JOIN sys_user u ON tr.user_id = u.user_id
         WHERE
         t.id IN

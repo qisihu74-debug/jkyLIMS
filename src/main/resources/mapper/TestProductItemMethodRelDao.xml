@@ -15,7 +15,7 @@
 
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_product_item_method_rel(check_item_id, method_id, status, del_flag, create_time, update_time, remark)
+        insert into test_product_item_method_rel(check_item_id, method_id, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.checkItemId}, #{entity.methodId}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
@@ -23,7 +23,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_product_item_method_rel(check_item_id, method_id, status, del_flag, create_time, update_time, remark)
+        insert into test_product_item_method_rel(check_item_id, method_id, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.checkItemId}, #{entity.methodId}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})

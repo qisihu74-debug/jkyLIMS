@@ -22,9 +22,9 @@ public interface ReportMapper {
      *
      * @return
      */
-    List<ReportListVo> getReportList2(@Param("deptIds") List<Long> deptIds);
+    List<ReportListVo> getReportList2(@Param("deptIds") List<Long> deptIds,@Param("taskCode") String taskCode);
 
-    List<ReportListVo> reportDownloadList(@Param("deptIds") List<Long> deptIds);
+    List<ReportListVo> reportDownloadList(@Param("deptIds") List<Long> deptIds,@Param("reportCode") String reportCode);
 
     /**
      * 查询下载报告列表--科室

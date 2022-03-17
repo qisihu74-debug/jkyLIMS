@@ -16,7 +16,7 @@
 
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="productTypeId" useGeneratedKeys="true">
-        insert into JKERP.test_product_type(product_type_name, is_valid, code, status, del_flag, create_time, update_time, remark)
+        insert into test_product_type(product_type_name, is_valid, code, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.productTypeName}, #{entity.isValid}, #{entity.code}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
@@ -24,7 +24,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="productTypeId" useGeneratedKeys="true">
-        insert into JKERP.test_product_type(product_type_name, is_valid, code, status, del_flag, create_time, update_time, remark)
+        insert into test_product_type(product_type_name, is_valid, code, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.productTypeName}, #{entity.isValid}, #{entity.code}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})

@@ -17,7 +17,7 @@
 
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_skill_list(tech_user_id, tech_user_name, check_item_id, check_item_name, status, del_flag, create_time, update_time, remark)
+        insert into test_skill_list(tech_user_id, tech_user_name, check_item_id, check_item_name, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.techUserId}, #{entity.techUserName}, #{entity.checkItemId}, #{entity.checkItemName}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
@@ -25,7 +25,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_skill_list(tech_user_id, tech_user_name, check_item_id, check_item_name, status, del_flag, create_time, update_time, remark)
+        insert into test_skill_list(tech_user_id, tech_user_name, check_item_id, check_item_name, status, del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.techUserId}, #{entity.techUserName}, #{entity.checkItemId}, #{entity.checkItemName}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})

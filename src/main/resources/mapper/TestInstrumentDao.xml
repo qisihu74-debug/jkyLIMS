@@ -72,17 +72,17 @@
 
     <select id="getPageList" resultMap="TestInstrumentVoMap">
         select i.*,l.name as laboratoryName,t.name as typeName
-        from JKERP.test_instrument i
-        left join JKERP.test_laboratory l
+        from test_instrument i
+        left join test_laboratory l
         on i.laboratory_id=l.id
-        left join JKERP.test_instrument_type t
+        left join test_instrument_type t
         on i.type_id=t.id
         ${ew.customSqlsegment}
     </select>
 
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_instrument(type_id, name, laboratory_id, code, old_code, manufacturer, model, serial_number, price, picture, incorporated_date, appraisal_date, is_port, level, validity_date, content, check_price, specs, range, contract_url, invoice_url, remark, device_admin, price_per_hour, traceability_mode, status, del_flag, create_time, update_time)
+        insert into test_instrument(type_id, name, laboratory_id, code, old_code, manufacturer, model, serial_number, price, picture, incorporated_date, appraisal_date, is_port, level, validity_date, content, check_price, specs, range, contract_url, invoice_url, remark, device_admin, price_per_hour, traceability_mode, status, del_flag, create_time, update_time)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.typeId}, #{entity.name}, #{entity.laboratoryId}, #{entity.code}, #{entity.oldCode}, #{entity.manufacturer}, #{entity.model}, #{entity.serialNumber}, #{entity.price}, #{entity.picture}, #{entity.incorporatedDate}, #{entity.appraisalDate}, #{entity.isPort}, #{entity.level}, #{entity.validityDate}, #{entity.content}, #{entity.checkPrice}, #{entity.specs}, #{entity.range}, #{entity.contractUrl}, #{entity.invoiceUrl}, #{entity.remark}, #{entity.deviceAdmin}, #{entity.pricePerHour}, #{entity.traceabilityMode}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime})
@@ -90,7 +90,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into JKERP.test_instrument(type_id, name, laboratory_id, code, old_code, manufacturer, model, serial_number, price, picture, incorporated_date, appraisal_date, is_port, level, validity_date, content, check_price, specs, range, contract_url, invoice_url, remark, device_admin, price_per_hour, traceability_mode, status, del_flag, create_time, update_time)
+        insert into test_instrument(type_id, name, laboratory_id, code, old_code, manufacturer, model, serial_number, price, picture, incorporated_date, appraisal_date, is_port, level, validity_date, content, check_price, specs, range, contract_url, invoice_url, remark, device_admin, price_per_hour, traceability_mode, status, del_flag, create_time, update_time)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.typeId}, #{entity.name}, #{entity.laboratoryId}, #{entity.code}, #{entity.oldCode}, #{entity.manufacturer}, #{entity.model}, #{entity.serialNumber}, #{entity.price}, #{entity.picture}, #{entity.incorporatedDate}, #{entity.appraisalDate}, #{entity.isPort}, #{entity.level}, #{entity.validityDate}, #{entity.content}, #{entity.checkPrice}, #{entity.specs}, #{entity.range}, #{entity.contractUrl}, #{entity.invoiceUrl}, #{entity.remark}, #{entity.deviceAdmin}, #{entity.pricePerHour}, #{entity.traceabilityMode}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime})
