@@ -440,7 +440,7 @@
         FROM
         test_team AS t1
         LEFT JOIN  test_team as t3 ON t1.id = t3.pid
-        LEFT JOIN test_user_team_rel AS t2 ON t1.id = t2.team_id
+        LEFT JOIN test_technicist AS t2 ON t1.id = t2.team_id
         WHERE t2.user_id = #{userid}
     </select>
     <select id="getMemberInformation" resultType="com.lims.manage.erp.vo.LabelValueVo" >
@@ -449,7 +449,7 @@
 	t3.user_id AS VALUE
     FROM
     test_team as t1
-    LEFT JOIN test_user_team_rel as t2 ON t1.id = t2.team_id
+    LEFT JOIN test_technicist as t2 ON t1.id = t2.team_id
     LEFT JOIN sys_user as t3 ON t3.user_id = t2.user_id
     WHERE t1.id in
         <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
