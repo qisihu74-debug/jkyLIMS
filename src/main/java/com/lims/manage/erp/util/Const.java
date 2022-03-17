@@ -82,4 +82,28 @@ public class Const {
      * 角色名 (signer) 签发人 基于数据库 sys_role 定义
      */
     public static final String signerStr = "signer";
+    /**
+     * 产品管理日志
+     */
+    public static final String PRODUCT_MANAGEMENT_LOG = "13";
+    /**
+     * 知识管理日志
+     */
+    public static final String KNOWLEDGE_MANAGEMENT_LOG = "14";
+    /**
+     * 团队管理日志
+     */
+    public static final String TEAM_MANAGEMENT_LOG = "15";
+    /**
+     * 检测管理日志
+     */
+    public static final String DETECTION_MANAGEMENT_LOG = "16";
+    /**
+     * 仪器管理日志
+     */
+    public static final String INSTRUMENT_MANAGEMENT_LOG = "17";
+    /**
+     * 合作关系管理日志
+     */
+    public static final String PARTNERSHIP_MANAGEMENT_LOG = "19";
 }

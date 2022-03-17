@@ -7,13 +7,17 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itextpdf.text.io.StreamUtil;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestLaboratory;
 import com.lims.manage.erp.mapper.TestInstrumentDao;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestInstrumentService;
 import com.lims.manage.erp.service.TestLaboratoryService;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.TestInstrumentVo;
 import org.springframework.stereotype.Service;
 
@@ -34,8 +38,14 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
     private TestLaboratoryService testLaboratoryService;
     @Resource
     private TestInstrumentDao testInstrumentDao;
+    @Resource
+    private LogManagerService logManagerService;
     @Override
     public Result addInstrument(TestInstrument testInstrument) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         if (testInstrument.getLaboratoryId()!=null){
             TestLaboratory testLaboratory=testLaboratoryService.getById(testInstrument.getLaboratoryId());
             if (StrUtil.isEmptyIfStr(testLaboratory)){
@@ -55,14 +65,20 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         testInstrument.setCreateTime(new Date());
         testInstrument.setUpdateTime(null);
         if (this.save(testInstrument)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加设备仪器"+testInstrument.getId()+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG,true);
             return ResultUtil.success("设备添加成功");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加设备仪器失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
             return ResultUtil.error("添加失败");
         }
     }
 
     @Override
     public Result updInstrument(TestInstrument testInstrument) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         if (testInstrument.getId()==null){
             return ResultUtil.error("修改对象ID为空！");
         }
@@ -82,14 +98,20 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         }
         testInstrument.setUpdateTime(new Date());
         if (this.updateById(testInstrument)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改设备仪器"+testInstrument.getId()+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG,true);
             return ResultUtil.success("修改成功");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改设备仪器"+testInstrument.getId()+"失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
             return ResultUtil.error("修改失败");
         }
     }
 
     @Override
     public Result delInstruments(List<Long> idList) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         List<TestInstrument> testInstrumentList=new ArrayList<>();
         for (Long aLong : idList) {
             TestInstrument testInstrument=new TestInstrument();
@@ -98,9 +120,12 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
             testInstrument.setId(aLong.intValue());
             testInstrumentList.add(testInstrument);
         }
+        String idStr=idList.toString();
         if (this.updateBatchById(testInstrumentList)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除设备仪器"+idStr+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG,true);
             return ResultUtil.success("删除成功");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除设备仪器"+idStr+"失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
             return ResultUtil.error("删除失败");
         }
     }

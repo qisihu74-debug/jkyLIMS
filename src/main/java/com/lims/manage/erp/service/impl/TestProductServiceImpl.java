@@ -9,6 +9,8 @@ import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.TestProductItemVo;
 import com.lims.manage.erp.vo.TestProductSelVo;
 import com.lims.manage.erp.vo.TestProductVo;
@@ -45,8 +47,15 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
     /*产品检测项*/
     @Resource
     private TestProductItemService testProductItemService;
+    /*日志*/
+    @Resource
+    private LogManagerService logManagerService;
     @Override
     public Result addTestProduct(TestProductItemVo testProductItemVo) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         //判断产品基本信息参数
         if (testProductItemVo.getTestProduct().getProductName()==null){
             return ResultUtil.error("产品名称不能为空");
@@ -74,14 +83,20 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
                     }
                 }
             }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品"+testProductItemVo.getTestProduct().getProductId()+"成功!", Const.PRODUCT_MANAGEMENT_LOG,true);
             return ResultUtil.success("添加成功!",testProductItemVo);
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品失败!", Const.PRODUCT_MANAGEMENT_LOG,false);
             return ResultUtil.error("保存产品信息失败，未知异常!");
         }
     }
 
     @Override
     public Result updTestProduct(TestProductItemVo testProductItemVo) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         //判断产品基本信息参数
         if (testProductItemVo.getTestProduct().getProductName()==null){
             return ResultUtil.error("产品名称不能为空");
@@ -111,14 +126,20 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
                     }
                 }
             }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改产品"+testProductItemVo.getTestProduct().getProductId()+"成功!", Const.PRODUCT_MANAGEMENT_LOG,true);
             return ResultUtil.success("保存成功!",testProductItemVo);
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改产品"+testProductItemVo.getTestProduct().getProductId()+"失败!", Const.PRODUCT_MANAGEMENT_LOG,false);
             return ResultUtil.error("保存产品信息失败，未知异常!");
         }
     }
 
     @Override
     public Result delTestProduct(List<Long> idList) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         List<TestProduct> testMethods=new ArrayList<>();
         for (Long aLong : idList) {
             TestProduct testMethod=new TestProduct();
@@ -127,9 +148,12 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
             testMethod.setProductId(aLong.intValue());
             testMethods.add(testMethod);
         }
+        String idStr=idList.toString();
         if (this.updateBatchById(testMethods)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除产品"+idStr+"成功!", Const.PRODUCT_MANAGEMENT_LOG,true);
             return ResultUtil.success("删除成功");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除产品"+idStr+"失败!", Const.PRODUCT_MANAGEMENT_LOG,false);
             return ResultUtil.error("删除失败");
         }
     }

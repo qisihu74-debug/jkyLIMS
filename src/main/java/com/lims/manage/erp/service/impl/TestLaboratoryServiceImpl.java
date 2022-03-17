@@ -4,12 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.mapper.TestLaboratoryDao;
 import com.lims.manage.erp.entity.TestLaboratory;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestLaboratoryService;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.TestLaboratoryVo;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +32,14 @@ import java.util.List;
 public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, TestLaboratory> implements TestLaboratoryService {
     @Resource
     private TestLaboratoryDao testLaboratoryDao;
+    @Resource
+    private LogManagerService logManagerService;
     @Override
     public Result addLaboratory(TestLaboratory testLaboratory) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         if (testLaboratory.getName()==null){
             return ResultUtil.error("实验室名称不能为空");
         }
@@ -41,14 +51,20 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
         testLaboratory.setCreateTime(new Date());
         testLaboratory.setUpdateTime(null);
         if (this.save(testLaboratory)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加实验室"+testLaboratory.getId()+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
             return ResultUtil.success("添加成功!");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加实验室失败!", Const.TEAM_MANAGEMENT_LOG,false);
             return ResultUtil.error("添加失败，未知异常!");
         }
     }
 
     @Override
     public Result updLaboratory(TestLaboratory testLaboratory) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         if (testLaboratory.getId()==null){
             return ResultUtil.error("修改对象ID为空");
         }
@@ -60,14 +76,20 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
         }
         testLaboratory.setUpdateTime(new Date());
         if (this.updateById(testLaboratory)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改实验室"+testLaboratory.getId()+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
             return ResultUtil.success("修改成功!");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改实验室"+testLaboratory.getId()+"失败!", Const.TEAM_MANAGEMENT_LOG,false);
             return ResultUtil.error("修改失败，未知异常!");
         }
     }
 
     @Override
     public Result delLaboratory(List<Long> idList) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         List<TestLaboratory> testLaboratoryList=new ArrayList<>();
         for (Long aLong : idList) {
             TestLaboratory testLaboratory=new TestLaboratory();
@@ -76,9 +98,12 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
             testLaboratory.setId(aLong.intValue());
             testLaboratoryList.add(testLaboratory);
         }
+        String idStr=idList.toString();
         if (this.updateBatchById(testLaboratoryList)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除实验室"+idStr+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
             return ResultUtil.success("删除成功");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除实验室"+idStr+"失败!", Const.TEAM_MANAGEMENT_LOG,false);
             return ResultUtil.error("删除失败");
         }
     }
