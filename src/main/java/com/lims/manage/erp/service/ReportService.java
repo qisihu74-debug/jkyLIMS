@@ -27,13 +27,13 @@ public interface ReportService {
      * @return
      */
 //    List<ReportListVo> makeReport();
-    PageInfo makeReport(Integer pageNum,Integer pageSize);
+    PageInfo makeReport(Integer pageNum,Integer pageSize,String search);
 
     /**
      * 报告下载列表--科室权限
      * @return
      */
-    PageInfo reportDownloadList(Integer pageNum,Integer pageSize);
+    PageInfo reportDownloadList(Integer pageNum,Integer pageSize,String search);
 
     /**
      * 提交审批

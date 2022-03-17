@@ -134,17 +134,17 @@ public class ReportServiceImpl implements ReportService {
 //        return reportMapper.getReportList2(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
 //    }
     @Override
-    public PageInfo makeReport(Integer pageNum,Integer pageSize) {
+    public PageInfo makeReport(Integer pageNum,Integer pageSize,String search) {
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportListVo> list = reportMapper.getReportList2(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+        List<ReportListVo> list = reportMapper.getReportList2(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()),search);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
 
 
-    public PageInfo reportDownloadList(Integer pageNum,Integer pageSize) {
+    public PageInfo reportDownloadList(Integer pageNum,Integer pageSize,String search) {
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportListVo> list = reportMapper.reportDownloadList(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+        List<ReportListVo> list = reportMapper.reportDownloadList(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()),search);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
