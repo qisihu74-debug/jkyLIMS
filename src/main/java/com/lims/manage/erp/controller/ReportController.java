@@ -191,6 +191,16 @@ public class ReportController {
     }
 
     /**
+     * 报告生成--编辑按钮--科室
+     *
+     * @return
+     */
+    @GetMapping("/getQuota")
+    public Result getQuota(Long taskId) {
+        return ResultUtil.success("查询委托单信息成功！", reportService.getQuota(taskId));
+    }
+
+    /**
      * 查询当前委托单所有检测项
      * @param id
      * @return

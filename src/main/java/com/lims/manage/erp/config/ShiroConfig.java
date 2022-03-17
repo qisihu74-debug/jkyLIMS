@@ -68,14 +68,14 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/userLogin/**", "anon");
         filterChainDefinitionMap.put("/qiyuesuo/**", "anon");
         // 过滤前端 a标签附带的路径
-        filterChainDefinitionMap.put("/task/downloadEntrust_two", "anon");
-        filterChainDefinitionMap.put("/task/downloadOriginalRecord", "anon");
-        filterChainDefinitionMap.put("/entrust/downloadEntrust","anon");
-        filterChainDefinitionMap.put("/task/downloadEntrust","anon");
-        filterChainDefinitionMap.put("/report/previewTemplate","anon");
-        filterChainDefinitionMap.put("/report/downloadQysFile","anon");
-        filterChainDefinitionMap.put("/report/preview","anon");
-        filterChainDefinitionMap.put("/sample/downloadSampleTag","anon");
+//        filterChainDefinitionMap.put("/task/downloadEntrust_two", "anon");
+//        filterChainDefinitionMap.put("/task/downloadOriginalRecord", "anon");
+//        filterChainDefinitionMap.put("/entrust/downloadEntrust","anon");
+//        filterChainDefinitionMap.put("/task/downloadEntrust","anon");
+//        filterChainDefinitionMap.put("/report/previewTemplate","anon");
+//        filterChainDefinitionMap.put("/report/downloadQysFile","anon");
+//        filterChainDefinitionMap.put("/report/preview","anon");
+//        filterChainDefinitionMap.put("/sample/downloadSampleTag","anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");
