@@ -26,7 +26,7 @@
                             ELSE 0
                             END ischild
                  FROM (SELECT id, pid, NAME, del_flag FROM test_team ORDER BY pid, id) t1,
-                      (SELECT @pids := ( SELECT team_id FROM test_technicist WHERE user_id = #{userId} )) t2
+                      (SELECT @pids := ( SELECT team_id FROM test_technicist WHERE user_id = #{userId} and del_flag = 0 )) t2
              ) t3
         WHERE ischild != 0
 	AND del_flag = 0
