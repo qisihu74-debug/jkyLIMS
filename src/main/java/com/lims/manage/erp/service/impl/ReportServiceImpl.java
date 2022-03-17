@@ -8,6 +8,7 @@ import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.QiYueSuoSealEntity;
 import com.lims.manage.erp.entity.QuotaEntity;
+import com.lims.manage.erp.entity.QuotaRes;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
@@ -961,7 +962,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Map<String,List<QuotaEntity>> getQuota(Long taskId) {
+    public List<QuotaRes> getQuota(Long taskId) {
         Map<String,List<QuotaEntity>> map = new HashMap<>();
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
@@ -991,7 +992,16 @@ public class ReportServiceImpl implements ReportService {
                 map.put(bean.getConditionValue(),entities);
             }
         }
-        return map;
+        //处理map
+        List<QuotaRes> lis = Lists.newArrayList();
+        Set<String> set = map.keySet();
+        for (String key:set) {
+            QuotaRes res = new QuotaRes();
+            res.setKey(key);
+            res.setValue(map.get(key));
+            lis.add(res);
+        }
+        return lis;
     }
 
 }
