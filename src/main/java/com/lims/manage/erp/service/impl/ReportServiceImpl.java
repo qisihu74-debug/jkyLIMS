@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.QiYueSuoSealEntity;
+import com.lims.manage.erp.entity.QuotaEntity;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
@@ -14,10 +15,31 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.ReportMapper;
+import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
+import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
+import com.lims.manage.erp.mapper.TestReportQualifcationDao;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.WordUtils;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
+import com.lims.manage.erp.vo.ReportDetailVo;
+import com.lims.manage.erp.vo.ReportHistoryDetailVo;
+import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
@@ -68,6 +90,8 @@ public class ReportServiceImpl implements ReportService {
     EntrustServiceImpl entrustService;
     @Autowired
     private TeamMapper teamMapper;
+    @Autowired
+    private TestReportQualifcationDao dao;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -934,6 +958,40 @@ public class ReportServiceImpl implements ReportService {
         }
         qiYueSuoResponse.setList(newList);
         return qiYueSuoResponse;
+    }
+
+    @Override
+    public Map<String,List<QuotaEntity>> getQuota(Long taskId) {
+        Map<String,List<QuotaEntity>> map = new HashMap<>();
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
+        List<Long> ids = Lists.newArrayList();
+        for (ReportSampleDetailVo bean:reportDetail.getSamples()) {
+            //获取检测id
+            List<ReportCheckItemDetailVo> checkItems = bean.getCheckItems();
+            for (ReportCheckItemDetailVo detailVo:checkItems) {
+                ids.add(detailVo.getCheckItemId());
+            }
+        }
+        List<QuotaEntity> list = dao.getListById(ids);
+        List<QuotaEntity> quotaEntityList = Lists.newArrayList();
+        for (QuotaEntity bean:list) {
+            if (map.get(bean.getConditionValue()) == null){
+                QuotaEntity quotaEntity = new QuotaEntity();
+                quotaEntity.setCheckItemId(bean.getCheckItemId());
+                quotaEntity.setSpecsContent(bean.getSpecsContent());
+                quotaEntityList.add(quotaEntity);
+                map.put(bean.getConditionValue(),quotaEntityList);
+            }else {
+                List<QuotaEntity> entities = map.get(bean.getConditionValue());
+                QuotaEntity quota = new QuotaEntity();
+                quota.setCheckItemId(bean.getCheckItemId());
+                quota.setSpecsContent(bean.getSpecsContent());
+                entities.add(quota);
+                map.put(bean.getConditionValue(),entities);
+            }
+        }
+        return map;
     }
 
 }

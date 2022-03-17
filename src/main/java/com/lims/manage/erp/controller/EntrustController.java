@@ -429,6 +429,7 @@ public class EntrustController {
             EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
             response.reset();
+            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             fileName = URLEncoder.encode(fileName, "UTF-8");

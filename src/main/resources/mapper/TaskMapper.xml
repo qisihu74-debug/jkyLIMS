@@ -49,11 +49,12 @@
         required_completion_time,
         state,
         issue_report,
-        orderer
+        orderer,
+        report_complete
         )
         VALUES
         <foreach collection="vos" item="vo" separator=",">
-            (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},#{vo.state}, #{vo.issueReport}, #{vo.orderer})
+            (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},#{vo.state}, #{vo.issueReport}, #{vo.orderer},#{vo.reportComplete})
         </foreach>
     </insert>
 
@@ -588,7 +589,8 @@
             update test_entrusted_sample_checkitem_rel
             <set>
                 dept_id = ${item.deptId},
-                distribution_date = current_timestamp()
+                distribution_date = current_timestamp(),
+
             </set>
             where id = ${item.id}
         </foreach>

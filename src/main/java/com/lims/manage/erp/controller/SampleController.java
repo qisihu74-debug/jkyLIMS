@@ -169,6 +169,7 @@ public class SampleController {
         try {
             workbook = transformer.transformXLS(fileStream, result);
             response.reset();
+            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             String fileName2 = URLEncoder.encode(fileName.toString(), "UTF-8");
