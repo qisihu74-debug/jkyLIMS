@@ -1,11 +1,13 @@
 package com.lims.manage.erp.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.TestMethod;
 import com.lims.manage.erp.entity.TestProductItem;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.TestProductItemParamVo;
 import com.lims.manage.erp.vo.TestProductItemSelVo;
+import com.lims.manage.erp.vo.TestProductItemTreeVo;
 import com.lims.manage.erp.vo.TestProductItemVo;
 
 import java.util.List;
@@ -22,5 +24,6 @@ public interface TestProductItemService extends IService<TestProductItem> {
     Result delTestProductItem(List<Long> idList);
     TestProductItemParamVo getItemParamVo(TestProductItem testProductItem);
     List<TestProductItemSelVo> getTestProductSelVoList(Integer ProductId);
+    List<TestProductItemTreeVo> getTreeList(TestProductItem testProductItem);
 }
 

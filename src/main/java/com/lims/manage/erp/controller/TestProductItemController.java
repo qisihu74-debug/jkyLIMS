@@ -11,6 +11,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestProductItemService;
 import com.lims.manage.erp.vo.TestProductItemParamVo;
+import com.lims.manage.erp.vo.TestProductItemTreeVo;
 import com.lims.manage.erp.vo.TestProductItemVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -49,22 +50,13 @@ public class TestProductItemController extends ApiController {
     /**
      * 分页查询所有数据
      *
-     * @param page 分页对象
      * @param testProductItem 查询实体
      * @return 所有数据
      */
     @GetMapping("/list")
-    public Result selectAll(Page<TestProductItem> page, TestProductItem testProductItem) {
-        QueryWrapper<TestProductItem> queryWrapper=new QueryWrapper<>();
-        queryWrapper.eq("del_flag",0);
-        if (testProductItem.getCheckItemName()!=null){
-            queryWrapper.like("check_item_name",testProductItem.getCheckItemName());
-        }
-        if (testProductItem.getProductId()!=null){
-            queryWrapper.like("product_id",testProductItem.getProductId());
-        }
-        queryWrapper.orderByDesc("create_time");
-        return ResultUtil.success(this.testProductItemService.page(page, queryWrapper));
+    public Result selectAll(TestProductItem testProductItem) {
+        List<TestProductItemTreeVo> treeVos=this.testProductItemService.getTreeList(testProductItem);
+        return ResultUtil.success(treeVos);
     }
 
     /**

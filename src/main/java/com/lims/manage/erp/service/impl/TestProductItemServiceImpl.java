@@ -11,6 +11,8 @@ import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.TestProductItemParamVo;
 import com.lims.manage.erp.vo.TestProductItemSelVo;
+import com.lims.manage.erp.vo.TestProductItemTreeVo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -230,6 +232,35 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
             testProductItemSelVos.add(testProductItemSelVo);
         }
         return testProductItemSelVos;
+    }
+
+    @Override
+    public List<TestProductItemTreeVo> getTreeList(TestProductItem testProductItem) {
+        List<TestProductItemTreeVo> treeVos=new ArrayList<>();
+        QueryWrapper<TestProductItem> queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("del_flag",0);
+        if (testProductItem.getProductId()!=null){
+            queryWrapper.eq("product_id",testProductItem.getProductId());
+        }
+        if (testProductItem.getCheckItemPid()!=null){
+            queryWrapper.eq("check_item_pid",testProductItem.getProductId());
+        }else {
+            queryWrapper.eq("check_item_pid",0);
+        }
+        queryWrapper.orderByDesc("create_time");
+        List<TestProductItem> list=this.list(queryWrapper);
+        if (list.size()!=0){
+            for (TestProductItem productItem : list) {
+                TestProductItemTreeVo treeVo=new TestProductItemTreeVo();
+                BeanUtils.copyProperties(productItem,treeVo);
+                TestProductItem testProductItem1=new TestProductItem();
+                testProductItem1.setProductId(productItem.getProductId());
+                testProductItem1.setCheckItemPid(productItem.getCheckItemId());
+                treeVo.setChildren(getTreeList(testProductItem1));
+                treeVos.add(treeVo);
+            }
+        }
+        return treeVos;
     }
 }
 
