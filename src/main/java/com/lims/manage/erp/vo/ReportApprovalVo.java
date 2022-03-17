@@ -25,6 +25,7 @@ public class ReportApprovalVo {
      * 任务单编号
      */
     private String taskCode;
+    private String reportCode;
     /**
      *报告提交申请人
      */
