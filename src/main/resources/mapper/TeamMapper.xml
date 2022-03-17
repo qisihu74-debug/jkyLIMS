@@ -6,7 +6,7 @@
         SELECT u.position AS position,u.username AS username
         FROM
             test_team t
-            LEFT JOIN test_user_team_rel tr
+            LEFT JOIN test_technicist tr
         ON t.id = tr.team_id
             LEFT JOIN sys_user u ON tr.user_id = u.user_id
         WHERE
@@ -41,7 +41,7 @@
         u.user_id
         FROM
         test_team t
-        LEFT JOIN test_user_team_rel tr ON t.id = tr.team_id
+        LEFT JOIN test_technicist tr ON t.id = tr.team_id
         LEFT JOIN sys_user u ON tr.user_id = u.user_id
         WHERE
         t.id IN

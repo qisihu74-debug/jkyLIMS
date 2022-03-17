@@ -42,7 +42,7 @@ public interface TeamMapper extends BaseMapper {
      * @param userId
      * @return
      */
-    @Select("select team_id from test_user_team_rel where user_id = #{userId}")
+    @Select("select team_id from test_technicist where user_id = #{userId}")
     Long getTeamIdByUid(@Param("userId") Long userId);
 
     /**
@@ -65,7 +65,7 @@ public interface TeamMapper extends BaseMapper {
     @Select("SELECT u.user_id \n" +
             "        FROM\n" +
             "            test_team t\n" +
-            "            LEFT JOIN test_user_team_rel tr\n" +
+            "            LEFT JOIN test_technicist tr\n" +
             "        ON t.id = tr.team_id\n" +
             "            LEFT JOIN sys_user u ON tr.user_id = u.user_id\n" +
             "        WHERE\n" +
@@ -99,7 +99,7 @@ public interface TeamMapper extends BaseMapper {
             "t3.name\n" +
             "FROM\n" +
             "test_task as t1\n" +
-            "LEFT JOIN test_user_team_rel as t2 ON t1.dept_id = t2.team_id\n" +
+            "LEFT JOIN test_technicist as t2 ON t1.dept_id = t2.team_id\n" +
             "LEFT JOIN sys_user as t3 ON t3.user_id = t2.user_id\n" +
             "WHERE t1.id = #{taskId}")
     List<String> getTaskIdUserName(Long taskId);
