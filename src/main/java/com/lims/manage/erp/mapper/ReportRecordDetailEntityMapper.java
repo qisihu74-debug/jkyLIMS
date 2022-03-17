@@ -44,4 +44,11 @@ public interface ReportRecordDetailEntityMapper {
      * @return
      */
     List<ReportRecordDetailEntity> getCheckInfoByRecordId(Long recordId);
+
+    /**
+     * 查询已记录的检测项ID
+     * @param recordId
+     * @return
+     */
+    List<Long> getCheckItemIds(Long recordId);
 }

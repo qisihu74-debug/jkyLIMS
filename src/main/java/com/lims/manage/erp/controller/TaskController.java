@@ -433,7 +433,7 @@ public class TaskController {
 
     @RequestMapping("/updatePersonInfo")
     public Result updatePersonInfo(@RequestBody PersonInfoVo vo) {
-        if (vo == null) {
+        if (vo.getTaskId() == null|| vo.getInspector()==null||vo.getRecorder()==null||vo.getReviewer()==null||vo.getReportProducer()==null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             int i = taskService.updatePersonInfo(vo);
