@@ -100,6 +100,10 @@ public class TaskTestEntity {
      * 是否出具报告：0、不出具；1、出具
      */
     private Integer issueReport;
+    /**
+     * 报告是否完成
+     */
+    private Integer reportComplete;
 
     /**
      * 审核人

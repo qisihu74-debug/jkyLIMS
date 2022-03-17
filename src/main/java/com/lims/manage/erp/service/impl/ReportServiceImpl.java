@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.QiYueSuoSealEntity;
+import com.lims.manage.erp.entity.QuotaEntity;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
@@ -14,10 +15,31 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.ReportMapper;
+import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
+import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
+import com.lims.manage.erp.mapper.TestReportQualifcationDao;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.WordUtils;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
+import com.lims.manage.erp.vo.ReportDetailVo;
+import com.lims.manage.erp.vo.ReportHistoryDetailVo;
+import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
@@ -68,6 +90,8 @@ public class ReportServiceImpl implements ReportService {
     EntrustServiceImpl entrustService;
     @Autowired
     private TeamMapper teamMapper;
+    @Autowired
+    private TestReportQualifcationDao dao;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -265,7 +289,7 @@ public class ReportServiceImpl implements ReportService {
 
         }
         // 获取检测项
-        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemList(id);
+        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemList(id,teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
         reportSampleDetailVo.setCheckItems(checkItemList);
         return reportSampleDetailVo;
     }
@@ -337,9 +361,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Transactional
     @Override
-    public Boolean preserve(ReportPreserveVo vo) {
-//        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
-        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByTaskId(vo.getTaskId());
+    public Boolean preserve1(ReportPreserveVo vo) {
+        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
+//        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByTaskId(vo.getTaskId());
         if (reportRecordEntity1 != null) {
             String state = "1";
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
@@ -393,6 +417,82 @@ public class ReportServiceImpl implements ReportService {
             }
             reportRecordEntity.setId(recordId);
             reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+            int insert = recordEntityMapper.insert(reportRecordEntity);
+            if (insert < 1) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    @Transactional
+    @Override
+    public Boolean preserve(ReportPreserveVo vo) {
+        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
+//        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByTaskId(vo.getTaskId());
+        if (reportRecordEntity1 != null) {
+            String state = "1";
+            List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
+            for (ReportRecordDetailEntity e : checkInfos) {
+                e.setRecordId(reportRecordEntity1.getId());
+                if (e.getJudgeResult() == null) {
+                    state = "2";
+                }
+                List<Long> checkItemIds = recordDetailEntityMapper.getCheckItemIds(reportRecordEntity1.getId());
+                int insert1;
+                if(checkItemIds.contains(e.getCheckItemId())){
+                    insert1 = recordDetailEntityMapper.updateByRecordIdSelective(e);
+                }else{
+                    insert1 = recordDetailEntityMapper.insert(e);
+                }
+                if (insert1 < 1) {
+                    return false;
+                }
+            }
+            reportRecordEntity1.setState(state);
+            if ("1".equals(state)) {
+                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
+            }
+            //修改任务报告状态
+            taskMapper.updateReportStatus(Integer.parseInt(state),vo.getTaskId());
+            int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
+            if (update < 1) {
+                return false;
+            }
+            return true;
+        } else {
+            long recordId = GenID.getID();
+            String state = "1";
+            List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
+            for (ReportRecordDetailEntity e : checkInfos) {
+                e.setRecordId(recordId);
+                if (e.getJudgeResult() == null) {
+                    state = "2";
+                }
+                int insert1 = recordDetailEntityMapper.insert(e);
+                if (insert1 < 1) {
+                    return false;
+                }
+            }
+            ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
+            reportRecordEntity.setState(state);
+            if ("1".equals(state)) {
+                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+            }
+            //生成报告编号
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+            String year = sdf.format(new Date());
+            Integer maxCode = recordEntityMapper.getMaxCode(year);
+            if(maxCode == null){
+                reportRecordEntity.setReportCode("ZX-"+year+"-JC-0001");
+            }else{
+                int newCode = maxCode + 1;
+                reportRecordEntity.setReportCode("ZX-"+year+"-JC-"+newCode);
+            }
+            reportRecordEntity.setId(recordId);
+            reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+            //修改任务报告状态
+            taskMapper.updateReportStatus(Integer.parseInt(state),vo.getTaskId());
             int insert = recordEntityMapper.insert(reportRecordEntity);
             if (insert < 1) {
                 return false;
@@ -764,9 +864,9 @@ public class ReportServiceImpl implements ReportService {
         //step1 根据文件类型创建合同文档
         String url = "";
         MinioClient client = MinIoUtil.minioClient;
-        String code = recordEntityMapper.getReportModelNameById(entrustId);
+        List<String> code = recordEntityMapper.getReportModelNameById(entrustId);
         try {
-            url = downLoad(client,code,entrustId);
+            url = downLoad(client,code.get(0),entrustId);
         }catch (Exception e){
             logger.error("盖章下载报告文件失败:{}",e);
         }
@@ -858,6 +958,40 @@ public class ReportServiceImpl implements ReportService {
         }
         qiYueSuoResponse.setList(newList);
         return qiYueSuoResponse;
+    }
+
+    @Override
+    public Map<String,List<QuotaEntity>> getQuota(Long taskId) {
+        Map<String,List<QuotaEntity>> map = new HashMap<>();
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
+        List<Long> ids = Lists.newArrayList();
+        for (ReportSampleDetailVo bean:reportDetail.getSamples()) {
+            //获取检测id
+            List<ReportCheckItemDetailVo> checkItems = bean.getCheckItems();
+            for (ReportCheckItemDetailVo detailVo:checkItems) {
+                ids.add(detailVo.getCheckItemId());
+            }
+        }
+        List<QuotaEntity> list = dao.getListById(ids);
+        for (QuotaEntity bean:list) {
+            if (map.get(bean.getConditionValue()) == null){
+                List<QuotaEntity> quotaEntityList = Lists.newArrayList();
+                QuotaEntity quotaEntity = new QuotaEntity();
+                quotaEntity.setCheckItemId(bean.getCheckItemId());
+                quotaEntity.setSpecsContent(bean.getSpecsContent());
+                quotaEntityList.add(quotaEntity);
+                map.put(bean.getConditionValue(),quotaEntityList);
+            }else {
+                List<QuotaEntity> entities = map.get(bean.getConditionValue());
+                QuotaEntity quota = new QuotaEntity();
+                quota.setCheckItemId(bean.getCheckItemId());
+                quota.setSpecsContent(bean.getSpecsContent());
+                entities.add(quota);
+                map.put(bean.getConditionValue(),entities);
+            }
+        }
+        return map;
     }
 
 }

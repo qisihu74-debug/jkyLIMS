@@ -174,4 +174,13 @@
         where record_id = #{recordId,jdbcType=BIGINT}
     </select>
 
+    <select id="getCheckItemIds" resultType="java.lang.Long">
+        SELECT
+            check_item_id
+        FROM
+            test_report_record_detail
+        WHERE
+            record_id = #{recordId,jdbcType=BIGINT}
+    </select>
+
 </mapper>

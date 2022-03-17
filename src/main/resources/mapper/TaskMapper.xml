@@ -49,11 +49,12 @@
         required_completion_time,
         state,
         issue_report,
-        orderer
+        orderer,
+        report_complete
         )
         VALUES
         <foreach collection="vos" item="vo" separator=",">
-            (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},#{vo.state}, #{vo.issueReport}, #{vo.orderer})
+            (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},#{vo.state}, #{vo.issueReport}, #{vo.orderer},#{vo.reportComplete})
         </foreach>
     </insert>
 
@@ -439,7 +440,7 @@
         FROM
         test_team AS t1
         LEFT JOIN  test_team as t3 ON t1.id = t3.pid
-        LEFT JOIN test_user_team_rel AS t2 ON t1.id = t2.team_id
+        LEFT JOIN test_technicist AS t2 ON t1.id = t2.team_id
         WHERE t2.user_id = #{userid}
     </select>
     <select id="getMemberInformation" resultType="com.lims.manage.erp.vo.LabelValueVo" >
@@ -448,7 +449,7 @@
 	t3.user_id AS VALUE
     FROM
     test_team as t1
-    LEFT JOIN test_user_team_rel as t2 ON t1.id = t2.team_id
+    LEFT JOIN test_technicist as t2 ON t1.id = t2.team_id
     LEFT JOIN sys_user as t3 ON t3.user_id = t2.user_id
     WHERE t1.id in
         <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
@@ -577,12 +578,19 @@
         where id = #{taskId,jdbcType=INTEGER}
     </update>
 
+    <update id="updateReportStatus">
+        update test_task
+        set report_complete       = #{status,jdbcType=INTEGER}
+        where id = #{taskId,jdbcType=INTEGER}
+    </update>
+
     <update id="batchUpdateCheckItem" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
             update test_entrusted_sample_checkitem_rel
             <set>
                 dept_id = ${item.deptId},
-                distribution_date = current_timestamp()
+                distribution_date = current_timestamp(),
+
             </set>
             where id = ${item.id}
         </foreach>

@@ -32,6 +32,7 @@ public class TaskVo {
      * 任务状态
      */
     private Integer state;
+    private Integer reportComplete;
 
 
 //    private Integer issueReport;

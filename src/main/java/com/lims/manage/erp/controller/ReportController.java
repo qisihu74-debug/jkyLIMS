@@ -166,7 +166,7 @@ public class ReportController {
      */
     @GetMapping("/list_history_details")
     public Result getlist_history_details(Long id) {
-        return ResultUtil.success("获取历史任务单成功！", reportService.getReportList_history_details(id));
+        return ResultUtil.success("获取历史任务单详情成功！", reportService.getReportList_history_details(id));
     }
 
 
@@ -187,7 +187,17 @@ public class ReportController {
      */
     @GetMapping("/edit")
     public Result edit(Long taskId) {
-        return ResultUtil.success("查询委托单信息成功！", reportService.getReportDetail(taskId));
+        return ResultUtil.success("查询任务单详情成功！", reportService.getReportDetail(taskId));
+    }
+
+    /**
+     * 报告生成--编辑按钮--科室
+     *
+     * @return
+     */
+    @GetMapping("/getQuota")
+    public Result getQuota(Long taskId) {
+        return ResultUtil.success("查询指标信息成功！", reportService.getQuota(taskId));
     }
 
     /**
@@ -217,8 +227,6 @@ public class ReportController {
 
     /**
      * 待盖章和历史盖章列表查询
-     *
-     * @param type
      * @param search
      * @param pageNum
      * @param pageSize

@@ -108,6 +108,8 @@ public interface ReportService {
      * @param vo
      * @return
      */
+    Boolean preserve1(ReportPreserveVo vo);
+
     Boolean preserve(ReportPreserveVo vo);
 
     /**
@@ -273,4 +275,11 @@ public interface ReportService {
      * @return
      */
     QiYueSuoResponse sealListOfQys(String category, String companyName, String sealType);
+
+    /**
+     * 报告生成--编辑按钮--科室
+     * @param taskId
+     * @return
+     */
+    Object getQuota(Long taskId);
 }

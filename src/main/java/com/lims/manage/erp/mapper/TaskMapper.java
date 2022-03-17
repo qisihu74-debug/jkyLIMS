@@ -243,6 +243,8 @@ public interface TaskMapper extends BaseMapper {
      */
     int updatePersonInfo(PersonInfoVo vo);
 
+    int updateReportStatus(@Param("status") Integer status,@Param("taskId")Long taskId);
+
     /**
      * 根据任务id获取委托单id
      * @param id

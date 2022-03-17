@@ -43,8 +43,8 @@ public interface ReportMapper {
 
     /**
      * 查询委托单--报告制作详情--科室
-     *
-     * @param id
+     * @param taskId
+     * @param deptIds
      * @return
      */
     ReportDetailVo getReportDetail(Long taskId,List<Long> deptIds);
@@ -71,7 +71,7 @@ public interface ReportMapper {
 
     List<ReportSampleDetailVo> getReportHeadDetails(Long id);
 
-    List<ReportCheckItemDetailVo> getReportCheckItemList(Long id);
+    List<ReportCheckItemDetailVo> getReportCheckItemList(@Param("id") Long id,@Param("deptIds") List<Long> deptIds);
 
     /**
      * 查询判定依据

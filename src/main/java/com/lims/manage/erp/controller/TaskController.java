@@ -283,6 +283,7 @@ public class TaskController {
         try {
             workbook = transformer.transformXLS(fileStream, result);
             response.reset();
+            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             String fileName2 = URLEncoder.encode(split[2], "UTF-8");
@@ -310,6 +311,7 @@ public class TaskController {
             TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfo(taskId);
             XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
             response.reset();
+            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             fileName = URLEncoder.encode(fileName, "UTF-8");
@@ -338,6 +340,7 @@ public class TaskController {
             TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId, null);
             XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
             response.reset();
+            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             fileName = URLEncoder.encode(fileName, "UTF-8");
@@ -430,7 +433,7 @@ public class TaskController {
 
     @RequestMapping("/updatePersonInfo")
     public Result updatePersonInfo(@RequestBody PersonInfoVo vo) {
-        if (vo == null) {
+        if (vo.getTaskId() == null|| vo.getInspector()==null||vo.getRecorder()==null||vo.getReviewer()==null||vo.getReportProducer()==null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             int i = taskService.updatePersonInfo(vo);

@@ -9,6 +9,7 @@ public class ReportListVo {
     private Long id;
     private Long taskId;
     private String taskCode;
+    private String reportCode;
     private String sampleName;
     private String countPrice;
     private String requestDate;

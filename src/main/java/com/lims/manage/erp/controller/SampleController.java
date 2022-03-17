@@ -103,10 +103,10 @@ public class SampleController {
      */
     @RequestMapping("/getSampleList2")
     public Result getSampleList2(@RequestBody SampleEntity sampleEntity) {
-        System.out.println("getSampleList2"+sampleEntity);
         if (sampleEntity.getPageNum() == null || sampleEntity.getPageSize() == null) {
             return ResultUtil.error("缺少分页参数！");
         }
+
         return ResultUtil.success(sampleService.getSampleDataList2(sampleEntity));
     }
 
@@ -169,6 +169,7 @@ public class SampleController {
         try {
             workbook = transformer.transformXLS(fileStream, result);
             response.reset();
+            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             String fileName2 = URLEncoder.encode(fileName.toString(), "UTF-8");
