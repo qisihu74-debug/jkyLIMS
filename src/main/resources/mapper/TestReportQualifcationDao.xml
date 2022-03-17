@@ -59,5 +59,20 @@
         on duplicate key update
          check_item_id = values(check_item_id) , check_basis_code = values(check_basis_code) , count_type = values(count_type) , specs_content = values(specs_content) , condition_key = values(condition_key) , condition_value = values(condition_value) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , remark = values(remark)     </insert>
 
+    <select id="getListById" resultType="com.lims.manage.erp.entity.QuotaEntity">
+        SELECT
+        check_item_id,
+        specs_content,
+        condition_key,
+        condition_value
+        FROM
+        test_report_qualifcation
+        WHERE
+        check_item_id IN
+        <foreach collection = "ids" item = "check_item_id" index = "index" open = "(" close = ")" separator = ",">
+            #{check_item_id}
+        </foreach>
+    </select>
+
 </mapper>
 

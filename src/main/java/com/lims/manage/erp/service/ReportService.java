@@ -273,4 +273,11 @@ public interface ReportService {
      * @return
      */
     QiYueSuoResponse sealListOfQys(String category, String companyName, String sealType);
+
+    /**
+     * 报告生成--编辑按钮--科室
+     * @param taskId
+     * @return
+     */
+    Object getQuota(Long taskId);
 }
