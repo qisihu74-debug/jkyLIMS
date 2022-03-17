@@ -197,7 +197,7 @@ public class ReportController {
      */
     @GetMapping("/getQuota")
     public Result getQuota(Long taskId) {
-        return ResultUtil.success("查询委托单信息成功！", reportService.getQuota(taskId));
+        return ResultUtil.success("查询指标信息成功！", reportService.getQuota(taskId));
     }
 
     /**

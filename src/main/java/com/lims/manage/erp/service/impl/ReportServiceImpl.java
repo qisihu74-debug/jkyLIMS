@@ -974,9 +974,9 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         List<QuotaEntity> list = dao.getListById(ids);
-        List<QuotaEntity> quotaEntityList = Lists.newArrayList();
         for (QuotaEntity bean:list) {
             if (map.get(bean.getConditionValue()) == null){
+                List<QuotaEntity> quotaEntityList = Lists.newArrayList();
                 QuotaEntity quotaEntity = new QuotaEntity();
                 quotaEntity.setCheckItemId(bean.getCheckItemId());
                 quotaEntity.setSpecsContent(bean.getSpecsContent());
