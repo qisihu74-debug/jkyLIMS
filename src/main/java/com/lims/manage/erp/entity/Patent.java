@@ -27,7 +27,7 @@ public class Patent extends Model<Patent> {
     //专利名称
     private String patentname;
     //专利时间
-    @JsonFormat(pattern = "yyyy-MM-DD", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date patenttime;
     //申请人
     private String patenproposer;

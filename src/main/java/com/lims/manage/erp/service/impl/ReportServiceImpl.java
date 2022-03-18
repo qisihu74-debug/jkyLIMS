@@ -16,15 +16,7 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.ReportApprovalMapper;
-import com.lims.manage.erp.mapper.ReportMapper;
-import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestReportQualifcationDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
@@ -91,6 +83,8 @@ public class ReportServiceImpl implements ReportService {
     EntrustServiceImpl entrustService;
     @Autowired
     private TeamMapper teamMapper;
+    @Autowired
+    private TestProductDao testProductDao;
     @Autowired
     private TestReportQualifcationDao dao;
 
@@ -303,7 +297,21 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ReportDetailVo getReportDetail(Long taskId) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        return reportMapper.getReportDetail(taskId,userTeamIds);
+        ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
+        List<ReportSampleDetailVo> samples = reportDetail.getSamples();
+        for (ReportSampleDetailVo reportSampleDetailVo : samples) {
+            List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
+            for (int j = 0; j < checkItems.size(); j++) {
+                ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
+                int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
+                if(last>0){
+                    checkItems.remove(reportCheckItemDetailVo);
+                }
+            }
+            reportSampleDetailVo.setCheckItems(checkItems);
+        }
+        reportDetail.setSamples(samples);
+        return reportDetail;
     }
 
     @Override
@@ -740,9 +748,14 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public String downLoad(MinioClient client, String code, Long id) throws Exception { XWPFDocument doc = null;
-        client.statObject("report-word", code + ".docx");
-        InputStream object = client.getObject("report-word", code + ".docx");
+    public String downLoad(MinioClient client, String code, Long id) throws Exception {
+        String[] split = code.split("\\?");
+        String[] strings = split[0].split("\\/");
+        String bluckName = strings[3];
+        String fileName  = strings[4];
+        XWPFDocument doc = null;
+        client.statObject(bluckName, fileName);
+        InputStream object = client.getObject(bluckName, fileName);
         doc = new XWPFDocument(object);
         //写入数据
         ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
@@ -822,16 +835,19 @@ public class ReportServiceImpl implements ReportService {
                 }
                 //存放检测数据
                 for (ReportRecordDetailEntity item : checkItemList) {
-                    int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
-                    int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
-                    int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
-                    if (i == page) {
-                        rows.get(row).getCell(column + 1).removeParagraph(0);
-                        rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
-                        rows.get(row).getCell(column + 2).removeParagraph(0);
-                        rows.get(row).getCell(column + 2).setText(item.getCheckResult());
-                        rows.get(row).getCell(column + 3).removeParagraph(0);
-                        rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
+                    int last = testProductDao.isLast(item.getCheckItemId().intValue());
+                    if(last==0){
+                        int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
+                        int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
+                        int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
+                        if (i == page) {
+                            rows.get(row).getCell(column + 1).removeParagraph(0);
+                            rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
+                            rows.get(row).getCell(column + 2).removeParagraph(0);
+                            rows.get(row).getCell(column + 2).setText(item.getCheckResult());
+                            rows.get(row).getCell(column + 3).removeParagraph(0);
+                            rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
+                        }
                     }
                 }
                 i++;
@@ -865,11 +881,12 @@ public class ReportServiceImpl implements ReportService {
         //step1 根据文件类型创建合同文档
         String url = "";
         MinioClient client = MinIoUtil.minioClient;
-        List<String> code = recordEntityMapper.getReportModelNameById(entrustId);
+        String code = recordEntityMapper.getReportModelNameById(entrustId);
         try {
-            url = downLoad(client,code.get(0),entrustId);
+            url = downLoad(client,code,entrustId);
         }catch (Exception e){
             logger.error("盖章下载报告文件失败:{}",e);
+            return false;
         }
         if (StringUtils.isNotEmpty(url)){
             File file = null;
@@ -877,6 +894,7 @@ public class ReportServiceImpl implements ReportService {
                 file = FileAndFolderUtil.getFile(url);
             }catch (Exception e){
                 logger.error("将报告地址转为File文件失败:{}",e);
+                return false;
             }
             if (file != null){
                 QiYueSuoResponse response = qiYueSuoHnadler.creatFile(file, title, fileType, null, null, null);
@@ -885,6 +903,8 @@ public class ReportServiceImpl implements ReportService {
                     List<QiYueSuoDocment> result = response.getResult();
                     entityMapper.updateDocIdAndState(entrustId,result.get(0).getDocumentId(),"2");
                 }
+            }else {
+                return false;
             }
         }
         return true;
