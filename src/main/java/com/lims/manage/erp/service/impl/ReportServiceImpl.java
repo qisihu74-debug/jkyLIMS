@@ -297,7 +297,21 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ReportDetailVo getReportDetail(Long taskId) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        return reportMapper.getReportDetail(taskId,userTeamIds);
+        ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
+        List<ReportSampleDetailVo> samples = reportDetail.getSamples();
+        for (ReportSampleDetailVo reportSampleDetailVo : samples) {
+            List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
+            for (int j = 0; j < checkItems.size(); j++) {
+                ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
+                int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
+                if(last>0){
+                    checkItems.remove(reportCheckItemDetailVo);
+                }
+            }
+            reportSampleDetailVo.setCheckItems(checkItems);
+        }
+        reportDetail.setSamples(samples);
+        return reportDetail;
     }
 
     @Override
