@@ -37,7 +37,6 @@ public class MehordController extends ApiController {
      * 分页查询所有数据
      *
      * @param page 分页对象
-     * @param mehord 查询实体
      * @return 所有数据
      */
     @GetMapping("/list")
@@ -83,7 +82,7 @@ public class MehordController extends ApiController {
         if (StrUtil.isEmptyIfStr(mehord)){
             return ResultUtil.error("数据为空");
         }
-        return ResultUtil.success(mehordService.addMethod(mehord));
+        return mehordService.addMethod(mehord);
 
     }
 
@@ -96,7 +95,7 @@ public class MehordController extends ApiController {
     @PostMapping("/edit")
     public Result update(@RequestBody Mehord mehord) {
 
-        return ResultUtil.success(this.mehordService.updMethod(mehord));
+        return this.mehordService.updMethod(mehord);
     }
 
     /**
@@ -108,7 +107,7 @@ public class MehordController extends ApiController {
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {
         if (idList.size()!=0){
-            return ResultUtil.success(this.mehordService.delMethod(idList));
+            return this.mehordService.delMethod(idList);
         }else {
             return ResultUtil.error("数据为空");
         }

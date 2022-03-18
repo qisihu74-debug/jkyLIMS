@@ -20,13 +20,21 @@
    </resultMap>
 
    <select id="getPageList" resultMap="tortv">
-    SELECT tort.id id,  tort.`code` code, tort.`name` name, tort.check_item_id checkItemId ,
-         tort.file_url fileUrl ,tort.is_available isAvailable ,tort.status status ,tort.del_flag delFlag,
-       tort.create_time createTime ,tort.update_time updateTime ,tort.remark remark,
-     tpi.check_item_name checkitemname
+    SELECT tort.id id,
+           tort.`code` code,
+           tort.`name` name,
+           tort.check_item_id checkItemId,
+           tort.file_url fileUrl,
+           tort.is_available isAvailable,
+           tort.status status,
+           tort.del_flag delFlag,
+           tort.create_time createTime,
+           tort.update_time updateTime,
+           tort.remark remark,
+           tpi.check_item_name checkitemname
     FROM test_original_record_template tort
     LEFT JOIN test_product_item tpi
     ON tort.check_item_id =tpi.check_item_id
-         ${ew.customSqlsegment}
+    ${ew.customSqlsegment}
    </select>
 </mapper>
