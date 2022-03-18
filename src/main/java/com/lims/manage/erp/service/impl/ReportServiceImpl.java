@@ -740,9 +740,14 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public String downLoad(MinioClient client, String code, Long id) throws Exception { XWPFDocument doc = null;
-        client.statObject("report-word", code + ".docx");
-        InputStream object = client.getObject("report-word", code + ".docx");
+    public String downLoad(MinioClient client, String code, Long id) throws Exception {
+        String[] split = code.split("\\?");
+        String[] strings = split[0].split("\\/");
+        String bluckName = strings[3];
+        String fileName  = strings[4];
+        XWPFDocument doc = null;
+        client.statObject(bluckName, fileName);
+        InputStream object = client.getObject(bluckName, fileName);
         doc = new XWPFDocument(object);
         //写入数据
         ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
@@ -865,9 +870,9 @@ public class ReportServiceImpl implements ReportService {
         //step1 根据文件类型创建合同文档
         String url = "";
         MinioClient client = MinIoUtil.minioClient;
-        List<String> code = recordEntityMapper.getReportModelNameById(entrustId);
+        String code = recordEntityMapper.getReportModelNameById(entrustId);
         try {
-            url = downLoad(client,code.get(0),entrustId);
+            url = downLoad(client,code,entrustId);
         }catch (Exception e){
             logger.error("盖章下载报告文件失败:{}",e);
         }
