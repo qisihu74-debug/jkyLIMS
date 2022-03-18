@@ -875,6 +875,7 @@ public class ReportServiceImpl implements ReportService {
             url = downLoad(client,code,entrustId);
         }catch (Exception e){
             logger.error("盖章下载报告文件失败:{}",e);
+            return false;
         }
         if (StringUtils.isNotEmpty(url)){
             File file = null;
@@ -882,6 +883,7 @@ public class ReportServiceImpl implements ReportService {
                 file = FileAndFolderUtil.getFile(url);
             }catch (Exception e){
                 logger.error("将报告地址转为File文件失败:{}",e);
+                return false;
             }
             if (file != null){
                 QiYueSuoResponse response = qiYueSuoHnadler.creatFile(file, title, fileType, null, null, null);
@@ -890,6 +892,8 @@ public class ReportServiceImpl implements ReportService {
                     List<QiYueSuoDocment> result = response.getResult();
                     entityMapper.updateDocIdAndState(entrustId,result.get(0).getDocumentId(),"2");
                 }
+            }else {
+                return false;
             }
         }
         return true;
