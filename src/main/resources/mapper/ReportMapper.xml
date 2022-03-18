@@ -367,8 +367,8 @@
                  LEFT JOIN test_standard_file AS t5 ON t5.id = t4.standard_id
         WHERE t1.state != 2
 	AND t1.id = #{id}
-          AND (t5.type=2
-           or t5.type= 3)
+--           AND (t5.type=2
+--            or t5.type= 3)
     </select>
 
     <select id="getReportCheckItemList" resultType="com.lims.manage.erp.vo.ReportCheckItemDetailVo">
