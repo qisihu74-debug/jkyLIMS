@@ -25,11 +25,11 @@
         SELECT t2.id VALUE,
 	    t2.CODE label
         FROM
-            ( SELECT * FROM test_product_standard_file_rel WHERE product_id = 2549 ) t1
+            ( SELECT * FROM test_product_standard_file_rel WHERE product_id = #{productId} ) t1
             LEFT JOIN test_standard_file t2
         ON t1.standard_file_id = t2.id
         WHERE
-            t2.type IN ( 1
+            t2.type IN ( 2
             , 3 )
         UNION ALL
         SELECT 0,
@@ -93,14 +93,14 @@
 
     <select id="getPageList" resultMap="TestProductVoMap">
         select p.*,t.product_type_name as productTypeName
-        from JKERP.test_product p
-                 left join JKERP.test_product_type t
+        from test_product p
+                 left join test_product_type t
                            on p.product_type_id=t.product_type_id
             ${ew.customSqlsegment}
     </select>
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="checkItemId" useGeneratedKeys="true">
-        insert into JKERP.test_product_item(check_item_pid, check_item_code, product_id, report_model_id, check_item_name, coordinate, icon, additional_fees, unit, sample_count, place, duration, frequency, difficulty, remark, check_price, is_available, status, del_flag, create_time, update_time, logistics_costs)
+        insert into test_product_item(check_item_pid, check_item_code, product_id, report_model_id, check_item_name, coordinate, icon, additional_fees, unit, sample_count, place, duration, frequency, difficulty, remark, check_price, is_available, status, del_flag, create_time, update_time, logistics_costs)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.checkItemPid}, #{entity.checkItemCode}, #{entity.productId}, #{entity.reportModelId}, #{entity.checkItemName}, #{entity.coordinate}, #{entity.icon}, #{entity.additionalFees}, #{entity.unit}, #{entity.sampleCount}, #{entity.place}, #{entity.duration}, #{entity.frequency}, #{entity.difficulty}, #{entity.remark}, #{entity.checkPrice}, #{entity.isAvailable}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.logisticsCosts})
@@ -108,7 +108,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="checkItemId" useGeneratedKeys="true">
-        insert into JKERP.test_product_item(check_item_pid, check_item_code, product_id, report_model_id, check_item_name, coordinate, icon, additional_fees, unit, sample_count, place, duration, frequency, difficulty, remark, check_price, is_available, status, del_flag, create_time, update_time, logistics_costs)
+        insert into test_product_item(check_item_pid, check_item_code, product_id, report_model_id, check_item_name, coordinate, icon, additional_fees, unit, sample_count, place, duration, frequency, difficulty, remark, check_price, is_available, status, del_flag, create_time, update_time, logistics_costs)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.checkItemPid}, #{entity.checkItemCode}, #{entity.productId}, #{entity.reportModelId}, #{entity.checkItemName}, #{entity.coordinate}, #{entity.icon}, #{entity.additionalFees}, #{entity.unit}, #{entity.sampleCount}, #{entity.place}, #{entity.duration}, #{entity.frequency}, #{entity.difficulty}, #{entity.remark}, #{entity.checkPrice}, #{entity.isAvailable}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.logisticsCosts})

@@ -9,7 +9,7 @@
 
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="productId" useGeneratedKeys="true">
-        insert into JKERP.test_product_standard_file_rel()
+        insert into test_product_standard_file_rel()
         values
         <foreach collection="entities" item="entity" separator=",">
         ()
@@ -17,7 +17,7 @@
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="productId" useGeneratedKeys="true">
-        insert into JKERP.test_product_standard_file_rel()
+        insert into test_product_standard_file_rel()
         values
         <foreach collection="entities" item="entity" separator=",">
             ()

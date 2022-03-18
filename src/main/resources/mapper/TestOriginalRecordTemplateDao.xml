@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.TestOriginalRecordTemplateDao">
+
+
+   <resultMap id="tortv" type="com.lims.manage.erp.vo.TorttpiVo">
+      <id column="id" property="id"/>
+      <result column="code" property="code"/>
+      <result column="name" property="name"/>
+      <result column="checkItemId" property="checkItemId"/>
+      <result column="fileUrl" property="fileUrl"/>
+      <result column="isAvailable" property="isAvailable"/>
+      <result column="status" property="status"/>
+      <result column="delFlag" property="delFlag"/>
+      <result column="createTime" property="createTime"/>
+      <result column="updateTime" property="updateTime"/>
+      <result column="remark" property="remark"/>
+      <result column="checkitemname" property="checkitemname"/>
+   </resultMap>
+
+   <select id="getPageList" resultMap="tortv">
+    SELECT tort.id id,  tort.`code` code, tort.`name` name, tort.check_item_id checkItemId ,
+         tort.file_url fileUrl ,tort.is_available isAvailable ,tort.status status ,tort.del_flag delFlag,
+       tort.create_time createTime ,tort.update_time updateTime ,tort.remark remark,
+     tpi.check_item_name checkitemname
+    FROM test_original_record_template tort
+    LEFT JOIN test_product_item tpi
+    ON tort.check_item_id =tpi.check_item_id
+         ${ew.customSqlsegment}
+   </select>
+</mapper>
