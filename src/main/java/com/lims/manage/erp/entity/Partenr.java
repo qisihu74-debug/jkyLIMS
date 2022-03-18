@@ -35,12 +35,11 @@ public class Partenr extends Model<Partenr> {
     private String status;
     //0默认未删除,1删除
     private Integer delFlag;
-
     //注册时间
-    @JsonFormat(pattern = "yyyy-MM-DD", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date createTime;
     //更新时间
-    @JsonFormat(pattern = "yyyy-MM-DD", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date updateTime;
     //备注
     private String remark;

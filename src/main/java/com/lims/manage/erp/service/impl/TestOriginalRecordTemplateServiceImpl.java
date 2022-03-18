@@ -4,16 +4,20 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.mapper.TestOriginalRecordTemplateDao;
 import com.lims.manage.erp.entity.TestOriginalRecordTemplate;
 
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestOriginalRecordTemplateService;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.TorttpiVo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,11 +30,16 @@ import java.util.List;
  */
 @Service("testOriginalRecordTemplateService")
 public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOriginalRecordTemplateDao, TestOriginalRecordTemplate> implements TestOriginalRecordTemplateService {
-    @Autowired
+    @Resource
+    private LogManagerService logManagerService;
+    @Resource
     private TestOriginalRecordTemplateDao testOriginalRecordTemplateDao;
     @Override
     public Result addtestOriginalRecordTemplate(TestOriginalRecordTemplate testOriginalRecordTemplate) {
-
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         if (testOriginalRecordTemplate.getName()==null){
             return ResultUtil.error("原始模板名称不能为空");
         }
@@ -41,8 +50,10 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
         testOriginalRecordTemplate.setDelFlag(0);
         testOriginalRecordTemplate.setCreateTime(new Date());
         if (this.save(testOriginalRecordTemplate)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加原始记录模板"+testOriginalRecordTemplate.getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
             return ResultUtil.success("添加成功!");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加原始记录模板"+testOriginalRecordTemplate.getId()+"失败!", Const.DETECTION_MANAGEMENT_LOG,false);
             return ResultUtil.error("添加失败，未知异常!");
         }
 
@@ -50,7 +61,10 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
 
     @Override
     public Result updtestOriginalRecordTemplate(TestOriginalRecordTemplate testOriginalRecordTemplate) {
-
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         if (testOriginalRecordTemplate.getId()==null){
             return ResultUtil.error("修改对象ID为空");
         }
@@ -62,15 +76,20 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
         }
         testOriginalRecordTemplate.setUpdateTime(new Date());
         if (this.updateById(testOriginalRecordTemplate)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改原始记录模板"+testOriginalRecordTemplate.getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
             return ResultUtil.success("修改成功!");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改原始记录模板"+testOriginalRecordTemplate.getId()+"失败!", Const.DETECTION_MANAGEMENT_LOG,false);
             return ResultUtil.error("修改失败，未知异常!");
         }
     }
 
     @Override
     public Result delTtestOriginalRecordTemplate(List<Long> idList) {
-
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
         List<TestOriginalRecordTemplate> testOriginalRecordTemplate=new ArrayList<>();
         for (Long aLong : idList) {
             TestOriginalRecordTemplate testProductType=new TestOriginalRecordTemplate();
@@ -79,9 +98,12 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
             testProductType.setId(aLong.intValue());
             testOriginalRecordTemplate.add(testProductType);
         }
+        String idStr=idList.toString();
         if (this.updateBatchById(testOriginalRecordTemplate)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除原始记录模板"+idStr+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
             return ResultUtil.success("删除成功");
         }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除原始记录模板"+idStr+"失败!", Const.DETECTION_MANAGEMENT_LOG,false);
             return ResultUtil.error("删除失败");
         }
 

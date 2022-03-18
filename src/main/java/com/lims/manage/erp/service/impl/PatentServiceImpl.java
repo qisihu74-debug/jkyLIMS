@@ -70,7 +70,6 @@ public class PatentServiceImpl extends ServiceImpl<PatentDao, Patent> implements
         if (this.getOne(new QueryWrapper<Patent>().eq("Patentname",Patent.getPatentname()).eq("del_flag",0).ne("id",Patent.getId()))!=null){
             return ResultUtil.error("检测专利名称重复");
         }
-        Patent.setPatenttime(new Date());
         if (this.updateById(Patent)){
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改专利"+Patent.getId()+"成功!", Const.KNOWLEDGE_MANAGEMENT_LOG,true);
             return ResultUtil.success("修改成功!");
