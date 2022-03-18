@@ -16,15 +16,7 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.ReportApprovalMapper;
-import com.lims.manage.erp.mapper.ReportMapper;
-import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestReportQualifcationDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
@@ -91,6 +83,8 @@ public class ReportServiceImpl implements ReportService {
     EntrustServiceImpl entrustService;
     @Autowired
     private TeamMapper teamMapper;
+    @Autowired
+    private TestProductDao testProductDao;
     @Autowired
     private TestReportQualifcationDao dao;
 
@@ -827,16 +821,19 @@ public class ReportServiceImpl implements ReportService {
                 }
                 //存放检测数据
                 for (ReportRecordDetailEntity item : checkItemList) {
-                    int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
-                    int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
-                    int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
-                    if (i == page) {
-                        rows.get(row).getCell(column + 1).removeParagraph(0);
-                        rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
-                        rows.get(row).getCell(column + 2).removeParagraph(0);
-                        rows.get(row).getCell(column + 2).setText(item.getCheckResult());
-                        rows.get(row).getCell(column + 3).removeParagraph(0);
-                        rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
+                    int last = testProductDao.isLast(item.getCheckItemId().intValue());
+                    if(last==0){
+                        int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
+                        int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
+                        int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
+                        if (i == page) {
+                            rows.get(row).getCell(column + 1).removeParagraph(0);
+                            rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
+                            rows.get(row).getCell(column + 2).removeParagraph(0);
+                            rows.get(row).getCell(column + 2).setText(item.getCheckResult());
+                            rows.get(row).getCell(column + 3).removeParagraph(0);
+                            rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
+                        }
                     }
                 }
                 i++;

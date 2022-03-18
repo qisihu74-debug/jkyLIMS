@@ -98,4 +98,8 @@
         </foreach>
         on duplicate key update
         check_item_pid = values(check_item_pid) , check_item_code = values(check_item_code) , product_id = values(product_id) , report_model_id = values(report_model_id) , check_item_name = values(check_item_name) , coordinate = values(coordinate) , icon = values(icon) , additional_fees = values(additional_fees) , unit = values(unit) , sample_count = values(sample_count) , place = values(place) , duration = values(duration) , frequency = values(frequency) , difficulty = values(difficulty) , remark = values(remark) , check_price = values(check_price) , is_available = values(is_available) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , logistics_costs = values(logistics_costs)     </insert>
+
+    <select id="isLast" resultType="java.lang.Integer">
+        select COUNT(*) from test_product_item where check_item_pid = #{checkItemId}
+    </select>
 </mapper>
