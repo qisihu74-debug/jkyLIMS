@@ -14,6 +14,10 @@ public class TestProductItemSelVo {
     private List<String> typeList;
     //产品检测依据
     private List<String> itemStandardList;
+    //检测项所属科室
+    private List<String> teamList;
     //产品模板名称
     private String reportName;
+    //子检测项
+    private List<TestProductItemSelVo> children;
 }

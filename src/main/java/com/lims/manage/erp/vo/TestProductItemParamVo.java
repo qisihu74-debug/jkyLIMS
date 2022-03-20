@@ -14,4 +14,6 @@ public class TestProductItemParamVo {
     private List<Integer> standardIds;
     //产品检测项的设备
     private List<Integer> typeIds;
+    //产品检测项所属科室
+    private List<Integer> itemIds;
 }

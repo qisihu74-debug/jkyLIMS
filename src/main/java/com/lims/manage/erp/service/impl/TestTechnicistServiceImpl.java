@@ -12,6 +12,7 @@ import com.lims.manage.erp.entity.TestTechnicist;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestTechnicistService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -35,6 +36,9 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
     private TestTechnicistDao testTechnicistDao;
     @Resource
     private LogManagerService logManagerService;
+    @Resource
+    private SysOssService sysOssService;
+
     @Override
     public Result addTestTechnicist(TestTechnicist TestTechnicist) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -102,6 +106,7 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
             testLaboratory.setUpdateTime(new Date());
             testLaboratory.setDelFlag(1);
             testLaboratory.setId(aLong.intValue());
+            sysOssService.delAnnounce(this.getById(aLong).getCertificateUrl());
             testLaboratoryList.add(testLaboratory);
         }
         String idStr=idList.toString();

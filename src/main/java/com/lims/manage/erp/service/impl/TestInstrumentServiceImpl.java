@@ -14,6 +14,7 @@ import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestInstrumentService;
 import com.lims.manage.erp.service.TestLaboratoryService;
 import com.lims.manage.erp.util.Const;
@@ -40,6 +41,9 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
     private TestInstrumentDao testInstrumentDao;
     @Resource
     private LogManagerService logManagerService;
+
+    @Resource
+    private SysOssService sysOssService;
     @Override
     public Result addInstrument(TestInstrument testInstrument) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -118,6 +122,10 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
             testInstrument.setUpdateTime(new Date());
             testInstrument.setDelFlag(1);
             testInstrument.setId(aLong.intValue());
+            sysOssService.delAnnounce(this.getById(aLong).getPicture());
+            sysOssService.delAnnounce(this.getById(aLong).getContractUrl());
+            sysOssService.delAnnounce(this.getById(aLong).getInvoiceUrl());
+
             testInstrumentList.add(testInstrument);
         }
         String idStr=idList.toString();

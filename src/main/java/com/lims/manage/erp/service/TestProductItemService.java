@@ -22,8 +22,10 @@ public interface TestProductItemService extends IService<TestProductItem> {
     Result addTestProductItem(TestProductItemParamVo testProductItemParamVo);
     Result updTestProductItem(TestProductItemParamVo testProductItemParamVo);
     Result delTestProductItem(List<Long> idList);
+    Result disableStatusTestProductItem(List<Long> idList);
+    Result enableStatusTestProductItem(List<Long> idList);
     TestProductItemParamVo getItemParamVo(TestProductItem testProductItem);
-    List<TestProductItemSelVo> getTestProductSelVoList(Integer ProductId);
+    List<TestProductItemSelVo> getTestProductSelVoList(TestProductItem testProductItem);
     List<TestProductItemTreeVo> getTreeList(TestProductItem testProductItem);
 }
 

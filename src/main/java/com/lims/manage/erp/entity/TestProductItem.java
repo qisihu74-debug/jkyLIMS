@@ -21,7 +21,7 @@ public class TestProductItem extends Model<TestProductItem> {
     //检验项目ID
     @TableId(type = IdType.AUTO)
     private Integer checkItemId;
-    //
+    //所属检测项ID
     private Integer checkItemPid;
     //检测项编号
     private String checkItemCode;
@@ -40,7 +40,7 @@ public class TestProductItem extends Model<TestProductItem> {
     //检测项单位（1点，2样）
     private String unit;
     //取样数量
-    private Integer sampleCount;
+    private String sampleCount;
     //实验地点
     private String place;
     //实验检测时长
@@ -67,6 +67,10 @@ public class TestProductItem extends Model<TestProductItem> {
     private Date updateTime;
     //物流费用
     private String logisticsCosts;
+    //应用印章
+    private String methodSignet;
+    //取样标准
+    private String sampleStandard;
 
     public Integer getCheckItemId() {
         return checkItemId;
@@ -148,11 +152,11 @@ public class TestProductItem extends Model<TestProductItem> {
         this.unit = unit;
     }
 
-    public Integer getSampleCount() {
+    public String getSampleCount() {
         return sampleCount;
     }
 
-    public void setSampleCount(Integer sampleCount) {
+    public void setSampleCount(String sampleCount) {
         this.sampleCount = sampleCount;
     }
 
@@ -250,6 +254,22 @@ public class TestProductItem extends Model<TestProductItem> {
 
     public void setLogisticsCosts(String logisticsCosts) {
         this.logisticsCosts = logisticsCosts;
+    }
+
+    public String getMethodSignet() {
+        return methodSignet;
+    }
+
+    public void setMethodSignet(String methodSignet) {
+        this.methodSignet = methodSignet;
+    }
+
+    public String getSampleStandard() {
+        return sampleStandard;
+    }
+
+    public void setSampleStandard(String sampleStandard) {
+        this.sampleStandard = sampleStandard;
     }
 
     /**

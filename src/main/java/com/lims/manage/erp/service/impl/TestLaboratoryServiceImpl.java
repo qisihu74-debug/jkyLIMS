@@ -11,6 +11,7 @@ import com.lims.manage.erp.entity.TestLaboratory;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestLaboratoryService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -34,6 +35,8 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
     private TestLaboratoryDao testLaboratoryDao;
     @Resource
     private LogManagerService logManagerService;
+    @Resource
+    private SysOssService sysOssService;
     @Override
     public Result addLaboratory(TestLaboratory testLaboratory) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -96,6 +99,7 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
             testLaboratory.setUpdateTime(new Date());
             testLaboratory.setDelFlag(1);
             testLaboratory.setId(aLong.intValue());
+            sysOssService.delAnnounce(this.getById(aLong).getPicture());
             testLaboratoryList.add(testLaboratory);
         }
         String idStr=idList.toString();
