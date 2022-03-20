@@ -740,9 +740,14 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public String downLoad(MinioClient client, String code, Long id) throws Exception { XWPFDocument doc = null;
-        client.statObject("report-word", code + ".docx");
-        InputStream object = client.getObject("report-word", code + ".docx");
+    public String downLoad(MinioClient client, String code, Long id) throws Exception {
+        String[] split = code.split("\\?");
+        String[] strings = split[0].split("\\/");
+        String bluckName = strings[3];
+        String fileName  = strings[4];
+        XWPFDocument doc = null;
+        client.statObject(bluckName, fileName);
+        InputStream object = client.getObject(bluckName, fileName);
         doc = new XWPFDocument(object);
         //写入数据
         ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
@@ -865,11 +870,12 @@ public class ReportServiceImpl implements ReportService {
         //step1 根据文件类型创建合同文档
         String url = "";
         MinioClient client = MinIoUtil.minioClient;
-        List<String> code = recordEntityMapper.getReportModelNameById(entrustId);
+        String code = recordEntityMapper.getReportModelNameById(entrustId);
         try {
-            url = downLoad(client,code.get(0),entrustId);
+            url = downLoad(client,code,entrustId);
         }catch (Exception e){
             logger.error("盖章下载报告文件失败:{}",e);
+            return false;
         }
         if (StringUtils.isNotEmpty(url)){
             File file = null;
@@ -877,6 +883,7 @@ public class ReportServiceImpl implements ReportService {
                 file = FileAndFolderUtil.getFile(url);
             }catch (Exception e){
                 logger.error("将报告地址转为File文件失败:{}",e);
+                return false;
             }
             if (file != null){
                 QiYueSuoResponse response = qiYueSuoHnadler.creatFile(file, title, fileType, null, null, null);
@@ -885,6 +892,8 @@ public class ReportServiceImpl implements ReportService {
                     List<QiYueSuoDocment> result = response.getResult();
                     entityMapper.updateDocIdAndState(entrustId,result.get(0).getDocumentId(),"2");
                 }
+            }else {
+                return false;
             }
         }
         return true;
