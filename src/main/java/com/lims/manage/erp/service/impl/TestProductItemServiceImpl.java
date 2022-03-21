@@ -49,6 +49,12 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
     /*模板*/
     @Resource
     private TestReportTemplateService testReportTemplateService;
+    /*科室检测项*/
+    @Resource
+    private TestCheckItemTeamRelService testCheckItemTeamRelService;
+    /*科室*/
+    @Resource
+    private TestTeamService testTeamService;
     /*日志*/
     @Resource
     private LogManagerService logManagerService;
@@ -80,10 +86,16 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                             testProductItemStandardFileRelService.save(new TestProductItemStandardFileRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),StandardId));
                         }
                     }
-                    //设置检查项检测设置
+                    //设置检查项检测设备
                     if (testProductItemParamVo.getTypeIds()!=null&&testProductItemParamVo.getTypeIds().size()>0){
                         for (Integer TypeId : testProductItemParamVo.getTypeIds()) {
                             testProductItemInstrumentTypeRelService.save(new TestProductItemInstrumentTypeRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),TypeId));
+                        }
+                    }
+                    //设置检测项所属科室
+                    if (testProductItemParamVo.getItemIds()!=null&&testProductItemParamVo.getItemIds().size()>0){
+                        for (Integer itemId : testProductItemParamVo.getItemIds()) {
+                            testCheckItemTeamRelService.save(new TestCheckItemTeamRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),itemId,testProductItemParamVo.getTestProductItem().getProductId()));
                         }
                     }
                     logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品检测项"+testProductItemParamVo.getTestProductItem().getCheckItemId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
@@ -135,6 +147,14 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                     testProductItemInstrumentTypeRelService.save(new TestProductItemInstrumentTypeRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),TypeId));
                 }
             }
+            //删除原有检测设备
+            testCheckItemTeamRelService.remove(new QueryWrapper<TestCheckItemTeamRel>().eq("check_item_id",testProductItemParamVo.getTestProductItem().getCheckItemId()));
+            //设置检测项所属科室
+            if (testProductItemParamVo.getItemIds()!=null&&testProductItemParamVo.getItemIds().size()>0){
+                for (Integer itemId : testProductItemParamVo.getItemIds()) {
+                    testCheckItemTeamRelService.save(new TestCheckItemTeamRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),itemId,testProductItemParamVo.getTestProductItem().getProductId()));
+                }
+            }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改产品检测项"+testProductItemParamVo.getTestProductItem().getCheckItemId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
             return ResultUtil.success("修改成功");
         }else {
@@ -149,21 +169,88 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         if(userInfo==null){
             return ResultUtil.error("token 已过期！");
         }
-        List<TestProductItem> testMethods=new ArrayList<>();
-        for (Long aLong : idList) {
-            TestProductItem testMethod=new TestProductItem();
-            testMethod.setUpdateTime(new Date());
-            testMethod.setDelFlag(1);
-            testMethod.setCheckItemId(aLong.intValue());
-            testMethods.add(testMethod);
-        }
-        String idStr=idList.toString();
-        if (this.updateBatchById(testMethods)){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除产品检测项"+idStr+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
-            return ResultUtil.success("删除成功");
+        TestProductItem testProductItem=getById(idList.get(0));
+        testProductItem.setDelFlag(1);
+        if (this.updateById(testProductItem)) {
+            if (this.delChildren(idList.get(0))) {
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品检测项" + idList.get(0) + "成功!", Const.DETECTION_MANAGEMENT_LOG, true);
+                return ResultUtil.success("删除成功");
+            } else {
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品检测项" + idList.get(0) + "失败!", Const.DETECTION_MANAGEMENT_LOG, false);
+                return ResultUtil.error("删除失败");
+            }
         }else {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除产品检测项"+idStr+"失败!", Const.DETECTION_MANAGEMENT_LOG,false);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品检测项" + idList.get(0) + "失败!", Const.DETECTION_MANAGEMENT_LOG, false);
             return ResultUtil.error("删除失败");
+        }
+    }
+
+    @Override
+    public Result disableStatusTestProductItem(List<Long> idList) {
+        TestProductItem testProductItem=getById(idList.get(0));
+        testProductItem.setStatus("1");
+        if (this.updateById(testProductItem)){
+            if (this.disableStatus(idList.get(0))){
+                return ResultUtil.success("禁用成功");
+            }else {
+                return ResultUtil.error("禁用失败");
+            }
+        }else {
+            return ResultUtil.error("禁用失败");
+        }
+    }
+
+    @Override
+    public Result enableStatusTestProductItem(List<Long> idList) {
+        TestProductItem testProductItem=getById(idList.get(0));
+        testProductItem.setStatus("0");
+        if (this.updateById(testProductItem)){
+            if (this.enableStatus(testProductItem.getCheckItemPid().longValue())){
+                return ResultUtil.success("启用成功");
+            }else {
+                return ResultUtil.error("启用失败");
+            }
+        }else {
+            return ResultUtil.error("启用失败");
+        }
+    }
+
+    public boolean delChildren(Long id){
+        List<TestProductItem> testProductItemList=list(new QueryWrapper<TestProductItem>().eq("check_item_pid",id));
+        for (TestProductItem testProductItem : testProductItemList) {
+            testProductItem.setDelFlag(1);
+            testProductItem.setUpdateTime(new Date());
+            if(!this.updateById(testProductItem)){
+                return false;
+            }
+            this.delChildren(testProductItem.getCheckItemId().longValue());
+        }
+        return true;
+    }
+
+
+    public boolean disableStatus(Long id){
+        List<TestProductItem> testProductItemList=list(new QueryWrapper<TestProductItem>().eq("check_item_pid",id));
+        for (TestProductItem testProductItem : testProductItemList) {
+            testProductItem.setStatus("1");
+            testProductItem.setUpdateTime(new Date());
+            if(!this.updateById(testProductItem)){
+                return false;
+            }
+            this.disableStatus(testProductItem.getCheckItemId().longValue());
+        }
+        return true;
+    }
+    public boolean enableStatus(Long id){
+        TestProductItem testProductItem=getById(id);
+        if (testProductItem==null){
+            return true;
+        }
+        testProductItem.setStatus("0");
+        if (this.updateById(testProductItem)){
+            return this.enableStatus(testProductItem.getCheckItemPid().longValue());
+        }else {
+            return false;
         }
     }
 
@@ -174,9 +261,11 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         List<TestProductItemMethodRel>  testProductItemMethodRels=testProductItemMethodRelService.list(new QueryWrapper<TestProductItemMethodRel>().eq("check_item_id",testProductItem.getCheckItemId()));
         List<TestProductItemStandardFileRel>  testProductItemStandardFileRels=testProductItemStandardFileRelService.list(new QueryWrapper<TestProductItemStandardFileRel>().eq("check_item_id",testProductItem.getCheckItemId()));
         List<TestProductItemInstrumentTypeRel>  testProductItemInstrumentTypeRels=testProductItemInstrumentTypeRelService.list(new QueryWrapper<TestProductItemInstrumentTypeRel>().eq("check_item_id",testProductItem.getCheckItemId()));
+        List<TestCheckItemTeamRel>  testCheckItemTeamRels=testCheckItemTeamRelService.list(new QueryWrapper<TestCheckItemTeamRel>().eq("check_item_id",testProductItem.getCheckItemId()));
         List<Integer> MethodRel=new ArrayList<>();
         List<Integer> StandardFileRel=new ArrayList<>();
         List<Integer> TypeRel=new ArrayList<>();
+        List<Integer> ItemRel=new ArrayList<>();
         for (TestProductItemMethodRel testProductItemMethodRel : testProductItemMethodRels) {
             MethodRel.add(testProductItemMethodRel.getMethodId());
         }
@@ -186,18 +275,30 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         for (TestProductItemInstrumentTypeRel testProductItemInstrumentTypeRel : testProductItemInstrumentTypeRels) {
             TypeRel.add(testProductItemInstrumentTypeRel.getIntrusmentTypeId());
         }
+        for (TestCheckItemTeamRel testCheckItemTeamRel : testCheckItemTeamRels) {
+            ItemRel.add(testCheckItemTeamRel.getTeamId());
+        }
         testProductItemParamVo.setMethodIds(MethodRel);
         testProductItemParamVo.setStandardIds(StandardFileRel);
         testProductItemParamVo.setTypeIds(TypeRel);
+        testProductItemParamVo.setItemIds(ItemRel);
         return testProductItemParamVo;
     }
 
     @Override
-    public List<TestProductItemSelVo> getTestProductSelVoList(Integer ProductId) {
+    public List<TestProductItemSelVo> getTestProductSelVoList(TestProductItem productItem) {
         //初始化
         List<TestProductItemSelVo> testProductItemSelVos=new ArrayList<>();
+        QueryWrapper<TestProductItem> queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("del_flag",0);
+        if (productItem.getProductId()!=null){
+            queryWrapper.eq("product_id",productItem.getProductId());
+        }
+        if (productItem.getCheckItemId()!=null){
+            queryWrapper.eq("check_item_id",productItem.getCheckItemId());
+        }
         //查询产品检测项
-        List<TestProductItem> testProductItems=this.list(new QueryWrapper<TestProductItem>().eq("del_flag",0).eq("product_id",ProductId));
+        List<TestProductItem> testProductItems=this.list(queryWrapper);
         //遍历
         for (TestProductItem testProductItem : testProductItems) {
             TestProductItemSelVo testProductItemSelVo=new TestProductItemSelVo();
@@ -228,6 +329,13 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                 StandarString.add(testStandardFileService.getById(testProductItemStandardFileRel.getStandardFileId()).getName());
             }
             testProductItemSelVo.setItemStandardList(StandarString);
+            //设置检测项所属科室
+            List<TestCheckItemTeamRel> testCheckItemTeamRels=testCheckItemTeamRelService.list(new QueryWrapper<TestCheckItemTeamRel>().eq("check_item_id",testProductItem.getCheckItemId()));
+            List<String> ItemTeamString=new ArrayList<>();
+            for (TestCheckItemTeamRel testCheckItemTeamRel : testCheckItemTeamRels) {
+                ItemTeamString.add(testTeamService.getById(testCheckItemTeamRel.getTeamId()).getName());
+            }
+            testProductItemSelVo.setTeamList(ItemTeamString);
             //追加进Vo集合
             testProductItemSelVos.add(testProductItemSelVo);
         }
@@ -242,24 +350,28 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         if (testProductItem.getProductId()!=null){
             queryWrapper.eq("product_id",testProductItem.getProductId());
         }
+        if (testProductItem.getStatus()!=null){
+            queryWrapper.eq("status",testProductItem.getStatus());
+        }
         if (testProductItem.getCheckItemPid()!=null){
-            queryWrapper.eq("check_item_pid",testProductItem.getProductId());
+            queryWrapper.eq("check_item_pid",testProductItem.getCheckItemPid());
         }else {
             queryWrapper.eq("check_item_pid",0);
         }
         queryWrapper.orderByDesc("create_time");
         List<TestProductItem> list=this.list(queryWrapper);
-        if (list.size()!=0){
             for (TestProductItem productItem : list) {
                 TestProductItemTreeVo treeVo=new TestProductItemTreeVo();
                 BeanUtils.copyProperties(productItem,treeVo);
                 TestProductItem testProductItem1=new TestProductItem();
                 testProductItem1.setProductId(productItem.getProductId());
                 testProductItem1.setCheckItemPid(productItem.getCheckItemId());
-                treeVo.setChildren(getTreeList(testProductItem1));
+                if (testProductItem.getStatus()!=null){
+                    testProductItem1.setStatus(testProductItem.getStatus());
+                }
+                treeVo.setChildren(this.getTreeList(testProductItem1));
                 treeVos.add(treeVo);
             }
-        }
         return treeVos;
     }
 }

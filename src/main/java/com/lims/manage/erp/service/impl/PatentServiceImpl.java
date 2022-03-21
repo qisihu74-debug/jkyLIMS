@@ -11,6 +11,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.PatentService;
+import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestProductService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -33,6 +34,8 @@ public class PatentServiceImpl extends ServiceImpl<PatentDao, Patent> implements
     private TestProductService testProductService;
     @Resource
     private LogManagerService logManagerService;
+    @Resource
+    private SysOssService sysOssService;
     @Override
     public Result addPatent(Patent Patent) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -92,6 +95,7 @@ public class PatentServiceImpl extends ServiceImpl<PatentDao, Patent> implements
             Patent.setId(aLong.intValue());
             Patent.setDelFlag(1);
             Patent.setPatenttime(new Date());
+            sysOssService.delAnnounce(this.getById(aLong).getUrl());
             testMethods.add(Patent);
         }
         String idStr=idList.toString();

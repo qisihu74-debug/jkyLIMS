@@ -57,6 +57,15 @@ public class TestCheckItemTeamRel extends Model<TestCheckItemTeamRel> {
         this.productId = productId;
     }
 
+    public TestCheckItemTeamRel() {
+    }
+
+    public TestCheckItemTeamRel(Integer checkItemId, Integer teamId, Integer productId) {
+        this.checkItemId = checkItemId;
+        this.teamId = teamId;
+        this.productId = productId;
+    }
+
     /**
      * 获取主键值
      *

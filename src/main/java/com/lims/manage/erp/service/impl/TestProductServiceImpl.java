@@ -188,7 +188,9 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
         }
         testProductSelVo.setSpecsList(SpecsList);
         //设置产品检测项
-        testProductSelVo.setTestProductItemSelVoList(testProductItemService.getTestProductSelVoList(testProduct.getProductId()));
+        TestProductItem testProductItem=new TestProductItem();
+        testProductItem.setProductId(testProduct.getProductId());
+        testProductSelVo.setTestProductItemSelVoList(testProductItemService.getTestProductSelVoList(testProductItem));
         return testProductSelVo;
     }
 

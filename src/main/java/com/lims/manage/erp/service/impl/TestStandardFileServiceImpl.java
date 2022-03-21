@@ -9,6 +9,7 @@ import com.lims.manage.erp.entity.TestStandardFile;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestStandardFileService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -29,6 +30,8 @@ import java.util.List;
 public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao, TestStandardFile> implements TestStandardFileService {
     @Resource
     private LogManagerService logManagerService;
+    @Resource
+    private SysOssService sysOssService;
 //添加
     @Override
     public Result addTestStandardFile(TestStandardFile testStandardFile) {
@@ -84,6 +87,7 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
             TestStandardFile testStandardFile=new TestStandardFile();
             testStandardFile.setId(aLong.intValue());
             testStandardFile.setStatus("0");
+            sysOssService.delAnnounce(this.getById(aLong).getFileUrl());
             testStandardFile.setFileUrl("");
             testStandardFile.setDelFlag(1);
             testMethods.add(testStandardFile);

@@ -8,6 +8,7 @@ import com.lims.manage.erp.entity.TestReportTemplate;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestReportTemplateService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -28,6 +29,9 @@ import java.util.List;
 public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplateDao, TestReportTemplate> implements TestReportTemplateService {
     @Resource
     private LogManagerService logManagerService;
+    @Resource
+    private SysOssService sysOssService;
+
     @Override
     public Result addReportTemplate(TestReportTemplate testReportTemplate) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -77,6 +81,7 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
             testReportTemplate.setUpdateTime(new Date());
             testReportTemplate.setDelFlag(1);
             testReportTemplate.setId(aLong.intValue());
+            sysOssService.delAnnounce(this.getById(aLong).getReportFileUri());
             testReportTemplates.add(testReportTemplate);
         }
         String idStr=idList.toString();

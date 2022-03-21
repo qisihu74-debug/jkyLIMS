@@ -2,6 +2,8 @@ package com.lims.manage.erp.service.impl;
 
 
 import com.lims.manage.erp.constant.BucketsConst;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
@@ -48,6 +50,17 @@ public class SysOssServiceImpl implements SysOssService {
             }
         }
         return map;
+    }
+
+    @Override
+    public Boolean delAnnounce(String fileUrl) {
+        try {
+            String fileName = fileUrl.substring(fileUrl.lastIndexOf("/")+1,fileUrl.indexOf("?"));
+            MinIoUtil.deleteFile(BucketsConst.file_syn, fileName);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }

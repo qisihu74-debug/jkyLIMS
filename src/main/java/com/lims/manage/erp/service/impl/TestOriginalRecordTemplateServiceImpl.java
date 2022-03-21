@@ -11,6 +11,7 @@ import com.lims.manage.erp.entity.TestOriginalRecordTemplate;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestOriginalRecordTemplateService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -34,6 +35,9 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
     private LogManagerService logManagerService;
     @Resource
     private TestOriginalRecordTemplateDao testOriginalRecordTemplateDao;
+
+    @Resource
+    private SysOssService sysOssService;
     @Override
     public Result addtestOriginalRecordTemplate(TestOriginalRecordTemplate testOriginalRecordTemplate) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -96,6 +100,7 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
             testProductType.setUpdateTime(new Date());
             testProductType.setDelFlag(1);
             testProductType.setId(aLong.intValue());
+            sysOssService.delAnnounce(this.getById(aLong).getFileUrl());
             testOriginalRecordTemplate.add(testProductType);
         }
         String idStr=idList.toString();

@@ -11,6 +11,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestProductItemService;
 import com.lims.manage.erp.vo.TestProductItemParamVo;
+import com.lims.manage.erp.vo.TestProductItemSelVo;
 import com.lims.manage.erp.vo.TestProductItemTreeVo;
 import com.lims.manage.erp.vo.TestProductItemVo;
 import org.springframework.beans.BeanUtils;
@@ -60,6 +61,18 @@ public class TestProductItemController extends ApiController {
     }
 
     /**
+     * 分页查询所有数据
+     *
+     * @param testProductItem 查询实体
+     * @return 所有数据
+     */
+    @GetMapping("/getSel")
+    public Result selectOneSel(TestProductItem testProductItem) {
+        List<TestProductItemSelVo> treeVos=this.testProductItemService.getTestProductSelVoList(testProductItem);
+        return ResultUtil.success(treeVos);
+    }
+
+    /**
      * 通过主键查询单条数据
      *
      * @param id 主键
@@ -75,6 +88,7 @@ public class TestProductItemController extends ApiController {
             return ResultUtil.error("参数为空");
         }
     }
+
 
     /**
      * 新增数据
@@ -114,6 +128,36 @@ public class TestProductItemController extends ApiController {
     public Result delete(@RequestBody List<Long> idList) {
         if (idList.size()!=0){
             return this.testProductItemService.delTestProductItem(idList);
+        }else {
+            return ResultUtil.error("数据为空");
+        }
+    }
+
+    /**
+     * 禁用
+     *
+     * @param idList 主键结合
+     * @return 禁用
+     */
+    @PostMapping("/disableStatus")
+    public Result disableStatus(@RequestBody List<Long> idList) {
+        if (idList.size()!=0){
+            return this.testProductItemService.disableStatusTestProductItem(idList);
+        }else {
+            return ResultUtil.error("数据为空");
+        }
+    }
+
+    /**
+     * 禁用
+     *
+     * @param idList 主键结合
+     * @return 禁用
+     */
+    @PostMapping("/enableStatus")
+    public Result enableStatus(@RequestBody List<Long> idList) {
+        if (idList.size()!=0){
+            return this.testProductItemService.enableStatusTestProductItem(idList);
         }else {
             return ResultUtil.error("数据为空");
         }

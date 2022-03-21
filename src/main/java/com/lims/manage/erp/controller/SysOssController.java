@@ -1,15 +1,18 @@
 package com.lims.manage.erp.controller;
 
+import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.SysOssService;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,6 +39,19 @@ public class SysOssController  {
         }
         Map<String,Object> map = sysOssService.postAnnounce(file);
         map.put("userName",userInfo.getName());
+        return ResultUtil.success(map);
+    }
+
+    @PostMapping("delAnnounce")
+    public Result delFile(@RequestBody String fileUrl) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token 已过期！");
+        }
+        Map<String,Object> map = new HashMap<>();
+        map.put("userName",userInfo.getName());
+        Boolean flag=sysOssService.delAnnounce(fileUrl);
+        map.put("delIsOk",flag);
         return ResultUtil.success(map);
     }
 }
