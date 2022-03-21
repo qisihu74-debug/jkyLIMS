@@ -275,7 +275,7 @@ public class EntrustServiceImpl implements EntrustService {
                 if (!CollectionUtils.isEmpty(sampleCheckItem)) {
                     //计算检测项总价钱
                     for (SampleItemEntity entity : sampleCheckItem) {
-                        if (entity.getUnitPrice() >= 0 || entity.getUnitPrice() != null) {
+                        if (entity.getUnitPrice() != null&&entity.getUnitPrice() >= 0) {
                             int money = entity.getTimes() * entity.getUnitPrice();
                             totalMoney = totalMoney + money;
                         }

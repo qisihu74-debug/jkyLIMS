@@ -65,4 +65,6 @@ public interface TestProductDao extends BaseMapper<TestProduct> {
     int insertOrUpdateBatch(@Param("entities") List<TestProduct> entities);
 
     IPage<TestProductVo> getPageList(IPage<TestProductVo> page, @Param(Constants.WRAPPER) Wrapper<TestProduct> queryWrapper);
+
+    int isLast(Integer checkItemId);
 }
