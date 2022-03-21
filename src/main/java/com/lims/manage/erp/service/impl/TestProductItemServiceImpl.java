@@ -58,6 +58,9 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
     /*日志*/
     @Resource
     private LogManagerService logManagerService;
+    /*文件*/
+    @Resource
+    private SysOssService sysOssService;
     @Override
     public Result addTestProductItem(TestProductItemParamVo testProductItemParamVo) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -67,8 +70,8 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                 if (testProductItemParamVo.getTestProductItem().getCheckItemName()==null){
                     return ResultUtil.error("检测项目名称不能为空");
                 }
-                if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).eq("del_flag",0).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
-                    return ResultUtil.error("检测项名称重复");
+                if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).eq("del_flag",0).eq("check_item_pid",testProductItemParamVo.getTestProductItem().getCheckItemPid()).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
+                    return ResultUtil.error("同层检测项名称不能重复");
                 }
                 testProductItemParamVo.getTestProductItem().setStatus("0");
                 testProductItemParamVo.getTestProductItem().setDelFlag(0);
@@ -118,8 +121,8 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         if (testProductItemParamVo.getTestProductItem().getCheckItemName()==null){
             return ResultUtil.error("检测项目名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).ne("check_item_id",testProductItemParamVo.getTestProductItem().getCheckItemId()).eq("del_flag",0).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
-            return ResultUtil.error("检测项名称重复");
+        if (this.getOne(new QueryWrapper<TestProductItem>().eq("check_item_pid",testProductItemParamVo.getTestProductItem().getCheckItemPid()).eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).ne("check_item_id",testProductItemParamVo.getTestProductItem().getCheckItemId()).eq("del_flag",0).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
+            return ResultUtil.error("同层检测项名称不能重复");
         }
         testProductItemParamVo.getTestProductItem().setUpdateTime(new Date());
         if (this.updateById(testProductItemParamVo.getTestProductItem())){
@@ -171,6 +174,9 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         }
         TestProductItem testProductItem=getById(idList.get(0));
         testProductItem.setDelFlag(1);
+        if (testProductItem.getIcon()!=null){
+            sysOssService.delAnnounce(testProductItem.getIcon());
+        }
         if (this.updateById(testProductItem)) {
             if (this.delChildren(idList.get(0))) {
                 logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品检测项" + idList.get(0) + "成功!", Const.DETECTION_MANAGEMENT_LOG, true);

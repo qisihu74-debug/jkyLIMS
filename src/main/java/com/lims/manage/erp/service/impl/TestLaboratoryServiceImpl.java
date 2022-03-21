@@ -99,7 +99,10 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
             testLaboratory.setUpdateTime(new Date());
             testLaboratory.setDelFlag(1);
             testLaboratory.setId(aLong.intValue());
-            sysOssService.delAnnounce(this.getById(aLong).getPicture());
+            String url=this.getById(aLong).getPicture();
+            if (url!=null){
+                sysOssService.delAnnounce(url);
+            }
             testLaboratoryList.add(testLaboratory);
         }
         String idStr=idList.toString();

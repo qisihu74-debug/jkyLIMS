@@ -106,7 +106,10 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
             testLaboratory.setUpdateTime(new Date());
             testLaboratory.setDelFlag(1);
             testLaboratory.setId(aLong.intValue());
-            sysOssService.delAnnounce(this.getById(aLong).getCertificateUrl());
+            String url=this.getById(aLong).getCertificateUrl();
+            if (url!=null){
+                sysOssService.delAnnounce(url);
+            }
             testLaboratoryList.add(testLaboratory);
         }
         String idStr=idList.toString();

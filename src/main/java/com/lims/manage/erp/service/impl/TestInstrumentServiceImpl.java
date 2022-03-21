@@ -122,10 +122,18 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
             testInstrument.setUpdateTime(new Date());
             testInstrument.setDelFlag(1);
             testInstrument.setId(aLong.intValue());
-            sysOssService.delAnnounce(this.getById(aLong).getPicture());
-            sysOssService.delAnnounce(this.getById(aLong).getContractUrl());
-            sysOssService.delAnnounce(this.getById(aLong).getInvoiceUrl());
-
+            String url1=this.getById(aLong).getPicture();
+            if (url1!=null){
+                sysOssService.delAnnounce(url1);
+            }
+            String url2=this.getById(aLong).getContractUrl();
+            if (url2!=null){
+                sysOssService.delAnnounce(url2);
+            }
+            String url3=this.getById(aLong).getInvoiceUrl();
+            if (url3!=null){
+                sysOssService.delAnnounce(url3);
+            }
             testInstrumentList.add(testInstrument);
         }
         String idStr=idList.toString();

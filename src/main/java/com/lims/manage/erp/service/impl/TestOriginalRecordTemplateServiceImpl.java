@@ -100,7 +100,10 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
             testProductType.setUpdateTime(new Date());
             testProductType.setDelFlag(1);
             testProductType.setId(aLong.intValue());
-            sysOssService.delAnnounce(this.getById(aLong).getFileUrl());
+            String url=this.getById(aLong).getFileUrl();
+            if (url!=null){
+                sysOssService.delAnnounce(url);
+            }
             testOriginalRecordTemplate.add(testProductType);
         }
         String idStr=idList.toString();

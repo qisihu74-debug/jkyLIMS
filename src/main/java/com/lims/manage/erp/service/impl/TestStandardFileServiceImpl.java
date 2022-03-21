@@ -87,8 +87,11 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
             TestStandardFile testStandardFile=new TestStandardFile();
             testStandardFile.setId(aLong.intValue());
             testStandardFile.setStatus("0");
+            String url=this.getById(aLong).getFileUrl();
+            if (url!=null){
+                sysOssService.delAnnounce(url);
+            }
             sysOssService.delAnnounce(this.getById(aLong).getFileUrl());
-            testStandardFile.setFileUrl("");
             testStandardFile.setDelFlag(1);
             testMethods.add(testStandardFile);
         }

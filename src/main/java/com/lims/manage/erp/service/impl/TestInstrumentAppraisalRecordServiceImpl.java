@@ -10,6 +10,7 @@ import com.lims.manage.erp.entity.TestInstrumentAppraisalRecord;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestInstrumentAppraisalRecordService;
 import com.lims.manage.erp.service.TestInstrumentService;
 import com.lims.manage.erp.util.Const;
@@ -33,6 +34,8 @@ public class TestInstrumentAppraisalRecordServiceImpl extends ServiceImpl<TestIn
     private TestInstrumentService testInstrumentService;
     @Resource
     private LogManagerService logManagerService;
+    @Resource
+    private SysOssService sysOssService;
     @Override
     public Result addInstrumentAppraisalRecord(TestInstrumentAppraisalRecord testInstrumentAppraisalRecord) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -107,6 +110,10 @@ public class TestInstrumentAppraisalRecordServiceImpl extends ServiceImpl<TestIn
             testInstrument.setUpdateTime(new Date());
             testInstrument.setDelFlag(1);
             testInstrument.setId(aLong.intValue());
+            String url=this.getById(aLong).getFileUrl();
+            if (url!=null){
+                sysOssService.delAnnounce(url);
+            }
             testInstrumentList.add(testInstrument);
         }
         String idStr=idList.toString();
