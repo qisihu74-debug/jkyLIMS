@@ -67,9 +67,9 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                 if (testProductItemParamVo.getTestProductItem().getCheckItemName()==null){
                     return ResultUtil.error("检测项目名称不能为空");
                 }
-                if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).eq("del_flag",0).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
+                /*if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).eq("del_flag",0).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
                     return ResultUtil.error("检测项名称重复");
-                }
+                }*/
                 testProductItemParamVo.getTestProductItem().setStatus("0");
                 testProductItemParamVo.getTestProductItem().setDelFlag(0);
                 testProductItemParamVo.getTestProductItem().setCreateTime(new Date());
