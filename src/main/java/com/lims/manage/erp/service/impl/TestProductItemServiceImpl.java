@@ -67,6 +67,9 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         if(userInfo==null){
             return ResultUtil.error("token 已过期！");
         }
+        if(testProductItemParamVo.getTestProductItem().getCheckItemPid()==null){
+            testProductItemParamVo.getTestProductItem().setCheckItemPid(0);
+        }
                 if (testProductItemParamVo.getTestProductItem().getCheckItemName()==null){
                     return ResultUtil.error("检测项目名称不能为空");
                 }
@@ -77,12 +80,6 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                 testProductItemParamVo.getTestProductItem().setDelFlag(0);
                 testProductItemParamVo.getTestProductItem().setCreateTime(new Date());
                 if (this.save(testProductItemParamVo.getTestProductItem())){
-                    //设置检查项检测方法
-                    if (testProductItemParamVo.getMethodIds()!=null&&testProductItemParamVo.getMethodIds().size()>0){
-                        for (Integer MethodId : testProductItemParamVo.getMethodIds()) {
-                            testProductItemMethodRelService.save(new TestProductItemMethodRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),MethodId));
-                        }
-                    }
                     //设置检查项检测依据
                     if (testProductItemParamVo.getStandardIds()!=null&&testProductItemParamVo.getStandardIds().size()>0){
                         for (Integer StandardId : testProductItemParamVo.getStandardIds()) {
@@ -126,14 +123,6 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         }
         testProductItemParamVo.getTestProductItem().setUpdateTime(new Date());
         if (this.updateById(testProductItemParamVo.getTestProductItem())){
-            //删除原有检测方法
-            testProductItemMethodRelService.remove(new QueryWrapper<TestProductItemMethodRel>().eq("check_item_id",testProductItemParamVo.getTestProductItem().getCheckItemId()));
-            //设置检查项检测方法
-            if (testProductItemParamVo.getMethodIds()!=null&&testProductItemParamVo.getMethodIds().size()>0){
-                for (Integer MethodId : testProductItemParamVo.getMethodIds()) {
-                    testProductItemMethodRelService.save(new TestProductItemMethodRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),MethodId));
-                }
-            }
             //删除原有检测依据
             testProductItemStandardFileRelService.remove(new QueryWrapper<TestProductItemStandardFileRel>().eq("check_item_id",testProductItemParamVo.getTestProductItem().getCheckItemId()));
             //设置检查项检测依据

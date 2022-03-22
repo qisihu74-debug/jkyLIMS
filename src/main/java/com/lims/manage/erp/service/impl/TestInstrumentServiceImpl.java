@@ -8,15 +8,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itextpdf.text.io.StreamUtil;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TestInstrumentAppraisalRecord;
 import com.lims.manage.erp.entity.TestLaboratory;
 import com.lims.manage.erp.mapper.TestInstrumentDao;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.LogManagerService;
-import com.lims.manage.erp.service.SysOssService;
-import com.lims.manage.erp.service.TestInstrumentService;
-import com.lims.manage.erp.service.TestLaboratoryService;
+import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.TestInstrumentVo;
@@ -41,6 +39,8 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
     private TestInstrumentDao testInstrumentDao;
     @Resource
     private LogManagerService logManagerService;
+    @Resource
+    private TestInstrumentAppraisalRecordService testInstrumentAppraisalRecordService;
 
     @Resource
     private SysOssService sysOssService;
@@ -101,6 +101,14 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
             return ResultUtil.error("该实验室已有该设备！");
         }
         testInstrument.setUpdateTime(new Date());
+        List<TestInstrumentAppraisalRecord> testInstrumentAppraisalRecords=testInstrumentAppraisalRecordService.list(new QueryWrapper<TestInstrumentAppraisalRecord>().eq("code",testInstrument.getId()));
+        if (testInstrumentAppraisalRecords!=null&&testInstrumentAppraisalRecords.size()!=0){
+            for (TestInstrumentAppraisalRecord testInstrumentAppraisalRecord : testInstrumentAppraisalRecords) {
+                testInstrumentAppraisalRecord.setName(testInstrument.getName());
+                testInstrumentAppraisalRecord.setUpdateTime(new Date());
+            }
+            testInstrumentAppraisalRecordService.updateBatchById(testInstrumentAppraisalRecords);
+        }
         if (this.updateById(testInstrument)){
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改设备仪器"+testInstrument.getId()+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG,true);
             return ResultUtil.success("修改成功");

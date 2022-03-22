@@ -60,11 +60,10 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
         if (testProductItemVo.getTestProduct().getProductName()==null){
             return ResultUtil.error("产品名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestProduct>().eq("product_name",testProductItemVo.getTestProduct().getProductName()))!=null){
+        if (this.getOne(new QueryWrapper<TestProduct>().eq("del_flag",0).eq("product_name",testProductItemVo.getTestProduct().getProductName()))!=null){
             return ResultUtil.error("产品名称重复");
         }
         //设置基础信息
-        testProductItemVo.getTestProduct().setStatus("1");
         testProductItemVo.getTestProduct().setDelFlag(0);
         testProductItemVo.getTestProduct().setCreateTime(new Date());
         //保存产品
@@ -101,7 +100,7 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
         if (testProductItemVo.getTestProduct().getProductName()==null){
             return ResultUtil.error("产品名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestProduct>().ne("product_id",testProductItemVo.getTestProduct().getProductId()).eq("product_name",testProductItemVo.getTestProduct().getProductName()))!=null){
+        if (this.getOne(new QueryWrapper<TestProduct>().eq("del_flag",0).ne("product_id",testProductItemVo.getTestProduct().getProductId()).eq("product_name",testProductItemVo.getTestProduct().getProductName()))!=null){
             return ResultUtil.error("产品名称重复");
         }
         //设置基础信息

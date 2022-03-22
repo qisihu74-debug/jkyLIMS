@@ -41,6 +41,8 @@ public class TestProductVo extends Model<TestProductVo> {
     private Date updateTime;
     //产品类型名称
     private String productTypeName;
+    //产品用途
+    private String productPurpose;
     /**
      * 获取主键值
      *
