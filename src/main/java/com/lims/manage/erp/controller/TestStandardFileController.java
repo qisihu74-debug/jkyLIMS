@@ -39,6 +39,7 @@ public class TestStandardFileController extends ApiController {
         QueryWrapper<TestStandardFile> queryWrapper=new QueryWrapper<>();
         if (testStandardFile.getType()!=null){
             queryWrapper.ne("type",testStandardFile.getType());
+            queryWrapper.ne("type","4");
         }
         queryWrapper.eq("del_flag",0);
         queryWrapper.orderByDesc("create_time");

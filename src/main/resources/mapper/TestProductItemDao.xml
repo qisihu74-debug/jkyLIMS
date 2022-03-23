@@ -46,5 +46,30 @@
         on duplicate key update
          check_item_pid = values(check_item_pid) , check_item_code = values(check_item_code) , product_id = values(product_id) , report_model_id = values(report_model_id) , check_item_name = values(check_item_name) , coordinate = values(coordinate) , icon = values(icon) , additional_fees = values(additional_fees) , unit = values(unit) , sample_count = values(sample_count) , place = values(place) , duration = values(duration) , frequency = values(frequency) , difficulty = values(difficulty) , remark = values(remark) , check_price = values(check_price) , is_available = values(is_available) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , logistics_costs = values(logistics_costs)     </insert>
 
+    <select id="getChirldsByIds" resultType="Long">
+        WITH RECURSIVE td AS (
+        SELECT
+        *
+        FROM
+        test_product_item
+        WHERE
+        check_item_id in
+        <foreach collection="ids" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        UNION ALL
+        SELECT
+        c.*
+        FROM
+        test_product_item c,
+        td
+        WHERE
+        c.check_item_pid = td.check_item_id
+        ) SELECT
+        *
+        FROM
+        td
+    </select>
+
 </mapper>
 

@@ -42,6 +42,9 @@ public class TestReportTemplate extends Model<TestReportTemplate> {
     private Date updateTime;
     //备注
     private String remark;
+    //报告标准
+    private String reportStandard;
+
 
 
     public Integer getId() {
@@ -130,6 +133,14 @@ public class TestReportTemplate extends Model<TestReportTemplate> {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public String getReportStandard() {
+        return reportStandard;
+    }
+
+    public void setReportStandard(String reportStandard) {
+        this.reportStandard = reportStandard;
     }
 
     /**

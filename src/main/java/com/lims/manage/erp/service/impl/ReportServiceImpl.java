@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -87,6 +88,8 @@ public class ReportServiceImpl implements ReportService {
     private TestProductDao testProductDao;
     @Autowired
     private TestReportQualifcationDao dao;
+    @Resource
+    private TestProductItemDao itemDao;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -986,7 +989,7 @@ public class ReportServiceImpl implements ReportService {
         Map<String,List<QuotaEntity>> map = new HashMap<>();
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
-        List<Long> ids = Lists.newArrayList();
+        Set<Long> ids = new HashSet<>();
         for (ReportSampleDetailVo bean:reportDetail.getSamples()) {
             //获取检测id
             List<ReportCheckItemDetailVo> checkItems = bean.getCheckItems();
@@ -994,7 +997,9 @@ public class ReportServiceImpl implements ReportService {
                 ids.add(detailVo.getCheckItemId());
             }
         }
-        List<QuotaEntity> list = dao.getListById(ids);
+        //获取检测项下的子检测项
+        List<Long> itemIds = itemDao.getChirldsByIds(ids);
+        List<QuotaEntity> list = dao.getListById(itemIds);
         for (QuotaEntity bean:list) {
             if (map.get(bean.getConditionValue()) == null){
                 List<QuotaEntity> quotaEntityList = Lists.newArrayList();

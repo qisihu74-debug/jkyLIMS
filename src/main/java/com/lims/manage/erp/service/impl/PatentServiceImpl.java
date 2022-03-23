@@ -95,7 +95,10 @@ public class PatentServiceImpl extends ServiceImpl<PatentDao, Patent> implements
             Patent.setId(aLong.intValue());
             Patent.setDelFlag(1);
             Patent.setPatenttime(new Date());
-            sysOssService.delAnnounce(this.getById(aLong).getUrl());
+            String url=this.getById(aLong).getUrl();
+            if (url!=null){
+                sysOssService.delAnnounce(url);
+            }
             testMethods.add(Patent);
         }
         String idStr=idList.toString();

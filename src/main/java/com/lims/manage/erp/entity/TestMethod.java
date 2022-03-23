@@ -24,10 +24,6 @@ public class TestMethod extends Model<TestMethod> {
     private String name;
     //备注
     private String remark;
-    //价格
-    private String price;
-    //应用印章
-    private String signet;
     // 0,启用，1,冻结
     private String status;
     //0默认未删除,1删除
@@ -94,22 +90,6 @@ public class TestMethod extends Model<TestMethod> {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public String getSignet() {
-        return signet;
-    }
-
-    public void setSignet(String signet) {
-        this.signet = signet;
     }
 
     /**

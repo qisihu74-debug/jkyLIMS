@@ -58,28 +58,31 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
     /*日志*/
     @Resource
     private LogManagerService logManagerService;
+    /*文件*/
+    @Resource
+    private SysOssService sysOssService;
     @Override
     public Result addTestProductItem(TestProductItemParamVo testProductItemParamVo) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if(userInfo==null){
             return ResultUtil.error("token 已过期！");
         }
+        if(testProductItemParamVo.getTestProductItem().getCheckItemPid()==null){
+            testProductItemParamVo.getTestProductItem().setCheckItemPid(0);
+        }
                 if (testProductItemParamVo.getTestProductItem().getCheckItemName()==null){
                     return ResultUtil.error("检测项目名称不能为空");
                 }
-                if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).eq("del_flag",0).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
+                /*if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).eq("del_flag",0).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
                     return ResultUtil.error("检测项名称重复");
+                }*/
+                if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).eq("del_flag",0).eq("check_item_pid",testProductItemParamVo.getTestProductItem().getCheckItemPid()).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
+                    return ResultUtil.error("同层检测项名称不能重复");
                 }
                 testProductItemParamVo.getTestProductItem().setStatus("0");
                 testProductItemParamVo.getTestProductItem().setDelFlag(0);
                 testProductItemParamVo.getTestProductItem().setCreateTime(new Date());
                 if (this.save(testProductItemParamVo.getTestProductItem())){
-                    //设置检查项检测方法
-                    if (testProductItemParamVo.getMethodIds()!=null&&testProductItemParamVo.getMethodIds().size()>0){
-                        for (Integer MethodId : testProductItemParamVo.getMethodIds()) {
-                            testProductItemMethodRelService.save(new TestProductItemMethodRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),MethodId));
-                        }
-                    }
                     //设置检查项检测依据
                     if (testProductItemParamVo.getStandardIds()!=null&&testProductItemParamVo.getStandardIds().size()>0){
                         for (Integer StandardId : testProductItemParamVo.getStandardIds()) {
@@ -118,19 +121,11 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         if (testProductItemParamVo.getTestProductItem().getCheckItemName()==null){
             return ResultUtil.error("检测项目名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).ne("check_item_id",testProductItemParamVo.getTestProductItem().getCheckItemId()).eq("del_flag",0).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
-            return ResultUtil.error("检测项名称重复");
+        if (this.getOne(new QueryWrapper<TestProductItem>().eq("check_item_pid",testProductItemParamVo.getTestProductItem().getCheckItemPid()).eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).ne("check_item_id",testProductItemParamVo.getTestProductItem().getCheckItemId()).eq("del_flag",0).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
+            return ResultUtil.error("同层检测项名称不能重复");
         }
         testProductItemParamVo.getTestProductItem().setUpdateTime(new Date());
         if (this.updateById(testProductItemParamVo.getTestProductItem())){
-            //删除原有检测方法
-            testProductItemMethodRelService.remove(new QueryWrapper<TestProductItemMethodRel>().eq("check_item_id",testProductItemParamVo.getTestProductItem().getCheckItemId()));
-            //设置检查项检测方法
-            if (testProductItemParamVo.getMethodIds()!=null&&testProductItemParamVo.getMethodIds().size()>0){
-                for (Integer MethodId : testProductItemParamVo.getMethodIds()) {
-                    testProductItemMethodRelService.save(new TestProductItemMethodRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),MethodId));
-                }
-            }
             //删除原有检测依据
             testProductItemStandardFileRelService.remove(new QueryWrapper<TestProductItemStandardFileRel>().eq("check_item_id",testProductItemParamVo.getTestProductItem().getCheckItemId()));
             //设置检查项检测依据
@@ -171,6 +166,9 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         }
         TestProductItem testProductItem=getById(idList.get(0));
         testProductItem.setDelFlag(1);
+        if (testProductItem.getIcon()!=null){
+            sysOssService.delAnnounce(testProductItem.getIcon());
+        }
         if (this.updateById(testProductItem)) {
             if (this.delChildren(idList.get(0))) {
                 logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品检测项" + idList.get(0) + "成功!", Const.DETECTION_MANAGEMENT_LOG, true);
