@@ -3,8 +3,10 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestProductItem;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 产品检测项(TestProductItem)表数据库访问层
@@ -31,5 +33,11 @@ int insertBatch(@Param("entities") List<TestProductItem> entities);
 */
 int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
 
+    /**
+     * 获取检测项下的子检测项
+     * @param ids
+     * @return
+     */
+    List<Long> getChirldsByIds(@Param("ids") Set<Long> ids);
 }
 

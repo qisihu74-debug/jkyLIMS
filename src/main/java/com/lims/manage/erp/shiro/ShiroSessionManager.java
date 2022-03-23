@@ -1,6 +1,8 @@
 package com.lims.manage.erp.shiro;
 
+import com.lims.manage.erp.util.ShiroUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.shiro.session.Session;
 import org.apache.shiro.web.servlet.ShiroHttpServletRequest;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.apache.shiro.web.util.WebUtils;
@@ -8,6 +10,7 @@ import org.apache.shiro.web.util.WebUtils;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * @Description 自定义获取Token
