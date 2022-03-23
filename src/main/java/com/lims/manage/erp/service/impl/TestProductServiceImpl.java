@@ -83,7 +83,7 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
                 }
             }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品"+testProductItemVo.getTestProduct().getProductId()+"成功!", Const.PRODUCT_MANAGEMENT_LOG,true);
-            return ResultUtil.success("添加成功!",testProductItemVo);
+            return ResultUtil.success("添加成功!");
         }else {
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品失败!", Const.PRODUCT_MANAGEMENT_LOG,false);
             return ResultUtil.error("保存产品信息失败，未知异常!");
@@ -126,7 +126,7 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
                 }
             }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改产品"+testProductItemVo.getTestProduct().getProductId()+"成功!", Const.PRODUCT_MANAGEMENT_LOG,true);
-            return ResultUtil.success("保存成功!",testProductItemVo);
+            return ResultUtil.success("修改成功!");
         }else {
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改产品"+testProductItemVo.getTestProduct().getProductId()+"失败!", Const.PRODUCT_MANAGEMENT_LOG,false);
             return ResultUtil.error("保存产品信息失败，未知异常!");
