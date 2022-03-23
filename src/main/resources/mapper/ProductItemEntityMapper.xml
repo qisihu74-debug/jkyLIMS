@@ -260,7 +260,8 @@ logistics_costs, unit, samplestandard, sample_count,
         FROM
             test_product_item
         WHERE
-            product_id = #{productId}
+            check_price is not null
+            and product_id = #{productId}
     </select>
 
     <select id="getItemInfo" resultType="com.lims.manage.erp.vo.CheckItemInfoVo">
