@@ -175,6 +175,51 @@ public class EntrustEntity {
      */
     private String fileUrlStr;
 
+    /**
+     * 委托检测类别（原材检测 配合比）
+     */
+    private String entrustTestType;
+
+    /**
+     *设计强度（MPa）
+     */
+    private String designStrength;
+
+    /**
+     * 配制强度（MPa）
+     */
+    private String  intensityOfConfiguration;
+
+    /**
+     * 抗（渗、冻）等级
+     */
+    private String antifreezeLevel;
+
+    /**
+     *水胶比
+     */
+    private String waterBinderRatio;
+
+    /**
+     * 单位用水量（kg）
+     */
+    private String unitWaterUse;
+
+    /**
+     * 砂率（%）
+     */
+    private String sandRatio;
+
+    /**
+     * 设计坍落度（mm）
+     */
+    private String designSlump;
+
+    /**
+     * 拌和方式
+     */
+    private String mixingWay;
+
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,
                          String witnessUint, String witnessPerson, String witnessPhone, String projectName,
@@ -251,6 +296,15 @@ public class EntrustEntity {
         this.addressee = vo.getAddressee();
         this.mobile=vo.getMobile();
         this.mailbox=vo.getMailbox();
+        this.entrustTestType=vo.getEntrustTestType();
+        this.designStrength=vo.getDesignStrength();
+        this.intensityOfConfiguration=vo.getIntensityOfConfiguration();
+        this.antifreezeLevel=vo.getAntifreezeLevel();
+        this.waterBinderRatio=vo.getWaterBinderRatio();
+        this.unitWaterUse =vo.getUnitWaterUse();
+        this.sandRatio=vo.getSandRatio();
+        this.designSlump=vo.getDesignSlump();
+        this.mixingWay=vo.getMixingWay();
     }
 
 

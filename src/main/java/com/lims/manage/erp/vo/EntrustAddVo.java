@@ -178,4 +178,49 @@ public class EntrustAddVo {
      */
     private String[] sealTypes;
 
+    /**
+     * 委托检测类别（原材检测 配合比）
+     */
+    private String entrustTestType;
+
+    /**
+     *设计强度（MPa）
+     */
+    private String designStrength;
+
+    /**
+     * 配制强度（MPa）
+     */
+    private String  intensityOfConfiguration;
+
+    /**
+     * 抗（渗、冻）等级
+     */
+    private String antifreezeLevel;
+
+    /**
+     *水胶比
+     */
+    private String waterBinderRatio;
+
+    /**
+     * 单位用水量（kg）
+     */
+    private String unitWaterUse;
+
+    /**
+     * 砂率（%）
+     */
+    private String sandRatio;
+
+    /**
+     * 设计坍落度（mm）
+     */
+    private String designSlump;
+
+    /**
+     * 拌和方式
+     */
+    private String mixingWay;
+
 }

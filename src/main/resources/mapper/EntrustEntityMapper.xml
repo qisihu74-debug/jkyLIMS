@@ -10,7 +10,9 @@
     witness_person, witness_phone, project_name, project_part, sampling_method, check_purpose,
     report_count, report_type, request_date, payment_method, present_information, acceptance_date,
      team, state, remark, invalid_reason, operate_user, operate_date, file_url,  is_save,
-    business_acceptor,seal_type,count_price AS paymentCount,address,addressee,mobile,mailbox,file_url_str
+    business_acceptor,seal_type,count_price AS paymentCount,address,addressee,mobile,mailbox,file_url_str,
+    entrust_test_type,design_strength,intensity_of_configuration,antifreeze_level,water_binder_ratio,unit_water_use,sand_ratio,
+    design_slump,mixing_way
     from test_entrusted_info
     where id = #{id}
   </select>
@@ -233,7 +235,17 @@ addressee,
 mobile,
 mailbox,
 file_url_str,
-state
+state,
+entrust_test_type,
+design_strength,
+intensity_of_configuration,
+antifreeze_level,
+water_binder_ratio,
+unit_water_use,
+sand_ratio,
+design_slump,
+mixing_way
+
 )
         values (#{id},
 #{entrustmentNo},
@@ -269,7 +281,17 @@ state
 #{mobile},
 #{mailbox},
 #{fileUrlStr},
-#{state}
+#{state},
+#{entrustTestType},
+#{designStrength},
+#{intensityOfConfiguration},
+#{antifreezeLevel},
+#{waterBinderRatio},
+#{unitWaterUse},
+#{sandRatio},
+#{designSlump},
+#{mixingWay}
+
 )
 
   </insert>
@@ -321,6 +343,15 @@ state
       <if test="operateDate != null">operate_date=#{operateDate},</if>
       <if test="invalidReason != null and invalidReason!=''">invalid_reason=#{invalidReason},</if>
       <if test="fileUrlStr != null and fileUrlStr!=''">file_url_str=#{fileUrlStr},</if>
+      <if test="entrustTestType != null and entrustTestType!=''">entrust_test_type=#{entrustTestType},</if>
+      <if test="designStrength != null and designStrength!=''">design_strength=#{designStrength},</if>
+      <if test="intensityOfConfiguration != null and intensityOfConfiguration!=''">intensity_of_configuration=#{intensityOfConfiguration},</if>
+      <if test="antifreezeLevel != null and antifreezeLevel!=''">antifreeze_level=#{antifreezeLevel},</if>
+      <if test="waterBinderRatio != null and waterBinderRatio!=''">water_binder_ratio=#{waterBinderRatio},</if>
+      <if test="unitWaterUse != null and unitWaterUse!='' ">unit_water_use=#{unitWaterUse},</if>
+      <if test="sandRatio != null and sandRatio!=''">sand_ratio=#{sandRatio},</if>
+      <if test="designSlump != null and designSlump!=''">design_slump=#{designSlump},</if>
+      <if test="mixingWay != null and mixingWay!=''">mixing_way=#{mixingWay},</if>
     </trim>
     <trim prefix="WHERE" prefixOverrides="AND |OR ">
     <if test="id!=null">
