@@ -23,6 +23,10 @@ public class TestProductItemMethodRel extends Model<TestProductItemMethodRel> {
     private Integer checkItemId;
     //检测方法id
     private Integer methodId;
+    //检测项方法检测价格
+    private Integer methodItemPrice;
+    //检测项应用印章
+    private Integer methodItemSignet;
 
 
     public Integer getId() {
@@ -52,9 +56,25 @@ public class TestProductItemMethodRel extends Model<TestProductItemMethodRel> {
     public TestProductItemMethodRel() {
     }
 
+    public Integer getMethodItemPrice() {
+        return methodItemPrice;
+    }
+
+    public void setMethodItemPrice(Integer methodItemPrice) {
+        this.methodItemPrice = methodItemPrice;
+    }
+
     public TestProductItemMethodRel(Integer checkItemId, Integer methodId) {
         this.checkItemId = checkItemId;
         this.methodId = methodId;
+    }
+
+    public Integer getMethodItemSignet() {
+        return methodItemSignet;
+    }
+
+    public void setMethodItemSignet(Integer methodItemSignet) {
+        this.methodItemSignet = methodItemSignet;
     }
 
     /**

@@ -81,7 +81,10 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
             testReportTemplate.setUpdateTime(new Date());
             testReportTemplate.setDelFlag(1);
             testReportTemplate.setId(aLong.intValue());
-            sysOssService.delAnnounce(this.getById(aLong).getReportFileUri());
+            String url=this.getById(aLong).getReportFileUri();
+            if (url!=null){
+                sysOssService.delAnnounce(url);
+            }
             testReportTemplates.add(testReportTemplate);
         }
         String idStr=idList.toString();

@@ -61,29 +61,6 @@ public class TestProductController extends ApiController {
         }
     }
 
-
-    /**
-     * 通过主键查询单条数据
-     *
-     * @param id 主键
-     * @return 单条数据
-     */
-    @GetMapping("/upStatus/{id}")
-    public Result updateProductStatus(@PathVariable Serializable id) {
-        if (id!=null&&id!=""){
-            TestProduct testProduct=this.testProductService.getOne(new QueryWrapper<TestProduct>().eq("product_id",id));
-            testProduct.setStatus("0");
-            testProduct.setUpdateTime(new Date());
-            if (this.testProductService.updateById(testProduct)){
-                return ResultUtil.success("成功");
-            }else {
-                return ResultUtil.error(500,"参数为空");
-            }
-        }else {
-            return ResultUtil.error("参数为空");
-        }
-    }
-
     /**
      * 分页查询所有数据
      *
@@ -95,7 +72,6 @@ public class TestProductController extends ApiController {
     public Result selectAll(Page<TestProductVo> page, TestProduct testProduct) {
         QueryWrapper<TestProduct> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("p.del_flag",0);
-        queryWrapper.eq("p.status",0);
         if (testProduct.getProductName()!=null){
             queryWrapper.like("p.product_name",testProduct.getProductName());
         }

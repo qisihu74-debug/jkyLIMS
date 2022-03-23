@@ -43,6 +43,9 @@ public class TestInstrumentAppraisalRecordController extends ApiController {
         if (testInstrumentAppraisalRecord.getName()!=null){
             queryWrapper.like("name",testInstrumentAppraisalRecord.getName());
         }
+        if (testInstrumentAppraisalRecord.getCode()!=null){
+            queryWrapper.like("code",testInstrumentAppraisalRecord.getCode());
+        }
         queryWrapper.orderByDesc("create_time");
         return ResultUtil.success(this.testInstrumentAppraisalRecordService.page(page, queryWrapper));
     }
