@@ -124,11 +124,10 @@ public class TaskController {
             Long strLong = ShiroUtils.getUserInfo().getUserId();
             String str1 = String.valueOf(strLong);
             taskTestEntity.setReceiver(str1);
-        }
-        else {
+        } else {
             return ResultUtil.error(201, "token已过期！");
         }
-        if(taskTestEntity.getInspector()==null||taskTestEntity.getRecorder()==null||taskTestEntity.getReviewer()==null||taskTestEntity.getReportProducer()==null){
+        if (taskTestEntity.getInspector() == null || taskTestEntity.getRecorder() == null || taskTestEntity.getReviewer() == null || taskTestEntity.getReportProducer() == null) {
             return ResultUtil.error(201, "缺少必填参数！");
         }
         Boolean taskStatus = taskService.getJudgmentTaskList(taskTestEntity.getId());
@@ -201,7 +200,7 @@ public class TaskController {
     @PostMapping(value = "/getTaskList_two")
     public Result getTaskInfo_two(@RequestBody TaskListParamVo paramVo) {
 
-        if (paramVo == null||paramVo.getState()==null||paramVo.getPageNum()==null||paramVo.getPageSize()==null) {
+        if (paramVo == null || paramVo.getState() == null || paramVo.getPageNum() == null || paramVo.getPageSize() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             // 验证登录人信息 和部门 存入
@@ -230,7 +229,7 @@ public class TaskController {
      */
     @RequestMapping("/getSampleList")
     public Result getSampleList(@RequestBody TaskListParamVo paramVo) {
-        if (paramVo == null||paramVo.getPageNum()==null||paramVo.getPageSize()==null) {
+        if (paramVo == null || paramVo.getPageNum() == null || paramVo.getPageSize() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             return ResultUtil.success("查询领样列表成功！", taskService.getSampleList(paramVo));
@@ -245,16 +244,14 @@ public class TaskController {
      */
     @RequestMapping("/receiveSample")
     public Result receiveSample(@RequestBody ReceiveSampleParamVo paramVo) {
-        if (paramVo == null||paramVo.getSampler()==null||"".equals(paramVo.getSampler())||paramVo.getTaskId()==null) {
+        if (paramVo == null || paramVo.getSampler() == null || "".equals(paramVo.getSampler()) || paramVo.getTaskId() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             // 领样人姓名与任务单ID  效验是否属于同一部门
-           if(taskService.isIntendedEffectReceive(paramVo.getTaskId(),paramVo.getSampler())){
+            if (taskService.isIntendedEffectReceive(paramVo.getTaskId(), paramVo.getSampler()) == true) {
                 return ResultUtil.success("领样成功！", taskService.receiveSample(paramVo));
             }
-            else{
-                return ResultUtil.error("领样失败！领样人姓名不属于此任务单下团队成员");
-            }
+            return ResultUtil.error("领样失败！领样人姓名不属于此任务单下团队成员");
         }
     }
 
@@ -283,7 +280,7 @@ public class TaskController {
         try {
             workbook = transformer.transformXLS(fileStream, result);
             response.reset();
-            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             String fileName2 = URLEncoder.encode(split[2], "UTF-8");
@@ -311,7 +308,7 @@ public class TaskController {
             TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfo(taskId);
             XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
             response.reset();
-            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             fileName = URLEncoder.encode(fileName, "UTF-8");
@@ -340,7 +337,7 @@ public class TaskController {
             TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId, null);
             XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
             response.reset();
-            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             fileName = URLEncoder.encode(fileName, "UTF-8");
@@ -370,7 +367,7 @@ public class TaskController {
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),paramVo.getTaskId())==false){
+        if (testDetectionService.VerifyTheLogin(userInfo.getUserId(), paramVo.getTaskId()) == false) {
             return ResultUtil.error("登录人没有被派发检测资格");
         }
         int i = taskService.uploadOriginalRecord(paramVo, file);
@@ -406,13 +403,13 @@ public class TaskController {
             }
             // 通过检测项主键 获取test_task Id
             Long taskId = taskMapper.getReturnTaskId(itemId);
-            if(state==1){
-                if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),taskId)==false){
+            if (state == 1) {
+                if (testDetectionService.VerifyTheLogin(userInfo.getUserId(), taskId) == false) {
                     return ResultUtil.error("登录人没有被派发检测资格");
                 }
             }
-            if(state==3||state==4){
-                if(testDetectionService.reviewTheLogin(userInfo.getUserId(),taskId)==false){
+            if (state == 3 || state == 4) {
+                if (testDetectionService.reviewTheLogin(userInfo.getUserId(), taskId) == false) {
                     return ResultUtil.error("登录人没有被派发复核资格");
                 }
             }
@@ -433,7 +430,7 @@ public class TaskController {
 
     @RequestMapping("/updatePersonInfo")
     public Result updatePersonInfo(@RequestBody PersonInfoVo vo) {
-        if (vo.getTaskId() == null|| vo.getInspector()==null||vo.getRecorder()==null||vo.getReviewer()==null||vo.getReportProducer()==null) {
+        if (vo.getTaskId() == null || vo.getInspector() == null || vo.getRecorder() == null || vo.getReviewer() == null || vo.getReportProducer() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             int i = taskService.updatePersonInfo(vo);

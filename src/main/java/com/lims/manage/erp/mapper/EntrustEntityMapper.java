@@ -235,4 +235,51 @@ public interface EntrustEntityMapper extends BaseMapper {
             "WHERE company_name = #{companyName} and type = #{type} LIMIT 1")
     String getCompanyName(String companyName,Integer type);
 
+    /**
+     * 遍历 获取检测项id 和价格。
+     *
+     */
+    @Select("SELECT\n" +
+            "\tc.check_item_id,\n" +
+            "\tc.check_price \n" +
+            "FROM\n" +
+            "\t(\n" +
+            "\t\tSELECT\n" +
+            "\t\t\ta.check_item_id,\n" +
+            "\t\t\ta.check_price,\n" +
+            "\t\tIF (\n" +
+            "\t\t\tFIND_IN_SET(a.check_item_pid ,@pids) > 0,\n" +
+            "\n" +
+            "\t\tIF (\n" +
+            "\t\t\tlength(@pids) - length(\n" +
+            "\t\t\t\tREPLACE (@pids, a.check_item_pid, '')\n" +
+            "\t\t\t) > 1,\n" +
+            "\n" +
+            "\t\tIF (\n" +
+            "\t\t\tlength(@pids) - length(REPLACE(@pids, a.check_item_id, '')) > 1 ,@pids ,@pids := concat(@pids, ',', a.check_item_id)\n" +
+            "\t\t) ,@pids := concat(@pids, ',', a.check_item_id)\n" +
+            "\t\t),\n" +
+            "\t\t0\n" +
+            "\t\t) AS 'plist',\n" +
+            "\n" +
+            "\tIF (\n" +
+            "\t\tFIND_IN_SET(a.check_item_id ,@pids) > 0,\n" +
+            "\t\t@pids,\n" +
+            "\t\t0\n" +
+            "\t) AS ischild\n" +
+            "\tFROM\n" +
+            "\t\t(\n" +
+            "\t\t\tSELECT\n" +
+            "\t\t\t  r.check_price,\n" +
+            "\t\t\t\tr.check_item_id,\n" +
+            "\t\t\t\tr.check_item_pid\n" +
+            "\t\t\tFROM\n" +
+            "\t\t\t\ttest_product_item r\n" +
+            "\t\t) a,\n" +
+            "\t\t(SELECT @pids := #{checkItemId}) b\n" +
+            "\t) c\n" +
+            "WHERE\n" +
+            "\tc.ischild != 0")
+    List<SampleItemEntity> getyItemList(Long checkItemId);
+
 }

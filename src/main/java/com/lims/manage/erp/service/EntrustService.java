@@ -47,9 +47,14 @@ public interface EntrustService {
     Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file);
 
     /**
-     * 修改委托样品测试 new
+     * 修改委托样品测试 new 暂时废弃 （勿删！！）
      */
     Boolean updateEntrustTestNewSample(EntrustAddVo vo);
+
+    /**
+     * 修改委托样品测试 new 3.23
+     */
+    Boolean updateEntrustTestNewSampleEnscript(EntrustAddVo vo);
 
     /**
      * 实现作废

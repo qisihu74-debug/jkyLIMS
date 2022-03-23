@@ -234,7 +234,7 @@ public class EntrustServiceImpl implements EntrustService {
                 stringBuilder.append(upload);
                 stringBuilder.append(",");
                 // 存放上传文件的名称带后缀如：（文件编号&委托文档资料.pdf,文件编号&原始文档.docx）
-                stringfileUrlStr.append(fileCode+"&"+name);
+                stringfileUrlStr.append(fileCode + "&" + name);
                 stringfileUrlStr.append(",");
             }
             String fileUrl = stringBuilder.toString();
@@ -273,19 +273,26 @@ public class EntrustServiceImpl implements EntrustService {
                 //样品下检测项
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
                 if (!CollectionUtils.isEmpty(sampleCheckItem)) {
-                    //计算检测项总价钱
                     for (SampleItemEntity entity : sampleCheckItem) {
-                        if (entity.getUnitPrice() != null&&entity.getUnitPrice() >= 0) {
-                            int money = entity.getTimes() * entity.getUnitPrice();
-                            totalMoney = totalMoney + money;
+                        // 根据检测项id 遍历检测项层级和价格 获取集合
+                        List<SampleItemEntity> ItemList = entityMapper.getyItemList(entity.getCheckItemId());
+                        if (!CollectionUtils.isEmpty(ItemList)) {
+                            for (SampleItemEntity entity1 : ItemList) {
+                                //计算检测项总价钱
+                                if (entity1.getUnitPrice() != null && entity1.getUnitPrice() >= 0) {
+                                    int money = entity.getTimes() * entity1.getUnitPrice();
+                                    totalMoney = totalMoney + money;
+                                }
+                                //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+                                entity1.setSampleId(sampleEntity.getId());
+                                entity1.setEntrustId(basisInfo.getId());
+                                entity1.setMethodId(entity.getMethodId());
+                                entity1.setStandardId(entity.getStandardId());
+                                entity1.setTimes(entity.getTimes());
+                            }
+                            entityMapper.BatchSaveEntrustSampleItem(ItemList);
                         }
                     }
-                    //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
-                    for (SampleItemEntity entity : sampleCheckItem) {
-                        entity.setSampleId(sampleEntity.getId());
-                        entity.setEntrustId(basisInfo.getId());
-                    }
-                    entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
                 }
             }
             if (!CollectionUtils.isEmpty(list)) {
@@ -486,7 +493,7 @@ public class EntrustServiceImpl implements EntrustService {
                         if (strings3.length >= 2) {
                             String[] strings4 = strings3[0].split("&");
                             // 获取 文件编号
-                             Long fileCode =Long.parseLong(strings4[0]);
+                            Long fileCode = Long.parseLong(strings4[0]);
                             MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure, fileCode + "." + strings3[1]);
                         }
                     }
@@ -505,7 +512,7 @@ public class EntrustServiceImpl implements EntrustService {
                 stringBuilder.append(upload);
                 stringBuilder.append(",");
                 // 存放上传文件的名称带后缀如：（文件编号&委托文档资料.pdf,文件编号&原始文档.docx）
-                stringfileUrlStr.append(fileCode+"&"+name);
+                stringfileUrlStr.append(fileCode + "&" + name);
                 stringfileUrlStr.append(",");
             }
             String fileUrl = stringBuilder.toString();
@@ -664,6 +671,99 @@ public class EntrustServiceImpl implements EntrustService {
                         sampleItemList.add(sampleItemEntity);
                     }
                     entityMapper.BatchSaveEntrustSampleItem(sampleItemList);
+                }
+            }
+            if (!CollectionUtils.isEmpty(list)) {
+                entityMapper.BatchSaveEntrustSample(list);
+            }
+            if (!CollectionUtils.isEmpty(list1)) {
+                entityMapper.BatchSaveSampleStandard(list1);
+            }
+        }
+
+
+        if (totalMoney != 0) {
+            //得到总价钱，再保存委托基本信息
+            basisInfo.setPaymentCount(totalMoney + "");
+            //存放委托基本信息==》test_entrusted
+            entityMapper.updateEntrustInfo(basisInfo);
+        }
+
+        return true;
+    }
+
+    @Override
+    public Boolean updateEntrustTestNewSampleEnscript(EntrustAddVo vo) {
+        EntrustEntity basisInfo = new EntrustEntity(vo);
+        // 删除样品id
+        // 统计是否存在
+        if (entityMapper.countSampleDetailsRel(basisInfo.getId()) > 0) {
+            entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
+        }
+        //修改样品为未使用
+        List<Integer> sampleIds = entityMapper.getSampleId(basisInfo.getId());
+        if (!CollectionUtils.isEmpty(sampleIds)) {
+            for (Integer sampleId : sampleIds) {
+                sampleEntityMapper.updateSampleUse(sampleId, 0);
+            }
+        }
+        // 删除判定依据id
+        if (entityMapper.countSampleStandardRel(basisInfo.getId()) > 0) {
+            entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
+        }
+        // 删除缴费信息
+//        entityMapper.removeTestEntrustedPaymentRecordInfo(basisInfo.getId());
+        // 样品下检测依据
+        if (entityMapper.countSampleCheckitemRel(basisInfo.getId()) > 0) {
+            entityMapper.removeTestEntrustedSampleCheckitemRel(basisInfo.getId());
+        }
+
+        //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
+        int totalMoney = 0;
+        List<SampleEntity> samples = vo.getSamples();
+        List<EntrustSampleEntity> list = new ArrayList<>();
+        List<EntrustSampleEntity> list1 = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(samples)) {
+            for (SampleEntity sampleEntity : samples) {
+                EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
+                entrustSampleEntity.setEntrustmentId(basisInfo.getId());
+                entrustSampleEntity.setSampleId(sampleEntity.getId());
+                list.add(entrustSampleEntity);
+                sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
+                // 样品依据
+                List<JudgmentBasisVo> standardFileIds = sampleEntity.getStandardFileIdStr();
+                if (!CollectionUtils.isEmpty(standardFileIds)) {
+                    for (JudgmentBasisVo integer : standardFileIds) {
+                        EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
+                        sampleEntity1.setSampleId(sampleEntity.getId());
+                        sampleEntity1.setStandardId(integer.getStandardId());
+                        sampleEntity1.setEntrustmentId(basisInfo.getId());
+                        list1.add(sampleEntity1);
+                    }
+                }
+                //样品下检测项
+                List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
+                if (!CollectionUtils.isEmpty(sampleCheckItem)) {
+                    for (SampleItemEntity entity : sampleCheckItem) {
+                        // 根据检测项id 遍历检测项层级和价格 获取集合
+                        List<SampleItemEntity> ItemList = entityMapper.getyItemList(entity.getCheckItemId());
+                        if (!CollectionUtils.isEmpty(ItemList)) {
+                            for (SampleItemEntity entity1 : ItemList) {
+                                //计算检测项总价钱
+                                if (entity1.getUnitPrice() != null && entity1.getUnitPrice() >= 0) {
+                                    int money = entity.getTimes() * entity1.getUnitPrice();
+                                    totalMoney = totalMoney + money;
+                                }
+                                //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+                                entity1.setSampleId(sampleEntity.getId());
+                                entity1.setEntrustId(basisInfo.getId());
+                                entity1.setMethodId(entity.getMethodId());
+                                entity1.setStandardId(entity.getStandardId());
+                                entity1.setTimes(entity.getTimes());
+                            }
+                            entityMapper.BatchSaveEntrustSampleItem(ItemList);
+                        }
+                    }
                 }
             }
             if (!CollectionUtils.isEmpty(list)) {
