@@ -292,6 +292,7 @@ public class EntrustServiceImpl implements EntrustService {
                             }
                             entityMapper.BatchSaveEntrustSampleItem(ItemList);
                         }
+
                     }
                 }
             }
@@ -744,6 +745,13 @@ public class EntrustServiceImpl implements EntrustService {
                 //样品下检测项
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
                 if (!CollectionUtils.isEmpty(sampleCheckItem)) {
+                    // 利用map的特性 （去除重复的id检测项 保留sampleCheckItem下ItemId数据。）
+                    Map<Long, SampleItemEntity> map = new HashMap<>();
+                    for (SampleItemEntity entity0 : sampleCheckItem) {
+                        entity0.setSampleId(sampleEntity.getId());
+                        entity0.setEntrustId(basisInfo.getId());
+                        map.put(entity0.getCheckItemId(), entity0);
+                    }
                     for (SampleItemEntity entity : sampleCheckItem) {
                         // 根据检测项id 遍历检测项层级和价格 获取集合
                         List<SampleItemEntity> ItemList = entityMapper.getyItemList(entity.getCheckItemId());
@@ -760,10 +768,18 @@ public class EntrustServiceImpl implements EntrustService {
                                 entity1.setMethodId(entity.getMethodId());
                                 entity1.setStandardId(entity.getStandardId());
                                 entity1.setTimes(entity.getTimes());
+                                if (map.get(entity1.getCheckItemId()) == null) {
+                                    map.put(entity1.getCheckItemId(), entity1);
+                                }
                             }
-                            entityMapper.BatchSaveEntrustSampleItem(ItemList);
                         }
                     }
+                    List<SampleItemEntity> itemListData = new ArrayList<>();
+                    // 去除重复的id检测项 保留sampleCheckItem下数据。
+                    for (Long key : map.keySet()) {
+                        itemListData.add(map.get(key));
+                    }
+                    entityMapper.BatchSaveEntrustSampleItem(itemListData);
                 }
             }
             if (!CollectionUtils.isEmpty(list)) {

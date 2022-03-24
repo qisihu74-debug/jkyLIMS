@@ -241,7 +241,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     @Select("SELECT\n" +
             "\tc.check_item_id,\n" +
-            "\tc.check_price \n" +
+            "\tc.check_price as unitPrice \n" +
             "FROM\n" +
             "\t(\n" +
             "\t\tSELECT\n" +
