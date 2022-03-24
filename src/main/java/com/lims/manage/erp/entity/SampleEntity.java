@@ -140,6 +140,10 @@ public class SampleEntity {
      */
     private String insertFlag;
     /**
+     * 样品数量
+     */
+    private String sampleQuantity;
+    /**
      * 0为未使用，1为已使用
      */
     private Integer isUse;
@@ -186,6 +190,7 @@ public class SampleEntity {
         this.sampleRequirement = addParamVo.getSampleRequirement();
         this.generation = addParamVo.getGeneration();
         this.outwardDescribe = addParamVo.getOutwardDescribe();
+        this.sampleQuantity=addParamVo.getSampleQuantity();
         this.insertFlag = insertFlag;
         this.isUse = 0;
 //        this.state = state;
