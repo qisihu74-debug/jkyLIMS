@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -171,4 +172,18 @@ public interface ReportRecordEntityMapper {
 
     @Select("select qys_docment_id,contract_id,sign_url,qys_state from test_report_record where entrustment_id=#{entrustId}")
     List<ReportRecordEntity> selectMessageByEntrustId(@Param("entrustId") long entrustId);
+
+    /**
+     * 查询所有报告
+     * @param entrustId
+     * @return
+     */
+    List<String> getAllReportCode(Long entrustId);
+
+    /**
+     * 查询报告与检测项关系
+     * @param entrustId
+     * @return
+     */
+    List<LabelValueVo> getCheckReportRel(Long entrustId);
 }
