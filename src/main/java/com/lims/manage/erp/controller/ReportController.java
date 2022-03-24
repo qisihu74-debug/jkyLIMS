@@ -501,13 +501,17 @@ public class ReportController {
      * @param response
      * @return
      */
-    @GetMapping("download")
-    public String downReport(Long id, String code, HttpServletResponse response) {
+    @GetMapping("downloadold")
+    public String downloadold(Long id, String code, HttpServletResponse response) {
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
         String url = "";
         try {
-        url = reportService.downLoad(client,code,id);
+            //先查询委托检测的类别：原材，配合比。
+            //是原材的话，调用原材检测的报告生成方法。
+            url = reportService.downLoad(client,code,id);
+            //是配合比的话，调用配合比报告生成方法。
+            //遍历检测项查出有多少报告
         } catch (MinioException e) {
             System.out.println("Error occurred: " + e);
         } catch (XmlPullParserException e) {
@@ -521,6 +525,34 @@ public class ReportController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return url;
+    }
+
+    @GetMapping("download")
+    public String downReport(Long id) {
+        //从文件服务器拉取文件
+        MinioClient client = MinIoUtil.minioClient;
+        String url = "";
+        try {
+            //先查询委托检测的类别：原材，配合比。
+            //是原材的话，调用原材检测的报告生成方法。
+            url = reportService.downLoad2(client,id);
+            //是配合比的话，调用配合比报告生成方法。
+            //遍历检测项查出有多少报告
+        } catch (MinioException e) {
+            System.out.println("Error occurred: " + e);
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //根据委托单ID查询检测项的所属报告
         return url;
     }
 

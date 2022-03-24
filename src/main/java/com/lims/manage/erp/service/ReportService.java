@@ -233,6 +233,25 @@ public interface ReportService {
     String downLoad(MinioClient client, String code, Long id) throws Exception;
 
     /**
+     * 下载报告--根据检测项ID存放数据
+     * @param client
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    String downLoad2(MinioClient client, Long id) throws Exception;
+
+    /**
+     * 根据检测项ID下载报告
+     * @param client
+     * @param code
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    String downLoadByCheckItemId(MinioClient client, String code, Long id) throws Exception;
+
+    /**
      * 创建合同
      * @param reqBean
      * @return
