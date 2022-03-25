@@ -1,8 +1,11 @@
 package com.lims.manage.erp.mapper;
 
+import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -95,4 +98,23 @@ public interface ReportMapper {
     List<String> getEquipment(Long id);
 
     int updateReportUrl(Long id,String url,String code);
+
+    /**
+     * 更新报告上传的url存储地址
+     * @param reportCode
+     * @param url
+     */
+    @Update("update test_report_record set report_url=#{url},verifyer=#{verifyer},issuer=#{issuer}," +
+            "verifyer_id=#{verifyerId},issuer_id=#{issuerId} where entrustment_id=#{entrustId}")
+    void updateUrl(@Param("entrustId") String reportCode, @Param("url") String url,
+                   @Param("verifyer") String verifyer,@Param("issuer") String issuer,
+                   @Param("verifyerId") Long verifyerId,@Param("issuerId") Long issuerId);
+
+    /**
+     * 根据报告编号获取信息
+     * @param reportCode
+     * @return
+     */
+    @Select("select entrustment_id from test_report_record where report_code=#{reportCode}")
+    Long getMessageByCode(@Param("reportCode") String reportCode);
 }

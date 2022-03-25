@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.ByteArrayOutputStream;
@@ -873,6 +874,22 @@ public class ReportServiceImpl implements ReportService {
         return url;
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean uploadReport(String reportCode, MultipartFile file, String verifyer,
+                                String issuer,Long verifyerId, Long issuerId) {
+        String url = "";
+        try {
+            url = MinIoUtil.upload("report-download", file, GenID.getID() + ".pdf");
+            if (StringUtils.isNotEmpty(url)){
+                reportMapper.updateUrl(reportCode,url,verifyer,issuer,verifyerId,issuerId);
+            }
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
     public String downLoadNew(MinioClient client, String code, Long id,List<Long> checkIds) throws Exception {
         String[] split = code.split("\\?");
         String[] strings = split[0].split("\\/");
@@ -1170,6 +1187,8 @@ public class ReportServiceImpl implements ReportService {
     public Boolean seal(Long entrustId,String title,String fileType) {
         //step1 根据文件类型创建合同文档
         String url = "";
+        //TODO 根据报告类型确定是使用怎样方式处理
+
         MinioClient client = MinIoUtil.minioClient;
         String code = recordEntityMapper.getReportModelNameById(entrustId);
         try {
@@ -1315,5 +1334,6 @@ public class ReportServiceImpl implements ReportService {
         }
         return lis;
     }
+
 
 }
