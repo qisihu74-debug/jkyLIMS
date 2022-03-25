@@ -10,7 +10,7 @@ import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
+//import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -63,8 +63,8 @@ public class ReportController {
     private EntrustService entrustService;
     @Autowired
     private ReportApprovalMapper reportApprovalMapper;
-    @Autowired
-    private ReportRecordEntityMapper recordEntityMapper;
+//    @Autowired
+//    private ReportRecordEntityMapper recordEntityMapper;
 
     Logger logger = LoggerFactory.getLogger(ReportController.class);
 
@@ -650,7 +650,8 @@ public class ReportController {
             return ResultUtil.error("请上传报告文件！");
         }
 
-        Boolean flag = reportService.uploadReport(reportCode,file,verifyer,issuer,Long.parseLong(verifyer.split(",")[1]),Long.parseLong(issuer.split(",")[1]));
+        Boolean flag = reportService.uploadReport(reportCode,file,verifyer.split("&")[0],issuer.split("&")[0]
+                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]));
         if (flag) {
             return ResultUtil.success("报告文件上传成功！");
         }else {

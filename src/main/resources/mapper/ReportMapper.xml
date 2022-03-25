@@ -383,6 +383,7 @@
         AND t3.check_item_id = t2.check_item_id
         WHERE t1.state !=2
             and t1.id = #{id}
+        and t2.id is not NULL
         <if test="deptIds!=null">
             and t3.dept_id in
             <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
