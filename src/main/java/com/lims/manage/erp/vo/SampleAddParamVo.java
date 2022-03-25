@@ -67,4 +67,9 @@ public class SampleAddParamVo {
      */
     private String outwardDescribe;
 
+    /**
+     * 样品数量
+     */
+    private String sampleQuantity;
+
 }
