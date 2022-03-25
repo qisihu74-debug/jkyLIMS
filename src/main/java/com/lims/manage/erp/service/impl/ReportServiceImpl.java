@@ -663,8 +663,18 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ReportTemplateEntity> getReportTemplateList(String productId) {
-        return templateEntityMapper.getReportTemplateList(productId);
+    public List<ReportTemplateEntity> getReportTemplateListOld(String productId) {
+        return templateEntityMapper.getReportTemplateListOld(productId);
+    }
+
+    @Override
+    public List<ReportTemplateEntity> getReportTemplateList(Long id) {
+        List<ReportTemplateEntity> result = Lists.newArrayList();
+        List<Long> allReportId = entityMapper.getAllReportId(id);
+        if(!CollectionUtils.isEmpty(allReportId)){
+            result = templateEntityMapper.getReportTemplateList(allReportId);
+        }
+        return result;
     }
 
     @Override
@@ -1008,6 +1018,7 @@ public class ReportServiceImpl implements ReportService {
     public String downLoad2(MinioClient client, Long id) throws Exception {
         StringBuilder url = new StringBuilder();
         //
+
         List<String> allReportCode = entityMapper.getAllReportCode(id);
         List<LabelValueVo> checkReportRel = entityMapper.getCheckReportRel(id);
         for (String s : allReportCode) {
@@ -1020,133 +1031,6 @@ public class ReportServiceImpl implements ReportService {
             String s1 = downLoadNew(client, s, id,checkIds);
             url.append(s1);
         }
-//        ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
-//        List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
-
-//        String[] split = code.split("\\?");
-//        String[] strings = split[0].split("\\/");
-//        String bluckName = strings[3];
-//        String fileName  = strings[4];
-//        XWPFDocument doc = null;
-//        client.statObject(bluckName, fileName);
-//        InputStream object = client.getObject(bluckName, fileName);
-//        doc = new XWPFDocument(object);
-//        //写入数据
-//        ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
-//        List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
-//        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
-//            //设置报告首页参数
-//            EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
-//            Map<String, String> textMap = new HashMap<>();
-//            textMap.put("code",reportRecordEntity.getReportCode());
-//            textMap.put("page",doc.getTables().size()+"");
-//            textMap.put("sampleName",reportRecordEntity.getSampleName());
-//            textMap.put("dept",entrustAddVo.getEntrustCompany());
-//            textMap.put("part",entrustAddVo.getProjectPart());
-//            textMap.put("checkType",entrustAddVo.getCheckPurpose());
-//            WordUtils.changeText(doc, textMap);
-//            //处理表格
-//            Iterator<XWPFTable> it = doc.getTablesIterator();
-//            //表格索引
-//            int i = 1;
-//            //获取表格信息
-//            while (it.hasNext()) {
-//                XWPFTable table = it.next();
-//                List<XWPFTableRow> rows = table.getRows();
-//                //存放表头信息
-//                EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
-//                if (i == 1) {
-//                    rows.get(4).getCell(1).removeParagraph(0);
-//                    rows.get(4).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
-//                    rows.get(4).getCell(3).removeParagraph(0);
-//                    rows.get(4).getCell(3).setText(entrustHistoryDetail.getProjectName());
-//                    rows.get(5).getCell(1).removeParagraph(0);
-//                    rows.get(5).getCell(1).setText(entrustHistoryDetail.getProjectPart());
-//                    //样品信息
-//                    SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
-//                    rows.get(6).getCell(1).removeParagraph(0);
-//                    rows.get(6).getCell(1).setText("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
-//                            + "样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
-//                            + "样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
-//                            + "样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
-//                            + "收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
-//                    //检测依据
-//                    String checkBasis = getCheckBasis(id);
-//                    rows.get(7).getCell(1).removeParagraph(0);
-//                    rows.get(7).getCell(1).setText(checkBasis.equals("") ? "——" : checkBasis);
-//                    //判定依据
-//                    String judgeBasis = getJudgeBasis(id);
-//                    rows.get(7).getCell(3).removeParagraph(0);
-//                    rows.get(7).getCell(3).setText(judgeBasis.equals("") ? "——" : judgeBasis);
-//                    //检测日期
-//                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-//                    rows.get(8).getCell(1).removeParagraph(0);
-//                    rows.get(8).getCell(1).setText(sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
-//                            + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime())
-//                    );
-//                    //主要仪器
-//                    String equipment = getEquipment(id);
-//                    rows.get(9).getCell(1).removeParagraph(0);
-//                    rows.get(9).getCell(1).setText(equipment.equals("") ? "——" : equipment);
-//                    //委托编号
-//                    rows.get(10).getCell(1).removeParagraph(0);
-//                    rows.get(10).getCell(1).setText(entrustHistoryDetail.getEntrustmentNo() + "");
-//                    //检测类别
-//                    rows.get(10).getCell(3).removeParagraph(0);
-//                    rows.get(10).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
-//                    //批号
-//                    rows.get(11).getCell(1).removeParagraph(0);
-//                    rows.get(11).getCell(1).setText(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
-//                    //生产厂家
-//                    rows.get(11).getCell(3).removeParagraph(0);
-//                    rows.get(11).getCell(3).setText(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
-//                    //规格等级
-//                    rows.get(12).getCell(1).removeParagraph(0);
-//                    rows.get(12).getCell(1).setText(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
-//                    //代表数量
-//                    rows.get(12).getCell(3).removeParagraph(0);
-//                    rows.get(12).getCell(3).setText(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
-//                }
-//                //存放检测数据
-//                for (ReportRecordDetailEntity item : checkItemList) {
-//                    int last = testProductDao.isLast(item.getCheckItemId().intValue());
-//                    if(last==0){
-//                        int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
-//                        int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
-//                        int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
-//                        if (i == page) {
-//                            rows.get(row).getCell(column + 1).removeParagraph(0);
-//                            rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
-//                            rows.get(row).getCell(column + 2).removeParagraph(0);
-//                            rows.get(row).getCell(column + 2).setText(item.getCheckResult());
-//                            rows.get(row).getCell(column + 3).removeParagraph(0);
-//                            rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
-//                        }
-//                    }
-//                }
-//                i++;
-//            }
-//        }
-//        ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
-//        //盖章
-////        String sealUrl = reportRecordEntity.getSealUrl();
-////        List<ImagePro> imagePros = com.google.api.client.util.Lists.newArrayList();
-////        if (!StringUtils.isEmpty(sealUrl) || sealUrl != null) {
-////            String[] split = sealUrl.split(",");
-////            for (int i = 0; i < split.length; i++) {
-////                ImagePro pro = new ImagePro(100 * (i + 1), 100, 15F, split[i]);
-////                imagePros.add(pro);
-////            }
-////        }
-////        InputStream inputStream1 = new ByteArrayInputStream(b1.toByteArray());
-////        ByteArrayOutputStream b2 = new ByteArrayOutputStream();
-////        ByteArrayOutputStream b3 = ImageToPdfUtils.writeToPdf4(inputStream1, b2, imagePros);
-//        InputStream inputStream = FileAndFolderUtil.parseOut(b1);
-//        String url = "";
-//        url = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream, "application/octet-stream");
-//        updateReportUrl(reportRecordEntity.getId(), url,code);
-////            ServletOutputStream outputStream = response.getOutputStream();
-////            FileAndFolderUtil.parseIn(inputStream)
         return url.toString();
     }
 

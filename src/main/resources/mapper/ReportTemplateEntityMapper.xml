@@ -106,10 +106,20 @@
         where id = #{id,jdbcType=INTEGER}
     </update>
 
-    <select id="getReportTemplateList" resultType="com.lims.manage.erp.entity.ReportTemplateEntity" parameterType="java.lang.String">
+    <select id="getReportTemplateListOld" resultType="com.lims.manage.erp.entity.ReportTemplateEntity" parameterType="java.lang.String">
         select
         *
         from test_report_template
         where product_id = #{productId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getReportTemplateList" resultType="com.lims.manage.erp.entity.ReportTemplateEntity">
+        select
+        *
+        from test_report_template
+        where id in
+        <foreach collection="allReportId" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
     </select>
 </mapper>

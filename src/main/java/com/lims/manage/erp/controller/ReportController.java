@@ -488,9 +488,14 @@ public class ReportController {
      * @param productId
      * @return
      */
+    @GetMapping("/getTemplateListOld")
+    public Result getTemplateListOld(String productId) {
+        return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateListOld(productId));
+    }
+
     @GetMapping("/getTemplateList")
-    public Result getTemplateList(String productId) {
-        return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList(productId));
+    public Result getTemplateList(Long id) {
+        return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList(id));
     }
 
     /**

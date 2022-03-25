@@ -171,7 +171,8 @@ public interface ReportService {
      * @param productId
      * @return
      */
-    List<ReportTemplateEntity> getReportTemplateList(String productId);
+    List<ReportTemplateEntity> getReportTemplateListOld(String productId);
+    List<ReportTemplateEntity> getReportTemplateList(Long id);
 
     /**
      * 查询存在委托单报告信息

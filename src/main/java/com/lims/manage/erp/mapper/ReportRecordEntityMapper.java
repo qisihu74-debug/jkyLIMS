@@ -179,6 +179,7 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     List<String> getAllReportCode(Long entrustId);
+    List<Long> getAllReportId(Long entrustId);
 
     /**
      * 查询报告与检测项关系

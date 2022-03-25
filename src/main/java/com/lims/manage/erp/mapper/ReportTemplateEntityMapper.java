@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,5 +22,6 @@ public interface ReportTemplateEntityMapper {
 
     int updateByPrimaryKey(ReportTemplateEntity record);
 
-    List<ReportTemplateEntity> getReportTemplateList(String productId);
+    List<ReportTemplateEntity> getReportTemplateListOld(String productId);
+    List<ReportTemplateEntity> getReportTemplateList(@Param("allReportId") List<Long> allReportId);
 }
