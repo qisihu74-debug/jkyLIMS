@@ -1185,6 +1185,7 @@ public class EntrustServiceImpl implements EntrustService {
                 rows.get(sampleIndex).getTableCells().get(index + 3).setText(samples.get(i).getSampleGroups().toString());//样品数量
                 rows.get(sampleIndex).getTableCells().get(index + 4).setText(samples.get(i).getGeneration());//代表批量
                 rows.get(sampleIndex).getTableCells().get(index + 5).setText(samples.get(i).getManufacturer());//样品产地/生产厂家
+                rows.get(sampleIndex).getTableCells().get(index + 6).setText(samples.get(i).getRemark());//样品备注
                 sampleIndex = sampleIndex + 1;
             }
             //设置其它信息
@@ -1192,8 +1193,7 @@ public class EntrustServiceImpl implements EntrustService {
             rows.get(14).getTableCells().get(2).setText(detail.getPresentInformation() == null ? "--" : detail.getPresentInformation());//提供资料
             rows.get(15).getTableCells().get(2).setText(detail.getSamplingMethod() == null ? "--" : detail.getSamplingMethod());//取样方式
             rows.get(15).getTableCells().get(4).setText(detail.getCheckPurpose() == null ? "--" : detail.getCheckPurpose());//检验目的
-            Integer productId = samples.get(0).getProductId();
-            List<String> list = entityMapper.getStatndardByPId(productId);
+            List<String> list = entityMapper.getSampleStandard(detail.getId());
             StringBuilder stringBuilder = new StringBuilder();
             if (!CollectionUtils.isEmpty(list)) {
                 for (String s : list) {
@@ -1211,8 +1211,7 @@ public class EntrustServiceImpl implements EntrustService {
                         String name = itemEntity.getCheckItemName();
                         stringBuilder1.append(name);
                         stringBuilder1.append("(");
-                        //TODO 检测项的检测依据
-                        stringBuilder1.append("GB2021-2001");
+                        stringBuilder1.append(itemEntity.getStandardName());
                         stringBuilder1.append(")");
                         stringBuilder1.append(",");
                     }
@@ -1234,7 +1233,7 @@ public class EntrustServiceImpl implements EntrustService {
                 String s = sampleEntity.getSampleName() + "(" + sampleEntity.getSpecs() + "," + sampleEntity.getOutward() + ")";
                 rows.get(20).getTableCells().get(2).setText(s == null ? "--" : s);//样品状态
             }
-            rows.get(20).getTableCells().get(4).setText(detail.getIsSave().equals("1") ? "保留" : "废弃");//样品保留
+            rows.get(20).getTableCells().get(4).setText(detail.getIsSave().equals("1") ? "是" : "否");//样品保留
             rows.get(21).getTableCells().get(2).setText(detail.getPaymentCount() == null ? "--" : detail.getPaymentCount());//检验收费
             rows.get(21).getTableCells().get(4).setText(detail.getPaymentMethod() == null ? "--" : detail.getPaymentMethod());//支付方式
             //TODO 本次缴费统计缴费记录表
@@ -1242,6 +1241,7 @@ public class EntrustServiceImpl implements EntrustService {
             rows.get(22).getTableCells().get(2).setText(DateUtil.formatDate(detail.getRequestDate()));//完成期限
             rows.get(22).getTableCells().get(4).setText(detail.getBusinessAcceptor() == null ? "--" : detail.getBusinessAcceptor());//业务受理人
             rows.get(22).getTableCells().get(6).setText(DateUtil.formatDate(detail.getAcceptanceDate()));//受理日期
+            rows.get(24).getTableCells().get(1).setText(detail.getRemark());//受理日期
         } catch (Exception e) {
             logger.error("设置委托单信息到模板异常:{}", e);
         }
