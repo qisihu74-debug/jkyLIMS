@@ -11,6 +11,7 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
@@ -159,8 +160,25 @@ public class SampleServiceImpl implements SampleService {
             sampleEntity.setBeginDate(split[0]);
             sampleEntity.setEndDate(split[1]);
         }
-        List<SampleEntity> list = sampleEntityMapper.selectSampleList(sampleEntity);
-        PageInfo<SampleEntity> pageInfo = new PageInfo<>(list);
+        List<SampleEntrustAddVo> topList = sampleEntityMapper.selectSampleListTop(sampleEntity);
+        List<String> codes = Lists.newArrayList();
+        for (SampleEntrustAddVo sampleEntrustAddVo : topList) {
+            codes.add(sampleEntrustAddVo.getCode());
+        }
+        if(!CollectionUtils.isEmpty(codes)){
+            List<SampleEntity> groupNode = sampleEntityMapper.getGroupNode(codes);
+            for (SampleEntrustAddVo sampleEntrustAddVo : topList) {
+                List<SampleEntity> samples = Lists.newArrayList();
+                for (SampleEntity sampleEntity1 : groupNode) {
+                    if(sampleEntrustAddVo.getCode().equals(sampleEntity1.getSampleCode().substring(0,12))){
+                        samples.add(sampleEntity1);
+                    }
+                }
+                sampleEntrustAddVo.setSamples(samples);
+            }
+        }
+
+        PageInfo<SampleEntrustAddVo> pageInfo = new PageInfo<>(topList);
         return pageInfo;
     }
 

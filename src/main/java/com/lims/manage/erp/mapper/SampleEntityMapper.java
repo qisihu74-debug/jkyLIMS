@@ -33,6 +33,27 @@ public interface SampleEntityMapper {
     List<SampleEntity> selectSampleList(SampleEntity record);
 
     /**
+     * 查询样品编号、名称--按组
+     * @param record
+     * @return
+     */
+    List<SampleEntrustAddVo> selectSampleListTop(SampleEntity record);
+
+    /**
+     * 新增委托--按照组添加委托样品
+     * @param record
+     * @return
+     */
+    List<SampleEntrustAddVo> selectSampleListByGroup(SampleEntity record);
+
+    /**
+     * 查询子样品信息
+     * @param codes
+     * @return
+     */
+    List<SampleEntity> getGroupNode(@Param("codes") List<String> codes);
+
+    /**
      * 查询样品组基本信息
      *
      * @param insertFlag
