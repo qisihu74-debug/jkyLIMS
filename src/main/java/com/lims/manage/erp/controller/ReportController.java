@@ -635,8 +635,7 @@ public class ReportController {
      */
     @PostMapping(value = "uploadReport")
     public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("verifyer") String verifyer,
-                               @RequestParam("issuer") String issuer, @RequestParam("file") MultipartFile file,
-                               @RequestParam("verifyerId") Long verifyerId, @RequestParam("issuerId") Long issuerId) {
+                               @RequestParam("issuer") String issuer, @RequestParam("file") MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
         if (org.apache.commons.lang.StringUtils.isNotEmpty(originalFilename)){
             String substring = originalFilename.substring(originalFilename.length() - 4, originalFilename.length());
@@ -650,7 +649,8 @@ public class ReportController {
         if (file == null){
             return ResultUtil.error("请上传报告文件！");
         }
-        Boolean flag = reportService.uploadReport(reportCode,file,verifyer,issuer,verifyerId,issuerId);
+
+        Boolean flag = reportService.uploadReport(reportCode,file,verifyer,issuer,Long.parseLong(verifyer.split(",")[1]),Long.parseLong(issuer.split(",")[1]));
         if (flag) {
             return ResultUtil.success("报告文件上传成功！");
         }else {
