@@ -117,4 +117,12 @@ public interface ReportMapper {
      */
     @Select("select entrustment_id from test_report_record where report_code=#{reportCode}")
     Long getMessageByCode(@Param("reportCode") String reportCode);
+
+    /**
+     * 获取url
+     * @param entrustId
+     * @return
+     */
+    @Select("select report_url from test_report_record where entrustment_id=#{entrustId}")
+    String getUrlByEntrustId(@Param("entrustId") Long entrustId);
 }

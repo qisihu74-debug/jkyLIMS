@@ -1189,10 +1189,11 @@ public class ReportServiceImpl implements ReportService {
         String url = "";
         //TODO 根据报告类型确定是使用怎样方式处理
 
-        MinioClient client = MinIoUtil.minioClient;
-        String code = recordEntityMapper.getReportModelNameById(entrustId);
+//        MinioClient client = MinIoUtil.minioClient;
+//        String code = recordEntityMapper.getReportModelNameById(entrustId);
         try {
-            url = downLoad(client,code,entrustId);
+            //url = downLoad(client,code,entrustId);
+            url = reportMapper.getUrlByEntrustId(entrustId);
         }catch (Exception e){
             logger.error("盖章下载报告文件失败:{}",e);
             return false;
