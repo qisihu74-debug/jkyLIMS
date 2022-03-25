@@ -10,6 +10,7 @@ import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
@@ -302,4 +303,14 @@ public interface ReportService {
      * @return
      */
     Object getQuota(Long taskId);
+
+    /**
+     * 报告上传
+     * @param reportCode
+     * @param file
+     * @param verifyer
+     * @param issuer
+     * @return
+     */
+    Boolean uploadReport(String reportCode, MultipartFile file, String verifyer, String issuer,Long verifyerId, Long issuerId);
 }

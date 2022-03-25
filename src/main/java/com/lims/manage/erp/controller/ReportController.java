@@ -35,7 +35,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.xmlpull.v1.XmlPullParserException;
 
 import javax.servlet.ServletOutputStream;
@@ -623,5 +625,37 @@ public class ReportController {
         }
     }
 
+    /**
+     * 客户上传报告
+     * @param reportCode
+     * @param verifyer
+     * @param issuer
+     * @param file
+     * @return
+     */
+    @PostMapping(value = "uploadReport")
+    public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("verifyer") String verifyer,
+                               @RequestParam("issuer") String issuer, @RequestParam("file") MultipartFile file,
+                               @RequestParam("verifyerId") Long verifyerId, @RequestParam("issuerId") Long issuerId) {
+        String originalFilename = file.getOriginalFilename();
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(originalFilename)){
+            String substring = originalFilename.substring(originalFilename.length() - 4, originalFilename.length());
+            if (!".pdf".equals(substring)){
+                return ResultUtil.error("请上传pdf格式的报告！");
+            }
+        }
+        if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
+            return ResultUtil.error("缺少参数！");
+        }
+        if (file == null){
+            return ResultUtil.error("请上传报告文件！");
+        }
+        Boolean flag = reportService.uploadReport(reportCode,file,verifyer,issuer,verifyerId,issuerId);
+        if (flag) {
+            return ResultUtil.success("报告文件上传成功！");
+        }else {
+            return ResultUtil.error("报告文件上传失败！");
+        }
+    }
 
 }
