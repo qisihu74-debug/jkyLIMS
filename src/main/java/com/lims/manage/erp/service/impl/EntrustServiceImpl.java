@@ -1137,6 +1137,7 @@ public class EntrustServiceImpl implements EntrustService {
             vo.setTaskCode(teamCode + codeStr.substring(0, 4) + "-" + codeStr.substring(4, 7));
             vo.setEntrustmentId(entity.getEntrustmentId());
             vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
+            vo.setOrderTime(entity.getOrderTime());
             vo.setState(0);
             vo.setReportComplete(2);
             vo.setOrderer(ShiroUtils.getUserInfo().getName());

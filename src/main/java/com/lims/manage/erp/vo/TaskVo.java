@@ -46,6 +46,13 @@ public class TaskVo {
      */
     @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date requiredCompletionTime;
+
+    /**
+     * 下单时间=orderTime (委托单转任务单的时间)
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private Date orderTime;
+
     /**
      * 检测项分配的科室、分配时间、是否需要出具报告
      */
