@@ -160,6 +160,20 @@ public class SampleServiceImpl implements SampleService {
             sampleEntity.setBeginDate(split[0]);
             sampleEntity.setEndDate(split[1]);
         }
+        List<SampleEntity> list = sampleEntityMapper.selectSampleList(sampleEntity);
+        List<SampleEntity> sampleEntities = sampleEntityMapper.selectSampleList(sampleEntity);
+//        List<SampleEntrustAddVo> sampleEntrustAddVos = sampleEntityMapper.selectSampleList(sampleEntity);
+        PageInfo<SampleEntity> pageInfo = new PageInfo<>(sampleEntities);
+        return pageInfo;
+    }
+    @Override
+    public PageInfo getSampleDataListNew(SampleEntity sampleEntity) {
+        PageHelper.startPage(sampleEntity.getPageNum(), sampleEntity.getPageSize());
+        if (sampleEntity.getReceivedDate() != null) {
+            String[] split = sampleEntity.getReceivedDate().split("~");
+            sampleEntity.setBeginDate(split[0]);
+            sampleEntity.setEndDate(split[1]);
+        }
         List<SampleEntrustAddVo> topList = sampleEntityMapper.selectSampleListTop(sampleEntity);
         List<String> codes = Lists.newArrayList();
         for (SampleEntrustAddVo sampleEntrustAddVo : topList) {

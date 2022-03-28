@@ -1,474 +1,502 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lims.manage.erp.mapper.EntrustEntityMapper">
-  <select id="selectMaxNo" resultType="java.lang.Integer">
-    select max(entrustment_no) from test_entrusted_info
-  </select>
-  <select id="selectByKeyId" resultType="com.lims.manage.erp.vo.EntrustAddVo">
-		select
-    id, entrustment_no, entrust_type,entrust_company, entrust_people, entrust_phone, witness_uint,
-    witness_person, witness_phone, project_name, project_part, sampling_method, check_purpose,
-    report_count, report_type, request_date, payment_method, present_information, acceptance_date,
-     team, state, remark, invalid_reason, operate_user, operate_date, file_url,  is_save,
-    business_acceptor,seal_type,count_price AS paymentCount,address,addressee,mobile,mailbox,file_url_str,
-    entrust_test_type,design_strength,intensity_of_configuration,antifreeze_level,water_binder_ratio,unit_water_use,sand_ratio,
-    design_slump,mixing_way
-    from test_entrusted_info
-    where id = #{id}
-  </select>
-  <select id="getByData" resultType="com.lims.manage.erp.vo.EntrustAddVo">
-    SELECT
-	id,
-	entrustment_no
-    FROM
+    <select id="selectMaxNo" resultType="java.lang.Integer">
+        select max(entrustment_no)
+        from test_entrusted_info
+    </select>
+    <select id="selectByKeyId" resultType="com.lims.manage.erp.vo.EntrustAddVo">
+        select id,
+               entrustment_no,
+               entrust_type,
+               entrust_company,
+               entrust_people,
+               entrust_phone,
+               witness_uint,
+               witness_person,
+               witness_phone,
+               project_name,
+               project_part,
+               sampling_method,
+               check_purpose,
+               report_count,
+               report_type,
+               request_date,
+               payment_method,
+               present_information,
+               acceptance_date,
+               team,
+               state,
+               remark,
+               invalid_reason,
+               operate_user,
+               operate_date,
+               file_url,
+               is_save,
+               business_acceptor,
+               seal_type,
+               count_price AS paymentCount,
+               address,
+               addressee,
+               mobile,
+               mailbox,
+               file_url_str,
+               entrust_test_type,
+               design_strength,
+               intensity_of_configuration,
+               antifreeze_level,
+               water_binder_ratio,
+               unit_water_use,
+               sand_ratio,
+               design_slump,
+               mixing_way
+        from test_entrusted_info
+        where id = #{id}
+    </select>
+    <select id="getEntrustTestType" resultType="java.lang.String">
+        select entrust_test_type
+        from test_entrusted_info
+        where id = #{id}
+    </select>
+    <select id="getByData" resultType="com.lims.manage.erp.vo.EntrustAddVo">
+        SELECT id,
+               entrustment_no
+        FROM test_entrusted_info
+        WHERE entrustment_no = #{code}
+    </select>
+    <select id="selectEntrustHistoryList" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity"
+            parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
+        SELECT
+        id,
+        entrustment_no,
+        entrust_company,
+        entrust_people,
+        project_name,
+        business_acceptor,
+        acceptance_date,
+        state
+        FROM
         test_entrusted_info
-    WHERE
-        entrustment_no = #{code}
-  </select>
-  <select id="selectEntrustHistoryList" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity" parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
-    SELECT
-    id,
-    entrustment_no,
-    entrust_company,
-    entrust_people,
-    project_name,
-    business_acceptor,
-    acceptance_date,
-    state
-    FROM
-    test_entrusted_info
-    <trim prefix="WHERE" prefixOverrides="AND |OR ">
-      <if test="entrustmentNo!=null and entrustmentNo!=''">
-        and entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
-      </if>
-      <if test="entrustCompany!=null and entrustCompany!=''">
-        and entrust_company LIKE CONCAT('%',#{entrustCompany},'%')
-      </if>
-      <if test="entrustPeople!=null and entrustPeople!=''">
-        and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
-      </if>
-      <if test="projectName!=null and projectName!=''">
-        and project_name LIKE CONCAT('%',#{projectName},'%')
-      </if>
-      <if test="entrustPeople!=null and entrustPeople!=''">
-        and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
-      </if>
-      <if test="businessAcceptor!=null and businessAcceptor!=''">
-        and  business_acceptor LIKE CONCAT('%',#{businessAcceptor},'%')
-      </if>
-      <if test="startDate!=null">
-        and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>
-      </if>
-      <if test="endingDate!=null">
-        and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
-      </if>
-      <if test="state!=null">
-        and  state = #{state}
-      </if>
-    </trim>
-    ORDER BY entrustment_no  DESC
-  </select>
-  <select id="selectEntrustHistoryListRelease_of" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity" parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
-    SELECT
-    id,
-    entrustment_no,
-    entrust_company,
-    entrust_people,
-    project_name,
-    business_acceptor,
-    acceptance_date,
-    state
-    FROM
-    test_entrusted_info
-    <trim prefix="WHERE" prefixOverrides="AND |OR ">
-      <if test="entrustmentNo!=null and entrustmentNo!=''">
-        and entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
-      </if>
-      <if test="entrustCompany!=null and entrustCompany!=''">
-        and entrust_company LIKE CONCAT('%',#{entrustCompany},'%')
-      </if>
-      <if test="entrustPeople!=null and entrustPeople!=''">
-        and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
-      </if>
-      <if test="projectName!=null and projectName!=''">
-        and project_name LIKE CONCAT('%',#{projectName},'%')
-      </if>
-      <if test="entrustPeople!=null and entrustPeople!=''">
-        and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
-      </if>
-      <if test="businessAcceptor!=null and businessAcceptor!=''">
-        and  business_acceptor LIKE CONCAT('%',#{businessAcceptor},'%')
-      </if>
-      <if test="startDate!=null">
-        and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>
-      </if>
-      <if test="endingDate!=null">
-        and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
-      </if>
-      <if test="state!=null">
-        and  state!=0 and state!=144
-      </if>
-    </trim>
-    ORDER BY entrustment_no  DESC
-  </select>
-  <select id="selectEntrustReleasedList" resultType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity" parameterType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity">
-    SELECT
-    DISTINCT t1.id AS id,
-    t1.entrustment_no AS entrustment_no,
-    t1.entrust_company AS entrust_company,
-    t1.entrust_people AS entrust_people,
-    t1.business_acceptor AS business_acceptor,
-    t1.acceptance_date AS acceptance_date,
-    CONCAT(t3.sample_name,"(",")") AS sampleStatus
-    FROM
-    test_entrusted_info as t1
-    LEFT JOIN test_entrusted_sample_details_rel as t2 ON t1.id = t2.entrustment_id
-    LEFT JOIN test_sample as t3 ON t3.id = t2.sample_id
-    <trim prefix="WHERE" prefixOverrides="AND |OR ">
-      <if test="entrustmentNo!=null and entrustmentNo!=''">
-        and t1.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
-      </if>
-      <if test="entrustCompany!=null and entrustCompany!=''">
-        and t1.entrust_company LIKE CONCAT('%',#{entrustCompany},'%')
-      </if>
-      <if test="entrustPeople!=null and entrustPeople!=''">
-        and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
-      </if>
-      <if test="projectName!=null and projectName!=''">
-        and t1.project_name LIKE CONCAT('%',#{projectName},'%')
-      </if>
-      <if test="entrustPeople!=null and entrustPeople!=''">
-        and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
-      </if>
-      <if test="businessAcceptor!=null and businessAcceptor!=''">
-        and  t1.business_acceptor LIKE CONCAT('%',#{businessAcceptor},'%')
-      </if>
-      <if test="startDate!=null">
-        and <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>
-      </if>
-      <if test="endingDate!=null">
-        and <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
-      </if>
-      <if test="state!=null">
-        and  t1.state = #{state}
-      </if>
-    </trim>
-    ORDER BY t1.entrustment_no  DESC
-  </select>
-  <insert id="BatchSaveEntrustSample" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
-    INSERT into  test_entrusted_sample_details_rel(sample_id,
-    entrustment_id
-    )
-    VALUES
-    <foreach collection="list" item="item" open="" separator="," close="">
-      (#{item.sampleId},#{item.entrustmentId})
-    </foreach>
-  </insert>
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="entrustmentNo!=null and entrustmentNo!=''">
+                and entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
+            </if>
+            <if test="entrustCompany!=null and entrustCompany!=''">
+                and entrust_company LIKE CONCAT('%',#{entrustCompany},'%')
+            </if>
+            <if test="entrustPeople!=null and entrustPeople!=''">
+                and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and project_name LIKE CONCAT('%',#{projectName},'%')
+            </if>
+            <if test="entrustPeople!=null and entrustPeople!=''">
+                and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+            </if>
+            <if test="businessAcceptor!=null and businessAcceptor!=''">
+                and business_acceptor LIKE CONCAT('%',#{businessAcceptor},'%')
+            </if>
+            <if test="startDate!=null">
+                and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>
+            </if>
+            <if test="endingDate!=null">
+                and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
+            </if>
+            <if test="state!=null">
+                and state = #{state}
+            </if>
+        </trim>
+        ORDER BY entrustment_no DESC
+    </select>
+    <select id="selectEntrustHistoryListRelease_of" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity"
+            parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
+        SELECT
+        id,
+        entrustment_no,
+        entrust_company,
+        entrust_people,
+        project_name,
+        business_acceptor,
+        acceptance_date,
+        state
+        FROM
+        test_entrusted_info
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="entrustmentNo!=null and entrustmentNo!=''">
+                and entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
+            </if>
+            <if test="entrustCompany!=null and entrustCompany!=''">
+                and entrust_company LIKE CONCAT('%',#{entrustCompany},'%')
+            </if>
+            <if test="entrustPeople!=null and entrustPeople!=''">
+                and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and project_name LIKE CONCAT('%',#{projectName},'%')
+            </if>
+            <if test="entrustPeople!=null and entrustPeople!=''">
+                and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+            </if>
+            <if test="businessAcceptor!=null and businessAcceptor!=''">
+                and business_acceptor LIKE CONCAT('%',#{businessAcceptor},'%')
+            </if>
+            <if test="startDate!=null">
+                and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>
+            </if>
+            <if test="endingDate!=null">
+                and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
+            </if>
+            <if test="state!=null">
+                and state!=0 and state!=144
+            </if>
+        </trim>
+        ORDER BY entrustment_no DESC
+    </select>
+    <select id="selectEntrustReleasedList" resultType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity"
+            parameterType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity">
+        SELECT
+        DISTINCT t1.id AS id,
+        t1.entrustment_no AS entrustment_no,
+        t1.entrust_company AS entrust_company,
+        t1.entrust_people AS entrust_people,
+        t1.business_acceptor AS business_acceptor,
+        t1.acceptance_date AS acceptance_date,
+        CONCAT(t3.sample_name,"(",")") AS sampleStatus
+        FROM
+        test_entrusted_info as t1
+        LEFT JOIN test_entrusted_sample_details_rel as t2 ON t1.id = t2.entrustment_id
+        LEFT JOIN test_sample as t3 ON t3.id = t2.sample_id
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="entrustmentNo!=null and entrustmentNo!=''">
+                and t1.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
+            </if>
+            <if test="entrustCompany!=null and entrustCompany!=''">
+                and t1.entrust_company LIKE CONCAT('%',#{entrustCompany},'%')
+            </if>
+            <if test="entrustPeople!=null and entrustPeople!=''">
+                and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and t1.project_name LIKE CONCAT('%',#{projectName},'%')
+            </if>
+            <if test="entrustPeople!=null and entrustPeople!=''">
+                and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+            </if>
+            <if test="businessAcceptor!=null and businessAcceptor!=''">
+                and t1.business_acceptor LIKE CONCAT('%',#{businessAcceptor},'%')
+            </if>
+            <if test="startDate!=null">
+                and <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>
+            </if>
+            <if test="endingDate!=null">
+                and
+                <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
+            </if>
+            <if test="state!=null">
+                and t1.state = #{state}
+            </if>
+        </trim>
+        ORDER BY t1.entrustment_no DESC
+    </select>
+    <insert id="BatchSaveEntrustSample" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
+        INSERT into test_entrusted_sample_details_rel(sample_id,
+        entrustment_id
+        )
+        VALUES
+        <foreach collection="list" item="item" open="" separator="," close="">
+            (#{item.sampleId},#{item.entrustmentId})
+        </foreach>
+    </insert>
 
-  <insert id="BatchSaveSampleStandard" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
-    INSERT into  test_entrusted_sample_standard_rel(sample_id,
-    standard_id,
-    entrustment_id
-    )
-    VALUES
-    <foreach collection="list1" item="item" open="" separator="," close="">
-      (#{item.sampleId},#{item.standardId},#{item.entrustmentId})
-    </foreach>
-  </insert>
+    <insert id="BatchSaveSampleStandard" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
+        INSERT into test_entrusted_sample_standard_rel(sample_id,
+        standard_id,
+        entrustment_id
+        )
+        VALUES
+        <foreach collection="list1" item="item" open="" separator="," close="">
+            (#{item.sampleId},#{item.standardId},#{item.entrustmentId})
+        </foreach>
+    </insert>
 
-  <insert id="BatchSaveEntrustSampleItem" parameterType="com.lims.manage.erp.entity.SampleItemEntity">
-    INSERT into  test_entrusted_sample_checkitem_rel(sample_id,
-    entrust_id,
-    check_item_id,
-    standard_id,
-    method_id,
-    times,
-    unit_price
-    )
-    VALUES
-    <foreach collection="sampleItemList" item="item" open="" separator="," close="">
-      (#{item.sampleId},#{item.entrustId},#{item.checkItemId},#{item.standardId},#{item.methodId},#{item.times},#{item.unitPrice})
-    </foreach>
-  </insert>
+    <insert id="BatchSaveEntrustSampleItem" parameterType="com.lims.manage.erp.entity.SampleItemEntity">
+        INSERT into test_entrusted_sample_checkitem_rel(sample_id,
+        entrust_id,
+        check_item_id,
+        standard_id,
+        method_id,
+        times,
+        unit_price
+        )
+        VALUES
+        <foreach collection="sampleItemList" item="item" open="" separator="," close="">
+            (#{item.sampleId},#{item.entrustId},#{item.checkItemId},#{item.standardId},#{item.methodId},#{item.times},#{item.unitPrice})
+        </foreach>
+    </insert>
 
-  <insert id="saveEntrustPayRecord" parameterType="com.lims.manage.erp.entity.EntrustPamentEntity">
+    <insert id="saveEntrustPayRecord" parameterType="com.lims.manage.erp.entity.EntrustPamentEntity">
         insert into test_entrusted_payment_record_info(entrustment_id,
-price,
-time,
-operator
-)
-        values (#{entrustmentId},#{price},#{time},#{operator})
-  </insert>
+                                                       price,
+                                                       time,
+                                                       operator)
+        values (#{entrustmentId}, #{price}, #{time}, #{operator})
+    </insert>
 
-  <insert id="insertEntrustInfo" parameterType="com.lims.manage.erp.entity.EntrustEntity">
+    <insert id="insertEntrustInfo" parameterType="com.lims.manage.erp.entity.EntrustEntity">
         insert into test_entrusted_info(id,
-entrustment_no,
-entrust_type,
-entrust_company,
-entrust_people,
-entrust_phone,
-witness_uint,
-witness_person,
-witness_phone,
-project_name,
-project_part,
-sampling_method,
-check_purpose,
-report_count,
-report_type,
-request_date,
-payment_method,
-present_information,
-business_acceptor,
-acceptance_date,
-team,
-remark,
-invalid_reason,
-operate_user,
-operate_date,
-file_url,
-seal_type,
-is_save,
-count_price,
-address,
-addressee,
-mobile,
-mailbox,
-file_url_str,
-state,
-entrust_test_type,
-design_strength,
-intensity_of_configuration,
-antifreeze_level,
-water_binder_ratio,
-unit_water_use,
-sand_ratio,
-design_slump,
-mixing_way
-
-)
+                                        entrustment_no,
+                                        entrust_type,
+                                        entrust_company,
+                                        entrust_people,
+                                        entrust_phone,
+                                        witness_uint,
+                                        witness_person,
+                                        witness_phone,
+                                        project_name,
+                                        project_part,
+                                        sampling_method,
+                                        check_purpose,
+                                        report_count,
+                                        report_type,
+                                        request_date,
+                                        payment_method,
+                                        present_information,
+                                        business_acceptor,
+                                        acceptance_date,
+                                        team,
+                                        remark,
+                                        invalid_reason,
+                                        operate_user,
+                                        operate_date,
+                                        file_url,
+                                        seal_type,
+                                        is_save,
+                                        count_price,
+                                        address,
+                                        addressee,
+                                        mobile,
+                                        mailbox,
+                                        file_url_str,
+                                        state,
+                                        entrust_test_type,
+                                        design_strength,
+                                        intensity_of_configuration,
+                                        antifreeze_level,
+                                        water_binder_ratio,
+                                        unit_water_use,
+                                        sand_ratio,
+                                        design_slump,
+                                        mixing_way)
         values (#{id},
-#{entrustmentNo},
-#{entrustType},
-#{entrustCompany},
-#{entrustPeople},
-#{entrustPhone},
-#{witnessUint},
-#{witnessPerson},
-#{witnessPhone},
-#{projectName},
-#{projectPart},
-#{samplingMethod},
-#{checkPurpose},
-#{reportCount},
-#{reportType},
-#{requestDate},
-#{paymentMethod},
-#{presentInformation},
-#{businessAcceptor},
-#{acceptanceDate},
-#{team},
-#{remark},
-#{invalidReason},
-#{operateUser},
-#{operateDate},
-#{fileUrl},
-#{sealType},
-#{isSave},
-#{countPrice},
-#{address},
-#{addressee},
-#{mobile},
-#{mailbox},
-#{fileUrlStr},
-#{state},
-#{entrustTestType},
-#{designStrength},
-#{intensityOfConfiguration},
-#{antifreezeLevel},
-#{waterBinderRatio},
-#{unitWaterUse},
-#{sandRatio},
-#{designSlump},
-#{mixingWay}
+                #{entrustmentNo},
+                #{entrustType},
+                #{entrustCompany},
+                #{entrustPeople},
+                #{entrustPhone},
+                #{witnessUint},
+                #{witnessPerson},
+                #{witnessPhone},
+                #{projectName},
+                #{projectPart},
+                #{samplingMethod},
+                #{checkPurpose},
+                #{reportCount},
+                #{reportType},
+                #{requestDate},
+                #{paymentMethod},
+                #{presentInformation},
+                #{businessAcceptor},
+                #{acceptanceDate},
+                #{team},
+                #{remark},
+                #{invalidReason},
+                #{operateUser},
+                #{operateDate},
+                #{fileUrl},
+                #{sealType},
+                #{isSave},
+                #{countPrice},
+                #{address},
+                #{addressee},
+                #{mobile},
+                #{mailbox},
+                #{fileUrlStr},
+                #{state},
+                #{entrustTestType},
+                #{designStrength},
+                #{intensityOfConfiguration},
+                #{antifreezeLevel},
+                #{waterBinderRatio},
+                #{unitWaterUse},
+                #{sandRatio},
+                #{designSlump},
+                #{mixingWay})
 
-)
+    </insert>
+    <select id="GetDelegateInformation" resultType="String">
+        SELECT t1.contacts
+        FROM test_customer as t1
+                 LEFT JOIN test_company as t2 ON t1.company_id = t2.company_id
+        WHERE t2.company_name = #{companyName}
+          and type = #{type}
+          and t1.contacts = #{contacts}
+          and t1.phone = #{contactWay}
+    </select>
+    <update id="updateEntrustInfo" parameterType="com.lims.manage.erp.entity.EntrustEntity">
+        UPDATE test_entrusted_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="entrustType!=null and entrustType!=''">entrust_type=#{entrustType},</if>
+            <if test="businessAcceptor!=null and businessAcceptor!=''">business_acceptor=#{businessAcceptor},</if>
+            <if test="entrustCompany != null and entrustCompany!=''">entrust_company=#{entrustCompany},</if>
+            <if test="entrustPeople != null and entrustPeople!=''">entrust_people=#{entrustPeople},</if>
+            <if test="entrustPhone != null and entrustPhone!=''">entrust_phone=#{entrustPhone},</if>
+            <if test="witnessUint != null and witnessUint!=''">witness_uint=#{witnessUint},</if>
+            <if test="witnessPerson != null and witnessPerson!=''">witness_person=#{witnessPerson},</if>
+            <if test="witnessPhone != null and witnessPhone!=''">witness_phone=#{witnessPhone},</if>
+            <if test="projectName != null and projectName!=''">project_name=#{projectName},</if>
+            <if test="samplingMethod != null and samplingMethod!=''">sampling_method=#{samplingMethod},</if>
+            <if test="projectPart != null and projectPart!=''">project_part=#{projectPart},</if>
+            <if test="checkPurpose != null and checkPurpose!=''">check_purpose=#{checkPurpose},</if>
+            <if test="samplingMethod != null and samplingMethod!=''">sampling_method=#{samplingMethod},</if>
+            <if test="reportCount != null">report_count=#{reportCount},</if>
+            <if test="reportType != null and reportType!=''">report_type=#{reportType},</if>
+            <if test="requestDate != null">request_date=#{requestDate},</if>
+            <if test="paymentMethod != null and paymentMethod!=''">payment_method=#{paymentMethod},</if>
+            <if test="paymentCount != null and paymentCount!=''">count_price=#{paymentCount},</if>
+            <if test="presentInformation != null and presentInformation!=''">
+                present_information=#{presentInformation},
+            </if>
+            <if test="acceptanceDate != null">acceptance_date=#{acceptanceDate},</if>
+            <if test="team != null">team=#{team},</if>
+            <if test="state != null">state=#{state},</if>
+            <if test="remark != null and remark!=''">remark=#{remark},</if>
+            <if test="fileUrl != null and fileUrl!=''">file_url=#{fileUrl},</if>
+            <if test="sealType != null and sealType!=''">seal_type=#{sealType},</if>
+            <if test="isSave != null and isSave!=''">is_save=#{isSave},</if>
+            <if test="countPrice != null and countPrice!=''">count_price=#{countPrice},</if>
+            <if test="address != null and address!=''">address=#{address},</if>
+            <if test="addressee != null and addressee!=''">addressee=#{addressee},</if>
+            <if test="mobile != null and mobile!=''">mobile=#{mobile},</if>
+            <if test="mailbox != null and mailbox!=''">mailbox=#{mailbox},</if>
+            <if test="operateUser != null">operate_user=#{operateUser},</if>
+            <if test="operateDate != null">operate_date=#{operateDate},</if>
+            <if test="invalidReason != null and invalidReason!=''">invalid_reason=#{invalidReason},</if>
+            <if test="fileUrlStr != null and fileUrlStr!=''">file_url_str=#{fileUrlStr},</if>
+            <if test="entrustTestType != null and entrustTestType!=''">entrust_test_type=#{entrustTestType},</if>
+            <if test="designStrength != null and designStrength!=''">design_strength=#{designStrength},</if>
+            <if test="intensityOfConfiguration != null and intensityOfConfiguration!=''">
+                intensity_of_configuration=#{intensityOfConfiguration},
+            </if>
+            <if test="antifreezeLevel != null and antifreezeLevel!=''">antifreeze_level=#{antifreezeLevel},</if>
+            <if test="waterBinderRatio != null and waterBinderRatio!=''">water_binder_ratio=#{waterBinderRatio},</if>
+            <if test="unitWaterUse != null and unitWaterUse!='' ">unit_water_use=#{unitWaterUse},</if>
+            <if test="sandRatio != null and sandRatio!=''">sand_ratio=#{sandRatio},</if>
+            <if test="designSlump != null and designSlump!=''">design_slump=#{designSlump},</if>
+            <if test="mixingWay != null and mixingWay!=''">mixing_way=#{mixingWay},</if>
+        </trim>
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="id!=null">
+                and id = #{id}
+            </if>
+            <if test="entrustmentNo!=null">
+                and entrustment_no = #{entrustmentNo}
+            </if>
+        </trim>
+    </update>
+    <select id="getSampleIdSet" resultType="integer">
+        SELECT sample_id
+        FROM test_entrusted_sample_details_rel
+        WHERE entrustment_id = #{entrustmentId}
+    </select>
 
-  </insert>
-  <select id="GetDelegateInformation" resultType="String">
-    SELECT
-    t1.contacts
-    FROM
-    test_customer as t1
-    LEFT JOIN test_company as t2 ON t1.company_id = t2.company_id
-    WHERE
-    t2.company_name = #{companyName} and type = #{type}
-    and t1.contacts = #{contacts} and t1.phone = #{contactWay}
-  </select>
-  <update id="updateEntrustInfo" parameterType="com.lims.manage.erp.entity.EntrustEntity" >
-    UPDATE test_entrusted_info
-    <trim prefix="SET" suffixOverrides=",">
-      <if test="entrustType!=null and entrustType!=''">entrust_type=#{entrustType},</if>
-      <if test="businessAcceptor!=null and businessAcceptor!=''">business_acceptor=#{businessAcceptor},</if>
-      <if test="entrustCompany != null and entrustCompany!=''">entrust_company=#{entrustCompany},</if>
-      <if test="entrustPeople != null and entrustPeople!=''">entrust_people=#{entrustPeople},</if>
-      <if test="entrustPhone != null and entrustPhone!=''">entrust_phone=#{entrustPhone},</if>
-      <if test="witnessUint != null and witnessUint!=''">witness_uint=#{witnessUint},</if>
-      <if test="witnessPerson != null and witnessPerson!=''">witness_person=#{witnessPerson},</if>
-      <if test="witnessPhone != null and witnessPhone!=''">witness_phone=#{witnessPhone},</if>
-      <if test="projectName != null and projectName!=''">project_name=#{projectName},</if>
-      <if test="samplingMethod != null and samplingMethod!=''">sampling_method=#{samplingMethod},</if>
-      <if test="projectPart != null and projectPart!=''">project_part=#{projectPart},</if>
-      <if test="checkPurpose != null and checkPurpose!=''">check_purpose=#{checkPurpose},</if>
-      <if test="samplingMethod != null and samplingMethod!=''">sampling_method=#{samplingMethod},</if>
-      <if test="reportCount != null">report_count=#{reportCount},</if>
-      <if test="reportType != null and reportType!=''">report_type=#{reportType},</if>
-      <if test="requestDate != null">request_date=#{requestDate},</if>
-      <if test="paymentMethod != null and paymentMethod!=''">payment_method=#{paymentMethod},</if>
-      <if test="paymentCount != null and paymentCount!=''">count_price=#{paymentCount},</if>
-      <if test="presentInformation != null and presentInformation!=''">present_information=#{presentInformation},</if>
-      <if test="acceptanceDate != null">acceptance_date=#{acceptanceDate},</if>
-      <if test="team != null">team=#{team},</if>
-      <if test="state != null">state=#{state},</if>
-      <if test="remark != null and remark!=''">remark=#{remark},</if>
-      <if test="fileUrl != null and fileUrl!=''">file_url=#{fileUrl},</if>
-      <if test="sealType != null and sealType!=''">seal_type=#{sealType},</if>
-      <if test="isSave != null and isSave!=''">is_save=#{isSave},</if>
-      <if test="countPrice != null and countPrice!=''">count_price=#{countPrice},</if>
-      <if test="address != null and address!=''">address=#{address},</if>
-      <if test="addressee != null and addressee!=''">addressee=#{addressee},</if>
-      <if test="mobile != null and mobile!=''">mobile=#{mobile},</if>
-      <if test="mailbox != null and mailbox!=''">mailbox=#{mailbox},</if>
-      <if test="operateUser != null">operate_user=#{operateUser},</if>
-      <if test="operateDate != null">operate_date=#{operateDate},</if>
-      <if test="invalidReason != null and invalidReason!=''">invalid_reason=#{invalidReason},</if>
-      <if test="fileUrlStr != null and fileUrlStr!=''">file_url_str=#{fileUrlStr},</if>
-      <if test="entrustTestType != null and entrustTestType!=''">entrust_test_type=#{entrustTestType},</if>
-      <if test="designStrength != null and designStrength!=''">design_strength=#{designStrength},</if>
-      <if test="intensityOfConfiguration != null and intensityOfConfiguration!=''">intensity_of_configuration=#{intensityOfConfiguration},</if>
-      <if test="antifreezeLevel != null and antifreezeLevel!=''">antifreeze_level=#{antifreezeLevel},</if>
-      <if test="waterBinderRatio != null and waterBinderRatio!=''">water_binder_ratio=#{waterBinderRatio},</if>
-      <if test="unitWaterUse != null and unitWaterUse!='' ">unit_water_use=#{unitWaterUse},</if>
-      <if test="sandRatio != null and sandRatio!=''">sand_ratio=#{sandRatio},</if>
-      <if test="designSlump != null and designSlump!=''">design_slump=#{designSlump},</if>
-      <if test="mixingWay != null and mixingWay!=''">mixing_way=#{mixingWay},</if>
-    </trim>
-    <trim prefix="WHERE" prefixOverrides="AND |OR ">
-    <if test="id!=null">
-      and id = #{id}
-   </if>
-    <if test="entrustmentNo!=null">
-      and entrustment_no = #{entrustmentNo}
-    </if>
-    </trim>
-  </update>
-  <select id="getSampleIdSet" resultType="integer">
-    SELECT sample_id
-      FROM
-      test_entrusted_sample_details_rel
-      WHERE entrustment_id = #{entrustmentId}
-  </select>
+    <select id="getTestEntrustedPaymentRecordInfoPrice" resultType="string">
+        SELECT sum(price)
+        FROM test_entrusted_payment_record_info
+        WHERE entrustment_id = #{entrustmentId}
+    </select>
+    <select id="getTestEntrustedInfoMethodName" resultType="string">
+        SELECT t2.name
+        FROM test_entrusted_info as t1
+                 LEFT JOIN test_init_data as t2 ON t1.payment_method = t2.id
+        WHERE t1.id = #{entrustmentId}
+    </select>
+    <select id="getEntrustingParty" resultType="string">
+        SELECT t2.address
+        FROM test_entrusted_info as t1
+                 LEFT JOIN test_company as t2 ON t1.entrust_company = t2.company_name
+        WHERE t1.id = #{entrustmentId}
+    </select>
+    <delete id="removeTestEntrustedSampleDetailsRel">
+        DELETE
+        FROM test_entrusted_sample_details_rel
+        WHERE entrustment_id = #{entrustmentId}
+    </delete>
+    <delete id="removeTestEntrustedSampleStandardRel">
+        DELETE
+        FROM test_entrusted_sample_standard_rel
+        WHERE entrustment_id = #{entrustmentId}
+    </delete>
+    <delete id="removeTestEntrustedPaymentRecordInfo">
+        DELETE
+        FROM test_entrusted_payment_record_info
+        WHERE entrustment_id = #{entrustmentId}
+    </delete>
+    <delete id="removeTestEntrustedSampleCheckitemRel">
+        DELETE
+        FROM test_entrusted_sample_checkitem_rel
+        WHERE entrust_id = #{entrustmentId}
+    </delete>
 
-  <select id="getTestEntrustedPaymentRecordInfoPrice" resultType="string">
-    SELECT
-    sum(price)
-    FROM
-    test_entrusted_payment_record_info
-    WHERE entrustment_id = #{entrustmentId}
-  </select>
-  <select id="getTestEntrustedInfoMethodName" resultType="string">
-    SELECT
-    t2.name
-    FROM
-    test_entrusted_info as t1
-    LEFT JOIN test_init_data as t2 ON t1.payment_method = t2.id
-    WHERE t1.id =  #{entrustmentId}
-  </select>
-  <select id="getEntrustingParty" resultType="string">
-    SELECT
-    t2.address
-    FROM
-    test_entrusted_info as t1
-    LEFT JOIN test_company as t2 ON t1.entrust_company = t2.company_name
-    WHERE t1.id = #{entrustmentId}
-  </select>
-  <delete id="removeTestEntrustedSampleDetailsRel">
-    DELETE FROM test_entrusted_sample_details_rel WHERE entrustment_id = #{entrustmentId}
-  </delete>
-  <delete id="removeTestEntrustedSampleStandardRel">
-    DELETE FROM test_entrusted_sample_standard_rel WHERE entrustment_id = #{entrustmentId}
-  </delete>
-  <delete id="removeTestEntrustedPaymentRecordInfo">
-    DELETE FROM test_entrusted_payment_record_info WHERE entrustment_id = #{entrustmentId}
-  </delete>
-  <delete id="removeTestEntrustedSampleCheckitemRel">
-    DELETE FROM test_entrusted_sample_checkitem_rel WHERE  entrust_id = #{entrustmentId}
-  </delete>
+    <select id="getStatndardByPId" resultType="String">
+        SELECT s.code
+        FROM test_standard_file s
+                 LEFT JOIN test_product_standard_file_rel sf ON s.id = sf.standard_file_id
+        WHERE sf.product_id = #{productId}
+          AND s.type IN (2, 3)
+    </select>
 
-  <select id="getStatndardByPId" resultType="String">
-    SELECT
-	s.code
-FROM
-	test_standard_file s
-LEFT JOIN test_product_standard_file_rel sf ON s.id = sf.standard_file_id
-WHERE
-	sf.product_id = #{productId}
-AND s.type IN (2, 3)
-  </select>
+    <select id="getSampleId" resultType="java.lang.Integer">
+        SELECT sample_id
+        FROM test_entrusted_sample_details_rel
+        where entrustment_id = #{entrustmentId}
+    </select>
 
-  <select id="getSampleId" resultType="java.lang.Integer">
-    SELECT
-      sample_id
-    FROM
-      test_entrusted_sample_details_rel where entrustment_id = #{entrustmentId}
-  </select>
+    <select id="getHistoryData" resultType="com.lims.manage.erp.vo.HistoryEntrustDataVo">
+        SELECT project_name as projectName,
+               project_part as projectPart
+        FROM test_entrusted_info
+        WHERE entrust_company = #{name}
+        ORDER BY entrustment_no DESC LIMIT 1
+    </select>
 
-  <select id="getHistoryData" resultType="com.lims.manage.erp.vo.HistoryEntrustDataVo">
-    SELECT
-      project_name as projectName,
-      project_part as projectPart
-    FROM
-      test_entrusted_info
-    WHERE
-      entrust_company = #{name}
-    ORDER BY
-      entrustment_no DESC
-      LIMIT 1
-  </select>
+    <select id="getCompanyJsonEntityList" resultType="com.lims.manage.erp.entity.TestCompanyJsonEntity">
+        SELECT t1.contacts as contacts,
+               t1.phone    as contactWay
+        FROM test_customer as t1
+                 LEFT JOIN test_company as t2 ON t1.company_id = t2.company_id
+        WHERE t2.company_name = #{name}
+          and type = #{type}
+          and t1.contacts is not NULL
+    </select>
 
-  <select id="getCompanyJsonEntityList" resultType="com.lims.manage.erp.entity.TestCompanyJsonEntity">
-    SELECT
-    t1.contacts as contacts,
-    t1.phone as contactWay
-    FROM
-    test_customer as t1
-    LEFT JOIN test_company as t2 ON t1.company_id = t2.company_id
-    WHERE
-    t2.company_name = #{name} and type = #{type}
-    and t1.contacts is not NULL
-  </select>
+    <select id="getCompanyJsonEntitydata" resultType="com.lims.manage.erp.entity.TestCompanyJsonEntity">
+        SELECT t2.company_id as companyId,
+               t1.contacts   as contacts,
+               t1.phone      as contactWay
+        FROM test_customer as t1
+                 LEFT JOIN test_company as t2 ON t1.company_id = t2.company_id
+        WHERE t2.company_name = #{name}
+          and type = #{type} LIMIT 1
+    </select>
 
-  <select id="getCompanyJsonEntitydata" resultType="com.lims.manage.erp.entity.TestCompanyJsonEntity">
-    SELECT
-    t2.company_id as companyId,
-    t1.contacts as contacts,
-    t1.phone as contactWay
-    FROM
-    test_customer as t1
-    LEFT JOIN test_company as t2 ON t1.company_id = t2.company_id
-    WHERE
-    t2.company_name = #{name} and type = #{type}
-    LIMIT 1
-  </select>
-
-  <select id="getDept" resultType="com.lims.manage.erp.vo.LabelValueVo">
-    SELECT
-      t2.id VALUE,
+    <select id="getDept" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT t2.id VALUE,
 	t2.NAME label
-    FROM
-      test_check_item_team_rel t1
-      LEFT JOIN test_team t2 ON t1.team_id = t2.id
-    WHERE
-      t1.check_item_id = #{checkItemId}
-  </select>
+        FROM
+            test_check_item_team_rel t1
+            LEFT JOIN test_team t2
+        ON t1.team_id = t2.id
+        WHERE
+            t1.check_item_id = #{checkItemId}
+    </select>
 </mapper>

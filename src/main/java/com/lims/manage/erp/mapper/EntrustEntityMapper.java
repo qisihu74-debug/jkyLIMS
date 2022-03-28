@@ -24,6 +24,13 @@ public interface EntrustEntityMapper extends BaseMapper {
     EntrustAddVo selectByKeyId(Long id);
 
     /**
+     *
+     * @param id
+     * @return
+     */
+    String getEntrustTestType(Long id);
+
+    /**
      * 通过委托编号 获取委托单id 是否存在
      * @param code
      * @return
