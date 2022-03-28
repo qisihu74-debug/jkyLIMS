@@ -39,6 +39,41 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         from test_sample
         where id = #{id,jdbcType=INTEGER}
     </select>
+
+    <resultMap id="EntityResultMap" type="com.lims.manage.erp.entity.SampleEntity">
+        <result column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="sample_name" property="sampleName"/>
+        <result column="sample_code" property="sampleCode"/>
+        <result column="specs" property="specs"/>
+        <result column="batch_number" property="batchNumber"/>
+        <result column="manufacturer" property="manufacturer"/>
+        <result column="sample_origin" property="sampleOrigin"/>
+        <result column="outward" property="outward"/>
+        <result column="picture" property="picture"/>
+        <result column="save_place" property="savePlace"/>
+        <result column="admin" property="admin"/>
+        <result column="sample_groups" property="sampleGroups"/>
+        <result column="quantity_per_group" property="quantityPerGroup"/>
+        <result column="inspector" property="inspector"/>
+        <result column="received_date" property="receivedDate"/>
+        <result column="sample_requirement" property="sampleRequirement"/>
+        <result column="generation" property="generation"/>
+        <result column="state" property="state"/>
+        <result column="check_date" property="checkDate"/>
+        <result column="remark" property="remark"/>
+        <result column="product_id" property="productId"/>
+    </resultMap>
+
+    <resultMap id="VoResultMap" type="com.lims.manage.erp.vo.SampleEntrustAddVo"
+               extends="BaseResultMap">
+        <result column="code" property="code"/>
+        <result column="sample_name" property="sampleName"/>
+        <collection property="samples" column="id" ofType="com.lims.manage.erp.entity.SampleEntity"
+                    javaType="java.util.ArrayList" select="getNextDept" >
+        </collection>
+    </resultMap>
+
     <select id="selectSampleListGroup" resultType="com.lims.manage.erp.entity.SampleEntity">
         SELECT t2.company_id         as companyId,
                t2.sample_name        as sampleName,
@@ -65,6 +100,43 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         FROM test_entrusted_sample_details_rel AS t1
                  LEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id
         WHERE t1.entrustment_id = #{entrustmentId}
+    </select>
+
+    <select id="selectSampleListByGroup" resultMap="VoResultMap">
+        SELECT
+            *
+        FROM
+            ( SELECT DISTINCT SUBSTR( sample_code, 1, 12 ) CODE, sample_name FROM test_sample ) t1
+                LEFT JOIN (
+                SELECT
+                    id,
+                    company_id,
+                    sample_name,
+                    sample_code,
+                    specs,
+                    batch_number,
+                    manufacturer,
+                    sample_origin,
+                    outward,
+                    picture,
+                    save_place,
+                    admin,
+                    sample_groups,
+                    quantity_per_group,
+                    inspector,
+                    received_date,
+                    sample_requirement,
+                    generation,
+                    state,
+                    check_date,
+                    remark,
+                    product_id,is_use
+                FROM
+                    test_sample
+            ) t2 ON t1.CODE = SUBSTR( t2.sample_code, 1, 12 )
+        WHERE
+            t2.is_use = 0
+          AND t2.company_id = 4681
     </select>
 
     <select id="selectTestStandardList" resultType="com.lims.manage.erp.vo.JudgmentBasisVo">
@@ -147,6 +219,55 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         </trim>
         order by insert_flag desc
     </select>
+    <select id="getGroupNode" resultType="com.lims.manage.erp.entity.SampleEntity"
+            parameterType="com.lims.manage.erp.entity.SampleEntity">
+        SELECT
+        id, company_id, sample_name, sample_code, specs, batch_number, manufacturer, sample_origin,
+        outward, picture,
+        save_place, admin, sample_groups, quantity_per_group, inspector,
+        received_date, sample_requirement, generation, state, check_date, remark,product_id
+        FROM
+        test_sample
+            where SUBSTR( sample_code, 1, 12 ) in
+        <foreach collection="codes" item="code" index="index" open="(" close=")" separator=",">
+            #{code}
+        </foreach>
+    </select>
+
+    <select id="selectSampleListTop" resultType="com.lims.manage.erp.vo.SampleEntrustAddVo"
+            parameterType="com.lims.manage.erp.entity.SampleEntity">
+        SELECT DISTINCT
+        SUBSTR( sample_code, 1, 12 ) CODE,
+        sample_name
+        FROM
+        test_sample
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            is_use = 0
+            <if test="sampleName!=null and sampleName!=''">
+                and sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="batchNumber!=null and batchNumber!=''">
+                and batch_number LIKE CONCAT('%',#{batchNumber},'%')
+            </if>
+            <if test="manufacturer!=null and manufacturer!=''">
+                and manufacturer LIKE CONCAT('%',#{manufacturer},'%')
+            </if>
+            <if test="beginDate!=null and beginDate!=''">
+                and str_to_date( received_date, '%Y-%m-%d' ) &gt;= str_to_date( #{beginDate}, '%Y-%m-%d' )
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                and str_to_date( received_date, '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}, '%Y-%m-%d' )
+            </if>
+            <if test="productId!=null">
+                and product_id = #{productId}
+            </if>
+            <if test="companyId!=null">
+                and company_id = #{companyId}
+            </if>
+        </trim>
+        order by CODE
+    </select>
+
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
         delete
         from test_sample
@@ -160,7 +281,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                                  save_place, admin,
                                  sample_groups, quantity_per_group, inspector,
                                  received_date, sample_requirement, generation,
-                                 state, check_date, remark, insert_flag,is_use,sample_quantity)
+                                 state, check_date, remark, insert_flag, is_use, sample_quantity)
         values (#{id,jdbcType=INTEGER}, #{companyId,jdbcType=INTEGER}, #{sampleName,jdbcType=CHAR},
                 #{productId,jdbcType=INTEGER},
                 #{sampleCode,jdbcType=VARCHAR}, #{specs,jdbcType=INTEGER}, #{batchNumber,jdbcType=VARCHAR},
@@ -169,7 +290,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                 #{sampleGroups,jdbcType=INTEGER}, #{quantityPerGroup,jdbcType=INTEGER}, #{inspector,jdbcType=VARCHAR},
                 #{receivedDate,jdbcType=CHAR}, #{sampleRequirement,jdbcType=VARCHAR}, #{generation,jdbcType=VARCHAR},
                 #{state,jdbcType=VARCHAR}, #{checkDate,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR},
-                #{insertFlag,jdbcType=VARCHAR},0,#{sampleQuantity})
+                #{insertFlag,jdbcType=VARCHAR}, 0, #{sampleQuantity})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.SampleEntity">
         insert into test_sample
@@ -537,12 +658,12 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     </select>
 
     <select id="getSampleBasisList" resultType="com.lims.manage.erp.vo.JudgmentBasisVo">
-    SELECT DISTINCT t1.standard_id as standardId,
-                                    CONCAT(t2.name,'《',t2.code,'》') as standardName
-            FROM test_entrusted_sample_standard_rel as t1
-                     LEFT JOIN test_standard_file as t2 ON t1.standard_id = t2.id
-            WHERE t1.sample_id = #{sampleId}
-              and t1.entrustment_id = #{entrustmentId}
+        SELECT DISTINCT t1.standard_id                     as standardId,
+                        CONCAT(t2.name, '《', t2.code, '》') as standardName
+        FROM test_entrusted_sample_standard_rel as t1
+                 LEFT JOIN test_standard_file as t2 ON t1.standard_id = t2.id
+        WHERE t1.sample_id = #{sampleId}
+          and t1.entrustment_id = #{entrustmentId}
     </select>
 
     <resultMap id="sampleResultMap" type="com.lims.manage.erp.vo.SamplePublicInfoVo">
@@ -661,7 +782,8 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         ORDER BY
         t1.insert_flag desc
     </select>
-    <select id="getSamplePublicInfos1" resultMap="sampleResultMap1" parameterType="com.lims.manage.erp.vo.SampleDetailVo">
+    <select id="getSamplePublicInfos1" resultMap="sampleResultMap1"
+            parameterType="com.lims.manage.erp.vo.SampleDetailVo">
         SELECT
         t1.company_id,
         t1.company_name,
@@ -745,16 +867,13 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     </select>
 
     <select id="getOriginalSampleInfo" resultType="com.lims.manage.erp.vo.TemplateSampleVo">
-        SELECT
-            sample_name sampleName,
-            sample_code sampleNumber,
-            quantity_per_group sampleQuantity,
-            outward sampleDesc,
-            received_date sampleTime
-        FROM
-            test_sample
-        WHERE
-            id = #{sampleId}
+        SELECT sample_name        sampleName,
+               sample_code        sampleNumber,
+               quantity_per_group sampleQuantity,
+               outward            sampleDesc,
+               received_date      sampleTime
+        FROM test_sample
+        WHERE id = #{sampleId}
     </select>
 
     <!--<update id="updateSampleUse">
