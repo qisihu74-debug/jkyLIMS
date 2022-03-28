@@ -2,6 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.config.PoiConfig;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TaskService;
@@ -335,6 +336,13 @@ public class TaskServiceImpl implements TaskService {
             //表格属性
             CTTblPr pr = table.getCTTbl().getTblPr();
             //表头部分
+            //解析替换文本段落对象
+            Map<String, String> testMap = new HashMap<String, String>();
+            // 下单日期
+            testMap.put("date", taskDetailInfoVo.getOrderTime());
+            // 编号
+            testMap.put("number", taskDetailInfoVo.getTaskCode());
+            PoiConfig.changeText(doc, testMap);
 
             // 获取委托单印章
             if (taskDetailInfoVo.getSealType() != null) {
@@ -452,27 +460,7 @@ public class TaskServiceImpl implements TaskService {
             rows1.get(3).getTableCells().get(1).setText(taskDetailInfoVo.getRequiredCompletionTime());
             // 本单产值
             rows1.get(3).getTableCells().get(3).setText(taskDetailInfoVo.getCost());
-            //导出word文档
-            String fileName = "D:/poiFile/newPoi.docx";
-            File outputFolder = new File("D:/");
-            if (!outputFolder.exists()) {
-                outputFolder.mkdir();
-            }
-            String encode = System.getProperty("file.encoding");
-            try {
-                fileName = new String(fileName.getBytes("UTF-8"), encode);
-            } catch (UnsupportedEncodingException e1) {
-                e1.printStackTrace();
-            }
-            try {
-                FileOutputStream fout = new FileOutputStream(fileName);
-                doc.write(fout);
-                fout.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
             return doc;
         } catch (
                 Exception e) {
