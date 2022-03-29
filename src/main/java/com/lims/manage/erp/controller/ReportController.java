@@ -394,6 +394,8 @@ public class ReportController {
             return ResultUtil.error("缺少必要参数");
         }
         byte[] bytes = reportService.downloadQysFile(entrustId, contractId, name, contact);
+        response.reset();
+        response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
         try {
             OutputStream outputStream = response.getOutputStream();
             outputStream.write(bytes);
