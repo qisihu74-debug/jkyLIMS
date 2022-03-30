@@ -169,4 +169,6 @@ public interface SampleEntityMapper {
      */
     @Update("update test_sample set is_use=#{isUse} where id = #{sampleId}")
     void updateSampleUse(@Param("sampleId") Integer sampleId, @Param("isUse") Integer isUse);
+
+    List<ConcreteSampleVo> getSamplesByEntrustID(Long entrustId);
 }

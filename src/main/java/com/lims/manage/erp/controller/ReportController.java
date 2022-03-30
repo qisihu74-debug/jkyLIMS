@@ -126,7 +126,7 @@ public class ReportController {
      */
     @GetMapping("/report_submit")
     public Result getReportSubmit(ReportRecordEntity reportRecordEntity) {
-        if (reportRecordEntity.getEntrustmentId() == null || reportRecordEntity.getVerifyer()==null || reportRecordEntity.getIssuer()==null || reportRecordEntity.getReportUrl()==null) {
+        if (reportRecordEntity.getEntrustmentId() == null || reportRecordEntity.getVerifyer()==null || reportRecordEntity.getIssuer()==null ) {
             return ResultUtil.error(678, "缺少必要参数！");
         }
         //1、 获取提交报告人信息
