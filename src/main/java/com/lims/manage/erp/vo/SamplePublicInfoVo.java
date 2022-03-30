@@ -24,5 +24,7 @@ public class SamplePublicInfoVo {
     private String generation;
     private Integer productId;
     private String insertFlag;
+    private String sampleQuantity;
+    private String aliasName;
     private List<SamplePrivateInfoVo> childNode;
 }

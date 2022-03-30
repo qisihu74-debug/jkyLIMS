@@ -85,6 +85,8 @@ public class ReportServiceImpl implements ReportService {
     private TestReportQualifcationDao dao;
     @Resource
     private TestProductItemDao itemDao;
+    @Autowired
+    private SampleEntityMapper sampleEntityMapper;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -1065,7 +1067,43 @@ public class ReportServiceImpl implements ReportService {
                 List<XWPFTableRow> rows = table.getRows();
                 //存放表头信息
                 EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
+
                 if (i == 1) {
+                    List<ConcreteSampleVo> samplesByEntrustID = sampleEntityMapper.getSamplesByEntrustID(id);
+                    if(samplesByEntrustID.size()>7){
+                        // 3.25 测试表格插入数据
+                        int addRows = samplesByEntrustID.size()-5;
+                        // 表格插入
+                        XWPFDocument doc1 = new XWPFDocument();
+                        XWPFTable newTable  = doc1.createTable(addRows,9);  //2行9格
+                        // 创建表格后直接进行存放 后续多余数据
+                        List<XWPFTableRow> dataTable = newTable.getRows();
+                        int j=0;
+                        for (int k = 5; k < samplesByEntrustID.size(); k++) {
+//                            ConcreteSampleVo concreteSampleVo = samplesByEntrustID.get(k);
+//                            //材料名称
+//                            dataTable.get(j).getTableCells().get(0).setText("——");
+//                            //规格
+//                            dataTable.get(j).getTableCells().get(1).setText("——");
+//                            //生产厂家
+//                            dataTable.get(j).getTableCells().get(2).setText("——");
+//                            //生产批号
+//                            dataTable.get(j).getTableCells().get(3).setText("——");
+//                            //样品数量
+//                            dataTable.get(j).getTableCells().get(4).setText("——");
+//                            //样品状态
+//                            dataTable.get(j).getTableCells().get(5).setText("——");
+//                            //样品编号
+//                            dataTable.get(j).getTableCells().get(6).setText("——");
+//                            //每m³用量
+//                            dataTable.get(j).getTableCells().get(7).setText("——");
+//                            //单位比
+//                            dataTable.get(j).getTableCells().get(8).setText("——");
+                            table.addRow(dataTable.get(j));
+                            j++;
+                        }
+                        rows = table.getRows();
+                    }
                     rows.get(4).getCell(1).removeParagraph(0);
                     rows.get(4).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
                     rows.get(4).getCell(3).removeParagraph(0);
@@ -1104,22 +1142,69 @@ public class ReportServiceImpl implements ReportService {
                     //检测类别
                     rows.get(10).getCell(3).removeParagraph(0);
                     rows.get(10).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
-                    //批号
+//                    //批号
+//                    rows.get(11).getCell(1).removeParagraph(0);
+//                    rows.get(11).getCell(1).setText(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
+//                    //生产厂家
+//                    rows.get(11).getCell(3).removeParagraph(0);
+//                    rows.get(11).getCell(3).setText(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+//                    //规格等级
+//                    if ("规格/等级".equals(rows.get(12).getCell(0).getText())) {
+//                        rows.get(12).getCell(1).removeParagraph(0);
+//                        rows.get(12).getCell(1).setText(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
+//                    }
+//                    //代表数量
+//                    if ("代表数量".equals(rows.get(12).getCell(2).getText())) {
+//                        rows.get(12).getCell(3).removeParagraph(0);
+//                        rows.get(12).getCell(3).setText(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
+//                    }
+                    //设计强度
                     rows.get(11).getCell(1).removeParagraph(0);
-                    rows.get(11).getCell(1).setText(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
-                    //生产厂家
+                    rows.get(11).getCell(1).setText(entrustHistoryDetail.getDesignStrength());
+                    //配制强度
                     rows.get(11).getCell(3).removeParagraph(0);
-                    rows.get(11).getCell(3).setText(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
-                    //规格等级
-                    if ("规格/等级".equals(rows.get(12).getCell(0).getText())) {
-                        rows.get(12).getCell(1).removeParagraph(0);
-                        rows.get(12).getCell(1).setText(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
-                    }
-                    //代表数量
-                    if ("代表数量".equals(rows.get(12).getCell(2).getText())) {
-                        rows.get(12).getCell(3).removeParagraph(0);
-                        rows.get(12).getCell(3).setText(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
-                    }
+                    rows.get(11).getCell(3).setText(entrustHistoryDetail.getIntensityOfConfiguration());
+                    //抗（渗、冻）等级
+                    rows.get(12).getCell(1).removeParagraph(0);
+                    rows.get(12).getCell(1).setText(entrustHistoryDetail.getAntifreezeLevel());
+                    //水胶比
+                    rows.get(12).getCell(3).removeParagraph(0);
+                    rows.get(12).getCell(3).setText(entrustHistoryDetail.getWaterBinderRatio());
+                    //单位用水量
+                    rows.get(13).getCell(1).removeParagraph(0);
+                    rows.get(13).getCell(1).setText(entrustHistoryDetail.getUnitWaterUse());
+                    //砂率
+                    rows.get(13).getCell(3).removeParagraph(0);
+                    rows.get(13).getCell(3).setText(entrustHistoryDetail.getSandRatio());
+                    //设计坍落度
+                    rows.get(14).getCell(1).removeParagraph(0);
+                    rows.get(14).getCell(1).setText(entrustHistoryDetail.getDesignSlump());
+                    //拌和方式
+                    rows.get(14).getCell(3).removeParagraph(0);
+                    rows.get(14).getCell(3).setText(entrustHistoryDetail.getMixingWay());
+                    //遍历样品信息
+//                    for (int k = 0; k < samplesByEntrustID.size(); k++) {
+//                        ConcreteSampleVo concreteSampleVo = samplesByEntrustID.get(k);
+//                        //材料名称
+//                        rows.get(16 + k).getCell(0).setText(concreteSampleVo.getSampleName());
+////                        rows.get(16 + k).getTableCells().get(0).setText(concreteSampleVo.getSampleName());
+//                        //规格
+//                        rows.get(16 + k).getCell(1).setText(concreteSampleVo.getSpecs());
+//                        //生产厂家
+//                        rows.get(16 + k).getCell(2).setText(concreteSampleVo.getManufacturer());
+//                        //生产批号
+//                        rows.get(16 + k).getCell(3).setText(concreteSampleVo.getBatchNumber());
+//                        //样品数量
+//                        rows.get(16 + k).getCell(4).setText(concreteSampleVo.getSampleQuantity());
+//                        //样品状态
+//                        rows.get(16 + k).getCell(5).setText(concreteSampleVo.getOutward());
+//                        //样品编号
+//                        rows.get(16 + k).getCell(6).setText(concreteSampleVo.getSampleCode());
+//                        //每m³用量
+//                        rows.get(16 + k).getCell(7).setText("——");
+//                        //单位比
+//                        rows.get(16 + k).getCell(8).setText("——");
+//                    }
                 }
                 //存放检测数据
                 for (ReportRecordDetailEntity item : checkItemList) {
@@ -1131,10 +1216,10 @@ public class ReportServiceImpl implements ReportService {
                         if (i == page) {
                             rows.get(row).getCell(column + 1).removeParagraph(0);
                             rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
-                            rows.get(row).getCell(column + 2).removeParagraph(0);
-                            rows.get(row).getCell(column + 2).setText(item.getCheckResult());
-                            rows.get(row).getCell(column + 3).removeParagraph(0);
-                            rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
+//                            rows.get(row).getCell(column + 2).removeParagraph(0);
+//                            rows.get(row).getCell(column + 2).setText(item.getCheckResult());
+//                            rows.get(row).getCell(column + 3).removeParagraph(0);
+//                            rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
                         }
                     }
                 }
@@ -1142,25 +1227,10 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
-        //盖章
-//        String sealUrl = reportRecordEntity.getSealUrl();
-//        List<ImagePro> imagePros = com.google.api.client.util.Lists.newArrayList();
-//        if (!StringUtils.isEmpty(sealUrl) || sealUrl != null) {
-//            String[] split = sealUrl.split(",");
-//            for (int i = 0; i < split.length; i++) {
-//                ImagePro pro = new ImagePro(100 * (i + 1), 100, 15F, split[i]);
-//                imagePros.add(pro);
-//            }
-//        }
-//        InputStream inputStream1 = new ByteArrayInputStream(b1.toByteArray());
-//        ByteArrayOutputStream b2 = new ByteArrayOutputStream();
-//        ByteArrayOutputStream b3 = ImageToPdfUtils.writeToPdf4(inputStream1, b2, imagePros);
         InputStream inputStream = FileAndFolderUtil.parseOut(b1);
         String url = "";
         url = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream, "application/octet-stream");
         updateReportUrl(reportRecordEntity.getId(), url, code);
-//            ServletOutputStream outputStream = response.getOutputStream();
-//            FileAndFolderUtil.parseIn(inputStream)
         return url;
     }
 

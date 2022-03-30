@@ -281,7 +281,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                                  save_place, admin,
                                  sample_groups, quantity_per_group, inspector,
                                  received_date, sample_requirement, generation,
-                                 state, check_date, remark, insert_flag, is_use, sample_quantity)
+                                 state, check_date, remark, insert_flag, is_use, sample_quantity,alias_name)
         values (#{id,jdbcType=INTEGER}, #{companyId,jdbcType=INTEGER}, #{sampleName,jdbcType=CHAR},
                 #{productId,jdbcType=INTEGER},
                 #{sampleCode,jdbcType=VARCHAR}, #{specs,jdbcType=INTEGER}, #{batchNumber,jdbcType=VARCHAR},
@@ -290,7 +290,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                 #{sampleGroups,jdbcType=INTEGER}, #{quantityPerGroup,jdbcType=INTEGER}, #{inspector,jdbcType=VARCHAR},
                 #{receivedDate,jdbcType=CHAR}, #{sampleRequirement,jdbcType=VARCHAR}, #{generation,jdbcType=VARCHAR},
                 #{state,jdbcType=VARCHAR}, #{checkDate,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR},
-                #{insertFlag,jdbcType=VARCHAR}, 0, #{sampleQuantity})
+                #{insertFlag,jdbcType=VARCHAR}, 0, #{sampleQuantity},#{aliasName})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.SampleEntity">
         insert into test_sample
@@ -625,7 +625,8 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                         t1.sample_requirement sampleRequirement,
                         t1.generation         generation,
                         t1.insert_flag        insertFlag,
-                        t1.sample_quantity    sampleQuantity
+                        t1.sample_quantity    sampleQuantity,
+                        t1.alias_name         aliasName
         FROM test_sample t1
                  LEFT JOIN test_company t2 ON t1.company_id = t2.company_id
         where insert_flag = #{insertFlag}
@@ -799,7 +800,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         t1.sample_requirement,
         t1.generation,
         t1.product_id,
-        t1.insert_flag
+        t1.insert_flag,
+        t1.sample_quantity,
+        t1.alias_name
         FROM
         (
         SELECT DISTINCT
@@ -817,7 +820,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         sample_requirement,
         generation,
         product_id,
-        insert_flag
+        insert_flag,
+        t1.sample_quantity,
+        t1.alias_name
         FROM
         test_sample t1
         LEFT JOIN test_company t2 ON t1.company_id = t2.company_id
@@ -885,5 +890,18 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         </set>
         where id = #{sampleId,jdbcType=INTEGER}
     </update>-->
-
+    <select id="getSamplesByEntrustID" resultType="com.lims.manage.erp.vo.ConcreteSampleVo">
+        SELECT
+            sample_name,
+            specs,
+            manufacturer,
+            batch_number,
+            sample_quantity,
+            outward,
+            sample_code
+        FROM
+            test_sample
+        WHERE
+                id IN (select distinct sample_id from test_entrusted_sample_checkitem_rel where entrust_id = #{entrustId} )
+    </select>
 </mapper>

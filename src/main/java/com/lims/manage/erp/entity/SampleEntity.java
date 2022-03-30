@@ -144,6 +144,10 @@ public class SampleEntity {
      */
     private String sampleQuantity;
     /**
+     * 别名
+     */
+    private String aliasName;
+    /**
      * 0为未使用，1为已使用
      */
     private Integer isUse;
@@ -193,6 +197,7 @@ public class SampleEntity {
         this.sampleQuantity=addParamVo.getSampleQuantity();
         this.insertFlag = insertFlag;
         this.isUse = 0;
+        this.aliasName = addParamVo.getAliasName();
 //        this.state = state;
 //        this.checkDate = checkDate;
 //        this.remark = remark;

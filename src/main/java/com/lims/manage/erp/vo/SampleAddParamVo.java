@@ -72,4 +72,9 @@ public class SampleAddParamVo {
      */
     private String sampleQuantity;
 
+    /**
+     * 别名
+     */
+    private String aliasName;
+
 }
