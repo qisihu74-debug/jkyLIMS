@@ -396,6 +396,9 @@ public class ReportController {
         byte[] bytes = reportService.downloadQysFile(entrustId, contractId, name, contact);
         response.reset();
         response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+        response.setContentType("application/zip");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" + "report.zip");
         try {
             OutputStream outputStream = response.getOutputStream();
             outputStream.write(bytes);
