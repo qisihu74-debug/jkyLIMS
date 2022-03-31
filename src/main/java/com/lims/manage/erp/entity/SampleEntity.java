@@ -148,6 +148,10 @@ public class SampleEntity {
      */
     private String aliasName;
     /**
+     * 样品类型：做原材检测还是配合比检测
+     */
+    private String sampleType;
+    /**
      * 0为未使用，1为已使用
      */
     private Integer isUse;
@@ -198,6 +202,7 @@ public class SampleEntity {
         this.insertFlag = insertFlag;
         this.isUse = 0;
         this.aliasName = addParamVo.getAliasName();
+        this.sampleType = addParamVo.getSampleType();
 //        this.state = state;
 //        this.checkDate = checkDate;
 //        this.remark = remark;
