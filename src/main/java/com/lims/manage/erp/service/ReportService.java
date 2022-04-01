@@ -312,5 +312,5 @@ public interface ReportService {
      * @param issuer
      * @return
      */
-    Boolean uploadReport(String reportCode, MultipartFile file, String verifyer, String issuer,Long verifyerId, Long issuerId);
+    Boolean uploadReport(String reportCode, MultipartFile file, String verifyer, String issuer,Long verifyerId, Long issuerId,String code);
 }

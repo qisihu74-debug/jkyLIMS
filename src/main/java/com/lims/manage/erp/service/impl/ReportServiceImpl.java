@@ -18,6 +18,7 @@ import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
 import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
@@ -906,17 +907,31 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean uploadReport(String reportCode, MultipartFile file, String verifyer,
-                                String issuer, Long verifyerId, Long issuerId) {
-        String url = "";
-        try {
-            url = MinIoUtil.upload("report-download", file, GenID.getID() + ".pdf");
-            if (StringUtils.isNotEmpty(url)) {
-                reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId);
+                                String issuer, Long verifyerId, Long issuerId, String code) {
+        if (file == null){
+            //下载模板填充数据
+            MinioClient client = MinIoUtil.minioClient;
+            Long entrustId = reportMapper.getMessageByCode(reportCode);
+            try {
+                this.downLoad(client,code,entrustId);
+                return true;
+            }catch (Exception e){
+                logger.error("提交报告审批失败:{}",e);
+                return false;
             }
-            return true;
-        } catch (Exception e) {
-            return false;
+        }else {
+            String url = "";
+            try {
+                url = MinIoUtil.upload("report-download", file, GenID.getID() + ".pdf");
+                if (StringUtils.isNotEmpty(url)) {
+                    reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId);
+                }
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
         }
+
     }
 
     public String downLoadNew(MinioClient client, String code, Long id, List<Long> checkIds) throws Exception {

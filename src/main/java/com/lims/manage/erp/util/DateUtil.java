@@ -362,7 +362,7 @@ public class DateUtil {
     }
 
 
-    public static final String GENERAL_DATE_FORMAT="yyyy-MM-dd HH:mm:ss";
+    public static final String GENERAL_DATE_FORMAT="yyyy-MM-dd";
 
     /**
      * @desc 格式化日期
