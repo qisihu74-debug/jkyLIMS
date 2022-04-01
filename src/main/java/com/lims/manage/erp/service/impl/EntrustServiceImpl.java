@@ -20,11 +20,28 @@ import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
 import com.lims.manage.erp.entity.TestInitDataEntity;
-import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.ProductItemEntityMapper;
+import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.SysUserDao;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
+import com.lims.manage.erp.mapper.TestCompanyDao;
+import com.lims.manage.erp.mapper.TestCustomerDao;
+import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.EntrustService;
-import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.*;
-import io.minio.errors.MinioException;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.CheckItemDeptVo;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.TaskVo;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -45,7 +62,11 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -1201,6 +1222,7 @@ public class EntrustServiceImpl implements EntrustService {
             //获取表格对应的行
             rows = table.getRows();
             //设置模板数据
+            rows.get(2).getTableCells().get(8).setText("№."+detail.getEntrustmentNo());//委托单位
             rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
             rows.get(4).getTableCells().get(2).setText(detail.getWitnessUint());//见证单位
             rows.get(5).getTableCells().get(2).setText(detail.getProjectPart());//工程部位
@@ -1213,7 +1235,7 @@ public class EntrustServiceImpl implements EntrustService {
                 rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getSampleName());//样品名称
                 rows.get(sampleIndex).getTableCells().get(index + 1).setText(samples.get(i).getSpecs());//规格等级
                 rows.get(sampleIndex).getTableCells().get(index + 2).setText(samples.get(i).getBatchNumber());//批号/编号
-                rows.get(sampleIndex).getTableCells().get(index + 3).setText(samples.get(i).getSampleGroups().toString());//样品数量
+                rows.get(sampleIndex).getTableCells().get(index + 3).setText(samples.get(i).getSampleQuantity());//样品数量
                 rows.get(sampleIndex).getTableCells().get(index + 4).setText(samples.get(i).getGeneration());//代表批量
                 rows.get(sampleIndex).getTableCells().get(index + 5).setText(samples.get(i).getManufacturer());//样品产地/生产厂家
                 rows.get(sampleIndex).getTableCells().get(index + 6).setText(samples.get(i).getRemark());//样品备注
@@ -1229,7 +1251,7 @@ public class EntrustServiceImpl implements EntrustService {
             if (!CollectionUtils.isEmpty(list)) {
                 for (String s : list) {
                     stringBuilder.append(s);
-                    stringBuilder.append(",");
+                    stringBuilder.append("，");
                 }
                 String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
                 rows.get(15).getTableCells().get(6).setText(substring == null ? "--" : substring);//产品标准
@@ -1241,10 +1263,14 @@ public class EntrustServiceImpl implements EntrustService {
                     for (JudgmentBasisVo itemEntity : sampleCheckItem) {
                         String name = itemEntity.getCheckItemName();
                         stringBuilder1.append(name);
-                        stringBuilder1.append("(");
-                        stringBuilder1.append(itemEntity.getStandardName());
-                        stringBuilder1.append(")");
-                        stringBuilder1.append(",");
+                        if (!StringUtils.isEmpty(itemEntity.getStandardName())){
+                            stringBuilder1.append("（");
+                            String s = itemEntity.getStandardName();
+                            String aa = s.split("《")[0];
+                            stringBuilder1.append(aa);
+                            stringBuilder1.append("）");
+                        }
+                        stringBuilder1.append("，");
                     }
                 }
                 String substring = stringBuilder1.toString().substring(0, stringBuilder1.length() - 1);
@@ -1261,7 +1287,7 @@ public class EntrustServiceImpl implements EntrustService {
             rows.get(19).getTableCells().get(6).setText(detail.getWitnessPerson() == null ? "--" : detail.getWitnessPerson());//见证人
             SampleEntity sampleEntity = samples.get(0);
             if (sampleEntity != null) {
-                String s = sampleEntity.getSampleName() + "(" + sampleEntity.getSpecs() + "," + sampleEntity.getOutward() + ")";
+                String s = sampleEntity.getSampleName() + "（" + sampleEntity.getSpecs() + "，" + sampleEntity.getOutward() + "）";
                 rows.get(20).getTableCells().get(2).setText(s == null ? "--" : s);//样品状态
             }
             rows.get(20).getTableCells().get(4).setText(detail.getIsSave().equals("1") ? "是" : "否");//样品保留
@@ -1272,7 +1298,8 @@ public class EntrustServiceImpl implements EntrustService {
             rows.get(22).getTableCells().get(2).setText(DateUtil.formatDate(detail.getRequestDate()));//完成期限
             rows.get(22).getTableCells().get(4).setText(detail.getBusinessAcceptor() == null ? "--" : detail.getBusinessAcceptor());//业务受理人
             rows.get(22).getTableCells().get(6).setText(DateUtil.formatDate(detail.getAcceptanceDate()));//受理日期
-            rows.get(24).getTableCells().get(1).setText(detail.getRemark());//受理日期
+            rows.get(24).getTableCells().get(1).removeParagraph(0);
+            rows.get(24).getTableCells().get(1).setText(detail.getRemark());//备注
         } catch (Exception e) {
             logger.error("设置委托单信息到模板异常:{}", e);
         }
