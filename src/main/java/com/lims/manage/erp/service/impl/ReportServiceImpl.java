@@ -441,13 +441,13 @@ public class ReportServiceImpl implements ReportService {
         ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
 //        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByTaskId(vo.getTaskId());
         if (reportRecordEntity1 != null) {
-            String state = "1";
+//            String state = "1";
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
             for (ReportRecordDetailEntity e : checkInfos) {
                 e.setRecordId(reportRecordEntity1.getId());
-                if (e.getJudgeResult() == null) {
-                    state = "2";
-                }
+//                if (e.getJudgeResult() == null) {
+//                    state = "2";
+//                }
                 List<Long> checkItemIds = recordDetailEntityMapper.getCheckItemIds(reportRecordEntity1.getId());
                 int insert1;
                 if (checkItemIds.contains(e.getCheckItemId())) {
@@ -459,12 +459,16 @@ public class ReportServiceImpl implements ReportService {
                     return false;
                 }
             }
-            reportRecordEntity1.setState(state);
-            if ("1".equals(state)) {
+//            reportRecordEntity1.setState(state);
+//            if ("1".equals(state)) {
+//                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
+//            }
+            reportRecordEntity1.setState(vo.getReportComplete()+"");
+            if ("1".equals(vo.getReportComplete()+"")) {
                 reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
             }
             //修改任务报告状态
-            taskMapper.updateReportStatus(Integer.parseInt(state), vo.getTaskId());
+            taskMapper.updateReportStatus(vo.getReportComplete(), vo.getTaskId());
             int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
             if (update < 1) {
                 return false;
@@ -472,21 +476,25 @@ public class ReportServiceImpl implements ReportService {
             return true;
         } else {
             long recordId = GenID.getID();
-            String state = "1";
+//            String state = "1";
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
             for (ReportRecordDetailEntity e : checkInfos) {
                 e.setRecordId(recordId);
-                if (e.getJudgeResult() == null) {
-                    state = "2";
-                }
+//                if (e.getJudgeResult() == null) {
+//                    state = "2";
+//                }
                 int insert1 = recordDetailEntityMapper.insert(e);
                 if (insert1 < 1) {
                     return false;
                 }
             }
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
-            reportRecordEntity.setState(state);
-            if ("1".equals(state)) {
+//            reportRecordEntity.setState(state);
+//            if ("1".equals(state)) {
+//                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+//            }
+            reportRecordEntity.setState(vo.getReportComplete()+"");
+            if ("1".equals(vo.getReportComplete()+"")) {
                 reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
             }
             //生成报告编号
@@ -502,7 +510,7 @@ public class ReportServiceImpl implements ReportService {
             reportRecordEntity.setId(recordId);
             reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
             //修改任务报告状态
-            taskMapper.updateReportStatus(Integer.parseInt(state), vo.getTaskId());
+            taskMapper.updateReportStatus(vo.getReportComplete(), vo.getTaskId());
             int insert = recordEntityMapper.insert(reportRecordEntity);
             if (insert < 1) {
                 return false;
