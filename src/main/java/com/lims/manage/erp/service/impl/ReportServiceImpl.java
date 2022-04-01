@@ -464,7 +464,7 @@ public class ReportServiceImpl implements ReportService {
 //                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
 //            }
             //校验其他任务单是否完成
-            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId());
+            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
             if(allReportComplete.contains(2)){
                 reportRecordEntity1.setState(2+"");
             }else{
@@ -498,7 +498,7 @@ public class ReportServiceImpl implements ReportService {
 //                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
 //            }
 
-            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId());
+            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
             if(allReportComplete.contains(2)){
                 reportRecordEntity.setState(2+"");
             }else{

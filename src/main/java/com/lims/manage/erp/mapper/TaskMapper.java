@@ -259,7 +259,7 @@ public interface TaskMapper extends BaseMapper {
      * @param entrustmentId
      * @return
      */
-    List<Integer> getAllReportComplete(Long entrustmentId);
+    List<Integer> getAllReportComplete(Long entrustmentId,Long taskId);
 
     /**
      * 根据任务id获取委托单id
