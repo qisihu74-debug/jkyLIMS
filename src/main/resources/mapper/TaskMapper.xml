@@ -601,7 +601,7 @@
         where id = #{taskId,jdbcType=INTEGER}
     </update>
 
-    <select id="getAllReportComplete" resultType="com.lims.manage.erp.vo.PersonInfoVo">
+    <select id="getAllReportComplete" resultType="java.lang.Integer">
         select report_complete from test_task where entrustment_id = (SELECT distinct entrustment_id FROM `test_task` where id = #{taskId})
     </select>
 
