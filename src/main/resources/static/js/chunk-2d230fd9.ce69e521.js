@@ -1,2 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d230fd9"],{ef46:function(n,e,t){"use strict";function o(n,e,t,o,c,r){return null}t.r(e);var c=t("7a23"),r=Object(c["r"])({name:"Taskallocation",components:{},setup(){return{}}}),u=t("6b0d"),a=t.n(u);const s=a()(r,[["render",o]]);e["default"]=s}}]);
-//# sourceMappingURL=chunk-2d230fd9.ce69e521.js.map

@@ -1,2 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d0e48fb"],{"916c":function(n,e,t){"use strict";t.r(e);var c=t("7a23");function r(n,e,t,r,u,i){return Object(c["L"])(),Object(c["m"])("div",null,"权限管理")}var u=Object(c["r"])({name:"Jurisdiction",setup(){return{}}}),i=t("6b0d"),d=t.n(i);const o=d()(u,[["render",r]]);e["default"]=o}}]);
-//# sourceMappingURL=chunk-2d0e48fb.a7ae68ce.js.map

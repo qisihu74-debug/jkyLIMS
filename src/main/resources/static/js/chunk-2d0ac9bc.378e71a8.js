@@ -1,2 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d0ac9bc"],{"19ec":function(n,e,t){"use strict";t.r(e);var c=t("7a23");function r(n,e,t,r,u,a){return Object(c["L"])(),Object(c["m"])("div",null,"委托详情")}var u=Object(c["r"])({name:"DetailsEntrustment",setup(){}}),a=t("6b0d"),s=t.n(a);const b=s()(u,[["render",r]]);e["default"]=b}}]);
-//# sourceMappingURL=chunk-2d0ac9bc.378e71a8.js.map

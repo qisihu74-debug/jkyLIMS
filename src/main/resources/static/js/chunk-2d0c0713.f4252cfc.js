@@ -1,2 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d0c0713"],{4298:function(n,e,t){"use strict";t.r(e);var c=t("7a23");function r(n,e,t,r,u,s){return Object(c["L"])(),Object(c["m"])("div",null,"委托作废")}var u=Object(c["r"])({name:"EntrustDel",setup(){}}),s=t("6b0d"),a=t.n(s);const d=a()(u,[["render",r]]);e["default"]=d}}]);
-//# sourceMappingURL=chunk-2d0c0713.f4252cfc.js.map
