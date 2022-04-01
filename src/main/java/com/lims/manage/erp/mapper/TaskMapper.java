@@ -256,10 +256,10 @@ public interface TaskMapper extends BaseMapper {
 
     /**
      * 查询所有任务报告的状态
-     * @param taskId
+     * @param entrustmentId
      * @return
      */
-    List<Integer> getAllReportComplete(Long taskId);
+    List<Integer> getAllReportComplete(Long entrustmentId);
 
     /**
      * 根据任务id获取委托单id

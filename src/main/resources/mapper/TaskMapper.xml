@@ -602,7 +602,7 @@
     </update>
 
     <select id="getAllReportComplete" resultType="java.lang.Integer">
-        select report_complete from test_task where entrustment_id = (SELECT distinct entrustment_id FROM `test_task` where id = #{taskId})
+        select report_complete from test_task where entrustment_id = #{entrustmentId}
     </select>
 
     <update id="batchUpdateCheckItem" parameterType="java.util.List">
