@@ -44,7 +44,7 @@ public class TaskController {
     private TaskMapper taskMapper;
 
     /**
-     * 查询任务详情
+     * 查询任务详情——废弃
      *
      * @param taskId
      * @return
@@ -59,7 +59,7 @@ public class TaskController {
     }
 
     /**
-     * 查询任务详情二次开发
+     * 查询任务详情——线上使用
      *
      * @param taskId
      * @return
@@ -142,7 +142,7 @@ public class TaskController {
     }
 
     /**
-     * 返回 团队姓名
+     * 返回 团队姓名 前后端已废弃 （丁）
      *
      * @return
      */
@@ -249,7 +249,8 @@ public class TaskController {
         } else {
             // 领样人姓名与任务单ID  效验是否属于同一部门
             if (taskService.isIntendedEffectReceive(paramVo.getTaskId(), paramVo.getSampler()) == true) {
-                return ResultUtil.success("领样成功！", taskService.receiveSample(paramVo));
+                taskService.receiveSample(paramVo);
+                return ResultUtil.success("领样成功！");
             }
             return ResultUtil.error("领样失败！领样人姓名不属于此任务单下团队成员");
         }

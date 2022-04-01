@@ -55,15 +55,16 @@ public class TestDetectionImpl implements TestDetectionService {
                 // 检测项 开始时间更新
                 testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
                 // 检测项下 仪器表 新增
-                TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
-                testChItemInstrumentMiddleEntity.setSidItem(sampleItemInstrumentEntity.getItemId());
-                testChItemInstrumentMiddleEntity.setStartTime(data.getStartTime());
-                if (CollectionUtils.isNotEmpty(sampleItemInstrumentEntity.getIds())) {
-                    for (Integer id : sampleItemInstrumentEntity.getIds()) {
-                        testChItemInstrumentMiddleEntity.setIntrusmentId(id);
-                        testDetectionDao.addItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
-                    }
-                }
+                // 开始试验  检测项与不关联仪器信息
+//                TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
+//                testChItemInstrumentMiddleEntity.setSidItem(sampleItemInstrumentEntity.getItemId());
+//                testChItemInstrumentMiddleEntity.setStartTime(data.getStartTime());
+//                if (CollectionUtils.isNotEmpty(sampleItemInstrumentEntity.getIds())) {
+//                    for (Integer id : sampleItemInstrumentEntity.getIds()) {
+//                        testChItemInstrumentMiddleEntity.setIntrusmentId(id);
+//                        testDetectionDao.addItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
+//                    }
+//                }
             }
         }
         // 根据 任务单id  开始检测时间 判定是否为空

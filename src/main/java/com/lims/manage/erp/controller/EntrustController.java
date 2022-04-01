@@ -54,7 +54,7 @@ public class EntrustController {
     private EntrustEntityMapper entrustEntityMapper;
 
     /**
-     * 新增委托
+     * 新增委托 废弃
      *
      * @param json
      * @param file
@@ -73,7 +73,7 @@ public class EntrustController {
     }
 
     /**
-     * 新增委托 测试丁
+     * 新增委托 使用中丁
      *
      * @param json
      * @param file
@@ -280,7 +280,7 @@ public class EntrustController {
         if (entrustHistoryEntity.getState() == null) {
             entrustHistoryEntity.setState(0);
         }
-        if (entrustHistoryEntity.getState() != 0 && entrustHistoryEntity.getState() != 144 && entrustHistoryEntity.getState() != 1) {
+        if (entrustHistoryEntity.getState() != 0 && entrustHistoryEntity.getState() != 144 && entrustHistoryEntity.getState() != 1 && entrustHistoryEntity.getState()!=200) {
             return ResultUtil.error("必填参数状态有误");
         }
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
@@ -309,7 +309,7 @@ public class EntrustController {
     }
 
     /**
-     * 查询历史委托信息详情 测试
+     * 查询历史委托信息详情 测试 废弃
      *
      * @param id
      * @return
