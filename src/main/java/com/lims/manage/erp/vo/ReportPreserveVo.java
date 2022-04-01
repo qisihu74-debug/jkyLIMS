@@ -11,5 +11,6 @@ import java.util.List;
 @Data
 public class ReportPreserveVo extends ReportRecordEntity {
     private Boolean isOver;
+    private Integer reportComplete;
     private List<ReportRecordDetailEntity> checkInfos;
 }

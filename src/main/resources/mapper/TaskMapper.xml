@@ -546,6 +546,12 @@
         WHERE check_item_id = #{checkItemId}
     </select>
 
+    <select id="getOriginalTemplateUrl" resultType="java.lang.String">
+        SELECT file_url
+        FROM test_original_record_template
+        WHERE check_item_id = #{checkItemId}
+    </select>
+
     <update id="updateOriginalFile" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
         update test_entrusted_sample_checkitem_rel
         set origin_url   = #{originalUrl,jdbcType=VARCHAR},

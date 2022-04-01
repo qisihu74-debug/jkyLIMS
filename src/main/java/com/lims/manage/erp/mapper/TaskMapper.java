@@ -204,6 +204,13 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     String getOriginalTemplate(Integer checkItemId);
+    /**
+     * 查询原始记录模板文件url
+     *
+     * @param checkItemId
+     * @return
+     */
+    String getOriginalTemplateUrl(Integer checkItemId);
 
     /**
      * 更新上传的原始记录文件地址

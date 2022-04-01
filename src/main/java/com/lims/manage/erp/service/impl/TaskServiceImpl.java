@@ -501,6 +501,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public String getOriginalTemplateUrl(Integer checkItemId) {
+        return taskMapper.getOriginalTemplateUrl(checkItemId);
+    }
+
+    @Override
     public int uploadOriginalRecord(OriginalRecordParamVo paramVo, MultipartFile file) {
         //获取委托单信息
         EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
