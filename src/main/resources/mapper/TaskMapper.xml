@@ -594,6 +594,10 @@
         where id = #{taskId,jdbcType=INTEGER}
     </update>
 
+    <select id="getAllReportComplete" resultType="com.lims.manage.erp.vo.PersonInfoVo">
+        select report_complete from test_task where entrustment_id = (SELECT distinct entrustment_id FROM `test_task` where id = #{taskId})
+    </select>
+
     <update id="batchUpdateCheckItem" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
             update test_entrusted_sample_checkitem_rel
