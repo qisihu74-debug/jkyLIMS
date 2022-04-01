@@ -338,7 +338,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     public Set<Long> getNextIdsToTeam(){
         //获取当前管理账户的id
         Long userId = ShiroUtils.getUserInfo().getUserId();
-        //根据userId获取当前科室id
+       /* //根据userId获取当前科室id
         Long teamId = teamMapper.getTeamIdByUid(userId);
         //获取下级科室id
         List<TeamTreeStructureEntity> list = teamMapper.getChirds(teamId);
@@ -353,6 +353,8 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         Set<Long> ids = new HashSet<>();
         uids.removeAll(users);
         ids.addAll(uids);
+        ids.add(userId);*/
+        Set<Long> ids = new HashSet<>();
         ids.add(userId);
         return ids;
     }
