@@ -2,6 +2,7 @@ package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import com.lims.manage.erp.entity.InstrumentEntity;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
@@ -14,6 +15,7 @@ import com.lims.manage.erp.vo.SampleItemInstrumentVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import com.lims.manage.erp.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +43,19 @@ public class TestDetectionController {
         }
         return ResultUtil.success(dataCollect);
     }
+
+    /**
+     * 检测项 选择仪器集合
+     * @param
+     * @return
+     */
+    @PostMapping("/post_select_instrument")
+    public Result postSelectInstrument(@RequestBody InstrumentEntity instrumentEntity){
+        // 操作 检测项Id 选择仪器集合 保存
+        testDetectionService.postSelectInstrument(instrumentEntity);
+        return ResultUtil.success("成功");
+    }
+
 
     @RequestMapping("/start_test")
     public Result PostOnTest(@RequestBody SampleItemInstrumentVo sampleItemInstrumentVo) {
