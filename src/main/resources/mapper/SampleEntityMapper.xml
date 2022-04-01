@@ -96,7 +96,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                t2.check_date         as checkDate,
                t2.remark             as remark,
                t2.product_id         as productId,
-               t1.sample_id          as id
+               t1.sample_id          as id,
+               t2.alias_name          as aliasName,
+               t2.sample_quantity    as sampleQuantity
         FROM test_entrusted_sample_details_rel AS t1
                  LEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id
         WHERE t1.entrustment_id = #{entrustmentId}
@@ -281,7 +283,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                                  save_place, admin,
                                  sample_groups, quantity_per_group, inspector,
                                  received_date, sample_requirement, generation,
-                                 state, check_date, remark, insert_flag, is_use, sample_quantity,alias_name)
+                                 state, check_date, remark, insert_flag, is_use, sample_quantity,alias_name,sample_remark)
+                                 state, check_date, remark, insert_flag, is_use,
+                                 sample_quantity,alias_name,sample_type)
         values (#{id,jdbcType=INTEGER}, #{companyId,jdbcType=INTEGER}, #{sampleName,jdbcType=CHAR},
                 #{productId,jdbcType=INTEGER},
                 #{sampleCode,jdbcType=VARCHAR}, #{specs,jdbcType=INTEGER}, #{batchNumber,jdbcType=VARCHAR},
@@ -290,7 +294,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                 #{sampleGroups,jdbcType=INTEGER}, #{quantityPerGroup,jdbcType=INTEGER}, #{inspector,jdbcType=VARCHAR},
                 #{receivedDate,jdbcType=CHAR}, #{sampleRequirement,jdbcType=VARCHAR}, #{generation,jdbcType=VARCHAR},
                 #{state,jdbcType=VARCHAR}, #{checkDate,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR},
-                #{insertFlag,jdbcType=VARCHAR}, 0, #{sampleQuantity},#{aliasName})
+                #{insertFlag,jdbcType=VARCHAR}, 0, #{sampleQuantity},#{aliasName},#{sampleRemark,jdbcType=VARCHAR})
+                #{insertFlag,jdbcType=VARCHAR}, 0, #{sampleQuantity,jdbcType=VARCHAR},#{aliasName,jdbcType=VARCHAR},
+                #{sampleType,jdbcType=VARCHAR})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.SampleEntity">
         insert into test_sample

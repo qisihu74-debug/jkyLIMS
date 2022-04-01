@@ -115,6 +115,7 @@ public interface TaskService {
      * @return
      */
     String getOriginalTemplate(Integer checkItemId);
+    String getOriginalTemplateUrl(Integer checkItemId);
 
     /**
      * 填充数据

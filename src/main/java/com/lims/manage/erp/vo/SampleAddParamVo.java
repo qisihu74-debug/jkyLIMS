@@ -76,5 +76,13 @@ public class SampleAddParamVo {
      * 别名
      */
     private String aliasName;
+    /**
+     * 样品类型：做原材检测还是配合比检测
+     */
+    private String sampleType;
+    /**
+     * 样品备注
+     */
+    private String sampleRemark;
 
 }

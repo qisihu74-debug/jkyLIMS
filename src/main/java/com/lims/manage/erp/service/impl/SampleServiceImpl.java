@@ -98,6 +98,13 @@ public class SampleServiceImpl implements SampleService {
                 if (multipartFile != null) {
                     pictureUrl = MinIoUtil.upload("test-sample", multipartFile, pictureFileName);
                 }
+                // 去除 Outward 标点符号(、)进行删除
+                if(addParamVo.getOutward().length()==1){
+                    // 赋值为空
+                    addParamVo.setOutward(null);
+                }else{
+                    addParamVo.setOutward(addParamVo.getOutward().substring(1, addParamVo.getOutward().length()));
+                }
                 //保存样品信息
                 SampleEntity sampleEntity = new SampleEntity(addParamVo, details.get(i), productName, sampleCode, pictureUrl, insertFlag);
                 result = sampleEntityMapper.insert(sampleEntity);

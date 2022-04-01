@@ -312,6 +312,8 @@ public class TaskServiceImpl implements TaskService {
         // 签发人集合
         List<LabelValueVo> SignerVo = taskMapper.getRoleInformation(Const.signerStr);
         teamVo.setSignerVo(SignerVo);
+        // 获取科室下人员信息 （一个科室下）
+
         return teamVo;
     }
 
@@ -504,6 +506,11 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public String getOriginalTemplate(Integer checkItemId) {
         return taskMapper.getOriginalTemplate(checkItemId);
+    }
+
+    @Override
+    public String getOriginalTemplateUrl(Integer checkItemId) {
+        return taskMapper.getOriginalTemplateUrl(checkItemId);
     }
 
     @Override

@@ -147,7 +147,7 @@
                 and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
             </if>
             <if test="state!=null">
-                and state!=0 and state!=144
+                and state!=0 and state!=144 and state!=200
             </if>
         </trim>
         ORDER BY entrustment_no DESC
@@ -340,7 +340,9 @@
         WHERE t2.company_name = #{companyName}
           and type = #{type}
           and t1.contacts = #{contacts}
-          and t1.phone = #{contactWay}
+          <if test="contactWay !=null">
+              and t1.phone = #{contactWay}
+          </if>
     </select>
     <update id="updateEntrustInfo" parameterType="com.lims.manage.erp.entity.EntrustEntity">
         UPDATE test_entrusted_info

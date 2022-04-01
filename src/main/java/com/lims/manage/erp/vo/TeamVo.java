@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 public class TeamVo {
     /**
-     * 团队信息
+     * 团队信息（含下一级）
      */
     List<LabelValueVo> teamVo;
     /**
@@ -27,4 +27,9 @@ public class TeamVo {
      * 签发人
      */
     List<LabelValueVo> signerVo;
+    /**
+     * 团队信息 一层
+     */
+    List<LabelValueVo> ledSampleVo;
+
 }

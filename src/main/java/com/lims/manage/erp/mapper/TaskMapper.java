@@ -101,6 +101,8 @@ public interface TaskMapper extends BaseMapper {
      */
     List<TeamTreeStructureEntity> getTeamDeptVo(Long userid);
 
+
+
     /**
      *  根据团队id 查询人员信息列表
      */
@@ -202,6 +204,13 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     String getOriginalTemplate(Integer checkItemId);
+    /**
+     * 查询原始记录模板文件url
+     *
+     * @param checkItemId
+     * @return
+     */
+    String getOriginalTemplateUrl(Integer checkItemId);
 
     /**
      * 更新上传的原始记录文件地址
@@ -244,6 +253,13 @@ public interface TaskMapper extends BaseMapper {
     int updatePersonInfo(PersonInfoVo vo);
 
     int updateReportStatus(@Param("status") Integer status,@Param("taskId")Long taskId);
+
+    /**
+     * 查询所有任务报告的状态
+     * @param entrustmentId
+     * @return
+     */
+    List<Integer> getAllReportComplete(Long entrustmentId,Long taskId);
 
     /**
      * 根据任务id获取委托单id

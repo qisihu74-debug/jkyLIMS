@@ -27,7 +27,7 @@ public class EntrustHistoryEntity {
      */
     private String entrustPeople;
     /**
-     * 委托公司
+     * 委托单位
      */
     private String entrustCompany;
     /**

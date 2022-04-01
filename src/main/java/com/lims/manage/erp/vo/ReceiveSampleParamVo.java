@@ -9,8 +9,22 @@ import java.util.Date;
  */
 @Data
 public class ReceiveSampleParamVo {
+    /**
+     * 任务主键ID
+     */
     private Long taskId;
+    /**
+     * 领样人
+     */
     private String sampler;
+    /**
+     * 领样时间
+     */
     private Date sampleReceivingTime;
+
     private Integer state;
+    /**
+     * 样品状态描述
+     */
+    private String sampleStateDescription;
 }

@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.lims.manage.erp.entity.InstrumentEntity;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.vo.SampleItemInstrumentVo;
@@ -20,6 +21,11 @@ public interface TestDetectionService {
      * @return
      */
     Boolean postStartTest(SampleItemInstrumentVo data);
+
+    /**
+     *  操作 检测项Id 选择仪器集合 保存
+     */
+    Boolean postSelectInstrument(InstrumentEntity instrumentEntity);
 
     /**
      * 验证登录人userId 是否具备开始检测资格
