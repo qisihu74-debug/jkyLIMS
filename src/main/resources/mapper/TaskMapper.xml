@@ -363,8 +363,9 @@
             </if>
         </trim>
         ORDER BY
-        t1.required_completion_time desc,
-        t2.entrustment_no desc
+        t2.entrustment_no desc,
+        t1.required_completion_time desc
+
     </select>
 
     <select id="getTaskListTwoGreater" resultType="com.lims.manage.erp.vo.TaskListVo"
@@ -407,8 +408,9 @@
             </if>
         </trim>
         ORDER BY
-        t1.required_completion_time desc,
-        t2.entrustment_no desc
+        t2.entrustment_no desc,
+        t1.required_completion_time desc
+
     </select>
     <update id="updateTestTask" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
         UPDATE test_task

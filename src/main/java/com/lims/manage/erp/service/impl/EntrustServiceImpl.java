@@ -1341,28 +1341,30 @@ public class EntrustServiceImpl implements EntrustService {
                     state = "待检";
                 }else {
                     List<String> status = taskMapper.getStateByEntrustId(entrustId);
-                    List<Integer> longs = Lists.newArrayList();
-                    for (String s:status) {
-                        longs.add(Integer.parseInt(s));
-                    }
-                    Integer max = Collections.max(longs);
-                    if (max<=2){
-                        state = "待检";
-                    }
-                    if (3 == max){
-                        state = "在检";
-                    }
-                    Boolean flag = false;
-                    for (Integer num:longs) {
-                        if (num>=4){
-                            flag = true;
-                        }else {
-                            flag = false;
-                            break;
+                    if (!CollectionUtils.isEmpty(status)){
+                        List<Integer> longs = Lists.newArrayList();
+                        for (String s:status) {
+                            longs.add(Integer.parseInt(s));
                         }
-                    }
-                    if (flag){
-                        state = "已检";
+                        Integer max = Collections.max(longs);
+                        if (max<=2){
+                            state = "待检";
+                        }
+                        if (3 == max){
+                            state = "在检";
+                        }
+                        Boolean flag = false;
+                        for (Integer num:longs) {
+                            if (num>=4){
+                                flag = true;
+                            }else {
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if (flag){
+                            state = "已检";
+                        }
                     }
                 }
 

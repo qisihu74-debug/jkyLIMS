@@ -283,9 +283,8 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                                  save_place, admin,
                                  sample_groups, quantity_per_group, inspector,
                                  received_date, sample_requirement, generation,
-                                 state, check_date, remark, insert_flag, is_use, sample_quantity,alias_name,sample_remark)
-                                 state, check_date, remark, insert_flag, is_use,
-                                 sample_quantity,alias_name,sample_type)
+                                 state, check_date, remark, insert_flag, is_use,sample_quantity,alias_name,sample_remark, sample_type)
+
         values (#{id,jdbcType=INTEGER}, #{companyId,jdbcType=INTEGER}, #{sampleName,jdbcType=CHAR},
                 #{productId,jdbcType=INTEGER},
                 #{sampleCode,jdbcType=VARCHAR}, #{specs,jdbcType=INTEGER}, #{batchNumber,jdbcType=VARCHAR},
@@ -294,8 +293,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                 #{sampleGroups,jdbcType=INTEGER}, #{quantityPerGroup,jdbcType=INTEGER}, #{inspector,jdbcType=VARCHAR},
                 #{receivedDate,jdbcType=CHAR}, #{sampleRequirement,jdbcType=VARCHAR}, #{generation,jdbcType=VARCHAR},
                 #{state,jdbcType=VARCHAR}, #{checkDate,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR},
-                #{insertFlag,jdbcType=VARCHAR}, 0, #{sampleQuantity},#{aliasName},#{sampleRemark,jdbcType=VARCHAR})
-                #{insertFlag,jdbcType=VARCHAR}, 0, #{sampleQuantity,jdbcType=VARCHAR},#{aliasName,jdbcType=VARCHAR},
+                #{insertFlag,jdbcType=VARCHAR}, 0, #{sampleQuantity},#{aliasName},#{sampleRemark,jdbcType=VARCHAR},
                 #{sampleType,jdbcType=VARCHAR})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.SampleEntity">
