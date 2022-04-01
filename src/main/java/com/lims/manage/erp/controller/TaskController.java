@@ -272,10 +272,12 @@ public class TaskController {
         Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
         result.put("result", originalData);
         //从文件服务器获取文件流
-        String originalTemplate = taskService.getOriginalTemplate(checkItemId);
+        String originalTemplate = taskService.getOriginalTemplateUrl(checkItemId);
         String[] split = originalTemplate.split("/");
+        String[] split1 = split[4].split("\\?");
         XLSTransformer transformer = new XLSTransformer();
-        InputStream fileStream = MinIoUtil.getFileStream("original-record-template", originalTemplate);
+//        InputStream fileStream = MinIoUtil.getFileStream("original-record-template", originalTemplate);
+        InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
         Workbook workbook = null;
         try {
             workbook = transformer.transformXLS(fileStream, result);
