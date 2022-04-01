@@ -104,7 +104,6 @@ public class TaskServiceImpl implements TaskService {
             }
             taskDetailInfoVo.setJudgmentBasis(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
         }
-
         return taskDetailInfoVo;
     }
 
@@ -196,6 +195,15 @@ public class TaskServiceImpl implements TaskService {
 
         PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
         List<ReceiveSampleListVo> dataList = taskMapper.getSampleList(paramVo);
+        //TODO gjl添加样品状态
+        EntrustServiceImpl service = new EntrustServiceImpl();
+        for (ReceiveSampleListVo sampleListVo:dataList) {
+            List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
+            for (SamplePrivateInfoVo samplePrivateInfoVo:sampleList) {
+                String state = service.findStateBySampleId(samplePrivateInfoVo.getId(),entrustEntityMapper,taskMapper);
+                samplePrivateInfoVo.setState(state);
+            }
+        }
         PageInfo<ReceiveSampleListVo> result = new PageInfo<>(dataList);
         return result;
     }

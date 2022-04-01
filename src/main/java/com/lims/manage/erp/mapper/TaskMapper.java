@@ -278,4 +278,6 @@ public interface TaskMapper extends BaseMapper {
             "\t)")
     Long getReturnTaskId(@Param("itemId")Integer itemId);
 
+    @Select("select state from test_task where entrustment_id = #{entrustId}")
+    List<String> getStateByEntrustId(Long entrustId);
 }

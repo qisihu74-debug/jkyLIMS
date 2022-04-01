@@ -1301,4 +1301,47 @@ public class EntrustServiceImpl implements EntrustService {
         return data;
     }
 
+    @Override
+    public String findStateBySampleId(int sampleId,EntrustEntityMapper entityMapper, TaskMapper taskMapper) {
+
+        String state = "";
+        //五种样品状态1待检，2在检，3已检，||TODO 4留样，5处置
+        if (sampleId > 0){
+            Long id = entityMapper.getMesBySampleId(sampleId);
+            Long entrustId = entityMapper.getEntrustIdBySampleId(sampleId);
+            if (id != null){
+                if (entrustId == null){
+                    state = "待检";
+                }else {
+                    List<String> status = taskMapper.getStateByEntrustId(entrustId);
+                    List<Integer> longs = Lists.newArrayList();
+                    for (String s:status) {
+                        longs.add(Integer.parseInt(s));
+                    }
+                    Integer max = Collections.max(longs);
+                    if (max<=2){
+                        state = "待检";
+                    }
+                    if (3 == max){
+                        state = "在检";
+                    }
+                    Boolean flag = false;
+                    for (Integer num:longs) {
+                        if (num>=4){
+                            flag = true;
+                        }else {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag){
+                        state = "已检";
+                    }
+                }
+
+            }
+        }
+        return state;
+    }
+
 }

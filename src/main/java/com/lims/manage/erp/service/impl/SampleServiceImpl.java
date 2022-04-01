@@ -4,7 +4,9 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.SampleService;
 import com.lims.manage.erp.util.MinIoUtil;
@@ -22,9 +24,12 @@ import java.util.List;
 public class SampleServiceImpl implements SampleService {
     @Autowired
     TestProductDao testProductDao;
-
+    @Autowired
+    private TaskMapper taskMapper;
     @Autowired
     SampleEntityMapper sampleEntityMapper;
+    @Autowired
+    private EntrustEntityMapper mapper;
 
     @Override
     public Integer addSampleData(SampleAddParamVo addParamVo, MultipartFile[] file) {
@@ -140,6 +145,10 @@ public class SampleServiceImpl implements SampleService {
                 if(insertFlag.equals(insertFlag1)){
                     childNode.add(privateInfoVo);
                 }
+                //TODO gjl添加样品状态
+                EntrustServiceImpl service = new EntrustServiceImpl();
+                String state = service.findStateBySampleId(privateInfoVo.getId(),mapper,taskMapper);
+                privateInfoVo.setState(state);
             }
             vo.setChildNode(childNode);
         }

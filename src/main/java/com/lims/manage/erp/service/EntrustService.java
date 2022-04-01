@@ -8,8 +8,11 @@ import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
 import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -163,4 +166,11 @@ public interface EntrustService {
      * @return
      */
     HistoryEntrustDataVo getHistoryData(String name,Integer type);
+
+    /**
+     * 样品状态查询 样品状态1待检，2在检，3已检
+     * @param sampleId
+     * @return
+     */
+    String findStateBySampleId(int sampleId, EntrustEntityMapper mapper,TaskMapper taskMapper);
 }

@@ -289,4 +289,14 @@ public interface EntrustEntityMapper extends BaseMapper {
             "\tc.ischild != 0 and c.check_price is not NULL ")
     List<SampleItemEntity> getyItemList(Long checkItemId);
 
+    /**
+     * 判断样品是否存在
+     * @param sampleId
+     * @return
+     */
+    @Select("select id from test_sample where id = #{sampleId}")
+    Long getMesBySampleId(int sampleId);
+
+    @Select("select entrustment_id from test_entrusted_sample_details_rel where sample_id = #{sampleId}")
+    Long getEntrustIdBySampleId(int sampleId);
 }
