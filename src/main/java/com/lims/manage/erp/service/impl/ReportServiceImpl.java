@@ -463,8 +463,12 @@ public class ReportServiceImpl implements ReportService {
 //            if ("1".equals(state)) {
 //                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
 //            }
-            reportRecordEntity1.setState(vo.getReportComplete()+"");
-            if ("1".equals(vo.getReportComplete()+"")) {
+            //校验其他任务单是否完成
+            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getTaskId());
+            if(allReportComplete.contains(2)){
+                reportRecordEntity1.setState(2+"");
+            }else{
+                reportRecordEntity1.setState(1+"");
                 reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
             }
             //修改任务报告状态
@@ -493,8 +497,12 @@ public class ReportServiceImpl implements ReportService {
 //            if ("1".equals(state)) {
 //                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
 //            }
-            reportRecordEntity.setState(vo.getReportComplete()+"");
-            if ("1".equals(vo.getReportComplete()+"")) {
+
+            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getTaskId());
+            if(allReportComplete.contains(2)){
+                reportRecordEntity.setState(2+"");
+            }else{
+                reportRecordEntity.setState(1+"");
                 reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
             }
             //生成报告编号
