@@ -110,6 +110,7 @@
                 <result property="state" column="state"></result>
                 <result property="originUrl" column="originUrl"></result>
                 <result property="opinion" column="opinion"></result>
+                <result property="itemFileName" column="item_file_name"></result>
             </collection>
         </collection>
     </resultMap>
@@ -167,7 +168,8 @@
                t5.id         AS                                     itemId,
                t5.state      AS                                     state,
                t5.origin_url AS                                     originUrl,
-               t5.opinion
+               t5.opinion,
+               t5.item_file_name as itemFileName
         FROM test_task t1
                  LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
                  LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
@@ -239,6 +241,16 @@
                 #{id}
             </foreach>
         </if>
+    </select>
+    <select id="getInstrumentEntityList" resultType="com.lims.manage.erp.entity.TestInstrumentEntity">
+    SELECT
+        t2.id,
+        t2.name
+    FROM
+        test_product_item_instrument_middle_rel AS t1
+        LEFT JOIN test_instrument AS t2 ON t1.intrusment_id = t2.id
+    WHERE
+        t1.id_item = #{idItem}
     </select>
     <select id="getSampleList" resultMap="sampleResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT t1.id taskId,
@@ -555,7 +567,9 @@
     <update id="updateOriginalFile" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
         update test_entrusted_sample_checkitem_rel
         set origin_url   = #{originalUrl,jdbcType=VARCHAR},
-            file_url_str = #{fileUrlStr,jdbcType=VARCHAR}
+            file_url_str = #{fileUrlStr,jdbcType=VARCHAR},
+            item_file_name = #{fileName,jdbcType=VARCHAR}
+
         where entrust_id = #{entrustId,jdbcType=BIGINT}
           and sample_id = #{sampleId,jdbcType=INTEGER}
           and check_item_id = #{checkItemId,jdbcType=INTEGER}

@@ -393,9 +393,23 @@ public class TaskController {
         }
     }
 
+    /**
+     * 删除附件
+     * @param itemId
+     * @return
+     */
+    @RequestMapping("/passorno_delete")
+    public Result passorno_delete(Integer itemId) {
+        if (itemId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        return ResultUtil.success(taskService.passorno_delete(itemId));
+
+    }
+
     @RequestMapping("/passorno")
     public Result passorno(Integer itemId, Integer state, String opinion) {
-        if (itemId == null || itemId == null) {
+        if (itemId == null || state == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             // 验证登录人userId 是否具备操作资格

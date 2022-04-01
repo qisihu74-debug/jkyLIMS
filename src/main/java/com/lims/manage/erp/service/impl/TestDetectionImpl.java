@@ -87,6 +87,8 @@ public class TestDetectionImpl implements TestDetectionService {
 
     @Override
     public Boolean postSelectInstrument(InstrumentEntity instrumentEntity) {
+        // 新增前 删除存留信息
+        testDetectionDao.deleteInstrument(instrumentEntity.getItemId());
         // 检测项下 仪器表 新增
                 TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
                 testChItemInstrumentMiddleEntity.setSidItem(instrumentEntity.getItemId());

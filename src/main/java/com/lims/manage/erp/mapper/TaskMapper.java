@@ -74,6 +74,11 @@ public interface TaskMapper extends BaseMapper {
     TaskDetailInfoVo getTaskDetailInfoTwo(TaskListParamVo paramVo);
 
     /**
+     * 根据检测项 主键 获取 仪器信息
+     */
+    List<TestInstrumentEntity>  getInstrumentEntityList(int idItem);
+
+    /**
      * 根据任务id 获取所属部门信息
      * @param taskId
      * @return
@@ -221,7 +226,7 @@ public interface TaskMapper extends BaseMapper {
      * @param checkItemId
      * @return
      */
-    int updateOriginalFile(String originalUrl, Long entrustId, Integer sampleId, Integer checkItemId,String fileUrlStr);
+    int updateOriginalFile(String originalUrl, Long entrustId, Integer sampleId, Integer checkItemId,String fileUrlStr,String fileName);
 
     /**
      * 查询复合数据

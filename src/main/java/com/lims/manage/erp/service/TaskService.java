@@ -147,6 +147,15 @@ public interface TaskService {
     String passorno(Integer itemId, Integer state,String opinion);
 
     /**
+     * 删除附件
+     *
+     * @param itemId
+     * @param
+     * @return
+     */
+    String passorno_delete(Integer itemId);
+
+    /**
      * 查询任务下检测人、记录人、复核人、报告制作人信息
      * @param taskId
      * @return

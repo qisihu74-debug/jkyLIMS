@@ -42,4 +42,9 @@ public class SampleItemInstrumentEntity extends SampleItemEntity{
      */
     private String fileUrlStr;
 
+    /***
+     * 文件原始附件名称
+     */
+    private String itemFileName;
+
 }

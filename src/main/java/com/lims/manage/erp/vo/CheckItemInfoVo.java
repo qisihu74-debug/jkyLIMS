@@ -26,10 +26,18 @@ public class CheckItemInfoVo {
     private Integer state;
     private String originUrl;
     private String opinion;
+    /***
+     * 文件原始附件名称
+     */
+    private String itemFileName;
     /**
      * 仪器设备
      */
     private List<TestInstrumentEntity> testInstrumentEntityList;
+    /**
+     * 仪器数组
+     */
+    private int[] testInstrumentEntityArray;
     /**
      * 开始检测时间
      */

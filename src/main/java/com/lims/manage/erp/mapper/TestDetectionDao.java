@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.TestChItemInstrumentMiddleEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 

@@ -26,6 +26,7 @@
         <if test="opinion!=null and opinion!=''">opinion=#{opinion},</if>
             origin_url=#{originUrl},
             file_url_str=#{fileUrlStr},
+            item_file_name = #{itemFileName},
         </trim>
          WHERE id = #{itemId}
     </update>

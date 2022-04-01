@@ -104,6 +104,35 @@ public class TaskServiceImpl implements TaskService {
             }
             taskDetailInfoVo.setJudgmentBasis(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
         }
+        // 根据itemId 查询设备仪器信息集合
+        if(taskDetailInfoVo.getSampleDetailList()!=null&&!taskDetailInfoVo.getSampleDetailList().isEmpty()){
+            for(SampleDetailVo sampleDetailVo :taskDetailInfoVo.getSampleDetailList())
+            {
+                if(sampleDetailVo.getCheckItemInfoList()!=null&&!sampleDetailVo.getCheckItemInfoList().isEmpty()){
+                    for(CheckItemInfoVo checkItemInfoVo:sampleDetailVo.getCheckItemInfoList())
+                    {
+                        List<TestInstrumentEntity>   instrumentEntityList = taskMapper.getInstrumentEntityList(checkItemInfoVo.getItemId());
+//                        List<Integer> result = Lists.newArrayList();
+                        // 设置数组 存放
+                        int[] arrayInt = new int[instrumentEntityList.size()];
+                        if(instrumentEntityList!=null&&!instrumentEntityList.isEmpty()){
+                            checkItemInfoVo.setTestInstrumentEntityList(instrumentEntityList);
+                            for(int i=0;i<instrumentEntityList.size();i++){
+                                arrayInt[i]=instrumentEntityList.get(0).getId();
+                            }
+                            checkItemInfoVo.setTestInstrumentEntityArray(arrayInt);
+                        }
+                        else {
+                            checkItemInfoVo.setTestInstrumentEntityList(instrumentEntityList);
+                            checkItemInfoVo.setTestInstrumentEntityArray(arrayInt);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
         return taskDetailInfoVo;
     }
 
@@ -525,11 +554,14 @@ public class TaskServiceImpl implements TaskService {
         }
         String upload = "";
         String fileUrlStr = "";
+        // 原始名称
+        String fileName="";
         if (file != null) {
             String name = file.getOriginalFilename();
             String[] strings = name.split("\\.");
             upload = MinIoUtil.upload("upload-original-record", file, entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + "." + strings[strings.length - 1]);
             fileUrlStr = entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + "." + strings[strings.length - 1];
+            fileName = strings[0]+"."+strings[strings.length - 1];
         }
         // 根据任务单主键 获取委托单主键
         if (entrustBaseInfo != null) {
@@ -537,7 +569,7 @@ public class TaskServiceImpl implements TaskService {
                 taskMapper.updateEntrustById(entrustBaseInfo.getId(), 5);
             }
         }
-        return taskMapper.updateOriginalFile(upload, entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId(), fileUrlStr);
+        return taskMapper.updateOriginalFile(upload, entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId(), fileUrlStr,fileName);
     }
 
     /**
@@ -606,6 +638,37 @@ public class TaskServiceImpl implements TaskService {
             return "成功";
         }
         return "失败";
+    }
+
+    @Override
+    public String passorno_delete(Integer itemId) {
+        SampleItemInstrumentEntity sampleItemInstrumentEntity2 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
+        // 检测项 撤回时 考虑 （盖章的话） test_report_record state = '7'
+        // 通过委托单id 获取报告test_report_record state 状态
+        ReportRecordEntity reportRecordEntity = reportRecordEntityMapper.selectByEntrustId(sampleItemInstrumentEntity2.getEntrustId());
+        if (reportRecordEntity != null && reportRecordEntity.getState() != null) {
+            if (Integer.parseInt(reportRecordEntity.getState()) == 7 && Integer.parseInt(reportRecordEntity.getState()) >= 7) {
+                return "撤回失败！此报告已经盖章";
+            }
+        }
+
+        if (sampleItemInstrumentEntity2.getOriginUrl() != null && !sampleItemInstrumentEntity2.getOriginUrl().isEmpty()) {
+            // 去清除 MinIo 桶数据。
+            try {
+                MinIoUtil.deleteFile("upload-original-record", sampleItemInstrumentEntity2.getFileUrlStr());
+            } catch (Exception e) {
+                logger.info("修改委托下清除 MinIo 桶数据 出错");
+            }
+        }
+        SampleItemInstrumentEntity sampleItemInstrumentEntity = new SampleItemInstrumentEntity();
+        sampleItemInstrumentEntity.setStartTime(null);
+        sampleItemInstrumentEntity.setItemId(itemId);
+        sampleItemInstrumentEntity.setOriginUrl(null);
+        sampleItemInstrumentEntity.setFileUrlStr(null);
+        sampleItemInstrumentEntity.setEndTime(null);
+        sampleItemInstrumentEntity.setItemFileName(null);
+        testDetectionDao.updateTaskPassorno(sampleItemInstrumentEntity);
+        return "成功";
     }
 
     @Override
