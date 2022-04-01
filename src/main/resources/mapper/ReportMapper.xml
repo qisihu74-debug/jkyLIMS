@@ -246,7 +246,7 @@
                  LEFT JOIN test_entrusted_sample_details_rel t3 ON t1.id = t3.entrustment_id
                  LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
                  left join test_entrusted_sample_checkitem_rel t5 on t1.id = t5.entrust_id and t4.id = t5.sample_id
-                 left join test_report_record t6 on t2.id = t6.task_id
+                 left join test_report_record t6 on t1.id = t6.entrustment_id
         where t2.issue_report = '是'
             AND t6.state = 1
         <if test="reportCode!=null and reportCode!=''">
