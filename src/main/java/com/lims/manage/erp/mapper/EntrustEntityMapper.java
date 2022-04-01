@@ -286,7 +286,7 @@ public interface EntrustEntityMapper extends BaseMapper {
             "\t\t(SELECT @pids := #{checkItemId}) b\n" +
             "\t) c\n" +
             "WHERE\n" +
-            "\tc.ischild != 0 and c.check_price is not NULL ")
+            "\tc.ischild != 0 ")
     List<SampleItemEntity> getyItemList(Long checkItemId);
 
 }

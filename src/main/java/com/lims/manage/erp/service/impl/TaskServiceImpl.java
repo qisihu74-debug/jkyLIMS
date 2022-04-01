@@ -304,6 +304,8 @@ public class TaskServiceImpl implements TaskService {
         // 签发人集合
         List<LabelValueVo> SignerVo = taskMapper.getRoleInformation(Const.signerStr);
         teamVo.setSignerVo(SignerVo);
+        // 获取科室下人员信息 （一个科室下）
+
         return teamVo;
     }
 

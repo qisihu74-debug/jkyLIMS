@@ -76,5 +76,9 @@ public class SampleAddParamVo {
      * 别名
      */
     private String aliasName;
+    /**
+     * 样品备注
+     */
+    private String sampleRemark;
 
 }

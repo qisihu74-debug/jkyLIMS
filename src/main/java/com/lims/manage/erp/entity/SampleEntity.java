@@ -148,6 +148,10 @@ public class SampleEntity {
      */
     private String aliasName;
     /**
+     * 样品备注
+     */
+    private String sampleRemark;
+    /**
      * 0为未使用，1为已使用
      */
     private Integer isUse;
@@ -198,6 +202,7 @@ public class SampleEntity {
         this.insertFlag = insertFlag;
         this.isUse = 0;
         this.aliasName = addParamVo.getAliasName();
+        this.sampleRemark = addParamVo.getSampleRemark();
 //        this.state = state;
 //        this.checkDate = checkDate;
 //        this.remark = remark;

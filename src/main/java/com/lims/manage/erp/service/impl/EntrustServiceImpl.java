@@ -270,20 +270,20 @@ public class EntrustServiceImpl implements EntrustService {
                 //样品下检测项
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
                 // 迭代样品下检测项单价信息 如果为空 删除此检测项信息
-                try {
-                    if(!CollectionUtils.isEmpty(sampleCheckItem)){
-                        Iterator<SampleItemEntity> sampleCheckItemList = sampleCheckItem.iterator();
-                        while (sampleCheckItemList.hasNext()){
-                            SampleItemEntity dataItem = sampleCheckItemList.next();
-                            if(dataItem.getUnitPrice()==null){
-                                sampleCheckItemList.remove();
-                            }
-                        }
-                    }
-                }
-                catch (Exception e){
-                    logger.error("删除样品下检测项单价为空时异常");
-                }
+//                try {
+//                    if(!CollectionUtils.isEmpty(sampleCheckItem)){
+//                        Iterator<SampleItemEntity> sampleCheckItemList = sampleCheckItem.iterator();
+//                        while (sampleCheckItemList.hasNext()){
+//                            SampleItemEntity dataItem = sampleCheckItemList.next();
+//                            if(dataItem.getUnitPrice()==null){
+//                                sampleCheckItemList.remove();
+//                            }
+//                        }
+//                    }
+//                }
+//                catch (Exception e){
+//                    logger.error("删除样品下检测项单价为空时异常");
+//                }
 
                 if (!CollectionUtils.isEmpty(sampleCheckItem)) {
                     for (SampleItemEntity entity : sampleCheckItem) {
@@ -357,8 +357,8 @@ public class EntrustServiceImpl implements EntrustService {
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
         }
-        // 通过见证单位和类型 查看联系人和手机号是否存在
-        if (basisInfo.getWitnessUint() != null && basisInfo.getWitnessPerson() != null && basisInfo.getWitnessPhone() != null) {
+        // 通过见证单位和类型 查看联系人 （手机号可以不填）
+        if (basisInfo.getWitnessUint() != null && basisInfo.getWitnessPerson() != null) {
             testCompanyJsonEntity.setCompanyName(basisInfo.getWitnessUint());
             testCompanyJsonEntity.setContacts(basisInfo.getWitnessPerson());
             testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
@@ -759,20 +759,20 @@ public class EntrustServiceImpl implements EntrustService {
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
 
                 // 迭代样品下检测项单价信息 如果为空 删除此检测项信息
-                try {
-                    if(!CollectionUtils.isEmpty(sampleCheckItem)){
-                        Iterator<SampleItemEntity> sampleCheckItemList = sampleCheckItem.iterator();
-                        while (sampleCheckItemList.hasNext()){
-                            SampleItemEntity dataItem = sampleCheckItemList.next();
-                            if(dataItem.getUnitPrice()==null){
-                                sampleCheckItemList.remove();
-                            }
-                        }
-                    }
-                }
-                catch (Exception e){
-                    logger.error("删除样品下检测项单价为空时异常");
-                }
+//                try {
+//                    if(!CollectionUtils.isEmpty(sampleCheckItem)){
+//                        Iterator<SampleItemEntity> sampleCheckItemList = sampleCheckItem.iterator();
+//                        while (sampleCheckItemList.hasNext()){
+//                            SampleItemEntity dataItem = sampleCheckItemList.next();
+//                            if(dataItem.getUnitPrice()==null){
+//                                sampleCheckItemList.remove();
+//                            }
+//                        }
+//                    }
+//                }
+//                catch (Exception e){
+//                    logger.error("删除样品下检测项单价为空时异常");
+//                }
 
                 if (!CollectionUtils.isEmpty(sampleCheckItem)) {
                     // 利用map的特性 （去除重复的id检测项 保留sampleCheckItem下ItemId数据。）
