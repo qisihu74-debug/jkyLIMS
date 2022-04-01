@@ -86,6 +86,21 @@ public class TestDetectionImpl implements TestDetectionService {
     }
 
     @Override
+    public Boolean postSelectInstrument(InstrumentEntity instrumentEntity) {
+        // 检测项下 仪器表 新增
+                TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
+                testChItemInstrumentMiddleEntity.setSidItem(instrumentEntity.getItemId());
+                testChItemInstrumentMiddleEntity.setStartTime(new Date());
+                if (CollectionUtils.isNotEmpty(instrumentEntity.getIds())) {
+                    for (Integer id : instrumentEntity.getIds()) {
+                        testChItemInstrumentMiddleEntity.setIntrusmentId(id);
+                        testDetectionDao.addItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
+                    }
+                }
+                 return true;
+    }
+
+    @Override
     public Boolean VerifyTheLogin(Long userId, Long taskId) {
         TaskTestEntity data = taskMapper.getTaskOrders(taskId);
         if (data.getInspector() != null) {
