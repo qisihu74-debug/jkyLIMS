@@ -924,14 +924,14 @@ public class ReportServiceImpl implements ReportService {
             try {
                 url = MinIoUtil.upload("report-download", file, GenID.getID() + ".pdf");
                 if (StringUtils.isNotEmpty(url)) {
-                    reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId);
+
+                    reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date());
                 }
                 return true;
             } catch (Exception e) {
                 return false;
             }
         }
-
     }
 
     public String downLoadNew(MinioClient client, String code, Long id, List<Long> checkIds) throws Exception {
