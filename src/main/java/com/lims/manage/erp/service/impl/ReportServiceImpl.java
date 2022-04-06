@@ -908,30 +908,28 @@ public class ReportServiceImpl implements ReportService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean uploadReport(String reportCode, MultipartFile file, String verifyer,
                                 String issuer, Long verifyerId, Long issuerId, String code) {
+        Boolean flag = false;
+        String url = "";
         if (file == null){
             //下载模板填充数据
             MinioClient client = MinIoUtil.minioClient;
             //Long entrustId = reportMapper.getMessageByCode(reportCode);
             try {
                 this.downLoad(client,code,Long.parseLong(reportCode));
-                return true;
+                flag = true;
             }catch (Exception e){
                 logger.error("提交报告审批失败:{}",e);
-                return false;
             }
         }else {
-            String url = "";
             try {
                 url = MinIoUtil.upload("report-download", file, GenID.getID() + ".pdf");
-                if (StringUtils.isNotEmpty(url)) {
-
-                    reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date());
-                }
-                return true;
+                flag = true;
             } catch (Exception e) {
-                return false;
+                logger.info("提交审批中上传文件失败:{}",e);
             }
         }
+        reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date());
+        return flag;
     }
 
     @Override
