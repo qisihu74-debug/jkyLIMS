@@ -86,6 +86,11 @@ public class ReportApprovalVo {
      */
     private String sealType;
     /**
+     * 用章类型数组
+     *  sealTypeArray
+     */
+    private String[] sealTypeArray;
+    /**
      * 签发驳回原因
      */
     private String issuReason;

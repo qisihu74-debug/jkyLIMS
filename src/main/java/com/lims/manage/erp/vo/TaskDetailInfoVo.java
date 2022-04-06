@@ -27,15 +27,26 @@ public class TaskDetailInfoVo {
      */
     private String judgmentBasis;
     /**
-     * 报告用章
+     *  报告报告用章
      */
     private String sealType;
+    /**
+     * 委托单报告用章
+     */
+    private String sealTypeTicket;
     private String fileUrl;//下载附件
     /**
      * url
      */
     private String[] array;
     private List<SampleDetailVo> sampleDetailList;//样品信息
+
+    /**
+     * 用章类型数组
+     *  sealTypeArray
+     */
+    private String[] sealTypeArray;
+
 
     public TaskDetailInfoVo(Long taskId) {
         this.taskId = taskId;

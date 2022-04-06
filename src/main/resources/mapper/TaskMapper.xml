@@ -195,6 +195,7 @@
                t2.seal_type,
                t3.sample_id,
                t4.sample_name,
+               t4.alias_name,
                t4.product_id,
                t4.sample_code,
                t4.specs,
