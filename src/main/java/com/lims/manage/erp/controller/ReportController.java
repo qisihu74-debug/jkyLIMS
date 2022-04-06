@@ -393,13 +393,15 @@ public class ReportController {
         if (contractId == null || StringUtils.isEmpty(name) || StringUtils.isEmpty(contact)){
             return ResultUtil.error("缺少必要参数");
         }
+        ReportRecordEntity bean = reportService.getDetailByEntrustId(entrustId);
         byte[] bytes = reportService.downloadQysFile(entrustId, contractId, name, contact);
         response.reset();
         response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
         response.setContentType("application/zip");
         response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment;fileName=" + "report.zip");
+        String fileName = bean.getReportCode()+"（"+bean.getSampleName()+"）.zip";
         try {
+            response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(fileName, "UTF-8"));
             OutputStream outputStream = response.getOutputStream();
             outputStream.write(bytes);
             outputStream.close();

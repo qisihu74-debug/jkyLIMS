@@ -313,4 +313,11 @@ public interface ReportService {
      * @return
      */
     Boolean uploadReport(String reportCode, MultipartFile file, String verifyer, String issuer,Long verifyerId, Long issuerId,String code);
+
+    /**
+     * 根据委托单id查询报告编号和名称
+     * @param entrustId
+     * @return
+     */
+    ReportRecordEntity getDetailByEntrustId(Long entrustId);
 }
