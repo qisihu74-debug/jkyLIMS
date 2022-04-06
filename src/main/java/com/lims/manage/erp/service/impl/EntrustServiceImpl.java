@@ -237,6 +237,14 @@ public class EntrustServiceImpl implements EntrustService {
         if (entityMapper.getByData(basisInfo.getEntrustmentNo()) != null) {
             return false;
         }
+        // 通过样品ID 查询委托单信息和样品Id 绑定关系 （==null 正常，!=null false）
+        if (!CollectionUtils.isEmpty(vo.getSamples())) {
+            for (SampleEntity sampleEntity : vo.getSamples()) {
+                if (entityMapper.getEntrustIdBySampleId(sampleEntity.getId()) != null) {
+                    return false;
+                }
+            }
+        }
         //附件存在上传附件到服务器
         if (file != null) {
             StringBuilder stringBuilder = new StringBuilder();

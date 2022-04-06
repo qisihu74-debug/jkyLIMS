@@ -174,6 +174,19 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
          * 获取任务单详情
          */
         TaskDetailInfoVo taskDetailInfoVo = reportApprovalMapper.getTaskDetail(id);
+        // 获取印章数据以 数组形式呈现
+        String[] sealTypeArray = new String[3];
+        // 1、优先考虑报告印章 呈现
+        if(taskDetailInfoVo.getSealType()!=null){
+            sealTypeArray = taskDetailInfoVo.getSealType().split(",");
+        }else {
+            // 2、考虑委托单印章 呈现
+            if(taskDetailInfoVo.getSealTypeTicket()!=null){
+                sealTypeArray = taskDetailInfoVo.getSealTypeTicket().split(",");
+            }
+        }
+        taskDetailInfoVo.setSealTypeArray(sealTypeArray);
+
         if (taskDetailInfoVo == null) {
             return new TaskDetailInfoVo(id);
         }
@@ -239,7 +252,13 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         // 报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
         Integer state = 0;
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
-        reportApprovalVo.setSealType(reportApprovalVo1.getSealType());
+        // 处理印章数组 解析成 字符串,
+        StringBuilder stringBuilder = new StringBuilder();
+        for(int i=0;i<reportApprovalVo1.getSealTypeArray().length;i++){
+            stringBuilder.append(reportApprovalVo1.getSealTypeArray()[i]);
+            stringBuilder.append(",");
+        }
+        reportApprovalVo.setSealType(stringBuilder.deleteCharAt(stringBuilder.toString().length()-1).toString());
         if (reportApprovalVo1.getState() == 0) {
             //通过6已签
             state = 6;
@@ -272,7 +291,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 
     @Override
     public Boolean verify_data_two(ReportApprovalVo reportApprovalVo1) {
-        //        0是通过 1 是驳回
+        //      state  0是通过 1 是驳回
         // 报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
         Integer state = 0;
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
@@ -282,7 +301,13 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             state = 6;
             reportApprovalVo.setIssuerTime(new Date());
             reportApprovalVo.setIssuer(reportApprovalVo1.getIssuer());
-            reportApprovalVo.setSealType(reportApprovalVo1.getSealType());
+            // 印章数据 转成字符串
+            StringBuilder stringBuilder = new StringBuilder();
+            for(int i=0;i<reportApprovalVo1.getSealTypeArray().length;i++){
+                stringBuilder.append(reportApprovalVo1.getSealTypeArray()[i]);
+                stringBuilder.append(",");
+            }
+            reportApprovalVo.setSealType(stringBuilder.deleteCharAt(stringBuilder.toString().length()-1).toString());
 
             // 根据任务单主键 获取委托单主键 更改委托单状态
             EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(reportApprovalVo1.getId());

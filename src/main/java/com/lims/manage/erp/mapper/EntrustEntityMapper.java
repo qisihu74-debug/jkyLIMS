@@ -37,6 +37,8 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     EntrustAddVo getByData(Integer code);
 
+
+
     /**
      * 保存委托单下样品信息
      * @param list

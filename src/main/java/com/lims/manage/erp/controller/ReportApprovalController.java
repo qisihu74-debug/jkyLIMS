@@ -281,7 +281,7 @@ public class ReportApprovalController {
     }
 
     /**
-     * 签发抢单
+     * 签发抢单 废弃
      *
      * @param reportApprovalVo1
      * @return
@@ -349,7 +349,7 @@ public class ReportApprovalController {
             return ResultUtil.error(678, "审批信息有误");
         }
         if (reportApprovalVo1.getState() == 0) {
-            if (reportApprovalVo1.getSealType() == null || reportApprovalVo1.getSealType().equals("")) {
+            if (reportApprovalVo1.getSealTypeArray() == null || reportApprovalVo1.getSealTypeArray().length<=0) {
                 return ResultUtil.error(678, "印章不能为空");
             }
         }
@@ -406,7 +406,7 @@ public class ReportApprovalController {
             return ResultUtil.error(678, "审批信息有误");
         }
         if (reportApprovalVo1.getState() == 0) {
-            if (reportApprovalVo1.getSealType() == null || reportApprovalVo1.getSealType().equals("")) {
+            if (reportApprovalVo1.getSealTypeArray() == null || reportApprovalVo1.getSealTypeArray().length==0) {
                 return ResultUtil.error(678, "印章不能为空");
             }
         }
