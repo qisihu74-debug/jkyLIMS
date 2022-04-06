@@ -5,6 +5,7 @@ import com.lims.manage.erp.entity.TestChItemInstrumentMiddleEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -62,6 +63,17 @@ public interface TestDetectionDao {
      *
      */
     SampleItemInstrumentEntity getTestEntrustedSampleCheckitemRelDetail(Integer id);
+    /**
+     * 通过委托单id 和部门ID为条件  遍历（判断每个状态 state = 3）
+     */
+    @Select("SELECT\n" +
+            "\tstate \n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel \n" +
+            "WHERE\n" +
+            "\tentrust_id = #{entrustId} \n" +
+            "\tAND dept_id = #{deptId}")
+    List<Integer> getSampleCheckitemRelDetailState(Long entrustId,Integer deptId);
     /**
      * 实验完成-依据检测项主键 展示 所属仪器列表
      */

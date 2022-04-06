@@ -407,6 +407,13 @@ public class TaskController {
 
     }
 
+    /**
+     * 驳回=4，通过=3，撤回=1
+     * @param itemId
+     * @param state
+     * @param opinion
+     * @return
+     */
     @RequestMapping("/passorno")
     public Result passorno(Integer itemId, Integer state, String opinion) {
         if (itemId == null || state == null) {

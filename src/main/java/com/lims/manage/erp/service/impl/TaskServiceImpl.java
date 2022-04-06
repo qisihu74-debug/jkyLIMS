@@ -624,6 +624,7 @@ public class TaskServiceImpl implements TaskService {
             }
             if (state == 3) {
                 // 检测项复核通过
+                taskMapper.updateState(itemId, 3, opinion);
                 SampleItemInstrumentEntity sampleItemInstrumentEntity2 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
                 if (sampleItemInstrumentEntity2 != null && sampleItemInstrumentEntity2.getEntrustId() != null) {
                     EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(sampleItemInstrumentEntity2.getEntrustId());
@@ -631,8 +632,23 @@ public class TaskServiceImpl implements TaskService {
                         taskMapper.updateEntrustById(entrustBaseInfo.getId(), 6);
                     }
                 }
+                // 通过委托单id 和部门ID为条件  遍历（判断每个状态 state = 3 复核通过。 改变任务单 6 否则 任务单还是为试验完成）
+                List<Integer> states = testDetectionDao.getSampleCheckitemRelDetailState(sampleItemInstrumentEntity2.getEntrustId(), sampleItemInstrumentEntity2.getDeptId());
+                for(Integer stateItem : states){
+                    if(stateItem!=3){
+                        return "当前任务单下检测项未全部复核成功";
+                    }
+                }
+                // 修改test_task state 状态 为6：
+               Long testTaskId =  taskMapper.getTestTaskId(sampleItemInstrumentEntity2.getEntrustId(),sampleItemInstrumentEntity2.getDeptId());
+                TaskTestEntity taskTestEntity = new TaskTestEntity();
+                taskTestEntity.setId(testTaskId);
+                taskTestEntity.setState(6);
+                taskMapper.updateTestTask(taskTestEntity);
+                return "任务单复核成功";
             }
         }
+        // state = 4 检测项状态驳回
         int status = taskMapper.updateState(itemId, state, opinion);
         if (status > 0) {
             return "成功";

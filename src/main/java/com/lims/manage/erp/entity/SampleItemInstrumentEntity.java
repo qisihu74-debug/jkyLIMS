@@ -47,4 +47,9 @@ public class SampleItemInstrumentEntity extends SampleItemEntity{
      */
     private String itemFileName;
 
+    /**
+     * 部门id
+     */
+    private Integer deptId;
+
 }

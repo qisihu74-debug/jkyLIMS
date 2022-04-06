@@ -274,6 +274,20 @@ public interface TaskMapper extends BaseMapper {
     @Select("select entrustment_id from test_task where id = #{id}")
     Long getEntrustIdByTaskId(@Param("id") Long id);
 
+    /**
+     * 根据委托单id 和 deptId 获取任务单id
+     * @param
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid \n" +
+            "FROM\n" +
+            "\ttest_task \n" +
+            "WHERE\n" +
+            "\tentrustment_id = #{id} \n" +
+            "\tAND dept_id = #{deptId}")
+    Long getTestTaskId(@Param("id") Long id,@Param("deptId") Integer deptId);
+
     int batchUpdateCheckItem(@Param("list") List<CheckItemDeptVo> list);
 
     /**
