@@ -173,4 +173,10 @@ public interface EntrustService {
      * @return
      */
     String findStateBySampleId(int sampleId, EntrustEntityMapper mapper,TaskMapper taskMapper);
+
+    /**
+     * 获取委托单模板信息
+     * @return
+     */
+    String getMessage();
 }

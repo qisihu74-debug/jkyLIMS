@@ -423,19 +423,21 @@ public class EntrustController {
      */
     @RequestMapping("downloadEntrust")
     public void downloadEntrust(Long entrustId, HttpServletResponse response) {
-        String fileName = "BD20210021.docx";
+        String message = entrustService.getMessage();
+        String[] strings = message.split("/");
+        String fileName = strings[1];
         try {
             MinioClient client = MinIoUtil.minioClient;
-            InputStream object = client.getObject(BucketsConst.buckets_entrust_template, fileName);
+            InputStream object = client.getObject(strings[0], fileName);
             //填充数据
             EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
+            log.debug("====aaa:{}",JSON.toJSONString(detail));
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
             response.reset();
             response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            fileName = URLEncoder.encode(fileName, "UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
+            response.setHeader("Content-Disposition", "attachment;fileName=" + detail.getEntrustmentNo()+".docx");
             OutputStream outputStream = response.getOutputStream();
             document.write(outputStream);
             outputStream.close();

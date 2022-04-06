@@ -1238,7 +1238,7 @@ public class EntrustServiceImpl implements EntrustService {
                 rows.get(sampleIndex).getTableCells().get(index + 3).setText(samples.get(i).getSampleQuantity());//样品数量
                 rows.get(sampleIndex).getTableCells().get(index + 4).setText(samples.get(i).getGeneration());//代表批量
                 rows.get(sampleIndex).getTableCells().get(index + 5).setText(samples.get(i).getManufacturer());//样品产地/生产厂家
-                rows.get(sampleIndex).getTableCells().get(index + 6).setText(samples.get(i).getRemark());//样品备注
+                rows.get(sampleIndex).getTableCells().get(index + 6).setText(samples.get(i).getSampleRemark());//样品备注
                 sampleIndex = sampleIndex + 1;
             }
             //设置其它信息
@@ -1261,16 +1261,19 @@ public class EntrustServiceImpl implements EntrustService {
                 for (SampleEntity entity : samples) {
                     List<JudgmentBasisVo> sampleCheckItem = entity.getJudgmentBasisVos();
                     for (JudgmentBasisVo itemEntity : sampleCheckItem) {
-                        String name = itemEntity.getCheckItemName();
-                        stringBuilder1.append(name);
-                        if (!StringUtils.isEmpty(itemEntity.getStandardName())){
-                            stringBuilder1.append("（");
-                            String s = itemEntity.getStandardName();
-                            String aa = s.split("《")[0];
-                            stringBuilder1.append(aa);
-                            stringBuilder1.append("）");
+                        //价钱为null的不展示
+                        if (itemEntity.getCheckPrice() != null){
+                            String name = itemEntity.getCheckItemName();
+                            stringBuilder1.append(name);
+                            if (!StringUtils.isEmpty(itemEntity.getStandardName())){
+                                stringBuilder1.append("（");
+                                String s = itemEntity.getStandardName();
+                                String aa = s.split("《")[0];
+                                stringBuilder1.append(aa);
+                                stringBuilder1.append("）");
+                            }
+                            stringBuilder1.append("，");
                         }
-                        stringBuilder1.append("，");
                     }
                 }
                 String substring = stringBuilder1.toString().substring(0, stringBuilder1.length() - 1);
@@ -1371,6 +1374,11 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         return state;
+    }
+
+    @Override
+    public String getMessage() {
+        return entityMapper.getMessage();
     }
 
 }
