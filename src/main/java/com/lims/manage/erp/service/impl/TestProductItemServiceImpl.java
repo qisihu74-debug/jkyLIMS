@@ -42,7 +42,7 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
     private TestProductItemStandardFileRelService testProductItemStandardFileRelService;
     /*检测设备*/
     @Resource
-    private TestInstrumentTypeService typeService;
+    private TestInstrumentService typeService;
     /*检测设备关联*/
     @Resource
     private TestProductItemInstrumentTypeRelService testProductItemInstrumentTypeRelService;
@@ -73,9 +73,6 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                 if (testProductItemParamVo.getTestProductItem().getCheckItemName()==null){
                     return ResultUtil.error("检测项目名称不能为空");
                 }
-                /*if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).eq("del_flag",0).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
-                    return ResultUtil.error("检测项名称重复");
-                }*/
                 if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).eq("del_flag",0).eq("check_item_pid",testProductItemParamVo.getTestProductItem().getCheckItemPid()).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
                     return ResultUtil.error("同层检测项名称不能重复");
                 }
