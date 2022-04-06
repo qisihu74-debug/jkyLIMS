@@ -159,7 +159,7 @@ public interface ReportRecordEntityMapper {
      * @param contractId
      * @param state
      */
-    @Update("update test_report_record set qys_state=#{state} where contract_id=#{contractId}")
+    @Update("update test_report_record set qys_state=#{state},state='7' where contract_id=#{contractId}")
     void updateFileState(@Param("contractId") Long contractId, @Param("state") String state);
 
     /**

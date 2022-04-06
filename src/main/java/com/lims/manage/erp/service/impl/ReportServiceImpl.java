@@ -911,9 +911,9 @@ public class ReportServiceImpl implements ReportService {
         if (file == null){
             //下载模板填充数据
             MinioClient client = MinIoUtil.minioClient;
-            Long entrustId = reportMapper.getMessageByCode(reportCode);
+            //Long entrustId = reportMapper.getMessageByCode(reportCode);
             try {
-                this.downLoad(client,code,entrustId);
+                this.downLoad(client,code,Long.parseLong(reportCode));
                 return true;
             }catch (Exception e){
                 logger.error("提交报告审批失败:{}",e);
@@ -932,6 +932,11 @@ public class ReportServiceImpl implements ReportService {
                 return false;
             }
         }
+    }
+
+    @Override
+    public ReportRecordEntity getDetailByEntrustId(Long entrustId) {
+        return reportMapper.getDetailByEntrustId(entrustId);
     }
 
     public String downLoadNew(MinioClient client, String code, Long id, List<Long> checkIds) throws Exception {
