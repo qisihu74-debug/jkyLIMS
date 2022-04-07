@@ -547,7 +547,9 @@
     </select>
 
     <select id="getJudgeBasis" resultType="java.lang.String">
-        SELECT CONCAT(t2.CODE, "《", t2.`name`, "》")
+        SELECT
+--          CONCAT(t2.CODE, "《", t2.`name`, "》")
+        t2.CODE
         FROM (SELECT standard_id
               FROM test_entrusted_sample_standard_rel
               WHERE sample_id = #{sampleId}
