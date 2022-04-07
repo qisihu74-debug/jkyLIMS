@@ -22,4 +22,11 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      * @return
      */
     PageInfo querySampleList(TestSampleEntity sampleEntity);
+
+    /**
+     * 根据ID查询样品详情
+     * @param id
+     * @return
+     */
+    TestSampleEntity sampleDetail(Integer id);
 }

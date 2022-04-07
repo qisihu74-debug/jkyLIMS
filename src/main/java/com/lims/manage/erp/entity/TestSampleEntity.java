@@ -97,7 +97,7 @@ public class TestSampleEntity {
         this.receivedDate = new SimpleDateFormat("yyyy-MM-dd").format(vo.getReceivedDate());
         this.sampleRequirement = vo.getSampleRequirement();
         this.generation = vo.getGeneration();
-        this.state = state;
+        this.state = 0+"";
         this.productId = vo.getProductId();
         this.outwardDescribe = vo.getOutwardDescribe();
         this.isUse = 0;

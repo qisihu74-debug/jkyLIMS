@@ -23,11 +23,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -227,12 +223,30 @@ public class SampleController {
         }
     }
 
+    /**
+     * 样品查询打印列表
+     * @param sampleEntity
+     * @return
+     */
     @RequestMapping("/querySampleList")
     public Result querySampleList(@RequestBody TestSampleEntity sampleEntity) {
         if (sampleEntity.getPageNum() == null || sampleEntity.getPageSize() == null) {
             return ResultUtil.error("缺少分页参数！");
         }
         return ResultUtil.success(testSampleEntityService.querySampleList(sampleEntity));
+    }
+
+    /**
+     * 查询样品详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/sampleDetail")
+    public Result sampleDetail(Integer id) {
+        if (id == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        return ResultUtil.success(testSampleEntityService.sampleDetail(id));
     }
 
 }

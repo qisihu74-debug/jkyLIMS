@@ -68,4 +68,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
         return pageInfo;
     }
+
+    @Override
+    public TestSampleEntity sampleDetail(Integer id) {
+        return testSampleEntityMapper.selectByPrimaryKey(id);
+    }
 }

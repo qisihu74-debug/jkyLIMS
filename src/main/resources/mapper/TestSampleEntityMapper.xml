@@ -78,7 +78,7 @@
     <sql id="Blob_Column_List">
         picture
     </sql>
-    <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer">
+    <select id="selectByPrimaryKey" resultType="com.lims.manage.erp.entity.TestSampleEntity" parameterType="java.lang.Integer">
         select
         <include refid="Base_Column_List"/>
         ,
@@ -473,30 +473,39 @@
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.companyId,jdbcType=INTEGER}, #{entity.sampleName,jdbcType=CHAR},
-            #{entity.sampleCode,jdbcType=VARCHAR}, #{entity.specs,jdbcType=VARCHAR}, #{entity.batchNumber,jdbcType=VARCHAR},
-            #{entity.manufacturer,jdbcType=VARCHAR}, #{entity.sampleOrigin,jdbcType=VARCHAR}, #{entity.outward,jdbcType=VARCHAR},
-            #{entity.savePlace,jdbcType=VARCHAR}, #{entity.admin,jdbcType=VARCHAR}, #{entity.sampleGroups,jdbcType=INTEGER},
-            #{entity.quantityPerGroup,jdbcType=INTEGER}, #{entity.inspector,jdbcType=VARCHAR}, #{entity.receivedDate,jdbcType=VARCHAR},
-            #{entity.sampleRequirement,jdbcType=VARCHAR}, #{entity.generation,jdbcType=VARCHAR}, #{entity.state,jdbcType=VARCHAR},
+            #{entity.sampleCode,jdbcType=VARCHAR}, #{entity.specs,jdbcType=VARCHAR},
+            #{entity.batchNumber,jdbcType=VARCHAR},
+            #{entity.manufacturer,jdbcType=VARCHAR}, #{entity.sampleOrigin,jdbcType=VARCHAR},
+            #{entity.outward,jdbcType=VARCHAR},
+            #{entity.savePlace,jdbcType=VARCHAR}, #{entity.admin,jdbcType=VARCHAR},
+            #{entity.sampleGroups,jdbcType=INTEGER},
+            #{entity.quantityPerGroup,jdbcType=INTEGER}, #{entity.inspector,jdbcType=VARCHAR},
+            #{entity.receivedDate,jdbcType=VARCHAR},
+            #{entity.sampleRequirement,jdbcType=VARCHAR}, #{entity.generation,jdbcType=VARCHAR},
+            #{entity.state,jdbcType=VARCHAR},
             #{entity.checkDate,jdbcType=TIMESTAMP}, #{entity.remark,jdbcType=VARCHAR}, #{entity.file,jdbcType=VARCHAR},
-            #{entity.productId,jdbcType=INTEGER}, #{entity.outwardDescribe,jdbcType=VARCHAR}, #{entity.insertFlag,jdbcType=VARCHAR},
-            #{entity.isUse,jdbcType=INTEGER}, #{entity.sampleQuantity,jdbcType=VARCHAR}, #{entity.aliasName,jdbcType=VARCHAR},
-            #{entity.sampleType,jdbcType=VARCHAR}, #{entity.sampleRemark,jdbcType=VARCHAR}, #{entity.picture,jdbcType=LONGVARCHAR})
+            #{entity.productId,jdbcType=INTEGER}, #{entity.outwardDescribe,jdbcType=VARCHAR},
+            #{entity.insertFlag,jdbcType=VARCHAR},
+            #{entity.isUse,jdbcType=INTEGER}, #{entity.sampleQuantity,jdbcType=VARCHAR},
+            #{entity.aliasName,jdbcType=VARCHAR},
+            #{entity.sampleType,jdbcType=VARCHAR}, #{entity.sampleRemark,jdbcType=VARCHAR},
+            #{entity.picture,jdbcType=LONGVARCHAR})
         </foreach>
     </insert>
 
-    <select id="getSimpleList" parameterType="com.lims.manage.erp.entity.TestSampleEntity" resultType="com.lims.manage.erp.vo.SampleSimpleListVo">
+    <select id="getSimpleList" parameterType="com.lims.manage.erp.entity.TestSampleEntity"
+            resultType="com.lims.manage.erp.vo.SampleSimpleListVo">
         SELECT
-            id,
-            sample_name,
-            sample_code,
-            manufacturer,
-            specs,
-            inspector,
-            generation,
-            received_date
+        id,
+        sample_name,
+        sample_code,
+        manufacturer,
+        specs,
+        inspector,
+        generation,
+        received_date
         FROM
-            test_sample
+        test_sample
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
             is_use = 0
             <if test="sampleName!=null and sampleName!=''">
