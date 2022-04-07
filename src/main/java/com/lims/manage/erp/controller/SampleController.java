@@ -9,8 +9,10 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ProductService;
 import com.lims.manage.erp.service.SampleService;
+import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.SampleAddParamVo;
+import com.lims.manage.erp.vo.SampleDetailAddVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
@@ -31,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -43,6 +46,8 @@ public class SampleController {
     private SampleService sampleService;
     @Autowired
     private ProductService productService;
+    @Autowired
+    private TestSampleEntityService testSampleEntityService;
 
     /**
      * 新增样品
@@ -196,6 +201,21 @@ public class SampleController {
             return ResultUtil.success(productService.getAllItemByProductId(productId));
         }
     }
+    //---------------------------------------2022年4月6日样品管理修改-----------------------------------------------
 
+    /**
+     * 样品管理--样品签收--新增样品
+     * @param samples
+     * @return
+     */
+    @RequestMapping(value = "/addSamples", method = RequestMethod.POST)
+    public Result addSamples(@RequestBody List<SampleDetailAddVo> samples) {
+        System.out.println("样品数量："+samples.size());
+        for (int i = 0; i < samples.size(); i++) {
+            System.out.println(samples.get(i).toString());
+        }
+        testSampleEntityService.batchInsertSample(samples);
+        return null;
+    }
 
 }
