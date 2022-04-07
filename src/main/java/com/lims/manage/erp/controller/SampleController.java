@@ -3,6 +3,7 @@ package com.lims.manage.erp.controller;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -224,6 +225,14 @@ public class SampleController {
                 return ResultUtil.error("添加样品失败，请联系管理员！");
             }
         }
+    }
+
+    @RequestMapping("/querySampleList")
+    public Result querySampleList(@RequestBody TestSampleEntity sampleEntity) {
+        if (sampleEntity.getPageNum() == null || sampleEntity.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success(testSampleEntityService.querySampleList(sampleEntity));
     }
 
 }

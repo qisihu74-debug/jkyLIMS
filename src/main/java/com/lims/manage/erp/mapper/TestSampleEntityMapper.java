@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.vo.SampleSimpleListVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -32,4 +33,11 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
      * @return
      */
     int insertBatch(@Param("entities") List<TestSampleEntity> entities);
+
+    /**
+     * 样品查询/打印列表
+     * @param entity
+     * @return
+     */
+    List<SampleSimpleListVo> getSimpleList(TestSampleEntity entity);
 }

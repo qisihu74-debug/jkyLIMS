@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
 import lombok.Data;
@@ -69,6 +70,16 @@ public class TestSampleEntity {
     private String sampleRemark;
 
     private String picture;
+
+    @TableField(exist = false)
+    private Integer pageNum;
+    @TableField(exist = false)
+    private Integer pageSize;
+    @TableField(exist = false)
+    private String beginDate;
+    @TableField(exist = false)
+    private String endDate;
+
 
     public TestSampleEntity() {
     }
