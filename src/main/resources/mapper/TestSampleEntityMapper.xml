@@ -460,7 +460,7 @@
     </update>
 
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into test_sample (id, company_id, sample_name,
+        insert into test_sample (company_id, sample_name,
         sample_code, specs, batch_number,
         manufacturer, sample_origin, outward,
         save_place, admin, sample_groups,
@@ -472,16 +472,16 @@
         sample_type, sample_remark, picture)
         values
         <foreach collection="entities" item="entity" separator=",">
-            (#{id,jdbcType=INTEGER}, #{companyId,jdbcType=INTEGER}, #{sampleName,jdbcType=CHAR},
-            #{sampleCode,jdbcType=VARCHAR}, #{specs,jdbcType=VARCHAR}, #{batchNumber,jdbcType=VARCHAR},
-            #{manufacturer,jdbcType=VARCHAR}, #{sampleOrigin,jdbcType=VARCHAR}, #{outward,jdbcType=VARCHAR},
-            #{savePlace,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR}, #{sampleGroups,jdbcType=INTEGER},
-            #{quantityPerGroup,jdbcType=INTEGER}, #{inspector,jdbcType=VARCHAR}, #{receivedDate,jdbcType=VARCHAR},
-            #{sampleRequirement,jdbcType=VARCHAR}, #{generation,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR},
-            #{checkDate,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR}, #{file,jdbcType=VARCHAR},
-            #{productId,jdbcType=INTEGER}, #{outwardDescribe,jdbcType=VARCHAR}, #{insertFlag,jdbcType=VARCHAR},
-            #{isUse,jdbcType=INTEGER}, #{sampleQuantity,jdbcType=VARCHAR}, #{aliasName,jdbcType=VARCHAR},
-            #{sampleType,jdbcType=VARCHAR}, #{sampleRemark,jdbcType=VARCHAR}, #{picture,jdbcType=LONGVARCHAR})
+            (#{entity.companyId,jdbcType=INTEGER}, #{entity.sampleName,jdbcType=CHAR},
+            #{entity.sampleCode,jdbcType=VARCHAR}, #{entity.specs,jdbcType=VARCHAR}, #{entity.batchNumber,jdbcType=VARCHAR},
+            #{entity.manufacturer,jdbcType=VARCHAR}, #{entity.sampleOrigin,jdbcType=VARCHAR}, #{entity.outward,jdbcType=VARCHAR},
+            #{entity.savePlace,jdbcType=VARCHAR}, #{entity.admin,jdbcType=VARCHAR}, #{entity.sampleGroups,jdbcType=INTEGER},
+            #{entity.quantityPerGroup,jdbcType=INTEGER}, #{entity.inspector,jdbcType=VARCHAR}, #{entity.receivedDate,jdbcType=VARCHAR},
+            #{entity.sampleRequirement,jdbcType=VARCHAR}, #{entity.generation,jdbcType=VARCHAR}, #{entity.state,jdbcType=VARCHAR},
+            #{entity.checkDate,jdbcType=TIMESTAMP}, #{entity.remark,jdbcType=VARCHAR}, #{entity.file,jdbcType=VARCHAR},
+            #{entity.productId,jdbcType=INTEGER}, #{entity.outwardDescribe,jdbcType=VARCHAR}, #{entity.insertFlag,jdbcType=VARCHAR},
+            #{entity.isUse,jdbcType=INTEGER}, #{entity.sampleQuantity,jdbcType=VARCHAR}, #{entity.aliasName,jdbcType=VARCHAR},
+            #{entity.sampleType,jdbcType=VARCHAR}, #{entity.sampleRemark,jdbcType=VARCHAR}, #{entity.picture,jdbcType=LONGVARCHAR})
         </foreach>
     </insert>
 </mapper>

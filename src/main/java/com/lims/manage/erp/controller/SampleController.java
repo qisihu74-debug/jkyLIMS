@@ -14,6 +14,7 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.SamplesAddVo;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -209,12 +210,12 @@ public class SampleController {
      * @return
      */
     @RequestMapping(value = "/addSamples", method = RequestMethod.POST)
-    public Result addSamples(@RequestBody List<SampleDetailAddVo> samples) {
-        System.out.println("样品数量："+samples.size());
-        for (int i = 0; i < samples.size(); i++) {
-            System.out.println(samples.get(i).toString());
+    public Result addSamples(@RequestBody SamplesAddVo samples) {
+        System.out.println("样品数量："+samples.getSamples().size());
+        for (int i = 0; i < samples.getSamples().size(); i++) {
+            System.out.println(samples.getSamples().get(i).toString());
         }
-        testSampleEntityService.batchInsertSample(samples);
+        testSampleEntityService.batchInsertSample(samples.getSamples());
         return null;
     }
 

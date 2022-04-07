@@ -2,6 +2,9 @@ package com.lims.manage.erp.vo;
 
 import lombok.Data;
 
+import java.util.Date;
+import java.util.List;
+
 @Data
 public class SampleDetailAddVo {
     private String key;
@@ -10,7 +13,7 @@ public class SampleDetailAddVo {
      */
     private String productName;
     /**
-     *产品ID
+     * 产品ID
      */
     private Integer productId;
     /**
@@ -18,23 +21,23 @@ public class SampleDetailAddVo {
      */
     private String aliasName;
     /**
-     *委托单位
+     * 委托单位
      */
     private Integer companyId;
     /**
-     *样品产地
+     * 样品产地
      */
     private String sampleOrigin;
     /**
-     *生产厂家
+     * 生产厂家
      */
     private String manufacturer;
     /**
-     *规格/等级
+     * 规格/等级
      */
     private String specs;
     /**
-     *代表批量
+     * 代表批量
      */
     private String generation;
     /**
@@ -42,11 +45,11 @@ public class SampleDetailAddVo {
      */
     private String sampleQuantity;
     /**
-     * 样品数量单位
+     * 每组样品数量
      */
-    private String sampleQuantityUnit;
+    private String quantityPerGroup;
     /**
-     *批号编号
+     * 批号编号
      */
     private String batchNumber;
     /**
@@ -60,7 +63,7 @@ public class SampleDetailAddVo {
     /**
      * 收样时间
      */
-    private String receivedDate;
+    private Date receivedDate;
     /**
      * 样品要求
      */
@@ -72,7 +75,7 @@ public class SampleDetailAddVo {
     /**
      * 外观
      */
-    private String outward;
+    private List<String> outward;
     /**
      * 样品类型：做原材检测还是配合比检测
      */

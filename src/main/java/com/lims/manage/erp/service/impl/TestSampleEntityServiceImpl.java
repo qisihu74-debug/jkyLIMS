@@ -52,7 +52,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             System.out.println(entities.get(i).toString());
         }
 
-//        int i = testSampleEntityMapper.insertBatch(entities);
+        int i = testSampleEntityMapper.insertBatch(entities);
         return null;
     }
 }

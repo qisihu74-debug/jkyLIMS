@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
 import lombok.Data;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Data
@@ -80,16 +81,16 @@ public class TestSampleEntity {
         this.batchNumber = vo.getBatchNumber();
         this.manufacturer = vo.getManufacturer();
         this.sampleOrigin = vo.getSampleOrigin();
-        this.outward = vo.getOutward();
+        this.outward = vo.getOutward().toString();
         this.inspector = vo.getInspector();
-        this.receivedDate = vo.getReceivedDate();
+        this.receivedDate = new SimpleDateFormat("yyyy-MM-dd").format(vo.getReceivedDate());
         this.sampleRequirement = vo.getSampleRequirement();
         this.generation = vo.getGeneration();
         this.state = state;
         this.productId = vo.getProductId();
         this.outwardDescribe = vo.getOutwardDescribe();
         this.isUse = 0;
-        this.sampleQuantity = vo.getSampleQuantity();
+        this.sampleQuantity = vo.getQuantityPerGroup();
         this.aliasName = vo.getAliasName();
         this.sampleType = vo.getSampleType();
         this.sampleRemark = vo.getSampleRemark();
