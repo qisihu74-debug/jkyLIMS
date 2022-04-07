@@ -215,9 +215,9 @@ public class SampleController {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             Integer integer = testSampleEntityService.batchInsertSample(samples.getSamples());
-            if(integer>0){
+            if (integer > 0) {
                 return ResultUtil.success("添加样品成功！", integer);
-            }else{
+            } else {
                 return ResultUtil.error("添加样品失败，请联系管理员！");
             }
         }
@@ -225,6 +225,7 @@ public class SampleController {
 
     /**
      * 样品查询打印列表
+     *
      * @param sampleEntity
      * @return
      */
@@ -238,6 +239,7 @@ public class SampleController {
 
     /**
      * 查询样品详情
+     *
      * @param id
      * @return
      */
@@ -247,6 +249,25 @@ public class SampleController {
             return ResultUtil.error("缺少必要参数！");
         }
         return ResultUtil.success(testSampleEntityService.sampleDetail(id));
+    }
+
+    /**
+     * 样品修改
+     *
+     * @param sampleEntity
+     * @return
+     */
+    @RequestMapping("/updateSampleInfo")
+    public Result updateSample(@RequestBody TestSampleEntity sampleEntity) {
+        if (sampleEntity == null || sampleEntity.getId() == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        int i = testSampleEntityService.updateSample(sampleEntity);
+        if (i > 1) {
+            return ResultUtil.success("样品信息修改成功！", i);
+        } else {
+            return ResultUtil.error("样品信息修改失败！");
+        }
     }
 
 }

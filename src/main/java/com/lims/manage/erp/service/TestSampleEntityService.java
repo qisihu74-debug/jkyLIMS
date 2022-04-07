@@ -29,4 +29,11 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      * @return
      */
     TestSampleEntity sampleDetail(Integer id);
+
+    /**
+     * 更新样品信息
+     * @param sampleEntity
+     * @return
+     */
+    int updateSample(TestSampleEntity sampleEntity);
 }

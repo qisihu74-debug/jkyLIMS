@@ -73,4 +73,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     public TestSampleEntity sampleDetail(Integer id) {
         return testSampleEntityMapper.selectByPrimaryKey(id);
     }
+
+    @Override
+    public int updateSample(TestSampleEntity sampleEntity) {
+        return testSampleEntityMapper.updateByPrimaryKeyNotAll(sampleEntity);
+    }
 }

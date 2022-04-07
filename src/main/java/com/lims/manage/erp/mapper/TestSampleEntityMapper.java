@@ -26,6 +26,8 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
 
     int updateByPrimaryKey(TestSampleEntity record);
 
+    int updateByPrimaryKeyNotAll(TestSampleEntity record);
+
     /**
      * 批量新增样品
      *

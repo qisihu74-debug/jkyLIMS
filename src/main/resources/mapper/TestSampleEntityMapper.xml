@@ -458,6 +458,21 @@
             sample_remark      = #{sampleRemark,jdbcType=VARCHAR}
         where id = #{id,jdbcType=INTEGER}
     </update>
+    <update id="updateByPrimaryKeyNotAll" parameterType="com.lims.manage.erp.entity.TestSampleEntity">
+        update test_sample
+        set
+            specs              = #{specs,jdbcType=VARCHAR},
+            batch_number       = #{batchNumber,jdbcType=VARCHAR},
+            manufacturer       = #{manufacturer,jdbcType=VARCHAR},
+            sample_origin      = #{sampleOrigin,jdbcType=VARCHAR},
+            outward            = #{outward,jdbcType=VARCHAR},
+            received_date      = #{receivedDate,jdbcType=VARCHAR},
+            generation         = #{generation,jdbcType=VARCHAR},
+            outward_describe   = #{outwardDescribe,jdbcType=VARCHAR},
+            alias_name         = #{aliasName,jdbcType=VARCHAR},
+            sample_remark      = #{sampleRemark,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
 
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
         insert into test_sample (company_id, sample_name,
