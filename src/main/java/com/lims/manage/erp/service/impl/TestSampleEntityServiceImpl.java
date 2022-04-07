@@ -23,7 +23,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     private SampleEntityMapper sampleEntityMapper;
 
     @Override
-    public String batchInsertSample(List<SampleDetailAddVo> samples) {
+    public Integer batchInsertSample(List<SampleDetailAddVo> samples) {
         List<TestSampleEntity> entities = Lists.newArrayList();
         //获取数据库当前年份最大的样品编号
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -48,11 +48,6 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             TestSampleEntity entity = new TestSampleEntity(samples.get(i), sampleCode);
             entities.add(entity);
         }
-        for (int i = 0; i < entities.size(); i++) {
-            System.out.println(entities.get(i).toString());
-        }
-
-        int i = testSampleEntityMapper.insertBatch(entities);
-        return null;
+        return testSampleEntityMapper.insertBatch(entities);
     }
 }

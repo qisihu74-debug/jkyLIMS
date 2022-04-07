@@ -21,6 +21,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -60,7 +61,7 @@ public class SampleController {
     @RequestMapping(value = "/addSample", method = RequestMethod.POST)
     public Result getAddSampleData(@RequestParam("json") String json, MultipartFile[] file) {
         SampleAddParamVo samples = JSON.parseObject(json, SampleAddParamVo.class);
-        log.debug("样品新增参数:{}",json);
+        log.debug("样品新增参数:{}", json);
         if (samples == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
@@ -86,6 +87,7 @@ public class SampleController {
 
     /**
      * 查询样品信息列表--分页
+     *
      * @param paramVo
      * @return
      */
@@ -175,7 +177,7 @@ public class SampleController {
         try {
             workbook = transformer.transformXLS(fileStream, result);
             response.reset();
-            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             String fileName2 = URLEncoder.encode(fileName.toString(), "UTF-8");
@@ -206,17 +208,22 @@ public class SampleController {
 
     /**
      * 样品管理--样品签收--新增样品
+     *
      * @param samples
      * @return
      */
     @RequestMapping(value = "/addSamples", method = RequestMethod.POST)
     public Result addSamples(@RequestBody SamplesAddVo samples) {
-        System.out.println("样品数量："+samples.getSamples().size());
-        for (int i = 0; i < samples.getSamples().size(); i++) {
-            System.out.println(samples.getSamples().get(i).toString());
+        if (samples == null || CollectionUtils.isEmpty(samples.getSamples())) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            Integer integer = testSampleEntityService.batchInsertSample(samples.getSamples());
+            if(integer>0){
+                return ResultUtil.success("添加样品成功！", integer);
+            }else{
+                return ResultUtil.error("添加样品失败，请联系管理员！");
+            }
         }
-        testSampleEntityService.batchInsertSample(samples.getSamples());
-        return null;
     }
 
 }

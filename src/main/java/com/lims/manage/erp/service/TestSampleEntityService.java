@@ -12,5 +12,5 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      * @param samples
      * @return
      */
-    String batchInsertSample(List<SampleDetailAddVo> samples);
+    Integer batchInsertSample(List<SampleDetailAddVo> samples);
 }
