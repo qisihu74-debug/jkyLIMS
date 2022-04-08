@@ -106,10 +106,10 @@ public interface ReportMapper {
      * @param url
      */
     @Update("update test_report_record set report_url=#{url},verifyer=#{verifyer},issuer=#{issuer}," +
-            "verifyer_id=#{verifyerId},issuer_id=#{issuerId},report_complete_time=#{now},state='3' where entrustment_id=#{entrustId}")
+            "verifyer_id=#{verifyerId},issuer_id=#{issuerId},report_complete_time=#{now},state='3',applicant=#{applicant} where entrustment_id=#{entrustId}")
     void updateUrl(@Param("entrustId") String reportCode, @Param("url") String url,
                    @Param("verifyer") String verifyer, @Param("issuer") String issuer,
-                   @Param("verifyerId") Long verifyerId, @Param("issuerId") Long issuerId, @Param("now")Date now);
+                   @Param("verifyerId") Long verifyerId, @Param("issuerId") Long issuerId, @Param("now")Date now,@Param("applicant") String applicant);
 
     /**
      * 根据报告编号获取信息
