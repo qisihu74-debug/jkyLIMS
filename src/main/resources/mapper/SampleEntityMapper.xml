@@ -877,7 +877,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     </select>
 
     <select id="getOriginalSampleInfo" resultType="com.lims.manage.erp.vo.TemplateSampleVo">
-        SELECT sample_name        sampleName,
+        SELECT alias_name        sampleName,
                sample_code        sampleNumber,
                quantity_per_group sampleQuantity,
                outward            sampleDesc,

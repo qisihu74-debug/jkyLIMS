@@ -528,6 +528,9 @@ public class TaskServiceImpl implements TaskService {
                 judgeBasis.append(judgeBasisList.get(i) + "\n");
             }
         }
+        // 检测项 开始检测日期。
+
+        // 所使用的设备仪器。
         OriginalRecordDataVo result = new OriginalRecordDataVo(recordNumber, entrustBaseInfo, sampleVo, checkBasis, judgeBasis.toString());
         return result;
     }
