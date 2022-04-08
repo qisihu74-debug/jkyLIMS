@@ -821,12 +821,15 @@ public class ReportServiceImpl implements ReportService {
                     SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
                     rows.get(6).getCell(1).removeParagraph(0);
                     rows.get(6).getCell(1).setText("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
-                            + "样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
-                            + "样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
-                            + "样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
-                            + "收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                            + "，样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
+                            + "，样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
+                            + "，样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
+                            + "，收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                     //检测依据
                     String checkBasis = getCheckBasis(id);
+                    if (checkBasis.contains("《")){
+                        checkBasis = checkBasis.split("《")[0];
+                    }
                     rows.get(7).getCell(1).removeParagraph(0);
                     rows.get(7).getCell(1).setText(checkBasis.equals("") ? "——" : checkBasis);
                     //判定依据
