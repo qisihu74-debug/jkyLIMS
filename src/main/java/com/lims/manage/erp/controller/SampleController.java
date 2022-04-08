@@ -263,7 +263,7 @@ public class SampleController {
             return ResultUtil.error("缺少必要参数！");
         }
         int i = testSampleEntityService.updateSample(sampleEntity);
-        if (i > 1) {
+        if (i > 0) {
             return ResultUtil.success("样品信息修改成功！", i);
         } else {
             return ResultUtil.error("样品信息修改失败！");
