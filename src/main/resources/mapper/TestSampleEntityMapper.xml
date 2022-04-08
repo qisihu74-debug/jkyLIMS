@@ -78,12 +78,18 @@
     <sql id="Blob_Column_List">
         picture
     </sql>
-    <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer">
+    <select id="selectByPrimaryKey" resultType="com.lims.manage.erp.entity.TestSampleEntity" parameterType="java.lang.Integer">
         select
-        <include refid="Base_Column_List"/>
+        t1.id
+        , t1.company_id, t1.sample_name, t1.sample_code, t1.specs, t1.batch_number, t1.manufacturer, t1.sample_origin,
+        t1.outward, t1.save_place, t1.admin, t1.sample_groups, t1.quantity_per_group, t1.inspector, t1.received_date,
+        t1.sample_requirement, t1.generation, t1.state, t1.check_date, t1.remark, t1.file, t1.product_id, t1.outward_describe,
+        t1.insert_flag, t1.is_use, t1.sample_quantity, t1.alias_name, t1.sample_type, t1.sample_remark
         ,
         <include refid="Blob_Column_List"/>
-        from test_sample
+        ,
+        t2.company_name
+        from test_sample t1 left join test_company t2 on t1.company_id = t2.company_id
         where id = #{id,jdbcType=INTEGER}
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
@@ -458,9 +464,24 @@
             sample_remark      = #{sampleRemark,jdbcType=VARCHAR}
         where id = #{id,jdbcType=INTEGER}
     </update>
+    <update id="updateByPrimaryKeyNotAll" parameterType="com.lims.manage.erp.entity.TestSampleEntity">
+        update test_sample
+        set
+            specs              = #{specs,jdbcType=VARCHAR},
+            batch_number       = #{batchNumber,jdbcType=VARCHAR},
+            manufacturer       = #{manufacturer,jdbcType=VARCHAR},
+            sample_origin      = #{sampleOrigin,jdbcType=VARCHAR},
+            outward            = #{outward,jdbcType=VARCHAR},
+            received_date      = #{receivedDate,jdbcType=VARCHAR},
+            generation         = #{generation,jdbcType=VARCHAR},
+            outward_describe   = #{outwardDescribe,jdbcType=VARCHAR},
+            alias_name         = #{aliasName,jdbcType=VARCHAR},
+            sample_remark      = #{sampleRemark,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
 
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into test_sample (id, company_id, sample_name,
+        insert into test_sample (company_id, sample_name,
         sample_code, specs, batch_number,
         manufacturer, sample_origin, outward,
         save_place, admin, sample_groups,
@@ -472,16 +493,64 @@
         sample_type, sample_remark, picture)
         values
         <foreach collection="entities" item="entity" separator=",">
-            (#{id,jdbcType=INTEGER}, #{companyId,jdbcType=INTEGER}, #{sampleName,jdbcType=CHAR},
-            #{sampleCode,jdbcType=VARCHAR}, #{specs,jdbcType=VARCHAR}, #{batchNumber,jdbcType=VARCHAR},
-            #{manufacturer,jdbcType=VARCHAR}, #{sampleOrigin,jdbcType=VARCHAR}, #{outward,jdbcType=VARCHAR},
-            #{savePlace,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR}, #{sampleGroups,jdbcType=INTEGER},
-            #{quantityPerGroup,jdbcType=INTEGER}, #{inspector,jdbcType=VARCHAR}, #{receivedDate,jdbcType=VARCHAR},
-            #{sampleRequirement,jdbcType=VARCHAR}, #{generation,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR},
-            #{checkDate,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR}, #{file,jdbcType=VARCHAR},
-            #{productId,jdbcType=INTEGER}, #{outwardDescribe,jdbcType=VARCHAR}, #{insertFlag,jdbcType=VARCHAR},
-            #{isUse,jdbcType=INTEGER}, #{sampleQuantity,jdbcType=VARCHAR}, #{aliasName,jdbcType=VARCHAR},
-            #{sampleType,jdbcType=VARCHAR}, #{sampleRemark,jdbcType=VARCHAR}, #{picture,jdbcType=LONGVARCHAR})
+            (#{entity.companyId,jdbcType=INTEGER}, #{entity.sampleName,jdbcType=CHAR},
+            #{entity.sampleCode,jdbcType=VARCHAR}, #{entity.specs,jdbcType=VARCHAR},
+            #{entity.batchNumber,jdbcType=VARCHAR},
+            #{entity.manufacturer,jdbcType=VARCHAR}, #{entity.sampleOrigin,jdbcType=VARCHAR},
+            #{entity.outward,jdbcType=VARCHAR},
+            #{entity.savePlace,jdbcType=VARCHAR}, #{entity.admin,jdbcType=VARCHAR},
+            #{entity.sampleGroups,jdbcType=INTEGER},
+            #{entity.quantityPerGroup,jdbcType=INTEGER}, #{entity.inspector,jdbcType=VARCHAR},
+            #{entity.receivedDate,jdbcType=VARCHAR},
+            #{entity.sampleRequirement,jdbcType=VARCHAR}, #{entity.generation,jdbcType=VARCHAR},
+            #{entity.state,jdbcType=VARCHAR},
+            #{entity.checkDate,jdbcType=TIMESTAMP}, #{entity.remark,jdbcType=VARCHAR}, #{entity.file,jdbcType=VARCHAR},
+            #{entity.productId,jdbcType=INTEGER}, #{entity.outwardDescribe,jdbcType=VARCHAR},
+            #{entity.insertFlag,jdbcType=VARCHAR},
+            #{entity.isUse,jdbcType=INTEGER}, #{entity.sampleQuantity,jdbcType=VARCHAR},
+            #{entity.aliasName,jdbcType=VARCHAR},
+            #{entity.sampleType,jdbcType=VARCHAR}, #{entity.sampleRemark,jdbcType=VARCHAR},
+            #{entity.picture,jdbcType=LONGVARCHAR})
         </foreach>
     </insert>
+
+    <select id="getSimpleList" parameterType="com.lims.manage.erp.entity.TestSampleEntity"
+            resultType="com.lims.manage.erp.vo.SampleSimpleListVo">
+        SELECT
+        id,
+        sample_name,
+        sample_code,
+        manufacturer,
+        specs,
+        inspector,
+        generation,
+        received_date
+        FROM
+        test_sample
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            is_use = 0
+            <if test="sampleName!=null and sampleName!=''">
+                and sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="batchNumber!=null and batchNumber!=''">
+                and batch_number LIKE CONCAT('%',#{batchNumber},'%')
+            </if>
+            <if test="manufacturer!=null and manufacturer!=''">
+                and manufacturer LIKE CONCAT('%',#{manufacturer},'%')
+            </if>
+            <if test="beginDate!=null and beginDate!=''">
+                and str_to_date( received_date, '%Y-%m-%d' ) &gt;= str_to_date( #{beginDate}, '%Y-%m-%d' )
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                and str_to_date( received_date, '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}, '%Y-%m-%d' )
+            </if>
+            <if test="productId!=null">
+                and product_id = #{productId}
+            </if>
+            <if test="companyId!=null">
+                and company_id = #{companyId}
+            </if>
+        </trim>
+        order by str_to_date( received_date, '%Y-%m-%d' ) desc
+    </select>
 </mapper>

@@ -1,11 +1,16 @@
 package com.lims.manage.erp.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.service.TestSampleEntityService;
+import com.lims.manage.erp.vo.SampleEntrustAddVo;
+import com.lims.manage.erp.vo.SampleSimpleListVo;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +28,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     private SampleEntityMapper sampleEntityMapper;
 
     @Override
-    public String batchInsertSample(List<SampleDetailAddVo> samples) {
+    public Integer batchInsertSample(List<SampleDetailAddVo> samples) {
         List<TestSampleEntity> entities = Lists.newArrayList();
         //获取数据库当前年份最大的样品编号
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -39,8 +44,8 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             int code = newMax + i + 1;
             String codeStr = new DecimalFormat("0000").format(code);
             String sampleCode;
-            if (Integer.parseInt(samples.get(i).getSampleQuantity()) > 1) {
-                String numStr = new DecimalFormat("00").format(Integer.parseInt(samples.get(i).getSampleQuantity()));
+            if (samples.get(i).getQuantityPerGroup() > 1) {
+                String numStr = new DecimalFormat("00").format(samples.get(i).getQuantityPerGroup());
                 sampleCode = "YP-" + sdf.format(now) + "-" + codeStr + "（01~" + numStr + "）";
             } else {
                 sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
@@ -48,11 +53,44 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             TestSampleEntity entity = new TestSampleEntity(samples.get(i), sampleCode);
             entities.add(entity);
         }
-        for (int i = 0; i < entities.size(); i++) {
-            System.out.println(entities.get(i).toString());
+        return testSampleEntityMapper.insertBatch(entities);
+    }
+
+    @Override
+    public PageInfo querySampleList(TestSampleEntity sampleEntity) {
+        PageHelper.startPage(sampleEntity.getPageNum(), sampleEntity.getPageSize());
+        if (sampleEntity.getReceivedDate() != null) {
+            String[] split = sampleEntity.getReceivedDate().split("~");
+            sampleEntity.setBeginDate(split[0]);
+            sampleEntity.setEndDate(split[1]);
+        }
+        List<SampleSimpleListVo> simpleList = testSampleEntityMapper.getSimpleList(sampleEntity);
+        PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
+        return pageInfo;
+    }
+
+    @Override
+    public TestSampleEntity sampleDetail(Integer id) {
+        TestSampleEntity entity = testSampleEntityMapper.selectByPrimaryKey(id);
+        if(entity != null){
+            String outward = entity.getOutward();
+            if(outward != null){
+                String replace = outward.replace("[", "");
+                String replace1 = replace.replace("]", "");
+                String[] split = replace1.split(",");
+                List<String> outwardArr = Lists.newArrayList();
+                for (String s : split) {
+                    outwardArr.add(s.trim());
+                }
+                entity.setOutwardArr(outwardArr);
+            }
         }
 
-//        int i = testSampleEntityMapper.insertBatch(entities);
-        return null;
+        return entity;
+    }
+
+    @Override
+    public int updateSample(TestSampleEntity sampleEntity) {
+        return testSampleEntityMapper.updateByPrimaryKeyNotAll(sampleEntity);
     }
 }

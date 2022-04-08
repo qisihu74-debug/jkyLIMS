@@ -3,6 +3,7 @@ package com.lims.manage.erp.controller;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -14,17 +15,15 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.SamplesAddVo;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -59,7 +58,7 @@ public class SampleController {
     @RequestMapping(value = "/addSample", method = RequestMethod.POST)
     public Result getAddSampleData(@RequestParam("json") String json, MultipartFile[] file) {
         SampleAddParamVo samples = JSON.parseObject(json, SampleAddParamVo.class);
-        log.debug("样品新增参数:{}",json);
+        log.debug("样品新增参数:{}", json);
         if (samples == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
@@ -85,6 +84,7 @@ public class SampleController {
 
     /**
      * 查询样品信息列表--分页
+     *
      * @param paramVo
      * @return
      */
@@ -174,7 +174,7 @@ public class SampleController {
         try {
             workbook = transformer.transformXLS(fileStream, result);
             response.reset();
-            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             String fileName2 = URLEncoder.encode(fileName.toString(), "UTF-8");
@@ -205,17 +205,69 @@ public class SampleController {
 
     /**
      * 样品管理--样品签收--新增样品
+     *
      * @param samples
      * @return
      */
     @RequestMapping(value = "/addSamples", method = RequestMethod.POST)
-    public Result addSamples(@RequestBody List<SampleDetailAddVo> samples) {
-        System.out.println("样品数量："+samples.size());
-        for (int i = 0; i < samples.size(); i++) {
-            System.out.println(samples.get(i).toString());
+    public Result addSamples(@RequestBody SamplesAddVo samples) {
+        if (samples == null || CollectionUtils.isEmpty(samples.getSamples())) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            Integer integer = testSampleEntityService.batchInsertSample(samples.getSamples());
+            if (integer > 0) {
+                return ResultUtil.success("添加样品成功！", integer);
+            } else {
+                return ResultUtil.error("添加样品失败，请联系管理员！");
+            }
         }
-        testSampleEntityService.batchInsertSample(samples);
-        return null;
+    }
+
+    /**
+     * 样品查询打印列表
+     *
+     * @param sampleEntity
+     * @return
+     */
+    @RequestMapping("/querySampleList")
+    public Result querySampleList(@RequestBody TestSampleEntity sampleEntity) {
+        if (sampleEntity.getPageNum() == null || sampleEntity.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success(testSampleEntityService.querySampleList(sampleEntity));
+    }
+
+    /**
+     * 查询样品详情
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/sampleDetail")
+    public Result sampleDetail(Integer id) {
+        if (id == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        return ResultUtil.success(testSampleEntityService.sampleDetail(id));
+    }
+
+    /**
+     * 样品修改
+     *
+     * @param sampleEntity
+     * @return
+     */
+    @RequestMapping("/updateSampleInfo")
+    public Result updateSample(@RequestBody TestSampleEntity sampleEntity) {
+        if (sampleEntity == null || sampleEntity.getId() == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        int i = testSampleEntityService.updateSample(sampleEntity);
+        if (i > 0) {
+            return ResultUtil.success("样品信息修改成功！", i);
+        } else {
+            return ResultUtil.error("样品信息修改失败！");
+        }
     }
 
 }
