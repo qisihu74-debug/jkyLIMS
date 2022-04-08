@@ -193,6 +193,7 @@ public interface TaskMapper extends BaseMapper {
      */
     String getCheckBasis(Integer checkItemId, Long entrustId, Integer sampleId);
 
+
     /**
      * 查询判定依据
      *

@@ -287,7 +287,7 @@ public class EntrustController {
     }
 
     /**
-     * 查询历史委托信息详情
+     * 历史委托信息详情查询
      *
      * @param entrustmentId
      * @return
@@ -295,6 +295,17 @@ public class EntrustController {
     @RequestMapping("/get_entrust_history_detail")
     public Result getEntrustHistoryDetail(Long entrustmentId) {
         return ResultUtil.success(entrustService.getEntrustHistoryDetail(entrustmentId));
+    }
+
+    /**
+     * 分布委托信息详情查询
+     *
+     * @param entrustmentId
+     * @return
+     */
+    @RequestMapping("/get_entrust_distribution_detail")
+    public Result getEntrustDistributionDetail(Long entrustmentId) {
+        return ResultUtil.success(entrustService.getEntrustDistributionDetail(entrustmentId));
     }
 
     /**

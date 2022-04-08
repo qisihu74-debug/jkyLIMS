@@ -62,11 +62,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -331,6 +327,7 @@ public class EntrustServiceImpl implements EntrustService {
                                 entity1.setMethodId(entity.getMethodId());
                                 entity1.setStandardId(entity.getStandardId());
                                 entity1.setTimes(entity.getTimes());
+                                entity1.setCheckItemName(entity.getCheckItemName());
                             }
                             entityMapper.BatchSaveEntrustSampleItem(ItemList);
                         }
@@ -740,15 +737,18 @@ public class EntrustServiceImpl implements EntrustService {
         EntrustEntity basisInfo = new EntrustEntity(vo);
         // 删除样品id
         // 统计是否存在
-        if (entityMapper.countSampleDetailsRel(basisInfo.getId()) > 0) {
-            entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
-        }
-        //修改样品为未使用
+//        if (entityMapper.countSampleDetailsRel(basisInfo.getId()) > 0) {
+//            entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
+//        }
+        // 判断 样品与委托单是否存在
         List<Integer> sampleIds = entityMapper.getSampleId(basisInfo.getId());
         if (!CollectionUtils.isEmpty(sampleIds)) {
             for (Integer sampleId : sampleIds) {
+                //修改样品为未使用
                 sampleEntityMapper.updateSampleUse(sampleId, 0);
             }
+            // 1.0 样品与委托单已存在 1.1、删除样品id
+            entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
         }
         // 删除判定依据id
         if (entityMapper.countSampleStandardRel(basisInfo.getId()) > 0) {
@@ -1086,6 +1086,61 @@ public class EntrustServiceImpl implements EntrustService {
         return entrustAddVo;
     }
 
+    /**
+     * 分布详情——检测项无价格不展示。
+     *
+     * @param entrustmentId
+     * @return
+     */
+    @Override
+    public EntrustAddVo getEntrustDistributionDetail(Long entrustmentId) {
+        // 通过委托ID 委托单信息 → test_entrusted_info
+        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
+        if (entrustAddVo.getOperateUser() != null) {
+            // 获取做废人id 查询账号姓名
+            entrustAddVo.setOperateUserStr(sysUserDao.getSysUserName(entrustAddVo.getOperateUser()));
+        }
+        // 通过委托单id 获取缴费记录 依据id 同价价格
+        entrustAddVo.setPaymentRecord(entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId));
+        // -- 支付方式。
+//        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
+        // 联系地址
+//        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
+        // 通过委托ID 样品集合 → test_sample
+        List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
+        // 样品信息 进行补充 检测依据集合，检测项集合
+        for (SampleEntity sampleEntity : sampleCollection) {
+            // 样品下 检测项、检测依据 补充。
+            // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
+            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144) {
+                List<JudgmentBasisVo> list = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
+                // 遍历检测项数据处理 价格为空的不展示（删除）
+                if (list != null && !list.isEmpty()) {
+                    Iterator<JudgmentBasisVo> it = list.iterator();
+                    while (it.hasNext()) {
+                        JudgmentBasisVo judgmentBasisVo = it.next();
+                        if (judgmentBasisVo.getCheckPrice() == null) {
+                            it.remove();
+                        }
+                    }
+                }
+                if (list != null && !list.isEmpty()) {
+                    // 根据检测项id 查询 默认匹配部门信息
+                    for (JudgmentBasisVo data : list) {
+                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
+                        data.setTestingRoom(strings.toString());
+                    }
+                    sampleEntity.setJudgmentBasisVos(list);
+                }
+            }
+
+            // 补充样品下 依据集合
+            sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
+        }
+        entrustAddVo.setSamples(sampleCollection);
+        return entrustAddVo;
+    }
+
     @Override
     public List<LabelValueVo> getDept(Integer checkItemId) {
         return entityMapper.getDept(checkItemId);
@@ -1230,7 +1285,7 @@ public class EntrustServiceImpl implements EntrustService {
             //获取表格对应的行
             rows = table.getRows();
             //设置模板数据
-            rows.get(2).getTableCells().get(8).setText("№."+detail.getEntrustmentNo());//委托单位
+            rows.get(2).getTableCells().get(8).setText("№." + detail.getEntrustmentNo());//委托单位
             rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
             rows.get(4).getTableCells().get(2).setText(detail.getWitnessUint());//见证单位
             rows.get(5).getTableCells().get(2).setText(detail.getProjectPart());//工程部位
@@ -1270,10 +1325,10 @@ public class EntrustServiceImpl implements EntrustService {
                     List<JudgmentBasisVo> sampleCheckItem = entity.getJudgmentBasisVos();
                     for (JudgmentBasisVo itemEntity : sampleCheckItem) {
                         //价钱为null的不展示
-                        if (itemEntity.getCheckPrice() != null){
+                        if (itemEntity.getCheckPrice() != null) {
                             String name = itemEntity.getCheckItemName();
                             stringBuilder1.append(name);
-                            if (!StringUtils.isEmpty(itemEntity.getStandardName())){
+                            if (!StringUtils.isEmpty(itemEntity.getStandardName())) {
                                 stringBuilder1.append("（");
                                 String s = itemEntity.getStandardName();
                                 String aa = s.split("《")[0];
@@ -1340,40 +1395,40 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public String findStateBySampleId(int sampleId,EntrustEntityMapper entityMapper, TaskMapper taskMapper) {
+    public String findStateBySampleId(int sampleId, EntrustEntityMapper entityMapper, TaskMapper taskMapper) {
 
         String state = "";
         //五种样品状态1待检，2在检，3已检，||TODO 4留样，5处置
-        if (sampleId > 0){
+        if (sampleId > 0) {
             Long id = entityMapper.getMesBySampleId(sampleId);
             Long entrustId = entityMapper.getEntrustIdBySampleId(sampleId);
-            if (id != null){
-                if (entrustId == null){
+            if (id != null) {
+                if (entrustId == null) {
                     state = "待检";
-                }else {
+                } else {
                     List<String> status = taskMapper.getStateByEntrustId(entrustId);
-                    if (!CollectionUtils.isEmpty(status)){
+                    if (!CollectionUtils.isEmpty(status)) {
                         List<Integer> longs = Lists.newArrayList();
-                        for (String s:status) {
+                        for (String s : status) {
                             longs.add(Integer.parseInt(s));
                         }
                         Integer max = Collections.max(longs);
-                        if (max<=2){
+                        if (max <= 2) {
                             state = "待检";
                         }
-                        if (3 == max){
+                        if (3 == max) {
                             state = "在检";
                         }
                         Boolean flag = false;
-                        for (Integer num:longs) {
-                            if (num>=4){
+                        for (Integer num : longs) {
+                            if (num >= 4) {
                                 flag = true;
-                            }else {
+                            } else {
                                 flag = false;
                                 break;
                             }
                         }
-                        if (flag){
+                        if (flag) {
                             state = "已检";
                         }
                     }

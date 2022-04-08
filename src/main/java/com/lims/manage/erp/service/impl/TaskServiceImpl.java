@@ -509,7 +509,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public OriginalRecordDataVo getOriginalData(Long taskId, Integer sampleId, Integer checkItemId) {
+    public OriginalRecordDataVo getOriginalData(Long taskId, Integer sampleId, Integer checkItemId,Integer idItem) {
         //生成记录编号
         String recordNumber = "JL-C2105-108-04";
         //获取委托单信息
@@ -528,10 +528,22 @@ public class TaskServiceImpl implements TaskService {
                 judgeBasis.append(judgeBasisList.get(i) + "\n");
             }
         }
+        OriginalRecordDataVo result = new OriginalRecordDataVo(recordNumber, entrustBaseInfo, sampleVo, checkBasis, judgeBasis.toString());
         // 检测项 开始检测日期。
 
         // 所使用的设备仪器。
-        OriginalRecordDataVo result = new OriginalRecordDataVo(recordNumber, entrustBaseInfo, sampleVo, checkBasis, judgeBasis.toString());
+        List<TestInstrumentEntity> InstrumentEntityList = taskMapper.getInstrumentEntityList(idItem);
+        if(InstrumentEntityList!=null&&!InstrumentEntityList.isEmpty())
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            for(TestInstrumentEntity testInstrumentEntity:InstrumentEntityList)
+            {
+                stringBuilder.append(testInstrumentEntity.getCode());
+                stringBuilder.append(",");
+            }
+            result.setEquipment(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+        }
+
         return result;
     }
 

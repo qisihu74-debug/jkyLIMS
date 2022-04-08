@@ -116,6 +116,13 @@ public interface EntrustService {
     EntrustAddVo getEntrustHistoryDetail(Long entrustmentId);
 
     /**
+     * 分布委托信息 具体详情
+     * @param entrustmentId
+     * @return
+     */
+    EntrustAddVo getEntrustDistributionDetail(Long entrustmentId);
+
+    /**
      * 根据检测项ID查询可以做的团队
      * @param checkItemId
      * @return

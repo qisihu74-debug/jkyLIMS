@@ -106,7 +106,7 @@ public interface TaskService {
      * @param checkItemId
      * @return
      */
-    OriginalRecordDataVo getOriginalData(Long taskId, Integer sampleId, Integer checkItemId);
+    OriginalRecordDataVo getOriginalData(Long taskId, Integer sampleId, Integer checkItemId,Integer idItem);
 
     /**
      * 查询原始记录模板
