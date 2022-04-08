@@ -44,8 +44,8 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             int code = newMax + i + 1;
             String codeStr = new DecimalFormat("0000").format(code);
             String sampleCode;
-            if (Integer.parseInt(samples.get(i).getSampleQuantity()) > 1) {
-                String numStr = new DecimalFormat("00").format(Integer.parseInt(samples.get(i).getSampleQuantity()));
+            if (samples.get(i).getQuantityPerGroup() > 1) {
+                String numStr = new DecimalFormat("00").format(samples.get(i).getQuantityPerGroup());
                 sampleCode = "YP-" + sdf.format(now) + "-" + codeStr + "（01~" + numStr + "）";
             } else {
                 sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
@@ -71,7 +71,22 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
     @Override
     public TestSampleEntity sampleDetail(Integer id) {
-        return testSampleEntityMapper.selectByPrimaryKey(id);
+        TestSampleEntity entity = testSampleEntityMapper.selectByPrimaryKey(id);
+        if(entity != null){
+            String outward = entity.getOutward();
+            if(outward != null){
+                String replace = outward.replace("[", "");
+                String replace1 = replace.replace("]", "");
+                String[] split = replace1.split(",");
+                List<String> outwardArr = Lists.newArrayList();
+                for (String s : split) {
+                    outwardArr.add(s.trim());
+                }
+                entity.setOutwardArr(outwardArr);
+            }
+        }
+
+        return entity;
     }
 
     @Override

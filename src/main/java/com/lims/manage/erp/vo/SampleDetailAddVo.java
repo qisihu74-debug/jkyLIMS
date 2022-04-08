@@ -47,7 +47,7 @@ public class SampleDetailAddVo {
     /**
      * 每组样品数量
      */
-    private String quantityPerGroup;
+    private Integer quantityPerGroup;
     /**
      * 批号编号
      */

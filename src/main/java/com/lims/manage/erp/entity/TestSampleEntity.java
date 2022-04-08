@@ -7,6 +7,7 @@ import lombok.Data;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @TableName("test_sample")
@@ -81,6 +82,8 @@ public class TestSampleEntity {
     private String endDate;
     @TableField(exist = false)
     private String companyName;
+    @TableField(exist = false)
+    private List<String> outwardArr;
 
 
     public TestSampleEntity() {
@@ -94,7 +97,7 @@ public class TestSampleEntity {
         this.batchNumber = vo.getBatchNumber();
         this.manufacturer = vo.getManufacturer();
         this.sampleOrigin = vo.getSampleOrigin();
-        this.outward = vo.getOutward().toString();
+        this.outward = vo.getOutward() == null ? null : vo.getOutward().toString();
         this.inspector = vo.getInspector();
         this.receivedDate = new SimpleDateFormat("yyyy-MM-dd").format(vo.getReceivedDate());
         this.sampleRequirement = vo.getSampleRequirement();
@@ -103,7 +106,8 @@ public class TestSampleEntity {
         this.productId = vo.getProductId();
         this.outwardDescribe = vo.getOutwardDescribe();
         this.isUse = 0;
-        this.sampleQuantity = vo.getQuantityPerGroup();
+        this.sampleQuantity = vo.getSampleQuantity();
+        this.quantityPerGroup = vo.getQuantityPerGroup();
         this.aliasName = vo.getAliasName();
         this.sampleType = vo.getSampleType();
         this.sampleRemark = vo.getSampleRemark();
