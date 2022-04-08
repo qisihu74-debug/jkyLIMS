@@ -79,6 +79,8 @@ public class TestSampleEntity {
     private String beginDate;
     @TableField(exist = false)
     private String endDate;
+    @TableField(exist = false)
+    private String companyName;
 
 
     public TestSampleEntity() {
