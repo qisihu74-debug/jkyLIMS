@@ -551,6 +551,6 @@
                 and company_id = #{companyId}
             </if>
         </trim>
-        order by str_to_date( received_date, '%Y-%m-%d' ) desc
+        order by sample_code DESC,str_to_date( received_date, '%Y-%m-%d' ) desc
     </select>
 </mapper>
