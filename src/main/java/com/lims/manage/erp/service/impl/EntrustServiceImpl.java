@@ -1168,6 +1168,16 @@ public class EntrustServiceImpl implements EntrustService {
             // 补充样品下 依据集合
             List<JudgmentBasisVo> standardList = sampleEntityMapper.getSampleBasisList(sampleEntity.getId(), entrustAddVo.getId());
             sampleEntity.setStandardFileIdStr(standardList);
+            //补充检测项可选的全部检测依据
+            if(!CollectionUtils.isEmpty(listJson)){
+                for (JudgmentBasisVo judgmentBasisVo : listJson) {
+                    List<LabelValueVo> allCheckBasis = testProductDao.getAllCheckBasis(judgmentBasisVo.getCheckItemId());
+                    judgmentBasisVo.setCheckBasisList(allCheckBasis);
+                }
+            }
+            //补充产品可选的全部判定依据
+            List<LabelValueVo> judges = testProductDao.getJudges(sampleEntity.getProductId());
+            sampleEntity.setAllStandardFileList(judges);
         }
         entrustAddVo.setSamples(sampleCollection);
         return entrustAddVo;

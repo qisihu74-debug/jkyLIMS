@@ -71,4 +71,6 @@ public interface ProductItemEntityMapper {
      * @return
      */
     List<CheckItemInfoVo> getItemInfo3(@Param("checkIds")List<Integer> checkIds);
+
+
 }

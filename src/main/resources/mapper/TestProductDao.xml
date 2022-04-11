@@ -102,4 +102,15 @@
     <select id="isLast" resultType="java.lang.Integer">
         select COUNT(*) from test_product_item where check_item_pid = #{checkItemId}
     </select>
+
+    <select id="getAllCheckBasis" parameterType="java.lang.Integer" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT
+            t2.id value,
+	        CONCAT(t2.code,'《',t2.name,'》') label
+        FROM
+            test_product_standard_file_rel t1
+            LEFT JOIN test_standard_file t2 ON t1.standard_file_id = t2.id
+        WHERE
+            t1.product_id = #{checkItemId}
+    </select>
 </mapper>
