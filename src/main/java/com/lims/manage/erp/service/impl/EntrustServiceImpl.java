@@ -1163,20 +1163,24 @@ public class EntrustServiceImpl implements EntrustService {
         // 样品信息 进行补充 检测依据集合，检测项集合
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
-            List<JudgmentBasisVo> listJson = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
+            List<JudgmentBasisVo> listJson = Lists.newArrayList();
+            listJson.addAll(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
             sampleEntity.setJudgmentBasisVoStr(listJson);
             // 补充样品下 依据集合
-            List<JudgmentBasisVo> standardList = sampleEntityMapper.getSampleBasisList(sampleEntity.getId(), entrustAddVo.getId());
+            List<JudgmentBasisVo> standardList = Lists.newArrayList();
+            standardList.addAll(sampleEntityMapper.getSampleBasisList(sampleEntity.getId(), entrustAddVo.getId()));
             sampleEntity.setStandardFileIdStr(standardList);
             //补充检测项可选的全部检测依据
             if(!CollectionUtils.isEmpty(listJson)){
                 for (JudgmentBasisVo judgmentBasisVo : listJson) {
-                    List<LabelValueVo> allCheckBasis = testProductDao.getAllCheckBasis(judgmentBasisVo.getCheckItemId());
+                    List<LabelValueVo> allCheckBasis = Lists.newArrayList();
+                    allCheckBasis.addAll(testProductDao.getAllCheckBasis(judgmentBasisVo.getCheckItemId()));
                     judgmentBasisVo.setCheckBasisList(allCheckBasis);
                 }
             }
             //补充产品可选的全部判定依据
-            List<LabelValueVo> judges = testProductDao.getJudges(sampleEntity.getProductId());
+            List<LabelValueVo> judges = Lists.newArrayList();
+            judges.addAll(testProductDao.getJudges(sampleEntity.getProductId()));
             sampleEntity.setAllStandardFileList(judges);
         }
         entrustAddVo.setSamples(sampleCollection);
