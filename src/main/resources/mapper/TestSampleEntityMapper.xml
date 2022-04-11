@@ -78,12 +78,14 @@
     <sql id="Blob_Column_List">
         picture
     </sql>
-    <select id="selectByPrimaryKey" resultType="com.lims.manage.erp.entity.TestSampleEntity" parameterType="java.lang.Integer">
+    <select id="selectByPrimaryKey" resultType="com.lims.manage.erp.entity.TestSampleEntity"
+            parameterType="java.lang.Integer">
         select
         t1.id
         , t1.company_id, t1.sample_name, t1.sample_code, t1.specs, t1.batch_number, t1.manufacturer, t1.sample_origin,
         t1.outward, t1.save_place, t1.admin, t1.sample_groups, t1.quantity_per_group, t1.inspector, t1.received_date,
-        t1.sample_requirement, t1.generation, t1.state, t1.check_date, t1.remark, t1.file, t1.product_id, t1.outward_describe,
+        t1.sample_requirement, t1.generation, t1.state, t1.check_date, t1.remark, t1.file, t1.product_id,
+        t1.outward_describe,
         t1.insert_flag, t1.is_use, t1.sample_quantity, t1.alias_name, t1.sample_type, t1.sample_remark
         ,
         <include refid="Blob_Column_List"/>
@@ -466,17 +468,16 @@
     </update>
     <update id="updateByPrimaryKeyNotAll" parameterType="com.lims.manage.erp.entity.TestSampleEntity">
         update test_sample
-        set
-            specs              = #{specs,jdbcType=VARCHAR},
-            batch_number       = #{batchNumber,jdbcType=VARCHAR},
-            manufacturer       = #{manufacturer,jdbcType=VARCHAR},
-            sample_origin      = #{sampleOrigin,jdbcType=VARCHAR},
-            outward            = #{outward,jdbcType=VARCHAR},
-            received_date      = #{receivedDate,jdbcType=VARCHAR},
-            generation         = #{generation,jdbcType=VARCHAR},
-            outward_describe   = #{outwardDescribe,jdbcType=VARCHAR},
-            alias_name         = #{aliasName,jdbcType=VARCHAR},
-            sample_remark      = #{sampleRemark,jdbcType=VARCHAR}
+        set specs            = #{specs,jdbcType=VARCHAR},
+            batch_number     = #{batchNumber,jdbcType=VARCHAR},
+            manufacturer     = #{manufacturer,jdbcType=VARCHAR},
+            sample_origin    = #{sampleOrigin,jdbcType=VARCHAR},
+            outward          = #{outward,jdbcType=VARCHAR},
+            received_date    = #{receivedDate,jdbcType=VARCHAR},
+            generation       = #{generation,jdbcType=VARCHAR},
+            outward_describe = #{outwardDescribe,jdbcType=VARCHAR},
+            alias_name       = #{aliasName,jdbcType=VARCHAR},
+            sample_remark    = #{sampleRemark,jdbcType=VARCHAR}
         where id = #{id,jdbcType=INTEGER}
     </update>
 
@@ -552,5 +553,75 @@
             </if>
         </trim>
         order by sample_code DESC,str_to_date( received_date, '%Y-%m-%d' ) desc
+    </select>
+
+
+    <resultMap id="sampleJudgeBasisListMap" type="com.lims.manage.erp.vo.SampleJudgeBasisVo">
+        <result property="id" column="id"></result>
+        <result property="sampleName" column="sample_name"></result>
+        <result property="sampleCode" column="sample_code"></result>
+        <result property="manufacturer" column="manufacturer"></result>
+        <result property="specs" column="specs"></result>
+        <result property="inspector" column="inspector"></result>
+        <result property="generation" column="generation"></result>
+        <result property="receivedDate" column="received_date"></result>
+        <!--        <collection property="judgeBasisList" ofType="com.lims.manage.erp.vo.LabelValueVo">-->
+        <!--            <id property="value" column="value"></id>-->
+        <!--            <result property="label" column="label"></result>-->
+        <!--        </collection>-->
+        <collection property="judgeBasisList" ofType="com.lims.manage.erp.vo.LabelValueVo"
+                    column="standardFileId" select="selectJudgeBasis">
+        </collection>
+    </resultMap>
+
+    <select id="querySampleJudgeBasisList" parameterType="com.lims.manage.erp.entity.TestSampleEntity"
+            resultMap="sampleJudgeBasisListMap">
+        SELECT
+        t1.id,
+        sample_name,
+        sample_code,
+        manufacturer,
+        specs,
+        inspector,
+        generation,
+        received_date,
+        t2.standard_file_id standardFileId
+        FROM
+        test_sample t1
+        LEFT JOIN test_product_standard_file_rel t2 ON t1.product_id = t2.product_id
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            is_use = 0
+            <if test="sampleName!=null and sampleName!=''">
+                and sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="batchNumber!=null and batchNumber!=''">
+                and batch_number LIKE CONCAT('%',#{batchNumber},'%')
+            </if>
+            <if test="manufacturer!=null and manufacturer!=''">
+                and manufacturer LIKE CONCAT('%',#{manufacturer},'%')
+            </if>
+            <if test="beginDate!=null and beginDate!=''">
+                and str_to_date( received_date, '%Y-%m-%d' ) &gt;= str_to_date( #{beginDate}, '%Y-%m-%d' )
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                and str_to_date( received_date, '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}, '%Y-%m-%d' )
+            </if>
+            <if test="productId!=null">
+                and product_id = #{productId}
+            </if>
+            <if test="companyId!=null">
+                and company_id = #{companyId}
+            </if>
+        </trim>
+        order by sample_code DESC,str_to_date( received_date, '%Y-%m-%d' ) desc
+    </select>
+
+    <select id="selectJudgeBasis" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT id VALUE,
+	           CONCAT( CODE, '《', NAME, '》' ) label
+        FROM
+            test_standard_file
+        WHERE
+            id = #{standardFileId}
     </select>
 </mapper>
