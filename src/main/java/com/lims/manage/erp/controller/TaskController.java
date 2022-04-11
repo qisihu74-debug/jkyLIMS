@@ -85,6 +85,34 @@ public class TaskController {
     }
 
     /**
+     * 试验开始下 查询任务详情（检测项无价格不展示）——线上使用
+     *
+     * @param taskId
+     * @return
+     */
+    @RequestMapping("/getTaskTestDetails")
+    public Result getTaskTestDetails(Long taskId) {
+        if (taskId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            // 验证登录人信息 和部门 存入
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            if (userInfo == null) {
+                return ResultUtil.error("token 已过期！");
+            }
+
+            // 根据账号 查询有可能包含多个科室 以及下级科室信息
+            String dept = taskService.getDeptIds(userInfo.getUserId());
+            // 科室id集合
+            String[] deptIds = new String[]{};
+            if (dept != null) {
+                deptIds = dept.split(",");
+            }
+            return ResultUtil.success("查询任务详情成功！", taskService.getTaskTestDetails(taskId, deptIds));
+        }
+    }
+
+    /**
      * 副团长抢单
      *
      * @param taskTestEntity

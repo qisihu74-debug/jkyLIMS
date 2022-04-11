@@ -26,6 +26,13 @@ public interface TaskService {
     TaskDetailInfoVo getTaskDetailInfoTwo(Long taskId,String [] deptIds);
 
     /**
+     * 试验开始下 查询任务详情（检测项无价格不展示）——线上使用
+     *
+     * @return
+     */
+    TaskDetailInfoVo getTaskTestDetails(Long taskId,String [] deptIds);
+
+    /**
      * 查询任务列表
      *
      * @param paramVo
