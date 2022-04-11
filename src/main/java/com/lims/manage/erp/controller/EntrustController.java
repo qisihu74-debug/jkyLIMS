@@ -497,4 +497,19 @@ public class EntrustController {
             return ResultUtil.success(historyData);
         }
     }
+
+    /**
+     * 查询产品所有的检测项及检测项的检测依据
+     *
+     * @param productId
+     * @return
+     */
+    @RequestMapping("/getCheckItemBasis")
+    public Result getCheckItemBasis(Integer productId) {
+        if (productId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            return ResultUtil.success(entrustService.getCheckItemBasis(productId));
+        }
+    }
 }

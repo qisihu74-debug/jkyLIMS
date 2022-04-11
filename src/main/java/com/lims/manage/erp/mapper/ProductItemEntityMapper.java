@@ -57,6 +57,11 @@ public interface ProductItemEntityMapper {
      * @return
      */
     List<CheckItemInfoVo> getItemInfo2(@Param("checkIds")List<Integer> checkIds);
-
-
+    /**
+     * 查询产品所有的检测项及检测项的检测依据
+     *
+     * @param productId
+     * @return
+     */
+    List<CheckItemDetailVo> getCheckItemBasis(Integer productId);
 }

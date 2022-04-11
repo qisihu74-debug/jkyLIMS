@@ -186,4 +186,11 @@ public interface EntrustService {
      * @return
      */
     String getMessage();
+    /**
+     * 查询产品所有的检测项及检测项的检测依据
+     *
+     * @param productId
+     * @return
+     */
+    List<CheckItemDetailVo> getCheckItemBasis(Integer productId);
 }

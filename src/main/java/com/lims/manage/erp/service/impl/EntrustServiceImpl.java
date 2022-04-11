@@ -35,13 +35,7 @@ import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.CheckItemDeptVo;
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.HistoryEntrustDataVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.TaskVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -1442,6 +1436,11 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public String getMessage() {
         return entityMapper.getMessage();
+    }
+
+    @Override
+    public List<CheckItemDetailVo> getCheckItemBasis(Integer productId) {
+        return itemEntityMapper.getCheckItemBasis(productId);
     }
 
 }
