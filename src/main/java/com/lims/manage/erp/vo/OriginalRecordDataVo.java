@@ -49,7 +49,7 @@ public class OriginalRecordDataVo {
         this.sample = sampleVo;
         this.testDate = testDate;
         this.testCondition = testCondition;
-        this.testBasis = testBasis;
+        this.testBasis = checkBasis;
         this.judgeBasis = judgeBasis;
         this.equipment = equipment;
     }

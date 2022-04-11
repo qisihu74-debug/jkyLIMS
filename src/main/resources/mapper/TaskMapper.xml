@@ -538,7 +538,7 @@
     </select>
 
     <select id="getCheckBasis" resultType="java.lang.String">
-        SELECT t2.`name`
+        SELECT t2.`code`
         FROM (SELECT *
               FROM test_entrusted_sample_checkitem_rel
               WHERE check_item_id = #{checkItemId}

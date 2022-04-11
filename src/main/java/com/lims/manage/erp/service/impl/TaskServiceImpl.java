@@ -516,6 +516,12 @@ public class TaskServiceImpl implements TaskService {
         EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(taskId);
         //获取样品信息
         TemplateSampleVo sampleVo = sampleEntityMapper.getOriginalSampleInfo(sampleId);
+        // 得到样品信息数据; 分割。
+        sampleVo.setSampleName(sampleVo.getSampleName()+";");
+        sampleVo.setSampleNumber(sampleVo.getSampleNumber()+";");
+        sampleVo.setSampleQuantity(sampleVo.getSampleQuantity()+";");
+        sampleVo.setSampleDesc(sampleVo.getSampleDesc()+";");
+        sampleVo.setSampleTime(sampleVo.getSampleTime()+";");
         //获取检测依据
         log.debug("执行上一行完成---------------");
         String checkBasis = taskMapper.getCheckBasis(checkItemId, entrustBaseInfo.getId(), sampleId);

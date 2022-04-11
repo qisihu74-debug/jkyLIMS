@@ -25,9 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -276,6 +274,9 @@ public class TaskController {
         result.put("result", originalData);
         //从文件服务器获取文件流
         String originalTemplate = taskService.getOriginalTemplateUrl(checkItemId);
+        if(originalTemplate==null){
+            log.error(checkItemId+"\t无原始记录模板为null");
+        }
         String[] split = originalTemplate.split("/");
         String[] split1 = split[4].split("\\?");
         XLSTransformer transformer = new XLSTransformer();
@@ -288,7 +289,7 @@ public class TaskController {
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            String fileName2 = URLEncoder.encode(split[2], "UTF-8");
+            String fileName2 = URLEncoder.encode(split1[0], "UTF-8");
             response.setHeader("Content-Disposition", "attachment;fileName=" + fileName2);
             OutputStream outputStream = response.getOutputStream();
             workbook.write(outputStream);
