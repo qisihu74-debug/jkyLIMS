@@ -864,6 +864,11 @@ public class EntrustServiceImpl implements EntrustService {
                 sampleEntityMapper.updateSampleUse(sampleId, 0);
             }
         }
+        // 删除 委托单id与样品id 中间表关系。
+        if (!CollectionUtils.isEmpty(sampleIds)) {
+            // 1.0 样品与委托单已存在 1.1、删除样品id
+            entityMapper.removeTestEntrustedSampleDetailsRel(entrustEntity.getId());
+        }
         return true;
     }
 
