@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class SampleSimpleListVo {
     private Long id;
+    private Integer productId;
     private String sampleName;
     private String sampleCode;
     private String manufacturer;

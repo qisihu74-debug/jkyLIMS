@@ -519,6 +519,7 @@
             resultType="com.lims.manage.erp.vo.SampleSimpleListVo">
         SELECT
         id,
+        productId,
         sample_name,
         sample_code,
         manufacturer,
