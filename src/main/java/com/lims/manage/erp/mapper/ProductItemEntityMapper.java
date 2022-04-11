@@ -64,4 +64,11 @@ public interface ProductItemEntityMapper {
      * @return
      */
     List<CheckItemDetailVo> getCheckItemBasis(Integer productId);
+
+    /**
+     * 查询检测项详细信息
+     * @param checkIds
+     * @return
+     */
+    List<CheckItemInfoVo> getItemInfo3(@Param("checkIds")List<Integer> checkIds);
 }

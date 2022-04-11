@@ -193,4 +193,12 @@ public interface EntrustService {
      * @return
      */
     List<CheckItemDetailVo> getCheckItemBasis(Integer productId);
+
+    /**
+     * 查询检测项详情：检测项名称，检测项方法，规格型号，检测依据
+     *
+     * @param ids
+     * @return
+     */
+    List<CheckItemInfoVo> getCheckItemInfo(List<Integer> ids);
 }

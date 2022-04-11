@@ -1443,4 +1443,9 @@ public class EntrustServiceImpl implements EntrustService {
         return itemEntityMapper.getCheckItemBasis(productId);
     }
 
+    @Override
+    public List<CheckItemInfoVo> getCheckItemInfo(List<Integer> ids) {
+        return itemEntityMapper.getItemInfo3(ids);
+    }
+
 }

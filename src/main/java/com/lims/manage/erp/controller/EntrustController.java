@@ -235,12 +235,12 @@ public class EntrustController {
 
     /**
      * 查询检测项详情：检测项名称，检测项方法，规格型号，检测依据
-     *
+     *      旧版不带检测依据
      * @param itemIds
      * @return
      */
-    @RequestMapping("/getItemDetail")
-    public Result getItemDetail(@RequestBody CheckItemParamVo itemIds) {
+    @RequestMapping("/getItemDetailOld")
+    public Result getItemDetailOld(@RequestBody CheckItemParamVo itemIds) {
         if (itemIds == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
@@ -510,6 +510,21 @@ public class EntrustController {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             return ResultUtil.success(entrustService.getCheckItemBasis(productId));
+        }
+    }
+
+    /**
+     * 查询检测项详情：检测项名称，检测项方法，规格型号，检测依据
+     *
+     * @param itemIds
+     * @return
+     */
+    @RequestMapping("/getItemDetail")
+    public Result getItemDetail(@RequestBody CheckItemParamVo itemIds) {
+        if (itemIds == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            return ResultUtil.success(entrustService.getCheckItemInfo(itemIds.getIds()));
         }
     }
 }

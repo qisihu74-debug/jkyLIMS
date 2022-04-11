@@ -329,10 +329,10 @@ logistics_costs, unit, samplestandard, sample_count,
             check_item_id = #{itemId}
     </select>
 
-    <resultMap id="checkItemBasisMap" type="com.lims.manage.erp.vo.CheckItemDetailVo">
+    <resultMap id="checkItemBasisMap" type="com.lims.manage.erp.vo.CheckItemInfoVo">
         <result property="productId" column="productId"></result>
         <result property="checkItemId" column="checkItemId"></result>
-        <result property="itemPid" column="itemPid"></result>
+        <result property="checkPrice" column="checkPrice"></result>
         <result property="checkItemName" column="checkItemName"></result>
         <collection property="checkBasisList" ofType="com.lims.manage.erp.vo.LabelValueVo">
             <id property="value" column="value"></id>
@@ -356,6 +356,27 @@ logistics_costs, unit, samplestandard, sample_count,
         WHERE
             check_price IS NOT NULL
           AND product_id = #{productId}
+    </select>
+
+    <select id="getItemInfo3" resultMap="checkItemBasisMap">
+        SELECT
+        t1.check_item_id checkItemId,
+        check_item_name checkItemName,
+        product_id productId,
+        check_price checkPrice,
+        t3.id VALUE,
+        CONCAT( t3.CODE, '《', t3.NAME, '》' ) label
+        FROM
+        test_product_item t1
+        LEFT JOIN test_product_item_standard_file_rel t2
+        ON t1.check_item_id = t2.check_item_id
+        LEFT JOIN test_standard_file t3 ON t2.standard_file_id = t3.id
+        <if test="checkIds != null">
+            <foreach collection="checkIds" item="id" index="index" open="WHERE t1.check_item_id IN (" close=")"
+                     separator=",">
+                #{id}
+            </foreach>
+        </if>
     </select>
 
 </mapper>
