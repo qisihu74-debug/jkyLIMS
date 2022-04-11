@@ -42,6 +42,10 @@ public interface TaskMapper extends BaseMapper {
     void updateEntrustById(Long entrustmentId,Integer state);
 
     /**
+     * 根据委托单id 修改 test_task 下 report_complete =2
+     */
+    int updateTestTaskReportComplete(Long entrustmentId);
+    /**
      * 保存任务单
      *
      * @param entity

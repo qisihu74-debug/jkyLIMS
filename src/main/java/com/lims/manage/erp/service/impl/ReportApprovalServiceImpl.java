@@ -130,6 +130,8 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             // 驳回 state=0  test_report_record表修改到驳回状态 。
             reportApprovalVo.setEntrustmentId(entrustAddVo.getId());
             reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
+            // 驳回操作 test_task 下 report_complete =2
+            taskMapper.updateTestTaskReportComplete(entrustAddVo.getId());
             if(entrustAddVo.getState()!=null){
                 taskMapper.updateEntrustById(entrustAddVo.getId(),7);
             }
@@ -340,6 +342,8 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalVo.setEntrustmentId(entrustAddVo.getId());
             // 根据委托单id 进行全部修改
             reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
+            // 驳回操作 test_task 下 report_complete =2
+            taskMapper.updateTestTaskReportComplete(entrustAddVo.getId());
             if(entrustAddVo.getState()!=null){
                 taskMapper.updateEntrustById(entrustAddVo.getId(),7);
             }

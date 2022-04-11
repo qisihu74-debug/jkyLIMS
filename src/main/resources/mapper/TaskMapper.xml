@@ -64,6 +64,12 @@
         set state=#{state}
         where id = #{entrustmentId}
     </update>
+
+    <update id="updateTestTaskReportComplete">
+        update test_task
+        set report_complete =2
+        WHERE entrustment_id = #{entrustmentId}
+    </update>
     <!--任务列表结果集-->
     <resultMap id="taskResultMap" type="com.lims.manage.erp.vo.TaskDetailInfoVo">
         <result property="taskId" column="id"></result>
