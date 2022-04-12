@@ -1107,6 +1107,8 @@ public class EntrustServiceImpl implements EntrustService {
     public EntrustAddVo getEntrustDistributionDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
+        List<LabelValueVo> allTestRoom = Lists.newArrayList();
+
         if (entrustAddVo.getOperateUser() != null) {
             // 获取做废人id 查询账号姓名
             entrustAddVo.setOperateUserStr(sysUserDao.getSysUserName(entrustAddVo.getOperateUser()));
@@ -1141,6 +1143,7 @@ public class EntrustServiceImpl implements EntrustService {
                         List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
                         data.setTestingRoom(strings.toString());
                         List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
+                        allTestRoom.addAll(testingRoomList);
                         data.setTestingRoomList(testingRoomList);
                     }
                     sampleEntity.setJudgmentBasisVos(list);
@@ -1151,6 +1154,9 @@ public class EntrustServiceImpl implements EntrustService {
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
         }
         entrustAddVo.setSamples(sampleCollection);
+        LinkedHashSet<LabelValueVo> hashSet = new LinkedHashSet<>(allTestRoom);
+        ArrayList<LabelValueVo> allTestRooms = new ArrayList<>(hashSet);
+        entrustAddVo.setAllTestRoom(allTestRooms);
         return entrustAddVo;
     }
 

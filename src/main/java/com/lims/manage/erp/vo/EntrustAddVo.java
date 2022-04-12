@@ -226,5 +226,9 @@ public class EntrustAddVo {
      * 拌和方式
      */
     private String mixingWay;
+    /**
+     * 所有可选科室
+     */
+    private List<LabelValueVo> allTestRoom;
 
 }
