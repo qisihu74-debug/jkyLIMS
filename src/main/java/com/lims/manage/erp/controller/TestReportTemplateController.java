@@ -37,7 +37,10 @@ public class TestReportTemplateController extends ApiController {
 
     @GetMapping("/getList")
     public Result getAll(TestReportTemplate testReportTemplate) {
-        QueryWrapper<TestReportTemplate> queryWrapper=new QueryWrapper<>(testReportTemplate);
+        QueryWrapper<TestReportTemplate> queryWrapper=new QueryWrapper<>();
+        if (testReportTemplate.getProductId()!=null){
+            queryWrapper.eq("product_id",testReportTemplate.getProductId());
+        }
         queryWrapper.orderByDesc("create_time");
         queryWrapper.eq("del_flag",0);
         return ResultUtil.success(this.testReportTemplateService.list(queryWrapper));
