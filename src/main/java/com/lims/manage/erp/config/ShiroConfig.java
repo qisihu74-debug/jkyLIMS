@@ -67,15 +67,6 @@ public class ShiroConfig {
         // 注意过滤器配置顺序不能颠倒
         filterChainDefinitionMap.put("/userLogin/**", "anon");
         filterChainDefinitionMap.put("/qiyuesuo/**", "anon");
-        // 过滤前端 a标签附带的路径
-//        filterChainDefinitionMap.put("/task/downloadEntrust_two", "anon");
-//        filterChainDefinitionMap.put("/task/downloadOriginalRecord", "anon");
-//        filterChainDefinitionMap.put("/entrust/downloadEntrust","anon");
-//        filterChainDefinitionMap.put("/task/downloadEntrust","anon");
-//        filterChainDefinitionMap.put("/report/previewTemplate","anon");
-//        filterChainDefinitionMap.put("/report/downloadQysFile","anon");
-//        filterChainDefinitionMap.put("/report/preview","anon");
-//        filterChainDefinitionMap.put("/sample/downloadSampleTag","anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");
@@ -85,7 +76,6 @@ public class ShiroConfig {
 
         // 配置shiro默认登录界面地址，前后端分离中登录界面跳转应由前端路由控制，后台仅返回json数据
         shiroFilterFactoryBean.setLoginUrl("index.html");
-        shiroFilterFactoryBean.setUnauthorizedUrl("/userLogin/unauth");
         filterChainDefinitionMap.put("/**", "authc");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         return shiroFilterFactoryBean;
@@ -164,6 +154,7 @@ public class ShiroConfig {
         RedisCacheManager redisCacheManager = new RedisCacheManager();
         redisCacheManager.setRedisManager(redisManager());
         redisCacheManager.setKeyPrefix(CACHE_KEY);
+        redisCacheManager.setExpire(2*3600*1000);
         // 配置缓存的话要求放在session里面的实体类必须有个id标识
         redisCacheManager.setPrincipalIdFieldName("userId");
         return redisCacheManager;
@@ -191,7 +182,7 @@ public class ShiroConfig {
         redisSessionDAO.setRedisManager(redisManager());
         redisSessionDAO.setSessionIdGenerator(sessionIdGenerator());
         redisSessionDAO.setKeyPrefix(SESSION_KEY);
-        redisSessionDAO.setExpire(timeout);
+        redisSessionDAO.setExpire(3*3600*1000);
         return redisSessionDAO;
     }
 
@@ -204,6 +195,11 @@ public class ShiroConfig {
     public SessionManager sessionManager() {
         ShiroSessionManager shiroSessionManager = new ShiroSessionManager();
         shiroSessionManager.setSessionDAO(redisSessionDAO());
+        shiroSessionManager.setGlobalSessionTimeout(2*3600*1000);// 会话过期时间 ms
+        shiroSessionManager.setSessionValidationSchedulerEnabled(true);
+        shiroSessionManager.setSessionIdCookieEnabled(true);
+        //设置session失效的扫描时间, 清理用户直接关闭浏览器造成的孤立会话 默认为 1个小时
+        shiroSessionManager.setSessionValidationInterval(1800*1000);
         return shiroSessionManager;
     }
 }
