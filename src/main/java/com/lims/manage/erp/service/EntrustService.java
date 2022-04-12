@@ -151,6 +151,15 @@ public interface EntrustService {
     Boolean distributionTask(TaskVo entity);
 
     /**
+     * 任务发布4.12日修改
+     * 修改报告的制作单位选择样式
+     * 权限放到task表
+     * @param entity
+     * @return
+     */
+    Boolean distributionTask412(TaskVo entity);
+
+    /**
      * 填充数据
      * @param detail
      * @param object

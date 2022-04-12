@@ -1299,6 +1299,56 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    public Boolean distributionTask412(TaskVo entity) {
+        List<Long> deptIds = Lists.newArrayList();
+        List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
+        for (CheckItemDeptVo vo : checkItemDeptVoList) {
+            if (!deptIds.contains(vo.getDeptId())) {
+                deptIds.add(vo.getDeptId());
+            }
+        }
+        //创建任务对象
+        List<TaskVo> vos = Lists.newArrayList();
+        for (Long deptId : deptIds) {
+            TaskVo vo = new TaskVo();
+            vo.setId(GenID.getID());
+            String teamCode = taskMapper.getTeamCode(deptId);
+            Integer integer = taskMapper.selectMaxNoByCode(teamCode);
+            Integer code = null;
+            if (integer == null) {
+                String currentTime = DateUtil.getTodayString().substring(2, 6);
+                code = Integer.parseInt(currentTime + "001");
+            } else {
+                code = integer + 1;
+            }
+            String codeStr = code + "";
+            vo.setDeptId(deptId);
+            vo.setCode(codeStr);
+            vo.setTaskCode(teamCode + codeStr.substring(0, 4) + "-" + codeStr.substring(4, 7));
+            vo.setEntrustmentId(entity.getEntrustmentId());
+            vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
+            vo.setOrderTime(entity.getOrderTime());
+            vo.setState(0);
+            vo.setReportComplete(2);
+            vo.setOrderer(ShiroUtils.getUserInfo().getName());
+//            if(deptId.equals(dept)){
+            if (entity.getDeptIds().contains(deptId)) {
+                vo.setIssueReport("是");
+            } else {
+                vo.setIssueReport("否");
+            }
+            vos.add(vo);
+        }
+        //任务单保存
+        taskMapper.batchSave(vos);
+        //更新检测项信息
+        taskMapper.batchUpdateCheckItem(entity.getCheckItemDeptVoList());
+        //更新委托单状态
+        taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
+        return true;
+    }
+
+    @Override
     public XWPFDocument downloadEntrust(EntrustAddVo detail, InputStream object) {
         XWPFDocument doc = null;
         try {
