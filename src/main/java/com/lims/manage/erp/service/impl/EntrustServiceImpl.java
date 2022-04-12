@@ -1134,6 +1134,8 @@ public class EntrustServiceImpl implements EntrustService {
                     for (JudgmentBasisVo data : list) {
                         List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
                         data.setTestingRoom(strings.toString());
+                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
+                        data.setTestingRoomList(testingRoomList);
                     }
                     sampleEntity.setJudgmentBasisVos(list);
                 }
