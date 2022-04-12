@@ -71,6 +71,8 @@ public class TestProductItem extends Model<TestProductItem> {
     private String methodSignet;
     //取样标准
     private String sampleStandard;
+    //报告模板别名
+    private String reportModelName;
 
     public Integer getCheckItemId() {
         return checkItemId;
@@ -270,6 +272,14 @@ public class TestProductItem extends Model<TestProductItem> {
 
     public void setSampleStandard(String sampleStandard) {
         this.sampleStandard = sampleStandard;
+    }
+
+    public String getReportModelName() {
+        return reportModelName;
+    }
+
+    public void setReportModelName(String reportModelName) {
+        this.reportModelName = reportModelName;
     }
 
     /**
