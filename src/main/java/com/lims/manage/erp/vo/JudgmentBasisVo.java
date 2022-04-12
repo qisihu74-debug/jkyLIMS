@@ -64,4 +64,8 @@ public class JudgmentBasisVo {
      * 检测项全部的检测依据
      */
     private List<LabelValueVo> checkBasisList;
+    /**
+     * 可做gai
+     */
+    private List<LabelValueVo> testingRoomList;
 }

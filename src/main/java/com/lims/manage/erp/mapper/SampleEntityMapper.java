@@ -85,6 +85,8 @@ public interface SampleEntityMapper {
             "WHERE t2.check_item_id = #{checkItemId} ")
     List<String> getTeamNameStrings(Integer checkItemId);
 
+    List<LabelValueVo> getTestingRoomList(Integer checkItemId);
+
 
     /**
      * 检测依据信息
