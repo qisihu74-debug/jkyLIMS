@@ -27,15 +27,14 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理自定义的业务异常
-     * @param req
      * @param e
      * @return
      */
     @ExceptionHandler(value = JkyException.class)
     @ResponseBody
-    public  ResultBody bizExceptionHandler(HttpServletRequest req, JkyException e){
-        logger.error("发生业务异常！原因是：{}",e.getErrorMsg());
-        return ResultBody.error(e.getErrorCode(),e.getErrorMsg());
+    public  ResultBody bizExceptionHandler(HttpServletRequest req,JkyException e){
+        logger.error("发生业务异常！原因是：{}",e.getCode());
+        return ResultBody.error(e.getCode(),e.getMsg());
     }
 
     /**

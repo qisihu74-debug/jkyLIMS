@@ -199,7 +199,7 @@ public class ShiroConfig {
         shiroSessionManager.setSessionValidationSchedulerEnabled(true);
         shiroSessionManager.setSessionIdCookieEnabled(true);
         //设置session失效的扫描时间, 清理用户直接关闭浏览器造成的孤立会话 默认为 1个小时
-        shiroSessionManager.setSessionValidationInterval(1800*1000);
+        shiroSessionManager.setSessionValidationInterval(5*60*1000);
         return shiroSessionManager;
     }
 }
