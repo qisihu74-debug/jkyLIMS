@@ -130,6 +130,8 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             // 驳回 state=0  test_report_record表修改到驳回状态 。
             reportApprovalVo.setEntrustmentId(entrustAddVo.getId());
             reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
+            // 驳回操作 test_task 下 report_complete =2
+            taskMapper.updateTestTaskReportComplete(entrustAddVo.getId());
             if(entrustAddVo.getState()!=null){
                 taskMapper.updateEntrustById(entrustAddVo.getId(),7);
             }
@@ -177,11 +179,11 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         // 获取印章数据以 数组形式呈现
         String[] sealTypeArray = new String[3];
         // 1、优先考虑报告印章 呈现
-        if(taskDetailInfoVo.getSealType()!=null){
+        if(taskDetailInfoVo.getSealType()!=null&&!taskDetailInfoVo.getSealType().equals("")){
             sealTypeArray = taskDetailInfoVo.getSealType().split(",");
         }else {
             // 2、考虑委托单印章 呈现
-            if(taskDetailInfoVo.getSealTypeTicket()!=null){
+            if(taskDetailInfoVo.getSealTypeTicket()!=null&&!taskDetailInfoVo.getSealTypeTicket().equals("")){
                 sealTypeArray = taskDetailInfoVo.getSealTypeTicket().split(",");
             }
         }
@@ -340,6 +342,8 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalVo.setEntrustmentId(entrustAddVo.getId());
             // 根据委托单id 进行全部修改
             reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
+            // 驳回操作 test_task 下 report_complete =2
+            taskMapper.updateTestTaskReportComplete(entrustAddVo.getId());
             if(entrustAddVo.getState()!=null){
                 taskMapper.updateEntrustById(entrustAddVo.getId(),7);
             }

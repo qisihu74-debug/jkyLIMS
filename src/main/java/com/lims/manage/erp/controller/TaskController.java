@@ -25,9 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +81,34 @@ public class TaskController {
                 deptIds = dept.split(",");
             }
             return ResultUtil.success("查询任务详情成功！", taskService.getTaskDetailInfoTwo(taskId, deptIds));
+        }
+    }
+
+    /**
+     * 试验开始下 查询任务详情（检测项无价格不展示）——线上使用
+     *
+     * @param taskId
+     * @return
+     */
+    @RequestMapping("/getTaskTestDetails")
+    public Result getTaskTestDetails(Long taskId) {
+        if (taskId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            // 验证登录人信息 和部门 存入
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            if (userInfo == null) {
+                return ResultUtil.error("token 已过期！");
+            }
+
+            // 根据账号 查询有可能包含多个科室 以及下级科室信息
+            String dept = taskService.getDeptIds(userInfo.getUserId());
+            // 科室id集合
+            String[] deptIds = new String[]{};
+            if (dept != null) {
+                deptIds = dept.split(",");
+            }
+            return ResultUtil.success("查询任务详情成功！", taskService.getTaskTestDetails(taskId, deptIds));
         }
     }
 
@@ -262,18 +288,23 @@ public class TaskController {
      * @param taskId
      * @param sampleId
      * @param checkItemId
+     * @param idItem
      * @param response
      */
     @RequestMapping(value = "/downloadOriginalRecord")
     public void downloadOriginalRecord(Long taskId,
                                        Integer sampleId,
                                        Integer checkItemId,
+                                       Integer idItem,
                                        HttpServletResponse response) {
-        OriginalRecordDataVo originalData = taskService.getOriginalData(taskId, sampleId, checkItemId);
+        OriginalRecordDataVo originalData = taskService.getOriginalData(taskId, sampleId, checkItemId,idItem);
         Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
         result.put("result", originalData);
         //从文件服务器获取文件流
         String originalTemplate = taskService.getOriginalTemplateUrl(checkItemId);
+        if(originalTemplate==null){
+            log.error(checkItemId+"\t无原始记录模板为null");
+        }
         String[] split = originalTemplate.split("/");
         String[] split1 = split[4].split("\\?");
         XLSTransformer transformer = new XLSTransformer();
@@ -286,7 +317,7 @@ public class TaskController {
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            String fileName2 = URLEncoder.encode(split[2], "UTF-8");
+            String fileName2 = URLEncoder.encode(split1[0], "UTF-8");
             response.setHeader("Content-Disposition", "attachment;fileName=" + fileName2);
             OutputStream outputStream = response.getOutputStream();
             workbook.write(outputStream);

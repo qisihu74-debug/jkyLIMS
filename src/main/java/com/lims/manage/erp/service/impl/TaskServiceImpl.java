@@ -105,24 +105,21 @@ public class TaskServiceImpl implements TaskService {
             taskDetailInfoVo.setJudgmentBasis(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
         }
         // 根据itemId 查询设备仪器信息集合
-        if(taskDetailInfoVo.getSampleDetailList()!=null&&!taskDetailInfoVo.getSampleDetailList().isEmpty()){
-            for(SampleDetailVo sampleDetailVo :taskDetailInfoVo.getSampleDetailList())
-            {
-                if(sampleDetailVo.getCheckItemInfoList()!=null&&!sampleDetailVo.getCheckItemInfoList().isEmpty()){
-                    for(CheckItemInfoVo checkItemInfoVo:sampleDetailVo.getCheckItemInfoList())
-                    {
-                        List<TestInstrumentEntity>   instrumentEntityList = taskMapper.getInstrumentEntityList(checkItemInfoVo.getItemId());
+        if (taskDetailInfoVo.getSampleDetailList() != null && !taskDetailInfoVo.getSampleDetailList().isEmpty()) {
+            for (SampleDetailVo sampleDetailVo : taskDetailInfoVo.getSampleDetailList()) {
+                if (sampleDetailVo.getCheckItemInfoList() != null && !sampleDetailVo.getCheckItemInfoList().isEmpty()) {
+                    for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+                        List<TestInstrumentEntity> instrumentEntityList = taskMapper.getInstrumentEntityList(checkItemInfoVo.getItemId());
 //                        List<Integer> result = Lists.newArrayList();
                         // 设置数组 存放
                         int[] arrayInt = new int[instrumentEntityList.size()];
-                        if(instrumentEntityList!=null&&!instrumentEntityList.isEmpty()){
+                        if (instrumentEntityList != null && !instrumentEntityList.isEmpty()) {
                             checkItemInfoVo.setTestInstrumentEntityList(instrumentEntityList);
-                            for(int i=0;i<instrumentEntityList.size();i++){
-                                arrayInt[i]=instrumentEntityList.get(0).getId();
+                            for (int i = 0; i < instrumentEntityList.size(); i++) {
+                                arrayInt[i] = instrumentEntityList.get(0).getId();
                             }
                             checkItemInfoVo.setTestInstrumentEntityArray(arrayInt);
-                        }
-                        else {
+                        } else {
                             checkItemInfoVo.setTestInstrumentEntityList(instrumentEntityList);
                             checkItemInfoVo.setTestInstrumentEntityArray(arrayInt);
                         }
@@ -131,6 +128,87 @@ public class TaskServiceImpl implements TaskService {
             }
         }
 
+
+        return taskDetailInfoVo;
+    }
+
+    @Override
+    public TaskDetailInfoVo getTaskTestDetails(Long taskId, String[] deptIds) {
+        TaskListParamVo paramVo = new TaskListParamVo();
+        paramVo.setTaskId(taskId);
+        if (deptIds != null) {
+            // 根据部门id 遍历包含下级部门信息
+            List<Long> ids = new ArrayList<>();
+            for (int i = 0; i < deptIds.length; i++) {
+                ids.add(Long.valueOf(deptIds[i]));
+            }
+            paramVo.setDeptIds(ids);
+        } else {
+            // 查询任务单 所属部门id
+            Long deptId = taskMapper.getTaskDept(taskId);
+            if (deptId == null) {
+                paramVo.setDeptIds(null);
+            } else {
+                List<Long> ids = new ArrayList<>();
+                ids.add(deptId);
+                paramVo.setDeptIds(ids);
+            }
+        }
+        // 处理 委托单的文件链接
+        TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfoTwo(paramVo);
+        if (taskDetailInfoVo.getFileUrl() != null) {
+            String[] array = taskDetailInfoVo.getFileUrl().split(",");
+            taskDetailInfoVo.setArray(array);
+        }
+        // 遍历数据 处理检测项下 检测项价格单位为空不展示。
+        if (taskDetailInfoVo.getSampleDetailList() != null && !taskDetailInfoVo.getSampleDetailList().isEmpty()) {
+
+            for (SampleDetailVo sampleDetailVo : taskDetailInfoVo.getSampleDetailList()) {
+                if (sampleDetailVo.getCheckItemInfoList() != null && !sampleDetailVo.getCheckItemInfoList().isEmpty()) {
+                    Iterator<CheckItemInfoVo> it = sampleDetailVo.getCheckItemInfoList().iterator();
+                    while (it.hasNext()) {
+                        CheckItemInfoVo judgmentBasisVo = it.next();
+                        if (judgmentBasisVo.getCheckPrice() == null) {
+                            it.remove();
+                        }
+                    }
+                }
+            }
+        }
+        // 获取文件附件
+        Long entrustId = taskMapper.getEntrustIdByTaskId(taskId);
+        List<String> strings = entrustEntityMapper.getSampleStandard(entrustId);
+        StringBuilder stringBuilder = new StringBuilder();
+        if (strings != null && !strings.isEmpty()) {
+            for (String str : strings) {
+                stringBuilder.append(str);
+                stringBuilder.append(",");
+            }
+            taskDetailInfoVo.setJudgmentBasis(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+        }
+        // 根据itemId 查询设备仪器信息集合
+        if (taskDetailInfoVo.getSampleDetailList() != null && !taskDetailInfoVo.getSampleDetailList().isEmpty()) {
+            for (SampleDetailVo sampleDetailVo : taskDetailInfoVo.getSampleDetailList()) {
+                if (sampleDetailVo.getCheckItemInfoList() != null && !sampleDetailVo.getCheckItemInfoList().isEmpty()) {
+                    for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+                        List<TestInstrumentEntity> instrumentEntityList = taskMapper.getInstrumentEntityList(checkItemInfoVo.getItemId());
+//                        List<Integer> result = Lists.newArrayList();
+                        // 设置数组 存放
+                        int[] arrayInt = new int[instrumentEntityList.size()];
+                        if (instrumentEntityList != null && !instrumentEntityList.isEmpty()) {
+                            checkItemInfoVo.setTestInstrumentEntityList(instrumentEntityList);
+                            for (int i = 0; i < instrumentEntityList.size(); i++) {
+                                arrayInt[i] = instrumentEntityList.get(0).getId();
+                            }
+                            checkItemInfoVo.setTestInstrumentEntityArray(arrayInt);
+                        } else {
+                            checkItemInfoVo.setTestInstrumentEntityList(instrumentEntityList);
+                            checkItemInfoVo.setTestInstrumentEntityArray(arrayInt);
+                        }
+                    }
+                }
+            }
+        }
 
 
         return taskDetailInfoVo;
@@ -226,10 +304,10 @@ public class TaskServiceImpl implements TaskService {
         List<ReceiveSampleListVo> dataList = taskMapper.getSampleList(paramVo);
         //TODO gjl添加样品状态
         EntrustServiceImpl service = new EntrustServiceImpl();
-        for (ReceiveSampleListVo sampleListVo:dataList) {
+        for (ReceiveSampleListVo sampleListVo : dataList) {
             List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
-            for (SamplePrivateInfoVo samplePrivateInfoVo:sampleList) {
-                String state = service.findStateBySampleId(samplePrivateInfoVo.getId(),entrustEntityMapper,taskMapper);
+            for (SamplePrivateInfoVo samplePrivateInfoVo : sampleList) {
+                String state = service.findStateBySampleId(samplePrivateInfoVo.getId(), entrustEntityMapper, taskMapper);
                 samplePrivateInfoVo.setState(state);
             }
         }
@@ -430,13 +508,13 @@ public class TaskServiceImpl implements TaskService {
             // 补充增加表格数量。
             if (sampleDetailList.size() > 5) {
                 // 3.25 测试表格插入数据
-                 int addRows = sampleDetailList.size()-5;
+                int addRows = sampleDetailList.size() - 5;
                 // 表格插入
                 XWPFDocument doc1 = new XWPFDocument();
-                XWPFTable newTable  = doc1.createTable(addRows,7);  //2行7格
+                XWPFTable newTable = doc1.createTable(addRows, 7);  //2行7格
                 // 创建表格后直接进行存放 后续多余数据
                 List<XWPFTableRow> dataTable = newTable.getRows();
-                int j=0;
+                int j = 0;
                 for (int i = 5; i < sampleDetailList.size(); i++) {
                     SampleDetailVo sampleDetailVo = sampleDetailList.get(i);
                     // 补充表格数据 样品名称
@@ -509,13 +587,19 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public OriginalRecordDataVo getOriginalData(Long taskId, Integer sampleId, Integer checkItemId) {
+    public OriginalRecordDataVo getOriginalData(Long taskId, Integer sampleId, Integer checkItemId, Integer idItem) {
         //生成记录编号
         String recordNumber = "JL-C2105-108-04";
         //获取委托单信息
         EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(taskId);
         //获取样品信息
         TemplateSampleVo sampleVo = sampleEntityMapper.getOriginalSampleInfo(sampleId);
+        // 得到样品信息数据; 分割。
+        sampleVo.setSampleName(sampleVo.getSampleName() + ";");
+        sampleVo.setSampleNumber(sampleVo.getSampleNumber() + ";");
+        sampleVo.setSampleQuantity(sampleVo.getSampleQuantity() + ";");
+        sampleVo.setSampleDesc(sampleVo.getSampleDesc() + ";");
+        sampleVo.setSampleTime(sampleVo.getSampleTime() + ";");
         //获取检测依据
         log.debug("执行上一行完成---------------");
         String checkBasis = taskMapper.getCheckBasis(checkItemId, entrustBaseInfo.getId(), sampleId);
@@ -528,10 +612,20 @@ public class TaskServiceImpl implements TaskService {
                 judgeBasis.append(judgeBasisList.get(i) + "\n");
             }
         }
+        OriginalRecordDataVo result = new OriginalRecordDataVo(recordNumber, entrustBaseInfo, sampleVo, checkBasis, judgeBasis.toString());
         // 检测项 开始检测日期。
 
         // 所使用的设备仪器。
-        OriginalRecordDataVo result = new OriginalRecordDataVo(recordNumber, entrustBaseInfo, sampleVo, checkBasis, judgeBasis.toString());
+        List<TestInstrumentEntity> InstrumentEntityList = taskMapper.getInstrumentEntityList(idItem);
+        if (InstrumentEntityList != null && !InstrumentEntityList.isEmpty()) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (TestInstrumentEntity testInstrumentEntity : InstrumentEntityList) {
+                stringBuilder.append(testInstrumentEntity.getCode());
+                stringBuilder.append(",");
+            }
+            result.setEquipment(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+        }
+
         return result;
     }
 
@@ -558,13 +652,13 @@ public class TaskServiceImpl implements TaskService {
         String upload = "";
         String fileUrlStr = "";
         // 原始名称
-        String fileName="";
+        String fileName = "";
         if (file != null) {
             String name = file.getOriginalFilename();
             String[] strings = name.split("\\.");
             upload = MinIoUtil.upload("upload-original-record", file, entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + "." + strings[strings.length - 1]);
             fileUrlStr = entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + "." + strings[strings.length - 1];
-            fileName = strings[0]+"."+strings[strings.length - 1];
+            fileName = strings[0] + "." + strings[strings.length - 1];
         }
         // 根据任务单主键 获取委托单主键
         if (entrustBaseInfo != null) {
@@ -572,7 +666,7 @@ public class TaskServiceImpl implements TaskService {
                 taskMapper.updateEntrustById(entrustBaseInfo.getId(), 5);
             }
         }
-        return taskMapper.updateOriginalFile(upload, entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId(), fileUrlStr,fileName);
+        return taskMapper.updateOriginalFile(upload, entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId(), fileUrlStr, fileName);
     }
 
     /**
@@ -637,13 +731,13 @@ public class TaskServiceImpl implements TaskService {
                 }
                 // 通过委托单id 和部门ID为条件  遍历（判断每个状态 state = 3 复核通过。 改变任务单 6 否则 任务单还是为试验完成）
                 List<Integer> states = testDetectionDao.getSampleCheckitemRelDetailState(sampleItemInstrumentEntity2.getEntrustId(), sampleItemInstrumentEntity2.getDeptId());
-                for(Integer stateItem : states){
-                    if(stateItem!=3){
+                for (Integer stateItem : states) {
+                    if (stateItem != 3) {
                         return "当前任务单下检测项未全部复核成功";
                     }
                 }
                 // 修改test_task state 状态 为6：
-               Long testTaskId =  taskMapper.getTestTaskId(sampleItemInstrumentEntity2.getEntrustId(),sampleItemInstrumentEntity2.getDeptId());
+                Long testTaskId = taskMapper.getTestTaskId(sampleItemInstrumentEntity2.getEntrustId(), sampleItemInstrumentEntity2.getDeptId());
                 TaskTestEntity taskTestEntity = new TaskTestEntity();
                 taskTestEntity.setId(testTaskId);
                 taskTestEntity.setState(6);

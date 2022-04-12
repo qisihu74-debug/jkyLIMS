@@ -226,11 +226,13 @@
         standard_id,
         method_id,
         times,
-        unit_price
+        unit_price,
+        check_item_name
         )
         VALUES
         <foreach collection="sampleItemList" item="item" open="" separator="," close="">
-            (#{item.sampleId},#{item.entrustId},#{item.checkItemId},#{item.standardId},#{item.methodId},#{item.times},#{item.unitPrice})
+            (#{item.sampleId},#{item.entrustId},#{item.checkItemId},#{item.standardId},#{item.methodId},#{item.times},#{item.unitPrice},
+            #{item.checkItemName})
         </foreach>
     </insert>
 

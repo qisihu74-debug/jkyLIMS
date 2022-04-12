@@ -58,6 +58,10 @@ public class CheckItemInfoVo {
      * 检测样次
      */
     private int times;
+    /**
+     * 检测依据集合
+     */
+    private List<LabelValueVo> checkBasisList;
 
     public CheckItemInfoVo() {
     }

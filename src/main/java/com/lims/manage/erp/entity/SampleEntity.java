@@ -2,6 +2,7 @@ package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.SampleAddDetailVo;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import lombok.Data;
@@ -121,6 +122,10 @@ public class SampleEntity {
      */
     private List<JudgmentBasisVo> standardFileIdStr;
     /**
+     * 产品可选的全部判定依据
+     */
+    private List<LabelValueVo> allStandardFileList;
+    /**
      * 样品依据 ID 和名称
      */
     /**
@@ -177,7 +182,6 @@ public class SampleEntity {
      * 样品下检测项、检测依据、总价 String 表示
      */
    private  List<JudgmentBasisVo> judgmentBasisVoStr;
-
 
     public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo, String sampleName, String sampleCode, String pictureUrl, String insertFlag) {
         this.productId = addParamVo.getSampleName();

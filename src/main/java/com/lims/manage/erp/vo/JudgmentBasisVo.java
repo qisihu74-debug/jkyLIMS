@@ -2,6 +2,8 @@ package com.lims.manage.erp.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Author: DLC
  * @Date: 2021/12/6 11:48
@@ -35,7 +37,7 @@ public class JudgmentBasisVo {
      */
     private Integer checkItemId;
     /**
-     *检测次数
+     * 检测次数
      */
     private Integer times;
     /**
@@ -58,4 +60,8 @@ public class JudgmentBasisVo {
      * 检测室
      */
     private String testingRoom;
+    /**
+     * 检测项全部的检测依据
+     */
+    private List<LabelValueVo> checkBasisList;
 }

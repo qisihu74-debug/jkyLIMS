@@ -116,6 +116,13 @@ public interface EntrustService {
     EntrustAddVo getEntrustHistoryDetail(Long entrustmentId);
 
     /**
+     * 分布委托信息 具体详情
+     * @param entrustmentId
+     * @return
+     */
+    EntrustAddVo getEntrustDistributionDetail(Long entrustmentId);
+
+    /**
      * 根据检测项ID查询可以做的团队
      * @param checkItemId
      * @return
@@ -179,4 +186,19 @@ public interface EntrustService {
      * @return
      */
     String getMessage();
+    /**
+     * 查询产品所有的检测项及检测项的检测依据
+     *
+     * @param productId
+     * @return
+     */
+    List<CheckItemDetailVo> getCheckItemBasis(Integer productId);
+
+    /**
+     * 查询检测项详情：检测项名称，检测项方法，规格型号，检测依据
+     *
+     * @param ids
+     * @return
+     */
+    List<CheckItemInfoVo> getCheckItemInfo(List<Integer> ids);
 }

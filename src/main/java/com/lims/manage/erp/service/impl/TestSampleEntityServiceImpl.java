@@ -1,6 +1,5 @@
 package com.lims.manage.erp.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -9,9 +8,9 @@ import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.service.TestSampleEntityService;
-import com.lims.manage.erp.vo.SampleEntrustAddVo;
-import com.lims.manage.erp.vo.SampleSimpleListVo;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
+import com.lims.manage.erp.vo.SampleJudgeBasisVo;
+import com.lims.manage.erp.vo.SampleSimpleListVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -72,9 +71,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     @Override
     public TestSampleEntity sampleDetail(Integer id) {
         TestSampleEntity entity = testSampleEntityMapper.selectByPrimaryKey(id);
-        if(entity != null){
+        if (entity != null) {
             String outward = entity.getOutward();
-            if(outward != null){
+            if (outward != null) {
                 String replace = outward.replace("[", "");
                 String replace1 = replace.replace("]", "");
                 String[] split = replace1.split(",");

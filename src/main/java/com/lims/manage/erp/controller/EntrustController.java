@@ -235,12 +235,12 @@ public class EntrustController {
 
     /**
      * 查询检测项详情：检测项名称，检测项方法，规格型号，检测依据
-     *
+     *      旧版不带检测依据
      * @param itemIds
      * @return
      */
-    @RequestMapping("/getItemDetail")
-    public Result getItemDetail(@RequestBody CheckItemParamVo itemIds) {
+    @RequestMapping("/getItemDetailOld")
+    public Result getItemDetailOld(@RequestBody CheckItemParamVo itemIds) {
         if (itemIds == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
@@ -287,7 +287,7 @@ public class EntrustController {
     }
 
     /**
-     * 查询历史委托信息详情
+     * 历史委托信息详情查询
      *
      * @param entrustmentId
      * @return
@@ -295,6 +295,17 @@ public class EntrustController {
     @RequestMapping("/get_entrust_history_detail")
     public Result getEntrustHistoryDetail(Long entrustmentId) {
         return ResultUtil.success(entrustService.getEntrustHistoryDetail(entrustmentId));
+    }
+
+    /**
+     * 分布委托信息详情查询
+     *
+     * @param entrustmentId
+     * @return
+     */
+    @RequestMapping("/get_entrust_distribution_detail")
+    public Result getEntrustDistributionDetail(Long entrustmentId) {
+        return ResultUtil.success(entrustService.getEntrustDistributionDetail(entrustmentId));
     }
 
     /**
@@ -484,6 +495,36 @@ public class EntrustController {
                 historyData = new HistoryEntrustDataVo();
             }
             return ResultUtil.success(historyData);
+        }
+    }
+
+    /**
+     * 查询产品所有的检测项及检测项的检测依据
+     *
+     * @param productId
+     * @return
+     */
+    @RequestMapping("/getCheckItemBasis")
+    public Result getCheckItemBasis(Integer productId) {
+        if (productId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            return ResultUtil.success(entrustService.getCheckItemBasis(productId));
+        }
+    }
+
+    /**
+     * 查询检测项详情：检测项名称，检测项方法，规格型号，检测依据
+     *
+     * @param itemIds
+     * @return
+     */
+    @RequestMapping("/getItemDetail")
+    public Result getItemDetail(@RequestBody CheckItemParamVo itemIds) {
+        if (itemIds == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            return ResultUtil.success(entrustService.getCheckItemInfo(itemIds.getIds()));
         }
     }
 }

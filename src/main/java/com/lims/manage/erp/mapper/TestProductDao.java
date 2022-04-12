@@ -67,4 +67,6 @@ public interface TestProductDao extends BaseMapper<TestProduct> {
     IPage<TestProductVo> getPageList(IPage<TestProductVo> page, @Param(Constants.WRAPPER) Wrapper<TestProduct> queryWrapper);
 
     int isLast(Integer checkItemId);
+
+    List<LabelValueVo> getAllCheckBasis(Integer checkItemId);
 }

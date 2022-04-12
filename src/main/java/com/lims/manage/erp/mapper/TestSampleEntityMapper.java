@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.vo.SampleJudgeBasisVo;
 import com.lims.manage.erp.vo.SampleSimpleListVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -42,4 +43,11 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
      * @return
      */
     List<SampleSimpleListVo> getSimpleList(TestSampleEntity entity);
+
+    /**
+     * 新增委托--导入样品列表--带判定依据
+     * @param entity
+     * @return
+     */
+    List<SampleJudgeBasisVo> querySampleJudgeBasisList(TestSampleEntity entity);
 }
