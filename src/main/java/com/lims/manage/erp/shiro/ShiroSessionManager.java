@@ -44,7 +44,8 @@ public class ShiroSessionManager extends DefaultWebSessionManager {
         //如果请求头中存在token 则从请求头中获取token
         if (StringUtils.isNotEmpty(token)) {
             //校验token是否存在
-            Object o = redisUtils.get("shiro:session:" + token);
+            String key = "shiro:session:" + token;
+            Object o = redisUtils.get("\""+key+"\"");
             if (o == null){
                 throw new JkyException("token不合法或已过期");
             }
