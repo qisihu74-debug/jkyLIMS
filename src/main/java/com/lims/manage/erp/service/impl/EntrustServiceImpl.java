@@ -361,7 +361,7 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
         // 通过委托单id 获取公司名称。
-        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(),1));
+        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(), 1));
         // 通过委托单位和类型 查看联系人和手机号是否存在
         TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
         if (basisInfo.getEntrustCompany() != null && basisInfo.getEntrustPeople() != null && basisInfo.getEntrustPhone() != null) {
@@ -583,7 +583,7 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
         // 通过委托单id 获取公司名称。
-        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(),1));
+        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(), 1));
         // 通过委托单位和类型 查看联系人和手机号是否存在
         TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
         if (basisInfo.getEntrustCompany() != null && basisInfo.getEntrustPeople() != null && basisInfo.getEntrustPhone() != null) {
