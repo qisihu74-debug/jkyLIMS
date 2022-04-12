@@ -1083,6 +1083,7 @@ public class EntrustServiceImpl implements EntrustService {
                         List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
                         data.setTestingRoomList(testingRoomList);
                     }
+                    sampleEntity.setJudgmentBasisVos(list);
                 }
             } else {
                 sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
