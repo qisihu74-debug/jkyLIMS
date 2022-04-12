@@ -27,6 +27,10 @@ public class EntrustAddVo {
      */
     private String entrustCompany;
     /**
+     * 委托单位id
+     */
+    private Integer entrustCompanyId;
+    /**
      * 委托人
      */
     private String entrustPeople;

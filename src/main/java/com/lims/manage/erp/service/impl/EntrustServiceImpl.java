@@ -321,7 +321,8 @@ public class EntrustServiceImpl implements EntrustService {
                                 entity1.setMethodId(entity.getMethodId());
                                 entity1.setStandardId(entity.getStandardId());
                                 entity1.setTimes(entity.getTimes());
-                                entity1.setCheckItemName(entity.getCheckItemName());
+                                // 比对检测项父级名称 进行存储例如：（）。
+//                                entity1.setCheckItemName(entity.getCheckItemName());
                             }
                             entityMapper.BatchSaveEntrustSampleItem(ItemList);
                         }
@@ -359,6 +360,8 @@ public class EntrustServiceImpl implements EntrustService {
             }
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
+        // 通过委托单id 获取公司名称。
+        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(),1));
         // 通过委托单位和类型 查看联系人和手机号是否存在
         TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
         if (basisInfo.getEntrustCompany() != null && basisInfo.getEntrustPeople() != null && basisInfo.getEntrustPhone() != null) {
@@ -369,9 +372,9 @@ public class EntrustServiceImpl implements EntrustService {
             String entrustCompanystr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (entrustCompanystr == null) {
                 // 保存新的委托联系人姓名 和所属委托单位公司id
-                Integer companyId = entityMapper.getCompanyId(basisInfo.getEntrustCompany(), 1);
+//                Integer companyId = entityMapper.getCompanyId(basisInfo.getEntrustCompany(), 1);
                 TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
-                testCustomerEntity.setCompanyId(companyId);
+                testCustomerEntity.setCompanyId(basisInfo.getEntrustCompanyId());
                 testCustomerEntity.setContacts(basisInfo.getEntrustPeople());
                 testCustomerEntity.setPhone(basisInfo.getEntrustPhone());
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
@@ -579,6 +582,8 @@ public class EntrustServiceImpl implements EntrustService {
             }
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
+        // 通过委托单id 获取公司名称。
+        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(),1));
         // 通过委托单位和类型 查看联系人和手机号是否存在
         TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
         if (basisInfo.getEntrustCompany() != null && basisInfo.getEntrustPeople() != null && basisInfo.getEntrustPhone() != null) {
@@ -589,9 +594,9 @@ public class EntrustServiceImpl implements EntrustService {
             String entrustCompanystr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (entrustCompanystr == null) {
                 // 保存新的委托联系人姓名 和所属委托单位公司id
-                Integer companyId = entityMapper.getCompanyId(basisInfo.getEntrustCompany(), 1);
+//                Integer companyId = entityMapper.getCompanyId(basisInfo.getEntrustCompany(), 1);
                 TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
-                testCustomerEntity.setCompanyId(companyId);
+                testCustomerEntity.setCompanyId(basisInfo.getEntrustCompanyId());
                 testCustomerEntity.setContacts(basisInfo.getEntrustPeople());
                 testCustomerEntity.setPhone(basisInfo.getEntrustPhone());
                 testCustomerDao.insertTestCustomer(testCustomerEntity);

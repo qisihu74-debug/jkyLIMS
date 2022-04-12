@@ -130,7 +130,7 @@ public interface EntrustService {
     List<LabelValueVo> getDept(Integer checkItemId);
 
     /**
-     * 历史委托信息 具体详情 测试
+     * 历史委托信息 具体详情
      * @param entrustmentId
      * @return
      */

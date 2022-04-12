@@ -224,6 +224,22 @@ public interface EntrustEntityMapper extends BaseMapper {
     Integer getCompanyId(@Param(value = "name") String name, @Param(value = "type")Integer type);
 
     /**
+     * 通过委托单位id 和type 获取公司名称。
+     * @param companyId
+     * @param type
+     * @return
+     */
+    @Select("SELECT\n" +
+            "company_name\n" +
+            "FROM\n" +
+            "test_company\n" +
+            "WHERE\n" +
+            "company_id = #{companyId}\n" +
+            "AND type = #{type}\n" +
+            "LIMIT 1")
+    String getCompanyNameId(@Param(value = "companyId") Integer companyId, @Param(value = "type")Integer type);
+
+    /**
      * 根据检测项ID查询可以做的团队
      * @param checkItemId
      * @return

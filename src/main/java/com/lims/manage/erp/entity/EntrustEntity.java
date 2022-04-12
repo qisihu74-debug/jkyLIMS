@@ -25,9 +25,13 @@ public class EntrustEntity {
      */
     private String businessAcceptor;
     /**
-     * 委托单位ID
+     * 委托单位名称
      */
     private String entrustCompany;
+    /**
+     * 委托单位id
+     */
+    private Integer entrustCompanyId;
     /**
      * 委托人
      */
@@ -273,6 +277,7 @@ public class EntrustEntity {
         this.samplingMethod=vo.getSamplingMethod();
         this.reportType=vo.getReportType();
         this.entrustCompany=vo.getEntrustCompany();
+        this.entrustCompanyId=vo.getEntrustCompanyId();
         this.entrustPeople=vo.getEntrustPeople();
         this.entrustPhone=vo.getEntrustPhone();
         this.witnessUint=vo.getWitnessUint();
