@@ -320,7 +320,7 @@ public class EntrustController {
     }
 
     /**
-     * 查询历史委托信息详情 测试 废弃
+     * 查询历史委托信息详情
      *
      * @param id
      * @return

@@ -10,6 +10,7 @@
                entrustment_no,
                entrust_type,
                entrust_company,
+               entrust_company_id,
                entrust_people,
                entrust_phone,
                witness_uint,
@@ -196,6 +197,7 @@
                 and t1.state = #{state}
             </if>
         </trim>
+        GROUP BY t1.entrustment_no
         ORDER BY t1.entrustment_no DESC
     </select>
     <insert id="BatchSaveEntrustSample" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
@@ -288,7 +290,8 @@
                                         unit_water_use,
                                         sand_ratio,
                                         design_slump,
-                                        mixing_way)
+                                        mixing_way,
+                                        entrust_company_id)
         values (#{id},
                 #{entrustmentNo},
                 #{entrustType},
@@ -332,7 +335,8 @@
                 #{unitWaterUse},
                 #{sandRatio},
                 #{designSlump},
-                #{mixingWay})
+                #{mixingWay},
+                #{entrustCompanyId})
 
     </insert>
     <select id="GetDelegateInformation" resultType="String">
@@ -352,6 +356,7 @@
             <if test="entrustType!=null and entrustType!=''">entrust_type=#{entrustType},</if>
             <if test="businessAcceptor!=null and businessAcceptor!=''">business_acceptor=#{businessAcceptor},</if>
             <if test="entrustCompany != null and entrustCompany!=''">entrust_company=#{entrustCompany},</if>
+            <if test="entrustCompanyId != null">entrust_company_id=#{entrustCompanyId},</if>
             <if test="entrustPeople != null and entrustPeople!=''">entrust_people=#{entrustPeople},</if>
             <if test="entrustPhone != null and entrustPhone!=''">entrust_phone=#{entrustPhone},</if>
             <if test="witnessUint != null and witnessUint!=''">witness_uint=#{witnessUint},</if>
