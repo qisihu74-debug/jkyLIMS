@@ -401,7 +401,7 @@ public class EntrustController {
         }
         // 下单时间=orderTime (委托单转任务单的时间)
         entity.setOrderTime(new java.sql.Date(System.currentTimeMillis()));
-        Boolean flag = entrustService.distributionTask(entity);
+        Boolean flag = entrustService.distributionTask412(entity);
         if (flag) {
             /*logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"账户："+ShiroUtils.getUserInfo().getUsername()+"发布任务成功编号为："+vo.getEntrustmentNo(),
                     Const.ENTRUST_PUBLISH,true);*/
