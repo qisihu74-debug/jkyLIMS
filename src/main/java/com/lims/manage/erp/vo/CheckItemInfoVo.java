@@ -62,6 +62,10 @@ public class CheckItemInfoVo {
      * 检测依据集合
      */
     private List<LabelValueVo> checkBasisList;
+    /**
+     * 检测项父ID
+     */
+    private Integer checkItemPid;
 
     public CheckItemInfoVo() {
     }
