@@ -130,7 +130,7 @@ public interface EntrustService {
     List<LabelValueVo> getDept(Integer checkItemId);
 
     /**
-     * 历史委托信息 具体详情 测试
+     * 历史委托信息 具体详情
      * @param entrustmentId
      * @return
      */
@@ -149,6 +149,15 @@ public interface EntrustService {
      * @return
      */
     Boolean distributionTask(TaskVo entity);
+
+    /**
+     * 任务发布4.12日修改
+     * 修改报告的制作单位选择样式
+     * 权限放到task表
+     * @param entity
+     * @return
+     */
+    Boolean distributionTask412(TaskVo entity);
 
     /**
      * 填充数据

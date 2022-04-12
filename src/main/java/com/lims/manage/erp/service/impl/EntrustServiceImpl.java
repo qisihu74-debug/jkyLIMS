@@ -321,7 +321,8 @@ public class EntrustServiceImpl implements EntrustService {
                                 entity1.setMethodId(entity.getMethodId());
                                 entity1.setStandardId(entity.getStandardId());
                                 entity1.setTimes(entity.getTimes());
-                                entity1.setCheckItemName(entity.getCheckItemName());
+                                // 比对检测项父级名称 进行存储例如：（）。
+//                                entity1.setCheckItemName(entity.getCheckItemName());
                             }
                             entityMapper.BatchSaveEntrustSampleItem(ItemList);
                         }
@@ -359,6 +360,8 @@ public class EntrustServiceImpl implements EntrustService {
             }
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
+        // 通过委托单id 获取公司名称。
+        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(),1));
         // 通过委托单位和类型 查看联系人和手机号是否存在
         TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
         if (basisInfo.getEntrustCompany() != null && basisInfo.getEntrustPeople() != null && basisInfo.getEntrustPhone() != null) {
@@ -369,9 +372,9 @@ public class EntrustServiceImpl implements EntrustService {
             String entrustCompanystr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (entrustCompanystr == null) {
                 // 保存新的委托联系人姓名 和所属委托单位公司id
-                Integer companyId = entityMapper.getCompanyId(basisInfo.getEntrustCompany(), 1);
+//                Integer companyId = entityMapper.getCompanyId(basisInfo.getEntrustCompany(), 1);
                 TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
-                testCustomerEntity.setCompanyId(companyId);
+                testCustomerEntity.setCompanyId(basisInfo.getEntrustCompanyId());
                 testCustomerEntity.setContacts(basisInfo.getEntrustPeople());
                 testCustomerEntity.setPhone(basisInfo.getEntrustPhone());
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
@@ -579,6 +582,8 @@ public class EntrustServiceImpl implements EntrustService {
             }
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
+        // 通过委托单id 获取公司名称。
+        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(),1));
         // 通过委托单位和类型 查看联系人和手机号是否存在
         TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
         if (basisInfo.getEntrustCompany() != null && basisInfo.getEntrustPeople() != null && basisInfo.getEntrustPhone() != null) {
@@ -589,9 +594,9 @@ public class EntrustServiceImpl implements EntrustService {
             String entrustCompanystr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (entrustCompanystr == null) {
                 // 保存新的委托联系人姓名 和所属委托单位公司id
-                Integer companyId = entityMapper.getCompanyId(basisInfo.getEntrustCompany(), 1);
+//                Integer companyId = entityMapper.getCompanyId(basisInfo.getEntrustCompany(), 1);
                 TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
-                testCustomerEntity.setCompanyId(companyId);
+                testCustomerEntity.setCompanyId(basisInfo.getEntrustCompanyId());
                 testCustomerEntity.setContacts(basisInfo.getEntrustPeople());
                 testCustomerEntity.setPhone(basisInfo.getEntrustPhone());
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
@@ -1068,16 +1073,17 @@ public class EntrustServiceImpl implements EntrustService {
                 List<JudgmentBasisVo> list = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
                 if (list != null && !list.isEmpty()) {
                     // 根据检测项id 查询 默认匹配部门信息
+                    for (JudgmentBasisVo data : list) {
+                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
+                        data.setTestingRoom(strings.toString());
+                    }
+                    sampleEntity.setJudgmentBasisVos(list);
+//                    //根据检测项ID查询可做该检测项的科室labelvalue集合
 //                    for (JudgmentBasisVo data : list) {
-//                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
-//                        data.setTestingRoom(strings.toString());
+//                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
+//                        data.setTestingRoomList(testingRoomList);
 //                    }
 //                    sampleEntity.setJudgmentBasisVos(list);
-                    //根据检测项ID查询可做该检测项的科室labelvalue集合
-                    for (JudgmentBasisVo data : list) {
-                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
-                        data.setTestingRoomList(testingRoomList);
-                    }
                 }
             } else {
                 sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
@@ -1133,6 +1139,8 @@ public class EntrustServiceImpl implements EntrustService {
                     for (JudgmentBasisVo data : list) {
                         List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
                         data.setTestingRoom(strings.toString());
+                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
+                        data.setTestingRoomList(testingRoomList);
                     }
                     sampleEntity.setJudgmentBasisVos(list);
                 }
@@ -1275,6 +1283,56 @@ public class EntrustServiceImpl implements EntrustService {
             vo.setOrderer(ShiroUtils.getUserInfo().getName());
 //            if(deptId.equals(dept)){
             if (dept.contains(deptId)) {
+                vo.setIssueReport("是");
+            } else {
+                vo.setIssueReport("否");
+            }
+            vos.add(vo);
+        }
+        //任务单保存
+        taskMapper.batchSave(vos);
+        //更新检测项信息
+        taskMapper.batchUpdateCheckItem(entity.getCheckItemDeptVoList());
+        //更新委托单状态
+        taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
+        return true;
+    }
+
+    @Override
+    public Boolean distributionTask412(TaskVo entity) {
+        List<Long> deptIds = Lists.newArrayList();
+        List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
+        for (CheckItemDeptVo vo : checkItemDeptVoList) {
+            if (!deptIds.contains(vo.getDeptId())) {
+                deptIds.add(vo.getDeptId());
+            }
+        }
+        //创建任务对象
+        List<TaskVo> vos = Lists.newArrayList();
+        for (Long deptId : deptIds) {
+            TaskVo vo = new TaskVo();
+            vo.setId(GenID.getID());
+            String teamCode = taskMapper.getTeamCode(deptId);
+            Integer integer = taskMapper.selectMaxNoByCode(teamCode);
+            Integer code = null;
+            if (integer == null) {
+                String currentTime = DateUtil.getTodayString().substring(2, 6);
+                code = Integer.parseInt(currentTime + "001");
+            } else {
+                code = integer + 1;
+            }
+            String codeStr = code + "";
+            vo.setDeptId(deptId);
+            vo.setCode(codeStr);
+            vo.setTaskCode(teamCode + codeStr.substring(0, 4) + "-" + codeStr.substring(4, 7));
+            vo.setEntrustmentId(entity.getEntrustmentId());
+            vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
+            vo.setOrderTime(entity.getOrderTime());
+            vo.setState(0);
+            vo.setReportComplete(2);
+            vo.setOrderer(ShiroUtils.getUserInfo().getName());
+//            if(deptId.equals(dept)){
+            if (entity.getDeptIds().contains(deptId)) {
                 vo.setIssueReport("是");
             } else {
                 vo.setIssueReport("否");

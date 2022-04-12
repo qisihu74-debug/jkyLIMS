@@ -230,6 +230,7 @@
                 #{id}
             </foreach>
         </if>
+        GROUP BY t2.id
     </select>
 
     <select id="reportDownloadList" resultType="com.lims.manage.erp.vo.ReportListVo">

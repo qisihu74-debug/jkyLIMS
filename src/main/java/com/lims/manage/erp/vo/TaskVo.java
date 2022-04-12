@@ -57,5 +57,9 @@ public class TaskVo {
      * 检测项分配的科室、分配时间、是否需要出具报告
      */
     List<CheckItemDeptVo> checkItemDeptVoList;
+    /**
+     * 出报告科室ID集合
+     */
+    private List<Long> deptIds;
 
 }
