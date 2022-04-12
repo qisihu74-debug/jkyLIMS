@@ -1527,7 +1527,33 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<CheckItemInfoVo> getCheckItemInfo(List<Integer> ids) {
-        return itemEntityMapper.getItemInfo3(ids);
+        List<CheckItemInfoVo> result = Lists.newArrayList();
+        result.addAll(itemEntityMapper.getItemInfo3(ids));
+        if(!CollectionUtils.isEmpty(result)){
+            for (CheckItemInfoVo checkItemInfoVo : result) {
+                if(checkItemInfoVo.getCheckItemPid() != 0){
+                    checkItemInfoVo.setCheckItemName(getAllLevelName(checkItemInfoVo.getCheckItemPid())
+                            +checkItemInfoVo.getCheckItemName());
+                }
+            }
+        }
+        return result;
+    }
+
+    private String getAllLevelName(Integer checkItemPid){
+        StringBuilder prefix = new StringBuilder();
+        List<String> temp = Lists.newArrayList();
+        Integer pid = checkItemPid;
+        while (pid != 0){
+            CheckItemDetailVo parentInfo = itemEntityMapper.getParentInfo(checkItemPid);
+            temp.add(parentInfo.getCheckItemName());
+            Integer itemPid = parentInfo.getItemPid();
+            pid = parentInfo.getItemPid();
+        }
+        for (int i = temp.size()-1; i >=0 ; i--) {
+            prefix.append(temp.get(i)).append("-");
+        }
+        return prefix.toString();
     }
 
 }

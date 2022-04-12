@@ -72,5 +72,10 @@ public interface ProductItemEntityMapper {
      */
     List<CheckItemInfoVo> getItemInfo3(@Param("checkIds")List<Integer> checkIds);
 
-
+    /**
+     * 查询父名称、父ID
+     * @param checkItemPid
+     * @return
+     */
+    CheckItemDetailVo getParentInfo(Integer checkItemPid);
 }
