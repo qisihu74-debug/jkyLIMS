@@ -321,6 +321,7 @@ public class EntrustServiceImpl implements EntrustService {
                                 entity1.setMethodId(entity.getMethodId());
                                 entity1.setStandardId(entity.getStandardId());
                                 entity1.setTimes(entity.getTimes());
+                                entity1.setCheckItemName(entity.getCheckItemName());
                                 // 比对检测项父级名称 进行存储例如：（）。
 //                                entity1.setCheckItemName(entity.getCheckItemName());
                             }
