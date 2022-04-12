@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestProductItem;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
@@ -39,5 +40,19 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
      * @return
      */
     List<Long> getChirldsByIds(@Param("ids") Set<Long> ids);
+
+    /**
+     * 根据报告模板url获取该报告模板中检测项ids
+     * @param url
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tpt.report_model_id \n" +
+            "FROM\n" +
+            "\ttest_report_template rt\n" +
+            "\tLEFT JOIN test_product_item pt ON rt.id = pt.report_model_id \n" +
+            "WHERE\n" +
+            "\trt.report_file_uri = #{url}")
+    List<Long> getItemsByTemplateUrl(@Param("url") String url);
 }
 
