@@ -1073,17 +1073,17 @@ public class EntrustServiceImpl implements EntrustService {
                 List<JudgmentBasisVo> list = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
                 if (list != null && !list.isEmpty()) {
                     // 根据检测项id 查询 默认匹配部门信息
-//                    for (JudgmentBasisVo data : list) {
-//                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
-//                        data.setTestingRoom(strings.toString());
-//                    }
-//                    sampleEntity.setJudgmentBasisVos(list);
-                    //根据检测项ID查询可做该检测项的科室labelvalue集合
                     for (JudgmentBasisVo data : list) {
-                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
-                        data.setTestingRoomList(testingRoomList);
+                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
+                        data.setTestingRoom(strings.toString());
                     }
                     sampleEntity.setJudgmentBasisVos(list);
+//                    //根据检测项ID查询可做该检测项的科室labelvalue集合
+//                    for (JudgmentBasisVo data : list) {
+//                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
+//                        data.setTestingRoomList(testingRoomList);
+//                    }
+//                    sampleEntity.setJudgmentBasisVos(list);
                 }
             } else {
                 sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
