@@ -266,12 +266,12 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     @Select("SELECT\n" +
             "\tc.check_item_id,\n" +
-            "\tc.check_price as unitPrice \n" +
+            "\tc.check_price as unitPrice,c.check_item_name \n" +
             "FROM\n" +
             "\t(\n" +
             "\t\tSELECT\n" +
             "\t\t\ta.check_item_id,\n" +
-            "\t\t\ta.check_price,\n" +
+            "\t\t\ta.check_price,a.check_item_name,\n" +
             "\t\tIF (\n" +
             "\t\t\tFIND_IN_SET(a.check_item_pid ,@pids) > 0,\n" +
             "\n" +
@@ -297,7 +297,7 @@ public interface EntrustEntityMapper extends BaseMapper {
             "\t\t\tSELECT\n" +
             "\t\t\t  r.check_price,\n" +
             "\t\t\t\tr.check_item_id,\n" +
-            "\t\t\t\tr.check_item_pid\n" +
+            "\t\t\t\tr.check_item_pid,r.check_item_name\n" +
             "\t\t\tFROM\n" +
             "\t\t\t\ttest_product_item r\n" +
             "\t\t) a,\n" +
@@ -306,6 +306,13 @@ public interface EntrustEntityMapper extends BaseMapper {
             "WHERE\n" +
             "\tc.ischild != 0 ")
     List<SampleItemEntity> getyItemList(Long checkItemId);
+
+    /**
+     * 通过检测项主键递归查询。
+     * @param checkItemId
+     * @return
+     */
+    List<SampleItemEntity> getItemRecursionList(Long checkItemId);
 
     /**
      * 判断样品是否存在

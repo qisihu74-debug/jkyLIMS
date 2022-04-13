@@ -27,6 +27,10 @@ public class SampleItemEntity {
      */
     private Long checkItemId;
     /**
+     * 检测项Pid
+     */
+    private Long checkItemPid;
+    /**
      * 仪器id
      */
     private Integer instrumentId;

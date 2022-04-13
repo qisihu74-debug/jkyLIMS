@@ -131,6 +131,7 @@ public interface EntrustService {
 
     /**
      * 历史委托信息 具体详情
+     * 修改委托时 修改样品时 查询详情 线上使用 丁
      * @param entrustmentId
      * @return
      */

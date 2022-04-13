@@ -307,7 +307,23 @@ public class EntrustServiceImpl implements EntrustService {
                 if (!CollectionUtils.isEmpty(sampleCheckItem)) {
                     for (SampleItemEntity entity : sampleCheckItem) {
                         // 根据检测项id 遍历检测项层级和价格 获取集合
-                        List<SampleItemEntity> ItemList = entityMapper.getyItemList(entity.getCheckItemId());
+                        List<SampleItemEntity> ItemList = entityMapper.getItemRecursionList(entity.getCheckItemId());
+                        //处理检测项 遍历出来的层级数据 拼接层级名。
+                        HashMap<Long,SampleItemEntity> itemMap = new HashMap<>();
+                        if (!CollectionUtils.isEmpty(ItemList)) {
+                            for (SampleItemEntity entity0 : ItemList) {
+                                itemMap.put(entity0.getCheckItemId(),entity0);
+                            }
+                            for (SampleItemEntity entity2 : ItemList) {
+                                SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
+                                if(sampleItemEntity!=null){
+                                    // 变更检测项名为： 伪造a-伪造b
+                                    entity2.setCheckItemName(sampleItemEntity.getCheckItemName()+"-"+entity2.getCheckItemName());
+                                }
+                            }
+                        }
+                        // 根据检测项id 遍历检测项层级和价格 获取集合
+//                        List<SampleItemEntity> ItemList = entityMapper.getyItemList(entity.getCheckItemId());
                         if (!CollectionUtils.isEmpty(ItemList)) {
                             for (SampleItemEntity entity1 : ItemList) {
                                 //计算检测项总价钱
@@ -321,7 +337,9 @@ public class EntrustServiceImpl implements EntrustService {
                                 entity1.setMethodId(entity.getMethodId());
                                 entity1.setStandardId(entity.getStandardId());
                                 entity1.setTimes(entity.getTimes());
-                                entity1.setCheckItemName(entity.getCheckItemName());
+                                if(entity1.getUnitPrice()==null){
+                                    entity1.setCheckItemName(entity.getCheckItemName()+"-"+entity1.getCheckItemName());
+                                }
                                 // 比对检测项父级名称 进行存储例如：（）。
 //                                entity1.setCheckItemName(entity.getCheckItemName());
                             }
@@ -813,7 +831,21 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                     for (SampleItemEntity entity : sampleCheckItem) {
                         // 根据检测项id 遍历检测项层级和价格 获取集合
-                        List<SampleItemEntity> ItemList = entityMapper.getyItemList(entity.getCheckItemId());
+                        List<SampleItemEntity> ItemList = entityMapper.getItemRecursionList(entity.getCheckItemId());
+                        //处理检测项 遍历出来的层级数据 拼接层级名。
+                        HashMap<Long,SampleItemEntity> itemMap = new HashMap<>();
+                        if (!CollectionUtils.isEmpty(ItemList)) {
+                            for (SampleItemEntity entity0 : ItemList) {
+                                itemMap.put(entity0.getCheckItemId(),entity0);
+                            }
+                            for (SampleItemEntity entity2 : ItemList) {
+                                SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
+                                if(sampleItemEntity!=null){
+                                    // 变更检测项名为： 伪造a-伪造b
+                                    entity2.setCheckItemName(sampleItemEntity.getCheckItemName()+"-"+entity2.getCheckItemName());
+                                }
+                            }
+                        }
                         if (!CollectionUtils.isEmpty(ItemList)) {
                             for (SampleItemEntity entity1 : ItemList) {
                                 //计算检测项总价钱
@@ -827,6 +859,9 @@ public class EntrustServiceImpl implements EntrustService {
                                 entity1.setMethodId(entity.getMethodId());
                                 entity1.setStandardId(entity.getStandardId());
                                 entity1.setTimes(entity.getTimes());
+                                if(entity1.getUnitPrice()==null){
+                                    entity1.setCheckItemName(entity.getCheckItemName()+"-"+entity1.getCheckItemName());
+                                }
                                 if (map.get(entity1.getCheckItemId()) == null) {
                                     map.put(entity1.getCheckItemId(), entity1);
                                 }
