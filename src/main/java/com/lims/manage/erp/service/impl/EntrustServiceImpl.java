@@ -337,7 +337,7 @@ public class EntrustServiceImpl implements EntrustService {
                                 entity1.setMethodId(entity.getMethodId());
                                 entity1.setStandardId(entity.getStandardId());
                                 entity1.setTimes(entity.getTimes());
-                                if(entity1.getUnitPrice()==null){
+                                if(!entity1.getCheckItemName().equals(entity.getCheckItemName())&&entity1.getUnitPrice()==null){
                                     entity1.setCheckItemName(entity.getCheckItemName()+"-"+entity1.getCheckItemName());
                                 }
                                 // 比对检测项父级名称 进行存储例如：（）。
@@ -859,7 +859,7 @@ public class EntrustServiceImpl implements EntrustService {
                                 entity1.setMethodId(entity.getMethodId());
                                 entity1.setStandardId(entity.getStandardId());
                                 entity1.setTimes(entity.getTimes());
-                                if(entity1.getUnitPrice()==null){
+                                if(!entity1.getCheckItemName().equals(entity.getCheckItemName())&&entity1.getUnitPrice()==null){
                                     entity1.setCheckItemName(entity.getCheckItemName()+"-"+entity1.getCheckItemName());
                                 }
                                 if (map.get(entity1.getCheckItemId()) == null) {
@@ -1215,12 +1215,27 @@ public class EntrustServiceImpl implements EntrustService {
 //        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
         // 通过委托ID 样品集合 → test_sample
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
+        // 处理信息 样品下检测项信息无价格不展示。
+        // 样品下 检测项、检测依据 补充。
+        List<JudgmentBasisVo> listJson = Lists.newArrayList();
+        for(SampleEntity sampleEntity0:sampleCollection){
+            List<JudgmentBasisVo> itemList  = sampleEntityMapper.selectTestStandardList(sampleEntity0.getId(), entrustmentId);
+            Iterator<JudgmentBasisVo> it = itemList.iterator();
+            while (it.hasNext()){
+                JudgmentBasisVo judgmentBasisVo = it.next();
+                if(judgmentBasisVo.getCheckPrice()==null){
+                    it.remove();
+                }
+            }
+            listJson.addAll(itemList);
+            sampleEntity0.setJudgmentBasisVoStr(listJson);
+        }
         // 样品信息 进行补充 检测依据集合，检测项集合
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
-            List<JudgmentBasisVo> listJson = Lists.newArrayList();
-            listJson.addAll(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
-            sampleEntity.setJudgmentBasisVoStr(listJson);
+//            List<JudgmentBasisVo> listJson = Lists.newArrayList();
+//            listJson.addAll(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
+//            sampleEntity.setJudgmentBasisVoStr(listJson);
             // 补充样品下 依据集合
             List<JudgmentBasisVo> standardList = Lists.newArrayList();
             standardList.addAll(sampleEntityMapper.getSampleBasisList(sampleEntity.getId(), entrustAddVo.getId()));
