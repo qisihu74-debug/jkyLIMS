@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.deepoove.poi.xwpf.NiceXWPFDocument;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -1626,15 +1627,18 @@ public class ReportServiceImpl implements ReportService {
         //报告头部合并顺序1
         map.put(1,topDoc);
         //将报告合并成一个完整的word
-
-
+        NiceXWPFDocument mergeDoc = AsposeUtil.mergeDoc(map);
         //转换报告为pdf上传到文件服务器
-        //ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
-        //InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+        ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(mergeDoc);
+        InputStream inputStream = FileAndFolderUtil.parseOut(b1);
         String url = "";
-        //url = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream, "application/octet-stream");
-        //updateReportUrl(reportRecordEntity.getId(), url, code);
-
+        url = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream, "application/octet-stream");
+        StringBuilder stringBuilder = new StringBuilder();
+        for (ConclusionEntity entity:list) {
+            stringBuilder.append(entity.getUrl());
+            stringBuilder.append("&&");
+        }
+        updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
         return url;
     }
 }

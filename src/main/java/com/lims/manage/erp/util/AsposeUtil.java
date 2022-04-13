@@ -193,7 +193,7 @@ public class AsposeUtil {
      * @return
      * @throws Exception
      */
-    public NiceXWPFDocument mergeDoc(Map<Integer,XWPFDocument> map) throws Exception {
+    public static NiceXWPFDocument mergeDoc(Map<Integer,XWPFDocument> map) throws Exception {
         //将map按照key的顺序将value转为list
         Map<Integer, XWPFDocument> documentMap = sortByKey(map, false);
         List<XWPFDocument> documentList = map.values().stream()
@@ -203,15 +203,15 @@ public class AsposeUtil {
         FileOutputStream out = new FileOutputStream(dest);
         //之前声明了一个 ArrayList<File> fileList;
         XWPFDocument document = documentList.get(0);
-//        NiceXWPFDocument mainDoc = new NiceXWPFDocument(new FileInputStream(document));
-//        for (int i = 1; i < documentList.size(); i++) {
-//            NiceXWPFDocument subDoc = new NiceXWPFDocument(new FileInputStream(documentList.get(i)));
-//            mainDoc = mainDoc.merge(subDoc);
-//        }
-//        mainDoc.write(out);
-//        mainDoc.close();
-//        out.close();
-          return null;
+        NiceXWPFDocument mainDoc = new NiceXWPFDocument(docToIo(document));
+        for (int i = 1; i < documentList.size(); i++) {
+            NiceXWPFDocument subDoc = new NiceXWPFDocument(docToIo(documentList.get(i)));
+            mainDoc = mainDoc.merge(subDoc);
+        }
+        mainDoc.write(out);
+        mainDoc.close();
+        out.close();
+        return mainDoc;
     }
 
     /**
@@ -222,7 +222,7 @@ public class AsposeUtil {
      * @return 排序好的map
      * @author zero 2019/04/08
      */
-    public <K extends Comparable<? super K>, V> Map<K, V> sortByKey(Map<K, V> map, boolean isDesc) {
+    public static <K extends Comparable<? super K>, V> Map<K, V> sortByKey(Map<K, V> map, boolean isDesc) {
         Map<K, V> result = Maps.newLinkedHashMap();
         if (isDesc) {
             map.entrySet().stream().sorted(Map.Entry.<K, V>comparingByKey().reversed())
@@ -240,11 +240,13 @@ public class AsposeUtil {
      * @return
      * @throws IOException
      */
-    public FileInputStream docToIo(XWPFDocument document) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();//二进制OutputStream
-        document.write(baos);//文档写入流
-        ByteArrayInputStream in = new ByteArrayInputStream(baos.toByteArray());//OutputStream写入InputStream二进制流
-
-        return null;
+    public static InputStream docToIo(XWPFDocument document) throws IOException {
+        //二进制OutputStream
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        //文档写入流
+        document.write(baos);
+        //OutputStream写入InputStream二进制流
+        ByteArrayInputStream in = new ByteArrayInputStream(baos.toByteArray());
+        return in;
     }
 }
