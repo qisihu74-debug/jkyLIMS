@@ -4,7 +4,9 @@ package com.lims.manage.erp.util;
 import com.aspose.words.Document;
 import com.aspose.words.SaveFormat;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.deepoove.poi.xwpf.NiceXWPFDocument;
 import com.google.api.client.util.Lists;
+import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.ImagePro;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import io.minio.MinioClient;
@@ -17,10 +19,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Aut gjl
@@ -181,4 +187,66 @@ public class AsposeUtil {
         return result;
     }
 
+    /**
+     * 合并报告
+     * @param map
+     * @return
+     * @throws Exception
+     */
+    public static NiceXWPFDocument mergeDoc(Map<Integer,XWPFDocument> map) throws Exception {
+        //将map按照key的顺序将value转为list
+        Map<Integer, XWPFDocument> documentMap = sortByKey(map, false);
+        List<XWPFDocument> documentList = map.values().stream()
+                .collect(Collectors.toList());
+        //新文档的地址
+        File dest = new File("D:\\dest.docx");
+        FileOutputStream out = new FileOutputStream(dest);
+        //之前声明了一个 ArrayList<File> fileList;
+        XWPFDocument document = documentList.get(0);
+        NiceXWPFDocument mainDoc = new NiceXWPFDocument(docToIo(document));
+        for (int i = 1; i < documentList.size(); i++) {
+            NiceXWPFDocument subDoc = new NiceXWPFDocument(docToIo(documentList.get(i)));
+            mainDoc = mainDoc.merge(subDoc);
+        }
+        mainDoc.write(out);
+        mainDoc.close();
+        out.close();
+        return mainDoc;
+    }
+
+    /**
+     * 根据map的key排序
+     *
+     * @param map 待排序的map
+     * @param isDesc 是否降序，true：降序，false：升序
+     * @return 排序好的map
+     * @author zero 2019/04/08
+     */
+    public static <K extends Comparable<? super K>, V> Map<K, V> sortByKey(Map<K, V> map, boolean isDesc) {
+        Map<K, V> result = Maps.newLinkedHashMap();
+        if (isDesc) {
+            map.entrySet().stream().sorted(Map.Entry.<K, V>comparingByKey().reversed())
+                    .forEachOrdered(e -> result.put(e.getKey(), e.getValue()));
+        } else {
+            map.entrySet().stream().sorted(Map.Entry.<K, V>comparingByKey())
+                    .forEachOrdered(e -> result.put(e.getKey(), e.getValue()));
+        }
+        return result;
+    }
+
+    /**
+     * doc文件输入流
+     * @param document
+     * @return
+     * @throws IOException
+     */
+    public static InputStream docToIo(XWPFDocument document) throws IOException {
+        //二进制OutputStream
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        //文档写入流
+        document.write(baos);
+        //OutputStream写入InputStream二进制流
+        ByteArrayInputStream in = new ByteArrayInputStream(baos.toByteArray());
+        return in;
+    }
 }

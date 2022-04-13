@@ -384,6 +384,12 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        <!--poi摸板-->
+        <dependency>
+            <groupId>com.deepoove</groupId>
+            <artifactId>poi-tl</artifactId>
+            <version>1.8.1</version>
+        </dependency>
 
         <dependency>
             <groupId>net.sf.jxls</groupId>
