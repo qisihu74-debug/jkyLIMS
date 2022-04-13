@@ -508,4 +508,33 @@
         WHERE
             t1.check_item_id = #{checkItemId}
     </select>
+
+    <select id="getItemRecursionList" resultType="com.lims.manage.erp.entity.SampleItemEntity">
+        WITH RECURSIVE td AS (
+        SELECT
+        check_item_id,
+        check_price as unitPrice,
+        check_item_name,
+        check_item_pid
+        FROM
+        test_product_item
+        WHERE
+        check_item_id =
+        #{checkItemId}
+        UNION ALL
+        SELECT
+        c.check_item_id,
+        c.check_price as unitPrice,
+        c.check_item_name,
+        c.check_item_pid
+        FROM
+        test_product_item c,
+        td
+        WHERE
+        c.check_item_pid = td.check_item_id
+        ) SELECT
+        *
+        FROM
+        td
+    </select>
 </mapper>

@@ -321,7 +321,7 @@ public class EntrustController {
 
     /**
      * 查询历史委托信息详情
-     *
+     *修改委托时 修改样品时 查询详情 线上使用 丁。
      * @param id
      * @return
      */
