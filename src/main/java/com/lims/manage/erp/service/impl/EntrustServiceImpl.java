@@ -337,9 +337,9 @@ public class EntrustServiceImpl implements EntrustService {
                                 entity1.setMethodId(entity.getMethodId());
                                 entity1.setStandardId(entity.getStandardId());
                                 entity1.setTimes(entity.getTimes());
-                                if(!entity1.getCheckItemName().equals(entity.getCheckItemName())&&entity1.getUnitPrice()==null){
-                                    entity1.setCheckItemName(entity.getCheckItemName()+"-"+entity1.getCheckItemName());
-                                }
+//                                if(!entity1.getCheckItemName().equals(entity.getCheckItemName())&&entity1.getUnitPrice()==null){
+//                                    entity1.setCheckItemName(entity.getCheckItemName()+"-"+entity1.getCheckItemName());
+//                                }
                                 // 比对检测项父级名称 进行存储例如：（）。
 //                                entity1.setCheckItemName(entity.getCheckItemName());
                             }
@@ -859,9 +859,9 @@ public class EntrustServiceImpl implements EntrustService {
                                 entity1.setMethodId(entity.getMethodId());
                                 entity1.setStandardId(entity.getStandardId());
                                 entity1.setTimes(entity.getTimes());
-                                if(!entity1.getCheckItemName().equals(entity.getCheckItemName())&&entity1.getUnitPrice()==null){
-                                    entity1.setCheckItemName(entity.getCheckItemName()+"-"+entity1.getCheckItemName());
-                                }
+//                                if(!entity1.getCheckItemName().equals(entity.getCheckItemName())&&entity1.getUnitPrice()==null){
+//                                    entity1.setCheckItemName(entity.getCheckItemName()+"-"+entity1.getCheckItemName());
+//                                }
                                 if (map.get(entity1.getCheckItemId()) == null) {
                                     map.put(entity1.getCheckItemId(), entity1);
                                 }
