@@ -1,10 +1,11 @@
 package com.lims.manage.erp.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.deepoove.poi.xwpf.NiceXWPFDocument;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.lims.manage.erp.config.PoiConfig;
 import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
@@ -18,8 +19,18 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.*;
-import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.ReportMapper;
+import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
+import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
+import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
+import com.lims.manage.erp.mapper.TestProductDao;
+import com.lims.manage.erp.mapper.TestProductItemDao;
+import com.lims.manage.erp.mapper.TestReportQualifcationDao;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
@@ -28,8 +39,18 @@ import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.WordUtils;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.ConcreteSampleVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
+import com.lims.manage.erp.vo.ReportDetailVo;
+import com.lims.manage.erp.vo.ReportHistoryDetailVo;
+import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -138,6 +159,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
 
+    @Override
     public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search) {
         PageHelper.startPage(pageNum, pageSize);
         List<ReportListVo> list = reportMapper.reportDownloadList(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()), search);
@@ -1474,9 +1496,12 @@ public class ReportServiceImpl implements ReportService {
         return lis;
     }
 
-    /*@Override
+    //@Override
     public String submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) throws Exception {
-        List<XWPFDocument> documents = Lists.newArrayList();
+        //2代表报告头2页
+        int totalPage = 2;
+        Map<Integer,XWPFDocument> map = new HashedMap();
+        ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
         for (ConclusionEntity conclusionEntity:list) {
             String[] split = conclusionEntity.getUrl().split("\\?");
             String[] strings = split[0].split("\\/");
@@ -1487,7 +1512,6 @@ public class ReportServiceImpl implements ReportService {
             InputStream object = client.getObject(bluckName, fileName);
             doc = new XWPFDocument(object);
             //写入数据
-            ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
             List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
             if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
                 //处理表格
@@ -1495,7 +1519,10 @@ public class ReportServiceImpl implements ReportService {
                 //表格索引
                 int i = 1;
                 //获取表格信息
+                int index = 1;
                 while (it.hasNext()) {
+                    totalPage++;
+                    index++;
                     XWPFTable table = it.next();
                     List<XWPFTableRow> rows = table.getRows();
                     //存放表头信息
@@ -1553,9 +1580,17 @@ public class ReportServiceImpl implements ReportService {
                         rows.get(12).getCell(3).setText(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
                     }
                     //过滤每个报告模板的检测项
-
-                    //存放检测数据
-                    for (ReportRecordDetailEntity item : checkItemList) {
+                    List<ReportRecordDetailEntity> entities = Lists.newArrayList();
+                    List<Long> longList = itemDao.getItemsByTemplateUrl(conclusionEntity.getUrl());
+                    for (ReportRecordDetailEntity entity:checkItemList) {
+                        for (Long itemId:longList) {
+                            if (entity.getCheckItemId().equals(itemId)){
+                                entities.add(entity);
+                            }
+                        }
+                    }
+                    //存放检测数据checkItemList为该报告模板所属的检测项
+                    for (ReportRecordDetailEntity item : entities) {
                         int last = testProductDao.isLast(item.getCheckItemId().intValue());
                         if (last == 0) {
                             int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
@@ -1573,28 +1608,37 @@ public class ReportServiceImpl implements ReportService {
                     }
                     i++;
                 }
+                //按照顺序存放doc
+                map.put(index,doc);
             }
         }
         //获取报告头部模板填充头部数据
-        topDoc = "";
+        InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
+        XWPFDocument topDoc = new XWPFDocument(fileStream);;
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
         Map<String, String> textMap = new HashMap<>();
         textMap.put("code", reportRecordEntity.getReportCode());
-        textMap.put("page", doc.getTables().size() + "");
+        textMap.put("page", totalPage+"");
         textMap.put("sampleName", reportRecordEntity.getSampleName());
         textMap.put("dept", entrustAddVo.getEntrustCompany());
         textMap.put("part", entrustAddVo.getProjectPart());
         textMap.put("checkType", entrustAddVo.getCheckPurpose());
-        WordUtils.changeText(topDoc, textMap);
-        //将报告合并成一个完成的word
-
+        PoiConfig.changeText(topDoc, textMap);
+        //报告头部合并顺序1
+        map.put(1,topDoc);
+        //将报告合并成一个完整的word
+        NiceXWPFDocument mergeDoc = AsposeUtil.mergeDoc(map);
         //转换报告为pdf上传到文件服务器
-        ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
+        ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(mergeDoc);
         InputStream inputStream = FileAndFolderUtil.parseOut(b1);
         String url = "";
         url = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream, "application/octet-stream");
-        updateReportUrl(reportRecordEntity.getId(), url, code);
-
+        StringBuilder stringBuilder = new StringBuilder();
+        for (ConclusionEntity entity:list) {
+            stringBuilder.append(entity.getUrl());
+            stringBuilder.append("&&");
+        }
+        updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
         return url;
-    }*/
+    }
 }
