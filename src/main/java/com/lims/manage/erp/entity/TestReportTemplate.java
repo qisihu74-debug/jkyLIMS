@@ -23,7 +23,7 @@ public class TestReportTemplate extends Model<TestReportTemplate> {
     //报告编号
     private String reportCode;
     //产品id
-    private Integer productId;
+    private String productId;
     //报告名称
     private String reportName;
     //报告模板文件路径
@@ -63,11 +63,11 @@ public class TestReportTemplate extends Model<TestReportTemplate> {
         this.reportCode = reportCode;
     }
 
-    public Integer getProductId() {
+    public String getProductId() {
         return productId;
     }
 
-    public void setProductId(Integer productId) {
+    public void setProductId(String productId) {
         this.productId = productId;
     }
 

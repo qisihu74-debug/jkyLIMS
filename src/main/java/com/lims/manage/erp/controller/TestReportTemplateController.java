@@ -5,15 +5,12 @@ package com.lims.manage.erp.controller;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.lims.manage.erp.entity.TestMethod;
-import com.lims.manage.erp.entity.TestProduct;
 import com.lims.manage.erp.entity.TestReportTemplate;
-import com.lims.manage.erp.entity.TestStandardFile;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestReportTemplateService;
+import com.lims.manage.erp.vo.TestReportTemplateVo;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -35,15 +32,9 @@ public class TestReportTemplateController extends ApiController {
     @Resource
     private TestReportTemplateService testReportTemplateService;
 
-    @GetMapping("/getList")
-    public Result getAll(TestReportTemplate testReportTemplate) {
-        QueryWrapper<TestReportTemplate> queryWrapper=new QueryWrapper<>();
-        if (testReportTemplate.getProductId()!=null){
-            queryWrapper.eq("product_id",testReportTemplate.getProductId());
-        }
-        queryWrapper.orderByDesc("create_time");
-        queryWrapper.eq("del_flag",0);
-        return ResultUtil.success(this.testReportTemplateService.list(queryWrapper));
+    @GetMapping("/getList/{id}")
+    public Result getAll(@PathVariable Serializable id) {
+        return this.testReportTemplateService.getList(id);
     }
     /**
      * 分页查询所有数据
@@ -72,8 +63,7 @@ public class TestReportTemplateController extends ApiController {
     @GetMapping("{id}")
     public Result selectOne(@PathVariable Serializable id) {
         if (id!=null&&id!=""){
-            TestReportTemplate testMethod=this.testReportTemplateService.getOne(new QueryWrapper<TestReportTemplate>().eq("id",id).eq("del_flag",0));
-            return ResultUtil.success(testMethod);
+            return this.testReportTemplateService.getUpdOne(id);
         }else {
             return ResultUtil.error("参数为空");
         }
@@ -82,29 +72,27 @@ public class TestReportTemplateController extends ApiController {
     /**
      * 新增数据
      *
-     * @param testReportTemplate 实体对象
      * @return 新增结果
      */
     @PostMapping("/add")
-    public Result insert(@RequestBody TestReportTemplate testReportTemplate) {
-        if (StrUtil.isEmptyIfStr(testReportTemplate)){
+    public Result insert(@RequestBody TestReportTemplateVo testReportTemplateVo) {
+        if (StrUtil.isEmptyIfStr(testReportTemplateVo)){
             return ResultUtil.error("数据为空");
         }
-        return this.testReportTemplateService.addReportTemplate(testReportTemplate);
+        return this.testReportTemplateService.addReportTemplate(testReportTemplateVo);
     }
 
     /**
      * 修改数据
      *
-     * @param testReportTemplate 实体对象
      * @return 修改结果
      */
     @PostMapping("/edit")
-    public Result update(@RequestBody TestReportTemplate testReportTemplate) {
-        if (StrUtil.isEmptyIfStr(testReportTemplate)){
+    public Result update(@RequestBody TestReportTemplateVo testReportTemplateVo) {
+        if (StrUtil.isEmptyIfStr(testReportTemplateVo)){
             return ResultUtil.error("数据为空");
         }
-        return this.testReportTemplateService.updReportTemplate(testReportTemplate);
+        return this.testReportTemplateService.updReportTemplate(testReportTemplateVo);
     }
 
     /**
