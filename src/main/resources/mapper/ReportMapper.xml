@@ -106,7 +106,7 @@
             t5.id id_item,
             t5.state,
             t6.check_item_id,
-            t6.check_item_name,
+            t5.check_item_name,
             t9.specs_content,
             t9.check_result,
             t9.judge_result,
