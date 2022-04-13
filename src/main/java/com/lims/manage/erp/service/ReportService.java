@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
@@ -320,4 +321,13 @@ public interface ReportService {
      * @return
      */
     ReportRecordEntity getDetailByEntrustId(Long entrustId);
+
+    /**
+     * 报告提交审批
+     * @param client
+     * @param list
+     * @param id
+     * @return
+     */
+    String submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id);
 }

@@ -3,6 +3,7 @@ package com.lims.manage.erp.controller;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
+import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
@@ -539,6 +540,20 @@ public class ReportController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return url;
+    }
+
+    /**
+     * 提交审批，支持多个报告模板，支持报告合并
+     * @param list
+     * @param id
+     * @return
+     */
+    @GetMapping("submitDownLoad")
+    public String submitDownLoad(List<ConclusionEntity> list, Long id) {
+        //从文件服务器拉取文件
+        MinioClient client = MinIoUtil.minioClient;
+        String url = reportService.submitDownLoad(client, list, id);
         return url;
     }
 

@@ -50,6 +50,7 @@ import com.lims.manage.erp.vo.ReportListVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
+import lombok.SneakyThrows;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
@@ -1496,8 +1497,9 @@ public class ReportServiceImpl implements ReportService {
         return lis;
     }
 
-    //@Override
-    public String submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) throws Exception {
+    @SneakyThrows
+    @Override
+    public String submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) {
         //2代表报告头2页
         int totalPage = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
