@@ -67,7 +67,8 @@
         condition_value
         FROM
         test_report_qualifcation
-        WHERE
+        WHERE del_flag=0
+        AND
         check_item_id IN
         <foreach collection = "ids" item = "check_item_id" index = "index" open = "(" close = ")" separator = ",">
             #{check_item_id}
