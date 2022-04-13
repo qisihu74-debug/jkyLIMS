@@ -220,7 +220,7 @@
                t4.alias_name,
                t4.sample_remark,
                t5.check_item_id,
-               t8.check_item_name,
+               t5.check_item_name,
                t5.method_id,
                t7.name,
                t5.standard_id,

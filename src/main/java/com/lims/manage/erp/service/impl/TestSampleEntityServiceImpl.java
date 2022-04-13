@@ -76,7 +76,8 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             if (outward != null) {
                 String replace = outward.replace("[", "");
                 String replace1 = replace.replace("]", "");
-                String[] split = replace1.split(",");
+                String replace2 = replace1.replace("\"", "");
+                String[] split = replace2.split(",");
                 List<String> outwardArr = Lists.newArrayList();
                 for (String s : split) {
                     outwardArr.add(s.trim());

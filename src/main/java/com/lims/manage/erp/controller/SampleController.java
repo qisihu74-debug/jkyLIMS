@@ -27,9 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
@@ -159,11 +157,33 @@ public class SampleController {
      * @return
      */
     @RequestMapping("/downloadSampleTag")
-    public void downloadSampleTag(Integer sampleId, HttpServletResponse response) {
+    public void downloadSampleTag(Integer sampleId,Integer number, HttpServletResponse response) {
+        if(number==null||number<=0){
+            number = 1;
+        }
         SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
         HashMap<String, SampleDetailVo> result = Maps.newHashMap();
         StringBuilder fileName = new StringBuilder("");
         if (sampleTagInfo != null) {
+            // 样品编号格式： 情况1： YP-2022-0095（01~02） 情况2：YP-2022-0096
+            String sampleCode = sampleTagInfo.getSampleCode();
+            int startNumber = sampleCode.indexOf("（");
+            int endNumber = sampleCode.indexOf("）");
+            if (startNumber > 0 && endNumber > 0) {
+                String[] strings = sampleCode.substring(startNumber + 1, endNumber).split("~");
+                Integer maxNumber = Integer.valueOf(strings[0]);
+                Integer smallNumber = Integer.valueOf(strings[1]);
+                if (maxNumber <= number && number <= smallNumber) {
+                    log.info("样品id\t"+sampleId+"编号"+"最大参数\t" + maxNumber + ";最小参数\t" + smallNumber+"取值参数在范围之内。\t"+number);
+                    sampleTagInfo.setSampleCode(sampleCode.substring(0,startNumber)+"_"+number);
+                }
+                else {
+                    log.info("样品id\t"+sampleId+"编号"+"最大参数\t" + maxNumber + ";最小参数\t" + smallNumber+"取值参数不在范围之内。\t"+number);
+                    sampleTagInfo.setSampleCode(sampleCode.substring(0,startNumber)+"_"+number+"取值参数不在范围之内。");
+                }
+            }
+            // 处理样品描述信息 Outward 清除两边[]
+            sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1,sampleTagInfo.getOutward().length()-1));
             fileName.append(sampleTagInfo.getSampleCode());
             fileName.append("样品标签.xlsx");
             result.put("result", sampleTagInfo);
