@@ -1610,6 +1610,11 @@ public class ReportServiceImpl implements ReportService {
                     }
                     i++;
                 }
+                //报告结论，附加声明填入
+                Map<String, String> textMap = new HashMap<>();
+                textMap.put("conclusion", conclusionEntity.getConclusion());
+                textMap.put("additional", conclusionEntity.getAdditional());
+                PoiConfig.changeText(doc, textMap);
                 //按照顺序存放doc
                 map.put(index,doc);
             }
