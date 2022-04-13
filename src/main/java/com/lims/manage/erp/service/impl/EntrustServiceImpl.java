@@ -321,6 +321,7 @@ public class EntrustServiceImpl implements EntrustService {
                                 entity1.setMethodId(entity.getMethodId());
                                 entity1.setStandardId(entity.getStandardId());
                                 entity1.setTimes(entity.getTimes());
+                                entity1.setCheckItemName(entity.getCheckItemName());
                                 // 比对检测项父级名称 进行存储例如：（）。
 //                                entity1.setCheckItemName(entity.getCheckItemName());
                             }
@@ -361,7 +362,7 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
         // 通过委托单id 获取公司名称。
-        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(),1));
+        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(), 1));
         // 通过委托单位和类型 查看联系人和手机号是否存在
         TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
         if (basisInfo.getEntrustCompany() != null && basisInfo.getEntrustPeople() != null && basisInfo.getEntrustPhone() != null) {
@@ -583,7 +584,7 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
         // 通过委托单id 获取公司名称。
-        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(),1));
+        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(), 1));
         // 通过委托单位和类型 查看联系人和手机号是否存在
         TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
         if (basisInfo.getEntrustCompany() != null && basisInfo.getEntrustPeople() != null && basisInfo.getEntrustPhone() != null) {
@@ -1106,6 +1107,8 @@ public class EntrustServiceImpl implements EntrustService {
     public EntrustAddVo getEntrustDistributionDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
+        List<LabelValueVo> allTestRoom = Lists.newArrayList();
+
         if (entrustAddVo.getOperateUser() != null) {
             // 获取做废人id 查询账号姓名
             entrustAddVo.setOperateUserStr(sysUserDao.getSysUserName(entrustAddVo.getOperateUser()));
@@ -1140,6 +1143,7 @@ public class EntrustServiceImpl implements EntrustService {
                         List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
                         data.setTestingRoom(strings.toString());
                         List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
+                        allTestRoom.addAll(testingRoomList);
                         data.setTestingRoomList(testingRoomList);
                     }
                     sampleEntity.setJudgmentBasisVos(list);
@@ -1150,6 +1154,9 @@ public class EntrustServiceImpl implements EntrustService {
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
         }
         entrustAddVo.setSamples(sampleCollection);
+        LinkedHashSet<LabelValueVo> hashSet = new LinkedHashSet<>(allTestRoom);
+        ArrayList<LabelValueVo> allTestRooms = new ArrayList<>(hashSet);
+        entrustAddVo.setAllTestRoom(allTestRooms);
         return entrustAddVo;
     }
 
@@ -1527,7 +1534,33 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public List<CheckItemInfoVo> getCheckItemInfo(List<Integer> ids) {
-        return itemEntityMapper.getItemInfo3(ids);
+        List<CheckItemInfoVo> result = Lists.newArrayList();
+        result.addAll(itemEntityMapper.getItemInfo3(ids));
+        if(!CollectionUtils.isEmpty(result)){
+            for (CheckItemInfoVo checkItemInfoVo : result) {
+                if(checkItemInfoVo.getCheckItemPid() != 0){
+                    checkItemInfoVo.setCheckItemName(getAllLevelName(checkItemInfoVo.getCheckItemPid())
+                            +checkItemInfoVo.getCheckItemName());
+                }
+            }
+        }
+        return result;
+    }
+
+    private String getAllLevelName(Integer checkItemPid){
+        StringBuilder prefix = new StringBuilder();
+        List<String> temp = Lists.newArrayList();
+        Integer pid = checkItemPid;
+        while (pid != 0){
+            CheckItemDetailVo parentInfo = itemEntityMapper.getParentInfo(checkItemPid);
+            temp.add(parentInfo.getCheckItemName());
+            Integer itemPid = parentInfo.getItemPid();
+            pid = parentInfo.getItemPid();
+        }
+        for (int i = temp.size()-1; i >=0 ; i--) {
+            prefix.append(temp.get(i)).append("-");
+        }
+        return prefix.toString();
     }
 
 }

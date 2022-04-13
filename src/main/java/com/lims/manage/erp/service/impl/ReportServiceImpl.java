@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.deepoove.poi.xwpf.NiceXWPFDocument;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -49,6 +50,7 @@ import com.lims.manage.erp.vo.ReportListVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
+import lombok.SneakyThrows;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
@@ -1495,8 +1497,9 @@ public class ReportServiceImpl implements ReportService {
         return lis;
     }
 
-    //@Override
-    public String submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) throws Exception {
+    @SneakyThrows
+    @Override
+    public String submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) {
         //2代表报告头2页
         int totalPage = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
@@ -1626,15 +1629,18 @@ public class ReportServiceImpl implements ReportService {
         //报告头部合并顺序1
         map.put(1,topDoc);
         //将报告合并成一个完整的word
-
-
+        NiceXWPFDocument mergeDoc = AsposeUtil.mergeDoc(map);
         //转换报告为pdf上传到文件服务器
-        //ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
-        //InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+        ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(mergeDoc);
+        InputStream inputStream = FileAndFolderUtil.parseOut(b1);
         String url = "";
-        //url = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream, "application/octet-stream");
-        //updateReportUrl(reportRecordEntity.getId(), url, code);
-
+        url = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream, "application/octet-stream");
+        StringBuilder stringBuilder = new StringBuilder();
+        for (ConclusionEntity entity:list) {
+            stringBuilder.append(entity.getUrl());
+            stringBuilder.append("&&");
+        }
+        updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
         return url;
     }
 }

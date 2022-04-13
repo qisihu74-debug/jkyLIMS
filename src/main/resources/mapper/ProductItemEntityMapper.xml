@@ -332,6 +332,7 @@ logistics_costs, unit, samplestandard, sample_count,
     <resultMap id="checkItemBasisMap" type="com.lims.manage.erp.vo.CheckItemInfoVo">
         <result property="productId" column="productId"></result>
         <result property="checkItemId" column="checkItemId"></result>
+        <result property="checkItemPid" column="checkItemPid"></result>
         <result property="checkPrice" column="checkPrice"></result>
         <result property="checkItemName" column="checkItemName"></result>
         <collection property="checkBasisList" ofType="com.lims.manage.erp.vo.LabelValueVo">
@@ -361,6 +362,7 @@ logistics_costs, unit, samplestandard, sample_count,
     <select id="getItemInfo3" resultMap="checkItemBasisMap">
         SELECT
         t1.check_item_id checkItemId,
+        t1.check_item_pid checkItemPid,
         check_item_name checkItemName,
         product_id productId,
         check_price checkPrice,
@@ -377,6 +379,17 @@ logistics_costs, unit, samplestandard, sample_count,
                 #{id}
             </foreach>
         </if>
+    </select>
+
+    <select id="getParentInfo" resultType="com.lims.manage.erp.vo.CheckItemDetailVo"
+            parameterType="java.lang.Integer">
+        SELECT
+            check_item_pid itemPid,
+            check_item_name checkItemName
+        FROM
+            test_product_item
+        WHERE
+                check_item_id = #{checkItemPid}
     </select>
 
 </mapper>
