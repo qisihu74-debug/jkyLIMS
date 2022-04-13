@@ -316,7 +316,7 @@ public class EntrustServiceImpl implements EntrustService {
                             }
                             for (SampleItemEntity entity2 : ItemList) {
                                 SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
-                                if(sampleItemEntity!=null){
+                                if(sampleItemEntity!=null&&entity2.getUnitPrice()==null){
                                     // 变更检测项名为： 伪造a-伪造b
                                     entity2.setCheckItemName(sampleItemEntity.getCheckItemName()+"-"+entity2.getCheckItemName());
                                 }
@@ -840,7 +840,7 @@ public class EntrustServiceImpl implements EntrustService {
                             }
                             for (SampleItemEntity entity2 : ItemList) {
                                 SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
-                                if(sampleItemEntity!=null){
+                                if(sampleItemEntity!=null&&entity2.getUnitPrice()==null){
                                     // 变更检测项名为： 伪造a-伪造b
                                     entity2.setCheckItemName(sampleItemEntity.getCheckItemName()+"-"+entity2.getCheckItemName());
                                 }
