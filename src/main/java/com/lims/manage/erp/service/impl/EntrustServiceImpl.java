@@ -312,6 +312,9 @@ public class EntrustServiceImpl implements EntrustService {
                         HashMap<Long,SampleItemEntity> itemMap = new HashMap<>();
                         if (!CollectionUtils.isEmpty(ItemList)) {
                             for (SampleItemEntity entity0 : ItemList) {
+                                if(entity0.getCheckItemId().equals(entity.getCheckItemId())){
+                                    entity0.setCheckItemName(entity.getCheckItemName());
+                                }
                                 itemMap.put(entity0.getCheckItemId(),entity0);
                             }
                             for (SampleItemEntity entity2 : ItemList) {
@@ -321,6 +324,7 @@ public class EntrustServiceImpl implements EntrustService {
                                     entity2.setCheckItemName(sampleItemEntity.getCheckItemName()+"-"+entity2.getCheckItemName());
                                 }
                             }
+                            //
                         }
                         // 根据检测项id 遍历检测项层级和价格 获取集合
 //                        List<SampleItemEntity> ItemList = entityMapper.getyItemList(entity.getCheckItemId());
