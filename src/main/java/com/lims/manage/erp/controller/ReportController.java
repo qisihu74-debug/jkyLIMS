@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
@@ -551,6 +552,9 @@ public class ReportController {
      */
     @GetMapping("submitDownLoad")
     public String submitDownLoad(List<ConclusionEntity> list, Long id) {
+        if (id == null || CollectionUtil.isEmpty(list)){
+            return null;
+        }
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
         String url = reportService.submitDownLoad(client, list, id);

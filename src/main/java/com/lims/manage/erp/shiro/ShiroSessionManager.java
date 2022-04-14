@@ -47,9 +47,12 @@ public class ShiroSessionManager extends DefaultWebSessionManager {
     @Override
     public Serializable getSessionId(ServletRequest request, ServletResponse response) {
         String requestURI = WebUtils.toHttp(request).getRequestURI();
+        if (requestURI.contains("/userLogin/") || requestURI.contains("/qiyuesuo/")){
+            return null;
+        }
         String token = WebUtils.toHttp(request).getHeader(AUTHORIZATION);
         //如果请求头中存在token 则从请求头中获取token
-        if (StringUtils.isNotEmpty(token) && !("null").equals(token)) {
+        if (StringUtils.isNotEmpty(token)) {
             //校验token是否存在
             Object o = redisUtils.get("shiro:session:" + token);
             if (o == null){
@@ -62,12 +65,8 @@ public class ShiroSessionManager extends DefaultWebSessionManager {
                 return token;
             }
         } else {
-            if (requestURI.contains("/userLogin/") || requestURI.contains("/qiyuesuo/")){
-                return null;
-            }else {
-                JkyException exception = new JkyException(CommonEnum.SIGNATURE_NO_TOKEN.getResultCode(),CommonEnum.SIGNATURE_NO_TOKEN.getResultMsg());
-                responseJsonString((HttpServletResponse) response,JSON.toJSONString(exception));
-            }
+            JkyException exception = new JkyException(CommonEnum.SIGNATURE_NO_TOKEN.getResultCode(),CommonEnum.SIGNATURE_NO_TOKEN.getResultMsg());
+            responseJsonString((HttpServletResponse) response,JSON.toJSONString(exception));
         }
         return null;
     }
