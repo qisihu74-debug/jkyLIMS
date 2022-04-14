@@ -293,8 +293,7 @@
                 #{item}
             </foreach>
         </if>
-
-        order by t1.receive_time desc
+        order by t1.code desc
     </select>
 
     <select id="getTaskList" resultType="com.lims.manage.erp.vo.TaskListVo"
