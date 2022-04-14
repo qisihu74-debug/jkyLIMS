@@ -293,8 +293,7 @@
                 #{item}
             </foreach>
         </if>
-
-        order by t1.receive_time desc
+        order by t1.code desc
     </select>
 
     <select id="getTaskList" resultType="com.lims.manage.erp.vo.TaskListVo"
@@ -372,9 +371,8 @@
         </trim>
         GROUP BY t1.id
         ORDER BY
-        t1.code
---         t2.entrustment_no desc,
---         t1.required_completion_time desc
+        t1.code desc
+
 
     </select>
 
