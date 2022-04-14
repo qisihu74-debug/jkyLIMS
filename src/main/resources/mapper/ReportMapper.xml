@@ -231,7 +231,7 @@
             </foreach>
         </if>
         GROUP BY t2.id
-        order by t2.code
+        order by t2.code desc
     </select>
 
     <select id="reportDownloadList" resultType="com.lims.manage.erp.vo.ReportListVo">
@@ -260,7 +260,7 @@
                 #{id}
             </foreach>
         </if>
-        order by t2.code
+        order by t2.code desc
 --         order by t1.request_date
     </select>
 
@@ -337,7 +337,7 @@
                 #{id}
             </foreach>
         </if>
-        order by t1.report_complete_time
+        order by t2.code desc
     </select>
 
     <select id="getReportDetailHistory" resultMap="reportDetailMap">
