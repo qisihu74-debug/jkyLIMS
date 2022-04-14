@@ -198,7 +198,7 @@ public class AsposeUtil {
     public static XWPFDocument mergeDoc(Map<Integer,XWPFDocument> map) throws Exception {
         //将map按照key的顺序将value转为list
         Map<Integer, XWPFDocument> documentMap = sortByKey(map, false);
-        List<XWPFDocument> documentList = map.values().stream()
+        List<XWPFDocument> documentList = documentMap.values().stream()
                 .collect(Collectors.toList());
         XWPFDocument xmd=documentList.get(0); //默认获取第一个作为模板
         for (int i=0;i<documentList.size()-1;i++) {
