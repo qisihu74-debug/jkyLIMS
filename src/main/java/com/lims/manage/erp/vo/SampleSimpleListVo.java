@@ -13,4 +13,5 @@ public class SampleSimpleListVo {
     private String inspector;
     private String generation;
     private String receivedDate;
+    private String batchNumber;
 }

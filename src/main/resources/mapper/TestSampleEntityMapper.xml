@@ -526,7 +526,8 @@
         specs,
         inspector,
         generation,
-        received_date
+        received_date,
+        batch_number
         FROM
         test_sample
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
