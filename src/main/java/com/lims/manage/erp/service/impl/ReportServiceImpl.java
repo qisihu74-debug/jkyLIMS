@@ -1,7 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.deepoove.poi.xwpf.NiceXWPFDocument;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -1504,6 +1503,7 @@ public class ReportServiceImpl implements ReportService {
         int totalPage = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
         ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
+        int index = 1;
         for (ConclusionEntity conclusionEntity:list) {
             String[] split = conclusionEntity.getUrl().split("\\?");
             String[] strings = split[0].split("\\/");
@@ -1521,7 +1521,6 @@ public class ReportServiceImpl implements ReportService {
                 //表格索引
                 int i = 1;
                 //获取表格信息
-                int index = 1;
                 while (it.hasNext()) {
                     totalPage++;
                     index++;
@@ -1634,9 +1633,9 @@ public class ReportServiceImpl implements ReportService {
         //报告头部合并顺序1
         map.put(1,topDoc);
         //将报告合并成一个完整的word
-        NiceXWPFDocument mergeDoc = AsposeUtil.mergeDoc(map);
+        XWPFDocument document = AsposeUtil.mergeDoc(map);
         //转换报告为pdf上传到文件服务器
-        ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(mergeDoc);
+        ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(document);
         InputStream inputStream = FileAndFolderUtil.parseOut(b1);
         String url = "";
         url = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream, "application/octet-stream");

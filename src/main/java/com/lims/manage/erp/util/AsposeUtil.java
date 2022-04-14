@@ -4,13 +4,16 @@ package com.lims.manage.erp.util;
 import com.aspose.words.Document;
 import com.aspose.words.SaveFormat;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.deepoove.poi.xwpf.NiceXWPFDocument;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.ImagePro;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import io.minio.MinioClient;
+import lombok.SneakyThrows;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.xmlbeans.XmlOptions;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -193,25 +195,16 @@ public class AsposeUtil {
      * @return
      * @throws Exception
      */
-    public static NiceXWPFDocument mergeDoc(Map<Integer,XWPFDocument> map) throws Exception {
+    public static XWPFDocument mergeDoc(Map<Integer,XWPFDocument> map) throws Exception {
         //将map按照key的顺序将value转为list
         Map<Integer, XWPFDocument> documentMap = sortByKey(map, false);
         List<XWPFDocument> documentList = map.values().stream()
                 .collect(Collectors.toList());
-        //新文档的地址
-        File dest = new File("D:\\dest.docx");
-        FileOutputStream out = new FileOutputStream(dest);
-        //之前声明了一个 ArrayList<File> fileList;
-        XWPFDocument document = documentList.get(0);
-        NiceXWPFDocument mainDoc = new NiceXWPFDocument(docToIo(document));
-        for (int i = 1; i < documentList.size(); i++) {
-            NiceXWPFDocument subDoc = new NiceXWPFDocument(docToIo(documentList.get(i)));
-            mainDoc = mainDoc.merge(subDoc);
+        XWPFDocument xmd=documentList.get(0); //默认获取第一个作为模板
+        for (int i=0;i<documentList.size()-1;i++) {
+            xmd=mergeDoc(xmd,documentList.get(i+1)); //相继合并
         }
-        mainDoc.write(out);
-        mainDoc.close();
-        out.close();
-        return mainDoc;
+        return xmd;
     }
 
     /**
@@ -248,5 +241,32 @@ public class AsposeUtil {
         //OutputStream写入InputStream二进制流
         ByteArrayInputStream in = new ByteArrayInputStream(baos.toByteArray());
         return in;
+    }
+
+    /**
+     * 合并word
+     * @param src1Document
+     * @param src2Document
+     * @return
+     */
+    @SneakyThrows
+    public static XWPFDocument mergeDoc(XWPFDocument src1Document, XWPFDocument src2Document){
+        XWPFParagraph p = src1Document.createParagraph();
+        //设置分页符
+        p.setPageBreak(true);
+        CTBody src1Body = src1Document.getDocument().getBody();
+        CTBody src2Body = src2Document.getDocument().getBody();
+        //XWPFParagraph p2 = src2Document.createParagraph();
+        XmlOptions optionsOuter = new XmlOptions();
+        optionsOuter.setSaveOuter();
+        String appendString = src2Body.xmlText(optionsOuter);
+        String srcString = src1Body.xmlText();
+        String prefix = srcString.substring(0,srcString.indexOf(">")+1);
+        String mainPart = srcString.substring(srcString.indexOf(">")+1,srcString.lastIndexOf("<"));
+        String sufix = srcString.substring( srcString.lastIndexOf("<") );
+        String addPart = appendString.substring(appendString.indexOf(">") + 1, appendString.lastIndexOf("<"));
+        CTBody makeBody = CTBody.Factory.parse(prefix+mainPart+addPart+sufix);
+        src1Body.set(makeBody);
+        return src1Document;
     }
 }

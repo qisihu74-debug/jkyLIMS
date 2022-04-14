@@ -173,10 +173,6 @@
                     <artifactId>xmlbeans</artifactId>
                     <groupId>org.apache.xmlbeans</groupId>
                 </exclusion>
-                <exclusion>
-                    <artifactId>poi-ooxml</artifactId>
-                    <groupId>org.apache.poi</groupId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -383,12 +379,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
-        </dependency>
-        <!--poi摸板-->
-        <dependency>
-            <groupId>com.deepoove</groupId>
-            <artifactId>poi-tl</artifactId>
-            <version>1.8.1</version>
         </dependency>
 
         <dependency>

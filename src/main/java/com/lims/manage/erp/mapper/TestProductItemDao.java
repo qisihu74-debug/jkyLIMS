@@ -46,12 +46,12 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
      * @param url
      * @return
      */
-    @Select("SELECT\n" +
-            "\tpt.report_model_id \n" +
+    @Select("SELECT DISTINCT \n" +
+            "\tpt.check_item_id \n" +
             "FROM\n" +
             "\ttest_report_template rt\n" +
             "\tLEFT JOIN test_product_item pt ON rt.id = pt.report_model_id \n" +
-            "WHERE\n" +
+            "WHERE rt.del_flag=0 and pt.del_flag=0 and  \n" +
             "\trt.report_file_uri = #{url}")
     List<Long> getItemsByTemplateUrl(@Param("url") String url);
 }

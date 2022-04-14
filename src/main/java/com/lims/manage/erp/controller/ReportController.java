@@ -1,6 +1,7 @@
 package com.lims.manage.erp.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
@@ -9,6 +10,7 @@ import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.ReqBean;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
@@ -546,18 +548,17 @@ public class ReportController {
 
     /**
      * 提交审批，支持多个报告模板，支持报告合并
-     * @param list
-     * @param id
+     * @param reqBean
      * @return
      */
-    @GetMapping("submitDownLoad")
-    public String submitDownLoad(List<ConclusionEntity> list, Long id) {
-        if (id == null || CollectionUtil.isEmpty(list)){
+    @PostMapping("submitDownLoad")
+    public String submitDownLoad(@RequestBody ReqBean reqBean) {
+        if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
             return null;
         }
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
-        String url = reportService.submitDownLoad(client, list, id);
+        String url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
         return url;
     }
 
