@@ -1166,16 +1166,16 @@ public class EntrustServiceImpl implements EntrustService {
             // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
             if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144) {
                 List<JudgmentBasisVo> list = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
-                // 遍历检测项数据处理 价格为空的不展示（删除）
-                if (list != null && !list.isEmpty()) {
-                    Iterator<JudgmentBasisVo> it = list.iterator();
-                    while (it.hasNext()) {
-                        JudgmentBasisVo judgmentBasisVo = it.next();
-                        if (judgmentBasisVo.getCheckPrice() == null) {
-                            it.remove();
-                        }
-                    }
-                }
+                // 遍历检测项数据处理 价格为空的不展示（删除） 暂时废弃
+//                if (list != null && !list.isEmpty()) {
+//                    Iterator<JudgmentBasisVo> it = list.iterator();
+//                    while (it.hasNext()) {
+//                        JudgmentBasisVo judgmentBasisVo = it.next();
+//                        if (judgmentBasisVo.getCheckPrice() == null) {
+//                            it.remove();
+//                        }
+//                    }
+//                }
                 if (list != null && !list.isEmpty()) {
                     // 根据检测项id 查询 默认匹配部门信息
                     for (JudgmentBasisVo data : list) {
