@@ -66,6 +66,7 @@ import javax.annotation.Resource;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -537,7 +538,7 @@ public class ReportServiceImpl implements ReportService {
                 reportRecordEntity.setReportCode("ZX-" + year + "-JC-0001");
             } else {
                 int newCode = maxCode + 1;
-                reportRecordEntity.setReportCode("ZX-" + year + "-JC-" + newCode);
+                reportRecordEntity.setReportCode("ZX-" + year + "-JC-" + new DecimalFormat("0000").format(newCode));
             }
             reportRecordEntity.setId(recordId);
             reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));

@@ -260,8 +260,7 @@
                 #{id}
             </foreach>
         </if>
-        order by t2.code desc
---         order by t1.request_date
+        order by t6.report_code desc
     </select>
 
     <select id="getReportList3" resultType="com.lims.manage.erp.vo.ReportListVo">
@@ -337,7 +336,7 @@
                 #{id}
             </foreach>
         </if>
-        order by t2.code desc
+        order by t1.report_code desc
     </select>
 
     <select id="getReportDetailHistory" resultMap="reportDetailMap">
