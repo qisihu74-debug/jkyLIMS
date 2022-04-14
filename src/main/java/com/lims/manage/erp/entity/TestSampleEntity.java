@@ -51,8 +51,14 @@ public class TestSampleEntity {
     private Date checkDate;
 
     private String remark;
-
+    /**
+     * 文件url
+     */
     private String file;
+    /**
+     * 文件url原始名称
+     */
+    private String fileUrlStr;
 
     private Integer productId;
 
@@ -84,6 +90,9 @@ public class TestSampleEntity {
     private String companyName;
     @TableField(exist = false)
     private List<String> outwardArr;
+    @TableField(exist = false)
+    private List<TestSampleCollectionJSON> fileArrays;
+
 
 
     public TestSampleEntity() {

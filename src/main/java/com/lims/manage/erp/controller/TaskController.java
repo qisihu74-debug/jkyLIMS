@@ -292,12 +292,13 @@ public class TaskController {
      * @param response
      */
     @RequestMapping(value = "/downloadOriginalRecord")
+//    @CrossOrigin()
     public void downloadOriginalRecord(Long taskId,
                                        Integer sampleId,
                                        Integer checkItemId,
-                                       Integer idItem,
+                                       Integer itemId,
                                        HttpServletResponse response) {
-        OriginalRecordDataVo originalData = taskService.getOriginalData(taskId, sampleId, checkItemId,idItem);
+        OriginalRecordDataVo originalData = taskService.getOriginalData(taskId, sampleId, checkItemId,itemId);
         Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
         result.put("result", originalData);
         //从文件服务器获取文件流

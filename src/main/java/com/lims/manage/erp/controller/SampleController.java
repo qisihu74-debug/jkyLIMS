@@ -290,4 +290,22 @@ public class SampleController {
         }
     }
 
+    /**
+     * 上传样品多个文件
+     */
+    @RequestMapping("/uploading/{id}")
+    public Result uploading(@PathVariable("id") Integer id, MultipartFile[] file) {
+        if (id == null && "".equals(id)) {
+            return ResultUtil.error("缺少必填参数！");
+        }
+        if (file == null) {
+            return ResultUtil.error("样品file文件为空！");
+        }
+        if (testSampleEntityService.uploading(id, file) == true) {
+            return ResultUtil.success("样品文件上传成功");
+        }
+        return ResultUtil.error("样品文件上传失败");
+    }
+
+
 }

@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,6 +23,10 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      * @return
      */
     PageInfo querySampleList(TestSampleEntity sampleEntity);
+    /**
+     * 上传样品多个文件
+     */
+    Boolean uploading(Integer id, MultipartFile[] file);
 
     /**
      * 根据ID查询样品详情

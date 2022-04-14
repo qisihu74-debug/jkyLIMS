@@ -110,6 +110,13 @@ public interface SampleEntityMapper {
     int updateSampleInfo(SampleEntity record);
 
     /**
+     * 更新附件和别名 根据样品id
+     * @param record
+     * @return
+     */
+    int updateSampleInfoFileUrl(SampleEntity record);
+
+    /**
      * 查询样品标签信息
      *
      * @param sampleId
