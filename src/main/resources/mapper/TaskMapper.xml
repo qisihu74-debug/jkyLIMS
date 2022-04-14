@@ -372,9 +372,8 @@
         </trim>
         GROUP BY t1.id
         ORDER BY
-        t1.code
---         t2.entrustment_no desc,
---         t1.required_completion_time desc
+        t1.code desc
+
 
     </select>
 
