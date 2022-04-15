@@ -327,4 +327,7 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Select("select name from test_init_data where type=12")
     String getMessage();
+
+    @Select("select entrustment_id from test_report_record where report_code=#{reportCode}")
+    Long getEntrustIdByCode(@Param("reportCode") String reportCode);
 }

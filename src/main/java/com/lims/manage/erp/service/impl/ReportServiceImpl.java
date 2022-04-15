@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -51,7 +52,12 @@ import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.poi.POIXMLDocument;
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.hwpf.usermodel.Range;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.slf4j.Logger;
@@ -65,6 +71,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -942,7 +950,16 @@ public class ReportServiceImpl implements ReportService {
             MinioClient client = MinIoUtil.minioClient;
             //Long entrustId = reportMapper.getMessageByCode(reportCode);
             try {
-                this.downLoad(client,code,Long.parseLong(reportCode));
+                // this.downLoad(client,code,Long.parseLong(reportCode));
+                Long id = entrustEntityMapper.getEntrustIdByCode(reportCode);
+                List<String> keys = JSONArray.parseArray(code, String.class);
+                List<ConclusionEntity> list = Lists.newArrayList();
+                for (int i=0;i<keys.size();i++) {
+                    ConclusionEntity conclusionEntity = new ConclusionEntity();
+                    conclusionEntity.setUrl(keys.get(i));
+                    list.add(conclusionEntity);
+                }
+                this.submitDownLoad(client,list,id);
                 flag = true;
             }catch (Exception e){
                 logger.error("提交报告审批失败:{}",e);
@@ -1630,7 +1647,7 @@ public class ReportServiceImpl implements ReportService {
         textMap.put("dept", entrustAddVo.getEntrustCompany());
         textMap.put("part", entrustAddVo.getProjectPart());
         textMap.put("checkType", entrustAddVo.getCheckPurpose());
-        PoiConfig.changeText(topDoc, textMap);
+        replaceWord(topDoc,"top.docx",textMap);
         //报告头部合并顺序1
         map.put(1,topDoc);
         //将报告合并成一个完整的word
@@ -1648,4 +1665,60 @@ public class ReportServiceImpl implements ReportService {
         updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
         return url;
     }
+
+
+    /**
+     *
+     * @param document word模板数据源路径
+     * @param fileName word导出路径
+     * @param map 关键字键值对映射
+     * @throws Exception
+     */
+    public static void replaceWord(XWPFDocument document,String fileName,Map<String, String> map) throws Exception {
+        FileOutputStream out = null;
+        FileInputStream input = null;
+        try {
+            if("doc".equals(fileName.split("\\.")[1])) {
+                //doc转inputstream
+                InputStream inputStream = AsposeUtil.docToIo(document);
+                HWPFDocument hwpfDocument = new HWPFDocument(inputStream);
+                Range range = hwpfDocument.getRange();
+                for(Map.Entry<String, String> entry : map.entrySet()) {
+                    if (entry.getValue() == null) {
+                        //TODO
+                        entry.setValue("aa");
+                    }
+                    range.replaceText(entry.getKey(), entry.getValue());
+                }
+            }else {
+                // 替换段落中的指定文字
+                Iterator<XWPFParagraph> itPara = document.getParagraphsIterator();
+                while (itPara.hasNext()) {
+                    XWPFParagraph paragraph = itPara.next();
+                    List<XWPFRun> runs = paragraph.getRuns();
+                    for (XWPFRun run : runs) {
+                        String oneparaString = run.getText(run.getTextPosition());
+                        if (StringUtils.isEmpty(oneparaString)){
+                            continue;
+                        }
+                        for (Map.Entry<String, String> entry :
+                                map.entrySet()) {
+                            oneparaString = oneparaString.replace(entry.getKey(), entry.getValue());
+                        }
+                        run.setText(oneparaString, 0);
+                    }
+                }
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(out != null) {
+                out.close();
+            }
+            if(input != null) {
+                input.close();
+            }
+        }
+    }
+
 }
