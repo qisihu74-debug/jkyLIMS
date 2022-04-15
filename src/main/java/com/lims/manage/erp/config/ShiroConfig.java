@@ -154,7 +154,7 @@ public class ShiroConfig {
         RedisCacheManager redisCacheManager = new RedisCacheManager();
         redisCacheManager.setRedisManager(redisManager());
         redisCacheManager.setKeyPrefix(CACHE_KEY);
-        redisCacheManager.setExpire(2*3600*1000);
+        redisCacheManager.setExpire(3*3600*1000);
         // 配置缓存的话要求放在session里面的实体类必须有个id标识
         redisCacheManager.setPrincipalIdFieldName("userId");
         return redisCacheManager;
@@ -199,7 +199,7 @@ public class ShiroConfig {
         shiroSessionManager.setSessionValidationSchedulerEnabled(true);
         shiroSessionManager.setSessionIdCookieEnabled(true);
         //设置session失效的扫描时间, 清理用户直接关闭浏览器造成的孤立会话 默认为 1个小时
-        shiroSessionManager.setSessionValidationInterval(5*60*1000);
+        shiroSessionManager.setSessionValidationInterval(3600);
         return shiroSessionManager;
     }
 }
