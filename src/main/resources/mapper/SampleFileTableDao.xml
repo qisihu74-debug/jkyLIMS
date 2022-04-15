@@ -4,17 +4,22 @@
 <mapper namespace="com.lims.manage.erp.mapper.SampleFileTableDao">
 
     <insert id="insertSampleFileTableEntity" parameterType="com.lims.manage.erp.entity.SampleFileTableEntity">
-        insert into test_sample_file_rel(sample_id,file_url,file_url_str) values (#{sampleId},#{fileUrl},#{fileUrlStr})
+        insert into test_sample_file_rel(sample_id,file_url,file_url_str,create_time) values (#{sampleId},#{fileUrl},#{fileUrlStr},#{carateTime})
     </insert>
 
     <select id="getSampleFileTableEntityList" resultType="com.lims.manage.erp.entity.SampleFileTableEntity">
 				SELECT
+				id,
 				file_url,
 				file_url_str
 				FROM
 				test_sample_file_rel
-				WHERE sample_id = #{}
+				WHERE sample_id = #{sampleId}
     </select>
+
+	<delete id="deleteSampleFileTableEntity">
+		delete from test_sample_file_rel where id = #{id}
+	</delete>
 
 
 

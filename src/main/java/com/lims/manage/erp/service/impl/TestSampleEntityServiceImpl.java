@@ -112,7 +112,14 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
                 sampleFileTableEntity.setFileUrlStr(substring);
             }
         }
+        sampleFileTableEntity.setCarateTime(new Date());
         sampleFileTableDao.insertSampleFileTableEntity(sampleFileTableEntity);
+        return true;
+    }
+
+    @Override
+    public Boolean removeding(Integer id) {
+        sampleFileTableDao.deleteSampleFileTableEntity(id);
         return true;
     }
 
@@ -134,6 +141,18 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             }
             List<TestSampleCollectionJSON> fileArrays = new ArrayList<>();
             // 根据样品id 查询 对应的文件信息。
+            List<SampleFileTableEntity> sampleFileTableEntityList  = sampleFileTableDao.getSampleFileTableEntityList(id);
+            if(sampleFileTableEntityList!=null&&!sampleFileTableEntityList.isEmpty())
+            {
+                for(SampleFileTableEntity sampleFileTableEntity:sampleFileTableEntityList)
+                {
+                    TestSampleCollectionJSON testSampleCollectionJSON = new TestSampleCollectionJSON();
+                    testSampleCollectionJSON.setLable(sampleFileTableEntity.getFileUrl());
+                    testSampleCollectionJSON.setValue(sampleFileTableEntity.getFileUrlStr());
+                    testSampleCollectionJSON.setId(sampleFileTableEntity.getId());
+                    fileArrays.add(testSampleCollectionJSON);
+                }
+            }
             // 处理原始记录名称
 //            if (entity.getFile() != null && entity.getFileUrlStr() != null) {
 //                String[] file = entity.getFile().split(",");

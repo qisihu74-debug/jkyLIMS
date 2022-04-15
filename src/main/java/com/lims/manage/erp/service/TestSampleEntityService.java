@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
+import io.swagger.models.auth.In;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -27,6 +28,13 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      * 上传样品多个文件
      */
     Boolean uploading(Integer id, MultipartFile[] file);
+
+    /**
+     * 删除文件id
+     * @param id
+     * @return
+     */
+    Boolean removeding(Integer id);
 
     /**
      * 根据ID查询样品详情

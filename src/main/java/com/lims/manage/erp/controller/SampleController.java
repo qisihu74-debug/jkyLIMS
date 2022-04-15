@@ -291,7 +291,7 @@ public class SampleController {
     }
 
     /**
-     * 上传样品多个文件
+     * 上传样品多个文件  单个上传。
      */
     @RequestMapping("/uploading/{id}")
     public Result uploading(@PathVariable("id") Integer id, MultipartFile[] file) {
@@ -306,6 +306,17 @@ public class SampleController {
         }
         return ResultUtil.error("样品文件上传失败");
     }
+
+    /**
+     * 删除文件id
+     */
+    @RequestMapping("/removeding/{id}")
+    public Result removeding(@PathVariable("id") Integer id) {
+        testSampleEntityService.removeding(id);
+        return ResultUtil.success("样品文件删除成功");
+    }
+
+
 
 
 }

@@ -15,6 +15,7 @@ public class TestSampleCollectionJSON {
 //    private String sortNumber;
 //    private String batchNumber;
     //private MultipartFile picture;
+    private Integer id;
     private String lable;
     private String value;
 }
