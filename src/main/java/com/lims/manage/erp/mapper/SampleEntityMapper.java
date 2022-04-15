@@ -180,4 +180,12 @@ public interface SampleEntityMapper {
     void updateSampleUse(@Param("sampleId") Integer sampleId, @Param("isUse") Integer isUse);
 
     List<ConcreteSampleVo> getSamplesByEntrustID(Long entrustId);
+
+    /**
+     * 更新样品状态
+     * @param sampleId
+     * @param state
+     */
+    @Update("update test_sample set state=#{state} where id = #{sampleId}")
+    void updateSampleState(@Param("sampleId") Integer sampleId, @Param("isUse") Integer state);
 }

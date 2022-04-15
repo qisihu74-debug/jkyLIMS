@@ -14,6 +14,10 @@ public class ReceiveSampleParamVo {
      */
     private Long taskId;
     /**
+     * 样品ID
+     */
+    private Integer sampleId;
+    /**
      * 领样人
      */
     private String sampler;
