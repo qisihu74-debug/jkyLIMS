@@ -13,4 +13,5 @@ public class SamplePrivateInfoVo {
     private String picture;
     private String insertFlag;
     private String state;
+    private String aliasName;
 }
