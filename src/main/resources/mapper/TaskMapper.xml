@@ -132,6 +132,7 @@
             <result property="sampleCode" column="sampeCode"></result>
             <result property="batchNumber" column="batchNumber"></result>
             <result property="picture" column="picture"></result>
+            <result property="aliasName" column="aliasName"></result>
         </collection>
     </resultMap>
 
@@ -269,7 +270,8 @@
         t4.id sampleId,
         t4.sample_code sampeCode,
         t4.batch_number batchNumber,
-        t4.picture
+        t4.picture,
+        t4.alias_name aliasName
         FROM test_task t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
         LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
