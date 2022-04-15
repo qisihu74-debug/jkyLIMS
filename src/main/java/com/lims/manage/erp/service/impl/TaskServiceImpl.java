@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -563,9 +564,24 @@ public class TaskServiceImpl implements TaskService {
                 rows.get(i + 1).getTableCells().get(5).setText(sampleDetailVo.getSampleCode());
                 // 备注
                 rows.get(i + 1).getTableCells().get(6).setText(sampleDetailVo.getRemark());
+//                for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+//                    stringBuilder.append(checkItemInfoVo.getCheckItemName() + "(" + checkItemInfoVo.getStandardName() + ")" + ",");
+//                }
+                // 处理检测项 依据名去除 只保留编号。
                 for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
-                    stringBuilder.append(checkItemInfoVo.getCheckItemName() + "(" + checkItemInfoVo.getStandardName() + ")" + ",");
+//                    stringBuilder.append(checkItemInfoVo.getCheckItemName() + "(" + checkItemInfoVo.getStandardName() + ")" + ",");
+                    String name = checkItemInfoVo.getCheckItemName();
+                    stringBuilder.append(name);
+                    if (!StringUtils.isEmpty(checkItemInfoVo.getStandardName())) {
+                        stringBuilder.append("（");
+                        String s = checkItemInfoVo.getStandardName();
+                        String aa = s.split("《")[0];
+                        stringBuilder.append(aa);
+                        stringBuilder.append("）");
+                    }
+                    stringBuilder.append("，");
                 }
+
             }
             // 提供资料
             rows1.get(0).getTableCells().get(0).setText(taskDetailInfoVo.getPresentInformation());
@@ -576,12 +592,12 @@ public class TaskServiceImpl implements TaskService {
             // 产品标准
             rows1.get(1).getTableCells().get(5).setText(taskDetailInfoVo.getJudgmentBasis());
             // 检测项目及检验依据
-            rows1.get(2).getTableCells().get(1).setText(stringBuilder.toString());
+            String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
+            rows1.get(2).getTableCells().get(1).setText(substring);
             // 要求检验完成日期
             rows1.get(3).getTableCells().get(1).setText(taskDetailInfoVo.getRequiredCompletionTime());
             // 本单产值
             rows1.get(3).getTableCells().get(3).setText(taskDetailInfoVo.getCost());
-
             return doc;
         } catch (
                 Exception e) {
