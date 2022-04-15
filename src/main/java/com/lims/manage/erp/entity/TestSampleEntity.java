@@ -90,6 +90,9 @@ public class TestSampleEntity {
     private String companyName;
     @TableField(exist = false)
     private List<String> outwardArr;
+    /**
+     * 样品文件集合。
+     */
     @TableField(exist = false)
     private List<TestSampleCollectionJSON> fileArrays;
 

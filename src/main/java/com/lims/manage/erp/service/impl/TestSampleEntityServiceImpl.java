@@ -6,9 +6,11 @@ import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleFileTableEntity;
 import com.lims.manage.erp.entity.TestSampleCollectionJSON;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.SampleFileTableDao;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.GenID;
@@ -16,6 +18,8 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
 import com.lims.manage.erp.vo.SampleJudgeBasisVo;
 import com.lims.manage.erp.vo.SampleSimpleListVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -33,6 +37,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     private TestSampleEntityMapper testSampleEntityMapper;
     @Autowired
     private SampleEntityMapper sampleEntityMapper;
+    @Autowired
+    private SampleFileTableDao sampleFileTableDao;
+    Logger logger = LoggerFactory.getLogger(TestSampleEntityServiceImpl.class);
 
     @Override
     public Integer batchInsertSample(List<SampleDetailAddVo> samples) {
@@ -78,8 +85,8 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
     @Override
     public Boolean uploading(Integer id, MultipartFile[] file) {
-        SampleEntity sampleEntity = new SampleEntity();
-        sampleEntity.setId(id);
+        SampleFileTableEntity sampleFileTableEntity = new SampleFileTableEntity();
+        sampleFileTableEntity.setSampleId(id);
         //附件存在上传附件到服务器
         if (file != null) {
             StringBuilder stringBuilder = new StringBuilder();
@@ -100,16 +107,42 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             String fileUrl = stringBuilder.toString();
             if (!StringUtils.isEmpty(fileUrl)) {
                 String substring = fileUrl.substring(0, fileUrl.length() - 1);
-                sampleEntity.setFileUrl(substring);
+                sampleFileTableEntity.setFileUrl(substring);
             }
             String fileUrlStr = stringfileUrlStr.toString();
             if (!StringUtils.isEmpty(fileUrlStr)) {
                 String substring = fileUrlStr.substring(0, fileUrlStr.length() - 1);
-                sampleEntity.setFileUrlStr(substring);
+                sampleFileTableEntity.setFileUrlStr(substring);
             }
         }
-        // 根据样品id 更新附件url。
-        sampleEntityMapper.updateSampleInfoFileUrl(sampleEntity);
+        sampleFileTableEntity.setCarateTime(new Date());
+        sampleFileTableDao.insertSampleFileTableEntity(sampleFileTableEntity);
+        return true;
+    }
+
+    @Override
+    public Boolean removeding(Integer id) {
+        // 根据附件id 查询文件名称 进行删除minIo文件服务器中内容。
+        SampleFileTableEntity SampleFileData = sampleFileTableDao.getSampleFileTableEntityId(id);
+        if(SampleFileData!=null&&SampleFileData.getFileUrl()!=null){
+            // 去清除 MinIo 桶数据。
+            try {
+                String[] strings2 = SampleFileData.getFileUrlStr().split(",");
+                for (int i = 0; i < strings2.length; i++) {
+                    String[] strings3 = strings2[i].split("\\.");
+                    if (strings3.length >= 2) {
+                        String[] strings4 = strings3[0].split("&");
+                        // 获取 文件编号
+                        Long fileCode = Long.parseLong(strings4[0]);
+                        MinIoUtil.deleteFile(BucketsConst.buckets_sample_enclosure, fileCode + "." + strings3[1]);
+                    }
+                }
+            } catch (Exception e) {
+                logger.info("修改委托下清除 MinIo 桶数据 出错");
+            }
+        }
+
+        sampleFileTableDao.deleteSampleFileTableEntity(id);
         return true;
     }
 
@@ -130,17 +163,30 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
                 entity.setOutwardArr(outwardArr);
             }
             List<TestSampleCollectionJSON> fileArrays = new ArrayList<>();
-            // 处理原始记录名称
-            if(entity.getFile()!=null&&entity.getFileUrlStr()!=null){
-               String[] file = entity.getFile().split(",");
-               String[] fileUrlStr = entity.getFileUrlStr().split(",");
-               for(int i = 0;i<file.length;i++){
-                   TestSampleCollectionJSON testSampleCollectionJSON = new TestSampleCollectionJSON();
-                   testSampleCollectionJSON.setLable(fileUrlStr[i]);
-                   testSampleCollectionJSON.setValue(file[i]);
-                   fileArrays.add(testSampleCollectionJSON);
-               }
+            // 根据样品id 查询 对应的文件信息。
+            List<SampleFileTableEntity> sampleFileTableEntityList  = sampleFileTableDao.getSampleFileTableEntityList(id);
+            if(sampleFileTableEntityList!=null&&!sampleFileTableEntityList.isEmpty())
+            {
+                for(SampleFileTableEntity sampleFileTableEntity:sampleFileTableEntityList)
+                {
+                    TestSampleCollectionJSON testSampleCollectionJSON = new TestSampleCollectionJSON();
+                    testSampleCollectionJSON.setLable(sampleFileTableEntity.getFileUrl());
+                    testSampleCollectionJSON.setValue(sampleFileTableEntity.getFileUrlStr());
+                    testSampleCollectionJSON.setId(sampleFileTableEntity.getId());
+                    fileArrays.add(testSampleCollectionJSON);
+                }
             }
+            // 处理原始记录名称
+//            if (entity.getFile() != null && entity.getFileUrlStr() != null) {
+//                String[] file = entity.getFile().split(",");
+//                String[] fileUrlStr = entity.getFileUrlStr().split(",");
+//                for (int i = 0; i < file.length; i++) {
+//                    TestSampleCollectionJSON testSampleCollectionJSON = new TestSampleCollectionJSON();
+//                    testSampleCollectionJSON.setLable(fileUrlStr[i]);
+//                    testSampleCollectionJSON.setValue(file[i]);
+//                    fileArrays.add(testSampleCollectionJSON);
+//                }
+//            }
             entity.setFileArrays(fileArrays);
         }
 
