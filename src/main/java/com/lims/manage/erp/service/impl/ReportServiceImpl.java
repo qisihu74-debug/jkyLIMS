@@ -951,7 +951,7 @@ public class ReportServiceImpl implements ReportService {
             //Long entrustId = reportMapper.getMessageByCode(reportCode);
             try {
                 // this.downLoad(client,code,Long.parseLong(reportCode));
-                Long id = entrustEntityMapper.getEntrustIdByCode(reportCode);
+                //Long id = entrustEntityMapper.getEntrustIdByCode(reportCode);
                 List<String> keys = JSONArray.parseArray(code, String.class);
                 List<ConclusionEntity> list = Lists.newArrayList();
                 for (int i=0;i<keys.size();i++) {
@@ -959,10 +959,11 @@ public class ReportServiceImpl implements ReportService {
                     conclusionEntity.setUrl(keys.get(i));
                     list.add(conclusionEntity);
                 }
-                this.submitDownLoad(client,list,id);
+                this.submitDownLoad(client,list,Long.parseLong(reportCode));
                 flag = true;
             }catch (Exception e){
                 logger.error("提交报告审批失败:{}",e);
+                return null;
             }
         }else {
             try {
