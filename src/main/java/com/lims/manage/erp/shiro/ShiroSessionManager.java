@@ -80,15 +80,17 @@ public class ShiroSessionManager extends DefaultWebSessionManager {
         String token = WebUtils.toHttp(request).getHeader(AUTHORIZATION);
         //如果请求头中存在token 则从请求头中获取token
         if (!StringUtils.isEmpty(token)) {
-            Object o = redisUtils.get("shiro:session:" + token);
-            if (o == null){
-                JkyException exception = new JkyException(CommonEnum.SIGNATURE_NOT_PASS.getResultCode(), CommonEnum.SIGNATURE_NOT_PASS.getResultMsg());
-                responseJsonString((HttpServletResponse) response,JSON.toJSONString(exception));
-            }else {
+            if ("null".equals(token)){
                 request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID_SOURCE, REFERENCED_SESSION_ID_SOURCE);
                 request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID, token);
                 request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID_IS_VALID, Boolean.TRUE);
                 return token;
+            }else {
+                Object o = redisUtils.get("shiro:session:" + token);
+                if (o == null){
+                    JkyException exception = new JkyException(CommonEnum.SIGNATURE_NOT_PASS.getResultCode(), CommonEnum.SIGNATURE_NOT_PASS.getResultMsg());
+                    responseJsonString((HttpServletResponse) response,JSON.toJSONString(exception));
+                }
             }
         } else {
             // 这里禁用掉Cookie获取方式
