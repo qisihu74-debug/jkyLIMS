@@ -48,7 +48,7 @@ public class DingUserJob {
      * 定时拉取钉钉用户信息
      */
     @Async("syncExecutor")
-    @Scheduled(cron="0 */60 * * * ?")
+    @Scheduled(cron="0 35 2 ?")
     public void sync(){
         AccessTokenSingleton instance = AccessTokenSingleton.getInstance();
         String token = instance.getToken(tokenUrl, appKey, appsecret);
