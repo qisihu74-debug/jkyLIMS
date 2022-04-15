@@ -3,6 +3,7 @@ package com.lims.manage.erp.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TestProductItem;
 import com.lims.manage.erp.entity.TestReportTemplateProductRef;
 import com.lims.manage.erp.mapper.TestReportTemplateDao;
 import com.lims.manage.erp.entity.TestReportTemplate;
@@ -56,6 +57,9 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
         if(userInfo==null){
             return ResultUtil.error("token 已过期！");
         }
+        if (this.getOne(new QueryWrapper<TestReportTemplate>().eq("report_code",testReportTemplate.getTestReportTemplate().getReportCode()).eq("del_flag",0))!=null){
+            return ResultUtil.error("检测模板编号重复");
+        }
         testReportTemplate.getTestReportTemplate().setStatus("0");
         testReportTemplate.getTestReportTemplate().setDelFlag(0);
         testReportTemplate.getTestReportTemplate().setCreateTime(new Date());
@@ -77,6 +81,9 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
         }
         if (testReportTemplate.getTestReportTemplate().getId()==null){
             return ResultUtil.error("修改对象ID为空");
+        }
+        if (this.getOne(new QueryWrapper<TestReportTemplate>().ne("id",testReportTemplate.getTestReportTemplate().getId()).eq("report_code",testReportTemplate.getTestReportTemplate().getReportCode()).eq("del_flag",0))!=null){
+            return ResultUtil.error("检测模板编号重复");
         }
         testReportTemplate.getTestReportTemplate().setUpdateTime(new Date());
         if (this.updateById(testReportTemplate.getTestReportTemplate())){
