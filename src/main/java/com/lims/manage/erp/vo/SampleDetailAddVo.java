@@ -11,7 +11,7 @@ public class SampleDetailAddVo {
     /**
      * 产品名称
      */
-    private String productName;
+    private String sampleName;
     /**
      * 产品ID
      */
