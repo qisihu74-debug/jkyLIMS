@@ -539,6 +539,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         </set>
         where insert_flag = #{insertFlag,jdbcType=VARCHAR}
     </update>
+    <update id="updateSampleInfoFileUrl" parameterType="com.lims.manage.erp.entity.SampleEntity">
+    update test_sample set file = #{fileUrl},file_url_str=#{fileUrlStr}  where id = #{id,jdbcType=INTEGER}
+    </update>
     <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.SampleEntity">
         update test_sample
         set company_id         = #{companyId,jdbcType=INTEGER},

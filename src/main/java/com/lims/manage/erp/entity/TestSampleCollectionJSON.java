@@ -12,7 +12,9 @@ import java.io.File;
  */
 @Data
 public class TestSampleCollectionJSON {
-    private String sortNumber;
-    private String batchNumber;
+//    private String sortNumber;
+//    private String batchNumber;
     //private MultipartFile picture;
+    private String lable;
+    private String value;
 }

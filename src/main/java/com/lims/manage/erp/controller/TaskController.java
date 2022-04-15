@@ -270,11 +270,12 @@ public class TaskController {
      */
     @RequestMapping("/receiveSample")
     public Result receiveSample(@RequestBody ReceiveSampleParamVo paramVo) {
-        if (paramVo == null || paramVo.getSampler() == null || "".equals(paramVo.getSampler()) || paramVo.getTaskId() == null) {
+        if (paramVo == null || paramVo.getSampler() == null || "".equals(paramVo.getSampler())
+                || paramVo.getTaskId() == null || paramVo.getSampleId() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             // 领样人姓名与任务单ID  效验是否属于同一部门
-            if (taskService.isIntendedEffectReceive(paramVo.getTaskId(), paramVo.getSampler()) == true) {
+            if (taskService.isIntendedEffectReceive(paramVo.getTaskId(), paramVo.getSampler())) {
                 taskService.receiveSample(paramVo);
                 return ResultUtil.success("领样成功！");
             }
@@ -292,12 +293,13 @@ public class TaskController {
      * @param response
      */
     @RequestMapping(value = "/downloadOriginalRecord")
+//    @CrossOrigin()
     public void downloadOriginalRecord(Long taskId,
                                        Integer sampleId,
                                        Integer checkItemId,
-                                       Integer idItem,
+                                       Integer itemId,
                                        HttpServletResponse response) {
-        OriginalRecordDataVo originalData = taskService.getOriginalData(taskId, sampleId, checkItemId,idItem);
+        OriginalRecordDataVo originalData = taskService.getOriginalData(taskId, sampleId, checkItemId,itemId);
         Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
         result.put("result", originalData);
         //从文件服务器获取文件流

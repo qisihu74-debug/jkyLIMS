@@ -70,6 +70,10 @@ public class SampleEntity {
      */
     private String fileUrl;
     /**
+     * 附件url原始名称
+     */
+    private String fileUrlStr;
+    /**
      * 保存地点
      */
     private String savePlace;
