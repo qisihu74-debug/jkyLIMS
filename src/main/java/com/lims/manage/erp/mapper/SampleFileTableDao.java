@@ -25,6 +25,13 @@ public interface SampleFileTableDao {
     List<SampleFileTableEntity> getSampleFileTableEntityList(Integer sampleId);
 
     /**
+     * 根据附件id 查询详情。
+     * @param id
+     * @return
+     */
+    SampleFileTableEntity getSampleFileTableEntityId(Integer id);
+
+    /**
      * 删除单个文件id
      * @param id
      * @return

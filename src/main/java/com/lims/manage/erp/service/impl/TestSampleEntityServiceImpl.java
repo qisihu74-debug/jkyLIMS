@@ -18,6 +18,8 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
 import com.lims.manage.erp.vo.SampleJudgeBasisVo;
 import com.lims.manage.erp.vo.SampleSimpleListVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -37,6 +39,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     private SampleEntityMapper sampleEntityMapper;
     @Autowired
     private SampleFileTableDao sampleFileTableDao;
+    Logger logger = LoggerFactory.getLogger(TestSampleEntityServiceImpl.class);
 
     @Override
     public Integer batchInsertSample(List<SampleDetailAddVo> samples) {
@@ -119,6 +122,26 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
     @Override
     public Boolean removeding(Integer id) {
+        // 根据附件id 查询文件名称 进行删除minIo文件服务器中内容。
+        SampleFileTableEntity SampleFileData = sampleFileTableDao.getSampleFileTableEntityId(id);
+        if(SampleFileData!=null&&SampleFileData.getFileUrl()!=null){
+            // 去清除 MinIo 桶数据。
+            try {
+                String[] strings2 = SampleFileData.getFileUrlStr().split(",");
+                for (int i = 0; i < strings2.length; i++) {
+                    String[] strings3 = strings2[i].split("\\.");
+                    if (strings3.length >= 2) {
+                        String[] strings4 = strings3[0].split("&");
+                        // 获取 文件编号
+                        Long fileCode = Long.parseLong(strings4[0]);
+                        MinIoUtil.deleteFile(BucketsConst.buckets_sample_enclosure, fileCode + "." + strings3[1]);
+                    }
+                }
+            } catch (Exception e) {
+                logger.info("修改委托下清除 MinIo 桶数据 出错");
+            }
+        }
+
         sampleFileTableDao.deleteSampleFileTableEntity(id);
         return true;
     }

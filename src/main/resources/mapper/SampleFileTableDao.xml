@@ -17,6 +17,18 @@
 				WHERE sample_id = #{sampleId}
     </select>
 
+	<select id="getSampleFileTableEntityId" resultType="com.lims.manage.erp.entity.SampleFileTableEntity">
+		SELECT
+			id,
+			file_url,
+			file_url_str,
+			create_time,
+			update_time
+			FROM
+			test_sample_file_rel
+			WHERE id = #{id}
+	</select>
+
 	<delete id="deleteSampleFileTableEntity">
 		delete from test_sample_file_rel where id = #{id}
 	</delete>
