@@ -103,7 +103,7 @@ public class TestSampleEntity {
 
     public TestSampleEntity(SampleDetailAddVo vo,String sampleCode) {
         this.companyId = vo.getCompanyId();
-        this.sampleName = vo.getAliasName();
+        this.sampleName = vo.getSampleName();
         this.sampleCode = sampleCode;
         this.specs = vo.getSpecs();
         this.batchNumber = vo.getBatchNumber();
