@@ -321,13 +321,13 @@ public class TaskServiceImpl implements TaskService {
     public int receiveSample(ReceiveSampleParamVo paramVo) {
         paramVo.setState(2);
         // 根据任务单主键 获取委托单主键
-//        EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
-//        if (entrustEntity != null) {
-//        }
-        //更新任务单状态为已领样
-        taskMapper.updateEntrustById(paramVo.getTaskId(), 2);
+        EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
+        if (entrustEntity != null) {
+            //更新任务单状态为已领样
+            taskMapper.updateEntrustById(paramVo.getTaskId(), 2);
+        }
         //更新样品状态为领样
-        sampleEntityMapper.updateSampleState(paramVo.getSampleId(),1);
+//        sampleEntityMapper.updateSampleState(paramVo.getSampleId(),1);
         return taskMapper.updateSampler(paramVo);
     }
 
