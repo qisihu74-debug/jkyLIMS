@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.SampleFileTableDao">
+
+    <insert id="insertSampleFileTableEntity" parameterType="com.lims.manage.erp.entity.SampleFileTableEntity">
+        insert into test_sample_file_rel(sample_id,file_url,file_url_str) values (#{sampleId},#{fileUrl},#{fileUrlStr})
+    </insert>
+
+    <select id="getSampleFileTableEntityList" resultType="com.lims.manage.erp.entity.SampleFileTableEntity">
+				SELECT
+				file_url,
+				file_url_str
+				FROM
+				test_sample_file_rel
+				WHERE sample_id = #{}
+    </select>
+
+
+
+</mapper>
