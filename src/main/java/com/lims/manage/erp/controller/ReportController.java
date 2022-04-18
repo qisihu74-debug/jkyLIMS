@@ -665,13 +665,6 @@ public class ReportController {
     public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file,
                                @RequestParam("code") String code) {
-       /* String originalFilename = file.getOriginalFilename();
-        if (org.apache.commons.lang.StringUtils.isNotEmpty(originalFilename)){
-            String substring = originalFilename.substring(originalFilename.length() - 4, originalFilename.length());
-            if (!".pdf".equals(substring)){
-                return ResultUtil.error("请上传pdf格式的报告！");
-            }
-        }*/
         if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数！");
         }
