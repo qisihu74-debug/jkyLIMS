@@ -7,6 +7,7 @@ import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
@@ -419,10 +420,10 @@ public class TaskServiceImpl implements TaskService {
 
         teamVo.setReviewVo(null);
         // 审批人集合
-        List<LabelValueVo> ApproverVo = taskMapper.getRoleInformation(Const.approverStr);
+        List<LabelValueVo> ApproverVo = taskMapper.getRoleInformation(Const.approverLongUserId);
         teamVo.setApproverVo(ApproverVo);
         // 签发人集合
-        List<LabelValueVo> SignerVo = taskMapper.getRoleInformation(Const.signerStr);
+        List<LabelValueVo> SignerVo = taskMapper.getRoleInformation(Const.signerLongUserId);
         teamVo.setSignerVo(SignerVo);
         // 获取科室下人员信息 （一个科室下）
 
@@ -618,6 +619,13 @@ public class TaskServiceImpl implements TaskService {
         sampleVo.setSampleName(sampleVo.getSampleName() + ";");
         sampleVo.setSampleNumber(sampleVo.getSampleNumber() + ";");
         sampleVo.setSampleQuantity(sampleVo.getSampleQuantity() + ";");
+        // 处理自定义备注信息与备注标志格。进行合并输出
+        String outward = sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1);
+        if (outward != null && !"".equals(outward)) {
+            sampleVo.setSampleDesc(outward + "," + sampleVo.getOutwardDescribe() + ";");
+        } else {
+            sampleVo.setSampleDesc(sampleVo.getOutwardDescribe() + ";");
+        }
         sampleVo.setSampleDesc(sampleVo.getSampleDesc() + ";");
         sampleVo.setSampleTime(sampleVo.getSampleTime() + ";");
         //获取检测依据
@@ -687,6 +695,45 @@ public class TaskServiceImpl implements TaskService {
             }
         }
         return taskMapper.updateOriginalFile(upload, entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId(), fileUrlStr, fileName);
+    }
+
+    @Override
+    public Boolean uploadingBatch(List<Integer> ids, MultipartFile file) {
+        List<SampleItemInstrumentEntity> entityList = new ArrayList<>();
+        for(Integer id :ids){
+            SampleItemInstrumentEntity sampleItemInstrumentEntity = new SampleItemInstrumentEntity();
+            String upload = "";
+            String fileUrlStr = "";
+            // 原始名称
+            String fileName = "";
+            long fileUrlLongId = GenID.getID();
+            if (file != null) {
+                String name = file.getOriginalFilename();
+                String[] strings = name.split("\\.");
+                upload = MinIoUtil.upload("upload-original-record", file, fileUrlLongId + "." + strings[strings.length - 1]);
+                fileUrlStr = fileUrlLongId + "." + strings[strings.length - 1];
+                fileName = strings[0] + "." + strings[strings.length - 1];
+            }
+            sampleItemInstrumentEntity.setItemId(id);
+            sampleItemInstrumentEntity.setOriginUrl(upload);
+            sampleItemInstrumentEntity.setFileUrlStr(fileUrlStr);
+            sampleItemInstrumentEntity.setItemFileName(fileName);
+            entityList.add(sampleItemInstrumentEntity);
+        }
+        taskMapper.updateTestEntrustedSampleCheckitemRel(entityList);
+        return true;
+    }
+
+    @Override
+    public Boolean effectDataSet(List<Integer> ids) {
+        List<SampleItemInstrumentEntity> list = testDetectionDao.getTestEntrustedSampleCheckitemRelDetailList(ids);
+        for(SampleItemInstrumentEntity sampleItemInstrumentEntity :list)
+        {
+            if(sampleItemInstrumentEntity.getOriginUrl()!=null){
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

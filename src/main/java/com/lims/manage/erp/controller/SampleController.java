@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -291,7 +292,7 @@ public class SampleController {
     }
 
     /**
-     * 上传样品多个文件  单个上传。
+     * 上传样品文件  单个上传。
      */
     @RequestMapping("/uploading/{id}")
     public Result uploading(@PathVariable("id") Integer id, MultipartFile[] file) {

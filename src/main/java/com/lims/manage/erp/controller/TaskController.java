@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -289,7 +290,7 @@ public class TaskController {
      * @param taskId
      * @param sampleId
      * @param checkItemId
-     * @param idItem
+     * @param itemId
      * @param response
      */
     @RequestMapping(value = "/downloadOriginalRecord")
@@ -415,6 +416,26 @@ public class TaskController {
         } else {
             return ResultUtil.error(101, "上传原始记录失败！");
         }
+    }
+    /**
+     * 批量上传原始记录 uploading_batch。
+     */
+    @GetMapping("/upload_original_records_in_batches")
+    @ResponseBody
+    public Result uploadingBatch(@RequestParam List<Integer> ids, MultipartFile file) {
+        if (ids == null && ids.size()==0) {
+            return ResultUtil.error("缺少必填参数！");
+        }
+        if (file == null) {
+            return ResultUtil.error("样品file文件为空！");
+        }
+        if(taskService.effectDataSet((List<Integer>)ids)==false){
+            return ResultUtil.error("文件已存在");
+        }
+        if (taskService.uploadingBatch((List<Integer>) ids, file) == true) {
+            return ResultUtil.success("样品文件上传成功");
+        }
+        return ResultUtil.error("样品文件上传失败");
     }
 
     @RequestMapping("/review")

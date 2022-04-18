@@ -79,9 +79,17 @@ public class Const {
      */
     public static final String approverStr = "approver";
     /**
+     * 角色id =2L 审批人 基于数据库 sys_role 定义
+     */
+    public static final Long approverLongUserId = 2L;
+    /**
      * 角色名 (signer) 签发人 基于数据库 sys_role 定义
      */
     public static final String signerStr = "signer";
+    /**
+     * 角色id = 3L 签发人 基于数据库 sys_role 定义
+     */
+    public static final Long signerLongUserId = 3L;
     /**
      * 产品管理日志
      */

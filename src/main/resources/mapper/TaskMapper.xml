@@ -504,7 +504,7 @@
             LEFT JOIN sys_user AS t3
             ON t3.user_id = t2.user_id
         WHERE
-            t1.role_name = #{RoleName}
+            t1.role_id = #{roleId}
             AND t3.NAME IS NOT NULL
     </select>
 
@@ -588,6 +588,24 @@
         where entrust_id = #{entrustId,jdbcType=BIGINT}
           and sample_id = #{sampleId,jdbcType=INTEGER}
           and check_item_id = #{checkItemId,jdbcType=INTEGER}
+    </update>
+
+    <update id="updateTestEntrustedSampleCheckitemRel">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update test_entrusted_sample_checkitem_rel
+            <set>
+                <if test="item.originUrl != null and item.originUrl != ''">
+                    origin_url = #{item.originUrl},
+                </if>
+                <if test="item.fileUrlStr != null and item.fileUrlStr != ''">
+                    file_url_str = #{item.fileUrlStr},
+                </if>
+                <if test="item.itemFileName != null and item.itemFileName != ''">
+                    item_file_name = #{item.itemFileName},
+                </if>
+            </set>
+            where id = #{item.itemId}
+        </foreach>
     </update>
 
     <select id="getReviewInfo" resultType="com.lims.manage.erp.vo.ReviewVo">

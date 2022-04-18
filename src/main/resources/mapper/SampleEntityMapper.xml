@@ -894,9 +894,10 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     <select id="getOriginalSampleInfo" resultType="com.lims.manage.erp.vo.TemplateSampleVo">
         SELECT alias_name        sampleName,
                sample_code        sampleNumber,
-               quantity_per_group sampleQuantity,
+               sample_quantity sampleQuantity,
                outward            sampleDesc,
-               received_date      sampleTime
+               received_date      sampleTime,
+               outward_describe outwardDescribe
         FROM test_sample
         WHERE id = #{sampleId}
     </select>

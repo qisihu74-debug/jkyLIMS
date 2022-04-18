@@ -64,6 +64,12 @@ public interface TestDetectionDao {
      */
     SampleItemInstrumentEntity getTestEntrustedSampleCheckitemRelDetail(Integer id);
     /**
+     *  通过in 查询获取集合
+     * @param list
+     * @return
+     */
+    List<SampleItemInstrumentEntity> getTestEntrustedSampleCheckitemRelDetailList(List<Integer> list);
+    /**
      * 通过委托单id 和部门ID为条件  遍历（判断每个状态 state = 3）
      */
     @Select("SELECT\n" +

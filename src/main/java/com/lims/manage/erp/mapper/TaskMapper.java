@@ -118,11 +118,11 @@ public interface TaskMapper extends BaseMapper {
     List<LabelValueVo> getMemberInformation(@Param(value = "deptIds") Set<Long> deptIds);
 
     /**
-     * 根据角色名称 查询审批 人员信息
-     * @param RoleName
+     * 根据角色id 查询审批、签发人员信息
+     * @param roleId
      * @return
      */
-    List<LabelValueVo> getRoleInformation(String RoleName);
+    List<LabelValueVo> getRoleInformation(Long roleId);
 
 
     /**
@@ -232,6 +232,13 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     int updateOriginalFile(String originalUrl, Long entrustId, Integer sampleId, Integer checkItemId,String fileUrlStr,String fileName);
+
+    /**
+     * 通过id 更新上传的原始记录文件
+     * @param list
+     * @return
+     */
+    int updateTestEntrustedSampleCheckitemRel(List<SampleItemInstrumentEntity> list);
 
     /**
      * 查询复合数据
