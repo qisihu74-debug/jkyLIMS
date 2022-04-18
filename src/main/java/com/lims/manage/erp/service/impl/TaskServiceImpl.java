@@ -322,13 +322,13 @@ public class TaskServiceImpl implements TaskService {
     public int receiveSample(ReceiveSampleParamVo paramVo) {
         paramVo.setState(2);
         // 根据任务单主键 获取委托单主键
-//        EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
-//        if (entrustEntity != null) {
-//        }
-        //更新任务单状态为已领样
-        taskMapper.updateEntrustById(paramVo.getTaskId(), 2);
+        EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
+        if (entrustEntity != null) {
+            //更新任务单状态为已领样
+            taskMapper.updateEntrustById(paramVo.getTaskId(), 2);
+        }
         //更新样品状态为领样
-        sampleEntityMapper.updateSampleState(paramVo.getSampleId(), 1);
+//        sampleEntityMapper.updateSampleState(paramVo.getSampleId(),1);
         return taskMapper.updateSampler(paramVo);
     }
 
@@ -571,18 +571,16 @@ public class TaskServiceImpl implements TaskService {
                 // 处理检测项 依据名去除 只保留编号。
                 for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
 //                    stringBuilder.append(checkItemInfoVo.getCheckItemName() + "(" + checkItemInfoVo.getStandardName() + ")" + ",");
-                    if (checkItemInfoVo.getCheckPrice() != null) {
-                        String name = checkItemInfoVo.getCheckItemName();
-                        stringBuilder.append(name);
-                        if (!StringUtils.isEmpty(checkItemInfoVo.getStandardName())) {
-                            stringBuilder.append("（");
-                            String s = checkItemInfoVo.getStandardName();
-                            String aa = s.split("《")[0];
-                            stringBuilder.append(aa);
-                            stringBuilder.append("）");
-                        }
-                        stringBuilder.append("，");
+                    String name = checkItemInfoVo.getCheckItemName();
+                    stringBuilder.append(name);
+                    if (!StringUtils.isEmpty(checkItemInfoVo.getStandardName())) {
+                        stringBuilder.append("（");
+                        String s = checkItemInfoVo.getStandardName();
+                        String aa = s.split("《")[0];
+                        stringBuilder.append(aa);
+                        stringBuilder.append("）");
                     }
+                    stringBuilder.append("，");
                 }
 
             }
@@ -601,7 +599,6 @@ public class TaskServiceImpl implements TaskService {
             rows1.get(3).getTableCells().get(1).setText(taskDetailInfoVo.getRequiredCompletionTime());
             // 本单产值
             rows1.get(3).getTableCells().get(3).setText(taskDetailInfoVo.getCost());
-
             return doc;
         } catch (
                 Exception e) {

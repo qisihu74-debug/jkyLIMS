@@ -948,10 +948,7 @@ public class ReportServiceImpl implements ReportService {
         if (file == null){
             //下载模板填充数据
             MinioClient client = MinIoUtil.minioClient;
-            //Long entrustId = reportMapper.getMessageByCode(reportCode);
             try {
-                // this.downLoad(client,code,Long.parseLong(reportCode));
-                Long id = entrustEntityMapper.getEntrustIdByCode(reportCode);
                 List<String> keys = JSONArray.parseArray(code, String.class);
                 List<ConclusionEntity> list = Lists.newArrayList();
                 for (int i=0;i<keys.size();i++) {
@@ -959,15 +956,25 @@ public class ReportServiceImpl implements ReportService {
                     conclusionEntity.setUrl(keys.get(i));
                     list.add(conclusionEntity);
                 }
-                this.submitDownLoad(client,list,id);
+                this.submitDownLoad(client,list,Long.parseLong(reportCode));
                 flag = true;
             }catch (Exception e){
                 logger.error("提交报告审批失败:{}",e);
+                return null;
             }
         }else {
             try {
-                url = MinIoUtil.upload("report-download", file, GenID.getID() + ".pdf");
-                flag = true;
+                //如果上传的是word转为pdf
+                String originalFilename = file.getOriginalFilename();
+                if (originalFilename.contains(".pdf")){
+                    url = MinIoUtil.upload("report-download", file, GenID.getID() + ".pdf");
+                    flag = true;
+                }else {
+                    XWPFDocument document = (XWPFDocument)file;
+                    ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(document);
+                    InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+                    url = MinIoUtil.upload("report-download", GenID.getID() + ".pdf", inputStream, "application/octet-stream");
+                }
             } catch (Exception e) {
                 logger.info("提交审批中上传文件失败:{}",e);
             }
@@ -1652,11 +1659,9 @@ public class ReportServiceImpl implements ReportService {
         map.put(1,topDoc);
         //将报告合并成一个完整的word
         XWPFDocument document = AsposeUtil.mergeDoc(map);
-        //转换报告为pdf上传到文件服务器
-        ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(document);
-        InputStream inputStream = FileAndFolderUtil.parseOut(b1);
-        String url = "";
-        url = MinIoUtil.upload("report-download", reportRecordEntity.getReportCode() + ".pdf", inputStream, "application/octet-stream");
+        //上传合并完成的doc到服务器
+        MultipartFile file = (MultipartFile) document;
+        String url = MinIoUtil.upload("report-download", file, reportRecordEntity.getReportCode() + ".pdf");
         StringBuilder stringBuilder = new StringBuilder();
         for (ConclusionEntity entity:list) {
             stringBuilder.append(entity.getUrl());
