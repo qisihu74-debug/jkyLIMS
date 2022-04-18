@@ -83,6 +83,27 @@
         LEFT JOIN test_product_item as t2 ON t1.check_item_id = t2.check_item_id
         WHERE  t1.id = #{id}
     </select>
+    <select id="getTestEntrustedSampleCheckitemRelDetailList" resultType="com.lims.manage.erp.entity.SampleItemInstrumentEntity" >
+         SELECT
+        t1.id AS itemId,
+        t2.check_item_name As checkItemName,
+        t1.start_time AS startTime,
+        t1.end_time AS endTime,
+        t1.result AS result,
+        t1.test_people testPeople,
+        t1.state As state,
+        t1.origin_url As originUrl,
+        t1.file_url_str as fileUrlStr,
+        t1.entrust_id as entrustId,
+        t1.dept_id as deptId
+        FROM
+        test_entrusted_sample_checkitem_rel as t1
+        LEFT JOIN test_product_item as t2 ON t1.check_item_id = t2.check_item_id
+        WHERE  t1.id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
     <select id="getInstrumentTestItem" resultType="com.lims.manage.erp.entity.TestInstrumentEntity">
         SELECT
         t1.id AS itemInstrumentMiddleId,

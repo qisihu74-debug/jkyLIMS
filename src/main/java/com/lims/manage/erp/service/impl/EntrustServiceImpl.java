@@ -755,6 +755,7 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updateEntrustTestNewSampleEnscript(EntrustAddVo vo) {
         EntrustEntity basisInfo = new EntrustEntity(vo);
         // 删除样品id
@@ -773,15 +774,11 @@ public class EntrustServiceImpl implements EntrustService {
             entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
         }
         // 删除判定依据id
-        if (entityMapper.countSampleStandardRel(basisInfo.getId()) > 0) {
-            entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
-        }
+        entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
         // 删除缴费信息
 //        entityMapper.removeTestEntrustedPaymentRecordInfo(basisInfo.getId());
-        // 样品下检测依据
-        if (entityMapper.countSampleCheckitemRel(basisInfo.getId()) > 0) {
-            entityMapper.removeTestEntrustedSampleCheckitemRel(basisInfo.getId());
-        }
+        // 删除样品下检测项
+        entityMapper.removeTestEntrustedSampleCheckitemRel(basisInfo.getId());
 
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
         int totalMoney = 0;
@@ -806,7 +803,7 @@ public class EntrustServiceImpl implements EntrustService {
                         list1.add(sampleEntity1);
                     }
                 }
-                //样品下检测项
+                //样品下检测项集合
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
 
                 // 迭代样品下检测项单价信息 如果为空 删除此检测项信息
@@ -824,15 +821,7 @@ public class EntrustServiceImpl implements EntrustService {
 //                catch (Exception e){
 //                    logger.error("删除样品下检测项单价为空时异常");
 //                }
-
                 if (!CollectionUtils.isEmpty(sampleCheckItem)) {
-                    // 利用map的特性 （去除重复的id检测项 保留sampleCheckItem下ItemId数据。）
-                    Map<Long, SampleItemEntity> map = new HashMap<>();
-                    for (SampleItemEntity entity0 : sampleCheckItem) {
-                        entity0.setSampleId(sampleEntity.getId());
-                        entity0.setEntrustId(basisInfo.getId());
-                        map.put(entity0.getCheckItemId(), entity0);
-                    }
                     for (SampleItemEntity entity : sampleCheckItem) {
                         // 根据检测项id 遍历检测项层级和价格 获取集合
                         List<SampleItemEntity> ItemList = entityMapper.getItemRecursionList(entity.getCheckItemId());
@@ -840,6 +829,9 @@ public class EntrustServiceImpl implements EntrustService {
                         HashMap<Long,SampleItemEntity> itemMap = new HashMap<>();
                         if (!CollectionUtils.isEmpty(ItemList)) {
                             for (SampleItemEntity entity0 : ItemList) {
+                                if(entity0.getCheckItemId().equals(entity.getCheckItemId())){
+                                    entity0.setCheckItemName(entity.getCheckItemName());
+                                }
                                 itemMap.put(entity0.getCheckItemId(),entity0);
                             }
                             for (SampleItemEntity entity2 : ItemList) {
@@ -849,7 +841,10 @@ public class EntrustServiceImpl implements EntrustService {
                                     entity2.setCheckItemName(sampleItemEntity.getCheckItemName()+"-"+entity2.getCheckItemName());
                                 }
                             }
+                            //
                         }
+                        // 根据检测项id 遍历检测项层级和价格 获取集合
+//                        List<SampleItemEntity> ItemList = entityMapper.getyItemList(entity.getCheckItemId());
                         if (!CollectionUtils.isEmpty(ItemList)) {
                             for (SampleItemEntity entity1 : ItemList) {
                                 //计算检测项总价钱
@@ -866,19 +861,16 @@ public class EntrustServiceImpl implements EntrustService {
 //                                if(!entity1.getCheckItemName().equals(entity.getCheckItemName())&&entity1.getUnitPrice()==null){
 //                                    entity1.setCheckItemName(entity.getCheckItemName()+"-"+entity1.getCheckItemName());
 //                                }
-                                if (map.get(entity1.getCheckItemId()) == null) {
-                                    map.put(entity1.getCheckItemId(), entity1);
-                                }
+                                // 比对检测项父级名称 进行存储例如：（）。
+//                                entity1.setCheckItemName(entity.getCheckItemName());
                             }
+                            entityMapper.BatchSaveEntrustSampleItem(ItemList);
                         }
+
                     }
-                    List<SampleItemEntity> itemListData = new ArrayList<>();
-                    // 去除重复的id检测项 保留sampleCheckItem下数据。
-                    for (Long key : map.keySet()) {
-                        itemListData.add(map.get(key));
-                    }
-                    entityMapper.BatchSaveEntrustSampleItem(itemListData);
                 }
+
+
             }
             if (!CollectionUtils.isEmpty(list)) {
                 entityMapper.BatchSaveEntrustSample(list);

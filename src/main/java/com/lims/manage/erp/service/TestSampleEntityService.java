@@ -28,7 +28,6 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      * 上传样品多个文件
      */
     Boolean uploading(Integer id, MultipartFile[] file);
-
     /**
      * 删除文件id
      * @param id

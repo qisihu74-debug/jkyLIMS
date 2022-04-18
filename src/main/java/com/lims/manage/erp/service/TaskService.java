@@ -139,6 +139,18 @@ public interface TaskService {
     int uploadOriginalRecord(OriginalRecordParamVo paramVo, MultipartFile file);
 
     /**
+     *  通过id集合 上传原始记录文件
+     */
+    Boolean uploadingBatch(List<Integer> ids, MultipartFile file);
+
+    /**
+     * 通过ids集合 获取集合 效验原始记录文件
+     * @param ids
+     * @return
+     */
+    Boolean effectDataSet(List<Integer> ids);
+
+    /**
      * @param itemId
      * @return
      */
