@@ -664,12 +664,12 @@ public class ReportController {
     @PostMapping(value = "uploadReport")
     public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file,
-                               @RequestParam("code") String code) {
+                               @RequestParam("code") String code,@RequestParam("conclusion") String conclusion ,@RequestParam("additional") String additional) {
         if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数！");
         }
         Boolean flag = reportService.uploadReport(reportCode,file,verifyer.split("&")[0],issuer.split("&")[0]
-                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code);
+                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional);
         if (flag) {
             return ResultUtil.success("报告文件上传成功！");
         }else {
@@ -677,4 +677,17 @@ public class ReportController {
         }
     }
 
+    /**
+     * 获取委托单下各个报告模板所需的检测结论和附加声明的文案
+     * @param entrustId
+     * @return
+     */
+    @GetMapping("getResut")
+    public Result getResut(Long entrustId){
+        if (entrustId == null){
+            return ResultUtil.error("缺少必要的参数");
+        }
+        List<ConclusionEntity> list = reportService.getResut(entrustId);
+        return ResultUtil.success(list);
+    }
 }

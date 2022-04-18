@@ -52,7 +52,6 @@ import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import org.apache.commons.collections.map.HashedMap;
-import org.apache.poi.POIXMLDocument;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.usermodel.Range;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -77,6 +76,7 @@ import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -94,7 +94,8 @@ public class ReportServiceImpl implements ReportService {
     private ReportRecordEntityMapper entityMapper;
     @Autowired
     private ReportTemplateEntityMapper templateEntityMapper;
-
+    @Autowired
+    private ReportService reportService;
     @Autowired
     private ReportRecordEntityMapper recordEntityMapper;
     @Autowired
@@ -942,7 +943,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean uploadReport(String reportCode, MultipartFile file, String verifyer,
-                                String issuer, Long verifyerId, Long issuerId, String code) {
+                                String issuer, Long verifyerId, Long issuerId, String code,String conclusion,String additional) {
         Boolean flag = false;
         String url = "";
         if (file == null){
@@ -950,17 +951,21 @@ public class ReportServiceImpl implements ReportService {
             MinioClient client = MinIoUtil.minioClient;
             try {
                 List<String> keys = JSONArray.parseArray(code, String.class);
+                List<String> conclusions = JSONArray.parseArray(conclusion, String.class);
+                List<String> additionals = JSONArray.parseArray(additional, String.class);
                 List<ConclusionEntity> list = Lists.newArrayList();
                 for (int i=0;i<keys.size();i++) {
                     ConclusionEntity conclusionEntity = new ConclusionEntity();
                     conclusionEntity.setUrl(keys.get(i));
+                    conclusionEntity.setConclusion(conclusions.get(i));
+                    conclusionEntity.setAdditional(additionals.get(i));
                     list.add(conclusionEntity);
                 }
                 this.submitDownLoad(client,list,Long.parseLong(reportCode));
                 flag = true;
             }catch (Exception e){
                 logger.error("提交报告审批失败:{}",e);
-                return null;
+                return false;
             }
         }else {
             try {
@@ -974,9 +979,11 @@ public class ReportServiceImpl implements ReportService {
                     ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(document);
                     InputStream inputStream = FileAndFolderUtil.parseOut(b1);
                     url = MinIoUtil.upload("report-download", GenID.getID() + ".pdf", inputStream, "application/octet-stream");
+                    flag = true;
                 }
             } catch (Exception e) {
                 logger.info("提交审批中上传文件失败:{}",e);
+                return false;
             }
         }
         reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
@@ -1669,6 +1676,57 @@ public class ReportServiceImpl implements ReportService {
         }
         updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
         return url;
+    }
+
+    @Override
+    public List<ConclusionEntity> getResut(Long entrustId) {
+        List<ReportTemplateEntity> templateList = reportService.getReportTemplateList(entrustId);
+        List<ConclusionEntity> list = Lists.newArrayList();
+        EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(entrustId);
+        List<SampleEntity> samples = entrustHistoryDetail.getSamples();
+        for (ReportTemplateEntity templateEntity:templateList) {
+            for (SampleEntity sampleEntity :samples) {
+                String des = delItemDes(sampleEntity.getJudgmentBasisVos(),templateEntity.getReportFileUri(),entrustId);
+                String judgeBasis = getJudgeBasis(entrustId);
+                ConclusionEntity conclusionEntity =  new ConclusionEntity();
+                conclusionEntity.setUrl(templateEntity.getReportFileUri());
+                conclusionEntity.setConclusion("经检测，该"+sampleEntity.getSampleName()+"样品,"+des+"均符合"+judgeBasis+"中的技术要求。");
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("1."+entrustHistoryDetail.getEntrustPeople()+"；");
+                stringBuilder.append("2."+(StringUtils.isEmpty(entrustHistoryDetail.getWitnessUint())?"见证单位：无":entrustHistoryDetail.getWitnessUint())+"；");
+                stringBuilder.append("3."+(StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson())?"见证人：无":entrustHistoryDetail.getWitnessPerson())+"；");
+                stringBuilder.append("4.委托方提供"+entrustHistoryDetail.getRemark()+" ；");
+                conclusionEntity.setAdditional(stringBuilder.toString());
+                list.add(conclusionEntity);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * 处理检测项描述
+     * @param sampleCheckItem
+     * @param url
+     * @return
+     */
+    private String delItemDes(List<JudgmentBasisVo> sampleCheckItem,String url,Long entrustId) {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (!CollectionUtils.isEmpty(sampleCheckItem)){
+            for (JudgmentBasisVo entity:sampleCheckItem) {
+                //过滤每个报告模板的检测项
+                List<Long> longList = itemDao.getItemsByTemplateUrl(url);
+                for (Long itemId:longList) {
+                    if (entity.getCheckItemId().longValue() == itemId.longValue()){
+                        String name = recordDetailEntityMapper.getIdByItemId(entity.getCheckItemId(),entrustId);
+                        if (StringUtils.isNotEmpty(name)){
+                            stringBuilder.append(name);
+                            stringBuilder.append("，");
+                        }
+                    }
+                }
+            }
+        }
+        return stringBuilder.toString().substring(0,stringBuilder.length()-1);
     }
 
 
