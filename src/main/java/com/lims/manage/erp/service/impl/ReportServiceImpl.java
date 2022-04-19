@@ -1692,10 +1692,10 @@ public class ReportServiceImpl implements ReportService {
                 conclusionEntity.setUrl(templateEntity.getReportFileUri());
                 conclusionEntity.setConclusion("经检测，该"+sampleEntity.getSampleName()+"样品,"+des+"均符合"+judgeBasis+"中的技术要求。");
                 StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("1."+entrustHistoryDetail.getEntrustPeople()+"；");
-                stringBuilder.append("2."+(StringUtils.isEmpty(entrustHistoryDetail.getWitnessUint())?"见证单位：无":entrustHistoryDetail.getWitnessUint())+"；");
-                stringBuilder.append("3."+(StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson())?"见证人：无":entrustHistoryDetail.getWitnessPerson())+"；");
-                stringBuilder.append("4.委托方提供"+entrustHistoryDetail.getRemark()+" ；");
+                stringBuilder.append("1.委托人："+entrustHistoryDetail.getEntrustPeople()+"；");
+                stringBuilder.append("2."+(StringUtils.isEmpty(entrustHistoryDetail.getWitnessUint())?"见证单位：无":"见证单位："+entrustHistoryDetail.getWitnessUint())+"；");
+                stringBuilder.append("3."+(StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson())?"见证人：无":"见证人："+entrustHistoryDetail.getWitnessPerson())+"；");
+                stringBuilder.append("4.委托方提供："+ (StringUtils.isEmpty(entrustHistoryDetail.getRemark())?"无":entrustHistoryDetail.getRemark())+" ；");
                 conclusionEntity.setAdditional(stringBuilder.toString());
                 list.add(conclusionEntity);
             }
