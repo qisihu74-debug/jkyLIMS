@@ -7,6 +7,7 @@ import com.lims.manage.erp.vo.SampleDetailVo;
 import com.lims.manage.erp.vo.SamplePublicInfoVo;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
 
 public interface SampleService {
@@ -70,6 +71,8 @@ public interface SampleService {
      * @return
      */
     SampleDetailVo getSampleTagInfo(Integer sampleId);
+
+    List<HashMap<String, SampleDetailVo>>getSampleTagInfoList(Integer sampleId);
 
 
 }

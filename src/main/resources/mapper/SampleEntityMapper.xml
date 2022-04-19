@@ -656,7 +656,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         SELECT sample_code sampleCode,
                sample_name sampleName,
                specs,
-               outward
+               outward,
+               quantity_per_group quantityPerGroup,
+               outward_describe outwardDescribe
         FROM test_sample
         WHERE id = #{sampleId}
     </select>

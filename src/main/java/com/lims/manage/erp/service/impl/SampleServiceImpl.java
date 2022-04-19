@@ -3,6 +3,7 @@ package com.lims.manage.erp.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
+import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
@@ -16,8 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -230,5 +233,42 @@ public class SampleServiceImpl implements SampleService {
     @Override
     public SampleDetailVo getSampleTagInfo(Integer sampleId) {
         return sampleEntityMapper.getSampleTagInfo(sampleId);
+    }
+
+    public List<HashMap<String, SampleDetailVo>> getSampleTagInfoList(Integer sampleId) {
+        List<HashMap<String, SampleDetailVo>> results = Lists.newArrayList();
+        SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
+        if (sampleTagInfo != null) {
+            // 处理样品描述信息 Outward 清除两边[]
+            if (sampleTagInfo.getOutwardDescribe() == null) {
+                sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+            } else {
+                sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1) + "," + sampleTagInfo.getOutwardDescribe());
+            }
+            // 样品编号格式： 情况1： YP-2022-0095（01~02） 情况2：YP-2022-0096
+            String sampleCode = sampleTagInfo.getSampleCode();
+            if(sampleCode.contains("~")){
+                //获取样品数量
+                Integer i = sampleTagInfo.getQuantityPerGroup();
+                //构造样品编号
+                for (int j = 1; j <= i; j++) {
+                    String prefix = sampleCode.substring(0, sampleCode.indexOf("（"));
+                    String suffix = new DecimalFormat("00").format(j);
+                    SampleDetailVo vo = new SampleDetailVo();
+                    vo.setSampleCode(prefix+"_"+suffix);
+                    vo.setSampleName(sampleTagInfo.getSampleName());
+                    vo.setSpecs(sampleTagInfo.getSpecs());
+                    vo.setOutward(sampleTagInfo.getOutward());
+                    HashMap<String, SampleDetailVo> result = Maps.newHashMap();
+                    result.put("result", vo);
+                    results.add(result);
+                }
+            }else{
+                HashMap<String, SampleDetailVo> result = Maps.newHashMap();
+                result.put("result", sampleTagInfo);
+                results.add(result);
+            }
+        }
+        return results;
     }
 }
