@@ -1,6 +1,8 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.google.api.client.util.IOUtils;
+import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
@@ -24,14 +26,20 @@ import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Slf4j
 @RestController
@@ -157,7 +165,7 @@ public class SampleController {
      * @param sampleId
      * @return
      */
-    @RequestMapping("/downloadSampleTag")
+    @RequestMapping("/downloadSampleTagOld")
     public void downloadSampleTag(Integer sampleId,Integer number, HttpServletResponse response) {
         if(number==null||number<=0){
             number = 1;
@@ -204,6 +212,58 @@ public class SampleController {
             workbook.write(outputStream);
             outputStream.close();
         } catch (IOException | InvalidFormatException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RequestMapping("/downloadSampleTag")
+    public void downloadSampleTagZip(Integer sampleId, HttpServletResponse response) {
+        HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        String location = req.getServletContext().getRealPath("/file/");
+        List<HashMap<String, SampleDetailVo>> sampleTagInfoList = sampleService.getSampleTagInfoList(sampleId);
+        ZipOutputStream zos = null;
+        try {
+            zos = new ZipOutputStream(response.getOutputStream());
+            XLSTransformer transformer = new XLSTransformer();
+//            InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
+            List<String> fileName = Lists.newArrayList();
+            for (HashMap<String, SampleDetailVo> stringSampleDetailVoHashMap : sampleTagInfoList) {
+                InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
+                FileOutputStream fileOutputStream = new FileOutputStream(location+stringSampleDetailVoHashMap
+                        .get("result").getSampleCode()+"标签.xlsx");
+                Workbook workbook = null;
+                try {
+                    workbook = transformer.transformXLS(fileStream, stringSampleDetailVoHashMap);
+                    workbook.write(fileOutputStream);
+                    fileName.add(location+stringSampleDetailVoHashMap.get("result").getSampleCode()+"标签.xlsx");
+                    fileOutputStream.close();
+                } catch (InvalidFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+            InputStream input = null;
+            for (String filePath :fileName) {
+                File file = new File(filePath);
+                // 一个文件对应一个ZipEntry
+                ZipEntry zipEntry = new ZipEntry(file.getName());
+                input = new FileInputStream(file);
+                zos.putNextEntry(zipEntry);
+                IOUtils.copy(input, zos);
+                input.close();
+                file.delete();
+            }
+            zos.close();
+            response.flushBuffer();
+
+
+////            response.reset();
+//            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+//            response.setContentType("application/x-msdownload");
+//            response.setCharacterEncoding("UTF-8");
+//            String fileName2 = URLEncoder.encode("样品标签.zip", "UTF-8");
+//            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName2);
+//            OutputStream outputStream = response.getOutputStream();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
