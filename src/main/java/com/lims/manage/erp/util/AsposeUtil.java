@@ -10,12 +10,17 @@ import com.lims.manage.erp.entity.ImagePro;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.xmlbeans.XmlOptions;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -268,5 +273,29 @@ public class AsposeUtil {
         CTBody makeBody = CTBody.Factory.parse(prefix+mainPart+addPart+sufix);
         src1Body.set(makeBody);
         return src1Document;
+    }
+
+    /**
+     * XWPFDocument 转 MultipartFile（CommonsMultipartFile）
+     *
+     * @param document 文档对象
+     * @param fileName 文件名
+     * @return
+     */
+    public static MultipartFile xwpfDocumentToCommonsMultipartFile(XWPFDocument document, String fileName) {
+        //XWPFDocument转FileItem
+        FileItemFactory factory = new DiskFileItemFactory(16, null);
+        FileItem fileItem = factory.createItem("textField", "text/plain", true, fileName);
+        try {
+            OutputStream os = fileItem.getOutputStream();
+            document.write(os);
+            os.close();
+            //FileItem转MultipartFile
+            MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
+            return multipartFile;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

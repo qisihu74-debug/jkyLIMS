@@ -76,7 +76,6 @@ import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -961,7 +960,7 @@ public class ReportServiceImpl implements ReportService {
                     conclusionEntity.setAdditional(additionals.get(i));
                     list.add(conclusionEntity);
                 }
-                this.submitDownLoad(client,list,Long.parseLong(reportCode));
+                url = this.submitDownLoad(client, list, Long.parseLong(reportCode));
                 flag = true;
             }catch (Exception e){
                 logger.error("提交报告审批失败:{}",e);
@@ -975,7 +974,7 @@ public class ReportServiceImpl implements ReportService {
                     url = MinIoUtil.upload("report-download", file, GenID.getID() + ".pdf");
                     flag = true;
                 }else {
-                    XWPFDocument document = (XWPFDocument)file;
+                    XWPFDocument document = new XWPFDocument(file.getInputStream());
                     ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(document);
                     InputStream inputStream = FileAndFolderUtil.parseOut(b1);
                     url = MinIoUtil.upload("report-download", GenID.getID() + ".pdf", inputStream, "application/octet-stream");
@@ -1548,6 +1547,7 @@ public class ReportServiceImpl implements ReportService {
             //写入数据
             List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
             if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
+                int size = doc.getTables().size();
                 //处理表格
                 Iterator<XWPFTable> it = doc.getTablesIterator();
                 //表格索引
@@ -1639,13 +1639,17 @@ public class ReportServiceImpl implements ReportService {
                             }
                         }
                     }
+                    //处理附加声明和检测结论
+                    if (i==size){
+                        XWPFTable xwpfTable = doc.getTables().get(size - 1);
+                        int size1 = xwpfTable.getRows().size();
+                        rows.get(size1-3).getCell(0).removeParagraph(0);
+                        rows.get(size1-3).getCell(0).setText(conclusionEntity.getConclusion());
+                        rows.get(size1-2).getCell(0).removeParagraph(0);
+                        rows.get(size1-2).getCell(0).setText(conclusionEntity.getAdditional());
+                    }
                     i++;
                 }
-                //报告结论，附加声明填入
-                Map<String, String> textMap = new HashMap<>();
-                textMap.put("conclusion", conclusionEntity.getConclusion());
-                textMap.put("additional", conclusionEntity.getAdditional());
-                PoiConfig.changeText(doc, textMap);
                 //按照顺序存放doc
                 map.put(index,doc);
             }
@@ -1667,8 +1671,9 @@ public class ReportServiceImpl implements ReportService {
         //将报告合并成一个完整的word
         XWPFDocument document = AsposeUtil.mergeDoc(map);
         //上传合并完成的doc到服务器
-        MultipartFile file = (MultipartFile) document;
-        String url = MinIoUtil.upload("report-download", file, reportRecordEntity.getReportCode() + ".pdf");
+        MultipartFile multipartFile = AsposeUtil.xwpfDocumentToCommonsMultipartFile(document, reportRecordEntity.getReportCode() + ".pdf");
+        //MultipartFile file = (MultipartFile) document;
+        String url = MinIoUtil.upload("report-download", multipartFile, reportRecordEntity.getReportCode() + ".docx");
         StringBuilder stringBuilder = new StringBuilder();
         for (ConclusionEntity entity:list) {
             stringBuilder.append(entity.getUrl());
@@ -1749,7 +1754,7 @@ public class ReportServiceImpl implements ReportService {
                 for(Map.Entry<String, String> entry : map.entrySet()) {
                     if (entry.getValue() == null) {
                         //TODO
-                        entry.setValue("aa");
+                        entry.setValue("--");
                     }
                     range.replaceText(entry.getKey(), entry.getValue());
                 }
