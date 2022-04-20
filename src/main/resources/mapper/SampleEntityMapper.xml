@@ -77,6 +77,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     <select id="selectSampleListGroup" resultType="com.lims.manage.erp.entity.SampleEntity">
         SELECT t2.company_id         as companyId,
                t2.sample_name        as sampleName,
+               t2.sample_type        as sampleType,
                t2.sample_code        as sampleCode,
                t2.specs              as specs,
                t2.batch_number       as batchNumber,

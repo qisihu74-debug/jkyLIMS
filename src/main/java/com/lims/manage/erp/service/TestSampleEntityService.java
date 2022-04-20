@@ -55,4 +55,11 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      * @return
      */
     int updateSample(TestSampleEntity sampleEntity);
+
+    /**
+     * 更新配合比样品信息
+     * @param sampleEntity
+     * @return
+     */
+    int updateSampleBatch(TestSampleEntity sampleEntity);
 }

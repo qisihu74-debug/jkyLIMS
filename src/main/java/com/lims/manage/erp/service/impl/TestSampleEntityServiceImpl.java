@@ -276,4 +276,16 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     public int updateSample(TestSampleEntity sampleEntity) {
         return testSampleEntityMapper.updateByPrimaryKeyNotAll(sampleEntity);
     }
+
+    @Transactional
+    @Override
+    public int updateSampleBatch(TestSampleEntity sampleEntity) {
+        List<TestSampleEntity> nodeSample = sampleEntity.getNodeSample();
+        nodeSample.add(sampleEntity);
+        int result = 0;
+        for (TestSampleEntity entity : nodeSample) {
+            result = testSampleEntityMapper.updateByPrimaryKeyNotAll(entity);
+        }
+        return result;
+    }
 }
