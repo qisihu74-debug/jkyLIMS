@@ -84,7 +84,8 @@
         t1.id
         , t1.company_id, t1.sample_name, t1.sample_code, t1.specs, t1.batch_number, t1.manufacturer, t1.sample_origin,
         t1.outward, t1.save_place, t1.admin, t1.sample_groups, t1.quantity_per_group, t1.inspector, t1.received_date,
-        t1.sample_requirement, t1.generation, t1.state, t1.check_date, t1.remark, t1.file , t1.file_url_str, t1.product_id,
+        t1.sample_requirement, t1.generation, t1.state, t1.check_date, t1.remark, t1.file , t1.file_url_str,
+        t1.product_id,
         t1.outward_describe,
         t1.insert_flag, t1.is_use, t1.sample_quantity, t1.alias_name, t1.sample_type, t1.sample_remark
         ,
@@ -484,16 +485,18 @@
     </update>
     <update id="updateByPrimaryKeyNotAll" parameterType="com.lims.manage.erp.entity.TestSampleEntity">
         update test_sample
-        set specs            = #{specs,jdbcType=VARCHAR},
-            batch_number     = #{batchNumber,jdbcType=VARCHAR},
-            manufacturer     = #{manufacturer,jdbcType=VARCHAR},
-            sample_origin    = #{sampleOrigin,jdbcType=VARCHAR},
-            outward          = #{outward,jdbcType=VARCHAR},
-            received_date    = #{receivedDate,jdbcType=VARCHAR},
-            generation       = #{generation,jdbcType=VARCHAR},
-            outward_describe = #{outwardDescribe,jdbcType=VARCHAR},
-            alias_name       = #{aliasName,jdbcType=VARCHAR},
-            sample_remark    = #{sampleRemark,jdbcType=VARCHAR}
+        set specs                   = #{specs,jdbcType=VARCHAR},
+            batch_number            = #{batchNumber,jdbcType=VARCHAR},
+            manufacturer            = #{manufacturer,jdbcType=VARCHAR},
+            sample_origin           = #{sampleOrigin,jdbcType=VARCHAR},
+            outward                 = #{outward,jdbcType=VARCHAR},
+            received_date           = #{receivedDate,jdbcType=VARCHAR},
+            generation              = #{generation,jdbcType=VARCHAR},
+            outward_describe        = #{outwardDescribe,jdbcType=VARCHAR},
+            alias_name              = #{aliasName,jdbcType=VARCHAR},
+            sample_remark           = #{sampleRemark,jdbcType=VARCHAR},
+            unit_ratio              = #{unitRatio,jdbcType=VARCHAR},
+            cubic_meter_consumption = #{cubicMeterConsumption,jdbcType=VARCHAR}
         where id = #{id,jdbcType=INTEGER}
     </update>
 
@@ -683,6 +686,7 @@
     </select>
 
     <select id="getMaxId" resultType="java.lang.Integer">
-        SELECT MAX(id) value FROM test_sample
+        SELECT MAX(id) value
+        FROM test_sample
     </select>
 </mapper>

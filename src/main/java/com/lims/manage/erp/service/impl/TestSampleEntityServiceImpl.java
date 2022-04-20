@@ -286,6 +286,8 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         for (TestSampleEntity entity : nodeSample) {
             result = testSampleEntityMapper.updateByPrimaryKeyNotAll(entity);
         }
+        mixInfoEntityMapper.updateByPrimaryKey(new TestSampleMixInfoEntity(sampleEntity));
         return result;
     }
+
 }
