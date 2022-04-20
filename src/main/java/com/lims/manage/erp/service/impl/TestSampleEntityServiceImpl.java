@@ -18,6 +18,7 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
 import com.lims.manage.erp.vo.SampleJudgeBasisVo;
 import com.lims.manage.erp.vo.SampleSimpleListVo;
+import com.lims.manage.erp.vo.SamplesAddVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +42,11 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     private SampleFileTableDao sampleFileTableDao;
     Logger logger = LoggerFactory.getLogger(TestSampleEntityServiceImpl.class);
 
-    @Override
-    public Integer batchInsertSample(List<SampleDetailAddVo> samples) {
-        List<TestSampleEntity> entities = Lists.newArrayList();
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+    private final Date now = new Date();
+
+    private int getNewSampleCode(){
         //获取数据库当前年份最大的样品编号
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-        Date now = new Date();
         String maxNumber = sampleEntityMapper.getMaxNumber(sdf.format(now));
         int newMax;
         if (maxNumber == null) {
@@ -54,6 +54,14 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         } else {
             newMax = Integer.parseInt(maxNumber);
         }
+        return newMax;
+    }
+
+    @Override
+    public Integer batchInsertSample(List<SampleDetailAddVo> samples) {
+        List<TestSampleEntity> entities = Lists.newArrayList();
+        //获取数据库当前年份最大的样品编号
+        int newMax = getNewSampleCode();
         for (int i = 0; i < samples.size(); i++) {
             int code = newMax + i + 1;
             String codeStr = new DecimalFormat("0000").format(code);
@@ -68,6 +76,44 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             entities.add(entity);
         }
         return testSampleEntityMapper.insertBatch(entities);
+    }
+
+    @Override
+    public Integer batchInsertMixSample(SamplesAddVo samples) {
+        List<TestSampleEntity> param = Lists.newArrayList();
+        //处理配合比样品数据
+        Integer newId = testSampleEntityMapper.getMaxId()+1;
+        SampleDetailAddVo vo = new SampleDetailAddVo(samples,newId);
+        int newMax = getNewSampleCode()+1;
+        String codeStr = new DecimalFormat("0000").format(newMax);
+        String sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
+        TestSampleEntity mainSample = new TestSampleEntity(vo,sampleCode);
+        param.add(mainSample);
+        //处理子样品
+        List<SampleDetailAddVo> samples1 = samples.getSamples();
+        int i = 1;
+        for (SampleDetailAddVo sampleDetailAddVo : samples1) {
+            //设置样品编号
+            String format = new DecimalFormat("00").format(i);
+            String code = sampleCode + "_" + format;
+            //设置签收人
+            sampleDetailAddVo.setInspector(vo.getInspector());
+            //设置签收时间
+            sampleDetailAddVo.setReceivedDate(vo.getReceivedDate());
+            //设置检验类型
+            sampleDetailAddVo.setSampleType(vo.getSampleType());
+            //设置原材PID
+            sampleDetailAddVo.setPid(newId);
+            //设置委托单位
+            sampleDetailAddVo.setCompanyId(vo.getCompanyId());
+            TestSampleEntity sample = new TestSampleEntity(sampleDetailAddVo,code);
+            param.add(sample);
+            i++;
+        }
+//        for (TestSampleEntity sampleDetailAddVo : param) {
+//            System.out.println(sampleDetailAddVo);
+//        }
+        return testSampleEntityMapper.insertBatchMixSamples(param);
     }
 
     @Override

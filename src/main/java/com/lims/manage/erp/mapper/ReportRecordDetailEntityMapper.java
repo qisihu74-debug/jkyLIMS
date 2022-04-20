@@ -2,6 +2,8 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -53,4 +55,14 @@ public interface ReportRecordDetailEntityMapper {
      * @return
      */
     List<Long> getCheckItemIds(Long recordId);
+
+    @Select("SELECT\n" +
+            "\trrd.check_item_name As name \n" +
+            "FROM\n" +
+            "\ttest_report_record rd\n" +
+            "\tLEFT JOIN test_report_record_detail rrd ON rd.id = rrd.record_id \n" +
+            "WHERE rrd.judge_result='合格'\n" +
+            "\tAND rd.entrustment_id = #{entrustId}\n" +
+            "\tAND rrd.check_item_id=#{checkItemId}")
+    String getIdByItemId(@Param("checkItemId") Integer checkItemId,@Param("entrustId") Long entrustId);
 }

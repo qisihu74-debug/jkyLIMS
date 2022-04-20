@@ -313,7 +313,8 @@ public interface ReportService {
      * @param issuer
      * @return
      */
-    Boolean uploadReport(String reportCode, MultipartFile file, String verifyer, String issuer,Long verifyerId, Long issuerId,String code);
+    Boolean uploadReport(String reportCode, MultipartFile file, String verifyer, String issuer,Long verifyerId,
+                         Long issuerId,String code,String conclusion,String additional);
 
     /**
      * 根据委托单id查询报告编号和名称
@@ -330,4 +331,11 @@ public interface ReportService {
      * @return
      */
     String submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id);
+
+    /**
+     * 获取委托单下各个报告模板所需的检测结论和附加声明的文案
+     * @param entrustId
+     * @return
+     */
+    List<ConclusionEntity> getResut(Long entrustId);
 }

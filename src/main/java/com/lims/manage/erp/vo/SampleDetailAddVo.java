@@ -7,11 +7,16 @@ import java.util.List;
 
 @Data
 public class SampleDetailAddVo {
+    private Integer id;
     private String key;
     /**
      * 产品名称
      */
     private String sampleName;
+    /**
+     * 样品编号
+     */
+    private String sampleCode;
     /**
      * 产品ID
      */
@@ -80,4 +85,35 @@ public class SampleDetailAddVo {
      * 样品类型：做原材检测还是配合比检测
      */
     private String sampleType;
+    /**
+     * 单位比
+     */
+    private String unitRatio;
+    /**
+     * 每立方米用量
+     */
+    private String cubicMeterConsumption;
+    /**
+     * 原材的父ID
+     */
+    private Integer pid;
+
+    public SampleDetailAddVo() {
+    }
+
+    public SampleDetailAddVo(SamplesAddVo samples,Integer id) {
+        this.id = id;
+        this.sampleName = samples.getSampleName();
+        this.productId = samples.getProductId();
+        this.aliasName = samples.getAliasName();
+        this.companyId = samples.getCompanyId();
+        this.specs = samples.getSpecs();
+        this.inspector = samples.getInspector();
+        this.receivedDate = samples.getReceivedDate();
+        this.sampleRequirement = samples.getSampleRequirement();
+        this.sampleType = samples.getSampleType();
+        this.sampleRemark = samples.getSampleRemark();
+        this.unitRatio = samples.getUnitRatio();
+        this.cubicMeterConsumption = samples.getCubicMeterConsumption();
+    }
 }

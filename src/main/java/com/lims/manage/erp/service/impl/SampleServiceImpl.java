@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.DecimalFormat;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -109,10 +110,10 @@ public class SampleServiceImpl implements SampleService {
                     pictureUrl = MinIoUtil.upload("test-sample", multipartFile, pictureFileName);
                 }
                 // 去除 Outward 标点符号(、)进行删除
-                if (addParamVo.getOutward().length() == 1) {
+                if(addParamVo.getOutward().length()==1){
                     // 赋值为空
                     addParamVo.setOutward(null);
-                } else {
+                }else{
                     addParamVo.setOutward(addParamVo.getOutward().substring(1, addParamVo.getOutward().length()));
                 }
                 //保存样品信息
@@ -150,21 +151,21 @@ public class SampleServiceImpl implements SampleService {
         }
         List<SamplePublicInfoVo> list = sampleEntityMapper.getSamplePublicInfos1(paramVo);
         List<String> insertFlags = Lists.newArrayList();
-        for (SamplePublicInfoVo vo : list) {
+        for (SamplePublicInfoVo vo:list) {
             insertFlags.add(vo.getInsertFlag());
         }
         List<SamplePrivateInfoVo> samplePrivateInfos1 = sampleEntityMapper.getSamplePrivateInfos1(insertFlags);
-        for (SamplePublicInfoVo vo : list) {
+        for (SamplePublicInfoVo vo:list) {
             String insertFlag = vo.getInsertFlag();
             List<SamplePrivateInfoVo> childNode = Lists.newArrayList();
-            for (SamplePrivateInfoVo privateInfoVo : samplePrivateInfos1) {
+            for (SamplePrivateInfoVo privateInfoVo: samplePrivateInfos1) {
                 String insertFlag1 = privateInfoVo.getInsertFlag();
-                if (insertFlag.equals(insertFlag1)) {
+                if(insertFlag.equals(insertFlag1)){
                     childNode.add(privateInfoVo);
                 }
                 //TODO gjl添加样品状态
                 EntrustServiceImpl service = new EntrustServiceImpl();
-                String state = service.findStateBySampleId(privateInfoVo.getId(), mapper, taskMapper);
+                String state = service.findStateBySampleId(privateInfoVo.getId(),mapper,taskMapper);
                 privateInfoVo.setState(state);
             }
             vo.setChildNode(childNode);
@@ -192,7 +193,6 @@ public class SampleServiceImpl implements SampleService {
         PageInfo<SampleEntity> pageInfo = new PageInfo<>(sampleEntities);
         return pageInfo;
     }
-
     @Override
     public PageInfo getSampleDataListNew(SampleEntity sampleEntity) {
         PageHelper.startPage(sampleEntity.getPageNum(), sampleEntity.getPageSize());
@@ -206,12 +206,12 @@ public class SampleServiceImpl implements SampleService {
         for (SampleEntrustAddVo sampleEntrustAddVo : topList) {
             codes.add(sampleEntrustAddVo.getCode());
         }
-        if (!CollectionUtils.isEmpty(codes)) {
+        if(!CollectionUtils.isEmpty(codes)){
             List<SampleEntity> groupNode = sampleEntityMapper.getGroupNode(codes);
             for (SampleEntrustAddVo sampleEntrustAddVo : topList) {
                 List<SampleEntity> samples = Lists.newArrayList();
                 for (SampleEntity sampleEntity1 : groupNode) {
-                    if (sampleEntrustAddVo.getCode().equals(sampleEntity1.getSampleCode().substring(0, 12))) {
+                    if(sampleEntrustAddVo.getCode().equals(sampleEntity1.getSampleCode().substring(0,12))){
                         samples.add(sampleEntity1);
                     }
                 }
@@ -401,5 +401,42 @@ public class SampleServiceImpl implements SampleService {
             e.printStackTrace();
         }
 
+    }
+
+    public List<HashMap<String, SampleDetailVo>> getSampleTagInfoList(Integer sampleId) {
+        List<HashMap<String, SampleDetailVo>> results = Lists.newArrayList();
+        SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
+        if (sampleTagInfo != null) {
+            // 处理样品描述信息 Outward 清除两边[]
+            if (sampleTagInfo.getOutwardDescribe() == null) {
+                sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+            } else {
+                sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1) + "," + sampleTagInfo.getOutwardDescribe());
+            }
+            // 样品编号格式： 情况1： YP-2022-0095（01~02） 情况2：YP-2022-0096
+            String sampleCode = sampleTagInfo.getSampleCode();
+            if(sampleCode.contains("~")){
+                //获取样品数量
+                Integer i = sampleTagInfo.getQuantityPerGroup();
+                //构造样品编号
+                for (int j = 1; j <= i; j++) {
+                    String prefix = sampleCode.substring(0, sampleCode.indexOf("（"));
+                    String suffix = new DecimalFormat("00").format(j);
+                    SampleDetailVo vo = new SampleDetailVo();
+                    vo.setSampleCode(prefix+"_"+suffix);
+                    vo.setSampleName(sampleTagInfo.getSampleName());
+                    vo.setSpecs(sampleTagInfo.getSpecs());
+                    vo.setOutward(sampleTagInfo.getOutward());
+                    HashMap<String, SampleDetailVo> result = Maps.newHashMap();
+                    result.put("result", vo);
+                    results.add(result);
+                }
+            }else{
+                HashMap<String, SampleDetailVo> result = Maps.newHashMap();
+                result.put("result", sampleTagInfo);
+                results.add(result);
+            }
+        }
+        return results;
     }
 }

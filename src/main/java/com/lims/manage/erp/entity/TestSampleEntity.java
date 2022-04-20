@@ -77,6 +77,18 @@ public class TestSampleEntity {
     private String sampleRemark;
 
     private String picture;
+    /**
+     * 单位比
+     */
+    private String unitRatio;
+    /**
+     * 每立方米用量
+     */
+    private String cubicMeterConsumption;
+    /**
+     * 原材的父ID
+     */
+    private Integer pid;
 
     @TableField(exist = false)
     private Integer pageNum;
@@ -102,6 +114,7 @@ public class TestSampleEntity {
     }
 
     public TestSampleEntity(SampleDetailAddVo vo,String sampleCode) {
+        this.id = vo.getId();
         this.companyId = vo.getCompanyId();
         this.sampleName = vo.getSampleName();
         this.sampleCode = sampleCode;
@@ -123,5 +136,8 @@ public class TestSampleEntity {
         this.aliasName = vo.getAliasName();
         this.sampleType = vo.getSampleType();
         this.sampleRemark = vo.getSampleRemark();
+        this.unitRatio = vo.getUnitRatio();
+        this.cubicMeterConsumption = vo.getCubicMeterConsumption();
+        this.pid = vo.getPid();
     }
 }

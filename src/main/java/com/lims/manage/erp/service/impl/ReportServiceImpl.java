@@ -52,7 +52,6 @@ import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import org.apache.commons.collections.map.HashedMap;
-import org.apache.poi.POIXMLDocument;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.usermodel.Range;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -94,7 +93,8 @@ public class ReportServiceImpl implements ReportService {
     private ReportRecordEntityMapper entityMapper;
     @Autowired
     private ReportTemplateEntityMapper templateEntityMapper;
-
+    @Autowired
+    private ReportService reportService;
     @Autowired
     private ReportRecordEntityMapper recordEntityMapper;
     @Autowired
@@ -942,7 +942,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean uploadReport(String reportCode, MultipartFile file, String verifyer,
-                                String issuer, Long verifyerId, Long issuerId, String code) {
+                                String issuer, Long verifyerId, Long issuerId, String code,String conclusion,String additional) {
         Boolean flag = false;
         String url = "";
         if (file == null){
@@ -950,17 +950,21 @@ public class ReportServiceImpl implements ReportService {
             MinioClient client = MinIoUtil.minioClient;
             try {
                 List<String> keys = JSONArray.parseArray(code, String.class);
+                List<String> conclusions = JSONArray.parseArray(conclusion, String.class);
+                List<String> additionals = JSONArray.parseArray(additional, String.class);
                 List<ConclusionEntity> list = Lists.newArrayList();
                 for (int i=0;i<keys.size();i++) {
                     ConclusionEntity conclusionEntity = new ConclusionEntity();
                     conclusionEntity.setUrl(keys.get(i));
+                    conclusionEntity.setConclusion(conclusions.get(i));
+                    conclusionEntity.setAdditional(additionals.get(i));
                     list.add(conclusionEntity);
                 }
-                this.submitDownLoad(client,list,Long.parseLong(reportCode));
+                url = this.submitDownLoad(client, list, Long.parseLong(reportCode));
                 flag = true;
             }catch (Exception e){
                 logger.error("提交报告审批失败:{}",e);
-                return null;
+                return false;
             }
         }else {
             try {
@@ -970,13 +974,15 @@ public class ReportServiceImpl implements ReportService {
                     url = MinIoUtil.upload("report-download", file, GenID.getID() + ".pdf");
                     flag = true;
                 }else {
-                    XWPFDocument document = (XWPFDocument)file;
+                    XWPFDocument document = new XWPFDocument(file.getInputStream());
                     ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(document);
                     InputStream inputStream = FileAndFolderUtil.parseOut(b1);
                     url = MinIoUtil.upload("report-download", GenID.getID() + ".pdf", inputStream, "application/octet-stream");
+                    flag = true;
                 }
             } catch (Exception e) {
                 logger.info("提交审批中上传文件失败:{}",e);
+                return false;
             }
         }
         reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
@@ -1541,6 +1547,7 @@ public class ReportServiceImpl implements ReportService {
             //写入数据
             List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
             if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
+                int size = doc.getTables().size();
                 //处理表格
                 Iterator<XWPFTable> it = doc.getTablesIterator();
                 //表格索引
@@ -1632,13 +1639,17 @@ public class ReportServiceImpl implements ReportService {
                             }
                         }
                     }
+                    //处理附加声明和检测结论
+                    if (i==size){
+                        XWPFTable xwpfTable = doc.getTables().get(size - 1);
+                        int size1 = xwpfTable.getRows().size();
+                        rows.get(size1-3).getCell(0).removeParagraph(0);
+                        rows.get(size1-3).getCell(0).setText(conclusionEntity.getConclusion());
+                        rows.get(size1-2).getCell(0).removeParagraph(0);
+                        rows.get(size1-2).getCell(0).setText(conclusionEntity.getAdditional());
+                    }
                     i++;
                 }
-                //报告结论，附加声明填入
-                Map<String, String> textMap = new HashMap<>();
-                textMap.put("conclusion", conclusionEntity.getConclusion());
-                textMap.put("additional", conclusionEntity.getAdditional());
-                PoiConfig.changeText(doc, textMap);
                 //按照顺序存放doc
                 map.put(index,doc);
             }
@@ -1660,8 +1671,9 @@ public class ReportServiceImpl implements ReportService {
         //将报告合并成一个完整的word
         XWPFDocument document = AsposeUtil.mergeDoc(map);
         //上传合并完成的doc到服务器
-        MultipartFile file = (MultipartFile) document;
-        String url = MinIoUtil.upload("report-download", file, reportRecordEntity.getReportCode() + ".pdf");
+        MultipartFile multipartFile = AsposeUtil.xwpfDocumentToCommonsMultipartFile(document, reportRecordEntity.getReportCode() + ".pdf");
+        //MultipartFile file = (MultipartFile) document;
+        String url = MinIoUtil.upload("report-download", multipartFile, reportRecordEntity.getReportCode() + ".docx");
         StringBuilder stringBuilder = new StringBuilder();
         for (ConclusionEntity entity:list) {
             stringBuilder.append(entity.getUrl());
@@ -1669,6 +1681,57 @@ public class ReportServiceImpl implements ReportService {
         }
         updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
         return url;
+    }
+
+    @Override
+    public List<ConclusionEntity> getResut(Long entrustId) {
+        List<ReportTemplateEntity> templateList = reportService.getReportTemplateList(entrustId);
+        List<ConclusionEntity> list = Lists.newArrayList();
+        EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(entrustId);
+        List<SampleEntity> samples = entrustHistoryDetail.getSamples();
+        for (ReportTemplateEntity templateEntity:templateList) {
+            for (SampleEntity sampleEntity :samples) {
+                String des = delItemDes(sampleEntity.getJudgmentBasisVos(),templateEntity.getReportFileUri(),entrustId);
+                String judgeBasis = getJudgeBasis(entrustId);
+                ConclusionEntity conclusionEntity =  new ConclusionEntity();
+                conclusionEntity.setUrl(templateEntity.getReportFileUri());
+                conclusionEntity.setConclusion("经检测，该"+sampleEntity.getSampleName()+"样品,"+des+"均符合"+judgeBasis+"中的技术要求。");
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("1.委托人："+entrustHistoryDetail.getEntrustPeople()+"；");
+                stringBuilder.append("2."+(StringUtils.isEmpty(entrustHistoryDetail.getWitnessUint())?"见证单位：无":"见证单位："+entrustHistoryDetail.getWitnessUint())+"；");
+                stringBuilder.append("3."+(StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson())?"见证人：无":"见证人："+entrustHistoryDetail.getWitnessPerson())+"；");
+                stringBuilder.append("4.委托方提供："+ (StringUtils.isEmpty(entrustHistoryDetail.getRemark())?"无":entrustHistoryDetail.getRemark())+" ；");
+                conclusionEntity.setAdditional(stringBuilder.toString());
+                list.add(conclusionEntity);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * 处理检测项描述
+     * @param sampleCheckItem
+     * @param url
+     * @return
+     */
+    private String delItemDes(List<JudgmentBasisVo> sampleCheckItem,String url,Long entrustId) {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (!CollectionUtils.isEmpty(sampleCheckItem)){
+            for (JudgmentBasisVo entity:sampleCheckItem) {
+                //过滤每个报告模板的检测项
+                List<Long> longList = itemDao.getItemsByTemplateUrl(url);
+                for (Long itemId:longList) {
+                    if (entity.getCheckItemId().longValue() == itemId.longValue()){
+                        String name = recordDetailEntityMapper.getIdByItemId(entity.getCheckItemId(),entrustId);
+                        if (StringUtils.isNotEmpty(name)){
+                            stringBuilder.append(name);
+                            stringBuilder.append("，");
+                        }
+                    }
+                }
+            }
+        }
+        return stringBuilder.toString().substring(0,stringBuilder.length()-1);
     }
 
 
@@ -1691,7 +1754,7 @@ public class ReportServiceImpl implements ReportService {
                 for(Map.Entry<String, String> entry : map.entrySet()) {
                     if (entry.getValue() == null) {
                         //TODO
-                        entry.setValue("aa");
+                        entry.setValue("--");
                     }
                     range.replaceText(entry.getKey(), entry.getValue());
                 }

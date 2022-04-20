@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
@@ -76,6 +77,8 @@ public interface SampleService {
      * @return
      */
     SampleDetailVo getSampleTagInfo(Integer sampleId);
+
+    List<HashMap<String, SampleDetailVo>>getSampleTagInfoList(Integer sampleId);
 
     /**
      * 通过参数 返回处理好的Excel 数据

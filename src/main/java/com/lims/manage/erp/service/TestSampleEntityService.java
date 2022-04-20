@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
+import com.lims.manage.erp.vo.SamplesAddVo;
 import io.swagger.models.auth.In;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +18,12 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      * @return
      */
     Integer batchInsertSample(List<SampleDetailAddVo> samples);
+    /**
+     * 批量新增配合比样品
+     * @param samples
+     * @return
+     */
+    Integer batchInsertMixSample(SamplesAddVo samples);
 
     /**
      * 样品查询打印列表
