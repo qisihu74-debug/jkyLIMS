@@ -106,7 +106,7 @@
         t1.state, t1.check_date, t1.remark, t1.file , t1.file_url_str,
         t1.product_id,t1.outward_describe,t1.insert_flag, t1.is_use,
         t1.sample_quantity, t1.alias_name, t1.sample_type, t1.sample_remark,
-        t1.unitRatio,t1.cubicMeterConsumption,
+        t1.unitRatio,t1.cubicMeterConsumption
         <include refid="Blob_Column_List"/>
         ,t2.company_name
         from test_sample t1 left join test_company t2 on t1.company_id = t2.company_id
