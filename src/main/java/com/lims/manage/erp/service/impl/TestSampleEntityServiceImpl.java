@@ -110,9 +110,6 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             param.add(sample);
             i++;
         }
-//        for (TestSampleEntity sampleDetailAddVo : param) {
-//            System.out.println(sampleDetailAddVo);
-//        }
         return testSampleEntityMapper.insertBatchMixSamples(param);
     }
 
