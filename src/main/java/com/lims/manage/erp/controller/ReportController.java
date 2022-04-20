@@ -548,7 +548,7 @@ public class ReportController {
     }
 
     /**
-     * 提交审批，支持多个报告模板，支持报告合并
+     * 合并报告下载，支持多个报告模板，支持报告合并
      * @param reqBean
      * @return
      */
@@ -564,7 +564,7 @@ public class ReportController {
     }
 
     /**
-     * 提交审批预览报告，支持多个报告模板，支持报告合并
+     * 合并报告预览，支持多个报告模板，支持报告合并
      * @param reqBean
      * @return
      */
@@ -589,19 +589,7 @@ public class ReportController {
             //相应pdf
             ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
             InputStream inputStream = FileAndFolderUtil.parseOut(b1);
-            response.reset();
-            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
-            response.setContentType("application/x-msdownload");
-            response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName+".pdf");
-            OutputStream outputStream = response.getOutputStream();
-            int len = 0;
-            byte[] b = new byte[1024];
-            while ((len = inputStream.read(b)) != -1){
-                outputStream.write(b,0,len);
-            }
-            outputStream.flush();
-            outputStream.close();
+            url = MinIoUtil.upload("report-download", reqBean.getId() + ".pdf", inputStream, "application/octet-stream");
         }catch (Exception e){
             logger.error("预览合并后的报告异常:{}",e);
         }
