@@ -21,6 +21,8 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
 
     TestSampleEntity selectByPrimaryKey(Integer id);
 
+    List<TestSampleEntity> selectByPid(Integer id);
+
     int updateByPrimaryKeySelective(TestSampleEntity record);
 
     int updateByPrimaryKeyWithBLOBs(TestSampleEntity record);

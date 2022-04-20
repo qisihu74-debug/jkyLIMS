@@ -30,7 +30,21 @@ public class TestSampleMixInfoEntity {
     public TestSampleMixInfoEntity() {
     }
 
-    public TestSampleMixInfoEntity(SamplesAddVo samples,Integer sampleId) {
+    public TestSampleMixInfoEntity(Integer id, Integer sampleId, Integer entrustmentId, String designStrength, String intensityConfiguration, String antifreezeLevel, String waterBinderRatio, String unitWaterUse, String sandRatio, String designSlump, String mixingWay) {
+        this.id = id;
+        this.sampleId = sampleId;
+        this.entrustmentId = entrustmentId;
+        this.designStrength = designStrength;
+        this.intensityConfiguration = intensityConfiguration;
+        this.antifreezeLevel = antifreezeLevel;
+        this.waterBinderRatio = waterBinderRatio;
+        this.unitWaterUse = unitWaterUse;
+        this.sandRatio = sandRatio;
+        this.designSlump = designSlump;
+        this.mixingWay = mixingWay;
+    }
+
+    public TestSampleMixInfoEntity(SamplesAddVo samples, Integer sampleId) {
         this.sampleId = sampleId;
         this.designStrength = samples.getDesignStrength();
         this.intensityConfiguration = samples.getIntensityConfiguration();

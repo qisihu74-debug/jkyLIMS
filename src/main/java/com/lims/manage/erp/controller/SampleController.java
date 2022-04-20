@@ -400,8 +400,6 @@ public class SampleController {
      */
     @RequestMapping("/addMixSamples")
     public Result addMixSamples(@RequestBody SamplesAddVo samples) {
-        System.out.println(samples.toString());
-
         if (CollectionUtils.isEmpty(samples.getSamples())) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {

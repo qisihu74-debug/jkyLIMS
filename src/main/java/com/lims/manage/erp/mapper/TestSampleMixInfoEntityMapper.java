@@ -1,7 +1,11 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Component;
 
+@Component
+@Mapper
 public interface TestSampleMixInfoEntityMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -10,6 +14,8 @@ public interface TestSampleMixInfoEntityMapper {
     int insertSelective(TestSampleMixInfoEntity record);
 
     TestSampleMixInfoEntity selectByPrimaryKey(Integer id);
+
+    TestSampleMixInfoEntity selectBySampleId(Integer sampleId);
 
     int updateByPrimaryKeySelective(TestSampleMixInfoEntity record);
 

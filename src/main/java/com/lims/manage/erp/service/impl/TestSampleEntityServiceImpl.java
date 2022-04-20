@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,7 +47,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
     private final Date now = new Date();
 
-    private int getNewSampleCode(){
+    private int getNewSampleCode() {
         //获取数据库当前年份最大的样品编号
         String maxNumber = sampleEntityMapper.getMaxNumber(sdf.format(now));
         int newMax;
@@ -84,12 +85,12 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     public Integer batchInsertMixSample(SamplesAddVo samples) {
         List<TestSampleEntity> param = Lists.newArrayList();
         //处理配合比样品数据
-        Integer newId = testSampleEntityMapper.getMaxId()+1;
-        SampleDetailAddVo vo = new SampleDetailAddVo(samples,newId);
-        int newMax = getNewSampleCode()+1;
+        Integer newId = testSampleEntityMapper.getMaxId() + 1;
+        SampleDetailAddVo vo = new SampleDetailAddVo(samples, newId);
+        int newMax = getNewSampleCode() + 1;
         String codeStr = new DecimalFormat("0000").format(newMax);
         String sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
-        TestSampleEntity mainSample = new TestSampleEntity(vo,sampleCode);
+        TestSampleEntity mainSample = new TestSampleEntity(vo, sampleCode);
         param.add(mainSample);
         //处理子样品
         List<SampleDetailAddVo> samples1 = samples.getSamples();
@@ -108,11 +109,11 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             sampleDetailAddVo.setPid(newId);
             //设置委托单位
             sampleDetailAddVo.setCompanyId(vo.getCompanyId());
-            TestSampleEntity sample = new TestSampleEntity(sampleDetailAddVo,code);
+            TestSampleEntity sample = new TestSampleEntity(sampleDetailAddVo, code);
             param.add(sample);
             i++;
         }
-        TestSampleMixInfoEntity mixInfoEntity = new TestSampleMixInfoEntity(samples,newId);
+        TestSampleMixInfoEntity mixInfoEntity = new TestSampleMixInfoEntity(samples, newId);
         //插入配合比参数信息
         mixInfoEntityMapper.insert(mixInfoEntity);
         return testSampleEntityMapper.insertBatchMixSamples(param);
@@ -172,7 +173,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     public Boolean removeding(Integer id) {
         // 根据附件id 查询文件名称 进行删除minIo文件服务器中内容。
         SampleFileTableEntity SampleFileData = sampleFileTableDao.getSampleFileTableEntityId(id);
-        if(SampleFileData!=null&&SampleFileData.getFileUrl()!=null){
+        if (SampleFileData != null && SampleFileData.getFileUrl() != null) {
             // 去清除 MinIo 桶数据。
             try {
                 String[] strings2 = SampleFileData.getFileUrlStr().split(",");
@@ -212,11 +213,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             }
             List<TestSampleCollectionJSON> fileArrays = new ArrayList<>();
             // 根据样品id 查询 对应的文件信息。
-            List<SampleFileTableEntity> sampleFileTableEntityList  = sampleFileTableDao.getSampleFileTableEntityList(id);
-            if(sampleFileTableEntityList!=null&&!sampleFileTableEntityList.isEmpty())
-            {
-                for(SampleFileTableEntity sampleFileTableEntity:sampleFileTableEntityList)
-                {
+            List<SampleFileTableEntity> sampleFileTableEntityList = sampleFileTableDao.getSampleFileTableEntityList(id);
+            if (sampleFileTableEntityList != null && !sampleFileTableEntityList.isEmpty()) {
+                for (SampleFileTableEntity sampleFileTableEntity : sampleFileTableEntityList) {
                     TestSampleCollectionJSON testSampleCollectionJSON = new TestSampleCollectionJSON();
                     testSampleCollectionJSON.setLable(sampleFileTableEntity.getFileUrl());
                     testSampleCollectionJSON.setValue(sampleFileTableEntity.getFileUrlStr());
@@ -224,6 +223,40 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
                     fileArrays.add(testSampleCollectionJSON);
                 }
             }
+            entity.setFileArrays(fileArrays);
+            //根据主样品信息查询节点样品信息
+            List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(id);
+            if(!CollectionUtils.isEmpty(testSampleEntities)){
+                for (TestSampleEntity entity1 : testSampleEntities) {
+                    if (entity1.getOutward() != null) {
+                        String replace = entity1.getOutward().replace("[", "");
+                        String replace1 = replace.replace("]", "");
+                        String replace2 = replace1.replace("\"", "");
+                        String[] split = replace2.split(",");
+                        List<String> outwardArr = Lists.newArrayList();
+                        for (String s : split) {
+                            outwardArr.add(s.trim());
+                        }
+                        entity1.setOutwardArr(outwardArr);
+                    }
+                    // 根据样品id 查询 对应的文件信息。
+                    List<SampleFileTableEntity> sampleFileList = sampleFileTableDao.getSampleFileTableEntityList(entity1.getId());
+                    if (sampleFileList != null && !sampleFileList.isEmpty()) {
+                        for (SampleFileTableEntity sampleFileTableEntity : sampleFileList) {
+                            TestSampleCollectionJSON testSampleCollectionJSON = new TestSampleCollectionJSON();
+                            testSampleCollectionJSON.setLable(sampleFileTableEntity.getFileUrl());
+                            testSampleCollectionJSON.setValue(sampleFileTableEntity.getFileUrlStr());
+                            testSampleCollectionJSON.setId(sampleFileTableEntity.getId());
+                            fileArrays.add(testSampleCollectionJSON);
+                        }
+                    }
+                    entity1.setFileArrays(fileArrays);
+                }
+            }
+            entity.setNodeSample(testSampleEntities);
+            //根据主样品信息查询配合比检测信息
+            TestSampleMixInfoEntity mixInfoEntity = mixInfoEntityMapper.selectBySampleId(id);
+            entity.setMixInfo(mixInfoEntity);
             // 处理原始记录名称
 //            if (entity.getFile() != null && entity.getFileUrlStr() != null) {
 //                String[] file = entity.getFile().split(",");
@@ -235,9 +268,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 //                    fileArrays.add(testSampleCollectionJSON);
 //                }
 //            }
-            entity.setFileArrays(fileArrays);
         }
-
         return entity;
     }
 
