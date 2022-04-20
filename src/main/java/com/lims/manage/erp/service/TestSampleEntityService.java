@@ -55,4 +55,6 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      * @return
      */
     int updateSample(TestSampleEntity sampleEntity);
+
+    int updateSampleBatch(TestSampleEntity sampleEntity);
 }

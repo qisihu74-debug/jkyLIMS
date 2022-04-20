@@ -358,7 +358,12 @@ public class SampleController {
         if (sampleEntity == null || sampleEntity.getId() == null) {
             return ResultUtil.error("缺少必要参数！");
         }
-        int i = testSampleEntityService.updateSample(sampleEntity);
+        int i;
+        if(sampleEntity.getSampleType().contains("配合比")){
+            i = testSampleEntityService.updateSampleBatch(sampleEntity);
+        }else{
+            i = testSampleEntityService.updateSample(sampleEntity);
+        }
         if (i > 0) {
             return ResultUtil.success("样品信息修改成功！", i);
         } else {
