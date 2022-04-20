@@ -567,9 +567,12 @@
         FROM
         test_sample
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            is_use = 0
+            is_use = 0 and pid is null
             <if test="sampleName!=null and sampleName!=''">
                 and sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="sampleType!=null and sampleName!=''">
+                and sample_type = #{sampleType}
             </if>
             <if test="batchNumber!=null and batchNumber!=''">
                 and batch_number LIKE CONCAT('%',#{batchNumber},'%')
