@@ -2,6 +2,7 @@ package com.lims.manage.erp.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
@@ -230,5 +231,9 @@ public class EntrustAddVo {
      * 所有可选科室
      */
     private List<LabelValueVo> allTestRoom;
+    /**
+     * 配合比下的原材样品信息
+     */
+    private List<TestSampleEntity> nodeSample;
 
 }
