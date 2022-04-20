@@ -38,6 +38,14 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
     int insertBatch(@Param("entities") List<TestSampleEntity> entities);
 
     /**
+     * 批量新增配合比样品
+     *
+     * @param entities
+     * @return
+     */
+    int insertBatchMixSamples(@Param("entities") List<TestSampleEntity> entities);
+
+    /**
      * 样品查询/打印列表
      * @param entity
      * @return
@@ -50,4 +58,10 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
      * @return
      */
     List<SampleJudgeBasisVo> querySampleJudgeBasisList(TestSampleEntity entity);
+
+    /**
+     * 查询样品表当前最大ID
+     * @return
+     */
+    Integer getMaxId();
 }

@@ -515,6 +515,42 @@
         </foreach>
     </insert>
 
+    <insert id="insertBatchMixSamples" keyProperty="id" useGeneratedKeys="true">
+        insert into test_sample (id,company_id, sample_name,
+        sample_code, specs, batch_number,
+        manufacturer, sample_origin, outward,
+        save_place, admin, sample_groups,
+        quantity_per_group, inspector, received_date,
+        sample_requirement, generation, state,
+        check_date, remark, file,
+        product_id, outward_describe, insert_flag,
+        is_use, sample_quantity, alias_name,
+        sample_type, sample_remark, picture,unit_ratio,
+        cubic_meter_consumption,pid)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.id,jdbcType=INTEGER},#{entity.companyId,jdbcType=INTEGER}, #{entity.sampleName,jdbcType=CHAR},
+            #{entity.sampleCode,jdbcType=VARCHAR}, #{entity.specs,jdbcType=VARCHAR},
+            #{entity.batchNumber,jdbcType=VARCHAR},
+            #{entity.manufacturer,jdbcType=VARCHAR}, #{entity.sampleOrigin,jdbcType=VARCHAR},
+            #{entity.outward,jdbcType=VARCHAR},
+            #{entity.savePlace,jdbcType=VARCHAR}, #{entity.admin,jdbcType=VARCHAR},
+            #{entity.sampleGroups,jdbcType=INTEGER},
+            #{entity.quantityPerGroup,jdbcType=INTEGER}, #{entity.inspector,jdbcType=VARCHAR},
+            #{entity.receivedDate,jdbcType=VARCHAR},
+            #{entity.sampleRequirement,jdbcType=VARCHAR}, #{entity.generation,jdbcType=VARCHAR},
+            #{entity.state,jdbcType=VARCHAR},
+            #{entity.checkDate,jdbcType=TIMESTAMP}, #{entity.remark,jdbcType=VARCHAR}, #{entity.file,jdbcType=VARCHAR},
+            #{entity.productId,jdbcType=INTEGER}, #{entity.outwardDescribe,jdbcType=VARCHAR},
+            #{entity.insertFlag,jdbcType=VARCHAR},
+            #{entity.isUse,jdbcType=INTEGER}, #{entity.sampleQuantity,jdbcType=VARCHAR},
+            #{entity.aliasName,jdbcType=VARCHAR},
+            #{entity.sampleType,jdbcType=VARCHAR}, #{entity.sampleRemark,jdbcType=VARCHAR},
+            #{entity.picture,jdbcType=LONGVARCHAR},#{entity.unitRatio,jdbcType=VARCHAR},
+            #{entity.cubicMeterConsumption,jdbcType=VARCHAR},#{entity.pid,jdbcType=INTEGER})
+        </foreach>
+    </insert>
+
     <select id="getSimpleList" parameterType="com.lims.manage.erp.entity.TestSampleEntity"
             resultType="com.lims.manage.erp.vo.SampleSimpleListVo">
         SELECT
@@ -625,5 +661,9 @@
             test_standard_file
         WHERE
             id = #{standardFileId}
+    </select>
+
+    <select id="getMaxId" resultType="java.lang.Integer">
+        SELECT MAX(id) value FROM test_sample
     </select>
 </mapper>
