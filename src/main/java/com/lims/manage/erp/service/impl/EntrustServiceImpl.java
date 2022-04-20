@@ -6,29 +6,8 @@ import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustHistoryEntity;
-import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
-import com.lims.manage.erp.entity.EntrustPamentEntity;
-import com.lims.manage.erp.entity.EntrustSampleEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TaskEntity;
-import com.lims.manage.erp.entity.TestCompanyEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.entity.TestInitDataEntity;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.ProductItemEntityMapper;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.SysUserDao;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestCompanyDao;
-import com.lims.manage.erp.mapper.TestCustomerDao;
-import com.lims.manage.erp.mapper.TestProductDao;
+import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.DateUtil;
@@ -80,7 +59,8 @@ public class EntrustServiceImpl implements EntrustService {
     private TeamMapper teamMapper;
     @Autowired
     private SysUserDao sysUserDao;
-
+    @Autowired
+    private TestSampleEntityMapper testSampleEntityMapper;
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentDispositionFormData("attachment", new String(fileName.getBytes("UTF-8"), "iso-8859-1"));
@@ -1152,6 +1132,8 @@ public class EntrustServiceImpl implements EntrustService {
 //        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
         // 通过委托ID 样品集合 → test_sample
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
+        //暂存原材样品信息
+        List<SampleEntity> nodeSamples = Lists.newArrayList();
         // 样品信息 进行补充 检测依据集合，检测项集合
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
@@ -1180,10 +1162,19 @@ public class EntrustServiceImpl implements EntrustService {
                     sampleEntity.setJudgmentBasisVos(list);
                 }
             }
+            //补充配合比样品的原材样品信息
+
+            if(sampleEntity.getSampleType().contains("配合比")){
+                List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(sampleEntity.getId());
+                for (TestSampleEntity entity : testSampleEntities) {
+                    nodeSamples.add(new SampleEntity(entity));
+                }
+            }
 
             // 补充样品下 依据集合
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
         }
+        sampleCollection.addAll(nodeSamples);
         entrustAddVo.setSamples(sampleCollection);
         LinkedHashSet<LabelValueVo> hashSet = new LinkedHashSet<>(allTestRoom);
         ArrayList<LabelValueVo> allTestRooms = new ArrayList<>(hashSet);

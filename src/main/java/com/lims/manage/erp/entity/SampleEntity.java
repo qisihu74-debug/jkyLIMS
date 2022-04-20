@@ -165,6 +165,19 @@ public class SampleEntity {
      */
     private String sampleRemark;
     /**
+     * 单位比
+     */
+    private String unitRatio;
+    /**
+     * 每立方米用量
+     */
+    private String cubicMeterConsumption;
+    /**
+     * 原材的父ID
+     */
+    private Integer pid;
+
+    /**
      * 0为未使用，1为已使用
      */
     private Integer isUse;
@@ -226,203 +239,39 @@ public class SampleEntity {
         super();
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(Integer companyId) {
-        this.companyId = companyId;
-    }
-
-    public String getSampleName() {
-        return sampleName;
-    }
-
-    public void setSampleName(String sampleName) {
-        this.sampleName = sampleName == null ? null : sampleName.trim();
-    }
-
-    public String getSampleCode() {
-        return sampleCode;
-    }
-
-    public void setSampleCode(String sampleCode) {
-        this.sampleCode = sampleCode == null ? null : sampleCode.trim();
-    }
-
-    public String getSpecs() {
-        return specs;
-    }
-
-    public void setSpecs(String specs) {
-        this.specs = specs;
-    }
-
-    public String getBatchNumber() {
-        return batchNumber;
-    }
-
-    public void setBatchNumber(String batchNumber) {
-        this.batchNumber = batchNumber == null ? null : batchNumber.trim();
-    }
-
-    public String getManufacturer() {
-        return manufacturer;
-    }
-
-    public void setManufacturer(String manufacturer) {
-        this.manufacturer = manufacturer == null ? null : manufacturer.trim();
-    }
-
-    public String getSampleOrigin() {
-        return sampleOrigin;
-    }
-
-    public void setSampleOrigin(String sampleOrigin) {
-        this.sampleOrigin = sampleOrigin == null ? null : sampleOrigin.trim();
-    }
-
-    public String getOutward() {
-        return outward;
-    }
-
-    public void setOutward(String outward) {
-        this.outward = outward == null ? null : outward.trim();
-    }
-
-    public String getPicture() {
-        return picture;
-    }
-
-    public void setPicture(String picture) {
-        this.picture = picture == null ? null : picture.trim();
-    }
-
-    public String getsavePlace() {
-        return savePlace;
-    }
-
-    public void setsavePlace(String savePlace) {
-        this.savePlace = savePlace == null ? null : savePlace.trim();
-    }
-
-    public String getAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(String admin) {
-        this.admin = admin == null ? null : admin.trim();
-    }
-
-    public Integer getSampleGroups() {
-        return sampleGroups;
-    }
-
-    public void setSampleGroups(Integer sampleGroups) {
-        this.sampleGroups = sampleGroups;
-    }
-
-    public Integer getQuantityPerGroup() {
-        return quantityPerGroup;
-    }
-
-    public void setQuantityPerGroup(Integer quantityPerGroup) {
-        this.quantityPerGroup = quantityPerGroup;
-    }
-
-    public String getInspector() {
-        return inspector;
-    }
-
-    public void setInspector(String inspector) {
-        this.inspector = inspector == null ? null : inspector.trim();
-    }
-
-    public String getReceivedDate() {
-        return receivedDate;
-    }
-
-    public void setReceivedDate(String receivedDate) {
-        this.receivedDate = receivedDate == null ? null : receivedDate.trim();
-    }
-
-    public String getSampleRequirement() {
-        return sampleRequirement;
-    }
-
-    public void setSampleRequirement(String sampleRequirement) {
-        this.sampleRequirement = sampleRequirement == null ? null : sampleRequirement.trim();
-    }
-
-    public String getGeneration() {
-        return generation;
-    }
-
-    public void setGeneration(String generation) {
-        this.generation = generation == null ? null : generation.trim();
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state == null ? null : state.trim();
-    }
-
-    public Date getCheckDate() {
-        return checkDate;
-    }
-
-    public void setCheckDate(Date checkDate) {
-        this.checkDate = checkDate;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark == null ? null : remark.trim();
-    }
-
-    public String getOutwardDescribe() {
-        return outwardDescribe;
-    }
-
-    public void setOutwardDescribe(String outwardDescribe) {
-        this.outwardDescribe = outwardDescribe;
-    }
-
-    public String getInsertFlag() {
-        return insertFlag;
-    }
-
-    public void setInsertFlag(String insertFlag) {
-        this.insertFlag = insertFlag;
-    }
-
-    public Integer getPageNum() {
-        return pageNum;
-    }
-
-    public void setPageNum(Integer pageNum) {
-        this.pageNum = pageNum;
-    }
-
-    public Integer getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
+    public SampleEntity(TestSampleEntity entity) {
+        this.id = entity.getId();
+        this.productId = entity.getProductId();
+        this.companyId = entity.getCompanyId();
+        this.sampleName = entity.getSampleName();
+        this.sampleCode = entity.getSampleCode();
+        this.specs = entity.getSpecs();
+        this.batchNumber = entity.getBatchNumber();
+        this.manufacturer = entity.getManufacturer();
+        this.sampleOrigin = entity.getSampleOrigin();
+        this.outward = entity.getOutward();
+        this.picture = entity.getPicture();
+//        this.fileUrl = entity.getfil;
+        this.fileUrlStr = entity.getFileUrlStr();
+        this.savePlace = entity.getSavePlace();
+        this.admin = entity.getAdmin();
+        this.sampleGroups = entity.getSampleGroups();
+        this.quantityPerGroup = entity.getQuantityPerGroup();
+        this.inspector = entity.getInspector();
+        this.receivedDate = entity.getReceivedDate();
+        this.sampleRequirement = entity.getSampleRequirement();
+        this.generation = entity.getGeneration();
+        this.state = entity.getState();
+        this.checkDate = entity.getCheckDate();
+        this.remark = entity.getRemark();
+        this.outwardDescribe = entity.getOutwardDescribe();
+        this.sampleQuantity = entity.getSampleQuantity();
+        this.aliasName = entity.getAliasName();
+        this.sampleType = entity.getSampleType();
+        this.sampleRemark = entity.getSampleRemark();
+        this.unitRatio = entity.getUnitRatio();
+        this.cubicMeterConsumption = entity.getCubicMeterConsumption();
+        this.pid = entity.getPid();
+        this.isUse = entity.getIsUse();
     }
 }
