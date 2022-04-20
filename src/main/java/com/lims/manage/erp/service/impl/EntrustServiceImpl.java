@@ -1077,6 +1077,8 @@ public class EntrustServiceImpl implements EntrustService {
 //        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
         // 通过委托ID 样品集合 → test_sample
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
+        //暂存原材样品信息
+        List<SampleEntity> nodeSamples = Lists.newArrayList();
         // 样品信息 进行补充 检测依据集合，检测项集合
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
@@ -1100,10 +1102,17 @@ public class EntrustServiceImpl implements EntrustService {
             } else {
                 sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
             }
-
             // 补充样品下 依据集合
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
+            //补充配合比样品的原材样品信息
+            if(sampleEntity.getSampleType().contains("配合比")){
+                List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(sampleEntity.getId());
+                for (TestSampleEntity entity : testSampleEntities) {
+                    nodeSamples.add(new SampleEntity(entity));
+                }
+            }
         }
+        sampleCollection.addAll(nodeSamples);
         entrustAddVo.setSamples(sampleCollection);
         return entrustAddVo;
     }
@@ -1163,14 +1172,12 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
             //补充配合比样品的原材样品信息
-
             if(sampleEntity.getSampleType().contains("配合比")){
                 List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(sampleEntity.getId());
                 for (TestSampleEntity entity : testSampleEntities) {
                     nodeSamples.add(new SampleEntity(entity));
                 }
             }
-
             // 补充样品下 依据集合
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
         }
