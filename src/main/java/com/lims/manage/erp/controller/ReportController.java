@@ -46,6 +46,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -559,6 +560,51 @@ public class ReportController {
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
         String url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+        return url;
+    }
+
+    /**
+     * 提交审批预览报告，支持多个报告模板，支持报告合并
+     * @param reqBean
+     * @return
+     */
+    @PostMapping("previewDownLoad")
+    public String previewDownLoad(@RequestBody ReqBean reqBean,HttpServletResponse response) {
+        if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
+            return null;
+        }
+        //从文件服务器拉取文件
+        MinioClient client = MinIoUtil.minioClient;
+        String url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+        //预览word转pdf
+        String[] split = url.split("\\?");
+        String[] strings = split[0].split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        XWPFDocument doc = null;
+        try {
+            client.statObject(bluckName, fileName);
+            InputStream object = client.getObject(bluckName, fileName);
+            doc = new XWPFDocument(object);
+            //相应pdf
+            ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
+            InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+            response.reset();
+            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName+".pdf");
+            OutputStream outputStream = response.getOutputStream();
+            int len = 0;
+            byte[] b = new byte[1024];
+            while ((len = inputStream.read(b)) != -1){
+                outputStream.write(b,0,len);
+            }
+            outputStream.flush();
+            outputStream.close();
+        }catch (Exception e){
+            logger.error("预览合并后的报告异常:{}",e);
+        }
         return url;
     }
 
