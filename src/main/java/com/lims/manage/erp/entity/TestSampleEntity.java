@@ -107,6 +107,16 @@ public class TestSampleEntity {
      */
     @TableField(exist = false)
     private List<TestSampleCollectionJSON> fileArrays;
+    /**
+     * 子样品信息
+     */
+    @TableField(exist = false)
+    private List<TestSampleEntity> nodeSample;
+    /**
+     * 配合比信息
+     */
+    @TableField(exist = false)
+    private TestSampleMixInfoEntity mixInfo;
 
 
 

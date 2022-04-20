@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper">
+    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.TestSampleMixInfoEntity">
+        <constructor>
+            <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="sample_id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="entrustment_id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="design_strength" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="intensity_configuration" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="antifreeze_level" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="water_binder_ratio" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="unit_water_use" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="sand_ratio" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="design_slump" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="mixing_way" jdbcType="VARCHAR" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , sample_id, entrustment_id, design_strength, intensity_configuration, antifreeze_level,
+    water_binder_ratio, unit_water_use, sand_ratio, design_slump, mixing_way
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from test_sample_mix_info
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectBySampleId" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from test_sample_mix_info
+        where sample_id = #{sampleId,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete
+        from test_sample_mix_info
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.lims.manage.erp.entity.TestSampleMixInfoEntity">
+        insert into test_sample_mix_info (id, sample_id, entrustment_id,
+                                          design_strength, intensity_configuration,
+                                          antifreeze_level, water_binder_ratio, unit_water_use,
+                                          sand_ratio, design_slump, mixing_way)
+        values (#{id,jdbcType=INTEGER}, #{sampleId,jdbcType=INTEGER}, #{entrustmentId,jdbcType=INTEGER},
+                #{designStrength,jdbcType=VARCHAR}, #{intensityConfiguration,jdbcType=VARCHAR},
+                #{antifreezeLevel,jdbcType=VARCHAR}, #{waterBinderRatio,jdbcType=VARCHAR},
+                #{unitWaterUse,jdbcType=VARCHAR},
+                #{sandRatio,jdbcType=VARCHAR}, #{designSlump,jdbcType=VARCHAR}, #{mixingWay,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.TestSampleMixInfoEntity">
+        insert into test_sample_mix_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="sampleId != null">
+                sample_id,
+            </if>
+            <if test="entrustmentId != null">
+                entrustment_id,
+            </if>
+            <if test="designStrength != null">
+                design_strength,
+            </if>
+            <if test="intensityConfiguration != null">
+                intensity_configuration,
+            </if>
+            <if test="antifreezeLevel != null">
+                antifreeze_level,
+            </if>
+            <if test="waterBinderRatio != null">
+                water_binder_ratio,
+            </if>
+            <if test="unitWaterUse != null">
+                unit_water_use,
+            </if>
+            <if test="sandRatio != null">
+                sand_ratio,
+            </if>
+            <if test="designSlump != null">
+                design_slump,
+            </if>
+            <if test="mixingWay != null">
+                mixing_way,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="sampleId != null">
+                #{sampleId,jdbcType=INTEGER},
+            </if>
+            <if test="entrustmentId != null">
+                #{entrustmentId,jdbcType=INTEGER},
+            </if>
+            <if test="designStrength != null">
+                #{designStrength,jdbcType=VARCHAR},
+            </if>
+            <if test="intensityConfiguration != null">
+                #{intensityConfiguration,jdbcType=VARCHAR},
+            </if>
+            <if test="antifreezeLevel != null">
+                #{antifreezeLevel,jdbcType=VARCHAR},
+            </if>
+            <if test="waterBinderRatio != null">
+                #{waterBinderRatio,jdbcType=VARCHAR},
+            </if>
+            <if test="unitWaterUse != null">
+                #{unitWaterUse,jdbcType=VARCHAR},
+            </if>
+            <if test="sandRatio != null">
+                #{sandRatio,jdbcType=VARCHAR},
+            </if>
+            <if test="designSlump != null">
+                #{designSlump,jdbcType=VARCHAR},
+            </if>
+            <if test="mixingWay != null">
+                #{mixingWay,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.TestSampleMixInfoEntity">
+        update test_sample_mix_info
+        <set>
+            <if test="sampleId != null">
+                sample_id = #{sampleId,jdbcType=INTEGER},
+            </if>
+            <if test="entrustmentId != null">
+                entrustment_id = #{entrustmentId,jdbcType=INTEGER},
+            </if>
+            <if test="designStrength != null">
+                design_strength = #{designStrength,jdbcType=VARCHAR},
+            </if>
+            <if test="intensityConfiguration != null">
+                intensity_configuration = #{intensityConfiguration,jdbcType=VARCHAR},
+            </if>
+            <if test="antifreezeLevel != null">
+                antifreeze_level = #{antifreezeLevel,jdbcType=VARCHAR},
+            </if>
+            <if test="waterBinderRatio != null">
+                water_binder_ratio = #{waterBinderRatio,jdbcType=VARCHAR},
+            </if>
+            <if test="unitWaterUse != null">
+                unit_water_use = #{unitWaterUse,jdbcType=VARCHAR},
+            </if>
+            <if test="sandRatio != null">
+                sand_ratio = #{sandRatio,jdbcType=VARCHAR},
+            </if>
+            <if test="designSlump != null">
+                design_slump = #{designSlump,jdbcType=VARCHAR},
+            </if>
+            <if test="mixingWay != null">
+                mixing_way = #{mixingWay,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.TestSampleMixInfoEntity">
+        update test_sample_mix_info
+        set sample_id               = #{sampleId,jdbcType=INTEGER},
+            entrustment_id          = #{entrustmentId,jdbcType=INTEGER},
+            design_strength         = #{designStrength,jdbcType=VARCHAR},
+            intensity_configuration = #{intensityConfiguration,jdbcType=VARCHAR},
+            antifreeze_level        = #{antifreezeLevel,jdbcType=VARCHAR},
+            water_binder_ratio      = #{waterBinderRatio,jdbcType=VARCHAR},
+            unit_water_use          = #{unitWaterUse,jdbcType=VARCHAR},
+            sand_ratio              = #{sandRatio,jdbcType=VARCHAR},
+            design_slump            = #{designSlump,jdbcType=VARCHAR},
+            mixing_way              = #{mixingWay,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

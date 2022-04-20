@@ -377,6 +377,25 @@ public class SampleController {
         if (file == null) {
             return ResultUtil.error("样品file文件为空！");
         }
+        // 处理file文件后缀
+        // 常规图片后缀名。
+        String[] nameSuffixS ={"png","jpeg","jpg","gif","webp"};
+        // true 正常运行。 flase 返回数组中不存在格式。
+        Boolean flag=false;
+        for (MultipartFile multipartFile : file) {
+            String name = multipartFile.getOriginalFilename();
+            String[] strings = name.split("\\.");
+            String nameSuffix = strings[strings.length - 1];
+            for(int i=0;i<nameSuffixS.length;i++){
+                if(nameSuffixS[i].equalsIgnoreCase(nameSuffix)){
+                    // 变动
+                    flag = true;
+                }
+            }
+            if(flag == false){
+               return ResultUtil.error("样品文件上传失败 图片后缀不在通用规则中！");
+            }
+        }
         if (testSampleEntityService.uploading(id, file) == true) {
             return ResultUtil.success("样品文件上传成功");
         }
@@ -400,8 +419,6 @@ public class SampleController {
      */
     @RequestMapping("/addMixSamples")
     public Result addMixSamples(@RequestBody SamplesAddVo samples) {
-        System.out.println(samples.toString());
-
         if (CollectionUtils.isEmpty(samples.getSamples())) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
