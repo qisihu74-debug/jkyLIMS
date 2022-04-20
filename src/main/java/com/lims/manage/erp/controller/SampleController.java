@@ -13,6 +13,7 @@ import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ProductService;
 import com.lims.manage.erp.service.SampleService;
 import com.lims.manage.erp.service.TestSampleEntityService;
+import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
@@ -379,7 +380,7 @@ public class SampleController {
         }
         // 处理file文件后缀
         // 常规图片后缀名。
-        String[] nameSuffixS ={"png","jpeg","jpg","gif","webp"};
+        String[] nameSuffixS = Const.nameSuffixS;
         // true 正常运行。 flase 返回数组中不存在格式。
         Boolean flag=false;
         for (MultipartFile multipartFile : file) {

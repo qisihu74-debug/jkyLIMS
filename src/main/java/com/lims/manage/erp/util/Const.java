@@ -114,4 +114,8 @@ public class Const {
      * 合作关系管理日志
      */
     public static final String PARTNERSHIP_MANAGEMENT_LOG = "19";
+    /**
+     * 常规图片后缀名大全。
+     */
+   public static final  String[] nameSuffixS ={"tiff","pjp","jfif","bmp","webp","pjpeg","avif","tif","jpg","svgz","png","xbm","dib","jxl","jpeg","gif","svg","ico"};
 }

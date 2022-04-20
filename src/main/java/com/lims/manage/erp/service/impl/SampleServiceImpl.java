@@ -283,7 +283,12 @@ public class SampleServiceImpl implements SampleService {
             if (startNumber > 0 && endNumber > 0) {
                 String[] strings = sampleCode.substring(startNumber + 1, endNumber).split("~");
                 Integer maxNumber = Integer.valueOf(strings[1]);
-                sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+                if(sampleTagInfo.getOutwardDescribe()!=null&&!sampleTagInfo.getOutwardDescribe().equals("")){
+                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1)+"\t"+sampleTagInfo.getOutwardDescribe());
+                }
+                else {
+                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+                }
                 for (int i = 1; i <= maxNumber; i++) {
                     InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
                     StringBuilder fileName = new StringBuilder("");
@@ -309,7 +314,12 @@ public class SampleServiceImpl implements SampleService {
                 InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
                 StringBuilder fileName = new StringBuilder("");
                 // 处理样品描述信息 Outward 清除两边[]
-                sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+                if(sampleTagInfo.getOutwardDescribe()!=null&&!sampleTagInfo.getOutwardDescribe().equals("")){
+                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1)+"\t"+sampleTagInfo.getOutwardDescribe());
+                }
+                else {
+                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+                }
                 fileName.append(sampleTagInfo.getSampleCode());
                 fileName.append("样品标签.xlsx");
                 result.put("result", sampleTagInfo);
