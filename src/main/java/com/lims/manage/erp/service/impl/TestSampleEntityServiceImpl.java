@@ -284,9 +284,17 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         nodeSample.add(sampleEntity);
         int result = 0;
         for (TestSampleEntity entity : nodeSample) {
+            //设置签收人
+            entity.setInspector(sampleEntity.getInspector());
+            //设置签收时间
+            entity.setReceivedDate(sampleEntity.getReceivedDate());
+            //设置检验类型
+            entity.setSampleType(sampleEntity.getSampleType());
+            //设置委托单位
+            entity.setCompanyId(sampleEntity.getCompanyId());
             result = testSampleEntityMapper.updateByPrimaryKeyNotAll(entity);
         }
-        mixInfoEntityMapper.updateByPrimaryKey(new TestSampleMixInfoEntity(sampleEntity));
+        mixInfoEntityMapper.updateBySampleId(new TestSampleMixInfoEntity(sampleEntity));
         return result;
     }
 

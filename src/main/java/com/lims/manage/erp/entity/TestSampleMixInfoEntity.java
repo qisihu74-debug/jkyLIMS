@@ -57,6 +57,7 @@ public class TestSampleMixInfoEntity {
     }
 
     public TestSampleMixInfoEntity(TestSampleEntity samples) {
+        this.sampleId = samples.getId();
         this.designStrength = samples.getDesignStrength();
         this.intensityConfiguration = samples.getIntensityConfiguration();
         this.antifreezeLevel = samples.getAntifreezeLevel();
