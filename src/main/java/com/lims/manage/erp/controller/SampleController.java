@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import java.util.zip.ZipOutputStream;
 
 @Slf4j
 @RestController
@@ -183,16 +184,15 @@ public class SampleController {
                 Integer maxNumber = Integer.valueOf(strings[0]);
                 Integer smallNumber = Integer.valueOf(strings[1]);
                 if (maxNumber <= number && number <= smallNumber) {
-                    log.info("样品id\t"+sampleId+"编号"+"最大参数\t" + maxNumber + ";最小参数\t" + smallNumber+"取值参数在范围之内。\t"+number);
-                    sampleTagInfo.setSampleCode(sampleCode.substring(0,startNumber)+"_"+number);
-                }
-                else {
-                    log.info("样品id\t"+sampleId+"编号"+"最大参数\t" + maxNumber + ";最小参数\t" + smallNumber+"取值参数不在范围之内。\t"+number);
-                    sampleTagInfo.setSampleCode(sampleCode.substring(0,startNumber)+"_"+number+"取值参数不在范围之内。");
+                    log.info("样品id\t" + sampleId + "编号" + "最大参数\t" + maxNumber + ";最小参数\t" + smallNumber + "取值参数在范围之内。\t" + number);
+                    sampleTagInfo.setSampleCode(sampleCode.substring(0, startNumber) + "_" + number);
+                } else {
+                    log.info("样品id\t" + sampleId + "编号" + "最大参数\t" + maxNumber + ";最小参数\t" + smallNumber + "取值参数不在范围之内。\t" + number);
+                    sampleTagInfo.setSampleCode(sampleCode.substring(0, startNumber) + "_" + number + "取值参数不在范围之内。");
                 }
             }
             // 处理样品描述信息 Outward 清除两边[]
-            sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1,sampleTagInfo.getOutward().length()-1));
+            sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
             fileName.append(sampleTagInfo.getSampleCode());
             fileName.append("样品标签.xlsx");
             result.put("result", sampleTagInfo);
@@ -267,6 +267,21 @@ public class SampleController {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 下载样品标签  多个或一个都打包成zip格式。
+     */
+    @RequestMapping("/downloadSamplePackagingZip")
+    public void downloadSamplePackagingZip(Integer sampleId, HttpServletResponse response) throws IOException {
+        response.reset();
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/zip");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" + "样品文件.zip");
+        ZipOutputStream zipOutputStream = sampleService.packagingWorkbookZip(sampleId, response);
+        zipOutputStream.flush();
+    }
+
 
     /**
      * 查询产品所有的检测项
@@ -377,7 +392,26 @@ public class SampleController {
         return ResultUtil.success("样品文件删除成功");
     }
 
+    /**
+     * 样品管理--样品签收--配合比新增样品
+     *
+     * @param samples
+     * @return
+     */
+    @RequestMapping("/addMixSamples")
+    public Result addMixSamples(@RequestBody SamplesAddVo samples) {
+        System.out.println(samples.toString());
 
+        if (CollectionUtils.isEmpty(samples.getSamples())) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
 
-
+            Integer integer = testSampleEntityService.batchInsertMixSample(samples);
+            if (integer > 0) {
+                return ResultUtil.success("添加样品成功！", integer);
+            } else {
+                return ResultUtil.error("添加样品失败，请联系管理员！");
+            }
+        }
+    }
 }
