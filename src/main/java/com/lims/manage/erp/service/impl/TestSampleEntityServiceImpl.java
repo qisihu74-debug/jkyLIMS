@@ -294,7 +294,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             entity.setCompanyId(sampleEntity.getCompanyId());
             result = testSampleEntityMapper.updateByPrimaryKeyNotAll(entity);
         }
-        mixInfoEntityMapper.updateBySampleId(new TestSampleMixInfoEntity(sampleEntity));
+        mixInfoEntityMapper.updateBySampleId(sampleEntity.getMixInfo());
         return result;
     }
 
