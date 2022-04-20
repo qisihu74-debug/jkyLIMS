@@ -5,13 +5,11 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleFileTableEntity;
-import com.lims.manage.erp.entity.TestSampleCollectionJSON;
-import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.SampleFileTableDao;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
+import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
@@ -23,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,6 +39,8 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     private SampleEntityMapper sampleEntityMapper;
     @Autowired
     private SampleFileTableDao sampleFileTableDao;
+    @Autowired
+    private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
     Logger logger = LoggerFactory.getLogger(TestSampleEntityServiceImpl.class);
 
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -78,6 +79,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         return testSampleEntityMapper.insertBatch(entities);
     }
 
+    @Transactional
     @Override
     public Integer batchInsertMixSample(SamplesAddVo samples) {
         List<TestSampleEntity> param = Lists.newArrayList();
@@ -110,6 +112,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             param.add(sample);
             i++;
         }
+        TestSampleMixInfoEntity mixInfoEntity = new TestSampleMixInfoEntity(samples,newId);
+        //插入配合比参数信息
+        mixInfoEntityMapper.insert(mixInfoEntity);
         return testSampleEntityMapper.insertBatchMixSamples(param);
     }
 
