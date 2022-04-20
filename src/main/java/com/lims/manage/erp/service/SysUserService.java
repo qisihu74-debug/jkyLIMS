@@ -8,6 +8,7 @@ import com.lims.manage.erp.entity.SysUserTreeEntity;
 import com.lims.manage.erp.vo.RegisterUserInfoVo;
 import com.lims.manage.erp.vo.UserInfoParamVo;
 import com.lims.manage.erp.vo.UserInfoVo;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -102,5 +103,12 @@ public interface SysUserService extends IService<SysUserEntity> {
      * @return
      */
     List<DingUserEntity> personList(String search);
+
+    /**
+     * 上传个人签名
+     * @param file
+     * @return
+     */
+    boolean uploadSignature(MultipartFile file);
 }
 

@@ -35,10 +35,12 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -568,7 +570,7 @@ public class ReportController {
      * @param reqBean
      * @return
      */
-    @PostMapping("previewDownLoad")
+    @PostMapping(value = "previewDownLoad",produces = MediaType.APPLICATION_PDF_VALUE)
     public String previewDownLoad(@RequestBody ReqBean reqBean,HttpServletResponse response) {
         if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
             return null;

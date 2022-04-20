@@ -2,6 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.*;
@@ -10,13 +11,20 @@ import com.lims.manage.erp.mapper.DingUsertDao;
 import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.mapper.SysUserRoleDao;
 import com.lims.manage.erp.service.SysUserService;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.UserInfoParamVo;
 import com.lims.manage.erp.vo.UserInfoVo;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.docx4j.wml.U;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +35,7 @@ import java.util.List;
  * @CreateTime 2021/11/09 15:57
  */
 @Service("sysUserService")
+@Slf4j
 public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> implements SysUserService {
 
     @Autowired
@@ -291,5 +300,36 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
             }
         }
         return personList;
+    }
+
+    @Override
+    public boolean uploadSignature(MultipartFile file) {
+        String url = "";
+        String originalFilename = file.getOriginalFilename();
+        String[] strings = originalFilename.split(".");
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        try {
+            url = MinIoUtil.upload("personal-signature",file,userId+"."+strings[1]);
+        }catch (Exception e){
+            log.error("上传个人签名失败:{}",e);
+            return false;
+        }
+        if (StringUtils.isNotEmpty(url)){
+            try {
+                String decode = URLDecoder.decode(url, "utf-8");
+                decode = decode.substring(0,decode.indexOf("?"));
+                LambdaUpdateWrapper<SysUserEntity> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.eq(true,SysUserEntity::getUserId,userId);
+                updateWrapper.set(true,SysUserEntity::getSignatureUrl,decode);
+                this.baseMapper.update(null,updateWrapper);
+                return true;
+            }catch (Exception e){
+                log.error("上传个人签名信息失败:{}",e);
+                //删除文件
+                MinIoUtil.deleteFile("personal-signature",userId+"."+strings[1]);
+                return false;
+            }
+        }
+        return true;
     }
 }

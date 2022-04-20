@@ -21,13 +21,18 @@ import com.lims.manage.erp.vo.RegisterUserInfoVo;
 import com.lims.manage.erp.vo.SysUserPasswordVo;
 import com.lims.manage.erp.vo.UserInfoParamVo;
 import com.lims.manage.erp.vo.UserInfoVo;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.File;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -427,6 +432,29 @@ public class UserController {
         }
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "删除系统用户ID【" + sysUserEntity.getUserId() + "】", Const.SYS_MANAGER_LOG, false);
         return ResultUtil.error("删除角色失败");
+    }
+
+    /**
+     * 上传个人签名
+     * @param file
+     * @return
+     */
+    @SneakyThrows
+    @GetMapping("uploadSignature")
+    public Result uploadSignature(MultipartFile file){
+        if (file == null){
+            return ResultUtil.error("请上传签名图片");
+        }
+        Image img = ImageIO.read((File) file); //imgFile为图片文件
+        if(img == null){
+            return ResultUtil.error("请上传图片");
+        }
+        boolean flag = sysUserService.uploadSignature(file);
+        if (flag){
+            return ResultUtil.success("个人签名上传成功");
+        }else {
+            return ResultUtil.error("个人签名上传失败");
+        }
     }
 
 }
