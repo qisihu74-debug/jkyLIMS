@@ -1,12 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
-import com.lims.manage.erp.entity.ConclusionEntity;
-import com.lims.manage.erp.entity.QiYueSuoReqBean;
-import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
-import com.lims.manage.erp.entity.ReportRecordDetailEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.ReportTemplateEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
@@ -345,6 +340,13 @@ public interface ReportService {
      * @return
      */
     ReportRecordEntity getUserInfo(Long entrustId);
+
+    /**
+     * 查询配合比检测信息
+     * @param entrustId
+     * @return
+     */
+    TestSampleMixInfoEntity getMixSampleInfo(Long entrustId);
 
     /**
      * 配合比报告合并，下载，预览

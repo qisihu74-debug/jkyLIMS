@@ -5,7 +5,7 @@
         <constructor>
             <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
             <arg column="sample_id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
-            <arg column="entrustment_id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="entrustment_id" jdbcType="BIGINT" javaType="java.lang.Long"/>
             <arg column="design_strength" jdbcType="VARCHAR" javaType="java.lang.String"/>
             <arg column="intensity_configuration" jdbcType="VARCHAR" javaType="java.lang.String"/>
             <arg column="antifreeze_level" jdbcType="VARCHAR" javaType="java.lang.String"/>
@@ -44,7 +44,7 @@
                                           design_strength, intensity_configuration,
                                           antifreeze_level, water_binder_ratio, unit_water_use,
                                           sand_ratio, design_slump, mixing_way)
-        values (#{id,jdbcType=INTEGER}, #{sampleId,jdbcType=INTEGER}, #{entrustmentId,jdbcType=INTEGER},
+        values (#{id,jdbcType=INTEGER}, #{sampleId,jdbcType=INTEGER}, #{entrustmentId,jdbcType=BIGINT},
                 #{designStrength,jdbcType=VARCHAR}, #{intensityConfiguration,jdbcType=VARCHAR},
                 #{antifreezeLevel,jdbcType=VARCHAR}, #{waterBinderRatio,jdbcType=VARCHAR},
                 #{unitWaterUse,jdbcType=VARCHAR},
@@ -95,7 +95,7 @@
                 #{sampleId,jdbcType=INTEGER},
             </if>
             <if test="entrustmentId != null">
-                #{entrustmentId,jdbcType=INTEGER},
+                #{entrustmentId,jdbcType=BIGINT},
             </if>
             <if test="designStrength != null">
                 #{designStrength,jdbcType=VARCHAR},
@@ -130,7 +130,7 @@
                 sample_id = #{sampleId,jdbcType=INTEGER},
             </if>
             <if test="entrustmentId != null">
-                entrustment_id = #{entrustmentId,jdbcType=INTEGER},
+                entrustment_id = #{entrustmentId,jdbcType=BIGINT},
             </if>
             <if test="designStrength != null">
                 design_strength = #{designStrength,jdbcType=VARCHAR},
@@ -162,7 +162,7 @@
     <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.TestSampleMixInfoEntity">
         update test_sample_mix_info
         set sample_id               = #{sampleId,jdbcType=INTEGER},
-            entrustment_id          = #{entrustmentId,jdbcType=INTEGER},
+            entrustment_id          = #{entrustmentId,jdbcType=BIGINT},
             design_strength         = #{designStrength,jdbcType=VARCHAR},
             intensity_configuration = #{intensityConfiguration,jdbcType=VARCHAR},
             antifreeze_level        = #{antifreezeLevel,jdbcType=VARCHAR},
@@ -176,7 +176,7 @@
     <update id="updateBySampleId" parameterType="com.lims.manage.erp.entity.TestSampleMixInfoEntity">
         update test_sample_mix_info
         set
-            entrustment_id          = #{entrustmentId,jdbcType=INTEGER},
+            entrustment_id          = #{entrustmentId,jdbcType=BIGINT},
             design_strength         = #{designStrength,jdbcType=VARCHAR},
             intensity_configuration = #{intensityConfiguration,jdbcType=VARCHAR},
             antifreeze_level        = #{antifreezeLevel,jdbcType=VARCHAR},
@@ -187,4 +187,11 @@
             mixing_way              = #{mixingWay,jdbcType=VARCHAR}
         where sample_id = #{sampleId,jdbcType=INTEGER}
     </update>
+
+    <select id="selectByEntrustId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from test_sample_mix_info
+        where entrustment_id = #{entrustId}
+    </select>
 </mapper>

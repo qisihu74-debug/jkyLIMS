@@ -17,9 +17,12 @@ import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
+import com.lims.manage.erp.config.PoiConfig;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.mapper.ReportMapper;
@@ -128,6 +131,8 @@ public class ReportServiceImpl implements ReportService {
     private SysUserDao sysUserDao;
     @Autowired
     private TestSampleMixInfoEntityMapper testSampleMixInfoEntityMapper;
+    @Autowired
+    private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -1927,6 +1932,11 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ReportRecordEntity getUserInfo(Long entrustId) {
         return reportMapper.getDetailByEntrustId(entrustId);
+    }
+
+    @Override
+    public TestSampleMixInfoEntity getMixSampleInfo(Long entrustId) {
+        return mixInfoEntityMapper.selectByEntrustId(entrustId);
     }
 
     /**

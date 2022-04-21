@@ -25,6 +25,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -110,10 +111,10 @@ public class SampleServiceImpl implements SampleService {
                     pictureUrl = MinIoUtil.upload("test-sample", multipartFile, pictureFileName);
                 }
                 // 去除 Outward 标点符号(、)进行删除
-                if(addParamVo.getOutward().length()==1){
+                if (addParamVo.getOutward().length() == 1) {
                     // 赋值为空
                     addParamVo.setOutward(null);
-                }else{
+                } else {
                     addParamVo.setOutward(addParamVo.getOutward().substring(1, addParamVo.getOutward().length()));
                 }
                 //保存样品信息
@@ -151,21 +152,21 @@ public class SampleServiceImpl implements SampleService {
         }
         List<SamplePublicInfoVo> list = sampleEntityMapper.getSamplePublicInfos1(paramVo);
         List<String> insertFlags = Lists.newArrayList();
-        for (SamplePublicInfoVo vo:list) {
+        for (SamplePublicInfoVo vo : list) {
             insertFlags.add(vo.getInsertFlag());
         }
         List<SamplePrivateInfoVo> samplePrivateInfos1 = sampleEntityMapper.getSamplePrivateInfos1(insertFlags);
-        for (SamplePublicInfoVo vo:list) {
+        for (SamplePublicInfoVo vo : list) {
             String insertFlag = vo.getInsertFlag();
             List<SamplePrivateInfoVo> childNode = Lists.newArrayList();
-            for (SamplePrivateInfoVo privateInfoVo: samplePrivateInfos1) {
+            for (SamplePrivateInfoVo privateInfoVo : samplePrivateInfos1) {
                 String insertFlag1 = privateInfoVo.getInsertFlag();
-                if(insertFlag.equals(insertFlag1)){
+                if (insertFlag.equals(insertFlag1)) {
                     childNode.add(privateInfoVo);
                 }
                 //TODO gjl添加样品状态
                 EntrustServiceImpl service = new EntrustServiceImpl();
-                String state = service.findStateBySampleId(privateInfoVo.getId(),mapper,taskMapper);
+                String state = service.findStateBySampleId(privateInfoVo.getId(), mapper, taskMapper);
                 privateInfoVo.setState(state);
             }
             vo.setChildNode(childNode);
@@ -193,6 +194,7 @@ public class SampleServiceImpl implements SampleService {
         PageInfo<SampleEntity> pageInfo = new PageInfo<>(sampleEntities);
         return pageInfo;
     }
+
     @Override
     public PageInfo getSampleDataListNew(SampleEntity sampleEntity) {
         PageHelper.startPage(sampleEntity.getPageNum(), sampleEntity.getPageSize());
@@ -206,12 +208,12 @@ public class SampleServiceImpl implements SampleService {
         for (SampleEntrustAddVo sampleEntrustAddVo : topList) {
             codes.add(sampleEntrustAddVo.getCode());
         }
-        if(!CollectionUtils.isEmpty(codes)){
+        if (!CollectionUtils.isEmpty(codes)) {
             List<SampleEntity> groupNode = sampleEntityMapper.getGroupNode(codes);
             for (SampleEntrustAddVo sampleEntrustAddVo : topList) {
                 List<SampleEntity> samples = Lists.newArrayList();
                 for (SampleEntity sampleEntity1 : groupNode) {
-                    if(sampleEntrustAddVo.getCode().equals(sampleEntity1.getSampleCode().substring(0,12))){
+                    if (sampleEntrustAddVo.getCode().equals(sampleEntity1.getSampleCode().substring(0, 12))) {
                         samples.add(sampleEntity1);
                     }
                 }
@@ -243,37 +245,35 @@ public class SampleServiceImpl implements SampleService {
         return sampleEntityMapper.getSampleTagInfo(sampleId);
     }
 
-    @Override
-    public Workbook returningData(InputStream fileStream, HashMap<String, SampleDetailVo> result, String fileName) {
-        try {
-            XLSTransformer transformer = new XLSTransformer();
-            Workbook workbook = null;
-            workbook = transformer.transformXLS(fileStream, result);
-            workbook.close();
-            return workbook;
-        } catch (InvalidFormatException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     /**
      * 根据样品id 获取Excel表格集合 存储到zip里面。
      *
      * @return
      */
     @Override
-    public ZipOutputStream packagingWorkbookZip(Integer sampleId,HttpServletResponse response) throws IOException {
+    public ZipOutputStream packagingWorkbookZip(Integer sampleId, HttpServletResponse response) throws IOException {
 
         SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
-        HashMap<String, SampleDetailVo> result = Maps.newHashMap();
         // 通过输入参数 返回 对应的处理成功的EXCEL数据。
         ServletOutputStream outputStream = response.getOutputStream();
         ZipOutputStream out = new ZipOutputStream(outputStream);
+        // 查询样品标签时： 区别 原材 和 配合比验证。
+        if (sampleTagInfo.getSampleType().equals("原材")) {
+            methodSampleTypeOriginalMaterial(sampleTagInfo, out);
+        } else {
+            methodSampleTypeLineBlend(sampleTagInfo, out);
+        }
+        return out;
+    }
+
+    /**
+     * 处理样品类型为： 原材。 进行zip。
+     *
+     * @param sampleTagInfo
+     * @param out
+     */
+    public void methodSampleTypeOriginalMaterial(SampleDetailVo sampleTagInfo, ZipOutputStream out) throws IOException {
+        HashMap<String, SampleDetailVo> result = Maps.newHashMap();
         if (sampleTagInfo != null) {
             // 样品编号格式： 情况1： YP-2022-0095（01~02） 情况2：YP-2022-0096
             String sampleCode = sampleTagInfo.getSampleCode();
@@ -283,11 +283,13 @@ public class SampleServiceImpl implements SampleService {
             if (startNumber > 0 && endNumber > 0) {
                 String[] strings = sampleCode.substring(startNumber + 1, endNumber).split("~");
                 Integer maxNumber = Integer.valueOf(strings[1]);
-                if(sampleTagInfo.getOutwardDescribe()!=null&&!sampleTagInfo.getOutwardDescribe().equals("")){
-                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1)+"\t"+sampleTagInfo.getOutwardDescribe());
-                }
-                else {
-                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+                // 处理样品 外观描述，和 外观
+                if (sampleTagInfo.getOutwardDescribe() != null && !sampleTagInfo.getOutwardDescribe().equals("") && sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
+                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1) + "\t" + sampleTagInfo.getOutwardDescribe());
+                } else {
+                    if (sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
+                        sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+                    }
                 }
                 for (int i = 1; i <= maxNumber; i++) {
                     InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
@@ -301,7 +303,7 @@ public class SampleServiceImpl implements SampleService {
                         Workbook workbook = null;
                         workbook = transformer.transformXLS(fileStream, result);
                         // 根据单个Workbook 进行处理打包。
-                        DealWithZip(workbook,fileName.toString(),out);
+                        DealWithZip(workbook, fileName.toString(), out);
                     } catch (InvalidFormatException e) {
                         e.printStackTrace();
                     } catch (Exception e) {
@@ -313,12 +315,13 @@ public class SampleServiceImpl implements SampleService {
             else {
                 InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
                 StringBuilder fileName = new StringBuilder("");
-                // 处理样品描述信息 Outward 清除两边[]
-                if(sampleTagInfo.getOutwardDescribe()!=null&&!sampleTagInfo.getOutwardDescribe().equals("")){
-                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1)+"\t"+sampleTagInfo.getOutwardDescribe());
-                }
-                else {
-                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+                // 处理样品 外观描述，和 外观
+                if (sampleTagInfo.getOutwardDescribe() != null && !sampleTagInfo.getOutwardDescribe().equals("") && sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
+                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1) + "\t" + sampleTagInfo.getOutwardDescribe());
+                } else {
+                    if (sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
+                        sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+                    }
                 }
                 fileName.append(sampleTagInfo.getSampleCode());
                 fileName.append("样品标签.xlsx");
@@ -327,86 +330,84 @@ public class SampleServiceImpl implements SampleService {
                     XLSTransformer transformer = new XLSTransformer();
                     Workbook workbook = null;
                     workbook = transformer.transformXLS(fileStream, result);
-                    DealWithZip(workbook,fileName.toString(),out);
+                    DealWithZip(workbook, fileName.toString(), out);
                 } catch (InvalidFormatException e) {
                     e.printStackTrace();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-             // 关闭输入流
+            // 关闭输入流
             out.closeEntry();
-            if(out!=null){
+            if (out != null) {
                 out.flush();
                 out.close();
             }
         }
-        return out;
     }
 
-    @Override
-    public Boolean packagingZip(List<Workbook> dateSet) {
-        // 创建 FileOutputStream 对象
-        FileOutputStream fileOutputStream = null;
-        // 创建 ZipOutputStream
-        ZipOutputStream zipOutputStream = null;
-        // 创建 FileInputStream 对象
-        FileInputStream fileInputStream = null;
-        File zipFile = new File("D:\\poiFile\\ZipFile.zip");
-        // 判断压缩后的文件存在不，不存在则创建
-        if (!zipFile.exists()) {
+    /**
+     * 处理样品类型为： 配合比验证。 进行zip。
+     *
+     * @param sampleTagInfo
+     * @param out
+     */
+    public void methodSampleTypeLineBlend(SampleDetailVo sampleTagInfo, ZipOutputStream out) throws IOException {
+        /**
+         * 获取配合比集合。
+         */
+        List<SampleDetailVo> sampleDetailVoList = new ArrayList<>();
+        sampleDetailVoList = sampleEntityMapper.getSampleTagInfoPidList(sampleTagInfo.getId());
+        // 存储顶级标签信息。
+        sampleDetailVoList.add(sampleTagInfo);
+        HashMap<String, SampleDetailVo> result = Maps.newHashMap();
+        for (int i = 0; i < sampleDetailVoList.size(); i++) {
+            SampleDetailVo sampleData = sampleDetailVoList.get(i);
+            // 处理样品 外观描述，和 外观
+            if (sampleData.getOutwardDescribe() != null && !sampleData.getOutwardDescribe().equals("") && sampleData.getOutward() != null && !sampleData.getOutward().equals("")) {
+                sampleData.setOutward(sampleData.getOutward().substring(1, sampleData.getOutward().length() - 1) + "\t" + sampleData.getOutwardDescribe());
+            } else {
+                if (sampleData.getOutward() != null && !sampleData.getOutward().equals("")) {
+                    sampleData.setOutward(sampleData.getOutward().substring(1, sampleData.getOutward().length() - 1));
+                }
+            }
+            InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
+            StringBuilder fileName = new StringBuilder("");
+            fileName.append(sampleData.getSampleCode());
+            fileName.append("样品标签.xlsx");
+            result.put("result", sampleData);
             try {
-                zipFile.createNewFile();
-            } catch (IOException e) {
+                XLSTransformer transformer = new XLSTransformer();
+                Workbook workbook = null;
+                workbook = transformer.transformXLS(fileStream, result);
+                // 根据单个Workbook 进行处理打包。
+                DealWithZip(workbook, fileName.toString(), out);
+            } catch (InvalidFormatException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        try {
-            // 实例化 FileOutputStream 对象
-            fileOutputStream = new FileOutputStream(zipFile);
-            // 实例化 ZipOutputStream 对象
-            zipOutputStream = new ZipOutputStream(fileOutputStream);
-            // 创建 ZipEntry 对象
-            ZipEntry zipEntry = null;
-            // 遍历源文件数组
-            for (int i = 0; i < dateSet.size(); i++) {
-                // 将源文件数组中的当前文件读入 FileInputStream 流中
-                Workbook workbook = dateSet.get(i);
-//                zipOutputStream.write(workbook.getSheetAt(0));
-//                fileInputStream = new FileInputStream("D:\\poiFilShiroSessionManagere\\YP-2022-0139_3样品标签.xlsx");
-//                // 实例化 ZipEntry 对象，源文件数组中的当前文件
-//                zipEntry = new ZipEntry("excel"+i);
-//                zipOutputStream.putNextEntry(zipEntry);
-//                // 该变量记录每次真正读的字节个数
-//                int len;
-//                // 定义每次读取的字节数组
-//                byte[] buffer = new byte[1024];
-//                while ((len = fileInputStream.read(buffer)) > 0) {
-//                    zipOutputStream.write(buffer, 0, len);
-//                }
-            }
-            zipOutputStream.closeEntry();
-            zipOutputStream.close();
-            fileInputStream.close();
-            fileOutputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        // 关闭输入流
+        out.closeEntry();
+        if (out != null) {
+            out.flush();
+            out.close();
         }
-        return null;
     }
 
     /**
      * 根据单个Workbook 进行处理打包。
      */
-    public void DealWithZip(Workbook workbook, String fileName,ZipOutputStream out){
+    public void DealWithZip(Workbook workbook, String fileName, ZipOutputStream out) {
         try {
-                // 将源文件数组中的当前文件读入 FileInputStream 流中
-                ZipEntry entry = new ZipEntry(fileName);
-                out.putNextEntry(entry);
-                //这里讲一下，workBook.write会指定关闭数据流，如果这里直接用workbook.write(out)，下次就会抛出out已被关闭的异常，所有用ByteArrayOutputStream来拷贝一下。
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                workbook.write(bos);
-                bos.writeTo(out);
+            // 将源文件数组中的当前文件读入 FileInputStream 流中
+            ZipEntry entry = new ZipEntry(fileName);
+            out.putNextEntry(entry);
+            //这里讲一下，workBook.write会指定关闭数据流，如果这里直接用workbook.write(out)，下次就会抛出out已被关闭的异常，所有用ByteArrayOutputStream来拷贝一下。
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            workbook.write(bos);
+            bos.writeTo(out);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -425,7 +426,7 @@ public class SampleServiceImpl implements SampleService {
             }
             // 样品编号格式： 情况1： YP-2022-0095（01~02） 情况2：YP-2022-0096
             String sampleCode = sampleTagInfo.getSampleCode();
-            if(sampleCode.contains("~")){
+            if (sampleCode.contains("~")) {
                 //获取样品数量
                 Integer i = sampleTagInfo.getQuantityPerGroup();
                 //构造样品编号
@@ -433,7 +434,7 @@ public class SampleServiceImpl implements SampleService {
                     String prefix = sampleCode.substring(0, sampleCode.indexOf("（"));
                     String suffix = new DecimalFormat("00").format(j);
                     SampleDetailVo vo = new SampleDetailVo();
-                    vo.setSampleCode(prefix+"_"+suffix);
+                    vo.setSampleCode(prefix + "_" + suffix);
                     vo.setSampleName(sampleTagInfo.getSampleName());
                     vo.setSpecs(sampleTagInfo.getSpecs());
                     vo.setOutward(sampleTagInfo.getOutward());
@@ -441,7 +442,7 @@ public class SampleServiceImpl implements SampleService {
                     result.put("result", vo);
                     results.add(result);
                 }
-            }else{
+            } else {
                 HashMap<String, SampleDetailVo> result = Maps.newHashMap();
                 result.put("result", sampleTagInfo);
                 results.add(result);

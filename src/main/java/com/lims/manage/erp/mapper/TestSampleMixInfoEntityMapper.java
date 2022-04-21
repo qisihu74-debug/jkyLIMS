@@ -34,4 +34,6 @@ public interface TestSampleMixInfoEntityMapper {
             "design_slump=#{item.designSlump},\n" +
             "mixing_way=#{item.mixingWay} where entrustment_id = #{entrustId}")
     void updateByEntrustId(@Param("entrustId") String entrustId, @Param("item") TestSampleMixInfoEntity item);
+    TestSampleMixInfoEntity selectByEntrustId(Long entrustId);
+
 }

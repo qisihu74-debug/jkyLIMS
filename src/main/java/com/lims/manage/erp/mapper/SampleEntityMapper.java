@@ -125,6 +125,14 @@ public interface SampleEntityMapper {
     SampleDetailVo getSampleTagInfo(Integer sampleId);
 
     /**
+     * 通过pid 查询样品标签信息集合。
+     *
+     * @param sampleId
+     * @return
+     */
+    List<SampleDetailVo> getSampleTagInfoPidList(Integer sampleId);
+
+    /**
      * 删除test_entrusted_sample_details_rel
      *
      * @return

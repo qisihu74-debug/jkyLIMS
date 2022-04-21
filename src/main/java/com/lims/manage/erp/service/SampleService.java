@@ -81,25 +81,12 @@ public interface SampleService {
     List<HashMap<String, SampleDetailVo>>getSampleTagInfoList(Integer sampleId);
 
     /**
-     * 通过参数 返回处理好的Excel 数据
-     * @param fileStream 模板
-     * @param result map参数
-     * @param fileName 文件名
-     * @return
-     */
-    Workbook returningData(InputStream fileStream, HashMap<String, SampleDetailVo> result, String fileName);
-    /**
      * 根据样品id 获取Excel表格集合 存储到zip里面。
      * @return
      */
     ZipOutputStream packagingWorkbookZip(Integer sampleId, HttpServletResponse response) throws IOException;
 
 
-    /**
-     * 获取数据集合 打包成 zip格式。
-     * @return
-     */
-    Boolean packagingZip(List<Workbook> dateSet);
 
 
 }

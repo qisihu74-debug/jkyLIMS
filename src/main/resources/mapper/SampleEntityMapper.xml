@@ -659,9 +659,23 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                specs,
                outward,
                quantity_per_group quantityPerGroup,
-               outward_describe outwardDescribe
+               outward_describe outwardDescribe,
+               sample_type sampleType,
+               id
         FROM test_sample
         WHERE id = #{sampleId}
+    </select>
+    <select id="getSampleTagInfoPidList" resultType="com.lims.manage.erp.vo.SampleDetailVo">
+        SELECT sample_code sampleCode,
+               sample_name sampleName,
+               specs,
+               outward,
+               quantity_per_group quantityPerGroup,
+               outward_describe outwardDescribe,
+               sample_type sampleType,
+               id
+        FROM test_sample
+        WHERE pid = #{sampleId}
     </select>
     <delete id="removeSamplesId">
         DELETE

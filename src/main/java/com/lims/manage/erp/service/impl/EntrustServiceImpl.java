@@ -61,6 +61,8 @@ public class EntrustServiceImpl implements EntrustService {
     private SysUserDao sysUserDao;
     @Autowired
     private TestSampleEntityMapper testSampleEntityMapper;
+    @Autowired
+    private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentDispositionFormData("attachment", new String(fileName.getBytes("UTF-8"), "iso-8859-1"));
@@ -186,7 +188,8 @@ public class EntrustServiceImpl implements EntrustService {
 
         //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
-        basisInfo.setId(GenID.getID());
+        long id = GenID.getID();
+        basisInfo.setId(id);
         //设置委托编号
         Integer code = null;
         String currentTime = DateUtil.getTodayString().substring(0, 6);
@@ -331,6 +334,14 @@ public class EntrustServiceImpl implements EntrustService {
                         }
 
                     }
+                }
+
+                //根据委托检测类别关联 配合比检测信息和委托单ID
+                if(vo.getEntrustTestType().contains("配合比")){
+                    TestSampleMixInfoEntity record = new TestSampleMixInfoEntity();
+                    record.setEntrustmentId(id);
+                    record.setSampleId(sampleEntity.getId());
+                    mixInfoEntityMapper.updateBySampleId(record);
                 }
             }
             if (!CollectionUtils.isEmpty(list)) {

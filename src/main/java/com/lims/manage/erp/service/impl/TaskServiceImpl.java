@@ -621,12 +621,13 @@ public class TaskServiceImpl implements TaskService {
         sampleVo.setSampleName(sampleVo.getSampleName() + ";");
         sampleVo.setSampleNumber(sampleVo.getSampleNumber() + ";");
         sampleVo.setSampleQuantity(sampleVo.getSampleQuantity() + ";");
-        // 处理自定义备注信息与备注数组。进行合并输出
-        if(sampleVo.getOutwardDescribe()!=null&&!sampleVo.getOutwardDescribe().equals("")){
-            sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1)+"\t"+sampleVo.getOutwardDescribe()+";");
-        }
-        else {
-            sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1)+";");
+        // 处理样品 外观描述，和 外观
+        if (sampleVo.getOutwardDescribe() != null && !sampleVo.getOutwardDescribe().equals("") && sampleVo.getSampleDesc() != null && !sampleVo.getSampleDesc().equals("")) {
+            sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1) + "\t" + sampleVo.getOutwardDescribe());
+        } else {
+            if (sampleVo.getSampleDesc() != null && !sampleVo.getSampleDesc().equals("")) {
+                sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1));
+            }
         }
         sampleVo.setSampleTime(sampleVo.getSampleTime() + ";");
         //获取检测依据
@@ -701,7 +702,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Boolean uploadingBatch(List<Integer> ids, MultipartFile file) {
         List<SampleItemInstrumentEntity> entityList = new ArrayList<>();
-        for(Integer id :ids){
+        for (Integer id : ids) {
             SampleItemInstrumentEntity sampleItemInstrumentEntity = new SampleItemInstrumentEntity();
             String upload = "";
             String fileUrlStr = "";
@@ -728,9 +729,8 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Boolean effectDataSet(List<Integer> ids) {
         List<SampleItemInstrumentEntity> list = testDetectionDao.getTestEntrustedSampleCheckitemRelDetailList(ids);
-        for(SampleItemInstrumentEntity sampleItemInstrumentEntity :list)
-        {
-            if(sampleItemInstrumentEntity.getOriginUrl()!=null){
+        for (SampleItemInstrumentEntity sampleItemInstrumentEntity : list) {
+            if (sampleItemInstrumentEntity.getOriginUrl() != null) {
                 return false;
             }
         }

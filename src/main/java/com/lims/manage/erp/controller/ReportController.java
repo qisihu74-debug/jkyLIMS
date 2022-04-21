@@ -5,13 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.ConclusionEntity;
-import com.lims.manage.erp.entity.QiYueSuoReqBean;
-import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
-import com.lims.manage.erp.entity.ReportRecordDetailEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.ReqBean;
-import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
 //import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
@@ -797,4 +791,23 @@ public class ReportController {
         List<ConclusionEntity> list = reportService.getResut(entrustId);
         return ResultUtil.success(list);
     }
+
+    /**
+     * 查询配合比检测信息
+     * @param entrustId
+     * @return
+     */
+    @GetMapping("getMixSampleInfo")
+    public Result getMixSampleInfo(Long entrustId){
+        if (entrustId == null){
+            return ResultUtil.error("缺少必要的参数");
+        }
+        TestSampleMixInfoEntity mixSampleInfo = reportService.getMixSampleInfo(entrustId);
+        if(mixSampleInfo == null){
+            return ResultUtil.error("未找到相关配合比检测信息！");
+        }else{
+            return ResultUtil.success("查询配合比检测信息成功！",mixSampleInfo);
+        }
+    }
+
 }
