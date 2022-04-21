@@ -9,7 +9,7 @@ public class TestSampleMixInfoEntity {
 
     private Integer sampleId;
 
-    private Integer entrustmentId;
+    private Long entrustmentId;
 
     private String designStrength;
 
@@ -30,7 +30,7 @@ public class TestSampleMixInfoEntity {
     public TestSampleMixInfoEntity() {
     }
 
-    public TestSampleMixInfoEntity(Integer id, Integer sampleId, Integer entrustmentId, String designStrength, String intensityConfiguration, String antifreezeLevel, String waterBinderRatio, String unitWaterUse, String sandRatio, String designSlump, String mixingWay) {
+    public TestSampleMixInfoEntity(Integer id, Integer sampleId, Long entrustmentId, String designStrength, String intensityConfiguration, String antifreezeLevel, String waterBinderRatio, String unitWaterUse, String sandRatio, String designSlump, String mixingWay) {
         this.id = id;
         this.sampleId = sampleId;
         this.entrustmentId = entrustmentId;
