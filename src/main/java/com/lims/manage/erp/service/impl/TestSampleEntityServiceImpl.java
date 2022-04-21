@@ -226,7 +226,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             entity.setFileArrays(fileArrays);
             //根据主样品信息查询节点样品信息
             List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(id);
-            if(!CollectionUtils.isEmpty(testSampleEntities)){
+            if (!CollectionUtils.isEmpty(testSampleEntities)) {
                 for (TestSampleEntity entity1 : testSampleEntities) {
                     if (entity1.getOutward() != null) {
                         String replace = entity1.getOutward().replace("[", "");
@@ -280,21 +280,47 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     @Transactional
     @Override
     public int updateSampleBatch(TestSampleEntity sampleEntity) {
+        List<Integer> allNodeIds = testSampleEntityMapper.getAllNodeIds(sampleEntity.getId());
         List<TestSampleEntity> nodeSample = sampleEntity.getNodeSample();
         nodeSample.add(sampleEntity);
         int result = 0;
+        int i = 1;
         for (TestSampleEntity entity : nodeSample) {
-            //设置签收人
-            entity.setInspector(sampleEntity.getInspector());
-            //设置签收时间
-            entity.setReceivedDate(sampleEntity.getReceivedDate());
-            //设置检验类型
-            entity.setSampleType(sampleEntity.getSampleType());
-            //设置委托单位
-            entity.setCompanyId(sampleEntity.getCompanyId());
-            result = testSampleEntityMapper.updateByPrimaryKeyNotAll(entity);
+            if (entity.getId() != null) {
+                //设置签收人
+                entity.setInspector(sampleEntity.getInspector());
+                //设置签收时间
+                entity.setReceivedDate(sampleEntity.getReceivedDate());
+                //设置检验类型
+                entity.setSampleType(sampleEntity.getSampleType());
+                //设置委托单位
+                entity.setCompanyId(sampleEntity.getCompanyId());
+                result = testSampleEntityMapper.updateByPrimaryKeyNotAll(entity);
+            } else {
+                //设置样品编号
+                String format = new DecimalFormat("00").format(i);
+                String code = sampleEntity.getSampleCode() + "_" + format;
+                //设置签收人
+                entity.setInspector(sampleEntity.getInspector());
+                //设置签收时间
+                entity.setReceivedDate(sampleEntity.getReceivedDate());
+                //设置检验类型
+                entity.setSampleType(sampleEntity.getSampleType());
+                //设置原材PID
+                entity.setPid(sampleEntity.getId());
+                //设置委托单位
+                entity.setCompanyId(sampleEntity.getCompanyId());
+                List<TestSampleEntity> list = Lists.newArrayList();
+                list.add(entity);
+                result = testSampleEntityMapper.insertBatchMixSamples(list);
+            }
+            allNodeIds.remove(entity.getId());
         }
-        mixInfoEntityMapper.updateBySampleId(sampleEntity.getMixInfo());
+        mixInfoEntityMapper.updateBySampleId(new TestSampleMixInfoEntity(sampleEntity));
+        //删除原材
+        if(!CollectionUtils.isEmpty(allNodeIds)){
+            testSampleEntityMapper.deleteBatchIds(allNodeIds);
+        }
         return result;
     }
 

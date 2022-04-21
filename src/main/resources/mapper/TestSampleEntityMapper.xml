@@ -690,4 +690,8 @@
         SELECT MAX(id) value
         FROM test_sample
     </select>
+
+    <select id="getAllNodeIds" resultType="java.lang.Integer">
+        SELECT id FROM test_sample where pid = #{sampleId}
+    </select>
 </mapper>
