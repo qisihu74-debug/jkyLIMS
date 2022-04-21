@@ -7,32 +7,11 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.config.PoiConfig;
-import com.lims.manage.erp.entity.ConclusionEntity;
-import com.lims.manage.erp.entity.QiYueSuoReqBean;
-import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
-import com.lims.manage.erp.entity.QiYueSuoSealEntity;
-import com.lims.manage.erp.entity.QuotaEntity;
-import com.lims.manage.erp.entity.QuotaRes;
-import com.lims.manage.erp.entity.ReportRecordDetailEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.ReportTemplateEntity;
-import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.ReportApprovalMapper;
-import com.lims.manage.erp.mapper.ReportMapper;
-import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.SysUserDao;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestProductDao;
-import com.lims.manage.erp.mapper.TestProductItemDao;
-import com.lims.manage.erp.mapper.TestReportQualifcationDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.AsposeUtil;
@@ -129,6 +108,8 @@ public class ReportServiceImpl implements ReportService {
     private SampleEntityMapper sampleEntityMapper;
     @Autowired
     private SysUserDao sysUserDao;
+    @Autowired
+    private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -1740,6 +1721,11 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ReportRecordEntity getUserInfo(Long entrustId) {
         return reportMapper.getDetailByEntrustId(entrustId);
+    }
+
+    @Override
+    public TestSampleMixInfoEntity getMixSampleInfo(Long entrustId) {
+        return mixInfoEntityMapper.selectByEntrustId(entrustId);
     }
 
     /**

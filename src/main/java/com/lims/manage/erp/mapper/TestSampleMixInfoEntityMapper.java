@@ -23,4 +23,6 @@ public interface TestSampleMixInfoEntityMapper {
 
     int updateBySampleId(TestSampleMixInfoEntity record);
 
+    TestSampleMixInfoEntity selectByEntrustId(Long entrustId);
+
 }

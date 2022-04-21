@@ -187,4 +187,11 @@
             mixing_way              = #{mixingWay,jdbcType=VARCHAR}
         where sample_id = #{sampleId,jdbcType=INTEGER}
     </update>
+
+    <select id="selectByEntrustId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from test_sample_mix_info
+        where entrustment_id = #{entrustId}
+    </select>
 </mapper>
