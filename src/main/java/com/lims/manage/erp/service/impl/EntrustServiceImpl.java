@@ -337,7 +337,7 @@ public class EntrustServiceImpl implements EntrustService {
                 }
 
                 //根据委托检测类别关联 配合比检测信息和委托单ID
-                if(vo.getEntrustType().contains("配合比")){
+                if(vo.getEntrustTestType().contains("配合比")){
                     TestSampleMixInfoEntity record = new TestSampleMixInfoEntity();
                     record.setEntrustmentId(id);
                     record.setSampleId(sampleEntity.getId());
