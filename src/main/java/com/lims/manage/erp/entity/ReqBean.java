@@ -16,5 +16,6 @@ import java.util.List;
 public class ReqBean {
     private List<ConclusionEntity> list;
     private Long id;
+    private String type;
 
 }

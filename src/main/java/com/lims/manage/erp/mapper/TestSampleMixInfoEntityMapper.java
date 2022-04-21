@@ -2,6 +2,8 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,4 +25,13 @@ public interface TestSampleMixInfoEntityMapper {
 
     int updateBySampleId(TestSampleMixInfoEntity record);
 
+    @Update("update test_sample_mix_info set design_strength=#{item.designStrength},\n" +
+            "intensity_configuration=#{item.intensityConfiguration},\n" +
+            "antifreeze_level=#{item.antifreezeLevel},\n" +
+            "water_binder_ratio=#{item.waterBinderRatio},\n" +
+            "unit_water_use=#{item.unitWaterUse},\n" +
+            "sand_ratio=#{item.sandRatio},\n" +
+            "design_slump=#{item.designSlump},\n" +
+            "mixing_way=#{item.mixingWay} where entrustment_id = #{entrustId}")
+    void updateByEntrustId(@Param("entrustId") String entrustId, @Param("item") TestSampleMixInfoEntity item);
 }

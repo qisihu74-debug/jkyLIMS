@@ -314,7 +314,7 @@ public interface ReportService {
      * @return
      */
     Boolean uploadReport(String reportCode, MultipartFile file, String verifyer, String issuer,Long verifyerId,
-                         Long issuerId,String code,String conclusion,String additional);
+                         Long issuerId,String code,String conclusion,String additional,String mixInfo);
 
     /**
      * 根据委托单id查询报告编号和名称
@@ -345,4 +345,13 @@ public interface ReportService {
      * @return
      */
     ReportRecordEntity getUserInfo(Long entrustId);
+
+    /**
+     * 配合比报告合并，下载，预览
+     * @param client
+     * @param list
+     * @param id
+     * @return
+     */
+    String submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id);
 }

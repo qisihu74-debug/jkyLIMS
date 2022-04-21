@@ -559,23 +559,29 @@ public class ReportController {
      */
     @PostMapping("submitDownLoad")
     public String submitDownLoad(@RequestBody ReqBean reqBean) {
+        String url = "";
         if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
             return null;
         }
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
-        String url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+        if ("1".equals(reqBean.getType())){
+            url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+        }else {
+            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId());
+        }
         return url;
     }
 
     /**
      * 合并报告预览，支持多个报告模板，支持报告合并
-     * @param reqBean
+     * @param json
      * @return
      */
     @GetMapping("previewDownLoad")
     public String previewDownLoad(@RequestParam("json") String json) {
         String decode = "";
+        String url = "";
         try {
             decode = URLDecoder.decode(json, "UTF-8");
         }catch (Exception e){
@@ -589,7 +595,11 @@ public class ReportController {
         }
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
-        String url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+        if ("1".equals(reqBean.getType())){
+            url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+        }else {
+            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId());
+        }
         //预览word转pdf
         String[] split = url.split("\\?");
         String[] strings = split[0].split("\\/");
@@ -760,12 +770,13 @@ public class ReportController {
     @PostMapping(value = "uploadReport")
     public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file,
-                               @RequestParam("code") String code,@RequestParam("conclusion") String conclusion ,@RequestParam("additional") String additional) {
+                               @RequestParam("code") String code,@RequestParam("conclusion") String conclusion
+            ,@RequestParam("additional") String additional,@RequestParam("mixInfo") String mixInfo) {
         if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数！");
         }
         Boolean flag = reportService.uploadReport(reportCode,file,verifyer.split("&")[0],issuer.split("&")[0]
-                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional);
+                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional,mixInfo);
         if (flag) {
             return ResultUtil.success("报告文件上传成功！");
         }else {

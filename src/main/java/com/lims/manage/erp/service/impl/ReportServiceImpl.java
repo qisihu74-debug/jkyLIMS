@@ -1,12 +1,11 @@
 package com.lims.manage.erp.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.aspose.words.ParagraphAlignment;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.lims.manage.erp.config.PoiConfig;
 import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
@@ -17,6 +16,7 @@ import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
@@ -33,8 +33,8 @@ import com.lims.manage.erp.mapper.TeamMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.mapper.TestReportQualifcationDao;
+import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
@@ -57,14 +57,13 @@ import lombok.SneakyThrows;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.usermodel.Range;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
-import org.apache.xmlbeans.XmlCursor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,9 +76,7 @@ import javax.annotation.Resource;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -129,6 +126,8 @@ public class ReportServiceImpl implements ReportService {
     private SampleEntityMapper sampleEntityMapper;
     @Autowired
     private SysUserDao sysUserDao;
+    @Autowired
+    private TestSampleMixInfoEntityMapper testSampleMixInfoEntityMapper;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -952,7 +951,8 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean uploadReport(String reportCode, MultipartFile file, String verifyer,
-                                String issuer, Long verifyerId, Long issuerId, String code,String conclusion,String additional) {
+                                String issuer, Long verifyerId, Long issuerId, String code,
+                                String conclusion,String additional,String mixInfo) {
         Boolean flag = false;
         String url = "";
         if (file == null){
@@ -996,6 +996,11 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
+        //更新配合比信息
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(mixInfo)){
+            TestSampleMixInfoEntity entity = JSON.parseObject(mixInfo,TestSampleMixInfoEntity.class);
+            testSampleMixInfoEntityMapper.updateByEntrustId(reportCode,entity);
+        }
         return flag;
     }
 
@@ -1658,7 +1663,7 @@ public class ReportServiceImpl implements ReportService {
                         rows.get(size1-2).getCell(0).removeParagraph(0);
                         rows.get(size1-2).getCell(0).setText(conclusionEntity.getAdditional());
                         //TODO 获取到签名信息插入指定位置
-                        /*ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(id);//审核人、签发人
+                        ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(id);//审核人、签发人
                         List<String> stringList = taskMapper.getInspectorByEntrustId(id);
                         List<Long> list1 = Lists.newArrayList();//检测人
                         for (String s:stringList) {
@@ -1674,8 +1679,190 @@ public class ReportServiceImpl implements ReportService {
                             checkUrl.add(signature);
                         }
                         //插入word指定位置
-                        insertPicToDoc(doc,verUrl,size1-1,size-1);*/
+                        insertPicToDoc(doc,issUrl,size-1,size1-1,5);
+                        insertPicToDoc(doc,verUrl,size-1,size1-1,3);
+                        //插入实验人员
+                        for (String url:checkUrl) {
+                            insertPicToDoc(doc,url,size-1,size1-1,1);
+                        }
+                    }
+                    i++;
+                }
+                //按照顺序存放doc
+                map.put(index,doc);
+            }
+        }
+        //获取报告头部模板填充头部数据
+        InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
+        XWPFDocument topDoc = new XWPFDocument(fileStream);;
+        EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
+        Map<String, String> textMap = new HashMap<>();
+        textMap.put("code", reportRecordEntity.getReportCode());
+        textMap.put("page", totalPage+"");
+        textMap.put("sampleName", reportRecordEntity.getSampleName());
+        textMap.put("dept", entrustAddVo.getEntrustCompany());
+        textMap.put("part", entrustAddVo.getProjectPart());
+        textMap.put("checkType", entrustAddVo.getCheckPurpose());
+        replaceWord(topDoc,"top.docx",textMap);
+        //报告头部合并顺序1
+        map.put(1,topDoc);
+        //将报告合并成一个完整的word
+        XWPFDocument document = AsposeUtil.mergeDoc(map);
+        //上传合并完成的doc到服务器
+        MultipartFile multipartFile = AsposeUtil.xwpfDocumentToCommonsMultipartFile(document, reportRecordEntity.getReportCode() + ".pdf");
+        //MultipartFile file = (MultipartFile) document;
+        String url = MinIoUtil.upload("report-download", multipartFile, reportRecordEntity.getReportCode() + ".docx");
+        StringBuilder stringBuilder = new StringBuilder();
+        for (ConclusionEntity entity:list) {
+            stringBuilder.append(entity.getUrl());
+            stringBuilder.append("&&");
+        }
+        updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
+        return url;
+    }
 
+    @SneakyThrows
+    @Override
+    public String submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id) {
+        //2代表报告头2页
+        int totalPage = 2;
+        Map<Integer,XWPFDocument> map = new HashedMap();
+        ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
+        int index = 1;
+        for (ConclusionEntity conclusionEntity:list) {
+            String[] split = conclusionEntity.getUrl().split("\\?");
+            String[] strings = split[0].split("\\/");
+            String bluckName = strings[3];
+            String fileName = strings[4];
+            XWPFDocument doc = null;
+            client.statObject(bluckName, fileName);
+            InputStream object = client.getObject(bluckName, fileName);
+            doc = new XWPFDocument(object);
+            //写入数据
+            List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
+            if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
+                int size = doc.getTables().size();
+                //处理表格
+                Iterator<XWPFTable> it = doc.getTablesIterator();
+                //表格索引
+                int i = 1;
+                //获取表格信息
+                while (it.hasNext()) {
+                    totalPage++;
+                    index++;
+                    XWPFTable table = it.next();
+                    List<XWPFTableRow> rows = table.getRows();
+                    //存放表头信息
+                    EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
+                    if (i == 1) {
+                        rows.get(4).getCell(1).removeParagraph(0);
+                        rows.get(4).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
+                        rows.get(4).getCell(3).removeParagraph(0);
+                        rows.get(4).getCell(3).setText(entrustHistoryDetail.getProjectName());
+
+                        //样品信息
+                        SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
+                        rows.get(6).getCell(1).removeParagraph(0);
+                        rows.get(6).getCell(1).setText("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
+                                + "样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
+                                + "样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
+                                + "样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
+                                + "收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                        //检测依据
+                        String checkBasis = getCheckBasis(id);
+                        rows.get(7).getCell(1).removeParagraph(0);
+                        rows.get(7).getCell(1).setText(checkBasis.equals("") ? "——" : checkBasis);
+                        //判定依据
+                        String judgeBasis = getJudgeBasis(id);
+                        rows.get(7).getCell(3).removeParagraph(0);
+                        rows.get(7).getCell(3).setText(judgeBasis.equals("") ? "——" : judgeBasis);
+                        //检测日期
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
+                        rows.get(8).getCell(1).removeParagraph(0);
+                        rows.get(8).getCell(1).setText(sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
+                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime())
+                        );
+                        //主要仪器
+                        String equipment = getEquipment(id);
+                        rows.get(9).getCell(1).removeParagraph(0);
+                        rows.get(9).getCell(1).setText(equipment.equals("") ? "——" : equipment);
+                        //委托编号
+                        rows.get(10).getCell(1).removeParagraph(0);
+                        rows.get(10).getCell(1).setText(entrustHistoryDetail.getEntrustmentNo() + "");
+                        //检测类别
+                        rows.get(10).getCell(3).removeParagraph(0);
+                        rows.get(10).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
+                        //批号
+                        rows.get(11).getCell(1).removeParagraph(0);
+                        rows.get(11).getCell(1).setText(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
+                        //生产厂家
+                        rows.get(11).getCell(3).removeParagraph(0);
+                        rows.get(11).getCell(3).setText(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+                        //规格等级
+                        rows.get(12).getCell(1).removeParagraph(0);
+                        rows.get(12).getCell(1).setText(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
+                        //代表数量
+                        rows.get(12).getCell(3).removeParagraph(0);
+                        rows.get(12).getCell(3).setText(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
+                    }
+                    //过滤每个报告模板的检测项
+                    List<ReportRecordDetailEntity> entities = Lists.newArrayList();
+                    List<Long> longList = itemDao.getItemsByTemplateUrl(conclusionEntity.getUrl());
+                    for (ReportRecordDetailEntity entity:checkItemList) {
+                        for (Long itemId:longList) {
+                            if (entity.getCheckItemId().equals(itemId)){
+                                entities.add(entity);
+                            }
+                        }
+                    }
+                    //存放检测数据checkItemList为该报告模板所属的检测项
+                    for (ReportRecordDetailEntity item : entities) {
+                        int last = testProductDao.isLast(item.getCheckItemId().intValue());
+                        if (last == 0) {
+                            int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
+                            int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
+                            int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
+                            if (i == page) {
+                                rows.get(row).getCell(column + 1).removeParagraph(0);
+                                rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
+                                rows.get(row).getCell(column + 2).removeParagraph(0);
+                                rows.get(row).getCell(column + 2).setText(item.getCheckResult());
+                                rows.get(row).getCell(column + 3).removeParagraph(0);
+                                rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
+                            }
+                        }
+                    }
+                    //处理附加声明和检测结论
+                    if (i==size){
+                        XWPFTable xwpfTable = doc.getTables().get(size - 1);
+                        int size1 = xwpfTable.getRows().size();
+                        rows.get(size1-3).getCell(0).removeParagraph(0);
+                        rows.get(size1-3).getCell(0).setText(conclusionEntity.getConclusion());
+                        rows.get(size1-2).getCell(0).removeParagraph(0);
+                        rows.get(size1-2).getCell(0).setText(conclusionEntity.getAdditional());
+                        //TODO 获取到签名信息插入指定位置
+                        ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(id);//审核人、签发人
+                        List<String> stringList = taskMapper.getInspectorByEntrustId(id);
+                        List<Long> list1 = Lists.newArrayList();//检测人
+                        for (String s:stringList) {
+                            String[] split1 = s.split("&");
+                            list1.add(Long.parseLong(split1[1]));
+                        }
+                        //获取每个人的个人签名
+                        String verUrl = sysUserDao.getSignatureById(detailByEntrustId.getVerifyerId());
+                        String issUrl = sysUserDao.getSignatureById(detailByEntrustId.getIssuerId());
+                        List<String> checkUrl = Lists.newArrayList();
+                        for (Long uId:list1) {
+                            String signature = sysUserDao.getSignatureById(uId);
+                            checkUrl.add(signature);
+                        }
+                        //插入word指定位置
+                        insertPicToDoc(doc,issUrl,size-1,size1-1,5);
+                        insertPicToDoc(doc,verUrl,size-1,size1-1,3);
+                        //插入实验人员
+                        for (String url:checkUrl) {
+                            insertPicToDoc(doc,url,size-1,size1-1,1);
+                        }
                     }
                     i++;
                 }
@@ -1836,8 +2023,19 @@ public class ReportServiceImpl implements ReportService {
      * @param picUrl
      * @param position
      */
-    public void insertPicToDoc(XWPFDocument doc, String picUrl,int position,int size) throws Exception {
-        XWPFParagraph xwpfParagraph = doc.getTables().get(position).getRows().get(size).getTableCells().get(0).addParagraph();
+    public void insertPicToDoc(XWPFDocument doc, String picUrl,int table,int size,int position) throws Exception {
+       /* InputStream inputStream = AsposeUtil.docToIo(doc);
+        Document document = new Document(inputStream);
+        File file = FileAndFolderUtil.getFile(picUrl);
+        FileInputStream fileInputStream = new FileInputStream(file);
+        document.getTables().get(table).getRows().get(size).getCells().get(position).addParagraph().appendPicture(fileInputStream);*/
+
+        XWPFTableCell tableCell = doc.getTables().get(table).getRows().get(size).getTableCells().get(position);
+        File file = FileAndFolderUtil.getFile("http://121.89.242.0:9000/personal-signature/1647502446459100.png");
+        FileInputStream fileInputStream = new FileInputStream(file);
+        tableCell.addParagraph().createRun().addPicture(fileInputStream,XWPFDocument.PICTURE_TYPE_PNG,"bus.png,", Units.toEMU(20), Units.toEMU(20));
+
+        /*XWPFParagraph xwpfParagraph = doc.getTables().get(table).getRows().get(size).getTableCells().get(position).getParagraphs().get(0);
         XmlCursor cursor = xwpfParagraph.getCTP().newCursor();
         XWPFParagraph newPara = doc.insertNewParagraph(cursor);
         newPara.setAlignment(org.apache.poi.xwpf.usermodel.ParagraphAlignment.valueOf(ParagraphAlignment.CENTER));//居中
@@ -1846,6 +2044,6 @@ public class ReportServiceImpl implements ReportService {
         File file = FileAndFolderUtil.getFile(picUrl);
         FileInputStream fileInputStream = new FileInputStream(file);
         newParaRun.addPicture(fileInputStream,XWPFDocument.PICTURE_TYPE_PNG,"bus.png,", Units.toEMU(20), Units.toEMU(20));
-        doc.removeBodyElement(doc.getPosOfParagraph(xwpfParagraph));
+        doc.removeBodyElement(doc.getPosOfParagraph(xwpfParagraph));*/
     }
 }
