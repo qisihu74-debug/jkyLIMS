@@ -619,14 +619,13 @@ public class TaskServiceImpl implements TaskService {
         sampleVo.setSampleName(sampleVo.getSampleName() + ";");
         sampleVo.setSampleNumber(sampleVo.getSampleNumber() + ";");
         sampleVo.setSampleQuantity(sampleVo.getSampleQuantity() + ";");
-        // 处理自定义备注信息与备注标志格。进行合并输出
-        String outward = sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1);
-        if (outward != null && !"".equals(outward)) {
-            sampleVo.setSampleDesc(outward + "," + sampleVo.getOutwardDescribe() + ";");
-        } else {
-            sampleVo.setSampleDesc(sampleVo.getOutwardDescribe() + ";");
+        // 处理自定义备注信息与备注数组。进行合并输出
+        if(sampleVo.getOutwardDescribe()!=null&&!sampleVo.getOutwardDescribe().equals("")){
+            sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1)+"\t"+sampleVo.getOutwardDescribe()+";");
         }
-        sampleVo.setSampleDesc(sampleVo.getSampleDesc() + ";");
+        else {
+            sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1)+";");
+        }
         sampleVo.setSampleTime(sampleVo.getSampleTime() + ";");
         //获取检测依据
         log.debug("执行上一行完成---------------");
