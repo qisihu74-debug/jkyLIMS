@@ -6,6 +6,7 @@ import com.lims.manage.erp.entity.SysUserTreeEntity;
 import com.lims.manage.erp.vo.UserInfoParamVo;
 import com.lims.manage.erp.vo.UserInfoVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
@@ -79,9 +80,6 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
     @Select("SELECT username FROM sys_user WHERE username = #{username} and user_id = #{userId} LIMIT 1")
     SysUserEntity getOldData(String username,Long userId);
 
-    @Select("")
-    List<SysUserEntity> getPersonList(String search);
-
     /**
      * 通过用户ID 获取使用人名称
      * @param userId
@@ -90,5 +88,11 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
     @Select("SELECT name FROM sys_user WHERE user_id = #{userId}")
     String getSysUserName(Long userId);
 
-
+    /**
+     * 查询个人签名
+     * @param userId
+     * @return
+     */
+    @Select("select signature_url from sys_user where user_id = #{userId}")
+    String getSignatureById(@Param("userId") Long userId);
 }
