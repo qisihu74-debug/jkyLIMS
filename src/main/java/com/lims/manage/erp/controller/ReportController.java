@@ -778,7 +778,7 @@ public class ReportController {
      * @param entrustId
      * @return
      */
-    @GetMapping("getResut")
+    @GetMapping("getResult")
     public Result getResut(Long entrustId){
         if (entrustId == null){
             return ResultUtil.error("缺少必要的参数");

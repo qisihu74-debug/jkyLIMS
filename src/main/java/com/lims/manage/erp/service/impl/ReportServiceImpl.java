@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
+import com.aspose.words.ParagraphAlignment;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -26,12 +27,14 @@ import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TeamMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.mapper.TestReportQualifcationDao;
 import com.lims.manage.erp.service.ReportService;
+import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
@@ -54,11 +57,14 @@ import lombok.SneakyThrows;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.usermodel.Range;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.apache.xmlbeans.XmlCursor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +77,9 @@ import javax.annotation.Resource;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -119,6 +127,8 @@ public class ReportServiceImpl implements ReportService {
     private TestProductItemDao itemDao;
     @Autowired
     private SampleEntityMapper sampleEntityMapper;
+    @Autowired
+    private SysUserDao sysUserDao;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -1647,6 +1657,25 @@ public class ReportServiceImpl implements ReportService {
                         rows.get(size1-3).getCell(0).setText(conclusionEntity.getConclusion());
                         rows.get(size1-2).getCell(0).removeParagraph(0);
                         rows.get(size1-2).getCell(0).setText(conclusionEntity.getAdditional());
+                        //TODO 获取到签名信息插入指定位置
+                        /*ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(id);//审核人、签发人
+                        List<String> stringList = taskMapper.getInspectorByEntrustId(id);
+                        List<Long> list1 = Lists.newArrayList();//检测人
+                        for (String s:stringList) {
+                            String[] split1 = s.split("&");
+                            list1.add(Long.parseLong(split1[1]));
+                        }
+                        //获取每个人的个人签名
+                        String verUrl = sysUserDao.getSignatureById(detailByEntrustId.getVerifyerId());
+                        String issUrl = sysUserDao.getSignatureById(detailByEntrustId.getIssuerId());
+                        List<String> checkUrl = Lists.newArrayList();
+                        for (Long uId:list1) {
+                            String signature = sysUserDao.getSignatureById(uId);
+                            checkUrl.add(signature);
+                        }
+                        //插入word指定位置
+                        insertPicToDoc(doc,verUrl,size1-1,size-1);*/
+
                     }
                     i++;
                 }
@@ -1725,18 +1754,25 @@ public class ReportServiceImpl implements ReportService {
             for (JudgmentBasisVo entity:sampleCheckItem) {
                 //过滤每个报告模板的检测项
                 List<Long> longList = itemDao.getItemsByTemplateUrl(url);
-                for (Long itemId:longList) {
-                    if (entity.getCheckItemId().longValue() == itemId.longValue()){
-                        String name = recordDetailEntityMapper.getIdByItemId(entity.getCheckItemId(),entrustId);
-                        if (StringUtils.isNotEmpty(name)){
-                            stringBuilder.append(name);
-                            stringBuilder.append("，");
+                if (!CollectionUtils.isEmpty(longList)){
+                    for (Long itemId:longList) {
+                        if (entity.getCheckItemId().longValue() == itemId.longValue()){
+                            String name = recordDetailEntityMapper.getIdByItemId(entity.getCheckItemId(),entrustId);
+                            if (StringUtils.isNotEmpty(name)){
+                                stringBuilder.append(name);
+                                stringBuilder.append("，");
+                            }
                         }
                     }
                 }
             }
         }
-        return stringBuilder.toString().substring(0,stringBuilder.length()-1);
+        if (stringBuilder.length()>0){
+            return stringBuilder.toString().substring(0,stringBuilder.length()-1);
+        }else {
+            return "";
+        }
+
     }
 
 
@@ -1794,4 +1830,22 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
+    /**
+     * 指定表格位置插入图片签名
+     * @param doc
+     * @param picUrl
+     * @param position
+     */
+    public void insertPicToDoc(XWPFDocument doc, String picUrl,int position,int size) throws Exception {
+        XWPFParagraph xwpfParagraph = doc.getTables().get(position).getRows().get(size).getTableCells().get(0).addParagraph();
+        XmlCursor cursor = xwpfParagraph.getCTP().newCursor();
+        XWPFParagraph newPara = doc.insertNewParagraph(cursor);
+        newPara.setAlignment(org.apache.poi.xwpf.usermodel.ParagraphAlignment.valueOf(ParagraphAlignment.CENTER));//居中
+        XWPFRun newParaRun = newPara.createRun();
+        //将图片转为流
+        File file = FileAndFolderUtil.getFile(picUrl);
+        FileInputStream fileInputStream = new FileInputStream(file);
+        newParaRun.addPicture(fileInputStream,XWPFDocument.PICTURE_TYPE_PNG,"bus.png,", Units.toEMU(20), Units.toEMU(20));
+        doc.removeBodyElement(doc.getPosOfParagraph(xwpfParagraph));
+    }
 }

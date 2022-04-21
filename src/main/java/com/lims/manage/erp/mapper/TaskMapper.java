@@ -327,4 +327,7 @@ public interface TaskMapper extends BaseMapper {
 
     @Select("select state from test_task where entrustment_id = #{entrustId}")
     List<String> getStateByEntrustId(Long entrustId);
+
+    @Select("select inspector from test_task where entrustment_id = #{entrustId}")
+    List<String> getInspectorByEntrustId(@Param("entrustId") Long id);
 }
