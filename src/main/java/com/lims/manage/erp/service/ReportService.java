@@ -338,4 +338,11 @@ public interface ReportService {
      * @return
      */
     List<ConclusionEntity> getResut(Long entrustId);
+
+    /**
+     * 根据委托单id获取报告检测人、审核人、批准人
+     * @param entrustId
+     * @return
+     */
+    ReportRecordEntity getUserInfo(Long entrustId);
 }

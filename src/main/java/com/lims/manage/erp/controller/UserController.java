@@ -1,8 +1,5 @@
 package com.lims.manage.erp.controller;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.segments.MergeSegments;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -16,18 +13,25 @@ import com.lims.manage.erp.service.DingUserService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.SysUserRoleService;
 import com.lims.manage.erp.service.SysUserService;
-import com.lims.manage.erp.util.*;
+import com.lims.manage.erp.util.AccountValidatorUtil;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.SHA256Util;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.RegisterUserInfoVo;
 import com.lims.manage.erp.vo.SysUserPasswordVo;
 import com.lims.manage.erp.vo.UserInfoParamVo;
 import com.lims.manage.erp.vo.UserInfoVo;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -35,7 +39,6 @@ import java.awt.*;
 import java.io.File;
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -440,12 +443,14 @@ public class UserController {
      * @return
      */
     @SneakyThrows
-    @GetMapping("uploadSignature")
+    @RequestMapping("uploadSignature")
     public Result uploadSignature(MultipartFile file){
+        File newFile = new File(file.getOriginalFilename());
         if (file == null){
             return ResultUtil.error("请上传签名图片");
         }
-        Image img = ImageIO.read((File) file); //imgFile为图片文件
+        FileUtils.copyInputStreamToFile(file.getInputStream(), newFile);
+        Image img = ImageIO.read(newFile); //imgFile为图片文件
         if(img == null){
             return ResultUtil.error("请上传图片");
         }

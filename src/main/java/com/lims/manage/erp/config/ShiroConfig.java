@@ -67,6 +67,7 @@ public class ShiroConfig {
         // 注意过滤器配置顺序不能颠倒
         filterChainDefinitionMap.put("/userLogin/**", "anon");
         filterChainDefinitionMap.put("/qiyuesuo/**", "anon");
+        filterChainDefinitionMap.put("/report/previewDownLoad", "anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");

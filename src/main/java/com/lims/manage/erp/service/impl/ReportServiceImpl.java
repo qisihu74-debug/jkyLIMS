@@ -1708,6 +1708,11 @@ public class ReportServiceImpl implements ReportService {
         return list;
     }
 
+    @Override
+    public ReportRecordEntity getUserInfo(Long entrustId) {
+        return reportMapper.getDetailByEntrustId(entrustId);
+    }
+
     /**
      * 处理检测项描述
      * @param sampleCheckItem

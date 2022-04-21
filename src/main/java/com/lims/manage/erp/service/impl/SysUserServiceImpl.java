@@ -306,7 +306,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     public boolean uploadSignature(MultipartFile file) {
         String url = "";
         String originalFilename = file.getOriginalFilename();
-        String[] strings = originalFilename.split(".");
+        String[] strings = originalFilename.split("\\.");
         Long userId = ShiroUtils.getUserInfo().getUserId();
         try {
             url = MinIoUtil.upload("personal-signature",file,userId+"."+strings[1]);
