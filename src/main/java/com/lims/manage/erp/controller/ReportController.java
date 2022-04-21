@@ -791,7 +791,12 @@ public class ReportController {
         if (entrustId == null){
             return ResultUtil.error("缺少必要的参数");
         }
-        return ResultUtil.success("查询配合比检测信息成功！",reportService.getMixSampleInfo(entrustId));
+        TestSampleMixInfoEntity mixSampleInfo = reportService.getMixSampleInfo(entrustId);
+        if(mixSampleInfo == null){
+            return ResultUtil.error("未找到相关配合比检测信息！");
+        }else{
+            return ResultUtil.success("查询配合比检测信息成功！",mixSampleInfo);
+        }
     }
 
 }
