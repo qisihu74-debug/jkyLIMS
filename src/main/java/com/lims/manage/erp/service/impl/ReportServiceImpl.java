@@ -17,12 +17,9 @@ import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
-import com.lims.manage.erp.config.PoiConfig;
-import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.mapper.ReportMapper;
@@ -129,8 +126,6 @@ public class ReportServiceImpl implements ReportService {
     private SampleEntityMapper sampleEntityMapper;
     @Autowired
     private SysUserDao sysUserDao;
-    @Autowired
-    private TestSampleMixInfoEntityMapper testSampleMixInfoEntityMapper;
     @Autowired
     private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
 
@@ -1004,7 +999,7 @@ public class ReportServiceImpl implements ReportService {
         //更新配合比信息
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(mixInfo)){
             TestSampleMixInfoEntity entity = JSON.parseObject(mixInfo,TestSampleMixInfoEntity.class);
-            testSampleMixInfoEntityMapper.updateByEntrustId(reportCode,entity);
+            mixInfoEntityMapper.updateByEntrustId(reportCode,entity);
         }
         return flag;
     }
