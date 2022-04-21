@@ -55,4 +55,16 @@ public class TestSampleMixInfoEntity {
         this.designSlump = samples.getDesignSlump();
         this.mixingWay = samples.getMixingWay();
     }
+
+    public TestSampleMixInfoEntity(TestSampleEntity samples) {
+        this.sampleId = samples.getId();
+        this.designStrength = samples.getDesignStrength();
+        this.intensityConfiguration = samples.getIntensityConfiguration();
+        this.antifreezeLevel = samples.getAntifreezeLevel();
+        this.waterBinderRatio = samples.getWaterBinderRatio();
+        this.unitWaterUse = samples.getUnitWaterUse();
+        this.sandRatio = samples.getSandRatio();
+        this.designSlump = samples.getDesignSlump();
+        this.mixingWay = samples.getMixingWay();
+    }
 }

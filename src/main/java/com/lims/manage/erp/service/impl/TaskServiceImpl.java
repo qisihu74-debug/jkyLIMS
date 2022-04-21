@@ -43,6 +43,8 @@ public class TaskServiceImpl implements TaskService {
     private EntrustEntityMapper entrustEntityMapper;
     @Autowired
     private TeamMapper teamMapper;
+    @Autowired
+    private TestSampleEntityMapper testSampleEntityMapper;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -127,10 +129,10 @@ public class TaskServiceImpl implements TaskService {
                         }
                     }
                 }
+                //设置原材样品信息
+                taskDetailInfoVo.setNodeSample(testSampleEntityMapper.selectByPid(sampleDetailVo.getId()));
             }
         }
-
-
         return taskDetailInfoVo;
     }
 

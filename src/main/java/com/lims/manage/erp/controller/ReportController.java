@@ -31,6 +31,7 @@ import io.minio.MinioClient;
 import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.xmlpull.v1.XmlPullParserException;
@@ -52,6 +54,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -570,8 +573,17 @@ public class ReportController {
      * @param reqBean
      * @return
      */
-    @PostMapping(value = "previewDownLoad",produces = MediaType.APPLICATION_PDF_VALUE)
-    public String previewDownLoad(@RequestBody ReqBean reqBean,HttpServletResponse response) {
+    @GetMapping("previewDownLoad")
+    public String previewDownLoad(@RequestParam("json") String json) {
+        String decode = "";
+        try {
+            decode = URLDecoder.decode(json, "UTF-8");
+        }catch (Exception e){
+
+        }
+        String unescapeJava = StringEscapeUtils.unescapeJava(decode);
+        String substring = unescapeJava.substring(1, unescapeJava.length() - 1);
+        ReqBean reqBean = JSON.parseObject(substring,ReqBean.class);
         if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
             return null;
         }
@@ -597,6 +609,54 @@ public class ReportController {
         }
         return url;
     }
+
+    /**
+     *
+     * @param json
+     * @param response
+     * @return
+     */
+    /*@RequestMapping("previewDownLoad")
+    @ResponseBody
+    public String previewDownLoad(@RequestBody ReqBean reqBean,HttpServletResponse response) {
+        //ReqBean reqBean = JSON.parseObject(json,ReqBean.class);
+        if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
+            return null;
+        }
+        //从文件服务器拉取文件
+        MinioClient client = MinIoUtil.minioClient;
+        String url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+        //预览word转pdf
+        String[] split = url.split("\\?");
+        String[] strings = split[0].split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        XWPFDocument doc = null;
+        try {
+            client.statObject(bluckName, fileName);
+            InputStream object = client.getObject(bluckName, fileName);
+            doc = new XWPFDocument(object);
+            //相应pdf
+            ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
+            InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+            response.reset();
+            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+            response.setContentType("application/pdf");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName+".pdf");
+            OutputStream outputStream = response.getOutputStream();
+            int len = 0;
+            byte[] b = new byte[1024];
+            while ((len = inputStream.read(b)) != -1){
+                outputStream.write(b,0,len);
+            }
+            outputStream.flush();
+            outputStream.close();
+        }catch (Exception e){
+            logger.error("预览合并后的报告异常:{}",e);
+        }
+        return url;
+    }*/
 
     @GetMapping("download")
     public String downReport(Long id) {

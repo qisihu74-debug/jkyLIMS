@@ -1,5 +1,6 @@
 package com.lims.manage.erp.vo;
 
+import com.lims.manage.erp.entity.TestSampleEntity;
 import lombok.Data;
 
 import java.util.List;
@@ -46,6 +47,10 @@ public class TaskDetailInfoVo {
      *  sealTypeArray
      */
     private String[] sealTypeArray;
+    /**
+     * 原材样品信息
+     */
+    private List<TestSampleEntity> nodeSample;
 
 
     public TaskDetailInfoVo(Long taskId) {

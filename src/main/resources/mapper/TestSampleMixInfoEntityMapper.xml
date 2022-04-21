@@ -173,4 +173,18 @@
             mixing_way              = #{mixingWay,jdbcType=VARCHAR}
         where id = #{id,jdbcType=INTEGER}
     </update>
+    <update id="updateBySampleId" parameterType="com.lims.manage.erp.entity.TestSampleMixInfoEntity">
+        update test_sample_mix_info
+        set
+            entrustment_id          = #{entrustmentId,jdbcType=INTEGER},
+            design_strength         = #{designStrength,jdbcType=VARCHAR},
+            intensity_configuration = #{intensityConfiguration,jdbcType=VARCHAR},
+            antifreeze_level        = #{antifreezeLevel,jdbcType=VARCHAR},
+            water_binder_ratio      = #{waterBinderRatio,jdbcType=VARCHAR},
+            unit_water_use          = #{unitWaterUse,jdbcType=VARCHAR},
+            sand_ratio              = #{sandRatio,jdbcType=VARCHAR},
+            design_slump            = #{designSlump,jdbcType=VARCHAR},
+            mixing_way              = #{mixingWay,jdbcType=VARCHAR}
+        where sample_id = #{sampleId,jdbcType=INTEGER}
+    </update>
 </mapper>
