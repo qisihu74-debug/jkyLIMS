@@ -14,6 +14,7 @@ public class ReportListVo {
     private String countPrice;
     private String requestDate;
     private String reportUrl;
+    private String entrustTestType;
     /**
      * 报告生成时间
      */
