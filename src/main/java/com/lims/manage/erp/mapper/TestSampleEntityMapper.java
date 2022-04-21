@@ -66,4 +66,6 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
      * @return
      */
     Integer getMaxId();
+
+    List<Integer> getAllNodeIds(Integer sampleId);
 }

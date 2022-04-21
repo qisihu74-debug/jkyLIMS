@@ -366,7 +366,7 @@ public class SampleController {
             i = testSampleEntityService.updateSample(sampleEntity);
         }
         if (i > 0) {
-            return ResultUtil.success("样品信息修改成功！", i);
+            return ResultUtil.success("样品信息修改成功！");
         } else {
             return ResultUtil.error("样品信息修改失败！");
         }

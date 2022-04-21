@@ -21,4 +21,6 @@ public interface TestSampleMixInfoEntityMapper {
 
     int updateByPrimaryKey(TestSampleMixInfoEntity record);
 
+    int updateBySampleId(TestSampleMixInfoEntity record);
+
 }
