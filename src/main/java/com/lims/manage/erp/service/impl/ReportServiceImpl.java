@@ -16,6 +16,7 @@ import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
@@ -33,6 +34,7 @@ import com.lims.manage.erp.mapper.TeamMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.mapper.TestReportQualifcationDao;
+import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
@@ -92,6 +94,8 @@ import java.util.Set;
 @Service
 public class ReportServiceImpl implements ReportService {
     Logger logger = LoggerFactory.getLogger(ReportServiceImpl.class);
+    @Autowired
+    private TestSampleEntityMapper testSampleEntityMapper;
     @Autowired
     private ReportMapper reportMapper;
     @Autowired
@@ -1814,9 +1818,29 @@ public class ReportServiceImpl implements ReportService {
                         rows.get(14).getCell(1).setText(entity.getDesignSlump());
                         rows.get(14).getCell(3).removeParagraph(0);
                         rows.get(14).getCell(3).setText(entity.getMixingWay());
-                        //TODO 填充配合比下原材样品信息
+                        //填充配合比下原材样品信息
+                        List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(entrustHistoryDetail.getSamples().get(0).getId());
+                        for (int j=0;j<testSampleEntities.size();j++) {
+                            if (j<=8){
+                                rows.get(j+16).getCell(0).removeParagraph(0);
+                                rows.get(j+16).getCell(0).setText(testSampleEntities.get(j).getSampleName());
+                                rows.get(j+16).getCell(1).removeParagraph(0);
+                                rows.get(j+16).getCell(1).setText(testSampleEntities.get(j).getSpecs());
+                                rows.get(j+16).getCell(2).removeParagraph(0);
+                                rows.get(j+16).getCell(2).setText(testSampleEntities.get(j).getManufacturer());
+                                rows.get(j+16).getCell(3).removeParagraph(0);
+                                rows.get(j+16).getCell(3).setText(testSampleEntities.get(j).getBatchNumber());
+                                rows.get(j+16).getCell(4).removeParagraph(0);
+                                rows.get(j+16).getCell(4).setText(testSampleEntities.get(j).getGeneration());
+                                rows.get(j+16).getCell(5).removeParagraph(0);
+                                rows.get(j+16).getCell(5).setText(testSampleEntities.get(j).getOutward());
+                                rows.get(j+16).getCell(6).removeParagraph(0);
+                                rows.get(j+16).getCell(6).setText(testSampleEntities.get(j).getSampleCode());
+                            }else {
+                                //新增表格填充样品信息
 
-
+                            }
+                        }
                     }
                     if (i==size){
                         //过滤每个报告模板的检测项

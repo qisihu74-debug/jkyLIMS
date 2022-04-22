@@ -861,4 +861,50 @@ public class TaskServiceImpl implements TaskService {
     public int updatePersonInfo(PersonInfoVo vo) {
         return taskMapper.updatePersonInfo(vo);
     }
+
+    /**
+     * 扩展模板样品行列
+     * @param table
+     * @param rows
+     * @param sampleDetailList
+     * @param modelSampleRows
+     * @param columns
+     */
+    public void  extendTable(XWPFTable table,List<XWPFTableRow> rows,List<SampleDetailVo> sampleDetailList,
+                             int modelSampleRows,int columns){
+        //获取表格对应的行
+        rows = table.getRows();
+        // 判断表格行数 >5 sampleDetailList.size()
+        // 补充增加表格数量。
+        if (sampleDetailList.size() > modelSampleRows) {
+            // 3.25 测试表格插入数据
+            int addRows = sampleDetailList.size() - modelSampleRows;
+            // 表格插入
+            XWPFDocument doc1 = new XWPFDocument();
+            XWPFTable newTable = doc1.createTable(addRows, columns);  //2行7格
+            // 创建表格后直接进行存放 后续多余数据
+            List<XWPFTableRow> dataTable = newTable.getRows();
+            int j = 0;
+            for (int i = modelSampleRows; i < sampleDetailList.size(); i++) {
+                SampleDetailVo sampleDetailVo = sampleDetailList.get(i);
+                // 补充表格数据 样品名称
+                dataTable.get(j).getTableCells().get(0).setText(sampleDetailVo.getSampleName());
+                // 规格/等级
+                dataTable.get(j).getTableCells().get(1).setText(sampleDetailVo.getSpecs());
+                // 批号/编号
+                dataTable.get(j).getTableCells().get(2).setText(sampleDetailVo.getBatchNumber());
+                // 样品数量
+                dataTable.get(j).getTableCells().get(3).setText(sampleDetailVo.getGeneration());
+                // 样品产地
+                dataTable.get(j).getTableCells().get(4).setText(sampleDetailVo.getSampleOrigin());
+                //样品编号
+                dataTable.get(j).getTableCells().get(5).setText(sampleDetailVo.getSampleCode());
+                // 备注
+                dataTable.get(j).getTableCells().get(6).setText(sampleDetailVo.getRemark());
+                table.addRow(dataTable.get(j));
+                j++;
+            }
+            rows = table.getRows();
+        }
+    }
 }
