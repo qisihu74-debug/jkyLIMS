@@ -1576,6 +1576,8 @@ public class ReportServiceImpl implements ReportService {
                     //存放表头信息
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 1) {
+                        rows.get(3).getCell(3).removeParagraph(0);
+                        rows.get(3).getCell(3).setText(reportRecordEntity.getReportCode());
                         rows.get(4).getCell(1).removeParagraph(0);
                         rows.get(4).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
                         rows.get(4).getCell(3).removeParagraph(0);
@@ -1755,6 +1757,8 @@ public class ReportServiceImpl implements ReportService {
                     //存放表头信息
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 1) {
+                        rows.get(3).getCell(3).removeParagraph(0);
+                        rows.get(3).getCell(3).setText(reportRecordEntity.getReportCode());
                         rows.get(4).getCell(1).removeParagraph(0);
                         rows.get(4).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
                         rows.get(4).getCell(3).removeParagraph(0);
@@ -1792,48 +1796,53 @@ public class ReportServiceImpl implements ReportService {
                         //检测类别
                         rows.get(10).getCell(3).removeParagraph(0);
                         rows.get(10).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
-                        //批号
+                        //设计参数
+                        TestSampleMixInfoEntity entity = mixInfoEntityMapper.selectByEntrustId(id);
                         rows.get(11).getCell(1).removeParagraph(0);
-                        rows.get(11).getCell(1).setText(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
-                        //生产厂家
+                        rows.get(11).getCell(1).setText(entity.getDesignStrength());
                         rows.get(11).getCell(3).removeParagraph(0);
-                        rows.get(11).getCell(3).setText(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
-                        //规格等级
+                        rows.get(11).getCell(3).setText(entity.getIntensityConfiguration());
                         rows.get(12).getCell(1).removeParagraph(0);
-                        rows.get(12).getCell(1).setText(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
-                        //代表数量
+                        rows.get(12).getCell(1).setText(entity.getAntifreezeLevel());
                         rows.get(12).getCell(3).removeParagraph(0);
-                        rows.get(12).getCell(3).setText(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
+                        rows.get(12).getCell(3).setText(entity.getWaterBinderRatio());
+                        rows.get(13).getCell(1).removeParagraph(0);
+                        rows.get(13).getCell(1).setText(entity.getUnitWaterUse());
+                        rows.get(13).getCell(3).removeParagraph(0);
+                        rows.get(13).getCell(3).setText(entity.getSandRatio());
+                        rows.get(14).getCell(1).removeParagraph(0);
+                        rows.get(14).getCell(1).setText(entity.getDesignSlump());
+                        rows.get(14).getCell(3).removeParagraph(0);
+                        rows.get(14).getCell(3).setText(entity.getMixingWay());
+                        //TODO 填充配合比下原材样品信息
+
+
                     }
-                    //过滤每个报告模板的检测项
-                    List<ReportRecordDetailEntity> entities = Lists.newArrayList();
-                    List<Long> longList = itemDao.getItemsByTemplateUrl(conclusionEntity.getUrl());
-                    for (ReportRecordDetailEntity entity:checkItemList) {
-                        for (Long itemId:longList) {
-                            if (entity.getCheckItemId().equals(itemId)){
-                                entities.add(entity);
-                            }
-                        }
-                    }
-                    //存放检测数据checkItemList为该报告模板所属的检测项
-                    for (ReportRecordDetailEntity item : entities) {
-                        int last = testProductDao.isLast(item.getCheckItemId().intValue());
-                        if (last == 0) {
-                            int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
-                            int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
-                            int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
-                            if (i == page) {
-                                rows.get(row).getCell(column + 1).removeParagraph(0);
-                                rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
-                                rows.get(row).getCell(column + 2).removeParagraph(0);
-                                rows.get(row).getCell(column + 2).setText(item.getCheckResult());
-                                rows.get(row).getCell(column + 3).removeParagraph(0);
-                                rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
-                            }
-                        }
-                    }
-                    //处理附加声明和检测结论
                     if (i==size){
+                        //过滤每个报告模板的检测项
+                        List<ReportRecordDetailEntity> entities = Lists.newArrayList();
+                        List<Long> longList = itemDao.getItemsByTemplateUrl(conclusionEntity.getUrl());
+                        for (ReportRecordDetailEntity entity:checkItemList) {
+                            for (Long itemId:longList) {
+                                if (entity.getCheckItemId().equals(itemId)){
+                                    entities.add(entity);
+                                }
+                            }
+                        }
+                        //存放检测数据checkItemList为该报告模板所属的检测项
+                        for (ReportRecordDetailEntity item : entities) {
+                            int last = testProductDao.isLast(item.getCheckItemId().intValue());
+                            if (last == 0) {
+                                int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
+                                int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
+                                int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
+                                if (i == page) {
+                                    rows.get(row).getCell(column + 1).removeParagraph(0);
+                                    rows.get(row).getCell(column + 1).setText(item.getCheckResult());
+                                }
+                            }
+                        }
+                        //处理附加声明和检测结论
                         XWPFTable xwpfTable = doc.getTables().get(size - 1);
                         int size1 = xwpfTable.getRows().size();
                         rows.get(size1-3).getCell(0).removeParagraph(0);
