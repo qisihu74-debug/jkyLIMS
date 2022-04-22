@@ -1072,6 +1072,11 @@ public class EntrustServiceImpl implements EntrustService {
         return result;
     }
 
+    /**
+     * 查询委托单详情。
+     * @param entrustmentId
+     * @return
+     */
     @Override
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info
@@ -1102,6 +1107,8 @@ public class EntrustServiceImpl implements EntrustService {
     {
         // 通过委托单id 获取样品集合 并遍历样品 分别处理：1、样品原材 2、配合比。
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
+        // 返回样品集合信息。
+        List<SampleEntity> ReturnsampleCollection = new ArrayList<>();
         //暂存配合比下的的样品信息
         List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 样品信息 进行补充 检测依据集合，检测项集合
