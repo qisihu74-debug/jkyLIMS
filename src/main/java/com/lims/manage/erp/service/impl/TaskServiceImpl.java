@@ -864,11 +864,11 @@ public class TaskServiceImpl implements TaskService {
 
     /**
      * 扩展模板样品行列
-     * @param table
-     * @param rows
-     * @param sampleDetailList
-     * @param modelSampleRows
-     * @param columns
+     * @param table 原始表格
+     * @param rows 原始表格行数
+     * @param sampleDetailList 待处理数据
+     * @param modelSampleRows 需要新增行
+     * @param columns 列数
      */
     public void  extendTable(XWPFTable table,List<XWPFTableRow> rows,List<SampleDetailVo> sampleDetailList,
                              int modelSampleRows,int columns){
