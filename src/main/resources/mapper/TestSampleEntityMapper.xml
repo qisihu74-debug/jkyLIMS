@@ -99,7 +99,7 @@
     <select id="selectByPid" resultType="com.lims.manage.erp.entity.TestSampleEntity"
             parameterType="java.lang.Integer">
         select
-        t1.id, t1.company_id, t1.sample_name, t1.sample_code, t1.specs,
+        t1.id, t1.company_id, t1.alias_name sample_name, t1.sample_code, t1.specs,
         t1.batch_number, t1.manufacturer, t1.sample_origin,t1.outward,
         t1.save_place, t1.admin, t1.sample_groups, t1.quantity_per_group,
         t1.inspector, t1.received_date,t1.sample_requirement, t1.generation,

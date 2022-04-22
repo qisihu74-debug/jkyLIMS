@@ -957,7 +957,7 @@ public class ReportServiceImpl implements ReportService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean uploadReport(String reportCode, MultipartFile file, String verifyer,
                                 String issuer, Long verifyerId, Long issuerId, String code,
-                                String conclusion,String additional,String mixInfo) {
+                                String conclusion,String additional,String mixInfo,String type) {
         Boolean flag = false;
         String url = "";
         if (file == null){
@@ -975,7 +975,12 @@ public class ReportServiceImpl implements ReportService {
                     conclusionEntity.setAdditional(additionals.get(i));
                     list.add(conclusionEntity);
                 }
-                url = this.submitDownLoad(client, list, Long.parseLong(reportCode));
+                if ("配合比".equals(type)){
+                    TestSampleMixInfoEntity mixInfoEntity = JSON.parseObject(mixInfo,TestSampleMixInfoEntity.class);
+                    url = this.submitDownLoadMix(client, list, Long.parseLong(reportCode),mixInfoEntity);
+                }else {
+                    url = this.submitDownLoad(client, list, Long.parseLong(reportCode));
+                }
                 flag = true;
             }catch (Exception e){
                 logger.error("提交报告审批失败:{}",e);
@@ -1730,7 +1735,7 @@ public class ReportServiceImpl implements ReportService {
 
     @SneakyThrows
     @Override
-    public String submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id) {
+    public String submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id,TestSampleMixInfoEntity mixInfoEntity) {
         //2代表报告头2页
         int totalPage = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
@@ -1802,23 +1807,42 @@ public class ReportServiceImpl implements ReportService {
                         rows.get(10).getCell(3).removeParagraph(0);
                         rows.get(10).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
                         //设计参数
-                        TestSampleMixInfoEntity entity = mixInfoEntityMapper.selectByEntrustId(id);
-                        rows.get(11).getCell(1).removeParagraph(0);
-                        rows.get(11).getCell(1).setText(entity.getDesignStrength());
-                        rows.get(11).getCell(3).removeParagraph(0);
-                        rows.get(11).getCell(3).setText(entity.getIntensityConfiguration());
-                        rows.get(12).getCell(1).removeParagraph(0);
-                        rows.get(12).getCell(1).setText(entity.getAntifreezeLevel());
-                        rows.get(12).getCell(3).removeParagraph(0);
-                        rows.get(12).getCell(3).setText(entity.getWaterBinderRatio());
-                        rows.get(13).getCell(1).removeParagraph(0);
-                        rows.get(13).getCell(1).setText(entity.getUnitWaterUse());
-                        rows.get(13).getCell(3).removeParagraph(0);
-                        rows.get(13).getCell(3).setText(entity.getSandRatio());
-                        rows.get(14).getCell(1).removeParagraph(0);
-                        rows.get(14).getCell(1).setText(entity.getDesignSlump());
-                        rows.get(14).getCell(3).removeParagraph(0);
-                        rows.get(14).getCell(3).setText(entity.getMixingWay());
+                        if (mixInfoEntity != null){
+                            rows.get(11).getCell(1).removeParagraph(0);
+                            rows.get(11).getCell(1).setText(mixInfoEntity.getDesignStrength());
+                            rows.get(11).getCell(3).removeParagraph(0);
+                            rows.get(11).getCell(3).setText(mixInfoEntity.getIntensityConfiguration());
+                            rows.get(12).getCell(1).removeParagraph(0);
+                            rows.get(12).getCell(1).setText(mixInfoEntity.getAntifreezeLevel());
+                            rows.get(12).getCell(3).removeParagraph(0);
+                            rows.get(12).getCell(3).setText(mixInfoEntity.getWaterBinderRatio());
+                            rows.get(13).getCell(1).removeParagraph(0);
+                            rows.get(13).getCell(1).setText(mixInfoEntity.getUnitWaterUse());
+                            rows.get(13).getCell(3).removeParagraph(0);
+                            rows.get(13).getCell(3).setText(mixInfoEntity.getSandRatio());
+                            rows.get(14).getCell(1).removeParagraph(0);
+                            rows.get(14).getCell(1).setText(mixInfoEntity.getDesignSlump());
+                            rows.get(14).getCell(3).removeParagraph(0);
+                            rows.get(14).getCell(3).setText(mixInfoEntity.getMixingWay());
+                        }else {
+                            TestSampleMixInfoEntity entity = mixInfoEntityMapper.selectByEntrustId(id);
+                            rows.get(11).getCell(1).removeParagraph(0);
+                            rows.get(11).getCell(1).setText(entity.getDesignStrength());
+                            rows.get(11).getCell(3).removeParagraph(0);
+                            rows.get(11).getCell(3).setText(entity.getIntensityConfiguration());
+                            rows.get(12).getCell(1).removeParagraph(0);
+                            rows.get(12).getCell(1).setText(entity.getAntifreezeLevel());
+                            rows.get(12).getCell(3).removeParagraph(0);
+                            rows.get(12).getCell(3).setText(entity.getWaterBinderRatio());
+                            rows.get(13).getCell(1).removeParagraph(0);
+                            rows.get(13).getCell(1).setText(entity.getUnitWaterUse());
+                            rows.get(13).getCell(3).removeParagraph(0);
+                            rows.get(13).getCell(3).setText(entity.getSandRatio());
+                            rows.get(14).getCell(1).removeParagraph(0);
+                            rows.get(14).getCell(1).setText(entity.getDesignSlump());
+                            rows.get(14).getCell(3).removeParagraph(0);
+                            rows.get(14).getCell(3).setText(entity.getMixingWay());
+                        }
                         //填充配合比下原材样品信息
                         List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(entrustHistoryDetail.getSamples().get(0).getId());
                         for (int j=0;j<testSampleEntities.size();j++) {
