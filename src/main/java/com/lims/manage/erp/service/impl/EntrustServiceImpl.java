@@ -63,6 +63,7 @@ public class EntrustServiceImpl implements EntrustService {
     private TestSampleEntityMapper testSampleEntityMapper;
     @Autowired
     private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
+
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentDispositionFormData("attachment", new String(fileName.getBytes("UTF-8"), "iso-8859-1"));
@@ -292,19 +293,19 @@ public class EntrustServiceImpl implements EntrustService {
                         // 根据检测项id 遍历检测项层级和价格 获取集合
                         List<SampleItemEntity> ItemList = entityMapper.getItemRecursionList(entity.getCheckItemId());
                         //处理检测项 遍历出来的层级数据 拼接层级名。
-                        HashMap<Long,SampleItemEntity> itemMap = new HashMap<>();
+                        HashMap<Long, SampleItemEntity> itemMap = new HashMap<>();
                         if (!CollectionUtils.isEmpty(ItemList)) {
                             for (SampleItemEntity entity0 : ItemList) {
-                                if(entity0.getCheckItemId().equals(entity.getCheckItemId())){
+                                if (entity0.getCheckItemId().equals(entity.getCheckItemId())) {
                                     entity0.setCheckItemName(entity.getCheckItemName());
                                 }
-                                itemMap.put(entity0.getCheckItemId(),entity0);
+                                itemMap.put(entity0.getCheckItemId(), entity0);
                             }
                             for (SampleItemEntity entity2 : ItemList) {
                                 SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
-                                if(sampleItemEntity!=null&&entity2.getUnitPrice()==null){
+                                if (sampleItemEntity != null && entity2.getUnitPrice() == null) {
                                     // 变更检测项名为： 伪造a-伪造b
-                                    entity2.setCheckItemName(sampleItemEntity.getCheckItemName()+"-"+entity2.getCheckItemName());
+                                    entity2.setCheckItemName(sampleItemEntity.getCheckItemName() + "-" + entity2.getCheckItemName());
                                 }
                             }
                             //
@@ -337,7 +338,7 @@ public class EntrustServiceImpl implements EntrustService {
                 }
 
                 //根据委托检测类别关联 配合比检测信息和委托单ID
-                if(vo.getEntrustTestType().contains("配合比")){
+                if (vo.getEntrustTestType().contains("配合比")) {
                     TestSampleMixInfoEntity record = new TestSampleMixInfoEntity();
                     record.setEntrustmentId(id);
                     record.setSampleId(sampleEntity.getId());
@@ -817,19 +818,19 @@ public class EntrustServiceImpl implements EntrustService {
                         // 根据检测项id 遍历检测项层级和价格 获取集合
                         List<SampleItemEntity> ItemList = entityMapper.getItemRecursionList(entity.getCheckItemId());
                         //处理检测项 遍历出来的层级数据 拼接层级名。
-                        HashMap<Long,SampleItemEntity> itemMap = new HashMap<>();
+                        HashMap<Long, SampleItemEntity> itemMap = new HashMap<>();
                         if (!CollectionUtils.isEmpty(ItemList)) {
                             for (SampleItemEntity entity0 : ItemList) {
-                                if(entity0.getCheckItemId().equals(entity.getCheckItemId())){
+                                if (entity0.getCheckItemId().equals(entity.getCheckItemId())) {
                                     entity0.setCheckItemName(entity.getCheckItemName());
                                 }
-                                itemMap.put(entity0.getCheckItemId(),entity0);
+                                itemMap.put(entity0.getCheckItemId(), entity0);
                             }
                             for (SampleItemEntity entity2 : ItemList) {
                                 SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
-                                if(sampleItemEntity!=null&&entity2.getUnitPrice()==null){
+                                if (sampleItemEntity != null && entity2.getUnitPrice() == null) {
                                     // 变更检测项名为： 伪造a-伪造b
-                                    entity2.setCheckItemName(sampleItemEntity.getCheckItemName()+"-"+entity2.getCheckItemName());
+                                    entity2.setCheckItemName(sampleItemEntity.getCheckItemName() + "-" + entity2.getCheckItemName());
                                 }
                             }
                             //
@@ -1074,11 +1075,14 @@ public class EntrustServiceImpl implements EntrustService {
 
     /**
      * 查询委托单详情。
+     *
      * @param entrustmentId
      * @return
      */
     @Override
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
+        //暂存配合比下的的样品信息
+        List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         if (entrustAddVo.getOperateUser() != null) {
@@ -1087,35 +1091,48 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 通过委托单id 获取缴费记录 依据id 同价价格
         entrustAddVo.setPaymentRecord(entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId));
-        // -- 支付方式。
-//        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
-        // 联系地址
-//        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
-        // 通过委托ID 样品集合 → test_sample
+        //  通过委托单id 状态 获取样品集合 并遍历样品 分别处理：1、样品原材 2、配合比。
+        List<SampleEntity> sampleCollection = methodReturnSampleCollection(entrustmentId, entrustAddVo.getState());
 
-//        entrustAddVo.setSamples(sampleCollection);
-//        entrustAddVo.setNodeSample(nodeSample);
+        // 暂存配合比下的的样品信息
+        List<SampleEntity> sampleProportioningCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
+        for (SampleEntity sampleEntity : sampleProportioningCollection) {
+            //补充配合比下的的样品信息
+            if (sampleEntity.getSampleType().contains("配合比")) {
+                nodeSample.addAll(testSampleEntityMapper.selectByPid(sampleEntity.getId()));
+            }
+        }
+        entrustAddVo.setSamples(sampleCollection);
+        entrustAddVo.setNodeSample(nodeSample);
         return entrustAddVo;
     }
+
     /**
      * 通过委托单id 获取样品集合 并遍历样品 分别处理：1、样品原材 2、配合比。
+     *
      * @param entrustmentId
      * @param state
      * @return 与委托单关联的样品集合。
      */
-    public List<SampleEntity> methodReturnSampleCollection(Long entrustmentId,Integer state)
-    {
+    public List<SampleEntity> methodReturnSampleCollection(Long entrustmentId, Integer state) {
         // 通过委托单id 获取样品集合 并遍历样品 分别处理：1、样品原材 2、配合比。
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
         // 返回样品集合信息。
         List<SampleEntity> ReturnsampleCollection = new ArrayList<>();
         //暂存配合比下的的样品信息
         List<TestSampleEntity> nodeSample = Lists.newArrayList();
-        // 样品信息 进行补充 检测依据集合，检测项集合
+        // 样品信息 遍历样品 分别处理：1、样品原材 2、配合比。
         for (SampleEntity sampleEntity : sampleCollection) {
-            // 样品下 检测项、检测依据 补充。
             // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
             if (state == 0 || state == 144) {
+                // 判断样品 是 原材 还是 配合比。
+                if (sampleEntity.getSampleType().contains("配合比")) {
+                    // 存储 获取配合比下样品集合
+                    List<SampleEntity> SampleEntityNextLevel = sampleEntityMapper.selectByPid(sampleEntity.getId());
+                    if (!CollectionUtils.isEmpty(SampleEntityNextLevel)) {
+                        ReturnsampleCollection.addAll(SampleEntityNextLevel);
+                    }
+                }
                 List<JudgmentBasisVo> list = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
                 if (list != null && !list.isEmpty()) {
                     // 根据检测项id 查询 默认匹配部门信息
@@ -1126,16 +1143,22 @@ public class EntrustServiceImpl implements EntrustService {
                     sampleEntity.setJudgmentBasisVos(list);
                 }
             } else {
+                // 判断样品 是 原材 还是 配合比。
+                if (sampleEntity.getSampleType().contains("配合比")) {
+                    // 存储 获取配合比下样品集合
+                    List<SampleEntity> SampleEntityNextLevel = sampleEntityMapper.selectByPid(sampleEntity.getId());
+                    if (!CollectionUtils.isEmpty(SampleEntityNextLevel)) {
+                        ReturnsampleCollection.addAll(SampleEntityNextLevel);
+                    }
+                }
                 sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
             }
             // 补充样品下 依据集合
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustmentId));
-            //补充配合比下的的样品信息
-            if(sampleEntity.getSampleType().contains("配合比")){
-                nodeSample.addAll(testSampleEntityMapper.selectByPid(sampleEntity.getId()));
-            }
+            // 存储样品。
+            ReturnsampleCollection.add(sampleEntity);
         }
-        return null;
+        return ReturnsampleCollection;
     }
 
 
@@ -1194,7 +1217,7 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
             //补充配合比样品的原材样品信息
-            if(sampleEntity.getSampleType().contains("配合比")){
+            if (sampleEntity.getSampleType().contains("配合比")) {
                 nodeSample.addAll(testSampleEntityMapper.selectByPid(sampleEntity.getId()));
             }
             // 补充样品下 依据集合
@@ -1231,12 +1254,12 @@ public class EntrustServiceImpl implements EntrustService {
         // 处理信息 样品下检测项信息无价格不展示。
         // 样品下 检测项、检测依据 补充。
         List<JudgmentBasisVo> listJson = Lists.newArrayList();
-        for(SampleEntity sampleEntity0:sampleCollection){
-            List<JudgmentBasisVo> itemList  = sampleEntityMapper.selectTestStandardList(sampleEntity0.getId(), entrustmentId);
+        for (SampleEntity sampleEntity0 : sampleCollection) {
+            List<JudgmentBasisVo> itemList = sampleEntityMapper.selectTestStandardList(sampleEntity0.getId(), entrustmentId);
             Iterator<JudgmentBasisVo> it = itemList.iterator();
-            while (it.hasNext()){
+            while (it.hasNext()) {
                 JudgmentBasisVo judgmentBasisVo = it.next();
-                if(judgmentBasisVo.getCheckPrice()==null){
+                if (judgmentBasisVo.getCheckPrice() == null) {
                     it.remove();
                 }
             }
@@ -1254,7 +1277,7 @@ public class EntrustServiceImpl implements EntrustService {
             standardList.addAll(sampleEntityMapper.getSampleBasisList(sampleEntity.getId(), entrustAddVo.getId()));
             sampleEntity.setStandardFileIdStr(standardList);
             //补充检测项可选的全部检测依据
-            if(!CollectionUtils.isEmpty(listJson)){
+            if (!CollectionUtils.isEmpty(listJson)) {
                 for (JudgmentBasisVo judgmentBasisVo : listJson) {
                     List<LabelValueVo> allCheckBasis = Lists.newArrayList();
                     allCheckBasis.addAll(testProductDao.getAllCheckBasis(judgmentBasisVo.getCheckItemId()));
@@ -1599,28 +1622,28 @@ public class EntrustServiceImpl implements EntrustService {
     public List<CheckItemInfoVo> getCheckItemInfo(List<Integer> ids) {
         List<CheckItemInfoVo> result = Lists.newArrayList();
         result.addAll(itemEntityMapper.getItemInfo3(ids));
-        if(!CollectionUtils.isEmpty(result)){
+        if (!CollectionUtils.isEmpty(result)) {
             for (CheckItemInfoVo checkItemInfoVo : result) {
-                if(checkItemInfoVo.getCheckItemPid() != 0){
+                if (checkItemInfoVo.getCheckItemPid() != 0) {
                     checkItemInfoVo.setCheckItemName(getAllLevelName(checkItemInfoVo.getCheckItemPid())
-                            +checkItemInfoVo.getCheckItemName());
+                            + checkItemInfoVo.getCheckItemName());
                 }
             }
         }
         return result;
     }
 
-    private String getAllLevelName(Integer checkItemPid){
+    private String getAllLevelName(Integer checkItemPid) {
         StringBuilder prefix = new StringBuilder();
         List<String> temp = Lists.newArrayList();
         Integer pid = checkItemPid;
-        while (pid != 0){
+        while (pid != 0) {
             CheckItemDetailVo parentInfo = itemEntityMapper.getParentInfo(checkItemPid);
             temp.add(parentInfo.getCheckItemName());
             Integer itemPid = parentInfo.getItemPid();
             pid = parentInfo.getItemPid();
         }
-        for (int i = temp.size()-1; i >=0 ; i--) {
+        for (int i = temp.size() - 1; i >= 0; i--) {
             prefix.append(temp.get(i)).append("-");
         }
         return prefix.toString();
