@@ -583,7 +583,8 @@
         inspector,
         generation,
         received_date,
-        batch_number
+        batch_number,
+        sample_type
         FROM
         test_sample
         <trim prefix="WHERE" prefixOverrides="AND |OR ">

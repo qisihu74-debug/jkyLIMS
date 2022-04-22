@@ -14,4 +14,5 @@ public class SampleSimpleListVo {
     private String generation;
     private String receivedDate;
     private String batchNumber;
+    private String sampleType;
 }
