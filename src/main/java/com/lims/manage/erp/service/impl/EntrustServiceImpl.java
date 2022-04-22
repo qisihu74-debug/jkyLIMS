@@ -1089,16 +1089,35 @@ public class EntrustServiceImpl implements EntrustService {
             // 获取做废人id 查询账号姓名
             entrustAddVo.setOperateUserStr(sysUserDao.getSysUserName(entrustAddVo.getOperateUser()));
         }
-        // 通过委托单id 获取缴费记录 依据id 同价价格
-        entrustAddVo.setPaymentRecord(entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId));
-        //  通过委托单id 状态 获取样品集合 并遍历样品 分别处理：1、样品原材 2、配合比。
-        List<SampleEntity> sampleCollection = methodReturnSampleCollection(entrustmentId, entrustAddVo.getState());
-
-        // 暂存配合比下的的样品信息
-        List<SampleEntity> sampleProportioningCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
-        for (SampleEntity sampleEntity : sampleProportioningCollection) {
+        List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
+        //暂存配合比下的的样品信息
+        // 样品信息 进行补充 检测依据集合，检测项集合
+        for (SampleEntity sampleEntity : sampleCollection) {
+            // 样品下 检测项、检测依据 补充。
+            // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
+            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144) {
+                List<JudgmentBasisVo> list = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
+                if (list != null && !list.isEmpty()) {
+                    // 根据检测项id 查询 默认匹配部门信息
+                    for (JudgmentBasisVo data : list) {
+                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
+                        data.setTestingRoom(strings.toString());
+                    }
+                    sampleEntity.setJudgmentBasisVos(list);
+//                    //根据检测项ID查询可做该检测项的科室labelvalue集合
+//                    for (JudgmentBasisVo data : list) {
+//                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
+//                        data.setTestingRoomList(testingRoomList);
+//                    }
+//                    sampleEntity.setJudgmentBasisVos(list);
+                }
+            } else {
+                sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
+            }
+            // 补充样品下 依据集合
+            sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
             //补充配合比下的的样品信息
-            if (sampleEntity.getSampleType().contains("配合比")) {
+            if(sampleEntity.getSampleType().contains("配合比")){
                 nodeSample.addAll(testSampleEntityMapper.selectByPid(sampleEntity.getId()));
             }
         }
@@ -1120,19 +1139,10 @@ public class EntrustServiceImpl implements EntrustService {
         // 返回样品集合信息。
         List<SampleEntity> ReturnsampleCollection = new ArrayList<>();
         //暂存配合比下的的样品信息
-        List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 样品信息 遍历样品 分别处理：1、样品原材 2、配合比。
         for (SampleEntity sampleEntity : sampleCollection) {
             // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
             if (state == 0 || state == 144) {
-                // 判断样品 是 原材 还是 配合比。
-                if (sampleEntity.getSampleType().contains("配合比")) {
-                    // 存储 获取配合比下样品集合
-                    List<SampleEntity> SampleEntityNextLevel = sampleEntityMapper.selectByPid(sampleEntity.getId());
-                    if (!CollectionUtils.isEmpty(SampleEntityNextLevel)) {
-                        ReturnsampleCollection.addAll(SampleEntityNextLevel);
-                    }
-                }
                 List<JudgmentBasisVo> list = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
                 if (list != null && !list.isEmpty()) {
                     // 根据检测项id 查询 默认匹配部门信息
@@ -1141,6 +1151,18 @@ public class EntrustServiceImpl implements EntrustService {
                         data.setTestingRoom(strings.toString());
                     }
                     sampleEntity.setJudgmentBasisVos(list);
+                }
+                // 补充样品下 依据集合
+                sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustmentId));
+                // 存储样品。
+                ReturnsampleCollection.add(sampleEntity);
+                // 判断样品 是 原材 还是 配合比。
+                if (sampleEntity.getSampleType().contains("配合比")) {
+                    // 存储 获取配合比下样品集合
+                    List<SampleEntity> SampleEntityNextLevel = sampleEntityMapper.selectByPid(sampleEntity.getId());
+                    if (!CollectionUtils.isEmpty(SampleEntityNextLevel)) {
+                        ReturnsampleCollection.addAll(SampleEntityNextLevel);
+                    }
                 }
             } else {
                 // 判断样品 是 原材 还是 配合比。
@@ -1152,11 +1174,11 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                 }
                 sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
+                // 补充样品下 依据集合
+                sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustmentId));
+                // 存储样品。
+                ReturnsampleCollection.add(sampleEntity);
             }
-            // 补充样品下 依据集合
-            sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustmentId));
-            // 存储样品。
-            ReturnsampleCollection.add(sampleEntity);
         }
         return ReturnsampleCollection;
     }

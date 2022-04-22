@@ -188,7 +188,8 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         CONCAT(t3.CODE,'《',t3.NAME,'》') As standardName,
         t1.method_id AS methodId,
         t4.name AS methodName,
-        t5.name as testingRoom
+        t5.name as testingRoom,
+        t2.check_item_pid  as checkItemPid
         FROM
         test_entrusted_sample_checkitem_rel AS t1
         LEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id

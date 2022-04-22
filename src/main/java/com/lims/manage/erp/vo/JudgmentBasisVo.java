@@ -68,4 +68,8 @@ public class JudgmentBasisVo {
      * 可做gai
      */
     private List<LabelValueVo> testingRoomList;
+    /**
+     * 检测项pid
+     */
+    private Integer checkItemPid;
 }

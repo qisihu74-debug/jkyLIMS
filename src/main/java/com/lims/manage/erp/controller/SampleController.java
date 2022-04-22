@@ -278,7 +278,7 @@ public class SampleController {
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/zip");
         response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment;fileName=" + "样品文件.zip");
+        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品文件.zip", "UTF-8") );
         ZipOutputStream zipOutputStream = sampleService.packagingWorkbookZip(sampleId, response);
         zipOutputStream.flush();
     }
