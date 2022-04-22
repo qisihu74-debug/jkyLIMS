@@ -447,7 +447,7 @@ public class TaskServiceImpl implements TaskService {
         try {
             doc = new XWPFDocument(object);
             List<XWPFTable> tables = doc.getTables();
-            List<XWPFTableRow> rows;
+            List<XWPFTableRow> rows = null;
             // 第一个整体表格 设置表格
             XWPFTable table = tables.get(0);
             // 第二个整体表格
@@ -510,45 +510,10 @@ public class TaskServiceImpl implements TaskService {
             if (taskDetailInfoVo.getSampleDetailList() == null || taskDetailInfoVo.getSampleDetailList().isEmpty()) {
                 return doc;
             }
-            //获取表格对应的行
-            rows = table.getRows();
-            // 判断表格行数 >5 sampleDetailList.size()
-            // 补充增加表格数量。
-            if (sampleDetailList.size() > 5) {
-                // 3.25 测试表格插入数据
-                int addRows = sampleDetailList.size() - 5;
-                // 表格插入
-                XWPFDocument doc1 = new XWPFDocument();
-                XWPFTable newTable = doc1.createTable(addRows, 7);  //2行7格
-                // 创建表格后直接进行存放 后续多余数据
-                List<XWPFTableRow> dataTable = newTable.getRows();
-                int j = 0;
-                for (int i = 5; i < sampleDetailList.size(); i++) {
-                    SampleDetailVo sampleDetailVo = sampleDetailList.get(i);
-                    // 补充表格数据 样品名称
-                    dataTable.get(j).getTableCells().get(0).setText(sampleDetailVo.getSampleName());
-                    // 规格/等级
-                    dataTable.get(j).getTableCells().get(1).setText(sampleDetailVo.getSpecs());
-                    // 批号/编号
-                    dataTable.get(j).getTableCells().get(2).setText(sampleDetailVo.getBatchNumber());
-                    // 样品数量
-                    dataTable.get(j).getTableCells().get(3).setText(sampleDetailVo.getGeneration());
-                    // 样品产地
-                    dataTable.get(j).getTableCells().get(4).setText(sampleDetailVo.getSampleOrigin());
-                    //样品编号
-                    dataTable.get(j).getTableCells().get(5).setText(sampleDetailVo.getSampleCode());
-                    // 备注
-                    dataTable.get(j).getTableCells().get(6).setText(sampleDetailVo.getRemark());
-                    table.addRow(dataTable.get(j));
-                    j++;
-                }
-//                XWPFTableRow rows25 = table25.getRow(0);
-//                rows25.getCell(0).setText("sampleDetailVo.getSampleName()");
-//                table.addRow(table25.getRow(0));
-                rows = table.getRows();
+            // 下载任务单表格处理。
+            //rows = table.getRows();
+            rows = extendTable(table,rows,sampleDetailList,5,7);
 
-
-            }
             //                表格逐行赋值
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < sampleDetailList.size(); i++) {
@@ -870,7 +835,7 @@ public class TaskServiceImpl implements TaskService {
      * @param modelSampleRows 需要新增行
      * @param columns 列数
      */
-    public void  extendTable(XWPFTable table,List<XWPFTableRow> rows,List<SampleDetailVo> sampleDetailList,
+    public List<XWPFTableRow> extendTable(XWPFTable table,List<XWPFTableRow> rows,List<SampleDetailVo> sampleDetailList,
                              int modelSampleRows,int columns){
         //获取表格对应的行
         rows = table.getRows();
@@ -906,5 +871,6 @@ public class TaskServiceImpl implements TaskService {
             }
             rows = table.getRows();
         }
+        return rows;
     }
 }

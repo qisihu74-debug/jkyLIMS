@@ -1072,6 +1072,11 @@ public class EntrustServiceImpl implements EntrustService {
         return result;
     }
 
+    /**
+     * 查询委托单详情。
+     * @param entrustmentId
+     * @return
+     */
     @Override
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info
@@ -1087,14 +1092,30 @@ public class EntrustServiceImpl implements EntrustService {
         // 联系地址
 //        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
         // 通过委托ID 样品集合 → test_sample
+
+//        entrustAddVo.setSamples(sampleCollection);
+//        entrustAddVo.setNodeSample(nodeSample);
+        return entrustAddVo;
+    }
+    /**
+     * 通过委托单id 获取样品集合 并遍历样品 分别处理：1、样品原材 2、配合比。
+     * @param entrustmentId
+     * @param state
+     * @return 与委托单关联的样品集合。
+     */
+    public List<SampleEntity> methodReturnSampleCollection(Long entrustmentId,Integer state)
+    {
+        // 通过委托单id 获取样品集合 并遍历样品 分别处理：1、样品原材 2、配合比。
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
+        // 返回样品集合信息。
+        List<SampleEntity> ReturnsampleCollection = new ArrayList<>();
         //暂存配合比下的的样品信息
         List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 样品信息 进行补充 检测依据集合，检测项集合
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
             // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
-            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144) {
+            if (state == 0 || state == 144) {
                 List<JudgmentBasisVo> list = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
                 if (list != null && !list.isEmpty()) {
                     // 根据检测项id 查询 默认匹配部门信息
@@ -1103,27 +1124,20 @@ public class EntrustServiceImpl implements EntrustService {
                         data.setTestingRoom(strings.toString());
                     }
                     sampleEntity.setJudgmentBasisVos(list);
-//                    //根据检测项ID查询可做该检测项的科室labelvalue集合
-//                    for (JudgmentBasisVo data : list) {
-//                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
-//                        data.setTestingRoomList(testingRoomList);
-//                    }
-//                    sampleEntity.setJudgmentBasisVos(list);
                 }
             } else {
                 sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
             }
             // 补充样品下 依据集合
-            sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
+            sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustmentId));
             //补充配合比下的的样品信息
             if(sampleEntity.getSampleType().contains("配合比")){
                 nodeSample.addAll(testSampleEntityMapper.selectByPid(sampleEntity.getId()));
             }
         }
-        entrustAddVo.setSamples(sampleCollection);
-        entrustAddVo.setNodeSample(nodeSample);
-        return entrustAddVo;
+        return null;
     }
+
 
     /**
      * 分布详情——检测项无价格不展示。
