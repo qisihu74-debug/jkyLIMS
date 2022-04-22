@@ -54,6 +54,7 @@ import com.lims.manage.erp.vo.ReportHistoryDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import org.apache.commons.collections.map.HashedMap;
@@ -1838,7 +1839,7 @@ public class ReportServiceImpl implements ReportService {
                                 rows.get(j+16).getCell(6).setText(testSampleEntities.get(j).getSampleCode());
                             }else {
                                 //新增表格填充样品信息
-
+                                extendTable(table,rows,testSampleEntities,8,9);
                             }
                         }
                     }
@@ -2083,5 +2084,39 @@ public class ReportServiceImpl implements ReportService {
         FileInputStream fileInputStream = new FileInputStream(file);
         newParaRun.addPicture(fileInputStream,XWPFDocument.PICTURE_TYPE_PNG,"bus.png,", Units.toEMU(20), Units.toEMU(20));
         doc.removeBodyElement(doc.getPosOfParagraph(xwpfParagraph));*/
+    }
+
+    /**
+     * 扩展模板样品行列
+     * @param table 原始表格
+     * @param rows 原始表格行数
+     * @param sampleDetailList 待处理数据
+     * @param modelSampleRows 需要新增行
+     * @param columns 列数
+     */
+    public void extendTable(XWPFTable table,List<XWPFTableRow> rows,List<TestSampleEntity> sampleDetailList,
+                             int modelSampleRows,int columns){
+        rows = table.getRows();
+        if (sampleDetailList.size() > modelSampleRows) {
+            int addRows = sampleDetailList.size() - modelSampleRows;
+            // 表格插入
+            XWPFDocument doc1 = new XWPFDocument();
+            XWPFTable newTable = doc1.createTable(addRows, columns);
+            // 创建表格后直接进行存放 后续多余数据
+            List<XWPFTableRow> dataTable = newTable.getRows();
+            int j = 0;
+            for (int i = modelSampleRows; i < sampleDetailList.size(); i++) {
+                dataTable.get(j).getCell(0).setText(sampleDetailList.get(i).getSampleName());
+                dataTable.get(j).getCell(1).setText(sampleDetailList.get(i).getSpecs());
+                dataTable.get(j).getCell(2).setText(sampleDetailList.get(i).getManufacturer());
+                dataTable.get(j).getCell(3).setText(sampleDetailList.get(i).getBatchNumber());
+                dataTable.get(j).getCell(4).setText(sampleDetailList.get(i).getGeneration());
+                dataTable.get(j).getCell(5).setText(sampleDetailList.get(i).getOutward());
+                dataTable.get(j).getCell(6).setText(sampleDetailList.get(i).getSampleCode());
+                table.addRow(dataTable.get(j));
+                j++;
+            }
+            rows = table.getRows();
+        }
     }
 }
