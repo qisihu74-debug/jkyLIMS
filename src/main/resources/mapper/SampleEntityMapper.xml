@@ -100,7 +100,8 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                t1.sample_id          as id,
                t2.alias_name          as aliasName,
                t2.sample_quantity    as sampleQuantity,
-               t2.sample_remark      as sampleRemark
+               t2.sample_remark      as sampleRemark,
+               t2.pid                as pid
         FROM test_entrusted_sample_details_rel AS t1
                  LEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id
         WHERE t1.entrustment_id = #{entrustmentId}
