@@ -559,10 +559,10 @@ public class ReportController {
         }
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
-        if ("1".equals(reqBean.getType())){
+        if ("原材".equals(reqBean.getType())){
             url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
         }else {
-            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId());
+            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),null);
         }
         return url;
     }
@@ -589,10 +589,10 @@ public class ReportController {
         }
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
-        if ("1".equals(reqBean.getType())){
+        if ("原材".equals(reqBean.getType())){
             url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
         }else {
-            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId());
+            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),null);
         }
         //预览word转pdf
         String[] split = url.split("\\?");
@@ -765,12 +765,12 @@ public class ReportController {
     public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file,
                                @RequestParam("code") String code,@RequestParam("conclusion") String conclusion
-            ,@RequestParam("additional") String additional,@RequestParam("mixInfo") String mixInfo) {
+            ,@RequestParam("additional") String additional,@RequestParam("mixInfo") String mixInfo,@RequestParam("type") String type) {
         if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数！");
         }
         Boolean flag = reportService.uploadReport(reportCode,file,verifyer.split("&")[0],issuer.split("&")[0]
-                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional,mixInfo);
+                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional,mixInfo,type);
         if (flag) {
             return ResultUtil.success("报告文件上传成功！");
         }else {
