@@ -330,4 +330,11 @@ public interface TaskMapper extends BaseMapper {
 
     @Select("select inspector from test_task where entrustment_id = #{entrustId}")
     List<String> getInspectorByEntrustId(@Param("entrustId") Long id);
+
+    /**
+     * 收样列表查询子原材样品信息
+     * @param sampleId
+     * @return
+     */
+    List<SamplePrivateInfoVo> getNodeSampleList(Integer sampleId);
 }

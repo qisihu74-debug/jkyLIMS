@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -308,10 +309,17 @@ public class TaskServiceImpl implements TaskService {
         EntrustServiceImpl service = new EntrustServiceImpl();
         for (ReceiveSampleListVo sampleListVo : dataList) {
             List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
+            List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
             for (SamplePrivateInfoVo samplePrivateInfoVo : sampleList) {
                 String state = service.findStateBySampleId(samplePrivateInfoVo.getId(), entrustEntityMapper, taskMapper);
                 samplePrivateInfoVo.setState(state);
+                //TODO PSH查询子原材样品信息
+                List<SamplePrivateInfoVo> nodeSampleList1 = taskMapper.getNodeSampleList(samplePrivateInfoVo.getId());
+                if(!CollectionUtils.isEmpty(nodeSampleList1)){
+                    nodeSampleList.addAll(nodeSampleList1);
+                }
             }
+            sampleList.addAll(nodeSampleList);
         }
         PageInfo<ReceiveSampleListVo> result = new PageInfo<>(dataList);
         return result;
