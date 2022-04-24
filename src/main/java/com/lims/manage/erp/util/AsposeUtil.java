@@ -2,7 +2,6 @@ package com.lims.manage.erp.util;
 
 
 import com.aspose.words.Document;
-import com.aspose.words.ParagraphAlignment;
 import com.aspose.words.SaveFormat;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.google.api.client.util.Lists;
@@ -14,12 +13,12 @@ import lombok.SneakyThrows;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.xmlbeans.XmlCursor;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.apache.xmlbeans.XmlOptions;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody;
 import org.slf4j.Logger;
@@ -32,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -303,5 +301,63 @@ public class AsposeUtil {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * des:表末尾添加行(表，要复制样式的行，添加行数)
+     * @param table
+     * @param source
+     * @param rows
+     */
+    public static void addRows(XWPFTable table, int source, int rows){
+        try{
+            //获取表格的总行数
+            int index = table.getNumberOfRows();
+            //循环添加行和和单元格
+            for(int i=1;i<=rows;i++) {
+                //获取要复制样式的行
+                XWPFTableRow sourceRow = table.getRow(source);
+                //添加新行
+                XWPFTableRow targetRow = table.insertNewTableRow(index++);
+                //复制行的样式给新行
+                targetRow.getCtRow().setTrPr(sourceRow.getCtRow().getTrPr());
+                //获取要复制样式的行的单元格
+                List<XWPFTableCell> sourceCells = sourceRow.getTableCells();
+                //循环复制单元格
+                for (XWPFTableCell sourceCell : sourceCells) {
+                    //添加新列
+                    XWPFTableCell newCell = targetRow.addNewTableCell();
+                    //复制单元格的样式给新单元格
+                    newCell.getCTTc().setTcPr(sourceCell.getCTTc().getTcPr());
+                    //得到复制单元格的段落
+                    List<XWPFParagraph> sourceParagraphs = sourceCell.getParagraphs();
+                    if (org.springframework.util.StringUtils.isEmpty(sourceCell.getText())) {
+                        continue;
+                    }
+                    //拿到第一段
+                    XWPFParagraph sourceParagraph = sourceParagraphs.get(0);
+                    //得到新单元格的段落
+                    List<XWPFParagraph> targetParagraphs = newCell.getParagraphs();
+                    //判断新单元格是否为空
+                    if (org.springframework.util.StringUtils.isEmpty(newCell.getText())) {
+                        //添加新的段落
+                        XWPFParagraph ph = newCell.addParagraph();
+                        //复制段落样式给新段落
+                        ph.getCTP().setPPr(sourceParagraph.getCTP().getPPr());
+                        //得到文本对象
+                        XWPFRun run = ph.getRuns().isEmpty() ? ph.createRun() : ph.getRuns().get(0);
+                        //复制文本样式
+                        run.setFontFamily(sourceParagraph.getRuns().get(0).getFontFamily());
+                    } else {
+                        XWPFParagraph ph = targetParagraphs.get(0);
+                        ph.getCTP().setPPr(sourceParagraph.getCTP().getPPr());
+                        XWPFRun run = ph.getRuns().isEmpty() ? ph.createRun() : ph.getRuns().get(0);
+                        run.setFontFamily(sourceParagraph.getRuns().get(0).getFontFamily());
+                    }
+                }
+            }
+        }catch (Exception e){
+            logger.error("word表格新增行失败:{}",e);
+        }
     }
 }

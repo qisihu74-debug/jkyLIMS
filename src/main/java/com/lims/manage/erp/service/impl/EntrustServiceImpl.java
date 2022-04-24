@@ -9,6 +9,7 @@ import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.EntrustService;
+import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
@@ -16,7 +17,10 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
 import org.slf4j.Logger;
@@ -1494,7 +1498,20 @@ public class EntrustServiceImpl implements EntrustService {
                     //新增的行数
                     int sampleIndex = 8;
                     int index = 1;
-                    if (samples.size()<=6){
+                    if (samples.size()>6){
+                        AsposeUtil.addRows(tables.get(0),sampleIndex,samples.size()-6);
+                    }
+                    for (int i = 0; i < samples.size(); i++) {
+                        rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getSampleName());//样品名称
+                        rows.get(sampleIndex).getTableCells().get(index + 1).setText(samples.get(i).getSpecs());//规格等级
+                        rows.get(sampleIndex).getTableCells().get(index + 2).setText(samples.get(i).getBatchNumber());//批号/编号
+                        rows.get(sampleIndex).getTableCells().get(index + 3).setText(samples.get(i).getSampleQuantity());//样品数量
+                        rows.get(sampleIndex).getTableCells().get(index + 4).setText(samples.get(i).getGeneration());//代表批量
+                        rows.get(sampleIndex).getTableCells().get(index + 5).setText(samples.get(i).getManufacturer());//样品产地/生产厂家
+                        rows.get(sampleIndex).getTableCells().get(index + 6).setText(samples.get(i).getSampleRemark());//样品备注
+                        sampleIndex = sampleIndex + 1;
+                    }
+                    /*if (samples.size()<=6){
                         for (int i = 0; i < samples.size(); i++) {
                             rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getSampleName());//样品名称
                             rows.get(sampleIndex).getTableCells().get(index + 1).setText(samples.get(i).getSpecs());//规格等级
@@ -1521,7 +1538,7 @@ public class EntrustServiceImpl implements EntrustService {
 
                     if (samples.size()>6){
                         rows = extendTable(tables.get(j),rows,samples,6,8);
-                    }
+                    }*/
                 }
                 if (j == tables.size()-1){
                     //设置其它信息(第二个table)
@@ -1737,4 +1754,5 @@ public class EntrustServiceImpl implements EntrustService {
         }
         return rows;
     }
+
 }
