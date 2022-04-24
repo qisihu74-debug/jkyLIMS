@@ -284,13 +284,30 @@ public class SampleServiceImpl implements SampleService {
                 String[] strings = sampleCode.substring(startNumber + 1, endNumber).split("~");
                 Integer maxNumber = Integer.valueOf(strings[1]);
                 // 处理样品 外观描述，和 外观
-                if (sampleTagInfo.getOutwardDescribe() != null && !sampleTagInfo.getOutwardDescribe().equals("") && sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
-                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1) + "\t" + sampleTagInfo.getOutwardDescribe());
-                } else {
-                    if (sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
-                        sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+//                if (sampleTagInfo.getOutwardDescribe() != null && !sampleTagInfo.getOutwardDescribe().equals("") && sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
+//                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1) + "\t" + sampleTagInfo.getOutwardDescribe());
+//                } else {
+//                    if (sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
+//                        sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+//                    }
+//                }
+
+                StringBuilder outward = new StringBuilder();
+                if(sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
+                    String replace = sampleTagInfo.getOutward().replace("[","");
+                    String replace1 = replace.replace("]", "");
+                    outward.append(replace1);
+                    if(sampleTagInfo.getOutwardDescribe() != null && !sampleTagInfo.getOutwardDescribe().equals("")){
+                        outward.append(",");
+                        outward.append(sampleTagInfo.getOutwardDescribe());
+                    }
+                }else{
+                    if(sampleTagInfo.getOutwardDescribe() != null && !sampleTagInfo.getOutwardDescribe().equals("")){
+                        outward.append(sampleTagInfo.getOutwardDescribe());
                     }
                 }
+                sampleTagInfo.setOutward(outward.toString());
+
                 for (int i = 1; i <= maxNumber; i++) {
                     InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
                     StringBuilder fileName = new StringBuilder("");
@@ -364,13 +381,28 @@ public class SampleServiceImpl implements SampleService {
         for (int i = 0; i < sampleDetailVoList.size(); i++) {
             SampleDetailVo sampleData = sampleDetailVoList.get(i);
             // 处理样品 外观描述，和 外观
-            if (sampleData.getOutwardDescribe() != null && !sampleData.getOutwardDescribe().equals("") && sampleData.getOutward() != null && !sampleData.getOutward().equals("")) {
-                sampleData.setOutward(sampleData.getOutward().substring(1, sampleData.getOutward().length() - 1) + "\t" + sampleData.getOutwardDescribe());
-            } else {
-                if (sampleData.getOutward() != null && !sampleData.getOutward().equals("")) {
-                    sampleData.setOutward(sampleData.getOutward().substring(1, sampleData.getOutward().length() - 1));
+//            if (sampleData.getOutwardDescribe() != null && !sampleData.getOutwardDescribe().equals("") && sampleData.getOutward() != null && !sampleData.getOutward().equals("")) {
+//                sampleData.setOutward(sampleData.getOutward().substring(1, sampleData.getOutward().length() - 1) + "\t" + sampleData.getOutwardDescribe());
+//            } else {
+//
+//            }
+
+            StringBuilder outward = new StringBuilder();
+            if(sampleData.getOutward() != null && !sampleData.getOutward().equals("")) {
+                String replace = sampleData.getOutward().replace("[","");
+                String replace1 = replace.replace("]", "");
+                outward.append(replace1);
+                if(sampleData.getOutwardDescribe() != null && !sampleData.getOutwardDescribe().equals("")){
+                    outward.append(",");
+                    outward.append(sampleData.getOutwardDescribe());
+                }
+            }else{
+                if(sampleData.getOutwardDescribe() != null && !sampleData.getOutwardDescribe().equals("")){
+                    outward.append(sampleData.getOutwardDescribe());
                 }
             }
+            sampleData.setOutward(outward.toString());
+
             InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
             StringBuilder fileName = new StringBuilder("");
             fileName.append(sampleData.getSampleCode());
