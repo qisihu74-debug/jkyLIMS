@@ -103,6 +103,7 @@
             <result property="sampleQuantity" column="sample_quantity"></result>
             <result property="aliasName" column="alias_name"></result>
             <result property="sampleRemark" column="sample_remark"></result>
+            <result property="sampleType" column="sample_type"></result>
             <collection property="checkItemInfoList" ofType="com.lims.manage.erp.vo.CheckItemInfoVo">
                 <id property="checkItemId" column="check_item_id"></id>
                 <result property="checkItemName" column="check_item_name"></result>
@@ -220,6 +221,7 @@
                t4.sample_quantity,
                t4.alias_name,
                t4.sample_remark,
+               t4.sample_type,
                t5.check_item_id,
                t5.check_item_name,
                t5.method_id,
