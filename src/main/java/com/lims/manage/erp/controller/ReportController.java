@@ -810,4 +810,16 @@ public class ReportController {
         }
     }
 
+    /**
+     * 下载报告获取url链接
+     * @param entrustId
+     * @return
+     */
+    @GetMapping("reportUrl")
+    public Result reportUrl(Long entrustId){
+        if (entrustId == null){
+            return ResultUtil.error("缺少必要参数");
+        }
+        return ResultUtil.success(reportService.reportUrl(entrustId));
+    }
 }

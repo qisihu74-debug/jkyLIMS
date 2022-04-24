@@ -356,4 +356,6 @@ public interface ReportService {
      * @return
      */
     String submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id,TestSampleMixInfoEntity mixInfoEntity);
+
+    String reportUrl(Long entrustId);
 }

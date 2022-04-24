@@ -1969,6 +1969,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public String reportUrl(Long entrustId) {
+        return reportMapper.getUrlByEntrustId(entrustId);
+    }
+
+    @Override
     public List<ConclusionEntity> getResut(Long entrustId) {
         List<ReportTemplateEntity> templateList = reportService.getReportTemplateList(entrustId);
         List<ConclusionEntity> list = Lists.newArrayList();

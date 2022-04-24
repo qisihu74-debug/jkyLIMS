@@ -1493,8 +1493,9 @@ public class EntrustServiceImpl implements EntrustService {
                     rows.get(2).getTableCells().get(8).setText("№." + detail.getEntrustmentNo());//委托单位
                     rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
                     rows.get(4).getTableCells().get(2).setText(detail.getWitnessUint());//见证单位
-                    rows.get(5).getTableCells().get(2).setText(detail.getProjectPart());//工程部位
-                    rows.get(6).getTableCells().get(2).setText(detail.getProjectName());//工程名称
+                    rows.get(5).getTableCells().get(2).setText(detail.getProjectName());//工程名称
+                    rows.get(6).getTableCells().get(2).setText(detail.getProjectPart());//工程部位
+
                     //新增的行数
                     int sampleIndex = 8;
                     int index = 1;
@@ -1591,16 +1592,21 @@ public class EntrustServiceImpl implements EntrustService {
                     rows.get(5).getTableCells().get(2).setText(detail.getEntrustPeople() == null ? "--" : detail.getEntrustPeople());//委托人
                     rows.get(5).getTableCells().get(4).setText(detail.getEntrustPhone() == null ? "--" : detail.getEntrustPhone());//委托人电话
                     rows.get(5).getTableCells().get(6).setText(detail.getWitnessPerson() == null ? "--" : detail.getWitnessPerson());//见证人
-                    SampleEntity sampleEntity = samples.get(0);
-                    if (sampleEntity != null) {
-                        String s = sampleEntity.getSampleName() + "（" + sampleEntity.getSpecs() + "，" + sampleEntity.getOutward() + "）";
-                        rows.get(6).getTableCells().get(2).setText(s == null ? "--" : s);//样品状态
+                    StringBuilder stringBuilder2 = new StringBuilder();
+                    for (SampleEntity sampleEntity:samples) {
+                        stringBuilder2.append(sampleEntity.getSampleName());
+                        stringBuilder2.append("（");
+                        stringBuilder2.append(sampleEntity.getSpecs());
+                        stringBuilder2.append("，");
+                        stringBuilder2.append(org.apache.commons.lang3.StringUtils.isEmpty(sampleEntity.getOutward())?"":sampleEntity.getOutward());
+                        stringBuilder2.append("）；");
                     }
+                    rows.get(6).getTableCells().get(2).setText(stringBuilder2.toString().substring(0,stringBuilder2.length()-1));//样品状态
                     rows.get(6).getTableCells().get(4).setText(detail.getIsSave().equals("1") ? "是" : "否");//样品保留
                     rows.get(7).getTableCells().get(2).setText(detail.getPaymentCount() == null ? "--" : detail.getPaymentCount());//检验收费
                     rows.get(7).getTableCells().get(4).setText(detail.getPaymentMethod() == null ? "--" : detail.getPaymentMethod());//支付方式
                     //TODO 本次缴费统计缴费记录表
-                    rows.get(7).getTableCells().get(6).setText(detail.getPaymentRecord() == null ? "--" : detail.getPaymentRecord());//本次交费
+                    rows.get(7).getTableCells().get(6).setText(detail.getPaymentRecord() == null ? "--" : detail.getPaymentRecord()+".00");//本次交费
                     rows.get(8).getTableCells().get(2).setText(DateUtil.formatDate(detail.getRequestDate()));//完成期限
                     rows.get(8).getTableCells().get(4).setText(detail.getBusinessAcceptor() == null ? "--" : detail.getBusinessAcceptor());//业务受理人
                     rows.get(8).getTableCells().get(6).setText(DateUtil.formatDate(detail.getAcceptanceDate()));//受理日期
