@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -308,10 +309,17 @@ public class TaskServiceImpl implements TaskService {
         EntrustServiceImpl service = new EntrustServiceImpl();
         for (ReceiveSampleListVo sampleListVo : dataList) {
             List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
+            List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
             for (SamplePrivateInfoVo samplePrivateInfoVo : sampleList) {
                 String state = service.findStateBySampleId(samplePrivateInfoVo.getId(), entrustEntityMapper, taskMapper);
                 samplePrivateInfoVo.setState(state);
+                //TODO PSH查询子原材样品信息
+                List<SamplePrivateInfoVo> nodeSampleList1 = taskMapper.getNodeSampleList(samplePrivateInfoVo.getId());
+                if(!CollectionUtils.isEmpty(nodeSampleList1)){
+                    nodeSampleList.addAll(nodeSampleList1);
+                }
             }
+            sampleList.addAll(nodeSampleList);
         }
         PageInfo<ReceiveSampleListVo> result = new PageInfo<>(dataList);
         return result;
@@ -444,7 +452,9 @@ public class TaskServiceImpl implements TaskService {
         XWPFDocument doc = null;
         doc = new XWPFDocument(object);
         List<XWPFTable> tables = doc.getTables();
-        for (int j=0;j<tables.size();j++) {
+        //                原材表格逐行赋值
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int j = 0; j < tables.size(); j++) {
             List<XWPFTableRow> rows = tables.get(j).getRows();
             //表头部分
             //解析替换文本段落对象
@@ -454,8 +464,88 @@ public class TaskServiceImpl implements TaskService {
             // 编号
             testMap.put("number", taskDetailInfoVo.getTaskCode());
             PoiConfig.changeText(doc, testMap);
+            if (j == 0) {
+                //设置样品信息
+                List<SampleDetailVo> sampleEntityList = Lists.newArrayList();
+                // 遍历 原材样品数据
+                List<SampleDetailVo> samples = taskDetailInfoVo.getSampleDetailList();
+                // 处理为配合比。
+                List<TestSampleEntity> nodeSample = taskDetailInfoVo.getNodeSample();
+                if (nodeSample != null && nodeSample.size() > 0) {
+                    for (TestSampleEntity node : nodeSample) {
+                        SampleEntity entity = new SampleEntity(node);
+                        SampleDetailVo sampleDetailVo = new SampleDetailVo();
+                        sampleDetailVo.setSampleName(entity.getSampleName());
+                        sampleDetailVo.setSpecs(entity.getSpecs());
+                        sampleDetailVo.setBatchNumber(entity.getBatchNumber());
+                        sampleDetailVo.setSampleQuantity(entity.getSampleQuantity());
+                        sampleDetailVo.setGeneration(entity.getGeneration());
+                        sampleDetailVo.setSampleOrigin(entity.getSampleOrigin());
+                        sampleDetailVo.setSampleRemark(entity.getSampleRemark());
+                        sampleDetailVo.setSampleCode(entity.getSampleCode());
+                        sampleEntityList.add(sampleDetailVo);
+                    }
+                    samples.addAll(sampleEntityList);
+                }
+                if (taskDetailInfoVo.getSampleDetailList() == null || taskDetailInfoVo.getSampleDetailList().isEmpty()) {
+                    return doc;
+                }
+                if (samples.size() > 5) {
+                    AsposeUtil.addRows(tables.get(0), 4, samples.size() - 5);
+                }
+
+                for (int i = 0; i < samples.size(); i++) {
+                    SampleDetailVo sampleDetailVo = samples.get(i);
+                    // 补充表格数据 样品名称
+                    rows.get(i + 1).getTableCells().get(0).setText(sampleDetailVo.getSampleName());
+                    // 规格/等级
+                    rows.get(i + 1).getTableCells().get(1).setText(sampleDetailVo.getSpecs());
+                    // 批号/编号
+                    rows.get(i + 1).getTableCells().get(2).setText(sampleDetailVo.getBatchNumber());
+                    // 样品数量
+                    rows.get(i + 1).getTableCells().get(3).setText(sampleDetailVo.getSampleQuantity());
+                    // 样品产地
+                    rows.get(i + 1).getTableCells().get(4).setText(sampleDetailVo.getSampleOrigin());
+                    //样品编号
+                    rows.get(i + 1).getTableCells().get(5).setText(sampleDetailVo.getSampleCode());
+                    // 备注
+                    rows.get(i + 1).getTableCells().get(6).setText(sampleDetailVo.getSampleRemark());
+                    // 处理检测项 依据名去除 只保留编号。
+                    if (sampleDetailVo.getCheckItemInfoList() != null) {
+                        for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+                            String name = checkItemInfoVo.getCheckItemName();
+                            stringBuilder.append(name);
+                            if (!StringUtils.isEmpty(checkItemInfoVo.getStandardName())) {
+                                stringBuilder.append("（");
+                                String s = checkItemInfoVo.getStandardName();
+                                String aa = s.split("《")[0];
+                                stringBuilder.append(aa);
+                                stringBuilder.append("）");
+                            }
+                            stringBuilder.append("，");
+                        }
+                    }
+                }
+            }
+            // 提供资料
+            if (j == 1) {
+                rows.get(0).getTableCells().get(0).setText(taskDetailInfoVo.getPresentInformation());
+                // 取样方式
+                rows.get(1).getTableCells().get(1).setText(taskDetailInfoVo.getSamplingMethod());
+                // 检验目的
+                rows.get(1).getTableCells().get(3).setText(taskDetailInfoVo.getCheckPurpose());
+                // 产品标准
+                rows.get(1).getTableCells().get(5).setText(taskDetailInfoVo.getJudgmentBasis());
+                // 检测项目及检验依据
+                String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
+                rows.get(2).getTableCells().get(1).setText(substring);
+                // 要求检验完成日期
+                rows.get(3).getTableCells().get(1).setText(taskDetailInfoVo.getRequiredCompletionTime());
+                // 本单产值
+                rows.get(3).getTableCells().get(3).setText(taskDetailInfoVo.getCost());
+            }
             // 获取委托单印章
-            if (taskDetailInfoVo.getSealType() != null) {
+            if (taskDetailInfoVo.getSealType() != null && j == 2) {
                 String[] sealTypes = taskDetailInfoVo.getSealType().split(",");
                 // 任务单表格数据
                 List<String> totalData = new ArrayList<>();
@@ -487,101 +577,8 @@ public class TaskServiceImpl implements TaskService {
                         sealType.append(rowData1);
                     }
                 }
-                if (j==2){
-                    rows.get(14).getTableCells().get(1).setText(sealType.toString());
-                }
+                rows.get(14).getTableCells().get(1).setText(sealType.toString());
             }
-            //设置样品信息
-            List<SampleDetailVo> sampleEntityList = Lists.newArrayList();
-            // 遍历 原材样品数据
-            List<SampleDetailVo> samples = taskDetailInfoVo.getSampleDetailList();
-            // 处理为配合比。
-            List<TestSampleEntity> nodeSample = taskDetailInfoVo.getNodeSample();
-            if (nodeSample != null && nodeSample.size()>0){
-                for (TestSampleEntity node :nodeSample) {
-                    SampleEntity entity = new SampleEntity(node);
-                    SampleDetailVo sampleDetailVo = new SampleDetailVo();
-                    sampleDetailVo.setSampleName(entity.getSampleName());
-                    sampleDetailVo.setSpecs(entity.getSpecs());
-                    sampleDetailVo.setBatchNumber(entity.getBatchNumber());
-                    sampleDetailVo.setSampleQuantity(entity.getSampleQuantity());
-                    sampleDetailVo.setGeneration(entity.getGeneration());
-                    sampleDetailVo.setSampleOrigin(entity.getSampleOrigin());
-                    sampleDetailVo.setSampleRemark(entity.getSampleRemark());
-                    sampleEntityList.add(sampleDetailVo);
-                }
-                samples.addAll(sampleEntityList);
-            }
-            if (taskDetailInfoVo.getSampleDetailList() == null || taskDetailInfoVo.getSampleDetailList().isEmpty()) {
-                return doc;
-            }
-            if(samples.size()>5) {
-//                rows = extendTable(table, rows, samples, 5, 7);
-                AsposeUtil.addRows(tables.get(0),4,samples.size()-5);
-            }
-            //                原材表格逐行赋值
-            StringBuilder stringBuilder = new StringBuilder();
-            for (int i = 0; i < samples.size(); i++) {
-                SampleDetailVo sampleDetailVo = samples.get(i);
-                // 补充表格数据 样品名称
-                rows.get(i + 1).getTableCells().get(0).setText(sampleDetailVo.getSampleName());
-                // 规格/等级
-                rows.get(i + 1).getTableCells().get(1).setText(sampleDetailVo.getSpecs());
-                // 批号/编号
-                rows.get(i + 1).getTableCells().get(2).setText(sampleDetailVo.getBatchNumber());
-                // 样品数量
-                rows.get(i + 1).getTableCells().get(3).setText(sampleDetailVo.getGeneration());
-                // 样品产地
-                rows.get(i + 1).getTableCells().get(4).setText(sampleDetailVo.getSampleOrigin());
-                //样品编号
-                rows.get(i + 1).getTableCells().get(5).setText(sampleDetailVo.getSampleCode());
-                // 备注
-                rows.get(i + 1).getTableCells().get(6).setText(sampleDetailVo.getRemark());
-//                for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
-//                    stringBuilder.append(checkItemInfoVo.getCheckItemName() + "(" + checkItemInfoVo.getStandardName() + ")" + ",");
-//                }
-                // 处理检测项 依据名去除 只保留编号。
-                if(sampleDetailVo.getCheckItemInfoList()!=null){
-                    for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
-//                    stringBuilder.append(checkItemInfoVo.getCheckItemName() + "(" + checkItemInfoVo.getStandardName() + ")" + ",");
-                        String name = checkItemInfoVo.getCheckItemName();
-                        stringBuilder.append(name);
-                        if (!StringUtils.isEmpty(checkItemInfoVo.getStandardName())) {
-                            stringBuilder.append("（");
-                            String s = checkItemInfoVo.getStandardName();
-                            String aa = s.split("《")[0];
-                            stringBuilder.append(aa);
-                            stringBuilder.append("）");
-                        }
-                        stringBuilder.append("，");
-                    }
-                }
-            }
-            // 提供资料
-            if (j==1){
-                rows.get(0).getTableCells().get(0).setText(taskDetailInfoVo.getPresentInformation());
-                // 取样方式
-                rows.get(1).getTableCells().get(1).setText(taskDetailInfoVo.getSamplingMethod());
-                // 检验目的
-                rows.get(1).getTableCells().get(3).setText(taskDetailInfoVo.getCheckPurpose());
-                // 产品标准
-                rows.get(1).getTableCells().get(5).setText(taskDetailInfoVo.getJudgmentBasis());
-                // 检测项目及检验依据
-                String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
-                rows.get(2).getTableCells().get(1).setText(substring);
-                // 要求检验完成日期
-                rows.get(3).getTableCells().get(1).setText(taskDetailInfoVo.getRequiredCompletionTime());
-                // 本单产值
-                rows.get(3).getTableCells().get(3).setText(taskDetailInfoVo.getCost());
-            }
-            return doc;
-
-        }
-        try {
-
-        } catch (
-                Exception e) {
-            System.out.println("设置任务单信息到模板异常:" + e);
         }
         return doc;
     }
