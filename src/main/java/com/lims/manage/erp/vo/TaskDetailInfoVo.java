@@ -52,6 +52,13 @@ public class TaskDetailInfoVo {
      */
     private List<TestSampleEntity> nodeSample;
 
+    /**
+     * reportCode
+     * 报告编号
+     * @param taskId
+     */
+    private String reportCode;
+
 
     public TaskDetailInfoVo(Long taskId) {
         this.taskId = taskId;

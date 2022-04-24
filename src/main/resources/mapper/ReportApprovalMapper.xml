@@ -87,7 +87,8 @@
         t2.entrustment_no AS entrustmentNo,
         t1.entrustment_id AS entrustmentId,
         t1.seal_type AS sealType,
-        t2.seal_type AS sealTypeTicket
+        t2.seal_type AS sealTypeTicket,
+		t1.report_code reportCode
         FROM
             test_report_record AS t1
             LEFT JOIN test_entrusted_info AS t2 on t2.id = t1.entrustment_id
@@ -111,6 +112,7 @@
         <id property="id" column="sample_id"></id>
         <result property="sampleCode" column="sample_code"></result>
         <result property="sampleName" column="sample_name"></result>
+        <result property="aliasName" column="alias_name"></result>
         <result property="productId" column="product_id"></result>
         <result property="specs" column="specs"></result>
         <result property="batchNumber" column="batch_number"></result>
@@ -152,11 +154,12 @@
         SELECT
                t4.id as sample_id,
                t4.sample_name,
+               t4.alias_name,
                t4.sample_code,
                t4.specs,
                t4.batch_number,
                t4.generation,
-               t8.check_item_name,
+               t5.check_item_name,
                t7.name,
                CONCAT(t6.code, '《', t6.`name`, '》') standard_name,
                t5.times,
