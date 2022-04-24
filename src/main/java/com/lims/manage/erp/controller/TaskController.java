@@ -384,7 +384,7 @@ public class TaskController {
             document.close();
             outputStream.close();
         } catch (Exception ex) {
-            log.info("导出失败：", ex.getMessage());
+            log.info("导出失败：{}", ex);
         }
     }
 
