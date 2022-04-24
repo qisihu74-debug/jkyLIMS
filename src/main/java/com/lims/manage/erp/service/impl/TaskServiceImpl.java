@@ -2,6 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.lims.manage.erp.config.PoiConfig;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
@@ -505,19 +506,35 @@ public class TaskServiceImpl implements TaskService {
                 rows2.get(14).getTableCells().get(1).setText(sealType.toString());
             }
 
-            // 遍历 样品数据
-            List<SampleDetailVo> sampleDetailList = taskDetailInfoVo.getSampleDetailList();
+            //设置样品信息
+            List<SampleDetailVo> sampleEntityList = Lists.newArrayList();
+            // 遍历 原材样品数据
+            List<SampleDetailVo> samples = taskDetailInfoVo.getSampleDetailList();
+            // 处理为配合比。
+            List<TestSampleEntity> nodeSample = taskDetailInfoVo.getNodeSample();
+            if (nodeSample != null && nodeSample.size()>0){
+                for (TestSampleEntity node :nodeSample) {
+                    SampleEntity entity = new SampleEntity(node);
+                    SampleDetailVo sampleDetailVo = new SampleDetailVo();
+                    sampleDetailVo.setSampleName(entity.getSampleName());
+                    sampleDetailVo.setSpecs(entity.getSpecs());
+                    sampleDetailVo.setBatchNumber(entity.getBatchNumber());
+                    sampleDetailVo.setSampleQuantity(entity.getSampleQuantity());
+                    sampleDetailVo.setGeneration(entity.getGeneration());
+                    sampleDetailVo.setSampleOrigin(entity.getSampleOrigin());
+                    sampleDetailVo.setSampleRemark(entity.getSampleRemark());
+                    sampleEntityList.add(sampleDetailVo);
+                }
+                samples.addAll(sampleEntityList);
+            }
             if (taskDetailInfoVo.getSampleDetailList() == null || taskDetailInfoVo.getSampleDetailList().isEmpty()) {
                 return doc;
             }
-            // 下载任务单表格处理。
-            //rows = table.getRows();
-            rows = extendTable(table,rows,sampleDetailList,5,7);
-
-            //                表格逐行赋值
+            rows = extendTable(table, rows, samples, 5, 7);
+            //                原材表格逐行赋值
             StringBuilder stringBuilder = new StringBuilder();
-            for (int i = 0; i < sampleDetailList.size(); i++) {
-                SampleDetailVo sampleDetailVo = sampleDetailList.get(i);
+            for (int i = 0; i < samples.size(); i++) {
+                SampleDetailVo sampleDetailVo = samples.get(i);
                 // 补充表格数据 样品名称
                 rows.get(i + 1).getTableCells().get(0).setText(sampleDetailVo.getSampleName());
                 // 规格/等级
@@ -549,7 +566,6 @@ public class TaskServiceImpl implements TaskService {
                     }
                     stringBuilder.append("，");
                 }
-
             }
             // 提供资料
             rows1.get(0).getTableCells().get(0).setText(taskDetailInfoVo.getPresentInformation());
@@ -829,14 +845,15 @@ public class TaskServiceImpl implements TaskService {
 
     /**
      * 扩展模板样品行列
-     * @param table 原始表格
-     * @param rows 原始表格行数
+     *
+     * @param table            原始表格
+     * @param rows             原始表格行数
      * @param sampleDetailList 待处理数据
-     * @param modelSampleRows 需要新增行
-     * @param columns 列数
+     * @param modelSampleRows  需要新增行
+     * @param columns          列数
      */
-    public List<XWPFTableRow> extendTable(XWPFTable table,List<XWPFTableRow> rows,List<SampleDetailVo> sampleDetailList,
-                             int modelSampleRows,int columns){
+    public List<XWPFTableRow> extendTable(XWPFTable table, List<XWPFTableRow> rows, List<SampleDetailVo> sampleDetailList,
+                                          int modelSampleRows, int columns) {
         //获取表格对应的行
         rows = table.getRows();
         // 判断表格行数 >5 sampleDetailList.size()
