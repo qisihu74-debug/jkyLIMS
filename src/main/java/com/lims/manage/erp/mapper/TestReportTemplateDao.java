@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestReportTemplate;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -31,5 +32,7 @@ int insertBatch(@Param("entities") List<TestReportTemplate> entities);
 */
 int insertOrUpdateBatch(@Param("entities") List<TestReportTemplate> entities);
 
+    @Select("select report_standard from test_report_template where report_file_uri=#{url}")
+    String getTypeByUrl(String url);
 }
 

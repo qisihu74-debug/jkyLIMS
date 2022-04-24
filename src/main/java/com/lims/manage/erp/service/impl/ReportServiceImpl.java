@@ -34,6 +34,7 @@ import com.lims.manage.erp.mapper.TeamMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.mapper.TestReportQualifcationDao;
+import com.lims.manage.erp.mapper.TestReportTemplateDao;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.service.ReportService;
@@ -133,6 +134,8 @@ public class ReportServiceImpl implements ReportService {
     private SysUserDao sysUserDao;
     @Autowired
     private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
+    @Autowired
+    private TestReportTemplateDao templateDao;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -1736,12 +1739,20 @@ public class ReportServiceImpl implements ReportService {
     @SneakyThrows
     @Override
     public String submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id,TestSampleMixInfoEntity mixInfoEntity) {
+        //配合比实验，设计到原材的报告模板忽略
+        List<ConclusionEntity> conclusionEntityList = Lists.newArrayList();
+        for (ConclusionEntity entity :list) {
+            String type = templateDao.getTypeByUrl(entity.getUrl());
+            if ("非常规".equals(type)){
+                conclusionEntityList.add(entity);
+            }
+        }
         //2代表报告头2页
         int totalPage = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
         ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
         int index = 1;
-        for (ConclusionEntity conclusionEntity:list) {
+        for (ConclusionEntity conclusionEntity:conclusionEntityList) {
             String[] split = conclusionEntity.getUrl().split("\\?");
             String[] strings = split[0].split("\\/");
             String bluckName = strings[3];
