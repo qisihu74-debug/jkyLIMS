@@ -1744,7 +1744,10 @@ public class ReportServiceImpl implements ReportService {
         //配合比实验，设计到原材的报告模板忽略
         List<ConclusionEntity> conclusionEntityList = Lists.newArrayList();
         for (ConclusionEntity entity :list) {
-            String type = templateDao.getTypeByUrl(entity.getUrl());
+            String[] split = entity.getUrl().split("\\?");
+            String[] strings = split[0].split("\\/");
+            String fileName = strings[4];
+            String type = templateDao.getTypeByUrl(fileName);
             if ("非常规".equals(type)){
                 conclusionEntityList.add(entity);
             }
