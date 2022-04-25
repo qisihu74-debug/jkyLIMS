@@ -32,7 +32,7 @@ int insertBatch(@Param("entities") List<TestReportTemplate> entities);
 */
 int insertOrUpdateBatch(@Param("entities") List<TestReportTemplate> entities);
 
-    @Select("select report_standard from test_report_template where report_file_uri=#{url}")
+    @Select("select report_standard from test_report_template where report_file_uri like '%#{url}%'")
     String getTypeByUrl(String url);
 }
 
