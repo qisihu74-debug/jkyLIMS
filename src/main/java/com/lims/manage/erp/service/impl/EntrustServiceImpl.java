@@ -1089,6 +1089,9 @@ public class EntrustServiceImpl implements EntrustService {
         List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
+        //查询实际缴费
+        int total = entityMapper.getRecordCountById(entrustmentId);
+        entrustAddVo.setPaymentRecord(total+"");
         if (entrustAddVo.getOperateUser() != null) {
             // 获取做废人id 查询账号姓名
             entrustAddVo.setOperateUserStr(sysUserDao.getSysUserName(entrustAddVo.getOperateUser()));
@@ -1598,7 +1601,7 @@ public class EntrustServiceImpl implements EntrustService {
                         stringBuilder2.append("（");
                         stringBuilder2.append(sampleEntity.getSpecs());
                         stringBuilder2.append("，");
-                        stringBuilder2.append(org.apache.commons.lang3.StringUtils.isEmpty(sampleEntity.getOutward())?"":sampleEntity.getOutward());
+                        stringBuilder2.append(org.apache.commons.lang3.StringUtils.isEmpty(sampleEntity.getOutward())?"无":sampleEntity.getOutward());
                         stringBuilder2.append("）；");
                     }
                     rows.get(6).getTableCells().get(2).setText(stringBuilder2.toString().substring(0,stringBuilder2.length()-1));//样品状态
