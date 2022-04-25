@@ -74,7 +74,19 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             } else {
                 sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
             }
-            TestSampleEntity entity = new TestSampleEntity(samples.get(i), sampleCode);
+            StringBuilder outwardStr = new StringBuilder();
+            List<String> outward = samples.get(i).getOutward();
+            if(!CollectionUtils.isEmpty(outward)){
+                for (int j = 0; j < outward.size(); j++) {
+                    if(j != outward.size()-1){
+                        outwardStr.append(outward.get(j));
+                        outwardStr.append(",");
+                    }else{
+                        outwardStr.append(outward.get(j));
+                    }
+                }
+            }
+            TestSampleEntity entity = new TestSampleEntity(samples.get(i), sampleCode,outwardStr.toString());
             entities.add(entity);
         }
         return testSampleEntityMapper.insertBatch(entities);
@@ -90,7 +102,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         int newMax = getNewSampleCode() + 1;
         String codeStr = new DecimalFormat("0000").format(newMax);
         String sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
-        TestSampleEntity mainSample = new TestSampleEntity(vo, sampleCode);
+        TestSampleEntity mainSample = new TestSampleEntity(vo, sampleCode,null);
         param.add(mainSample);
         //处理子样品
         List<SampleDetailAddVo> samples1 = samples.getSamples();
@@ -109,7 +121,19 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             sampleDetailAddVo.setPid(newId);
             //设置委托单位
             sampleDetailAddVo.setCompanyId(vo.getCompanyId());
-            TestSampleEntity sample = new TestSampleEntity(sampleDetailAddVo, code);
+            StringBuilder outwardStr = new StringBuilder();
+            List<String> outward = sampleDetailAddVo.getOutward();
+            if(!CollectionUtils.isEmpty(outward)){
+                for (int j = 0; j < outward.size(); j++) {
+                    if(j != outward.size()-1){
+                        outwardStr.append(outward.get(j));
+                        outwardStr.append(",");
+                    }else{
+                        outwardStr.append(outward.get(j));
+                    }
+                }
+            }
+            TestSampleEntity sample = new TestSampleEntity(sampleDetailAddVo, code,outwardStr.toString());
             param.add(sample);
             i++;
         }
@@ -274,6 +298,13 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
     @Override
     public int updateSample(TestSampleEntity sampleEntity) {
+        String outward = sampleEntity.getOutward();
+        if(outward != null){
+            String replace = outward.replace("[", "");
+            String replace1 = replace.replace("]", "");
+            String replace2 = replace1.replace("\"", "");
+            sampleEntity.setOutward(replace2);
+        }
         return testSampleEntityMapper.updateByPrimaryKeyNotAll(sampleEntity);
     }
 
@@ -295,6 +326,13 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
                 entity.setSampleType(sampleEntity.getSampleType());
                 //设置委托单位
                 entity.setCompanyId(sampleEntity.getCompanyId());
+                String outward = entity.getOutward();
+                if(outward != null){
+                    String replace = outward.replace("[", "");
+                    String replace1 = replace.replace("]", "");
+                    String replace2 = replace1.replace("\"", "");
+                    entity.setOutward(replace2);
+                }
                 result = testSampleEntityMapper.updateByPrimaryKeyNotAll(entity);
             } else {
                 //设置样品编号

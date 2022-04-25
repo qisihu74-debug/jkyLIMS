@@ -157,7 +157,7 @@ public class TestSampleEntity {
     public TestSampleEntity() {
     }
 
-    public TestSampleEntity(SampleDetailAddVo vo,String sampleCode) {
+    public TestSampleEntity(SampleDetailAddVo vo,String sampleCode,String outward) {
         this.id = vo.getId();
         this.companyId = vo.getCompanyId();
         this.sampleName = vo.getSampleName();
@@ -166,7 +166,7 @@ public class TestSampleEntity {
         this.batchNumber = vo.getBatchNumber();
         this.manufacturer = vo.getManufacturer();
         this.sampleOrigin = vo.getSampleOrigin();
-        this.outward = vo.getOutward() == null ? null : vo.getOutward().toString();
+        this.outward = outward;
         this.inspector = vo.getInspector();
         this.receivedDate = new SimpleDateFormat("yyyy-MM-dd").format(vo.getReceivedDate());
         this.sampleRequirement = vo.getSampleRequirement();
