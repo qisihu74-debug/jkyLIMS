@@ -483,6 +483,8 @@ public class TaskServiceImpl implements TaskService {
                         sampleDetailVo.setSampleOrigin(entity.getSampleOrigin());
                         sampleDetailVo.setSampleRemark(entity.getSampleRemark());
                         sampleDetailVo.setSampleCode(entity.getSampleCode());
+                        // 生产厂家/样品产地
+                        sampleDetailVo.setManufacturer(entity.getManufacturer());
                         sampleEntityList.add(sampleDetailVo);
                     }
                     samples.addAll(sampleEntityList);
@@ -505,7 +507,7 @@ public class TaskServiceImpl implements TaskService {
                     // 样品数量
                     rows.get(i + 1).getTableCells().get(3).setText(sampleDetailVo.getSampleQuantity());
                     // 样品产地
-                    rows.get(i + 1).getTableCells().get(4).setText(sampleDetailVo.getSampleOrigin());
+                    rows.get(i + 1).getTableCells().get(4).setText(sampleDetailVo.getManufacturer());
                     //样品编号
                     rows.get(i + 1).getTableCells().get(5).setText(sampleDetailVo.getSampleCode());
                     // 备注
