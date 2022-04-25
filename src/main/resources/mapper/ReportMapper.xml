@@ -396,14 +396,14 @@
     </select>
 
     <select id="getJudgeBasis" resultType="java.lang.String">
-        SELECT CONCAT(t2.code, "《", t2.name, "》")
+        SELECT distinct t2.code
         FROM test_entrusted_sample_standard_rel t1
                  LEFT JOIN test_standard_file t2 ON t1.standard_id = t2.id
         WHERE t1.entrustment_id = #{id}
     </select>
 
     <select id="getCheckBasis" resultType="java.lang.String">
-        SELECT CONCAT(t2.code, "《", t2.name, "》")
+        SELECT distinct t2.code
         FROM test_entrusted_sample_checkitem_rel t1
                  LEFT JOIN test_standard_file t2 ON t1.standard_id = t2.id
         WHERE t1.entrust_id = #{id}

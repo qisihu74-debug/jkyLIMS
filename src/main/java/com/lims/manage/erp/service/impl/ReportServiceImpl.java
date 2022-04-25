@@ -786,7 +786,12 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
         }
-        return result.toString();
+        if (result.length()>=1){
+            return result.toString().substring(0,result.length()-1);
+        }else {
+            return result.toString();
+        }
+
     }
 
     @Override
@@ -801,7 +806,11 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
         }
-        return result.toString();
+        if (result.length()>=1){
+            return result.toString().substring(0,result.length()-1);
+        }else {
+            return result.toString();
+        }
     }
 
     @Override
@@ -1601,10 +1610,10 @@ public class ReportServiceImpl implements ReportService {
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
                         rows.get(6).getCell(1).removeParagraph(0);
                         rows.get(6).getCell(1).setText("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
-                                + "样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
-                                + "样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
-                                + "样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
-                                + "收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                                + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
+                                + "；样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
+                                + "；样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
+                                + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                         //检测依据
                         String checkBasis = getCheckBasis(id);
                         rows.get(7).getCell(1).removeParagraph(0);
@@ -1711,14 +1720,7 @@ public class ReportServiceImpl implements ReportService {
         InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
         XWPFDocument topDoc = new XWPFDocument(fileStream);;
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
-        Map<String, String> textMap = new HashMap<>();
-        textMap.put("code", reportRecordEntity.getReportCode());
-        textMap.put("page", totalPage+"");
-        textMap.put("sampleName", reportRecordEntity.getSampleName());
-        textMap.put("dept", entrustAddVo.getEntrustCompany());
-        textMap.put("part", entrustAddVo.getProjectPart());
-        textMap.put("checkType", entrustAddVo.getCheckPurpose());
-        replaceWord(topDoc,"top.docx",textMap);
+        setReportTop(topDoc,entrustAddVo,reportRecordEntity,totalPage);
         //报告头部合并顺序1
         map.put(1,topDoc);
         //将报告合并成一个完整的word
@@ -1789,10 +1791,10 @@ public class ReportServiceImpl implements ReportService {
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
                         rows.get(6).getCell(1).removeParagraph(0);
                         rows.get(6).getCell(1).setText("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
-                                + "样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
-                                + "样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
-                                + "样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
-                                + "收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                                + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
+                                + "；样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
+                                + "；样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
+                                + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                         //检测依据
                         String checkBasis = getCheckBasis(id);
                         rows.get(7).getCell(1).removeParagraph(0);
@@ -1941,16 +1943,9 @@ public class ReportServiceImpl implements ReportService {
         }
         //获取报告头部模板填充头部数据
         InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
-        XWPFDocument topDoc = new XWPFDocument(fileStream);;
+        XWPFDocument topDoc = new XWPFDocument(fileStream);
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
-        Map<String, String> textMap = new HashMap<>();
-        textMap.put("code", reportRecordEntity.getReportCode());
-        textMap.put("page", totalPage+"");
-        textMap.put("sampleName", reportRecordEntity.getSampleName());
-        textMap.put("dept", entrustAddVo.getEntrustCompany());
-        textMap.put("part", entrustAddVo.getProjectPart());
-        textMap.put("checkType", entrustAddVo.getCheckPurpose());
-        replaceWord(topDoc,"top.docx",textMap);
+        setReportTop(topDoc,entrustAddVo,reportRecordEntity,totalPage);
         //报告头部合并顺序1
         map.put(1,topDoc);
         //将报告合并成一个完整的word
@@ -1966,6 +1961,22 @@ public class ReportServiceImpl implements ReportService {
         }
         updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
         return url;
+    }
+
+    /**
+     * 填充报告头部信息
+     * @param topDoc
+     * @param entrustAddVo
+     */
+    private void setReportTop(XWPFDocument topDoc, EntrustAddVo entrustAddVo,ReportRecordEntity reportRecordEntity,int totalPage) {
+        XWPFTable table = topDoc.getTables().get(0);
+        List<XWPFTableRow> rows = table.getRows();
+        rows.get(1).getCell(2).setText(reportRecordEntity.getReportCode());
+        rows.get(2).getCell(2).setText(totalPage+"");
+        rows.get(12).getCell(2).setText(reportRecordEntity.getSampleName());
+        rows.get(13).getCell(2).setText(entrustAddVo.getEntrustCompany());
+        rows.get(14).getCell(1).setText(entrustAddVo.getProjectPart());
+        rows.get(15).getCell(2).setText(entrustAddVo.getCheckPurpose());
     }
 
     @Override
