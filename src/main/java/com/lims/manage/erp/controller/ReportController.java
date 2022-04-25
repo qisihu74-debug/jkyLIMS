@@ -573,7 +573,7 @@ public class ReportController {
      * @return
      */
     @RequestMapping("previewDownLoad")
-    public String previewDownLoad(@RequestParam("json") String json) {
+    public void previewDownLoad(@RequestParam("json") String json,HttpServletResponse response) {
         String decode = "";
         String url = "";
         try {
@@ -584,9 +584,9 @@ public class ReportController {
         String unescapeJava = StringEscapeUtils.unescapeJava(decode);
         String substring = unescapeJava.substring(1, unescapeJava.length() - 1);
         ReqBean reqBean = JSON.parseObject(substring,ReqBean.class);
-        if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
+       /* if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
             return null;
-        }
+        }*/
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
         if ("原材".equals(reqBean.getType())){
@@ -607,11 +607,15 @@ public class ReportController {
             //相应pdf
             ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
             InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+            ServletOutputStream outputStream = response.getOutputStream();
+            int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+            inputStream.close();
+            outputStream.close();
             url = MinIoUtil.upload("report-download", reqBean.getId() + ".pdf", inputStream, "application/octet-stream");
         }catch (Exception e){
             logger.error("预览合并后的报告异常:{}",e);
         }
-        return url;
+        //return url;
     }
 
     /**

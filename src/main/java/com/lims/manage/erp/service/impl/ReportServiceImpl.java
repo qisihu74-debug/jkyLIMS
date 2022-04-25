@@ -1971,12 +1971,12 @@ public class ReportServiceImpl implements ReportService {
     private void setReportTop(XWPFDocument topDoc, EntrustAddVo entrustAddVo,ReportRecordEntity reportRecordEntity,int totalPage) {
         XWPFTable table = topDoc.getTables().get(0);
         List<XWPFTableRow> rows = table.getRows();
-        rows.get(0).getCell(2).setText(reportRecordEntity.getReportCode());
-        rows.get(1).getCell(2).setText(totalPage+"");
-        rows.get(3).getCell(1).setText(reportRecordEntity.getSampleName());
-        rows.get(4).getCell(1).setText(entrustAddVo.getEntrustCompany());
-        rows.get(5).getCell(1).setText(entrustAddVo.getProjectPart());
-        rows.get(6).getCell(1).setText(entrustAddVo.getCheckPurpose());
+        rows.get(1).getCell(2).setText(reportRecordEntity.getReportCode());
+        rows.get(2).getCell(2).setText(totalPage+"");
+        rows.get(12).getCell(2).setText(reportRecordEntity.getSampleName());
+        rows.get(13).getCell(2).setText(entrustAddVo.getEntrustCompany());
+        rows.get(14).getCell(1).setText(entrustAddVo.getProjectPart());
+        rows.get(15).getCell(2).setText(entrustAddVo.getCheckPurpose());
     }
 
     @Override
