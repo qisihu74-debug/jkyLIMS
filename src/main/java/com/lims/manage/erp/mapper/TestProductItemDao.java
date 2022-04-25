@@ -54,5 +54,7 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
             "WHERE rt.del_flag=0 and pt.del_flag=0 and  \n" +
             "\trt.report_file_uri = #{url}")
     List<Long> getItemsByTemplateUrl(@Param("url") String url);
+
+    List<Long> getItemsByTemplateLikeUrl(@Param("url") String url);
 }
 

@@ -71,5 +71,14 @@
         td
     </select>
 
+    <select id="getItemsByTemplateLikeUrl" resultType="Long">
+SELECT DISTINCT
+            pt.check_item_id
+            FROM
+            test_report_template rt
+            LEFT JOIN test_product_item pt ON rt.id = pt.report_model_id
+            WHERE rt.del_flag=0 and pt.del_flag=0 and
+            rt.report_file_uri like concat('%',#{url},'%')
+    </select>
 </mapper>
 
