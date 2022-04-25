@@ -559,7 +559,7 @@ public class ReportController {
         }
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
-        if ("原材".equals(reqBean.getType())){
+        if ("原材检测".equals(reqBean.getType())){
             url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
         }else {
             url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),null);
@@ -589,7 +589,7 @@ public class ReportController {
         }*/
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
-        if ("原材".equals(reqBean.getType())){
+        if ("原材检测".equals(reqBean.getType())){
             url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
         }else {
             url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());

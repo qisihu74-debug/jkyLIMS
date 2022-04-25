@@ -1653,7 +1653,11 @@ public class ReportServiceImpl implements ReportService {
                     }
                     //过滤每个报告模板的检测项
                     List<ReportRecordDetailEntity> entities = Lists.newArrayList();
-                    List<Long> longList = itemDao.getItemsByTemplateUrl(conclusionEntity.getUrl());
+
+                    String[] split11 = conclusionEntity.getUrl().split("\\?");
+                    String[] strings11 = split11[0].split("\\/");
+                    String fileName11 = strings11[4];
+                    List<Long> longList = itemDao.getItemsByTemplateLikeUrl(fileName11);
                     for (ReportRecordDetailEntity entity:checkItemList) {
                         for (Long itemId:longList) {
                             if (entity.getCheckItemId().equals(itemId)){
