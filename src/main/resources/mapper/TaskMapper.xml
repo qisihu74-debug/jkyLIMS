@@ -673,6 +673,7 @@
     <select id="getNodeSampleList" resultType="com.lims.manage.erp.vo.SamplePrivateInfoVo">
         SELECT
             id,
+            pid,
             sample_code sampleCode,
             batch_number batchNumber,
             state,

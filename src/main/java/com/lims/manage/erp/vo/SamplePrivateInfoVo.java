@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class SamplePrivateInfoVo {
     private Integer id;
+    private Integer pid;
     private String sampleCode;
     private String batchNumber;
     private String picture;

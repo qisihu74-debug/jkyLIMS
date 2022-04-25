@@ -1090,7 +1090,7 @@ public class EntrustServiceImpl implements EntrustService {
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         //查询实际缴费
-        int total = entityMapper.getRecordCountById(entrustmentId);
+        Integer total = entityMapper.getRecordCountById(entrustmentId);
         entrustAddVo.setPaymentRecord(total+"");
         if (entrustAddVo.getOperateUser() != null) {
             // 获取做废人id 查询账号姓名
