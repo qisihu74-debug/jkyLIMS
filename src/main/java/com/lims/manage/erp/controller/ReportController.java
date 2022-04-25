@@ -572,7 +572,7 @@ public class ReportController {
      * @param json
      * @return
      */
-    @GetMapping("previewDownLoad")
+    @RequestMapping("previewDownLoad")
     public String previewDownLoad(@RequestParam("json") String json) {
         String decode = "";
         String url = "";
