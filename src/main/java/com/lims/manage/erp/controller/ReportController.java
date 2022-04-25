@@ -592,7 +592,7 @@ public class ReportController {
         if ("原材".equals(reqBean.getType())){
             url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
         }else {
-            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getEntity());
+            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
         }
         //预览word转pdf
         String[] split = url.split("\\?");

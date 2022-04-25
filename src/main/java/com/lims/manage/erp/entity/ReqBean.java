@@ -17,6 +17,6 @@ public class ReqBean {
     private List<ConclusionEntity> list;
     private Long id;
     private String type;
-    private TestSampleMixInfoEntity entity;
+    private TestSampleMixInfoEntity mixInfo;
 
 }

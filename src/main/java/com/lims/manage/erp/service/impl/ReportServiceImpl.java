@@ -1863,26 +1863,24 @@ public class ReportServiceImpl implements ReportService {
                         }
                         //填充配合比下原材样品信息
                         List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(entrustHistoryDetail.getSamples().get(0).getId());
+                        if (testSampleEntities.size()>7){
+                            AsposeUtil.addRows(table,16,testSampleEntities.size()-7);
+                        }
                         for (int j=0;j<testSampleEntities.size();j++) {
-                            if (j<=8){
-                                rows.get(j+16).getCell(0).removeParagraph(0);
-                                rows.get(j+16).getCell(0).setText(testSampleEntities.get(j).getSampleName());
-                                rows.get(j+16).getCell(1).removeParagraph(0);
-                                rows.get(j+16).getCell(1).setText(testSampleEntities.get(j).getSpecs());
-                                rows.get(j+16).getCell(2).removeParagraph(0);
-                                rows.get(j+16).getCell(2).setText(testSampleEntities.get(j).getManufacturer());
-                                rows.get(j+16).getCell(3).removeParagraph(0);
-                                rows.get(j+16).getCell(3).setText(testSampleEntities.get(j).getBatchNumber());
-                                rows.get(j+16).getCell(4).removeParagraph(0);
-                                rows.get(j+16).getCell(4).setText(testSampleEntities.get(j).getGeneration());
-                                rows.get(j+16).getCell(5).removeParagraph(0);
-                                rows.get(j+16).getCell(5).setText(testSampleEntities.get(j).getOutward());
-                                rows.get(j+16).getCell(6).removeParagraph(0);
-                                rows.get(j+16).getCell(6).setText(testSampleEntities.get(j).getSampleCode());
-                            }else {
-                                //新增表格填充样品信息
-                                extendTable(table,rows,testSampleEntities,8,9);
-                            }
+                            rows.get(j+16).getCell(0).removeParagraph(0);
+                            rows.get(j+16).getCell(0).setText(testSampleEntities.get(j).getSampleName());
+                            rows.get(j+16).getCell(1).removeParagraph(0);
+                            rows.get(j+16).getCell(1).setText(testSampleEntities.get(j).getSpecs());
+                            rows.get(j+16).getCell(2).removeParagraph(0);
+                            rows.get(j+16).getCell(2).setText(testSampleEntities.get(j).getManufacturer());
+                            rows.get(j+16).getCell(3).removeParagraph(0);
+                            rows.get(j+16).getCell(3).setText(testSampleEntities.get(j).getBatchNumber());
+                            rows.get(j+16).getCell(4).removeParagraph(0);
+                            rows.get(j+16).getCell(4).setText(testSampleEntities.get(j).getGeneration());
+                            rows.get(j+16).getCell(5).removeParagraph(0);
+                            rows.get(j+16).getCell(5).setText(testSampleEntities.get(j).getOutward());
+                            rows.get(j+16).getCell(6).removeParagraph(0);
+                            rows.get(j+16).getCell(6).setText(testSampleEntities.get(j).getSampleCode());
                         }
                     }
                     if (i==size){
