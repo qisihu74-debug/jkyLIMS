@@ -32,7 +32,6 @@ int insertBatch(@Param("entities") List<TestReportTemplate> entities);
 */
 int insertOrUpdateBatch(@Param("entities") List<TestReportTemplate> entities);
 
-    @Select("select report_standard from test_report_template where report_file_uri like concat('%',#{url},'%')")
-    String getTypeByUrl(String url);
+    String getTypeByUrl(@Param("url") String url);
 }
 

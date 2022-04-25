@@ -1842,22 +1842,24 @@ public class ReportServiceImpl implements ReportService {
                             rows.get(14).getCell(3).setText(mixInfoEntity.getMixingWay());
                         }else {
                             TestSampleMixInfoEntity entity = mixInfoEntityMapper.selectByEntrustId(id);
-                            rows.get(11).getCell(1).removeParagraph(0);
-                            rows.get(11).getCell(1).setText(entity.getDesignStrength());
-                            rows.get(11).getCell(3).removeParagraph(0);
-                            rows.get(11).getCell(3).setText(entity.getIntensityConfiguration());
-                            rows.get(12).getCell(1).removeParagraph(0);
-                            rows.get(12).getCell(1).setText(entity.getAntifreezeLevel());
-                            rows.get(12).getCell(3).removeParagraph(0);
-                            rows.get(12).getCell(3).setText(entity.getWaterBinderRatio());
-                            rows.get(13).getCell(1).removeParagraph(0);
-                            rows.get(13).getCell(1).setText(entity.getUnitWaterUse());
-                            rows.get(13).getCell(3).removeParagraph(0);
-                            rows.get(13).getCell(3).setText(entity.getSandRatio());
-                            rows.get(14).getCell(1).removeParagraph(0);
-                            rows.get(14).getCell(1).setText(entity.getDesignSlump());
-                            rows.get(14).getCell(3).removeParagraph(0);
-                            rows.get(14).getCell(3).setText(entity.getMixingWay());
+                            if (entity != null){
+                                rows.get(11).getCell(1).removeParagraph(0);
+                                rows.get(11).getCell(1).setText(entity.getDesignStrength());
+                                rows.get(11).getCell(3).removeParagraph(0);
+                                rows.get(11).getCell(3).setText(entity.getIntensityConfiguration());
+                                rows.get(12).getCell(1).removeParagraph(0);
+                                rows.get(12).getCell(1).setText(entity.getAntifreezeLevel());
+                                rows.get(12).getCell(3).removeParagraph(0);
+                                rows.get(12).getCell(3).setText(entity.getWaterBinderRatio());
+                                rows.get(13).getCell(1).removeParagraph(0);
+                                rows.get(13).getCell(1).setText(entity.getUnitWaterUse());
+                                rows.get(13).getCell(3).removeParagraph(0);
+                                rows.get(13).getCell(3).setText(entity.getSandRatio());
+                                rows.get(14).getCell(1).removeParagraph(0);
+                                rows.get(14).getCell(1).setText(entity.getDesignSlump());
+                                rows.get(14).getCell(3).removeParagraph(0);
+                                rows.get(14).getCell(3).setText(entity.getMixingWay());
+                            }
                         }
                         //填充配合比下原材样品信息
                         List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(entrustHistoryDetail.getSamples().get(0).getId());

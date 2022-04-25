@@ -34,5 +34,11 @@
         on duplicate key update
          report_code = values(report_code) , product_id = values(product_id) , report_name = values(report_name) , report_file_uri = values(report_file_uri) , is_available = values(is_available) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , remark = values(remark)     </insert>
 
+    <select id="getTypeByUrl" resultType="String">
+        select report_standard
+            from test_report_template
+                where report_file_uri
+                like concat('%',#{url},'%')
+    </select>
 </mapper>
 
