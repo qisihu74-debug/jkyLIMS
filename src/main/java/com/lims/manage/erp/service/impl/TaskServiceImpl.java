@@ -625,22 +625,13 @@ public class TaskServiceImpl implements TaskService {
         List<TestInstrumentEntity> instrumentEntityList = taskMapper.getInstrumentEntityList(idItem);
         if (instrumentEntityList != null && !instrumentEntityList.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
-//            for (TestInstrumentEntity testInstrumentEntity : InstrumentEntityList) {
-//                stringBuilder.append(testInstrumentEntity.getCode());
-//                stringBuilder.append("、");
-//            }
             for (int i = 0; i < instrumentEntityList.size(); i++) {
+                stringBuilder.append(instrumentEntityList.get(i).getName());
+                stringBuilder.append("（");
+                stringBuilder.append(instrumentEntityList.get(i).getCode());
+                stringBuilder.append("）");
                 if(i != instrumentEntityList.size()-1){
-                    stringBuilder.append(instrumentEntityList.get(i).getName());
-                    stringBuilder.append("（");
-                    stringBuilder.append(instrumentEntityList.get(i).getCode());
-                    stringBuilder.append("）");
                     stringBuilder.append("、");
-                }else{
-                    stringBuilder.append(instrumentEntityList.get(i).getName());
-                    stringBuilder.append("（");
-                    stringBuilder.append(instrumentEntityList.get(i).getCode());
-                    stringBuilder.append("）");
                 }
             }
             result.setEquipment(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
