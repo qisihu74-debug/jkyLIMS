@@ -587,16 +587,16 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public OriginalRecordDataVo getOriginalData(Long taskId, Integer sampleId, Integer checkItemId, Integer idItem) {
-        //生成记录编号
-        String recordNumber = "JL-C2105-108-04";
         //获取委托单信息
         EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(taskId);
+        //生成记录编号
+        String recordNumber = "JL-"+entrustBaseInfo.getTaskCode();
         //获取样品信息
         TemplateSampleVo sampleVo = sampleEntityMapper.getOriginalSampleInfo(sampleId);
         // 得到样品信息数据; 分割。
-        sampleVo.setSampleName(sampleVo.getSampleName() + ";");
-        sampleVo.setSampleNumber(sampleVo.getSampleNumber() + ";");
-        sampleVo.setSampleQuantity(sampleVo.getSampleQuantity() + ";");
+        sampleVo.setSampleName(sampleVo.getSampleName() + "；");
+        sampleVo.setSampleNumber(sampleVo.getSampleNumber() + "；");
+        sampleVo.setSampleQuantity(sampleVo.getSampleQuantity() + "；");
         // 处理样品 外观描述，和 外观
         if (sampleVo.getOutwardDescribe() != null && !sampleVo.getOutwardDescribe().equals("") && sampleVo.getSampleDesc() != null && !sampleVo.getSampleDesc().equals("")) {
             sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1) + "\t" + sampleVo.getOutwardDescribe());
@@ -622,12 +622,26 @@ public class TaskServiceImpl implements TaskService {
         // 检测项 开始检测日期。
 
         // 所使用的设备仪器。
-        List<TestInstrumentEntity> InstrumentEntityList = taskMapper.getInstrumentEntityList(idItem);
-        if (InstrumentEntityList != null && !InstrumentEntityList.isEmpty()) {
+        List<TestInstrumentEntity> instrumentEntityList = taskMapper.getInstrumentEntityList(idItem);
+        if (instrumentEntityList != null && !instrumentEntityList.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
-            for (TestInstrumentEntity testInstrumentEntity : InstrumentEntityList) {
-                stringBuilder.append(testInstrumentEntity.getCode());
-                stringBuilder.append(",");
+//            for (TestInstrumentEntity testInstrumentEntity : InstrumentEntityList) {
+//                stringBuilder.append(testInstrumentEntity.getCode());
+//                stringBuilder.append("、");
+//            }
+            for (int i = 0; i < instrumentEntityList.size(); i++) {
+                if(i != instrumentEntityList.size()-1){
+                    stringBuilder.append(instrumentEntityList.get(i).getName());
+                    stringBuilder.append("（");
+                    stringBuilder.append(instrumentEntityList.get(i).getCode());
+                    stringBuilder.append("）");
+                    stringBuilder.append("、");
+                }else{
+                    stringBuilder.append(instrumentEntityList.get(i).getName());
+                    stringBuilder.append("（");
+                    stringBuilder.append(instrumentEntityList.get(i).getCode());
+                    stringBuilder.append("）");
+                }
             }
             result.setEquipment(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
         }

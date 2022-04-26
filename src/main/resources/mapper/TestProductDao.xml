@@ -31,10 +31,6 @@
         WHERE
             t2.type IN ( 2
             , 3 )
-        UNION ALL
-        SELECT 0,
-               "客户提供"
-        FROM DUAL
     </select>
 
 
