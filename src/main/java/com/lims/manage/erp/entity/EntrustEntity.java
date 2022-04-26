@@ -223,6 +223,10 @@ public class EntrustEntity {
      * 拌和方式
      */
     private String mixingWay;
+    /**
+     * 任务编号
+     */
+    private String taskCode;
 
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,

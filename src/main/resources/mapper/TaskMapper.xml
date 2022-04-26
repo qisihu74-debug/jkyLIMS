@@ -541,7 +541,8 @@
     </update>
 
     <select id="getEntrustBaseInfo" resultType="com.lims.manage.erp.entity.EntrustEntity">
-        SELECT t2.id,
+        SELECT t1.task_code,
+               t2.id,
                t2.project_name,
                t2.project_part,
                t2.state
