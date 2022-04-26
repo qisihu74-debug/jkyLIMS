@@ -786,12 +786,7 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
         }
-        if (result.length()>=1){
-            return result.toString().substring(0,result.length()-1);
-        }else {
-            return result.toString();
-        }
-
+        return result.toString();
     }
 
     @Override
@@ -806,11 +801,7 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
         }
-        if (result.length()>=1){
-            return result.toString().substring(0,result.length()-1);
-        }else {
-            return result.toString();
-        }
+        return result.toString();
     }
 
     @Override
@@ -1618,6 +1609,8 @@ public class ReportServiceImpl implements ReportService {
                     //存放表头信息
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 1) {
+                        rows.get(3).getCell(1).removeParagraph(0);
+                        rows.get(3).getCell(1).setText("河南省公路工程实验检测中心有限公司");
                         rows.get(3).getCell(3).removeParagraph(0);
                         rows.get(3).getCell(3).setText(reportRecordEntity.getReportCode());
                         rows.get(4).getCell(1).removeParagraph(0);
@@ -1807,6 +1800,8 @@ public class ReportServiceImpl implements ReportService {
                     //存放表头信息
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 1) {
+                        rows.get(3).getCell(1).removeParagraph(0);
+                        rows.get(3).getCell(1).setText("河南省公路工程实验检测中心有限公司");
                         rows.get(3).getCell(3).removeParagraph(0);
                         rows.get(3).getCell(3).setText(reportRecordEntity.getReportCode());
                         rows.get(4).getCell(1).removeParagraph(0);

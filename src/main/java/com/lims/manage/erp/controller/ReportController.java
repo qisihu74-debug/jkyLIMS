@@ -562,7 +562,7 @@ public class ReportController {
         if ("原材检测".equals(reqBean.getType())){
             url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
         }else {
-            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),null);
+            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
         }
         return url;
     }
@@ -772,10 +772,8 @@ public class ReportController {
      * @return
      */
     @GetMapping("reportUrl")
-    public Result reportUrl(Long entrustId){
-        if (entrustId == null){
-            return ResultUtil.error("缺少必要参数");
-        }
-        return ResultUtil.success(reportService.reportUrl(entrustId));
+    public String reportUrl(Long entrustId){
+
+        return reportService.reportUrl(entrustId);
     }
 }

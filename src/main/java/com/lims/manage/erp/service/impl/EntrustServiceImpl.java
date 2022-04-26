@@ -1515,34 +1515,6 @@ public class EntrustServiceImpl implements EntrustService {
                         rows.get(sampleIndex).getTableCells().get(index + 6).setText(samples.get(i).getSampleRemark());//样品备注
                         sampleIndex = sampleIndex + 1;
                     }
-                    /*if (samples.size()<=6){
-                        for (int i = 0; i < samples.size(); i++) {
-                            rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getSampleName());//样品名称
-                            rows.get(sampleIndex).getTableCells().get(index + 1).setText(samples.get(i).getSpecs());//规格等级
-                            rows.get(sampleIndex).getTableCells().get(index + 2).setText(samples.get(i).getBatchNumber());//批号/编号
-                            rows.get(sampleIndex).getTableCells().get(index + 3).setText(samples.get(i).getSampleQuantity());//样品数量
-                            rows.get(sampleIndex).getTableCells().get(index + 4).setText(samples.get(i).getGeneration());//代表批量
-                            rows.get(sampleIndex).getTableCells().get(index + 5).setText(samples.get(i).getManufacturer());//样品产地/生产厂家
-                            rows.get(sampleIndex).getTableCells().get(index + 6).setText(samples.get(i).getSampleRemark());//样品备注
-                            sampleIndex = sampleIndex + 1;
-                        }
-                    }else {
-                        int exclud = samples.size()-6;
-                        for (int i = 0; i < samples.size()-exclud; i++) {
-                            rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getSampleName());//样品名称
-                            rows.get(sampleIndex).getTableCells().get(index + 1).setText(samples.get(i).getSpecs());//规格等级
-                            rows.get(sampleIndex).getTableCells().get(index + 2).setText(samples.get(i).getBatchNumber());//批号/编号
-                            rows.get(sampleIndex).getTableCells().get(index + 3).setText(samples.get(i).getSampleQuantity());//样品数量
-                            rows.get(sampleIndex).getTableCells().get(index + 4).setText(samples.get(i).getGeneration());//代表批量
-                            rows.get(sampleIndex).getTableCells().get(index + 5).setText(samples.get(i).getManufacturer());//样品产地/生产厂家
-                            rows.get(sampleIndex).getTableCells().get(index + 6).setText(samples.get(i).getSampleRemark());//样品备注
-                            sampleIndex = sampleIndex + 1;
-                        }
-                    }
-
-                    if (samples.size()>6){
-                        rows = extendTable(tables.get(j),rows,samples,6,8);
-                    }*/
                 }
                 if (j == tables.size()-1){
                     //设置其它信息(第二个table)
@@ -1600,13 +1572,13 @@ public class EntrustServiceImpl implements EntrustService {
                         stringBuilder2.append(sampleEntity.getSampleName());
                         stringBuilder2.append("（");
                         stringBuilder2.append(sampleEntity.getSpecs());
-                        stringBuilder2.append("，");
+                        stringBuilder2.append("、");
                         stringBuilder2.append(org.apache.commons.lang3.StringUtils.isEmpty(sampleEntity.getOutward())?"无":sampleEntity.getOutward());
                         stringBuilder2.append("）；");
                     }
                     rows.get(6).getTableCells().get(2).setText(stringBuilder2.toString().substring(0,stringBuilder2.length()-1));//样品状态
                     rows.get(6).getTableCells().get(4).setText(detail.getIsSave().equals("1") ? "是" : "否");//样品保留
-                    rows.get(7).getTableCells().get(2).setText(detail.getPaymentCount() == null ? "--" : detail.getPaymentCount());//检验收费
+                    rows.get(7).getTableCells().get(2).setText(detail.getPaymentCount() == null ? "--" : detail.getPaymentCount()+".00");//检验收费
                     rows.get(7).getTableCells().get(4).setText(detail.getPaymentMethod() == null ? "--" : detail.getPaymentMethod());//支付方式
                     //TODO 本次缴费统计缴费记录表
                     rows.get(7).getTableCells().get(6).setText(detail.getPaymentRecord() == null ? "--" : detail.getPaymentRecord()+".00");//本次交费
