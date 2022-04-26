@@ -1091,7 +1091,7 @@ public class EntrustServiceImpl implements EntrustService {
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         //查询实际缴费
         Integer total = entityMapper.getRecordCountById(entrustmentId);
-        entrustAddVo.setPaymentRecord(total+"");
+        entrustAddVo.setPaymentRecord((total==null?"--":total+""));
         if (entrustAddVo.getOperateUser() != null) {
             // 获取做废人id 查询账号姓名
             entrustAddVo.setOperateUserStr(sysUserDao.getSysUserName(entrustAddVo.getOperateUser()));
