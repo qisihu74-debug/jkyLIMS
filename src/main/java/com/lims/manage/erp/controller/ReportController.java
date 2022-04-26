@@ -618,54 +618,6 @@ public class ReportController {
         //return url;
     }
 
-    /**
-     *
-     * @param json
-     * @param response
-     * @return
-     */
-    /*@RequestMapping("previewDownLoad")
-    @ResponseBody
-    public String previewDownLoad(@RequestBody ReqBean reqBean,HttpServletResponse response) {
-        //ReqBean reqBean = JSON.parseObject(json,ReqBean.class);
-        if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
-            return null;
-        }
-        //从文件服务器拉取文件
-        MinioClient client = MinIoUtil.minioClient;
-        String url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
-        //预览word转pdf
-        String[] split = url.split("\\?");
-        String[] strings = split[0].split("\\/");
-        String bluckName = strings[3];
-        String fileName = strings[4];
-        XWPFDocument doc = null;
-        try {
-            client.statObject(bluckName, fileName);
-            InputStream object = client.getObject(bluckName, fileName);
-            doc = new XWPFDocument(object);
-            //相应pdf
-            ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
-            InputStream inputStream = FileAndFolderUtil.parseOut(b1);
-            response.reset();
-            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
-            response.setContentType("application/pdf");
-            response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName+".pdf");
-            OutputStream outputStream = response.getOutputStream();
-            int len = 0;
-            byte[] b = new byte[1024];
-            while ((len = inputStream.read(b)) != -1){
-                outputStream.write(b,0,len);
-            }
-            outputStream.flush();
-            outputStream.close();
-        }catch (Exception e){
-            logger.error("预览合并后的报告异常:{}",e);
-        }
-        return url;
-    }*/
-
     @GetMapping("download")
     public String downReport(Long id) {
         //从文件服务器拉取文件

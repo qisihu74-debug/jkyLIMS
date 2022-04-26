@@ -300,6 +300,7 @@ public class FileAndFolderUtil {
      * @throws Exception
      */
     public static File getFile(String url) throws Exception {
+        logger.info("公网url:{}",url);
         //对本地文件命名
         String fileName = url.substring(url.lastIndexOf("."),url.length());
         File file = null;

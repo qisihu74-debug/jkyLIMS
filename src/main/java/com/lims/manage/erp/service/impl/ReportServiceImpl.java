@@ -1017,6 +1017,24 @@ public class ReportServiceImpl implements ReportService {
                 return false;
             }
         }
+        //转为pdf
+        MinioClient client = MinIoUtil.minioClient;
+        String[] split = url.split("\\?");
+        String[] strings = split[0].split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        XWPFDocument doc = null;
+        try {
+            client.statObject(bluckName, fileName);
+            InputStream object = client.getObject(bluckName, fileName);
+            doc = new XWPFDocument(object);
+            //相应pdf
+            ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
+            InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+            url = MinIoUtil.upload("report-download", reportCode + ".pdf", inputStream, "application/octet-stream");
+        }catch (Exception e){
+            logger.error("word转pdf异常");
+        }
         reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
         //更新配合比信息
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(mixInfo)){
@@ -1415,10 +1433,6 @@ public class ReportServiceImpl implements ReportService {
     public Boolean seal(Long entrustId, String title, String fileType) {
         //step1 根据文件类型创建合同文档
         String url = "";
-        //TODO 根据报告类型确定是使用怎样方式处理
-
-//        MinioClient client = MinIoUtil.minioClient;
-//        String code = recordEntityMapper.getReportModelNameById(entrustId);
         try {
             //url = downLoad(client,code,entrustId);
             url = reportMapper.getUrlByEntrustId(entrustId);
@@ -1429,7 +1443,13 @@ public class ReportServiceImpl implements ReportService {
         if (StringUtils.isNotEmpty(url)) {
             File file = null;
             try {
-                file = FileAndFolderUtil.getFile(url);
+                String uri = "";
+                if (url.contains("?")){
+                    uri = url.substring(0,url.indexOf("?"));
+                }else {
+                    uri = url;
+                }
+                file = FileAndFolderUtil.getFile(uri);
             } catch (Exception e) {
                 logger.error("将报告地址转为File文件失败:{}", e);
                 return false;
