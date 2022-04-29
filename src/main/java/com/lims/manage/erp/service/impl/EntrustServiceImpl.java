@@ -1091,7 +1091,7 @@ public class EntrustServiceImpl implements EntrustService {
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         //查询实际缴费
         Integer total = entityMapper.getRecordCountById(entrustmentId);
-        entrustAddVo.setPaymentRecord((total==null?"--":total+""));
+        entrustAddVo.setPaymentRecord((total == null ? "--" : total + ""));
         if (entrustAddVo.getOperateUser() != null) {
             // 获取做废人id 查询账号姓名
             entrustAddVo.setOperateUserStr(sysUserDao.getSysUserName(entrustAddVo.getOperateUser()));
@@ -1124,12 +1124,47 @@ public class EntrustServiceImpl implements EntrustService {
             // 补充样品下 依据集合
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
             //补充配合比下的的样品信息
-            if(sampleEntity.getSampleType().contains("配合比")){
+            if (sampleEntity.getSampleType().contains("配合比")) {
                 nodeSample.addAll(testSampleEntityMapper.selectByPid(sampleEntity.getId()));
             }
         }
         entrustAddVo.setSamples(sampleCollection);
         entrustAddVo.setNodeSample(nodeSample);
+        return entrustAddVo;
+    }
+
+    /**
+     * 再来一单（复制委托单详情）
+     * 样品信息：以样品签收中委托单位id相同的信息为准。否则为空。
+     *
+     * @param entrustmentId
+     * @return
+     */
+    @Override
+    public EntrustAddVo getAnotherList(Long entrustmentId) {
+        // 通过委托单id 获取copy 数据。
+        EntrustAddVo entrustAddVo = getEntrustHistoryDetail(entrustmentId);
+        // 通过委托单位id 获取样品已签收的 产品id集合。有数据则赋值，否则返回null。
+        List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListObtain(entrustAddVo.getEntrustCompanyId());
+        Iterator<SampleEntity> it = entrustAddVo.getSamples().iterator();
+        while (it.hasNext()) {
+            SampleEntity sampleEntity = it.next();
+            // 标志符。
+            Boolean flag = false;
+            if (!CollectionUtils.isEmpty(sampleCollection)) {
+                for (SampleEntity sampleEntity1 : sampleCollection) {
+                    if (sampleEntity.getProductId().equals(sampleEntity1.getProductId())) {
+                        sampleEntity.setId(sampleEntity1.getId());
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+            // 样品签收的productId 与copy委托单位id下产品Id不一致 则清除。
+            if (!flag) {
+                it.remove();
+            }
+        }
         return entrustAddVo;
     }
 
@@ -1480,18 +1515,18 @@ public class EntrustServiceImpl implements EntrustService {
             List<SampleEntity> sampleEntityList = Lists.newArrayList();
             List<SampleEntity> samples = detail.getSamples();
             List<TestSampleEntity> nodeSample = detail.getNodeSample();
-            if (nodeSample != null && nodeSample.size()>0){
-                for (TestSampleEntity node :nodeSample) {
+            if (nodeSample != null && nodeSample.size() > 0) {
+                for (TestSampleEntity node : nodeSample) {
                     SampleEntity entity = new SampleEntity(node);
                     sampleEntityList.add(entity);
                 }
                 samples.addAll(sampleEntityList);
             }
-            for (int j=0;j<tables.size();j++) {
+            for (int j = 0; j < tables.size(); j++) {
                 List<XWPFTableRow> rows;
                 //获取表格对应的行
                 rows = tables.get(j).getRows();
-                if (j == 0){
+                if (j == 0) {
                     //设置模板数据
                     rows.get(2).getTableCells().get(8).setText("№." + detail.getEntrustmentNo());//委托单位
                     rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
@@ -1502,8 +1537,8 @@ public class EntrustServiceImpl implements EntrustService {
                     //新增的行数
                     int sampleIndex = 8;
                     int index = 1;
-                    if (samples.size()>6){
-                        AsposeUtil.addRows(tables.get(0),sampleIndex,samples.size()-6);
+                    if (samples.size() > 6) {
+                        AsposeUtil.addRows(tables.get(0), sampleIndex, samples.size() - 6);
                     }
                     for (int i = 0; i < samples.size(); i++) {
                         rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getSampleName());//样品名称
@@ -1516,7 +1551,7 @@ public class EntrustServiceImpl implements EntrustService {
                         sampleIndex = sampleIndex + 1;
                     }
                 }
-                if (j == tables.size()-1){
+                if (j == tables.size() - 1) {
                     //设置其它信息(第二个table)
                     String ss = "";
                     rows.get(0).getTableCells().get(2).setText(detail.getPresentInformation() == null ? "--" : detail.getPresentInformation());//提供资料
@@ -1536,7 +1571,7 @@ public class EntrustServiceImpl implements EntrustService {
                     if (!CollectionUtils.isEmpty(samples)) {
                         for (SampleEntity entity : samples) {
                             List<JudgmentBasisVo> sampleCheckItem = entity.getJudgmentBasisVos();
-                            if (!CollectionUtils.isEmpty(sampleCheckItem)){
+                            if (!CollectionUtils.isEmpty(sampleCheckItem)) {
                                 for (JudgmentBasisVo itemEntity : sampleCheckItem) {
                                     //价钱为null的不展示
                                     if (itemEntity.getCheckPrice() != null) {
@@ -1568,20 +1603,20 @@ public class EntrustServiceImpl implements EntrustService {
                     rows.get(5).getTableCells().get(4).setText(detail.getEntrustPhone() == null ? "--" : detail.getEntrustPhone());//委托人电话
                     rows.get(5).getTableCells().get(6).setText(detail.getWitnessPerson() == null ? "--" : detail.getWitnessPerson());//见证人
                     StringBuilder stringBuilder2 = new StringBuilder();
-                    for (SampleEntity sampleEntity:samples) {
+                    for (SampleEntity sampleEntity : samples) {
                         stringBuilder2.append(sampleEntity.getSampleName());
                         stringBuilder2.append("（");
                         stringBuilder2.append(sampleEntity.getSpecs());
                         stringBuilder2.append("、");
-                        stringBuilder2.append(org.apache.commons.lang3.StringUtils.isEmpty(sampleEntity.getOutwardDescribe())?"无":sampleEntity.getOutwardDescribe());
+                        stringBuilder2.append(org.apache.commons.lang3.StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "无" : sampleEntity.getOutwardDescribe());
                         stringBuilder2.append("）；");
                     }
-                    rows.get(6).getTableCells().get(2).setText(stringBuilder2.toString().substring(0,stringBuilder2.length()-1));//样品状态
+                    rows.get(6).getTableCells().get(2).setText(stringBuilder2.toString().substring(0, stringBuilder2.length() - 1));//样品状态
                     rows.get(6).getTableCells().get(4).setText(detail.getIsSave().equals("1") ? "是" : "否");//样品保留
-                    rows.get(7).getTableCells().get(2).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentCount())?"--":detail.getPaymentCount()+".00");//检验收费
+                    rows.get(7).getTableCells().get(2).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentCount()) ? "--" : detail.getPaymentCount() + ".00");//检验收费
                     rows.get(7).getTableCells().get(4).setText(detail.getPaymentMethod() == null ? "--" : detail.getPaymentMethod());//支付方式
                     //TODO 本次缴费统计缴费记录表
-                    rows.get(7).getTableCells().get(6).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentRecord())?"--":detail.getPaymentRecord()+".00");//本次交费
+                    rows.get(7).getTableCells().get(6).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentRecord()) ? "--" : detail.getPaymentRecord() + ".00");//本次交费
                     rows.get(8).getTableCells().get(2).setText(DateUtil.formatDate(detail.getRequestDate()));//完成期限
                     rows.get(8).getTableCells().get(4).setText(detail.getBusinessAcceptor() == null ? "--" : detail.getBusinessAcceptor());//业务受理人
                     rows.get(8).getTableCells().get(6).setText(DateUtil.formatDate(detail.getAcceptanceDate()));//受理日期
@@ -1705,13 +1740,14 @@ public class EntrustServiceImpl implements EntrustService {
 
     /**
      * 扩展模板样品行列
-     * @param table 原始表格
+     *
+     * @param table            原始表格
      * @param sampleDetailList 待处理数据
-     * @param modelSampleRows 需要新增行
-     * @param columns 列数
+     * @param modelSampleRows  需要新增行
+     * @param columns          列数
      */
-    public List<XWPFTableRow> extendTable(XWPFTable table,List<XWPFTableRow> rows,List<SampleEntity> sampleDetailList,
-                            int modelSampleRows,int columns){
+    public List<XWPFTableRow> extendTable(XWPFTable table, List<XWPFTableRow> rows, List<SampleEntity> sampleDetailList,
+                                          int modelSampleRows, int columns) {
         if (sampleDetailList.size() > modelSampleRows) {
             int addRows = sampleDetailList.size() - modelSampleRows;
             // 表格插入

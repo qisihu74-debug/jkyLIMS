@@ -298,6 +298,16 @@ public class EntrustController {
     }
 
     /**
+     * 再来一单（复制委托单详情）
+     * @param entrustmentId
+     * @return
+     */
+    @RequestMapping("/get_another_list")
+    public Result getEntrustHistoryDetailAnotherList(Long entrustmentId) {
+        return ResultUtil.success(entrustService.getAnotherList(entrustmentId));
+    }
+
+    /**
      * 分布委托信息详情查询
      *
      * @param entrustmentId
