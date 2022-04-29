@@ -1154,6 +1154,13 @@ public class EntrustServiceImpl implements EntrustService {
             if (!CollectionUtils.isEmpty(sampleCollection)) {
                 for (SampleEntity sampleEntity1 : sampleCollection) {
                     if (sampleEntity.getProductId().equals(sampleEntity1.getProductId())) {
+                        // 并对 样品下 检测项ID所属样品ID 重新赋值。
+                        if(!CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())){
+                            for(JudgmentBasisVo judgmentBasisVo:sampleEntity.getJudgmentBasisVos())
+                            {
+                                judgmentBasisVo.setSampleId(sampleEntity1.getId());
+                            }
+                        }
                         sampleEntity.setId(sampleEntity1.getId());
                         flag = true;
                         break;
