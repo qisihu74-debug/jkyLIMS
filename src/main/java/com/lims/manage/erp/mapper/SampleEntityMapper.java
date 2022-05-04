@@ -25,6 +25,11 @@ public interface SampleEntityMapper {
     List<SampleEntity> selectSampleListGroup(Long entrustmentId);
 
     /**
+     * 通过委托单位id 获取样品信息集合。
+     */
+    List<SampleEntity> selectSampleListObtain(Integer companyId);
+
+    /**
      * 根据样品id 获取配合比下样品集合。
      * @param id
      * @return

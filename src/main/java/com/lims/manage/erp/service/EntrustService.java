@@ -116,6 +116,14 @@ public interface EntrustService {
     EntrustAddVo getEntrustHistoryDetail(Long entrustmentId);
 
     /**
+     * 再来一单（复制委托单详情）
+     * 样品信息：以样品签收中委托单位id相同的信息为准。否则为空。
+     * @param entrustmentId
+     * @return
+     */
+    EntrustAddVo getAnotherList(Long entrustmentId);
+
+    /**
      * 分布委托信息 具体详情
      * @param entrustmentId
      * @return
