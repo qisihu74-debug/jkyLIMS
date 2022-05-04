@@ -46,6 +46,7 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.WordUtils;
 import com.lims.manage.erp.vo.ConcreteSampleVo;
+import com.lims.manage.erp.vo.CustomXWPFDocument;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.JudgmentBasisVo;
 import com.lims.manage.erp.vo.LabelValueVo;
@@ -55,19 +56,19 @@ import com.lims.manage.erp.vo.ReportHistoryDetailVo;
 import com.lims.manage.erp.vo.ReportListVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import com.lims.manage.erp.vo.ReportSampleDetailVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.usermodel.Range;
-import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.CTInline;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTDocument1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1720,12 +1721,12 @@ public class ReportServiceImpl implements ReportService {
                             checkUrl.add(signature);
                         }
                         //插入word指定位置
-                        insertPicToDoc(doc,issUrl,size-1,size1-1,5);
-                        insertPicToDoc(doc,verUrl,size-1,size1-1,3);
+                        doc = insertPicToDoc(doc, issUrl, size - 1, size1 - 1, 5);
+                        /*insertPicToDoc(doc,verUrl,size-1,size1-1,3);
                         //插入实验人员
                         for (String url:checkUrl) {
                             insertPicToDoc(doc,url,size-1,size1-1,1);
-                        }
+                        }*/
                     }
                     i++;
                 }
@@ -1955,11 +1956,11 @@ public class ReportServiceImpl implements ReportService {
                         }
                         //插入word指定位置
                         insertPicToDoc(doc,issUrl,size-1,size1-1,5);
-                        insertPicToDoc(doc,verUrl,size-1,size1-1,3);
+                        /*insertPicToDoc(doc,verUrl,size-1,size1-1,3);
                         //插入实验人员
                         for (String url:checkUrl) {
                             insertPicToDoc(doc,url,size-1,size1-1,1);
-                        }
+                        }*/
                     }
                     i++;
                 }
@@ -2139,61 +2140,31 @@ public class ReportServiceImpl implements ReportService {
      * @param picUrl
      * @param position
      */
-    public void insertPicToDoc(XWPFDocument doc, String picUrl,int table,int size,int position) throws Exception {
-       /* InputStream inputStream = AsposeUtil.docToIo(doc);
-        Document document = new Document(inputStream);
-        File file = FileAndFolderUtil.getFile(picUrl);
-        FileInputStream fileInputStream = new FileInputStream(file);
-        document.getTables().get(table).getRows().get(size).getCells().get(position).addParagraph().appendPicture(fileInputStream);*/
-
-        XWPFTableCell tableCell = doc.getTables().get(table).getRows().get(size).getTableCells().get(position);
+    public XWPFDocument insertPicToDoc(XWPFDocument doc, String picUrl,int table,int size,int position) throws Exception {
+        //插入pic
+        /*XWPFTableCell tableCell = doc.getTables().get(table).getRows().get(size).getTableCells().get(position);
+        XWPFParagraph newPara = tableCell.getParagraphs().get(0);
+        XWPFRun run = newPara.createRun();
         File file = FileAndFolderUtil.getFile("http://121.89.242.0:9000/personal-signature/1647502446459100.png");
-        FileInputStream fileInputStream = new FileInputStream(file);
-        tableCell.addParagraph().createRun().addPicture(fileInputStream,XWPFDocument.PICTURE_TYPE_PNG,"bus.png,", Units.toEMU(20), Units.toEMU(20));
-
-        /*XWPFParagraph xwpfParagraph = doc.getTables().get(table).getRows().get(size).getTableCells().get(position).getParagraphs().get(0);
-        XmlCursor cursor = xwpfParagraph.getCTP().newCursor();
-        XWPFParagraph newPara = doc.insertNewParagraph(cursor);
-        newPara.setAlignment(org.apache.poi.xwpf.usermodel.ParagraphAlignment.valueOf(ParagraphAlignment.CENTER));//居中
-        XWPFRun newParaRun = newPara.createRun();
-        //将图片转为流
-        File file = FileAndFolderUtil.getFile(picUrl);
-        FileInputStream fileInputStream = new FileInputStream(file);
-        newParaRun.addPicture(fileInputStream,XWPFDocument.PICTURE_TYPE_PNG,"bus.png,", Units.toEMU(20), Units.toEMU(20));
-        doc.removeBodyElement(doc.getPosOfParagraph(xwpfParagraph));*/
+        InputStream inputStream = new FileInputStream(file);
+        run.addPicture(inputStream, XWPFDocument.PICTURE_TYPE_PNG, "aa.png", Units.toEMU(30), Units.toEMU(30));*/
+        InputStream inputStream = AsposeUtil.docToIo(doc);
+        CustomXWPFDocument temp = new CustomXWPFDocument(inputStream);
+        XWPFTableCell tableCell = doc.getTables().get(table).getRows().get(size).getTableCells().get(position);
+        List<XWPFParagraph> paragraphs = tableCell.getParagraphs();
+        XWPFParagraph newPara = paragraphs.get(0);
+        XWPFRun imageCellRunn = newPara.createRun();
+        File file = FileAndFolderUtil.getFile("http://121.89.242.0:9000/personal-signature/1647502446459100.png");
+        InputStream fileInputStream = new FileInputStream(file);
+        String id = temp.addPictureData(fileInputStream, XWPFDocument.PICTURE_TYPE_PNG);//添加图片数据
+        int id2=temp.getAllPackagePictures().size()+1;
+        CTInline ctinline=imageCellRunn.getCTR().addNewDrawing().addNewInline();//设置段落行
+        temp.createPic(id,id2, 15, 20,ctinline);//添加图片
+        //temp转io
+        InputStream stream = AsposeUtil.customXWPFDocumentToIo(temp);
+        XWPFDocument document = new XWPFDocument(stream);
+        return document;
     }
 
-    /**
-     * 扩展模板样品行列
-     * @param table 原始表格
-     * @param rows 原始表格行数
-     * @param sampleDetailList 待处理数据
-     * @param modelSampleRows 需要新增行
-     * @param columns 列数
-     */
-    public void extendTable(XWPFTable table,List<XWPFTableRow> rows,List<TestSampleEntity> sampleDetailList,
-                             int modelSampleRows,int columns){
-        rows = table.getRows();
-        if (sampleDetailList.size() > modelSampleRows) {
-            int addRows = sampleDetailList.size() - modelSampleRows;
-            // 表格插入
-            XWPFDocument doc1 = new XWPFDocument();
-            XWPFTable newTable = doc1.createTable(addRows, columns);
-            // 创建表格后直接进行存放 后续多余数据
-            List<XWPFTableRow> dataTable = newTable.getRows();
-            int j = 0;
-            for (int i = modelSampleRows; i < sampleDetailList.size(); i++) {
-                dataTable.get(j).getCell(0).setText(sampleDetailList.get(i).getSampleName());
-                dataTable.get(j).getCell(1).setText(sampleDetailList.get(i).getSpecs());
-                dataTable.get(j).getCell(2).setText(sampleDetailList.get(i).getManufacturer());
-                dataTable.get(j).getCell(3).setText(sampleDetailList.get(i).getBatchNumber());
-                dataTable.get(j).getCell(4).setText(sampleDetailList.get(i).getGeneration());
-                dataTable.get(j).getCell(5).setText(sampleDetailList.get(i).getOutward());
-                dataTable.get(j).getCell(6).setText(sampleDetailList.get(i).getSampleCode());
-                table.addRow(dataTable.get(j));
-                j++;
-            }
-            rows = table.getRows();
-        }
-    }
+
 }

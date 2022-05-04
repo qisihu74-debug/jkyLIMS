@@ -1,6 +1,5 @@
 package com.lims.manage.erp.util;
 
-import org.apache.poi.POIXMLDocument;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -8,9 +7,6 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,44 +21,6 @@ import java.util.Set;
  * @Copyright © 河南交科院
  */
 public class WordUtils {
-
-    /**
-     * 根据模板生成新word文档
-     * 判断表格是需要替换还是需要插入，判断逻辑有$为替换，表格无$为插入
-     *
-     * @param inputUrl  模板存放地址
-     * @param outputUrl 新文档存放地址
-     * @param textMap   需要替换的信息集合
-     * @param tableList 需要插入的表格信息集合
-     * @return 成功返回true, 失败返回false
-     */
-    public static boolean changWord(String inputUrl, String outputUrl,
-                                    Map<String, String> textMap, List<String[]> tableList) {
-
-        //模板转换默认成功
-        boolean changeFlag = true;
-        try {
-            //获取docx解析对象
-            XWPFDocument document = new XWPFDocument(POIXMLDocument.openPackage(inputUrl));
-            //解析替换文本段落对象
-            WordUtils.changeText(document, textMap);
-            //解析替换表格对象
-            WordUtils.changeTable(document, textMap, tableList);
-
-            //生成新的word
-            File file = new File(outputUrl);
-            FileOutputStream stream = new FileOutputStream(file);
-            document.write(stream);
-            stream.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            changeFlag = false;
-        }
-
-        return changeFlag;
-
-    }
 
     /**
      * 替换段落文本

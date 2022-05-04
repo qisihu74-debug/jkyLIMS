@@ -687,7 +687,6 @@ public class ReportController {
             EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
             FileAndFolderUtil.convertDocxToPdf(document, "D:/VPS/11.pdf");
-            document.close();
         } catch (Exception e) {
             logger.error("转换失败:{}", e);
         }
@@ -703,7 +702,6 @@ public class ReportController {
             InputStream object = client.getObject(BucketsConst.buckets_entrust_template, "BGLQ21001F.docx");
             XWPFDocument document = new XWPFDocument(object);
             AsposeUtil.word2pdf(document, "D:\\VPS\\22.pdf");
-            document.close();
         } catch (Exception e) {
             logger.error("转换失败:{}", e);
         }

@@ -8,6 +8,7 @@ import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.ImagePro;
 import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.vo.CustomXWPFDocument;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import org.apache.commons.fileupload.FileItem;
@@ -113,7 +114,7 @@ public class AsposeUtil {
             outputStream.flush();
             in.close();
             outputStream.close();
-            document.close();
+            //document.close();
         }catch (Exception e){
             logger.error("下载失败:{}",e);
         }
@@ -253,6 +254,22 @@ public class AsposeUtil {
     }
 
     /**
+     * doc文件输入流
+     * @param document
+     * @return
+     * @throws IOException
+     */
+    public static InputStream customXWPFDocumentToIo(CustomXWPFDocument document) throws IOException {
+        //二进制OutputStream
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        //文档写入流
+        document.write(baos);
+        //OutputStream写入InputStream二进制流
+        ByteArrayInputStream in = new ByteArrayInputStream(baos.toByteArray());
+        return in;
+    }
+
+    /**
      * 合并word
      * @param src1Document
      * @param src2Document
@@ -274,7 +291,7 @@ public class AsposeUtil {
         String mainPart = srcString.substring(srcString.indexOf(">")+1,srcString.lastIndexOf("<"));
         String sufix = srcString.substring( srcString.lastIndexOf("<") );
         String addPart = appendString.substring(appendString.indexOf(">") + 1, appendString.lastIndexOf("<"));
-        CTBody makeBody = CTBody.Factory.parse(prefix+mainPart+addPart+sufix);
+        CTBody makeBody = (CTBody) CTBody.Factory.parse(prefix+mainPart+addPart+sufix);
         src1Body.set(makeBody);
         return src1Document;
     }
@@ -360,4 +377,27 @@ public class AsposeUtil {
             logger.error("word表格新增行失败:{}",e);
         }
     }
+
+    /**
+     * 将MultipartFile转换为File
+     * @param multiFile
+     * @return
+     */
+    public static File MultipartFileToFile(MultipartFile multiFile) {
+        // 获取文件名
+        String fileName = multiFile.getOriginalFilename();
+        // 获取文件后缀
+        String prefix = fileName.substring(fileName.lastIndexOf("."));
+        // 若须要防止生成的临时文件重复,能够在文件名后添加随机码
+
+        try {
+            File file = File.createTempFile(fileName, prefix);
+            multiFile.transferTo(file);
+            return file;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

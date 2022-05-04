@@ -352,7 +352,7 @@ public class TaskController {
             response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
             OutputStream outputStream = response.getOutputStream();
             document.write(outputStream);
-            document.close();
+            //document.close();
             outputStream.close();
         } catch (Exception ex) {
             log.info("导出失败：", ex.getMessage());
@@ -381,7 +381,7 @@ public class TaskController {
             response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
             OutputStream outputStream = response.getOutputStream();
             document.write(outputStream);
-            document.close();
+            //document.close();
             outputStream.close();
         } catch (Exception ex) {
             log.info("导出失败：{}", ex);
