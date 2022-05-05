@@ -589,6 +589,9 @@ public class TaskServiceImpl implements TaskService {
     public OriginalRecordDataVo getOriginalData(Long taskId, Integer sampleId, Integer checkItemId, Integer idItem) {
         //获取委托单信息
         EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(taskId);
+        //工程名称及工程部位信息去掉不展示
+        entrustBaseInfo.setProjectName("/");
+        entrustBaseInfo.setProjectPart("/");
         //生成记录编号
         String recordNumber = "JL-"+entrustBaseInfo.getTaskCode();
         //获取样品信息
