@@ -984,7 +984,8 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                sample_quantity sampleQuantity,
                outward            sampleDesc,
                received_date      sampleTime,
-               outward_describe outwardDescribe
+               outward_describe outwardDescribe,
+               sample_type sampleType
         FROM test_sample
         WHERE id = #{sampleId}
     </select>
