@@ -42,11 +42,12 @@ import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.HttpDownloadUtil;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.PdfDoc;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.WordUtils;
 import com.lims.manage.erp.vo.ConcreteSampleVo;
-import com.lims.manage.erp.vo.CustomXWPFDocument;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.JudgmentBasisVo;
 import com.lims.manage.erp.vo.LabelValueVo;
@@ -65,10 +66,7 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
-import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.CTInline;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTDocument1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1010,22 +1008,30 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         //转为pdf
-        MinioClient client = MinIoUtil.minioClient;
-        String[] split = url.split("\\?");
-        String[] strings = split[0].split("\\/");
-        String bluckName = strings[3];
-        String fileName = strings[4];
-        XWPFDocument doc = null;
+        if (!url.contains(".pdf")){
+            MinioClient client = MinIoUtil.minioClient;
+            String[] split = url.split("\\?");
+            String[] strings = split[0].split("\\/");
+            String bluckName = strings[3];
+            String fileName = strings[4];
+            XWPFDocument doc = null;
+            try {
+                client.statObject(bluckName, fileName);
+                InputStream object = client.getObject(bluckName, fileName);
+                doc = new XWPFDocument(object);
+                //相应pdf
+                ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
+                InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+                url = MinIoUtil.upload("report-download", reportCode + ".pdf", inputStream, "application/octet-stream");
+            }catch (Exception e){
+                logger.error("word转pdf异常");
+            }
+        }
+        //设置签名信息
         try {
-            client.statObject(bluckName, fileName);
-            InputStream object = client.getObject(bluckName, fileName);
-            doc = new XWPFDocument(object);
-            //相应pdf
-            ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
-            InputStream inputStream = FileAndFolderUtil.parseOut(b1);
-            url = MinIoUtil.upload("report-download", reportCode + ".pdf", inputStream, "application/octet-stream");
+            url = insertPicToPdf(url,Long.parseLong(reportCode));
         }catch (Exception e){
-            logger.error("word转pdf异常");
+            logger.error("报告签名失败:{}",e);
         }
         reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
         //更新配合比信息
@@ -1704,29 +1710,6 @@ public class ReportServiceImpl implements ReportService {
                         rows.get(size1-3).getCell(0).setText(conclusionEntity.getConclusion());
                         rows.get(size1-2).getCell(0).removeParagraph(0);
                         rows.get(size1-2).getCell(0).setText(conclusionEntity.getAdditional());
-                        //TODO 获取到签名信息插入指定位置
-                        ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(id);//审核人、签发人
-                        List<String> stringList = taskMapper.getInspectorByEntrustId(id);
-                        List<Long> list1 = Lists.newArrayList();//检测人
-                        for (String s:stringList) {
-                            String[] split1 = s.split("&");
-                            list1.add(Long.parseLong(split1[1]));
-                        }
-                        //获取每个人的个人签名
-                        String verUrl = sysUserDao.getSignatureById(detailByEntrustId.getVerifyerId());
-                        String issUrl = sysUserDao.getSignatureById(detailByEntrustId.getIssuerId());
-                        List<String> checkUrl = Lists.newArrayList();
-                        for (Long uId:list1) {
-                            String signature = sysUserDao.getSignatureById(uId);
-                            checkUrl.add(signature);
-                        }
-                        //插入word指定位置
-                        doc = insertPicToDoc(doc, issUrl, size - 1, size1 - 1, 5);
-                        /*insertPicToDoc(doc,verUrl,size-1,size1-1,3);
-                        //插入实验人员
-                        for (String url:checkUrl) {
-                            insertPicToDoc(doc,url,size-1,size1-1,1);
-                        }*/
                     }
                     i++;
                 }
@@ -1938,29 +1921,6 @@ public class ReportServiceImpl implements ReportService {
                         rows.get(size1-3).getCell(0).setText(conclusionEntity.getConclusion());
                         rows.get(size1-2).getCell(0).removeParagraph(0);
                         rows.get(size1-2).getCell(0).setText(conclusionEntity.getAdditional());
-                        //TODO 获取到签名信息插入指定位置
-                        ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(id);//审核人、签发人
-                        List<String> stringList = taskMapper.getInspectorByEntrustId(id);
-                        List<Long> list1 = Lists.newArrayList();//检测人
-                        for (String s:stringList) {
-                            String[] split1 = s.split("&");
-                            list1.add(Long.parseLong(split1[1]));
-                        }
-                        //获取每个人的个人签名
-                        String verUrl = sysUserDao.getSignatureById(detailByEntrustId.getVerifyerId());
-                        String issUrl = sysUserDao.getSignatureById(detailByEntrustId.getIssuerId());
-                        List<String> checkUrl = Lists.newArrayList();
-                        for (Long uId:list1) {
-                            String signature = sysUserDao.getSignatureById(uId);
-                            checkUrl.add(signature);
-                        }
-                        //插入word指定位置
-                        insertPicToDoc(doc,issUrl,size-1,size1-1,5);
-                        /*insertPicToDoc(doc,verUrl,size-1,size1-1,3);
-                        //插入实验人员
-                        for (String url:checkUrl) {
-                            insertPicToDoc(doc,url,size-1,size1-1,1);
-                        }*/
                     }
                     i++;
                 }
@@ -2136,35 +2096,51 @@ public class ReportServiceImpl implements ReportService {
 
     /**
      * 指定表格位置插入图片签名
-     * @param doc
-     * @param picUrl
-     * @param position
+     * @param pdfUrl 需要签名的pdf公网地址
+     * @param entrustId 委托单id
+     * @throws Exception
      */
-    public XWPFDocument insertPicToDoc(XWPFDocument doc, String picUrl,int table,int size,int position) throws Exception {
-        //插入pic
-        /*XWPFTableCell tableCell = doc.getTables().get(table).getRows().get(size).getTableCells().get(position);
-        XWPFParagraph newPara = tableCell.getParagraphs().get(0);
-        XWPFRun run = newPara.createRun();
-        File file = FileAndFolderUtil.getFile("http://121.89.242.0:9000/personal-signature/1647502446459100.png");
-        InputStream inputStream = new FileInputStream(file);
-        run.addPicture(inputStream, XWPFDocument.PICTURE_TYPE_PNG, "aa.png", Units.toEMU(30), Units.toEMU(30));*/
-        InputStream inputStream = AsposeUtil.docToIo(doc);
-        CustomXWPFDocument temp = new CustomXWPFDocument(inputStream);
-        XWPFTableCell tableCell = doc.getTables().get(table).getRows().get(size).getTableCells().get(position);
-        List<XWPFParagraph> paragraphs = tableCell.getParagraphs();
-        XWPFParagraph newPara = paragraphs.get(0);
-        XWPFRun imageCellRunn = newPara.createRun();
-        File file = FileAndFolderUtil.getFile("http://121.89.242.0:9000/personal-signature/1647502446459100.png");
-        InputStream fileInputStream = new FileInputStream(file);
-        String id = temp.addPictureData(fileInputStream, XWPFDocument.PICTURE_TYPE_PNG);//添加图片数据
-        int id2=temp.getAllPackagePictures().size()+1;
-        CTInline ctinline=imageCellRunn.getCTR().addNewDrawing().addNewInline();//设置段落行
-        temp.createPic(id,id2, 15, 20,ctinline);//添加图片
-        //temp转io
-        InputStream stream = AsposeUtil.customXWPFDocumentToIo(temp);
-        XWPFDocument document = new XWPFDocument(stream);
-        return document;
+    public String insertPicToPdf(String pdfUrl, Long entrustId) throws Exception {
+        ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(entrustId);//审核人、签发人
+        List<String> stringList = taskMapper.getInspectorByEntrustId(entrustId);
+        List<Long> list1 = Lists.newArrayList();//检测人
+        for (String s:stringList) {
+            String[] split1 = s.split("&");
+            list1.add(Long.parseLong(split1[1]));
+        }
+        //获取每个人的个人签名
+        String verUrl = sysUserDao.getSignatureById(detailByEntrustId.getVerifyerId());
+        String issUrl = sysUserDao.getSignatureById(detailByEntrustId.getIssuerId());
+        List<String> checkUrl = Lists.newArrayList();
+        for (Long uId:list1) {
+            String signature = sysUserDao.getSignatureById(uId);
+            checkUrl.add(signature);
+        }
+        String outPath = "E:\\"+detailByEntrustId.getReportCode()+".pdf";
+        //现将服务器上的报告文件、图片签名文件缓存到本地
+        String localPdfPath = HttpDownloadUtil.download(pdfUrl, "E:\\");
+        String verUrlPath = HttpDownloadUtil.download(verUrl, "E:\\");
+        String issUrlPath = HttpDownloadUtil.download(issUrl, "E:\\");
+        String signaturePath = HttpDownloadUtil.download(checkUrl.get(0), "E:\\");
+        String signaturePath2 = "";
+        if (checkUrl.size()>1){
+            signaturePath2 = HttpDownloadUtil.download(checkUrl.get(1), "E:\\");
+        }
+
+        PdfDoc pdf = new PdfDoc(localPdfPath, outPath);
+        pdf.addImage(signaturePath, "检测：",1,-10, 30, 20);
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(signaturePath2)){
+            PdfDoc pdf1 = new PdfDoc(outPath, outPath);
+            pdf1.addImage(signaturePath2, "检测：",30,-10, 30, 20);
+        }
+        PdfDoc pdf2 = new PdfDoc(outPath, outPath);
+        pdf2.addImage(verUrlPath, "审核：",15,-10, 30, 20);
+        PdfDoc pdf3 = new PdfDoc(outPath, outPath);
+        pdf3.addImage(issUrlPath, "批准：",20,-10, 30, 20);
+        //将最终本地的pdf报告上传到文件服务器
+        File file = new File(outPath);
+        MultipartFile multipartFile = AsposeUtil.fileToMultipart(file, detailByEntrustId.getReportCode());
+        String url = MinIoUtil.upload("report-download", multipartFile, detailByEntrustId.getReportCode() + ".pdf");
+        return url;
     }
-
-
 }
