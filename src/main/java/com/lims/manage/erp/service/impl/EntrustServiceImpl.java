@@ -9,12 +9,7 @@ import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.EntrustService;
-import com.lims.manage.erp.util.AsposeUtil;
-import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -1045,14 +1040,27 @@ public class EntrustServiceImpl implements EntrustService {
         // 获取状态
         List<EntrustHistoryEntity> dataList = new ArrayList<>();
         if (entrustHistoryEntity.getState() == 1) {
-            PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
-            dataList = entityMapper.selectEntrustHistoryListRelease_of(entrustHistoryEntity);
-            PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
+//            PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+            dataList = entityMapper.selectEntrustHistoryTaskListRelease_of(entrustHistoryEntity);
+            //存放任务编号
+//            if(!CollectionUtils.isEmpty(dataList)){
+//                for (EntrustHistoryEntity entrustHistoryEntity1 : dataList) {
+//                    entrustHistoryEntity1.setTaskCodes(entityMapper.getTaskCode(entrustHistoryEntity1.getId()));
+//                }
+//            }
+            PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+//            PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
             return result;
         }
-        PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
-        dataList = entityMapper.selectEntrustHistoryList(entrustHistoryEntity);
-        PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
+//        PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+        dataList = entityMapper.selectEntrustTaskHistoryList(entrustHistoryEntity);
+//        if(!CollectionUtils.isEmpty(dataList)){
+//            for (EntrustHistoryEntity entrustHistoryEntity1 : dataList) {
+//                entrustHistoryEntity1.setTaskCodes(entityMapper.getTaskCode(entrustHistoryEntity1.getId()));
+//            }
+//        }
+//        PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
+        PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
         return result;
     }
 
