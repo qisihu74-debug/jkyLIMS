@@ -561,12 +561,13 @@ public class EntrustController {
         }
     }
 
-    @GetMapping("/updateReportTeam")
-    public Result updateReportTeam(@RequestParam(value = "entrustmentId") Long entrustmentId,@RequestParam(value = "deptIds") List<Integer> deptIds) {
-        if (entrustmentId == null || deptIds == null || deptIds.size()<1) {
+    @RequestMapping("/updateReportTeam")
+//    public Result updateReportTeam(@RequestParam(value = "entrustmentId") Long entrustmentId,@RequestParam(value = "deptIds") List<Integer> deptIds) {
+    public Result updateReportTeam(@RequestBody UpdateIssueReportVo vo) {
+        if (vo.getEntrustmentId() == null || vo.getDeptIds() == null || vo.getDeptIds().size()<1) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
-            int i = entrustService.updateReportTeam(entrustmentId, deptIds);
+            int i = entrustService.updateReportTeam(vo.getEntrustmentId(), vo.getDeptIds());
             if(i<1){
                 return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "修改出报告科室失败！");
             }
