@@ -1,6 +1,7 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.aspose.words.SaveFormat;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -321,7 +322,7 @@ public class TaskController {
         Workbook workbook = null;
         try {
             workbook = transformer.transformXLS(fileStream, result);
-            response.reset();
+           /* response.reset();
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
@@ -329,9 +330,26 @@ public class TaskController {
             response.setHeader("Content-Disposition", "attachment;fileName=" + fileName2);
             OutputStream outputStream = response.getOutputStream();
             workbook.write(outputStream);
-            outputStream.close();
-        } catch (IOException | InvalidFormatException e) {
-            e.printStackTrace();
+            outputStream.close();*/
+           //workbook转字节流
+            String basePath = Thread.currentThread().getContextClassLoader().getResource("processes").getPath()+"/";
+            FileOutputStream output=new FileOutputStream(basePath+"bak.xlsx");
+            workbook.write(output);
+            //转换pdf
+            byte[] bytes = null;
+            com.aspose.cells.Workbook wb = new com.aspose.cells.Workbook(basePath+"bak.xlsx");
+            //调用方法保存为PDF格式
+            String pdfLoacl = basePath+"bak.pdf";
+            wb.save(pdfLoacl, SaveFormat.PDF);
+            File file = new File(pdfLoacl);
+            bytes = FileAndFolderUtil.file2byte(file);
+            //删除缓存文件
+            FileAndFolderUtil.delete(pdfLoacl);
+            FileAndFolderUtil.delete(basePath+"bak.xlsx");
+            ServletOutputStream sos = response.getOutputStream();
+            sos.write(bytes);
+        } catch (Exception e) {
+            log.error("原始记录转换pdf预览失败:{}",e);
         }
     }
 
