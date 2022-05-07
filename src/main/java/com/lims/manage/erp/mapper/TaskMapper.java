@@ -303,6 +303,13 @@ public interface TaskMapper extends BaseMapper {
     int batchUpdateCheckItem(@Param("list") List<CheckItemDeptVo> list);
 
     /**
+     * 批量修改可出报告的科室
+     * @param list
+     * @return
+     */
+    int batchUpdateReportTeam(@Param("list") List<UpdateReportTeamVo> list);
+
+    /**
      * 通过检测项id 获取test_task 任务单id
      * @param itemId
      * @return

@@ -670,6 +670,15 @@
             where id = ${item.id}
         </foreach>
     </update>
+    <update id="batchUpdateReportTeam" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update test_task
+            <set>
+                issue_report = #{item.issueReport}
+            </set>
+            where entrustment_id = #{item.entrustmentId} and dept_id = #{item.deptId}
+        </foreach>
+    </update>
 
     <select id="getNodeSampleList" resultType="com.lims.manage.erp.vo.SamplePrivateInfoVo">
         SELECT

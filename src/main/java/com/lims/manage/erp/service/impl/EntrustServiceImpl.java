@@ -1742,6 +1742,24 @@ public class EntrustServiceImpl implements EntrustService {
         return entityMapper.getReportTeams(entrustmentId);
     }
 
+    @Override
+    public int updateReportTeam(Long entrustmentId, List<Integer> deptIds) {
+        List<LabelValueVo> reportTeams = entityMapper.getReportTeams(entrustmentId);
+        List<UpdateReportTeamVo> result = Lists.newArrayList();
+        for (LabelValueVo vo : reportTeams) {
+            UpdateReportTeamVo entity = new UpdateReportTeamVo();
+            entity.setEntrustmentId(entrustmentId);
+            entity.setDeptId(vo.getValue());
+            if (deptIds.contains(Integer.parseInt(vo.getValue().toString()))) {
+                entity.setIssueReport("是");
+            } else {
+                entity.setIssueReport("否");
+            }
+            result.add(entity);
+        }
+        return taskMapper.batchUpdateReportTeam(result);
+    }
+
     private String getAllLevelName(Integer checkItemPid) {
         StringBuilder prefix = new StringBuilder();
         List<String> temp = Lists.newArrayList();

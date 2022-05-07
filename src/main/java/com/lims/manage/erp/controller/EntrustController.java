@@ -560,4 +560,17 @@ public class EntrustController {
             return ResultUtil.success(reportTeams);
         }
     }
+
+    @RequestMapping("/updateReportTeam")
+    public Result updateReportTeam(@RequestParam(value = "entrustmentId") Long entrustmentId,@RequestParam(value = "deptIds") List<Integer> deptIds) {
+        if (entrustmentId == null || deptIds == null || deptIds.size()<1) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            int i = entrustService.updateReportTeam(entrustmentId, deptIds);
+            if(i<1){
+                return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "修改出报告科室失败！");
+            }
+            return ResultUtil.success("修改出报告科室成功！");
+        }
+    }
 }
