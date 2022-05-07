@@ -49,11 +49,17 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
     int insertBatchMixSamples(@Param("entities") List<TestSampleEntity> entities);
 
     /**
-     * 样品查询/打印列表
+     * 添加委托查询样品列表
      * @param entity
      * @return
      */
     List<SampleSimpleListVo> getSimpleList(TestSampleEntity entity);
+    /**
+     * 样品查询/打印列表
+     * @param entity
+     * @return
+     */
+    List<SampleSimpleListVo> showSimpleList(TestSampleEntity entity);
 
     /**
      * 新增委托--导入样品列表--带判定依据

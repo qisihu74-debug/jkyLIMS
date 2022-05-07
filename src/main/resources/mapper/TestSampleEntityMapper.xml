@@ -588,7 +588,52 @@
         FROM
         test_sample
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            is_use = 0 and pid is null
+            is_use = 0
+            <if test="sampleName!=null and sampleName!=''">
+                and sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="sampleType!=null and sampleName!=''">
+                and sample_type = #{sampleType}
+            </if>
+            <if test="batchNumber!=null and batchNumber!=''">
+                and batch_number LIKE CONCAT('%',#{batchNumber},'%')
+            </if>
+            <if test="manufacturer!=null and manufacturer!=''">
+                and manufacturer LIKE CONCAT('%',#{manufacturer},'%')
+            </if>
+            <if test="beginDate!=null and beginDate!=''">
+                and str_to_date( received_date, '%Y-%m-%d' ) &gt;= str_to_date( #{beginDate}, '%Y-%m-%d' )
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                and str_to_date( received_date, '%Y-%m-%d' ) &lt;= str_to_date( #{endDate}, '%Y-%m-%d' )
+            </if>
+            <if test="productId!=null">
+                and product_id = #{productId}
+            </if>
+            <if test="companyId!=null">
+                and company_id = #{companyId}
+            </if>
+        </trim>
+        order by sample_code DESC,str_to_date( received_date, '%Y-%m-%d' ) desc
+    </select>
+
+    <select id="showSimpleList" parameterType="com.lims.manage.erp.entity.TestSampleEntity"
+            resultType="com.lims.manage.erp.vo.SampleSimpleListVo">
+        SELECT
+        id,
+        product_id,
+        sample_name,
+        sample_code,
+        manufacturer,
+        specs,
+        inspector,
+        generation,
+        received_date,
+        batch_number,
+        sample_type
+        FROM
+        test_sample
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
             <if test="sampleName!=null and sampleName!=''">
                 and sample_name LIKE CONCAT('%',#{sampleName},'%')
             </if>
