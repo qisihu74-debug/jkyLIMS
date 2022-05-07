@@ -157,6 +157,19 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     }
 
     @Override
+    public PageInfo showSampleList(TestSampleEntity sampleEntity) {
+        PageHelper.startPage(sampleEntity.getPageNum(), sampleEntity.getPageSize());
+        if (sampleEntity.getReceivedDate() != null) {
+            String[] split = sampleEntity.getReceivedDate().split("~");
+            sampleEntity.setBeginDate(split[0]);
+            sampleEntity.setEndDate(split[1]);
+        }
+        List<SampleSimpleListVo> simpleList = testSampleEntityMapper.showSimpleList(sampleEntity);
+        PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
+        return pageInfo;
+    }
+
+    @Override
     public Boolean uploading(Integer id, MultipartFile[] file) {
         SampleFileTableEntity sampleFileTableEntity = new SampleFileTableEntity();
         sampleFileTableEntity.setSampleId(id);
