@@ -219,4 +219,19 @@ public interface EntrustService {
      * @return
      */
     List<CheckItemInfoVo> getCheckItemInfo(List<Integer> ids);
+
+    /**
+     * 查询当前可出报告科室
+     * @param entrustmentId
+     * @return
+     */
+    List<LabelValueVo> getReportTeams(Long entrustmentId);
+
+    /**
+     * 修改出报告科室
+     * @param entrustmentId
+     * @param deptIds
+     * @return
+     */
+    int updateReportTeam(Long entrustmentId,List<Integer> deptIds);
 }

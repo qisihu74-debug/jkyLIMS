@@ -148,6 +148,10 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo);
+    /**
+     * 查询任务列表 包含样品信息
+     */
+    List<TaskListVo> getTaskListContainsSample(TaskListParamVo paramVo);
 
     /**
      * 查询任务列表 并且 state>=1
@@ -301,6 +305,13 @@ public interface TaskMapper extends BaseMapper {
     Long getTestTaskId(@Param("id") Long id,@Param("deptId") Integer deptId);
 
     int batchUpdateCheckItem(@Param("list") List<CheckItemDeptVo> list);
+
+    /**
+     * 批量修改可出报告的科室
+     * @param list
+     * @return
+     */
+    int batchUpdateReportTeam(@Param("list") List<UpdateReportTeamVo> list);
 
     /**
      * 通过检测项id 获取test_task 任务单id

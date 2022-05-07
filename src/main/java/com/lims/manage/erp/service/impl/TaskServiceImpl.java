@@ -261,11 +261,36 @@ public class TaskServiceImpl implements TaskService {
         List<TaskListVo> dataList = new ArrayList<>();
         if (paramVo.getState() != null && paramVo.getState() != 1) {
             PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
-            dataList = taskMapper.getTaskListTwo(paramVo);
+            dataList = taskMapper.getTaskListContainsSample(paramVo);
+        }
+        if(!CollectionUtils.isEmpty(dataList)){
+            // 处理任务单 与信息。
+            //TODO gjl添加样品状态
+            EntrustServiceImpl service = new EntrustServiceImpl();
+            for (TaskListVo sampleListVo : dataList) {
+                List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
+                List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
+                for (SamplePrivateInfoVo samplePrivateInfoVo : sampleList) {
+                    String state = service.findStateBySampleId(samplePrivateInfoVo.getId(), entrustEntityMapper, taskMapper);
+                    samplePrivateInfoVo.setState(state);
+                    //TODO PSH查询子原材样品信息
+                    List<SamplePrivateInfoVo> nodeSampleList1 = taskMapper.getNodeSampleList(samplePrivateInfoVo.getId());
+                    if(!CollectionUtils.isEmpty(nodeSampleList1)){
+                        nodeSampleList.addAll(nodeSampleList1);
+                    }
+                }
+                sampleList.addAll(nodeSampleList);
+            }
         }
         if (paramVo.getState() == 1) {
             PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
             dataList = taskMapper.getTaskListTwoGreater(paramVo);
+            // 返回前端的话 sampleListVo.getSampleList() 空集合 []
+            for(TaskListVo sampleListVo:dataList){
+                if(CollectionUtils.isEmpty(sampleListVo.getSampleList())){
+                    sampleListVo.setSampleList(new ArrayList<>());
+                }
+            }
         }
 //        if (dataList != null && !dataList.isEmpty()) {
 //            for (TaskListVo data : dataList) {
@@ -589,10 +614,14 @@ public class TaskServiceImpl implements TaskService {
     public OriginalRecordDataVo getOriginalData(Long taskId, Integer sampleId, Integer checkItemId, Integer idItem) {
         //获取委托单信息
         EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(taskId);
+        //工程名称及工程部位信息去掉不展示
+        entrustBaseInfo.setProjectName("/");
+        entrustBaseInfo.setProjectPart("/");
         //生成记录编号
         String recordNumber = "JL-"+entrustBaseInfo.getTaskCode();
         //获取样品信息
         TemplateSampleVo sampleVo = sampleEntityMapper.getOriginalSampleInfo(sampleId);
+
         // 得到样品信息数据; 分割。
         sampleVo.setSampleName(sampleVo.getSampleName() + "；");
         sampleVo.setSampleNumber(sampleVo.getSampleNumber() + "；");
@@ -605,7 +634,7 @@ public class TaskServiceImpl implements TaskService {
                 sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1));
             }
         }
-        sampleVo.setSampleTime(sampleVo.getSampleTime() + ";");
+
         //获取检测依据
         log.debug("执行上一行完成---------------");
         String checkBasis = taskMapper.getCheckBasis(checkItemId, entrustBaseInfo.getId(), sampleId);
@@ -618,6 +647,44 @@ public class TaskServiceImpl implements TaskService {
                 judgeBasis.append(judgeBasisList.get(i) + "\n");
             }
         }
+        StringBuilder sampleTime = new StringBuilder(sampleVo.getSampleTime() + ";");
+
+        //补充原材信息
+        if(sampleVo.getSampleType().contains("配合比")){
+            List<SampleEntity> sampleEntities = sampleEntityMapper.selectByPid(sampleId);
+            for (SampleEntity sampleEntity : sampleEntities) {
+                sampleTime.append("样品名称：");
+                sampleTime.append(sampleEntity.getAliasName()== null ? "——" :sampleEntity.getAliasName());
+                sampleTime.append("；");
+                sampleTime.append("样品编号：");
+                sampleTime.append(sampleEntity.getSampleCode()== null ? "——" :sampleEntity.getSampleCode());
+                sampleTime.append("；");
+                sampleTime.append("样品数量：");
+                sampleTime.append(sampleEntity.getSampleQuantity()== null ? "——": sampleEntity.getSampleQuantity());
+                sampleTime.append("；");
+                sampleTime.append("样品描述：");
+                StringBuilder outward = new StringBuilder();
+                if(sampleEntity.getOutward() != null){
+                    outward.append(sampleEntity.getOutward());
+                    if(sampleEntity.getOutwardDescribe() != null){
+                        outward.append(",");
+                        outward.append(sampleEntity.getOutwardDescribe());
+                    }
+                }else{
+                    if(sampleEntity.getOutwardDescribe() != null){
+                        outward.append(sampleEntity.getOutwardDescribe());
+                    }
+                }
+                if("".equals(outward.toString())){
+                    outward.append("——");
+                }
+                outward.append("；");
+                sampleTime.append(outward);
+                sampleTime.append("来样时间：");
+                sampleTime.append(sampleEntity.getReceivedDate());
+            }
+        }
+        sampleVo.setSampleTime(sampleTime.toString());
         OriginalRecordDataVo result = new OriginalRecordDataVo(recordNumber, entrustBaseInfo, sampleVo, checkBasis, judgeBasis.toString());
         // 检测项 开始检测日期。
 
@@ -634,7 +701,7 @@ public class TaskServiceImpl implements TaskService {
                     stringBuilder.append("、");
                 }
             }
-            result.setEquipment(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+            result.setEquipment(stringBuilder.toString());
         }
 
         return result;

@@ -10,6 +10,7 @@ public class TemplateSampleVo {
     private String sampleQuantity;
     private String sampleDesc;
     private String sampleTime;
+    private String sampleType;
     /**
      * 样品备注信息
      */

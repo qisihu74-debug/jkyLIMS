@@ -2,6 +2,8 @@ package com.lims.manage.erp.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class TaskListVo {
     private Long taskId;//任务主键
@@ -19,4 +21,8 @@ public class TaskListVo {
      * 是否出具报告
      */
     private String issueReport;
+    /**
+     * 样品集合。
+     */
+    private List<SamplePrivateInfoVo> sampleList;
 }

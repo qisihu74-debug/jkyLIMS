@@ -542,4 +542,36 @@ public class EntrustController {
             return ResultUtil.success(entrustService.getCheckItemInfo(itemIds.getIds()));
         }
     }
+
+    /**
+     *
+     * @param entrustmentId
+     * @return
+     */
+    @GetMapping("/getReportTeams")
+    public Result getReportTeams(Long entrustmentId) {
+        if (entrustmentId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            List<LabelValueVo> reportTeams = entrustService.getReportTeams(entrustmentId);
+            if(CollectionUtils.isEmpty(reportTeams)){
+                return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "未找到当前委托分配的团队信息！");
+            }
+            return ResultUtil.success(reportTeams);
+        }
+    }
+
+    @RequestMapping("/updateReportTeam")
+//    public Result updateReportTeam(@RequestParam(value = "entrustmentId") Long entrustmentId,@RequestParam(value = "deptIds") List<Integer> deptIds) {
+    public Result updateReportTeam(@RequestBody UpdateIssueReportVo vo) {
+        if (vo.getEntrustmentId() == null || vo.getDeptIds() == null || vo.getDeptIds().size()<1) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            int i = entrustService.updateReportTeam(vo.getEntrustmentId(), vo.getDeptIds());
+            if(i<1){
+                return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "修改出报告科室失败！");
+            }
+            return ResultUtil.success("修改出报告科室成功！");
+        }
+    }
 }

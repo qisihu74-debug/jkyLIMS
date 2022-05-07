@@ -82,6 +82,12 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     List<EntrustHistoryEntity> selectEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity);
+    /**
+     * 委托历史 查询--加任务编号。
+     * @param entrustHistoryEntity
+     * @return
+     */
+    List<EntrustHistoryEntity> selectEntrustTaskHistoryList(EntrustHistoryEntity entrustHistoryEntity);
 
     /**
      * 历史委托查询 state不为0 state不为144
@@ -89,6 +95,12 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     List<EntrustHistoryEntity> selectEntrustHistoryListRelease_of(EntrustHistoryEntity entrustHistoryEntity);
+    /**
+     * 历史委托查询 state不为0 state不为14--加任务编号
+     * @param entrustHistoryEntity
+     * @return
+     */
+    List<EntrustHistoryEntity> selectEntrustHistoryTaskListRelease_of(EntrustHistoryEntity entrustHistoryEntity);
     /**
      * 委托单任务待发布列表
      * @param entrustHistoryEntity
@@ -333,4 +345,13 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Select("select sum(price) from test_entrusted_payment_record_info where entrustment_id=#{entrustmentId}")
     Integer getRecordCountById(@Param("entrustmentId") Long entrustmentId);
+
+    List<String> getTaskCode(Long id);
+
+    /**
+     * 查询当前可出报告科室
+     * @param entrustmentId
+     * @return
+     */
+    List<LabelValueVo> getReportTeams(Long entrustmentId);
 }
