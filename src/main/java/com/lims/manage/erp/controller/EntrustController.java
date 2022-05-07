@@ -548,7 +548,7 @@ public class EntrustController {
      * @param entrustmentId
      * @return
      */
-    @RequestMapping("/getReportTeams")
+    @GetMapping("/getReportTeams")
     public Result getReportTeams(Long entrustmentId) {
         if (entrustmentId == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
@@ -561,7 +561,7 @@ public class EntrustController {
         }
     }
 
-    @RequestMapping("/updateReportTeam")
+    @GetMapping("/updateReportTeam")
     public Result updateReportTeam(@RequestParam(value = "entrustmentId") Long entrustmentId,@RequestParam(value = "deptIds") List<Integer> deptIds) {
         if (entrustmentId == null || deptIds == null || deptIds.size()<1) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
