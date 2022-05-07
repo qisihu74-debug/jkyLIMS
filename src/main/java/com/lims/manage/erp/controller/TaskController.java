@@ -322,7 +322,7 @@ public class TaskController {
         Workbook workbook = null;
         try {
             workbook = transformer.transformXLS(fileStream, result);
-           /* response.reset();
+            response.reset();
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
@@ -330,7 +330,44 @@ public class TaskController {
             response.setHeader("Content-Disposition", "attachment;fileName=" + fileName2);
             OutputStream outputStream = response.getOutputStream();
             workbook.write(outputStream);
-            outputStream.close();*/
+            outputStream.close();
+        } catch (IOException | InvalidFormatException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 预览原始记录
+     *
+     * @param taskId
+     * @param sampleId
+     * @param checkItemId
+     * @param itemId
+     * @param response
+     */
+    @RequestMapping(value = "/previewOriginalRecord")
+//    @CrossOrigin()
+    public void previewOriginalRecord(Long taskId,
+                                       Integer sampleId,
+                                       Integer checkItemId,
+                                       Integer itemId,
+                                       HttpServletResponse response) {
+        OriginalRecordDataVo originalData = taskService.getOriginalData(taskId, sampleId, checkItemId,itemId);
+        Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
+        result.put("result", originalData);
+        //从文件服务器获取文件流
+        String originalTemplate = taskService.getOriginalTemplateUrl(checkItemId);
+        if(originalTemplate==null){
+            log.error(checkItemId+"\t无原始记录模板为null");
+        }
+        String[] split = originalTemplate.split("/");
+        String[] split1 = split[4].split("\\?");
+        XLSTransformer transformer = new XLSTransformer();
+//        InputStream fileStream = MinIoUtil.getFileStream("original-record-template", originalTemplate);
+        InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
+        Workbook workbook = null;
+        try {
+            workbook = transformer.transformXLS(fileStream, result);
            //workbook转字节流
             String basePath = Thread.currentThread().getContextClassLoader().getResource("processes").getPath()+"/";
             FileOutputStream output=new FileOutputStream(basePath+"bak.xlsx");
