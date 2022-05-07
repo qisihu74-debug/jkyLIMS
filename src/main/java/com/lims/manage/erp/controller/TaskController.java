@@ -154,7 +154,8 @@ public class TaskController {
         } else {
             return ResultUtil.error(201, "token已过期！");
         }
-        if (taskTestEntity.getInspector() == null || taskTestEntity.getRecorder() == null || taskTestEntity.getReviewer() == null || taskTestEntity.getReportProducer() == null) {
+        if (taskTestEntity.getInspector() == null || taskTestEntity.getRecorder() == null || taskTestEntity.getReviewer() == null
+                || taskTestEntity.getReportProducer() == null || taskTestEntity.getSampler() ==null) {
             return ResultUtil.error(201, "缺少必填参数！");
         }
         Boolean taskStatus = taskService.getJudgmentTaskList(taskTestEntity.getId());
@@ -361,6 +362,35 @@ public class TaskController {
 
     /**
      * 下载任务通知单——二次开发 丁 线上使用中
+     * 废弃 变更需求 world 已经废弃。
+     * @param taskId
+     * @param response
+     */
+//    @GetMapping("downloadEntrust_two")
+//    public void downloadEntrust_two(Long taskId, HttpServletResponse response) {
+//        String fileName = "taskOrder3.docx";
+//        try {
+//            MinioClient client = MinIoUtil.minioClient;
+//            InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
+//            TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId, null);
+//            XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
+//            response.reset();
+//            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+//            response.setContentType("application/x-msdownload");
+//            response.setCharacterEncoding("UTF-8");
+//            fileName = URLEncoder.encode(fileName, "UTF-8");
+//            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
+//            OutputStream outputStream = response.getOutputStream();
+//            document.write(outputStream);
+//            //document.close();
+//            outputStream.close();
+//        } catch (Exception ex) {
+//            log.info("导出失败：{}", ex);
+//        }
+//    }
+    /**
+     * 下载任务通知单——二次开发 丁 线上使用中
+     * 变更需求 world 转 pdf。
      *
      * @param taskId
      * @param response
