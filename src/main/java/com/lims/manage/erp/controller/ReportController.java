@@ -776,4 +776,15 @@ public class ReportController {
 
         return reportService.reportUrl(entrustId);
     }
+
+    @GetMapping("testInsert")
+    public void test(String url,Long entrustId) {
+        try {
+            String s = reportService.insertPicToPdf(url, entrustId);
+            System.out.println("============="+s);
+        }catch (Exception e){
+            logger.error("===");
+        }
+
+    }
 }

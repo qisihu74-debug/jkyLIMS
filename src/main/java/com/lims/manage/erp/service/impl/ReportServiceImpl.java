@@ -81,6 +81,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -2116,31 +2117,40 @@ public class ReportServiceImpl implements ReportService {
             String signature = sysUserDao.getSignatureById(uId);
             checkUrl.add(signature);
         }
-        String outPath = "E:\\"+detailByEntrustId.getReportCode()+".pdf";
+        int index = 2;
+        String pre = "E:\\";
+        String outPath = ".pdf";
         //现将服务器上的报告文件、图片签名文件缓存到本地
-        String localPdfPath = HttpDownloadUtil.download(pdfUrl, "E:\\");
-        String verUrlPath = HttpDownloadUtil.download(verUrl, "E:\\");
-        String issUrlPath = HttpDownloadUtil.download(issUrl, "E:\\");
-        String signaturePath = HttpDownloadUtil.download(checkUrl.get(0), "E:\\");
+        String localPdfPath = HttpDownloadUtil.download(pdfUrl, pre);
+        String verUrlPath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", "E:\\");
+        String issUrlPath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", "E:\\");
+        String signaturePath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", "E:\\");
         String signaturePath2 = "";
         if (checkUrl.size()>1){
-            signaturePath2 = HttpDownloadUtil.download(checkUrl.get(1), "E:\\");
+            signaturePath2 = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", "E:\\");
         }
+        PdfDoc pdf = new PdfDoc(pre+localPdfPath, pre+index+outPath);
+        pdf.addImage(pre+signaturePath, "检测：",1,-10, 30, 20);
 
-        PdfDoc pdf = new PdfDoc(localPdfPath, outPath);
-        pdf.addImage(signaturePath, "检测：",1,-10, 30, 20);
+        String path= pre+index+outPath;
+        String des = pre+index+index+outPath;
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(signaturePath2)){
-            PdfDoc pdf1 = new PdfDoc(outPath, outPath);
-            pdf1.addImage(signaturePath2, "检测：",30,-10, 30, 20);
+            PdfDoc pdf1 = new PdfDoc(path, des);
+            pdf1.addImage(pre+signaturePath2, "检测：",50,-10, 30, 20);
+            path= pre+index+index+outPath;
+            des = pre+index+index+index+outPath;
         }
-        PdfDoc pdf2 = new PdfDoc(outPath, outPath);
-        pdf2.addImage(verUrlPath, "审核：",15,-10, 30, 20);
-        PdfDoc pdf3 = new PdfDoc(outPath, outPath);
-        pdf3.addImage(issUrlPath, "批准：",20,-10, 30, 20);
+        PdfDoc pdf2 = new PdfDoc(path, des);
+        pdf2.addImage(pre+verUrlPath, "审核：",15,-10, 30, 20);
+
+        PdfDoc pdf3 = new PdfDoc(des, pre+20+outPath);
+        pdf3.addImage(pre+issUrlPath, "批准：",20,-10, 30, 20);
         //将最终本地的pdf报告上传到文件服务器
-        File file = new File(outPath);
+        File file = new File(pre+20+outPath);
         MultipartFile multipartFile = AsposeUtil.fileToMultipart(file, detailByEntrustId.getReportCode());
         String url = MinIoUtil.upload("report-download", multipartFile, detailByEntrustId.getReportCode() + ".pdf");
+        //删除产生的临时文件
+
         return url;
     }
 }
