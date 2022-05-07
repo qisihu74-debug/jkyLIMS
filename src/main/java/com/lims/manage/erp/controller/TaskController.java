@@ -1,7 +1,6 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.aspose.words.SaveFormat;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -13,10 +12,18 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
 import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.ExcelConvertPdf;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
+import com.lims.manage.erp.vo.OriginalRecordDataVo;
+import com.lims.manage.erp.vo.OriginalRecordParamVo;
+import com.lims.manage.erp.vo.PersonInfoVo;
+import com.lims.manage.erp.vo.ReceiveSampleParamVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.TaskListParamVo;
+import com.lims.manage.erp.vo.TeamVo;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
@@ -25,14 +32,22 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -368,23 +383,11 @@ public class TaskController {
         Workbook workbook = null;
         try {
             workbook = transformer.transformXLS(fileStream, result);
-           //workbook转字节流
-            String basePath = Thread.currentThread().getContextClassLoader().getResource("processes").getPath()+"/";
-            FileOutputStream output=new FileOutputStream(basePath+"bak.xlsx");
-            workbook.write(output);
-            //转换pdf
-            byte[] bytes = null;
-            com.aspose.cells.Workbook wb = new com.aspose.cells.Workbook(basePath+"bak.xlsx");
-            //调用方法保存为PDF格式
-            String pdfLoacl = basePath+"bak.pdf";
-            wb.save(pdfLoacl, SaveFormat.PDF);
-            File file = new File(pdfLoacl);
-            bytes = FileAndFolderUtil.file2byte(file);
-            //删除缓存文件
-            FileAndFolderUtil.delete(pdfLoacl);
-            FileAndFolderUtil.delete(basePath+"bak.xlsx");
-            ServletOutputStream sos = response.getOutputStream();
-            sos.write(bytes);
+            int numberOfSheets = workbook.getNumberOfSheets();
+            for (int i=1;i<numberOfSheets;i++) {
+                workbook.removeSheetAt(1);
+            }
+            ExcelConvertPdf.excelConvertPdf(workbook,response.getOutputStream(),response);
         } catch (Exception e) {
             log.error("原始记录转换pdf预览失败:{}",e);
         }
