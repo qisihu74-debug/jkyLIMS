@@ -11,12 +11,15 @@ import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
@@ -398,21 +402,22 @@ public class TaskController {
     @GetMapping("downloadEntrust_two")
     public void downloadEntrust_two(Long taskId, HttpServletResponse response) {
         String fileName = "taskOrder3.docx";
+        String url = "";
         try {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
             TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId, null);
-            XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
-            response.reset();
-            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-            response.setContentType("application/x-msdownload");
-            response.setCharacterEncoding("UTF-8");
-            fileName = URLEncoder.encode(fileName, "UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
-            OutputStream outputStream = response.getOutputStream();
-            document.write(outputStream);
-            //document.close();
+            XWPFDocument doc = taskService.downloadEntrust(taskDetailInfo, object);
+            //相应pdf
+            ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
+            InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+            //TODO 设置签名信息
+
+            ServletOutputStream outputStream = response.getOutputStream();
+            int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+            inputStream.close();
             outputStream.close();
+            url = MinIoUtil.upload("task-download", taskId + ".pdf", inputStream, "application/octet-stream");
         } catch (Exception ex) {
             log.info("导出失败：{}", ex);
         }
