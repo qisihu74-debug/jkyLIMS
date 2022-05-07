@@ -151,7 +151,7 @@ public interface TaskMapper extends BaseMapper {
     /**
      * 查询任务列表 包含样品信息
      */
-//    List<TaskListVo> getTaskListContainsSample(TaskListParamVo paramVo);
+    List<TaskListVo> getTaskListContainsSample(TaskListParamVo paramVo);
 
     /**
      * 查询任务列表 并且 state>=1

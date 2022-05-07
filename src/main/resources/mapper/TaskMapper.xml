@@ -137,6 +137,29 @@
             <result property="sampleType" column="sampleType"></result>
         </collection>
     </resultMap>
+    <!--任务单和样品列表结果集-->
+    <resultMap id="taskSampleResultMap" type="com.lims.manage.erp.vo.TaskListVo">
+        <result property="taskId" column="taskId"></result>
+        <result property="taskCode" column="taskCode"></result>
+        <result property="requiredCompletionTime" column="requiredCompletionTime"></result>
+        <result property="inspector" column="inspector"></result>
+        <result property="cost" column="cost"></result>
+        <result property="sampleName" column="sampleName"></result>
+        <result property="state" column="state"></result>
+        <result property="recorder" column="recorder"></result>
+        <result property="reviewer" column="reviewer"></result>
+        <result property="reportProducer" column="reportProducer"></result>
+        <result property="issueReport" column="issueReport"></result>
+        <collection property="sampleList" ofType="com.lims.manage.erp.vo.SamplePrivateInfoVo">
+            <id property="id" column="sampleId"></id>
+            <result property="sampleCode" column="sampeCode"></result>
+            <result property="batchNumber" column="batchNumber"></result>
+            <result property="picture" column="picture"></result>
+            <result property="aliasName" column="aliasName"></result>
+            <result property="sampleType" column="sampleType"></result>
+        </collection>
+    </resultMap>
+
 
     <select id="getTaskDetailInfo" resultMap="taskResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT t1.id,
@@ -347,6 +370,57 @@
         t2.count_price cost,
         t4.sample_name sampleName,
         t4.product_id,
+        t1.state,
+        t1.recorder,
+        t1.reviewer,
+        t1.report_producer reportProducer,
+        t1.issue_report issueReport
+        FROM
+        test_task t1
+        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+        LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
+        LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
+        LEFT JOIN test_team t5 ON t1.team_id = t5.id
+        <trim prefix="WHERE" prefixOverrides="AND | OR ">
+            <if test="deptIds!=null">
+                and t1.dept_id in
+                <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="taskCode!=null and taskCode!=''">
+                and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
+            </if>
+            <if test="sampleName!=null and sampleName!=''">
+                and t4.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="state!=null">
+                and t1.state=#{state}
+            </if>
+        </trim>
+        GROUP BY t1.id
+        ORDER BY
+        t1.code desc
+
+
+    </select>
+
+    <select id="getTaskListContainsSample" resultMap="taskSampleResultMap"
+            parameterType="com.lims.manage.erp.vo.TaskListParamVo">
+        SELECT DISTINCT
+        t1.id taskId,
+        t1.task_code taskCode,
+        DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
+        t1.inspector,
+        t2.count_price cost,
+        t4.sample_name sampleName,
+        t4.product_id,
+        t4.id sampleId,
+        t4.sample_code sampeCode,
+        t4.batch_number batchNumber,
+        t4.picture,
+        t4.alias_name aliasName,
+        t4.sample_type sampleType,
         t1.state,
         t1.recorder,
         t1.reviewer,

@@ -261,11 +261,36 @@ public class TaskServiceImpl implements TaskService {
         List<TaskListVo> dataList = new ArrayList<>();
         if (paramVo.getState() != null && paramVo.getState() != 1) {
             PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
-            dataList = taskMapper.getTaskListTwo(paramVo);
+            dataList = taskMapper.getTaskListContainsSample(paramVo);
+        }
+        if(!CollectionUtils.isEmpty(dataList)){
+            // 处理任务单 与信息。
+            //TODO gjl添加样品状态
+            EntrustServiceImpl service = new EntrustServiceImpl();
+            for (TaskListVo sampleListVo : dataList) {
+                List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
+                List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
+                for (SamplePrivateInfoVo samplePrivateInfoVo : sampleList) {
+                    String state = service.findStateBySampleId(samplePrivateInfoVo.getId(), entrustEntityMapper, taskMapper);
+                    samplePrivateInfoVo.setState(state);
+                    //TODO PSH查询子原材样品信息
+                    List<SamplePrivateInfoVo> nodeSampleList1 = taskMapper.getNodeSampleList(samplePrivateInfoVo.getId());
+                    if(!CollectionUtils.isEmpty(nodeSampleList1)){
+                        nodeSampleList.addAll(nodeSampleList1);
+                    }
+                }
+                sampleList.addAll(nodeSampleList);
+            }
         }
         if (paramVo.getState() == 1) {
             PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
             dataList = taskMapper.getTaskListTwoGreater(paramVo);
+            // 返回前端的话 sampleListVo.getSampleList() 空集合 []
+            for(TaskListVo sampleListVo:dataList){
+                if(CollectionUtils.isEmpty(sampleListVo.getSampleList())){
+                    sampleListVo.setSampleList(new ArrayList<>());
+                }
+            }
         }
 //        if (dataList != null && !dataList.isEmpty()) {
 //            for (TaskListVo data : dataList) {
