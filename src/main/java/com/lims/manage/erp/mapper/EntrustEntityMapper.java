@@ -347,4 +347,11 @@ public interface EntrustEntityMapper extends BaseMapper {
     Integer getRecordCountById(@Param("entrustmentId") Long entrustmentId);
 
     List<String> getTaskCode(Long id);
+
+    /**
+     * 查询当前可出报告科室
+     * @param entrustmentId
+     * @return
+     */
+    List<LabelValueVo> getReportTeams(Long entrustmentId);
 }

@@ -1737,6 +1737,11 @@ public class EntrustServiceImpl implements EntrustService {
         return result;
     }
 
+    @Override
+    public List<LabelValueVo> getReportTeams(Long entrustmentId) {
+        return entityMapper.getReportTeams(entrustmentId);
+    }
+
     private String getAllLevelName(Integer checkItemPid) {
         StringBuilder prefix = new StringBuilder();
         List<String> temp = Lists.newArrayList();

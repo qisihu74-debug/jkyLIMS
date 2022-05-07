@@ -663,4 +663,15 @@
     <select id="getTaskCode" resultType="java.lang.String">
         select task_code from test_task where entrustment_id = #{id}
     </select>
+
+    <select id="getReportTeams" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT
+            t2.id value,
+	        t2.NAME label
+        FROM
+            test_task t1
+            LEFT JOIN test_team t2 ON t1.dept_id = t2.id
+        WHERE
+            entrustment_id = #{entrustmentId}
+    </select>
 </mapper>

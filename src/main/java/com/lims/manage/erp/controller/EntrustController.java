@@ -542,4 +542,22 @@ public class EntrustController {
             return ResultUtil.success(entrustService.getCheckItemInfo(itemIds.getIds()));
         }
     }
+
+    /**
+     *
+     * @param entrustmentId
+     * @return
+     */
+    @RequestMapping("/getReportTeams")
+    public Result getReportTeams(Long entrustmentId) {
+        if (entrustmentId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            List<LabelValueVo> reportTeams = entrustService.getReportTeams(entrustmentId);
+            if(CollectionUtils.isEmpty(reportTeams)){
+                return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "未找到当前委托分配的团队信息！");
+            }
+            return ResultUtil.success(reportTeams);
+        }
+    }
 }
