@@ -70,6 +70,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/report/previewDownLoad", "anon");
         filterChainDefinitionMap.put("/task/downloadEntrust_two", "anon");
         filterChainDefinitionMap.put("/entrust/previewEntrust", "anon");
+        filterChainDefinitionMap.put("/task/previewOriginalRecord", "anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");
