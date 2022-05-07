@@ -358,4 +358,6 @@ public interface ReportService {
     String submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id,TestSampleMixInfoEntity mixInfoEntity);
 
     String reportUrl(Long entrustId);
+
+    String insertPicToPdf(String url, Long entrustId) throws Exception;
 }

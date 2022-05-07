@@ -607,6 +607,8 @@ public class ReportController {
             //相应pdf
             ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
             InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+            //TODO 设置签名信息
+
             ServletOutputStream outputStream = response.getOutputStream();
             int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
             inputStream.close();
@@ -773,5 +775,16 @@ public class ReportController {
     public String reportUrl(Long entrustId){
 
         return reportService.reportUrl(entrustId);
+    }
+
+    @GetMapping("testInsert")
+    public void test(String url,Long entrustId) {
+        try {
+            String s = reportService.insertPicToPdf(url, entrustId);
+            System.out.println("============="+s);
+        }catch (Exception e){
+            logger.error("===");
+        }
+
     }
 }

@@ -361,4 +361,18 @@ public class FileAndFolderUtil {
         buffer=byteArrayOutputStream.toByteArray();
         return buffer;
     }
+
+    /**
+     * 删除指定的文件
+     *
+     * @param strFileName 指定绝对路径的文件名
+     * @return boolean 是否删除成功
+     */
+    public static boolean delete(String strFileName) {
+        File fileDelete = new File(strFileName);
+        if (!fileDelete.exists() || !fileDelete.isFile()) {
+            return false;
+        }
+        return fileDelete.delete();
+    }
 }

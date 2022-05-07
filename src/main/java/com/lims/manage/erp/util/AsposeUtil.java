@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -398,6 +399,32 @@ public class AsposeUtil {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * 将file转换成fileItem
+     * @param file
+     * @param fieldName
+     * @return
+     */
+    public static MultipartFile fileToMultipart(File file, String fieldName){
+        FileItemFactory factory = new DiskFileItemFactory(16, null);
+        FileItem item = factory.createItem(fieldName, "text/plain", true, file.getName());
+        int bytesRead = 0;
+        byte[] buffer = new byte[8192];
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            OutputStream os = item.getOutputStream();
+            while ((bytesRead = fis.read(buffer, 0, 8192)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            os.close();
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        MultipartFile multipartFile = new CommonsMultipartFile(item);
+        return multipartFile;
     }
 
 }
