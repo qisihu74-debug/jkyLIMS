@@ -16,11 +16,14 @@ import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +36,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
@@ -466,6 +471,35 @@ public class EntrustController {
             response.setHeader("Content-Disposition", "attachment;fileName=" + detail.getEntrustmentNo()+".docx");
             OutputStream outputStream = response.getOutputStream();
             document.write(outputStream);
+            outputStream.close();
+        } catch (Exception ex) {
+            log.info("导出失败：", ex.getMessage());
+        }
+    }
+
+    /**
+     * 委托预览
+     * @param entrustId
+     * @param response
+     */
+    @RequestMapping("previewEntrust")
+    public void preview(Long entrustId, HttpServletResponse response) {
+        String message = entrustService.getMessage();
+        String[] strings = message.split("/");
+        String fileName = strings[1];
+        try {
+            MinioClient client = MinIoUtil.minioClient;
+            InputStream object = client.getObject(strings[0], fileName);
+            //填充数据
+            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
+            log.debug("====aaa:{}",JSON.toJSONString(detail));
+            XWPFDocument document = entrustService.downloadEntrust(detail, object);
+            //相应pdf
+            ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(document);
+            InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+            ServletOutputStream outputStream = response.getOutputStream();
+            int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+            inputStream.close();
             outputStream.close();
         } catch (Exception ex) {
             log.info("导出失败：", ex.getMessage());
