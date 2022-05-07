@@ -1,6 +1,7 @@
 package com.lims.manage.erp.util;
 
 
+import com.aspose.cells.*;
 import com.aspose.words.Document;
 import com.aspose.words.SaveFormat;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -37,6 +38,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -427,4 +429,28 @@ public class AsposeUtil {
         return multipartFile;
     }
 
+    /**
+     * 将文件服务器上的excel转为pdf流输出
+     * @param excelUrl
+     */
+    public static byte[] excelToPdf(String excelUrl) {
+        String basePath = Thread.currentThread().getContextClassLoader().getResource("processes").getPath()+"/";
+        String localPdfPath = HttpDownloadUtil.download(excelUrl, basePath);//服务器excel缓存本地
+        //加载Excel文档
+        byte[] bytes = null;
+        try {
+            Workbook wb = new Workbook(basePath+localPdfPath);
+            //调用方法保存为PDF格式
+            String pdfLoacl = basePath+localPdfPath.split("\\.")[0]+".pdf";
+            wb.save(pdfLoacl, SaveFormat.PDF);
+            File file = new File(pdfLoacl);
+            bytes = FileAndFolderUtil.file2byte(file);
+            //删除缓存文件
+            FileAndFolderUtil.delete(pdfLoacl);
+            FileAndFolderUtil.delete(basePath+localPdfPath);
+        }catch (Exception e){
+            logger.error("excel转换异常:{}",e);
+        }
+        return bytes;
+    }
 }
