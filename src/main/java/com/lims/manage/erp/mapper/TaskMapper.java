@@ -148,6 +148,10 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     List<TaskListVo> getTaskListTwo(TaskListParamVo paramVo);
+    /**
+     * 查询任务列表 包含样品信息
+     */
+//    List<TaskListVo> getTaskListContainsSample(TaskListParamVo paramVo);
 
     /**
      * 查询任务列表 并且 state>=1
