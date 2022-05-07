@@ -501,11 +501,34 @@
             <artifactId>httpmime</artifactId>
             <version>4.4</version>
         </dependency>
+        <!-- com.aspose.excle-->
+        <dependency>
+            <groupId>e-iceblue</groupId>
+            <artifactId>spire.xls</artifactId>
+            <version>5.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>e-iceblue</groupId>
+            <artifactId>spire.office</artifactId>
+            <version>5.4.2</version>
+        </dependency>
+        <dependency>
+            <groupId> e-iceblue </groupId>
+            <artifactId>spire.doc</artifactId>
+            <version>5.4.2</version>
+        </dependency>
+
     </dependencies>
     <repositories>
         <repository>
             <id>aspose-maven-repository</id>
             <url>http://artifact.aspose.com/repo/</url>
+        </repository>
+
+        <repository>
+            <id>com.e-iceblue</id>
+            <name>e-iceblue</name>
+            <url>https://repo.e-iceblue.cn/repository/maven-public/</url>
         </repository>
     </repositories>
     <build>
