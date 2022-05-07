@@ -2117,40 +2117,62 @@ public class ReportServiceImpl implements ReportService {
             String signature = sysUserDao.getSignatureById(uId);
             checkUrl.add(signature);
         }
-        int index = 2;
-        String pre = "E:\\";
-        String outPath = ".pdf";
+        URL processes = Thread.currentThread().getContextClassLoader().getResource("processes");
+        String basePath = processes.getPath()+"/";
+        //临时文件路径（使用后删除）
+        String verPath = "";
+        String verPath1 = "";
+        String issPath = "";
+        String sigPath = "";
+        String finalPath = "";
+
+
+        String suffix = ".pdf";
         //现将服务器上的报告文件、图片签名文件缓存到本地
-        String localPdfPath = HttpDownloadUtil.download(pdfUrl, pre);
-        String verUrlPath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", "E:\\");
-        String issUrlPath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", "E:\\");
-        String signaturePath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", "E:\\");
+        String localPdfPath = HttpDownloadUtil.download(pdfUrl, basePath);
+        String verUrlPath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", basePath);
+        String issUrlPath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", basePath);
+        String signaturePath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", basePath);
         String signaturePath2 = "";
         if (checkUrl.size()>1){
-            signaturePath2 = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", "E:\\");
+            signaturePath2 = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", basePath);
         }
-        PdfDoc pdf = new PdfDoc(pre+localPdfPath, pre+index+outPath);
-        pdf.addImage(pre+signaturePath, "检测：",1,-10, 30, 20);
+        //图片插入
+        verPath= basePath+localPdfPath;
+        verPath1 = basePath+1+suffix;
+        PdfDoc pdf = new PdfDoc(verPath, verPath1);
+        pdf.addImage(basePath+signaturePath, "检测：",1,-10, 30, 20);
 
-        String path= pre+index+outPath;
-        String des = pre+index+index+outPath;
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(signaturePath2)){
-            PdfDoc pdf1 = new PdfDoc(path, des);
-            pdf1.addImage(pre+signaturePath2, "检测：",50,-10, 30, 20);
-            path= pre+index+index+outPath;
-            des = pre+index+index+index+outPath;
+            issPath = basePath+2+suffix;
+            PdfDoc pdf1 = new PdfDoc(verPath1, issPath);
+            pdf1.addImage(basePath+signaturePath2, "检测：",50,-10, 30, 20);
         }
-        PdfDoc pdf2 = new PdfDoc(path, des);
-        pdf2.addImage(pre+verUrlPath, "审核：",15,-10, 30, 20);
+        if (StringUtils.isEmpty(issPath)){
+            issPath = basePath+2+suffix;
+        }
 
-        PdfDoc pdf3 = new PdfDoc(des, pre+20+outPath);
-        pdf3.addImage(pre+issUrlPath, "批准：",20,-10, 30, 20);
+        sigPath = basePath+3+suffix;
+        PdfDoc pdf2 = new PdfDoc(issPath, sigPath);
+        pdf2.addImage(basePath+verUrlPath, "审核：",15,-10, 30, 20);
+
+        finalPath = basePath+4+suffix;
+        PdfDoc pdf3 = new PdfDoc(sigPath, finalPath);
+        pdf3.addImage(basePath+issUrlPath, "批准：",20,-10, 30, 20);
         //将最终本地的pdf报告上传到文件服务器
-        File file = new File(pre+20+outPath);
+        File file = new File(finalPath);
         MultipartFile multipartFile = AsposeUtil.fileToMultipart(file, detailByEntrustId.getReportCode());
         String url = MinIoUtil.upload("report-download", multipartFile, detailByEntrustId.getReportCode() + ".pdf");
         //删除产生的临时文件
-
+        FileAndFolderUtil.delete(verPath);
+        FileAndFolderUtil.delete(verPath1);
+        FileAndFolderUtil.delete(issPath);
+        FileAndFolderUtil.delete(sigPath);
+        FileAndFolderUtil.delete(finalPath);
+        FileAndFolderUtil.delete(basePath+verUrlPath);
+        FileAndFolderUtil.delete(basePath+issUrlPath);
+        FileAndFolderUtil.delete(basePath+signaturePath);
+        FileAndFolderUtil.delete(basePath+signaturePath2);
         return url;
     }
 }
