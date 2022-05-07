@@ -520,6 +520,8 @@
             <if test="endDetectionTime!=null">end_detection_time=#{endDetectionTime},</if>
             <if test="verifyer!=null and verifyer!=''">verifyer=#{verifyer},</if>
             <if test="signer!=null and signer!=''">signer=#{signer},</if>
+            <if test="sampleReceivingTime!=null">sample_receiving_time=#{sampleReceivingTime},</if>
+            <if test="sampleStateDescription!=null">sample_state_description=#{sampleStateDescription},</if>
         </trim>
         where id = #{id}
     </update>

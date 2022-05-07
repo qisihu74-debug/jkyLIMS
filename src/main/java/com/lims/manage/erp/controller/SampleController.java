@@ -321,7 +321,7 @@ public class SampleController {
     }
 
     /**
-     * 样品查询打印列表
+     * 添加委托查询样品列表
      *
      * @param sampleEntity
      * @return
@@ -332,6 +332,20 @@ public class SampleController {
             return ResultUtil.error("缺少分页参数！");
         }
         return ResultUtil.success(testSampleEntityService.querySampleList(sampleEntity));
+    }
+
+    /**
+     * 样品查询打印列表
+     *
+     * @param sampleEntity
+     * @return
+     */
+    @RequestMapping("/showSampleList")
+    public Result showSampleList(@RequestBody TestSampleEntity sampleEntity) {
+        if (sampleEntity.getPageNum() == null || sampleEntity.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success(testSampleEntityService.showSampleList(sampleEntity));
     }
 
     /**

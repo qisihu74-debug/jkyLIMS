@@ -62,6 +62,7 @@ public class TaskTestEntity {
     /**
      * 领样时间
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date sampleReceivingTime;
     /**
      * 检测人
@@ -113,5 +114,9 @@ public class TaskTestEntity {
      * 签发人
      */
     private String signer;
+    /**
+     * 样品状态描述
+     */
+    private String sampleStateDescription;
 
 }

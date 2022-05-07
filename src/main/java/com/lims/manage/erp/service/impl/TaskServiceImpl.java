@@ -414,11 +414,22 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Boolean postGrabASingleTwo(TaskTestEntity taskTestEntity) {
-        // 抢单
-        taskTestEntity.setState(1);
+        // 抢单 并领样。
+        taskTestEntity.setState(2);
+        // 根据任务单主键 获取委托单主键
+        EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
+        if (entrustEntity != null) {
+            //更新任务单状态为已领样
+            taskMapper.updateEntrustById(taskTestEntity.getId(), 2);
+        }
+        // 更新样品状态 test_sample state = 1。 在检。
+        //更新样品状态为领样
+//        sampleEntityMapper.updateSampleState(paramVo.getSampleId(),1);
         // 抢单时间
         java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
         taskTestEntity.setReceiveTime(currentDate);
+        // 领样时间
+        taskTestEntity.setSampleReceivingTime(currentDate);
         taskMapper.updateTestTask(taskTestEntity);
         return true;
     }
