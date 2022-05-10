@@ -144,7 +144,7 @@ public class EntrustController {
     @PostMapping("/updateEntrust_test_new_sample")
 //    @RequiresPermissions("entrust:entrust:updateEntrust")
     public Result updateEntrustTestNewSample(@RequestBody EntrustAddVo entrust) {
-        Boolean isSuccess = entrustService.updateEntrustTestNewSampleEnscript(entrust);
+        Boolean isSuccess = entrustService.updateEntrustCheckItem(entrust);
         if (isSuccess) {
             return ResultUtil.success("修改委托下样品成功");
         } else {

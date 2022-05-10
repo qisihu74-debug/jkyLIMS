@@ -57,7 +57,15 @@ public interface EntrustService {
     /**
      * 修改委托样品测试 new 3.23
      */
+    Boolean updateEntrustTestNewSampleEnscript1(EntrustAddVo vo);
     Boolean updateEntrustTestNewSampleEnscript(EntrustAddVo vo);
+
+    /**
+     * 修改委托检测项
+     * @param vo
+     * @return
+     */
+    Boolean updateEntrustCheckItem(EntrustAddVo vo);
 
     /**
      * 实现作废
