@@ -361,6 +361,23 @@
         </foreach>
     </insert>
 
+    <update id="batchUpdateEntrustSampleItem" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update test_entrusted_sample_checkitem_rel
+            <set>
+                standard_id = #{item.standardId},
+                times = #{item.times}
+            </set>
+            where entrust_id = #{item.entrustId} and check_item_id = #{checkItemId}
+        </foreach>
+    </update>
+
+    <delete id="batchDeleteEntrustSampleItem" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            delete from test_entrusted_sample_checkitem_rel where entrust_id = #{item.entrustId} and check_item_id = #{checkItemId}
+        </foreach>
+    </delete>
+
     <insert id="saveEntrustPayRecord" parameterType="com.lims.manage.erp.entity.EntrustPamentEntity">
         insert into test_entrusted_payment_record_info(entrustment_id,
                                                        price,
@@ -688,4 +705,8 @@
             where id = #{item.id}
         </foreach>
     </update>
+
+    <select id="getEntrustStateNow" resultType="java.lang.Integer">
+        SELECT state FROM test_entrusted_info where id = #{entrustmentId}
+    </select>
 </mapper>

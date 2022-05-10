@@ -71,6 +71,18 @@ public interface EntrustEntityMapper extends BaseMapper {
     void BatchSaveEntrustSampleItem(@Param("sampleItemList") List<SampleItemEntity> sampleItemList);
 
     /**
+     * 批量更新委托单下的检测项
+     * @param sampleItemList
+     */
+    void batchUpdateEntrustSampleItem(@Param("sampleItemList") List<SampleItemEntity> sampleItemList);
+
+    /**
+     * 批量删除委托单下的检测项
+     * @param sampleItemList
+     */
+    void batchDeleteEntrustSampleItem(@Param("sampleItemList") List<SampleItemEntity> sampleItemList);
+
+    /**
      * 缴费记录新增
      * @param pamentEntity
      */
@@ -367,4 +379,11 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     int updateSampleCompany(@Param("list") List<TestSampleEntity> list);
+
+    /**
+     * 查询委托单当前状态
+     * @param entrustmentId
+     * @return
+     */
+    Integer getEntrustStateNow(Long entrustmentId);
 }
