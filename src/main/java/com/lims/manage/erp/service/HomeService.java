@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.HomeAfficheEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -28,4 +29,11 @@ public interface HomeService {
      * @return
      */
     List<HomeAfficheEntity> showAnnounce();
+
+    /**
+     * 任务看板
+     * @param userId
+     * @return
+     */
+    List<LabelValueVo> taskKanban(Long userId) throws ParseException;
 }

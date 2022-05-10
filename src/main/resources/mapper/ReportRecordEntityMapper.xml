@@ -591,4 +591,13 @@
           AND entrustment_id = #{entrustId}
     </select>
 
+    <select id="selectCount" resultType="int">
+        select
+        count(*)
+        FROM
+        test_report_record
+        WHERE
+        state =#{state}
+    </select>
+
 </mapper>

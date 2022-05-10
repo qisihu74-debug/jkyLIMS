@@ -354,4 +354,17 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     List<LabelValueVo> getReportTeams(Long entrustmentId);
+
+    /**
+     * 统计未分配委托单
+     * @param state
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tcount( * ) \n" +
+            "FROM\n" +
+            "\ttest_entrusted_info \n" +
+            "WHERE\n" +
+            "\tstate = #{state}")
+    Integer selectCount(Integer state);
 }

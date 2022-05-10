@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.ParseException;
+
 @Slf4j
 @RestController
 @RequestMapping("/home/")
@@ -67,5 +69,18 @@ public class HomeController {
         }
         return ResultUtil.success(homeService.showAnnounce());
     }
+    /**
+     * 任务看板
+     * Task kanban
+     */
+    @GetMapping("taskKanban")
+    public Result taskKanban() throws ParseException {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token 已过期！");
+        }
+        return ResultUtil.success(homeService.taskKanban(userInfo.getUserId()));
+    }
+
 
 }

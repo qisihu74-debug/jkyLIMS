@@ -348,4 +348,9 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     List<SamplePrivateInfoVo> getNodeSampleList(Integer sampleId);
+
+    /**
+     * 统计未任务领取。
+     */
+    Integer selectCount(Integer state ,List<Long> deptIds);
 }

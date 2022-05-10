@@ -187,4 +187,9 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     List<LabelValueVo> getCheckReportRel(Long entrustId);
+
+    /**
+     * 统计报告的状态
+     */
+    Integer selectCount(Integer state);
 }
