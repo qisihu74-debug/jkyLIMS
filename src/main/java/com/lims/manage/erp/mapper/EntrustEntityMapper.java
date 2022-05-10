@@ -354,4 +354,17 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     List<LabelValueVo> getReportTeams(Long entrustmentId);
+
+    /**
+     * 查询该委托下所有的样品id
+     * @param entrustmentId
+     * @return
+     */
+    List<Integer> getAllSampleIdentrustmentId(Long entrustmentId);
+
+    /**
+     * 修改委托下样品委托单位
+     * @return
+     */
+    int updateSampleCompany(@Param("list") List<TestSampleEntity> list);
 }

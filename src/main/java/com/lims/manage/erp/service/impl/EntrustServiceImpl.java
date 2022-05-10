@@ -634,6 +634,18 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         entityMapper.updateEntrustInfo(basisInfo);
+        //修改样品委托单位
+        List<Integer> sampleIds = entityMapper.getAllSampleIdentrustmentId(basisInfo.getId());
+        if(!CollectionUtils.isEmpty(sampleIds)){
+            List<TestSampleEntity> entities = Lists.newArrayList();
+            for (int i = 0; i < sampleIds.size(); i++) {
+                TestSampleEntity entity = new TestSampleEntity();
+                entity.setId(sampleIds.get(i));
+                entity.setCompanyId(basisInfo.getEntrustCompanyId());
+                entities.add(entity);
+            }
+            entityMapper.updateSampleCompany(entities);
+        }
         return true;
     }
 
