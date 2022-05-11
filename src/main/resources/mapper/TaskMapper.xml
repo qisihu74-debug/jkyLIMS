@@ -770,4 +770,18 @@
         WHERE
             pid = #{sampleId}
     </select>
+    <select id="selectCount" resultType="int">
+        select
+        count(*)
+        FROM
+        test_task
+        WHERE
+        state =#{state}
+        <if test="deptIds != null">
+            and  dept_id in
+            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+    </select>
 </mapper>

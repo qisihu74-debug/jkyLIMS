@@ -118,4 +118,17 @@ public class Const {
      * 常规图片后缀名大全。
      */
    public static final  String[] nameSuffixS ={"tiff","pjp","jfif","bmp","webp","pjpeg","avif","tif","jpg","svgz","png","xbm","dib","jxl","jpeg","gif","svg","ico"};
+    /**
+     * 设计全局枚举 菜单名 与对应的表格相一致。
+     */
+    public static final String[] taskKanbans = {"查询/打印","委托查询","任务管理","试验检测","报告合成","报告审批","报告签发","电子印章","报告邮寄"};
+   public static final String sampleStr = "查询/打印";
+   public static final String entrustStr = "委托查询";
+   public static final String taskStr = "任务管理";
+   public static final String testStr = "试验检测";
+   public static final String reportStr = "报告合成";
+   public static final String approvalStr = "报告审批";
+   public static final String verifyStr = "报告签发";
+   public static final String sealStr = "电子印章";
+   public static final String toBeAStr = "报告邮寄";
 }
