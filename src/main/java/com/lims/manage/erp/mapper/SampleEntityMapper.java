@@ -87,6 +87,14 @@ public interface SampleEntityMapper {
     List<JudgmentBasisVo> selectTestStandardList(@Param(value = "sampleId") Integer sampleId, @Param(value = "entrustmentId") Long entrustmentId);
 
     /**
+     * 查询未分配的检测项
+     * @param sampleId
+     * @param entrustmentId
+     * @return
+     */
+    List<JudgmentBasisVo> getCheckItemNoDistribution(@Param(value = "sampleId") Integer sampleId, @Param(value = "entrustmentId") Long entrustmentId);
+
+    /**
      * 根据检测项id 查询 默认匹配部门信息
      */
     @Select("SELECT\n" +
