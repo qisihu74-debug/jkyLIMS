@@ -2,6 +2,7 @@
   * Copyright 2022 bejson.com 
   */
 package com.lims.manage.erp.entity;
+
 import lombok.Data;
 
 import java.util.List;
@@ -34,8 +35,13 @@ public class Actions {
      */
     private String sealIds;
     /**
+     * 印章id
+     */
+    private Long sealId;
+    /**
      *操作人信息
      */
     private List<ActionOperators> actionOperators;
+    private List<Location> locations;
 
 }

@@ -4,6 +4,7 @@ package com.lims.manage.erp.controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lims.manage.erp.entity.TestReportTemplate;
@@ -51,7 +52,11 @@ public class TestReportTemplateController extends ApiController {
             queryWrapper.like("report_name",testReportTemplate.getReportName());
         }
         queryWrapper.orderByDesc("create_time");
-        return ResultUtil.success(this.testReportTemplateService.page(page, queryWrapper));
+        IPage<TestReportTemplate> iPage = this.testReportTemplateService.page(page, queryWrapper);
+        for (TestReportTemplate bean:iPage.getRecords()) {
+            bean.setReportFileUri(bean.getReportFileUri().substring(0,bean.getReportFileUri().indexOf("?")));
+        }
+        return ResultUtil.success(iPage);
     }
 
     /**

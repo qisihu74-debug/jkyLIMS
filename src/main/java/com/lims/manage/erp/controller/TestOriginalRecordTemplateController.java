@@ -4,10 +4,12 @@ package com.lims.manage.erp.controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lims.manage.erp.entity.TestOriginalRecordTemplate;
 
+import com.lims.manage.erp.entity.TestReportTemplate;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestOriginalRecordTemplateService;
@@ -49,7 +51,11 @@ public class TestOriginalRecordTemplateController extends ApiController {
             queryWrapper.like("name",testOriginalRecordTemplate.getName());
         }
         queryWrapper.orderByDesc("tort.create_time");
-        return ResultUtil.success(this.testOriginalRecordTemplateService.getPageList(page, queryWrapper));
+        IPage<TorttpiVo> pageList = this.testOriginalRecordTemplateService.getPageList(page, queryWrapper);
+        for (TorttpiVo bean:pageList.getRecords()) {
+            bean.setFileUrl(bean.getFileUrl().substring(0,bean.getFileUrl().indexOf("?")));
+        }
+        return ResultUtil.success(pageList);
     }
 
     /**

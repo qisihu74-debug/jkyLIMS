@@ -35,6 +35,19 @@ public class QiYueSuoReqBean {
      */
     private String subject;
     /**
+     * 指定位置外签署，默认为false
+     */
+    private Boolean ordinal;
+    /**
+     * 允许指定位置签署，默认为true，指定位置外签署和指定位置签署两者不可同时为false
+     */
+    private Boolean extraSign;
+    private Boolean mustSign;
+    /**
+     * 是否自动生成会签节点（用于签署动作中传入多个印章并且未指定签署人）默认false
+     */
+    private Boolean autoCreateCounterSign;
+    /**
      * 发起方名称
      */
     private String tenantName;
