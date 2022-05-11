@@ -368,13 +368,13 @@
                 standard_id = #{item.standardId},
                 times = #{item.times}
             </set>
-            where entrust_id = #{item.entrustId} and check_item_id = #{checkItemId}
+            where entrust_id = #{item.entrustId} and check_item_id = #{item.checkItemId}
         </foreach>
     </update>
 
     <delete id="batchDeleteEntrustSampleItem" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
-            delete from test_entrusted_sample_checkitem_rel where entrust_id = #{item.entrustId} and check_item_id = #{checkItemId}
+            delete from test_entrusted_sample_checkitem_rel where entrust_id = #{item.entrustId} and check_item_id = #{item.checkItemId}
         </foreach>
     </delete>
 
@@ -708,5 +708,17 @@
 
     <select id="getEntrustStateNow" resultType="java.lang.Integer">
         SELECT state FROM test_entrusted_info where id = #{entrustmentId}
+    </select>
+
+    <select id="getAllOldCheckItemInfo" resultType="com.lims.manage.erp.entity.SampleItemEntity">
+        SELECT
+            sample_id,
+            entrust_id,
+            check_item_name,
+            check_item_id,
+            standard_id,
+            times
+        FROM
+            test_entrusted_sample_checkitem_rel where sample_id = #{sampleId} and entrust_id = #{entrustId} order by LENGTH(check_item_name)
     </select>
 </mapper>

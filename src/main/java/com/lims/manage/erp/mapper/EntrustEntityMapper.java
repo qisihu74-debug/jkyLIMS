@@ -72,15 +72,15 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     /**
      * 批量更新委托单下的检测项
-     * @param sampleItemList
+     * @param list
      */
-    void batchUpdateEntrustSampleItem(@Param("sampleItemList") List<SampleItemEntity> sampleItemList);
+    void batchUpdateEntrustSampleItem(@Param("list") List<SampleItemEntity> list);
 
     /**
      * 批量删除委托单下的检测项
-     * @param sampleItemList
+     * @param list
      */
-    void batchDeleteEntrustSampleItem(@Param("sampleItemList") List<SampleItemEntity> sampleItemList);
+    void batchDeleteEntrustSampleItem(@Param("list") List<SampleItemEntity> list);
 
     /**
      * 缴费记录新增
@@ -399,4 +399,12 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     Integer getEntrustStateNow(Long entrustmentId);
+
+    /**
+     * 查询委托单下样品的检测项信息
+     * @param sampleId
+     * @param entrustId
+     * @return
+     */
+    List<SampleItemEntity> getAllOldCheckItemInfo(@Param("sampleId") Integer sampleId,@Param("entrustId")Long entrustId);
 }

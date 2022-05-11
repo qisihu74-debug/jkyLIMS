@@ -1009,10 +1009,13 @@ public class EntrustServiceImpl implements EntrustService {
         }
     }
 
+    @Transactional
     private Boolean updatePublishedEntrust(EntrustAddVo vo){
         EntrustEntity basisInfo = new EntrustEntity(vo);
         //获取委托单原有信息
         EntrustAddVo oldEntrustInfo = getEntrustHistoryDetailTest(basisInfo.getId());
+        //当前委托单状态
+        Integer state = oldEntrustInfo.getState();
         // 删除判定依据id
         entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
         int totalMoney = 0;
@@ -1039,28 +1042,47 @@ public class EntrustServiceImpl implements EntrustService {
                     entityMapper.BatchSaveSampleStandard(list1);
                 }
                 //原有检测项信息
-                List<SampleItemEntity> sampleCheckItemOld = sampleEntityOld.getSampleCheckItem();
+                List<SampleItemEntity> sampleCheckItemOld = entityMapper.getAllOldCheckItemInfo(sampleEntityOld.getId(),basisInfo.getId());
                 //新检测项信息
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
-                //存放不同操作的检测项
+                //存放修改的检测项
                 List<SampleItemEntity> updateList = Lists.newArrayList();
-//                List<SampleItemEntity> saveList = Lists.newArrayList();
                 if(!CollectionUtils.isEmpty(sampleCheckItemOld) && !CollectionUtils.isEmpty(sampleCheckItem)){
-                    for (SampleItemEntity sampleItemEntity : sampleCheckItemOld) {
-                        Long checkItemId = sampleItemEntity.getCheckItemId();
-                        for (SampleItemEntity sampleItemEntity1 : sampleCheckItem) {
-                            Long checkItemId1 = sampleItemEntity1.getCheckItemId();
-                            if(checkItemId1.equals(checkItemId)){
-                                updateList.add(sampleItemEntity1);
-                                sampleCheckItemOld.remove(sampleItemEntity);
-                                sampleCheckItem.remove(sampleItemEntity1);
+                    for (int k = 0; k < sampleCheckItemOld.size(); k++) {
+                        SampleItemEntity sampleItemEntity = sampleCheckItemOld.get(k);
+                        if(sampleItemEntity!=null){
+                            Long checkItemId = sampleItemEntity.getCheckItemId();
+                            for (int m = 0; m < sampleCheckItem.size(); m++) {
+                                SampleItemEntity sampleItemEntity1 = sampleCheckItem.get(m);
+                                Long checkItemId1 = sampleItemEntity1.getCheckItemId();
+                                if(checkItemId1.equals(checkItemId)){
+                                    for (int j = 0; j < sampleCheckItemOld.size(); j++) {
+                                        SampleItemEntity old = sampleCheckItemOld.get(j);
+                                        if(old != null && old.getCheckItemName().contains(sampleItemEntity1.getCheckItemName()) && !old.getCheckItemName().equals(sampleItemEntity1.getCheckItemName())){
+                                            old.setTimes(sampleItemEntity1.getTimes());//修改次数
+                                            old.setStandardId(sampleItemEntity1.getStandardId());//修改检测依据
+                                            updateList.add(old);
+                                            sampleCheckItemOld.set(j,null);
+                                            if(CollectionUtils.isEmpty(sampleCheckItemOld)){
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    updateList.add(sampleItemEntity1);
+                                    sampleCheckItemOld.set(k,null);
+//                                sampleCheckItemOld.remove(sampleItemEntity);
+                                    sampleCheckItem.remove(sampleItemEntity1);
+                                }
+                                if(CollectionUtils.isEmpty(sampleCheckItem)){
+                                    break;
+                                }
+                            }
+                            if(CollectionUtils.isEmpty(sampleCheckItemOld)){
+                                break;
                             }
                         }
                     }
                 }
-//                if(CollectionUtils.isEmpty(sampleCheckItemOld)){//原检测项为空，只需增加新的检测项
-//                    sampleCheckItem.addAll(sampleCheckItem);
-//                }
                 //增加新的检测项
                 if (!CollectionUtils.isEmpty(sampleCheckItem)) {
                     for (SampleItemEntity entity : sampleCheckItem) {
@@ -1101,6 +1123,7 @@ public class EntrustServiceImpl implements EntrustService {
                             entityMapper.BatchSaveEntrustSampleItem(ItemList);
                         }
                     }
+                    state = 0;
                 }
                 //修改原有检测项
                 if (!CollectionUtils.isEmpty(updateList)){
@@ -1113,8 +1136,16 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                     entityMapper.batchUpdateEntrustSampleItem(updateList);
                 }
-                //删除原有检测项
-                if (!CollectionUtils.isEmpty(sampleCheckItemOld)){
+
+                //删除原有检测项--判断是否删除有子检测项的
+                if (sampleCheckItemOld != null && !CollectionUtils.isEmpty(sampleCheckItemOld)){
+                    //
+                    for (int j = 0; j < sampleCheckItemOld.size(); j++) {
+                        SampleItemEntity sampleItemEntity = sampleCheckItemOld.get(i);
+                        if(sampleItemEntity == null ){
+                            sampleCheckItemOld.remove(sampleItemEntity);
+                        }
+                    }
                     entityMapper.batchDeleteEntrustSampleItem(sampleCheckItemOld);
                 }
             }
@@ -1122,6 +1153,7 @@ public class EntrustServiceImpl implements EntrustService {
         if (totalMoney != 0) {
             //得到总价钱，再保存委托基本信息
             basisInfo.setPaymentCount(totalMoney + "");
+            basisInfo.setState(state);
             //存放委托基本信息==》test_entrusted
             entityMapper.updateEntrustInfo(basisInfo);
         }
