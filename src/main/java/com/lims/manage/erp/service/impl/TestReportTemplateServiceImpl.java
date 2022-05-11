@@ -16,6 +16,7 @@ import com.lims.manage.erp.service.TestReportTemplateService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.TestReportTemplateVo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -30,6 +31,7 @@ import java.util.List;
  * @author makejava
  * @since 2022-03-02 16:22:10
  */
+@Slf4j
 @Service("testReportTemplateService")
 public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplateDao, TestReportTemplate> implements TestReportTemplateService {
     @Resource
@@ -112,6 +114,7 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
             String url=this.getById(aLong).getReportFileUri();
             if (url!=null){
                 sysOssService.delAnnounce(url);
+                log.info("管理员:"+ShiroUtils.getUserInfo().getUsername()+"删除文件："+url);
             }
             testReportTemplates.add(testReportTemplate);
         }
