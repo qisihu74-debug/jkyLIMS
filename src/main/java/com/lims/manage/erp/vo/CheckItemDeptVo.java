@@ -7,6 +7,7 @@ import java.util.Date;
 public class CheckItemDeptVo {
     private Integer id;
     private Long deptId;
+    private Long taskId;
     private Date distributionDate;
     private String issueReport;
 }

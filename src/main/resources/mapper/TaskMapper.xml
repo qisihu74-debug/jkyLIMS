@@ -741,7 +741,7 @@
             <set>
                 dept_id = ${item.deptId},
                 distribution_date = current_timestamp(),
-
+                task_id = ${item.taskId}}
             </set>
             where id = ${item.id}
         </foreach>

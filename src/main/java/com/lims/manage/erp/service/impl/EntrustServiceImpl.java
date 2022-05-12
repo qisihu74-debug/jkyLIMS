@@ -1152,12 +1152,6 @@ public class EntrustServiceImpl implements EntrustService {
                         }
                     }
                     entityMapper.batchUpdateEntrustSampleItem(updateList);
-                    //修改报告的状态，和审批，复核信息
-                    if(!"2".equals(reportState)){
-                        ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
-                        reportApprovalVo.setState(2);
-                        reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
-                    }
                 }
 
                 //删除原有检测项--判断是否删除有子检测项的
@@ -1795,6 +1789,7 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean distributionTask412(TaskVo entity) {
         List<Long> deptIds = Lists.newArrayList();
         List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
@@ -1807,7 +1802,8 @@ public class EntrustServiceImpl implements EntrustService {
         List<TaskVo> vos = Lists.newArrayList();
         for (Long deptId : deptIds) {
             TaskVo vo = new TaskVo();
-            vo.setId(GenID.getID());
+            long id = GenID.getID();
+            vo.setId(id);
             String teamCode = taskMapper.getTeamCode(deptId);
             Integer integer = taskMapper.selectMaxNoByCode(teamCode);
             Integer code = null;
@@ -1834,11 +1830,19 @@ public class EntrustServiceImpl implements EntrustService {
                 vo.setIssueReport("否");
             }
             vos.add(vo);
+            //更新检测项分配的部门和任务单号
+            List<CheckItemDeptVo> checkItemDeptVoList1 = Lists.newArrayList();
+            for (CheckItemDeptVo checkItemDeptVo : checkItemDeptVoList) {
+                if (deptId.equals(checkItemDeptVo.getDeptId())) {
+                    checkItemDeptVo.setTaskId(id);
+                }
+                checkItemDeptVoList1.add(checkItemDeptVo);
+            }
+            //更新检测项信息
+            taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
         }
         //任务单保存
         taskMapper.batchSave(vos);
-        //更新检测项信息
-        taskMapper.batchUpdateCheckItem(entity.getCheckItemDeptVoList());
         //更新委托单状态
         taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
         return true;
