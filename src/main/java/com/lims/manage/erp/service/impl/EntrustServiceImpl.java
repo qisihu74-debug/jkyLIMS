@@ -12,8 +12,12 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1005,14 +1009,13 @@ public class EntrustServiceImpl implements EntrustService {
         }
     }
 
-    private Boolean updatePublishedEntrust(EntrustAddVo vo) {
     /**
      * 修改已分配的检测项
      * @param vo
      * @return
      */
-    @Transactional
-    private Boolean updatePublishedEntrust(EntrustAddVo vo){
+    @Transactional(rollbackFor = Exception.class)
+    Boolean updatePublishedEntrust(EntrustAddVo vo){
         EntrustEntity basisInfo = new EntrustEntity(vo);
         //获取委托单原有信息
         EntrustAddVo oldEntrustInfo = getEntrustHistoryDetailTest(basisInfo.getId());
@@ -1049,16 +1052,6 @@ public class EntrustServiceImpl implements EntrustService {
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
                 //存放修改的检测项
                 List<SampleItemEntity> updateList = Lists.newArrayList();
-//                List<SampleItemEntity> saveList = Lists.newArrayList();
-                if (!CollectionUtils.isEmpty(sampleCheckItemOld) && !CollectionUtils.isEmpty(sampleCheckItem)) {
-                    for (SampleItemEntity sampleItemEntity : sampleCheckItemOld) {
-                        Long checkItemId = sampleItemEntity.getCheckItemId();
-                        for (SampleItemEntity sampleItemEntity1 : sampleCheckItem) {
-                            Long checkItemId1 = sampleItemEntity1.getCheckItemId();
-                            if (checkItemId1.equals(checkItemId)) {
-                                updateList.add(sampleItemEntity1);
-                                sampleCheckItemOld.remove(sampleItemEntity);
-                                sampleCheckItem.remove(sampleItemEntity1);
                 if(!CollectionUtils.isEmpty(sampleCheckItemOld) && !CollectionUtils.isEmpty(sampleCheckItem)){
                     for (int k = 0; k < sampleCheckItemOld.size(); k++) {
                         SampleItemEntity sampleItemEntity = sampleCheckItemOld.get(k);
@@ -1138,7 +1131,7 @@ public class EntrustServiceImpl implements EntrustService {
                     state = 0;
                 }
                 //修改原有检测项
-                if (!CollectionUtils.isEmpty(updateList)) {
+                if (!CollectionUtils.isEmpty(updateList)){
                     for (SampleItemEntity entity1 : updateList) {
                         //计算检测项总价钱
                         if (entity1.getUnitPrice() != null && entity1.getUnitPrice() >= 0) {
@@ -1148,8 +1141,6 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                     entityMapper.batchUpdateEntrustSampleItem(updateList);
                 }
-                //删除原有检测项
-                if (!CollectionUtils.isEmpty(sampleCheckItemOld)) {
 
                 //删除原有检测项--判断是否删除有子检测项的
                 if (sampleCheckItemOld != null && !CollectionUtils.isEmpty(sampleCheckItemOld)){
@@ -2025,52 +2016,6 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         return state;
-    }
-
-    /**
-     * 设置样品
-     * 定时任务 获取样品信息。 补充 或者是 操作。
-     *样品状态（state）：待检0；领样1；在检2；已检3；
-     * @return
-     */
-    public  void setSampleList() {
-       long startTime = System.currentTimeMillis();
-        // 1 获取样品集合: id 和 state。
-        List<TestSampleEntity> sampleList = testSampleEntityMapper.selectStateCollection(null);
-        // 去除 state = 3.不进行处理。
-        Iterator<TestSampleEntity> it = sampleList.iterator();
-        while (it.hasNext()) {
-            TestSampleEntity sample = it.next();
-            if (sample.getState() != null && sample.getState().equals("3")) {
-                it.remove();
-            }
-        }
-        // 处理后的信息。 分为两块。 1，state = null。2、其他参数进行赋值。调用方法。
-        // 获取样品集合 state = 0 或者等于 1 等于 2.
-        // 进行验证数据
-        // 操作 state ="1" 和 "2" 删除 state =null state = 3
-        for (TestSampleEntity data : sampleList) {
-            String state = findStateBySampleId(data.getId(), entityMapper, taskMapper);
-//            样品为 待检(0；领样1)；在检2；已检3；
-            String sampleState = null;
-            if ("待检".equals(state)) {
-                sampleState = "0";
-            }
-            if ("领样".equals(state)) {
-                sampleState = "1";
-            }
-            if ("在检".equals(state)) {
-                sampleState = "2";
-            }
-            if ("已检".equals(state)) {
-                sampleState = "3";
-            }
-            data.setState(sampleState);
-        }
-        // 进行 批量操作。变更后的数据
-        System.out.println("变更后"+sampleList.size());
-        long EndTime = System.currentTimeMillis();
-        System.out.println("样品赋值操作时间"+(EndTime-startTime)+"ms");
     }
 
     @Override
