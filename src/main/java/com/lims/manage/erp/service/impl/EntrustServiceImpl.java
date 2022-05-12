@@ -62,6 +62,8 @@ public class EntrustServiceImpl implements EntrustService {
     private TestSampleEntityMapper testSampleEntityMapper;
     @Autowired
     private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
+    @Autowired
+    private ReportApprovalMapper reportApprovalMapper;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -1000,12 +1002,14 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public Boolean updateEntrustCheckItem(EntrustAddVo vo){
-        //委托单当前状态
-        Integer state = entityMapper.getEntrustStateNow(vo.getId());
-        if(0 == state){//未发布
-            return updateEntrustTestNewSampleEnscript(vo);
-        }else{//已发布
+//        //委托单当前状态
+//        Integer state = entityMapper.getEntrustStateNow(vo.getId());
+        //查询当前委托单下的任务单数量
+        Integer reportStateTaskNum = entityMapper.getReportStateTaskNum(vo.getId());
+        if(reportStateTaskNum>0){//已发布
             return updatePublishedEntrust(vo);
+        }else{//未发布
+            return updateEntrustTestNewSampleEnscript(vo);
         }
     }
 
@@ -1021,6 +1025,8 @@ public class EntrustServiceImpl implements EntrustService {
         EntrustAddVo oldEntrustInfo = getEntrustHistoryDetailTest(basisInfo.getId());
         //当前委托单状态
         Integer state = oldEntrustInfo.getState();
+        //查询报告状态
+        String reportState = entityMapper.getReportState(basisInfo.getId());
         // 删除判定依据id
         entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
         int totalMoney = 0;
@@ -1129,6 +1135,12 @@ public class EntrustServiceImpl implements EntrustService {
                         }
                     }
                     state = 0;
+                    //修改报告的状态，和审批，复核信息
+                    if(!"2".equals(reportState)){
+                        ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
+                        reportApprovalVo.setState(2);
+                        reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
+                    }
                 }
                 //修改原有检测项
                 if (!CollectionUtils.isEmpty(updateList)){
@@ -1140,6 +1152,12 @@ public class EntrustServiceImpl implements EntrustService {
                         }
                     }
                     entityMapper.batchUpdateEntrustSampleItem(updateList);
+                    //修改报告的状态，和审批，复核信息
+                    if(!"2".equals(reportState)){
+                        ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
+                        reportApprovalVo.setState(2);
+                        reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
+                    }
                 }
 
                 //删除原有检测项--判断是否删除有子检测项的

@@ -407,4 +407,18 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     List<SampleItemEntity> getAllOldCheckItemInfo(@Param("sampleId") Integer sampleId,@Param("entrustId")Long entrustId);
+
+    /**
+     * 查询当前委托的报告状态
+     * @param entrustmentId
+     * @return
+     */
+    String getReportState(Long entrustmentId);
+
+    /**
+     * 查询当前委托的任务数量
+     * @param entrustmentId
+     * @return
+     */
+    Integer getReportStateTaskNum(Long entrustmentId);
 }
