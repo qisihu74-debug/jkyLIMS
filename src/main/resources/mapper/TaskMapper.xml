@@ -268,7 +268,7 @@
                  LEFT JOIN test_standard_file t6 ON t5.standard_id = t6.id
                  LEFT JOIN test_method t7 ON t5.method_id = t7.id
                  left join test_product_item t8 on t5.check_item_id = t8.check_item_id
-        where t1.id = #{taskId}
+        where t1.id = #{taskId} and t5.task_id = #{taskId}
         <if test="deptIds!=null">
             and t9.id in
             <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
@@ -741,7 +741,7 @@
             <set>
                 dept_id = ${item.deptId},
                 distribution_date = current_timestamp(),
-                task_id = ${item.taskId}}
+                task_id = ${item.taskId}
             </set>
             where id = ${item.id}
         </foreach>
