@@ -318,22 +318,23 @@ public interface TaskMapper extends BaseMapper {
      * @param itemId
      * @return
      */
-    @Select("SELECT\n" +
-            "\tt1.id \n" +
-            "FROM\n" +
-            "\ttest_task AS t1\n" +
-            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.entrustment_id = t2.entrust_id \n" +
-            "WHERE\n" +
-            "\tt2.id = #{itemId} \n" +
-            "\tAND t1.dept_id  in (\n" +
-            "SELECT\n" +
-            "\tt2.dept_id \n" +
-            "FROM\n" +
-            "\ttest_task AS t1\n" +
-            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.entrustment_id = t2.entrust_id \n" +
-            "WHERE\n" +
-            "\tt2.id = #{itemId} \n" +
-            "\t)")
+//    @Select("SELECT\n" +
+//            "\tt1.id \n" +
+//            "FROM\n" +
+//            "\ttest_task AS t1\n" +
+//            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.entrustment_id = t2.entrust_id \n" +
+//            "WHERE\n" +
+//            "\tt2.id = #{itemId} \n" +
+//            "\tAND t1.dept_id  in (\n" +
+//            "SELECT\n" +
+//            "\tt2.dept_id \n" +
+//            "FROM\n" +
+//            "\ttest_task AS t1\n" +
+//            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.entrustment_id = t2.entrust_id \n" +
+//            "WHERE\n" +
+//            "\tt2.id = #{itemId} \n" +
+//            "\t)")
+    @Select("select task_id from test_entrusted_sample_checkitem_rel where id = #{itemId}")
     Long getReturnTaskId(@Param("itemId")Integer itemId);
 
     @Select("select state from test_task where entrustment_id = #{entrustId}")

@@ -864,7 +864,8 @@ public class TaskServiceImpl implements TaskService {
                     }
                 }
                 // 修改test_task state 状态 为6：
-                Long testTaskId = taskMapper.getTestTaskId(sampleItemInstrumentEntity2.getEntrustId(), sampleItemInstrumentEntity2.getDeptId());
+//                Long testTaskId = taskMapper.getTestTaskId(sampleItemInstrumentEntity2.getEntrustId(), sampleItemInstrumentEntity2.getDeptId());
+                Long testTaskId = taskMapper.getReturnTaskId(itemId);
                 TaskTestEntity taskTestEntity = new TaskTestEntity();
                 taskTestEntity.setId(testTaskId);
                 taskTestEntity.setState(6);
