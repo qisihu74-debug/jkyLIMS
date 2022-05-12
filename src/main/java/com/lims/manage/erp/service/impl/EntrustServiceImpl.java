@@ -1009,6 +1009,11 @@ public class EntrustServiceImpl implements EntrustService {
         }
     }
 
+    /**
+     * 修改已分配的检测项
+     * @param vo
+     * @return
+     */
     @Transactional
     private Boolean updatePublishedEntrust(EntrustAddVo vo){
         EntrustEntity basisInfo = new EntrustEntity(vo);
