@@ -13,4 +13,8 @@ public class SysRoleFunctionParent extends SysRoleFunction {
      * 菜单项父级 ID
      */
     private Long functionPid;
+    /**
+     * 菜单名。
+     */
+    private String treeName;
 }

@@ -7,6 +7,7 @@ import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.controller.UserFuctionController;
 import com.lims.manage.erp.entity.HomeAfficheEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.SysRoleFunctionParent;
 import com.lims.manage.erp.entity.TreeFunction;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
@@ -57,6 +58,10 @@ public class HomeServiceImpl implements HomeService {
     // 报告
     @Autowired
     ReportRecordEntityMapper reportRecordEntityMapper;
+    @Autowired
+    private SysRoleFuncMenuDao sysRoleFuncMenuDao;
+
+    private EntrustServiceImpl entrustServiceImpl;
 
 
     @Override
@@ -221,19 +226,17 @@ public class HomeServiceImpl implements HomeService {
         // 输出最终拥有的菜单
         List<LabelValueVo> returnData = new ArrayList<>();
         // 获取 当前登录展示菜单。
-        Result menus = userFuctionController.getMenuDisplayNew1();
-       if(menus.getData()==null){
-           return null;
-       }
+        List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userId);
+        if (menuIdList.isEmpty()) {
+            return null;
+        }
         // 设置任务看板 菜单名
         String[] strings = Const.taskKanbans;
         // 获取菜单成功！
-        if (menus.getCode() == 200) {
-            methodRenurnData(menus, strings, returnData);
-        }
-        if(returnData!=null){
+        methodRenurnData(menuIdList, strings, returnData);
+        if (returnData != null) {
             // 统计看板数据。
-            methodTaskKanbanData(deptIds,returnData);
+            methodTaskKanbanData(deptIds, returnData);
         }
         long EndTime = System.currentTimeMillis();
         System.out.println(EndTime - startTime + "ms");
@@ -243,44 +246,36 @@ public class HomeServiceImpl implements HomeService {
     /**
      * 通过任务看板模块栏 比对 当前用户拥有菜单列表。
      *
-     * @param menus      任务看板模块栏
+     * @param menuIdList      任务看板模块栏
      * @param strings    当前用户拥有菜单列表
      * @param returnData 输出最终拥有的菜单。
      */
-    void methodRenurnData(Result menus, String[] strings, List<LabelValueVo> returnData) {
+    void methodRenurnData(List<SysRoleFunctionParent> menuIdList, String[] strings, List<LabelValueVo> returnData) {
         // 针对菜单名 进行模块划分。
-        List<TreeFunction> menusData = (List<TreeFunction>) menus.getData();
+        // 整理 菜单属性图 为List排序。
         // 遍历获取 菜单名。
         for (int i = 0; i < strings.length; i++) {
             LabelValueVo labelValueVo = new LabelValueVo();
-            jj:
-            for (TreeFunction data : menusData) {
+            for (SysRoleFunctionParent data : menuIdList) {
                 if (data.getTreeName().equals(strings[i])) {
                     labelValueVo.setLabel(data.getTreeName());
                     returnData.add(labelValueVo);
-                    break jj;
-                }
-                // 同模块 与菜单子集进行·比较 是否存在菜单名。
-                if (data.getChildren() != null) {
-                    for (Object children : data.getChildren().toArray()) {
-                        TreeFunction childrenData = (TreeFunction) children;
-                        if (childrenData.getTreeName().equals(strings[i])) {
-                            labelValueVo.setLabel(childrenData.getTreeName());
-                            returnData.add(labelValueVo);
-                            break jj;
-                        }
-                    }
                 }
             }
         }
     }
 
+
+
     /**
      * 统计看板上各模块数据。
-     * @param deptIds 所属部门集合
+     *
+     * @param deptIds    所属部门集合
      * @param returnData 用户拥有菜单数据
      */
     void methodTaskKanbanData(List<Long> deptIds, List<LabelValueVo> returnData) {
+        // 统计样品已检
+//        Object MethodData = entrustServiceImpl.setSampleList();
         // 统计未分配委托单
         Integer entrustCount = entrustEntityMapper.selectCount(0);
         // 未任务领取。
@@ -289,9 +284,8 @@ public class HomeServiceImpl implements HomeService {
         Integer testCount = taskMapper.selectCount(3, deptIds);
         //报告合成
         List<ReportListVo> reportList = reportMapper.reportDownloadList(deptIds, null);
-        Set<Long> setUserId = new HashSet<>();
         // ArrList 转set
-        setUserId = new ReportApprovalServiceImpl().getNextIdsToTeam();
+        Set<Long> setUserId  = new ReportApprovalServiceImpl().getNextIdsToTeam();
         // 报告审核
         List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, setUserId);
         // 报告签发
