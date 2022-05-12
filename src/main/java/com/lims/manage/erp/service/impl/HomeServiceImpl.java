@@ -217,7 +217,6 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public List<LabelValueVo> taskKanban(Long userId) {
-        long startTime = System.currentTimeMillis();
         // 根据人员id 返回团队id集合
         List<Long> deptIds = teamMapper.getUserTeamIds(userId);
         // 输出最终拥有的菜单
@@ -235,8 +234,6 @@ public class HomeServiceImpl implements HomeService {
             // 统计看板数据。
             methodTaskKanbanData(deptIds, returnData);
         }
-        long EndTime = System.currentTimeMillis();
-        System.out.println(EndTime - startTime + "ms");
         return returnData;
     }
 
