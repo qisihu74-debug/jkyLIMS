@@ -80,6 +80,5 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
     /**
      * 获取样品信息集合 id 和 state
      */
-    @Select("select id,state FROM test_sample")
-    List<TestSampleEntity> selectList();
+    List<TestSampleEntity> selectStateCollection(@Param("state")String state);
 }

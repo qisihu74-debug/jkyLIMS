@@ -1980,13 +1980,13 @@ public class EntrustServiceImpl implements EntrustService {
     /**
      * 设置样品
      * 定时任务 获取样品信息。 补充 或者是 操作。
-     *
+     *样品状态（state）：待检0；领样1；在检2；已检3；
      * @return
      */
-    public boolean setSampleList() {
+    public  void setSampleList() {
        long startTime = System.currentTimeMillis();
         // 1 获取样品集合: id 和 state。
-        List<TestSampleEntity> sampleList = testSampleEntityMapper.selectList();
+        List<TestSampleEntity> sampleList = testSampleEntityMapper.selectStateCollection(null);
         // 去除 state = 3.不进行处理。
         Iterator<TestSampleEntity> it = sampleList.iterator();
         while (it.hasNext()) {
@@ -1996,36 +1996,19 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         // 处理后的信息。 分为两块。 1，state = null。2、其他参数进行赋值。调用方法。
-        // 处理 初始值的问题。
-        List<TestSampleEntity> startingSample = new ArrayList<>();
-        HashMap<Integer, String> map = new HashMap<>();
-        for (TestSampleEntity testSampleEntity : sampleList) {
-            if (testSampleEntity.getState() == null) {
-                testSampleEntity.setState("0");
-                startingSample.add(testSampleEntity);
-                map.put(testSampleEntity.getId(), "0");
-            }
-            if (testSampleEntity.getState() != null && !testSampleEntity.getState().equals("2") && !testSampleEntity.getState().equals("3")) {
-                testSampleEntity.setState("0");
-                startingSample.add(testSampleEntity);
-                map.put(testSampleEntity.getId(), "0");
-            }
-        }
-        // 再次迭代 操作。
-        Iterator<TestSampleEntity> it_two = sampleList.iterator();
-        while (it_two.hasNext()) {
-            TestSampleEntity sample = it_two.next();
-            if (map.get(sample.getId()) != null) {
-                // 已经占用 删除
-                it_two.remove();
-            }
-        }
+        // 获取样品集合 state = 0 或者等于 1 等于 2.
         // 进行验证数据
         // 操作 state ="1" 和 "2" 删除 state =null state = 3
         for (TestSampleEntity data : sampleList) {
             String state = findStateBySampleId(data.getId(), entityMapper, taskMapper);
 //            样品为 待检(0；领样1)；在检2；已检3；
             String sampleState = null;
+            if ("待检".equals(state)) {
+                sampleState = "0";
+            }
+            if ("领样".equals(state)) {
+                sampleState = "1";
+            }
             if ("在检".equals(state)) {
                 sampleState = "2";
             }
@@ -2036,13 +2019,8 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 进行 批量操作。变更后的数据
         System.out.println("变更后"+sampleList.size());
-
-        // 需要赋初始值的数据。
-        System.out.println("赋初始值"+startingSample.size());
-
         long EndTime = System.currentTimeMillis();
         System.out.println("样品赋值操作时间"+(EndTime-startTime)+"ms");
-        return false;
     }
 
     @Override

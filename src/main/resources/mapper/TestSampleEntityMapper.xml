@@ -740,4 +740,11 @@
     <select id="getAllNodeIds" resultType="java.lang.Integer">
         SELECT id FROM test_sample where pid = #{sampleId}
     </select>
+
+    <select id="selectStateCollection" resultType="com.lims.manage.erp.entity.TestSampleEntity" parameterType="java.lang.String">
+        select id,state FROM test_sample WHERE 1=1
+        <if test="state!=null and state!=''">
+            and state = #{state}
+        </if>
+    </select>
 </mapper>

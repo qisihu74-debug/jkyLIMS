@@ -121,10 +121,10 @@ public class Const {
     /**
      * 设计全局枚举 菜单名 与对应的表格相一致。
      */
-    public static final String[] taskKanbans = {"查询/打印","委托查询","任务管理","试验检测","报告合成","报告审批","报告签发","电子印章","报告邮寄"};
+    public static final String[] taskKanbans = {"查询/打印","委托查询","任务领取","试验检测","报告合成","报告审批","报告签发","电子印章","报告邮寄"};
    public static final String sampleStr = "查询/打印";
    public static final String entrustStr = "委托查询";
-   public static final String taskStr = "任务管理";
+   public static final String taskStr = "任务领取";
    public static final String testStr = "试验检测";
    public static final String reportStr = "报告合成";
    public static final String approvalStr = "报告审批";

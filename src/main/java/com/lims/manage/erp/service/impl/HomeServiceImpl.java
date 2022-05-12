@@ -5,10 +5,7 @@ import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 
 import com.lims.manage.erp.controller.UserFuctionController;
-import com.lims.manage.erp.entity.HomeAfficheEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.SysRoleFunctionParent;
-import com.lims.manage.erp.entity.TreeFunction;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.service.HomeService;
@@ -47,8 +44,8 @@ public class HomeServiceImpl implements HomeService {
     TaskMapper taskMapper;
     @Autowired
     private TeamMapper teamMapper;
-    //    @Autowired
-//    TaskController taskController;
+    @Autowired
+    TestSampleEntityMapper testSampleEntityMapper;
 //    // 报告合成 / 盖章 / 邮寄
     @Autowired
     ReportMapper reportMapper;
@@ -60,7 +57,7 @@ public class HomeServiceImpl implements HomeService {
     ReportRecordEntityMapper reportRecordEntityMapper;
     @Autowired
     private SysRoleFuncMenuDao sysRoleFuncMenuDao;
-
+    @Autowired
     private EntrustServiceImpl entrustServiceImpl;
 
 
@@ -276,8 +273,13 @@ public class HomeServiceImpl implements HomeService {
     void methodTaskKanbanData(List<Long> deptIds, List<LabelValueVo> returnData) {
         // 统计样品已检
 //        Object MethodData = entrustServiceImpl.setSampleList();
+        List<TestSampleEntity> sampleList = testSampleEntityMapper.selectStateCollection("0");
+//        entrustServiceImpl.setSampleList();
         // 统计未分配委托单
         Integer entrustCount = entrustEntityMapper.selectCount(0);
+        if(deptIds.isEmpty()){
+            deptIds = null;
+        }
         // 未任务领取。
         Integer taskCount = taskMapper.selectCount(0, deptIds);
         // 试验检测中
@@ -298,7 +300,7 @@ public class HomeServiceImpl implements HomeService {
         for (LabelValueVo data : returnData) {
             switch (data.getLabel()) {
                 case Const.sampleStr:
-                    data.setValue(0L);
+                    data.setValue((long) sampleList.size());
                     break;
                 case Const.entrustStr:
                     data.setValue(entrustCount.longValue());
