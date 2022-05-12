@@ -7,6 +7,7 @@ import com.lims.manage.erp.vo.SampleJudgeBasisVo;
 import com.lims.manage.erp.vo.SampleSimpleListVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -75,4 +76,9 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
     Integer getMaxId();
 
     List<Integer> getAllNodeIds(Integer sampleId);
+
+    /**
+     * 获取样品信息集合 id 和 state
+     */
+    List<TestSampleEntity> selectStateCollection(@Param("state")String state);
 }

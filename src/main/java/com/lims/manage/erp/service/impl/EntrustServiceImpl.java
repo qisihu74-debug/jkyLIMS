@@ -1018,8 +1018,8 @@ public class EntrustServiceImpl implements EntrustService {
      * @param vo
      * @return
      */
-    @Transactional
-    private Boolean updatePublishedEntrust(EntrustAddVo vo){
+    @Transactional(rollbackFor = Exception.class)
+    Boolean updatePublishedEntrust(EntrustAddVo vo){
         EntrustEntity basisInfo = new EntrustEntity(vo);
         //获取委托单原有信息
         EntrustAddVo oldEntrustInfo = getEntrustHistoryDetailTest(basisInfo.getId());
