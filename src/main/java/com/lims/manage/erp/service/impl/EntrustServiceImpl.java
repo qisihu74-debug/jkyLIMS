@@ -1139,6 +1139,7 @@ public class EntrustServiceImpl implements EntrustService {
                     if(!"2".equals(reportState)){
                         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
                         reportApprovalVo.setState(2);
+                        reportApprovalVo.setEntrustmentId(basisInfo.getId());
                         reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
                     }
                 }
@@ -1164,6 +1165,13 @@ public class EntrustServiceImpl implements EntrustService {
                         }
                     }
                     entityMapper.batchDeleteEntrustSampleItem(sampleCheckItemOld);
+                    //修改报告的状态，和审批，复核信息
+                    if(!"2".equals(reportState)){
+                        ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
+                        reportApprovalVo.setState(2);
+                        reportApprovalVo.setEntrustmentId(basisInfo.getId());
+                        reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
+                    }
                 }
             }
         }
