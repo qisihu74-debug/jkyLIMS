@@ -421,4 +421,11 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     Integer getReportStateTaskNum(Long entrustmentId);
+
+    /**
+     * 查询当前委托报告数据主键ID
+     * @param entrustmentId
+     * @return
+     */
+    Long getReportId(Long entrustmentId);
 }

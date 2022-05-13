@@ -729,4 +729,8 @@
     <select id="getReportStateTaskNum" resultType="java.lang.Integer">
         SELECT count(*) FROM test_task where entrustment_id= #{entrustmentId}
     </select>
+
+    <select id="getReportId" resultType="java.lang.Long">
+        SELECT id FROM test_report_record where entrustment_id= #{entrustmentId}
+    </select>
 </mapper>

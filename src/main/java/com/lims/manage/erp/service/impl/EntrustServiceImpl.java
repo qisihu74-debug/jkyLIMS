@@ -64,6 +64,8 @@ public class EntrustServiceImpl implements EntrustService {
     private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
     @Autowired
     private ReportApprovalMapper reportApprovalMapper;
+    @Autowired
+    private ReportRecordDetailEntityMapper reportRecordDetailEntityMapper;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -1069,7 +1071,7 @@ public class EntrustServiceImpl implements EntrustService {
                                 if(checkItemId1.equals(checkItemId)){
                                     for (int j = 0; j < sampleCheckItemOld.size(); j++) {
                                         SampleItemEntity old = sampleCheckItemOld.get(j);
-                                        if(old != null && old.getCheckItemName().contains(sampleItemEntity1.getCheckItemName()) && !old.getCheckItemName().equals(sampleItemEntity1.getCheckItemName())){
+                                        if(old != null && old.getCheckItemName().contains(sampleItemEntity1.getCheckItemName())){
                                             old.setTimes(sampleItemEntity1.getTimes());//修改次数
                                             old.setStandardId(sampleItemEntity1.getStandardId());//修改检测依据
                                             updateList.add(old);
@@ -1164,7 +1166,21 @@ public class EntrustServiceImpl implements EntrustService {
                             sampleCheckItemOld.remove(sampleItemEntity);
                         }
                     }
+                    //删除委托检测项表中的检测项
                     entityMapper.batchDeleteEntrustSampleItem(sampleCheckItemOld);
+                    //根据委托单Id查询报告数据主键
+                    List<ReportRecordDetailEntity> detailEntityList = Lists.newArrayList();
+                    Long reportId = entityMapper.getReportId(basisInfo.getId());
+                    for (SampleItemEntity sampleItemEntity : sampleCheckItemOld) {
+                        ReportRecordDetailEntity entity = new ReportRecordDetailEntity();
+                        if(sampleItemEntity != null){
+                            entity.setCheckItemId(sampleItemEntity.getCheckItemId());
+                            entity.setRecordId(reportId);
+                            detailEntityList.add(entity);
+                        }
+                    }
+                    //并且删除报告详情表中关联检测项
+                    reportRecordDetailEntityMapper.deleteByEntrustIdandCheckItemId(detailEntityList);
                     //修改报告的状态，和审批，复核信息
                     if(!"2".equals(reportState)){
                         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();

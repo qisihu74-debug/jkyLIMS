@@ -65,4 +65,11 @@ public interface ReportRecordDetailEntityMapper {
             "\tAND rd.entrustment_id = #{entrustId}\n" +
             "\tAND rrd.check_item_id=#{checkItemId}")
     String getIdByItemId(@Param("checkItemId") Integer checkItemId,@Param("entrustId") Long entrustId);
+
+    /**
+     * 批量删除委托单已删除的检测项
+     * @param list
+     * @return
+     */
+    int deleteByEntrustIdandCheckItemId(@Param("list")List<ReportRecordDetailEntity> list);
 }

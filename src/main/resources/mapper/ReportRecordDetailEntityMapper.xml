@@ -195,4 +195,12 @@
             record_id = #{recordId,jdbcType=BIGINT}
     </select>
 
+    <delete id="deleteByEntrustIdandCheckItemId" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            delete
+            from test_report_record_detail
+            where record_id = #{item.recordId} and check_item_id = #{item.checkItemId}
+        </foreach>
+    </delete>
+
 </mapper>
