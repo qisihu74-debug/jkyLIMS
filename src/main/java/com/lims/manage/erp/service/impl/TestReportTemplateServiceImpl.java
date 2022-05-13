@@ -40,6 +40,8 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
     private SysOssService sysOssService;
     @Resource
     private TestReportTemplateProductRefService testReportTemplateProductRefService;
+    @Resource
+    private TestReportTemplateDao templateDao;
 
     public  List<TestReportTemplateProductRef> getTestReportTemplateProductRef(Integer id,List<Integer> ids){
         List<TestReportTemplateProductRef> testReportTemplateProductRefs=new ArrayList<>();
@@ -146,6 +148,11 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
         testReportTemplateVo.setTestReportTemplate(testMethod);
         testReportTemplateVo.setProductIds(this.getProductIdList(id));
         return ResultUtil.success(testReportTemplateVo);
+    }
+
+    @Override
+    public String getNameById(String reportModelId) {
+        return templateDao.getNameById(reportModelId);
     }
 
     public List<Integer> getTemplateIdList(Serializable id){

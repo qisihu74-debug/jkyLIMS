@@ -21,5 +21,7 @@ public interface TestReportTemplateService extends IService<TestReportTemplate> 
     Result delReportTemplate(List<Long> idList);
     Result getList(Serializable id);
     Result getUpdOne(Serializable id);
+
+    String getNameById(String reportModelId);
 }
 
