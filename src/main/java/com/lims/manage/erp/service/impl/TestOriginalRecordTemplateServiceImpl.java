@@ -47,9 +47,9 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
         if (testOriginalRecordTemplate.getName()==null){
             return ResultUtil.error("原始模板名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestOriginalRecordTemplate>().eq("name",testOriginalRecordTemplate.getName()))!=null){
+        /*if (this.getOne(new QueryWrapper<TestOriginalRecordTemplate>().eq("name",testOriginalRecordTemplate.getName()))!=null){
             return ResultUtil.error("原始模板名称重复");
-        }
+        }*/
         testOriginalRecordTemplate.setStatus("0");
         testOriginalRecordTemplate.setDelFlag(0);
         testOriginalRecordTemplate.setCreateTime(new Date());
@@ -75,9 +75,9 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
         if (testOriginalRecordTemplate.getName()==null){
             return ResultUtil.error("模板名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestOriginalRecordTemplate>().eq("name",testOriginalRecordTemplate.getName()).eq("del_flag",0).ne("id",testOriginalRecordTemplate.getId()))!=null){
+        /*if (this.getOne(new QueryWrapper<TestOriginalRecordTemplate>().eq("name",testOriginalRecordTemplate.getName()).eq("del_flag",0).ne("id",testOriginalRecordTemplate.getId()))!=null){
             return ResultUtil.error("名称重复");
-        }
+        }*/
         testOriginalRecordTemplate.setUpdateTime(new Date());
         if (this.updateById(testOriginalRecordTemplate)){
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改原始记录模板"+testOriginalRecordTemplate.getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);

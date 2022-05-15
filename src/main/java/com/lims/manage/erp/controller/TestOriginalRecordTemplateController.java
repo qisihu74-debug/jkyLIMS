@@ -14,6 +14,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestOriginalRecordTemplateService;
 import com.lims.manage.erp.vo.TorttpiVo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -53,7 +54,9 @@ public class TestOriginalRecordTemplateController extends ApiController {
         queryWrapper.orderByDesc("tort.create_time");
         IPage<TorttpiVo> pageList = this.testOriginalRecordTemplateService.getPageList(page, queryWrapper);
         for (TorttpiVo bean:pageList.getRecords()) {
-            bean.setFileUrl(bean.getFileUrl().substring(0,bean.getFileUrl().indexOf("?")));
+            if (StringUtils.isNotEmpty(bean.getFileUrl())){
+                bean.setFileUrl(bean.getFileUrl().substring(0,bean.getFileUrl().indexOf("?")));
+            }
         }
         return ResultUtil.success(pageList);
     }

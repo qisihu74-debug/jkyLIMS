@@ -12,6 +12,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestReportTemplateService;
 import com.lims.manage.erp.vo.TestReportTemplateVo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -54,7 +55,9 @@ public class TestReportTemplateController extends ApiController {
         queryWrapper.orderByDesc("create_time");
         IPage<TestReportTemplate> iPage = this.testReportTemplateService.page(page, queryWrapper);
         for (TestReportTemplate bean:iPage.getRecords()) {
-            bean.setReportFileUri(bean.getReportFileUri().substring(0,bean.getReportFileUri().indexOf("?")));
+            if (StringUtils.isNotEmpty(bean.getReportFileUri())){
+                bean.setReportFileUri(bean.getReportFileUri().substring(0,bean.getReportFileUri().indexOf("?")));
+            }
         }
         return ResultUtil.success(iPage);
     }
