@@ -97,6 +97,6 @@ public class StatisticsController {
         if (paramVo == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }
-        return ResultUtil.success("查询任务统计！", statisticsService.areaStatistics(paramVo));
+        return ResultUtil.success("区域产值统计查询成功！", statisticsService.areaStatistics(paramVo));
     }
 }
