@@ -367,7 +367,7 @@ public class EntrustServiceImpl implements EntrustService {
             entityMapper.saveEntrustPayRecord(pamentEntity);
         }
         //得到总价钱，再保存委托基本信息
-        basisInfo.setCountPrice(totalMoney + "");
+//        basisInfo.setCountPrice(totalMoney + "");2022年5月19日修改不在后端计算价格
         basisInfo.setState(0);
         // 解析印章数组
         if (vo.getSealTypes() != null && vo.getSealTypes().length > 0) {

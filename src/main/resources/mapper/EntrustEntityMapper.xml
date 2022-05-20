@@ -431,7 +431,11 @@
                                         sand_ratio,
                                         design_slump,
                                         mixing_way,
-                                        entrust_company_id)
+                                        entrust_company_id,
+                                        task_source,
+                                        discount,
+                                        actual_price,
+                                        system_price)
         values (#{id},
                 #{entrustmentNo},
                 #{entrustType},
@@ -476,7 +480,11 @@
                 #{sandRatio},
                 #{designSlump},
                 #{mixingWay},
-                #{entrustCompanyId})
+                #{entrustCompanyId},
+                #{taskSource},
+                #{discount},
+                #{actualPrice},
+                #{systemPrice})
 
     </insert>
     <select id="GetDelegateInformation" resultType="String">

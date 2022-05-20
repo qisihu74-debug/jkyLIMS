@@ -227,6 +227,23 @@ public class EntrustEntity {
      * 任务编号
      */
     private String taskCode;
+    /**
+     * 任务来源
+     */
+    private String taskSource;
+    /**
+     * 折扣率
+     */
+    private String discount;
+    /**
+     * 实收价格
+     */
+    private String actualPrice;
+    /**
+     * 应收价格
+     */
+    private String systemPrice;
+
 
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,
@@ -314,6 +331,10 @@ public class EntrustEntity {
         this.sandRatio=vo.getSandRatio();
         this.designSlump=vo.getDesignSlump();
         this.mixingWay=vo.getMixingWay();
+        this.taskSource=vo.getTaskSource();
+        this.discount=vo.getDiscount();
+        this.actualPrice=vo.getActualPrice();
+        this.systemPrice=vo.getSystemPrice();
     }
 
 
