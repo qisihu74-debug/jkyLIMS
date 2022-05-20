@@ -6,6 +6,8 @@ import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.StatisticsService;
+import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.StatisticsParamVo;
 import com.lims.manage.erp.vo.TaskStatsVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,5 +87,16 @@ public class StatisticsController {
         bos.close();
     }
 
-
+    /**
+     * 区域产值统计
+     * @param paramVo
+     * @return
+     */
+    @RequestMapping("/areaStatistics")
+    public Result areaStatistics(@RequestBody StatisticsParamVo paramVo) {
+        if (paramVo == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        return ResultUtil.success("查询任务统计！", statisticsService.areaStatistics(paramVo));
+    }
 }

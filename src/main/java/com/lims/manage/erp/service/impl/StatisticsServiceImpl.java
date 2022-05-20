@@ -133,4 +133,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         os.close();
         return new ByteArrayInputStream(os.toByteArray());
     }
+
+    @Override
+    public List<AreaStatisticsResultVo> areaStatistics(StatisticsParamVo paramVo) {
+        return statisticsMapper.areaStatistics(paramVo);
+    }
 }

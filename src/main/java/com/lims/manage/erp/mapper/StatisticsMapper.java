@@ -1,6 +1,8 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.vo.AreaStatisticsResultVo;
+import com.lims.manage.erp.vo.StatisticsParamVo;
 import com.lims.manage.erp.vo.TaskStatsVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
@@ -22,5 +24,10 @@ public interface StatisticsMapper {
      */
     List<SampleEntity> selectSampleEntityList(Long taskId,Long entrustmentId);
 
-
+    /**
+     * 区域产值统计
+     * @param paramVo
+     * @return
+     */
+    List<AreaStatisticsResultVo> areaStatistics(StatisticsParamVo paramVo);
 }

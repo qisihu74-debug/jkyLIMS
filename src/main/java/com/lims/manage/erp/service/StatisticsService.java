@@ -1,6 +1,8 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.vo.AreaStatisticsResultVo;
+import com.lims.manage.erp.vo.StatisticsParamVo;
 import com.lims.manage.erp.vo.TaskStatsVo;
 
 import java.io.IOException;
@@ -18,5 +20,10 @@ public interface StatisticsService {
      */
     InputStream exportPersonDetails(PageInfo list) throws IOException;
 
-
+    /**
+     * 区域产值统计
+     * @param paramVo
+     * @return
+     */
+    List<AreaStatisticsResultVo> areaStatistics(StatisticsParamVo paramVo);
 }
