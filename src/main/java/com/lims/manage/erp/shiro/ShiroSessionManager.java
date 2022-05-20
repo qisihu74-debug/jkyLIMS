@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.lims.manage.erp.Exception.CommonEnum;
 import com.lims.manage.erp.Exception.JkyException;
 import com.lims.manage.erp.config.ShiroConfig;
+import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.util.RedisUtils;
 import com.lims.manage.erp.util.ShiroUtils;
 import lombok.SneakyThrows;
@@ -52,10 +53,17 @@ public class ShiroSessionManager extends DefaultWebSessionManager {
     public Serializable getSessionId(ServletRequest request, ServletResponse response) {
         String token = WebUtils.toHttp(request).getHeader(AUTHORIZATION);
         //如果请求头中存在token 则从请求头中获取token
+        log.info("token信息:{}",token);
         if (!StringUtils.isEmpty(token)) {
+            if (token.equals("null")){
+                return null;
+            }
             Object o = redisUtils.get("shiro:session:" + token);
             if (o == null){
-                responseJsonString((HttpServletResponse) response,"token过期请重新登录！");
+                Result result = new Result();
+                result.setCode(-1);
+                result.setMsg("token过期请重新登录！");
+                responseJsonString((HttpServletResponse) response,JSON.toJSONString(result));
             }else {
                 request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID_SOURCE, REFERENCED_SESSION_ID_SOURCE);
                 request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID, token);
