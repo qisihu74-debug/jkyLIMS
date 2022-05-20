@@ -50,7 +50,11 @@
                unit_water_use,
                sand_ratio,
                design_slump,
-               mixing_way
+               mixing_way,
+               task_source,
+               discount,
+               system_price,
+               actual_price
         from test_entrusted_info
         where id = #{id}
     </select>
