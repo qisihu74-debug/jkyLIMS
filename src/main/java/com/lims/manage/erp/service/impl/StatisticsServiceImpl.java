@@ -422,4 +422,33 @@ public class StatisticsServiceImpl implements StatisticsService {
     public List<TeamOutputValueVo> teamStatisticsExport(StatisticsParamVo paramVo) {
         return statisticsMapper.teamStatistics(paramVo);
     }
+
+    @Override
+    public InputStream teamStatisticsExportFunction(List<TeamOutputValueVo> list) throws IOException {
+        //创建HSSFWorkbook对象(excel的文档对象)
+        HSSFWorkbook wb = new HSSFWorkbook();
+        //建立新的sheet对象（excel的表单）
+        HSSFSheet sheet=wb.createSheet("sheet0");
+        //在sheet里创建第一行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
+        HSSFRow row1=sheet.createRow(0);
+        //创建单元格并设置单元格内容
+        row1.createCell(0).setCellValue("团队名称");
+        row1.createCell(1).setCellValue("团队代码");
+        row1.createCell(2).setCellValue("任务产值");
+        row1.createCell(3).setCellValue("报告产值");
+        for(int i=0;i<list.size();i++){
+            TeamOutputValueVo teamOutputValueVo = list.get(i);
+            //在sheet里创建第二行
+            HSSFRow row3=sheet.createRow(i+1);
+            row3.createCell(0).setCellValue(teamOutputValueVo.getTeamName());
+            row3.createCell(1).setCellValue(teamOutputValueVo.getTeamCode());
+            row3.createCell(2).setCellValue(teamOutputValueVo.getTaskPrice());
+            row3.createCell(3).setCellValue(teamOutputValueVo.getReportPrice());
+        }
+        //输出Excel文件 字节输出流
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        wb.write(os);
+        os.close();
+        return new ByteArrayInputStream(os.toByteArray());
+    }
 }

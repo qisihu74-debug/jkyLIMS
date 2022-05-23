@@ -75,4 +75,12 @@ public interface StatisticsService {
      * @return
      */
     List<TeamOutputValueVo> teamStatisticsExport(StatisticsParamVo paramVo);
+
+    /**
+     * 部门产值统计统计Excel
+     * @param list
+     * @return
+     * @throws IOException
+     */
+    InputStream teamStatisticsExportFunction(List<TeamOutputValueVo> list) throws IOException;
 }
