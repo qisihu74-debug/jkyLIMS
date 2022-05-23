@@ -107,4 +107,6 @@ public class TaskStatsVo {
      */
     private String taskProgress;
 
+    private List<SampleDetailVo> sampleDetailList;//样品信息
+
 }

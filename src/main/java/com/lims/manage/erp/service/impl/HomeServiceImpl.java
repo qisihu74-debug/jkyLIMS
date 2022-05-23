@@ -251,7 +251,7 @@ public class HomeServiceImpl implements HomeService {
         for (int i = 0; i < strings.length; i++) {
             LabelValueVo labelValueVo = new LabelValueVo();
             for (SysRoleFunctionParent data : menuIdList) {
-                if (data.getTreeName().equals(strings[i])) {
+                if (data.getTreeName()!=null&&data.getTreeName().equals(strings[i])) {
                     labelValueVo.setLabel(data.getTreeName());
                     returnData.add(labelValueVo);
                 }

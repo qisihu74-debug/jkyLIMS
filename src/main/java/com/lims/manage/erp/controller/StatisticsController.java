@@ -6,6 +6,7 @@ import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.StatisticsService;
+import com.lims.manage.erp.vo.PersonalStatsVo;
 import com.lims.manage.erp.vo.TaskStatsVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class StatisticsController {
      */
     @RequestMapping("/taskQuery")
     public Result taskQuery(@RequestBody TaskStatsVo taskStatsVo) {
-        if (taskStatsVo.getDeptId() == null || taskStatsVo.getPageNum() == null || taskStatsVo.getPageSize() == null) {
+        if (taskStatsVo.getPageNum() == null || taskStatsVo.getPageSize() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }
         return ResultUtil.success("查询任务统计！", statisticsService.taskQuery(taskStatsVo));
@@ -49,7 +50,7 @@ public class StatisticsController {
      * @return
      */
     @RequestMapping("/taskDetails")
-    public Result TaskDetails(@Param("taskId")Long taskId) {
+    public Result taskDetails(@Param("taskId")Long taskId) {
         if (taskId == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }
@@ -58,21 +59,71 @@ public class StatisticsController {
 
     /**
      * 任务查询_（Excel表导出）
-     * @param taskStatsVo
      * @return
      */
     @RequestMapping("/taskQuery_export")
-    public void taskQuery_export(@RequestBody TaskStatsVo taskStatsVo, HttpServletResponse response) throws IOException {
+    public void taskQueryExport(HttpServletResponse response) throws IOException {
         BufferedOutputStream bos = null;
-        if (taskStatsVo.getDeptId() == null || taskStatsVo.getPageNum() == null || taskStatsVo.getPageSize() == null) {
-            log.info("任务查询_（Excel表导出）\t"+"缺少必填参数");
-        }
+        TaskStatsVo taskStatsVo = new TaskStatsVo();
+        taskStatsVo.setPageNum(null);
+        taskStatsVo.setPageSize(null);
         PageInfo list = statisticsService.taskQuery(taskStatsVo);
         String fileName = "任务统计结果";
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "attachment; filename="
                 + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
         InputStream inputStream = statisticsService.exportPersonDetails(list);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+    }
+
+    /**
+     * 个人工作量统计
+     * @param
+     * @return
+     */
+    @RequestMapping("/personal_stats")
+    public Result personalStats(@RequestBody PersonalStatsVo personalStatsVo) {
+        if (personalStatsVo.getPageNum() == null || personalStatsVo.getPageSize() == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        return ResultUtil.success("个人工作量统计！",statisticsService.personalStats(personalStatsVo));
+    }
+
+    /**
+     * 返回团队信息
+     */
+    @RequestMapping("/get_all_team")
+    public Result getAllAllTeam(){
+        return ResultUtil.success(statisticsService.selectAllTeamVo());
+    }
+
+    /**
+     * 个人工作量统计
+     * @param
+     * @return
+     */
+    @RequestMapping("/personal_stats_export")
+    public void personalStatsExport(HttpServletResponse response) throws IOException {
+        BufferedOutputStream bos = null;
+        PersonalStatsVo personalStatsVo = new PersonalStatsVo();
+        personalStatsVo.setPageNum(null);
+        personalStatsVo.setPageSize(null);
+        PageInfo list = statisticsService.personalStats(personalStatsVo);
+        String fileName = "个人工作量统计";
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename="
+                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+        InputStream inputStream = statisticsService.personalStatsExport(list);
         ServletOutputStream outputStream = response.getOutputStream();
         BufferedInputStream bis = new BufferedInputStream(inputStream);
         bos = new BufferedOutputStream(outputStream);
