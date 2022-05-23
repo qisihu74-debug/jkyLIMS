@@ -50,7 +50,11 @@
                unit_water_use,
                sand_ratio,
                design_slump,
-               mixing_way
+               mixing_way,
+               task_source,
+               discount,
+               system_price,
+               actual_price
         from test_entrusted_info
         where id = #{id}
     </select>
@@ -550,6 +554,10 @@
             <if test="sandRatio != null and sandRatio!=''">sand_ratio=#{sandRatio},</if>
             <if test="designSlump != null and designSlump!=''">design_slump=#{designSlump},</if>
             <if test="mixingWay != null and mixingWay!=''">mixing_way=#{mixingWay},</if>
+            <if test="taskSource != null and taskSource!=''">task_source=#{taskSource},</if>
+            <if test="discount != null and discount!=''">discount=#{discount},</if>
+            <if test="actualPrice != null and actualPrice!=''">actual_price=#{actualPrice},</if>
+            <if test="systemPrice != null and systemPrice!=''">system_price=#{systemPrice},</if>
         </trim>
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
             <if test="id!=null">
