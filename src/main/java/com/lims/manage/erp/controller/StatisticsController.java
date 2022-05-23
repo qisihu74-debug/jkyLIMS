@@ -14,6 +14,7 @@ import com.lims.manage.erp.vo.TaskStatsVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -158,12 +159,18 @@ public class StatisticsController {
 
     /**
      * 区域产值统计--excel导出
-     * @param paramVo
+     * @param taskSource
+     * @param beginDate
+     * @param endDate
      * @param response
      * @throws IOException
      */
-    @RequestMapping("/areaStatisticsExport")
-    public void areaStatisticsExport(@RequestBody StatisticsParamVo paramVo, HttpServletResponse response) throws IOException {
+    @GetMapping("/areaStatisticsExport")
+    public void areaStatisticsExport(String taskSource,String beginDate,String endDate, HttpServletResponse response) throws IOException {
+        StatisticsParamVo paramVo = new StatisticsParamVo();
+        paramVo.setTaskSource(taskSource);
+        paramVo.setBeginDate(beginDate);
+        paramVo.setEndDate(endDate);
         BufferedOutputStream bos = null;
         List<AreaStatisticsResultVo> list = statisticsService.areaStatisticsExport(paramVo);
         StringBuilder fileName = new StringBuilder("区域产值统计");
