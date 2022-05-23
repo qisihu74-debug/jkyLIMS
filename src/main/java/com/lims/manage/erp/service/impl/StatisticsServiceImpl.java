@@ -135,7 +135,10 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public List<AreaStatisticsResultVo> areaStatistics(StatisticsParamVo paramVo) {
-        return statisticsMapper.areaStatistics(paramVo);
+    public PageInfo areaStatistics(StatisticsParamVo paramVo) {
+        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        List<AreaStatisticsResultVo> list = statisticsMapper.areaStatistics(paramVo);
+        PageInfo<AreaStatisticsResultVo> result = new PageInfo<>(list);
+        return result;
     }
 }

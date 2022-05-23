@@ -25,5 +25,5 @@ public interface StatisticsService {
      * @param paramVo
      * @return
      */
-    List<AreaStatisticsResultVo> areaStatistics(StatisticsParamVo paramVo);
+    PageInfo areaStatistics(StatisticsParamVo paramVo);
 }
