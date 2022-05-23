@@ -74,4 +74,6 @@ public class QiYueSuoEntity {
     @Value("${qiyuesuo.categoryId}")
     private String categoryId;
 
+    @Value("${autograph.path}")
+    private String autographPath;
 }

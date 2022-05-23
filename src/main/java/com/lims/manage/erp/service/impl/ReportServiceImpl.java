@@ -7,6 +7,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.QiYueSuoSealEntity;
@@ -136,6 +137,8 @@ public class ReportServiceImpl implements ReportService {
     private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
     @Autowired
     private TestReportTemplateDao templateDao;
+    @Autowired
+    private QiYueSuoEntity qiYueSuoEntity;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -2117,8 +2120,9 @@ public class ReportServiceImpl implements ReportService {
             String signature = sysUserDao.getSignatureById(uId);
             checkUrl.add(signature);
         }
-        URL processes = Thread.currentThread().getContextClassLoader().getResource("processes");
-        String basePath = processes.getPath()+"/";
+        //URL processes = Thread.currentThread().getContextClassLoader().getResource("processes");
+        String basePath = qiYueSuoEntity.getAutographPath();
+        logger.info("临时文件路径:{}",basePath);
         //临时文件路径（使用后删除）
         String verPath = "";
         String verPath1 = "";
