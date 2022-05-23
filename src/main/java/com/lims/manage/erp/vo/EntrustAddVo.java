@@ -235,5 +235,21 @@ public class EntrustAddVo {
      * 配合比下的原材样品信息
      */
     private List<TestSampleEntity> nodeSample;
+    /**
+     * 任务来源
+     */
+    private String taskSource;
+    /**
+     * 折扣率
+     */
+    private String discount;
+    /**
+     * 实收价格
+     */
+    private String actualPrice;
+    /**
+     * 应收价格
+     */
+    private String systemPrice;
 
 }
