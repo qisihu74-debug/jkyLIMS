@@ -108,9 +108,6 @@ public class StatisticsController {
     @RequestMapping("/areaStatisticsExport")
     public void areaStatisticsExport(@RequestBody StatisticsParamVo paramVo, HttpServletResponse response) throws IOException {
         BufferedOutputStream bos = null;
-//        if (paramVo == null) {
-//            log.info("区域产值统计Excel表导出\t"+"缺少必填参数");
-//        }
         List<AreaStatisticsResultVo> list = statisticsService.areaStatisticsExport(paramVo);
         StringBuilder fileName = new StringBuilder("区域产值统计");
         if(paramVo.getBeginDate() != null){
@@ -120,7 +117,6 @@ public class StatisticsController {
             fileName.append("-");
             fileName.append(paramVo.getEndDate());
         }
-//        String fileName = ""+;
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "attachment; filename="
                 + new String(fileName.toString().getBytes("gbk"), "iso_8859_1") + ".xls");
