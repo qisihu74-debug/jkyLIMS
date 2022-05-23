@@ -25,6 +25,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.List;
 
 @Slf4j
@@ -169,23 +170,34 @@ public class StatisticsController {
     @GetMapping("/areaStatisticsExport")
     public void areaStatisticsExport(String taskSource,String beginDate,String endDate, HttpServletResponse response) throws IOException {
         StatisticsParamVo paramVo = new StatisticsParamVo();
-        paramVo.setTaskSource(taskSource);
-        paramVo.setBeginDate(beginDate);
-        paramVo.setEndDate(endDate);
+        if(!"null".equals(taskSource)){
+            paramVo.setTaskSource(taskSource);
+        }
+        if(!"null".equals(beginDate)){
+            paramVo.setBeginDate(beginDate);
+        }
+        if(!"null".equals(endDate)){
+            paramVo.setEndDate(endDate);
+        }
         BufferedOutputStream bos = null;
         List<AreaStatisticsResultVo> list = statisticsService.areaStatisticsExport(paramVo);
         StringBuilder fileName = new StringBuilder("区域产值统计");
+        if (paramVo.getTaskSource()!=null) {
+            fileName.append("-");
+            fileName.append(paramVo.getTaskSource());
+        }
         if(paramVo.getBeginDate() != null){
+            fileName.append("-");
             fileName.append(paramVo.getBeginDate());
         }
         if(paramVo.getEndDate() != null){
             fileName.append("-");
             fileName.append(paramVo.getEndDate());
         }
+        String encode = URLEncoder.encode(fileName.toString(), "UTF-8");
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
-        response.setHeader("Content-Disposition", "attachment; filename="
-                + new String(fileName.toString().getBytes("gbk"), "iso_8859_1") + ".xls");
+        response.setHeader("Content-Disposition", "attachment; filename="+encode+".xls");
         InputStream inputStream = statisticsService.areaStatisticsExportFunction(list);
         ServletOutputStream outputStream = response.getOutputStream();
         BufferedInputStream bis = new BufferedInputStream(inputStream);
