@@ -181,6 +181,7 @@ public class StatisticsController {
             fileName.append("-");
             fileName.append(paramVo.getEndDate());
         }
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "attachment; filename="
                 + new String(fileName.toString().getBytes("gbk"), "iso_8859_1") + ".xls");
