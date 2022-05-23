@@ -34,19 +34,16 @@
             and t1.dept_id = #{deptId}
         </if>
         <if test="requestDate!=null">
-            and t1.required_completion_time <![CDATA[ <= ]]>  #{requestDate}
+            and t1.required_completion_time <![CDATA[ >= ]]>  #{requestDate}
         </if>
         <if test="finishDate!=null">
-            and t1.end_detection_time <![CDATA[ <= ]]>  #{finishDate}
-        </if>
-        <if test="finishDate!=null">
-            and t1.end_detection_time <![CDATA[ <= ]]>  #{finishDate}
+            and t1.end_detection_time <![CDATA[ >= ]]>  #{finishDate}
         </if>
         <if test="startDate!=null">
-            and t1.receive_time <![CDATA[ <= ]]>  #{startDate}
+            and t1.start_detection_time <![CDATA[ >= ]]>  #{startDate}
         </if>
         <if test="stopDate!=null">
-            and t1.review_time <![CDATA[ <= ]]>  #{stopDate}
+            and t1.end_detection_time <![CDATA[ <= ]]>  #{stopDate}
         </if>
         ORDER BY t1.task_code DESC
     </select>

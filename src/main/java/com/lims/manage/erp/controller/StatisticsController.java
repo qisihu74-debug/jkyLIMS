@@ -125,6 +125,7 @@ public class StatisticsController {
         personalStatsVo.setPageSize(null);
         PageInfo list = statisticsService.personalStats(personalStatsVo);
         String fileName = "个人工作量统计";
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "attachment; filename="
                 + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
