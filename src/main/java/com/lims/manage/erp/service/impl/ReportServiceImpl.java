@@ -181,8 +181,9 @@ public class ReportServiceImpl implements ReportService {
 //    }
     @Override
     public PageInfo makeReport(Integer pageNum, Integer pageSize, String search) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportListVo> list = reportMapper.getReportList2(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()), search);
+        List<ReportListVo> list = reportMapper.getReportList2(userTeamIds, search);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -190,8 +191,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportListVo> list = reportMapper.reportDownloadList(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()), search);
+        List<ReportListVo> list = reportMapper.reportDownloadList(userTeamIds, search);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -259,20 +261,22 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo getReportList_history(String search, Integer pageNum, Integer pageSize) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         PageHelper.startPage(pageNum, pageSize);
         ReportListVo reportListVo = new ReportListVo();
         reportListVo.setTaskCode(search);
-        reportListVo.setDeptIds(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+        reportListVo.setDeptIds(userTeamIds);
         List<ReportListVo> list = reportMapper.getReportList_history(reportListVo);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
 
     public PageInfo reportDownloadListHistory(String search, Integer pageNum, Integer pageSize) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         PageHelper.startPage(pageNum, pageSize);
         ReportListVo reportListVo = new ReportListVo();
         reportListVo.setTaskCode(search);
-        reportListVo.setDeptIds(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+        reportListVo.setDeptIds(userTeamIds);
         List<ReportListVo> list = reportMapper.reportDownloadListHistory(reportListVo);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
@@ -338,7 +342,8 @@ public class ReportServiceImpl implements ReportService {
 
         }
         // 获取检测项
-        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemList(id, teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemList(id, userTeamIds);
         reportSampleDetailVo.setCheckItems(checkItemList);
         return reportSampleDetailVo;
     }
