@@ -97,6 +97,9 @@ public class StatisticsController {
         if (paramVo == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }
+        if(paramVo.getPageNum() == null || paramVo.getPageSize() == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "缺少分页参数！");
+        }
         return ResultUtil.success("区域产值统计查询成功！", statisticsService.areaStatistics(paramVo));
     }
 }
