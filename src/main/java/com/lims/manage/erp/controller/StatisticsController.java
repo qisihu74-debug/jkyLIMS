@@ -6,6 +6,9 @@ import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.StatisticsService;
+import com.lims.manage.erp.vo.AreaStatisticsResultVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.StatisticsParamVo;
 import com.lims.manage.erp.vo.PersonalStatsVo;
 import com.lims.manage.erp.vo.TaskStatsVo;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -136,5 +140,69 @@ public class StatisticsController {
         bos.close();
     }
 
+    /**
+     * 区域产值统计
+     * @param paramVo
+     * @return
+     */
+    @RequestMapping("/areaStatistics")
+    public Result areaStatistics(@RequestBody StatisticsParamVo paramVo) {
+        if (paramVo == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        if(paramVo.getPageNum() == null || paramVo.getPageSize() == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "缺少分页参数！");
+        }
+        return ResultUtil.success("区域产值统计查询成功！", statisticsService.areaStatistics(paramVo));
+    }
 
+    /**
+     * 区域产值统计--excel导出
+     * @param paramVo
+     * @param response
+     * @throws IOException
+     */
+    @RequestMapping("/areaStatisticsExport")
+    public void areaStatisticsExport(@RequestBody StatisticsParamVo paramVo, HttpServletResponse response) throws IOException {
+        BufferedOutputStream bos = null;
+        List<AreaStatisticsResultVo> list = statisticsService.areaStatisticsExport(paramVo);
+        StringBuilder fileName = new StringBuilder("区域产值统计");
+        if(paramVo.getBeginDate() != null){
+            fileName.append(paramVo.getBeginDate());
+        }
+        if(paramVo.getEndDate() != null){
+            fileName.append("-");
+            fileName.append(paramVo.getEndDate());
+        }
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename="
+                + new String(fileName.toString().getBytes("gbk"), "iso_8859_1") + ".xls");
+        InputStream inputStream = statisticsService.areaStatisticsExportFunction(list);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+    }
+
+    /**
+     * 部门产值统计
+     * @param paramVo
+     * @return
+     */
+    @RequestMapping("/teamStatistics")
+    public Result teamStatistics(@RequestBody StatisticsParamVo paramVo) {
+        if (paramVo == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        if(paramVo.getPageNum() == null || paramVo.getPageSize() == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "缺少分页参数！");
+        }
+        return ResultUtil.success("部门产值统计查询成功！", statisticsService.teamStatistics(paramVo));
+    }
 }

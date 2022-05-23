@@ -7,4 +7,7 @@ public class StatisticsParamVo {
     private String taskSource;
     private String beginDate;
     private String endDate;
+
+    private Integer pageNum;
+    private Integer pageSize;
 }
