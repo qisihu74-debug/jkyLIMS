@@ -21,9 +21,23 @@ public interface StatisticsService {
     InputStream exportPersonDetails(PageInfo list) throws IOException;
 
     /**
+     * 生成区域产值统计Excel
+     * @param list
+     * @return
+     * @throws IOException
+     */
+    InputStream areaStatisticsExportFunction(List<AreaStatisticsResultVo> list) throws IOException;
+
+    /**
      * 区域产值统计
      * @param paramVo
      * @return
      */
     PageInfo areaStatistics(StatisticsParamVo paramVo);
+    /**
+     * 区域产值统计--导出
+     * @param paramVo
+     * @return
+     */
+    List<AreaStatisticsResultVo> areaStatisticsExport(StatisticsParamVo paramVo);
 }

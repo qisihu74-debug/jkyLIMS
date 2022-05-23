@@ -101,9 +101,9 @@ public class StatisticsServiceImpl implements StatisticsService {
     public InputStream exportPersonDetails(PageInfo list) throws IOException {
         //创建HSSFWorkbook对象(excel的文档对象)
         HSSFWorkbook wb = new HSSFWorkbook();
-//建立新的sheet对象（excel的表单）
+        //建立新的sheet对象（excel的表单）
         HSSFSheet sheet=wb.createSheet("sheet0");
-//在sheet里创建第一行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
+        //在sheet里创建第一行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
         HSSFRow row1=sheet.createRow(0);
         //创建单元格并设置单元格内容
         row1.createCell(0).setCellValue("任务单编号");
@@ -135,10 +135,44 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
+    public InputStream areaStatisticsExportFunction(List<AreaStatisticsResultVo> list) throws IOException {
+        //创建HSSFWorkbook对象(excel的文档对象)
+        HSSFWorkbook wb = new HSSFWorkbook();
+        //建立新的sheet对象（excel的表单）
+        HSSFSheet sheet=wb.createSheet("sheet0");
+        //在sheet里创建第一行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
+        HSSFRow row1=sheet.createRow(0);
+        //创建单元格并设置单元格内容
+        row1.createCell(0).setCellValue("任务来源");
+        row1.createCell(1).setCellValue("委托收费额");
+        row1.createCell(2).setCellValue("交费金额");
+        row1.createCell(3).setCellValue("报告产值");
+        for(int i=0;i<list.size();i++){
+            AreaStatisticsResultVo areaStatisticsResultVo = list.get(i);
+            //在sheet里创建第二行
+            HSSFRow row3=sheet.createRow(i+1);
+            row3.createCell(0).setCellValue(areaStatisticsResultVo.getTaskSource());
+            row3.createCell(1).setCellValue(areaStatisticsResultVo.getActualPrice());
+            row3.createCell(2).setCellValue(areaStatisticsResultVo.getReceivedPrice());
+            row3.createCell(3).setCellValue(areaStatisticsResultVo.getReportPrice());
+        }
+        //输出Excel文件 字节输出流
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        wb.write(os);
+        os.close();
+        return new ByteArrayInputStream(os.toByteArray());
+    }
+
+    @Override
     public PageInfo areaStatistics(StatisticsParamVo paramVo) {
         PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
         List<AreaStatisticsResultVo> list = statisticsMapper.areaStatistics(paramVo);
         PageInfo<AreaStatisticsResultVo> result = new PageInfo<>(list);
         return result;
+    }
+
+    @Override
+    public List<AreaStatisticsResultVo> areaStatisticsExport(StatisticsParamVo paramVo) {
+        return statisticsMapper.areaStatistics(paramVo);
     }
 }
