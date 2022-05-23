@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.vo.AreaStatisticsResultVo;
 import com.lims.manage.erp.vo.StatisticsParamVo;
 import com.lims.manage.erp.vo.TaskStatsVo;
+import com.lims.manage.erp.vo.TeamOutputValueVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -30,4 +31,11 @@ public interface StatisticsMapper {
      * @return
      */
     List<AreaStatisticsResultVo> areaStatistics(StatisticsParamVo paramVo);
+
+    /**
+     * 部门产值统计
+     * @param paramVo
+     * @return
+     */
+    List<TeamOutputValueVo> teamStatistics(StatisticsParamVo paramVo);
 }

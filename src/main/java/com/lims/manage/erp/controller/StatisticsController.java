@@ -105,6 +105,12 @@ public class StatisticsController {
         return ResultUtil.success("区域产值统计查询成功！", statisticsService.areaStatistics(paramVo));
     }
 
+    /**
+     * 区域产值统计--excel导出
+     * @param paramVo
+     * @param response
+     * @throws IOException
+     */
     @RequestMapping("/areaStatisticsExport")
     public void areaStatisticsExport(@RequestBody StatisticsParamVo paramVo, HttpServletResponse response) throws IOException {
         BufferedOutputStream bos = null;
@@ -131,5 +137,21 @@ public class StatisticsController {
             bos.flush();
         }
         bos.close();
+    }
+
+    /**
+     * 部门产值统计
+     * @param paramVo
+     * @return
+     */
+    @RequestMapping("/teamStatistics")
+    public Result teamStatistics(@RequestBody StatisticsParamVo paramVo) {
+        if (paramVo == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        if(paramVo.getPageNum() == null || paramVo.getPageSize() == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "缺少分页参数！");
+        }
+        return ResultUtil.success("部门产值统计查询成功！", statisticsService.teamStatistics(paramVo));
     }
 }

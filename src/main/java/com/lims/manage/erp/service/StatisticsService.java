@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.vo.AreaStatisticsResultVo;
 import com.lims.manage.erp.vo.StatisticsParamVo;
 import com.lims.manage.erp.vo.TaskStatsVo;
+import com.lims.manage.erp.vo.TeamOutputValueVo;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +22,20 @@ public interface StatisticsService {
     InputStream exportPersonDetails(PageInfo list) throws IOException;
 
     /**
+     * 区域产值统计
+     * @param paramVo
+     * @return
+     */
+    PageInfo areaStatistics(StatisticsParamVo paramVo);
+
+    /**
+     * 区域产值统计--导出
+     * @param paramVo
+     * @return
+     */
+    List<AreaStatisticsResultVo> areaStatisticsExport(StatisticsParamVo paramVo);
+
+    /**
      * 生成区域产值统计Excel
      * @param list
      * @return
@@ -29,15 +44,16 @@ public interface StatisticsService {
     InputStream areaStatisticsExportFunction(List<AreaStatisticsResultVo> list) throws IOException;
 
     /**
-     * 区域产值统计
+     * 部门产值统计
      * @param paramVo
      * @return
      */
-    PageInfo areaStatistics(StatisticsParamVo paramVo);
+    PageInfo teamStatistics(StatisticsParamVo paramVo);
+
     /**
-     * 区域产值统计--导出
+     * 部门产值统计--excel导出
      * @param paramVo
      * @return
      */
-    List<AreaStatisticsResultVo> areaStatisticsExport(StatisticsParamVo paramVo);
+    List<TeamOutputValueVo> teamStatisticsExport(StatisticsParamVo paramVo);
 }

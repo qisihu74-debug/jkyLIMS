@@ -104,4 +104,33 @@
         ORDER BY
         actualPrice DESC
     </select>
+
+    <select id="teamStatistics" resultType="com.lims.manage.erp.vo.TeamOutputValueVo"
+            parameterType="com.lims.manage.erp.vo.StatisticsParamVo">
+        SELECT
+            t3.NAME teamName,
+            t3.CODE teamCode,
+            SUM( IFNULL( t2.discount, 1 ) * IFNULL( t4.unit_price, 0 ) ) taskPrice
+        FROM
+            test_task t1
+                LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+                LEFT JOIN test_team t3 ON t1.dept_id = t3.id
+                LEFT JOIN test_entrusted_sample_checkitem_rel t4 ON t1.id = t4.task_id
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="taskSource!=null and taskSource!=''">
+                and t3.NAME = #{taskSource}
+            </if>
+            <if test="beginDate!=null">
+                and <![CDATA[  DATE_FORMAT(t1.review_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
+            </if>
+            <if test="endDate!=null">
+                and <![CDATA[  DATE_FORMAT(t1.review_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
+            </if>
+        </trim>
+        GROUP BY
+            t3.NAME,
+            t3.CODE
+        ORDER BY
+            taskPrice DESC
+    </select>
 </mapper>

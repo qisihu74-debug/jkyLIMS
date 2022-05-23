@@ -175,4 +175,17 @@ public class StatisticsServiceImpl implements StatisticsService {
     public List<AreaStatisticsResultVo> areaStatisticsExport(StatisticsParamVo paramVo) {
         return statisticsMapper.areaStatistics(paramVo);
     }
+
+    @Override
+    public PageInfo teamStatistics(StatisticsParamVo paramVo) {
+        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        List<TeamOutputValueVo> list = statisticsMapper.teamStatistics(paramVo);
+        PageInfo<TeamOutputValueVo> result = new PageInfo<>(list);
+        return result;
+    }
+
+    @Override
+    public List<TeamOutputValueVo> teamStatisticsExport(StatisticsParamVo paramVo) {
+        return statisticsMapper.teamStatistics(paramVo);
+    }
 }
