@@ -2113,8 +2113,15 @@ public class ReportServiceImpl implements ReportService {
         HashSet<String> delList = new HashSet<>();
         ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(entrustId);//审核人、签发人
         List<String> stringList = taskMapper.getInspectorByEntrustId(entrustId);
+        List<String> stringList1 = Lists.newArrayList();
+        for (String string:stringList) {
+            String[] split = string.split(",");
+            for (String s:split) {
+                stringList1.add(s);
+            }
+        }
         List<Long> list1 = Lists.newArrayList();//检测人
-        for (String s:stringList) {
+        for (String s:stringList1) {
             String[] split1 = s.split("&");
             list1.add(Long.parseLong(split1[1]));
         }
@@ -2143,8 +2150,9 @@ public class ReportServiceImpl implements ReportService {
         float y = -10;
         int index = 1;
         //添加测试数据，使用后删除
-        checkUrl.add("1");
-
+        if (checkUrl.size()<=1){
+            checkUrl.add("1");
+        }
         startPath= basePath+localPdfPath;
         delList.add(startPath);
         endPath = basePath+1+suffix;
