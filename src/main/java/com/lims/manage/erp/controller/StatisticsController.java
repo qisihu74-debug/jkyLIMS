@@ -43,7 +43,7 @@ public class StatisticsController {
         if (taskStatsVo.getPageNum() == null || taskStatsVo.getPageSize() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }
-        return ResultUtil.success("查询任务统计！", statisticsService.taskQuery(taskStatsVo));
+        return ResultUtil.success("查询任务统计！", statisticsService.taskQuery1111(taskStatsVo));
     }
 
     /**
@@ -67,9 +67,12 @@ public class StatisticsController {
     public void taskQueryExport(HttpServletResponse response) throws IOException {
         BufferedOutputStream bos = null;
         TaskStatsVo taskStatsVo = new TaskStatsVo();
-        taskStatsVo.setPageNum(null);
-        taskStatsVo.setPageSize(null);
-        PageInfo list = statisticsService.taskQuery(taskStatsVo);
+
+        if(taskStatsVo.getPageNum()==null||taskStatsVo.getPageSize()==null){
+            taskStatsVo.setPageNum(0);
+            taskStatsVo.setPageSize(0);
+        }
+        PagingToolVo list = statisticsService.taskQuery1111(taskStatsVo);
         String fileName = "任务统计结果";
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
@@ -226,7 +229,7 @@ public class StatisticsController {
     @GetMapping("/teamStatisticsExport")
     public void teamStatisticsExport(String teamName,String beginDate,String endDate, HttpServletResponse response) throws IOException {
         StatisticsParamVo paramVo = new StatisticsParamVo();
-        if(!"null".equals(teamName)){
+        if(!"null".equals(teamName) && !"undefined".equals(teamName)){
             paramVo.setTaskSource(teamName);
         }
         if(!"null".equals(beginDate)){
@@ -265,5 +268,14 @@ public class StatisticsController {
             bos.flush();
         }
         bos.close();
+    }
+
+    /**
+     * 查询区域信息
+     * @return
+     */
+    @GetMapping("/getAreas")
+    public Result getAreas() {
+        return ResultUtil.success("查询区域信息成功！", statisticsService.getAreas());
     }
 }

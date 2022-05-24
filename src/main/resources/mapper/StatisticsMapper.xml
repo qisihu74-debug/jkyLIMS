@@ -203,28 +203,11 @@
         <result property="requestDate" column="requestDate"></result>
         <result property="finishDate" column="finishDate"></result>
         <result property="reportCode" column="report_code"></result>
-        <result property="reportCode" column="report_code"></result>
+        <result property="state" column="report_state"></result>
+        <result property="entrustmentId" column="entrustment_id"></result>
         <collection property="sampleDetailList" ofType="com.lims.manage.erp.vo.SampleDetailVo">
             <id property="id" column="sample_id"></id>
-            <result property="sampleCode" column="sample_code"></result>
             <result property="sampleName" column="sample_name"></result>
-            <result property="productId" column="product_id"></result>
-            <result property="specs" column="specs"></result>
-            <result property="batchNumber" column="batch_number"></result>
-            <result property="generation" column="generation"></result>
-            <result property="sampleGroups" column="sample_groups"></result>
-            <result property="quantityPerGroup" column="quantity_per_group"></result>
-            <result property="sampleOrigin" column="sample_origin"></result>
-            <result property="manufacturer" column="manufacturer"></result>
-            <result property="receivedDate" column="received_date"></result>
-            <result property="inspector" column="inspector"></result>
-            <result property="sampleRequirement" column="sample_requirement"></result>
-            <result property="outward" column="outward"></result>
-            <result property="picture" column="picture"></result>
-            <result property="sampleQuantity" column="sample_quantity"></result>
-            <result property="aliasName" column="alias_name"></result>
-            <result property="sampleRemark" column="sample_remark"></result>
-            <result property="sampleType" column="sample_type"></result>
             <collection property="checkItemInfoList" ofType="com.lims.manage.erp.vo.CheckItemInfoVo">
                 <id property="checkItemId" column="check_item_id"></id>
                 <result property="checkItemName" column="check_item_name"></result>
@@ -235,10 +218,8 @@
                 <result property="times" column="times"></result>
                 <result property="checkPrice" column="unit_price"></result>
                 <result property="itemId" column="itemId"></result>
-                <result property="state" column="state"></result>
-                <result property="originUrl" column="originUrl"></result>
-                <result property="opinion" column="opinion"></result>
-                <result property="itemFileName" column="item_file_name"></result>
+                <result property="state" column="item_state"></result>
+                <result property="taskId" column="item_task_id"></result>
             </collection>
         </collection>
     </resultMap>
@@ -250,15 +231,16 @@
         t1.required_completion_time requestDate,
         t1.end_detection_time finishDate,
         t2.report_code reportCode,
-        t2.state state,
+        t2.state report_state,
         t1.entrustment_id,
+        t4.id sample_id,
 		t4.sample_name ,
         t5.id as itemId,
         t5.times,
         t5.unit_price,
         t5.check_item_name,
-        t5.state,
-		t5.task_id
+        t5.state item_state,
+		t5.task_id item_task_id
         FROM
         test_task AS t1
         LEFT JOIN test_report_record AS t2 ON t2.entrustment_id = t1.entrustment_id
@@ -270,19 +252,16 @@
             and t1.dept_id = #{deptId}
         </if>
         <if test="requestDate!=null">
-            and t1.required_completion_time <![CDATA[ <= ]]>  #{requestDate}
+            and t1.required_completion_time <![CDATA[ >= ]]>  #{requestDate}
         </if>
         <if test="finishDate!=null">
-            and t1.end_detection_time <![CDATA[ <= ]]>  #{finishDate}
-        </if>
-        <if test="finishDate!=null">
-            and t1.end_detection_time <![CDATA[ <= ]]>  #{finishDate}
+            and t1.end_detection_time <![CDATA[ >= ]]>  #{finishDate}
         </if>
         <if test="startDate!=null">
-            and t1.receive_time <![CDATA[ <= ]]>  #{startDate}
+            and t1.start_detection_time <![CDATA[ >= ]]>  #{startDate}
         </if>
         <if test="stopDate!=null">
-            and t1.review_time <![CDATA[ <= ]]>  #{stopDate}
+            and t1.end_detection_time <![CDATA[ <= ]]>  #{stopDate}
         </if>
         ORDER BY t1.task_code DESC
     </select>
@@ -351,5 +330,14 @@
             t3.CODE
         ORDER BY
             taskPrice DESC
+    </select>
+
+    <select id="getAreas" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT
+            @rownum := @rownum + 1 AS value,
+	t1.*
+        FROM
+            ( SELECT @rownum := 0 ) r,
+            ( SELECT DISTINCT task_source label FROM test_entrusted_info ) t1
     </select>
 </mapper>
