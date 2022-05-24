@@ -226,7 +226,7 @@ public class StatisticsController {
     @GetMapping("/teamStatisticsExport")
     public void teamStatisticsExport(String teamName,String beginDate,String endDate, HttpServletResponse response) throws IOException {
         StatisticsParamVo paramVo = new StatisticsParamVo();
-        if(!"null".equals(teamName)){
+        if(!"null".equals(teamName) && !"undefined".equals(teamName)){
             paramVo.setTaskSource(teamName);
         }
         if(!"null".equals(beginDate)){
