@@ -2,11 +2,13 @@ package com.lims.manage.erp.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.StatisticsMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.StatisticsService;
 import com.lims.manage.erp.vo.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -28,37 +30,6 @@ public class StatisticsServiceImpl implements StatisticsService {
     private TaskMapper taskMapper;
 
 
-    @Override
-    public PageInfo taskQuery(TaskStatsVo taskStatsVo) {
-        // 获取任务集合。
-        if(taskStatsVo.getPageSize()!=null&&taskStatsVo.getPageNum()!=null){
-            PageHelper.startPage(taskStatsVo.getPageNum(), taskStatsVo.getPageSize());
-        }
-        List<TaskStatsVo> list = statisticsMapper.selectTaskQuery(taskStatsVo);
-        for (TaskStatsVo data : list) {
-            // 通过任务单id 和 委托信息 获取样品名 和 所属的检测项价格及检测项状态（试验已开始，原始记录已上传，已复核）；
-            List<SampleEntity> sampleList = statisticsMapper.selectSampleEntityList(data.getTaskId(), data.getEntrustmentId());
-            Set<String> set = new HashSet<>();
-            Integer testPrice = 0;
-            for (SampleEntity sampleEntity : sampleList) {
-                set.add(sampleEntity.getSampleName());
-                for (SampleItemEntity sampleItemInstrumentEntity : sampleEntity.getSampleCheckItem()) {
-                    // 进行强转 子类 继承 父类信息。
-                    SampleItemInstrumentEntity sampleItemInstrumentEntity1 = (SampleItemInstrumentEntity) sampleItemInstrumentEntity;
-                    // times 次数 * 单价 UnitPrice = 此次检测价格。
-                    if (sampleItemInstrumentEntity1.getTimes() != null && sampleItemInstrumentEntity1.getUnitPrice() != null) {
-                        testPrice += sampleItemInstrumentEntity1.getTimes() * sampleItemInstrumentEntity1.getUnitPrice();
-                    }
-                }
-            }
-            data.setCost(testPrice.toString());
-            data.setSampleName(set.toString());
-            // 任务单 state = 6.原始记录已复核， 其余都未复核
-            data.setTaskStatus(data.getState() != null && data.getState() == 6 ? "完成复核" : "未完成复核");
-        }
-        PageInfo<TaskStatsVo> result = new PageInfo<>(list);
-        return result;
-    }
 
     @Override
     public TaskStatsVo TaskDetails(Long taskId) {
@@ -93,7 +64,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public InputStream exportPersonDetails(PageInfo list) throws IOException {
+    public InputStream exportPersonDetails( PagingToolVo list) throws IOException {
         //创建HSSFWorkbook对象(excel的文档对象)
         HSSFWorkbook wb = new HSSFWorkbook();
 //建立新的sheet对象（excel的表单）
@@ -421,5 +392,97 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public List<TeamOutputValueVo> teamStatisticsExport(StatisticsParamVo paramVo) {
         return statisticsMapper.teamStatistics(paramVo);
+    }
+
+    @Override
+    public PagingToolVo taskQuery1111(TaskStatsVo taskStatsVo) {
+        // 分页数据
+        List<TaskStatsVo> personList = new ArrayList<>();
+        List<TaskStatsVo> list = statisticsMapper.getTaskList(taskStatsVo);
+        // 遍历list数据
+        for(TaskStatsVo taskDetailInfoVo :list){
+            if(!taskDetailInfoVo.getSampleDetailList().isEmpty())
+            {
+                Set<String> set = new HashSet<>();
+                Integer testPrice = 0;
+                for (SampleDetailVo sampleEntity : taskDetailInfoVo.getSampleDetailList()) {
+                    set.add(sampleEntity.getSampleName());
+                    if(!sampleEntity.getCheckItemInfoList().isEmpty()){
+                        for (CheckItemInfoVo sampleItemInstrumentEntity : sampleEntity.getCheckItemInfoList()) {
+                            // 进行强转 子类 继承 父类信息。
+                            // times 次数 * 单价 UnitPrice = 此次检测价格。
+                            if (sampleItemInstrumentEntity.getTimes() != 0 && sampleItemInstrumentEntity.getCheckPrice() != null) {
+                                testPrice += sampleItemInstrumentEntity.getTimes() * Integer.parseInt(sampleItemInstrumentEntity.getCheckPrice());
+                            }
+                        }
+                    }
+                }
+                taskDetailInfoVo.setCost(testPrice.toString());
+                taskDetailInfoVo.setSampleName(set.toString());
+                // 任务单 state = 6.原始记录已复核， 其余都未复核
+                taskDetailInfoVo.setTaskStatus(taskDetailInfoVo.getState() != null && taskDetailInfoVo.getState() >= 6 ? "完成复核" : "未完成复核");
+                TaskStatsVo data = new TaskStatsVo();
+                data.setTaskId(taskDetailInfoVo.getTaskId());
+                data.setTaskCode(taskDetailInfoVo.getTaskCode());
+                data.setRequestDate(taskDetailInfoVo.getRequestDate());
+                data.setFinishDate(taskDetailInfoVo.getFinishDate());
+                data.setCost(taskDetailInfoVo.getCost());
+                data.setReportCode(taskDetailInfoVo.getReportCode());
+                data.setReportType(taskDetailInfoVo.getReportType());
+                data.setSampleName(taskDetailInfoVo.getSampleName());
+                data.setTaskStatus(taskDetailInfoVo.getTaskStatus());
+                personList.add(data);
+            }
+        }
+        Integer pageNum = taskStatsVo.getPageNum();
+        Integer pageSize = taskStatsVo.getPageSize();
+        PagingToolVo pagingVo = new PagingToolVo();
+        if(pageNum>0&&pageSize>0) {
+            // 总条数
+            pagingVo.setTotal(personList.size());
+            // 开始
+            pagingVo.setPageNum(pageNum);
+            // 页码
+            pagingVo.setPageSize(pageSize);
+            // 当前页展示数量
+            Integer size = personList.size() - (pageNum*pageSize); // 实际返回页码展示数量
+            if(size>0){
+                pagingVo.setSize(pageSize);
+            }
+            else {
+                size =pageSize -( pageNum*pageSize - personList.size());
+                pagingVo.setSize(size>0?size:0);
+            }
+            // 总页数
+            pagingVo.setPages(personList.size() / pageSize);
+            // 开始行数
+            pagingVo.setStartRow(personList.size() / pageSize / pageNum);
+            // 结束行数
+            pagingVo.setEndRow(personList.size() / pageSize);
+            List<TaskStatsVo> subList = Lists.newArrayList();
+            if (!CollectionUtils.isEmpty(personList)) {
+                try {
+                    if (personList.size() > 10 && personList.size() / 10 >= pageNum) {
+                        subList = personList.subList((pageNum - 1) * pageSize, pageNum * pageSize);
+                    } else {
+                        subList = personList.subList((pageNum - 1) * pageSize, personList.size());
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    subList = personList;
+                } catch (IllegalArgumentException e) {
+                    subList = personList.subList(0, personList.size());
+                } finally {
+                    // 返回数据
+                    pagingVo.setList(subList);
+                }
+            }
+            return pagingVo;
+        }
+        else {
+            if (!CollectionUtils.isEmpty(personList)) {
+                pagingVo.setList(personList);
+            }
+            return pagingVo;
+        }
     }
 }

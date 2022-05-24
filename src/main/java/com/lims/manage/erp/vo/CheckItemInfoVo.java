@@ -67,6 +67,11 @@ public class CheckItemInfoVo {
      */
     private Integer checkItemPid;
 
+    /**
+     *  检测项——任务主键
+     */
+    private Long taskId;
+
     public CheckItemInfoVo() {
     }
 

@@ -1,12 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
-import com.lims.manage.erp.vo.PersonalStatsVo;
-import com.lims.manage.erp.vo.AreaStatisticsResultVo;
-import com.lims.manage.erp.vo.StatisticsParamVo;
-import com.lims.manage.erp.vo.TaskStatsVo;
-import com.lims.manage.erp.vo.TestTeamVo;
-import com.lims.manage.erp.vo.TeamOutputValueVo;
+import com.lims.manage.erp.vo.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,14 +9,13 @@ import java.util.List;
 
 public interface StatisticsService {
 
-    PageInfo taskQuery(TaskStatsVo taskStatsVo);
 
     TaskStatsVo TaskDetails(Long taskId);
 
     /**
      * 导出Excel 表
      */
-    InputStream exportPersonDetails(PageInfo list) throws IOException;
+    InputStream exportPersonDetails(PagingToolVo list) throws IOException;
 
     /**
      * 个人工作量统计
@@ -75,4 +69,11 @@ public interface StatisticsService {
      * @return
      */
     List<TeamOutputValueVo> teamStatisticsExport(StatisticsParamVo paramVo);
+
+    /**
+     * 任务单统计
+     * @param taskStatsVo
+     * @return
+     */
+    PagingToolVo taskQuery1111(TaskStatsVo taskStatsVo);
 }

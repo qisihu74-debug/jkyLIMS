@@ -6,11 +6,7 @@ import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.StatisticsService;
-import com.lims.manage.erp.vo.AreaStatisticsResultVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.StatisticsParamVo;
-import com.lims.manage.erp.vo.PersonalStatsVo;
-import com.lims.manage.erp.vo.TaskStatsVo;
+import com.lims.manage.erp.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
@@ -47,7 +43,7 @@ public class StatisticsController {
         if (taskStatsVo.getPageNum() == null || taskStatsVo.getPageSize() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }
-        return ResultUtil.success("查询任务统计！", statisticsService.taskQuery(taskStatsVo));
+        return ResultUtil.success("查询任务统计！", statisticsService.taskQuery1111(taskStatsVo));
     }
 
     /**
@@ -71,9 +67,12 @@ public class StatisticsController {
     public void taskQueryExport(HttpServletResponse response) throws IOException {
         BufferedOutputStream bos = null;
         TaskStatsVo taskStatsVo = new TaskStatsVo();
-        taskStatsVo.setPageNum(null);
-        taskStatsVo.setPageSize(null);
-        PageInfo list = statisticsService.taskQuery(taskStatsVo);
+
+        if(taskStatsVo.getPageNum()==null||taskStatsVo.getPageSize()==null){
+            taskStatsVo.setPageNum(0);
+            taskStatsVo.setPageSize(0);
+        }
+        PagingToolVo list = statisticsService.taskQuery1111(taskStatsVo);
         String fileName = "任务统计结果";
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
