@@ -451,4 +451,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         os.close();
         return new ByteArrayInputStream(os.toByteArray());
     }
+
+    @Override
+    public List<LabelValueVo> getAreas() {
+        return statisticsMapper.getAreas();
+    }
 }

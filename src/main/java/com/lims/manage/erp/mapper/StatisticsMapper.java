@@ -4,12 +4,7 @@ import com.lims.manage.erp.entity.EntrustHistoryEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.vo.PersonalStatsVo;
-import com.lims.manage.erp.vo.AreaStatisticsResultVo;
-import com.lims.manage.erp.vo.StatisticsParamVo;
-import com.lims.manage.erp.vo.TaskStatsVo;
-import com.lims.manage.erp.vo.TestTeamVo;
-import com.lims.manage.erp.vo.TeamOutputValueVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -85,4 +80,10 @@ public interface StatisticsMapper {
      * @return
      */
     List<TeamOutputValueVo> teamStatistics(StatisticsParamVo paramVo);
+
+    /**
+     * 查询区域信息
+     * @return
+     */
+    List<LabelValueVo> getAreas();
 }

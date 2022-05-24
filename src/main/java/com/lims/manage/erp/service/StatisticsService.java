@@ -1,12 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
-import com.lims.manage.erp.vo.PersonalStatsVo;
-import com.lims.manage.erp.vo.AreaStatisticsResultVo;
-import com.lims.manage.erp.vo.StatisticsParamVo;
-import com.lims.manage.erp.vo.TaskStatsVo;
-import com.lims.manage.erp.vo.TestTeamVo;
-import com.lims.manage.erp.vo.TeamOutputValueVo;
+import com.lims.manage.erp.vo.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,4 +78,10 @@ public interface StatisticsService {
      * @throws IOException
      */
     InputStream teamStatisticsExportFunction(List<TeamOutputValueVo> list) throws IOException;
+
+    /**
+     * 查询区域信息
+     * @return
+     */
+    List<LabelValueVo> getAreas();
 }

@@ -266,4 +266,13 @@ public class StatisticsController {
         }
         bos.close();
     }
+
+    /**
+     * 查询区域信息
+     * @return
+     */
+    @GetMapping("/getAreas")
+    public Result getAreas() {
+        return ResultUtil.success("查询区域信息成功！", statisticsService.getAreas());
+    }
 }
