@@ -7,6 +7,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.QiYueSuoSealEntity;
@@ -136,6 +137,8 @@ public class ReportServiceImpl implements ReportService {
     private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
     @Autowired
     private TestReportTemplateDao templateDao;
+    @Autowired
+    private QiYueSuoEntity qiYueSuoEntity;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -178,8 +181,9 @@ public class ReportServiceImpl implements ReportService {
 //    }
     @Override
     public PageInfo makeReport(Integer pageNum, Integer pageSize, String search) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportListVo> list = reportMapper.getReportList2(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()), search);
+        List<ReportListVo> list = reportMapper.getReportList2(userTeamIds, search);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -187,8 +191,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportListVo> list = reportMapper.reportDownloadList(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()), search);
+        List<ReportListVo> list = reportMapper.reportDownloadList(userTeamIds, search);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -256,20 +261,22 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo getReportList_history(String search, Integer pageNum, Integer pageSize) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         PageHelper.startPage(pageNum, pageSize);
         ReportListVo reportListVo = new ReportListVo();
         reportListVo.setTaskCode(search);
-        reportListVo.setDeptIds(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+        reportListVo.setDeptIds(userTeamIds);
         List<ReportListVo> list = reportMapper.getReportList_history(reportListVo);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
 
     public PageInfo reportDownloadListHistory(String search, Integer pageNum, Integer pageSize) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         PageHelper.startPage(pageNum, pageSize);
         ReportListVo reportListVo = new ReportListVo();
         reportListVo.setTaskCode(search);
-        reportListVo.setDeptIds(teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+        reportListVo.setDeptIds(userTeamIds);
         List<ReportListVo> list = reportMapper.reportDownloadListHistory(reportListVo);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
@@ -335,7 +342,8 @@ public class ReportServiceImpl implements ReportService {
 
         }
         // 获取检测项
-        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemList(id, teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId()));
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemList(id, userTeamIds);
         reportSampleDetailVo.setCheckItems(checkItemList);
         return reportSampleDetailVo;
     }
@@ -2102,6 +2110,7 @@ public class ReportServiceImpl implements ReportService {
      * @throws Exception
      */
     public String insertPicToPdf(String pdfUrl, Long entrustId) throws Exception {
+        HashSet<String> delList = new HashSet<>();
         ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(entrustId);//审核人、签发人
         List<String> stringList = taskMapper.getInspectorByEntrustId(entrustId);
         List<Long> list1 = Lists.newArrayList();//检测人
@@ -2117,62 +2126,57 @@ public class ReportServiceImpl implements ReportService {
             String signature = sysUserDao.getSignatureById(uId);
             checkUrl.add(signature);
         }
-        URL processes = Thread.currentThread().getContextClassLoader().getResource("processes");
-        String basePath = processes.getPath()+"/";
+        String basePath = qiYueSuoEntity.getAutographPath();
+        logger.info("临时文件路径:{}",basePath);
         //临时文件路径（使用后删除）
-        String verPath = "";
-        String verPath1 = "";
-        String issPath = "";
-        String sigPath = "";
-        String finalPath = "";
-
-
+        String startPath = "";
+        String endPath = "";
         String suffix = ".pdf";
         //现将服务器上的报告文件、图片签名文件缓存到本地
         String localPdfPath = HttpDownloadUtil.download(pdfUrl, basePath);
         String verUrlPath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", basePath);
+        delList.add(basePath+verUrlPath);
         String issUrlPath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", basePath);
-        String signaturePath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", basePath);
-        String signaturePath2 = "";
-        if (checkUrl.size()>1){
-            signaturePath2 = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", basePath);
-        }
-        //图片插入
-        verPath= basePath+localPdfPath;
-        verPath1 = basePath+1+suffix;
-        PdfDoc pdf = new PdfDoc(verPath, verPath1);
-        pdf.addImage(basePath+signaturePath, "检测：",1,-10, 30, 20);
+        delList.add(basePath+issUrlPath);
+        String signaturePath = "";
+        float x = 1;
+        float y = -10;
+        int index = 1;
+        //添加测试数据，使用后删除
+        checkUrl.add("1");
 
-        if (org.apache.commons.lang3.StringUtils.isNotEmpty(signaturePath2)){
-            issPath = basePath+2+suffix;
-            PdfDoc pdf1 = new PdfDoc(verPath1, issPath);
-            pdf1.addImage(basePath+signaturePath2, "检测：",50,-10, 30, 20);
+        startPath= basePath+localPdfPath;
+        delList.add(startPath);
+        endPath = basePath+1+suffix;
+        delList.add(endPath);
+        for (String s:checkUrl) {
+            signaturePath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", basePath);
+            //图片插入
+            PdfDoc pdf = new PdfDoc(startPath, endPath);
+            pdf.addImage(basePath+signaturePath, "检测：",x,y, 30, 20);
+            index ++;
+            startPath = endPath;
+            endPath = basePath+index+suffix;
+            x = x+49;
+            delList.add(endPath);
         }
-        if (StringUtils.isEmpty(issPath)){
-            issPath = basePath+2+suffix;
-        }
-
-        sigPath = basePath+3+suffix;
-        PdfDoc pdf2 = new PdfDoc(issPath, sigPath);
+        PdfDoc pdf2 = new PdfDoc(startPath, endPath);
         pdf2.addImage(basePath+verUrlPath, "审核：",15,-10, 30, 20);
+        index = index+1;
+        startPath = endPath;
+        endPath = endPath = basePath+index+suffix;
+        delList.add(endPath);
 
-        finalPath = basePath+4+suffix;
-        PdfDoc pdf3 = new PdfDoc(sigPath, finalPath);
+        PdfDoc pdf3 = new PdfDoc(startPath, endPath);
         pdf3.addImage(basePath+issUrlPath, "批准：",20,-10, 30, 20);
         //将最终本地的pdf报告上传到文件服务器
-        File file = new File(finalPath);
+        File file = new File(endPath);
         MultipartFile multipartFile = AsposeUtil.fileToMultipart(file, detailByEntrustId.getReportCode());
         String url = MinIoUtil.upload("report-download", multipartFile, detailByEntrustId.getReportCode() + ".pdf");
         //删除产生的临时文件
-        FileAndFolderUtil.delete(verPath);
-        FileAndFolderUtil.delete(verPath1);
-        FileAndFolderUtil.delete(issPath);
-        FileAndFolderUtil.delete(sigPath);
-        FileAndFolderUtil.delete(finalPath);
-        FileAndFolderUtil.delete(basePath+verUrlPath);
-        FileAndFolderUtil.delete(basePath+issUrlPath);
-        FileAndFolderUtil.delete(basePath+signaturePath);
-        FileAndFolderUtil.delete(basePath+signaturePath2);
+        for (String del:delList) {
+            FileAndFolderUtil.delete(del);
+        }
         return url;
     }
 }

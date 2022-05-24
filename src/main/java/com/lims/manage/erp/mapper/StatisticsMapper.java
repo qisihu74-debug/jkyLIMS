@@ -82,4 +82,10 @@ public interface StatisticsMapper {
     List<TeamOutputValueVo> teamStatistics(StatisticsParamVo paramVo);
 
     List<TaskStatsVo> getTaskList(TaskStatsVo taskDetailInfoVo);
+
+    /**
+     * 查询区域信息
+     * @return
+     */
+    List<LabelValueVo> getAreas();
 }

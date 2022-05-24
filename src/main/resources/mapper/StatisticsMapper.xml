@@ -331,4 +331,13 @@
         ORDER BY
             taskPrice DESC
     </select>
+
+    <select id="getAreas" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT
+            @rownum := @rownum + 1 AS value,
+	t1.*
+        FROM
+            ( SELECT @rownum := 0 ) r,
+            ( SELECT DISTINCT task_source label FROM test_entrusted_info ) t1
+    </select>
 </mapper>

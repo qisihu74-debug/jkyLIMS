@@ -76,4 +76,18 @@ public interface StatisticsService {
      * @return
      */
     PagingToolVo taskQuery1111(TaskStatsVo taskStatsVo);
+
+    /**
+     * 部门产值统计统计Excel
+     * @param list
+     * @return
+     * @throws IOException
+     */
+    InputStream teamStatisticsExportFunction(List<TeamOutputValueVo> list) throws IOException;
+
+    /**
+     * 查询区域信息
+     * @return
+     */
+    List<LabelValueVo> getAreas();
 }

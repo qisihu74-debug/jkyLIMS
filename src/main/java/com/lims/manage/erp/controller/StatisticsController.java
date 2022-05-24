@@ -193,10 +193,10 @@ public class StatisticsController {
             fileName.append("-");
             fileName.append(paramVo.getEndDate());
         }
-        String encode = URLEncoder.encode(fileName.toString(), "UTF-8");
+//        String encode = URLEncoder.encode(fileName.toString(), "UTF-8");
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
-        response.setHeader("Content-Disposition", "attachment; filename="+encode+".xls");
+        response.setHeader("Content-Disposition", "attachment; filename="+java.net.URLEncoder.encode(fileName.toString(), "UTF-8")+".xls");
         InputStream inputStream = statisticsService.areaStatisticsExportFunction(list);
         ServletOutputStream outputStream = response.getOutputStream();
         BufferedInputStream bis = new BufferedInputStream(inputStream);
@@ -224,5 +224,58 @@ public class StatisticsController {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "缺少分页参数！");
         }
         return ResultUtil.success("部门产值统计查询成功！", statisticsService.teamStatistics(paramVo));
+    }
+
+    @GetMapping("/teamStatisticsExport")
+    public void teamStatisticsExport(String teamName,String beginDate,String endDate, HttpServletResponse response) throws IOException {
+        StatisticsParamVo paramVo = new StatisticsParamVo();
+        if(!"null".equals(teamName) && !"undefined".equals(teamName)){
+            paramVo.setTaskSource(teamName);
+        }
+        if(!"null".equals(beginDate)){
+            paramVo.setBeginDate(beginDate);
+        }
+        if(!"null".equals(endDate)){
+            paramVo.setEndDate(endDate);
+        }
+        BufferedOutputStream bos = null;
+        List<TeamOutputValueVo> teamOutputValueVos = statisticsService.teamStatisticsExport(paramVo);
+        StringBuilder fileName = new StringBuilder("部门产值统计");
+        if (paramVo.getTaskSource()!=null) {
+            fileName.append("-");
+            fileName.append(paramVo.getTaskSource());
+        }
+        if(paramVo.getBeginDate() != null){
+            fileName.append("-");
+            fileName.append(paramVo.getBeginDate());
+        }
+        if(paramVo.getEndDate() != null){
+            fileName.append("-");
+            fileName.append(paramVo.getEndDate());
+        }
+//        String encode = URLEncoder.encode(fileName.toString(), "UTF-8");
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename="+java.net.URLEncoder.encode(fileName.toString(), "UTF-8")+".xls");
+        InputStream inputStream = statisticsService.teamStatisticsExportFunction(teamOutputValueVos);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+    }
+
+    /**
+     * 查询区域信息
+     * @return
+     */
+    @GetMapping("/getAreas")
+    public Result getAreas() {
+        return ResultUtil.success("查询区域信息成功！", statisticsService.getAreas());
     }
 }
