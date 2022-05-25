@@ -1495,7 +1495,9 @@ public class ReportServiceImpl implements ReportService {
         reqBean.setContractId(Long.valueOf(entity.get(0).getContractId()));
         QiYueSuoResponse response = qiYueSuoHnadler.signurl(reqBean);
         //根据委托更新报告签署url
-        entityMapper.updateUrlAndState(reqBean.getEntrustId(), response.getSignUrl(), "4");
+        //设置盖章人和盖章时间
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        entityMapper.updateUrlAndState(reqBean.getEntrustId(), response.getSignUrl(), "4",userId+"",new Date(System.currentTimeMillis()));
         return response;
     }
 
