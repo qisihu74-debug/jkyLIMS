@@ -2190,50 +2190,21 @@ public class EntrustServiceImpl implements EntrustService {
             String[] sealTypes = new String[0];
             entrustAddVo.setSealTypes(sealTypes);
         }
-        // 通过委托单位id 获取样品已签收的 产品id集合。有数据则赋值，否则返回null。
-        List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListObtain(entrustAddVo.getEntrustCompanyId());
-        Iterator<SampleEntity> it = entrustAddVo.getSamples().iterator();
-        while (it.hasNext()) {
-            SampleEntity sampleEntity = it.next();
-            // 标志符。
-            Boolean flag = false;
+        List<SampleEntity> sampleCollection = entrustAddVo.getSamples();
+        Integer sampleId = 0;
             if (!CollectionUtils.isEmpty(sampleCollection)) {
-                for (SampleEntity sampleEntity1 : sampleCollection) {
-                    if (sampleEntity.getProductId().equals(sampleEntity1.getProductId())) {
+                for (SampleEntity sampleEntity : sampleCollection) {
                         // 并对 样品下 检测项ID所属样品ID 重新赋值。
+                        sampleId+=1;
                         if (!CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVoStr())) {
                             for (JudgmentBasisVo judgmentBasisVo : sampleEntity.getJudgmentBasisVoStr()) {
-                                judgmentBasisVo.setSampleId(sampleEntity1.getId());
+                                judgmentBasisVo.setSampleId(sampleId);
                             }
-                        }
-                        // 产品id相同，但是独有的属性不同，因此赋值。
-                        sampleEntity.setId(sampleEntity1.getId());
-                        // 样品名称
-                        sampleEntity.setSampleName(sampleEntity1.getSampleName());
-                        // 样品编号
-                        sampleEntity.setSampleCode(sampleEntity1.getSampleCode());
-                        // 规格、型号
-                        sampleEntity.setSpecs(sampleEntity1.getSpecs());
-                        // 批号
-                        sampleEntity.setBatchNumber(sampleEntity1.getBatchNumber());
-                        // 厂家
-                        sampleEntity.setManufacturer(sampleEntity1.getManufacturer());
-                        // 产地
-                        sampleEntity.setSampleOrigin(sampleEntity1.getSampleOrigin());
-                        // 代表批量
-                        sampleEntity.setGeneration(sampleEntity1.getGeneration());
-                        // 别名
-                        sampleEntity.setAliasName(sampleEntity1.getAliasName());
-                        flag = true;
-                        break;
+                        // 产品id相同，伪造样品编号。
+                        sampleEntity.setId(sampleId);
                     }
                 }
             }
-            // 样品签收的productId 与copy委托单位id下产品Id不一致 则清除。
-            if (!flag) {
-                it.remove();
-            }
-        }
         return entrustAddVo;
     }
 

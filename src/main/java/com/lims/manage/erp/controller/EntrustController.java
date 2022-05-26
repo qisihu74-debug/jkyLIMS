@@ -309,7 +309,7 @@ public class EntrustController {
      */
     @RequestMapping("/get_another_list")
     public Result getEntrustHistoryDetailAnotherList(Long entrustmentId) {
-        return ResultUtil.success(entrustService.getAnotherList(entrustmentId));
+        return ResultUtil.success(entrustService.getAnotherListCopy(entrustmentId));
     }
 
     /**
