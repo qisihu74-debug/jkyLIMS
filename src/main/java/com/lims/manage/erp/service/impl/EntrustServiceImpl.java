@@ -1976,15 +1976,15 @@ public class EntrustServiceImpl implements EntrustService {
                         stringBuilder2.append(sampleEntity.getSpecs());
                         stringBuilder2.append("、");
                         String s = sampleEntity.getOutwardDescribe();
-                        String s1 = "";
+                        String s1 = sampleEntity.getOutward();
                         if (org.apache.commons.lang3.StringUtils.isNotEmpty(s)){
-                            s1 = sampleEntity.getOutward();
+                            stringBuilder2.append(s);
                             if (org.apache.commons.lang3.StringUtils.isNotEmpty(s1)){
                                 stringBuilder2.append("、");
                                 stringBuilder2.append(s1);
                             }
                         }
-                        if (org.apache.commons.lang3.StringUtils.isNotEmpty(s1)){
+                        if (org.apache.commons.lang3.StringUtils.isEmpty(s) && org.apache.commons.lang3.StringUtils.isNotEmpty(s1)){
                             stringBuilder2.append(s1);
                         }
                         stringBuilder2.append("）；");
