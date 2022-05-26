@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -143,8 +144,9 @@ public interface ReportRecordEntityMapper {
      * @param signUrl
      * @param state
      */
-    @Update("update test_report_record set sign_url=#{signUrl},qys_state=#{state} where entrustment_id=#{entrustId}")
-    void updateUrlAndState(@Param("entrustId") Long entrustId, @Param("signUrl") String signUrl, @Param("state") String state);
+    @Update("update test_report_record set sign_url=#{signUrl},qys_state=#{state},sealer=#{sealer},seal_time=#{sealTime} where entrustment_id=#{entrustId}")
+    void updateUrlAndState(@Param("entrustId") Long entrustId, @Param("signUrl") String signUrl, @Param("state") String state,
+                           @Param("sealer") String sealer, @Param("sealTime") Date sealTime);
 
     /**
      * 下载契约锁报告状态更新

@@ -392,7 +392,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<TeamOutputValueVo> teamStatisticsExport(StatisticsParamVo paramVo) {
-        return statisticsMapper.teamStatistics(paramVo);
+        return statisticsMapper.teamStatisticsNode(paramVo);
     }
 
     @Override

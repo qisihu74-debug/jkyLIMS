@@ -167,7 +167,7 @@ public class StatisticsController {
     @GetMapping("/areaStatisticsExport")
     public void areaStatisticsExport(String taskSource,String beginDate,String endDate, HttpServletResponse response) throws IOException {
         StatisticsParamVo paramVo = new StatisticsParamVo();
-        if(!"null".equals(taskSource)){
+        if(!"null".equals(taskSource) && !"undefined".equals(taskSource)){
             paramVo.setTaskSource(taskSource);
         }
         if(!"null".equals(beginDate)){
@@ -209,7 +209,7 @@ public class StatisticsController {
     }
 
     /**
-     * 部门产值统计
+     * 部门产值统计--父级
      * @param paramVo
      * @return
      */
@@ -266,6 +266,17 @@ public class StatisticsController {
             bos.flush();
         }
         bos.close();
+    }
+
+    @RequestMapping("/teamStatisticsNode")
+    public Result teamStatisticsNode(@RequestBody StatisticsParamVo paramVo) {
+        if (paramVo == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        if(paramVo.getPageNum() == null || paramVo.getPageSize() == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "缺少分页参数！");
+        }
+        return ResultUtil.success("部门产值统计查询成功！", statisticsService.teamStatistics(paramVo));
     }
 
     /**
