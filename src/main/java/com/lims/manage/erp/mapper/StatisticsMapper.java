@@ -75,11 +75,18 @@ public interface StatisticsMapper {
     List<AreaStatisticsResultVo> areaStatistics(StatisticsParamVo paramVo);
 
     /**
-     * 部门产值统计
+     * 部门产值统计--父级
      * @param paramVo
      * @return
      */
     List<TeamOutputValueVo> teamStatistics(StatisticsParamVo paramVo);
+
+    /**
+     * 部门产值统计--子级
+     * @param paramVo
+     * @return
+     */
+    List<TeamOutputValueVo> teamStatisticsNode(StatisticsParamVo paramVo);
 
     List<TaskStatsVo> getTaskList(TaskStatsVo taskDetailInfoVo);
 

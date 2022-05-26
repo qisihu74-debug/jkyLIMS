@@ -211,7 +211,7 @@ public class StatisticsController {
     }
 
     /**
-     * 部门产值统计
+     * 部门产值统计--父级
      * @param paramVo
      * @return
      */
@@ -268,6 +268,17 @@ public class StatisticsController {
             bos.flush();
         }
         bos.close();
+    }
+
+    @RequestMapping("/teamStatisticsNode")
+    public Result teamStatisticsNode(@RequestBody StatisticsParamVo paramVo) {
+        if (paramVo == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        if(paramVo.getPageNum() == null || paramVo.getPageSize() == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "缺少分页参数！");
+        }
+        return ResultUtil.success("部门产值统计查询成功！", statisticsService.teamStatistics(paramVo));
     }
 
     /**
