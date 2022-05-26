@@ -253,6 +253,7 @@ public class HomeServiceImpl implements HomeService {
             for (SysRoleFunctionParent data : menuIdList) {
                 if (data.getTreeName()!=null&&data.getTreeName().equals(strings[i])) {
                     labelValueVo.setLabel(data.getTreeName());
+                    labelValueVo.setText(data.getKanbanName());
                     returnData.add(labelValueVo);
                 }
             }
@@ -296,9 +297,9 @@ public class HomeServiceImpl implements HomeService {
         // 循环 输出赋值。
         for (LabelValueVo data : returnData) {
             switch (data.getLabel()) {
-                case Const.sampleStr:
-                    data.setValue((long) sampleList.size());
-                    break;
+//                case Const.sampleStr:
+//                    data.setValue((long) sampleList.size());
+//                    break;
                 case Const.entrustStr:
                     data.setValue(entrustCount.longValue());
                     break;

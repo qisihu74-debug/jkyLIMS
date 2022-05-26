@@ -147,6 +147,13 @@
             sealer sealer
        FROM
             test_report_record
+        where 1=1
+        <if test="startDate!=null">
+            and seal_time <![CDATA[ >= ]]>  #{startDate}
+        </if>
+        <if test="stopDate!=null">
+            and seal_time <![CDATA[ <= ]]>  #{stopDate}
+        </if>
     </select>
 
     <select id="selectReportVerifyer" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
@@ -252,10 +259,10 @@
             and t1.dept_id = #{deptId}
         </if>
         <if test="requestDate!=null">
-            and t1.required_completion_time <![CDATA[ >= ]]>  #{requestDate}
+            and t1.required_completion_time <![CDATA[ <= ]]>  #{requestDate}
         </if>
         <if test="finishDate!=null">
-            and t1.end_detection_time <![CDATA[ >= ]]>  #{finishDate}
+            and t1.end_detection_time <![CDATA[ <= ]]>  #{finishDate}
         </if>
         <if test="startDate!=null">
             and t1.start_detection_time <![CDATA[ >= ]]>  #{startDate}
@@ -611,5 +618,13 @@
         FROM
             ( SELECT @rownum := 0 ) r,
             ( SELECT DISTINCT task_source label FROM test_entrusted_info ) t1
+    </select>
+
+    <select id="getDiscount" resultType="java.lang.String">
+        		SELECT
+				discount
+				FROM
+				test_entrusted_info
+				WHERE id = #{entrustmentId}
     </select>
 </mapper>

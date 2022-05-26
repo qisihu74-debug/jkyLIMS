@@ -324,7 +324,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         for(ReportRecordEntity reportRecordEntity:reportList){
             // 盖章人 1647657004269101
             if(reportRecordEntity.getSealer()!=null){
-                Integer mapValue = userIdMap.get(reportRecordEntity.getSealer());
+                // String 转 Long
+                Integer mapValue = userIdMap.get(Long.parseLong(reportRecordEntity.getSealer()));
                 if (mapValue != null) {
                     userIdMap.put((Long.parseLong(reportRecordEntity.getSealer())), mapValue += 1);
                 }
@@ -425,10 +426,22 @@ public class StatisticsServiceImpl implements StatisticsService {
                         }
                     }
                 }
-                taskDetailInfoVo.setCost(testPrice.toString());
+                // 委托单的 折扣率
+                String discount = statisticsMapper.getDiscount(taskDetailInfoVo.getEntrustmentId());
+                if(discount!=null&&!"".equals(discount)){
+                    Double fromString= new Double(discount);
+                    String a_str = String.format("%.2f", fromString); //以字符串形式保留位数，此处保留2位小数
+                    double a_1 = Double.parseDouble(a_str); //将字符串转回double类型
+                    String sunStr = String.format("%.2f", testPrice * a_1); //以字符串形式保留位数，此处保留2位小数
+                    taskDetailInfoVo.setCost(sunStr);
+                }
+                else {
+                    taskDetailInfoVo.setCost(testPrice.toString());
+                }
+
                 taskDetailInfoVo.setSampleName(set.toString());
                 // 任务单 state = 6.原始记录已复核， 其余都未复核
-                taskDetailInfoVo.setTaskStatus(taskDetailInfoVo.getState() != null && taskDetailInfoVo.getState() >= 6 ? "完成复核" : "未完成复核");
+                taskDetailInfoVo.setTaskStatus(taskDetailInfoVo.getState() != null && taskDetailInfoVo.getState() >= 6 ? "完成" : "未完成");
                 TaskStatsVo data = new TaskStatsVo();
                 data.setTaskId(taskDetailInfoVo.getTaskId());
                 data.setTaskCode(taskDetailInfoVo.getTaskCode());
