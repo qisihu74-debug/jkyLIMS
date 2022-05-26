@@ -242,4 +242,12 @@ public interface EntrustService {
      * @return
      */
     int updateReportTeam(Long entrustmentId,List<Integer> deptIds);
+
+    /**
+     * 再来一单（复制委托单详情）
+     * 样品信息来源： 以旧委托单下 样品信息详情关联 返回前端时 样品id 伪造
+     * @param entrustmentId
+     * @return
+     */
+    EntrustAddVo getAnotherListCopy(Long entrustmentId);
 }
