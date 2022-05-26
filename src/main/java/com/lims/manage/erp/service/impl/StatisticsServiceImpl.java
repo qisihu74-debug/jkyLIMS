@@ -391,6 +391,14 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
+    public PageInfo teamStatisticsNode(StatisticsParamVo paramVo) {
+        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        List<TeamOutputValueVo> list = statisticsMapper.teamStatisticsNode(paramVo);
+        PageInfo<TeamOutputValueVo> result = new PageInfo<>(list);
+        return result;
+    }
+
+    @Override
     public List<TeamOutputValueVo> teamStatisticsExport(StatisticsParamVo paramVo) {
         return statisticsMapper.teamStatisticsNode(paramVo);
     }

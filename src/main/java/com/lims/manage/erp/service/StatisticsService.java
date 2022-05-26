@@ -57,11 +57,18 @@ public interface StatisticsService {
     InputStream areaStatisticsExportFunction(List<AreaStatisticsResultVo> list) throws IOException;
 
     /**
-     * 部门产值统计
+     * 部门产值统计--父级
      * @param paramVo
      * @return
      */
     PageInfo teamStatistics(StatisticsParamVo paramVo);
+
+    /**
+     * 部门产值统计--子级
+     * @param paramVo
+     * @return
+     */
+    PageInfo teamStatisticsNode(StatisticsParamVo paramVo);
 
     /**
      * 部门产值统计--excel导出
