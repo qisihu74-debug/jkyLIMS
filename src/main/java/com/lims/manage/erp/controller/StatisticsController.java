@@ -226,6 +226,14 @@ public class StatisticsController {
         return ResultUtil.success("部门产值统计查询成功！", statisticsService.teamStatistics(paramVo));
     }
 
+    /**
+     * 部门产值统计--父级--导出
+     * @param teamName
+     * @param beginDate
+     * @param endDate
+     * @param response
+     * @throws IOException
+     */
     @GetMapping("/teamStatisticsExport")
     public void teamStatisticsExport(String teamName,String beginDate,String endDate, HttpServletResponse response) throws IOException {
         StatisticsParamVo paramVo = new StatisticsParamVo();
@@ -270,6 +278,11 @@ public class StatisticsController {
         bos.close();
     }
 
+    /**
+     * 部门产值统计--子级
+     * @param paramVo
+     * @return
+     */
     @RequestMapping("/teamStatisticsNode")
     public Result teamStatisticsNode(@RequestBody StatisticsParamVo paramVo) {
         if (paramVo == null) {
@@ -278,7 +291,7 @@ public class StatisticsController {
         if(paramVo.getPageNum() == null || paramVo.getPageSize() == null){
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "缺少分页参数！");
         }
-        return ResultUtil.success("部门产值统计查询成功！", statisticsService.teamStatistics(paramVo));
+        return ResultUtil.success("部门产值统计查询成功！", statisticsService.teamStatisticsNode(paramVo));
     }
 
     /**
