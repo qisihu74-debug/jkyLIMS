@@ -494,9 +494,6 @@
                                 LEFT JOIN test_entrusted_sample_checkitem_rel t4 ON t1.id = t4.task_id
                         <trim prefix="WHERE" prefixOverrides="AND |OR ">
                             t1.review_time is not null
-                            <if test="taskSource!=null and taskSource!=''">
-                                and t3.NAME = #{taskSource}
-                            </if>
                             <if test="beginDate!=null">
                                 and <![CDATA[  DATE_FORMAT(t1.review_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
                             </if>
@@ -509,6 +506,11 @@
                             t3.CODE
                     ) t1
                         LEFT JOIN test_team t2 ON t1.pid = t2.id
+                <trim prefix="WHERE" prefixOverrides="AND |OR ">
+                    <if test="taskSource!=null and taskSource!=''">
+                        and t3.NAME = #{taskSource}
+                    </if>
+                </trim>
                 GROUP BY
                     t2.NAME,
                     t2.CODE,
@@ -533,9 +535,6 @@
                                 LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.id = t5.task_id
                         <trim prefix="WHERE" prefixOverrides="AND |OR ">
                             t4.issuer_time IS NOT NULL
-                            <if test="taskSource!=null and taskSource!=''">
-                                and t3.NAME = #{taskSource}
-                            </if>
                             <if test="beginDate!=null">
                                 and <![CDATA[  DATE_FORMAT(t4.issuer_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
                             </if>
@@ -547,6 +546,11 @@
                             t3.NAME
                     ) t1
                         LEFT JOIN test_team t2 ON t1.pid = t2.id
+                <trim prefix="WHERE" prefixOverrides="AND |OR ">
+                    <if test="taskSource!=null and taskSource!=''">
+                        and t2.NAME = #{taskSource}
+                    </if>
+                </trim>
                 GROUP BY
                     t2.NAME,
                     t2.CODE,
