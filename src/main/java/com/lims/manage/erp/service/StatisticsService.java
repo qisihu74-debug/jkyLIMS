@@ -76,6 +76,12 @@ public interface StatisticsService {
      * @return
      */
     List<TeamOutputValueVo> teamStatisticsExport(StatisticsParamVo paramVo);
+    /**
+     * 部门产值统计--excel导出--子级
+     * @param paramVo
+     * @return
+     */
+    List<TeamOutputValueVo> teamStatisticsNodeExport(StatisticsParamVo paramVo);
 
     /**
      * 任务单统计
