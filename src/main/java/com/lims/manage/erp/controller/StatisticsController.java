@@ -169,7 +169,7 @@ public class StatisticsController {
     @GetMapping("/areaStatisticsExport")
     public void areaStatisticsExport(String taskSource,String beginDate,String endDate, HttpServletResponse response) throws IOException {
         StatisticsParamVo paramVo = new StatisticsParamVo();
-        if(!"null".equals(taskSource)){
+        if(!"null".equals(taskSource) && !"undefined".equals(taskSource)){
             paramVo.setTaskSource(taskSource);
         }
         if(!"null".equals(beginDate)){
