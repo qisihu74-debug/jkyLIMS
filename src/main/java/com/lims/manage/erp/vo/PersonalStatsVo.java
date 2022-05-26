@@ -88,7 +88,7 @@ public class PersonalStatsVo {
     /**
      * 报告签发
      */
-    private Integer IssueNumber;
+    private Integer issueNumber;
 
     /**
      * 报告盖章

@@ -147,6 +147,13 @@
             sealer sealer
        FROM
             test_report_record
+        where 1=1
+        <if test="startDate!=null">
+            and seal_time <![CDATA[ >= ]]>  #{startDate}
+        </if>
+        <if test="stopDate!=null">
+            and seal_time <![CDATA[ <= ]]>  #{stopDate}
+        </if>
     </select>
 
     <select id="selectReportVerifyer" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
@@ -252,10 +259,10 @@
             and t1.dept_id = #{deptId}
         </if>
         <if test="requestDate!=null">
-            and t1.required_completion_time <![CDATA[ >= ]]>  #{requestDate}
+            and t1.required_completion_time <![CDATA[ <= ]]>  #{requestDate}
         </if>
         <if test="finishDate!=null">
-            and t1.end_detection_time <![CDATA[ >= ]]>  #{finishDate}
+            and t1.end_detection_time <![CDATA[ <= ]]>  #{finishDate}
         </if>
         <if test="startDate!=null">
             and t1.start_detection_time <![CDATA[ >= ]]>  #{startDate}
@@ -396,7 +403,7 @@
         ORDER BY
             taskPrice DESC
     </select>
-    <select id="teamStatistics" resultType="com.lims.manage.erp.vo.TeamOutputValueVo"
+    <select id="teamStatistics3" resultType="com.lims.manage.erp.vo.TeamOutputValueVo"
             parameterType="com.lims.manage.erp.vo.StatisticsParamVo">
         SELECT
             t1.teamName,
@@ -458,6 +465,152 @@
             t1.taskPrice DESC
     </select>
 
+    <select id="teamStatistics" resultType="com.lims.manage.erp.vo.TeamOutputValueVo"
+            parameterType="com.lims.manage.erp.vo.StatisticsParamVo">
+        SELECT
+            t1.teamName,
+            t1.teamCode,
+            t1.taskPrice,
+            IFNULL( t2.reportPrice, 0 ) reportPrice
+        FROM
+            (
+                SELECT
+                    SUM( t1.taskPrice ) taskPrice,
+                    t2.NAME teamName,
+                    t2.CODE teamCode
+                FROM
+                    (
+                        SELECT
+                            t3.NAME teamName,
+                            t3.CODE teamCode,
+                            t3.pid,
+                            SUM( IFNULL( t2.discount, 1 ) * IFNULL( t4.unit_price, 0 ) ) taskPrice
+                        FROM
+                            test_task t1
+                                LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+                                LEFT JOIN test_team t3 ON t1.dept_id = t3.id
+                                LEFT JOIN test_entrusted_sample_checkitem_rel t4 ON t1.id = t4.task_id
+                        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+                            t1.review_time is not null
+                            <if test="taskSource!=null and taskSource!=''">
+                                and t3.NAME = #{taskSource}
+                            </if>
+                            <if test="beginDate!=null">
+                                and <![CDATA[  DATE_FORMAT(t1.review_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
+                            </if>
+                            <if test="endDate!=null">
+                                and <![CDATA[  DATE_FORMAT(t1.review_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
+                            </if>
+                        </trim>
+                        GROUP BY
+                            t3.NAME,
+                            t3.CODE
+                    ) t1
+                        LEFT JOIN test_team t2 ON t1.pid = t2.id
+                GROUP BY
+                    t2.NAME,
+                    t2.CODE
+            ) t1
+                LEFT JOIN (
+                SELECT
+                    t2.NAME teamName,
+                    t1.reportPrice
+                FROM
+                    (
+                        SELECT
+                            t3.NAME teamName,
+                            t3.pid,
+                            SUM( IFNULL( t2.discount, 1 ) * IFNULL( t5.unit_price, 0 ) ) reportPrice
+                        FROM
+                            test_task t1
+                                LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+                                LEFT JOIN test_team t3 ON t1.dept_id = t3.id
+                                LEFT JOIN test_report_record t4 ON t2.id = t4.entrustment_id
+                                LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.id = t5.task_id
+                        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+                            t4.issuer_time IS NOT NULL
+                            <if test="taskSource!=null and taskSource!=''">
+                                and t3.NAME = #{taskSource}
+                            </if>
+                            <if test="beginDate!=null">
+                                and <![CDATA[  DATE_FORMAT(t4.issuer_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
+                            </if>
+                            <if test="endDate!=null">
+                                and <![CDATA[  DATE_FORMAT(t4.issuer_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
+                            </if>
+                        </trim>
+                        GROUP BY
+                            t3.NAME
+                    ) t1
+                        LEFT JOIN test_team t2 ON t1.pid = t2.id
+                GROUP BY
+                    t2.NAME,
+                    t2.CODE
+            ) t2 ON t1.teamName = t2.teamName
+    </select>
+
+    <select id="teamStatisticsNode" resultType="com.lims.manage.erp.vo.TeamOutputValueVo"
+            parameterType="com.lims.manage.erp.vo.StatisticsParamVo">
+        SELECT
+            t1.teamName,
+            t1.teamCode,
+            t1.taskPrice,
+            IFNULL( t2.reportPrice, 0 ) reportPrice
+        FROM
+            (
+                SELECT
+                    t3.NAME teamName,
+                    t3.CODE teamCode,
+                    t3.pid,
+                    SUM( IFNULL( t2.discount, 1 ) * IFNULL( t4.unit_price, 0 ) ) taskPrice
+                FROM
+                    test_task t1
+                        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+                        LEFT JOIN test_team t3 ON t1.dept_id = t3.id
+                        LEFT JOIN test_entrusted_sample_checkitem_rel t4 ON t1.id = t4.task_id
+                <trim prefix="WHERE" prefixOverrides="AND |OR ">
+                    t1.review_time is not null
+                    <if test="taskSource!=null and taskSource!=''">
+                        and t3.NAME = #{taskSource}
+                    </if>
+                    <if test="beginDate!=null">
+                        and <![CDATA[  DATE_FORMAT(t1.review_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
+                    </if>
+                    <if test="endDate!=null">
+                        and <![CDATA[  DATE_FORMAT(t1.review_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
+                    </if>
+                </trim>
+                GROUP BY
+                    t3.NAME,
+                    t3.CODE
+            ) t1
+                LEFT JOIN (
+                SELECT
+                    t3.NAME teamName,
+                    SUM( IFNULL( t2.discount, 1 ) * IFNULL( t5.unit_price, 0 ) ) reportPrice
+                FROM
+                    test_task t1
+                        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+                        LEFT JOIN test_team t3 ON t1.dept_id = t3.id
+                        LEFT JOIN test_report_record t4 ON t2.id = t4.entrustment_id
+                        LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.id = t5.task_id
+                <trim prefix="WHERE" prefixOverrides="AND |OR ">
+                    t4.issuer_time IS NOT NULL
+                    <if test="taskSource!=null and taskSource!=''">
+                        and t3.NAME = #{taskSource}
+                    </if>
+                    <if test="beginDate!=null">
+                        and <![CDATA[  DATE_FORMAT(t4.issuer_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
+                    </if>
+                    <if test="endDate!=null">
+                        and <![CDATA[  DATE_FORMAT(t4.issuer_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
+                    </if>
+                </trim>
+                GROUP BY
+                    t3.NAME
+            ) t2 ON t1.teamName = t2.teamName
+    </select>
+
     <select id="getAreas" resultType="com.lims.manage.erp.vo.LabelValueVo">
         SELECT
             @rownum := @rownum + 1 AS value,
@@ -465,5 +618,13 @@
         FROM
             ( SELECT @rownum := 0 ) r,
             ( SELECT DISTINCT task_source label FROM test_entrusted_info ) t1
+    </select>
+
+    <select id="getDiscount" resultType="java.lang.String">
+        		SELECT
+				discount
+				FROM
+				test_entrusted_info
+				WHERE id = #{entrustmentId}
     </select>
 </mapper>

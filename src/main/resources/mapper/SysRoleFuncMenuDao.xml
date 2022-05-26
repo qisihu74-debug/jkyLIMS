@@ -101,7 +101,8 @@ FROM sys_menu
 		SELECT
 			DISTINCT t2.function_id functionId,
 			t3.function_pid functionPid,
-			t3.name treeName
+			t3.name treeName,
+			t3.kanban_name kanbanName
 		FROM
 			sys_user_role AS t1
 			LEFT JOIN sys_role_function AS t2 ON t1.role_id = t2.role_id

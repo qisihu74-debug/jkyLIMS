@@ -77,6 +77,11 @@ public class TaskTestEntity {
      */
     private String reviewer;
     /**
+     * 复核时间
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private Date reviewTime;
+    /**
      * 报告制作人
      */
     private String reportProducer;

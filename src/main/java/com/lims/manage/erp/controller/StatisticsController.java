@@ -10,10 +10,8 @@ import com.lims.manage.erp.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -63,15 +61,15 @@ public class StatisticsController {
      * 任务查询_（Excel表导出）
      * @return
      */
-    @RequestMapping("/taskQuery_export")
-    public void taskQueryExport(HttpServletResponse response) throws IOException {
+    @PostMapping("/taskQuery_export")
+    public void taskQueryExport(@RequestBody TaskStatsVo taskStatsVo,HttpServletResponse response) throws IOException {
         BufferedOutputStream bos = null;
-        TaskStatsVo taskStatsVo = new TaskStatsVo();
+//        TaskStatsVo taskStatsVo = new TaskStatsVo();
 
-        if(taskStatsVo.getPageNum()==null||taskStatsVo.getPageSize()==null){
+//        if(taskStatsVo.getPageNum()==null||taskStatsVo.getPageSize()==null){
             taskStatsVo.setPageNum(0);
             taskStatsVo.setPageSize(0);
-        }
+//        }
         PagingToolVo list = statisticsService.taskQuery1111(taskStatsVo);
         String fileName = "任务统计结果";
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
@@ -117,10 +115,10 @@ public class StatisticsController {
      * @param
      * @return
      */
-    @RequestMapping("/personal_stats_export")
-    public void personalStatsExport(HttpServletResponse response) throws IOException {
+    @PostMapping("/personal_stats_export")
+    public void personalStatsExport(@RequestBody PersonalStatsVo personalStatsVo, HttpServletResponse response) throws IOException {
         BufferedOutputStream bos = null;
-        PersonalStatsVo personalStatsVo = new PersonalStatsVo();
+//        PersonalStatsVo personalStatsVo = new PersonalStatsVo();
         personalStatsVo.setPageNum(null);
         personalStatsVo.setPageSize(null);
         PageInfo list = statisticsService.personalStats(personalStatsVo);
@@ -211,7 +209,7 @@ public class StatisticsController {
     }
 
     /**
-     * 部门产值统计
+     * 部门产值统计--父级
      * @param paramVo
      * @return
      */
@@ -226,6 +224,14 @@ public class StatisticsController {
         return ResultUtil.success("部门产值统计查询成功！", statisticsService.teamStatistics(paramVo));
     }
 
+    /**
+     * 部门产值统计--父级--导出
+     * @param teamName
+     * @param beginDate
+     * @param endDate
+     * @param response
+     * @throws IOException
+     */
     @GetMapping("/teamStatisticsExport")
     public void teamStatisticsExport(String teamName,String beginDate,String endDate, HttpServletResponse response) throws IOException {
         StatisticsParamVo paramVo = new StatisticsParamVo();
@@ -268,6 +274,22 @@ public class StatisticsController {
             bos.flush();
         }
         bos.close();
+    }
+
+    /**
+     * 部门产值统计--子级
+     * @param paramVo
+     * @return
+     */
+    @RequestMapping("/teamStatisticsNode")
+    public Result teamStatisticsNode(@RequestBody StatisticsParamVo paramVo) {
+        if (paramVo == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        if(paramVo.getPageNum() == null || paramVo.getPageSize() == null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "缺少分页参数！");
+        }
+        return ResultUtil.success("部门产值统计查询成功！", statisticsService.teamStatisticsNode(paramVo));
     }
 
     /**

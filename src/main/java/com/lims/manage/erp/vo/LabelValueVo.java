@@ -6,6 +6,10 @@ import lombok.Data;
 public class LabelValueVo {
     private String label;
     private Long value;
+    /**
+     * 描述性信息
+     */
+    private String text;
 
     public LabelValueVo() {
     }

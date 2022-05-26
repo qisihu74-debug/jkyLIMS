@@ -48,7 +48,7 @@ public interface StatisticsMapper {
     List<TaskTestEntity> selectTaskReview(PersonalStatsVo personalStats);
 
     /**
-     * 查询报告 获取 报告审批人(id)，报告签发人(id) 报告盖章(未知)
+     * 查询报告 获取 报告审批人(id)，报告签发人(id) 报告盖章(盖章)
      */
     List<ReportRecordEntity> selectReportSeal(PersonalStatsVo personalStats);
 
@@ -75,11 +75,18 @@ public interface StatisticsMapper {
     List<AreaStatisticsResultVo> areaStatistics(StatisticsParamVo paramVo);
 
     /**
-     * 部门产值统计
+     * 部门产值统计--父级
      * @param paramVo
      * @return
      */
     List<TeamOutputValueVo> teamStatistics(StatisticsParamVo paramVo);
+
+    /**
+     * 部门产值统计--子级
+     * @param paramVo
+     * @return
+     */
+    List<TeamOutputValueVo> teamStatisticsNode(StatisticsParamVo paramVo);
 
     List<TaskStatsVo> getTaskList(TaskStatsVo taskDetailInfoVo);
 
@@ -88,4 +95,9 @@ public interface StatisticsMapper {
      * @return
      */
     List<LabelValueVo> getAreas();
+
+    /**
+     * 通过委托单id 获取折扣率
+     */
+    String getDiscount(Long entrustmentId);
 }
