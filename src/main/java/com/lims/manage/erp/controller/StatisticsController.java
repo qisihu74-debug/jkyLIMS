@@ -277,6 +277,62 @@ public class StatisticsController {
     }
 
     /**
+     * 部门产值统计--子级--导出
+     * @param teamId
+     * @param teamName
+     * @param beginDate
+     * @param endDate
+     * @param response
+     * @throws IOException
+     */
+    @GetMapping("/teamStatisticsNodeExport")
+    public void teamStatisticsNodeExport(String teamId,String teamName,String beginDate,String endDate, HttpServletResponse response) throws IOException {
+        StatisticsParamVo paramVo = new StatisticsParamVo();
+        if(!"null".equals(teamName) && !"undefined".equals(teamName)){
+            paramVo.setTaskSource(teamName);
+        }
+        if(!"null".equals(teamId) && !"undefined".equals(teamId)){
+            paramVo.setTeamId(teamId);
+        }
+        if(!"null".equals(beginDate)){
+            paramVo.setBeginDate(beginDate);
+        }
+        if(!"null".equals(endDate)){
+            paramVo.setEndDate(endDate);
+        }
+        BufferedOutputStream bos = null;
+        List<TeamOutputValueVo> teamOutputValueVos = statisticsService.teamStatisticsNodeExport(paramVo);
+        StringBuilder fileName = new StringBuilder("部门产值统计");
+        if (paramVo.getTaskSource()!=null) {
+            fileName.append("-");
+            fileName.append(paramVo.getTaskSource());
+        }
+        if(paramVo.getBeginDate() != null){
+            fileName.append("-");
+            fileName.append(paramVo.getBeginDate());
+        }
+        if(paramVo.getEndDate() != null){
+            fileName.append("-");
+            fileName.append(paramVo.getEndDate());
+        }
+//        String encode = URLEncoder.encode(fileName.toString(), "UTF-8");
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename="+java.net.URLEncoder.encode(fileName.toString(), "UTF-8")+".xls");
+        InputStream inputStream = statisticsService.teamStatisticsExportFunction(teamOutputValueVos);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+    }
+
+    /**
      * 部门产值统计--子级
      * @param paramVo
      * @return
