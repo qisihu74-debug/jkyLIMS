@@ -1859,8 +1859,8 @@ public class EntrustServiceImpl implements EntrustService {
             for (CheckItemDeptVo checkItemDeptVo : checkItemDeptVoList) {
                 if (deptId.equals(checkItemDeptVo.getDeptId())) {
                     checkItemDeptVo.setTaskId(id);
+                    checkItemDeptVoList1.add(checkItemDeptVo);
                 }
-                checkItemDeptVoList1.add(checkItemDeptVo);
             }
             //更新检测项信息
             taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
