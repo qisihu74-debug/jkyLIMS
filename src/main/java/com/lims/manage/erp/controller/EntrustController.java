@@ -608,4 +608,22 @@ public class EntrustController {
             return ResultUtil.success("修改出报告科室成功！");
         }
     }
+
+    /**
+     * 新增委托_（针对 再来一单的数据保存）
+     *
+     * @param json
+     * @param file
+     * @return
+     */
+    @RequestMapping("/addEntrust_copy")
+    public Result addEntrustCopy(@RequestParam("json") String json, MultipartFile[] file) {
+        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
+        Boolean isSuccess = entrustService.addEntrustCopy(entrust, file);
+        if (isSuccess) {
+            return ResultUtil.success("新建委托成功");
+        } else {
+            return ResultUtil.error(678, "新增委托失败！");
+        }
+    }
 }

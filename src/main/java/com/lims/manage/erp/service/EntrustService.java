@@ -250,4 +250,11 @@ public interface EntrustService {
      * @return
      */
     EntrustAddVo getAnotherListCopy(Long entrustmentId);
+
+    /**
+     * 新增委托_（针对 再来一单的数据保存）
+     * @param vo
+     * @return
+     */
+    Boolean addEntrustCopy(EntrustAddVo vo, MultipartFile[] file);
 }
