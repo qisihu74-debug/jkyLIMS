@@ -151,7 +151,7 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
     }
 
     @Override
-    public String getNameById(String reportModelId) {
+    public String getNameById(Integer reportModelId) {
         return templateDao.getNameById(reportModelId);
     }
 
