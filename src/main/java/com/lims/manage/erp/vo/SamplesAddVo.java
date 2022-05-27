@@ -1,5 +1,6 @@
 package com.lims.manage.erp.vo;
 
+import com.lims.manage.erp.entity.SampleEntity;
 import lombok.Data;
 
 import java.util.Date;
@@ -88,4 +89,23 @@ public class SamplesAddVo {
      */
     private String cubicMeterConsumption;
     private List<SampleDetailAddVo> samples;
+
+    public SamplesAddVo() {
+    }
+
+    public SamplesAddVo(SampleEntity samples) {
+        this.sampleName = samples.getSampleName();
+        this.productId = samples.getProductId();
+        this.aliasName = samples.getAliasName();
+        this.companyId = samples.getCompanyId();
+        this.specs = samples.getSpecs();
+        this.inspector = samples.getInspector();
+        this.sampleRequirement = samples.getSampleRequirement();
+        this.sampleType = samples.getSampleType();
+        this.sampleRemark = samples.getSampleRemark();
+        this.unitRatio = samples.getUnitRatio();
+        this.cubicMeterConsumption = samples.getCubicMeterConsumption();
+//        this.quantityPerGroup = samples.getQuantityPerGroup();
+        this.receivedDate = samples.getCheckDate();
+    }
 }

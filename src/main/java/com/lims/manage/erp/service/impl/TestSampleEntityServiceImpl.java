@@ -457,7 +457,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         TestSampleMixInfoEntity mixInfoEntity = new TestSampleMixInfoEntity(samples, newId);
         //插入配合比参数信息
         mixInfoEntityMapper.insert(mixInfoEntity);
+        System.out.println("配合比add前\t"+param);
         testSampleEntityMapper.insertBatchMixSamples(param);
+        System.out.println("配合比add后\t"+param);
         return param;
     }
 
