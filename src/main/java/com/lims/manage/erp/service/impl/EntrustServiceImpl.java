@@ -2260,18 +2260,27 @@ public class EntrustServiceImpl implements EntrustService {
                 if(sampleDetailVo==null){
                     // 区别 是原材还是配合比。
                     if(sampleEntity.getPid()!=null){
+                        // 整理 配合比信息
+                        SamplesAddVo samples = new SamplesAddVo();
                         //获取 以pid的 配合比信息集合。
                         List<SampleEntity> samplePidS = sampleEntityMapper.selectByPid(sampleEntity.getId());
-                       //
+                       // 通过旧委托单id 获取样品集合 得到 配合比信息。
                         List<SampleEntity>  sampleSet  = sampleEntityMapper.selectSampleSet(old);
                         if(!samplePidS.isEmpty()){
-                            for(SampleEntity sampleEntity1:samplePidS){
-//                                samplePId+=1;
-//                                sampleEntity1.setId(samplePId);
-//                                sampleEntity1.setPid(sampleId);
-//                                sampleEntities.add(sampleEntity1);
+                            for(SampleEntity sampleEntity1:sampleSet){
+                                if(sampleEntity1.getId().equals(sampleEntity.getPid())){
+                                    // 相等 copy
+                                    sampleEntity1.setSpecs(sampleEntity.getSpecs());
+                                    sampleEntity1.setBatchNumber(sampleEntity.getBatchNumber());
+                                    sampleEntity1.setGeneration(sampleEntity.getGeneration());
+                                    sampleEntity1.setReceivedDate(sampleEntity.getReceivedDate());
+//                                    samples.set();
+                                }
                             }
                         }
+//                        samples.
+
+
                     }
                     // 对此信息 重新 add。 并获取id 替换。
                     List<SampleDetailAddVo> samples = new ArrayList<>();
