@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.TestSkillList;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.result.Result;
@@ -42,7 +43,19 @@ public class TestTeamController extends ApiController {
         QueryWrapper<TestTeam> queryWrapper=new QueryWrapper<>(testTeam);
         queryWrapper.eq("del_flag",0);
         queryWrapper.orderByDesc("create_time");
-        return ResultUtil.success(this.testTeamService.list(queryWrapper));
+        List<TestTeam> list = this.testTeamService.list(queryWrapper);
+        List<Integer> pids = Lists.newArrayList();
+        List<TestTeam> newList = Lists.newArrayList();
+        for (TestTeam team:list) {
+            pids.add(team.getPid());
+        }
+        //过滤id没被作为pid的数据
+        for (TestTeam team:list) {
+            if (!pids.contains(team.getId())){
+                newList.add(team);
+            }
+        }
+        return ResultUtil.success(newList);
     }
     /**
      * 分页查询所有数据
