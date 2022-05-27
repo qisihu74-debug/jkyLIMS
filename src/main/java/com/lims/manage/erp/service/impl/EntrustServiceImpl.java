@@ -1421,7 +1421,7 @@ public class EntrustServiceImpl implements EntrustService {
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         //查询实际缴费
         Integer total = entityMapper.getRecordCountById(entrustmentId);
-        entrustAddVo.setPaymentRecord((total == null ? "--" : total + ""));
+        entrustAddVo.setPaymentRecordShow((total == null ? "--" : total + ""));
         if (entrustAddVo.getOperateUser() != null) {
             // 获取做废人id 查询账号姓名
             entrustAddVo.setOperateUserStr(sysUserDao.getSysUserName(entrustAddVo.getOperateUser()));
@@ -1994,10 +1994,10 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                     rows.get(6).getTableCells().get(2).setText(stringBuilder2.toString().substring(0, stringBuilder2.length() - 1));//样品状态
                     rows.get(6).getTableCells().get(4).setText(detail.getIsSave().equals("1") ? "是" : "否");//样品保留
-                    rows.get(7).getTableCells().get(2).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentCount()) ? "--" : detail.getPaymentCount() + ".00");//检验收费
+                    rows.get(7).getTableCells().get(2).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getActualPrice()) ? "--" : detail.getActualPrice());//检验收费
                     rows.get(7).getTableCells().get(4).setText(detail.getPaymentMethod() == null ? "--" : detail.getPaymentMethod());//支付方式
                     //TODO 本次缴费统计缴费记录表
-                    rows.get(7).getTableCells().get(6).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentRecord()) ? "--" : detail.getPaymentRecord() + ".00");//本次交费
+                    rows.get(7).getTableCells().get(6).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentRecordShow()) ? "--" : detail.getPaymentRecordShow());//本次交费
                     rows.get(8).getTableCells().get(2).setText(DateUtil.formatDate(detail.getRequestDate()));//完成期限
                     rows.get(8).getTableCells().get(4).setText(detail.getBusinessAcceptor() == null ? "--" : detail.getBusinessAcceptor());//业务受理人
                     rows.get(8).getTableCells().get(6).setText(DateUtil.formatDate(detail.getAcceptanceDate()));//受理日期

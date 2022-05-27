@@ -157,6 +157,7 @@
             <result property="picture" column="picture"></result>
             <result property="aliasName" column="aliasName"></result>
             <result property="sampleType" column="sampleType"></result>
+            <result property="outward" column="outward"></result>
         </collection>
     </resultMap>
 
@@ -421,6 +422,7 @@
         t4.picture,
         t4.alias_name aliasName,
         t4.sample_type sampleType,
+        t4.outward,
         t1.state,
         t1.recorder,
         t1.reviewer,

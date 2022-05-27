@@ -269,8 +269,10 @@ public class TaskServiceImpl implements TaskService {
             EntrustServiceImpl service = new EntrustServiceImpl();
             for (TaskListVo sampleListVo : dataList) {
                 List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
+
                 List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
                 for (SamplePrivateInfoVo samplePrivateInfoVo : sampleList) {
+                    sampleListVo.setOutward(samplePrivateInfoVo.getOutward());
                     String state = service.findStateBySampleId(samplePrivateInfoVo.getId(), entrustEntityMapper, taskMapper);
                     samplePrivateInfoVo.setState(state);
                     //TODO PSH查询子原材样品信息
