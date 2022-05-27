@@ -16,4 +16,5 @@ public class SamplePrivateInfoVo {
     private String state;
     private String aliasName;
     private String sampleType;
+    private String outward;
 }
