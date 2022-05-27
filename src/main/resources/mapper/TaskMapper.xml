@@ -281,7 +281,8 @@
     SELECT
         t2.id,
         t2.name,
-        t2.code
+        t2.code,
+        t2.model
     FROM
         test_product_item_instrument_middle_rel AS t1
         LEFT JOIN test_instrument AS t2 ON t1.intrusment_id = t2.id

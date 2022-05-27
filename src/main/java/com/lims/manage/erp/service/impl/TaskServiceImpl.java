@@ -657,7 +657,10 @@ public class TaskServiceImpl implements TaskService {
         StringBuilder judgeBasis = new StringBuilder("");
         if (judgeBasisList != null && !judgeBasisList.isEmpty()) {
             for (int i = 0; i < judgeBasisList.size(); i++) {
-                judgeBasis.append(judgeBasisList.get(i) + "\n");
+                judgeBasis.append(judgeBasisList.get(i));
+                if(i != judgeBasisList.size()-1 ){
+                    judgeBasis.append("\n");
+                }
             }
         }
         StringBuilder sampleTime = new StringBuilder(sampleVo.getSampleTime() + ";");
@@ -706,6 +709,7 @@ public class TaskServiceImpl implements TaskService {
         if (instrumentEntityList != null && !instrumentEntityList.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < instrumentEntityList.size(); i++) {
+                stringBuilder.append(instrumentEntityList.get(i).getModel());
                 stringBuilder.append(instrumentEntityList.get(i).getName());
                 stringBuilder.append("（");
                 stringBuilder.append(instrumentEntityList.get(i).getCode());
