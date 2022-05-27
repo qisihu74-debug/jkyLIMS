@@ -28,7 +28,7 @@ public class TestProductItem extends Model<TestProductItem> {
     //产品ID
     private Integer productId;
     //报告模板id
-    private String reportModelId;
+    private Integer reportModelId;
     //检验项目名称
     private String checkItemName;
     //检测项在报告中的位置坐标
@@ -106,11 +106,11 @@ public class TestProductItem extends Model<TestProductItem> {
         this.productId = productId;
     }
 
-    public String getReportModelId() {
+    public Integer getReportModelId() {
         return reportModelId;
     }
 
-    public void setReportModelId(String reportModelId) {
+    public void setReportModelId(Integer reportModelId) {
         this.reportModelId = reportModelId;
     }
 

@@ -35,6 +35,6 @@ int insertOrUpdateBatch(@Param("entities") List<TestReportTemplate> entities);
     String getTypeByUrl(@Param("url") String url);
 
     @Select("select report_name from test_report_template where id=#{reportModelId}")
-    String getNameById(@Param("reportModelId") String reportModelId);
+    String getNameById(@Param("reportModelId") Integer reportModelId);
 }
 
