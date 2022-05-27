@@ -508,7 +508,7 @@
                         LEFT JOIN test_team t2 ON t1.pid = t2.id
                 <trim prefix="WHERE" prefixOverrides="AND |OR ">
                     <if test="taskSource!=null and taskSource!=''">
-                        and t3.NAME = #{taskSource}
+                        and t2.NAME = #{taskSource}
                     </if>
                 </trim>
                 GROUP BY

@@ -375,4 +375,38 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         return result;
     }
 
+    @Override
+    public List<TestSampleEntity>  batchInsertSampleCopy(List<SampleDetailAddVo> samples) {
+        List<TestSampleEntity> entities = Lists.newArrayList();
+        //获取数据库当前年份最大的样品编号
+        int newMax = getNewSampleCode();
+        for (int i = 0; i < samples.size(); i++) {
+            int code = newMax + i + 1;
+            String codeStr = new DecimalFormat("0000").format(code);
+            String sampleCode;
+            if (samples.get(i).getQuantityPerGroup() > 1) {
+                String numStr = new DecimalFormat("00").format(samples.get(i).getQuantityPerGroup());
+                sampleCode = "YP-" + sdf.format(now) + "-" + codeStr + "（01~" + numStr + "）";
+            } else {
+                sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
+            }
+            StringBuilder outwardStr = new StringBuilder();
+            List<String> outward = samples.get(i).getOutward();
+            if(!CollectionUtils.isEmpty(outward)){
+                for (int j = 0; j < outward.size(); j++) {
+                    if(j != outward.size()-1){
+                        outwardStr.append(outward.get(j));
+                        outwardStr.append(",");
+                    }else{
+                        outwardStr.append(outward.get(j));
+                    }
+                }
+            }
+            TestSampleEntity entity = new TestSampleEntity(samples.get(i), sampleCode,outwardStr.toString());
+            entities.add(entity);
+        }
+        testSampleEntityMapper.insertBatch(entities);
+        return entities;
+    }
+
 }

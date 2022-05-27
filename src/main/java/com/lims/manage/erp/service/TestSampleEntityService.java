@@ -70,4 +70,11 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      */
     int updateSampleBatch(TestSampleEntity sampleEntity);
 
+    /**
+     * 批量新增样品 后 返回新增的数据
+     * @param samples
+     * @return
+     */
+    List<TestSampleEntity>  batchInsertSampleCopy(List<SampleDetailAddVo> samples);
+
 }
