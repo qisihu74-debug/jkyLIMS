@@ -77,4 +77,11 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      */
     List<TestSampleEntity>  batchInsertSampleCopy(List<SampleDetailAddVo> samples);
 
+    /**
+     * 批量新增配合比样品 后 返回新增的数据
+     * @param samples
+     * @return
+     */
+    List<TestSampleEntity> batchInsertMixSampleCopy(SamplesAddVo samples);
+
 }

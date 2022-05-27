@@ -2194,30 +2194,17 @@ public class EntrustServiceImpl implements EntrustService {
             entrustAddVo.setSealTypes(sealTypes);
         }
         List<SampleEntity> sampleCollection = entrustAddVo.getSamples();
-        // 存储配合比集合。
-        List<SampleEntity> sampleEntities = new ArrayList<>();
         Integer sampleId = 0;
-        Integer samplePId = 100;
             if (!CollectionUtils.isEmpty(sampleCollection))
             {
                 for (SampleEntity sampleEntity : sampleCollection)
                 {
-                    // 并对 样品下 检测项ID所属样品ID 重新赋值。
-                    sampleId+=1;
-                        // 判断样品id下 是原材  or 配合比设计
                     if(sampleEntity.getSampleType().contentEquals("配合比设计"))
                     {
-                        //获取 以pid的 配合比信息集合。
-                        List<SampleEntity> samplePidS = sampleEntityMapper.selectByPid(sampleEntity.getId());
-                        if(!samplePidS.isEmpty()){
-                            for(SampleEntity sampleEntity1:samplePidS){
-                                samplePId+=1;
-                                sampleEntity1.setId(samplePId);
-                                sampleEntity1.setPid(sampleId);
-                                sampleEntities.add(sampleEntity1);
-                            }
-                        }
+                        sampleEntity.setPid(sampleEntity.getId());
                     }
+                    // 并对 样品下 检测项ID所属样品ID 重新赋值。
+                    sampleId+=1;
                         if (!CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVoStr()))
                         {
                             for (JudgmentBasisVo judgmentBasisVo : sampleEntity.getJudgmentBasisVoStr()) {
@@ -2228,7 +2215,6 @@ public class EntrustServiceImpl implements EntrustService {
                     sampleEntity.setId(sampleId);
                 }
             }
-            entrustAddVo.getSamples().addAll(sampleEntities);
             return entrustAddVo;
     }
 
@@ -2240,6 +2226,8 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     public Boolean addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) {
+        // 获取前台得到的 vo.getId()
+        long old = vo.getId();
         //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
         long id = GenID.getID();
@@ -2270,11 +2258,27 @@ public class EntrustServiceImpl implements EntrustService {
                 SampleDetailVo sampleDetailVo  = sampleEntityMapper.getSampleTagInfo(sampleEntity.getId());
                 // 已经找到伪造字段
                 if(sampleDetailVo==null){
+                    // 区别 是原材还是配合比。
+                    if(sampleEntity.getPid()!=null){
+                        //获取 以pid的 配合比信息集合。
+                        List<SampleEntity> samplePidS = sampleEntityMapper.selectByPid(sampleEntity.getId());
+                       //
+                        List<SampleEntity>  sampleSet  = sampleEntityMapper.selectSampleSet(old);
+                        if(!samplePidS.isEmpty()){
+                            for(SampleEntity sampleEntity1:samplePidS){
+//                                samplePId+=1;
+//                                sampleEntity1.setId(samplePId);
+//                                sampleEntity1.setPid(sampleId);
+//                                sampleEntities.add(sampleEntity1);
+                            }
+                        }
+                    }
                     // 对此信息 重新 add。 并获取id 替换。
                     List<SampleDetailAddVo> samples = new ArrayList<>();
                     sampleEntity.setCheckDate(new Date());
                     SampleDetailAddVo sampleDetailAddVo = new SampleDetailAddVo(sampleEntity);
                     samples.add(sampleDetailAddVo);
+                    // 样品为原材的。
                     List<TestSampleEntity> addSamples = testSampleEntityService.batchInsertSampleCopy(samples);
                     TestSampleEntity addSample = addSamples.get(0);
                     sampleEntity.setId(addSample.getId());

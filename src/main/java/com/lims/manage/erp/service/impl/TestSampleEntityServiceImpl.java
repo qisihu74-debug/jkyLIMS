@@ -409,4 +409,56 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         return entities;
     }
 
+    @Transactional
+    @Override
+    public List<TestSampleEntity> batchInsertMixSampleCopy(SamplesAddVo samples) {
+        List<TestSampleEntity> param = Lists.newArrayList();
+        //处理配合比样品数据
+        Integer newId = testSampleEntityMapper.getMaxId() + 1;
+        SampleDetailAddVo vo = new SampleDetailAddVo(samples, newId);
+        int newMax = getNewSampleCode() + 1;
+        String codeStr = new DecimalFormat("0000").format(newMax);
+        String sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
+        TestSampleEntity mainSample = new TestSampleEntity(vo, sampleCode,null);
+        param.add(mainSample);
+        //处理子样品
+        List<SampleDetailAddVo> samples1 = samples.getSamples();
+        int i = 1;
+        for (SampleDetailAddVo sampleDetailAddVo : samples1) {
+            //设置样品编号
+            String format = new DecimalFormat("00").format(i);
+            String code = sampleCode + "_" + format;
+            //设置签收人
+            sampleDetailAddVo.setInspector(vo.getInspector());
+            //设置签收时间
+            sampleDetailAddVo.setReceivedDate(vo.getReceivedDate());
+            //设置检验类型
+            sampleDetailAddVo.setSampleType(vo.getSampleType());
+            //设置原材PID
+            sampleDetailAddVo.setPid(newId);
+            //设置委托单位
+            sampleDetailAddVo.setCompanyId(vo.getCompanyId());
+            StringBuilder outwardStr = new StringBuilder();
+            List<String> outward = sampleDetailAddVo.getOutward();
+            if(!CollectionUtils.isEmpty(outward)){
+                for (int j = 0; j < outward.size(); j++) {
+                    if(j != outward.size()-1){
+                        outwardStr.append(outward.get(j));
+                        outwardStr.append(",");
+                    }else{
+                        outwardStr.append(outward.get(j));
+                    }
+                }
+            }
+            TestSampleEntity sample = new TestSampleEntity(sampleDetailAddVo, code,outwardStr.toString());
+            param.add(sample);
+            i++;
+        }
+        TestSampleMixInfoEntity mixInfoEntity = new TestSampleMixInfoEntity(samples, newId);
+        //插入配合比参数信息
+        mixInfoEntityMapper.insert(mixInfoEntity);
+        testSampleEntityMapper.insertBatchMixSamples(param);
+        return param;
+    }
+
 }
