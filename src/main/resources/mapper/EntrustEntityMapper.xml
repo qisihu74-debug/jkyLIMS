@@ -728,6 +728,7 @@
 
     <select id="getAllOldCheckItemInfo" resultType="com.lims.manage.erp.entity.SampleItemEntity">
         SELECT
+            id,
             sample_id,
             entrust_id,
             check_item_name,

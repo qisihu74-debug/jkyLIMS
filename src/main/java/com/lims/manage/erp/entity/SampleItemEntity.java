@@ -15,6 +15,10 @@ import java.util.Date;
 @Data
 public class SampleItemEntity {
     /**
+     * 检测项主键
+     */
+    private Integer id;
+    /**
      * 样品id
      */
     private Integer sampleId;

@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.vo.SampleJudgeBasisVo;
@@ -81,4 +82,9 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
      * 获取样品信息集合 id 和 state
      */
     List<TestSampleEntity> selectStateCollection(@Param("state")String state);
+
+    /**
+     * 获取委托状态，委托id
+     */
+    EntrustEntity selectEntrustState(Integer sampleId);
 }
