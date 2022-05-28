@@ -504,6 +504,15 @@
         t1.required_completion_time desc
 
     </select>
+    <select id="getCorrelationTask" resultType="java.lang.String">
+        SELECT
+            task_code
+        FROM
+            test_task
+        WHERE
+                entrustment_id = ( SELECT entrustment_id FROM test_task WHERE id = #{taskId} )
+          AND id != #{taskId}
+    </select>
     <update id="updateTestTask" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
         UPDATE test_task
         <trim prefix="SET" suffixOverrides=",">
