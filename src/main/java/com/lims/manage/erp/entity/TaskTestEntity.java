@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.lims.manage.erp.vo.BatchReceiveTaskVo;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -124,4 +125,19 @@ public class TaskTestEntity {
      */
     private String sampleStateDescription;
 
+    public TaskTestEntity() {
+    }
+
+    public TaskTestEntity(Long id, BatchReceiveTaskVo vo,Integer state,Date currentDate) {
+        this.id = id;
+        this.inspector = vo.getInspector();
+        this.recorder = vo.getRecorder();
+        this.reportProducer = vo.getReportProducer();
+        this.reviewer = vo.getReviewer();
+        this.sampleReceivingTime = vo.getSampleReceivingTime();
+        this.sampler = vo.getSampler();
+        this.receiver = vo.getReceiver();
+        this.state=state;
+        this.receiveTime = currentDate;
+    }
 }

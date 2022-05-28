@@ -92,6 +92,13 @@ public interface TaskService {
     Boolean postGrabASingleTwo(TaskTestEntity taskTestEntity);
 
     /**
+     * 批量领取任务单
+     * @param taskTestEntity
+     * @return
+     */
+    Boolean batchPostGrabASingle(List<TaskTestEntity> taskTestEntity);
+
+    /**
      * 返回 团队成员姓名
      */
     List<LabelValueTeamVo> getTeamUserName(Long UserLong);

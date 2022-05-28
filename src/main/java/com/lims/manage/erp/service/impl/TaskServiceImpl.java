@@ -449,6 +449,25 @@ public class TaskServiceImpl implements TaskService {
         return true;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Boolean batchPostGrabASingle(List<TaskTestEntity> taskTestEntitys) {
+        int i = taskMapper.batchUpdateTestTask(taskTestEntitys);
+       if(i==0){
+           logger.error("批量修改任务单信息失败！");
+       }
+        for (int j = 0; j < taskTestEntitys.size(); j++) {
+            TaskTestEntity taskTestEntity = taskTestEntitys.get(i);
+            // 根据任务单主键 获取委托单主键
+            EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
+            if (entrustEntity != null) {
+                //更新任务单状态为已领样
+                taskMapper.updateEntrustById(taskTestEntity.getId(), 2);
+            }
+        }
+        return true;
+    }
+
     @Override
     public List<LabelValueTeamVo> getTeamUserName(Long UserLong) {
         TaskTestTeamEntity dataTeam = taskMapper.selectTeamCode(UserLong);

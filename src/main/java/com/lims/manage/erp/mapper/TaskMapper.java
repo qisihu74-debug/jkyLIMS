@@ -96,6 +96,13 @@ public interface TaskMapper extends BaseMapper {
     int updateTestTask(TaskTestEntity taskTestEntity);
 
     /**
+     * 批量修改任务信息
+     * @param list
+     * @return
+     */
+    int batchUpdateTestTask(@Param("list") List<TaskTestEntity> list);
+
+    /**
      * 查询任务单详情
      */
     TaskTestEntity getTaskOrders(Long taskId);
