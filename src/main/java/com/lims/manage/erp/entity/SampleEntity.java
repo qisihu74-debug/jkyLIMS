@@ -189,6 +189,11 @@ public class SampleEntity {
     private String beginDate;
     @TableField(exist = false)
     private String endDate;
+    /**
+     * 旧样品id
+     */
+    @TableField(exist = false)
+    private Integer oldSampleid ;
 
     /**
      * 样品下检测项、检测依据、总价

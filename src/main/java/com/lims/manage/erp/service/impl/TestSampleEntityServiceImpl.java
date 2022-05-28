@@ -411,7 +411,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
     @Transactional
     @Override
-    public List<TestSampleEntity> batchInsertMixSampleCopy(SamplesAddVo samples) {
+    public TestSampleMixInfoEntity batchInsertMixSampleCopy(SamplesAddVo samples,long id) {
         List<TestSampleEntity> param = Lists.newArrayList();
         //处理配合比样品数据
         Integer newId = testSampleEntityMapper.getMaxId() + 1;
@@ -455,12 +455,11 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             i++;
         }
         TestSampleMixInfoEntity mixInfoEntity = new TestSampleMixInfoEntity(samples, newId);
+        mixInfoEntity.setEntrustmentId(id);
         //插入配合比参数信息
         mixInfoEntityMapper.insert(mixInfoEntity);
-        System.out.println("配合比add前\t"+param);
         testSampleEntityMapper.insertBatchMixSamples(param);
-        System.out.println("配合比add后\t"+param);
-        return param;
+        return mixInfoEntity;
     }
 
 }

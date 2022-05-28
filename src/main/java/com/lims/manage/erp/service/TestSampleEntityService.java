@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
 import com.lims.manage.erp.vo.SamplesAddVo;
 import io.swagger.models.auth.In;
@@ -82,6 +83,6 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      * @param samples
      * @return
      */
-    List<TestSampleEntity> batchInsertMixSampleCopy(SamplesAddVo samples);
+    TestSampleMixInfoEntity batchInsertMixSampleCopy(SamplesAddVo samples, long id);
 
 }
