@@ -161,6 +161,13 @@ public interface TaskMapper extends BaseMapper {
     List<TaskListVo> getTaskListTwoGreater(TaskListParamVo paramVo);
 
     /**
+     * 查询任务单关联的其他任务单号
+     * @param taskId
+     * @return
+     */
+    List<String> getCorrelationTask(Long taskId);
+
+    /**
      * 查询领样列表
      *
      * @param paramVo

@@ -289,6 +289,19 @@ public class TaskServiceImpl implements TaskService {
             dataList = taskMapper.getTaskListTwoGreater(paramVo);
             // 返回前端的话 sampleListVo.getSampleList() 空集合 []
             for(TaskListVo sampleListVo:dataList){
+                StringBuilder correlationTask = new StringBuilder();
+                List<String> correlationTaskList = taskMapper.getCorrelationTask(sampleListVo.getTaskId());
+                if(CollectionUtils.isEmpty(correlationTaskList)){
+                    correlationTask.append("——");
+                }else{
+                    for (int i = 0; i < correlationTaskList.size(); i++) {
+                        correlationTask.append(correlationTaskList.get(i));
+                        if(i!=correlationTaskList.size()-1){
+                            correlationTask.append("\n");
+                        }
+                    }
+                }
+                sampleListVo.setCorrelationTaskCode(correlationTask.toString());
                 if(CollectionUtils.isEmpty(sampleListVo.getSampleList())){
                     sampleListVo.setSampleList(new ArrayList<>());
                 }
