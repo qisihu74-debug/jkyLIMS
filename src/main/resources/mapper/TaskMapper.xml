@@ -543,15 +543,15 @@
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
             UPDATE test_task
             <trim prefix="SET" suffixOverrides=",">
-                <if test="inspector!=null and inspector!=''">inspector=#{item.inspector},</if>
-                <if test="recorder!=null and recorder!=''">recorder=#{item.recorder},</if>
-                <if test="reportProducer!=null and reportProducer!=''">report_producer=#{item.reportProducer},</if>
-                <if test="reviewer!=null and reviewer!=''">reviewer=#{item.reviewer},</if>
-                <if test="sampleReceivingTime!=null">sample_receiving_time=#{item.sampleReceivingTime},</if>
-                <if test="sampler!=null">sampler=#{item.sampler},</if>
-                <if test="receiver!=null and receiver!=''">receiver=#{item.receiver},</if>
-                <if test="state!=null">state=#{item.state},</if>
-                <if test="receiveTime!=null">receive_time=#{item.receiveTime},</if>
+                <if test="item.inspector!=null and item.inspector!=''">inspector=#{item.inspector},</if>
+                <if test="item.recorder!=null and item.recorder!=''">recorder=#{item.recorder},</if>
+                <if test="item.reportProducer!=null and item.reportProducer!=''">report_producer=#{item.reportProducer},</if>
+                <if test="item.reviewer!=null and item.reviewer!=''">reviewer=#{item.reviewer},</if>
+                <if test="item.sampleReceivingTime!=null">sample_receiving_time=#{item.sampleReceivingTime},</if>
+                <if test="item.sampler!=null">sampler=#{item.sampler},</if>
+                <if test="item.receiver!=null and item.receiver!=''">receiver=#{item.receiver},</if>
+                <if test="item.state!=null">state=#{item.state},</if>
+                <if test="item.receiveTime!=null">receive_time=#{item.receiveTime},</if>
             </trim>
             where id = #{item.id}
         </foreach>
