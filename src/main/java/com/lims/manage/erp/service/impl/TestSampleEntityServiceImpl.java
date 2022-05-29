@@ -6,10 +6,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.SampleFileTableDao;
-import com.lims.manage.erp.mapper.TestSampleEntityMapper;
-import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
@@ -42,6 +39,10 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     private SampleFileTableDao sampleFileTableDao;
     @Autowired
     private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
+    @Autowired
+    private EntrustEntityMapper entrustEntityMapper;
+    @Autowired
+    private TestProductItemDao testProductItemDao;
     Logger logger = LoggerFactory.getLogger(TestSampleEntityServiceImpl.class);
 
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -311,6 +312,8 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
     @Override
     public int updateSample(TestSampleEntity sampleEntity) {
+        // 根据样品ID 判断 样品与委托单是否绑定 、绑定 产品id是否变动，变动 则清除委托单下检测项信息。
+        methodUpdateSample(sampleEntity.getId(),sampleEntity.getProductId());
         String outward = sampleEntity.getOutward();
         if(outward != null){
             String replace = outward.replace("[", "");
@@ -324,6 +327,8 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     @Transactional
     @Override
     public int updateSampleBatch(TestSampleEntity sampleEntity) {
+        // 根据样品ID 判断 样品与委托单是否绑定 、绑定 产品id是否变动，变动 则清除委托单下检测项信息。
+        methodUpdateSample(sampleEntity.getId(),sampleEntity.getProductId());
         List<Integer> allNodeIds = testSampleEntityMapper.getAllNodeIds(sampleEntity.getId());
         List<TestSampleEntity> nodeSample = sampleEntity.getNodeSample();
         nodeSample.add(sampleEntity);
@@ -411,7 +416,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
     @Transactional
     @Override
-    public List<TestSampleEntity> batchInsertMixSampleCopy(SamplesAddVo samples) {
+    public TestSampleMixInfoEntity batchInsertMixSampleCopy(SamplesAddVo samples,long id) {
         List<TestSampleEntity> param = Lists.newArrayList();
         //处理配合比样品数据
         Integer newId = testSampleEntityMapper.getMaxId() + 1;
@@ -455,12 +460,37 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             i++;
         }
         TestSampleMixInfoEntity mixInfoEntity = new TestSampleMixInfoEntity(samples, newId);
+        mixInfoEntity.setEntrustmentId(id);
         //插入配合比参数信息
         mixInfoEntityMapper.insert(mixInfoEntity);
-        System.out.println("配合比add前\t"+param);
         testSampleEntityMapper.insertBatchMixSamples(param);
-        System.out.println("配合比add后\t"+param);
-        return param;
+        return mixInfoEntity;
+    }
+
+    /**
+     * 根据样品id 处理 是否需要变更。
+     * @param id
+     */
+    public void methodUpdateSample(Integer id,Integer productId){
+//        根据样品ID 判断 样品与委托单是否绑定 、绑定 产品id是否变动，变动 则清除委托单下检测项信息。
+        TestSampleEntity testSampleEntity = testSampleEntityMapper.selectByPrimaryKey(id);
+        // IsUse=1 则与委托单建立关系。
+        if(testSampleEntity.getIsUse()==1){
+            // 通过样品id 获得委托单id 获取委托单状态 是否未发布。
+            EntrustEntity entrustEntity =   testSampleEntityMapper.selectEntrustState(id);
+            // 产品id已经修改 AND 委托单未发布  则清除委托单改样品信息检测项集合。
+            if(!testSampleEntity.getProductId().equals(productId)&&entrustEntity.getState()==0){
+                List<SampleItemEntity>  allOldCheckItemInfo = entrustEntityMapper.getAllOldCheckItemInfo(id,entrustEntity.getId());
+                if(!allOldCheckItemInfo.isEmpty())
+                {
+                    // 获取检测项主键 依次删除。
+                    for(int i=0;i<allOldCheckItemInfo.size();i++){
+                        SampleItemEntity sampleItemEntity  = allOldCheckItemInfo.get(i);
+                        testProductItemDao.deleteById(sampleItemEntity.getId());
+                    }
+                }
+            }
+        }
     }
 
 }

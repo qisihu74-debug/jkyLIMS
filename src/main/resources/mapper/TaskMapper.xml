@@ -504,6 +504,15 @@
         t1.required_completion_time desc
 
     </select>
+    <select id="getCorrelationTask" resultType="java.lang.String">
+        SELECT
+            task_code
+        FROM
+            test_task
+        WHERE
+                entrustment_id = ( SELECT entrustment_id FROM test_task WHERE id = #{taskId} )
+          AND id != #{taskId}
+    </select>
     <update id="updateTestTask" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
         UPDATE test_task
         <trim prefix="SET" suffixOverrides=",">
@@ -529,6 +538,25 @@
         </trim>
         where id = #{id}
     </update>
+
+    <update id="batchUpdateTestTask" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            UPDATE test_task
+            <trim prefix="SET" suffixOverrides=",">
+                <if test="item.inspector!=null and item.inspector!=''">inspector=#{item.inspector},</if>
+                <if test="item.recorder!=null and item.recorder!=''">recorder=#{item.recorder},</if>
+                <if test="item.reportProducer!=null and item.reportProducer!=''">report_producer=#{item.reportProducer},</if>
+                <if test="item.reviewer!=null and item.reviewer!=''">reviewer=#{item.reviewer},</if>
+                <if test="item.sampleReceivingTime!=null">sample_receiving_time=#{item.sampleReceivingTime},</if>
+                <if test="item.sampler!=null">sampler=#{item.sampler},</if>
+                <if test="item.receiver!=null and item.receiver!=''">receiver=#{item.receiver},</if>
+                <if test="item.state!=null">state=#{item.state},</if>
+                <if test="item.receiveTime!=null">receive_time=#{item.receiveTime},</if>
+            </trim>
+            where id = #{item.id}
+        </foreach>
+    </update>
+
     <select id="getTaskOrders" resultType="com.lims.manage.erp.entity.TaskTestEntity">
         SELECT id,
                code,

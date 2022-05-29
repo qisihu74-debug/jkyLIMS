@@ -1,6 +1,7 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -16,14 +17,7 @@ import com.lims.manage.erp.util.ExcelConvertPdf;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.LabelValueTeamVo;
-import com.lims.manage.erp.vo.OriginalRecordDataVo;
-import com.lims.manage.erp.vo.OriginalRecordParamVo;
-import com.lims.manage.erp.vo.PersonInfoVo;
-import com.lims.manage.erp.vo.ReceiveSampleParamVo;
-import com.lims.manage.erp.vo.TaskDetailInfoVo;
-import com.lims.manage.erp.vo.TaskListParamVo;
-import com.lims.manage.erp.vo.TeamVo;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
@@ -32,6 +26,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -187,6 +182,49 @@ public class TaskController {
             return ResultUtil.error(678, "领取失败！");
         }
         return ResultUtil.error(678, "当前任务单已经被领！");
+    }
+
+    /**
+     * 批量领取任务
+     * @param batchReceiveTaskVo
+     * @return
+     */
+    @PostMapping("batchPostGrabASingle")
+    public Result batchPostGrabASingle(@RequestBody BatchReceiveTaskVo batchReceiveTaskVo) {
+        if (ShiroUtils.getUserInfo() != null) {
+            // 抢单人
+            Long strLong = ShiroUtils.getUserInfo().getUserId();
+            String str1 = String.valueOf(strLong);
+            batchReceiveTaskVo.setReceiver(str1);
+        } else {
+            return ResultUtil.error(201, "token已过期！");
+        }
+        if (batchReceiveTaskVo.getInspector() == null || batchReceiveTaskVo.getRecorder() == null || batchReceiveTaskVo.getReviewer() == null
+                || batchReceiveTaskVo.getReportProducer() == null || batchReceiveTaskVo.getSampler() ==null) {
+            return ResultUtil.error(201, "缺少必填参数！");
+        }
+        List<Long> ids = batchReceiveTaskVo.getId();
+        List<TaskTestEntity> batchUpdate = Lists.newArrayList();
+        if(CollectionUtils.isEmpty(ids)){
+            return ResultUtil.error(678, "请选择要领取的任务单！");
+        }else{
+            java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
+            for (Long id : ids) {
+                Boolean taskStatus = taskService.getJudgmentTaskList(id);
+                if (taskStatus) {
+                    //构造修改对象，状态2==领样
+                    TaskTestEntity entity = new TaskTestEntity(id,batchReceiveTaskVo,2,currentDate);
+                    batchUpdate.add(entity);
+                }else{
+                    return ResultUtil.error(678, "选择的任务单中包含已领取任务单，请刷新页面后重新领取！");
+                }
+            }
+        }
+        Boolean flag = taskService.batchPostGrabASingle(batchUpdate);
+        if (flag) {
+            return ResultUtil.success("领取成功");
+        }
+        return ResultUtil.error(678, "领取失败！");
     }
 
     /**
