@@ -91,6 +91,8 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
         }
         testReportTemplate.getTestReportTemplate().setUpdateTime(new Date());
         if (this.updateById(testReportTemplate.getTestReportTemplate())){
+            //编辑报告模板删除文件
+            sysOssService.delAnnounce(testReportTemplate.getTestReportTemplate().getReportFileUri());
             testReportTemplateProductRefService.remove(new QueryWrapper<TestReportTemplateProductRef>().eq("template_id",testReportTemplate.getTestReportTemplate().getId()));
             testReportTemplateProductRefService.saveBatch(this.getTestReportTemplateProductRef(testReportTemplate.getTestReportTemplate().getId(),testReportTemplate.getProductIds()));
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改报告模板"+testReportTemplate.getTestReportTemplate().getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);

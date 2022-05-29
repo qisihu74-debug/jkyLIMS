@@ -772,9 +772,24 @@ public class ReportController {
      * @return
      */
     @GetMapping("reportUrl")
-    public String reportUrl(Long entrustId){
-
-        return reportService.reportUrl(entrustId);
+    public void reportUrl(Long entrustId,HttpServletResponse response){
+        String reportUrl = reportService.reportUrl(entrustId);
+        MinioClient client = MinIoUtil.minioClient;
+        //预览word转pdf
+        String[] split = reportUrl.split("\\?");
+        String[] strings = split[0].split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        try {
+            client.statObject(bluckName, fileName);
+            InputStream inputStream = client.getObject(bluckName, fileName);
+            ServletOutputStream outputStream = response.getOutputStream();
+            int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+            inputStream.close();
+            outputStream.close();
+        }catch (Exception e){
+            logger.error("预览合并后的报告异常:{}",e);
+        }
     }
 
     @GetMapping("testInsert")

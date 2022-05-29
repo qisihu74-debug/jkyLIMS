@@ -49,7 +49,7 @@ public class SysOssController  {
 
     @PostMapping("delAnnounce")
     public Result delFile(@RequestBody String fileUrl) {
-        log.info("管理员:"+ShiroUtils.getUserInfo().getUsername()+"删除文件："+fileUrl);
+        /*log.info("管理员:"+ShiroUtils.getUserInfo().getUsername()+"删除文件："+fileUrl);
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
@@ -58,8 +58,8 @@ public class SysOssController  {
         map.put("userName",userInfo.getName());
         Boolean flag=sysOssService.delAnnounce(fileUrl);
         map.put("delIsOk",flag);
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除报告模板"+fileUrl+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
-        return ResultUtil.success(map);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除报告模板"+fileUrl+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);*/
+        return ResultUtil.success("");
     }
 }
 
