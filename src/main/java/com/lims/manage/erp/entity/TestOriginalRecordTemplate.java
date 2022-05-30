@@ -30,6 +30,7 @@ public class TestOriginalRecordTemplate extends Model<TestOriginalRecordTemplate
     private Integer checkItemId;
     //原始记录
     private String fileUrl;
+    private String copyUrl;
     //是否有效1有效，0无效
     private String isAvailable;
     // 0,启用，1,冻结
@@ -91,6 +92,14 @@ public class TestOriginalRecordTemplate extends Model<TestOriginalRecordTemplate
 
     public void setIsAvailable(String isAvailable) {
         this.isAvailable = isAvailable;
+    }
+
+    public String getCopyUrl() {
+        return copyUrl;
+    }
+
+    public void setCopyUrl(String copyUrl) {
+        this.copyUrl = copyUrl;
     }
 
     /**
