@@ -71,6 +71,7 @@ public class TestOriginalRecordTemplateController extends ApiController {
     public Result selectOne(@PathVariable Serializable id) {
         if (id!=null&&id!=""){
             TestOriginalRecordTemplate testMethod=this.testOriginalRecordTemplateService.getOne(new QueryWrapper<TestOriginalRecordTemplate>().eq("id",id).eq("del_flag",0));
+            testMethod.setCopyUrl(testMethod.getFileUrl());
             return ResultUtil.success(testMethod);
         }else {
             return ResultUtil.error("参数为空");

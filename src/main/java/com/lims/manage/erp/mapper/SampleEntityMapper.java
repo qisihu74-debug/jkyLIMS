@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -106,6 +107,13 @@ public interface SampleEntityMapper {
     List<String> getTeamNameStrings(Integer checkItemId);
 
     List<LabelValueVo> getTestingRoomList(Integer checkItemId);
+
+    /**
+     * 查询检测项关联团队信息
+     * @param checkItemId
+     * @return
+     */
+    List<TestTeam> getTestingRoomInfoList(Integer checkItemId);
 
 
     /**

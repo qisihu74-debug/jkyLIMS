@@ -1437,8 +1437,9 @@ public class EntrustServiceImpl implements EntrustService {
                 if (list != null && !list.isEmpty()) {
                     // 根据检测项id 查询 默认匹配部门信息
                     for (JudgmentBasisVo data : list) {
-                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
-                        data.setTestingRoom(strings.toString());
+//                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
+//                        data.setTestingRoom(strings.toString());
+                        data.setTestingRoom("——");
                     }
                     sampleEntity.setJudgmentBasisVos(list);
 //                    //根据检测项ID查询可做该检测项的科室labelvalue集合
@@ -1633,9 +1634,25 @@ public class EntrustServiceImpl implements EntrustService {
                     for (JudgmentBasisVo data : list) {
                         List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
                         data.setTestingRoom(strings.toString());
-                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
-                        allTestRoom.addAll(testingRoomList);
+//                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
+                        List<TestTeam> testingRoomInfoList = sampleEntityMapper.getTestingRoomInfoList(data.getCheckItemId());
+//                        allTestRoom.addAll(testingRoomList);
+                        List<Integer> pids = Lists.newArrayList();
+                        List<LabelValueVo> testingRoomList = Lists.newArrayList();
+                        for (TestTeam team:testingRoomInfoList) {
+                            pids.add(team.getPid());
+                        }
+                        //过滤id没被作为pid的数据
+                        for (TestTeam team:testingRoomInfoList) {
+                            if (!pids.contains(team.getId())){
+                                LabelValueVo vo= new LabelValueVo();
+                                vo.setValue(Long.parseLong(team.getId().toString()));
+                                vo.setLabel(team.getName());
+                                testingRoomList.add(vo);
+                            }
+                        }
                         data.setTestingRoomList(testingRoomList);
+                        allTestRoom.addAll(testingRoomList);
                     }
                     sampleEntity.setJudgmentBasisVos(list);
                 }
