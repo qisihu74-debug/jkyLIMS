@@ -174,7 +174,7 @@
             <if test="state!=null">
                 and t1.state = #{state}
             </if>
-            <if test="taskCodeParam!=null">
+            <if test="taskCodeParam!=null and taskCodeParam!=''">
                 and t2.task_code LIKE CONCAT('%',#{taskCodeParam},'%')
             </if>
         </trim>
@@ -750,4 +750,8 @@
     <select id="getReportId" resultType="java.lang.Long">
         SELECT id FROM test_report_record where entrustment_id= #{entrustmentId}
     </select>
+
+    <delete id="deleteEntrustedSampleCheckitemRel" parameterType="java.lang.Integer">
+        delete from test_entrusted_sample_checkitem_rel WHERE id = #{id}
+    </delete>
 </mapper>

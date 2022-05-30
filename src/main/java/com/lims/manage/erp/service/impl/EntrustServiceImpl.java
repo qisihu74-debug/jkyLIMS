@@ -2200,7 +2200,7 @@ public class EntrustServiceImpl implements EntrustService {
             {
                 for (SampleEntity sampleEntity : sampleCollection)
                 {
-                    if(sampleEntity.getSampleType().contentEquals("配合比设计"))
+                    if(sampleEntity.getSampleType().contains("配合比"))
                     {
                         sampleEntity.setPid(sampleEntity.getId());
                     }
@@ -2227,6 +2227,7 @@ public class EntrustServiceImpl implements EntrustService {
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) {
         // 获取前台得到的 vo.getId()
         long old = vo.getId();
@@ -2449,6 +2450,7 @@ public class EntrustServiceImpl implements EntrustService {
      * @param id 新委托单id
      * @param entrustCompanyId 新委托单-单位id
      */
+    @Transactional(rollbackFor = Exception.class)
     public void methodCopySamples(List<SampleEntity> sampleList,Long old,long id,Integer entrustCompanyId){
         // 获取样品集合 判断样品id 是否存在。 不存在 则 add样品。
             for (SampleEntity sampleEntity : sampleList) {
@@ -2485,20 +2487,21 @@ public class EntrustServiceImpl implements EntrustService {
                                     samples.setSamples(subset);
                                     // 获取配合比的样品字段
                                     TestSampleMixInfoEntity data = mixInfoEntityMapper.selectBySampleId(sampleEntity.getPid());
-                                    samples.setDesignStrength(data.getDesignStrength());
-                                    samples.setIntensityConfiguration(data.getIntensityConfiguration());
-                                    samples.setAntifreezeLevel(data.getAntifreezeLevel());
-                                    samples.setWaterBinderRatio(data.getWaterBinderRatio());
-                                    samples.setUnitWaterUse(data.getUnitWaterUse());
-                                    samples.setSandRatio(data.getSandRatio());
-                                    samples.setDesignSlump(data.getDesignSlump());
-                                    samples.setMixingWay(data.getMixingWay());
+                                  if(data!=null){
+                                      samples.setDesignStrength(data.getDesignStrength());
+                                      samples.setIntensityConfiguration(data.getIntensityConfiguration());
+                                      samples.setAntifreezeLevel(data.getAntifreezeLevel());
+                                      samples.setWaterBinderRatio(data.getWaterBinderRatio());
+                                      samples.setUnitWaterUse(data.getUnitWaterUse());
+                                      samples.setSandRatio(data.getSandRatio());
+                                      samples.setDesignSlump(data.getDesignSlump());
+                                      samples.setMixingWay(data.getMixingWay());
+                                  }
                                     samples.setCompanyId(entrustCompanyId);
                                     // 针对 配合比 进行处理
                                     TestSampleMixInfoEntity  addMixProportion  = testSampleEntityService.batchInsertMixSampleCopy(samples,id);
                                        if(addMixProportion!=null){
                                            sampleEntity.setId(addMixProportion.getSampleId());
-                                           System.out.println("配合比新id\t"+sampleEntity.getId());
                                        }
                                 }
                             }

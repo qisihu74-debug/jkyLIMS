@@ -450,12 +450,21 @@ public class SampleServiceImpl implements SampleService {
         List<HashMap<String, SampleDetailVo>> results = Lists.newArrayList();
         SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
         if (sampleTagInfo != null) {
-            // 处理样品描述信息 Outward 清除两边[]
-            if (sampleTagInfo.getOutwardDescribe() == null) {
-                sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
-            } else {
-                sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1) + "," + sampleTagInfo.getOutwardDescribe());
+            // 处理样品描述信息 Outward、 outwardDescribe 组合输出
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(sampleTagInfo.getOutwardDescribe() == null?null:sampleTagInfo.getOutwardDescribe());
+            if(stringBuilder.length()>0){
+                stringBuilder.append(",");
             }
+            stringBuilder.append(sampleTagInfo.getOutwardDescribe()==null?null:sampleTagInfo.getOutwardDescribe());
+            stringBuilder.append(",");
+            sampleTagInfo.setOutward(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
+            // 处理样品描述信息 Outward 清除两边[]
+//            if (sampleTagInfo.getOutwardDescribe() == null) {
+//                sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
+//            } else {
+//                sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1) + "," + sampleTagInfo.getOutwardDescribe());
+//            }
             // 样品编号格式： 情况1： YP-2022-0095（01~02） 情况2：YP-2022-0096
             String sampleCode = sampleTagInfo.getSampleCode();
             if (sampleCode.contains("~")) {

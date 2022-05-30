@@ -171,7 +171,8 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                t2.alias_name          as aliasName,
                t2.sample_quantity    as sampleQuantity,
                t2.sample_remark      as sampleRemark,
-               t2.pid                as pid
+               t2.pid                as pid,
+               t2.outward_describe as outwardDescribe
         FROM  test_sample AS t2
         WHERE t2.pid  = #{id}
     </select>
@@ -1076,7 +1077,8 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                t2.alias_name          as aliasName,
                t2.sample_quantity    as sampleQuantity,
                t2.sample_remark      as sampleRemark,
-               t2.pid                as pid
+               t2.pid                as pid,
+			   t2.outward_describe as outwardDescribe
         FROM
         test_entrusted_sample_details_rel as t1
 				LEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id
