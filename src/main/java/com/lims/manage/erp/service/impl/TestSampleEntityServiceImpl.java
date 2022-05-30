@@ -41,8 +41,6 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
     @Autowired
     private EntrustEntityMapper entrustEntityMapper;
-    @Autowired
-    private TestProductItemDao testProductItemDao;
     Logger logger = LoggerFactory.getLogger(TestSampleEntityServiceImpl.class);
 
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -381,6 +379,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public List<TestSampleEntity>  batchInsertSampleCopy(List<SampleDetailAddVo> samples) {
         List<TestSampleEntity> entities = Lists.newArrayList();
         //获取数据库当前年份最大的样品编号
@@ -414,8 +413,8 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         return entities;
     }
 
-    @Transactional
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public TestSampleMixInfoEntity batchInsertMixSampleCopy(SamplesAddVo samples,long id) {
         List<TestSampleEntity> param = Lists.newArrayList();
         //处理配合比样品数据
@@ -471,6 +470,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
      * 根据样品id 处理 是否需要变更。
      * @param id
      */
+    @Transactional(rollbackFor = Exception.class)
     public void methodUpdateSample(Integer id,Integer productId){
 //        根据样品ID 判断 样品与委托单是否绑定 、绑定 产品id是否变动，变动 则清除委托单下检测项信息。
         TestSampleEntity testSampleEntity = testSampleEntityMapper.selectByPrimaryKey(id);
@@ -486,7 +486,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
                     // 获取检测项主键 依次删除。
                     for(int i=0;i<allOldCheckItemInfo.size();i++){
                         SampleItemEntity sampleItemEntity  = allOldCheckItemInfo.get(i);
-                        testProductItemDao.deleteById(sampleItemEntity.getId());
+                        entrustEntityMapper.deleteEntrustedSampleCheckitemRel(sampleItemEntity.getId());
                     }
                 }
             }

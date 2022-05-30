@@ -1,10 +1,12 @@
 package com.lims.manage.erp.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.HistoryEntrustDataVo;
 import com.lims.manage.erp.vo.LabelValueVo;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -428,4 +430,11 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     Long getReportId(Long entrustmentId);
+
+    /**
+     * 删除委托单下 样品与检测项关联的 详情id
+     * @param id
+     * @return
+     */
+    Integer deleteEntrustedSampleCheckitemRel(@Param("id") Integer id);
 }

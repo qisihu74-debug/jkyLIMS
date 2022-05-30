@@ -1437,8 +1437,9 @@ public class EntrustServiceImpl implements EntrustService {
                 if (list != null && !list.isEmpty()) {
                     // 根据检测项id 查询 默认匹配部门信息
                     for (JudgmentBasisVo data : list) {
-                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
-                        data.setTestingRoom(strings.toString());
+//                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
+//                        data.setTestingRoom(strings.toString());
+                        data.setTestingRoom("——");
                     }
                     sampleEntity.setJudgmentBasisVos(list);
 //                    //根据检测项ID查询可做该检测项的科室labelvalue集合
@@ -1633,9 +1634,25 @@ public class EntrustServiceImpl implements EntrustService {
                     for (JudgmentBasisVo data : list) {
                         List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
                         data.setTestingRoom(strings.toString());
-                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
-                        allTestRoom.addAll(testingRoomList);
+//                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
+                        List<TestTeam> testingRoomInfoList = sampleEntityMapper.getTestingRoomInfoList(data.getCheckItemId());
+//                        allTestRoom.addAll(testingRoomList);
+                        List<Integer> pids = Lists.newArrayList();
+                        List<LabelValueVo> testingRoomList = Lists.newArrayList();
+                        for (TestTeam team:testingRoomInfoList) {
+                            pids.add(team.getPid());
+                        }
+                        //过滤id没被作为pid的数据
+                        for (TestTeam team:testingRoomInfoList) {
+                            if (!pids.contains(team.getId())){
+                                LabelValueVo vo= new LabelValueVo();
+                                vo.setValue(Long.parseLong(team.getId().toString()));
+                                vo.setLabel(team.getName());
+                                testingRoomList.add(vo);
+                            }
+                        }
                         data.setTestingRoomList(testingRoomList);
+                        allTestRoom.addAll(testingRoomList);
                     }
                     sampleEntity.setJudgmentBasisVos(list);
                 }
@@ -2200,7 +2217,7 @@ public class EntrustServiceImpl implements EntrustService {
             {
                 for (SampleEntity sampleEntity : sampleCollection)
                 {
-                    if(sampleEntity.getSampleType().contentEquals("配合比设计"))
+                    if(sampleEntity.getSampleType().contains("配合比"))
                     {
                         sampleEntity.setPid(sampleEntity.getId());
                     }
@@ -2227,6 +2244,7 @@ public class EntrustServiceImpl implements EntrustService {
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) {
         // 获取前台得到的 vo.getId()
         long old = vo.getId();
@@ -2449,6 +2467,7 @@ public class EntrustServiceImpl implements EntrustService {
      * @param id 新委托单id
      * @param entrustCompanyId 新委托单-单位id
      */
+    @Transactional(rollbackFor = Exception.class)
     public void methodCopySamples(List<SampleEntity> sampleList,Long old,long id,Integer entrustCompanyId){
         // 获取样品集合 判断样品id 是否存在。 不存在 则 add样品。
             for (SampleEntity sampleEntity : sampleList) {
@@ -2485,20 +2504,21 @@ public class EntrustServiceImpl implements EntrustService {
                                     samples.setSamples(subset);
                                     // 获取配合比的样品字段
                                     TestSampleMixInfoEntity data = mixInfoEntityMapper.selectBySampleId(sampleEntity.getPid());
-                                    samples.setDesignStrength(data.getDesignStrength());
-                                    samples.setIntensityConfiguration(data.getIntensityConfiguration());
-                                    samples.setAntifreezeLevel(data.getAntifreezeLevel());
-                                    samples.setWaterBinderRatio(data.getWaterBinderRatio());
-                                    samples.setUnitWaterUse(data.getUnitWaterUse());
-                                    samples.setSandRatio(data.getSandRatio());
-                                    samples.setDesignSlump(data.getDesignSlump());
-                                    samples.setMixingWay(data.getMixingWay());
+                                  if(data!=null){
+                                      samples.setDesignStrength(data.getDesignStrength());
+                                      samples.setIntensityConfiguration(data.getIntensityConfiguration());
+                                      samples.setAntifreezeLevel(data.getAntifreezeLevel());
+                                      samples.setWaterBinderRatio(data.getWaterBinderRatio());
+                                      samples.setUnitWaterUse(data.getUnitWaterUse());
+                                      samples.setSandRatio(data.getSandRatio());
+                                      samples.setDesignSlump(data.getDesignSlump());
+                                      samples.setMixingWay(data.getMixingWay());
+                                  }
                                     samples.setCompanyId(entrustCompanyId);
                                     // 针对 配合比 进行处理
                                     TestSampleMixInfoEntity  addMixProportion  = testSampleEntityService.batchInsertMixSampleCopy(samples,id);
                                        if(addMixProportion!=null){
                                            sampleEntity.setId(addMixProportion.getSampleId());
-                                           System.out.println("配合比新id\t"+sampleEntity.getId());
                                        }
                                 }
                             }

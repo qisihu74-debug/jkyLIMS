@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.SampleEntity;
 import lombok.Data;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -133,6 +134,10 @@ public class SampleDetailAddVo {
         this.cubicMeterConsumption = samples.getCubicMeterConsumption();
         this.quantityPerGroup = samples.getQuantityPerGroup();
         this.receivedDate = samples.getCheckDate();
+        this.manufacturer = samples.getManufacturer();
+        this.sampleOrigin = samples.getSampleOrigin();
+        this.outward = Collections.singletonList(samples.getOutward());
+        this.outwardDescribe = samples.getOutwardDescribe();
     }
 
 }

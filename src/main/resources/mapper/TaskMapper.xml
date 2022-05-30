@@ -522,7 +522,7 @@
             <if test="inspector!=null and inspector!=''">inspector=#{inspector},</if>
             <if test="recorder!=null and recorder!=''">recorder=#{recorder},</if>
             <if test="reviewer!=null and reviewer!=''">reviewer=#{reviewer},</if>
-            <if test="reviewTime!=null and reviewTime!=''">review_time=#{reviewTime},</if>
+            <if test="reviewTime!=null">review_time=#{reviewTime},</if>
 <!--            <if test="inspectorId!=null and inspectorId!=''">inspector_id=#{inspectorId},</if>-->
 <!--            <if test="recorderId!=null and recorderId!=''">recorder_id=#{recorderId},</if>-->
 <!--            <if test="reviewerId!=null and reviewerId!=''">reviewer_id=#{reviewerId},</if>-->

@@ -861,7 +861,9 @@ public class TaskServiceImpl implements TaskService {
         return taskMapper.getReviewInfo(itemId);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String passorno(Integer itemId, Integer state, String opinion) {
         // 驳回=4，通过=3，撤回=1
         if (state != null) {
