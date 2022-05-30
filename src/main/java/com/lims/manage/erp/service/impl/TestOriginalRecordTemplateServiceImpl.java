@@ -80,6 +80,9 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
         }*/
         testOriginalRecordTemplate.setUpdateTime(new Date());
         if (this.updateById(testOriginalRecordTemplate)){
+            if (!testOriginalRecordTemplate.getFileUrl().equals(testOriginalRecordTemplate.getCopyUrl())){
+                sysOssService.delAnnounce(testOriginalRecordTemplate.getCopyUrl());
+            }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改原始记录模板"+testOriginalRecordTemplate.getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
             return ResultUtil.success("修改成功!");
         }else {

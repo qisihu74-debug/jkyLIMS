@@ -2,6 +2,7 @@ package com.lims.manage.erp.entity;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -28,6 +29,8 @@ public class TestReportTemplate extends Model<TestReportTemplate> {
     private String reportName;
     //报告模板文件路径
     private String reportFileUri;
+    @TableField(exist = false)
+    private String copyFileUri;
     //是否可用1.可用，0不可用
     private String isAvailable;
     // 0,启用，1,冻结
@@ -141,6 +144,14 @@ public class TestReportTemplate extends Model<TestReportTemplate> {
 
     public void setReportStandard(String reportStandard) {
         this.reportStandard = reportStandard;
+    }
+
+    public String getCopyFileUri() {
+        return copyFileUri;
+    }
+
+    public void setCopyFileUri(String copyFileUri) {
+        this.copyFileUri = copyFileUri;
     }
 
     /**
