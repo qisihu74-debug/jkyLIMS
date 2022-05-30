@@ -1437,8 +1437,9 @@ public class EntrustServiceImpl implements EntrustService {
                 if (list != null && !list.isEmpty()) {
                     // 根据检测项id 查询 默认匹配部门信息
                     for (JudgmentBasisVo data : list) {
-                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
-                        data.setTestingRoom(strings.toString());
+//                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
+//                        data.setTestingRoom(strings.toString());
+                        data.setTestingRoom("——");
                     }
                     sampleEntity.setJudgmentBasisVos(list);
 //                    //根据检测项ID查询可做该检测项的科室labelvalue集合
