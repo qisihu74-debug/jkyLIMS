@@ -452,11 +452,11 @@ public class SampleServiceImpl implements SampleService {
         if (sampleTagInfo != null) {
             // 处理样品描述信息 Outward、 outwardDescribe 组合输出
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(sampleTagInfo.getOutwardDescribe() == null?null:sampleTagInfo.getOutwardDescribe());
+            stringBuilder.append(sampleTagInfo.getOutward() == null?"":sampleTagInfo.getOutward());
             if(stringBuilder.length()>0){
                 stringBuilder.append(",");
             }
-            stringBuilder.append(sampleTagInfo.getOutwardDescribe()==null?null:sampleTagInfo.getOutwardDescribe());
+            stringBuilder.append(sampleTagInfo.getOutwardDescribe()==null?"":sampleTagInfo.getOutwardDescribe());
             stringBuilder.append(",");
             sampleTagInfo.setOutward(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
             // 处理样品描述信息 Outward 清除两边[]
