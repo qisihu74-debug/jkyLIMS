@@ -42,6 +42,8 @@ public class TestProduct extends Model<TestProduct> {
     private Date updateTime;
     //产品用途
     private String productPurpose;
+    //外观描述
+    private String outwardDescribe;
 
     public String getProductPurpose() {
         return productPurpose;
@@ -129,6 +131,14 @@ public class TestProduct extends Model<TestProduct> {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getOutwardDescribe() {
+        return outwardDescribe;
+    }
+
+    public void setOutwardDescribe(String outwardDescribe) {
+        this.outwardDescribe = outwardDescribe;
     }
 
     /**

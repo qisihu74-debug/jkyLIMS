@@ -45,4 +45,9 @@ public class ProductServiceImpl implements ProductService {
         result.put("itemStandard",itemStandard);
         return result;
     }
+
+    @Override
+    public String getProductOutward(Integer productId) {
+        return testProductDao.getProductOutward(productId);
+    }
 }

@@ -69,4 +69,11 @@ public interface TestProductDao extends BaseMapper<TestProduct> {
     int isLast(Integer checkItemId);
 
     List<LabelValueVo> getAllCheckBasis(Integer checkItemId);
+
+    /**
+     * 查询产品的外观描述
+     * @param productId
+     * @return
+     */
+    String getProductOutward(Integer productId);
 }
