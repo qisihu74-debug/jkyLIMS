@@ -54,6 +54,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -552,19 +553,20 @@ public class ReportController {
      * @return
      */
     @PostMapping("submitDownLoad")
-    public String submitDownLoad(@RequestBody ReqBean reqBean) {
-        String url = "";
+    public Result submitDownLoad(@RequestBody ReqBean reqBean) {
         if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
             return null;
         }
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
+        ReportResBean resBean = null;
         if ("原材检测".equals(reqBean.getType())){
-            url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+            resBean = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
         }else {
-            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
+            resBean = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
         }
-        return url;
+
+        return ResultUtil.success(resBean);
     }
 
     /**
@@ -573,10 +575,9 @@ public class ReportController {
      * @return
      */
     @RequestMapping("previewDownLoad")
-    public void previewDownLoad(@RequestParam("json") String json,HttpServletResponse response) {
+    public void previewDownLoad(@RequestParam("json") String json, HttpServletResponse response) {
         String decode = "";
         String url = "";
-        //json = "\"{\"id\":1653880922215100,\"list\":[{\"url\":\"http://121.89.242.0:9000/file-resources/1653308619762103.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220523%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220523T122339Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=36508788f305c2f692143d7467915267abd08f6e340a2838e869d737dae0b361\",\"conclusion\":\"经检测，该土样品,均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：陈海伟；2.见证单位：辽宁省公路工程监理咨询有限公司G577精伊线第五监理驻地办；3.见证人：司建兵；4.委托方提供：无 ；\"},{\"url\":\"http://121.89.242.0:9000/file-resources/1649645248733108.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220411%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220411T024728Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=86b4fc87fb579a9c52628d141ff8960ff1e7d566a584230f1091f86b9cb364da\",\"conclusion\":\"经检测，该土样品,均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：陈海伟；2.见证单位：辽宁省公路工程监理咨询有限公司G577精伊线第五监理驻地办；3.见证人：司建兵；4.委托方提供：无 ；\"},{\"url\":\"http://121.89.242.0:9000/file-resources/1649645324684109.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220411%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220411T024844Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=621bfddf70c4e5bb952335fb438e58223f8d47677bb38b0c932c602071685008\",\"conclusion\":\"经检测，该土样品,均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：陈海伟；2.见证单位：辽宁省公路工程监理咨询有限公司G577精伊线第五监理驻地办；3.见证人：司建兵；4.委托方提供：无 ；\"}],\"type\":\"原材检测\",\"mixInfo\":{}}\"";
         try {
             decode = URLDecoder.decode(json, "UTF-8");
         }catch (Exception e){
@@ -590,11 +591,13 @@ public class ReportController {
         }*/
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
+        ReportResBean resBean = null;
         if ("原材检测".equals(reqBean.getType())){
-            url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+            resBean = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
         }else {
-            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
+            resBean = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
         }
+        url = resBean.getUrl();
         //预览word转pdf
         String[] split = url.split("\\?");
         String[] strings = split[0].split("\\/");
@@ -609,7 +612,9 @@ public class ReportController {
             ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
             InputStream inputStream = FileAndFolderUtil.parseOut(b1);
             //TODO 设置签名信息
-
+            //设置提醒信息
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("alert",java.net.URLEncoder.encode(JSON.toJSONString(resBean.getMap()), "UTF-8"));
             ServletOutputStream outputStream = response.getOutputStream();
             int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
             inputStream.close();
@@ -618,7 +623,6 @@ public class ReportController {
         }catch (Exception e){
             logger.error("预览合并后的报告异常:{}",e);
         }
-        //return url;
     }
 
     @GetMapping("download")

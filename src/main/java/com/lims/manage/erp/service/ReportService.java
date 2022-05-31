@@ -325,7 +325,7 @@ public interface ReportService {
      * @param id
      * @return
      */
-    String submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id);
+    ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id);
 
     /**
      * 获取委托单下各个报告模板所需的检测结论和附加声明的文案
@@ -355,7 +355,7 @@ public interface ReportService {
      * @param id
      * @return
      */
-    String submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id,TestSampleMixInfoEntity mixInfoEntity);
+    ReportResBean submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id,TestSampleMixInfoEntity mixInfoEntity);
 
     String reportUrl(Long entrustId);
 
