@@ -57,7 +57,7 @@ public class CheckItemInfoVo {
     /**
      * 检测样次
      */
-    private int times;
+    private Integer times;
     /**
      * 检测依据集合
      */
@@ -178,11 +178,11 @@ public class CheckItemInfoVo {
         this.state = state;
     }
 
-    public int getTimes() {
+    public Integer getTimes() {
         return times;
     }
 
-    public void setTimes(int times) {
+    public void setTimes(Integer times) {
         this.times = times;
     }
 

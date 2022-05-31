@@ -497,7 +497,7 @@ public class TaskController {
      */
     @GetMapping("downloadEntrust_two")
     public void downloadEntrust_two(Long taskId, HttpServletResponse response) {
-        String fileName = "taskOrder3.docx";
+        String fileName = "taskOrder4.docx";
         String url = "";
         try {
             MinioClient client = MinIoUtil.minioClient;
@@ -513,7 +513,7 @@ public class TaskController {
             int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
             inputStream.close();
             outputStream.close();
-            url = MinIoUtil.upload("task-download", taskId + ".pdf", inputStream, "application/octet-stream");
+//            url = MinIoUtil.upload("task-download", taskId + ".pdf", inputStream, "application/octet-stream");
         } catch (Exception ex) {
             log.info("导出失败：{}", ex);
         }
