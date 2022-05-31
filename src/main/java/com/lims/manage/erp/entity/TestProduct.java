@@ -42,6 +42,8 @@ public class TestProduct extends Model<TestProduct> {
     private Date updateTime;
     //产品用途
     private String productPurpose;
+    //外观描述
+    private String outwardDescribe;
 
     public String getProductPurpose() {
         return productPurpose;

@@ -43,6 +43,8 @@ public class TestProductVo extends Model<TestProductVo> {
     private String productTypeName;
     //产品用途
     private String productPurpose;
+    //外观描述
+    private String outwardDescribe;
     /**
      * 获取主键值
      *
