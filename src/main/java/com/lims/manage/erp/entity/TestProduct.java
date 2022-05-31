@@ -133,6 +133,14 @@ public class TestProduct extends Model<TestProduct> {
         this.updateTime = updateTime;
     }
 
+    public String getOutwardDescribe() {
+        return outwardDescribe;
+    }
+
+    public void setOutwardDescribe(String outwardDescribe) {
+        this.outwardDescribe = outwardDescribe;
+    }
+
     /**
      * 获取主键值
      *

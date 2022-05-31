@@ -39,4 +39,11 @@ public interface ProductService {
      * @return
      */
     Map<String, List<LabelValueVo>> getItemMethodStandard(Integer id);
+
+    /**
+     * 查询产品的外观描述
+     * @param productId
+     * @return
+     */
+    String getProductOutward(Integer productId);
 }

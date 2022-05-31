@@ -110,4 +110,13 @@
             t2.type IN ( 1, 3 )
             and t1.check_item_id = #{checkItemId}
     </select>
+
+    <select id="getProductOutward" parameterType="java.lang.Integer" resultType="java.lang.String">
+        SELECT
+            outward_describe
+        FROM
+            test_product
+        WHERE
+            product_id = #{productId}
+    </select>
 </mapper>
