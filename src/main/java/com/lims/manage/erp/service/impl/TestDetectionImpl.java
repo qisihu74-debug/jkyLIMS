@@ -154,13 +154,14 @@ public class TestDetectionImpl implements TestDetectionService {
             // 检测结论
             sampleItemInstrumentEntity.setResult(data.getResult());
             // 查询 当前检测项状态 文件是否上传
-            SampleItemInstrumentEntity checkItemData = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(sampleItemInstrumentEntity.getItemId());
-            if (checkItemData == null) {
-                return false;
-            }
-            if (checkItemData.getOriginUrl() == null) {
-                return false;
-            }
+//            SampleItemInstrumentEntity checkItemData = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(sampleItemInstrumentEntity.getItemId());
+//            if (checkItemData == null) {
+//                return false;
+//            }
+            // 5月31日 上传原始记录先隐藏掉，也能试验完成，后面流程一样能进行。
+//            if (checkItemData.getOriginUrl() == null) {
+//                return false;
+//            }
             testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
             // 存放 仪器的使用记录
             // 根据检测项 主键 获取 仪器id

@@ -551,7 +551,7 @@ public class TaskController {
     /**
      * 批量上传原始记录 uploading_batch。
      */
-    @GetMapping("/upload_original_records_in_batches")
+    @GetMapping("/uploadingBatch")
     @ResponseBody
     public Result uploadingBatch(@RequestParam List<Integer> ids, MultipartFile file) {
         if (ids == null && ids.size()==0) {
