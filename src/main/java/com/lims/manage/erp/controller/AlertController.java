@@ -32,7 +32,7 @@ public class AlertController {
      * @return
      */
     @GetMapping("alertList")
-    public Result delete(Long entrustId) {
+    public Result alertList(Long entrustId) {
         if (entrustId == null){
             return ResultUtil.error("缺少必要参数");
         }
