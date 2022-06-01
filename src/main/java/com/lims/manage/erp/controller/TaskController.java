@@ -27,13 +27,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
@@ -551,19 +545,24 @@ public class TaskController {
     /**
      * 批量上传原始记录 uploading_batch。
      */
-    @GetMapping("/uploadingBatch")
-    @ResponseBody
-    public Result uploadingBatch(@RequestParam List<Integer> ids, MultipartFile file) {
-        if (ids == null && ids.size()==0) {
-            return ResultUtil.error("缺少必填参数！");
-        }
-        if (file == null) {
-            return ResultUtil.error("样品file文件为空！");
-        }
-        if(taskService.effectDataSet((List<Integer>)ids)==false){
-            return ResultUtil.error("文件已存在");
-        }
-        if (taskService.uploadingBatch((List<Integer>) ids, file) == true) {
+    @PostMapping("/uploadingBatch")
+    public Result uploadingBatch(String[] ids, MultipartFile file) {
+
+//        if (ids == null ) {
+//            return ResultUtil.error("缺少必填参数！");
+//        }
+//        if (file == null) {
+//            return ResultUtil.error("样品file文件为空！");
+//        }
+//        for(int i=0;i<ids.length;i++){
+//            System.out.println(ids[i]);
+//            System.out.println(ids[i]+"转义后---------------"+Integer.parseInt(ids[i]));
+//
+//        }
+//        if(taskService.effectDataSet(null)==false){
+//            return ResultUtil.error("文件已存在");
+//        }
+        if (taskService.uploadingBatch(null, null) == true) {
             return ResultUtil.success("样品文件上传成功");
         }
         return ResultUtil.error("样品文件上传失败");
@@ -639,7 +638,7 @@ public class TaskController {
 
     @RequestMapping("/updatePersonInfo")
     public Result updatePersonInfo(@RequestBody PersonInfoVo vo) {
-        if (vo.getTaskId() == null || vo.getInspector() == null || vo.getRecorder() == null || vo.getReviewer() == null || vo.getReportProducer() == null) {
+        if (vo.getTaskId() == null || vo.getInspector() == null || vo.getRecorder() == null || vo.getReviewer() == null || vo.getReportProducer() == null||vo.getSampler()==null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             int i = taskService.updatePersonInfo(vo);

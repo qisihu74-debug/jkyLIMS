@@ -1,7 +1,10 @@
 package com.lims.manage.erp.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -27,4 +30,18 @@ public class TaskListVo {
      * 样品集合。
      */
     private List<SamplePrivateInfoVo> sampleList;
+    /**
+     * 领样人姓名
+     */
+    private String sampler;
+    /**
+     * 领样时间
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date sampleReceivingTime;
+    /**
+     * 样品描述信息
+     */
+    private String sampleStateDescription;
 }

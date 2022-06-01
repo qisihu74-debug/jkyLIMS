@@ -150,6 +150,9 @@
         <result property="reviewer" column="reviewer"></result>
         <result property="reportProducer" column="reportProducer"></result>
         <result property="issueReport" column="issueReport"></result>
+        <result property="sampler" column="sampler"></result>
+        <result property="sampleReceivingTime" column="sample_receiving_time"></result>
+        <result property="sampleStateDescription" column="sample_state_description"></result>
         <collection property="sampleList" ofType="com.lims.manage.erp.vo.SamplePrivateInfoVo">
             <id property="id" column="sampleId"></id>
             <result property="sampleCode" column="sampeCode"></result>
@@ -428,7 +431,10 @@
         t1.recorder,
         t1.reviewer,
         t1.report_producer reportProducer,
-        t1.issue_report issueReport
+        t1.issue_report issueReport,
+        t1.sampler,
+        t1.sample_receiving_time,
+        t1.sample_state_description
         FROM
         test_task t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
@@ -473,7 +479,10 @@
         t1.recorder,
         t1.reviewer,
         t1.report_producer reportProducer,
-        t1.issue_report issueReport
+        t1.issue_report issueReport,
+        t1.sampler,
+        t1.sample_receiving_time,
+        t1.sample_state_description
         FROM
         test_task t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
@@ -535,6 +544,7 @@
             <if test="signer!=null and signer!=''">signer=#{signer},</if>
             <if test="sampleReceivingTime!=null">sample_receiving_time=#{sampleReceivingTime},</if>
             <if test="sampleStateDescription!=null">sample_state_description=#{sampleStateDescription},</if>
+            <if test="sampler!=null and sampler!=''">sampler=#{sampler},</if>
         </trim>
         where id = #{id}
     </update>
@@ -750,10 +760,15 @@
 
     <update id="updatePersonInfo" parameterType="com.lims.manage.erp.vo.PersonInfoVo">
         update test_task
-        set inspector       = #{inspector,jdbcType=INTEGER},
-            recorder        = #{recorder,jdbcType=VARCHAR},
-            reviewer        = #{reviewer,jdbcType=VARCHAR},
-            report_producer = #{reportProducer,jdbcType=VARCHAR}
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="inspector!=null and inspector!=''">inspector=#{inspector},</if>
+            <if test="recorder!=null and recorder!=''">recorder=#{recorder},</if>
+            <if test="reviewer!=null and reviewer!=''">reviewer=#{reviewer},</if>
+            <if test="reportProducer!=null and reportProducer!=''">report_producer=#{reportProducer},</if>
+            <if test="sampleReceivingTime!=null">sample_receiving_time=#{sampleReceivingTime},</if>
+            <if test="sampleStateDescription!=null">sample_state_description=#{sampleStateDescription},</if>
+            <if test="sampler!=null and sampler!=''">sampler=#{sampler},</if>
+        </trim>
         where id = #{taskId,jdbcType=INTEGER}
     </update>
 
