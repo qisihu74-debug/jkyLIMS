@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -548,21 +549,21 @@ public class TaskController {
     @PostMapping("/uploadingBatch")
     public Result uploadingBatch(String[] ids, MultipartFile file) {
 
-//        if (ids == null ) {
-//            return ResultUtil.error("缺少必填参数！");
-//        }
-//        if (file == null) {
-//            return ResultUtil.error("样品file文件为空！");
-//        }
-//        for(int i=0;i<ids.length;i++){
-//            System.out.println(ids[i]);
-//            System.out.println(ids[i]+"转义后---------------"+Integer.parseInt(ids[i]));
-//
-//        }
-//        if(taskService.effectDataSet(null)==false){
-//            return ResultUtil.error("文件已存在");
-//        }
-        if (taskService.uploadingBatch(null, null) == true) {
+        if (ids == null ) {
+            return ResultUtil.error("缺少必填参数！");
+        }
+        if (file == null) {
+            return ResultUtil.error("样品file文件为空！");
+        }
+        List<Integer> intIds = new ArrayList<>();
+        for(int i=0;i<ids.length;i++){
+            // 字符格式 转义后 int类型。
+            intIds.add(Integer.valueOf(ids[i]));
+        }
+        if(taskService.effectDataSet(intIds)==false){
+            return ResultUtil.error("文件已存在");
+        }
+        if (taskService.uploadingBatch(intIds, file) == true) {
             return ResultUtil.success("样品文件上传成功");
         }
         return ResultUtil.error("样品文件上传失败");
