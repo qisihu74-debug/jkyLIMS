@@ -8,6 +8,7 @@ import com.lims.manage.erp.service.ProductService;
 import com.lims.manage.erp.vo.LabelValueVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -67,5 +68,19 @@ public class ProductController {
         } else {
             return ResultUtil.success(productService.getItemMethodStandard(itemId));
         }
+    }
+
+    /**
+     * 查询产品的外观描述
+     * @param productId
+     * @return
+     */
+    @GetMapping("/getProductOutward")
+    public Result getProductOutward(Integer productId) {
+        if (productId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        String productOutward = productService.getProductOutward(productId);
+        return ResultUtil.success(productOutward);
     }
 }

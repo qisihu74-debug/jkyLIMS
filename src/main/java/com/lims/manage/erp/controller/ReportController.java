@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoResponse;
@@ -12,11 +13,13 @@ import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.AlertService;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
@@ -24,6 +27,7 @@ import com.lims.manage.erp.vo.ReportPreserveVo;
 import io.minio.MinioClient;
 import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -54,6 +58,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -67,6 +73,8 @@ public class ReportController {
     private EntrustService entrustService;
     @Autowired
     private ReportApprovalMapper reportApprovalMapper;
+    @Autowired
+    private AlertService alertService;
 //    @Autowired
 //    private ReportRecordEntityMapper recordEntityMapper;
 
@@ -553,18 +561,34 @@ public class ReportController {
      */
     @PostMapping("submitDownLoad")
     public String submitDownLoad(@RequestBody ReqBean reqBean) {
-        String url = "";
         if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
             return null;
         }
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
+        ReportResBean resBean = null;
         if ("原材检测".equals(reqBean.getType())){
-            url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+            resBean = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
         }else {
-            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
+            resBean = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
         }
-        return url;
+        //保存告警信息
+        List<AlertEntity> list = Lists.newArrayList();
+        Map<String, String> map = resBean.getMap();
+        Set<String> set = map.keySet();
+        for (String s:set) {
+            AlertEntity entity = new AlertEntity();
+            entity.setId(GenID.getID());
+            entity.setCheckItemName(s);
+            entity.setDescrib(map.get(s));
+            entity.setEntrustId(reqBean.getId());
+            list.add(entity);
+        }
+        if (CollectionUtils.isNotEmpty(list)){
+            alertService.deleteByEntrustId(reqBean.getId());
+            alertService.saveBatch(list);
+        }
+        return resBean.getUrl();
     }
 
     /**
@@ -573,7 +597,7 @@ public class ReportController {
      * @return
      */
     @RequestMapping("previewDownLoad")
-    public void previewDownLoad(@RequestParam("json") String json,HttpServletResponse response) {
+    public void previewDownLoad(@RequestParam("json") String json, HttpServletResponse response) {
         String decode = "";
         String url = "";
         try {
@@ -589,11 +613,13 @@ public class ReportController {
         }*/
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
+        ReportResBean resBean = null;
         if ("原材检测".equals(reqBean.getType())){
-            url = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+            resBean = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
         }else {
-            url = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
+            resBean = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
         }
+        url = resBean.getUrl();
         //预览word转pdf
         String[] split = url.split("\\?");
         String[] strings = split[0].split("\\/");
@@ -608,7 +634,23 @@ public class ReportController {
             ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
             InputStream inputStream = FileAndFolderUtil.parseOut(b1);
             //TODO 设置签名信息
-
+            //设置提醒信息
+            //保存告警信息
+            List<AlertEntity> list = Lists.newArrayList();
+            Map<String, String> map = resBean.getMap();
+            Set<String> set = map.keySet();
+            for (String s:set) {
+                AlertEntity entity = new AlertEntity();
+                entity.setId(GenID.getID());
+                entity.setCheckItemName(s);
+                entity.setDescrib(map.get(s));
+                entity.setEntrustId(reqBean.getId());
+                list.add(entity);
+            }
+            if (CollectionUtils.isNotEmpty(list)){
+                alertService.deleteByEntrustId(reqBean.getId());
+                alertService.saveBatch(list);
+            }
             ServletOutputStream outputStream = response.getOutputStream();
             int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
             inputStream.close();
@@ -617,7 +659,6 @@ public class ReportController {
         }catch (Exception e){
             logger.error("预览合并后的报告异常:{}",e);
         }
-        //return url;
     }
 
     @GetMapping("download")

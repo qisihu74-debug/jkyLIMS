@@ -15,6 +15,7 @@ import com.lims.manage.erp.entity.QuotaEntity;
 import com.lims.manage.erp.entity.QuotaRes;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.ReportResBean;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
@@ -986,11 +987,14 @@ public class ReportServiceImpl implements ReportService {
                     conclusionEntity.setAdditional(additionals.get(i));
                     list.add(conclusionEntity);
                 }
+                ReportResBean resBean = null;
                 if ("配合比".equals(type)){
                     TestSampleMixInfoEntity mixInfoEntity = JSON.parseObject(mixInfo,TestSampleMixInfoEntity.class);
-                    url = this.submitDownLoadMix(client, list, Long.parseLong(reportCode),mixInfoEntity);
+                    resBean = this.submitDownLoadMix(client, list, Long.parseLong(reportCode),mixInfoEntity);
+                    url = resBean.getUrl();
                 }else {
-                    url = this.submitDownLoad(client, list, Long.parseLong(reportCode));
+                    resBean = this.submitDownLoad(client, list, Long.parseLong(reportCode));
+                    url = resBean.getUrl();
                 }
                 flag = true;
             }catch (Exception e){
@@ -1595,10 +1599,13 @@ public class ReportServiceImpl implements ReportService {
 
     @SneakyThrows
     @Override
-    public String submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) {
+    public ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) {
         //2代表报告头2页
         int totalPage = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
+        //处理坐标提示信息
+        ReportResBean resBean = new ReportResBean();
+        Map<String,String> mesMap = new HashedMap();
         ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
         int index = 1;
         for (ConclusionEntity conclusionEntity:list) {
@@ -1628,7 +1635,7 @@ public class ReportServiceImpl implements ReportService {
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 1) {
                         rows.get(3).getCell(1).removeParagraph(0);
-                        rows.get(3).getCell(1).setText("河南省公路工程实验检测中心有限公司");
+                        rows.get(3).getCell(1).setText("河南省公路工程试验检测中心有限公司");
                         rows.get(3).getCell(3).removeParagraph(0);
                         rows.get(3).getCell(3).setText(reportRecordEntity.getReportCode());
                         rows.get(4).getCell(1).removeParagraph(0);
@@ -1698,19 +1705,38 @@ public class ReportServiceImpl implements ReportService {
                     }
                     //存放检测数据checkItemList为该报告模板所属的检测项
                     for (ReportRecordDetailEntity item : entities) {
-                        int last = testProductDao.isLast(item.getCheckItemId().intValue());
-                        if (last == 0) {
-                            int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
-                            int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
-                            int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
-                            if (i == page) {
-                                rows.get(row).getCell(column + 1).removeParagraph(0);
-                                rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
-                                rows.get(row).getCell(column + 2).removeParagraph(0);
-                                rows.get(row).getCell(column + 2).setText(item.getCheckResult());
-                                rows.get(row).getCell(column + 3).removeParagraph(0);
-                                rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
+                        if (org.apache.commons.lang3.StringUtils.isNotEmpty(item.getCoordinate())){
+                            int last = testProductDao.isLast(item.getCheckItemId().intValue());
+                            int page = 0;
+                            int row = 0;
+                            int column = 0;
+                            if (last == 0) {
+                                try {
+                                    page = Integer.parseInt(item.getCoordinate().split(",")[0]);
+                                    row = Integer.parseInt(item.getCoordinate().split(",")[1]);
+                                    column = Integer.parseInt(item.getCoordinate().split(",")[2]);
+                                }catch (Exception e){
+                                    mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标格式错误");
+                                    logger.error("检测项在报告中的坐标格式错误:{}",e);
+                                    continue;
+                                }
+                                if (i == page) {
+                                    try {
+                                        rows.get(row).getCell(column + 1).removeParagraph(0);
+                                        rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
+                                        rows.get(row).getCell(column + 2).removeParagraph(0);
+                                        rows.get(row).getCell(column + 2).setText(item.getCheckResult());
+                                        rows.get(row).getCell(column + 3).removeParagraph(0);
+                                        rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
+                                    }catch (Exception e){
+                                        mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标错误");
+                                        logger.error("检测项在报告中的坐标错误:{}",e);
+                                        continue;
+                                    }
+                                }
                             }
+                        }else {
+                            mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标未录入");
                         }
                     }
                     //处理附加声明和检测结论
@@ -1728,6 +1754,8 @@ public class ReportServiceImpl implements ReportService {
                 map.put(index,doc);
             }
         }
+        //存放提示信息
+        resBean.setMap(mesMap);
         //获取报告头部模板填充头部数据
         InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
         XWPFDocument topDoc = new XWPFDocument(fileStream);;
@@ -1747,12 +1775,14 @@ public class ReportServiceImpl implements ReportService {
             stringBuilder.append("&&");
         }
         updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
-        return url;
+        //存放提示信息
+        resBean.setUrl(url);
+        return resBean;
     }
 
     @SneakyThrows
     @Override
-    public String submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id,TestSampleMixInfoEntity mixInfoEntity) {
+    public ReportResBean submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id,TestSampleMixInfoEntity mixInfoEntity) {
         //配合比实验，设计到原材的报告模板忽略
         List<ConclusionEntity> conclusionEntityList = Lists.newArrayList();
         for (ConclusionEntity entity :list) {
@@ -1767,6 +1797,10 @@ public class ReportServiceImpl implements ReportService {
         //2代表报告头2页
         int totalPage = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
+        //处理坐标提示信息
+        ReportResBean resBean = new ReportResBean();
+        Map<String,String> mesMap = new HashedMap();
+
         ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
         int index = 1;
         for (ConclusionEntity conclusionEntity:conclusionEntityList) {
@@ -1796,7 +1830,7 @@ public class ReportServiceImpl implements ReportService {
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 1) {
                         rows.get(3).getCell(1).removeParagraph(0);
-                        rows.get(3).getCell(1).setText("河南省公路工程实验检测中心有限公司");
+                        rows.get(3).getCell(1).setText("河南省公路工程试验检测中心有限公司");
                         rows.get(3).getCell(3).removeParagraph(0);
                         rows.get(3).getCell(3).setText(reportRecordEntity.getReportCode());
                         rows.get(4).getCell(1).removeParagraph(0);
@@ -1914,15 +1948,34 @@ public class ReportServiceImpl implements ReportService {
                         }
                         //存放检测数据checkItemList为该报告模板所属的检测项
                         for (ReportRecordDetailEntity item : entities) {
-                            int last = testProductDao.isLast(item.getCheckItemId().intValue());
-                            if (last == 0) {
-                                int page = Integer.parseInt(item.getCoordinate().split(",")[0]);
-                                int row = Integer.parseInt(item.getCoordinate().split(",")[1]);
-                                int column = Integer.parseInt(item.getCoordinate().split(",")[2]);
-                                if (i == page) {
-                                    rows.get(row).getCell(column + 1).removeParagraph(0);
-                                    rows.get(row).getCell(column + 1).setText(item.getCheckResult());
+                            if (org.apache.commons.lang3.StringUtils.isNotEmpty(item.getCoordinate())){
+                                int last = testProductDao.isLast(item.getCheckItemId().intValue());
+                                int page = 0;
+                                int row = 0;
+                                int column = 0;
+                                if (last == 0) {
+                                    try {
+                                        page = Integer.parseInt(item.getCoordinate().split(",")[0]);
+                                        row = Integer.parseInt(item.getCoordinate().split(",")[1]);
+                                        column = Integer.parseInt(item.getCoordinate().split(",")[2]);
+                                    }catch (Exception e){
+                                        mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标格式错误");
+                                        logger.error("检测项在报告中的坐标格式错误:{}",e);
+                                        continue;
+                                    }
+                                    if (i == page) {
+                                        try {
+                                            rows.get(row).getCell(column + 1).removeParagraph(0);
+                                            rows.get(row).getCell(column + 1).setText(item.getCheckResult());
+                                        }catch (Exception e){
+                                            mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标错误");
+                                            logger.error("检测项在报告中的坐标错误:{}",e);
+                                            continue;
+                                        }
+                                    }
                                 }
+                            }else {
+                                mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标未录入");
                             }
                         }
                         //处理附加声明和检测结论
@@ -1939,6 +1992,8 @@ public class ReportServiceImpl implements ReportService {
                 map.put(index,doc);
             }
         }
+        //存放提示信息
+        resBean.setMap(mesMap);
         //获取报告头部模板填充头部数据
         InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
         XWPFDocument topDoc = new XWPFDocument(fileStream);
@@ -1958,7 +2013,7 @@ public class ReportServiceImpl implements ReportService {
             stringBuilder.append("&&");
         }
         updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
-        return url;
+        return resBean;
     }
 
     /**
