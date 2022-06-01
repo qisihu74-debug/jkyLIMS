@@ -1,9 +1,7 @@
 package com.lims.manage.erp.config;
 
 
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.*;
 
 import java.util.List;
 import java.util.Map;
@@ -72,5 +70,27 @@ public class PoiConfig {
             check = true;
         }
         return check;
+    }
+    /**
+     * 遍历表格
+     * @param rows 表格行对象
+     * @param textMap 需要替换的信息集合
+     */
+    public static void eachTable(List<XWPFTableRow> rows , Map<String, String> textMap){
+        for (XWPFTableRow row : rows) {
+            List<XWPFTableCell> cells = row.getTableCells();
+            for (XWPFTableCell cell : cells) {
+                //判断单元格是否需要替换
+                if(checkText(cell.getText())){
+                    List<XWPFParagraph> paragraphs = cell.getParagraphs();
+                    for (XWPFParagraph paragraph : paragraphs) {
+                        List<XWPFRun> runs = paragraph.getRuns();
+                        for (XWPFRun run : runs) {
+                            run.setText(changeValue(run.toString(), textMap),0);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
