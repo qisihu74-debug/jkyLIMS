@@ -23,3 +23,8 @@ UPDATE sys_function set kanban_name = "待审核" WHERE function_id = 44;
 UPDATE sys_function set kanban_name = "待签发" WHERE function_id = 45;
 UPDATE sys_function set kanban_name = "待盖章" WHERE function_id = 46;
 UPDATE sys_function set kanban_name = "待发出报告" WHERE function_id = 47;
+--6.2--
+INSERT INTO `sys_function` (`function_id`, `function_pid`, `name`, `sort`) VALUES ('65', '39', '报告查询', '9')
+
+ALTER TABLE `test_product`
+ADD COLUMN `outward_describe`  varchar(255) NULL COMMENT '外观描述' AFTER `outward_describe`;
