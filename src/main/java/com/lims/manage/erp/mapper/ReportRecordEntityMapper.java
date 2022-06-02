@@ -2,6 +2,8 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.ReportDetailListParamVo;
+import com.lims.manage.erp.vo.ReportDetailListVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
@@ -194,4 +196,7 @@ public interface ReportRecordEntityMapper {
      * 统计报告的状态
      */
     Integer selectCount(Integer state);
+
+    List<ReportDetailListVo> reportList(ReportDetailListParamVo paramVo);
+
 }

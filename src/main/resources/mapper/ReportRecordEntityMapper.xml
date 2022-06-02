@@ -600,4 +600,62 @@
         state =#{state}
     </select>
 
+    <resultMap id="reportDetailListResult" type="com.lims.manage.erp.vo.ReportDetailListVo">
+        <result property="entrustmentNo" column="entrustment_no"></result>
+        <result property="reportCode" column="report_code"></result>
+        <result property="sampleName" column="sample_name"></result>
+        <result property="applicant" column="applicant"></result>
+        <result property="reportCompleteTime" column="report_complete_time"></result>
+        <result property="addressee" column="addressee"></result>
+        <result property="reportTime" column="report_time"></result>
+        <collection property="taskCodes" ofType="com.lims.manage.erp.vo.TaskCodeVo">
+            <result property="taskCode" column="taskCode"></result>
+            <result property="teamName" column="teamName"></result>
+        </collection>
+    </resultMap>
+
+    <select id="reportList" resultMap="reportDetailListResult"
+            parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
+        SELECT
+        t2.entrustment_no,
+        t1.report_code,
+        t1.sample_name,
+        t1.applicant,
+        t1.report_complete_time,
+        t1.addressee,
+        t1.report_time,
+        t3.task_code taskCode,
+        t4.NAME teamName
+        FROM
+        test_report_record t1
+        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+        LEFT JOIN test_task t3 ON t1.entrustment_id = t3.entrustment_id
+        LEFT JOIN test_team t4 ON t3.dept_id = t4.id
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            t1.applicant is not null
+            <if test="entrustmentNo!=null and entrustmentNo!=''">
+                and t2.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
+            </if>
+            <if test="taskCode!=null and taskCode!=''">
+                and t3.task_code LIKE CONCAT('%',#{taskCode},'%')
+            </if>
+            <if test="reportCode!=null and reportCode!=''">
+                and t1.report_code LIKE CONCAT('%',#{reportCode},'%')
+            </if>
+            <if test="sampleName!=null and sampleName!=''">
+                and t1.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            </if>
+            <if test="applicant!=null and applicant!=''">
+                and t1.applicant LIKE CONCAT('%',#{applicant},'%')
+            </if>
+            <if test="startDate!=null">
+                and <![CDATA[  DATE_FORMAT(t1.report_complete_time, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>
+            </if>
+            <if test="endingDate!=null">
+                and <![CDATA[  DATE_FORMAT(t1.report_complete_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
+            </if>
+        </trim>
+        ORDER BY
+        t2.entrustment_no
+    </select>
 </mapper>

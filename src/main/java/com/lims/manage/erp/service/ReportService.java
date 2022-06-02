@@ -360,4 +360,11 @@ public interface ReportService {
     String reportUrl(Long entrustId);
 
     String insertPicToPdf(String url, Long entrustId) throws Exception;
+
+    /**
+     * 报告查询列表
+     * @param paramVo
+     * @return
+     */
+    PageInfo reportList(ReportDetailListParamVo paramVo);
 }

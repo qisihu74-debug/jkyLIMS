@@ -40,25 +40,8 @@ import com.lims.manage.erp.mapper.TestReportTemplateDao;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.util.AsposeUtil;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.FileAndFolderUtil;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.HttpDownloadUtil;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.PdfDoc;
-import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.util.WordUtils;
-import com.lims.manage.erp.vo.ConcreteSampleVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
-import com.lims.manage.erp.vo.ReportDetailVo;
-import com.lims.manage.erp.vo.ReportHistoryDetailVo;
-import com.lims.manage.erp.vo.ReportListVo;
-import com.lims.manage.erp.vo.ReportPreserveVo;
-import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.util.*;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import org.apache.commons.collections.map.HashedMap;
@@ -84,7 +67,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -2243,5 +2228,30 @@ public class ReportServiceImpl implements ReportService {
             FileAndFolderUtil.delete(del);
         }
         return url;
+    }
+
+    @Override
+    public PageInfo reportList(ReportDetailListParamVo paramVo) {
+        if (paramVo.getReportCompleteTime() != null) {
+            String[] strArry = paramVo.getReportCompleteTime().split("~");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                paramVo.setStartDate(dateFormat.parse(strArry[0]));
+            } catch (ParseException e) {
+                logger.error("====报告查询列表开始时间转换失败====");
+                e.printStackTrace();
+            }
+            try {
+                paramVo.setEndingDate(dateFormat.parse(strArry[1]));
+            } catch (ParseException e) {
+                logger.error("====报告查询列表结束时间转换失败====");
+                e.printStackTrace();
+            }
+        }
+        List<ReportDetailListVo> reportDetailListVos = entityMapper.reportList(paramVo);
+        PageInfo<ReportDetailListVo> pageInfo = PageInfoUtils.list2PageInfo(reportDetailListVos,
+                paramVo.getPageNum(),
+                paramVo.getPageSize());
+        return pageInfo;
     }
 }

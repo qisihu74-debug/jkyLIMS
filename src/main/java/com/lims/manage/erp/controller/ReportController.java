@@ -23,6 +23,7 @@ import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.ReportDetailListParamVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import io.minio.MinioClient;
 import io.minio.errors.MinioException;
@@ -842,5 +843,15 @@ public class ReportController {
             logger.error("===");
         }
 
+    }
+
+    @PostMapping("reportList")
+    public Result reportList(@RequestBody ReportDetailListParamVo paramVo) {
+        if (paramVo.getPageNum() == null || paramVo.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        logger.info("分页参数pageNum:{},pageSize:{}", paramVo.getPageNum(), paramVo.getPageSize());
+        PageInfo pageInfo = reportService.reportList(paramVo);
+        return ResultUtil.success(pageInfo);
     }
 }
