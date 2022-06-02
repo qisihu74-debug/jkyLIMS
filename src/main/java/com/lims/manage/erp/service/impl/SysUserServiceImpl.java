@@ -316,6 +316,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
         }
         if (StringUtils.isNotEmpty(url)){
             try {
+                url = url.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
                 String decode = URLDecoder.decode(url, "utf-8");
                 decode = decode.substring(0,decode.indexOf("?"));
                 LambdaUpdateWrapper<SysUserEntity> updateWrapper = new LambdaUpdateWrapper<>();

@@ -602,9 +602,11 @@ public class ReportController {
         String decode = "";
         String url = "";
         try {
+            json = json.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+            json = json.replaceAll("\\+", "%2B");
             decode = URLDecoder.decode(json, "UTF-8");
         }catch (Exception e){
-
+            logger.error("处理json参数转码错误:{}",e);
         }
         String unescapeJava = StringEscapeUtils.unescapeJava(decode);
         String substring = unescapeJava.substring(1, unescapeJava.length() - 1);
