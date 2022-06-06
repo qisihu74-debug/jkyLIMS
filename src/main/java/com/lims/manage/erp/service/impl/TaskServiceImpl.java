@@ -541,7 +541,6 @@ public class TaskServiceImpl implements TaskService {
         StringBuilder stringBuilder = new StringBuilder();
         Integer cost = 0;
         for (int j = 0; j < tables.size(); j++) {
-            System.out.println("表格信息\t"+j);
             List<XWPFTableRow> rows = tables.get(j).getRows();
             //表头部分
             Map<String, String> testMap = new HashMap<String, String>();
@@ -638,9 +637,8 @@ public class TaskServiceImpl implements TaskService {
                 rows.get(3).getTableCells().get(1).setText(taskDetailInfoVo.getRequiredCompletionTime());
                 // 本单产值
                 rows.get(3).getTableCells().get(3).setText(String.valueOf(cost));
-            }
             // 获取委托单印章
-            if (taskDetailInfoVo.getSealType() != null && j == 1) {
+            if (taskDetailInfoVo.getSealType() != null) {
                 String[] sealTypes = taskDetailInfoVo.getSealType().split(",");
                 // 任务单表格数据
                 List<String> totalData = new ArrayList<>();
@@ -673,6 +671,10 @@ public class TaskServiceImpl implements TaskService {
                     }
                 }
                 rows.get(20).getTableCells().get(1).setText(sealType.toString());
+            }
+            else{
+                rows.get(20).getTableCells().get(1).setText("□综合甲级□CMA□CNAS");
+            }
             }
         }
         return doc;

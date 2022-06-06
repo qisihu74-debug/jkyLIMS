@@ -292,21 +292,31 @@ public class SampleServiceImpl implements SampleService {
 //                    }
 //                }
 
-                StringBuilder outward = new StringBuilder();
-                if(sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
-                    String replace = sampleTagInfo.getOutward().replace("[","");
-                    String replace1 = replace.replace("]", "");
-                    outward.append(replace1);
-                    if(sampleTagInfo.getOutwardDescribe() != null && !sampleTagInfo.getOutwardDescribe().equals("")){
-                        outward.append(",");
-                        outward.append(sampleTagInfo.getOutwardDescribe());
-                    }
-                }else{
-                    if(sampleTagInfo.getOutwardDescribe() != null && !sampleTagInfo.getOutwardDescribe().equals("")){
-                        outward.append(sampleTagInfo.getOutwardDescribe());
-                    }
+//                StringBuilder outward = new StringBuilder();
+//                if(sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
+//                    String replace = sampleTagInfo.getOutward().replace("[","");
+//                    String replace1 = replace.replace("]", "");
+//                    outward.append(replace1);
+//                    if(sampleTagInfo.getOutwardDescribe() != null && !sampleTagInfo.getOutwardDescribe().equals("")){
+//                        outward.append(",");
+//                        outward.append(sampleTagInfo.getOutwardDescribe());
+//                    }
+//                }else{
+//                    if(sampleTagInfo.getOutwardDescribe() != null && !sampleTagInfo.getOutwardDescribe().equals("")){
+//                        outward.append(sampleTagInfo.getOutwardDescribe());
+//                    }
+//                }
+//                sampleTagInfo.setOutward(outward.toString());
+                // 处理样品描述信息 Outward、 outwardDescribe 组合输出
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append(sampleTagInfo.getOutward().length() == 0?"":sampleTagInfo.getOutward()+",");
+                stringBuilder.append(sampleTagInfo.getOutwardDescribe().length()==0?"":sampleTagInfo.getOutwardDescribe()+",");
+                if(stringBuilder.length()>1){
+                    sampleTagInfo.setOutward(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
                 }
-                sampleTagInfo.setOutward(outward.toString());
+                else {
+                    sampleTagInfo.setOutward("");
+                }
 
                 for (int i = 1; i <= maxNumber; i++) {
                     InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
@@ -387,21 +397,30 @@ public class SampleServiceImpl implements SampleService {
 //
 //            }
 
-            StringBuilder outward = new StringBuilder();
-            if(sampleData.getOutward() != null && !sampleData.getOutward().equals("")) {
-                String replace = sampleData.getOutward().replace("[","");
-                String replace1 = replace.replace("]", "");
-                outward.append(replace1);
-                if(sampleData.getOutwardDescribe() != null && !sampleData.getOutwardDescribe().equals("")){
-                    outward.append(",");
-                    outward.append(sampleData.getOutwardDescribe());
-                }
-            }else{
-                if(sampleData.getOutwardDescribe() != null && !sampleData.getOutwardDescribe().equals("")){
-                    outward.append(sampleData.getOutwardDescribe());
-                }
+//            StringBuilder outward = new StringBuilder();
+//            if(sampleData.getOutward() != null && !sampleData.getOutward().equals("")) {
+//                String replace = sampleData.getOutward().replace("[","");
+//                String replace1 = replace.replace("]", "");
+//                outward.append(replace1);
+//                if(sampleData.getOutwardDescribe() != null && !sampleData.getOutwardDescribe().equals("")){
+//                    outward.append(",");
+//                    outward.append(sampleData.getOutwardDescribe());
+//                }
+//            }else{
+//                if(sampleData.getOutwardDescribe() != null && !sampleData.getOutwardDescribe().equals("")){
+//                    outward.append(sampleData.getOutwardDescribe());
+//                }
+//            }
+//            sampleData.setOutward(outward.toString());
+            // 处理样品描述信息 Outward、 outwardDescribe 组合输出
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(sampleData.getOutward().length() == 0?"":sampleData.getOutward()+",");
+            stringBuilder.append(sampleData.getOutwardDescribe().length()==0?"":sampleData.getOutwardDescribe()+",");
+            if(stringBuilder.length()>1){
+                sampleData.setOutward(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
             }
-            sampleData.setOutward(outward.toString());
+            sampleData.setOutward("");
+
 
             InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
             StringBuilder fileName = new StringBuilder("");
