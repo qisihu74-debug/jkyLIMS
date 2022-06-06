@@ -358,7 +358,7 @@ public interface EntrustEntityMapper extends BaseMapper {
     Long getEntrustIdByCode(@Param("reportCode") String reportCode);
 
     @Select("select sum(price) from test_entrusted_payment_record_info where entrustment_id=#{entrustmentId}")
-    Integer getRecordCountById(@Param("entrustmentId") Long entrustmentId);
+    String getRecordCountById(@Param("entrustmentId") Long entrustmentId);
 
     List<String> getTaskCode(Long id);
 
