@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 import com.google.common.collect.Maps;
+import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.mapper.ProductItemEntityMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.ProductService;
@@ -47,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public String getProductOutward(Integer productId) {
+    public SampleEntity getProductOutward(Integer productId) {
         return testProductDao.getProductOutward(productId);
     }
 }
