@@ -111,9 +111,9 @@
             and t1.check_item_id = #{checkItemId}
     </select>
 
-    <select id="getProductOutward" parameterType="java.lang.Integer" resultType="java.lang.String">
+    <select id="getProductOutward" parameterType="java.lang.Integer" resultType="com.lims.manage.erp.entity.SampleEntity">
         SELECT
-            outward_describe
+            outward_describe outwardDescribe
         FROM
             test_product
         WHERE

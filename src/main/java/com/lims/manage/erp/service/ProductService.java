@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 
@@ -45,5 +46,5 @@ public interface ProductService {
      * @param productId
      * @return
      */
-    String getProductOutward(Integer productId);
+    SampleEntity getProductOutward(Integer productId);
 }

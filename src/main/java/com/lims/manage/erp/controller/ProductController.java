@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -80,7 +81,6 @@ public class ProductController {
         if (productId == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }
-        String productOutward = productService.getProductOutward(productId);
-        return ResultUtil.success(productOutward);
+        return ResultUtil.success(productService.getProductOutward(productId));
     }
 }

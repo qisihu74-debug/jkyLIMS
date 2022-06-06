@@ -2,6 +2,7 @@ package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.EntrustHistoryEntity;
@@ -625,5 +626,23 @@ public class EntrustController {
         } else {
             return ResultUtil.error(678, "新增委托失败！");
         }
+    }
+
+    /**
+     * 查询任务来源
+     * @return
+     */
+    @GetMapping("/getTaskSource")
+    public Result getTaskSource() {
+        String[] arr = {"省内","云南","甘肃","广西","新疆","西藏","杭州","江西","安徽","检测七所","生产管理办"};
+        List<LabelValueVo> taskSource = Lists.newArrayList();
+        for (int i = 0; i < arr.length; i++) {
+            Long value = 1L+i;
+            LabelValueVo vo = new LabelValueVo();
+            vo.setValue(value);
+            vo.setLabel(arr[i]);
+            taskSource.add(vo);
+        }
+        return ResultUtil.success(taskSource);
     }
 }
