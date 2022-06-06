@@ -1686,7 +1686,9 @@ public class EntrustServiceImpl implements EntrustService {
             entrustAddVo.setSealTypes(entrustAddVo.getSealType().split(","));
         }
         // 通过委托单id 获取缴费记录 依据id 同价价格
-        entrustAddVo.setPaymentRecordShow(entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId));
+        String total = entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId);
+        entrustAddVo.setPaymentRecordShow((total.length() == 0 ? "--" : total + ""));
+        entrustAddVo.setPaymentRecord((total.length() == 0 ? "--" : total + ""));
         // -- 支付方式。
 //        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
         // 联系地址
