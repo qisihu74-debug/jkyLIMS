@@ -24,6 +24,7 @@ public class ReportListVo {
      */
     private Integer state;
     private Integer productId;
+    private String entrustmentNo;
 
     private List<Long> deptIds;
 

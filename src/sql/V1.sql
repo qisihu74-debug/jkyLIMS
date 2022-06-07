@@ -28,3 +28,17 @@ INSERT INTO `sys_function` (`function_id`, `function_pid`, `name`, `sort`) VALUE
 
 ALTER TABLE `test_product`
 ADD COLUMN `outward_describe`  varchar(255) NULL COMMENT '外观描述' AFTER `outward_describe`;
+--增加 中间报告菜单
+INSERT INTO `sys_function`(`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES (66, 39, '中间报告', 3, 0, NULL);
+--修改任务管理下菜单排序
+UPDATE sys_function SET sort=4 WHERE function_id= 42;
+UPDATE sys_function SET sort=5 WHERE function_id= 43;
+UPDATE sys_function SET sort=6 WHERE function_id= 44;
+UPDATE sys_function SET sort=7 WHERE function_id= 45;
+UPDATE sys_function SET sort=8 WHERE function_id= 46;
+UPDATE sys_function SET sort=9 WHERE function_id= 47;
+UPDATE sys_function SET sort=10 WHERE function_id= 65;
+
+ALTER TABLE `test_report_record`
+ADD COLUMN `type`  int NULL DEFAULT 0 COMMENT '0,最终报告，1中间报告' AFTER `type`;
+

@@ -430,4 +430,31 @@
         </set>
         where id = #{id,jdbcType=INTEGER}
     </update>
+
+    <select id="getMiddleReportList" resultType="com.lims.manage.erp.vo.ReportListVo">
+        SELECT DISTINCT
+        t1.id,
+        t2.entrustment_no,
+        t4.sample_name,
+        t2.request_date
+        FROM
+        test_task t1
+        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+        LEFT JOIN test_entrusted_sample_details_rel t3 ON t1.entrustment_id = t3.entrustment_id
+        LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
+        LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.entrustment_id = t5.entrust_id
+        WHERE
+        t1.state = 3
+        AND t5.state = 3
+        <if test="entrustmentNo!=null and entrustmentNo!=''">
+            and t2.entrustment_no like CONCAT('%',#{entrustmentNo},'%')
+        </if>
+        <if test="deptIds!=null">
+            and t1.dept_id in
+            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        order by t2.entrustment_no desc
+    </select>
 </mapper>

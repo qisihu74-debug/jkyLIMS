@@ -367,4 +367,13 @@ public interface ReportService {
      * @return
      */
     PageInfo reportList(ReportDetailListParamVo paramVo);
+
+    /**
+     * 中间报告列表
+     * @param pageNum
+     * @param pageSize
+     * @param search
+     * @return
+     */
+    PageInfo middleReportList(Integer pageNum,Integer pageSize,String search);
 }
