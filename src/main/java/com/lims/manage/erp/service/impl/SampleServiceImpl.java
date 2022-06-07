@@ -309,8 +309,12 @@ public class SampleServiceImpl implements SampleService {
 //                sampleTagInfo.setOutward(outward.toString());
                 // 处理样品描述信息 Outward、 outwardDescribe 组合输出
                 StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(sampleTagInfo.getOutward().length() == 0?"":sampleTagInfo.getOutward()+",");
-                stringBuilder.append(sampleTagInfo.getOutwardDescribe().length()==0?"":sampleTagInfo.getOutwardDescribe()+",");
+                if(sampleTagInfo.getOutward()!=null&&sampleTagInfo.getOutward().length() >0){
+                    stringBuilder.append(sampleTagInfo.getOutward()+",");
+                }
+                if(sampleTagInfo.getOutwardDescribe()!=null&&sampleTagInfo.getOutwardDescribe().length()>0){
+                    stringBuilder.append(sampleTagInfo.getOutwardDescribe()+",");
+                }
                 if(stringBuilder.length()>1){
                     sampleTagInfo.setOutward(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
                 }
@@ -414,8 +418,12 @@ public class SampleServiceImpl implements SampleService {
 //            sampleData.setOutward(outward.toString());
             // 处理样品描述信息 Outward、 outwardDescribe 组合输出
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(sampleData.getOutward().length() == 0?"":sampleData.getOutward()+",");
-            stringBuilder.append(sampleData.getOutwardDescribe().length()==0?"":sampleData.getOutwardDescribe()+",");
+            if(sampleData.getOutward()!=null&&sampleData.getOutward().length() >0){
+                stringBuilder.append(sampleData.getOutward()+",");
+            }
+            if(sampleData.getOutwardDescribe()!=null&&sampleData.getOutwardDescribe().length()>0){
+                stringBuilder.append(sampleData.getOutwardDescribe()+",");
+            }
             if(stringBuilder.length()>1){
                 sampleData.setOutward(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
             }
