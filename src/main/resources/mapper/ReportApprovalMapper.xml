@@ -14,7 +14,8 @@
         state,
         applicant,
         verifyer,
-        verifyer_time
+        verifyer_time,
+        type reportTypeStatus
         FROM
         test_report_record
         WHERE
@@ -25,6 +26,9 @@
         </foreach>
             <if test="search!=null and search!=''">
                 and report_code like CONCAT('%',#{search},'%')
+            </if>
+            <if test="reportTypeStatus!=null">
+                and type = #{reportTypeStatus}
             </if>
         ORDER BY report_complete_time desc
     </select>
@@ -62,7 +66,8 @@
             state,
             applicant,
             verifyer,
-            verifyer_time
+            verifyer_time,
+            type reportTypeStatus
         FROM
             test_report_record
         WHERE
@@ -73,6 +78,9 @@
         </foreach>
         <if test="search!=null and search!=''">
             and report_code like CONCAT('%',#{search},'%')
+        </if>
+        <if test="reportTypeStatus!=null">
+            and type = #{reportTypeStatus}
         </if>
         ORDER BY verifyer_time desc
     </select>
@@ -195,7 +203,8 @@
         applicant,
         issuer,
         issuer_time,
-        verifyer_time
+        verifyer_time,
+        type reportTypeStatus
         FROM
         test_report_record
         WHERE  verifyer_time is not NULL
@@ -205,6 +214,9 @@
         </foreach>
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
+        </if>
+        <if test="reportTypeStatus!=null">
+            and type = #{reportTypeStatus}
         </if>
         order by verifyer_time desc
     </select>
@@ -220,7 +232,8 @@
         applicant,
         issuer,
         issuer_time,
-        verifyer_time
+        verifyer_time,
+        type reportTypeStatus
         FROM
         test_report_record
         WHERE  issuer_time is not NULL
@@ -230,6 +243,9 @@
         </foreach>
         <if test="search!=null and search!=''">
             and report_code like CONCAT('%',#{search},'%')
+        </if>
+        <if test="reportTypeStatus!=null">
+            and type = #{reportTypeStatus}
         </if>
         order by issuer_time desc
     </select>

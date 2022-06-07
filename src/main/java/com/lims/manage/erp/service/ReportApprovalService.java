@@ -50,7 +50,7 @@ public interface ReportApprovalService {
      * @param pageSize
      * @return
      */
-    PageInfo applyfor_history(String search, Integer pageNum, Integer pageSize);
+    PageInfo applyfor_history(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus);
 
     /**
      * 查看报告详情
@@ -75,7 +75,7 @@ public interface ReportApprovalService {
      * @param pageSize
      * @return
      */
-    PageInfo getVerify_list(String search, Integer pageNum, Integer pageSize);
+    PageInfo getVerify_list(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus);
 
     /**
      * 签发抢单
@@ -112,7 +112,7 @@ public interface ReportApprovalService {
      * @param pageSize
      * @return
      */
-    PageInfo getApplyforList(String search, Integer pageNum, Integer pageSize);
+    PageInfo getApplyforList(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus);
 
     /**
      * 报告签发历史记录
@@ -121,5 +121,5 @@ public interface ReportApprovalService {
      * @param pageSize
      * @return
      */
-    PageInfo verifyHistory(String search, Integer pageNum, Integer pageSize);
+    PageInfo verifyHistory(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus);
 }
