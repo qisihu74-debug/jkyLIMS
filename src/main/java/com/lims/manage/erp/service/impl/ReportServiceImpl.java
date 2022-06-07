@@ -40,8 +40,28 @@ import com.lims.manage.erp.mapper.TestReportTemplateDao;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.HttpDownloadUtil;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.PageInfoUtils;
+import com.lims.manage.erp.util.PdfDoc;
+import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.WordUtils;
+import com.lims.manage.erp.vo.ConcreteSampleVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
+import com.lims.manage.erp.vo.ReportDetailListParamVo;
+import com.lims.manage.erp.vo.ReportDetailListVo;
+import com.lims.manage.erp.vo.ReportDetailVo;
+import com.lims.manage.erp.vo.ReportHistoryDetailVo;
+import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import org.apache.commons.collections.map.HashedMap;
@@ -66,7 +86,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -1026,8 +1045,12 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         //设置签名信息
+        String url1 = "";
         try {
-            url = insertPicToPdf(url,Long.parseLong(reportCode));
+            url1 = insertPicToPdf(url,Long.parseLong(reportCode));
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)){
+                url = url1;
+            }
         }catch (Exception e){
             logger.error("报告签名失败:{}",e);
         }
@@ -2151,6 +2174,7 @@ public class ReportServiceImpl implements ReportService {
      * @param entrustId 委托单id
      * @throws Exception
      */
+    @Override
     public String insertPicToPdf(String pdfUrl, Long entrustId) throws Exception {
         HashSet<String> delList = new HashSet<>();
         ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(entrustId);//审核人、签发人
@@ -2175,6 +2199,9 @@ public class ReportServiceImpl implements ReportService {
             String signature = sysUserDao.getSignatureById(uId);
             checkUrl.add(signature);
         }
+        if (StringUtils.isEmpty(verUrl) || StringUtils.isEmpty(verUrl) || checkUrl.size()<1){
+            return "";
+        }
         String basePath = qiYueSuoEntity.getAutographPath();
         logger.info("临时文件路径:{}",basePath);
         //临时文件路径（使用后删除）
@@ -2183,24 +2210,20 @@ public class ReportServiceImpl implements ReportService {
         String suffix = ".pdf";
         //现将服务器上的报告文件、图片签名文件缓存到本地
         String localPdfPath = HttpDownloadUtil.download(pdfUrl, basePath);
-        String verUrlPath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", basePath);
+        String verUrlPath = HttpDownloadUtil.download(verUrl, basePath);
         delList.add(basePath+verUrlPath);
-        String issUrlPath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", basePath);
+        String issUrlPath = HttpDownloadUtil.download(issUrl, basePath);
         delList.add(basePath+issUrlPath);
         String signaturePath = "";
         float x = 1;
         float y = -10;
         int index = 1;
-        //添加测试数据，使用后删除
-        if (checkUrl.size()<=1){
-            checkUrl.add("1");
-        }
         startPath= basePath+localPdfPath;
         delList.add(startPath);
         endPath = basePath+1+suffix;
         delList.add(endPath);
         for (String s:checkUrl) {
-            signaturePath = HttpDownloadUtil.download("http://121.89.242.0:9000/personal-signature/1647502446459100.png", basePath);
+            signaturePath = HttpDownloadUtil.download(s, basePath);
             //图片插入
             PdfDoc pdf = new PdfDoc(startPath, endPath);
             pdf.addImage(basePath+signaturePath, "检测：",x,y, 30, 20);

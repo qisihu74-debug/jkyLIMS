@@ -28,3 +28,7 @@ INSERT INTO `sys_function` (`function_id`, `function_pid`, `name`, `sort`) VALUE
 
 ALTER TABLE `test_product`
 ADD COLUMN `outward_describe`  varchar(255) NULL COMMENT '外观描述' AFTER `outward_describe`;
+
+ALTER TABLE `test_report_record`
+ADD COLUMN `type`  int NULL DEFAULT 0 COMMENT '0,最终报告，1中间报告' AFTER `type`;
+
