@@ -2254,4 +2254,13 @@ public class ReportServiceImpl implements ReportService {
                 paramVo.getPageSize());
         return pageInfo;
     }
+
+    @Override
+    public PageInfo middleReportList(Integer pageNum, Integer pageSize, String search) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        PageHelper.startPage(pageNum, pageSize);
+        List<ReportListVo> list = reportMapper.getMiddleReportList(userTeamIds, search);
+        PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
+        return pageInfo;
+    }
 }

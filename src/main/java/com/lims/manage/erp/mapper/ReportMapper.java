@@ -132,4 +132,12 @@ public interface ReportMapper {
 
     @Select("select ")
     Object reportUrl(String reportCode);
+
+    /**
+     * 获取中间报告列表
+     * @param deptIds
+     * @param entrustmentNo
+     * @return
+     */
+    List<ReportListVo> getMiddleReportList(@Param("deptIds") List<Long> deptIds,@Param("entrustmentNo") String entrustmentNo);
 }
