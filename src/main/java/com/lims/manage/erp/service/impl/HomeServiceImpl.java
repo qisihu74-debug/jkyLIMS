@@ -291,7 +291,7 @@ public class HomeServiceImpl implements HomeService {
         // 报告签发
         List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, setUserId,null);
         // 报告盖章
-        List<ReportRecordEntity> sealList = reportRecordEntityMapper.getSealList(null, "1", "1");
+        List<ReportRecordEntity> sealList = reportRecordEntityMapper.getSealList(null, "1", "1",null);
         // 报告邮寄
         Integer toBeA = reportRecordEntityMapper.selectCount(7);
         // 循环 输出赋值。

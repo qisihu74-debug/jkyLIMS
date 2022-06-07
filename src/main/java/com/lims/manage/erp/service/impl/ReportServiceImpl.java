@@ -591,12 +591,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public PageInfo sealList(String search, Integer pageNum, Integer pageSize, String reportType, String state) {
+    public PageInfo sealList(String search, Integer pageNum, Integer pageSize, String reportType, String state,Integer reportTypeStatus) {
         PageHelper.startPage(pageNum, pageSize);
         if (StringUtils.isEmpty(state)) {
             state = "1";
         }
-        List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state);
+        List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state,reportTypeStatus);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -771,9 +771,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize, String type) {
+    public PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize, String type,Integer reportTypeStatus) {
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportRecordEntity> list = entityMapper.getSendList(search, reportType, type);
+        List<ReportRecordEntity> list = entityMapper.getSendList(search, reportType, type,reportTypeStatus);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }

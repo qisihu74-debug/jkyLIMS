@@ -42,4 +42,9 @@ public class ReportDetailListVo {
      * 任务单号集合
      */
     private List<TaskCodeVo> taskCodes;
+
+    /**
+     * 报告类型 （0最终报告,1中间报告）
+     */
+    private Integer reportTypeStatus;
 }
