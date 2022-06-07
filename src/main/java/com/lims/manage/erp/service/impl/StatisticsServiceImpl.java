@@ -432,9 +432,9 @@ public class StatisticsServiceImpl implements StatisticsService {
                     }
                 }
                 // 委托单的 折扣率
-                String discount = statisticsMapper.getDiscount(taskDetailInfoVo.getEntrustmentId());
-                if(discount!=null&&!"".equals(discount)){
-                    Double fromString= new Double(discount);
+//                String discount = statisticsMapper.getDiscount(taskDetailInfoVo.getEntrustmentId());
+                if(taskDetailInfoVo.getDiscount()!=null&&!"".equals(taskDetailInfoVo.getDiscount())){
+                    Double fromString= new Double(taskDetailInfoVo.getDiscount());
                     String a_str = String.format("%.2f", fromString); //以字符串形式保留位数，此处保留2位小数
                     double a_1 = Double.parseDouble(a_str); //将字符串转回double类型
                     String sunStr = String.format("%.2f", testPrice * a_1); //以字符串形式保留位数，此处保留2位小数

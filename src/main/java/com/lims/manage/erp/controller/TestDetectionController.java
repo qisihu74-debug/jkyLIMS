@@ -76,27 +76,27 @@ public class TestDetectionController {
     }
 
     /**
-     * 开始试验二次开发
+     * 开始试验二次开发 废弃
      * @param sampleItemInstrumentVo
      * @return
      */
-    @RequestMapping("/start_test_two")
-    public Result PostOnTestTwo(@RequestBody SampleItemInstrumentVo sampleItemInstrumentVo) {
-        // 验证登录人userId 是否具备开始检测资格
-        // 验证登录人信息 和部门 存入
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if (userInfo == null) {
-            return ResultUtil.error("token 已过期！");
-        }
-       if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),sampleItemInstrumentVo.getTaskId())==false){
-           return ResultUtil.error("登录人没有被派发检测资格");
-       }
-        Boolean flag = testDetectionService.postStartTest(sampleItemInstrumentVo);
-        if (flag) {
-            return ResultUtil.success("成功！！！");
-        }
-        return ResultUtil.error(204, "失败");
-    }
+//    @RequestMapping("/start_test_two")
+//    public Result PostOnTestTwo(@RequestBody SampleItemInstrumentVo sampleItemInstrumentVo) {
+//        // 验证登录人userId 是否具备开始检测资格
+//        // 验证登录人信息 和部门 存入
+//        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+//        if (userInfo == null) {
+//            return ResultUtil.error("token 已过期！");
+//        }
+//       if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),sampleItemInstrumentVo.getTaskId())==false){
+//           return ResultUtil.error("登录人没有被派发检测资格");
+//       }
+//        Boolean flag = testDetectionService.postStartTest(sampleItemInstrumentVo);
+//        if (flag) {
+//            return ResultUtil.success("成功！！！");
+//        }
+//        return ResultUtil.error(204, "失败");
+//    }
 
     /**
      * 结束试验。
@@ -133,7 +133,7 @@ public class TestDetectionController {
             // 更新任务单状态 需要 对所有的 样品信息 下 检测项 进行判断 ==2的话 更新。
             TaskDetailInfoVo dataGather = taskService.getTaskDetailInfoTwo(sampleItemInstrumentVo.getTaskId(),null);
             Boolean DetailStatus = testDetectionService.JudgmentTaskDetail(dataGather, sampleItemInstrumentVo.getTaskId());
-            if (DetailStatus) {
+            if (DetailStatus==true) {
                 return ResultUtil.success("任务单完成！！！");
             }
             return ResultUtil.success("检测项未全部完成检测，任务单未结束","整体任务单未结束");

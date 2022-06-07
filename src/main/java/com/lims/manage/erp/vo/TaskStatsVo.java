@@ -109,4 +109,9 @@ public class TaskStatsVo {
 
     private List<SampleDetailVo> sampleDetailList;//样品信息
 
+    /**
+     * 委托单折扣率
+     */
+    private String discount;
+
 }

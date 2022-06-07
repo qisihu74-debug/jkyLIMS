@@ -212,6 +212,7 @@
         <result property="reportCode" column="report_code"></result>
         <result property="state" column="report_state"></result>
         <result property="entrustmentId" column="entrustment_id"></result>
+        <result property="discount" column="discount"></result>
         <collection property="sampleDetailList" ofType="com.lims.manage.erp.vo.SampleDetailVo">
             <id property="id" column="sample_id"></id>
             <result property="sampleName" column="sample_name"></result>
@@ -236,7 +237,7 @@
         t1.id as task_id,
         t1.task_code task_code,
         t1.required_completion_time requestDate,
-        t1.end_detection_time finishDate,
+        t1.review_time finishDate,
         t2.report_code reportCode,
         t2.state report_state,
         t1.entrustment_id,
@@ -247,13 +248,15 @@
         t5.unit_price,
         t5.check_item_name,
         t5.state item_state,
-		t5.task_id item_task_id
+		t5.task_id item_task_id,
+        t6.discount
         FROM
         test_task AS t1
         LEFT JOIN test_report_record AS t2 ON t2.entrustment_id = t1.entrustment_id
 				LEFT JOIN test_entrusted_sample_details_rel AS t3 ON t3.entrustment_id = t1.entrustment_id
         LEFT JOIN test_sample AS t4 ON t3.sample_id = t4.id
         LEFT JOIN test_entrusted_sample_checkitem_rel AS t5 ON t5.sample_id = t4.id
+        LEFT JOIN test_entrusted_info as t6 ON t1.entrustment_id = t6.id
         WHERE 1=1
         <if test="deptId!=null">
             and t1.dept_id = #{deptId}
@@ -262,7 +265,7 @@
             and t1.required_completion_time <![CDATA[ <= ]]>  #{requestDate}
         </if>
         <if test="finishDate!=null">
-            and t1.end_detection_time <![CDATA[ <= ]]>  #{finishDate}
+            and t1.review_time <![CDATA[ <= ]]>  #{finishDate}
         </if>
         <if test="startDate!=null">
             and t1.start_detection_time <![CDATA[ >= ]]>  #{startDate}
