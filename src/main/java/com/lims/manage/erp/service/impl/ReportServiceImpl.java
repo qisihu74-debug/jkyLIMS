@@ -98,6 +98,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ReportServiceImpl implements ReportService {
@@ -821,10 +822,14 @@ public class ReportServiceImpl implements ReportService {
     public String getEquipment(Long id) {
         StringBuilder result = new StringBuilder("");
         List<String> equipment = reportMapper.getEquipment(id);
-        if (!CollectionUtils.isEmpty(equipment)) {
-            for (int i = 0; i < equipment.size(); i++) {
-                result.append(equipment.get(i));
-                if (equipment.size() - 1 != i) {
+        List<String> list = null;
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(equipment)){
+            list=equipment.stream().distinct().collect(Collectors.toList());
+        }
+        if (!CollectionUtils.isEmpty(list)) {
+            for (int i = 0; i < list.size(); i++) {
+                result.append(list.get(i));
+                if (list.size() - 1 != i) {
                     result.append(",");
                 }
             }
