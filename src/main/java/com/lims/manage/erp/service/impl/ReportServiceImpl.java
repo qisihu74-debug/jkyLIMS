@@ -1053,6 +1053,7 @@ public class ReportServiceImpl implements ReportService {
         String url1 = "";
         try {
             url1 = insertPicToPdf(url,Long.parseLong(reportCode));
+            logger.info("设置签名信息：{}",url1);
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)){
                 url = url1;
             }
@@ -1060,6 +1061,7 @@ public class ReportServiceImpl implements ReportService {
             logger.error("报告签名失败:{}",e);
         }
         reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
+        logger.info("签名信息更新成功！:{}",reportCode+":"+url);
         //更新配合比信息
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(mixInfo)){
             TestSampleMixInfoEntity entity = JSON.parseObject(mixInfo,TestSampleMixInfoEntity.class);
@@ -2290,5 +2292,25 @@ public class ReportServiceImpl implements ReportService {
         List<ReportListVo> list = reportMapper.getMiddleReportList(userTeamIds, search);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
+    }
+
+    @Override
+    public ReportDetailVo getMiddleReportDetail(Long taskId) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        ReportDetailVo reportDetail = reportMapper.getMiddleReportDetail(taskId, userTeamIds);
+        List<ReportSampleDetailVo> samples = reportDetail.getSamples();
+        for (ReportSampleDetailVo reportSampleDetailVo : samples) {
+            List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
+            for (int j = 0; j < checkItems.size(); j++) {
+                ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
+                int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
+                if (last > 0) {
+                    checkItems.remove(reportCheckItemDetailVo);
+                }
+            }
+            reportSampleDetailVo.setCheckItems(checkItems);
+        }
+        reportDetail.setSamples(samples);
+        return reportDetail;
     }
 }

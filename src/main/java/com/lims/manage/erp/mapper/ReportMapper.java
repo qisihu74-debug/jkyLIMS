@@ -140,4 +140,12 @@ public interface ReportMapper {
      * @return
      */
     List<ReportListVo> getMiddleReportList(@Param("deptIds") List<Long> deptIds,@Param("entrustmentNo") String entrustmentNo);
+
+    /**
+     * 查询可做中间报告的检测项详情
+     * @param taskId
+     * @param deptIds
+     * @return
+     */
+    ReportDetailVo getMiddleReportDetail(Long taskId,List<Long> deptIds);
 }

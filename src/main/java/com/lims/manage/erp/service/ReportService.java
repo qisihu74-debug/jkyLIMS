@@ -376,4 +376,11 @@ public interface ReportService {
      * @return
      */
     PageInfo middleReportList(Integer pageNum,Integer pageSize,String search);
+
+    /**
+     * 查询可制作中间报告的检测项详情
+     * @param taskId
+     * @return
+     */
+    ReportDetailVo getMiddleReportDetail(Long taskId);
 }
