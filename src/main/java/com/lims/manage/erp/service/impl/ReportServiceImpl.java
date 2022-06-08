@@ -1053,6 +1053,7 @@ public class ReportServiceImpl implements ReportService {
         String url1 = "";
         try {
             url1 = insertPicToPdf(url,Long.parseLong(reportCode));
+            logger.info("设置签名信息：{}",url1);
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)){
                 url = url1;
             }
@@ -1060,6 +1061,7 @@ public class ReportServiceImpl implements ReportService {
             logger.error("报告签名失败:{}",e);
         }
         reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
+        logger.info("签名信息更新成功！:{}",reportCode+":"+url);
         //更新配合比信息
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(mixInfo)){
             TestSampleMixInfoEntity entity = JSON.parseObject(mixInfo,TestSampleMixInfoEntity.class);
