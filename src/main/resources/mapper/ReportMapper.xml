@@ -12,6 +12,7 @@
         <result property="productId" column="product_id1"></result>
         <result property="countPrice" column="count_price"></result>
         <result property="requestDate" column="request_date"></result>
+        <result property="entrustTestType" column="entrust_test_type"></result>
         <collection property="samples" ofType="com.lims.manage.erp.vo.ReportSampleDetailVo">
             <id property="sampleId" column="sample_id"></id>
             <result property="productId" column="product_id"></result>
@@ -433,7 +434,7 @@
 
     <select id="getMiddleReportList" resultType="com.lims.manage.erp.vo.ReportListVo">
         SELECT DISTINCT
-        t1.id,
+        t1.id taskId,
         t2.entrustment_no,
         t4.sample_name,
         t2.request_date
@@ -460,9 +461,12 @@
 
     <select id="getMiddleReportDetail" resultMap="reportDetailMap">
         SELECT
-        t1.id,
+        t1.id taskId,
+        t2.id,
         t1.task_code,
         t2.entrustment_no,
+        t2.entrust_test_type,
+        t4.product_id product_id1,
         t4.sample_name,
         DATE ( t2.request_date ) request_date,
         t4.product_id,
