@@ -871,4 +871,14 @@ public class ReportController {
         }
         return ResultUtil.success("获取可制作中间报告列表成功！", reportService.middleReportList(pageNum,pageSize,search));
     }
+
+    /**
+     * 中间报告制作
+     * @param taskId
+     * @return
+     */
+    @GetMapping("/middleReportEdit")
+    public Result middleReportEdit(Long taskId) {
+        return ResultUtil.success("查询中间报告详情成功！", reportService.getMiddleReportDetail(taskId));
+    }
 }
