@@ -287,11 +287,11 @@ public class HomeServiceImpl implements HomeService {
         // ArrList 转set
         Set<Long> setUserId  = new ReportApprovalServiceImpl().getNextIdsToTeam();
         // 报告审核
-        List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, setUserId);
+        List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, setUserId,null);
         // 报告签发
-        List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, setUserId);
+        List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, setUserId,null);
         // 报告盖章
-        List<ReportRecordEntity> sealList = reportRecordEntityMapper.getSealList(null, "1", "1");
+        List<ReportRecordEntity> sealList = reportRecordEntityMapper.getSealList(null, "1", "1",null);
         // 报告邮寄
         Integer toBeA = reportRecordEntityMapper.selectCount(7);
         // 循环 输出赋值。

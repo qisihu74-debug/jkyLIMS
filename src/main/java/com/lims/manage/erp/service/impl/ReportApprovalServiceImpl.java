@@ -39,10 +39,10 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     private TeamMapper teamMapper;
 
     @Override
-    public PageInfo getApplyforList(String search, Integer pageNum, Integer pageSize) {
+    public PageInfo getApplyforList(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
         PageHelper.startPage(pageNum, pageSize);
         Set<Long> ids = getNextIdsToTeam();
-        List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalList(search,ids);
+        List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalList(search,ids,reportTypeStatus);
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
     }
@@ -161,10 +161,10 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 
 
     @Override
-    public PageInfo applyfor_history(String search, Integer pageNum, Integer pageSize) {
+    public PageInfo applyfor_history(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
         PageHelper.startPage(pageNum, pageSize);
         Set<Long> ids = getNextIdsToTeam();
-        List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalHistory(search,ids);
+        List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalHistory(search,ids,reportTypeStatus);
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
     }
@@ -229,9 +229,9 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 //    }
 
     @Override
-    public PageInfo getVerify_list(String search, Integer pageNum, Integer pageSize) {
+    public PageInfo getVerify_list(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportApprovalVo> list = reportApprovalMapper.getVerifyList(search,getNextIdsToTeam());
+        List<ReportApprovalVo> list = reportApprovalMapper.getVerifyList(search,getNextIdsToTeam(),reportTypeStatus);
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
     }
@@ -353,9 +353,9 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     }
 
     @Override
-    public PageInfo verifyHistory(String search, Integer pageNum, Integer pageSize) {
+    public PageInfo verifyHistory(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportApprovalVo> list = reportApprovalMapper.getVerifyHistory(search,getNextIdsToTeam());
+        List<ReportApprovalVo> list = reportApprovalMapper.getVerifyHistory(search,getNextIdsToTeam(),reportTypeStatus);
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
     }

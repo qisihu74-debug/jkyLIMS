@@ -34,7 +34,7 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     List<ReportRecordEntity> getSealList(@Param("search") String search,
-                                         @Param("reportType") String reportType,@Param("state") String state);
+                                         @Param("reportType") String reportType,@Param("state") String state,@Param("reportTypeStatus")Integer reportTypeStatus);
 
 
     ReportRecordEntity getDetail(Long id);
@@ -95,7 +95,7 @@ public interface ReportRecordEntityMapper {
      * @param reportType
      * @return
      */
-    List<ReportRecordEntity> getSendList(@Param("search") String search, @Param("reportType") String reportType,@Param("type") String type);
+    List<ReportRecordEntity> getSendList(@Param("search") String search, @Param("reportType") String reportType,@Param("type") String type,@Param("reportTypeStatus")Integer reportTypeStatus);
 
     String isApprove(Long id);
 

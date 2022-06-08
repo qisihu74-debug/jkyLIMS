@@ -116,7 +116,7 @@ public interface ReportService {
      * @param pageSize
      * @return
      */
-    PageInfo sealList(String search, Integer pageNum, Integer pageSize,String reportType,String state);
+    PageInfo sealList(String search, Integer pageNum, Integer pageSize,String reportType,String state,Integer reportTypeStatus);
 
 
 
@@ -194,7 +194,7 @@ public interface ReportService {
      * @param pageSize
      * @return
      */
-    PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize,String type);
+    PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize,String type,Integer reportTypeStatus);
 
     Boolean isApprove(Long id);
 
@@ -376,4 +376,11 @@ public interface ReportService {
      * @return
      */
     PageInfo middleReportList(Integer pageNum,Integer pageSize,String search);
+
+    /**
+     * 查询可制作中间报告的检测项详情
+     * @param taskId
+     * @return
+     */
+    ReportDetailVo getMiddleReportDetail(Long taskId);
 }

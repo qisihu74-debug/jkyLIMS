@@ -592,12 +592,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public PageInfo sealList(String search, Integer pageNum, Integer pageSize, String reportType, String state) {
+    public PageInfo sealList(String search, Integer pageNum, Integer pageSize, String reportType, String state,Integer reportTypeStatus) {
         PageHelper.startPage(pageNum, pageSize);
         if (StringUtils.isEmpty(state)) {
             state = "1";
         }
-        List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state);
+        List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state,reportTypeStatus);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -772,9 +772,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize, String type) {
+    public PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize, String type,Integer reportTypeStatus) {
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportRecordEntity> list = entityMapper.getSendList(search, reportType, type);
+        List<ReportRecordEntity> list = entityMapper.getSendList(search, reportType, type,reportTypeStatus);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -2292,5 +2292,25 @@ public class ReportServiceImpl implements ReportService {
         List<ReportListVo> list = reportMapper.getMiddleReportList(userTeamIds, search);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
+    }
+
+    @Override
+    public ReportDetailVo getMiddleReportDetail(Long taskId) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        ReportDetailVo reportDetail = reportMapper.getMiddleReportDetail(taskId, userTeamIds);
+        List<ReportSampleDetailVo> samples = reportDetail.getSamples();
+        for (ReportSampleDetailVo reportSampleDetailVo : samples) {
+            List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
+            for (int j = 0; j < checkItems.size(); j++) {
+                ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
+                int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
+                if (last > 0) {
+                    checkItems.remove(reportCheckItemDetailVo);
+                }
+            }
+            reportSampleDetailVo.setCheckItems(checkItems);
+        }
+        reportDetail.setSamples(samples);
+        return reportDetail;
     }
 }
