@@ -877,8 +877,8 @@ public class ReportController {
      * @param taskId
      * @return
      */
-    @GetMapping("/middleReportEdit")
-    public Result middleReportEdit(Long taskId) {
+    @GetMapping("/middleReportDetail")
+    public Result middleReportDetail(Long taskId) {
         return ResultUtil.success("查询中间报告详情成功！", reportService.getMiddleReportDetail(taskId));
     }
 }
