@@ -346,13 +346,19 @@ public class SampleServiceImpl implements SampleService {
             else {
                 InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
                 StringBuilder fileName = new StringBuilder("");
-                // 处理样品 外观描述，和 外观
-                if (sampleTagInfo.getOutwardDescribe() != null && !sampleTagInfo.getOutwardDescribe().equals("") && sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
-                    sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1) + "\t" + sampleTagInfo.getOutwardDescribe());
-                } else {
-                    if (sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
-                        sampleTagInfo.setOutward(sampleTagInfo.getOutward().substring(1, sampleTagInfo.getOutward().length() - 1));
-                    }
+                // 处理样品描述信息 Outward、 outwardDescribe 组合输出
+                StringBuilder stringBuilder = new StringBuilder();
+                if(sampleTagInfo.getOutward()!=null&&sampleTagInfo.getOutward().length() >0){
+                    stringBuilder.append(sampleTagInfo.getOutward()+",");
+                }
+                if(sampleTagInfo.getOutwardDescribe()!=null&&sampleTagInfo.getOutwardDescribe().length()>0){
+                    stringBuilder.append(sampleTagInfo.getOutwardDescribe()+",");
+                }
+                if(stringBuilder.length()>1){
+                    sampleTagInfo.setOutward(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
+                }
+                else {
+                    sampleTagInfo.setOutward("");
                 }
                 fileName.append(sampleTagInfo.getSampleCode());
                 fileName.append("样品标签.xlsx");
@@ -427,7 +433,6 @@ public class SampleServiceImpl implements SampleService {
             if(stringBuilder.length()>1){
                 sampleData.setOutward(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
             }
-            sampleData.setOutward("");
 
 
             InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
