@@ -38,4 +38,8 @@ public class ReportDetailListParamVo {
     private Date startDate;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date endingDate;
+    /**
+     * 报告类型 （0最终报告,1中间报告）
+     */
+    private Integer reportTypeStatus;
 }

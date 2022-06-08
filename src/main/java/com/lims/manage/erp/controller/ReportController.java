@@ -249,11 +249,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("sealList")
-    public Result sealList(String search, Integer pageNum, Integer pageSize, String reportType,String state) {
+    public Result sealList(String search, Integer pageNum, Integer pageSize, String reportType,String state,Integer reportTypeStatus) {
         if (pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少必要的参数！");
         }
-        PageInfo pageInfo = reportService.sealList(search, pageNum, pageSize, reportType,state);
+        PageInfo pageInfo = reportService.sealList(search, pageNum, pageSize, reportType,state,reportTypeStatus);
         return ResultUtil.success(pageInfo);
     }
 
@@ -701,9 +701,9 @@ public class ReportController {
      * @return
      */
     @GetMapping("sendList")
-    public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type) {
+    public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type,Integer reportTypeStatus) {
         logger.info("分页参数pageNum:{},pageSize:{}", pageNum, pageSize);
-        PageInfo pageInfo = reportService.getSendList(search, reportType, pageNum, pageSize, type);
+        PageInfo pageInfo = reportService.getSendList(search, reportType, pageNum, pageSize, type,reportTypeStatus);
         return ResultUtil.success(pageInfo);
     }
 

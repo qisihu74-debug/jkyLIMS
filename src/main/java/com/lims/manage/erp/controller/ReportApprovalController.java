@@ -56,11 +56,11 @@ public class ReportApprovalController {
      * @return
      */
     @GetMapping("/applyfor")
-    public Result applyfor(String search, Integer pageNum, Integer pageSize) {
+    public Result applyfor(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
         if (pageNum == null || pageSize == null){
             return ResultUtil.error("缺少分页参数！");
         }
-        PageInfo pageInfo = reportApprovalService.getApplyforList(search, pageNum,pageSize);
+        PageInfo pageInfo = reportApprovalService.getApplyforList(search, pageNum,pageSize,reportTypeStatus);
         return ResultUtil.success(pageInfo);
     }
 
@@ -226,11 +226,11 @@ public class ReportApprovalController {
      * 报告审批历史查询列表
      */
     @GetMapping("/applyfor_history")
-    public Result applyfor_history(String search,Integer pageNum,Integer pageSize) {
+    public Result applyfor_history(String search,Integer pageNum,Integer pageSize,Integer reportTypeStatus) {
         if (pageNum == null || pageSize == null){
             return ResultUtil.error("缺少分页参数！");
         }
-        PageInfo pageInfo = reportApprovalService.applyfor_history(search, pageNum,pageSize);
+        PageInfo pageInfo = reportApprovalService.applyfor_history(search, pageNum,pageSize,reportTypeStatus);
         return ResultUtil.success(pageInfo);
     }
 
@@ -272,11 +272,11 @@ public class ReportApprovalController {
      * @return
      */
     @GetMapping("/verify_list")
-    public Result verify_list(String search, Integer pageNum, Integer pageSize) {
+    public Result verify_list(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
         if (pageNum == null || pageSize == null){
             return ResultUtil.error("缺少分页参数！");
         }
-        PageInfo pageInfo = reportApprovalService.getVerify_list(search, pageNum, pageSize);
+        PageInfo pageInfo = reportApprovalService.getVerify_list(search, pageNum, pageSize,reportTypeStatus);
         return ResultUtil.success(pageInfo);
     }
 
@@ -440,11 +440,11 @@ public class ReportApprovalController {
      * @return
      */
     @GetMapping("/verify_history")
-    public Result verify_history(String search, Integer pageNum, Integer pageSize) {
+    public Result verify_history(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
         if (pageNum == null || pageSize == null){
             return ResultUtil.error("缺少分页参数！");
         }
-        PageInfo pageInfo= reportApprovalService.verifyHistory(search,pageNum,pageSize);
+        PageInfo pageInfo= reportApprovalService.verifyHistory(search,pageNum,pageSize,reportTypeStatus);
         return ResultUtil.success(pageInfo);
     }
 

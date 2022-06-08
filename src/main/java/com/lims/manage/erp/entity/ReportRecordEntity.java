@@ -206,4 +206,9 @@ public class ReportRecordEntity {
         this.taskId = vo.getTaskId() == null ? null : vo.getTaskId();
     }
 
+    /**
+     * 报告类型 （0最终报告,1中间报告）
+     */
+    private Integer reportTypeStatus;
+
 }

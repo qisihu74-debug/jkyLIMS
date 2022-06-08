@@ -20,7 +20,7 @@ import java.util.Set;
 @Mapper
 public interface ReportApprovalMapper {
 
-    List<ReportApprovalVo> getReportApprovalList(@Param("search")String search,@Param("list") Set<Long> list);
+    List<ReportApprovalVo> getReportApprovalList(@Param("search")String search,@Param("list") Set<Long> list,@Param("reportTypeStatus")Integer reportTypeStatus);
 
     ReportApprovalVo getReportApprovalDetail(Long id);
 
@@ -39,7 +39,7 @@ public interface ReportApprovalMapper {
     String getUserName(Long userId);
 
 
-    List<ReportApprovalVo> getReportApprovalHistory(@Param("search")String search,@Param("list") Set<Long> list);
+    List<ReportApprovalVo> getReportApprovalHistory(@Param("search")String search,@Param("list") Set<Long> list,@Param("reportTypeStatus")Integer reportTypeStatus);
 
     /**
      * 任务单详情
@@ -66,14 +66,14 @@ public interface ReportApprovalMapper {
      * @param search
      * @return
      */
-    List<ReportApprovalVo> getVerifyList(@Param("search")String search,@Param("list") Set<Long> list);
+    List<ReportApprovalVo> getVerifyList(@Param("search")String search,@Param("list") Set<Long> list,@Param("reportTypeStatus")Integer reportTypeStatus);
 
     /**
      * 查询签发 历史
      * @param search
      * @return
      */
-    List<ReportApprovalVo> getVerifyHistory(@Param("search")String search,@Param("list") Set<Long> list);
+    List<ReportApprovalVo> getVerifyHistory(@Param("search")String search,@Param("list") Set<Long> list,@Param("reportTypeStatus")Integer reportTypeStatus);
 
     /**
      * 签发抢单
