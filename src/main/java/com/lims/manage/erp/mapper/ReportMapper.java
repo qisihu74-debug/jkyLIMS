@@ -127,8 +127,7 @@ public interface ReportMapper {
     @Select("select report_url from test_report_record where entrustment_id=#{entrustId}")
     String getUrlByEntrustId(@Param("entrustId") Long entrustId);
 
-    @Select("select verifyer_id,issuer_id,report_code,sample_name from test_report_record where entrustment_id=#{entrustId}")
-    ReportRecordEntity getDetailByEntrustId(Long entrustId);
+    ReportRecordEntity getDetailByEntrustId(@Param("entrustId") Long entrustId);
     /**
      * 获取中间报告列表
      * @param deptIds
@@ -144,10 +143,4 @@ public interface ReportMapper {
      * @return
      */
     ReportDetailVo getMiddleReportDetail(Long taskId,List<Long> deptIds);
-
-    @Select("select DISTINCT verifyer_id from test_report_record where entrustment_id = #{entrustId}")
-    String getVerifyerId(@Param("entrustId") Long entrustId);
-
-    @Select("select DISTINCT issuer_id from test_report_record where entrustment_id = #{entrustId}")
-    String getIssuerId(@Param("entrustId") Long entrustId);
 }

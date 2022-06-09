@@ -99,14 +99,6 @@ public interface ReportService {
      */
     Boolean saveMessage(ReportRecordEntity reportRecordEntity);
 
-    /**
-     * 保存信息
-     *
-     * @param vo
-     * @return
-     */
-    Boolean preserve1(ReportPreserveVo vo);
-
     Boolean preserve(ReportPreserveVo vo);
 
     /**
