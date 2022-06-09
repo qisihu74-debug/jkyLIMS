@@ -435,72 +435,6 @@ public class ReportServiceImpl implements ReportService {
 
     @Transactional
     @Override
-    public Boolean preserve1(ReportPreserveVo vo) {
-        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
-//        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByTaskId(vo.getTaskId());
-        if (reportRecordEntity1 != null) {
-            String state = "1";
-            List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
-            for (ReportRecordDetailEntity e : checkInfos) {
-                e.setRecordId(reportRecordEntity1.getId());
-                if (e.getJudgeResult() == null) {
-                    state = "2";
-                }
-                int insert1 = recordDetailEntityMapper.updateByRecordIdSelective(e);
-                if (insert1 < 1) {
-                    return false;
-                }
-            }
-            reportRecordEntity1.setState(state);
-            if ("1".equals(state)) {
-                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
-            }
-            int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
-            if (update < 1) {
-                return false;
-            }
-            return true;
-        } else {
-            long recordId = GenID.getID();
-            String state = "1";
-            List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
-            for (ReportRecordDetailEntity e : checkInfos) {
-                e.setRecordId(recordId);
-                if (e.getJudgeResult() == null) {
-                    state = "2";
-                }
-                int insert1 = recordDetailEntityMapper.insert(e);
-                if (insert1 < 1) {
-                    return false;
-                }
-            }
-            ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
-            reportRecordEntity.setState(state);
-            if ("1".equals(state)) {
-                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-            }
-            //生成报告编号
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-            String year = sdf.format(new Date());
-            Integer maxCode = recordEntityMapper.getMaxCode(year);
-            if (maxCode == null) {
-                reportRecordEntity.setReportCode("ZX-" + year + "-JC-0001");
-            } else {
-                int newCode = maxCode + 1;
-                reportRecordEntity.setReportCode("ZX-" + year + "-JC-" + newCode);
-            }
-            reportRecordEntity.setId(recordId);
-            reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-            int insert = recordEntityMapper.insert(reportRecordEntity);
-            if (insert < 1) {
-                return false;
-            }
-            return true;
-        }
-    }
-
-    @Transactional
-    @Override
     public Boolean preserve(ReportPreserveVo vo) {
         ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
 //        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByTaskId(vo.getTaskId());
@@ -2069,6 +2003,7 @@ public class ReportServiceImpl implements ReportService {
         MultipartFile multipartFile = AsposeUtil.xwpfDocumentToCommonsMultipartFile(document, reportRecordEntity.getReportCode() + ".pdf");
         //MultipartFile file = (MultipartFile) document;
         String url = MinIoUtil.upload("report-download", multipartFile, reportRecordEntity.getReportCode() + ".docx");
+        resBean.setUrl(url);
         StringBuilder stringBuilder = new StringBuilder();
         for (ConclusionEntity entity:list) {
             stringBuilder.append(entity.getUrl());
@@ -2241,11 +2176,8 @@ public class ReportServiceImpl implements ReportService {
             String[] split1 = s.split("&");
             list1.add(Long.parseLong(split1[1]));
         }
-        //获取每个人的个人签名
-        logger.info("签发人id:{}",detailByEntrustId.getVerifyerId());
         String verUrl = sysUserDao.getSignatureById(detailByEntrustId.getVerifyerId());
         logger.info("签发人:{}",verUrl);
-        logger.info("批准人id:{}",detailByEntrustId.getIssuerId());
         String issUrl = sysUserDao.getSignatureById(detailByEntrustId.getIssuerId());
         logger.info("批准人:{}",issUrl);
         List<String> checkUrl = Lists.newArrayList();

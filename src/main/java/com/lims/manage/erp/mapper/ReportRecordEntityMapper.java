@@ -67,6 +67,13 @@ public interface ReportRecordEntityMapper {
     ReportRecordEntity selectByEntrustId(Long entrustId);
 
     /**
+     * 根据recordId查询委托单信息
+     * @param recordId
+     * @return
+     */
+    ReportRecordEntity selectByRecordId(Long recordId);
+
+    /**
      * 查询是否存在委托单信息--根据任务ID
      * @param taskId
      * @return
