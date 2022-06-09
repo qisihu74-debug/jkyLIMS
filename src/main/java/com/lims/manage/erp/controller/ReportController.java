@@ -599,6 +599,7 @@ public class ReportController {
      */
     @RequestMapping("previewDownLoad")
     public void previewDownLoad(@RequestParam("json") String json, HttpServletResponse response) {
+        //json = "{\"id\":1654743132971144,\"list\":[{\"url\":\"http://121.89.242.0:9000/file-resources/1649661309796156.docx\",\"conclusion\":\"经检测，该水泥混凝土样品,均符合JTG/T 3650-2020中的技术要求。\",\"additional\":\"1.委托人：陈海伟；2.见证单位：江苏中源工程管理股份有限公司；3.见证人：小王；4.委托方提供：无 ；\"}],\"type\":\"配合比\",\"mixInfo\":{\"id\":32,\"sampleId\":820,\"entrustmentId\":1654743132971144,\"designStrength\":\"5\",\"intensityConfiguration\":\"4\",\"antifreezeLevel\":\"54\",\"waterBinderRatio\":\"54\",\"unitWaterUse\":\"54\",\"sandRatio\":\"5\",\"designSlump\":\"54\",\"mixingWay\":\"45\"}}";
         String decode = "";
         String url = "";
         try {
