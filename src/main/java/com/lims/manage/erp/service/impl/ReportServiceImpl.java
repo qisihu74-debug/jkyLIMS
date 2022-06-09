@@ -581,6 +581,8 @@ public class ReportServiceImpl implements ReportService {
             }
             reportRecordEntity.setId(recordId);
             reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+            //设置为最终报告
+            reportRecordEntity.setType(0);
             //修改任务报告状态
             taskMapper.updateReportStatus(vo.getReportComplete(), vo.getTaskId());
             int insert = recordEntityMapper.insert(reportRecordEntity);
@@ -589,6 +591,51 @@ public class ReportServiceImpl implements ReportService {
             }
             return true;
         }
+    }
+
+    @Transactional
+    @Override
+    public Boolean middleReportPreserve(ReportPreserveVo vo) {
+//        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
+        long recordId = GenID.getID();
+        List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
+        for (ReportRecordDetailEntity e : checkInfos) {
+            e.setRecordId(recordId);
+            int insert1 = recordDetailEntityMapper.insert(e);
+            if (insert1 < 1) {
+                return false;
+            }
+        }
+        ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
+//        List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
+//        if(allReportComplete.contains(2)){
+//            reportRecordEntity.setState(2+"");
+//        }else{
+//            reportRecordEntity.setState(1+"");
+//            reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+//        }
+//        reportRecordEntity.setState(3+"");
+        //生成报告编号
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+        String year = sdf.format(new Date());
+        Integer maxCode = recordEntityMapper.getMaxCode(year);
+        if (maxCode == null) {
+            reportRecordEntity.setReportCode("ZX-" + year + "-JC-0001");
+        } else {
+            int newCode = maxCode + 1;
+            reportRecordEntity.setReportCode("ZX-" + year + "-JC-" + new DecimalFormat("0000").format(newCode));
+        }
+        reportRecordEntity.setId(recordId);
+        reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+        //设置为中间报告
+        reportRecordEntity.setType(1);
+//        //修改任务报告状态
+//        taskMapper.updateReportStatus(vo.getReportComplete(), vo.getTaskId());
+        int insert = recordEntityMapper.insert(reportRecordEntity);
+        if (insert < 1) {
+            return false;
+        }
+        return true;
     }
 
     @Override

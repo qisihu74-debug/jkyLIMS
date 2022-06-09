@@ -890,6 +890,19 @@ public class ReportController {
      */
     @GetMapping("/middleReportDetail")
     public Result middleReportDetail(Long taskId) {
+        if(taskId == null){
+            return ResultUtil.error("缺少必要的参数!");
+        }
         return ResultUtil.success("查询中间报告详情成功！", reportService.getMiddleReportDetail(taskId));
+    }
+
+    @PostMapping("/middleReportPreserve")
+    public Result middleReportPreserve(@RequestBody ReportPreserveVo vo) {
+        Boolean preserve = reportService.middleReportPreserve(vo);
+        if (preserve) {
+            return ResultUtil.success("保存成功！", preserve);
+        } else {
+            return ResultUtil.error(ResultEnum.PRESERVE_FAIL.getCode(), ResultEnum.PRESERVE_FAIL.getMsg());
+        }
     }
 }

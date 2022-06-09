@@ -8,6 +8,7 @@ import java.util.List;
 public class ReportDetailVo extends ReportListVo {
     private Integer reportCount;
     private String reportType;
+    private String entrustTestType;
 //    private Long productId;
     private List<ReportSampleDetailVo> samples;
 }

@@ -59,7 +59,8 @@
                                         sealer, seal_time, report_manager,
                                         report_time, addressee, waybill,
                                         operate_time, email, report_phone,
-                                        report_mailing_address, report_complete_time,task_id)
+                                        report_mailing_address, report_complete_time,
+                                        task_id,type)
         values (#{id,jdbcType=BIGINT}, #{entrustmentId,jdbcType=BIGINT}, #{reportCode,jdbcType=VARCHAR},
                 #{sampleName,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{requiredCompletionTime,jdbcType=TIMESTAMP},
                 #{taskCode,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR}, #{number,jdbcType=INTEGER},
@@ -70,7 +71,7 @@
                 #{reportTime,jdbcType=TIMESTAMP}, #{addressee,jdbcType=VARCHAR}, #{waybill,jdbcType=VARCHAR},
                 #{operateTime,jdbcType=TIMESTAMP}, #{email,jdbcType=VARCHAR}, #{reportPhone,jdbcType=VARCHAR},
                 #{reportMailingAddress,jdbcType=VARCHAR}, #{reportCompleteTime,jdbcType=TIMESTAMP},
-                #{taskId,jdbcType=BIGINT})
+                #{taskId,jdbcType=BIGINT},#{type,jdbcType=INTEGER})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordEntity">
         insert into test_report_record
@@ -423,7 +424,8 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM test_report_record
-        where entrustment_id = #{entrustId,jdbcType=BIGINT}
+        where type = 0
+        and entrustment_id = #{entrustId,jdbcType=BIGINT}
     </select>
 
     <select id="selectByTaskId" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
