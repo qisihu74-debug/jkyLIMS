@@ -335,13 +335,6 @@ public interface ReportService {
     List<ConclusionEntity> getResut(Long entrustId);
 
     /**
-     * 根据委托单id获取报告检测人、审核人、批准人
-     * @param entrustId
-     * @return
-     */
-    ReportRecordEntity getUserInfo(Long entrustId);
-
-    /**
      * 查询配合比检测信息
      * @param entrustId
      * @return

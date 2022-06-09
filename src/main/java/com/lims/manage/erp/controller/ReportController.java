@@ -816,7 +816,18 @@ public class ReportController {
      * @return
      */
     @GetMapping("reportUrl")
-    public void reportUrl(Long entrustId,HttpServletResponse response){
+    public String reportUrl(Long entrustId){
+
+        return reportService.reportUrl(entrustId);
+    }
+
+    /**
+     * 下载报告获取url链接
+     * @param entrustId
+     * @return
+     */
+    @GetMapping("preReportUrl")
+    public void preReportUrl(Long entrustId,HttpServletResponse response){
         String reportUrl = reportService.reportUrl(entrustId);
         MinioClient client = MinIoUtil.minioClient;
         //预览word转pdf

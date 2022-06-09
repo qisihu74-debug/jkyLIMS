@@ -2078,11 +2078,6 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ReportRecordEntity getUserInfo(Long entrustId) {
-        return reportMapper.getDetailByEntrustId(entrustId);
-    }
-
-    @Override
     public TestSampleMixInfoEntity getMixSampleInfo(Long entrustId) {
         return mixInfoEntityMapper.selectByEntrustId(entrustId);
     }
@@ -2185,6 +2180,7 @@ public class ReportServiceImpl implements ReportService {
     public String insertPicToPdf(String pdfUrl, Long entrustId) throws Exception {
         HashSet<String> delList = new HashSet<>();
         ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(entrustId);//审核人、签发人
+        logger.info("查询签发复合信息:{}",JSON.toJSONString(detailByEntrustId));
         List<String> stringList = taskMapper.getInspectorByEntrustId(entrustId);
         List<String> stringList1 = Lists.newArrayList();
         for (String string:stringList) {
@@ -2199,14 +2195,23 @@ public class ReportServiceImpl implements ReportService {
             list1.add(Long.parseLong(split1[1]));
         }
         //获取每个人的个人签名
+        logger.info("签发人id:{}",detailByEntrustId.getVerifyerId());
         String verUrl = sysUserDao.getSignatureById(detailByEntrustId.getVerifyerId());
+        logger.info("签发人:{}",verUrl);
+        logger.info("批准人id:{}",detailByEntrustId.getIssuerId());
         String issUrl = sysUserDao.getSignatureById(detailByEntrustId.getIssuerId());
+        logger.info("批准人:{}",issUrl);
         List<String> checkUrl = Lists.newArrayList();
         for (Long uId:list1) {
             String signature = sysUserDao.getSignatureById(uId);
-            checkUrl.add(signature);
+            logger.info("实验人:{}",signature);
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(signature)){
+                checkUrl.add(signature);
+            }
         }
-        if (StringUtils.isEmpty(verUrl) || StringUtils.isEmpty(verUrl) || checkUrl.size()<1){
+        logger.info("checkUrl大小:{}",checkUrl.size());
+        if (StringUtils.isEmpty(verUrl) || StringUtils.isEmpty(issUrl) || checkUrl.size()<1){
+            logger.info("缺少签名信息:{}",verUrl+"#"+issUrl+"#"+checkUrl.size());
             return "";
         }
         String basePath = qiYueSuoEntity.getAutographPath();
@@ -2252,7 +2257,9 @@ public class ReportServiceImpl implements ReportService {
         //将最终本地的pdf报告上传到文件服务器
         File file = new File(endPath);
         MultipartFile multipartFile = AsposeUtil.fileToMultipart(file, detailByEntrustId.getReportCode());
+        logger.info("上传带签名的报告");
         String url = MinIoUtil.upload("report-download", multipartFile, detailByEntrustId.getReportCode() + ".pdf");
+        logger.info("上传完成带签名的报告:{}",url);
         //删除产生的临时文件
         for (String del:delList) {
             FileAndFolderUtil.delete(del);

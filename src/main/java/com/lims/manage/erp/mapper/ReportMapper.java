@@ -129,10 +129,6 @@ public interface ReportMapper {
 
     @Select("select verifyer_id,issuer_id,report_code,sample_name from test_report_record where entrustment_id=#{entrustId}")
     ReportRecordEntity getDetailByEntrustId(Long entrustId);
-
-    @Select("select ")
-    Object reportUrl(String reportCode);
-
     /**
      * 获取中间报告列表
      * @param deptIds
