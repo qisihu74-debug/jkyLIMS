@@ -424,8 +424,7 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM test_report_record
-        where type = 0
-        and entrustment_id = #{entrustId,jdbcType=BIGINT}
+        where entrustment_id = #{entrustId,jdbcType=BIGINT}
     </select>
 
     <select id="selectByTaskId" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
