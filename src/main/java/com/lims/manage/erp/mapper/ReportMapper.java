@@ -144,4 +144,10 @@ public interface ReportMapper {
      * @return
      */
     ReportDetailVo getMiddleReportDetail(Long taskId,List<Long> deptIds);
+
+    @Select("select DISTINCT verifyer_id from test_report_record where entrustment_id = #{entrustId}")
+    String getVerifyerId(@Param("entrustId") Long entrustId);
+
+    @Select("select DISTINCT issuer_id from test_report_record where entrustment_id = #{entrustId}")
+    String getIssuerId(@Param("entrustId") Long entrustId);
 }

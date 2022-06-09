@@ -2242,11 +2242,11 @@ public class ReportServiceImpl implements ReportService {
             list1.add(Long.parseLong(split1[1]));
         }
         //获取每个人的个人签名
-        logger.info("签发人id:{}",detailByEntrustId.getVerifyerId());
-        String verUrl = sysUserDao.getSignatureById(detailByEntrustId.getVerifyerId());
+        String s1 = reportMapper.getVerifyerId(entrustId);
+        String verUrl = sysUserDao.getSignatureById(Long.parseLong(s1));
         logger.info("签发人:{}",verUrl);
-        logger.info("批准人id:{}",detailByEntrustId.getIssuerId());
-        String issUrl = sysUserDao.getSignatureById(detailByEntrustId.getIssuerId());
+        String ss = reportMapper.getIssuerId(entrustId);
+        String issUrl = sysUserDao.getSignatureById(Long.parseLong(ss));
         logger.info("批准人:{}",issUrl);
         List<String> checkUrl = Lists.newArrayList();
         for (Long uId:list1) {
