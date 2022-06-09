@@ -110,6 +110,13 @@ public interface ReportService {
     Boolean preserve(ReportPreserveVo vo);
 
     /**
+     * 保存中间报告
+     * @param vo
+     * @return
+     */
+    Boolean middleReportPreserve(ReportPreserveVo vo);
+
+    /**
      * 待盖章和历史盖章列表查询
      * @param search
      * @param pageNum

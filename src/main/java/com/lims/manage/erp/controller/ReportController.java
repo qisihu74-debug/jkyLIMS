@@ -887,7 +887,7 @@ public class ReportController {
 
     @PostMapping("/middleReportPreserve")
     public Result middleReportPreserve(@RequestBody ReportPreserveVo vo) {
-        Boolean preserve = reportService.preserve(vo);
+        Boolean preserve = reportService.middleReportPreserve(vo);
         if (preserve) {
             return ResultUtil.success("保存成功！", preserve);
         } else {
