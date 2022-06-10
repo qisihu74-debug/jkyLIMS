@@ -1641,7 +1641,7 @@ public class ReportServiceImpl implements ReportService {
                         WordUtils.replaceCellText(rows.get(6).getCell(1),key,"样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
                                 + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
                                 + "；样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
-                                + "；样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
+                                + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutward()) ? "——" : sampleEntity.getOutward())
                                 + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                         //检测依据
                         String checkBasis = getCheckBasis(id);
@@ -1817,7 +1817,7 @@ public class ReportServiceImpl implements ReportService {
                         WordUtils.replaceCellText(rows.get(6).getCell(1),key,"样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
                                 + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
                                 + "；样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
-                                + "；样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
+                                + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutward()) ? "——" : sampleEntity.getOutward())
                                 + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                         //检测依据
                         String checkBasis = getCheckBasis(id);
