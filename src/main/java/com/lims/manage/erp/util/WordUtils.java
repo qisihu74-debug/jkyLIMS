@@ -161,4 +161,26 @@ public class WordUtils {
         }
         return value;
     }
+
+    /**
+     * 根据规则替换word中cell的内容
+     * @param cell
+     * @param key 需要被替换的对象
+     * @param value 替换成的对象
+     */
+    public static void replaceCellText(XWPFTableCell cell,String key,String value){
+        String cellText = cell.getText();
+        if (key.equals(cellText)) {
+            List<XWPFParagraph> paragraphs = cell.getParagraphs();
+            for (XWPFParagraph paragraph : paragraphs) {
+                List<XWPFRun> runs = paragraph.getRuns();
+                for (XWPFRun run : runs) {
+                    run.setText(value, 0);
+                }
+            }
+        }else {
+            cell.removeParagraph(0);
+            cell.setText(value);
+        }
+    }
 }
