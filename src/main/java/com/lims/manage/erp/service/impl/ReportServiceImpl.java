@@ -1597,6 +1597,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) {
         //2代表报告头2页
+        String key = "——";
         int totalPage = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
         //处理坐标提示信息
@@ -1630,60 +1631,43 @@ public class ReportServiceImpl implements ReportService {
                     //存放表头信息
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 1) {
-                        rows.get(3).getCell(1).removeParagraph(0);
-                        rows.get(3).getCell(1).setText("河南省公路工程试验检测中心有限公司");
-                        rows.get(3).getCell(3).removeParagraph(0);
-                        rows.get(3).getCell(3).setText(reportRecordEntity.getReportCode());
-                        rows.get(4).getCell(1).removeParagraph(0);
-                        rows.get(4).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
-                        rows.get(4).getCell(3).removeParagraph(0);
-                        rows.get(4).getCell(3).setText(entrustHistoryDetail.getProjectName());
-                        rows.get(5).getCell(1).removeParagraph(0);
-                        rows.get(5).getCell(1).setText(entrustHistoryDetail.getProjectPart());
+                        WordUtils.replaceCellText(rows.get(3).getCell(1),key,"河南省公路工程试验检测中心有限公司");
+                        WordUtils.replaceCellText(rows.get(3).getCell(3),key,reportRecordEntity.getReportCode());
+                        WordUtils.replaceCellText(rows.get(4).getCell(1),key,entrustHistoryDetail.getEntrustCompany());
+                        WordUtils.replaceCellText(rows.get(4).getCell(3),key,entrustHistoryDetail.getProjectName());
+                        WordUtils.replaceCellText(rows.get(5).getCell(1),key,entrustHistoryDetail.getProjectPart());
                         //样品信息
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
-                        rows.get(6).getCell(1).removeParagraph(0);
-                        rows.get(6).getCell(1).setText("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
+                        WordUtils.replaceCellText(rows.get(6).getCell(1),key,"样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
                                 + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
                                 + "；样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
                                 + "；样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
                                 + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                         //检测依据
                         String checkBasis = getCheckBasis(id);
-                        rows.get(7).getCell(1).removeParagraph(0);
-                        rows.get(7).getCell(1).setText(checkBasis.equals("") ? "——" : checkBasis);
+                        WordUtils.replaceCellText(rows.get(7).getCell(1),key,checkBasis.equals("") ? "——" : checkBasis);
                         //判定依据
                         String judgeBasis = getJudgeBasis(id);
-                        rows.get(7).getCell(3).removeParagraph(0);
-                        rows.get(7).getCell(3).setText(judgeBasis.equals("") ? "——" : judgeBasis);
+                        WordUtils.replaceCellText(rows.get(7).getCell(3),key,judgeBasis.equals("") ? "——" : judgeBasis);
                         //检测日期
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-                        rows.get(8).getCell(1).removeParagraph(0);
-                        rows.get(8).getCell(1).setText(sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
-                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime())
-                        );
+                        WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
+                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime()));
                         //主要仪器
                         String equipment = getEquipment(id);
-                        rows.get(9).getCell(1).removeParagraph(0);
-                        rows.get(9).getCell(1).setText(equipment.equals("") ? "——" : equipment);
+                        WordUtils.replaceCellText(rows.get(9).getCell(1),key,equipment.equals("") ? "——" : equipment);
                         //委托编号
-                        rows.get(10).getCell(1).removeParagraph(0);
-                        rows.get(10).getCell(1).setText(entrustHistoryDetail.getEntrustmentNo() + "");
+                        WordUtils.replaceCellText(rows.get(10).getCell(1),key,entrustHistoryDetail.getEntrustmentNo() + "");
                         //检测类别
-                        rows.get(10).getCell(3).removeParagraph(0);
-                        rows.get(10).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
+                        WordUtils.replaceCellText(rows.get(10).getCell(3),key,entrustHistoryDetail.getCheckPurpose());
                         //批号
-                        rows.get(11).getCell(1).removeParagraph(0);
-                        rows.get(11).getCell(1).setText(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
+                        WordUtils.replaceCellText(rows.get(11).getCell(1),key,sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
                         //生产厂家
-                        rows.get(11).getCell(3).removeParagraph(0);
-                        rows.get(11).getCell(3).setText(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+                        WordUtils.replaceCellText(rows.get(11).getCell(3),key,sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
                         //规格等级
-                        rows.get(12).getCell(1).removeParagraph(0);
-                        rows.get(12).getCell(1).setText(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
+                        WordUtils.replaceCellText(rows.get(12).getCell(1),key,sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
                         //代表数量
-                        rows.get(12).getCell(3).removeParagraph(0);
-                        rows.get(12).getCell(3).setText(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
+                        WordUtils.replaceCellText(rows.get(12).getCell(3),key,sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
                     }
                     //过滤每个报告模板的检测项
                     List<ReportRecordDetailEntity> entities = Lists.newArrayList();
@@ -1718,12 +1702,9 @@ public class ReportServiceImpl implements ReportService {
                                 }
                                 if (i == page) {
                                     try {
-                                        rows.get(row).getCell(column + 1).removeParagraph(0);
-                                        rows.get(row).getCell(column + 1).setText(item.getSpecsContent());
-                                        rows.get(row).getCell(column + 2).removeParagraph(0);
-                                        rows.get(row).getCell(column + 2).setText(item.getCheckResult());
-                                        rows.get(row).getCell(column + 3).removeParagraph(0);
-                                        rows.get(row).getCell(column + 3).setText(item.getJudgeResult());
+                                        WordUtils.replaceCellText(rows.get(row).getCell(column + 1),key,item.getSpecsContent());
+                                        WordUtils.replaceCellText(rows.get(row).getCell(column + 2),key,item.getCheckResult());
+                                        WordUtils.replaceCellText(rows.get(row).getCell(column + 3),key,item.getJudgeResult());
                                     }catch (Exception e){
                                         mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标错误");
                                         logger.error("检测项在报告中的坐标错误:{}",e);
@@ -1740,9 +1721,9 @@ public class ReportServiceImpl implements ReportService {
                         XWPFTable xwpfTable = doc.getTables().get(size - 1);
                         int size1 = xwpfTable.getRows().size();
                         rows.get(size1-3).getCell(0).removeParagraph(0);
-                        rows.get(size1-3).getCell(0).setText(conclusionEntity.getConclusion());
+                        rows.get(size1-3).getCell(0).setText("检测结论："+conclusionEntity.getConclusion());
                         rows.get(size1-2).getCell(0).removeParagraph(0);
-                        rows.get(size1-2).getCell(0).setText(conclusionEntity.getAdditional());
+                        rows.get(size1-2).getCell(0).setText("附加声明："+conclusionEntity.getAdditional());
                     }
                     i++;
                 }
@@ -1791,6 +1772,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         //2代表报告头2页
+        String key = "——";
         int totalPage = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
         //处理坐标提示信息
@@ -1825,84 +1807,57 @@ public class ReportServiceImpl implements ReportService {
                     //存放表头信息
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 1) {
-                        rows.get(3).getCell(1).removeParagraph(0);
-                        rows.get(3).getCell(1).setText("河南省公路工程试验检测中心有限公司");
-                        rows.get(3).getCell(3).removeParagraph(0);
-                        rows.get(3).getCell(3).setText(reportRecordEntity.getReportCode());
-                        rows.get(4).getCell(1).removeParagraph(0);
-                        rows.get(4).getCell(1).setText(entrustHistoryDetail.getEntrustCompany());
-                        rows.get(4).getCell(3).removeParagraph(0);
-                        rows.get(4).getCell(3).setText(entrustHistoryDetail.getProjectName());
-
+                        WordUtils.replaceCellText(rows.get(3).getCell(1),key,"河南省公路工程试验检测中心有限公司");
+                        WordUtils.replaceCellText(rows.get(3).getCell(3),key,reportRecordEntity.getReportCode());
+                        WordUtils.replaceCellText(rows.get(4).getCell(1),key,entrustHistoryDetail.getEntrustCompany());
+                        WordUtils.replaceCellText(rows.get(4).getCell(3),key,entrustHistoryDetail.getProjectName());
+                        WordUtils.replaceCellText(rows.get(5).getCell(1),key,entrustHistoryDetail.getProjectPart());
                         //样品信息
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
-                        rows.get(6).getCell(1).removeParagraph(0);
-                        rows.get(6).getCell(1).setText("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
+                        WordUtils.replaceCellText(rows.get(6).getCell(1),key,"样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
                                 + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
                                 + "；样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
                                 + "；样品状态：" + (sampleEntity.getOutward() == null ? "——" : sampleEntity.getOutward())
                                 + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                         //检测依据
                         String checkBasis = getCheckBasis(id);
-                        rows.get(7).getCell(1).removeParagraph(0);
-                        rows.get(7).getCell(1).setText(checkBasis.equals("") ? "——" : checkBasis);
+                        WordUtils.replaceCellText(rows.get(7).getCell(1),key,checkBasis.equals("") ? "——" : checkBasis);
                         //判定依据
                         String judgeBasis = getJudgeBasis(id);
-                        rows.get(7).getCell(3).removeParagraph(0);
-                        rows.get(7).getCell(3).setText(judgeBasis.equals("") ? "——" : judgeBasis);
+                        WordUtils.replaceCellText(rows.get(7).getCell(3),key,judgeBasis.equals("") ? "——" : judgeBasis);
                         //检测日期
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-                        rows.get(8).getCell(1).removeParagraph(0);
-                        rows.get(8).getCell(1).setText(sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
-                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime())
-                        );
+                        WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
+                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime()));
+
                         //主要仪器
                         String equipment = getEquipment(id);
-                        rows.get(9).getCell(1).removeParagraph(0);
-                        rows.get(9).getCell(1).setText(equipment.equals("") ? "——" : equipment);
+                        WordUtils.replaceCellText(rows.get(9).getCell(1),key,equipment.equals("") ? "——" : equipment);
                         //委托编号
-                        rows.get(10).getCell(1).removeParagraph(0);
-                        rows.get(10).getCell(1).setText(entrustHistoryDetail.getEntrustmentNo() + "");
+                        WordUtils.replaceCellText(rows.get(10).getCell(1),key,entrustHistoryDetail.getEntrustmentNo() + "");
                         //检测类别
-                        rows.get(10).getCell(3).removeParagraph(0);
-                        rows.get(10).getCell(3).setText(entrustHistoryDetail.getCheckPurpose());
+                        WordUtils.replaceCellText(rows.get(10).getCell(3),key,entrustHistoryDetail.getCheckPurpose());
                         //设计参数
                         if (mixInfoEntity != null){
-                            rows.get(11).getCell(1).removeParagraph(0);
-                            rows.get(11).getCell(1).setText(mixInfoEntity.getDesignStrength());
-                            rows.get(11).getCell(3).removeParagraph(0);
-                            rows.get(11).getCell(3).setText(mixInfoEntity.getIntensityConfiguration());
-                            rows.get(12).getCell(1).removeParagraph(0);
-                            rows.get(12).getCell(1).setText(mixInfoEntity.getAntifreezeLevel());
-                            rows.get(12).getCell(3).removeParagraph(0);
-                            rows.get(12).getCell(3).setText(mixInfoEntity.getWaterBinderRatio());
-                            rows.get(13).getCell(1).removeParagraph(0);
-                            rows.get(13).getCell(1).setText(mixInfoEntity.getUnitWaterUse());
-                            rows.get(13).getCell(3).removeParagraph(0);
-                            rows.get(13).getCell(3).setText(mixInfoEntity.getSandRatio());
-                            rows.get(14).getCell(1).removeParagraph(0);
-                            rows.get(14).getCell(1).setText(mixInfoEntity.getDesignSlump());
-                            rows.get(14).getCell(3).removeParagraph(0);
-                            rows.get(14).getCell(3).setText(mixInfoEntity.getMixingWay());
+                            WordUtils.replaceCellText(rows.get(11).getCell(1),key,mixInfoEntity.getDesignStrength());
+                            WordUtils.replaceCellText(rows.get(11).getCell(3),key,mixInfoEntity.getIntensityConfiguration());
+                            WordUtils.replaceCellText(rows.get(12).getCell(1),key,mixInfoEntity.getAntifreezeLevel());
+                            WordUtils.replaceCellText(rows.get(12).getCell(3),key,mixInfoEntity.getWaterBinderRatio());
+                            WordUtils.replaceCellText(rows.get(13).getCell(1),key,mixInfoEntity.getUnitWaterUse());
+                            WordUtils.replaceCellText(rows.get(13).getCell(3),key,mixInfoEntity.getSandRatio());
+                            WordUtils.replaceCellText(rows.get(14).getCell(1),key,mixInfoEntity.getDesignSlump());
+                            WordUtils.replaceCellText(rows.get(14).getCell(3),key,mixInfoEntity.getMixingWay());
                         }else {
                             TestSampleMixInfoEntity entity = mixInfoEntityMapper.selectByEntrustId(id);
                             if (entity != null){
-                                rows.get(11).getCell(1).removeParagraph(0);
-                                rows.get(11).getCell(1).setText(entity.getDesignStrength());
-                                rows.get(11).getCell(3).removeParagraph(0);
-                                rows.get(11).getCell(3).setText(entity.getIntensityConfiguration());
-                                rows.get(12).getCell(1).removeParagraph(0);
-                                rows.get(12).getCell(1).setText(entity.getAntifreezeLevel());
-                                rows.get(12).getCell(3).removeParagraph(0);
-                                rows.get(12).getCell(3).setText(entity.getWaterBinderRatio());
-                                rows.get(13).getCell(1).removeParagraph(0);
-                                rows.get(13).getCell(1).setText(entity.getUnitWaterUse());
-                                rows.get(13).getCell(3).removeParagraph(0);
-                                rows.get(13).getCell(3).setText(entity.getSandRatio());
-                                rows.get(14).getCell(1).removeParagraph(0);
-                                rows.get(14).getCell(1).setText(entity.getDesignSlump());
-                                rows.get(14).getCell(3).removeParagraph(0);
-                                rows.get(14).getCell(3).setText(entity.getMixingWay());
+                                WordUtils.replaceCellText(rows.get(11).getCell(1),key,entity.getDesignStrength());
+                                WordUtils.replaceCellText(rows.get(11).getCell(3),key,entity.getIntensityConfiguration());
+                                WordUtils.replaceCellText(rows.get(12).getCell(1),key,entity.getAntifreezeLevel());
+                                WordUtils.replaceCellText(rows.get(12).getCell(3),key,entity.getWaterBinderRatio());
+                                WordUtils.replaceCellText(rows.get(13).getCell(1),key,entity.getUnitWaterUse());
+                                WordUtils.replaceCellText(rows.get(13).getCell(3),key,entity.getSandRatio());
+                                WordUtils.replaceCellText(rows.get(14).getCell(1),key,entity.getDesignSlump());
+                                WordUtils.replaceCellText(rows.get(14).getCell(3),key,entity.getMixingWay());
                             }
                         }
                         //填充配合比下原材样品信息
@@ -1911,20 +1866,13 @@ public class ReportServiceImpl implements ReportService {
                             AsposeUtil.addRows(table,16,testSampleEntities.size()-7);
                         }
                         for (int j=0;j<testSampleEntities.size();j++) {
-                            rows.get(j+16).getCell(0).removeParagraph(0);
-                            rows.get(j+16).getCell(0).setText(testSampleEntities.get(j).getSampleName());
-                            rows.get(j+16).getCell(1).removeParagraph(0);
-                            rows.get(j+16).getCell(1).setText(testSampleEntities.get(j).getSpecs());
-                            rows.get(j+16).getCell(2).removeParagraph(0);
-                            rows.get(j+16).getCell(2).setText(testSampleEntities.get(j).getManufacturer());
-                            rows.get(j+16).getCell(3).removeParagraph(0);
-                            rows.get(j+16).getCell(3).setText(testSampleEntities.get(j).getBatchNumber());
-                            rows.get(j+16).getCell(4).removeParagraph(0);
-                            rows.get(j+16).getCell(4).setText(testSampleEntities.get(j).getGeneration());
-                            rows.get(j+16).getCell(5).removeParagraph(0);
-                            rows.get(j+16).getCell(5).setText(testSampleEntities.get(j).getOutward());
-                            rows.get(j+16).getCell(6).removeParagraph(0);
-                            rows.get(j+16).getCell(6).setText(testSampleEntities.get(j).getSampleCode());
+                            WordUtils.replaceCellText(rows.get(j+16).getCell(0),key,testSampleEntities.get(j).getSampleName());
+                            WordUtils.replaceCellText(rows.get(j+16).getCell(1),key,testSampleEntities.get(j).getSpecs());
+                            WordUtils.replaceCellText(rows.get(j+16).getCell(2),key,testSampleEntities.get(j).getManufacturer());
+                            WordUtils.replaceCellText(rows.get(j+16).getCell(3),key,testSampleEntities.get(j).getBatchNumber());
+                            WordUtils.replaceCellText(rows.get(j+16).getCell(4),key,testSampleEntities.get(j).getGeneration());
+                            WordUtils.replaceCellText(rows.get(j+16).getCell(5),key,testSampleEntities.get(j).getOutward());
+                            WordUtils.replaceCellText(rows.get(j+16).getCell(6),key,testSampleEntities.get(j).getSampleCode());
                         }
                     }
                     if (i==size){
@@ -1961,8 +1909,7 @@ public class ReportServiceImpl implements ReportService {
                                     }
                                     if (i == page) {
                                         try {
-                                            rows.get(row).getCell(column + 1).removeParagraph(0);
-                                            rows.get(row).getCell(column + 1).setText(item.getCheckResult());
+                                            WordUtils.replaceCellText(rows.get(row).getCell(column + 1),key,item.getCheckResult());
                                         }catch (Exception e){
                                             mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标错误");
                                             logger.error("检测项在报告中的坐标错误:{}",e);
@@ -1978,9 +1925,9 @@ public class ReportServiceImpl implements ReportService {
                         XWPFTable xwpfTable = doc.getTables().get(size - 1);
                         int size1 = xwpfTable.getRows().size();
                         rows.get(size1-3).getCell(0).removeParagraph(0);
-                        rows.get(size1-3).getCell(0).setText(conclusionEntity.getConclusion());
+                        rows.get(size1-3).getCell(0).setText("检测结论："+conclusionEntity.getConclusion());
                         rows.get(size1-2).getCell(0).removeParagraph(0);
-                        rows.get(size1-2).getCell(0).setText(conclusionEntity.getAdditional());
+                        rows.get(size1-2).getCell(0).setText("附加声明："+conclusionEntity.getAdditional());
                     }
                     i++;
                 }

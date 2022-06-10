@@ -508,6 +508,6 @@
     </select>
 
     <select id="getDetailByEntrustId" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
-        select verifyer_id As verifyerId,issuer_id As issuerId,report_code,sample_name from test_report_record where entrustment_id=#{entrustId}
+        select * from test_report_record where entrustment_id=#{entrustId}
     </select>
 </mapper>
