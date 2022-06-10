@@ -427,6 +427,14 @@
         where entrustment_id = #{entrustId,jdbcType=BIGINT}
     </select>
 
+    <select id="selectByRecordId" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
+            parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM test_report_record
+        where id = #{recordId,jdbcType=BIGINT}
+    </select>
+
     <select id="selectByTaskId" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
             parameterType="java.lang.Long">
         SELECT

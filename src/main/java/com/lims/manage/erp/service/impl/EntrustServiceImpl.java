@@ -1421,8 +1421,15 @@ public class EntrustServiceImpl implements EntrustService {
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         //查询实际缴费
         String total = entityMapper.getRecordCountById(entrustmentId);
-        entrustAddVo.setPaymentRecordShow((total.length() == 0 ? "--" : total + ""));
-        entrustAddVo.setPaymentRecord((total.length() == 0 ? "--" : total + ""));
+        if(total!=null&&total.length()>0){
+            entrustAddVo.setPaymentRecordShow(total);
+            entrustAddVo.setPaymentRecord(total);
+        }
+        else {
+            entrustAddVo.setPaymentRecordShow("--");
+            entrustAddVo.setPaymentRecord("--");
+        }
+
         if (entrustAddVo.getOperateUser() != null) {
             // 获取做废人id 查询账号姓名
             entrustAddVo.setOperateUserStr(sysUserDao.getSysUserName(entrustAddVo.getOperateUser()));
@@ -1687,8 +1694,14 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 通过委托单id 获取缴费记录 依据id 同价价格
         String total = entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId);
-        entrustAddVo.setPaymentRecordShow((total.length() == 0 ? "--" : total + ""));
-        entrustAddVo.setPaymentRecord((total.length() == 0 ? "--" : total + ""));
+        if(total!=null&&total.length()>0){
+            entrustAddVo.setPaymentRecordShow(total);
+            entrustAddVo.setPaymentRecord(total);
+        }
+        else {
+            entrustAddVo.setPaymentRecordShow("--");
+            entrustAddVo.setPaymentRecord("--");
+        }
         // -- 支付方式。
 //        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
         // 联系地址
