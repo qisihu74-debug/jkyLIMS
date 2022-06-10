@@ -1,9 +1,6 @@
 package com.lims.manage.erp.mapper;
 
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.ReportApprovalVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -99,6 +96,17 @@ public interface ReportApprovalMapper {
     @Select("SELECT origin_url  FROM `test_entrusted_sample_checkitem_rel` WHERE id =#{id}")
     String getCheckItemUrl(Long id);
 
+    /**
+     * 通过报告id 获取详细表中 检测项 check_item_id
+     */
+    List<CheckItemInfoVo> getCheckItemInfoVoList(Long id);
+
+    /**
+     * 任务单详情 ----中间报告
+     * @param id
+     * @return
+     */
+    TaskDetailInfoVo getTaskDetailInterimReport(Long id);
 
 
 
