@@ -176,7 +176,7 @@
                t5.opinion,
                  t5.start_time,
                  t5.end_time,
-                 t5.id as check_item_id,
+                 t5.check_item_id as check_item_id,
                  t10.name AS instrumentName,
                  t10.id
                 FROM test_entrusted_sample_details_rel t3

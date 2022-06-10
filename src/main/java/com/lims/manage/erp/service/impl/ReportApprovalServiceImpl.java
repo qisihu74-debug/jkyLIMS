@@ -104,7 +104,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         // 获取当前报告类型。
         ReportApprovalVo reportApprovalVo2 = reportApprovalMapper.getReportApprovalDetail(reportApprovalVo1.getId());
         // reportApprovalVo2.getReportTypeStatus()==1 处理最终报告
-        if (reportApprovalVo1.getState() == 0 && reportApprovalVo2.getReportTypeStatus()==1) {
+        if (reportApprovalVo1.getState() == 0 && reportApprovalVo2.getReportTypeStatus()==0) {
             //通过 4.签发待抢单
             state = 4;
             reportApprovalVo.setVerifyerTime(new Date());
@@ -119,7 +119,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalMapper.updateReportApprovalDetail(reportApprovalVo);
             return true;
         }
-        if (reportApprovalVo1.getState() == 1 &&  reportApprovalVo2.getReportTypeStatus()==1 ) {
+        if (reportApprovalVo1.getState() == 1 &&  reportApprovalVo2.getReportTypeStatus()==0 ) {
             state = 0;
             reportApprovalVo.setVerifyerTime(null);
             reportApprovalVo.setVerifyer(null);
@@ -297,8 +297,9 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         // 报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
         Integer state = 0;
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
-
-        if (reportApprovalVo1.getState() == 0) {
+        // 获取报告状态 是中间报告 还是 最终报告
+        ReportApprovalVo reportApprovalVo2  = reportApprovalMapper.getReportApprovalDetail(reportApprovalVo1.getId());
+        if (reportApprovalVo1.getState() == 0 && reportApprovalVo2.getReportTypeStatus()==0) {
             //通过6已签
             state = 6;
             reportApprovalVo.setIssuerTime(new Date());
@@ -322,7 +323,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
             return true;
         }
-        if (reportApprovalVo1.getState() == 1) {
+        if (reportApprovalVo1.getState() == 1 && reportApprovalVo2.getReportTypeStatus()==0) {
             // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填 清除信息 退回上一步
             state = 0;
             // 签发清除
@@ -343,10 +344,48 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             // 根据委托单id 进行全部修改
             reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
             // 驳回操作 test_task 下 report_complete =2
-            taskMapper.updateTestTaskReportComplete(entrustAddVo.getId());
+//            taskMapper.updateTestTaskReportComplete(entrustAddVo.getId());
             if(entrustAddVo.getState()!=null){
                 taskMapper.updateEntrustById(entrustAddVo.getId(),7);
             }
+            return true;
+        }
+        // 处理中间报告
+        if (reportApprovalVo1.getState() == 0 && reportApprovalVo2.getReportTypeStatus()==1) {
+            //通过6已签
+            state = 6;
+            reportApprovalVo.setIssuerTime(new Date());
+            reportApprovalVo.setIssuer(reportApprovalVo1.getIssuer());
+            // 印章数据 转成字符串
+            StringBuilder stringBuilder = new StringBuilder();
+            for(int i=0;i<reportApprovalVo1.getSealTypeArray().length;i++){
+                stringBuilder.append(reportApprovalVo1.getSealTypeArray()[i]);
+                stringBuilder.append(",");
+            }
+            reportApprovalVo.setSealType(stringBuilder.deleteCharAt(stringBuilder.toString().length()-1).toString());
+            reportApprovalVo.setId(reportApprovalVo1.getId());
+            reportApprovalVo.setReason(reportApprovalVo1.getReason());
+            reportApprovalVo.setState(state);
+            reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
+            return true;
+        }
+        if (reportApprovalVo1.getState() == 1 && reportApprovalVo2.getReportTypeStatus()==1) {
+            // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填 清除信息 退回上一步
+            state = 0;
+            // 签发清除
+            reportApprovalVo.setIssuerTime(null);
+            reportApprovalVo.setIssuer(null);
+            reportApprovalVo.setSealType(null);
+            reportApprovalVo.setVerifyerId(null);
+            // 审批清除
+            reportApprovalVo.setVerifyerTime(null);
+            reportApprovalVo.setVerifyer(null);
+            reportApprovalVo.setVerifyerId(null);
+            reportApprovalVo.setId(reportApprovalVo1.getId());
+            reportApprovalVo.setReason(reportApprovalVo1.getReason());
+            reportApprovalVo.setState(state);
+            //  修改中间报告单至驳回状态
+            reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
             return true;
         }
         return false;
