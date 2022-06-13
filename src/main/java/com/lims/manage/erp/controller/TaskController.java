@@ -492,8 +492,9 @@ public class TaskController {
      */
     @GetMapping("downloadEntrust_two")
     public void downloadEntrust_two(Long taskId, HttpServletResponse response) {
-        String fileName = "taskOrder4.docx";
+        String fileName = "taskOrder6.docx";
         String url = "";
+        String downloadFileName = "任务单编号";
         try {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
@@ -503,7 +504,12 @@ public class TaskController {
             ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
             InputStream inputStream = FileAndFolderUtil.parseOut(b1);
             //TODO 设置签名信息
-
+            /** 设置文件下载名 （任务单号+检测项名）**/
+            /** 不同文件的MimeType参考后续链接 **/
+            downloadFileName = taskDetailInfo.getTaskCode();
+            response.setContentType("application/pdf");//下面三行是关键代码，处理乱码问题
+            response.setCharacterEncoding("utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + new String(downloadFileName.getBytes("utf-8"), "iso8859-1") + "." + "pdf");
             ServletOutputStream outputStream = response.getOutputStream();
             int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
             inputStream.close();

@@ -831,4 +831,18 @@
             </foreach>
         </if>
     </select>
+
+    <select id="selectTaskListDetails" resultType="com.lims.manage.erp.vo.TaskListVo">
+        SELECT
+        t1.id as taskId,
+        t1.sampler as sampler,
+        t1.sample_receiving_time as sampleReceivingTime,
+        t1.orderer as recorder,
+        t1.sample_state_description as sampleStateDescription,
+        t2.is_save as issueReport
+        FROM
+        test_task as t1
+        LEFT JOIN test_entrusted_info as t2 ON t1.entrustment_id = t2.id
+        WHERE t1.id = #{id}
+    </select>
 </mapper>

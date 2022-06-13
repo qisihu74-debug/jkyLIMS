@@ -539,6 +539,8 @@ public class TaskServiceImpl implements TaskService {
         List<XWPFTable> tables = doc.getTables();
         //                原材表格逐行赋值
         StringBuilder stringBuilder = new StringBuilder();
+        // 通过任务单 获取对应的任务单中信息。
+        TaskListVo taskListVo = taskMapper.selectTaskListDetails(taskDetailInfoVo.getTaskId());
         Integer cost = 0;
         for (int j = 0; j < tables.size(); j++) {
             List<XWPFTableRow> rows = tables.get(j).getRows();
@@ -548,6 +550,42 @@ public class TaskServiceImpl implements TaskService {
             testMap.put("date", taskDetailInfoVo.getOrderTime());
             // 编号
             testMap.put("number", taskDetailInfoVo.getTaskCode());
+            // 发布人
+            if(taskListVo.getRecorder()!=null){
+                testMap.put("recorder", taskListVo.getRecorder());
+            }
+            else{
+                testMap.put("recorder", "--");
+            }
+            // 领样人
+            if(taskListVo.getSampler()!=null){
+                testMap.put("sampler", taskListVo.getSampler());
+            }else {
+                testMap.put("sampler", "--");
+            }
+            // 领样日期
+           if(taskListVo.getSampleReceivingTime()!=null){
+
+               String sampleReceivingTime = DateUtil.longToString(taskListVo.getSampleReceivingTime().getTime()/1000,"yyyy-MM-dd");
+               testMap.put("sampleReceivingTime", sampleReceivingTime);
+           }else {
+               testMap.put("sampleReceivingTime", "--");
+           }
+            // 样品描述
+           if(taskListVo.getSampleStateDescription()!=null){
+               testMap.put("sampleStateDescription", taskListVo.getSampleStateDescription());
+           }
+           else{
+               testMap.put("sampleStateDescription", "--");
+
+           }
+            //委托单是否留样。
+           if( taskListVo.getIssueReport()!=null&&taskListVo.getIssueReport().equals("是")){
+                testMap.put("issueReport", "☑退还  □弃样");
+            }
+            else{
+                testMap.put("issueReport", "□退还  ☑弃样");
+            }
             //解析替换文本段落对象
 //            PoiConfig.changeText(doc, testMap);
             //遍历表格,并替换模板
