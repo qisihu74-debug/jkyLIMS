@@ -19,6 +19,6 @@ import org.springframework.stereotype.Component;
 @Mapper
 public interface AlertDao extends BaseMapper<AlertEntity> {
 
-    @Delete("delete * from test_alert where entrust_id=#{id}")
+    @Delete("delete from test_alert where entrust_id=#{id}")
     void deleteByEntrustId(@Param("id") Long id);
 }
