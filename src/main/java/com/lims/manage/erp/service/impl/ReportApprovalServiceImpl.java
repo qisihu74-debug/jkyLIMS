@@ -101,7 +101,10 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         Integer state = 0;
         // 动态修改数据表
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
-        if (reportApprovalVo1.getState() == 0) {
+        // 获取当前报告类型。
+        ReportApprovalVo reportApprovalVo2 = reportApprovalMapper.getReportApprovalDetail(reportApprovalVo1.getId());
+        // reportApprovalVo2.getReportTypeStatus()==1 处理最终报告
+        if (reportApprovalVo1.getState() == 0 && reportApprovalVo2.getReportTypeStatus()==0) {
             //通过 4.签发待抢单
             state = 4;
             reportApprovalVo.setVerifyerTime(new Date());
@@ -116,7 +119,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalMapper.updateReportApprovalDetail(reportApprovalVo);
             return true;
         }
-        if (reportApprovalVo1.getState() == 1) {
+        if (reportApprovalVo1.getState() == 1 &&  reportApprovalVo2.getReportTypeStatus()==0 ) {
             state = 0;
             reportApprovalVo.setVerifyerTime(null);
             reportApprovalVo.setVerifyer(null);
@@ -135,6 +138,28 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             if(entrustAddVo.getState()!=null){
                 taskMapper.updateEntrustById(entrustAddVo.getId(),7);
             }
+            return true;
+        }
+        // reportApprovalVo2.getReportTypeStatus()==0 处理中间报告 不操作委托单id
+        if (reportApprovalVo1.getState() == 0 && reportApprovalVo2.getReportTypeStatus()==1) {
+            //通过 4.签发待抢单
+            state = 4;
+            reportApprovalVo.setVerifyerTime(new Date());
+            reportApprovalVo.setVerifyer(reportApprovalVo1.getVerifyer());
+            reportApprovalVo.setState(state);
+            reportApprovalVo.setId(reportApprovalVo1.getId());
+            reportApprovalMapper.updateReportApprovalDetail(reportApprovalVo);
+            return true;
+        }
+        if (reportApprovalVo1.getState() == 1 &&  reportApprovalVo2.getReportTypeStatus()==1 ) {
+            state = 0;
+            reportApprovalVo.setVerifyerTime(null);
+            reportApprovalVo.setVerifyer(null);
+            reportApprovalVo.setVerifyerId(null);
+            reportApprovalVo.setState(state);
+            reportApprovalVo.setId(reportApprovalVo1.getId());
+            reportApprovalVo.setReason(reportApprovalVo1.getReason());
+            reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
             return true;
         }
         return false;
@@ -169,49 +194,24 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         return result;
     }
 
-
+    /**
+     * 报告审批详情  展示检测项数据
+     * @param id
+     * @return
+     */
     @Override
     public TaskDetailInfoVo getDetails(Long id) {
-        /**
-         * 获取任务单详情
-         */
-        TaskDetailInfoVo taskDetailInfoVo = reportApprovalMapper.getTaskDetail(id);
-        // 获取印章数据以 数组形式呈现
-        String[] sealTypeArray = new String[3];
-        // 1、优先考虑报告印章 呈现
-        if(taskDetailInfoVo.getSealType()!=null&&!taskDetailInfoVo.getSealType().equals("")){
-            sealTypeArray = taskDetailInfoVo.getSealType().split(",");
-        }else {
-            // 2、考虑委托单印章 呈现
-            if(taskDetailInfoVo.getSealTypeTicket()!=null&&!taskDetailInfoVo.getSealTypeTicket().equals("")){
-                sealTypeArray = taskDetailInfoVo.getSealTypeTicket().split(",");
-            }
+        // 查询报告单详情  要区分 中间报告 还是 最终报告。 reportTypeStatus
+        ReportApprovalVo reportApprovalVo = reportApprovalMapper.getReportApprovalDetail(id);
+        // reportTypeStatus!=null 并且是中间报告的话
+        if(reportApprovalVo.getReportTypeStatus()!=null&&reportApprovalVo.getReportTypeStatus()==1){
+            // 审批报告详情 处理中间报告方法
+            TaskDetailInfoVo data = approvalMiddleMethod(id);
+            return data;
         }
-        taskDetailInfoVo.setSealTypeArray(sealTypeArray);
-
-        if (taskDetailInfoVo == null) {
-            return new TaskDetailInfoVo(id);
-        }
-        // 样品展示  样品的检测项信息展示
-        if (taskDetailInfoVo.getEntrustmentId() != null) {
-            // 通过委托id 获取样品信息 及以下的 处理。
-            List<SampleDetailVo> sampleDetailVoList = reportApprovalMapper.getSampleDetailList(taskDetailInfoVo.getEntrustmentId());
-            for (SampleDetailVo sampleDetailVo : sampleDetailVoList) {
-                if (!sampleDetailVo.getCheckItemInfoList().isEmpty()) {
-                    for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
-                        if (!checkItemInfoVo.getTestInstrumentEntityList().isEmpty()) {
-                            String InstrumentName = "";
-                            for (TestInstrumentEntity testInstrumentEntity : checkItemInfoVo.getTestInstrumentEntityList()) {
-                                InstrumentName += testInstrumentEntity.getName() + "、";
-                            }
-                            checkItemInfoVo.setIntrusmentName(InstrumentName);
-                        }
-                    }
-                }
-            }
-            taskDetailInfoVo.setSampleDetailList(sampleDetailVoList);
-        }
-        return taskDetailInfoVo;
+        // 处理最终报告详情。
+        TaskDetailInfoVo data = approvalUltimatelyMethod(id);
+        return  data;
     }
 
 
@@ -297,8 +297,9 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         // 报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
         Integer state = 0;
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
-
-        if (reportApprovalVo1.getState() == 0) {
+        // 获取报告状态 是中间报告 还是 最终报告
+        ReportApprovalVo reportApprovalVo2  = reportApprovalMapper.getReportApprovalDetail(reportApprovalVo1.getId());
+        if (reportApprovalVo1.getState() == 0 && reportApprovalVo2.getReportTypeStatus()==0) {
             //通过6已签
             state = 6;
             reportApprovalVo.setIssuerTime(new Date());
@@ -322,7 +323,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
             return true;
         }
-        if (reportApprovalVo1.getState() == 1) {
+        if (reportApprovalVo1.getState() == 1 && reportApprovalVo2.getReportTypeStatus()==0) {
             // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填 清除信息 退回上一步
             state = 0;
             // 签发清除
@@ -343,10 +344,48 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             // 根据委托单id 进行全部修改
             reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
             // 驳回操作 test_task 下 report_complete =2
-            taskMapper.updateTestTaskReportComplete(entrustAddVo.getId());
+//            taskMapper.updateTestTaskReportComplete(entrustAddVo.getId());
             if(entrustAddVo.getState()!=null){
                 taskMapper.updateEntrustById(entrustAddVo.getId(),7);
             }
+            return true;
+        }
+        // 处理中间报告
+        if (reportApprovalVo1.getState() == 0 && reportApprovalVo2.getReportTypeStatus()==1) {
+            //通过6已签
+            state = 6;
+            reportApprovalVo.setIssuerTime(new Date());
+            reportApprovalVo.setIssuer(reportApprovalVo1.getIssuer());
+            // 印章数据 转成字符串
+            StringBuilder stringBuilder = new StringBuilder();
+            for(int i=0;i<reportApprovalVo1.getSealTypeArray().length;i++){
+                stringBuilder.append(reportApprovalVo1.getSealTypeArray()[i]);
+                stringBuilder.append(",");
+            }
+            reportApprovalVo.setSealType(stringBuilder.deleteCharAt(stringBuilder.toString().length()-1).toString());
+            reportApprovalVo.setId(reportApprovalVo1.getId());
+            reportApprovalVo.setReason(reportApprovalVo1.getReason());
+            reportApprovalVo.setState(state);
+            reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
+            return true;
+        }
+        if (reportApprovalVo1.getState() == 1 && reportApprovalVo2.getReportTypeStatus()==1) {
+            // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填 清除信息 退回上一步
+            state = 0;
+            // 签发清除
+            reportApprovalVo.setIssuerTime(null);
+            reportApprovalVo.setIssuer(null);
+            reportApprovalVo.setSealType(null);
+            reportApprovalVo.setVerifyerId(null);
+            // 审批清除
+            reportApprovalVo.setVerifyerTime(null);
+            reportApprovalVo.setVerifyer(null);
+            reportApprovalVo.setVerifyerId(null);
+            reportApprovalVo.setId(reportApprovalVo1.getId());
+            reportApprovalVo.setReason(reportApprovalVo1.getReason());
+            reportApprovalVo.setState(state);
+            //  修改中间报告单至驳回状态
+            reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
             return true;
         }
         return false;
@@ -386,5 +425,118 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         Set<Long> ids = new HashSet<>();
         ids.add(userId);
         return ids;
+    }
+
+    /**
+     * 审批报告详情 处理中间报告方法
+     */
+    public TaskDetailInfoVo approvalMiddleMethod(Long id){
+    // 中间报告详情表 已经存储检测项 详情。 比对委托单检测项后 取值。
+        List<CheckItemInfoVo> CheckItemList  = reportApprovalMapper.getCheckItemInfoVoList(id);
+        Map<Integer,String> map = new HashMap<>();
+        if(!CheckItemList.isEmpty()){
+            for(int i=0; i<CheckItemList.size();i++){
+                CheckItemInfoVo checkItemInfoVo  =  CheckItemList.get(i);
+                map.put(checkItemInfoVo.getCheckItemId(),checkItemInfoVo.getCheckItemName());
+            }
+        }
+        // 获取任务单详情。----中间报告
+        TaskDetailInfoVo taskDetailInfoVo = reportApprovalMapper.getTaskDetailInterimReport(id);
+        // 获取印章数据以 数组形式呈现
+        String[] sealTypeArray = new String[3];
+        // 1、优先考虑报告印章 呈现
+        if(taskDetailInfoVo.getSealType()!=null&&!taskDetailInfoVo.getSealType().equals("")){
+            sealTypeArray = taskDetailInfoVo.getSealType().split(",");
+        }else {
+            // 2、考虑委托单印章 呈现
+            if(taskDetailInfoVo.getSealTypeTicket()!=null&&!taskDetailInfoVo.getSealTypeTicket().equals("")){
+                sealTypeArray = taskDetailInfoVo.getSealTypeTicket().split(",");
+            }
+        }
+        taskDetailInfoVo.setSealTypeArray(sealTypeArray);
+        if (taskDetailInfoVo == null) {
+            return new TaskDetailInfoVo(id);
+        }
+        // 样品展示  样品的检测项信息展示
+        if (taskDetailInfoVo.getEntrustmentId() != null) {
+            // 通过委托id 获取样品信息 及以下的 处理。
+            List<SampleDetailVo> sampleDetailVoList = reportApprovalMapper.getSampleDetailList(taskDetailInfoVo.getEntrustmentId());
+            for (SampleDetailVo sampleDetailVo : sampleDetailVoList) {
+                if (!sampleDetailVo.getCheckItemInfoList().isEmpty()) {
+                    for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+                        if (!checkItemInfoVo.getTestInstrumentEntityList().isEmpty()) {
+                            String InstrumentName = "";
+                            for (TestInstrumentEntity testInstrumentEntity : checkItemInfoVo.getTestInstrumentEntityList()) {
+                                InstrumentName += testInstrumentEntity.getName() + "、";
+                            }
+                            checkItemInfoVo.setIntrusmentName(InstrumentName);
+                        }
+                    }
+                }
+            }
+            //中间报告需要 比较委托单检测项 与报告单检测项。最终以报告单检测项为准。
+            if(!sampleDetailVoList.isEmpty()){
+                for(SampleDetailVo sampleDetailVo:sampleDetailVoList){
+                    if(!sampleDetailVo.getCheckItemInfoList().isEmpty()){
+                        Iterator<CheckItemInfoVo> it = sampleDetailVo.getCheckItemInfoList().iterator();
+                        while (it.hasNext()){
+                            CheckItemInfoVo checkItemInfoVo  = it.next();
+                            if(map.get(checkItemInfoVo.getCheckItemId())==null){
+                                it.remove();
+                            }
+                        }
+                    }
+                }
+            }
+            taskDetailInfoVo.setSampleDetailList(sampleDetailVoList);
+        }
+        return taskDetailInfoVo;
+    }
+
+    /**
+     * 审批报告详情 处理 最终报告方法
+     * @param id
+     * @return
+     */
+    public TaskDetailInfoVo approvalUltimatelyMethod(Long id){
+        /**
+         * 获取任务单详情
+         */
+        TaskDetailInfoVo taskDetailInfoVo = reportApprovalMapper.getTaskDetail(id);
+        // 获取印章数据以 数组形式呈现
+        String[] sealTypeArray = new String[3];
+        // 1、优先考虑报告印章 呈现
+        if(taskDetailInfoVo.getSealType()!=null&&!taskDetailInfoVo.getSealType().equals("")){
+            sealTypeArray = taskDetailInfoVo.getSealType().split(",");
+        }else {
+            // 2、考虑委托单印章 呈现
+            if(taskDetailInfoVo.getSealTypeTicket()!=null&&!taskDetailInfoVo.getSealTypeTicket().equals("")){
+                sealTypeArray = taskDetailInfoVo.getSealTypeTicket().split(",");
+            }
+        }
+        taskDetailInfoVo.setSealTypeArray(sealTypeArray);
+        if (taskDetailInfoVo == null) {
+            return new TaskDetailInfoVo(id);
+        }
+        // 样品展示  样品的检测项信息展示
+        if (taskDetailInfoVo.getEntrustmentId() != null) {
+            // 通过委托id 获取样品信息 及以下的 处理。
+            List<SampleDetailVo> sampleDetailVoList = reportApprovalMapper.getSampleDetailList(taskDetailInfoVo.getEntrustmentId());
+            for (SampleDetailVo sampleDetailVo : sampleDetailVoList) {
+                if (!sampleDetailVo.getCheckItemInfoList().isEmpty()) {
+                    for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+                        if (!checkItemInfoVo.getTestInstrumentEntityList().isEmpty()) {
+                            String InstrumentName = "";
+                            for (TestInstrumentEntity testInstrumentEntity : checkItemInfoVo.getTestInstrumentEntityList()) {
+                                InstrumentName += testInstrumentEntity.getName() + "、";
+                            }
+                            checkItemInfoVo.setIntrusmentName(InstrumentName);
+                        }
+                    }
+                }
+            }
+            taskDetailInfoVo.setSampleDetailList(sampleDetailVoList);
+        }
+        return taskDetailInfoVo;
     }
 }
