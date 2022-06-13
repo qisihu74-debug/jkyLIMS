@@ -823,13 +823,13 @@ public class ReportController {
     }
 
     /**
-     * 下载报告获取url链接
-     * @param entrustId
+     * 预览报告
+     * @param id
      * @return
      */
     @GetMapping("preReportUrl")
-    public void preReportUrl(Long entrustId,HttpServletResponse response){
-        String reportUrl = reportService.reportUrl(entrustId);
+    public void preReportUrl(Long id,HttpServletResponse response){
+        String reportUrl = reportService.getUrlById(id);
         MinioClient client = MinIoUtil.minioClient;
         //预览word转pdf
         String[] split = reportUrl.split("\\?");
@@ -904,6 +904,24 @@ public class ReportController {
             return ResultUtil.success("保存成功！", preserve);
         } else {
             return ResultUtil.error(ResultEnum.PRESERVE_FAIL.getCode(), ResultEnum.PRESERVE_FAIL.getMsg());
+        }
+    }
+
+    /**
+     * 设置物理用章
+     * @param ids
+     * @return
+     */
+    @GetMapping("category")
+    public Result category(@RequestParam("ids") List<String> ids){
+        if (CollectionUtils.isEmpty(ids)){
+            return ResultUtil.error("请选择需要操作的数据");
+        }
+        Boolean flag = reportService.category(ids);
+        if (flag){
+            return ResultUtil.success("操作成功！");
+        }else {
+            return ResultUtil.error("网络异常");
         }
     }
 }

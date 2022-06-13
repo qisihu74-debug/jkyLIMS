@@ -206,4 +206,6 @@ public interface ReportRecordEntityMapper {
 
     List<ReportDetailListVo> reportList(ReportDetailListParamVo paramVo);
 
+    @Update("update test_report_record set category = '电子章' where qys_docment_id = #{documentId}")
+    void updateSeal(@Param("documentId") Long documentId);
 }

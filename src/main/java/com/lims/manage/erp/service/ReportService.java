@@ -375,4 +375,8 @@ public interface ReportService {
      * @return
      */
     ReportDetailVo getMiddleReportDetail(Long taskId);
+
+    String getUrlById(Long id);
+
+    Boolean category(List<String> ids);
 }

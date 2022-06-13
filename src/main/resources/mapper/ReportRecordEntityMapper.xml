@@ -33,7 +33,7 @@
     <sql id="Base_Column_List">
         id
         , entrustment_id, report_code, sample_name, price, required_completion_time, task_code,
-    state, number, report_type, verifyer_time, issuer_time, seal_type, apply_reason, 
+    state, number, report_type, verifyer_time, issuer_time, seal_type, apply_reason,
     issu_reason, verifyer, issuer, applicant, sealer, seal_time, report_manager,
     report_time, addressee, waybill, operate_time,email,report_phone,report_mailing_address,
     report_complete_time,seal_url
@@ -493,6 +493,7 @@
     <select id="getSendList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         SELECT
         id,
+        category,
         entrustment_id As entrustmentId,
         report_code,
         sample_name,
@@ -637,6 +638,7 @@
         SELECT
         t2.entrustment_no,
         t1.report_code,
+        t1.category,
         t1.sample_name,
         t1.applicant,
         t1.report_complete_time,

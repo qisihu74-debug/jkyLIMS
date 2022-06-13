@@ -143,4 +143,9 @@ public interface ReportMapper {
      * @return
      */
     ReportDetailVo getMiddleReportDetail(Long taskId,List<Long> deptIds);
+
+    @Select("select report_url from test_report_record where id=#{id}")
+    String getUrlById(@Param("id") Long id);
+
+    void updateCategory(List<String> ids);
 }
