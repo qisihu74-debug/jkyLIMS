@@ -1467,6 +1467,7 @@ public class ReportServiceImpl implements ReportService {
                     //根据委托id存储文档id
                     List<QiYueSuoDocment> result = response.getResult();
                     entityMapper.updateDocIdAndState(entrustId, result.get(0).getDocumentId(), "2");
+                    entityMapper.updateSeal(result.get(0).getDocumentId());
                 }
             } else {
                 return false;
@@ -2250,5 +2251,16 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public String getUrlById(Long id) {
         return reportMapper.getUrlById(id);
+    }
+
+    @Override
+    public Boolean category(List<String> ids) {
+        //设置状态和用章类型
+        try {
+            reportMapper.updateCategory(ids);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
     }
 }

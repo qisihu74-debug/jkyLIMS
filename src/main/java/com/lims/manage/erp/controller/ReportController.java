@@ -906,4 +906,22 @@ public class ReportController {
             return ResultUtil.error(ResultEnum.PRESERVE_FAIL.getCode(), ResultEnum.PRESERVE_FAIL.getMsg());
         }
     }
+
+    /**
+     * 设置物理用章
+     * @param ids
+     * @return
+     */
+    @GetMapping("category")
+    public Result category(@RequestParam("ids") List<String> ids){
+        if (CollectionUtils.isEmpty(ids)){
+            return ResultUtil.error("请选择需要操作的数据");
+        }
+        Boolean flag = reportService.category(ids);
+        if (flag){
+            return ResultUtil.success("操作成功！");
+        }else {
+            return ResultUtil.error("网络异常");
+        }
+    }
 }

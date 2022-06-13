@@ -45,3 +45,8 @@ ADD COLUMN `type`  int NULL DEFAULT 0 COMMENT '0,最终报告，1中间报告' A
 --客户提供关联所有产品--
 insert into test_product_standard_file_rel(product_id,standard_file_id) select DISTINCT  product_id,2692 from test_product where del_flag=0 and status=0;
 
+ALTER TABLE `test_report_record`
+ADD COLUMN `category`  varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '印章分类，PHYSICS(物理章),ELECTRONIC(电子章)' AFTER `type`;
+
+
+
