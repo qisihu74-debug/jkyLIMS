@@ -375,4 +375,6 @@ public interface ReportService {
      * @return
      */
     ReportDetailVo getMiddleReportDetail(Long taskId);
+
+    String getUrlById(Long id);
 }

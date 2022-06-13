@@ -42,3 +42,6 @@ UPDATE sys_function SET sort=10 WHERE function_id= 65;
 ALTER TABLE `test_report_record`
 ADD COLUMN `type`  int NULL DEFAULT 0 COMMENT '0,最终报告，1中间报告' AFTER `type`;
 
+--客户提供关联所有产品--
+insert into test_product_standard_file_rel(product_id,standard_file_id) select DISTINCT  product_id,2692 from test_product where del_flag=0 and status=0;
+

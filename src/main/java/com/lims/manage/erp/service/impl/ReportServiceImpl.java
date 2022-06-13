@@ -2246,4 +2246,9 @@ public class ReportServiceImpl implements ReportService {
         reportDetail.setSamples(samples);
         return reportDetail;
     }
+
+    @Override
+    public String getUrlById(Long id) {
+        return reportMapper.getUrlById(id);
+    }
 }

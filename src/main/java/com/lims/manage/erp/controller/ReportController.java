@@ -823,13 +823,13 @@ public class ReportController {
     }
 
     /**
-     * 下载报告获取url链接
-     * @param entrustId
+     * 预览报告
+     * @param id
      * @return
      */
     @GetMapping("preReportUrl")
-    public void preReportUrl(Long entrustId,HttpServletResponse response){
-        String reportUrl = reportService.reportUrl(entrustId);
+    public void preReportUrl(Long id,HttpServletResponse response){
+        String reportUrl = reportService.getUrlById(id);
         MinioClient client = MinIoUtil.minioClient;
         //预览word转pdf
         String[] split = reportUrl.split("\\?");
