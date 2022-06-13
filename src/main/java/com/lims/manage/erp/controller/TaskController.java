@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
@@ -13,26 +14,42 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
 import com.lims.manage.erp.util.AsposeUtil;
-import com.lims.manage.erp.util.ExcelConvertPdf;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.BatchReceiveTaskVo;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
+import com.lims.manage.erp.vo.OriginalRecordDataVo;
+import com.lims.manage.erp.vo.OriginalRecordParamVo;
+import com.lims.manage.erp.vo.PersonInfoVo;
+import com.lims.manage.erp.vo.ReceiveSampleParamVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.TaskListParamVo;
+import com.lims.manage.erp.vo.TeamVo;
+import com.spire.xls.Workbook;
+import com.spire.xls.Worksheet;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -51,6 +68,8 @@ public class TaskController {
     TestDetectionService testDetectionService;
     @Autowired
     private TaskMapper taskMapper;
+    @Autowired
+    private QiYueSuoEntity qiYueSuoEntity;
 
     /**
      * 查询任务详情——废弃
@@ -367,7 +386,7 @@ public class TaskController {
         XLSTransformer transformer = new XLSTransformer();
 //        InputStream fileStream = MinIoUtil.getFileStream("original-record-template", originalTemplate);
         InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
-        Workbook workbook = null;
+        org.apache.poi.ss.usermodel.Workbook workbook = null;
         try {
             workbook = transformer.transformXLS(fileStream, result);
             response.reset();
@@ -393,7 +412,7 @@ public class TaskController {
      * @param itemId
      * @param response
      */
-    @RequestMapping(value = "/previewOriginalRecord")
+    /*@RequestMapping(value = "/previewOriginalRecord")
 //    @CrossOrigin()
     public void previewOriginalRecord(Long taskId,
                                        Integer sampleId,
@@ -424,7 +443,7 @@ public class TaskController {
         } catch (Exception e) {
             log.error("原始记录转换pdf预览失败:{}",e);
         }
-    }
+    }*/
 
     /**
      * 下载任务通知单 废弃 页面已经不使用
@@ -647,6 +666,55 @@ public class TaskController {
                 return ResultUtil.success("修改人员信息成功！", i);
             }
             return ResultUtil.error("修改人员信息失败！");
+        }
+    }
+
+    /**
+     * 预览原始记录
+     * @param url
+     * @return
+     */
+    @RequestMapping(value = "/previewOriginalRecord")
+    public Result previewOriginalRecord(String url,HttpServletResponse response){
+        if (StringUtils.isEmpty(url)){
+            return ResultUtil.error("原始记录未上传！");
+        }
+        try {
+            String[] split = url.split("\\?");
+            String[] strings = split[0].split("\\/");
+            String fileName = strings[4];
+            String[] names = fileName.split("\\.");
+            File file = FileAndFolderUtil.getFile(url);
+            InputStream in = new FileInputStream(file);
+            if (".xls".equals(names[1]) || ".xlsx".equals(names[1])){
+                Workbook workbook = new Workbook();
+                workbook.loadFromStream(in);
+                //获取第一个工作表
+                Worksheet sheet = workbook.getWorksheets().get(0);
+                //调用方法将Excel保存为图片
+                String basePath = qiYueSuoEntity.getAutographPath()+names[0]+".png";
+                sheet.saveToImage(basePath);
+                //读取临时图片文件输出
+                File file1 = new File(basePath);
+                InputStream fileInputStream = new FileInputStream(file1);
+                ServletOutputStream outputStream = response.getOutputStream();
+                int i = IOUtils.copy(fileInputStream, outputStream);   // copy流数据,i为字节数
+                //删除临时文件
+                FileAndFolderUtil.delete(basePath);
+                log.info("临时转换的图片删除成功！");
+                in.close();
+                fileInputStream.close();
+                outputStream.close();
+            }else {
+                ServletOutputStream outputStream = response.getOutputStream();
+                int i = IOUtils.copy(in, outputStream);   // copy流数据,i为字节数
+                in.close();
+                outputStream.close();
+            }
+            return ResultUtil.success("ok");
+        }catch (Exception e){
+            log.error("预览原始记录模板失败:{}",e);
+            return ResultUtil.error("预览原始记录模板失败");
         }
     }
 
