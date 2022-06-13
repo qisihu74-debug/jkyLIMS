@@ -368,4 +368,10 @@ public interface TaskMapper extends BaseMapper {
      * 统计未任务领取。
      */
     Integer selectCount(Integer state ,List<Long> deptIds);
+
+    /**
+     * 通过任务单id 获取任务单中关联信息。
+     */
+    TaskListVo selectTaskListDetails(Long id);
+
 }
