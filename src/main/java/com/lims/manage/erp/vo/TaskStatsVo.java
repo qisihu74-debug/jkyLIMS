@@ -114,4 +114,11 @@ public class TaskStatsVo {
      */
     private String discount;
 
+    /**
+     * 备注
+     */
+    private String remark;
+
+    private Integer[] integers;
+
 }

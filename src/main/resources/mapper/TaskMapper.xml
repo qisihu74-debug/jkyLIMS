@@ -845,4 +845,19 @@
         LEFT JOIN test_entrusted_info as t2 ON t1.entrustment_id = t2.id
         WHERE t1.id = #{id}
     </select>
+
+    <update id="batchReview">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update test_entrusted_sample_checkitem_rel
+            <set>
+                <if test="item.state != null">
+                    state = #{item.state},
+                </if>
+                <if test="item.remark != null and item.remark != ''">
+                    opinion = #{item.remark},
+                </if>
+            </set>
+            where id = #{item.itemId}
+        </foreach>
+    </update>
 </mapper>

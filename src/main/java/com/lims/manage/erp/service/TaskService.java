@@ -194,4 +194,10 @@ public interface TaskService {
      * @return
      */
     int updatePersonInfo(PersonInfoVo vo);
+
+    /**
+     * 批量 通过或驳回
+     * @return
+     */
+    String batchReview(TaskStatsVo taskStatsVo);
 }

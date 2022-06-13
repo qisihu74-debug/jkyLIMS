@@ -656,4 +656,37 @@ public class TaskController {
         }
     }
 
+    /**
+     * 批量复核通过
+     */
+    /**
+     * itemId 主键
+     * state 驳回=4，通过=3，撤回=1
+     * 备注 opinion
+     * @return
+     */
+    @RequestMapping("/batchReview")
+    public Result batchReview(@RequestBody TaskStatsVo taskStatsVo) {
+        if(taskStatsVo.getTaskId()==null || taskStatsVo.getIntegers().length==0||taskStatsVo.getIntegers()==null){
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+            // 验证登录人userId 是否具备操作资格
+            // 验证登录人信息 和部门 存入
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            if (userInfo == null) {
+                return ResultUtil.error("token 已过期！");
+            }
+            // 验证该账号 是否具备检测资格。
+            if (testDetectionService.reviewTheLogin(userInfo.getUserId(), taskStatsVo.getTaskId()) == false) {
+                return ResultUtil.error("登录人没有被派发复核资格");
+            }
+
+            return ResultUtil.success(taskService.batchReview(taskStatsVo));
+    }
+
+    /**
+     * 批量下载原始记录
+     */
+
+
 }
