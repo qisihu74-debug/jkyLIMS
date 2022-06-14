@@ -6,8 +6,11 @@ import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.zip.ZipOutputStream;
 
 public interface TaskService {
 
@@ -200,4 +203,13 @@ public interface TaskService {
      * @return
      */
     String batchReview(TaskStatsVo taskStatsVo);
+
+    /**
+     * 获取检测项zip
+     * @param taskStatsVo
+     * @return
+     */
+    String batchDownloadOriginalRecord(TaskStatsVo taskStatsVo);
+
+    ZipOutputStream packagingWorkbookZip(Integer[] ids, HttpServletResponse response) throws IOException;
 }

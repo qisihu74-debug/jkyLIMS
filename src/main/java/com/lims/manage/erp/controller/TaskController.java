@@ -39,16 +39,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipOutputStream;
 
 @Slf4j
 @RestController
@@ -746,7 +742,24 @@ public class TaskController {
 
     /**
      * 批量下载原始记录
+     * 根据检测项id
+     * @param taskStatsVo
+     * @return
      */
+    @RequestMapping("/batchDownloadOriginalRecord")
+    public void batchDownloadOriginalRecord(@RequestBody TaskStatsVo taskStatsVo,HttpServletResponse response) throws IOException {
+        if(taskStatsVo.getIntegers().length==0||taskStatsVo.getIntegers()==null){
+            log.info("批量下载原始记录 integers = "+ taskStatsVo.getIntegers().toString());
+        }
+        response.reset();
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/zip");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("原始记录.zip", "UTF-8") );
+        ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(taskStatsVo.getIntegers(),response);
+        zipOutputStream.flush();
+    }
+
 
 
 }
