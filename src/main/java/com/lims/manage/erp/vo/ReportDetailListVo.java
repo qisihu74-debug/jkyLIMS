@@ -47,4 +47,9 @@ public class ReportDetailListVo {
      * 报告类型 （0最终报告,1中间报告）
      */
     private Integer reportTypeStatus;
+
+    /**
+     * 物理章、电子章
+     */
+    private String category;
 }
