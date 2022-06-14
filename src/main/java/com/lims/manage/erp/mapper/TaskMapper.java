@@ -374,4 +374,17 @@ public interface TaskMapper extends BaseMapper {
      */
     TaskListVo selectTaskListDetails(Long id);
 
+    int batchReview(List<TaskStatsItemVo> list);
+
+    /**
+     * -- 通过任务单 效验检测项信息。
+     */
+    @Select("SELECT\n" +
+            "\tstate \n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel \n" +
+            "WHERE\n" +
+            "\ttask_id = #{taskId}")
+    List<Integer> selectCheckItemState(Long taskId);
+
 }

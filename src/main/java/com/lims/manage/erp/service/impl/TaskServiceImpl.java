@@ -1073,4 +1073,36 @@ public class TaskServiceImpl implements TaskService {
         }
         return rows;
     }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String batchReview(TaskStatsVo taskStatsVo) {
+        // 批量操作。
+        List<TaskStatsItemVo> list = new ArrayList<>();
+        for(int i=0;i<taskStatsVo.getIntegers().length;i++){
+            TaskStatsItemVo taskStatsItemVo = new TaskStatsItemVo();
+            taskStatsItemVo.setItemId(taskStatsVo.getIntegers()[i]);
+            taskStatsItemVo.setState(taskStatsVo.getState());
+            taskStatsItemVo.setRemark(taskStatsItemVo.getRemark()!=null?taskStatsItemVo.getRemark():"--");
+            list.add(taskStatsItemVo);
+        }
+        taskMapper.batchReview(list);
+        // 通过任务单 获取检测项状态 =3 通过状态
+        if(taskStatsVo.getState()==3){
+            List<Integer> states = taskMapper.selectCheckItemState(taskStatsVo.getTaskId());
+            for (Integer stateItem : states) {
+                if (stateItem != 3) {
+                    return "当前任务单下检测项未全部复核成功";
+                }
+            }
+            // 修改test_task state 状态 为6：
+            TaskTestEntity taskTestEntity = new TaskTestEntity();
+            taskTestEntity.setId(taskStatsVo.getTaskId());
+            taskTestEntity.setState(6);
+            // 任务单 复核成功 记录复核时间。
+            taskTestEntity.setReviewTime(new Date());
+            taskMapper.updateTestTask(taskTestEntity);
+            return "任务单复核成功";
+        }
+        return "成功";
+    }
 }

@@ -33,4 +33,13 @@ public class TaskStatsItemVo {
      * 已复核
      */
     private Boolean review;
+
+    /**
+     * 状态
+     */
+    private Integer state;
+    /**
+     * 描述信息
+     */
+    private String remark;
 }
