@@ -204,12 +204,6 @@ public interface TaskService {
      */
     String batchReview(TaskStatsVo taskStatsVo);
 
-    /**
-     * 获取检测项zip
-     * @param taskStatsVo
-     * @return
-     */
-    String batchDownloadOriginalRecord(TaskStatsVo taskStatsVo);
 
     ZipOutputStream packagingWorkbookZip(Integer[] ids, HttpServletResponse response) throws IOException;
 }

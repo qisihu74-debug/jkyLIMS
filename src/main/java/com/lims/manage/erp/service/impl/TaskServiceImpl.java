@@ -1115,31 +1115,6 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public String batchDownloadOriginalRecord(TaskStatsVo taskStatsVo) {
-        // 批量获取 检测项id（有可能对应多个模板） 再进行填充。
-        // 通过检测项id 获取 相应的 id关联信息。
-        List<TaskIdEntity> ids = taskMapper.selectconditionId(taskStatsVo.getIntegers());
-        List<OriginalRecordDataVo> list =new ArrayList<>();
-        for(int i=0; i<ids.size(); i++ ){
-            TaskIdEntity data = ids.get(i);
-            // 有序信息。
-            OriginalRecordDataVo originalData = getOriginalData(data.getTaskId(), data.getSampleId(),data.getCheckItemId(), data.getIdItem());
-            Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
-            result.put("result", originalData);
-            HttpServletResponse response = null;
-
-            // 根据单个Workbook 进行处理打包。
-            Workbook workbook = methodPlugTheData(data.getFileUrl(),result,response);
-            ZipOutputStream out = null;
-            SampleServiceImpl.DealWithZip(workbook, data.getCheckItemName()+i, out);
-        }
-
-
-
-        return null;
-    }
-
-    @Override
     public ZipOutputStream packagingWorkbookZip(Integer[] Ids, HttpServletResponse response) throws IOException {
         // 通过输入参数 返回 对应的处理成功的EXCEL数据。
         ServletOutputStream outputStream = response.getOutputStream();
@@ -1159,17 +1134,18 @@ public class TaskServiceImpl implements TaskService {
                 // 根据单个Workbook 进行处理打包。
                 Workbook workbook = methodPlugTheData(data.getFileUrl(),result,response);
                 SampleServiceImpl.DealWithZip(workbook, data.getCheckItemName()+i, out);
+                // 关闭输入流
+                out.closeEntry();
+                if (out != null) {
+                    out.flush();
+                    out.close();
+                }
             }
             catch (Exception e){
                 log.info("根据单个Workbook 进行处理打包" + e);
             }
         }
-        // 关闭输入流
-        out.closeEntry();
-        if (out != null) {
-            out.flush();
-            out.close();
-        }
+
         return out;
     }
 
