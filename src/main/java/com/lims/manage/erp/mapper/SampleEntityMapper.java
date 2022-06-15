@@ -103,7 +103,7 @@ public interface SampleEntityMapper {
             "FROM\n" +
             "test_team as t1\n" +
             "LEFT JOIN test_check_item_team_rel as t2 ON t1.id = t2.team_id\n" +
-            "WHERE t2.check_item_id = #{checkItemId} ")
+            "WHERE t2.check_item_id = #{checkItemId} ORDER BY t1.sort ASC")
     List<String> getTeamNameStrings(Integer checkItemId);
 
     List<LabelValueVo> getTestingRoomList(Integer checkItemId);

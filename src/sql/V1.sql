@@ -48,5 +48,9 @@ insert into test_product_standard_file_rel(product_id,standard_file_id) select D
 ALTER TABLE `test_report_record`
 ADD COLUMN `category`  varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '印章分类，PHYSICS(物理章),ELECTRONIC(电子章)' AFTER `type`;
 
+--2022-06-15--
+ALTER TABLE `test_team`
+ADD COLUMN `sort`  int NULL COMMENT '排序字段' AFTER `check_item_id`;
+
 
 
