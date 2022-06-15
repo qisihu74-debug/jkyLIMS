@@ -384,8 +384,8 @@ public interface TaskMapper extends BaseMapper {
             "FROM\n" +
             "\ttest_entrusted_sample_checkitem_rel \n" +
             "WHERE\n" +
-            "\ttask_id = #{taskId}")
-    List<Integer> selectCheckItemState(Long taskId);
+            "\ttask_id = #{taskId} and dept_id = #{deptId}")
+    List<Integer> selectCheckItemState(@Param(value = "taskId") Long taskId,@Param(value = "deptId") Integer deptId);
 
     /**
      * 获取有效数据 根据主键集合。

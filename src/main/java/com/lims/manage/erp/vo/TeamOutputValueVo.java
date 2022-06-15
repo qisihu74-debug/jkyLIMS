@@ -8,5 +8,12 @@ public class TeamOutputValueVo {
     private String teamName;
     private String teamCode;
     private String taskPrice;
-    private String reportPrice;
+    /**
+     * 实收报告产值
+     */
+    private String actualReportPrice;
+    /**
+     * 应收报告产值
+     */
+    private String systemReportPrice;
 }

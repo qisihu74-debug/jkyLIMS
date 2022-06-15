@@ -1099,17 +1099,21 @@ public class TaskServiceImpl implements TaskService {
     public String batchReview(TaskStatsVo taskStatsVo) {
         // 批量操作。
         List<TaskStatsItemVo> list = new ArrayList<>();
+        // 检测项id
+        Integer itemId =0;
         for(int i=0;i<taskStatsVo.getIntegers().length;i++){
             TaskStatsItemVo taskStatsItemVo = new TaskStatsItemVo();
             taskStatsItemVo.setItemId(taskStatsVo.getIntegers()[i]);
             taskStatsItemVo.setState(taskStatsVo.getState());
-            taskStatsItemVo.setRemark(taskStatsItemVo.getRemark()!=null?taskStatsItemVo.getRemark():"--");
+            taskStatsItemVo.setRemark(taskStatsVo.getRemark()!=null?taskStatsVo.getRemark():"--");
             list.add(taskStatsItemVo);
+            itemId = taskStatsVo.getIntegers()[i];
         }
         taskMapper.batchReview(list);
         // 通过任务单 获取检测项状态 =3 通过状态
         if(taskStatsVo.getState()==3){
-            List<Integer> states = taskMapper.selectCheckItemState(taskStatsVo.getTaskId());
+            SampleItemInstrumentEntity sampleItemInstrumentEntity2 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
+            List<Integer> states = taskMapper.selectCheckItemState(taskStatsVo.getTaskId(),sampleItemInstrumentEntity2.getDeptId());
             for (Integer stateItem : states) {
                 if (stateItem != 3) {
                     return "当前任务单下检测项未全部复核成功";
@@ -1144,7 +1148,7 @@ public class TaskServiceImpl implements TaskService {
             result.put("result", originalData);
 
             // 根据单个Workbook 进行处理打包。
-            HttpServletResponse response1 = response;
+            HttpServletResponse response1 = null;
             // 原始记录模板 比对信息
             try {
                 // 链接 get minIo 检查是否存在
@@ -1152,8 +1156,8 @@ public class TaskServiceImpl implements TaskService {
                 String[] split1 = split[4].split("\\?");
                 XLSTransformer transformer = new XLSTransformer();
                 InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
-                Workbook workbook = methodPlugTheData(data.getFileUrl(),result,response1);
-                SampleServiceImpl.DealWithZip(workbook, data.getCheckItemName()+i, out);
+                Workbook workbook = methodPlugTheData(data.getFileUrl(),result, null);
+                SampleServiceImpl.DealWithZip(workbook, data.getTaskCode()+data.getCheckItemName()+".xls", out);
             }
             catch (Exception e){
                 log.info("输出异常\t"+e);
@@ -1172,35 +1176,13 @@ public class TaskServiceImpl implements TaskService {
     /**
      * 如果原始记录文件不为空 塞数据
      */
-    public Workbook methodPlugTheData(String originalTemplate,Map<String, OriginalRecordDataVo> result,HttpServletResponse response){
+    public Workbook methodPlugTheData(String originalTemplate,Map<String, OriginalRecordDataVo> result,HttpServletResponse response) throws InvalidFormatException {
         String[] split = originalTemplate.split("/");
         String[] split1 = split[4].split("\\?");
         XLSTransformer transformer = new XLSTransformer();
-        InputStream fileStream = null;
-        try {
-            fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
-            System.out.println(fileStream+"\t数据输出");
-        }
-        catch (Exception e){
-            log.info("输出异常\t"+e);
-        }
-        
+        InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
         org.apache.poi.ss.usermodel.Workbook workbook = null;
-        try {
-            workbook = transformer.transformXLS(fileStream, result);
-            response.reset();
-            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-            response.setContentType("application/x-msdownload");
-            response.setCharacterEncoding("UTF-8");
-            String fileName2 = URLEncoder.encode(split1[0], "UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName2);
-            OutputStream outputStream = response.getOutputStream();
-            workbook.write(outputStream);
-            outputStream.close();
-            return workbook;
-        } catch (IOException | InvalidFormatException e) {
-            e.printStackTrace();
-        }
-        return null;
+        workbook = transformer.transformXLS(fileStream, result);
+        return workbook;
     }
 }
