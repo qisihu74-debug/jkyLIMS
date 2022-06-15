@@ -522,9 +522,9 @@ public class TaskController {
             /** 设置文件下载名 （任务单号+检测项名）**/
             /** 不同文件的MimeType参考后续链接 **/
             downloadFileName = taskDetailInfo.getTaskCode();
-            response.setContentType("application/pdf");//下面三行是关键代码，处理乱码问题
-            response.setCharacterEncoding("utf-8");
-            response.setHeader("Content-Disposition", "attachment;filename=" + new String(downloadFileName.getBytes("utf-8"), "iso8859-1") + "." + "pdf");
+//            response.setContentType("application/pdf");//下面三行是关键代码，处理乱码问题
+//            response.setCharacterEncoding("utf-8");
+//            response.setHeader("Content-Disposition", "attachment;filename=" + new String(downloadFileName.getBytes("utf-8"), "iso8859-1") + "." + "pdf");
             ServletOutputStream outputStream = response.getOutputStream();
             int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
             inputStream.close();
