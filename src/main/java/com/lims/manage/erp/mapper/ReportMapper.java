@@ -75,7 +75,7 @@ public interface ReportMapper {
 
     List<ReportSampleDetailVo> getReportHeadDetails(Long id);
 
-    List<ReportCheckItemDetailVo> getReportCheckItemList(@Param("id") Long id,@Param("deptIds") List<Long> deptIds);
+    List<ReportCheckItemDetailVo> getReportCheckItemList(@Param("id") Long id,@Param("deptIds") List<Long> deptIds,@Param("taskId") Long taskId);
 
     /**
      * 查询判定依据

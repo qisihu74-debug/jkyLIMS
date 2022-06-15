@@ -60,7 +60,7 @@ public interface ReportService {
      * @param id
      * @return
      */
-    ReportSampleDetailVo getReportList_history_details(Long id);
+    ReportSampleDetailVo getReportList_history_details(Long recordId,Long taskId);
 
     /**
      * 查询委托单--报告制作详情
