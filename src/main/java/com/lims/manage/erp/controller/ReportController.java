@@ -913,11 +913,17 @@ public class ReportController {
      * @return
      */
     @GetMapping("category")
-    public Result category(@RequestParam("ids") List<String> ids){
-        if (CollectionUtils.isEmpty(ids)){
+    public Result category(String ids){
+
+        if (org.apache.commons.lang.StringUtils.isEmpty(ids)){
             return ResultUtil.error("请选择需要操作的数据");
         }
-        Boolean flag = reportService.category(ids);
+        String[] split = ids.split(",");
+        List<String> list = Lists.newArrayList();
+        for (String s:split) {
+            list.add(s);
+        }
+        Boolean flag = reportService.category(list);
         if (flag){
             return ResultUtil.success("操作成功！");
         }else {

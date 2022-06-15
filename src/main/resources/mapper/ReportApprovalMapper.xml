@@ -6,6 +6,7 @@
     <select id="getReportApprovalList" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
         SELECT
         id,
+        entrustment_id,
         sample_name,
         price AS cost,
         required_completion_time,
@@ -194,6 +195,7 @@
     <select id="getVerifyList" resultType="com.lims.manage.erp.vo.ReportApprovalVo">
         SELECT
         id,
+        entrustment_id,
         sample_name,
         price AS cost,
         required_completion_time,
