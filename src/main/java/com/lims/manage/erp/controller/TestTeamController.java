@@ -42,7 +42,7 @@ public class TestTeamController extends ApiController {
     public Result getAll(TestTeam testTeam) {
         QueryWrapper<TestTeam> queryWrapper=new QueryWrapper<>(testTeam);
         queryWrapper.eq("del_flag",0);
-        queryWrapper.orderByDesc("create_time");
+        queryWrapper.orderByAsc("sort");
         List<TestTeam> list = this.testTeamService.list(queryWrapper);
         List<Integer> pids = Lists.newArrayList();
         List<TestTeam> newList = Lists.newArrayList();
