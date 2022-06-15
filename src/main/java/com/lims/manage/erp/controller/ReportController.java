@@ -180,8 +180,8 @@ public class ReportController {
      * @return
      */
     @GetMapping("/list_history_details")
-    public Result getlist_history_details(Long id) {
-        return ResultUtil.success("获取历史任务单详情成功！", reportService.getReportList_history_details(id));
+    public Result getlist_history_details(Long id,Long taskId) {
+        return ResultUtil.success("获取历史任务单详情成功！", reportService.getReportList_history_details(id,taskId));
     }
 
 

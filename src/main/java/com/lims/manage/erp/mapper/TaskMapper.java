@@ -387,4 +387,8 @@ public interface TaskMapper extends BaseMapper {
             "\ttask_id = #{taskId}")
     List<Integer> selectCheckItemState(Long taskId);
 
+    /**
+     * 获取有效数据 根据主键集合。
+     */
+    List<TaskIdEntity> selectconditionId(@Param(value = "array") Integer[] array);
 }

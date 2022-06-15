@@ -463,7 +463,7 @@ public class SampleServiceImpl implements SampleService {
     /**
      * 根据单个Workbook 进行处理打包。
      */
-    public void DealWithZip(Workbook workbook, String fileName, ZipOutputStream out) {
+    public static void DealWithZip(Workbook workbook, String fileName, ZipOutputStream out) {
         try {
             // 将源文件数组中的当前文件读入 FileInputStream 流中
             ZipEntry entry = new ZipEntry(fileName);

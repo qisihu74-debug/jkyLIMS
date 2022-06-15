@@ -3,6 +3,7 @@ package com.lims.manage.erp.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.lims.manage.erp.config.PoiConfig;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
@@ -11,6 +12,9 @@ import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRow;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
@@ -23,8 +27,12 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.*;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Slf4j
@@ -112,6 +120,19 @@ public class TaskServiceImpl implements TaskService {
             for (SampleDetailVo sampleDetailVo : taskDetailInfoVo.getSampleDetailList()) {
                 if (sampleDetailVo.getCheckItemInfoList() != null && !sampleDetailVo.getCheckItemInfoList().isEmpty()) {
                     for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+                        if(org.apache.commons.lang.StringUtils.isNotEmpty(checkItemInfoVo.getOriginUrl())){
+                            String[] split = checkItemInfoVo.getOriginUrl().split("\\?");
+                            String[] strings1 = split[0].split("\\/");
+                            String fileName = strings1[4];
+                            String[] names = fileName.split("\\.");
+                            if("pdf".equals(names[1]) || "xls".equals(names[1]) || "xlsx".equals(names[1])){
+                                checkItemInfoVo.setSuffixType("1");
+                            }
+                            else if("jpeg".equals(names[1]) || "png".equals(names[1]) || "jpg".equals(names[1])){
+                                checkItemInfoVo.setSuffixType("2");
+                            }
+                        }
+
                         List<TestInstrumentEntity> instrumentEntityList = taskMapper.getInstrumentEntityList(checkItemInfoVo.getItemId());
 //                        List<Integer> result = Lists.newArrayList();
                         // 设置数组 存放
@@ -1104,5 +1125,82 @@ public class TaskServiceImpl implements TaskService {
             return "任务单复核成功";
         }
         return "成功";
+    }
+
+    @Override
+    public ZipOutputStream packagingWorkbookZip(Integer[] Ids, HttpServletResponse response) throws IOException {
+        // 通过输入参数 返回 对应的处理成功的EXCEL数据。
+        ServletOutputStream outputStream = response.getOutputStream();
+        ZipOutputStream out = new ZipOutputStream(outputStream);
+
+        // 批量获取 检测项id（有可能对应多个模板） 再进行填充。
+        // 通过检测项id 获取 相应的 id关联信息。
+        List<TaskIdEntity> ids = taskMapper.selectconditionId(Ids);
+        for(int i=0; i<ids.size(); i++ ){
+            TaskIdEntity data = ids.get(i);
+            // 有序信息。
+            OriginalRecordDataVo originalData = getOriginalData(data.getTaskId(), data.getSampleId(),data.getCheckItemId(), data.getIdItem());
+            Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
+            result.put("result", originalData);
+
+            // 根据单个Workbook 进行处理打包。
+            HttpServletResponse response1 = response;
+            // 原始记录模板 比对信息
+            try {
+                // 链接 get minIo 检查是否存在
+                String[] split = data.getFileUrl().split("/");
+                String[] split1 = split[4].split("\\?");
+                XLSTransformer transformer = new XLSTransformer();
+                InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
+                Workbook workbook = methodPlugTheData(data.getFileUrl(),result,response1);
+                SampleServiceImpl.DealWithZip(workbook, data.getCheckItemName()+i, out);
+            }
+            catch (Exception e){
+                log.info("输出异常\t"+e);
+            }
+
+        }
+        // 关闭输入流
+        out.closeEntry();
+        if (out != null) {
+            out.flush();
+            out.close();
+        }
+        return out;
+    }
+
+    /**
+     * 如果原始记录文件不为空 塞数据
+     */
+    public Workbook methodPlugTheData(String originalTemplate,Map<String, OriginalRecordDataVo> result,HttpServletResponse response){
+        String[] split = originalTemplate.split("/");
+        String[] split1 = split[4].split("\\?");
+        XLSTransformer transformer = new XLSTransformer();
+        InputStream fileStream = null;
+        try {
+            fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
+            System.out.println(fileStream+"\t数据输出");
+        }
+        catch (Exception e){
+            log.info("输出异常\t"+e);
+        }
+        
+        org.apache.poi.ss.usermodel.Workbook workbook = null;
+        try {
+            workbook = transformer.transformXLS(fileStream, result);
+            response.reset();
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("UTF-8");
+            String fileName2 = URLEncoder.encode(split1[0], "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName2);
+            OutputStream outputStream = response.getOutputStream();
+            workbook.write(outputStream);
+            outputStream.close();
+            return workbook;
+        } catch (IOException | InvalidFormatException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

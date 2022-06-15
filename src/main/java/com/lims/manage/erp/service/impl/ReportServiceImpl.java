@@ -289,10 +289,10 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ReportSampleDetailVo getReportList_history_details(Long id) {
+    public ReportSampleDetailVo getReportList_history_details(Long recordId,Long taskId) {
         ReportSampleDetailVo reportSampleDetailVo = new ReportSampleDetailVo();
         // 获取报告头部信息
-        List<ReportSampleDetailVo> list = reportMapper.getReportHeadDetails(id);
+        List<ReportSampleDetailVo> list = reportMapper.getReportHeadDetails(recordId);
         // 获取样品编号
         Set<String> setSampleCode = new HashSet<>();
         // 获取外观
@@ -349,7 +349,7 @@ public class ReportServiceImpl implements ReportService {
         }
         // 获取检测项
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemList(id, userTeamIds);
+        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemList(recordId, userTeamIds,taskId);
         reportSampleDetailVo.setCheckItems(checkItemList);
         return reportSampleDetailVo;
     }

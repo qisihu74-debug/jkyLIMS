@@ -126,7 +126,7 @@
             LEFT JOIN test_report_qualifcation t7 ON t6.check_item_id = t7.check_item_id
             left join test_report_record t8 on t1.id = t8.entrustment_id
             left join test_report_record_detail t9 on t8.id = t9.record_id and t5.check_item_id = t9.check_item_id
-        WHERE t2.id = #{taskId}
+        WHERE t2.id = #{taskId} and t5.task_id = #{taskId}
         <if test="deptIds!=null">
             and t5.dept_id in
             <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
@@ -224,7 +224,6 @@
         <if test="taskCode!=null and taskCode!=''">
             and t2.task_code like CONCAT('%',#{taskCode},'%')
         </if>
---           AND ( t6.state IS NULL OR t6.state in (0,2) )
         <if test="deptIds!=null">
             and t2.dept_id in
             <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
@@ -291,6 +290,7 @@
         SELECT
         t1.id,
         t2.task_code as taskCode,
+        t2.id as taskId,
         t1.sample_name as sampleName,
         t1.price as countPrice,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') as requestDate,
@@ -299,8 +299,6 @@
         FROM
         test_report_record t1 left join test_task t2 on t1.entrustment_id = t2.entrustment_id
         WHERE
-              t1.state !=2
-        and
         t2.report_complete = 1
         and t1.report_complete_time is not NULL
         <if test="taskCode!=null and taskCode!=''">
@@ -387,6 +385,7 @@
         AND t3.check_item_id = t2.check_item_id
         WHERE t1.state !=2
             and t1.id = #{id}
+            and t3.task_id = #{taskId}
         and t2.id is not NULL
         <if test="deptIds!=null">
             and t3.dept_id in

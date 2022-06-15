@@ -72,6 +72,11 @@ public class CheckItemInfoVo {
      */
     private Long taskId;
 
+    /**
+     * 检测项文件后缀类型
+     */
+    private String suffixType;
+
     public CheckItemInfoVo() {
     }
 
