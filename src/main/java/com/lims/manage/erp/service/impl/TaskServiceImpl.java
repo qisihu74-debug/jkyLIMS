@@ -120,6 +120,16 @@ public class TaskServiceImpl implements TaskService {
             for (SampleDetailVo sampleDetailVo : taskDetailInfoVo.getSampleDetailList()) {
                 if (sampleDetailVo.getCheckItemInfoList() != null && !sampleDetailVo.getCheckItemInfoList().isEmpty()) {
                     for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
+                        String[] split = checkItemInfoVo.getOriginUrl().split("\\?");
+                        String[] strings1 = split[0].split("\\/");
+                        String fileName = strings1[4];
+                        String[] names = fileName.split("\\.");
+                        if("pdf".equals(names[1]) || "xls".equals(names[1]) || "xlsx".equals(names[1])){
+                            checkItemInfoVo.setSuffixType("1");
+                        }
+                        else if("jpeg".equals(names[1]) || "png".equals(names[1]) || "jpg".equals(names[1])){
+                            checkItemInfoVo.setSuffixType("2");
+                        }
                         List<TestInstrumentEntity> instrumentEntityList = taskMapper.getInstrumentEntityList(checkItemInfoVo.getItemId());
 //                        List<Integer> result = Lists.newArrayList();
                         // 设置数组 存放
@@ -1123,29 +1133,33 @@ public class TaskServiceImpl implements TaskService {
         // 批量获取 检测项id（有可能对应多个模板） 再进行填充。
         // 通过检测项id 获取 相应的 id关联信息。
         List<TaskIdEntity> ids = taskMapper.selectconditionId(Ids);
-        List<OriginalRecordDataVo> list =new ArrayList<>();
         for(int i=0; i<ids.size(); i++ ){
             TaskIdEntity data = ids.get(i);
             // 有序信息。
             OriginalRecordDataVo originalData = getOriginalData(data.getTaskId(), data.getSampleId(),data.getCheckItemId(), data.getIdItem());
             Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
             result.put("result", originalData);
+
+            // 根据单个Workbook 进行处理打包。
+            HttpServletResponse response1 = response;
+            // 原始记录模板 比对信息
             try {
-                // 根据单个Workbook 进行处理打包。
-                Workbook workbook = methodPlugTheData(data.getFileUrl(),result,response);
+                // 链接 get minIo 检查是否存在
+
+                Workbook workbook = methodPlugTheData(data.getFileUrl(),result,response1);
                 SampleServiceImpl.DealWithZip(workbook, data.getCheckItemName()+i, out);
-                // 关闭输入流
-                out.closeEntry();
-                if (out != null) {
-                    out.flush();
-                    out.close();
-                }
             }
             catch (Exception e){
-                log.info("根据单个Workbook 进行处理打包" + e);
+                log.info("输出异常\t"+e);
             }
-        }
 
+        }
+        // 关闭输入流
+        out.closeEntry();
+        if (out != null) {
+            out.flush();
+            out.close();
+        }
         return out;
     }
 
@@ -1156,7 +1170,15 @@ public class TaskServiceImpl implements TaskService {
         String[] split = originalTemplate.split("/");
         String[] split1 = split[4].split("\\?");
         XLSTransformer transformer = new XLSTransformer();
-        InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
+        InputStream fileStream = null;
+        try {
+            fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
+            System.out.println(fileStream+"\t数据输出");
+        }
+        catch (Exception e){
+            log.info("输出异常\t"+e);
+        }
+        
         org.apache.poi.ss.usermodel.Workbook workbook = null;
         try {
             workbook = transformer.transformXLS(fileStream, result);
