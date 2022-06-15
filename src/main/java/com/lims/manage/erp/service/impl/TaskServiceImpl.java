@@ -1099,17 +1099,21 @@ public class TaskServiceImpl implements TaskService {
     public String batchReview(TaskStatsVo taskStatsVo) {
         // 批量操作。
         List<TaskStatsItemVo> list = new ArrayList<>();
+        // 检测项id
+        Integer itemId =0;
         for(int i=0;i<taskStatsVo.getIntegers().length;i++){
             TaskStatsItemVo taskStatsItemVo = new TaskStatsItemVo();
             taskStatsItemVo.setItemId(taskStatsVo.getIntegers()[i]);
             taskStatsItemVo.setState(taskStatsVo.getState());
-            taskStatsItemVo.setRemark(taskStatsItemVo.getRemark()!=null?taskStatsItemVo.getRemark():"--");
+            taskStatsItemVo.setRemark(taskStatsVo.getRemark()!=null?taskStatsVo.getRemark():"--");
             list.add(taskStatsItemVo);
+            itemId = taskStatsVo.getIntegers()[i];
         }
         taskMapper.batchReview(list);
         // 通过任务单 获取检测项状态 =3 通过状态
         if(taskStatsVo.getState()==3){
-            List<Integer> states = taskMapper.selectCheckItemState(taskStatsVo.getTaskId());
+            SampleItemInstrumentEntity sampleItemInstrumentEntity2 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
+            List<Integer> states = taskMapper.selectCheckItemState(taskStatsVo.getTaskId(),sampleItemInstrumentEntity2.getDeptId());
             for (Integer stateItem : states) {
                 if (stateItem != 3) {
                     return "当前任务单下检测项未全部复核成功";
