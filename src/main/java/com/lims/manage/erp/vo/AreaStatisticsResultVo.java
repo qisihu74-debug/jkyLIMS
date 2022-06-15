@@ -17,7 +17,11 @@ public class AreaStatisticsResultVo {
      */
     private String receivedPrice;
     /**
-     * 报告产值
+     * 报告实收产值
      */
-    private String reportPrice;
+    private String actualReportPrice;
+    /**
+     * 报告应收产值
+     */
+    private String systemReportPrice;
 }

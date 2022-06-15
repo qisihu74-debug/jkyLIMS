@@ -352,7 +352,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         row1.createCell(0).setCellValue("任务来源");
         row1.createCell(1).setCellValue("委托收费额");
         row1.createCell(2).setCellValue("交费金额");
-        row1.createCell(3).setCellValue("报告产值");
+        row1.createCell(3).setCellValue("报告实收产值");
+        row1.createCell(4).setCellValue("报告应收产值");
         for(int i=0;i<list.size();i++){
             AreaStatisticsResultVo areaStatisticsResultVo = list.get(i);
             //在sheet里创建第二行
@@ -360,7 +361,8 @@ public class StatisticsServiceImpl implements StatisticsService {
             row3.createCell(0).setCellValue(areaStatisticsResultVo.getTaskSource());
             row3.createCell(1).setCellValue(areaStatisticsResultVo.getActualPrice());
             row3.createCell(2).setCellValue(areaStatisticsResultVo.getReceivedPrice());
-            row3.createCell(3).setCellValue(areaStatisticsResultVo.getReportPrice());
+            row3.createCell(3).setCellValue(areaStatisticsResultVo.getActualReportPrice());
+            row3.createCell(4).setCellValue(areaStatisticsResultVo.getSystemReportPrice());
         }
         //输出Excel文件 字节输出流
         ByteArrayOutputStream os = new ByteArrayOutputStream();
