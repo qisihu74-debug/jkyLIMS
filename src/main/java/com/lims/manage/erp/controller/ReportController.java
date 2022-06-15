@@ -925,7 +925,7 @@ public class ReportController {
         }
     }
 
-    @GetMapping("/withdrewRepor")
+    @GetMapping("/withdrewReport")
     public Result withdrewReport(Long recordId,Long taskId) {
         if(taskId == null || recordId == null){
             return ResultUtil.error("缺少必要的参数!");
