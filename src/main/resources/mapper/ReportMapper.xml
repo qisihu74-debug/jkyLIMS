@@ -290,6 +290,7 @@
         SELECT
         t1.id,
         t2.task_code as taskCode,
+        t2.id as taskId,
         t1.sample_name as sampleName,
         t1.price as countPrice,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') as requestDate,
@@ -298,8 +299,6 @@
         FROM
         test_report_record t1 left join test_task t2 on t1.entrustment_id = t2.entrustment_id
         WHERE
-              t1.state !=2
-        and
         t2.report_complete = 1
         and t1.report_complete_time is not NULL
         <if test="taskCode!=null and taskCode!=''">
