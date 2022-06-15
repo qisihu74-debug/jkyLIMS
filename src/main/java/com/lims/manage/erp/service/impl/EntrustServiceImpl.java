@@ -1183,7 +1183,9 @@ public class EntrustServiceImpl implements EntrustService {
                         }
                     }
                     //并且删除报告详情表中关联检测项
-                    reportRecordDetailEntityMapper.deleteByEntrustIdandCheckItemId(detailEntityList);
+                    if(!CollectionUtils.isEmpty(detailEntityList)){
+                        reportRecordDetailEntityMapper.deleteByEntrustIdandCheckItemId(detailEntityList);
+                    }
                     //修改报告的状态，和审批，复核信息
                     if(!"2".equals(reportState)){
                         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
