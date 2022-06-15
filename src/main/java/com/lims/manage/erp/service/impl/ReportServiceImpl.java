@@ -2263,4 +2263,17 @@ public class ReportServiceImpl implements ReportService {
             return false;
         }
     }
+
+    @Override
+    public Boolean withdrawReport(Long recordId,Long taskId) {
+        ReportRecordEntity reportRecordEntity = recordEntityMapper.getByRecordId(recordId);
+        String state = reportRecordEntity.getState();
+        if(Integer.parseInt(state) >=3){
+            return false;
+        }else{
+            taskMapper.updateReportStatus(2, taskId);
+            return true;
+        }
+    }
+
 }

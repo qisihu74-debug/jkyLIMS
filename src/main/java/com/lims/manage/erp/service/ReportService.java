@@ -379,4 +379,12 @@ public interface ReportService {
     String getUrlById(Long id);
 
     Boolean category(List<String> ids);
+
+    /**
+     * 撤回報告
+     * @param recordId
+     * @param taskId
+     * @return
+     */
+    Boolean withdrawReport(Long recordId,Long taskId);
 }

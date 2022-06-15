@@ -924,4 +924,12 @@ public class ReportController {
             return ResultUtil.error("网络异常");
         }
     }
+
+    @GetMapping("/withdrewRepor")
+    public Result withdrewReport(Long recordId,Long taskId) {
+        if(taskId == null || recordId == null){
+            return ResultUtil.error("缺少必要的参数!");
+        }
+        return ResultUtil.success("查询任务单详情成功！", reportService.withdrawReport(recordId,taskId));
+    }
 }

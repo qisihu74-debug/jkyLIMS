@@ -24,6 +24,8 @@ public interface ReportRecordEntityMapper {
 
     ReportRecordEntity selectByPrimaryKey(Long id);
 
+    ReportRecordEntity getByRecordId(Long recordId);
+
     int updateByPrimaryKeySelective(ReportRecordEntity record);
 
     int updateByPrimaryKey(ReportRecordEntity record);

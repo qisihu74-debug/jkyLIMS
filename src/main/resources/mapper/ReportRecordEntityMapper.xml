@@ -44,6 +44,13 @@
         from test_report_record
         where id = #{id,jdbcType=BIGINT}
     </select>
+    <select id="getByRecordId" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
+            parameterType="java.lang.Long">
+        SELECT
+            *
+        FROM test_report_record
+        where id = #{recordId,jdbcType=BIGINT}
+    </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete
         from test_report_record
