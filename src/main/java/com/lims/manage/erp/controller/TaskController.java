@@ -36,10 +36,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import sun.misc.BASE64Encoder;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -680,7 +689,7 @@ public class TaskController {
             String[] names = fileName.split("\\.");
             File file = FileAndFolderUtil.getFile(url);
             InputStream in = new FileInputStream(file);
-            if (".xls".equals(names[1]) || ".xlsx".equals(names[1])){
+            if ("xls".equals(names[1]) || "xlsx".equals(names[1])){
                 Workbook workbook = new Workbook();
                 workbook.loadFromStream(in);
                 //获取第一个工作表
@@ -691,21 +700,30 @@ public class TaskController {
                 //读取临时图片文件输出
                 File file1 = new File(basePath);
                 InputStream fileInputStream = new FileInputStream(file1);
-                ServletOutputStream outputStream = response.getOutputStream();
-                int i = IOUtils.copy(fileInputStream, outputStream);   // copy流数据,i为字节数
+                //图片流转base64
+                byte[] data = new byte[fileInputStream.available()];
+                fileInputStream.read(data);
+                BASE64Encoder encoder = new BASE64Encoder();
+                String encode = encoder.encode(data);
                 //删除临时文件
                 FileAndFolderUtil.delete(basePath);
                 log.info("临时转换的图片删除成功！");
                 in.close();
                 fileInputStream.close();
-                outputStream.close();
+                return ResultUtil.success(encode);
+            }else if ("png".equals(names[1]) || "jpg".equals(names[1]) || "jpeg".equals(names[1])){
+                byte[] data = new byte[in.available()];
+                in.read(data);
+                BASE64Encoder encoder = new BASE64Encoder();
+                String encode = encoder.encode(data);
+                return ResultUtil.success(encode);
             }else {
                 ServletOutputStream outputStream = response.getOutputStream();
                 int i = IOUtils.copy(in, outputStream);   // copy流数据,i为字节数
                 in.close();
                 outputStream.close();
+                return ResultUtil.success("ok");
             }
-            return ResultUtil.success("ok");
         }catch (Exception e){
             log.error("预览原始记录模板失败:{}",e);
             return ResultUtil.error("预览原始记录模板失败");
