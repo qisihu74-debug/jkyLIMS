@@ -43,6 +43,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -680,6 +682,7 @@ public class TaskController {
             return ResultUtil.error("原始记录未上传！");
         }
         try {
+            ServletOutputStream outputStream = response.getOutputStream();
             String[] split = url.split("\\?");
             String[] strings = split[0].split("\\/");
             String fileName = strings[4];
@@ -693,21 +696,40 @@ public class TaskController {
                 Worksheet sheet = workbook.getWorksheets().get(0);
                 //调用方法将Excel保存为图片
                 String basePath = qiYueSuoEntity.getAutographPath()+names[0]+".png";
+                String pdfPath = qiYueSuoEntity.getAutographPath()+names[0]+".pdf";
                 sheet.saveToImage(basePath);
                 //读取临时图片文件输出
                 File file1 = new File(basePath);
                 InputStream fileInputStream = new FileInputStream(file1);
-                //图片流转base64
-                byte[] data = new byte[fileInputStream.available()];
-                fileInputStream.read(data);
-                BASE64Encoder encoder = new BASE64Encoder();
-                String encode = encoder.encode(data);
+                //图片流转pdf
+                FileOutputStream out = null;
+                try {
+                    out = new FileOutputStream(pdfPath);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                int data;
+                try {
+                    while((data = fileInputStream.read()) != -1) {
+                        out.write(data);
+                    }
+                    out.close();
+                } catch (IOException e) {
+                    log.error("图片转pdf异常:{}",e);
+                }
+                //输出pdf
+                File pdfFile = new File(pdfPath);
+                InputStream pdfInput = new FileInputStream(pdfFile);
+                int i = IOUtils.copy(pdfInput, outputStream);
                 //删除临时文件
                 FileAndFolderUtil.delete(basePath);
+                FileAndFolderUtil.delete(pdfPath);
                 log.info("临时转换的图片删除成功！");
                 in.close();
+                pdfInput.close();
                 fileInputStream.close();
-                return ResultUtil.success(encode);
+                outputStream.close();
+                return ResultUtil.success("ok");
             }else if ("png".equals(names[1]) || "jpg".equals(names[1]) || "jpeg".equals(names[1])){
                 byte[] data = new byte[in.available()];
                 in.read(data);
@@ -715,7 +737,6 @@ public class TaskController {
                 String encode = encoder.encode(data);
                 return ResultUtil.success(encode);
             }else {
-                ServletOutputStream outputStream = response.getOutputStream();
                 int i = IOUtils.copy(in, outputStream);   // copy流数据,i为字节数
                 in.close();
                 outputStream.close();
