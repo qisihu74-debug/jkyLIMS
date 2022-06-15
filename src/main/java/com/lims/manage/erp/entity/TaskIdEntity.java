@@ -39,4 +39,9 @@ public class TaskIdEntity {
      * 检测项名称
      */
     private String checkItemName;
+
+    /**
+     * 任务编号
+     */
+    private String taskCode;
 }
