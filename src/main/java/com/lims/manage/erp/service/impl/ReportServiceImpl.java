@@ -2279,4 +2279,9 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
+    @Override
+    public Long getEntrustIdById(Long id) {
+        return reportMapper.getEntrustIdById(id);
+    }
+
 }

@@ -387,4 +387,6 @@ public interface ReportService {
      * @return
      */
     Boolean withdrawReport(Long recordId,Long taskId);
+
+    Long getEntrustIdById(Long id);
 }

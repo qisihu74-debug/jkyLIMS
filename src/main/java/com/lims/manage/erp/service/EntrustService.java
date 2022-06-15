@@ -257,4 +257,6 @@ public interface EntrustService {
      * @return
      */
     Boolean addEntrustCopy(EntrustAddVo vo, MultipartFile[] file);
+
+    Long checkEntrustId(Long entrustId);
 }

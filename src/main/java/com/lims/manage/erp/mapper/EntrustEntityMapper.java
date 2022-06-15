@@ -437,4 +437,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     Integer deleteEntrustedSampleCheckitemRel(@Param("id") Integer id);
+
+    @Select("select id from test_entrusted_info where id=#{entrustId}")
+    Long checkEntrustId(@Param("entrustId") Long entrustId);
 }

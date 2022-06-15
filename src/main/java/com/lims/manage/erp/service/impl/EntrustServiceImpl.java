@@ -2478,6 +2478,11 @@ public class EntrustServiceImpl implements EntrustService {
         return true;
     }
 
+    @Override
+    public Long checkEntrustId(Long entrustId) {
+        return entityMapper.checkEntrustId(entrustId);
+    }
+
     /**
      * 方法 用来处理 copy 伪造样品信息 id 并进行add
      * @param sampleList copy 样品信息集。

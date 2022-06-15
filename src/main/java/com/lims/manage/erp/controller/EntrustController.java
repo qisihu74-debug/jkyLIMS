@@ -17,6 +17,7 @@ import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.MinIoUtil;
@@ -58,6 +59,8 @@ public class EntrustController {
     private LogManagerService logManagerService;
     @Autowired
     private EntrustEntityMapper entrustEntityMapper;
+    @Autowired
+    private ReportService reportService;
 
     /**
      * 新增委托 废弃
@@ -492,6 +495,12 @@ public class EntrustController {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(strings[0], fileName);
             //填充数据
+            //校验是否是委托单id
+            Long id = entrustService.checkEntrustId(entrustId);
+            if (id == null){
+                Long entrustIdById = reportService.getEntrustIdById(entrustId);
+                entrustId = entrustIdById;
+            }
             EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             log.debug("====aaa:{}",JSON.toJSONString(detail));
             XWPFDocument document = entrustService.downloadEntrust(detail, object);

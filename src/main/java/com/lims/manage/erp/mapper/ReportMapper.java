@@ -149,4 +149,7 @@ public interface ReportMapper {
 
     @Update("update test_report_record set category = '物理章',state = '7' where id =#{id}")
     void updateCategory(@Param("id") Long id);
+
+    @Select("select entrustment_id from test_report_record where id=#{id}")
+    Long getEntrustIdById(@Param("id") Long id);
 }
