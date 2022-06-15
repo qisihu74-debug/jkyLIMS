@@ -378,7 +378,7 @@ public interface ReportService {
 
     String getUrlById(Long id);
 
-    Boolean category(List<String> ids);
+    Boolean category(List<Long> ids);
 
     /**
      * 撤回報告

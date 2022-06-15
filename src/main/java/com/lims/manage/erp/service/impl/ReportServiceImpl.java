@@ -2254,12 +2254,15 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Boolean category(List<String> ids) {
+    public Boolean category(List<Long> ids) {
         //设置状态和用章类型
         try {
-            reportMapper.updateCategory(ids);
+            for (Long id:ids) {
+                reportMapper.updateCategory(id);
+            }
             return true;
         }catch (Exception e){
+            logger.error("更新印章类型失败:{}",e);
             return false;
         }
     }

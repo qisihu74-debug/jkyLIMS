@@ -147,5 +147,6 @@ public interface ReportMapper {
     @Select("select report_url from test_report_record where id=#{id}")
     String getUrlById(@Param("id") Long id);
 
-    void updateCategory(List<String> ids);
+    @Update("update test_report_record set category = '物理章',state = '7' where id =#{id}")
+    void updateCategory(@Param("id") Long id);
 }

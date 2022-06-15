@@ -509,15 +509,4 @@
     <select id="getDetailByEntrustId" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         select * from test_report_record where entrustment_id=#{entrustId}
     </select>
-
-    <update id="updateCategory">
-        <foreach collection="ids" item="item" index="index" open="" close="" separator=";">
-            update test_report_record
-            <set>
-                category = '物理章',
-                state = '7'
-            </set>
-            where id = #{item.id}
-        </foreach>
-    </update>
 </mapper>

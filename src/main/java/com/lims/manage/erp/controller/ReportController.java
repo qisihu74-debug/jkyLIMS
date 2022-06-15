@@ -919,9 +919,9 @@ public class ReportController {
             return ResultUtil.error("请选择需要操作的数据");
         }
         String[] split = ids.split(",");
-        List<String> list = Lists.newArrayList();
+        List<Long> list = Lists.newArrayList();
         for (String s:split) {
-            list.add(s);
+            list.add(Long.parseLong(s));
         }
         Boolean flag = reportService.category(list);
         if (flag){
