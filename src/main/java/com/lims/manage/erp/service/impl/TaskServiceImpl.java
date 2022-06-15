@@ -120,16 +120,19 @@ public class TaskServiceImpl implements TaskService {
             for (SampleDetailVo sampleDetailVo : taskDetailInfoVo.getSampleDetailList()) {
                 if (sampleDetailVo.getCheckItemInfoList() != null && !sampleDetailVo.getCheckItemInfoList().isEmpty()) {
                     for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
-                        String[] split = checkItemInfoVo.getOriginUrl().split("\\?");
-                        String[] strings1 = split[0].split("\\/");
-                        String fileName = strings1[4];
-                        String[] names = fileName.split("\\.");
-                        if("pdf".equals(names[1]) || "xls".equals(names[1]) || "xlsx".equals(names[1])){
-                            checkItemInfoVo.setSuffixType("1");
+                        if(org.apache.commons.lang.StringUtils.isNotEmpty(checkItemInfoVo.getOriginUrl())){
+                            String[] split = checkItemInfoVo.getOriginUrl().split("\\?");
+                            String[] strings1 = split[0].split("\\/");
+                            String fileName = strings1[4];
+                            String[] names = fileName.split("\\.");
+                            if("pdf".equals(names[1]) || "xls".equals(names[1]) || "xlsx".equals(names[1])){
+                                checkItemInfoVo.setSuffixType("1");
+                            }
+                            else if("jpeg".equals(names[1]) || "png".equals(names[1]) || "jpg".equals(names[1])){
+                                checkItemInfoVo.setSuffixType("2");
+                            }
                         }
-                        else if("jpeg".equals(names[1]) || "png".equals(names[1]) || "jpg".equals(names[1])){
-                            checkItemInfoVo.setSuffixType("2");
-                        }
+
                         List<TestInstrumentEntity> instrumentEntityList = taskMapper.getInstrumentEntityList(checkItemInfoVo.getItemId());
 //                        List<Integer> result = Lists.newArrayList();
                         // 设置数组 存放
@@ -1145,7 +1148,10 @@ public class TaskServiceImpl implements TaskService {
             // 原始记录模板 比对信息
             try {
                 // 链接 get minIo 检查是否存在
-
+                String[] split = data.getFileUrl().split("/");
+                String[] split1 = split[4].split("\\?");
+                XLSTransformer transformer = new XLSTransformer();
+                InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
                 Workbook workbook = methodPlugTheData(data.getFileUrl(),result,response1);
                 SampleServiceImpl.DealWithZip(workbook, data.getCheckItemName()+i, out);
             }
