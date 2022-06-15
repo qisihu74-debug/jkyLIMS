@@ -930,6 +930,11 @@ public class ReportController {
         if(taskId == null || recordId == null){
             return ResultUtil.error("缺少必要的参数!");
         }
-        return ResultUtil.success("查询任务单详情成功！", reportService.withdrawReport(recordId,taskId));
+        Boolean aBoolean = reportService.withdrawReport(recordId, taskId);
+        if(aBoolean){
+            return ResultUtil.success("撤回报告成功！",aBoolean);
+        }else{
+            return ResultUtil.error("报告已发起审批，撤回报告失败!");
+        }
     }
 }
