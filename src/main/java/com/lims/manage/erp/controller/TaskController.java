@@ -685,7 +685,7 @@ public class TaskController {
             String[] strings = split[0].split("\\/");
             String fileName = strings[4];
             String[] names = fileName.split("\\.");
-            File file = FileAndFolderUtil.getFile(url);
+            File file = FileAndFolderUtil.getFile(split[0]);
             InputStream in = new FileInputStream(file);
             if ("xls".equals(names[1]) || "xlsx".equals(names[1])){
                 Workbook workbook = new Workbook();
