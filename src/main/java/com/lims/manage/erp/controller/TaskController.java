@@ -698,6 +698,7 @@ public class TaskController {
                 String basePath = qiYueSuoEntity.getAutographPath()+names[0]+".png";
                 String pdfPath = qiYueSuoEntity.getAutographPath()+names[0]+".pdf";
                 sheet.saveToImage(basePath);
+                log.info("临时图片保存成功:{}",basePath);
                 //读取临时图片文件输出
                 File file1 = new File(basePath);
                 InputStream fileInputStream = new FileInputStream(file1);
