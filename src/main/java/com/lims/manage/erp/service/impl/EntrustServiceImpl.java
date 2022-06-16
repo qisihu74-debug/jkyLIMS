@@ -1711,9 +1711,9 @@ public class EntrustServiceImpl implements EntrustService {
         // 通过委托ID 样品集合 → test_sample
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
         // 处理信息 样品下检测项信息无价格不展示。
-        // 样品下 检测项、检测依据 补充。
-        List<JudgmentBasisVo> listJson = Lists.newArrayList();
         for (SampleEntity sampleEntity0 : sampleCollection) {
+            // 样品下 检测项、检测依据 补充。
+            List<JudgmentBasisVo> listJson = Lists.newArrayList();
             List<JudgmentBasisVo> itemList = sampleEntityMapper.selectTestStandardList(sampleEntity0.getId(), entrustmentId);
             Iterator<JudgmentBasisVo> it = itemList.iterator();
             while (it.hasNext()) {
@@ -1727,17 +1727,13 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 样品信息 进行补充 检测依据集合，检测项集合
         for (SampleEntity sampleEntity : sampleCollection) {
-            // 样品下 检测项、检测依据 补充。
-//            List<JudgmentBasisVo> listJson = Lists.newArrayList();
-//            listJson.addAll(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
-//            sampleEntity.setJudgmentBasisVoStr(listJson);
             // 补充样品下 依据集合
             List<JudgmentBasisVo> standardList = Lists.newArrayList();
             standardList.addAll(sampleEntityMapper.getSampleBasisList(sampleEntity.getId(), entrustAddVo.getId()));
             sampleEntity.setStandardFileIdStr(standardList);
             //补充检测项可选的全部检测依据
-            if (!CollectionUtils.isEmpty(listJson)) {
-                for (JudgmentBasisVo judgmentBasisVo : listJson) {
+            if (!CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVoStr())) {
+                for (JudgmentBasisVo judgmentBasisVo : sampleEntity.getJudgmentBasisVoStr()) {
                     List<LabelValueVo> allCheckBasis = Lists.newArrayList();
                     allCheckBasis.addAll(testProductDao.getAllCheckBasis(judgmentBasisVo.getCheckItemId()));
                     judgmentBasisVo.setCheckBasisList(allCheckBasis);
