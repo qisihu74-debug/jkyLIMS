@@ -518,7 +518,7 @@
             <version>5.4.2</version>
         </dependency>
         <dependency>
-            <groupId> e-iceblue </groupId>
+            <groupId>e-iceblue</groupId>
             <artifactId>spire.doc</artifactId>
             <version>5.4.2</version>
         </dependency>

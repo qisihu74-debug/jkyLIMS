@@ -1030,6 +1030,8 @@ public class ReportServiceImpl implements ReportService {
                 logger.error("word转pdf异常");
             }
         }
+        //更新签名
+        reportMapper.updateVerAndIss(reportCode, verifyer, issuer, verifyerId, issuerId);
         //设置签名信息
         String url1 = "";
         try {
