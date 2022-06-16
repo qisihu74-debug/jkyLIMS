@@ -9,6 +9,7 @@ import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.StatisticsService;
 import com.lims.manage.erp.vo.*;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -456,9 +457,17 @@ public class StatisticsServiceImpl implements StatisticsService {
                 data.setFinishDate(taskDetailInfoVo.getFinishDate());
                 data.setCost(taskDetailInfoVo.getCost());
                 data.setReportCode(taskDetailInfoVo.getReportCode());
-                data.setReportType(taskDetailInfoVo.getReportType());
+//                data.setReportType(taskDetailInfoVo.getReportType());
                 data.setSampleName(taskDetailInfoVo.getSampleName());
                 data.setTaskStatus(taskDetailInfoVo.getTaskStatus());
+                // 报告编号
+                data.setReportCode(taskDetailInfoVo.getReportCode()!=null?taskDetailInfoVo.getReportCode():"--");
+                if(StringUtils.isNotEmpty(taskDetailInfoVo.getReportType())){
+                    data.setReportType("0".equals(taskDetailInfoVo.getReportType())?"最终报告":"中间报告");
+                }
+                else {
+                    data.setReportType("--");
+                }
                 personList.add(data);
             }
         }
