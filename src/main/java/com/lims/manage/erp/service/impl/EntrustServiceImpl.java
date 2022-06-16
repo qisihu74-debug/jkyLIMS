@@ -1946,7 +1946,7 @@ public class EntrustServiceImpl implements EntrustService {
                         AsposeUtil.addRows(tables.get(0), sampleIndex, samples.size() - 6);
                     }
                     for (int i = 0; i < samples.size(); i++) {
-                        rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getSampleName());//样品名称
+                        rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getAliasName());//样品名称
                         rows.get(sampleIndex).getTableCells().get(index + 1).setText(samples.get(i).getSpecs());//规格等级
                         rows.get(sampleIndex).getTableCells().get(index + 2).setText(samples.get(i).getBatchNumber());//批号/编号
                         rows.get(sampleIndex).getTableCells().get(index + 3).setText(samples.get(i).getSampleQuantity());//样品数量
