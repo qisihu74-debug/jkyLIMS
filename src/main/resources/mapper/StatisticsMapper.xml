@@ -213,6 +213,7 @@
         <result property="state" column="report_state"></result>
         <result property="entrustmentId" column="entrustment_id"></result>
         <result property="discount" column="discount"></result>
+        <result property="reportType" column="type"></result>
         <collection property="sampleDetailList" ofType="com.lims.manage.erp.vo.SampleDetailVo">
             <id property="id" column="sample_id"></id>
             <result property="sampleName" column="sample_name"></result>
@@ -240,6 +241,7 @@
         t1.review_time finishDate,
         t2.report_code reportCode,
         t2.state report_state,
+        t2.type,
         t1.entrustment_id,
         t4.id sample_id,
 		t4.sample_name ,
