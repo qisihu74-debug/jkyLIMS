@@ -289,6 +289,10 @@ public class TaskServiceImpl implements TaskService {
             //TODO gjl添加样品状态
             EntrustServiceImpl service = new EntrustServiceImpl();
             for (TaskListVo sampleListVo : dataList) {
+                //TODO dlc 补充任务单价格
+                if(StringUtils.isEmpty(sampleListVo.getCost())){
+                   sampleListVo.setCost("--");
+                }
                 List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
 
                 List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
@@ -324,6 +328,10 @@ public class TaskServiceImpl implements TaskService {
             dataList = taskMapper.getTaskListTwoGreater(paramVo);
             // 返回前端的话 sampleListVo.getSampleList() 空集合 []
             for(TaskListVo sampleListVo:dataList){
+                //TODO dlc 补充任务单价格
+                if(StringUtils.isEmpty(sampleListVo.getCost())){
+                    sampleListVo.setCost("--");
+                }
                 //增加关联委托单信息
                 StringBuilder correlationTask = new StringBuilder();
                 List<String> correlationTaskList = taskMapper.getCorrelationTask(sampleListVo.getTaskId());
@@ -694,8 +702,14 @@ public class TaskServiceImpl implements TaskService {
                 rows.get(2).getTableCells().get(1).setText(substring);
                 // 要求检验完成日期
                 rows.get(3).getTableCells().get(1).setText(taskDetailInfoVo.getRequiredCompletionTime());
-                // 本单产值
-                rows.get(3).getTableCells().get(3).setText(String.valueOf(cost));
+                // 本单产值 6月17日 任务单 test_task 字段 task_price 为准
+                if(!StringUtils.isEmpty(taskDetailInfoVo.getCost())){
+                    rows.get(3).getTableCells().get(3).setText(String.valueOf(taskDetailInfoVo.getCost()));
+                }
+                else {
+                    rows.get(3).getTableCells().get(3).setText(String.valueOf("--"));
+                }
+
             // 获取委托单印章
             if (taskDetailInfoVo.getSealType() != null) {
                 String[] sealTypes = taskDetailInfoVo.getSealType().split(",");

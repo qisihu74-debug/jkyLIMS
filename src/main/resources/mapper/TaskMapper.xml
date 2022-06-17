@@ -475,7 +475,7 @@
         t1.task_code taskCode,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
         t1.inspector,
-        t2.count_price cost,
+        t1.task_price as cost,
         t4.sample_name sampleName,
         t4.product_id,
         t1.state,
