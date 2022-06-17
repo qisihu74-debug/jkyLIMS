@@ -61,5 +61,12 @@ public class TaskVo {
      * 出报告科室ID集合
      */
     private List<Long> deptIds;
-
+    /**
+     * 折扣率
+     */
+    private Double discount;
+    /**
+     * 任务单价格
+     */
+    private Double taskPrice;
 }

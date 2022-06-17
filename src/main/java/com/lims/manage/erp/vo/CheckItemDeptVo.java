@@ -10,4 +10,6 @@ public class CheckItemDeptVo {
     private Long taskId;
     private Date distributionDate;
     private String issueReport;
+    private Double checkPrice;
+    private int times;
 }
