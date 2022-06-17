@@ -1859,9 +1859,18 @@ public class EntrustServiceImpl implements EntrustService {
         //创建任务对象
         List<TaskVo> vos = Lists.newArrayList();
         for (Long deptId : deptIds) {
+            //计算本单价格
+            double taskPrice = 0L;
+            for (CheckItemDeptVo vo : checkItemDeptVoList) {
+                if (deptId.equals(vo.getDeptId())) {
+                    taskPrice = taskPrice + ((entity.getDiscount() == null ? 0 : entity.getDiscount()) *
+                            (vo.getCheckPrice() == null ? 0 : vo.getCheckPrice()) * vo.getTimes());
+                }
+            }
             TaskVo vo = new TaskVo();
             long id = GenID.getID();
             vo.setId(id);
+            vo.setTaskPrice(taskPrice);
             String teamCode = taskMapper.getTeamCode(deptId);
             Integer integer = taskMapper.selectMaxNoByCode(teamCode);
             Integer code = null;
