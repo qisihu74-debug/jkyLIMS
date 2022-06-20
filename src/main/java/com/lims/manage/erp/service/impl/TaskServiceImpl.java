@@ -104,6 +104,10 @@ public class TaskServiceImpl implements TaskService {
             String[] array = taskDetailInfoVo.getFileUrl().split(",");
             taskDetailInfoVo.setArray(array);
         }
+        //TODO dlc 补充任务单价格
+        if(StringUtils.isEmpty(taskDetailInfoVo.getCost())){
+            taskDetailInfoVo.setCost("--");
+        }
         // 获取文件附件
         Long entrustId = taskMapper.getEntrustIdByTaskId(taskId);
         List<String> strings = entrustEntityMapper.getSampleStandard(entrustId);
@@ -610,10 +614,10 @@ public class TaskServiceImpl implements TaskService {
            }
             //委托单是否留样。
            if( taskListVo.getIssueReport()!=null&&taskListVo.getIssueReport().equals("是")){
-                testMap.put("issueReport", "☑退还  □弃样");
+                testMap.put("issueReport", "☑退还\t\t□弃样");
             }
             else{
-                testMap.put("issueReport", "□退还  ☑弃样");
+                testMap.put("issueReport", "□退还\t\t☑弃样");
             }
             //解析替换文本段落对象
 //            PoiConfig.changeText(doc, testMap);
