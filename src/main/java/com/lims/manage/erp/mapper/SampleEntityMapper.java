@@ -229,4 +229,11 @@ public interface SampleEntityMapper {
      * 通过委托单id 获取样品信息集合。
      */
     List<SampleEntity> selectSampleSet(Long entrustmentId);
+
+    /**
+     * 查询全部团队信息
+     * @return
+     */
+    List<TestTeam> getAllRoomInfoList();
+
 }
