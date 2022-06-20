@@ -55,6 +55,17 @@ public class TestTeamController extends ApiController {
                 newList.add(team);
             }
         }*/
+        //如果团队非顶级团队，则团队名称展示为父级名称-本团队名称team1需要处理的数据，team所有团队数据
+        for (TestTeam team1:list) {
+            for (TestTeam team:list) {
+                if (team1.getPid() !=0){
+                    if (team1.getPid().equals(team.getId())){
+                        String name = team.getName()+"—"+team1.getName();
+                        team1.setName(name);
+                    }
+                }
+            }
+        }
         return ResultUtil.success(list);
     }
     /**
@@ -73,6 +84,21 @@ public class TestTeamController extends ApiController {
         }
         queryWrapper.orderByDesc("t.create_time");
         IPage<TestTeamVo> teamIPage = this.testTeamService.getListPage(page, queryWrapper);
+        //查询所有团队
+        QueryWrapper<TestTeam> queryWrapperAll=new QueryWrapper<>(testTeam);
+        queryWrapperAll.eq("del_flag",0);
+        queryWrapperAll.orderByAsc("sort");
+        List<TestTeam> list = this.testTeamService.list(queryWrapperAll);
+        for (TestTeamVo team1:teamIPage.getRecords()) {
+            for (TestTeam team:list) {
+                if (team1.getPid() !=0){
+                    if (team1.getPid().equals(team.getId())){
+                        String name = team.getName()+"—"+team1.getName();
+                        team1.setName(name);
+                    }
+                }
+            }
+        }
         return ResultUtil.success(teamIPage);
     }
 
