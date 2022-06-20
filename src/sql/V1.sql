@@ -52,5 +52,8 @@ ADD COLUMN `category`  varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_a
 ALTER TABLE `test_team`
 ADD COLUMN `sort`  int NULL COMMENT '排序字段' AFTER `check_item_id`;
 
+--task表增加任务价格字段
+ALTER TABLE `test_task`
+ADD COLUMN `task_price`  double(10,2) COMMENT '任务单价格' AFTER `review_time`;
 
 

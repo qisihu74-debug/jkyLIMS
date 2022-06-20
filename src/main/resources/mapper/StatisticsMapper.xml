@@ -239,7 +239,7 @@
         t1.task_code task_code,
         t1.required_completion_time requestDate,
         t1.review_time finishDate,
-        t2.report_code reportCode,
+        t2.report_code,
         t2.state report_state,
         t2.type,
         t1.entrustment_id,
