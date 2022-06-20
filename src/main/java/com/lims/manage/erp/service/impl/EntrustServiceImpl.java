@@ -2024,7 +2024,7 @@ public class EntrustServiceImpl implements EntrustService {
                         stringBuilder2.append("）；");
                     }
                     rows.get(6).getTableCells().get(2).setText(stringBuilder2.toString().substring(0, stringBuilder2.length() - 1));//样品状态
-                    rows.get(6).getTableCells().get(4).setText(detail.getIsSave().equals("1") ? "是" : "否");//样品保留
+                    rows.get(6).getTableCells().get(4).setText(detail.getIsSave());//样品保留
                     rows.get(7).getTableCells().get(2).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getActualPrice()) ? "--" : detail.getActualPrice());//检验收费
                     rows.get(7).getTableCells().get(4).setText(detail.getPaymentMethod() == null ? "--" : detail.getPaymentMethod());//支付方式
                     //TODO 本次缴费统计缴费记录表

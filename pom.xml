@@ -320,28 +320,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-        <!--钉钉依赖 -->
-        <dependency>
-            <groupId>com.aliyun</groupId>
-            <artifactId>dingtalk</artifactId>
-            <version>1.1.78</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/src/lib/dingtalk-1.1.78.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>com.taobao.top</groupId>
-            <artifactId>top-api-sdk-dev</artifactId>
-            <version>ding-open-mc-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/src/lib/taobao-sdk-java-auto_1479188381469-20210823.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>com.taobao.top</groupId>
-            <artifactId>lippi-oapi-encrpt</artifactId>
-            <version>dingtalk-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/src/lib/taobao-sdk-java-auto_1479188381469-20210823-source.jar</systemPath>
-        </dependency>
         <!--mybatis plus -->
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -523,6 +501,22 @@
             <version>5.4.2</version>
         </dependency>
 
+        <!-- dingding -->
+        <dependency>
+            <groupId>ding-talk</groupId>
+            <artifactId>ding</artifactId>
+            <version>3.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>ding-talk</groupId>
+            <artifactId>taoa</artifactId>
+            <version>3.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>ding-talk</groupId>
+            <artifactId>taob</artifactId>
+            <version>3.11.0</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>
