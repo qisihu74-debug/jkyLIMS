@@ -44,7 +44,7 @@ public class TestTeamController extends ApiController {
         queryWrapper.eq("del_flag",0);
         queryWrapper.orderByAsc("sort");
         List<TestTeam> list = this.testTeamService.list(queryWrapper);
-        List<Integer> pids = Lists.newArrayList();
+        /*List<Integer> pids = Lists.newArrayList();
         List<TestTeam> newList = Lists.newArrayList();
         for (TestTeam team:list) {
             pids.add(team.getPid());
@@ -54,8 +54,8 @@ public class TestTeamController extends ApiController {
             if (!pids.contains(team.getId())){
                 newList.add(team);
             }
-        }
-        return ResultUtil.success(newList);
+        }*/
+        return ResultUtil.success(list);
     }
     /**
      * 分页查询所有数据
