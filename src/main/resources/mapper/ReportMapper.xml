@@ -210,7 +210,7 @@
                         t2.id task_id,
                         t2.task_code,
                         t4.sample_name,
-                        t1.count_price,
+                        t2.task_price as countPrice,
                         DATE_FORMAT(t1.request_date, '%Y-%m-%d') request_date
         FROM test_entrusted_info t1
                  LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
@@ -292,7 +292,7 @@
         t2.task_code as taskCode,
         t2.id as taskId,
         t1.sample_name as sampleName,
-        t1.price as countPrice,
+        t2.task_price as countPrice,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') as requestDate,
         DATE_FORMAT(t1.report_complete_time,'%Y-%m-%d') as reportCompleteTime,
         t1.report_url as reportUrl
