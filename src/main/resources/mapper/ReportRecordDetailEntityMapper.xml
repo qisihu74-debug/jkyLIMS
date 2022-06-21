@@ -24,6 +24,13 @@
         from test_report_record_detail
         where id = #{id,jdbcType=BIGINT}
     </select>
+    <select id="selectByRecordIdAndItemId" resultType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        select
+        *
+        from test_report_record_detail
+        where record_id = #{recordId} and check_item_id = #{checkItemId}
+    </select>
+
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete
         from test_report_record_detail
@@ -32,10 +39,10 @@
     <insert id="insert" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
         insert into test_report_record_detail (id, record_id, check_item_id,
                                                check_item_name, specs_content, check_result,
-                                               judge_result, coordinate)
+                                               judge_result, coordinate,origin_url)
         values (#{id,jdbcType=BIGINT}, #{recordId,jdbcType=BIGINT}, #{checkItemId,jdbcType=BIGINT},
                 #{checkItemName,jdbcType=VARCHAR}, #{specsContent,jdbcType=VARCHAR}, #{checkResult,jdbcType=VARCHAR},
-                #{judgeResult,jdbcType=VARCHAR}, #{coordinate,jdbcType=VARCHAR})
+                #{judgeResult,jdbcType=VARCHAR}, #{coordinate,jdbcType=VARCHAR},#{originUrl})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
         insert into test_report_record_detail
@@ -163,6 +170,9 @@
             </if>
             <if test="coordinate != null">
                 coordinate = #{coordinate,jdbcType=VARCHAR},
+            </if>
+            <if test="originUrl != null">
+                origin_url = #{originUrl},
             </if>
         </set>
         where record_id = #{recordId,jdbcType=BIGINT} and check_item_id = #{checkItemId,jdbcType=BIGINT}

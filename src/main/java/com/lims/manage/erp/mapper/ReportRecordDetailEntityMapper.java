@@ -19,6 +19,8 @@ public interface ReportRecordDetailEntityMapper {
 
     ReportRecordDetailEntity selectByPrimaryKey(Long id);
 
+    ReportRecordDetailEntity selectByRecordIdAndItemId(@Param("recordId") Long recordId,@Param("checkItemId") Integer checkItemId);
+
     int updateByPrimaryKeySelective(ReportRecordDetailEntity record);
 
     int updateByPrimaryKey(ReportRecordDetailEntity record);

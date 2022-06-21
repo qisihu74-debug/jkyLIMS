@@ -368,6 +368,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportDetailVo getReportDetail0620(Long taskId) {
+        Long recordId = recordEntityMapper.getRecordId(taskId);
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
         List<ReportSampleDetailVo> samples = reportDetail.getSamples();
@@ -376,6 +377,7 @@ public class ReportServiceImpl implements ReportService {
             List<ReportCheckItemDetailVo> result = Lists.newArrayList();
             List<SampleItemEntity> temp = Lists.newArrayList();
             List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
+            //查询子级检测项信息
             for (int j = 0; j < checkItems.size(); j++) {
                 ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
                 int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
@@ -413,24 +415,25 @@ public class ReportServiceImpl implements ReportService {
                     if (last > 0) {
                         continue;
                     }
-                    //判断子检测项是否已存在
-                    boolean flag = false;
-                    for (ReportCheckItemDetailVo reportCheckItemDetailVo : checkItems) {
-                        if (reportCheckItemDetailVo.getCheckItemId().equals(sampleItemEntity.getCheckItemId())) {
-                            flag = true;
-                            break;
-                        }
-                    }
-                    if (flag) {//子检测项已存在
-                        break;
-                    } else {//子检测项不存在
-                        ReportCheckItemDetailVo vo = new ReportCheckItemDetailVo();
+                    ReportCheckItemDetailVo vo = new ReportCheckItemDetailVo();
+                    if(recordId != null){
+                        ReportRecordDetailEntity entity = recordDetailEntityMapper.selectByRecordIdAndItemId(recordId, sampleItemEntity.getCheckItemId().intValue());
+                        vo.setCheckItemId(entity.getCheckItemId());
+                        vo.setCheckItemName(entity.getCheckItemName());
+                        vo.setCoordinate(entity.getCoordinate());
+                        vo.setOriginUrl(entity.getOriginUrl());
+
+                        vo.setId(entity.getId());
+                        vo.setSpecsContent(entity.getSpecsContent());
+                        vo.setCheckResult(entity.getCheckResult());
+                        vo.setJudgeResult(entity.getJudgeResult());
+                    }else{
                         vo.setCheckItemId(sampleItemEntity.getCheckItemId());
                         vo.setCheckItemName(sampleItemEntity.getCheckItemName());
                         vo.setCoordinate(sampleItemEntity.getCoordinate());
                         vo.setOriginUrl(sampleItemEntity.getOriginUrl());
-                        result.add(vo);
                     }
+                    result.add(vo);
                 }
             }
             if(!CollectionUtils.isEmpty(checkItems)){
@@ -500,7 +503,6 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean preserve(ReportPreserveVo vo) {
         ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
-//        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByTaskId(vo.getTaskId());
         if (reportRecordEntity1 != null) {
 //            String state = "1";
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
