@@ -52,6 +52,7 @@ public interface ReportMapper {
      * @return
      */
     ReportDetailVo getReportDetail(Long taskId,List<Long> deptIds);
+    ReportDetailVo getReportDetail0621(Long taskId,List<Long> deptIds);
 
     /**
      * 根据委托单ID查询所有检测项

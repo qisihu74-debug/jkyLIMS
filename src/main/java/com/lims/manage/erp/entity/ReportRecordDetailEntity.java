@@ -22,4 +22,6 @@ public class ReportRecordDetailEntity {
 
     private String coordinate;
 
+    private String originUrl;
+
 }
