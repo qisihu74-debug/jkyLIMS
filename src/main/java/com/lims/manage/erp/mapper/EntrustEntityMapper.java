@@ -58,7 +58,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @param entrustmentId
      * @return
      */
-    @Select("SELECT\n" +
+    @Select("SELECT DISTINCT\n" +
             "t2.code as judgmentBasis\n" +
             "FROM\n" +
             "test_entrusted_sample_standard_rel as t1 \n" +
