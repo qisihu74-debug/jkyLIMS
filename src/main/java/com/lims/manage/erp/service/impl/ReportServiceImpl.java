@@ -416,8 +416,8 @@ public class ReportServiceImpl implements ReportService {
                         continue;
                     }
                     ReportCheckItemDetailVo vo = new ReportCheckItemDetailVo();
-                    if(recordId != null){
-                        ReportRecordDetailEntity entity = recordDetailEntityMapper.selectByRecordIdAndItemId(recordId, sampleItemEntity.getCheckItemId().intValue());
+                    ReportRecordDetailEntity entity = recordDetailEntityMapper.selectByRecordIdAndItemId(recordId, sampleItemEntity.getCheckItemId().intValue());
+                    if(recordId != null && entity != null){
                         vo.setCheckItemId(entity.getCheckItemId());
                         vo.setCheckItemName(entity.getCheckItemName());
                         vo.setCoordinate(entity.getCoordinate());
