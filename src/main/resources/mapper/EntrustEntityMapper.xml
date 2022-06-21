@@ -671,7 +671,8 @@
         check_item_id,
         check_price as unitPrice,
         check_item_name,
-        check_item_pid
+        check_item_pid,
+        coordinate
         FROM
         test_product_item
         WHERE
@@ -682,7 +683,8 @@
         c.check_item_id,
         c.check_price as unitPrice,
         c.check_item_name,
-        c.check_item_pid
+        c.check_item_pid,
+        c.coordinate
         FROM
         test_product_item c,
         td

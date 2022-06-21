@@ -35,6 +35,8 @@ public interface EntrustService {
      */
     Boolean addEntrustTest(EntrustAddVo vo, MultipartFile[] file);
 
+    Boolean addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file);
+
 
 
 

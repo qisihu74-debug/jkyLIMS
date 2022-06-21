@@ -14,5 +14,6 @@ public class ReportCheckItemDetailVo {
     private String checkResult;
     private String judgeResult;
     private String coordinate;
+    private String originUrl;
     private List<ReportSpecsContentVo> specsContents;
 }

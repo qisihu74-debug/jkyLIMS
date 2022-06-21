@@ -30,6 +30,7 @@
                 <result property="checkResult" column="check_result"></result>
                 <result property="judgeResult" column="judge_result"></result>
                 <result property="coordinate" column="coordinate"></result>
+                <result property="originUrl" column="origin_url"></result>
                 <collection property="specsContents" ofType="com.lims.manage.erp.vo.ReportSpecsContentVo">
                     <result property="value" column="value"></result>
                     <result property="label" column="label"></result>
@@ -106,6 +107,7 @@
             t4.product_id,
             t5.id id_item,
             t5.state,
+            t5.origin_url,
             t6.check_item_id,
             t5.check_item_name,
             t9.specs_content,

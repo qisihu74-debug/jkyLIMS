@@ -6,20 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.lims.manage.erp.entity.ConclusionEntity;
-import com.lims.manage.erp.entity.QiYueSuoEntity;
-import com.lims.manage.erp.entity.QiYueSuoReqBean;
-import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
-import com.lims.manage.erp.entity.QiYueSuoSealEntity;
-import com.lims.manage.erp.entity.QuotaEntity;
-import com.lims.manage.erp.entity.QuotaRes;
-import com.lims.manage.erp.entity.ReportRecordDetailEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.ReportResBean;
-import com.lims.manage.erp.entity.ReportTemplateEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
@@ -374,6 +361,82 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
             reportSampleDetailVo.setCheckItems(checkItems);
+        }
+        reportDetail.setSamples(samples);
+        return reportDetail;
+    }
+
+    @Override
+    public ReportDetailVo getReportDetail0620(Long taskId) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
+        List<ReportSampleDetailVo> samples = reportDetail.getSamples();
+        //处理每组样品下检测项
+        for (ReportSampleDetailVo reportSampleDetailVo : samples) {
+            List<ReportCheckItemDetailVo> result = Lists.newArrayList();
+            List<SampleItemEntity> temp = Lists.newArrayList();
+            List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
+            for (int j = 0; j < checkItems.size(); j++) {
+                ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
+                int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
+                if (last > 0) {
+                    //移除有子检测项的父检测项
+                    checkItems.remove(reportCheckItemDetailVo);
+                    //查询该父检测项下的子检测项信息
+                    List<SampleItemEntity> nodeItems = entrustEntityMapper.getItemRecursionList(reportCheckItemDetailVo.getCheckItemId());
+                    List<SampleItemEntity> tempNodeItems = Lists.newArrayList();
+                    //将父级原始记录传递给子级
+                    for (SampleItemEntity nodeItem : nodeItems) {
+                        nodeItem.setOriginUrl(reportCheckItemDetailVo.getOriginUrl());
+                        tempNodeItems.add(nodeItem);
+                    }
+                    temp.addAll(tempNodeItems);
+                }
+            }
+            //拼接父检测项名称和子检测项名称
+            HashMap<Long, SampleItemEntity> itemMap = new HashMap<>();
+            if(!CollectionUtils.isEmpty(temp)){
+                for (SampleItemEntity entity0 : temp) {
+                    itemMap.put(entity0.getCheckItemId(), entity0);
+                }
+                for (SampleItemEntity entity2 : temp) {
+                    SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
+                    if (sampleItemEntity != null && entity2.getUnitPrice() == null) {
+                        entity2.setCheckItemName(sampleItemEntity.getCheckItemName() + "-" + entity2.getCheckItemName());
+                    }
+                }
+            }
+            if(!CollectionUtils.isEmpty(temp)){
+                for (SampleItemEntity sampleItemEntity : temp) {
+                    //去除父检测项
+                    int last = testProductDao.isLast(sampleItemEntity.getCheckItemId().intValue());
+                    if (last > 0) {
+                        continue;
+                    }
+                    //判断子检测项是否已存在
+                    boolean flag = false;
+                    for (ReportCheckItemDetailVo reportCheckItemDetailVo : checkItems) {
+                        if (reportCheckItemDetailVo.getCheckItemId().equals(sampleItemEntity.getCheckItemId())) {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag) {//子检测项已存在
+                        break;
+                    } else {//子检测项不存在
+                        ReportCheckItemDetailVo vo = new ReportCheckItemDetailVo();
+                        vo.setCheckItemId(sampleItemEntity.getCheckItemId());
+                        vo.setCheckItemName(sampleItemEntity.getCheckItemName());
+                        vo.setCoordinate(sampleItemEntity.getCoordinate());
+                        vo.setOriginUrl(sampleItemEntity.getOriginUrl());
+                        result.add(vo);
+                    }
+                }
+            }
+            if(!CollectionUtils.isEmpty(checkItems)){
+                result.addAll(checkItems);
+            }
+            reportSampleDetailVo.setCheckItems(result);
         }
         reportDetail.setSamples(samples);
         return reportDetail;

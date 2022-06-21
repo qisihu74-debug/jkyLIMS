@@ -78,6 +78,8 @@ public interface ReportService {
      */
     ReportDetailVo getReportDetail(Long taskId);
 
+    ReportDetailVo getReportDetail0620(Long taskId);
+
     /**
      * 根据委托单ID查询所有检测项
      * @param id

@@ -92,7 +92,7 @@ public class EntrustController {
     //@RequiresPermissions("entrust:entrust:addEntrust")
     public Result addEntrustTest(@RequestParam("json") String json, MultipartFile[] file) {
         EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
-        Boolean isSuccess = entrustService.addEntrustTest(entrust, file);
+        Boolean isSuccess = entrustService.addEntrustTest0620(entrust, file);
         if (isSuccess) {
             return ResultUtil.success("新建委托成功");
         } else {

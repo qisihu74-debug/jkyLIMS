@@ -202,7 +202,7 @@ public class ReportController {
      */
     @GetMapping("/edit")
     public Result edit(Long taskId) {
-        return ResultUtil.success("查询任务单详情成功！", reportService.getReportDetail(taskId));
+        return ResultUtil.success("查询任务单详情成功！", reportService.getReportDetail0620(taskId));
     }
 
     /**

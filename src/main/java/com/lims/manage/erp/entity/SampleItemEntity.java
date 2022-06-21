@@ -78,5 +78,13 @@ public class SampleItemEntity {
      * 检测项名称
      */
     private String checkItemName;
+    /**
+     * 检测项坐标
+     */
+    private String coordinate;
+    /**
+     * 原始记录
+     */
+    private String originUrl;
 
 }
