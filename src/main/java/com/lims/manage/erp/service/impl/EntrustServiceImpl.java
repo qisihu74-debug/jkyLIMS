@@ -2558,9 +2558,11 @@ public class EntrustServiceImpl implements EntrustService {
                 //样品下检测项
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
                 if (!CollectionUtils.isEmpty(sampleCheckItem)) {
+                    List<SampleItemEntity> ItemList = new ArrayList<>();
                     for (SampleItemEntity entity : sampleCheckItem) {
-                        // 根据检测项id 遍历检测项层级和价格 获取集合
-                        List<SampleItemEntity> ItemList = entityMapper.getItemRecursionList(entity.getCheckItemId());
+                        /** 废弃 6月21日需求变更。
+                         // 根据检测项id 遍历检测项层级和价格 获取集合
+                         List<SampleItemEntity> ItemList = entityMapper.getItemRecursionList(entity.getCheckItemId());
                         //处理检测项 遍历出来的层级数据 拼接层级名。
                         HashMap<Long, SampleItemEntity> itemMap = new HashMap<>();
                         if (!CollectionUtils.isEmpty(ItemList)) {
@@ -2596,7 +2598,24 @@ public class EntrustServiceImpl implements EntrustService {
                             entityMapper.BatchSaveEntrustSampleItem(ItemList);
                         }
                     }
-                }
+                 *
+                 */
+                        // 正常存储检测项即可。
+                        //计算检测项总价钱
+                        if (entity.getUnitPrice() != null && entity.getUnitPrice() >= 0) {
+                            int money = entity.getTimes() * entity.getUnitPrice();
+                            totalMoney = totalMoney + money;
+                        }
+                        //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+                        entity.setSampleId(sampleEntity.getId());
+                        entity.setEntrustId(basisInfo.getId());
+                        entity.setStandardId(entity.getStandardId());
+                        entity.setMethodId(entity.getMethodId());
+                        entity.setTimes(entity.getTimes());
+                        ItemList.add(entity);
+                    }
+                    entityMapper.BatchSaveEntrustSampleItem(ItemList);
+                    }
                 //根据委托检测类别关联 配合比检测信息和委托单ID
                 // 再来一单 add 不需要关联。
 //                if (vo.getEntrustTestType().contains("配合比")) {
