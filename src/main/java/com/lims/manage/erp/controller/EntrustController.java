@@ -102,7 +102,7 @@ public class EntrustController {
 
 
     /**
-     * 修改委托
+     * 修改委托 废弃
      *
      * @param json
      * @param file
@@ -121,7 +121,7 @@ public class EntrustController {
     }
 
     /**
-     * 修改委托测试丁 new
+     * 修改委托测试丁 线上使用
      *
      * @param json
      * @param file
