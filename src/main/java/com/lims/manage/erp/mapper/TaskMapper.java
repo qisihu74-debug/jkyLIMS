@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -391,4 +392,10 @@ public interface TaskMapper extends BaseMapper {
      * 获取有效数据 根据主键集合。
      */
     List<TaskIdEntity> selectconditionId(@Param(value = "array") Integer[] array);
+
+    @Select("SELECT MIN(start_detection_time) from test_task where entrustment_id=#{id}")
+    Date getStartTime(@Param("id") Long id);
+
+    @Select("select MAX(end_detection_time) from test_task where entrustment_id=#{id}")
+    Date getEndTime(Long id);
 }

@@ -1643,8 +1643,8 @@ public class ReportServiceImpl implements ReportService {
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
                         WordUtils.replaceCellText(rows.get(6).getCell(1),key,"样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
                                 + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
-                                + "；样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
-                                + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutward()) ? "——" : sampleEntity.getOutward())
+                                + "；样品数量：" + (sampleEntity.getSampleQuantity() == null ? "——" : sampleEntity.getSampleQuantity())
+                                + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
                                 + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                         //检测依据
                         String checkBasis = getCheckBasis(id);
@@ -1652,10 +1652,18 @@ public class ReportServiceImpl implements ReportService {
                         //判定依据
                         String judgeBasis = getJudgeBasis(id);
                         WordUtils.replaceCellText(rows.get(7).getCell(3),key,judgeBasis.equals("") ? "——" : judgeBasis);
-                        //检测日期
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-                        WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
-                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime()));
+                        //检测日期 TODO 实验开始日期 -实验结束日期 时间起始相同展示一个时间即可
+                        //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
+                        Date start = taskMapper.getStartTime(id);
+                        Date end = taskMapper.getEndTime(id);
+                        if (start != null && end != null){
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
+                            if (start == end){
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(start));
+                            }else {
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(start) + "~" + sdf.format(end));
+                            }
+                        }
                         //主要仪器
                         String equipment = getEquipment(id);
                         WordUtils.replaceCellText(rows.get(9).getCell(1),key,equipment.equals("") ? "——" : equipment);
@@ -1829,10 +1837,17 @@ public class ReportServiceImpl implements ReportService {
                         String judgeBasis = getJudgeBasis(id);
                         WordUtils.replaceCellText(rows.get(7).getCell(3),key,judgeBasis.equals("") ? "——" : judgeBasis);
                         //检测日期
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-                        WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(entrustHistoryDetail.getAcceptanceDate()) + "~"
-                                + sdf.format(reportRecordEntity.getReportCompleteTime() == null ? new Date() : reportRecordEntity.getReportCompleteTime()));
-
+                        //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
+                        Date start = taskMapper.getStartTime(id);
+                        Date end = taskMapper.getEndTime(id);
+                        if (start != null && end != null){
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
+                            if (start == end){
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(start));
+                            }else {
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(start) + "~" + sdf.format(end));
+                            }
+                        }
                         //主要仪器
                         String equipment = getEquipment(id);
                         WordUtils.replaceCellText(rows.get(9).getCell(1),key,equipment.equals("") ? "——" : equipment);
