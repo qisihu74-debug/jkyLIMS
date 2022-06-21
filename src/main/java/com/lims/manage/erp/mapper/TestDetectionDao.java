@@ -78,7 +78,7 @@ public interface TestDetectionDao {
             "\ttest_entrusted_sample_checkitem_rel \n" +
             "WHERE\n" +
             "\tentrust_id = #{entrustId} \n" +
-            "\tAND dept_id = #{deptId}")
+            "\tAND dept_id = #{deptId} AND unit_price is not null")
     List<Integer> getSampleCheckitemRelDetailState(Long entrustId,Integer deptId);
     /**
      * 实验完成-依据检测项主键 展示 所属仪器列表

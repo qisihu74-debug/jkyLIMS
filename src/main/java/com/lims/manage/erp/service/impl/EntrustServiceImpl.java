@@ -1642,9 +1642,7 @@ public class EntrustServiceImpl implements EntrustService {
                 if (list != null && !list.isEmpty()) {
                     // 根据检测项id 查询 默认匹配部门信息
                     for (JudgmentBasisVo data : list) {
-                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
-                        data.setTestingRoom(strings.toString());
-//                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
+                        List<String> strings = new ArrayList<>();
                         List<TestTeam> testingRoomInfoList = sampleEntityMapper.getTestingRoomInfoList(data.getCheckItemId());
 //                        ALL团队信息
                         List<TestTeam> Alllist = sampleEntityMapper.getAllRoomInfoList();
@@ -1655,10 +1653,12 @@ public class EntrustServiceImpl implements EntrustService {
                                     if (team1.getPid().equals(team.getId())){
                                         String name = team.getName()+"—"+team1.getName();
                                         team1.setName(name);
+                                        strings.add(name);
                                     }
                                 }
                             }
                         }
+                        data.setTestingRoom(strings.toString());
 //                        allTestRoom.addAll(testingRoomList);
                         List<Integer> pids = Lists.newArrayList();
                         List<LabelValueVo> testingRoomList = Lists.newArrayList();

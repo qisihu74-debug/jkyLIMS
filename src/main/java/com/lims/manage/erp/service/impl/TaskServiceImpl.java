@@ -997,7 +997,7 @@ public class TaskServiceImpl implements TaskService {
                         taskMapper.updateEntrustById(entrustBaseInfo.getId(), 6);
                     }
                 }
-                // 通过委托单id 和部门ID为条件  遍历（判断每个状态 state = 3 复核通过。 改变任务单 6 否则 任务单还是为试验完成）
+                // 通过委托单id 和部门ID为条件  遍历（判断每个状态 state = 3 复核通过。 改变任务单 6 否则 任务单还是为试验完成） 去除 检测项单价为空
                 List<Integer> states = testDetectionDao.getSampleCheckitemRelDetailState(sampleItemInstrumentEntity2.getEntrustId(), sampleItemInstrumentEntity2.getDeptId());
                 for (Integer stateItem : states) {
                     if (stateItem != 3) {

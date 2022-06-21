@@ -72,7 +72,7 @@ public interface TaskMapper extends BaseMapper {
 
     /**
      * 查询任务详情二次开发
-     *
+     *  2022年6月21日 检测项 单价为null 的不展示。
      * @return
      */
     TaskDetailInfoVo getTaskDetailInfoTwo(TaskListParamVo paramVo);
@@ -384,7 +384,7 @@ public interface TaskMapper extends BaseMapper {
             "FROM\n" +
             "\ttest_entrusted_sample_checkitem_rel \n" +
             "WHERE\n" +
-            "\ttask_id = #{taskId} and dept_id = #{deptId}")
+            "\ttask_id = #{taskId} and dept_id = #{deptId} and unit_price is not null ")
     List<Integer> selectCheckItemState(@Param(value = "taskId") Long taskId,@Param(value = "deptId") Integer deptId);
 
     /**
