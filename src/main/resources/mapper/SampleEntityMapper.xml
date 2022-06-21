@@ -1098,4 +1098,12 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         ORDER BY
 		t2.id DESC
     </select>
+    <select id="getAllRoomInfoList" resultType="com.lims.manage.erp.entity.TestTeam">
+    SELECT
+	t1.pid,
+	t1.id,
+	t1.NAME
+    FROM
+	test_team AS t1
+    </select>
 </mapper>

@@ -104,6 +104,10 @@ public class TaskServiceImpl implements TaskService {
             String[] array = taskDetailInfoVo.getFileUrl().split(",");
             taskDetailInfoVo.setArray(array);
         }
+        //TODO dlc 补充任务单价格
+        if(StringUtils.isEmpty(taskDetailInfoVo.getCost())){
+            taskDetailInfoVo.setCost("--");
+        }
         // 获取文件附件
         Long entrustId = taskMapper.getEntrustIdByTaskId(taskId);
         List<String> strings = entrustEntityMapper.getSampleStandard(entrustId);
@@ -610,10 +614,10 @@ public class TaskServiceImpl implements TaskService {
            }
             //委托单是否留样。
            if( taskListVo.getIssueReport()!=null&&taskListVo.getIssueReport().equals("是")){
-                testMap.put("issueReport", "☑退还  □弃样");
+                testMap.put("issueReport", "☑退还\t\t□弃样");
             }
             else{
-                testMap.put("issueReport", "□退还  ☑弃样");
+                testMap.put("issueReport", "□退还\t\t☑弃样");
             }
             //解析替换文本段落对象
 //            PoiConfig.changeText(doc, testMap);
@@ -993,7 +997,7 @@ public class TaskServiceImpl implements TaskService {
                         taskMapper.updateEntrustById(entrustBaseInfo.getId(), 6);
                     }
                 }
-                // 通过委托单id 和部门ID为条件  遍历（判断每个状态 state = 3 复核通过。 改变任务单 6 否则 任务单还是为试验完成）
+                // 通过委托单id 和部门ID为条件  遍历（判断每个状态 state = 3 复核通过。 改变任务单 6 否则 任务单还是为试验完成） 去除 检测项单价为空
                 List<Integer> states = testDetectionDao.getSampleCheckitemRelDetailState(sampleItemInstrumentEntity2.getEntrustId(), sampleItemInstrumentEntity2.getDeptId());
                 for (Integer stateItem : states) {
                     if (stateItem != 3) {

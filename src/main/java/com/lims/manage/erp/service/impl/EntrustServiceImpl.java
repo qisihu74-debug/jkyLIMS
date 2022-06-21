@@ -1642,10 +1642,23 @@ public class EntrustServiceImpl implements EntrustService {
                 if (list != null && !list.isEmpty()) {
                     // 根据检测项id 查询 默认匹配部门信息
                     for (JudgmentBasisVo data : list) {
-                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
-                        data.setTestingRoom(strings.toString());
-//                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
+                        List<String> strings = new ArrayList<>();
                         List<TestTeam> testingRoomInfoList = sampleEntityMapper.getTestingRoomInfoList(data.getCheckItemId());
+//                        ALL团队信息
+                        List<TestTeam> Alllist = sampleEntityMapper.getAllRoomInfoList();
+                        //如果团队非顶级团队，则团队名称展示为父级名称-本团队名称team1需要处理的数据，team所有团队数据
+                        for (TestTeam team1:testingRoomInfoList) {
+                            for (TestTeam team:Alllist) {
+                                if (team1.getPid() !=0){
+                                    if (team1.getPid().equals(team.getId())){
+                                        String name = team.getName()+"—"+team1.getName();
+                                        team1.setName(name);
+                                        strings.add(name);
+                                    }
+                                }
+                            }
+                        }
+                        data.setTestingRoom(strings.toString());
 //                        allTestRoom.addAll(testingRoomList);
                         List<Integer> pids = Lists.newArrayList();
                         List<LabelValueVo> testingRoomList = Lists.newArrayList();

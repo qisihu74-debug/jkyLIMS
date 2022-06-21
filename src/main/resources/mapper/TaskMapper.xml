@@ -281,6 +281,7 @@
                 #{id}
             </foreach>
         </if>
+        AND t5.unit_price is not null
     </select>
     <select id="getInstrumentEntityList" resultType="com.lims.manage.erp.entity.TestInstrumentEntity">
     SELECT
