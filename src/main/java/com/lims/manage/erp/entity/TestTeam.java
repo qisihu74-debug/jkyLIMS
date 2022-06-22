@@ -47,6 +47,10 @@ public class TestTeam extends Model<TestTeam> {
     private Date updateTime;
     //备注
     private String remark;
+    @TableField(exist = false)
+    private Long userId;
+    @TableField(exist = false)
+    private String personName;
 
     public Integer getId() {
         return id;

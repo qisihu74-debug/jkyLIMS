@@ -2442,19 +2442,17 @@ public class EntrustServiceImpl implements EntrustService {
                     for (SampleEntity sampleEntity : samples) {
                         stringBuilder2.append(sampleEntity.getAliasName());
                         stringBuilder2.append("（");
-                        stringBuilder2.append(sampleEntity.getSpecs());
+                        if (org.apache.commons.lang3.StringUtils.isNotEmpty(sampleEntity.getSpecs())){
+                            stringBuilder2.append(sampleEntity.getSpecs());
+                        }else {
+                            stringBuilder2.append("--");
+                        }
                         stringBuilder2.append("、");
                         String s = sampleEntity.getOutwardDescribe();
-                        String s1 = sampleEntity.getOutward();
                         if (org.apache.commons.lang3.StringUtils.isNotEmpty(s)){
                             stringBuilder2.append(s);
-                            if (org.apache.commons.lang3.StringUtils.isNotEmpty(s1)){
-                                stringBuilder2.append("、");
-                                stringBuilder2.append(s1);
-                            }
-                        }
-                        if (org.apache.commons.lang3.StringUtils.isEmpty(s) && org.apache.commons.lang3.StringUtils.isNotEmpty(s1)){
-                            stringBuilder2.append(s1);
+                        }else {
+                            stringBuilder2.append("--");
                         }
                         stringBuilder2.append("）；");
                     }
