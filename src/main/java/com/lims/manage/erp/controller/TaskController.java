@@ -279,10 +279,24 @@ public class TaskController {
      */
     @RequestMapping("/getTaskList")
     public Result getTaskInfo(@RequestBody TaskListParamVo paramVo) {
-        if (paramVo == null) {
+        if (paramVo == null || paramVo.getState() == null || paramVo.getPageNum() == null || paramVo.getPageSize() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
-            return ResultUtil.success("查询任务列表成功！", taskService.getTaskList(paramVo));
+            // 验证登录人信息 和部门 存入
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            if (userInfo == null) {
+                return ResultUtil.error("token 已过期！");
+            }
+            // 根据账号 查询有可能包含多个科室 以及下级科室信息
+            String dept = taskService.getDeptIds(userInfo.getUserId());
+            // 科室id集合
+            String[] deptIds = new String[]{};
+            if (dept != null) {
+                deptIds = dept.split(",");
+            } else {
+                return ResultUtil.error("账号使用人未配置科室人员");
+            }
+            return ResultUtil.success("查询任务列表成功！", taskService.getTaskListTwo(paramVo, deptIds));
         }
     }
 
@@ -313,6 +327,8 @@ public class TaskController {
             } else {
                 return ResultUtil.error("账号使用人未配置科室人员");
             }
+            paramVo.setReviewer(userInfo.getUserId().toString());
+            paramVo.setInspector(userInfo.getUserId().toString());
             return ResultUtil.success("查询任务列表成功！", taskService.getTaskListTwo(paramVo, deptIds));
         }
     }

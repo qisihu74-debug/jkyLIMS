@@ -250,25 +250,8 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public String getDeptIds(Long userId) {
 
-/*        // 根据人员id 返回团队id集合
-//        List<Long> deptIds = teamMapper.getUserTeamIds(userId);*/
-        List<Long> deptIds = new ArrayList<>();
-        // 获取当前用户所在科室id
-        Long department = teamMapper.getTeamIdByUid(userId);
-        // All全部 部门科室
-        List<TeamTreeStructureEntity> list = teamMapper.getDeptAll();
-        // 获取顶级部门 为空则是当前部门
-         Long topDepartment = teamMapper.getTopDepartment(department);
-         if(StringUtils.isEmpty(topDepartment)){
-             topDepartment = department;
-             deptIds.add(topDepartment);
-         }
-        // 通过顶级部门 遍历得到 相关的子部门。
-        for(TeamTreeStructureEntity teamTreeStructureEntity:list){
-            if(teamTreeStructureEntity.getPid().equals(topDepartment)){
-                deptIds.add(teamTreeStructureEntity.getId());
-            }
-        }
+        // 根据人员id 返回团队id集合
+        List<Long> deptIds = teamMapper.getUserTeamIds(userId);
         if (deptIds != null && !deptIds.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
             for (Long detId : deptIds) {
@@ -277,14 +260,6 @@ public class TaskServiceImpl implements TaskService {
             }
             return stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString();
         }
-/*        if (deptIds != null && !deptIds.isEmpty()) {
-            StringBuilder stringBuilder = new StringBuilder();
-            for (Long detId : deptIds) {
-                stringBuilder.append(detId);
-                stringBuilder.append(",");
-            }
-            return stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString();
-        }*/
         return null;
     }
 

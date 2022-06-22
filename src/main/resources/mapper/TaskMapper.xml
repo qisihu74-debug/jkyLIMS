@@ -452,6 +452,12 @@
                     #{id}
                 </foreach>
             </if>
+            <if test="inspector!=null and inspector!=''">
+                or t1.inspector LIKE CONCAT('%',#{inspector},'%')
+            </if>
+            <if test="reviewer!=null and reviewer!=''">
+                or t1.reviewer LIKE CONCAT('%',#{reviewer},'%')
+            </if>
             <if test="taskCode!=null and taskCode!=''">
                 and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
             </if>
@@ -499,6 +505,12 @@
                 <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
                     #{id}
                 </foreach>
+            </if>
+            <if test="inspector!=null and inspector!=''">
+                or t1.inspector LIKE CONCAT('%',#{inspector},'%')
+            </if>
+            <if test="reviewer!=null and reviewer!=''">
+                or t1.reviewer LIKE CONCAT('%',#{reviewer},'%')
             </if>
             <if test="taskCode!=null and taskCode!=''">
                 and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
