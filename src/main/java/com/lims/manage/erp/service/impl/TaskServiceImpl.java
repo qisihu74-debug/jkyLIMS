@@ -250,11 +250,25 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public String getDeptIds(Long userId) {
 
-        // 根据人员id 返回团队id集合
-        List<Long> deptIds = teamMapper.getUserTeamIds(userId);
+/*        // 根据人员id 返回团队id集合
+//        List<Long> deptIds = teamMapper.getUserTeamIds(userId);*/
+        List<Long> deptIds = new ArrayList<>();
         // 获取当前用户所在科室id
         Long department = teamMapper.getTeamIdByUid(userId);
-
+        // All全部 部门科室
+        List<TeamTreeStructureEntity> list = teamMapper.getDeptAll();
+        // 获取顶级部门 为空则是当前部门
+         Long topDepartment = teamMapper.getTopDepartment(department);
+         if(StringUtils.isEmpty(topDepartment)){
+             topDepartment = department;
+             deptIds.add(topDepartment);
+         }
+        // 通过顶级部门 遍历得到 相关的子部门。
+        for(TeamTreeStructureEntity teamTreeStructureEntity:list){
+            if(teamTreeStructureEntity.getPid().equals(topDepartment)){
+                deptIds.add(teamTreeStructureEntity.getId());
+            }
+        }
         if (deptIds != null && !deptIds.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
             for (Long detId : deptIds) {
@@ -263,6 +277,14 @@ public class TaskServiceImpl implements TaskService {
             }
             return stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString();
         }
+/*        if (deptIds != null && !deptIds.isEmpty()) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Long detId : deptIds) {
+                stringBuilder.append(detId);
+                stringBuilder.append(",");
+            }
+            return stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString();
+        }*/
         return null;
     }
 
@@ -531,8 +553,9 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TeamVo getTeamUserNameTwo(Long UserLong) {
         TeamVo teamVo = new TeamVo();
-        // 返回团队id集合 根据人员id
+/*        // 返回团队id集合 根据人员id
         List<TeamTreeStructureEntity> dataDepts = taskMapper.getTeamDeptVo(UserLong);
+        List<TeamTreeStructureEntity> dataDepts = new ArrayList<>();
         if (dataDepts != null && !dataDepts.isEmpty()) {
             Set<Long> deptIds = new HashSet<>();
             for (TeamTreeStructureEntity data : dataDepts) {
@@ -543,6 +566,37 @@ public class TaskServiceImpl implements TaskService {
             }
             // 团队id集合 返回人员信息
             List<LabelValueVo> teamVos = taskMapper.getMemberInformation(deptIds);
+            teamVo.setTeamVo(teamVos);
+        }*/
+
+        /*// 返回团队所有人员信息。*/
+        // 获取当前用户所在科室id
+        Long department = teamMapper.getTeamIdByUid(UserLong);
+        // 获取顶级部门 为空则是当前部门
+        Long topDepartment = teamMapper.getTopDepartment(department);
+        if(StringUtils.isEmpty(topDepartment)){
+            topDepartment = department;
+        }
+        // 获取团队下所有子集团队下技术人员集合
+        List<TestTeam> testTeamList = teamMapper.getIdsByTeamId(topDepartment);
+        List<LabelValueVo> teamVos = new ArrayList<>();
+        // testTeamList =null
+        if(CollectionUtils.isEmpty(testTeamList)){
+            // 团队id集合 返回人员信息
+            Set<Long> deptIds = new HashSet<>();
+            deptIds.add(topDepartment);
+            List<LabelValueVo> teamVos0 = taskMapper.getMemberInformation(deptIds);
+            teamVo.setTeamVo(teamVos0);
+        } else {
+            for(TestTeam testTeam:testTeamList)
+            {
+                if(!StringUtils.isEmpty(testTeam)){
+                    LabelValueVo labelValueVo = new LabelValueVo();
+                    labelValueVo.setLabel(testTeam.getPersonName());
+                    labelValueVo.setValue(testTeam.getUserId());
+                    teamVos.add(labelValueVo);
+                }
+            }
             teamVo.setTeamVo(teamVos);
         }
         // 复核人集合

@@ -56,8 +56,8 @@
     <select id="getDeptAll" resultType="com.lims.manage.erp.entity.TeamTreeStructureEntity">
         	   SELECT
                     id as id,
-                    NAME,
-                    pid
+                    NAME name,
+                    pid as pid
                 FROM
                     test_team
                 WHERE

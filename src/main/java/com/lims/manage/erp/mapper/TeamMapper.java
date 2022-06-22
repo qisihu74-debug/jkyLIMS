@@ -43,7 +43,7 @@ public interface TeamMapper extends BaseMapper {
      * @param userId
      * @return
      */
-    @Select("select team_id from test_technicist where user_id = #{userId} and t2.del_flag = 0")
+    @Select("select team_id from test_technicist where user_id = #{userId} and del_flag = 0")
     Long getTeamIdByUid(@Param("userId") Long userId);
 
     /**
@@ -151,4 +151,40 @@ public interface TeamMapper extends BaseMapper {
      * 查询所有部门id
      */
     List<TeamTreeStructureEntity> getDeptAll();
+
+    /**
+     * 通过mysql 寻找顶级部门 为空 则就是顶级部门
+     */
+    @Select(" SELECT\n" +
+            " tb1.id\n" +
+            "FROM\n" +
+            " (\n" +
+            "  WITH RECURSIVE cte AS (\n" +
+            "   SELECT\n" +
+            "    a.id,\n" +
+            "    a.pid,\n" +
+            "    a. NAME\n" +
+            "   FROM\n" +
+            "    test_team a\n" +
+            "   WHERE\n" +
+            "    a.id = #{deptId}\n" +
+            "   UNION ALL\n" +
+            "    SELECT\n" +
+            "     k.id,\n" +
+            "     k.pid,\n" +
+            "     k. NAME\n" +
+            "    FROM\n" +
+            "     test_team k\n" +
+            "    INNER JOIN cte c ON c.pid = k.id\n" +
+            "  ) SELECT\n" +
+            "   id,\n" +
+            "   NAME,\n" +
+            "   pid\n" +
+            "  FROM\n" +
+            "   cte\n" +
+            " ) tb1\n" +
+            "WHERE\n" +
+            " tb1.id != #{deptId}")
+    Long getTopDepartment(Long deptId);
+
 }
