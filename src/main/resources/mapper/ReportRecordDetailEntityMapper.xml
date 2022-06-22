@@ -39,10 +39,10 @@
     <insert id="insert" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
         insert into test_report_record_detail (id, record_id, check_item_id,
                                                check_item_name, specs_content, check_result,
-                                               judge_result, coordinate,origin_url)
+                                               judge_result, coordinate,origin_url,task_id)
         values (#{id,jdbcType=BIGINT}, #{recordId,jdbcType=BIGINT}, #{checkItemId,jdbcType=BIGINT},
                 #{checkItemName,jdbcType=VARCHAR}, #{specsContent,jdbcType=VARCHAR}, #{checkResult,jdbcType=VARCHAR},
-                #{judgeResult,jdbcType=VARCHAR}, #{coordinate,jdbcType=VARCHAR},#{originUrl})
+                #{judgeResult,jdbcType=VARCHAR}, #{coordinate,jdbcType=VARCHAR},#{originUrl},#{taskId})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
         insert into test_report_record_detail

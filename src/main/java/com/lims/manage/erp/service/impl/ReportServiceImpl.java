@@ -504,13 +504,10 @@ public class ReportServiceImpl implements ReportService {
     public Boolean preserve(ReportPreserveVo vo) {
         ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
         if (reportRecordEntity1 != null) {
-//            String state = "1";
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
             for (ReportRecordDetailEntity e : checkInfos) {
                 e.setRecordId(reportRecordEntity1.getId());
-//                if (e.getJudgeResult() == null) {
-//                    state = "2";
-//                }
+                e.setTaskId(vo.getTaskId());
                 List<Long> checkItemIds = recordDetailEntityMapper.getCheckItemIds(reportRecordEntity1.getId());
                 int insert1;
                 if (checkItemIds.contains(e.getCheckItemId())) {
@@ -522,10 +519,6 @@ public class ReportServiceImpl implements ReportService {
                     return false;
                 }
             }
-//            reportRecordEntity1.setState(state);
-//            if ("1".equals(state)) {
-//                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
-//            }
             //校验其他任务单是否完成
             List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
             if(allReportComplete.contains(2)){
@@ -543,24 +536,16 @@ public class ReportServiceImpl implements ReportService {
             return true;
         } else {
             long recordId = GenID.getID();
-//            String state = "1";
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
             for (ReportRecordDetailEntity e : checkInfos) {
                 e.setRecordId(recordId);
-//                if (e.getJudgeResult() == null) {
-//                    state = "2";
-//                }
+                e.setTaskId(vo.getTaskId());
                 int insert1 = recordDetailEntityMapper.insert(e);
                 if (insert1 < 1) {
                     return false;
                 }
             }
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
-//            reportRecordEntity.setState(state);
-//            if ("1".equals(state)) {
-//                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-//            }
-
             List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
             if(allReportComplete.contains(2)){
                 reportRecordEntity.setState(2+"");

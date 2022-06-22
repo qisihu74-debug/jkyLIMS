@@ -24,4 +24,6 @@ public class ReportRecordDetailEntity {
 
     private String originUrl;
 
+    private Long taskId;
+
 }

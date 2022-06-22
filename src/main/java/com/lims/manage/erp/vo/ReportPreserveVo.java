@@ -10,6 +10,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ReportPreserveVo extends ReportRecordEntity {
+    private Long taskId;
     private Boolean isOver;
     private Integer reportComplete;
     private List<ReportRecordDetailEntity> checkInfos;
