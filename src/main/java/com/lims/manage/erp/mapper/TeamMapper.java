@@ -42,7 +42,7 @@ public interface TeamMapper extends BaseMapper {
      * @param userId
      * @return
      */
-    @Select("select team_id from test_technicist where user_id = #{userId}")
+    @Select("select team_id from test_technicist where user_id = #{userId} and t2.del_flag = 0")
     Long getTeamIdByUid(@Param("userId") Long userId);
 
     /**
@@ -103,4 +103,9 @@ public interface TeamMapper extends BaseMapper {
             "LEFT JOIN sys_user as t3 ON t3.user_id = t2.user_id\n" +
             "WHERE t1.id = #{taskId}")
     List<String> getTaskIdUserName(Long taskId);
+
+    /**
+     * 查询所有部门id
+     */
+    List<TeamTreeStructureEntity> getDeptAll();
 }
