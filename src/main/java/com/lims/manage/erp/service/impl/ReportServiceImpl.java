@@ -336,7 +336,7 @@ public class ReportServiceImpl implements ReportService {
         }
         // 获取检测项
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemList(recordId, userTeamIds,taskId);
+        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemListByTaskId(taskId);
         reportSampleDetailVo.setCheckItems(checkItemList);
         return reportSampleDetailVo;
     }
