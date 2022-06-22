@@ -61,6 +61,7 @@ public interface EntrustService {
      */
     Boolean updateEntrustTestNewSampleEnscript1(EntrustAddVo vo);
     Boolean updateEntrustTestNewSampleEnscript(EntrustAddVo vo);
+    Boolean updateEntrustTestNewSampleEnscript0621(EntrustAddVo vo);
 
     /**
      * 修改委托检测项

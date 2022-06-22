@@ -409,7 +409,7 @@
     <select id="getReportHeadDetails" resultType="com.lims.manage.erp.vo.ReportSampleDetailVo">
         SELECT t1.sample_name                AS sampleName,
                t3.sample_code                As sampleCode,
-               t3.outward                    AS outward,
+               t3.outward_describe           AS outward,
                t3.specs                      AS specs,
                CONCAT(t5.NAME, '、', t5.CODE) as standard
         FROM test_report_record AS t1
@@ -417,10 +417,7 @@
                  LEFT JOIN test_sample AS t3 ON t3.id = t2.sample_id
                  LEFT JOIN test_entrusted_sample_standard_rel AS t4 ON t4.entrustment_id = t1.entrustment_id
                  LEFT JOIN test_standard_file AS t5 ON t5.id = t4.standard_id
-        WHERE t1.state != 2
-	AND t1.id = #{id}
---           AND (t5.type=2
---            or t5.type= 3)
+        WHERE t1.id = #{id}
     </select>
 
     <select id="getReportCheckItemList" resultType="com.lims.manage.erp.vo.ReportCheckItemDetailVo">
@@ -443,6 +440,18 @@
                 #{id}
             </foreach>
         </if>
+    </select>
+    <select id="getReportCheckItemListByTaskId" resultType="com.lims.manage.erp.vo.ReportCheckItemDetailVo">
+        SELECT
+            id AS checkItemId,
+            check_item_name AS checkItemName,
+            specs_content AS specsContent,
+            check_result checkResult,
+            judge_result AS judgeResult
+        FROM
+            test_report_record_detail
+        WHERE
+            task_id = #{taskId}
     </select>
 
     <select id="getJudgeBasis" resultType="java.lang.String">

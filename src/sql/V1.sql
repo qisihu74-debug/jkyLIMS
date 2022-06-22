@@ -57,3 +57,11 @@ ALTER TABLE `test_task`
 ADD COLUMN `task_price`  double(10,2) COMMENT '任务单价格' AFTER `review_time`;
 
 
+--task表增加任务价格字段
+ALTER TABLE `test_report_record_detail`
+    ADD COLUMN `origin_url`  text COMMENT '原始记录上传url' AFTER `coordinate`;
+
+ALTER TABLE `test_report_record_detail`
+    ADD COLUMN `task_id`  bigint COMMENT '任务ID' AFTER `origin_url`;
+
+

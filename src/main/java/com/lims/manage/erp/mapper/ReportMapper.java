@@ -79,6 +79,13 @@ public interface ReportMapper {
     List<ReportCheckItemDetailVo> getReportCheckItemList(@Param("id") Long id,@Param("deptIds") List<Long> deptIds,@Param("taskId") Long taskId);
 
     /**
+     * 根据任务单ID查询检测项信息
+     * @param taskId
+     * @return
+     */
+    List<ReportCheckItemDetailVo> getReportCheckItemListByTaskId(@Param("taskId") Long taskId);
+
+    /**
      * 查询判定依据
      * @param id
      * @return

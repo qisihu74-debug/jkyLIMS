@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TeamTreeStructureEntity;
+import com.lims.manage.erp.entity.TestTeam;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Param;
@@ -103,6 +104,48 @@ public interface TeamMapper extends BaseMapper {
             "LEFT JOIN sys_user as t3 ON t3.user_id = t2.user_id\n" +
             "WHERE t1.id = #{taskId}")
     List<String> getTaskIdUserName(Long taskId);
+
+    /**
+     * 获取团队下所有子集团队下技术人员集合
+     * @param id
+     * @return
+     */
+    @Select("SELECT DISTINCT\n" +
+            "\tuus.user_id As userId,\n" +
+            "\tuus. NAME As personName\n" +
+            "FROM\n" +
+            "\ttest_technicist tte\n" +
+            "LEFT JOIN sys_user uus ON tte.user_id = uus.user_id\n" +
+            "WHERE\n" +
+            "\ttte.team_id IN (\n" +
+            "\t\tSELECT\n" +
+            "\t\t\ttb1.id\n" +
+            "\t\tFROM\n" +
+            "\t\t\t(\n" +
+            "\t\t\t\tWITH RECURSIVE td AS (\n" +
+            "\t\t\t\t\tSELECT\n" +
+            "\t\t\t\t\t\t*\n" +
+            "\t\t\t\t\tFROM\n" +
+            "\t\t\t\t\t\ttest_team\n" +
+            "\t\t\t\t\tWHERE\n" +
+            "\t\t\t\t\t\tid = #{id}\n" +
+            "\t\t\t\t\tUNION ALL\n" +
+            "\t\t\t\t\t\tSELECT\n" +
+            "\t\t\t\t\t\t\tc.*\n" +
+            "\t\t\t\t\t\tFROM\n" +
+            "\t\t\t\t\t\t\ttest_team c,\n" +
+            "\t\t\t\t\t\t\ttd\n" +
+            "\t\t\t\t\t\tWHERE\n" +
+            "\t\t\t\t\t\t\tc.pid = td.id\n" +
+            "\t\t\t\t) SELECT\n" +
+            "\t\t\t\t\t*\n" +
+            "\t\t\t\tFROM\n" +
+            "\t\t\t\t\ttd\n" +
+            "\t\t\t) tb1\n" +
+            "\t\tWHERE\n" +
+            "\t\t\ttb1.id != #{id}\n" +
+            "\t)")
+    List<TestTeam> getIdsByTeamId(@Param("id") Long id);
 
     /**
      * 查询所有部门id
