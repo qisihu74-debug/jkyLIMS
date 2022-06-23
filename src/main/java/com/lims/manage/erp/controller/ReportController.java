@@ -694,17 +694,20 @@ public class ReportController {
     }
 
     /**
-     * 报告邮寄
-     * 待邮寄报告列表及已发出报告历史列表查询
-     *
+     * 查询报告邮寄列表--0623
      * @param search
      * @param reportType
+     * @param pageNum
+     * @param pageSize
+     * @param type
+     * @param category
+     * @param reportTypeStatus
      * @return
      */
     @GetMapping("sendList")
-    public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type,Integer reportTypeStatus) {
+    public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type,String category,Integer reportTypeStatus) {
         logger.info("分页参数pageNum:{},pageSize:{}", pageNum, pageSize);
-        PageInfo pageInfo = reportService.getSendList(search, reportType, pageNum, pageSize, type,reportTypeStatus);
+        PageInfo pageInfo = reportService.getSendList0623(search, reportType, pageNum, pageSize, type,category,reportTypeStatus);
         return ResultUtil.success(pageInfo);
     }
 
