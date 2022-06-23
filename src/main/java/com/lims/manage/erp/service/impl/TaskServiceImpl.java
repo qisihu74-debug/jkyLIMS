@@ -16,8 +16,10 @@ import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.*;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRow;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTc;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTcPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -587,10 +589,10 @@ public class TaskServiceImpl implements TaskService {
            }
             //委托单是否留样。
            if( taskListVo.getIssueReport()!=null&&taskListVo.getIssueReport().equals("是")){
-                testMap.put("issueReport", "☑退还\t\t□弃样");
+                testMap.put("issueReport", "\t☑退还\t\t□弃样");
             }
             else{
-                testMap.put("issueReport", "□退还\t\t☑弃样");
+                testMap.put("issueReport", "\t□退还\t\t☑弃样");
             }
             //解析替换文本段落对象
 //            PoiConfig.changeText(doc, testMap);
@@ -727,6 +729,34 @@ public class TaskServiceImpl implements TaskService {
                     rows.get(3).getTableCells().get(3).setText(String.valueOf("--"));
                 }
                 // 检测项目处理 add增加表格。
+                // 判断表格 是否大于3
+                if(checkItemInfoVoMap.size()>3){
+                    AsposeUtil.addRows(tables.get(j), 11, checkItemInfoVoMap.size() - 3);
+                    //遍历表格插入数据
+                    XWPFTable table1 = tables.get(j);
+                    List<XWPFTableRow> rows1 = table1.getRows();
+                    for (int i = 1; i < rows1.size(); i++) {
+                        List<XWPFTableCell> cells = rows1.get(i).getTableCells();
+                        for (int j1 = 0; j1 < cells.size(); j1++) {
+                            XWPFTableCell cell = cells.get(j1);
+
+                            // 设置水平居中,需要ooxml-schemas包支持
+                            CTTc cttc = cell.getCTTc();
+                            CTTcPr ctPr = cttc.addNewTcPr();
+                            ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
+                            cttc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
+                        }
+                    }
+                }
+
+
+                // 塞入数据
+                int serialNumber = 9;
+                for (Integer key : checkItemInfoVoMap.keySet()) {
+                    CheckItemInfoVo checkItemInfoVo = checkItemInfoVoMap.get(key);
+                    rows.get(serialNumber).getTableCells().get(1).setText(checkItemInfoVo.getCheckItemName());
+                    serialNumber+=1;
+                }
 
             }
         if(j==2){
