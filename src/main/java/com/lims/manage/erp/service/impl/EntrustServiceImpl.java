@@ -1408,7 +1408,7 @@ public class EntrustServiceImpl implements EntrustService {
                     entityMapper.batchUpdateEntrustSampleItem(updateList);
                 }
 
-                //删除原有检测项--判断是否删除有子检测项的
+                //删除原有检测项——判断是否删除有子检测项的
                 if (sampleCheckItemOld != null && !CollectionUtils.isEmpty(sampleCheckItemOld)){
                     //
                     for (int j = 0; j < sampleCheckItemOld.size(); j++) {
@@ -1568,7 +1568,7 @@ public class EntrustServiceImpl implements EntrustService {
                     entityMapper.batchUpdateEntrustSampleItem(updateList);
                 }
 
-                //删除原有检测项--判断是否删除有子检测项的
+                //删除原有检测项——判断是否删除有子检测项的
                 if (sampleCheckItemOld != null && !CollectionUtils.isEmpty(sampleCheckItemOld)){
                     //
                     for (int j = 0; j < sampleCheckItemOld.size(); j++) {
@@ -1836,8 +1836,8 @@ public class EntrustServiceImpl implements EntrustService {
             entrustAddVo.setPaymentRecord(total);
         }
         else {
-            entrustAddVo.setPaymentRecordShow("--");
-            entrustAddVo.setPaymentRecord("--");
+            entrustAddVo.setPaymentRecordShow("——");
+            entrustAddVo.setPaymentRecord("——");
         }
 
         if (entrustAddVo.getOperateUser() != null) {
@@ -2023,7 +2023,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 通过委托单id 获取缴费记录 依据id 同价价格
         entrustAddVo.setPaymentRecord(entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId));
-        // -- 支付方式。
+        // —— 支付方式。
 //        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
         // 联系地址
 //        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
@@ -2122,10 +2122,10 @@ public class EntrustServiceImpl implements EntrustService {
             entrustAddVo.setPaymentRecord(total);
         }
         else {
-            entrustAddVo.setPaymentRecordShow("--");
-            entrustAddVo.setPaymentRecord("--");
+            entrustAddVo.setPaymentRecordShow("——");
+            entrustAddVo.setPaymentRecord("——");
         }
-        // -- 支付方式。
+        // —— 支付方式。
 //        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
         // 联系地址
 //        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
@@ -2361,9 +2361,9 @@ public class EntrustServiceImpl implements EntrustService {
                     //设置模板数据
                     rows.get(2).getTableCells().get(8).setText("№." + detail.getEntrustmentNo());//委托单位
                     rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
-                    rows.get(4).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getWitnessUint())?"--":detail.getWitnessUint());//见证单位
-                    rows.get(5).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getProjectName())?"--":detail.getProjectName());//工程名称
-                    rows.get(6).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getProjectPart())?"--":detail.getProjectPart());//工程部位
+                    rows.get(4).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getWitnessUint())?"——":detail.getWitnessUint());//见证单位
+                    rows.get(5).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getProjectName())?"——":detail.getProjectName());//工程名称
+                    rows.get(6).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getProjectPart())?"——":detail.getProjectPart());//工程部位
                     //新增的行数
                     int sampleIndex = 8;
                     int index = 1;
@@ -2372,21 +2372,21 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                     for (int i = 0; i < samples.size(); i++) {
                         rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getAliasName());//样品名称
-                        rows.get(sampleIndex).getTableCells().get(index + 1).setText(StringUtils.isEmpty(StringUtils.isEmpty(detail.getProjectPart())?"--":detail.getProjectPart())?"--":samples.get(i).getSpecs());//规格等级
-                        rows.get(sampleIndex).getTableCells().get(index + 2).setText(StringUtils.isEmpty(samples.get(i).getBatchNumber())?"--":samples.get(i).getBatchNumber());//批号/编号
-                        rows.get(sampleIndex).getTableCells().get(index + 3).setText(StringUtils.isEmpty(samples.get(i).getSampleQuantity())?"--":samples.get(i).getSampleQuantity());//样品数量
-                        rows.get(sampleIndex).getTableCells().get(index + 4).setText(StringUtils.isEmpty(samples.get(i).getGeneration())?"--":samples.get(i).getGeneration());//代表批量
-                        rows.get(sampleIndex).getTableCells().get(index + 5).setText(StringUtils.isEmpty(samples.get(i).getManufacturer())?"--":samples.get(i).getManufacturer());//样品产地/生产厂家
-                        rows.get(sampleIndex).getTableCells().get(index + 6).setText(StringUtils.isEmpty(samples.get(i).getSampleRemark())?"--":samples.get(i).getSampleRemark());//样品备注
+                        rows.get(sampleIndex).getTableCells().get(index + 1).setText(StringUtils.isEmpty(StringUtils.isEmpty(detail.getProjectPart())?"——":detail.getProjectPart())?"——":samples.get(i).getSpecs());//规格等级
+                        rows.get(sampleIndex).getTableCells().get(index + 2).setText(StringUtils.isEmpty(samples.get(i).getBatchNumber())?"——":samples.get(i).getBatchNumber());//批号/编号
+                        rows.get(sampleIndex).getTableCells().get(index + 3).setText(StringUtils.isEmpty(samples.get(i).getSampleQuantity())?"——":samples.get(i).getSampleQuantity());//样品数量
+                        rows.get(sampleIndex).getTableCells().get(index + 4).setText(StringUtils.isEmpty(samples.get(i).getGeneration())?"——":samples.get(i).getGeneration());//代表批量
+                        rows.get(sampleIndex).getTableCells().get(index + 5).setText(StringUtils.isEmpty(samples.get(i).getManufacturer())?"——":samples.get(i).getManufacturer());//样品产地/生产厂家
+                        rows.get(sampleIndex).getTableCells().get(index + 6).setText(StringUtils.isEmpty(samples.get(i).getSampleRemark())?"——":samples.get(i).getSampleRemark());//样品备注
                         sampleIndex = sampleIndex + 1;
                     }
                 }
                 if (j == tables.size() - 1) {
                     //设置其它信息(第二个table)
                     String ss = "";
-                    rows.get(0).getTableCells().get(2).setText(detail.getPresentInformation() == null ? "--" : detail.getPresentInformation());//提供资料
-                    rows.get(1).getTableCells().get(2).setText(detail.getSamplingMethod() == null ? "--" : detail.getSamplingMethod());//取样方式
-                    rows.get(1).getTableCells().get(4).setText(detail.getCheckPurpose() == null ? "--" : detail.getCheckPurpose());//检验目的
+                    rows.get(0).getTableCells().get(2).setText(detail.getPresentInformation() == null ? "——" : detail.getPresentInformation());//提供资料
+                    rows.get(1).getTableCells().get(2).setText(detail.getSamplingMethod() == null ? "——" : detail.getSamplingMethod());//取样方式
+                    rows.get(1).getTableCells().get(4).setText(detail.getCheckPurpose() == null ? "——" : detail.getCheckPurpose());//检验目的
                     List<String> list = entityMapper.getSampleStandard(detail.getId());
                     StringBuilder stringBuilder = new StringBuilder();
                     if (!CollectionUtils.isEmpty(list)) {
@@ -2395,7 +2395,7 @@ public class EntrustServiceImpl implements EntrustService {
                             stringBuilder.append("，");
                         }
                         String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
-                        rows.get(1).getTableCells().get(6).setText(substring == null ? "--" : substring);//产品标准 TODO 去重
+                        rows.get(1).getTableCells().get(6).setText(substring == null ? "——" : substring);//产品标准 TODO 去重
                     }
                     StringBuilder stringBuilder1 = new StringBuilder();
                     if (!CollectionUtils.isEmpty(samples)) {
@@ -2426,18 +2426,18 @@ public class EntrustServiceImpl implements EntrustService {
                             set.add(s);
                         }
                         String substring1 = set.toString().substring(1, set.toString().length() - 1);
-                        rows.get(2).getTableCells().get(2).setText(substring1 == null ? "--" : substring1);//检验项目及检测依据 TODO 去重
+                        rows.get(2).getTableCells().get(2).setText(substring1 == null ? "——" : substring1);//检验项目及检测依据 TODO 去重
                     }
                     //TODO +1
                     rows.get(3).getTableCells().get(2).setText(detail.getReportCount().toString());//报告分数
-                    rows.get(3).getTableCells().get(4).setText(detail.getReportType() == null ? "--" : detail.getReportType());//取报告方式
-                    rows.get(3).getTableCells().get(6).setText(detail.getAddress() == null ? "--" : detail.getEntrustCompany());//收报告单位
-                    rows.get(4).getTableCells().get(2).setText(detail.getAddress() == null ? "--" : detail.getAddress());//联系地址
-                    rows.get(4).getTableCells().get(4).setText(detail.getAddressee() == null ? "--" : detail.getAddressee());//联系人
-                    rows.get(4).getTableCells().get(6).setText(detail.getMobile() == null ? "--" : detail.getMobile());//联系方式
-                    rows.get(5).getTableCells().get(2).setText(detail.getEntrustPeople() == null ? "--" : detail.getEntrustPeople());//委托人
-                    rows.get(5).getTableCells().get(4).setText(detail.getEntrustPhone() == null ? "--" : detail.getEntrustPhone());//委托人电话
-                    rows.get(5).getTableCells().get(6).setText(detail.getWitnessPerson() == null ? "--" : detail.getWitnessPerson());//见证人
+                    rows.get(3).getTableCells().get(4).setText(detail.getReportType() == null ? "——" : detail.getReportType());//取报告方式
+                    rows.get(3).getTableCells().get(6).setText(detail.getAddress() == null ? "——" : detail.getEntrustCompany());//收报告单位
+                    rows.get(4).getTableCells().get(2).setText(detail.getAddress() == null ? "——" : detail.getAddress());//联系地址
+                    rows.get(4).getTableCells().get(4).setText(detail.getAddressee() == null ? "——" : detail.getAddressee());//联系人
+                    rows.get(4).getTableCells().get(6).setText(detail.getMobile() == null ? "——" : detail.getMobile());//联系方式
+                    rows.get(5).getTableCells().get(2).setText(detail.getEntrustPeople() == null ? "——" : detail.getEntrustPeople());//委托人
+                    rows.get(5).getTableCells().get(4).setText(detail.getEntrustPhone() == null ? "——" : detail.getEntrustPhone());//委托人电话
+                    rows.get(5).getTableCells().get(6).setText(detail.getWitnessPerson() == null ? "——" : detail.getWitnessPerson());//见证人
                     StringBuilder stringBuilder2 = new StringBuilder();
                     for (SampleEntity sampleEntity : samples) {
                         stringBuilder2.append(sampleEntity.getAliasName());
@@ -2445,28 +2445,28 @@ public class EntrustServiceImpl implements EntrustService {
                         if (org.apache.commons.lang3.StringUtils.isNotEmpty(sampleEntity.getSpecs())){
                             stringBuilder2.append(sampleEntity.getSpecs());
                         }else {
-                            stringBuilder2.append("--");
+                            stringBuilder2.append("——");
                         }
                         stringBuilder2.append("、");
                         String s = sampleEntity.getOutwardDescribe();
                         if (org.apache.commons.lang3.StringUtils.isNotEmpty(s)){
                             stringBuilder2.append(s);
                         }else {
-                            stringBuilder2.append("--");
+                            stringBuilder2.append("——");
                         }
                         stringBuilder2.append("）；");
                     }
                     rows.get(6).getTableCells().get(2).setText(stringBuilder2.toString().substring(0, stringBuilder2.length() - 1));//样品状态
                     rows.get(6).getTableCells().get(4).setText(detail.getIsSave());//样品保留
-                    rows.get(7).getTableCells().get(2).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getActualPrice()) ? "--" : detail.getActualPrice());//检验收费
-                    rows.get(7).getTableCells().get(4).setText(detail.getPaymentMethod() == null ? "--" : detail.getPaymentMethod());//支付方式
+                    rows.get(7).getTableCells().get(2).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getActualPrice()) ? "——" : detail.getActualPrice());//检验收费
+                    rows.get(7).getTableCells().get(4).setText(detail.getPaymentMethod() == null ? "——" : detail.getPaymentMethod());//支付方式
                     //TODO 本次缴费统计缴费记录表
-                    rows.get(7).getTableCells().get(6).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentRecordShow()) ? "--" : detail.getPaymentRecordShow());//本次交费
+                    rows.get(7).getTableCells().get(6).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentRecordShow()) ? "——" : detail.getPaymentRecordShow());//本次交费
                     rows.get(8).getTableCells().get(2).setText(DateUtil.formatDate(detail.getRequestDate()));//完成期限
-                    rows.get(8).getTableCells().get(4).setText(detail.getBusinessAcceptor() == null ? "--" : detail.getBusinessAcceptor());//业务受理人
+                    rows.get(8).getTableCells().get(4).setText(detail.getBusinessAcceptor() == null ? "——" : detail.getBusinessAcceptor());//业务受理人
                     rows.get(8).getTableCells().get(6).setText(DateUtil.formatDate(detail.getAcceptanceDate()));//受理日期
                     rows.get(10).getTableCells().get(1).removeParagraph(0);
-                    rows.get(10).getTableCells().get(1).setText(StringUtils.isEmpty(detail.getRemark())?"--":detail.getRemark());//备注
+                    rows.get(10).getTableCells().get(1).setText(StringUtils.isEmpty(detail.getRemark())?"——":detail.getRemark());//备注
                 }
             }
         } catch (Exception e) {

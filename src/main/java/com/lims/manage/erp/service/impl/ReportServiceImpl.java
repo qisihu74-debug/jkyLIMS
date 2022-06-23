@@ -1708,7 +1708,7 @@ public class ReportServiceImpl implements ReportService {
                         Date end = taskMapper.getEndTime(id);
                         if (start != null && end != null){
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-                            if (start == end){
+                            if (start.equals(end)){
                                 WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(start));
                             }else {
                                 WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(start) + "~" + sdf.format(end));
@@ -1892,7 +1892,7 @@ public class ReportServiceImpl implements ReportService {
                         Date end = taskMapper.getEndTime(id);
                         if (start != null && end != null){
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-                            if (start == end){
+                            if (start.equals(end)){
                                 WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(start));
                             }else {
                                 WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(start) + "~" + sdf.format(end));
@@ -2132,7 +2132,7 @@ public class ReportServiceImpl implements ReportService {
                 for(Map.Entry<String, String> entry : map.entrySet()) {
                     if (entry.getValue() == null) {
                         //TODO
-                        entry.setValue("--");
+                        entry.setValue("——");
                     }
                     range.replaceText(entry.getKey(), entry.getValue());
                 }
