@@ -80,24 +80,6 @@ public class TaskServiceImpl implements TaskService {
     public TaskDetailInfoVo getTaskDetailInfoTwo(Long taskId, String[] deptIds) {
         TaskListParamVo paramVo = new TaskListParamVo();
         paramVo.setTaskId(taskId);
-        if (deptIds != null) {
-            // 根据部门id 遍历包含下级部门信息
-            List<Long> ids = new ArrayList<>();
-            for (int i = 0; i < deptIds.length; i++) {
-                ids.add(Long.valueOf(deptIds[i]));
-            }
-            paramVo.setDeptIds(ids);
-        } else {
-            // 查询任务单 所属部门id
-            Long deptId = taskMapper.getTaskDept(taskId);
-            if (deptId == null) {
-                paramVo.setDeptIds(null);
-            } else {
-                List<Long> ids = new ArrayList<>();
-                ids.add(deptId);
-                paramVo.setDeptIds(ids);
-            }
-        }
         // 处理 委托单的文件链接
         TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfoTwo(paramVo);
         if (taskDetailInfoVo.getFileUrl() != null) {
@@ -250,25 +232,8 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public String getDeptIds(Long userId) {
 
-/*        // 根据人员id 返回团队id集合
-//        List<Long> deptIds = teamMapper.getUserTeamIds(userId);*/
-        List<Long> deptIds = new ArrayList<>();
-        // 获取当前用户所在科室id
-        Long department = teamMapper.getTeamIdByUid(userId);
-        // All全部 部门科室
-        List<TeamTreeStructureEntity> list = teamMapper.getDeptAll();
-        // 获取顶级部门 为空则是当前部门
-         Long topDepartment = teamMapper.getTopDepartment(department);
-         if(StringUtils.isEmpty(topDepartment)){
-             topDepartment = department;
-             deptIds.add(topDepartment);
-         }
-        // 通过顶级部门 遍历得到 相关的子部门。
-        for(TeamTreeStructureEntity teamTreeStructureEntity:list){
-            if(teamTreeStructureEntity.getPid().equals(topDepartment)){
-                deptIds.add(teamTreeStructureEntity.getId());
-            }
-        }
+        // 根据人员id 返回团队id集合
+        List<Long> deptIds = teamMapper.getUserTeamIds(userId);
         if (deptIds != null && !deptIds.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
             for (Long detId : deptIds) {
@@ -277,19 +242,11 @@ public class TaskServiceImpl implements TaskService {
             }
             return stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString();
         }
-/*        if (deptIds != null && !deptIds.isEmpty()) {
-            StringBuilder stringBuilder = new StringBuilder();
-            for (Long detId : deptIds) {
-                stringBuilder.append(detId);
-                stringBuilder.append(",");
-            }
-            return stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString();
-        }*/
         return null;
     }
 
     /**
-     * 查询任务列表列表 并设置
+     * 查询检测列表 并设置
      *
      * @param paramVo
      * @param deptIds
@@ -309,10 +266,8 @@ public class TaskServiceImpl implements TaskService {
             paramVo.setDeptIds(null);
         }
         List<TaskListVo> dataList = new ArrayList<>();
-        if (paramVo.getState() != null && paramVo.getState() != 1) {
-            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
-            dataList = taskMapper.getTaskListContainsSample(paramVo);
-        }
+        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        dataList = taskMapper.getTaskListContainsSample(paramVo);
         if(!CollectionUtils.isEmpty(dataList)){
             // 处理任务单 与信息。
             //TODO gjl添加样品状态
@@ -320,47 +275,23 @@ public class TaskServiceImpl implements TaskService {
             for (TaskListVo sampleListVo : dataList) {
                 //TODO dlc 补充任务单价格
                 if(StringUtils.isEmpty(sampleListVo.getCost())){
-                   sampleListVo.setCost("--");
-                }
-                List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
-
-                List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
-                for (SamplePrivateInfoVo samplePrivateInfoVo : sampleList) {
-                    sampleListVo.setOutward(samplePrivateInfoVo.getOutward());
-                    String state = service.findStateBySampleId(samplePrivateInfoVo.getId(), entrustEntityMapper, taskMapper);
-                    samplePrivateInfoVo.setState(state);
-                    //TODO PSH查询子原材样品信息
-                    List<SamplePrivateInfoVo> nodeSampleList1 = taskMapper.getNodeSampleList(samplePrivateInfoVo.getId());
-                    if(!CollectionUtils.isEmpty(nodeSampleList1)){
-                        nodeSampleList.addAll(nodeSampleList1);
-                    }
-                }
-                sampleList.addAll(nodeSampleList);
-                //增加关联委托单信息
-                StringBuilder correlationTask = new StringBuilder();
-                List<String> correlationTaskList = taskMapper.getCorrelationTask(sampleListVo.getTaskId());
-                if(CollectionUtils.isEmpty(correlationTaskList)){
-                    correlationTask.append("——");
-                }else{
-                    for (int i = 0; i < correlationTaskList.size(); i++) {
-                        correlationTask.append(correlationTaskList.get(i));
-                        if(i!=correlationTaskList.size()-1){
-                            correlationTask.append("\n");
-                        }
-                    }
-                }
-                sampleListVo.setCorrelationTaskCode(correlationTask.toString());
-            }
-        }
-        if (paramVo.getState() == 1) {
-            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
-            dataList = taskMapper.getTaskListTwoGreater(paramVo);
-            // 返回前端的话 sampleListVo.getSampleList() 空集合 []
-            for(TaskListVo sampleListVo:dataList){
-                //TODO dlc 补充任务单价格
-                if(StringUtils.isEmpty(sampleListVo.getCost())){
                     sampleListVo.setCost("--");
                 }
+                List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
+                List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
+                if(!CollectionUtils.isEmpty(sampleList)) {
+                    for (SamplePrivateInfoVo samplePrivateInfoVo : sampleList) {
+                        sampleListVo.setOutward(samplePrivateInfoVo.getOutward());
+                        String state = service.findStateBySampleId(samplePrivateInfoVo.getId(), entrustEntityMapper, taskMapper);
+                        samplePrivateInfoVo.setState(state);
+                        //TODO PSH查询子原材样品信息
+                        List<SamplePrivateInfoVo> nodeSampleList1 = taskMapper.getNodeSampleList(samplePrivateInfoVo.getId());
+                        if (!CollectionUtils.isEmpty(nodeSampleList1)) {
+                            nodeSampleList.addAll(nodeSampleList1);
+                        }
+                    }
+                    sampleList.addAll(nodeSampleList);
+                }
                 //增加关联委托单信息
                 StringBuilder correlationTask = new StringBuilder();
                 List<String> correlationTaskList = taskMapper.getCorrelationTask(sampleListVo.getTaskId());
@@ -375,25 +306,8 @@ public class TaskServiceImpl implements TaskService {
                     }
                 }
                 sampleListVo.setCorrelationTaskCode(correlationTask.toString());
-                if(CollectionUtils.isEmpty(sampleListVo.getSampleList())){
-                    sampleListVo.setSampleList(new ArrayList<>());
-                }
             }
         }
-//        if (dataList != null && !dataList.isEmpty()) {
-//            for (TaskListVo data : dataList) {
-//                if (data.getInspector() != null) {
-//                    String[] strings2 = data.getInspector().split(",");
-//                    StringBuilder stringBuilder = new StringBuilder();
-//                    for (int i = 0; i < strings2.length; i++) {
-//                        String[] strings3 = strings2[i].split("&");
-//                        stringBuilder.append(strings3[0]);
-//                        stringBuilder.append(",");
-//                    }
-//                    data.setInspector(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
-//                }
-//            }
-//        }
         PageInfo<TaskListVo> result = new PageInfo<>(dataList);
         return result;
     }
@@ -502,8 +416,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Boolean postGrabASingleTwo(TaskTestEntity taskTestEntity) {
-        // 抢单 并领样。
-        taskTestEntity.setState(2);
+        // state=1 （领取任务单 并领样）。
+        taskTestEntity.setState(1);
         // 根据任务单主键 获取委托单主键
         EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
         if (entrustEntity != null) {
@@ -1291,6 +1205,78 @@ public class TaskServiceImpl implements TaskService {
             out.close();
         }
         return out;
+    }
+
+    /**
+     * 查询任务列表
+     * @param paramVo
+     * @param deptIds
+     * @return
+     */
+    @Override
+    public PageInfo getTaskList(TaskListParamVo paramVo, String[] deptIds) {
+        if (deptIds != null && deptIds.length >= 1) {
+            // 根据部门id 遍历包含下级部门信息
+            List<Long> ids = new ArrayList<>();
+            for (int i = 0; i < deptIds.length; i++) {
+                ids.add(Long.valueOf(deptIds[i]));
+            }
+            paramVo.setDeptIds(ids);
+        } else {
+            paramVo.setDeptIds(null);
+        }
+        List<TaskListVo> dataList = new ArrayList<>();
+        if (paramVo.getState() != null && paramVo.getState() != 1) {
+            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+            dataList = taskMapper.getTaskListContainsSample(paramVo);
+        }
+
+        if (paramVo.getState() == 1) {
+            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+            dataList = taskMapper.getTaskListTwoGreater(paramVo);
+        }
+        if(!CollectionUtils.isEmpty(dataList)){
+            // 处理任务单 与信息。
+            //TODO gjl添加样品状态
+            EntrustServiceImpl service = new EntrustServiceImpl();
+            for (TaskListVo sampleListVo : dataList) {
+                //TODO dlc 补充任务单价格
+                if(StringUtils.isEmpty(sampleListVo.getCost())){
+                    sampleListVo.setCost("--");
+                }
+                List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
+                List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
+                if(!CollectionUtils.isEmpty(sampleList)) {
+                    for (SamplePrivateInfoVo samplePrivateInfoVo : sampleList) {
+                        sampleListVo.setOutward(samplePrivateInfoVo.getOutward());
+                        String state = service.findStateBySampleId(samplePrivateInfoVo.getId(), entrustEntityMapper, taskMapper);
+                        samplePrivateInfoVo.setState(state);
+                        //TODO PSH查询子原材样品信息
+                        List<SamplePrivateInfoVo> nodeSampleList1 = taskMapper.getNodeSampleList(samplePrivateInfoVo.getId());
+                        if (!CollectionUtils.isEmpty(nodeSampleList1)) {
+                            nodeSampleList.addAll(nodeSampleList1);
+                        }
+                    }
+                    sampleList.addAll(nodeSampleList);
+                }
+                //增加关联委托单信息
+                StringBuilder correlationTask = new StringBuilder();
+                List<String> correlationTaskList = taskMapper.getCorrelationTask(sampleListVo.getTaskId());
+                if(CollectionUtils.isEmpty(correlationTaskList)){
+                    correlationTask.append("——");
+                }else{
+                    for (int i = 0; i < correlationTaskList.size(); i++) {
+                        correlationTask.append(correlationTaskList.get(i));
+                        if(i!=correlationTaskList.size()-1){
+                            correlationTask.append("\n");
+                        }
+                    }
+                }
+                sampleListVo.setCorrelationTaskCode(correlationTask.toString());
+            }
+        }
+        PageInfo<TaskListVo> result = new PageInfo<>(dataList);
+        return result;
     }
 
     /**

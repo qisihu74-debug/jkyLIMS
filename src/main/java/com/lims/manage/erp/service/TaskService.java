@@ -51,7 +51,7 @@ public interface TaskService {
     String getDeptIds(Long userId);
 
     /**
-     * 查询任务列表——并设置分页
+     * 查询检测列表——并设置分页
      *
      * @param paramVo
      * @return
@@ -206,4 +206,12 @@ public interface TaskService {
 
 
     ZipOutputStream packagingWorkbookZip(Integer[] ids, HttpServletResponse response) throws IOException;
+
+    /**
+     * 查询任务列表——并设置分页
+     *
+     * @param paramVo
+     * @return
+     */
+    PageInfo getTaskList(TaskListParamVo paramVo, String [] deptIds);
 }

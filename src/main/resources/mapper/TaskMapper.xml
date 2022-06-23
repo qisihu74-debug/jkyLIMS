@@ -276,13 +276,7 @@
                  LEFT JOIN test_method t7 ON t5.method_id = t7.id
                  left join test_product_item t8 on t5.check_item_id = t8.check_item_id
         where t1.id = #{taskId} and t5.task_id = #{taskId}
-        <if test="deptIds!=null">
-            and t9.id in
-            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
-                #{id}
-            </foreach>
-        </if>
-        AND t5.unit_price is not null
+        and t9.id in (t1.dept_id )
     </select>
     <select id="getInstrumentEntityList" resultType="com.lims.manage.erp.entity.TestInstrumentEntity">
     SELECT
@@ -448,7 +442,7 @@
         LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
         LEFT JOIN test_team t5 ON t1.team_id = t5.id
         <trim prefix="WHERE" prefixOverrides="AND | OR ">
-            <if test="deptIds!=null">
+            <if test="deptIds!=null and inspector==null">
                 and t1.dept_id in
                 <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
                     #{id}
@@ -463,6 +457,14 @@
             <if test="state!=null">
                 and t1.state=#{state}
             </if>
+            <if test="inspector!=null and inspector!='' and deptIds!=null ">
+                and ( t1.inspector LIKE CONCAT('%',#{inspector},'%') or t1.reviewer LIKE CONCAT('%',#{reviewer},'%')
+                            or t1.dept_id in
+                            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                                #{id}
+                            </foreach>
+                )
+            </if>
         </trim>
         GROUP BY t1.id
         ORDER BY
@@ -471,7 +473,7 @@
 
     </select>
 
-    <select id="getTaskListTwoGreater" resultType="com.lims.manage.erp.vo.TaskListVo"
+    <select id="getTaskListTwoGreater" resultMap="taskSampleResultMap"
             parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT DISTINCT
         t1.id taskId,
@@ -482,6 +484,13 @@
         t1.task_price as cost,
         t4.sample_name sampleName,
         t4.product_id,
+        t4.id sampleId,
+        t4.sample_code sampeCode,
+        t4.batch_number batchNumber,
+        t4.picture,
+        t4.alias_name aliasName,
+        t4.sample_type sampleType,
+        t4.outward_describe outwardDescribe,
         t1.state,
         t1.recorder,
         t1.reviewer,

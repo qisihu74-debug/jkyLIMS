@@ -73,7 +73,6 @@ public interface TaskMapper extends BaseMapper {
 
     /**
      * 查询任务详情二次开发
-     *  2022年6月21日 检测项 单价为null 的不展示。
      * @return
      */
     TaskDetailInfoVo getTaskDetailInfoTwo(TaskListParamVo paramVo);
