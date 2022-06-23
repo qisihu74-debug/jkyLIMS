@@ -11,6 +11,7 @@ import java.util.List;
 public class TaskListVo {
     private Long taskId;//任务主键
     private String taskCode;//任务编号
+    private String orderer;//下单人
     private String correlationTaskCode;//关联任务编号
     private String inspector;
     private Integer productId;

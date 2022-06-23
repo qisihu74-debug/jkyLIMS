@@ -143,6 +143,7 @@
     <resultMap id="taskSampleResultMap" type="com.lims.manage.erp.vo.TaskListVo">
         <result property="taskId" column="taskId"></result>
         <result property="taskCode" column="taskCode"></result>
+        <result property="orderer" column="orderer"></result>
         <result property="requiredCompletionTime" column="requiredCompletionTime"></result>
         <result property="inspector" column="inspector"></result>
         <result property="cost" column="task_price"></result>
@@ -418,6 +419,7 @@
         SELECT DISTINCT
         t1.id taskId,
         t1.task_code taskCode,
+        t1.orderer,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
         t1.inspector,
         t2.count_price cost,
@@ -474,6 +476,7 @@
         SELECT DISTINCT
         t1.id taskId,
         t1.task_code taskCode,
+        t1.orderer,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
         t1.inspector,
         t1.task_price as cost,
