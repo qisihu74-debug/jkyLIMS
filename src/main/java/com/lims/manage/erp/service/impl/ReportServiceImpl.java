@@ -811,6 +811,14 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public PageInfo getSendList0623(String search, String reportType, Integer pageNum, Integer pageSize, String type,String category,Integer reportTypeStatus) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<ReportRecordEntity> list = entityMapper.getSendList0623(search, reportType, type,category,reportTypeStatus);
+        PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
+        return pageInfo;
+    }
+
+    @Override
     public Boolean isApprove(Long id) {
         String approve = entityMapper.isApprove(id);
         if ("1".equals(approve)) {

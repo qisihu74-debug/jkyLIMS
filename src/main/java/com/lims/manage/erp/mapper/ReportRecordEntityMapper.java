@@ -105,6 +105,11 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     List<ReportRecordEntity> getSendList(@Param("search") String search, @Param("reportType") String reportType,@Param("type") String type,@Param("reportTypeStatus")Integer reportTypeStatus);
+    List<ReportRecordEntity> getSendList0623(@Param("search") String search,
+                                             @Param("reportType") String reportType,
+                                             @Param("type") String type,
+                                             @Param("category") String category,
+                                             @Param("reportTypeStatus")Integer reportTypeStatus);
 
     String isApprove(Long id);
 
