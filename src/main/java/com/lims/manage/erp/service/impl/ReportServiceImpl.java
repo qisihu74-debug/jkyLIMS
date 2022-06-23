@@ -2321,12 +2321,10 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Boolean category(List<Long> ids) {
+    public Boolean category(List<SealEntity> list) {
         //设置状态和用章类型
         try {
-            for (Long id:ids) {
-                reportMapper.updateCategory(id);
-            }
+            reportMapper.updateCategory(list);
             return true;
         }catch (Exception e){
             logger.error("更新印章类型失败:{}",e);
@@ -2349,6 +2347,14 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Long getEntrustIdById(Long id) {
         return reportMapper.getEntrustIdById(id);
+    }
+
+    @Override
+    public PageInfo<ReportRecordEntity> historyList(String reportCode, String reportType, String sealType, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<ReportRecordEntity> list = reportMapper.historyList(reportCode,reportType,sealType);
+        PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
+        return pageInfo;
     }
 
 }
