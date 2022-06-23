@@ -568,4 +568,48 @@
     <select id="getDetailByEntrustId" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         select * from test_report_record where entrustment_id=#{entrustId}
     </select>
+
+    <update id="updateCategory" parameterType="com.lims.manage.erp.entity.SealEntity">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update test_report_record
+            <set>
+                category = '物理章',
+                state = '7',
+                sealType = #{item.seal_type},
+                sealer = #{item.sealer},
+                sealTime = #{item.seal_time}
+            </set>
+            where id = #{item.id}
+        </foreach>
+    </update>
+
+    <select id="historyList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+	id,
+	entrustment_id,
+	report_code,
+	sample_name,
+	required_completion_time,
+	report_url,
+	number,
+	issuer_time,
+	seal_type,
+	sealer,
+	seal_time,
+	type,
+	category
+FROM
+	test_report_record
+WHERE
+	state >= 7
+        <if test="reportCode !=null and reportCode != ''">
+            AND report_code like concat(concat('%',#{reportCode}),'%')
+        </if>
+        <if test="reportType != null and reportType != ''">
+            AND type = #{reportType}
+        </if>
+        <if test="sealType != null and sealType != ''">
+            AND category = #{sealType}
+        </if>
+    </select>
 </mapper>

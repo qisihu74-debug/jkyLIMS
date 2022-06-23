@@ -909,19 +909,13 @@ public class ReportController {
 
     /**
      * 设置物理用章
-     * @param ids
+     * @param list
      * @return
      */
-    @GetMapping("category")
-    public Result category(String ids){
-
-        if (org.apache.commons.lang.StringUtils.isEmpty(ids)){
+    @PostMapping("category")
+    public Result category(@RequestBody List<SealEntity> list){
+        if (CollectionUtils.isEmpty(list)){
             return ResultUtil.error("请选择需要操作的数据");
-        }
-        String[] split = ids.split(",");
-        List<Long> list = Lists.newArrayList();
-        for (String s:split) {
-            list.add(Long.parseLong(s));
         }
         Boolean flag = reportService.category(list);
         if (flag){
@@ -942,5 +936,21 @@ public class ReportController {
         }else{
             return ResultUtil.error("报告已发起审批，撤回报告失败!");
         }
+    }
+
+    /**
+     * 查询盖章列表
+     * @param reportCode
+     * @param reportType
+     * @param sealType
+     * @return
+     */
+    @GetMapping("historyList")
+    public Result historyList(String reportCode, String reportType, String sealType,Integer pageNum,Integer pageSize){
+        if (pageNum == null || pageSize == null){
+            return ResultUtil.error("缺少分页参数");
+        }
+        PageInfo<ReportRecordEntity> pageInfo = reportService.historyList(reportCode,reportType,sealType,pageNum,pageSize);
+        return ResultUtil.success(pageInfo);
     }
 }

@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.SealEntity;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -160,9 +161,10 @@ public interface ReportMapper {
     @Select("select report_url from test_report_record where id=#{id}")
     String getUrlById(@Param("id") Long id);
 
-    @Update("update test_report_record set category = '物理章',state = '7' where id =#{id}")
-    void updateCategory(@Param("id") Long id);
+    void updateCategory(List<SealEntity> list);
 
     @Select("select entrustment_id from test_report_record where id=#{id}")
     Long getEntrustIdById(@Param("id") Long id);
+
+    List<ReportRecordEntity> historyList(@Param("reportCode") String reportCode, @Param("reportType") String reportType, @Param("sealType") String sealType);
 }
