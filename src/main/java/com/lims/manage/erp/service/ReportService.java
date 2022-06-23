@@ -380,7 +380,7 @@ public interface ReportService {
 
     String getUrlById(Long id);
 
-    Boolean category(List<SealEntity> ids);
+    Boolean category(SealEntity ids);
 
     /**
      * 撤回報告
@@ -393,4 +393,6 @@ public interface ReportService {
     Long getEntrustIdById(Long id);
 
     PageInfo<ReportRecordEntity> historyList(String reportCode, String reportType, String sealType, Integer pageNum, Integer pageSize);
+
+    List<TestTeam> getSealer();
 }

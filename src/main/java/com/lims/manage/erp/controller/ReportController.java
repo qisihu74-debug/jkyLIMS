@@ -909,15 +909,15 @@ public class ReportController {
 
     /**
      * 设置物理用章
-     * @param list
+     * @param sealEntity
      * @return
      */
     @PostMapping("category")
-    public Result category(@RequestBody List<SealEntity> list){
-        if (CollectionUtils.isEmpty(list)){
+    public Result category(@RequestBody SealEntity sealEntity){
+        if (CollectionUtils.isEmpty(sealEntity.getId())){
             return ResultUtil.error("请选择需要操作的数据");
         }
-        Boolean flag = reportService.category(list);
+        Boolean flag = reportService.category(sealEntity);
         if (flag){
             return ResultUtil.success("操作成功！");
         }else {
@@ -952,5 +952,15 @@ public class ReportController {
         }
         PageInfo<ReportRecordEntity> pageInfo = reportService.historyList(reportCode,reportType,sealType,pageNum,pageSize);
         return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * 获取报告盖章人员
+     * @return
+     */
+    @GetMapping("getSealer")
+    public Result getSealer(){
+        List<TestTeam> list = reportService.getSealer();
+        return ResultUtil.success(list);
     }
 }

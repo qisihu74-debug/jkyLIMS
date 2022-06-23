@@ -3,6 +3,7 @@ package com.lims.manage.erp.entity;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author gjl
@@ -15,9 +16,9 @@ import java.util.Date;
 @Data
 public class SealEntity {
     /**
-     * 记录id
+     * 记录id集合
      */
-    private Long id;
+    private List<Long> id;
     /**
      * 印章类型
      */
@@ -30,4 +31,8 @@ public class SealEntity {
      * 盖章时间
      */
     private Date sealTime;
+    /**
+     * 逐渐id
+     */
+    private Long key;
 }

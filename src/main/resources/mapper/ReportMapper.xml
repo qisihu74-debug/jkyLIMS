@@ -579,7 +579,7 @@
                 sealer = #{item.sealer},
                 sealTime = #{item.seal_time}
             </set>
-            where id = #{item.id}
+            where id = #{item.key}
         </foreach>
     </update>
 
