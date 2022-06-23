@@ -222,8 +222,8 @@ public class TaskController {
             for (Long id : ids) {
                 Boolean taskStatus = taskService.getJudgmentTaskList(id);
                 if (taskStatus) {
-                    //构造修改对象，状态2==领样
-                    TaskTestEntity entity = new TaskTestEntity(id,batchReceiveTaskVo,2,currentDate);
+                    //构造修改对象，状态1==（领样/任务单领取）
+                    TaskTestEntity entity = new TaskTestEntity(id,batchReceiveTaskVo,1,currentDate);
                     batchUpdate.add(entity);
                 }else{
                     return ResultUtil.error(678, "选择的任务单中包含已领取任务单，请刷新页面后重新领取！");
@@ -296,12 +296,12 @@ public class TaskController {
             } else {
                 return ResultUtil.error("账号使用人未配置科室人员");
             }
-            return ResultUtil.success("查询任务列表成功！", taskService.getTaskListTwo(paramVo, deptIds));
+            return ResultUtil.success("查询任务列表成功！", taskService.getTaskList(paramVo, deptIds));
         }
     }
 
     /**
-     * 查询任务列表二次
+     * 查询检测列表
      * 根据科室进行展示数据
      *
      * @param paramVo

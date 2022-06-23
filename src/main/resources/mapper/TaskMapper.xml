@@ -446,7 +446,7 @@
         LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
         LEFT JOIN test_team t5 ON t1.team_id = t5.id
         <trim prefix="WHERE" prefixOverrides="AND | OR ">
-            <if test="deptIds!=null inspector==null">
+            <if test="deptIds!=null and inspector==null">
                 and t1.dept_id in
                 <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
                     #{id}
@@ -477,7 +477,7 @@
 
     </select>
 
-    <select id="getTaskListTwoGreater" resultType="com.lims.manage.erp.vo.TaskListVo"
+    <select id="getTaskListTwoGreater" resultMap="taskSampleResultMap"
             parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT DISTINCT
         t1.id taskId,
@@ -487,6 +487,13 @@
         t1.task_price as cost,
         t4.sample_name sampleName,
         t4.product_id,
+        t4.id sampleId,
+        t4.sample_code sampeCode,
+        t4.batch_number batchNumber,
+        t4.picture,
+        t4.alias_name aliasName,
+        t4.sample_type sampleType,
+        t4.outward_describe outwardDescribe,
         t1.state,
         t1.recorder,
         t1.reviewer,
