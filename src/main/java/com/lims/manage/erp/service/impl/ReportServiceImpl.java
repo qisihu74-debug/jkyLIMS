@@ -2132,7 +2132,7 @@ public class ReportServiceImpl implements ReportService {
                 for(Map.Entry<String, String> entry : map.entrySet()) {
                     if (entry.getValue() == null) {
                         //TODO
-                        entry.setValue("--");
+                        entry.setValue("——");
                     }
                     range.replaceText(entry.getKey(), entry.getValue());
                 }
