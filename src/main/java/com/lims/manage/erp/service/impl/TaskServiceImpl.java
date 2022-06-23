@@ -80,24 +80,6 @@ public class TaskServiceImpl implements TaskService {
     public TaskDetailInfoVo getTaskDetailInfoTwo(Long taskId, String[] deptIds) {
         TaskListParamVo paramVo = new TaskListParamVo();
         paramVo.setTaskId(taskId);
-//        if (deptIds != null) {
-//            // 根据部门id 遍历包含下级部门信息
-//            List<Long> ids = new ArrayList<>();
-//            for (int i = 0; i < deptIds.length; i++) {
-//                ids.add(Long.valueOf(deptIds[i]));
-//            }
-//            paramVo.setDeptIds(ids);
-//        } else {
-//            // 查询任务单 所属部门id
-//            Long deptId = taskMapper.getTaskDept(taskId);
-//            if (deptId == null) {
-//                paramVo.setDeptIds(null);
-//            } else {
-//                List<Long> ids = new ArrayList<>();
-//                ids.add(deptId);
-//                paramVo.setDeptIds(ids);
-//            }
-//        }
         // 处理 委托单的文件链接
         TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfoTwo(paramVo);
         if (taskDetailInfoVo.getFileUrl() != null) {
