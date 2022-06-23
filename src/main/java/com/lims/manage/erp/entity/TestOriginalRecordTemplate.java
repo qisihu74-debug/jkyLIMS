@@ -2,6 +2,7 @@ package com.lims.manage.erp.entity;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -30,6 +31,7 @@ public class TestOriginalRecordTemplate extends Model<TestOriginalRecordTemplate
     private Integer checkItemId;
     //原始记录
     private String fileUrl;
+    @TableField(exist = false)
     private String copyUrl;
     //是否有效1有效，0无效
     private String isAvailable;

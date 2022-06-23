@@ -24,4 +24,13 @@ public class TaskListParamVo {
     private List<Long> deptIds;
     private Integer pageNum;
     private Integer pageSize;
+
+    /**
+     * 检测人
+     */
+    private String inspector;
+    /**
+     * 复核人
+     */
+    private String reviewer;
 }

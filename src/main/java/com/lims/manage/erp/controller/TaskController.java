@@ -222,8 +222,8 @@ public class TaskController {
             for (Long id : ids) {
                 Boolean taskStatus = taskService.getJudgmentTaskList(id);
                 if (taskStatus) {
-                    //构造修改对象，状态2==领样
-                    TaskTestEntity entity = new TaskTestEntity(id,batchReceiveTaskVo,2,currentDate);
+                    //构造修改对象，状态1==（领样/任务单领取）
+                    TaskTestEntity entity = new TaskTestEntity(id,batchReceiveTaskVo,1,currentDate);
                     batchUpdate.add(entity);
                 }else{
                     return ResultUtil.error(678, "选择的任务单中包含已领取任务单，请刷新页面后重新领取！");
@@ -279,15 +279,29 @@ public class TaskController {
      */
     @RequestMapping("/getTaskList")
     public Result getTaskInfo(@RequestBody TaskListParamVo paramVo) {
-        if (paramVo == null) {
+        if (paramVo == null || paramVo.getState() == null || paramVo.getPageNum() == null || paramVo.getPageSize() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
-            return ResultUtil.success("查询任务列表成功！", taskService.getTaskList(paramVo));
+            // 验证登录人信息 和部门 存入
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            if (userInfo == null) {
+                return ResultUtil.error("token 已过期！");
+            }
+            // 根据账号 查询有可能包含多个科室 以及下级科室信息
+            String dept = taskService.getDeptIds(userInfo.getUserId());
+            // 科室id集合
+            String[] deptIds = new String[]{};
+            if (dept != null) {
+                deptIds = dept.split(",");
+            } else {
+                return ResultUtil.error("账号使用人未配置科室人员");
+            }
+            return ResultUtil.success("查询任务列表成功！", taskService.getTaskList(paramVo, deptIds));
         }
     }
 
     /**
-     * 查询任务列表二次
+     * 查询检测列表
      * 根据科室进行展示数据
      *
      * @param paramVo
@@ -313,6 +327,8 @@ public class TaskController {
             } else {
                 return ResultUtil.error("账号使用人未配置科室人员");
             }
+            paramVo.setReviewer(userInfo.getUserId().toString());
+            paramVo.setInspector(userInfo.getUserId().toString());
             return ResultUtil.success("查询任务列表成功！", taskService.getTaskListTwo(paramVo, deptIds));
         }
     }
