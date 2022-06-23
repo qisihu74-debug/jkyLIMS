@@ -12,6 +12,7 @@ import com.lims.manage.erp.vo.TestTeamVo;
 import com.lims.manage.erp.vo.TestTechnicistVo;
 import org.apache.ibatis.annotations.Param;
 import com.lims.manage.erp.entity.TestTechnicist;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 技术人员(TestTechnicistVo)表数据库访问层
@@ -39,5 +40,8 @@ int insertBatch(@Param("entities") List<TestTechnicist> entities);
 int insertOrUpdateBatch(@Param("entities") List<TestTechnicist> entities);
     IPage<TestTechnicistVo> getListPage(IPage<TestTechnicistVo> page, @Param(Constants.WRAPPER) Wrapper<TestTechnicist> queryWrapper);
     List<SysUserEntity> getUserList();
+
+    @Select("select team_id from test_technicist where user_id=#{userId}")
+    int getSealer(@Param("userId") Long userId);
 }
 

@@ -196,6 +196,7 @@ public interface ReportService {
      * @return
      */
     PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize,String type,Integer reportTypeStatus);
+    PageInfo getSendList0623(String search, String reportType, Integer pageNum, Integer pageSize,String type,String category,Integer reportTypeStatus);
 
     Boolean isApprove(Long id);
 
@@ -380,7 +381,7 @@ public interface ReportService {
 
     String getUrlById(Long id);
 
-    Boolean category(List<SealEntity> ids);
+    Boolean category(SealEntity ids);
 
     /**
      * 撤回報告
@@ -393,4 +394,6 @@ public interface ReportService {
     Long getEntrustIdById(Long id);
 
     PageInfo<ReportRecordEntity> historyList(String reportCode, String reportType, String sealType, Integer pageNum, Integer pageSize);
+
+    List<TestTeam> getSealer();
 }

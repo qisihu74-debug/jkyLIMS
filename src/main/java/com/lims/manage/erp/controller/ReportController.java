@@ -694,17 +694,20 @@ public class ReportController {
     }
 
     /**
-     * 报告邮寄
-     * 待邮寄报告列表及已发出报告历史列表查询
-     *
+     * 查询报告邮寄列表--0623
      * @param search
      * @param reportType
+     * @param pageNum
+     * @param pageSize
+     * @param type
+     * @param category
+     * @param reportTypeStatus
      * @return
      */
     @GetMapping("sendList")
-    public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type,Integer reportTypeStatus) {
+    public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type,String category,Integer reportTypeStatus) {
         logger.info("分页参数pageNum:{},pageSize:{}", pageNum, pageSize);
-        PageInfo pageInfo = reportService.getSendList(search, reportType, pageNum, pageSize, type,reportTypeStatus);
+        PageInfo pageInfo = reportService.getSendList0623(search, reportType, pageNum, pageSize, type,category,reportTypeStatus);
         return ResultUtil.success(pageInfo);
     }
 
@@ -909,15 +912,15 @@ public class ReportController {
 
     /**
      * 设置物理用章
-     * @param list
+     * @param sealEntity
      * @return
      */
     @PostMapping("category")
-    public Result category(@RequestBody List<SealEntity> list){
-        if (CollectionUtils.isEmpty(list)){
+    public Result category(@RequestBody SealEntity sealEntity){
+        if (CollectionUtils.isEmpty(sealEntity.getId())){
             return ResultUtil.error("请选择需要操作的数据");
         }
-        Boolean flag = reportService.category(list);
+        Boolean flag = reportService.category(sealEntity);
         if (flag){
             return ResultUtil.success("操作成功！");
         }else {
@@ -952,5 +955,15 @@ public class ReportController {
         }
         PageInfo<ReportRecordEntity> pageInfo = reportService.historyList(reportCode,reportType,sealType,pageNum,pageSize);
         return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * 获取报告盖章人员
+     * @return
+     */
+    @GetMapping("getSealer")
+    public Result getSealer(){
+        List<TestTeam> list = reportService.getSealer();
+        return ResultUtil.success(list);
     }
 }

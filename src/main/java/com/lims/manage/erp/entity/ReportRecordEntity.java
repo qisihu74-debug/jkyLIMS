@@ -173,6 +173,11 @@ public class ReportRecordEntity {
     private String signUrl;
 
     private Long taskId;
+    @TableField(exist = false)
+    private String entrustmentNo;
+    @TableField(exist = false)
+    private String entrustCompany;
+
 
     public ReportRecordEntity() {
     }
