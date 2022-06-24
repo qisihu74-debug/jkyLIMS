@@ -373,7 +373,7 @@
         t1.type reportTypeStatus
         FROM
         test_report_record t1 LEFT JOIN test_product t2 ON t1.sample_name = t2.product_name
-        WHERE state >=6
+        WHERE state =6
         <if test="search != null and search != ''">
             AND report_code like CONCAT('%',#{search},'%')
         </if>

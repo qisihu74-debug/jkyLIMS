@@ -26,6 +26,7 @@ import com.lims.manage.erp.mapper.TestReportQualifcationDao;
 import com.lims.manage.erp.mapper.TestReportTemplateDao;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
+import com.lims.manage.erp.mapper.TestTechnicistDao;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
@@ -132,6 +133,8 @@ public class ReportServiceImpl implements ReportService {
     private TestReportTemplateDao templateDao;
     @Autowired
     private QiYueSuoEntity qiYueSuoEntity;
+    @Autowired
+    private TestTechnicistDao testTechnicistDao;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -2329,7 +2332,16 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Boolean category(List<SealEntity> list) {
+    public Boolean category(SealEntity sealEntity) {
+        List<SealEntity> list = Lists.newArrayList();
+        for (Long id:sealEntity.getId()) {
+            SealEntity entity = new SealEntity();
+            entity.setSealer(sealEntity.getSealer());
+            entity.setSealTime(sealEntity.getSealTime());
+            entity.setSealType(sealEntity.getSealType());
+            entity.setKey(id);
+            list.add(entity);
+        }
         //设置状态和用章类型
         try {
             reportMapper.updateCategory(list);
@@ -2363,6 +2375,19 @@ public class ReportServiceImpl implements ReportService {
         List<ReportRecordEntity> list = reportMapper.historyList(reportCode,reportType,sealType);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
+    }
+
+    @Override
+    public List<TestTeam> getSealer() {
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        //校验用户id是否分配团队
+        int teamId = testTechnicistDao.getSealer(userId);
+        if (teamId > 0){
+            List<TestTeam> idsByTeamId = teamMapper.getIdsByTeamId((long) teamId);
+            return idsByTeamId;
+        }else {
+            return null;
+        }
     }
 
 }
