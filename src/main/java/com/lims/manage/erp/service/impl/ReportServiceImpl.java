@@ -85,6 +85,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -2407,6 +2408,11 @@ public class ReportServiceImpl implements ReportService {
         }
         PageHelper.startPage(pageNum,pageSize);
         List<ReportRecordEntity> list = reportMapper.historyList(reportCode,reportType,sealType,ids);
+        for (ReportRecordEntity entity:list) {
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(entity.getSealer())){
+                entity.setSealer(entity.getSealer().split("&")[0]);
+            }
+        }
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -2419,6 +2425,7 @@ public class ReportServiceImpl implements ReportService {
         Long aLong = teamMapper.getTopDepartment((long) teamId);
         if (teamId > 0){
             List<TestTeam> idsByTeamId = teamMapper.getIdsByTeamId((long) aLong);
+            idsByTeamId.removeIf(Objects::isNull);
             return idsByTeamId;
         }else {
             return null;

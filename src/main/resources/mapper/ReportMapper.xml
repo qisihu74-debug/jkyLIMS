@@ -575,9 +575,9 @@
             <set>
                 category = '物理章',
                 state = '7',
-                sealType = #{item.seal_type},
+                seal_type = #{item.sealType},
                 sealer = #{item.sealer},
-                sealTime = #{item.seal_time}
+                seal_time = #{item.sealTime}
             </set>
             where id = #{item.key}
         </foreach>
