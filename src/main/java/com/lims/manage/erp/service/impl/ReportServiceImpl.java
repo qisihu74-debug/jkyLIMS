@@ -2416,8 +2416,9 @@ public class ReportServiceImpl implements ReportService {
         Long userId = ShiroUtils.getUserInfo().getUserId();
         //校验用户id是否分配团队
         int teamId = testTechnicistDao.getSealer(userId);
+        Long aLong = teamMapper.getTopDepartment((long) teamId);
         if (teamId > 0){
-            List<TestTeam> idsByTeamId = teamMapper.getIdsByTeamId((long) teamId);
+            List<TestTeam> idsByTeamId = teamMapper.getIdsByTeamId((long) aLong);
             return idsByTeamId;
         }else {
             return null;
