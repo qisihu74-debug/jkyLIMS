@@ -18,6 +18,7 @@ import com.lims.manage.erp.vo.ReportListVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -217,8 +218,41 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public List<LabelValueVo> taskKanban(Long userId) {
-        // 根据人员id 返回团队id集合
-        List<Long> deptIds = teamMapper.getUserTeamIds(userId);
+        // 查看团队顶级部门下所属团队集合
+        List<Long> deptIds = new ArrayList<>();
+        // 4、是否有无所属科室 （验证团队与检测项是否存在）
+        boolean isDepartment = false;
+        // 获取当前用户所在科室id
+        Long department = teamMapper.getTeamIdByUid(userId);
+        if(!StringUtils.isEmpty(department)){
+            // 获取顶级部门 为空则是当前部门
+            Long topDepartment = teamMapper.getTopDepartment(department);
+            if(StringUtils.isEmpty(topDepartment)){
+                topDepartment = department;
+            }
+            // 通过顶级部门 查看团队顶级部门下所属团队集合
+            List<TeamTreeStructureEntity> deptList = teamMapper.getChirds(topDepartment);
+            for(int i=0; i<deptList.size();i++){
+                TeamTreeStructureEntity teamTreeStructureEntity  = deptList.get(i);
+                deptIds.add(teamTreeStructureEntity.getId());
+            }
+            // 该团队存在团队检测项 ： 检测项 与所属部门验证。 存在 或不存在。
+            List<TestCheckItemTeamRel> checkItemList = teamMapper.getDepartmentList(deptIds);
+            if(!CollectionUtils.isEmpty(checkItemList)){}
+            {
+                // 检测项 与所属部门验证。 存在
+                isDepartment = true;
+            }
+        }
+        /**
+         * @param deptIds
+         *  1、所属团队 ： 部门信息唯一。 deptIds.size() ==1
+         *  3、查看团队顶级部门下所属团队集合 deptIds.size()>1
+         *  4、无所属科室 deptIds =null
+         */
+
+
+
         // 输出最终拥有的菜单
         List<LabelValueVo> returnData = new ArrayList<>();
         // 获取 当前登录展示菜单。
@@ -240,8 +274,8 @@ public class HomeServiceImpl implements HomeService {
     /**
      * 通过任务看板模块栏 比对 当前用户拥有菜单列表。
      *
-     * @param menuIdList      任务看板模块栏
-     * @param strings    当前用户拥有菜单列表
+     * @param  strings    任务看板模块栏
+     * @param  menuIdList   当前用户拥有菜单列表
      * @param returnData 输出最终拥有的菜单。
      */
     void methodRenurnData(List<SysRoleFunctionParent> menuIdList, String[] strings, List<LabelValueVo> returnData) {
