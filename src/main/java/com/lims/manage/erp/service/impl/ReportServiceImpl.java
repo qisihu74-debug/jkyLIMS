@@ -631,7 +631,24 @@ public class ReportServiceImpl implements ReportService {
         if (StringUtils.isEmpty(state)) {
             state = "1";
         }
-        List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state,reportTypeStatus);
+        //每个团队看子集大团队任务产生的报告列表
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        List<Integer> ids = Lists.newArrayList();
+        //校验用户id是否分配团队
+        int teamId = testTechnicistDao.getSealer(userId);
+        if (teamId > 0) {
+            //获取顶级团队
+            Long topTeamId = teamMapper.getTopDepartment((long) teamId);
+            //获取顶级团队下的所有下级团队
+            List<TeamTreeStructureEntity> chirds = teamMapper.getChirds(topTeamId);
+            for (TeamTreeStructureEntity entity:chirds) {
+                ids.add(Integer.valueOf(entity.getId()+""));
+            }
+        }
+        if (ids.size()<=0){
+            ids = null;
+        }
+        List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state,reportTypeStatus,ids);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -2371,8 +2388,25 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo<ReportRecordEntity> historyList(String reportCode, String reportType, String sealType, Integer pageNum, Integer pageSize) {
+        //每个团队看子集大团队任务产生的报告列表
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        List<Integer> ids = Lists.newArrayList();
+        //校验用户id是否分配团队
+        int teamId = testTechnicistDao.getSealer(userId);
+        if (teamId > 0) {
+            //获取顶级团队
+            Long topTeamId = teamMapper.getTopDepartment((long) teamId);
+            //获取顶级团队下的所有下级团队
+            List<TeamTreeStructureEntity> chirds = teamMapper.getChirds(topTeamId);
+            for (TeamTreeStructureEntity entity:chirds) {
+                ids.add(Integer.valueOf(entity.getId()+""));
+            }
+        }
+        if (ids.size()<=0){
+            ids = null;
+        }
         PageHelper.startPage(pageNum,pageSize);
-        List<ReportRecordEntity> list = reportMapper.historyList(reportCode,reportType,sealType);
+        List<ReportRecordEntity> list = reportMapper.historyList(reportCode,reportType,sealType,ids);
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }

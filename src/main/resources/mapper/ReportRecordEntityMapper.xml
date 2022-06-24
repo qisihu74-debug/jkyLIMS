@@ -355,25 +355,33 @@
 
     <select id="getSealList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         SELECT
-        id,
-        entrustment_id,
-        report_code,
-        sample_name,
-        required_completion_time,
-        number,
-        issuer_time,
-        seal_type,
-        sealer,
-        seal_time,
+        t1.id,
+        t1.entrustment_id,
+        t1.report_code,
+        t1.sample_name,
+        t1.required_completion_time,
+        t1.number,
+        t1.issuer_time,
+        t1.seal_type,
+        t1.sealer,
+        t1.seal_time,
         t2.product_id,
-        qys_docment_id,
-        qys_state,
-        contract_id,
-        sign_url,
+        t1.qys_docment_id,
+        t1.qys_state,
+        t1.contract_id,
+        t1.sign_url,
         t1.type reportTypeStatus
         FROM
-        test_report_record t1 LEFT JOIN test_product t2 ON t1.sample_name = t2.product_name
-        WHERE state =6
+        test_report_record t1
+        LEFT JOIN test_product t2 ON t1.sample_name = t2.product_name
+        LEFT JOIN test_task t3 ON t1.entrustment_id = t3.entrustment_id
+        WHERE t1.state =6
+        <if test="ids != null">
+            AND t3.dept_id IN
+            <foreach collection="ids" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
         <if test="search != null and search != ''">
             AND report_code like CONCAT('%',#{search},'%')
         </if>
