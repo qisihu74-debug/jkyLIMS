@@ -558,9 +558,11 @@
             t1.report_url,
             t1.report_type,
             t1.report_time,
-            t1.addressee,
+            IFNULL(t1.report_mailing_address,t2.address) reportMailingAddress,
+            IFNULL(t1.addressee,t2.addressee) addressee,
+            IFNULL(t1.report_phone,t2.mobile) report_phone,
             t1.waybill,
-            t1.email,
+            IFNULL(t1.email,t2.mailbox) email,
             t1.report_manager
         FROM
             test_report_record t1

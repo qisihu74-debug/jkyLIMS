@@ -466,7 +466,6 @@
                 )
             </if>
         </trim>
-        GROUP BY t1.id
         ORDER BY
         t1.code desc
 
@@ -523,7 +522,6 @@
                 and t1.state !=2
             </if>
         </trim>
-        GROUP BY t1.id
         ORDER BY
         t2.entrustment_no desc,
         t1.required_completion_time desc
