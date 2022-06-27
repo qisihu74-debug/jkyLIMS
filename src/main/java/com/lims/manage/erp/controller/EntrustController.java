@@ -654,4 +654,19 @@ public class EntrustController {
         }
         return ResultUtil.success(taskSource);
     }
+
+    /**
+     * 委托是否发布
+     * @param entrustId
+     * @return
+     */
+    @GetMapping("/isPublish")
+    public Result isPublish(Long entrustId) {
+        if (entrustId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            Boolean publish = entrustService.isPublish(entrustId);
+            return ResultUtil.success(publish);
+        }
+    }
 }

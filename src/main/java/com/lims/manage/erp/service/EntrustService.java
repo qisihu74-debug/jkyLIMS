@@ -262,4 +262,11 @@ public interface EntrustService {
     Boolean addEntrustCopy(EntrustAddVo vo, MultipartFile[] file);
 
     Long checkEntrustId(Long entrustId);
+
+    /**
+     * 委托是否发布 true发布 false 未发布
+     * @param entrustId
+     * @return
+     */
+    Boolean isPublish(Long entrustId);
 }

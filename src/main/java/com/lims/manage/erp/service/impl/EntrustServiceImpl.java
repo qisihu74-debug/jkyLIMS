@@ -3026,4 +3026,13 @@ public class EntrustServiceImpl implements EntrustService {
             }
     }
 
+    @Override
+    public Boolean isPublish(Long entrustId) {
+        Integer reportStateTaskNum = entityMapper.getReportStateTaskNum(entrustId);
+        if(reportStateTaskNum > 0 ){
+            return true;
+        }
+        return false;
+    }
+
 }
