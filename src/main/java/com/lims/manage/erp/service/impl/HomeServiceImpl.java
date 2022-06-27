@@ -218,7 +218,6 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public List<LabelValueVo> taskKanban(Long userId) {
-       long startTime = System.currentTimeMillis();
         // 查看团队顶级部门下所属团队集合
         List<Long> deptIds = new ArrayList<>();
         // 是否有无所属科室 （验证团队与检测项是否存在）
@@ -261,8 +260,6 @@ public class HomeServiceImpl implements HomeService {
             // 统计看板数据。
             methodTaskKanbanData(deptIds, personalMenu,isDepartment,department);
         }
-        long endTime = System.currentTimeMillis();
-        System.out.println("用时\t"+(endTime-startTime));
         return personalMenu;
     }
 
