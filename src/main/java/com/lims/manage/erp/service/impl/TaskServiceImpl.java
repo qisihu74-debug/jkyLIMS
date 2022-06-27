@@ -508,7 +508,7 @@ public class TaskServiceImpl implements TaskService {
             {
                 if(!StringUtils.isEmpty(testTeam)){
                     LabelValueVo labelValueVo = new LabelValueVo();
-                    labelValueVo.setLabel(testTeam.getPersonName());
+                    labelValueVo.setLabel(testTeam.getName());
                     labelValueVo.setValue(testTeam.getUserId());
                     teamVos.add(labelValueVo);
                 }
