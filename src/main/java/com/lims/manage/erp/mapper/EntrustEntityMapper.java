@@ -374,13 +374,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @param state
      * @return
      */
-    @Select("SELECT\n" +
-            "\tcount( * ) \n" +
-            "FROM\n" +
-            "\ttest_entrusted_info \n" +
-            "WHERE\n" +
-            "\tstate = #{state}")
-    Integer selectCount(Integer state);
+    Integer selectCountUnallocated(@Param(value = "state") Integer state,@Param(value = "deptIds") List<Long> deptIds);
 
     /**
      * 查询该委托下所有的样品id

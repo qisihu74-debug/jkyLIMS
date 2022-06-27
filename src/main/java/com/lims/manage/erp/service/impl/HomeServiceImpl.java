@@ -220,7 +220,7 @@ public class HomeServiceImpl implements HomeService {
     public List<LabelValueVo> taskKanban(Long userId) {
         // 查看团队顶级部门下所属团队集合
         List<Long> deptIds = new ArrayList<>();
-        // 4、是否有无所属科室 （验证团队与检测项是否存在）
+        // 是否有无所属科室 （验证团队与检测项是否存在）
         boolean isDepartment = false;
         // 获取当前用户所在科室id
         Long department = teamMapper.getTeamIdByUid(userId);
@@ -238,23 +238,15 @@ public class HomeServiceImpl implements HomeService {
             }
             // 该团队存在团队检测项 ： 检测项 与所属部门验证。 存在 或不存在。
             List<TestCheckItemTeamRel> checkItemList = teamMapper.getDepartmentList(deptIds);
-            if(!CollectionUtils.isEmpty(checkItemList)){}
+            if(!CollectionUtils.isEmpty(checkItemList))
             {
                 // 检测项 与所属部门验证。 存在
                 isDepartment = true;
             }
         }
-        /**
-         * @param deptIds
-         *  1、所属团队 ： 部门信息唯一。 deptIds.size() ==1
-         *  3、查看团队顶级部门下所属团队集合 deptIds.size()>1
-         *  4、无所属科室 deptIds =null
-         */
 
-
-
-        // 输出最终拥有的菜单
-        List<LabelValueVo> returnData = new ArrayList<>();
+        // 个人拥有的菜单
+        List<LabelValueVo> personalMenu = new ArrayList<>();
         // 获取 当前登录展示菜单。
         List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userId);
         if (menuIdList.isEmpty()) {
@@ -263,12 +255,12 @@ public class HomeServiceImpl implements HomeService {
         // 设置任务看板 菜单名
         String[] strings = Const.taskKanbans;
         // 获取菜单成功！
-        methodRenurnData(menuIdList, strings, returnData);
-        if (returnData != null) {
+        methodRenurnData(menuIdList, strings, personalMenu);
+        if (personalMenu != null) {
             // 统计看板数据。
-            methodTaskKanbanData(deptIds, returnData);
+            methodTaskKanbanData(deptIds, personalMenu,isDepartment,department);
         }
-        return returnData;
+        return personalMenu;
     }
 
     /**
@@ -301,33 +293,124 @@ public class HomeServiceImpl implements HomeService {
      *
      * @param deptIds    所属部门集合
      * @param returnData 用户拥有菜单数据
+     * @param isDepartment 是否有无所属科室  （验证团队与检测项是否存在） ：true = 存在 false = B不存在
+     * @param department 获取当前用户所在科室id
      */
-    void methodTaskKanbanData(List<Long> deptIds, List<LabelValueVo> returnData) {
+    void methodTaskKanbanData(List<Long> deptIds, List<LabelValueVo> returnData,Boolean isDepartment,Long department ) {
         // 统计样品已检
 //        Object MethodData = entrustServiceImpl.setSampleList();
-        List<TestSampleEntity> sampleList = testSampleEntityMapper.selectStateCollection("0");
+//        List<TestSampleEntity> sampleList = testSampleEntityMapper.selectStateCollection("0");
 //        entrustServiceImpl.setSampleList();
-        // 统计未分配委托单
-        Integer entrustCount = entrustEntityMapper.selectCount(0);
-        if(deptIds.isEmpty()){
-            deptIds = null;
+        /**
+         * 	一： 1、所属团队 ： 部门信息唯一。
+         * 	2、该团队存在团队检测项 ： 检测项 与所属部门验证。 存在 或不存在。
+         * 	3、查看团队顶级部门下所属团队集合
+         * 	二：4、无所属科室
+         */
+        // 所属团队 ： 部门信息唯一。
+        List<Long> departmentIds = new ArrayList<>();
+        departmentIds.add(department);
+        // 获取团队下 人员id集合。
+        Set<Long> listUser = new HashSet<>();
+        Set<Long> SetDeptIds = new HashSet<>();
+        SetDeptIds.add(department);
+        List<LabelValueVo> teamVos0 = taskMapper.getMemberInformation(SetDeptIds);
+        if(CollectionUtils.isEmpty(teamVos0)){
+            for(LabelValueVo labelValueVo:teamVos0){
+                listUser.add(labelValueVo.getValue());
+            }
         }
-        // 未任务领取。
-        Integer taskCount = taskMapper.selectCount(0, deptIds);
-        // 试验检测中
-        Integer testCount = taskMapper.selectCount(3, deptIds);
-        //报告合成
-        List<ReportListVo> reportList = reportMapper.reportDownloadList(deptIds, null);
-        // ArrList 转set
-        Set<Long> setUserId  = new ReportApprovalServiceImpl().getNextIdsToTeam();
-        // 报告审核
-        List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, setUserId,null);
-        // 报告签发
-        List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, setUserId,null);
         // 报告盖章
-        List<ReportRecordEntity> sealList = reportRecordEntityMapper.getSealList(null, "1", "1",null);
+//        List<ReportRecordEntity> sealList = reportRecordEntityMapper.getSealList(null, "1", "1",null);
         // 报告邮寄
-        Integer toBeA = reportRecordEntityMapper.selectCount(7);
+//        Integer toBeA = reportRecordEntityMapper.selectCount(7);
+        // 统计未分配委托单
+        Integer entrustCount = 0;
+        // 未任务领取。
+        Integer taskCount = 0;
+        // 试验检测中
+        Integer testCount =0;
+        //报告合成
+        Integer ReportInt = 0;
+        // 报告审核
+        Integer approvalInt = 0;
+        // 报告签发
+        Integer verifyInt = 0;
+        // 报告邮寄
+        Integer toBeA = 0;
+        /**
+         * 账号拥有这个菜单（=发出报告）并且无所属科室 = 查看的待发出报告是全部的。
+         */
+        if(CollectionUtils.isEmpty(deptIds)) {
+            entrustCount  = entrustEntityMapper.selectCountUnallocated(0,null);
+            taskCount = taskMapper.selectCount(0, null);
+            testCount = taskMapper.selectCount(3, null);
+            List<ReportListVo> reportList = reportMapper.reportDownloadList(null, null);
+            if(CollectionUtils.isEmpty(reportList)){
+                ReportInt = 0;
+            }else{
+                ReportInt = reportList.size();
+            }
+            // 报告审核
+            List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, listUser,null);
+            if(CollectionUtils.isEmpty(approvalList)){
+                approvalInt = 0;
+            }else {
+                approvalInt = approvalList.size();
+            }
+            // 报告签发
+            List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, listUser,null);
+            if(CollectionUtils.isEmpty(verifyList)){
+                verifyInt = 0;
+            }else {
+                verifyInt = verifyList.size();
+            }
+            // 待发出报告
+            List<ReportRecordEntity> sendList = reportRecordEntityMapper.getSendListCount("1", null);
+            if(CollectionUtils.isEmpty(sendList)){
+                toBeA = 0;
+            }
+            else {
+                toBeA = sendList.size();
+            }
+
+        } else {
+            taskCount = taskMapper.selectCount(0, departmentIds);
+            testCount = taskMapper.selectCount(3, departmentIds);
+            List<ReportListVo> reportList = reportMapper.reportDownloadList(departmentIds, null);
+            ReportInt = reportList.size();
+            // 报告审核
+            List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, null,null);
+            if(CollectionUtils.isEmpty(approvalList)){
+                approvalInt = 0;
+            } else{
+                approvalInt = approvalList.size();
+            }
+            // 报告签发
+            List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, null,null);
+            if(CollectionUtils.isEmpty(verifyList)){
+                verifyInt = 0;
+            }else {
+                verifyInt = verifyList.size();
+            }
+            // 待发出报告
+            List<ReportRecordEntity> sendList = reportRecordEntityMapper.getSendListCount("1", deptIds);
+            if(CollectionUtils.isEmpty(sendList)){
+                toBeA = 0;
+            }
+            else {
+                toBeA = sendList.size();
+            }
+            /**
+             * 有所属团队 并且 该团队存在团队检测项
+             */
+            if(isDepartment==true){
+                entrustCount  = entrustEntityMapper.selectCountUnallocated(0,null);
+            }
+            else {
+                entrustCount = entrustEntityMapper.selectCountUnallocated(0,deptIds);
+            }
+        }
         // 循环 输出赋值。
         for (LabelValueVo data : returnData) {
             switch (data.getLabel()) {
@@ -344,17 +427,17 @@ public class HomeServiceImpl implements HomeService {
                     data.setValue(testCount.longValue());
                     break;
                 case Const.reportStr:
-                    data.setValue((long) reportList.size());
+                    data.setValue((long) ReportInt);
                     break;
                 case Const.approvalStr:
-                    data.setValue((long) approvalList.size());
+                    data.setValue((long) approvalInt);
                     break;
                 case Const.verifyStr:
-                    data.setValue((long) verifyList.size());
+                    data.setValue((long) verifyInt);
                     break;
-                case Const.sealStr:
-                    data.setValue((long) sealList.size());
-                    break;
+//                case Const.sealStr:
+//                    data.setValue((long) sealList.size());
+//                    break;
                 case Const.toBeAStr:
                     data.setValue(toBeA.longValue());
                     break;

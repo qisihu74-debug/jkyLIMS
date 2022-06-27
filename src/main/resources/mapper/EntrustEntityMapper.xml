@@ -756,4 +756,22 @@
     <delete id="deleteEntrustedSampleCheckitemRel" parameterType="java.lang.Integer">
         delete from test_entrusted_sample_checkitem_rel WHERE id = #{id}
     </delete>
+
+    <select id="selectCountUnallocated" resultType="java.lang.Integer">
+        				SELECT
+						count(*)
+						FROM
+						test_entrusted_info
+						<where>
+                            <if test="state!=null">
+                               and state = 0
+                            </if>
+                            <if test="deptIds!=null">
+                                and department in
+                                <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                                    #{id}
+                                </foreach>
+                            </if>
+                        </where>
+    </select>
 </mapper>

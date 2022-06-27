@@ -205,7 +205,18 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
      */
     public List<TreeFunction> returnListUpgrade1(Long userid) {
         List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userid);
+        int idNumber = 0;
+        for (SysRoleFunctionParent sysRoleFunctionParent:menuIdList) {
+            System.out.println("自定义菜单序号"+idNumber+"\t"+sysRoleFunctionParent);
+            idNumber+=1;
+        }
         List<TreeFunction> dataList = fuctionDao.getList();
+        int dataIds = 0;
+        for(TreeFunction treeFunction:dataList){
+            System.out.println("返回all菜单"+dataIds+"\t"+treeFunction);
+            dataIds+=1;
+        }
+        System.out.println("自定义菜单序号集"+idNumber+"\t"+dataIds+"\t"+"返回all菜单");
         if (menuIdList.isEmpty() || menuIdList.get(0) == null) {
             System.out.println("此用户不包含菜单信息，请配置");
             return null;

@@ -218,4 +218,6 @@ public interface ReportRecordEntityMapper {
 
     @Select("SELECT t1.id record_id FROM test_report_record t1 LEFT JOIN test_task t2 ON t1.entrustment_id = t2.entrustment_id where t2.id = #{taskId}")
     Long getRecordId(@Param("taskId") Long taskId);
+
+    List<ReportRecordEntity> getSendListCount(@Param("type") String type, @Param("deptIds")List<Long> deptIds);
 }
