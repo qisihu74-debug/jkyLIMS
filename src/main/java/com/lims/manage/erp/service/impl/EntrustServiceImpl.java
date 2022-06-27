@@ -588,6 +588,16 @@ public class EntrustServiceImpl implements EntrustService {
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
         }
+        // 获取当前用户所在科室id
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        Long department = teamMapper.getTeamIdByUid(userInfo.getUserId());
+        // 委托单创建人所属部门
+        if(StringUtils.isEmpty(department)){
+            basisInfo.setDepartment(null);
+        }
+        else {
+            basisInfo.setDepartment(department);
+        }
         entityMapper.insertEntrustInfo(basisInfo);
         return true;
     }
@@ -811,6 +821,19 @@ public class EntrustServiceImpl implements EntrustService {
                 testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
+        }
+        /**
+         * 6月27日 update 更新
+         */
+        // 获取当前用户所在科室id
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        Long department = teamMapper.getTeamIdByUid(userInfo.getUserId());
+        // 委托单创建人所属部门
+        if(StringUtils.isEmpty(department)){
+            basisInfo.setDepartment(null);
+        }
+        else {
+            basisInfo.setDepartment(department);
         }
         entityMapper.updateEntrustInfo(basisInfo);
         //修改样品委托单位
@@ -2923,6 +2946,16 @@ public class EntrustServiceImpl implements EntrustService {
                 testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
+        }
+        // 获取当前用户所在科室id
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        Long department = teamMapper.getTeamIdByUid(userInfo.getUserId());
+        // 委托单创建人所属部门
+        if(StringUtils.isEmpty(department)){
+            basisInfo.setDepartment(null);
+        }
+        else {
+            basisInfo.setDepartment(department);
         }
         entityMapper.insertEntrustInfo(basisInfo);
         return true;

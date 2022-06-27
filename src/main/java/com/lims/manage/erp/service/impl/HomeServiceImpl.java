@@ -218,6 +218,7 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public List<LabelValueVo> taskKanban(Long userId) {
+       long startTime = System.currentTimeMillis();
         // 查看团队顶级部门下所属团队集合
         List<Long> deptIds = new ArrayList<>();
         // 是否有无所属科室 （验证团队与检测项是否存在）
@@ -260,6 +261,8 @@ public class HomeServiceImpl implements HomeService {
             // 统计看板数据。
             methodTaskKanbanData(deptIds, personalMenu,isDepartment,department);
         }
+        long endTime = System.currentTimeMillis();
+        System.out.println("用时\t"+(endTime-startTime));
         return personalMenu;
     }
 
@@ -297,15 +300,12 @@ public class HomeServiceImpl implements HomeService {
      * @param department 获取当前用户所在科室id
      */
     void methodTaskKanbanData(List<Long> deptIds, List<LabelValueVo> returnData,Boolean isDepartment,Long department ) {
-        // 统计样品已检
-//        Object MethodData = entrustServiceImpl.setSampleList();
-//        List<TestSampleEntity> sampleList = testSampleEntityMapper.selectStateCollection("0");
-//        entrustServiceImpl.setSampleList();
         /**
-         * 	一： 1、所属团队 ： 部门信息唯一。
+         *  一：1、无所属科室 （查询时全部的）
+         * 	二： 1、所属团队 ： 部门信息唯一。
          * 	2、该团队存在团队检测项 ： 检测项 与所属部门验证。 存在 或不存在。
          * 	3、查看团队顶级部门下所属团队集合
-         * 	二：4、无所属科室
+         *
          */
         // 所属团队 ： 部门信息唯一。
         List<Long> departmentIds = new ArrayList<>();
@@ -314,16 +314,16 @@ public class HomeServiceImpl implements HomeService {
         Set<Long> listUser = new HashSet<>();
         Set<Long> SetDeptIds = new HashSet<>();
         SetDeptIds.add(department);
+        // 根据团队id 获取人员id集合
         List<LabelValueVo> teamVos0 = taskMapper.getMemberInformation(SetDeptIds);
-        if(CollectionUtils.isEmpty(teamVos0)){
+        if(!CollectionUtils.isEmpty(teamVos0)){
             for(LabelValueVo labelValueVo:teamVos0){
                 listUser.add(labelValueVo.getValue());
             }
         }
-        // 报告盖章
-//        List<ReportRecordEntity> sealList = reportRecordEntityMapper.getSealList(null, "1", "1",null);
-        // 报告邮寄
-//        Integer toBeA = reportRecordEntityMapper.selectCount(7);
+        else{
+            listUser = null;
+        }
         // 统计未分配委托单
         Integer entrustCount = 0;
         // 未任务领取。
@@ -331,15 +331,18 @@ public class HomeServiceImpl implements HomeService {
         // 试验检测中
         Integer testCount =0;
         //报告合成
-        Integer ReportInt = 0;
+        Integer reportInt = 0;
         // 报告审核
         Integer approvalInt = 0;
         // 报告签发
         Integer verifyInt = 0;
         // 报告邮寄
         Integer toBeA = 0;
+        // 待盖章：
+        Integer sealInt = 0;
         /**
-         * 账号拥有这个菜单（=发出报告）并且无所属科室 = 查看的待发出报告是全部的。
+         * deptIds = null
+         * 账号无所属科室 = 查看的待发出信息是全部的。
          */
         if(CollectionUtils.isEmpty(deptIds)) {
             entrustCount  = entrustEntityMapper.selectCountUnallocated(0,null);
@@ -347,19 +350,19 @@ public class HomeServiceImpl implements HomeService {
             testCount = taskMapper.selectCount(3, null);
             List<ReportListVo> reportList = reportMapper.reportDownloadList(null, null);
             if(CollectionUtils.isEmpty(reportList)){
-                ReportInt = 0;
+                reportInt = 0;
             }else{
-                ReportInt = reportList.size();
+                reportInt = reportList.size();
             }
             // 报告审核
-            List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, listUser,null);
+            List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, null,null);
             if(CollectionUtils.isEmpty(approvalList)){
                 approvalInt = 0;
             }else {
                 approvalInt = approvalList.size();
             }
             // 报告签发
-            List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, listUser,null);
+            List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, null,null);
             if(CollectionUtils.isEmpty(verifyList)){
                 verifyInt = 0;
             }else {
@@ -373,33 +376,54 @@ public class HomeServiceImpl implements HomeService {
             else {
                 toBeA = sendList.size();
             }
+            // 待盖章：
+            List<ReportRecordEntity> sealList  = reportRecordEntityMapper.getSealListCount(null);
+            if(CollectionUtils.isEmpty(sealList)){
+                sealInt = 0;
+            }
+            else {
+                 sealInt = sealList.size();
+            }
 
         } else {
             taskCount = taskMapper.selectCount(0, departmentIds);
             testCount = taskMapper.selectCount(3, departmentIds);
             List<ReportListVo> reportList = reportMapper.reportDownloadList(departmentIds, null);
-            ReportInt = reportList.size();
+            if(CollectionUtils.isEmpty(reportList)){
+                reportInt = 0;
+            }
+            else {
+                reportInt = reportList.size();
+            }
             // 报告审核
-            List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, null,null);
+            List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, listUser,null);
             if(CollectionUtils.isEmpty(approvalList)){
                 approvalInt = 0;
             } else{
                 approvalInt = approvalList.size();
             }
             // 报告签发
-            List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, null,null);
+            List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, listUser,null);
             if(CollectionUtils.isEmpty(verifyList)){
                 verifyInt = 0;
             }else {
                 verifyInt = verifyList.size();
             }
             // 待发出报告
-            List<ReportRecordEntity> sendList = reportRecordEntityMapper.getSendListCount("1", deptIds);
+            List<ReportRecordEntity> sendList = reportRecordEntityMapper.getSendListCount("1", departmentIds);
             if(CollectionUtils.isEmpty(sendList)){
                 toBeA = 0;
             }
             else {
                 toBeA = sendList.size();
+            }
+            // 待盖章：
+            List<ReportRecordEntity> sealList  = reportRecordEntityMapper.getSealListCount(departmentIds);
+            if(CollectionUtils.isEmpty(sealList)){
+                sealInt = 0;
+            }
+            else {
+                sealInt = sealList.size();
             }
             /**
              * 有所属团队 并且 该团队存在团队检测项
@@ -414,9 +438,6 @@ public class HomeServiceImpl implements HomeService {
         // 循环 输出赋值。
         for (LabelValueVo data : returnData) {
             switch (data.getLabel()) {
-//                case Const.sampleStr:
-//                    data.setValue((long) sampleList.size());
-//                    break;
                 case Const.entrustStr:
                     data.setValue(entrustCount.longValue());
                     break;
@@ -427,7 +448,7 @@ public class HomeServiceImpl implements HomeService {
                     data.setValue(testCount.longValue());
                     break;
                 case Const.reportStr:
-                    data.setValue((long) ReportInt);
+                    data.setValue((long) reportInt);
                     break;
                 case Const.approvalStr:
                     data.setValue((long) approvalInt);
@@ -435,9 +456,9 @@ public class HomeServiceImpl implements HomeService {
                 case Const.verifyStr:
                     data.setValue((long) verifyInt);
                     break;
-//                case Const.sealStr:
-//                    data.setValue((long) sealList.size());
-//                    break;
+                case Const.sealStr:
+                    data.setValue((long) sealInt);
+                    break;
                 case Const.toBeAStr:
                     data.setValue(toBeA.longValue());
                     break;

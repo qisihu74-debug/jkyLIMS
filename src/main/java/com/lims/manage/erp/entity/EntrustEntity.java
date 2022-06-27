@@ -244,6 +244,11 @@ public class EntrustEntity {
      */
     private String systemPrice;
 
+    /**
+    * 所属部门id
+    */
+    private Long department;
+
 
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,

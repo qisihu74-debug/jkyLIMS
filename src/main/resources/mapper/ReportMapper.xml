@@ -619,4 +619,8 @@
             AND category = #{sealType}
         </if>
     </select>
+
+    <select id="">
+
+    </select>
 </mapper>
