@@ -36,7 +36,7 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     List<ReportRecordEntity> getSealList(@Param("search") String search,
-                                         @Param("reportType") String reportType,@Param("state") String state,@Param("reportTypeStatus")Integer reportTypeStatus);
+                                         @Param("reportType") String reportType,@Param("state") String state,@Param("reportTypeStatus")Integer reportTypeStatus,@Param("ids") List<Integer> ids);
 
 
     ReportRecordEntity getDetail(Long id);

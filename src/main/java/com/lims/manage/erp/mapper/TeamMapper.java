@@ -113,7 +113,7 @@ public interface TeamMapper extends BaseMapper {
      */
     @Select("SELECT DISTINCT\n" +
             "\tuus.user_id As userId,\n" +
-            "\tuus. NAME As personName\n" +
+            "\tuus. NAME As name\n" +
             "FROM\n" +
             "\ttest_technicist tte\n" +
             "LEFT JOIN sys_user uus ON tte.user_id = uus.user_id\n" +

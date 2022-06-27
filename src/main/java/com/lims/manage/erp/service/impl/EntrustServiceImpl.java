@@ -1850,26 +1850,26 @@ public class EntrustServiceImpl implements EntrustService {
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
             // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
-            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144) {
-                List<JudgmentBasisVo> list = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
-                if (list != null && !list.isEmpty()) {
-                    // 根据检测项id 查询 默认匹配部门信息
-                    for (JudgmentBasisVo data : list) {
-//                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
-//                        data.setTestingRoom(strings.toString());
-                        data.setTestingRoom("——");
-                    }
-                    sampleEntity.setJudgmentBasisVos(list);
-//                    //根据检测项ID查询可做该检测项的科室labelvalue集合
-//                    for (JudgmentBasisVo data : list) {
-//                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
-//                        data.setTestingRoomList(testingRoomList);
-//                    }
+//            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144) {
+//                List<JudgmentBasisVo> list = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
+//                if (list != null && !list.isEmpty()) {
+//                    // 根据检测项id 查询 默认匹配部门信息
+////                    for (JudgmentBasisVo data : list) {
+//////                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
+//////                        data.setTestingRoom(strings.toString());
+////                        data.setTestingRoom("——");
+////                    }
 //                    sampleEntity.setJudgmentBasisVos(list);
-                }
-            } else {
-                sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
-            }
+////                    //根据检测项ID查询可做该检测项的科室labelvalue集合
+////                    for (JudgmentBasisVo data : list) {
+////                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
+////                        data.setTestingRoomList(testingRoomList);
+////                    }
+////                    sampleEntity.setJudgmentBasisVos(list);
+//                }
+//            } else {
+//            }
+            sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
             // 补充样品下 依据集合
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
             //补充配合比下的的样品信息
@@ -3024,6 +3024,15 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                 }
             }
+    }
+
+    @Override
+    public Boolean isPublish(Long entrustId) {
+        Integer reportStateTaskNum = entityMapper.getReportStateTaskNum(entrustId);
+        if(reportStateTaskNum > 0 ){
+            return true;
+        }
+        return false;
     }
 
 }
