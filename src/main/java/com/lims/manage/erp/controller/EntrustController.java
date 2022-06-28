@@ -363,8 +363,7 @@ public class EntrustController {
         }
         //核查委托单位、委托人、委托人联系方式、样品信息、检测项信息是否完整
         EntrustAddVo vo = entrustService.getEntrustHistoryDetail(entity.getEntrustmentId());
-        if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())
-                || StringUtils.isEmpty(vo.getEntrustPhone())) {
+        if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())) {
             return ResultUtil.error(-1, "请检查委托人信息是否完整！");
         }
         List<SampleEntity> samples = vo.getSamples();
