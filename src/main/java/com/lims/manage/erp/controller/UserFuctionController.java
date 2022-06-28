@@ -99,11 +99,13 @@ public class UserFuctionController {
     @GetMapping("getMenuDisplayNew")
     public Result getMenuDisplayNew1() {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        log.info("菜单进入获取登录人\tuserId"+userInfo.getUserId()+"\tname="+userInfo.getUsername());
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        List<TreeFunction> dataList = sysUserFuctionService.GetListUpgrade1(userInfo.getUserId());
+        List<TreeFunction> dataList = sysUserFuctionService.GetListUpgrade1(userInfo.getUserId(),userInfo.getUsername());
         if (dataList != null && dataList.size() > 0 && !dataList.isEmpty()) {
+            log.info("菜单输出获取登录人\tuserId"+userInfo.getUserId()+"\tname="+userInfo.getUsername());
             return ResultUtil.success(dataList);
         }
         return ResultUtil.error("使用人角色未配置菜单");

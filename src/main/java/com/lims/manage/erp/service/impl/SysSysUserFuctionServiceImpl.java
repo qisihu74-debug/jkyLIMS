@@ -4,7 +4,10 @@ import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.SysRoleDao;
 import com.lims.manage.erp.mapper.SysRoleFuncMenuDao;
 import com.lims.manage.erp.mapper.SysUserFuctionDao;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.SysUserFuctionService;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.SysRoleFuncMenuVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,8 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
     private SysUserFuctionDao fuctionDao;
     @Autowired
     private SysRoleFuncMenuDao sysRoleFuncMenuDao;
+    @Autowired
+    private LogManagerService logManagerService;
 
     @Override
     public List<SysFunction> getFunctionByuserId(Long userId) {
@@ -94,25 +99,18 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
     }
 
     @Override
-    public List<TreeFunction> GetListUpgrade1(Long userid) {
+    public List<TreeFunction> GetListUpgrade1(Long userid,String userName) {
 //        List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userid);
         List<TreeFunction> dataList = returnListUpgrade1(userid);
+
         if(CollectionUtils.isEmpty(dataList)){
             System.out.println("此用户不包含菜单信息，请配置");
             return null;
         }
-//        List<TreeFunction> dataList = new ArrayList<>();
-//        for(SysRoleFunctionParent sysRoleFunctionParent:menuIdList){
-//            TreeFunction treeFunction = new TreeFunction();
-//            treeFunction.setFunctionId(sysRoleFunctionParent.getFunctionId());
-//            treeFunction.setFunctionPid(sysRoleFunctionParent.getFunctionPid());
-//            treeFunction.setTreeName(sysRoleFunctionParent.getTreeName());
-//            treeFunction.setCatesFlag(false);
-//            treeFunction.setSort(sysRoleFunctionParent.getSort());
-//            dataList.add(treeFunction);
-//        }
         List<TreeFunction> bigTree = new ArrayList<>();
         for (TreeFunction treeEntity : dataList) {
+            treeEntity.setUserId(userid);
+            treeEntity.setUserName(userName);
             List children = new ArrayList<>();
             //再次遍历list，找到user的子节点
             for (TreeFunction node : dataList) {
@@ -217,18 +215,11 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
      */
     public List<TreeFunction> returnListUpgrade1(Long userid) {
         List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userid);
-        int idNumber = 0;
-        for (SysRoleFunctionParent sysRoleFunctionParent:menuIdList) {
-            System.out.println("自定义菜单序号"+idNumber+"\t"+sysRoleFunctionParent);
-            idNumber+=1;
-        }
+        //记录日志
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户(userid)="+userid+"获取菜单：" + ShiroUtils.getUserInfo().getUsername() + "用户获取菜单大小\t" +menuIdList.size()+ "成功！", Const.SYS_MANAGER_LOG, true);
         List<TreeFunction> dataList = fuctionDao.getList();
-        int dataIds = 0;
-        for(TreeFunction treeFunction:dataList){
-            System.out.println("返回all菜单"+dataIds+"\t"+treeFunction);
-            dataIds+=1;
-        }
-        System.out.println("自定义菜单序号集"+idNumber+"\t"+dataIds+"\t"+"返回all菜单");
+        //记录日志
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "获取菜单全部：" + ShiroUtils.getUserInfo().getUsername() + "用户获取菜单大小\t" +dataList.size()+ "成功！", Const.SYS_MANAGER_LOG, true);
         if (menuIdList.isEmpty() || menuIdList.get(0) == null) {
             System.out.println("此用户不包含菜单信息，请配置");
             return null;
