@@ -56,7 +56,7 @@ public interface TaskService {
      * @param paramVo
      * @return
      */
-    PageInfo getTaskListTwo(TaskListParamVo paramVo, String [] deptIds);
+    PagingToolVo getTaskListTwo(TaskListParamVo paramVo, String [] deptIds);
 
     /**
      * 查询领样列表
@@ -213,5 +213,5 @@ public interface TaskService {
      * @param paramVo
      * @return
      */
-    PageInfo getTaskList(TaskListParamVo paramVo, String [] deptIds);
+    PagingToolVo getTaskList(TaskListParamVo paramVo, String [] deptIds);
 }
