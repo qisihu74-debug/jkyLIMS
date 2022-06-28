@@ -95,21 +95,22 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
 
     @Override
     public List<TreeFunction> GetListUpgrade1(Long userid) {
-        List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userid);
-        if(CollectionUtils.isEmpty(menuIdList)){
+//        List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userid);
+        List<TreeFunction> dataList = returnListUpgrade1(userid);
+        if(CollectionUtils.isEmpty(dataList)){
             System.out.println("此用户不包含菜单信息，请配置");
             return null;
         }
-        List<TreeFunction> dataList = new ArrayList<>();
-        for(SysRoleFunctionParent sysRoleFunctionParent:menuIdList){
-            TreeFunction treeFunction = new TreeFunction();
-            treeFunction.setFunctionId(sysRoleFunctionParent.getFunctionId());
-            treeFunction.setFunctionPid(sysRoleFunctionParent.getFunctionPid());
-            treeFunction.setTreeName(sysRoleFunctionParent.getTreeName());
-            treeFunction.setCatesFlag(false);
-            treeFunction.setSort(sysRoleFunctionParent.getSort());
-            dataList.add(treeFunction);
-        }
+//        List<TreeFunction> dataList = new ArrayList<>();
+//        for(SysRoleFunctionParent sysRoleFunctionParent:menuIdList){
+//            TreeFunction treeFunction = new TreeFunction();
+//            treeFunction.setFunctionId(sysRoleFunctionParent.getFunctionId());
+//            treeFunction.setFunctionPid(sysRoleFunctionParent.getFunctionPid());
+//            treeFunction.setTreeName(sysRoleFunctionParent.getTreeName());
+//            treeFunction.setCatesFlag(false);
+//            treeFunction.setSort(sysRoleFunctionParent.getSort());
+//            dataList.add(treeFunction);
+//        }
         List<TreeFunction> bigTree = new ArrayList<>();
         for (TreeFunction treeEntity : dataList) {
             List children = new ArrayList<>();
