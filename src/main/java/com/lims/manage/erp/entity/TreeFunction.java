@@ -17,4 +17,6 @@ public class TreeFunction {
     private Integer sort;
     private boolean catesFlag;
     private List Children;
+    private Long userId;
+    private String userName;
 }

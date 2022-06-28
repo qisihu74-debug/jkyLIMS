@@ -39,7 +39,7 @@ public interface SysUserFuctionService {
      * @param userid
      * @return
      */
-    List<TreeFunction> GetListUpgrade1(Long userid);
+    List<TreeFunction> GetListUpgrade1(Long userid,String userName);
 
     /**
      * 查询角色现有权限
