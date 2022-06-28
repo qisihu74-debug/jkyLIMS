@@ -64,4 +64,8 @@ ALTER TABLE `test_report_record_detail`
 ALTER TABLE `test_report_record_detail`
     ADD COLUMN `task_id`  bigint COMMENT '任务ID' AFTER `origin_url`;
 
+--  test_entrusted_info表增加委托单创建人所属部门
+ALTER TABLE `test_entrusted_info`
+    ADD COLUMN `department`  int DEFAULT NULL COMMENT '委托单创建人所属部门' AFTER `system_price`;
+
 

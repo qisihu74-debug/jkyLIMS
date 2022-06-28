@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TeamTreeStructureEntity;
+import com.lims.manage.erp.entity.TestCheckItemTeamRel;
 import com.lims.manage.erp.entity.TestTeam;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -186,5 +187,10 @@ public interface TeamMapper extends BaseMapper {
             "WHERE\n" +
             " tb1.id != #{deptId}")
     Long getTopDepartment(Long deptId);
+
+    /**
+     * 该团队存在团队检测项 ： 检测项 与所属部门验证。 存在 或不存在
+     */
+    List<TestCheckItemTeamRel> getDepartmentList(@Param("deptIds")List<Long> deptIds);
 
 }

@@ -63,4 +63,22 @@
                 WHERE
                     del_flag = 0
     </select>
+
+    <select id="getDepartmentList" resultType="com.lims.manage.erp.entity.TestCheckItemTeamRel">
+        SELECT
+        id,
+        check_item_id,
+        team_id
+        FROM
+        test_check_item_team_rel
+        <where>
+            <if test="deptIds!=null">
+                team_id in
+                <foreach collection="deptIds" item="id" index="index" open="(" close = ")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        limit 1
+    </select>
 </mapper>

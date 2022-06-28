@@ -18,6 +18,7 @@ import com.lims.manage.erp.vo.ReportListVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -217,10 +218,35 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public List<LabelValueVo> taskKanban(Long userId) {
-        // 根据人员id 返回团队id集合
-        List<Long> deptIds = teamMapper.getUserTeamIds(userId);
-        // 输出最终拥有的菜单
-        List<LabelValueVo> returnData = new ArrayList<>();
+        // 查看团队顶级部门下所属团队集合
+        List<Long> deptIds = new ArrayList<>();
+        // 是否有无所属科室 （验证团队与检测项是否存在）
+        boolean isDepartment = false;
+        // 获取当前用户所在科室id
+        Long department = teamMapper.getTeamIdByUid(userId);
+        if(!StringUtils.isEmpty(department)){
+            // 获取顶级部门 为空则是当前部门
+            Long topDepartment = teamMapper.getTopDepartment(department);
+            if(StringUtils.isEmpty(topDepartment)){
+                topDepartment = department;
+            }
+            // 通过顶级部门 查看团队顶级部门下所属团队集合
+            List<TeamTreeStructureEntity> deptList = teamMapper.getChirds(topDepartment);
+            for(int i=0; i<deptList.size();i++){
+                TeamTreeStructureEntity teamTreeStructureEntity  = deptList.get(i);
+                deptIds.add(teamTreeStructureEntity.getId());
+            }
+            // 该团队存在团队检测项 ： 检测项 与所属部门验证。 存在 或不存在。
+            List<TestCheckItemTeamRel> checkItemList = teamMapper.getDepartmentList(deptIds);
+            if(!CollectionUtils.isEmpty(checkItemList))
+            {
+                // 检测项 与所属部门验证。 存在
+                isDepartment = true;
+            }
+        }
+
+        // 个人拥有的菜单
+        List<LabelValueVo> personalMenu = new ArrayList<>();
         // 获取 当前登录展示菜单。
         List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userId);
         if (menuIdList.isEmpty()) {
@@ -229,19 +255,19 @@ public class HomeServiceImpl implements HomeService {
         // 设置任务看板 菜单名
         String[] strings = Const.taskKanbans;
         // 获取菜单成功！
-        methodRenurnData(menuIdList, strings, returnData);
-        if (returnData != null) {
+        methodRenurnData(menuIdList, strings, personalMenu);
+        if (personalMenu != null) {
             // 统计看板数据。
-            methodTaskKanbanData(deptIds, returnData);
+            methodTaskKanbanData(deptIds, personalMenu,isDepartment,department);
         }
-        return returnData;
+        return personalMenu;
     }
 
     /**
      * 通过任务看板模块栏 比对 当前用户拥有菜单列表。
      *
-     * @param menuIdList      任务看板模块栏
-     * @param strings    当前用户拥有菜单列表
+     * @param  strings    任务看板模块栏
+     * @param  menuIdList   当前用户拥有菜单列表
      * @param returnData 输出最终拥有的菜单。
      */
     void methodRenurnData(List<SysRoleFunctionParent> menuIdList, String[] strings, List<LabelValueVo> returnData) {
@@ -267,39 +293,148 @@ public class HomeServiceImpl implements HomeService {
      *
      * @param deptIds    所属部门集合
      * @param returnData 用户拥有菜单数据
+     * @param isDepartment 是否有无所属科室  （验证团队与检测项是否存在） ：true = 存在 false = B不存在
+     * @param department 获取当前用户所在科室id
      */
-    void methodTaskKanbanData(List<Long> deptIds, List<LabelValueVo> returnData) {
-        // 统计样品已检
-//        Object MethodData = entrustServiceImpl.setSampleList();
-        List<TestSampleEntity> sampleList = testSampleEntityMapper.selectStateCollection("0");
-//        entrustServiceImpl.setSampleList();
-        // 统计未分配委托单
-        Integer entrustCount = entrustEntityMapper.selectCount(0);
-        if(deptIds.isEmpty()){
-            deptIds = null;
+    void methodTaskKanbanData(List<Long> deptIds, List<LabelValueVo> returnData,Boolean isDepartment,Long department ) {
+        /**
+         *  一：1、无所属科室 （查询时全部的）
+         * 	二： 1、所属团队 ： 部门信息唯一。
+         * 	2、该团队存在团队检测项 ： 检测项 与所属部门验证。 存在 或不存在。
+         * 	3、查看团队顶级部门下所属团队集合
+         *
+         */
+        // 所属团队 ： 部门信息唯一。
+        List<Long> departmentIds = new ArrayList<>();
+        departmentIds.add(department);
+        // 获取团队下 人员id集合。
+        Set<Long> listUser = new HashSet<>();
+        Set<Long> SetDeptIds = new HashSet<>();
+        SetDeptIds.add(department);
+        // 根据团队id 获取人员id集合
+        List<LabelValueVo> teamVos0 = taskMapper.getMemberInformation(SetDeptIds);
+        if(!CollectionUtils.isEmpty(teamVos0)){
+            for(LabelValueVo labelValueVo:teamVos0){
+                listUser.add(labelValueVo.getValue());
+            }
         }
+        else{
+            listUser = null;
+        }
+        // 统计未分配委托单
+        Integer entrustCount = 0;
         // 未任务领取。
-        Integer taskCount = taskMapper.selectCount(0, deptIds);
+        Integer taskCount = 0;
         // 试验检测中
-        Integer testCount = taskMapper.selectCount(3, deptIds);
+        Integer testCount =0;
         //报告合成
-        List<ReportListVo> reportList = reportMapper.reportDownloadList(deptIds, null);
-        // ArrList 转set
-        Set<Long> setUserId  = new ReportApprovalServiceImpl().getNextIdsToTeam();
+        Integer reportInt = 0;
         // 报告审核
-        List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, setUserId,null);
+        Integer approvalInt = 0;
         // 报告签发
-        List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, setUserId,null);
-        // 报告盖章
-        List<ReportRecordEntity> sealList = reportRecordEntityMapper.getSealList(null, "1", "1",null,null);
+        Integer verifyInt = 0;
         // 报告邮寄
-        Integer toBeA = reportRecordEntityMapper.selectCount(7);
+        Integer toBeA = 0;
+        // 待盖章：
+        Integer sealInt = 0;
+        /**
+         * deptIds = null
+         * 账号无所属科室 = 查看的待发出信息是全部的。
+         */
+        if(CollectionUtils.isEmpty(deptIds)) {
+            entrustCount  = entrustEntityMapper.selectCountUnallocated(0,null);
+            taskCount = taskMapper.selectCount(0, null);
+            testCount = taskMapper.selectCount(3, null);
+            List<ReportListVo> reportList = reportMapper.reportDownloadList(null, null);
+            if(CollectionUtils.isEmpty(reportList)){
+                reportInt = 0;
+            }else{
+                reportInt = reportList.size();
+            }
+            // 报告审核
+            List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, null,null);
+            if(CollectionUtils.isEmpty(approvalList)){
+                approvalInt = 0;
+            }else {
+                approvalInt = approvalList.size();
+            }
+            // 报告签发
+            List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, null,null);
+            if(CollectionUtils.isEmpty(verifyList)){
+                verifyInt = 0;
+            }else {
+                verifyInt = verifyList.size();
+            }
+            // 待发出报告
+            List<ReportRecordEntity> sendList = reportRecordEntityMapper.getSendListCount("1", null);
+            if(CollectionUtils.isEmpty(sendList)){
+                toBeA = 0;
+            }
+            else {
+                toBeA = sendList.size();
+            }
+            // 待盖章：
+            List<ReportRecordEntity> sealList  = reportRecordEntityMapper.getSealListCount(null);
+            if(CollectionUtils.isEmpty(sealList)){
+                sealInt = 0;
+            }
+            else {
+                 sealInt = sealList.size();
+            }
+
+        } else {
+            taskCount = taskMapper.selectCount(0, departmentIds);
+            testCount = taskMapper.selectCount(3, departmentIds);
+            List<ReportListVo> reportList = reportMapper.reportDownloadList(departmentIds, null);
+            if(CollectionUtils.isEmpty(reportList)){
+                reportInt = 0;
+            }
+            else {
+                reportInt = reportList.size();
+            }
+            // 报告审核
+            List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, listUser,null);
+            if(CollectionUtils.isEmpty(approvalList)){
+                approvalInt = 0;
+            } else{
+                approvalInt = approvalList.size();
+            }
+            // 报告签发
+            List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, listUser,null);
+            if(CollectionUtils.isEmpty(verifyList)){
+                verifyInt = 0;
+            }else {
+                verifyInt = verifyList.size();
+            }
+            // 待发出报告
+            List<ReportRecordEntity> sendList = reportRecordEntityMapper.getSendListCount("1", departmentIds);
+            if(CollectionUtils.isEmpty(sendList)){
+                toBeA = 0;
+            }
+            else {
+                toBeA = sendList.size();
+            }
+            // 待盖章：
+            List<ReportRecordEntity> sealList  = reportRecordEntityMapper.getSealListCount(departmentIds);
+            if(CollectionUtils.isEmpty(sealList)){
+                sealInt = 0;
+            }
+            else {
+                sealInt = sealList.size();
+            }
+            /**
+             * 有所属团队 并且 该团队存在团队检测项
+             */
+            if(isDepartment==true){
+                entrustCount  = entrustEntityMapper.selectCountUnallocated(0,null);
+            }
+            else {
+                entrustCount = entrustEntityMapper.selectCountUnallocated(0,deptIds);
+            }
+        }
         // 循环 输出赋值。
         for (LabelValueVo data : returnData) {
             switch (data.getLabel()) {
-//                case Const.sampleStr:
-//                    data.setValue((long) sampleList.size());
-//                    break;
                 case Const.entrustStr:
                     data.setValue(entrustCount.longValue());
                     break;
@@ -310,16 +445,16 @@ public class HomeServiceImpl implements HomeService {
                     data.setValue(testCount.longValue());
                     break;
                 case Const.reportStr:
-                    data.setValue((long) reportList.size());
+                    data.setValue((long) reportInt);
                     break;
                 case Const.approvalStr:
-                    data.setValue((long) approvalList.size());
+                    data.setValue((long) approvalInt);
                     break;
                 case Const.verifyStr:
-                    data.setValue((long) verifyList.size());
+                    data.setValue((long) verifyInt);
                     break;
                 case Const.sealStr:
-                    data.setValue((long) sealList.size());
+                    data.setValue((long) sealInt);
                     break;
                 case Const.toBeAStr:
                     data.setValue(toBeA.longValue());

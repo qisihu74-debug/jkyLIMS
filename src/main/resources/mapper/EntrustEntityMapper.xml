@@ -439,7 +439,8 @@
                                         task_source,
                                         discount,
                                         actual_price,
-                                        system_price)
+                                        system_price,
+                                        department)
         values (#{id},
                 #{entrustmentNo},
                 #{entrustType},
@@ -488,7 +489,8 @@
                 #{taskSource},
                 #{discount},
                 #{actualPrice},
-                #{systemPrice})
+                #{systemPrice},
+                #{department})
 
     </insert>
     <select id="GetDelegateInformation" resultType="String">
@@ -558,6 +560,7 @@
             <if test="discount != null and discount!=''">discount=#{discount},</if>
             <if test="actualPrice != null and actualPrice!=''">actual_price=#{actualPrice},</if>
             <if test="systemPrice != null and systemPrice!=''">system_price=#{systemPrice},</if>
+            <if test="department != null">department=#{department},</if>
         </trim>
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
             <if test="id!=null">
@@ -756,4 +759,22 @@
     <delete id="deleteEntrustedSampleCheckitemRel" parameterType="java.lang.Integer">
         delete from test_entrusted_sample_checkitem_rel WHERE id = #{id}
     </delete>
+
+    <select id="selectCountUnallocated" resultType="java.lang.Integer">
+        				SELECT
+						count(*)
+						FROM
+						test_entrusted_info
+						<where>
+                            <if test="state!=null">
+                               and state = 0
+                            </if>
+                            <if test="deptIds!=null">
+                                and department in
+                                <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                                    #{id}
+                                </foreach>
+                            </if>
+                        </where>
+    </select>
 </mapper>

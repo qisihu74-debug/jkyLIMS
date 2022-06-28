@@ -21,10 +21,13 @@
         test_report_record
         WHERE
         report_complete_time is not NULL
-        and state =3 and verifyer_id in
-        <foreach collection="list" item="verifyer_id" index="index" open="(" close = ")" separator=",">
-            #{verifyer_id}
-        </foreach>
+        and state =3
+             <if test="list!=null">
+                 and verifyer_id in
+                 <foreach collection="list" item="verifyer_id" index="index" open="(" close = ")" separator=",">
+                     #{verifyer_id}
+                 </foreach>
+             </if>
             <if test="search!=null and search!=''">
                 and report_code like CONCAT('%',#{search},'%')
             </if>
@@ -211,10 +214,13 @@
         FROM
         test_report_record
         WHERE  verifyer_time is not NULL
-            and  state = 4 and issuer_id in
-        <foreach collection="list" item="issuer_id" index="index" open="(" close = ")" separator=",">
-            #{issuer_id}
-        </foreach>
+            and  state = 4
+        <if test="list!=null">
+             and issuer_id in
+             <foreach collection="list" item="issuer_id" index="index" open="(" close = ")" separator=",">
+                 #{issuer_id}
+             </foreach>
+        </if>
         <if test="search!=null and search!=''">
             and task_code like CONCAT('%',#{search},'%')
         </if>

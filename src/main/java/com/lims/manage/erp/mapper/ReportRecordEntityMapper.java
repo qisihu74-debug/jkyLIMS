@@ -218,4 +218,21 @@ public interface ReportRecordEntityMapper {
 
     @Select("SELECT t1.id record_id FROM test_report_record t1 LEFT JOIN test_task t2 ON t1.entrustment_id = t2.entrustment_id where t2.id = #{taskId}")
     Long getRecordId(@Param("taskId") Long taskId);
+
+    /**
+     * 待发出报告列表
+     * @param type
+     * @param deptIds
+     * @return
+     */
+    List<ReportRecordEntity> getSendListCount(@Param("type") String type, @Param("deptIds")List<Long> deptIds);
+
+    /**
+     * 待盖章、已盖章列表查询统计
+     * @param ids
+     * @return
+     */
+    List<ReportRecordEntity> getSealListCount(@Param("ids") List<Long> ids);
+
+
 }
