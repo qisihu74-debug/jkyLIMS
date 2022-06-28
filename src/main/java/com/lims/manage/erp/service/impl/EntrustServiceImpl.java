@@ -1903,9 +1903,52 @@ public class EntrustServiceImpl implements EntrustService {
         entrustAddVo.setSamples(sampleCollection);
         entrustAddVo.setNodeSample(nodeSample);
         //查询当前委托任务信息
-        List<TaskProgressVo> taskProgressList = taskMapper.getTaskStateByEntrustId(entrustmentId);
+        List<TaskProgressVo> taskProgressList = dealTaskState(entrustmentId);
         entrustAddVo.setTaskProgressList(taskProgressList);
         return entrustAddVo;
+    }
+
+    /**
+     * 处理任务进度展示信息
+     * @param entrustmentId
+     * @return
+     */
+    private List<TaskProgressVo> dealTaskState(Long entrustmentId){
+        List<TaskProgressVo> taskProgressList = Lists.newArrayList();
+        taskProgressList = taskMapper.getTaskStateByEntrustId(entrustmentId);
+        if(!CollectionUtils.isEmpty(taskProgressList)){
+            for (TaskProgressVo taskProgressVo : taskProgressList) {
+                Integer state = taskProgressVo.getState();
+                if (state == 3) {
+                    taskProgressVo.setState(2);
+                } else if (state == 4) {
+                    taskProgressVo.setState(3);
+                } else if (state == 6) {
+                    taskProgressVo.setState(4);
+                }
+                List<TaskProgressStateVo> stateVoList = Lists.newArrayList();
+                for (int j = 0; j <= 4; j++) {
+                    if (j == 0) {
+                        TaskProgressStateVo vo = new TaskProgressStateVo("任务发布", taskProgressVo.getOrderTime());
+                        stateVoList.add(vo);
+                    } else if (j == 1) {
+                        TaskProgressStateVo vo = new TaskProgressStateVo("任务领取", taskProgressVo.getReceiveTime());
+                        stateVoList.add(vo);
+                    } else if (j == 2) {
+                        TaskProgressStateVo vo = new TaskProgressStateVo("试验开始", taskProgressVo.getStartDetectionTime());
+                        stateVoList.add(vo);
+                    } else if (j == 3) {
+                        TaskProgressStateVo vo = new TaskProgressStateVo("试验完成", taskProgressVo.getEndDetectionTime());
+                        stateVoList.add(vo);
+                    } else if (j == 4) {
+                        TaskProgressStateVo vo = new TaskProgressStateVo("复核完成", taskProgressVo.getReviewTime());
+                        stateVoList.add(vo);
+                    }
+                }
+                taskProgressVo.setStateVoList(stateVoList);
+            }
+        }
+        return taskProgressList;
     }
 
     /**

@@ -899,6 +899,17 @@
     </select>
 
     <select id="getTaskStateByEntrustId" resultType="com.lims.manage.erp.vo.TaskProgressVo" >
-        SELECT task_code,state FROM test_task where entrustment_id = #{entrustmentId}
+        SELECT
+            task_code,
+            state,
+            order_time,
+            receive_time,
+            start_detection_time,
+            end_detection_time,
+            review_time
+        FROM
+            test_task
+        WHERE
+            entrustment_id = #{entrustmentId}
     </select>
 </mapper>
