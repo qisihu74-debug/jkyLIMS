@@ -2069,8 +2069,8 @@ public class ReportServiceImpl implements ReportService {
         rows.get(2).getCell(2).setText(totalPage+"");
         rows.get(12).getCell(2).setText(reportRecordEntity.getSampleName());
         rows.get(13).getCell(2).setText(entrustAddVo.getEntrustCompany());
-        rows.get(14).getCell(1).setText(entrustAddVo.getProjectPart());
-        rows.get(15).getCell(2).setText(entrustAddVo.getCheckPurpose());
+        //rows.get(14).getCell(1).setText(entrustAddVo.getProjectPart());
+        rows.get(14).getCell(2).setText(entrustAddVo.getCheckPurpose());
     }
 
     @Override
