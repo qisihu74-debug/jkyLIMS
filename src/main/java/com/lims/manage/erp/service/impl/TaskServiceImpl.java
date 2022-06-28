@@ -255,7 +255,7 @@ public class TaskServiceImpl implements TaskService {
      * @return
      */
     @Override
-    public PageInfo getTaskListTwo(TaskListParamVo paramVo, String[] deptIds) {
+    public PagingToolVo getTaskListTwo(TaskListParamVo paramVo, String[] deptIds) {
 
         if (deptIds != null && deptIds.length >= 1) {
             // 根据部门id 遍历包含下级部门信息
@@ -267,51 +267,65 @@ public class TaskServiceImpl implements TaskService {
         } else {
             paramVo.setDeptIds(null);
         }
-        List<TaskListVo> dataList = new ArrayList<>();
-        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
-        dataList = taskMapper.getTaskListContainsSample(paramVo);
-        if(!CollectionUtils.isEmpty(dataList)){
-            // 处理任务单 与信息。
-            //TODO gjl添加样品状态
-            EntrustServiceImpl service = new EntrustServiceImpl();
-            for (TaskListVo sampleListVo : dataList) {
-                //TODO dlc 补充任务单价格
-                if(StringUtils.isEmpty(sampleListVo.getCost())){
-                    sampleListVo.setCost("--");
-                }
-                List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
-                List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
-                if(!CollectionUtils.isEmpty(sampleList)) {
-                    for (SamplePrivateInfoVo samplePrivateInfoVo : sampleList) {
-                        sampleListVo.setOutward(samplePrivateInfoVo.getOutward());
-                        String state = service.findStateBySampleId(samplePrivateInfoVo.getId(), entrustEntityMapper, taskMapper);
-                        samplePrivateInfoVo.setState(state);
-                        //TODO PSH查询子原材样品信息
-                        List<SamplePrivateInfoVo> nodeSampleList1 = taskMapper.getNodeSampleList(samplePrivateInfoVo.getId());
-                        if (!CollectionUtils.isEmpty(nodeSampleList1)) {
-                            nodeSampleList.addAll(nodeSampleList1);
-                        }
-                    }
-                    sampleList.addAll(nodeSampleList);
-                }
-                //增加关联委托单信息
-                StringBuilder correlationTask = new StringBuilder();
-                List<String> correlationTaskList = taskMapper.getCorrelationTask(sampleListVo.getTaskId());
-                if(CollectionUtils.isEmpty(correlationTaskList)){
-                    correlationTask.append("——");
-                }else{
-                    for (int i = 0; i < correlationTaskList.size(); i++) {
-                        correlationTask.append(correlationTaskList.get(i));
-                        if(i!=correlationTaskList.size()-1){
-                            correlationTask.append("\n");
-                        }
-                    }
-                }
-                sampleListVo.setCorrelationTaskCode(correlationTask.toString());
+        List<TaskListVo> personList = new ArrayList<>();
+//        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        personList = taskMapper.getTaskListContainsSample(paramVo);
+        // 手动分页
+        Integer pageNum =  paramVo.getPageNum();
+        Integer pageSize = paramVo.getPageSize();
+        PagingToolVo pagingVo = new PagingToolVo();
+        if(pageNum>0&&pageSize>0) {
+            // 总条数
+            pagingVo.setTotal(personList.size());
+            // 开始
+            pagingVo.setPageNum(pageNum);
+            // 页码
+            pagingVo.setPageSize(pageSize);
+            // 当前页展示数量
+            Integer size = personList.size() - (pageNum*pageSize); // 实际返回页码展示数量
+            if(size>0){
+                pagingVo.setSize(pageSize);
             }
+            else {
+                size =pageSize -( pageNum*pageSize - personList.size());
+                pagingVo.setSize(size>0?size:0);
+            }
+            // 总页数
+            pagingVo.setPages(personList.size() / pageSize);
+            // 开始行数
+            pagingVo.setStartRow(personList.size() / pageSize / pageNum);
+            // 结束行数
+            pagingVo.setEndRow(personList.size() / pageSize);
+            List<TaskListVo> subList = Lists.newArrayList();
+            if (!CollectionUtils.isEmpty(personList)) {
+                try {
+                    if (personList.size() > 10 && personList.size() / 10 >= pageNum) {
+                        subList = personList.subList((pageNum - 1) * pageSize, pageNum * pageSize);
+                    } else {
+                        subList = personList.subList((pageNum - 1) * pageSize, personList.size());
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    subList = personList;
+                } catch (IllegalArgumentException e) {
+                    subList = personList.subList(0, personList.size());
+                } finally {
+                    // 返回数据
+                    pagingVo.setList(subList);
+                }
+            }
+            // 分页后 逻辑处理
+            methodManualPages((List<TaskListVo>) pagingVo.getList());
+            return pagingVo;
         }
-        PageInfo<TaskListVo> result = new PageInfo<>(dataList);
-        return result;
+        else {
+            if (!CollectionUtils.isEmpty(personList)) {
+                pagingVo.setList(personList);
+            }
+            // 分页后 逻辑处理
+            methodManualPages((List<TaskListVo>) pagingVo.getList());
+            return pagingVo;
+        }
+
     }
 
     @Override
@@ -589,10 +603,10 @@ public class TaskServiceImpl implements TaskService {
            }
             //委托单是否留样。
            if( taskListVo.getIssueReport()!=null&&taskListVo.getIssueReport().equals("是")){
-                testMap.put("issueReport", "\t☑退还\t\t□弃样");
+                testMap.put("issueReport", "\t√退还\t\t弃样");
             }
             else{
-                testMap.put("issueReport", "\t□退还\t\t☑弃样");
+                testMap.put("issueReport", "\t退还\t\t√弃样");
             }
             //解析替换文本段落对象
 //            PoiConfig.changeText(doc, testMap);
@@ -759,7 +773,7 @@ public class TaskServiceImpl implements TaskService {
                 }
 
             }
-        if(j==2){
+/*        if(j==2){
             // 获取委托单印章
             if (taskDetailInfoVo.getSealType() != null) {
                 String[] sealTypes = taskDetailInfoVo.getSealType().split(",");
@@ -798,7 +812,7 @@ public class TaskServiceImpl implements TaskService {
             else{
                 rows.get(8).getTableCells().get(1).setText("□综合甲级□CMA□CNAS");
             }
-            }
+            }*/
         }
         return doc;
     }
@@ -1244,7 +1258,7 @@ public class TaskServiceImpl implements TaskService {
      * @return
      */
     @Override
-    public PageInfo getTaskList(TaskListParamVo paramVo, String[] deptIds) {
+    public PagingToolVo getTaskList(TaskListParamVo paramVo, String[] deptIds) {
         if (deptIds != null && deptIds.length >= 1) {
             // 根据部门id 遍历包含下级部门信息
             List<Long> ids = new ArrayList<>();
@@ -1255,16 +1269,92 @@ public class TaskServiceImpl implements TaskService {
         } else {
             paramVo.setDeptIds(null);
         }
-        List<TaskListVo> dataList = new ArrayList<>();
+        List<TaskListVo> personList = new ArrayList<>();
         if (paramVo.getState() != null && paramVo.getState() != 1) {
-            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
-            dataList = taskMapper.getTaskListContainsSample(paramVo);
+//            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+            personList = taskMapper.getTaskListContainsSample(paramVo);
         }
 
         if (paramVo.getState() == 1) {
-            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
-            dataList = taskMapper.getTaskListTwoGreater(paramVo);
+//            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+            personList = taskMapper.getTaskListTwoGreater(paramVo);
         }
+        // 手动分页
+       Integer pageNum =  paramVo.getPageNum();
+        Integer pageSize = paramVo.getPageSize();
+        PagingToolVo pagingVo = new PagingToolVo();
+        if(pageNum>0&&pageSize>0) {
+            // 总条数
+            pagingVo.setTotal(personList.size());
+            // 开始
+            pagingVo.setPageNum(pageNum);
+            // 页码
+            pagingVo.setPageSize(pageSize);
+            // 当前页展示数量
+            Integer size =  personList.size() - (pageNum*pageSize); // 实际返回页码展示数量
+            if(size>0){
+                pagingVo.setSize(pageSize);
+            }
+            else {
+                size =pageSize -( pageNum*pageSize - personList.size());
+                pagingVo.setSize(size>0?size:0);
+            }
+            // 总页数
+            pagingVo.setPages(personList.size() / pageSize);
+            // 开始行数
+            pagingVo.setStartRow(personList.size() / pageSize / pageNum);
+            // 结束行数
+            pagingVo.setEndRow(personList.size() / pageSize);
+            List<TaskListVo> subList = Lists.newArrayList();
+            if (!CollectionUtils.isEmpty(personList)) {
+                try {
+                    if (personList.size() > 10 && personList.size() / 10 >= pageNum) {
+                        subList = personList.subList((pageNum - 1) * pageSize, pageNum * pageSize);
+                    } else {
+                        subList = personList.subList((pageNum - 1) * pageSize, personList.size());
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    subList = personList;
+                } catch (IllegalArgumentException e) {
+                    subList = personList.subList(0, personList.size());
+                } finally {
+                    // 返回数据
+                    pagingVo.setList(subList);
+                }
+            }
+            // 分页后 逻辑处理
+            methodManualPages((List<TaskListVo>) pagingVo.getList());
+            return pagingVo;
+        }
+        else {
+            if (!CollectionUtils.isEmpty(personList)) {
+                pagingVo.setList(personList);
+            }
+            // 分页后 逻辑处理
+            methodManualPages((List<TaskListVo>) pagingVo.getList());
+            return pagingVo;
+        }
+
+    }
+
+    /**
+     * 如果原始记录文件不为空 塞数据
+     */
+    public Workbook methodPlugTheData(String originalTemplate,Map<String, OriginalRecordDataVo> result,HttpServletResponse response) throws InvalidFormatException {
+        String[] split = originalTemplate.split("/");
+        String[] split1 = split[4].split("\\?");
+        XLSTransformer transformer = new XLSTransformer();
+        InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
+        org.apache.poi.ss.usermodel.Workbook workbook = null;
+        workbook = transformer.transformXLS(fileStream, result);
+        return workbook;
+    }
+
+    /**
+     * 手动分页后 针对分页后数据 进行业务处理
+     * @param dataList
+     */
+    public void methodManualPages(List<TaskListVo> dataList){
         if(!CollectionUtils.isEmpty(dataList)){
             // 处理任务单 与信息。
             //TODO gjl添加样品状态
@@ -1305,20 +1395,5 @@ public class TaskServiceImpl implements TaskService {
                 sampleListVo.setCorrelationTaskCode(correlationTask.toString());
             }
         }
-        PageInfo<TaskListVo> result = new PageInfo<>(dataList);
-        return result;
-    }
-
-    /**
-     * 如果原始记录文件不为空 塞数据
-     */
-    public Workbook methodPlugTheData(String originalTemplate,Map<String, OriginalRecordDataVo> result,HttpServletResponse response) throws InvalidFormatException {
-        String[] split = originalTemplate.split("/");
-        String[] split1 = split[4].split("\\?");
-        XLSTransformer transformer = new XLSTransformer();
-        InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
-        org.apache.poi.ss.usermodel.Workbook workbook = null;
-        workbook = transformer.transformXLS(fileStream, result);
-        return workbook;
     }
 }
