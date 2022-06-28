@@ -1879,6 +1879,9 @@ public class EntrustServiceImpl implements EntrustService {
         }
         entrustAddVo.setSamples(sampleCollection);
         entrustAddVo.setNodeSample(nodeSample);
+        //查询当前委托任务信息
+        List<TaskProgressVo> taskProgressList = taskMapper.getTaskStateByEntrustId(entrustmentId);
+        entrustAddVo.setTaskProgressList(taskProgressList);
         return entrustAddVo;
     }
 

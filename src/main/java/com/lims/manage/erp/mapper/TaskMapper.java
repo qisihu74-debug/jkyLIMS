@@ -397,4 +397,11 @@ public interface TaskMapper extends BaseMapper {
 
     @Select("select MAX(end_detection_time) from test_task where entrustment_id=#{id}")
     Date getEndTime(Long id);
+
+    /**
+     * 查询委托下任务进度
+     * @param entrustmentId
+     * @return
+     */
+    List<TaskProgressVo> getTaskStateByEntrustId(Long entrustmentId);
 }
