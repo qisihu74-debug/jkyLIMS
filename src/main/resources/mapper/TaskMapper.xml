@@ -897,4 +897,8 @@
             </if>
             and t2.file_url is not NULL
     </select>
+
+    <select id="getTaskStateByEntrustId" resultType="com.lims.manage.erp.vo.TaskProgressVo" >
+        SELECT task_code,state FROM test_task where entrustment_id = #{entrustmentId}
+    </select>
 </mapper>

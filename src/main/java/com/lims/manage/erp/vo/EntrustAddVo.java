@@ -251,5 +251,9 @@ public class EntrustAddVo {
      * 应收价格
      */
     private String systemPrice;
+    /**
+     * 任务进度集合
+     */
+    List<TaskProgressVo> taskProgressList;
 
 }
