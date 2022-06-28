@@ -9,6 +9,7 @@ import com.lims.manage.erp.vo.SysRoleFuncMenuVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -94,10 +95,20 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
 
     @Override
     public List<TreeFunction> GetListUpgrade1(Long userid) {
-        List<TreeFunction> dataList = returnListUpgrade1(userid);
-        if (dataList == null || dataList.isEmpty()) {
+        List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userid);
+        if(CollectionUtils.isEmpty(menuIdList)){
             System.out.println("此用户不包含菜单信息，请配置");
             return null;
+        }
+        List<TreeFunction> dataList = new ArrayList<>();
+        for(SysRoleFunctionParent sysRoleFunctionParent:menuIdList){
+            TreeFunction treeFunction = new TreeFunction();
+            treeFunction.setFunctionId(sysRoleFunctionParent.getFunctionId());
+            treeFunction.setFunctionPid(sysRoleFunctionParent.getFunctionPid());
+            treeFunction.setTreeName(sysRoleFunctionParent.getTreeName());
+            treeFunction.setCatesFlag(false);
+            treeFunction.setSort(sysRoleFunctionParent.getSort());
+            dataList.add(treeFunction);
         }
         List<TreeFunction> bigTree = new ArrayList<>();
         for (TreeFunction treeEntity : dataList) {
@@ -199,7 +210,7 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
 
     /**
      * 1、用户拥有 多个角色 2、多个角色下 展示具体菜单项ID
-     *
+     * 暂时废弃 6月28 误删（测试菜单详情处理）
      * @param userid
      * @return
      */

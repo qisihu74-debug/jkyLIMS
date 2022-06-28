@@ -237,11 +237,13 @@ public class HomeServiceImpl implements HomeService {
                 deptIds.add(teamTreeStructureEntity.getId());
             }
             // 该团队存在团队检测项 ： 检测项 与所属部门验证。 存在 或不存在。
-            List<TestCheckItemTeamRel> checkItemList = teamMapper.getDepartmentList(deptIds);
-            if(!CollectionUtils.isEmpty(checkItemList))
-            {
-                // 检测项 与所属部门验证。 存在
-                isDepartment = true;
+            if(!CollectionUtils.isEmpty(deptIds)&&deptIds.size()>0){
+                List<TestCheckItemTeamRel> checkItemList = teamMapper.getDepartmentList(deptIds);
+                if(!CollectionUtils.isEmpty(checkItemList))
+                {
+                    // 检测项 与所属部门验证。 存在
+                    isDepartment = true;
+                }
             }
         }
 

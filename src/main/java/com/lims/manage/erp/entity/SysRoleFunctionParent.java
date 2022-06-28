@@ -21,4 +21,8 @@ public class SysRoleFunctionParent extends SysRoleFunction {
      * 菜单名——— 任务看板名
      */
     private String kanbanName;
+    /**
+     * 序号
+     */
+    private Integer sort;
 }
