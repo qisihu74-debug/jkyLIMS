@@ -597,7 +597,8 @@
         t1.sealer,
         t1.seal_time,
         t1.type,
-        t1.category
+        t1.category,
+        t1.contract_id
         FROM
         test_report_record t1
         LEFT JOIN test_task t3 ON t1.entrustment_id = t3.entrustment_id
