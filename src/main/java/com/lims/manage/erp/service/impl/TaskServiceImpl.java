@@ -700,15 +700,12 @@ public class TaskServiceImpl implements TaskService {
                 if (!StringUtils.isEmpty(taskDetailInfoVo.getJudgmentBasis())) {
                     String[] arrays = taskDetailInfoVo.getJudgmentBasis().split(",");
                     Set<String> set = new HashSet<>();
-                    Integer removeNumber = 0;
                     for (int i = 0; i < arrays.length; i++) {
                         set.add(arrays[i]);
                         set.add(",");
-                        removeNumber += 1;
                     }
-                    set.remove(removeNumber);
                     StringBuilder stringBuilder1 = new StringBuilder();
-                    for(int x=0; x<set.toArray().length; x++){
+                    for(int x=0; x<set.toArray().length-1; x++){
                         stringBuilder1.append(set.toArray()[x]);
                     }
                     rows.get(1).getTableCells().get(5).setText(stringBuilder1.toString());
@@ -1071,7 +1068,7 @@ public class TaskServiceImpl implements TaskService {
                 taskTestEntity.setId(testTaskId);
                 taskTestEntity.setState(6);
                 // 任务单 复核成功 记录复核时间。
-                taskTestEntity.setReviewTime(new Date(DateUtil.getDayStartMs(System.currentTimeMillis())));
+                taskTestEntity.setReviewTime(new Date(System.currentTimeMillis()));
                 taskMapper.updateTestTask(taskTestEntity);
                 return "任务单复核成功";
             }
@@ -1202,7 +1199,7 @@ public class TaskServiceImpl implements TaskService {
             taskTestEntity.setId(taskStatsVo.getTaskId());
             taskTestEntity.setState(6);
             // 任务单 复核成功 记录复核时间。
-            taskTestEntity.setReviewTime(new Date(DateUtil.getDayStartMs(System.currentTimeMillis())));
+            taskTestEntity.setReviewTime(new Date(System.currentTimeMillis()));
             taskMapper.updateTestTask(taskTestEntity);
             return "任务单复核成功";
         }
