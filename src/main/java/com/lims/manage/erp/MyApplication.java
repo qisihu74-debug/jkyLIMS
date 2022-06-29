@@ -114,9 +114,9 @@ public class MyApplication extends SpringBootServletInitializer {
     public MultipartConfigElement multipartConfigElement() {
         MultipartConfigFactory factory = new MultipartConfigFactory();
         //文件最大
-        factory.setMaxFileSize("10240KB"); //KB,MB
+        factory.setMaxFileSize("40960KB"); //KB,MB
         /// 设置总上传数据总大小
-        factory.setMaxRequestSize("102400KB");
+        factory.setMaxRequestSize("409600KB");
         return factory.createMultipartConfig();
     }
 }
