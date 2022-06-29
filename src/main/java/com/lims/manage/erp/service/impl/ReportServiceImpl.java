@@ -597,7 +597,7 @@ public class ReportServiceImpl implements ReportService {
             reportRecordEntity.setId(recordId);
             reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
             //设置为最终报告
-            reportRecordEntity.setType(0);
+            reportRecordEntity.setType(0+"");
             //修改任务报告状态
             taskMapper.updateReportStatus(vo.getReportComplete(), vo.getTaskId());
             int insert = recordEntityMapper.insert(reportRecordEntity);
@@ -643,7 +643,7 @@ public class ReportServiceImpl implements ReportService {
         reportRecordEntity.setId(recordId);
         reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
         //设置为中间报告
-        reportRecordEntity.setType(1);
+        reportRecordEntity.setType(1+"");
 //        //修改任务报告状态
 //        taskMapper.updateReportStatus(vo.getReportComplete(), vo.getTaskId());
         int insert = recordEntityMapper.insert(reportRecordEntity);
@@ -2438,6 +2438,11 @@ public class ReportServiceImpl implements ReportService {
         for (ReportRecordEntity entity:list) {
             if (org.apache.commons.lang.StringUtils.isNotEmpty(entity.getSealer())){
                 entity.setSealer(entity.getSealer().split("&")[0]);
+            }
+            if ("0".equals(entity.getType())){
+                entity.setType("最终报告");
+            }else {
+                entity.setType("中间报告");
             }
         }
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);

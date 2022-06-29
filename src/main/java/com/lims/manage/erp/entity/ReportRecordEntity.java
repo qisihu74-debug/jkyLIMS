@@ -214,7 +214,7 @@ public class ReportRecordEntity {
     /**
      * 报告类型 （0最终报告,1中间报告）
      */
-    private Integer type;
+    private String type;
 
     /**
      * 印章分类，PHYSICS(物理章),ELECTRONIC(电子章)
