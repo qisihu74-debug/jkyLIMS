@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import com.github.pagehelper.PageHelper;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.SysRoleDao;
 import com.lims.manage.erp.mapper.SysRoleFuncMenuDao;
@@ -100,6 +101,7 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
 
     @Override
     public List<TreeFunction> GetListUpgrade1(Long userid,String userName) {
+        PageHelper.clearPage();
 //        List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userid);
         List<TreeFunction> dataList = returnListUpgrade1(userid);
 
@@ -214,6 +216,7 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
      * @return
      */
     public List<TreeFunction> returnListUpgrade1(Long userid) {
+        PageHelper.clearPage();
         List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userid);
         //记录日志
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户(userid)="+userid+"获取菜单：" + ShiroUtils.getUserInfo().getUsername() + "用户获取菜单大小\t" +menuIdList.size()+ "成功！", Const.SYS_MANAGER_LOG, true);
