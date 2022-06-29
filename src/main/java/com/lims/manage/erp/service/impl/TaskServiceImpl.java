@@ -1071,7 +1071,7 @@ public class TaskServiceImpl implements TaskService {
                 taskTestEntity.setId(testTaskId);
                 taskTestEntity.setState(6);
                 // 任务单 复核成功 记录复核时间。
-                taskTestEntity.setReviewTime(new Date(DateUtil.getDayStartMs(System.currentTimeMillis())));
+                taskTestEntity.setReviewTime(new Date(System.currentTimeMillis()));
                 taskMapper.updateTestTask(taskTestEntity);
                 return "任务单复核成功";
             }
@@ -1202,7 +1202,7 @@ public class TaskServiceImpl implements TaskService {
             taskTestEntity.setId(taskStatsVo.getTaskId());
             taskTestEntity.setState(6);
             // 任务单 复核成功 记录复核时间。
-            taskTestEntity.setReviewTime(new Date(DateUtil.getDayStartMs(System.currentTimeMillis())));
+            taskTestEntity.setReviewTime(new Date(System.currentTimeMillis()));
             taskMapper.updateTestTask(taskTestEntity);
             return "任务单复核成功";
         }
