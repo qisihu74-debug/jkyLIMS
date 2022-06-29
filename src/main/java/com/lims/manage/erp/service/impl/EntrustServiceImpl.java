@@ -68,6 +68,8 @@ public class EntrustServiceImpl implements EntrustService {
     @Autowired
     private ReportRecordDetailEntityMapper reportRecordDetailEntityMapper;
     @Autowired
+    private ReportRecordEntityMapper recordEntityMapper;
+    @Autowired
     private TestSampleEntityService testSampleEntityService;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
@@ -1905,12 +1907,27 @@ public class EntrustServiceImpl implements EntrustService {
         //查询当前委托任务信息
         List<TaskProgressVo> taskProgressList = dealTaskState(entrustmentId);
         entrustAddVo.setTaskProgressList(taskProgressList);
+        //查询当前委托报告信息
+        ReportProgressVo reportProgressVo = dealReportState(entrustmentId);
+        entrustAddVo.setReportProgress(reportProgressVo);
         return entrustAddVo;
     }
 
     /**
      * 处理任务进度展示信息
      * @param entrustmentId
+     * --数据库存放的状态
+     * 0：任务发布
+     * 1：任务领取
+     * 3：试验开始
+     * 4：实验完成
+     * 6：复核完成
+     *--转换成页面所需状态
+     * 0：任务发布
+     * 1：任务领取
+     * 2：试验开始
+     * 3：实验完成
+     * 4：复核完成
      * @return
      */
     private List<TaskProgressVo> dealTaskState(Long entrustmentId){
@@ -1950,6 +1967,74 @@ public class EntrustServiceImpl implements EntrustService {
         }
         return taskProgressList;
     }
+
+    /**
+     * 处理报告进度展示信息
+     * @param entrustmentId
+     * @return
+     */
+    private ReportProgressVo dealReportState(Long entrustmentId){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        ReportProgressVo result;
+        ReportRecordEntity reportRecordEntity = recordEntityMapper.selectByEntrustId(entrustmentId);
+        if(reportRecordEntity == null){
+            result = null;
+        }else{
+            Integer state = Integer.parseInt(reportRecordEntity.getState());
+            if(state == 0 || state == 2){
+                reportRecordEntity.setState("0");
+            }else if(state == 3){//报告合成
+                reportRecordEntity.setState("1");
+            }else if(state == 4){
+                reportRecordEntity.setState("2");
+            }else if(state == 6){
+                reportRecordEntity.setState("3");
+            }else if(state == 7){
+                reportRecordEntity.setState("4");
+            }else if(state == 8){
+                reportRecordEntity.setState("5");
+            }
+            result = new ReportProgressVo(reportRecordEntity.getReportCode(),Integer.parseInt(reportRecordEntity.getState()));
+            List<ReportProgressStateVo> reportProgressStateList = Lists.newArrayList();
+            for (int i = 0; i <=5 ; i++) {
+                if(i == 0){
+                    ReportProgressStateVo vo = new ReportProgressStateVo();
+                    vo.setTitle("报告制作中");
+                    vo.setTime(reportRecordEntity.getReportCompleteTime());
+                    reportProgressStateList.add(vo);
+                }else if(i == 1){
+                    ReportProgressStateVo vo = new ReportProgressStateVo();
+                    vo.setTitle("报告合成");
+                    vo.setTime(reportRecordEntity.getReportCompleteTime());
+                    reportProgressStateList.add(vo);
+                }else if(i == 2){
+                    ReportProgressStateVo vo = new ReportProgressStateVo();
+                    vo.setTitle("审核完成");
+                    vo.setTime(reportRecordEntity.getVerifyerTime());
+                    reportProgressStateList.add(vo);
+                }else if(i == 3){
+                    ReportProgressStateVo vo = new ReportProgressStateVo();
+                    vo.setTitle("签发完成");
+                    vo.setTime(reportRecordEntity.getIssuerTime());
+                    reportProgressStateList.add(vo);
+                }else if(i == 4){
+                    ReportProgressStateVo vo = new ReportProgressStateVo();
+                    vo.setTitle("盖章完成");
+                    vo.setTime(reportRecordEntity.getSealTime());
+                    reportProgressStateList.add(vo);
+                }else if(i == 5){
+                    ReportProgressStateVo vo = new ReportProgressStateVo();
+                    vo.setTitle("报告发出");
+                    vo.setTime(reportRecordEntity.getOperateTime());
+                    reportProgressStateList.add(vo);
+                }
+            }
+            result.setReportProgressStateList(reportProgressStateList);
+        }
+        return result;
+    }
+
+
 
     /**
      * 再来一单（复制委托单详情）

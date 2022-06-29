@@ -255,5 +255,9 @@ public class EntrustAddVo {
      * 任务进度集合
      */
     List<TaskProgressVo> taskProgressList;
+    /**
+     * 报告进度
+     */
+    ReportProgressVo reportProgress;
 
 }
