@@ -556,8 +556,8 @@ public class EntrustServiceImpl implements EntrustService {
         // 通过委托单id 获取公司名称。
         basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(), 1));
         // 通过委托单位和类型 查看联系人和手机号是否存在
-        TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
-        if (basisInfo.getEntrustCompany() != null && basisInfo.getEntrustPeople() != null && basisInfo.getEntrustPhone() != null) {
+        if (!StringUtils.isEmpty(basisInfo.getEntrustCompany()) && !StringUtils.isEmpty(basisInfo.getEntrustPeople()) && !StringUtils.isEmpty(basisInfo.getEntrustPhone())) {
+            TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
             testCompanyJsonEntity.setCompanyName(basisInfo.getEntrustCompany());
             testCompanyJsonEntity.setContacts(basisInfo.getEntrustPeople());
             testCompanyJsonEntity.setContactWay(basisInfo.getEntrustPhone());
@@ -574,10 +574,13 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         // 通过见证单位和类型 查看联系人 （手机号可以不填）
-        if (basisInfo.getWitnessUint() != null && basisInfo.getWitnessPerson() != null) {
+        if (!StringUtils.isEmpty(basisInfo.getWitnessUint()) && !StringUtils.isEmpty(basisInfo.getWitnessPerson())) {
+            TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
             testCompanyJsonEntity.setCompanyName(basisInfo.getWitnessUint());
             testCompanyJsonEntity.setContacts(basisInfo.getWitnessPerson());
-            testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
+            if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())){
+                testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
+            }
             testCompanyJsonEntity.setType("2");
             String WitnessUintstr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (WitnessUintstr == null) {
@@ -586,7 +589,9 @@ public class EntrustServiceImpl implements EntrustService {
                 TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
                 testCustomerEntity.setCompanyId(companyId);
                 testCustomerEntity.setContacts(basisInfo.getWitnessPerson());
-                testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
+                if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())){
+                    testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
+                }
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
         }
@@ -811,7 +816,9 @@ public class EntrustServiceImpl implements EntrustService {
             TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
             testCompanyJsonEntity.setCompanyName(basisInfo.getWitnessUint());
             testCompanyJsonEntity.setContacts(basisInfo.getWitnessPerson());
-            testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
+            if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())) {
+                testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
+            }
             testCompanyJsonEntity.setType("2");
             String WitnessUintstr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (WitnessUintstr == null) {
@@ -820,7 +827,9 @@ public class EntrustServiceImpl implements EntrustService {
                 TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
                 testCustomerEntity.setCompanyId(companyId);
                 testCustomerEntity.setContacts(basisInfo.getWitnessPerson());
-                testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
+                if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())) {
+                    testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
+                }
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
         }
@@ -3065,7 +3074,9 @@ public class EntrustServiceImpl implements EntrustService {
             TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
             testCompanyJsonEntity.setCompanyName(basisInfo.getWitnessUint());
             testCompanyJsonEntity.setContacts(basisInfo.getWitnessPerson());
-            testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
+            if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())) {
+                testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
+            }
             testCompanyJsonEntity.setType("2");
             String WitnessUintstr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (WitnessUintstr == null) {
@@ -3074,7 +3085,9 @@ public class EntrustServiceImpl implements EntrustService {
                 TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
                 testCustomerEntity.setCompanyId(companyId);
                 testCustomerEntity.setContacts(basisInfo.getWitnessPerson());
-                testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
+                if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())){
+                    testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
+                }
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
         }
