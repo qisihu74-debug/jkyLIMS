@@ -2014,7 +2014,7 @@ public class EntrustServiceImpl implements EntrustService {
                 }else if(i == 1){
                     ReportProgressStateVo vo = new ReportProgressStateVo();
                     vo.setTitle("报告合成");
-                    vo.setTime(reportRecordEntity.getReportCompleteTime());
+                    vo.setTime(reportRecordEntity.getCombineTime());
                     reportProgressStateList.add(vo);
                 }else if(i == 2){
                     ReportProgressStateVo vo = new ReportProgressStateVo();

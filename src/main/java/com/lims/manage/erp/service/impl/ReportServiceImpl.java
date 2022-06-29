@@ -1137,7 +1137,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         //更新签名
-        reportMapper.updateVerAndIss(reportCode, verifyer, issuer, verifyerId, issuerId);
+        reportMapper.updateVerAndIss(reportCode, verifyer, issuer, verifyerId,new Date(System.currentTimeMillis()), issuerId);
         //设置签名信息
         String url1 = "";
         try {

@@ -177,6 +177,10 @@ public class ReportRecordEntity {
     private String entrustmentNo;
     @TableField(exist = false)
     private String entrustCompany;
+    /**
+     * 报告合并时间
+     */
+    private Date combineTime;
 
 
     public ReportRecordEntity() {

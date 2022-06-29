@@ -28,6 +28,7 @@
             <arg column="addressee" jdbcType="VARCHAR" javaType="java.lang.String"/>
             <arg column="waybill" jdbcType="VARCHAR" javaType="java.lang.String"/>
             <arg column="operate_time" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="combine_time" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
         </constructor>
     </resultMap>
     <sql id="Base_Column_List">
@@ -36,7 +37,7 @@
     state, number, report_type, verifyer_time, issuer_time, seal_type, apply_reason,
     issu_reason, verifyer, issuer, applicant, sealer, seal_time, report_manager,
     report_time, addressee, waybill, operate_time,email,report_phone,report_mailing_address,
-    report_complete_time,seal_url
+    report_complete_time,seal_url,combine_time
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -440,6 +441,7 @@
             report_code,
             state,
             report_complete_time,
+            combine_time,
             verifyer_time,
             issuer_time,
             seal_time,

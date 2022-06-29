@@ -18,6 +18,10 @@ public class ReportNodeVo {
      */
     private String reportCompleteTime;
     /**
+     * 报告合并时间
+     */
+    private String combineTime;
+    /**
      * 审批时间
      */
     private String verifyerTime;

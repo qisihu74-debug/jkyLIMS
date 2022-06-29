@@ -123,9 +123,9 @@ public interface ReportMapper {
                    @Param("now")Date now,@Param("applicant") String applicant);
 
     @Update("update test_report_record set verifyer=#{verifyer},issuer=#{issuer}," +
-            "verifyer_id=#{verifyerId},issuer_id=#{issuerId} where entrustment_id=#{entrustId}")
+            "verifyer_id=#{verifyerId},issuer_id=#{issuerId},combine_time=#{combineTime}} where entrustment_id=#{entrustId}")
     void updateVerAndIss(@Param("entrustId") String reportCode, @Param("verifyer") String verifyer, @Param("issuer") String issuer,
-                   @Param("verifyerId") Long verifyerId, @Param("issuerId") Long issuerId);
+                   @Param("verifyerId") Long verifyerId,@Param("combineTime") Date combineTime, @Param("issuerId") Long issuerId);
 
     /**
      * 根据报告编号获取信息

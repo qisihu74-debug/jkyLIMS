@@ -67,5 +67,8 @@ ALTER TABLE `test_report_record_detail`
 --  test_entrusted_info表增加委托单创建人所属部门
 ALTER TABLE `test_entrusted_info`
     ADD COLUMN `department`  int DEFAULT NULL COMMENT '委托单创建人所属部门' AFTER `system_price`;
+--增加报告合并时间
+ALTER TABLE `test_report_record`
+    ADD COLUMN `combine_time`  datetime DEFAULT NULL COMMENT '报告合并时间' AFTER `category`;
 
 
