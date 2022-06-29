@@ -700,15 +700,12 @@ public class TaskServiceImpl implements TaskService {
                 if (!StringUtils.isEmpty(taskDetailInfoVo.getJudgmentBasis())) {
                     String[] arrays = taskDetailInfoVo.getJudgmentBasis().split(",");
                     Set<String> set = new HashSet<>();
-                    Integer removeNumber = 0;
                     for (int i = 0; i < arrays.length; i++) {
                         set.add(arrays[i]);
                         set.add(",");
-                        removeNumber += 1;
                     }
-                    set.remove(removeNumber);
                     StringBuilder stringBuilder1 = new StringBuilder();
-                    for(int x=0; x<set.toArray().length; x++){
+                    for(int x=0; x<set.toArray().length-1; x++){
                         stringBuilder1.append(set.toArray()[x]);
                     }
                     rows.get(1).getTableCells().get(5).setText(stringBuilder1.toString());
