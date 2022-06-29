@@ -75,7 +75,8 @@ public class TestDetectionImpl implements TestDetectionService {
             // 任务单状态 == 实验中
             taskTestEntity.setState(3);
             //任务单 开始试验时间 年月日
-            taskTestEntity.setStartDetectionTime(new Date(DateUtil.getDayStartMs(System.currentTimeMillis())));
+//            taskTestEntity.setStartDetectionTime(new Date(DateUtil.getDayStartMs(System.currentTimeMillis())));
+            taskTestEntity.setStartDetectionTime(new Date(System.currentTimeMillis()));
             taskMapper.updateTestTask(taskTestEntity);
             // 根据任务单主键 获取委托单主键
             EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
@@ -205,7 +206,8 @@ public class TestDetectionImpl implements TestDetectionService {
         // 任务单 == 4 试验完成
         taskTestEntity.setState(4);
         // 任务单试验完成时间 只展示年月日
-        taskTestEntity.setEndDetectionTime(new Date(DateUtil.getDayStartMs(System.currentTimeMillis())));
+//        taskTestEntity.setEndDetectionTime(new Date(DateUtil.getDayStartMs(System.currentTimeMillis())));
+        taskTestEntity.setEndDetectionTime(new Date(System.currentTimeMillis()));
         taskMapper.updateTestTask(taskTestEntity);
         // 根据任务单主键 获取委托单主键
         EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
