@@ -513,24 +513,40 @@ public class ReportServiceImpl implements ReportService {
                 e.setRecordId(reportRecordEntity1.getId());
                 e.setTaskId(vo.getTaskId());
                 List<Long> checkItemIds = recordDetailEntityMapper.getCheckItemIds(reportRecordEntity1.getId());
-                int insert1;
                 if (checkItemIds.contains(e.getCheckItemId())) {
-                    insert1 = recordDetailEntityMapper.updateByRecordIdSelective(e);
+                    recordDetailEntityMapper.updateByRecordIdSelective(e);
                 } else {
-                    insert1 = recordDetailEntityMapper.insert(e);
+                    recordDetailEntityMapper.insert(e);
                 }
-                if (insert1 < 1) {
-                    return false;
-                }
+//                int insert1;
+//                if (checkItemIds.contains(e.getCheckItemId())) {
+//                    insert1 = recordDetailEntityMapper.updateByRecordIdSelective(e);
+//                } else {
+//                    insert1 = recordDetailEntityMapper.insert(e);
+//                }
+//                if (insert1 < 1) {
+//                    return false;
+//                }
             }
             //校验其他任务单是否完成
-            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
-            if(allReportComplete.contains(2)){
+            if(vo.getReportComplete() == 2){
                 reportRecordEntity1.setState(2+"");
             }else{
-                reportRecordEntity1.setState(1+"");
-                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
+                List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
+                if(allReportComplete.contains(2)){
+                    reportRecordEntity1.setState(2+"");
+                }else{
+                    reportRecordEntity1.setState(1+"");
+                    reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
+                }
             }
+//            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
+//            if(allReportComplete.contains(2)){
+//                reportRecordEntity1.setState(2+"");
+//            }else{
+//                reportRecordEntity1.setState(1+"");
+//                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
+//            }
             //修改任务报告状态
             taskMapper.updateReportStatus(vo.getReportComplete(), vo.getTaskId());
             int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
@@ -550,13 +566,24 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
-            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
-            if(allReportComplete.contains(2)){
+            if(vo.getReportComplete() == 2){
                 reportRecordEntity.setState(2+"");
             }else{
-                reportRecordEntity.setState(1+"");
-                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+                List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
+                if(allReportComplete.contains(2)){
+                    reportRecordEntity.setState(2+"");
+                }else{
+                    reportRecordEntity.setState(1+"");
+                    reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+                }
             }
+//            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
+//            if(allReportComplete.contains(2)){
+//                reportRecordEntity.setState(2+"");
+//            }else{
+//                reportRecordEntity.setState(1+"");
+//                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+//            }
             //生成报告编号
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
             String year = sdf.format(new Date());
