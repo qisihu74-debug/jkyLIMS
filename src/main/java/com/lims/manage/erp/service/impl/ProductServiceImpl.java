@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.mapper.ProductItemEntityMapper;
@@ -29,6 +30,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<CheckItemDetailVo> getAllItemByProductId(Integer productId) {
+        PageHelper.clearPage();
         return itemEntityMapper.getAllItemByProductId(productId);
     }
 
