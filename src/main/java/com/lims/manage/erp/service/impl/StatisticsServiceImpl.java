@@ -120,7 +120,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             PageHelper.startPage(personalStats.getPageNum(), personalStats.getPageSize());
         }
         List<PersonalStatsVo> perons = new ArrayList<>();
-        if(!deptIds.isEmpty()){
+        if(!CollectionUtils.isEmpty(deptIds)){
             perons =  statisticsMapper.selectAllPerson(deptIds);
         }
         else {
@@ -149,7 +149,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         // 盖章
         List<ReportRecordEntity> reporSealList = statisticsMapper.selectReportSeal(personalStats);
         for (EntrustHistoryEntity entrustHistoryEntity : entrustlist) {
-            if (entrustHistoryEntity.getBusinessAcceptor() != null) {
+            if (!org.springframework.util.StringUtils.isEmpty(entrustHistoryEntity.getBusinessAcceptor())) {
                 Integer mapValue = nameMap.get(entrustHistoryEntity.getBusinessAcceptor());
                 if (mapValue != null) {
                     nameMap.put(entrustHistoryEntity.getBusinessAcceptor(), mapValue += 1);
@@ -173,7 +173,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         methodApprovalReport(reporVerifyertList,userIdMap,perons);
         // 签发
         methodIssuerIdReport(reporIssuerList,userIdMap,perons);
-        // 盖章
+        // 盖章 盖章人=sealer  邓喜旺&1647657004269101
         methodsealIdReport(reporSealList,userIdMap,perons);
         PageInfo<PersonalStatsVo> result = new PageInfo<>(perons);
         return result;
@@ -230,7 +230,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         // 统计任务单信息
         for(TaskTestEntity taskTestEntity:taskList){
             // 检测人 邓喜旺&1647657004269101
-            if(taskTestEntity.getInspector()!=null){
+            if(!org.springframework.util.StringUtils.isEmpty(taskTestEntity.getInspector())){
                 String[] strings2 = taskTestEntity.getInspector().split(",");
                 for (int i = 0; i < strings2.length; i++) {
                     String[] strings3 = strings2[i].split("&");
@@ -255,7 +255,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     public void methodReviewTask(List<TaskTestEntity> taskList,HashMap<Long, Integer> userIdMap,List<PersonalStatsVo> perons){
         for(TaskTestEntity taskTestEntity:taskList){
             // 复核人 邓喜旺&1647657004269101
-            if(taskTestEntity.getReviewer()!=null){
+            if(!org.springframework.util.StringUtils.isEmpty(taskTestEntity.getReviewer())){
                 String[] strings2 = taskTestEntity.getReviewer().split(",");
                 for (int i = 0; i < strings2.length; i++) {
                     String[] strings3 = strings2[i].split("&");
@@ -280,7 +280,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     public void methodApprovalReport(List<ReportRecordEntity> reportList,HashMap<Long, Integer> userIdMap,List<PersonalStatsVo> perons){
         for(ReportRecordEntity reportRecordEntity:reportList){
             // 审批人 1647657004269101
-            if(reportRecordEntity.getVerifyerId()!=null){
+            if(!org.springframework.util.StringUtils.isEmpty(reportRecordEntity.getVerifyerId())){
                     Integer mapValue = userIdMap.get(reportRecordEntity.getVerifyerId());
                     if (mapValue != null) {
                         userIdMap.put(reportRecordEntity.getVerifyerId(), mapValue += 1);
@@ -302,7 +302,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     public void methodIssuerIdReport(List<ReportRecordEntity> reportList,HashMap<Long, Integer> userIdMap,List<PersonalStatsVo> perons){
         for(ReportRecordEntity reportRecordEntity:reportList){
             // 签发人 1647657004269101
-            if(reportRecordEntity.getIssuerId()!=null){
+            if(!org.springframework.util.StringUtils.isEmpty(reportRecordEntity.getIssuerId())){
                 Integer mapValue = userIdMap.get(reportRecordEntity.getIssuerId());
                 if (mapValue != null) {
                     userIdMap.put(reportRecordEntity.getIssuerId(), mapValue += 1);
@@ -323,12 +323,15 @@ public class StatisticsServiceImpl implements StatisticsService {
      */
     public void methodsealIdReport(List<ReportRecordEntity> reportList,HashMap<Long, Integer> userIdMap,List<PersonalStatsVo> perons){
         for(ReportRecordEntity reportRecordEntity:reportList){
-            // 盖章人 1647657004269101
-            if(reportRecordEntity.getSealer()!=null){
-                // String 转 Long
-                Integer mapValue = userIdMap.get(Long.parseLong(reportRecordEntity.getSealer()));
-                if (mapValue != null) {
-                    userIdMap.put((Long.parseLong(reportRecordEntity.getSealer())), mapValue += 1);
+            // 徐明月&1647502682230103
+            if(!org.springframework.util.StringUtils.isEmpty(reportRecordEntity.getSealer())){
+                String[] strings2 = reportRecordEntity.getSealer().split(",");
+                for (int i = 0; i < strings2.length; i++) {
+                    String[] strings3 = strings2[i].split("&");
+                    Integer mapValue = userIdMap.get((Long.parseLong(strings3[1])));
+                    if (mapValue != null) {
+                        userIdMap.put((Long.parseLong(strings3[1])), mapValue += 1);
+                    }
                 }
             }
         }
