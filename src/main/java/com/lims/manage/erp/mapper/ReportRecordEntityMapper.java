@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
 import com.lims.manage.erp.vo.ReportDetailListVo;
+import com.lims.manage.erp.vo.ReportNodeVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
@@ -67,6 +68,8 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     ReportRecordEntity selectByEntrustId(Long entrustId);
+
+    ReportNodeVo getReportNodeByEntrustId(Long entrustId);
 
     /**
      * 根据recordId查询委托单信息

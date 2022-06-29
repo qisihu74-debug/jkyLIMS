@@ -434,6 +434,21 @@
         where report_code = #{reportCode}
     </select>
 
+    <select id="getReportNodeByEntrustId" resultType="com.lims.manage.erp.vo.ReportNodeVo"
+            parameterType="java.lang.Long">
+        SELECT
+            report_code,
+            state,
+            report_complete_time,
+            verifyer_time,
+            issuer_time,
+            seal_time,
+            operate_time
+        FROM
+            test_report_record
+        where entrustment_id = #{entrustId,jdbcType=BIGINT}
+    </select>
+
     <select id="selectByEntrustId" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
             parameterType="java.lang.Long">
         SELECT

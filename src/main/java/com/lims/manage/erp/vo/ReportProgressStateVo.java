@@ -13,5 +13,5 @@ public class ReportProgressStateVo {
     /**
      * 状态时间
      */
-    private Date time;
+    private String time;
 }
