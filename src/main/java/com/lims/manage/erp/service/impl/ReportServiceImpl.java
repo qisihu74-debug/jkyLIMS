@@ -1156,6 +1156,9 @@ public class ReportServiceImpl implements ReportService {
         }catch (Exception e){
             logger.error("报告签名失败:{}",e);
         }
+        if (url.contains("?")){
+           url = url.substring(0,url.indexOf("?"));
+        }
         reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
         logger.info("签名信息更新成功！:{}",reportCode+":"+url);
         //更新配合比信息
