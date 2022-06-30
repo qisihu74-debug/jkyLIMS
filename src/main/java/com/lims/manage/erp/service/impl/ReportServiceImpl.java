@@ -677,6 +677,13 @@ public class ReportServiceImpl implements ReportService {
             ids = null;
         }
         List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state,reportTypeStatus,ids);
+        for (ReportRecordEntity recordEntity:list) {
+            if ("0".equals(recordEntity.getType())){
+                recordEntity.setType("最终报告");
+            }else {
+                recordEntity.setType("中间报告");
+            }
+        }
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }

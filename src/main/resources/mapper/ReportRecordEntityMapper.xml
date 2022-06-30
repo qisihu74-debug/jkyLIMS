@@ -371,6 +371,7 @@
         t1.qys_state,
         t1.contract_id,
         t1.sign_url,
+        t1.type,
         t1.type reportTypeStatus
         FROM
         test_report_record t1
