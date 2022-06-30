@@ -326,6 +326,11 @@
             <version>5.4.3</version>
 <!--            <version>5.2.0</version>-->
         </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext-asian</artifactId>
+            <version>5.2.0</version>
+        </dependency>
         <!--监控+refresh配置-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -379,6 +384,37 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+        <!--pdfBox -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.24</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>fontbox</artifactId>
+            <version>2.0.24</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>jempbox</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>xmpbox</artifactId>
+            <version>2.0.24</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>preflight</artifactId>
+            <version>2.0.24</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox-tools</artifactId>
+            <version>2.0.24</version>
         </dependency>
         <!-- EasyPoi文档处理工具 -->
         <dependency>
@@ -461,19 +497,29 @@
         </dependency>
         <!-- com.aspose.words-->
         <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.28.0-GA</version>
+        </dependency>
+        <dependency>
             <groupId>com.aspose</groupId>
             <artifactId>words</artifactId>
-            <version>1.0</version>
+            <version>21.1</version>
         </dependency>
         <dependency>
             <groupId>com.aspose</groupId>
             <artifactId>words-pdf</artifactId>
-            <version>2.0</version>
+            <version>21.11</version>
         </dependency>
         <dependency>
             <groupId>com.aspose</groupId>
             <artifactId>words-cells</artifactId>
-            <version>8.5.2</version>
+            <version>21.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>words-slides</artifactId>
+            <version>21.10</version>
         </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>
