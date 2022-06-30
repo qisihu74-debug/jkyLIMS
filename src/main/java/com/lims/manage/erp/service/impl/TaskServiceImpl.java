@@ -702,13 +702,15 @@ public class TaskServiceImpl implements TaskService {
                     Set<String> set = new HashSet<>();
                     for (int i = 0; i < arrays.length; i++) {
                         set.add(arrays[i]);
-                        set.add(",");
                     }
                     StringBuilder stringBuilder1 = new StringBuilder();
-                    for(int x=0; x<set.toArray().length-1; x++){
+                    for(int x=0; x<set.toArray().length; x++){
                         stringBuilder1.append(set.toArray()[x]);
+                        stringBuilder1.append(",");
                     }
-                    rows.get(1).getTableCells().get(5).setText(stringBuilder1.toString());
+                    if(stringBuilder1.length()>2){
+                        rows.get(1).getTableCells().get(5).setText(stringBuilder1.deleteCharAt(stringBuilder1.length()-1).toString());
+                    }
                 }
                 // 检测项目及检验依据
                 // 6月22日 (多组样品有相同的检测项无法预览任务单；产品标准、检测项都要去重展示；没有价格的子检测项目不展示)
