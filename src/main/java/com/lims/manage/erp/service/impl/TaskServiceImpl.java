@@ -647,7 +647,7 @@ public class TaskServiceImpl implements TaskService {
                 for (int i = 0; i < samples.size(); i++) {
                     SampleDetailVo sampleDetailVo = samples.get(i);
                     // 补充表格数据 样品名称
-                    rows.get(i + 2).getTableCells().get(0).setText(sampleDetailVo.getSampleName());
+                    rows.get(i + 2).getTableCells().get(0).setText(sampleDetailVo.getAliasName());
                     // 规格/等级
                     rows.get(i + 2).getTableCells().get(1).setText(sampleDetailVo.getSpecs());
                     // 批号/编号
