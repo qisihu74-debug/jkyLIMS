@@ -833,12 +833,15 @@ public class TaskServiceImpl implements TaskService {
         sampleVo.setSampleNumber(sampleVo.getSampleNumber() + "；");
         sampleVo.setSampleQuantity(sampleVo.getSampleQuantity() + "；");
         // 处理样品 外观描述，和 外观
-        if (sampleVo.getOutwardDescribe() != null && !sampleVo.getOutwardDescribe().equals("") && sampleVo.getSampleDesc() != null && !sampleVo.getSampleDesc().equals("")) {
+/*        if (sampleVo.getOutwardDescribe() != null && !sampleVo.getOutwardDescribe().equals("") && sampleVo.getSampleDesc() != null && !sampleVo.getSampleDesc().equals("")) {
             sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1) + "\t" + sampleVo.getOutwardDescribe());
         } else {
             if (sampleVo.getSampleDesc() != null && !sampleVo.getSampleDesc().equals("")) {
                 sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1));
             }
+        }*/
+        if(!StringUtils.isEmpty(sampleVo.getOutwardDescribe())){
+            sampleVo.setSampleDesc(sampleVo.getOutwardDescribe()+";");
         }
 
         //获取检测依据
@@ -872,8 +875,10 @@ public class TaskServiceImpl implements TaskService {
                 sampleTime.append(sampleEntity.getSampleQuantity()== null ? "——": sampleEntity.getSampleQuantity());
                 sampleTime.append("；");
                 sampleTime.append("样品描述：");
+                sampleTime.append(sampleEntity.getOutwardDescribe()== null ? "——": sampleEntity.getOutwardDescribe());
+                sampleTime.append("；");
                 StringBuilder outward = new StringBuilder();
-                if(sampleEntity.getOutward() != null){
+/*                if(sampleEntity.getOutward() != null){
                     outward.append(sampleEntity.getOutward());
                     if(sampleEntity.getOutwardDescribe() != null){
                         outward.append(",");
@@ -888,7 +893,7 @@ public class TaskServiceImpl implements TaskService {
                     outward.append("——");
                 }
                 outward.append("；");
-                sampleTime.append(outward);
+                sampleTime.append(outward);*/
                 sampleTime.append("来样时间：");
                 sampleTime.append(sampleEntity.getReceivedDate());
             }
