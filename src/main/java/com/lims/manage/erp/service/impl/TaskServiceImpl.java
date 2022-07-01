@@ -623,7 +623,7 @@ public class TaskServiceImpl implements TaskService {
                     for (TestSampleEntity node : nodeSample) {
                         SampleEntity entity = new SampleEntity(node);
                         SampleDetailVo sampleDetailVo = new SampleDetailVo();
-                        sampleDetailVo.setSampleName(entity.getSampleName());
+                        sampleDetailVo.setSampleName(entity.getAliasName());
                         sampleDetailVo.setSpecs(entity.getSpecs());
                         sampleDetailVo.setBatchNumber(entity.getBatchNumber());
                         sampleDetailVo.setSampleQuantity(entity.getSampleQuantity());
@@ -833,12 +833,20 @@ public class TaskServiceImpl implements TaskService {
         sampleVo.setSampleNumber(sampleVo.getSampleNumber() + "；");
         sampleVo.setSampleQuantity(sampleVo.getSampleQuantity() + "；");
         // 处理样品 外观描述，和 外观
-        if (sampleVo.getOutwardDescribe() != null && !sampleVo.getOutwardDescribe().equals("") && sampleVo.getSampleDesc() != null && !sampleVo.getSampleDesc().equals("")) {
+/*        if (sampleVo.getOutwardDescribe() != null && !sampleVo.getOutwardDescribe().equals("") && sampleVo.getSampleDesc() != null && !sampleVo.getSampleDesc().equals("")) {
             sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1) + "\t" + sampleVo.getOutwardDescribe());
         } else {
             if (sampleVo.getSampleDesc() != null && !sampleVo.getSampleDesc().equals("")) {
                 sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1));
             }
+        }*/
+        // 样品描述
+        if(!StringUtils.isEmpty(sampleVo.getOutwardDescribe())){
+            sampleVo.setOutwardDescribe(sampleVo.getOutwardDescribe()+";");
+        }
+        // 规格/等级
+        if(!StringUtils.isEmpty(sampleVo.getSpecs())){
+            sampleVo.setSpecs(sampleVo.getSpecs()+";");
         }
 
         //获取检测依据
@@ -872,8 +880,10 @@ public class TaskServiceImpl implements TaskService {
                 sampleTime.append(sampleEntity.getSampleQuantity()== null ? "——": sampleEntity.getSampleQuantity());
                 sampleTime.append("；");
                 sampleTime.append("样品描述：");
-                StringBuilder outward = new StringBuilder();
-                if(sampleEntity.getOutward() != null){
+                sampleTime.append(sampleEntity.getOutwardDescribe()== null ? "——": sampleEntity.getOutwardDescribe());
+                sampleTime.append("；");
+//                StringBuilder outward = new StringBuilder();
+/*                if(sampleEntity.getOutward() != null){
                     outward.append(sampleEntity.getOutward());
                     if(sampleEntity.getOutwardDescribe() != null){
                         outward.append(",");
@@ -888,7 +898,7 @@ public class TaskServiceImpl implements TaskService {
                     outward.append("——");
                 }
                 outward.append("；");
-                sampleTime.append(outward);
+                sampleTime.append(outward);*/
                 sampleTime.append("来样时间：");
                 sampleTime.append(sampleEntity.getReceivedDate());
             }
@@ -1234,7 +1244,7 @@ public class TaskServiceImpl implements TaskService {
                 XLSTransformer transformer = new XLSTransformer();
                 InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
                 Workbook workbook = methodPlugTheData(data.getFileUrl(),result, null);
-                SampleServiceImpl.DealWithZip(workbook, data.getTaskCode()+data.getCheckItemName()+".xls", out);
+                SampleServiceImpl.DealWithZip(workbook, data.getTaskCode()+data.getCheckItemName()+"编号"+i+".xls", out);
             }
             catch (Exception e){
                 log.info("输出异常\t"+e);

@@ -69,7 +69,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             String sampleCode;
             if (samples.get(i).getQuantityPerGroup() > 1) {
                 String numStr = new DecimalFormat("00").format(samples.get(i).getQuantityPerGroup());
-                sampleCode = "YP-" + sdf.format(now) + "-" + codeStr + "（01~" + numStr + "）";
+                sampleCode = "YP-" + sdf.format(now) + "-" + codeStr + "-01~" + numStr;
             } else {
                 sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
             }
@@ -390,7 +390,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             String sampleCode;
             if (samples.get(i).getQuantityPerGroup() > 1) {
                 String numStr = new DecimalFormat("00").format(samples.get(i).getQuantityPerGroup());
-                sampleCode = "YP-" + sdf.format(now) + "-" + codeStr + "（01~" + numStr + "）";
+                sampleCode = "YP-" + sdf.format(now) + "-" + codeStr + "-01~" + numStr;
             } else {
                 sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
             }
