@@ -555,6 +555,9 @@ public class ReportServiceImpl implements ReportService {
             }
             return true;
         } else {
+            //获取父级code
+            Long deptId = taskMapper.getDeptByEntrustId(vo.getEntrustmentId());
+            String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
             long recordId = GenID.getID();
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
             for (ReportRecordDetailEntity e : checkInfos) {
@@ -589,10 +592,10 @@ public class ReportServiceImpl implements ReportService {
             String year = sdf.format(new Date());
             Integer maxCode = recordEntityMapper.getMaxCode(year);
             if (maxCode == null) {
-                reportRecordEntity.setReportCode("ZX-" + year + "-JC-0001");
+                reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-0001");
             } else {
                 int newCode = maxCode + 1;
-                reportRecordEntity.setReportCode("ZX-" + year + "-JC-" + new DecimalFormat("0000").format(newCode));
+                reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
             }
             reportRecordEntity.setId(recordId);
             reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
@@ -612,6 +615,9 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean middleReportPreserve(ReportPreserveVo vo) {
 //        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
+        //获取父级code
+        Long deptId = taskMapper.getDeptByEntrustId(vo.getEntrustmentId());
+        String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
         long recordId = GenID.getID();
         List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
         for (ReportRecordDetailEntity e : checkInfos) {
@@ -635,10 +641,10 @@ public class ReportServiceImpl implements ReportService {
         String year = sdf.format(new Date());
         Integer maxCode = recordEntityMapper.getMaxCode(year);
         if (maxCode == null) {
-            reportRecordEntity.setReportCode("ZX-" + year + "-JC-0001");
+            reportRecordEntity.setReportCode("ZX-" + year + "-YC-0001");
         } else {
             int newCode = maxCode + 1;
-            reportRecordEntity.setReportCode("ZX-" + year + "-JC-" + new DecimalFormat("0000").format(newCode));
+            reportRecordEntity.setReportCode("ZX-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
         }
         reportRecordEntity.setId(recordId);
         reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
