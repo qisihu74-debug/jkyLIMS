@@ -189,6 +189,47 @@ public interface TeamMapper extends BaseMapper {
     Long getTopDepartment(Long deptId);
 
     /**
+     *
+     * @param deptId
+     * @return
+     */
+    @Select("SELECT \n" +
+            "  tb1.CODE \n" +
+            "FROM \n" +
+            "  (\n" +
+            "    WITH RECURSIVE cte AS (\n" +
+            "      SELECT \n" +
+            "        a.id, \n" +
+            "        a.pid, \n" +
+            "        a.CODE, \n" +
+            "        a.NAME \n" +
+            "      FROM \n" +
+            "        test_team a \n" +
+            "      WHERE \n" +
+            "        a.id = #{deptId} \n" +
+            "      UNION ALL \n" +
+            "      SELECT \n" +
+            "        k.id, \n" +
+            "        k.pid, \n" +
+            "        k.CODE, \n" +
+            "        k.NAME \n" +
+            "      FROM \n" +
+            "        test_team k \n" +
+            "        INNER JOIN cte c ON c.pid = k.id\n" +
+            "    ) \n" +
+            "    SELECT \n" +
+            "      id, \n" +
+            "      NAME, \n" +
+            "      CODE, \n" +
+            "      pid \n" +
+            "    FROM \n" +
+            "      cte\n" +
+            "  ) tb1 \n" +
+            "WHERE \n" +
+            "  tb1.id != #{deptId}")
+    String getTopDepartmentCode(Long deptId);
+
+    /**
      * 该团队存在团队检测项 ： 检测项 与所属部门验证。 存在 或不存在
      */
     List<TestCheckItemTeamRel> getDepartmentList(@Param("deptIds")List<Long> deptIds);

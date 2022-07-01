@@ -404,4 +404,12 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     List<TaskProgressVo> getTaskStateByEntrustId(Long entrustmentId);
+
+    /**
+     * 根据委托单ID查询分配的任务科室ID
+     * @param entrustId
+     * @return
+     */
+    @Select("SELECT dept_id FROM test_task WHERE entrustment_id = #{entrustId} LIMIT 1")
+    Long getDeptByEntrustId(Long entrustId);
 }

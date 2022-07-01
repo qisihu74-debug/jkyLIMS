@@ -503,7 +503,7 @@
           <if test="contactWay !=null">
               and t1.phone = #{contactWay}
           </if>
-        limit 1
+        LIMIT 1
     </select>
     <update id="updateEntrustInfo" parameterType="com.lims.manage.erp.entity.EntrustEntity">
         UPDATE test_entrusted_info
