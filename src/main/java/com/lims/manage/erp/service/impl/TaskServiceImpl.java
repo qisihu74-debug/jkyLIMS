@@ -623,7 +623,7 @@ public class TaskServiceImpl implements TaskService {
                     for (TestSampleEntity node : nodeSample) {
                         SampleEntity entity = new SampleEntity(node);
                         SampleDetailVo sampleDetailVo = new SampleDetailVo();
-                        sampleDetailVo.setSampleName(entity.getSampleName());
+                        sampleDetailVo.setSampleName(entity.getAliasName());
                         sampleDetailVo.setSpecs(entity.getSpecs());
                         sampleDetailVo.setBatchNumber(entity.getBatchNumber());
                         sampleDetailVo.setSampleQuantity(entity.getSampleQuantity());
@@ -840,8 +840,13 @@ public class TaskServiceImpl implements TaskService {
                 sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1));
             }
         }*/
+        // 样品描述
         if(!StringUtils.isEmpty(sampleVo.getOutwardDescribe())){
-            sampleVo.setSampleDesc(sampleVo.getOutwardDescribe()+";");
+            sampleVo.setOutwardDescribe(sampleVo.getOutwardDescribe()+";");
+        }
+        // 规格/等级
+        if(!StringUtils.isEmpty(sampleVo.getSpecs())){
+            sampleVo.setSpecs(sampleVo.getSpecs()+";");
         }
 
         //获取检测依据
@@ -877,7 +882,7 @@ public class TaskServiceImpl implements TaskService {
                 sampleTime.append("样品描述：");
                 sampleTime.append(sampleEntity.getOutwardDescribe()== null ? "——": sampleEntity.getOutwardDescribe());
                 sampleTime.append("；");
-                StringBuilder outward = new StringBuilder();
+//                StringBuilder outward = new StringBuilder();
 /*                if(sampleEntity.getOutward() != null){
                     outward.append(sampleEntity.getOutward());
                     if(sampleEntity.getOutwardDescribe() != null){
@@ -1239,7 +1244,7 @@ public class TaskServiceImpl implements TaskService {
                 XLSTransformer transformer = new XLSTransformer();
                 InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
                 Workbook workbook = methodPlugTheData(data.getFileUrl(),result, null);
-                SampleServiceImpl.DealWithZip(workbook, data.getTaskCode()+data.getCheckItemName()+".xls", out);
+                SampleServiceImpl.DealWithZip(workbook, data.getTaskCode()+data.getCheckItemName()+"编号"+i+".xls", out);
             }
             catch (Exception e){
                 log.info("输出异常\t"+e);

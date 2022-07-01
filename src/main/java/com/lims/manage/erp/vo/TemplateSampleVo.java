@@ -16,6 +16,11 @@ public class TemplateSampleVo {
      */
     private String outwardDescribe;
 
+    /**
+     * 规格等级
+     */
+    private String specs;
+
 //    public TemplateSampleVo() {
 //    }
 //
