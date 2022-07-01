@@ -275,13 +275,23 @@ public class SampleServiceImpl implements SampleService {
     public void methodSampleTypeOriginalMaterial(SampleDetailVo sampleTagInfo, ZipOutputStream out) throws IOException {
         HashMap<String, SampleDetailVo> result = Maps.newHashMap();
         if (sampleTagInfo != null) {
-            // 样品编号格式： 情况1： YP-2022-0095（01~02） 情况2：YP-2022-0096
-            String sampleCode = sampleTagInfo.getSampleCode();
-            int startNumber = sampleCode.indexOf("（");
-            int endNumber = sampleCode.indexOf("）");
+            // 样品编号格式： 情况1： YP-2022-0095（01~02） 情况2：YP-2022-0096 废弃
+            // 新样品编号格式处理： 情况1： YP-2022-9200-01~03 情况2：YP-2022-0096
+            String[] sampleSplits = sampleTagInfo.getSampleCode().split("-");
+            int startNumber = 0;
+            // 判断 样品编号情况
+            StringBuilder sampleCodeStr = new StringBuilder();
+            // 判断 样品编号情况
+            if(sampleSplits.length>3){
+                startNumber =1;
+                for(int i=0;i<sampleSplits.length-1;i++){
+                    sampleCodeStr.append(sampleSplits[i]);
+                    sampleCodeStr.append("-");
+                }
+            }
             // 处理多个样品 打包成zip
-            if (startNumber > 0 && endNumber > 0) {
-                String[] strings = sampleCode.substring(startNumber + 1, endNumber).split("~");
+            if (startNumber > 0) {
+                String[] strings = sampleTagInfo.getSampleCode().substring(startNumber + 1).split("~");
                 Integer maxNumber = Integer.valueOf(strings[1]);
                 // 处理样品 外观描述，和 外观
 //                if (sampleTagInfo.getOutwardDescribe() != null && !sampleTagInfo.getOutwardDescribe().equals("") && sampleTagInfo.getOutward() != null && !sampleTagInfo.getOutward().equals("")) {
@@ -325,7 +335,7 @@ public class SampleServiceImpl implements SampleService {
                 for (int i = 1; i <= maxNumber; i++) {
                     InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
                     StringBuilder fileName = new StringBuilder("");
-                    sampleTagInfo.setSampleCode(sampleCode.substring(0, startNumber) + "_" + i);
+                    sampleTagInfo.setSampleCode(sampleCodeStr + String.valueOf(i));
                     fileName.append(sampleTagInfo.getSampleCode());
                     fileName.append("样品标签.xlsx");
                     result.put("result", sampleTagInfo);
