@@ -1890,9 +1890,9 @@ public class EntrustServiceImpl implements EntrustService {
          */
         if(!StringUtils.isEmpty(entrustAddVo.getFileUrl())&&!StringUtils.isEmpty(entrustAddVo.getFileUrlStr())){
             // 使用逗号 分割文件附件链接
-            String[] files = entrustAddVo.getFileUrl().split("//,");
+            String[] files = entrustAddVo.getFileUrl().split(",");
             // 使用逗号 分割文件名称
-            String[] fileUrlStrs = entrustAddVo.getFileUrlStr().split("//,");
+            String[] fileUrlStrs = entrustAddVo.getFileUrlStr().split(",");
             List<LabelValueVo> fileArrays = new ArrayList<>();
             for(int i=0;i<files.length;i++){
              LabelValueVo labelValueVo = new LabelValueVo();
@@ -2319,6 +2319,27 @@ public class EntrustServiceImpl implements EntrustService {
         else {
             entrustAddVo.setPaymentRecordShow("——");
             entrustAddVo.setPaymentRecord("——");
+        }
+        /**
+         * 委托单文件file 处理
+         */
+        if(!StringUtils.isEmpty(entrustAddVo.getFileUrl())&&!StringUtils.isEmpty(entrustAddVo.getFileUrlStr())){
+            // 使用逗号 分割文件附件链接
+            String[] files = entrustAddVo.getFileUrl().split(",");
+            // 使用逗号 分割文件名称
+            String[] fileUrlStrs = entrustAddVo.getFileUrlStr().split(",");
+            List<LabelValueVo> fileArrays = new ArrayList<>();
+            for(int i=0;i<files.length;i++){
+                LabelValueVo labelValueVo = new LabelValueVo();
+                labelValueVo.setLabel(files[i]);
+                labelValueVo.setText(fileUrlStrs[i]);
+                fileArrays.add(labelValueVo);
+            }
+            entrustAddVo.setFileArrays(fileArrays);
+        }
+        else {
+            List<LabelValueVo> fileArrays = new ArrayList<>();
+            entrustAddVo.setFileArrays(fileArrays);
         }
         // —— 支付方式。
 //        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
@@ -2846,6 +2867,10 @@ public class EntrustServiceImpl implements EntrustService {
     public EntrustAddVo getAnotherListCopy(Long entrustmentId) {
         // 通过委托单id 获取copy 数据。
         EntrustAddVo entrustAddVo = getEntrustHistoryDetailTest(entrustmentId);
+        // 清除上传的 附件
+        entrustAddVo.setFileUrl(null);
+        entrustAddVo.setFileUrlStr(null);
+        entrustAddVo.setFileArrays(null);
         // 处理印章数组。
         if (entrustAddVo.getSealTypes() != null && entrustAddVo.getSealTypes().length > 0) {
             entrustAddVo.setSealTypes(entrustAddVo.getSealType().split(","));
@@ -3153,9 +3178,9 @@ public class EntrustServiceImpl implements EntrustService {
     public void methodCopySamples(List<SampleEntity> sampleList,Long old,long id,Integer entrustCompanyId){
         // 获取样品集合 判断样品id 是否存在。 不存在 则 add样品。
             for (SampleEntity sampleEntity : sampleList) {
-                SampleDetailVo sampleDetailVo  = sampleEntityMapper.getSampleTagInfo(sampleEntity.getId());
+                SampleEntity sampleDetailVo  = sampleEntityMapper.getSampleTagInfo(sampleEntity.getId());
                 // 已经找到伪造字段
-                if(sampleDetailVo==null){
+                if(StringUtils.isEmpty(sampleDetailVo)){
                     // 通过旧委托单id 获取样品集合 得到 配合比信息集合。
                     List<SampleEntity> sampleSet  = sampleEntityMapper.selectSampleSet(old);
                     // 配合比 处理。
