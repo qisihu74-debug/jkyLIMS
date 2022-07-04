@@ -1,6 +1,9 @@
 package com.lims.manage.erp.entity;
 
+import com.lims.manage.erp.vo.EntrustSampleInfoVo;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @Author: DLC
@@ -14,6 +17,9 @@ public class EntrustHistoryTaskEntity extends EntrustHistoryEntity {
      * 样品状态
      */
     private String sampleStatus;
-
+    /**
+     * 样品信息
+     */
+    private List<EntrustSampleInfoVo> sampleInfoVos;
 
 }

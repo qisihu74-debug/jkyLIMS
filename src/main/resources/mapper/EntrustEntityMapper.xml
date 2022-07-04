@@ -280,20 +280,77 @@
 
 
 
+<!--    <select id="selectEntrustReleasedList" resultType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity"-->
+<!--            parameterType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity">-->
+<!--        SELECT-->
+<!--        DISTINCT t1.id AS id,-->
+<!--        t1.entrustment_no AS entrustment_no,-->
+<!--        t1.entrust_company AS entrust_company,-->
+<!--        t1.entrust_people AS entrust_people,-->
+<!--        t1.business_acceptor AS business_acceptor,-->
+<!--        t1.acceptance_date AS acceptance_date,-->
+<!--        CONCAT(t3.sample_name,"(",")") AS sampleStatus-->
+<!--        FROM-->
+<!--        test_entrusted_info as t1-->
+<!--        LEFT JOIN test_entrusted_sample_details_rel as t2 ON t1.id = t2.entrustment_id-->
+<!--        LEFT JOIN test_sample as t3 ON t3.id = t2.sample_id-->
+<!--        <trim prefix="WHERE" prefixOverrides="AND |OR ">-->
+<!--            <if test="entrustmentNo!=null and entrustmentNo!=''">-->
+<!--                and t1.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')-->
+<!--            </if>-->
+<!--            <if test="entrustCompany!=null and entrustCompany!=''">-->
+<!--                and t1.entrust_company LIKE CONCAT('%',#{entrustCompany},'%')-->
+<!--            </if>-->
+<!--            <if test="entrustPeople!=null and entrustPeople!=''">-->
+<!--                and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')-->
+<!--            </if>-->
+<!--            <if test="projectName!=null and projectName!=''">-->
+<!--                and t1.project_name LIKE CONCAT('%',#{projectName},'%')-->
+<!--            </if>-->
+<!--            <if test="entrustPeople!=null and entrustPeople!=''">-->
+<!--                and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')-->
+<!--            </if>-->
+<!--            <if test="businessAcceptor!=null and businessAcceptor!=''">-->
+<!--                and t1.business_acceptor LIKE CONCAT('%',#{businessAcceptor},'%')-->
+<!--            </if>-->
+<!--            <if test="startDate!=null">-->
+<!--                and <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>-->
+<!--            </if>-->
+<!--            <if test="endingDate!=null">-->
+<!--                and-->
+<!--                <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>-->
+<!--            </if>-->
+<!--            <if test="state!=null">-->
+<!--                and t1.state = #{state}-->
+<!--            </if>-->
+<!--        </trim>-->
+<!--        GROUP BY t1.entrustment_no-->
+<!--        ORDER BY t1.entrustment_no DESC-->
+<!--    </select>-->
+    <select id="getEntrustSampleInfos" resultType="com.lims.manage.erp.vo.EntrustSampleInfoVo">
+        SELECT
+            IFNULL( t3.alias_name, "——" ) aliasName,
+            IFNULL( t3.specs, "——" ) specs,
+            IFNULL( t3.outward_describe, "——" ) outwardDescribe
+        FROM
+            test_entrusted_info AS t1
+                LEFT JOIN test_entrusted_sample_details_rel AS t2 ON t1.id = t2.entrustment_id
+                LEFT JOIN test_sample AS t3 ON t3.id = t2.sample_id
+        WHERE
+            t1.id = #{entrustId}
+    </select>
+
     <select id="selectEntrustReleasedList" resultType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity"
             parameterType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity">
         SELECT
-        DISTINCT t1.id AS id,
+        t1.id AS id,
         t1.entrustment_no AS entrustment_no,
         t1.entrust_company AS entrust_company,
         t1.entrust_people AS entrust_people,
         t1.business_acceptor AS business_acceptor,
-        t1.acceptance_date AS acceptance_date,
-        CONCAT(t3.sample_name,"(",")") AS sampleStatus
+        t1.acceptance_date AS acceptance_date
         FROM
-        test_entrusted_info as t1
-        LEFT JOIN test_entrusted_sample_details_rel as t2 ON t1.id = t2.entrustment_id
-        LEFT JOIN test_sample as t3 ON t3.id = t2.sample_id
+        test_entrusted_info AS t1
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
             <if test="entrustmentNo!=null and entrustmentNo!=''">
                 and t1.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
@@ -324,7 +381,6 @@
                 and t1.state = #{state}
             </if>
         </trim>
-        GROUP BY t1.entrustment_no
         ORDER BY t1.entrustment_no DESC
     </select>
     <insert id="BatchSaveEntrustSample" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
