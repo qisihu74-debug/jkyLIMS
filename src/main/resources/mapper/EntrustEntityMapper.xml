@@ -3,7 +3,7 @@
 <mapper namespace="com.lims.manage.erp.mapper.EntrustEntityMapper">
     <select id="selectMaxNo" resultType="java.lang.Integer">
         select max(entrustment_no)
-        from test_entrusted_info
+        from test_entrusted_info limit 1
     </select>
     <select id="selectByKeyId" resultType="com.lims.manage.erp.vo.EntrustAddVo">
         select id,
