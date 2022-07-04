@@ -195,6 +195,7 @@
     <select id="selectAllTeamVo" resultType="com.lims.manage.erp.vo.TestTeamVo">
         SELECT
         id,
+        pid,
         NAME,
         CODE
         FROM

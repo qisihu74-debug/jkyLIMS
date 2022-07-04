@@ -1849,8 +1849,16 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
         }
+        PageHelper.clearPage();
         PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
         List<EntrustHistoryTaskEntity> dataList = entityMapper.selectEntrustReleasedList(entrustHistoryEntity);
+        if(!CollectionUtils.isEmpty(dataList)){
+            for (EntrustHistoryTaskEntity entity : dataList) {
+                List<EntrustSampleInfoVo> entrustSampleInfos = Lists.newArrayList();
+                entrustSampleInfos = entityMapper.getEntrustSampleInfos(entity.getId());
+                entity.setSampleInfoVos(entrustSampleInfos);
+            }
+        }
         PageInfo<EntrustHistoryTaskEntity> result = new PageInfo<>(dataList);
         return result;
     }

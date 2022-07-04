@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.EntrustSampleInfoVo;
 import com.lims.manage.erp.vo.HistoryEntrustDataVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Delete;
@@ -121,6 +122,13 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     List<EntrustHistoryTaskEntity> selectEntrustReleasedList(EntrustHistoryTaskEntity entrustHistoryEntity);
+
+    /**
+     * 任务发布列表的样品信息
+     * @param entrustId
+     * @return
+     */
+    List<EntrustSampleInfoVo> getEntrustSampleInfos(Long entrustId);
 
     /**
      * 新增委托信息
