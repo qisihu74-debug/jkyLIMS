@@ -1807,6 +1807,7 @@ public class EntrustServiceImpl implements EntrustService {
         List<EntrustHistoryEntity> dataList = new ArrayList<>();
         if (entrustHistoryEntity.getState() == 1) {
 //            PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+            PageHelper.clearPage();
             dataList = entityMapper.selectEntrustHistoryTaskListRelease_of(entrustHistoryEntity);
             //存放任务编号
 //            if(!CollectionUtils.isEmpty(dataList)){
@@ -1819,6 +1820,7 @@ public class EntrustServiceImpl implements EntrustService {
             return result;
         }
 //        PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+        PageHelper.clearPage();
         dataList = entityMapper.selectEntrustTaskHistoryList(entrustHistoryEntity);
 //        if(!CollectionUtils.isEmpty(dataList)){
 //            for (EntrustHistoryEntity entrustHistoryEntity1 : dataList) {
@@ -1826,7 +1828,9 @@ public class EntrustServiceImpl implements EntrustService {
 //            }
 //        }
 //        PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
+        System.out.println("entrustHistoryEntity.getPageNum()"+entrustHistoryEntity.getPageNum() +"\t entrustHistoryEntity.getPageSize()" + entrustHistoryEntity.getPageSize());
         PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+        System.out.println(result.getList());
         return result;
     }
 
@@ -1873,7 +1877,27 @@ public class EntrustServiceImpl implements EntrustService {
             entrustAddVo.setPaymentRecordShow("——");
             entrustAddVo.setPaymentRecord("——");
         }
-
+        /**
+         * 委托单文件file 处理
+         */
+        if(!StringUtils.isEmpty(entrustAddVo.getFileUrl())&&!StringUtils.isEmpty(entrustAddVo.getFileUrlStr())){
+            // 使用逗号 分割文件附件链接
+            String[] files = entrustAddVo.getFileUrl().split("//,");
+            // 使用逗号 分割文件名称
+            String[] fileUrlStrs = entrustAddVo.getFileUrlStr().split("//,");
+            List<LabelValueVo> fileArrays = new ArrayList<>();
+            for(int i=0;i<files.length;i++){
+             LabelValueVo labelValueVo = new LabelValueVo();
+                labelValueVo.setLabel(files[i]);
+                labelValueVo.setText(fileUrlStrs[i]);
+                fileArrays.add(labelValueVo);
+            }
+            entrustAddVo.setFileArrays(fileArrays);
+        }
+        else {
+            List<LabelValueVo> fileArrays = new ArrayList<>();
+            entrustAddVo.setFileArrays(fileArrays);
+        }
         if (entrustAddVo.getOperateUser() != null) {
             // 获取做废人id 查询账号姓名
             entrustAddVo.setOperateUserStr(sysUserDao.getSysUserName(entrustAddVo.getOperateUser()));

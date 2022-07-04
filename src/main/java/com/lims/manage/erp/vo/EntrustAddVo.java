@@ -259,5 +259,9 @@ public class EntrustAddVo {
      * 报告进度
      */
     ReportProgressVo reportProgress;
+    /**
+     * 文件附件集合
+     */
+    List<LabelValueVo> fileArrays;
 
 }

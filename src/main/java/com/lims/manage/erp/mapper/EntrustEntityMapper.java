@@ -348,7 +348,7 @@ public interface EntrustEntityMapper extends BaseMapper {
     @Select("select id from test_sample where id = #{sampleId}")
     Long getMesBySampleId(int sampleId);
 
-    @Select("select entrustment_id from test_entrusted_sample_details_rel where sample_id = #{sampleId}")
+    @Select("select entrustment_id from test_entrusted_sample_details_rel where sample_id = #{sampleId} LIMIT 1")
     Long getEntrustIdBySampleId(int sampleId);
 
     @Select("select name from test_init_data where type=12")

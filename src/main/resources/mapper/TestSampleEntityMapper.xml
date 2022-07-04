@@ -584,7 +584,8 @@
         generation,
         received_date,
         batch_number,
-        sample_type
+        sample_type,
+        alias_name
         FROM
         test_sample
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
@@ -630,12 +631,13 @@
         generation,
         received_date,
         batch_number,
-        sample_type
+        sample_type,
+        alias_name
         FROM
         test_sample
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
             <if test="sampleName!=null and sampleName!=''">
-                and sample_name LIKE CONCAT('%',#{sampleName},'%')
+                and alias_name LIKE CONCAT('%',#{sampleName},'%')
             </if>
             <if test="sampleType!=null and sampleName!=''">
                 and sample_type = #{sampleType}

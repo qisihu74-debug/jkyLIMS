@@ -150,6 +150,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             sampleEntity.setBeginDate(split[0]);
             sampleEntity.setEndDate(split[1]);
         }
+
         List<SampleSimpleListVo> simpleList = testSampleEntityMapper.getSimpleList(sampleEntity);
         PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
         return pageInfo;

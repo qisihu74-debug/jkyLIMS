@@ -15,4 +15,8 @@ public class SampleSimpleListVo {
     private String receivedDate;
     private String batchNumber;
     private String sampleType;
+    /**
+     * 样品别名
+     */
+    private String aliasName;
 }
