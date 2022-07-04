@@ -181,7 +181,18 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<TestTeamVo> selectAllTeamVo() {
-        return statisticsMapper.selectAllTeamVo();
+        List<TestTeamVo> testTeamVos = statisticsMapper.selectAllTeamVo();
+        for (TestTeamVo team1:testTeamVos) {
+            for (TestTeamVo team:testTeamVos) {
+                if (team1.getPid() !=0){
+                    if (team1.getPid().equals(team.getId())){
+                        String name = team.getName()+"—"+team1.getName();
+                        team1.setName(name);
+                    }
+                }
+            }
+        }
+        return testTeamVos;
     }
 
     @Override

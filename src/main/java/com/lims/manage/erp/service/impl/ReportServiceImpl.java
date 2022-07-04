@@ -674,6 +674,9 @@ public class ReportServiceImpl implements ReportService {
             //获取顶级团队
             Long topTeamId = teamMapper.getTopDepartment((long) teamId);
             //获取顶级团队下的所有下级团队
+            if (topTeamId == null){
+                topTeamId = (long)teamId;
+            }
             List<TeamTreeStructureEntity> chirds = teamMapper.getChirds(topTeamId);
             for (TeamTreeStructureEntity entity:chirds) {
                 ids.add(Integer.valueOf(entity.getId()+""));
@@ -1622,7 +1625,8 @@ public class ReportServiceImpl implements ReportService {
         //根据委托更新报告签署url
         //设置盖章人和盖章时间
         Long userId = ShiroUtils.getUserInfo().getUserId();
-        entityMapper.updateUrlAndState(reqBean.getEntrustId(), response.getSignUrl(), "4",userId+"",new Date(System.currentTimeMillis()));
+        String sysUserName = sysUserDao.getSysUserName(userId);
+        entityMapper.updateUrlAndState(reqBean.getEntrustId(), response.getSignUrl(), "4",sysUserName+"&"+userId+"",new Date(System.currentTimeMillis()));
         return response;
     }
 
@@ -2440,6 +2444,9 @@ public class ReportServiceImpl implements ReportService {
         if (teamId > 0) {
             //获取顶级团队
             Long topTeamId = teamMapper.getTopDepartment((long) teamId);
+            if (topTeamId == null){
+                topTeamId = (long)teamId;
+            }
             //获取顶级团队下的所有下级团队
             List<TeamTreeStructureEntity> chirds = teamMapper.getChirds(topTeamId);
             for (TeamTreeStructureEntity entity:chirds) {
@@ -2471,6 +2478,9 @@ public class ReportServiceImpl implements ReportService {
         //校验用户id是否分配团队
         int teamId = testTechnicistDao.getSealer(userId);
         Long aLong = teamMapper.getTopDepartment((long) teamId);
+        if (aLong == null){
+            aLong = (long)teamId;
+        }
         if (teamId > 0){
             List<TestTeam> idsByTeamId = teamMapper.getIdsByTeamId((long) aLong);
             idsByTeamId.removeIf(Objects::isNull);
