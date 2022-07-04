@@ -398,8 +398,7 @@ public class EntrustController {
         if(vo.getState() == 1){
             return ResultUtil.error(-1, "任务已被发布，请重新确认信息！");
         }
-        if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())
-                || StringUtils.isEmpty(vo.getEntrustPhone())) {
+        if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())) {
             return ResultUtil.error(-1, "请检查委托人信息是否完整！");
         }
         List<SampleEntity> samples = vo.getSamples();
