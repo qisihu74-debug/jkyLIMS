@@ -2326,8 +2326,8 @@ public class EntrustServiceImpl implements EntrustService {
             entrustAddVo.setPaymentRecord(total);
         }
         else {
-            entrustAddVo.setPaymentRecordShow("——");
-            entrustAddVo.setPaymentRecord("——");
+            entrustAddVo.setPaymentRecordShow("0");
+            entrustAddVo.setPaymentRecord("0");
         }
         /**
          * 委托单文件file 处理

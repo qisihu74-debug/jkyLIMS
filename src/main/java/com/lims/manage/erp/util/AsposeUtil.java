@@ -57,7 +57,7 @@ public class AsposeUtil {
      * @param document
      */
     public static void word2pdf(XWPFDocument document, String outAddress) {
-        getLicense();
+        //getLicense();
         try {
             File file = new File(outAddress);
             FileOutputStream os = new FileOutputStream(file);
@@ -436,5 +436,9 @@ public class AsposeUtil {
             logger.error("excel转换异常:{}",e);
         }
         return bytes;
+    }
+
+    public static void main(String[] args) {
+        getLicense();
     }
 }
