@@ -84,6 +84,7 @@ public class EntrustController {
     /**
      * 新增委托 使用中丁
      *
+     * 丁 7月5日 : 返回字符串效验信息。
      * @param json
      * @param file
      * @return
@@ -92,12 +93,7 @@ public class EntrustController {
     //@RequiresPermissions("entrust:entrust:addEntrust")
     public Result addEntrustTest(@RequestParam("json") String json, MultipartFile[] file) {
         EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
-        Boolean isSuccess = entrustService.addEntrustTest0620(entrust, file);
-        if (isSuccess) {
-            return ResultUtil.success("新建委托成功");
-        } else {
-            return ResultUtil.error(678, "新增委托失败！");
-        }
+         return ResultUtil.success(entrustService.addEntrustTest0620(entrust, file));
     }
 
 
@@ -169,12 +165,7 @@ public class EntrustController {
             entrustEntity.setOperateUser(ShiroUtils.getUserInfo().getUserId());
         }
         entrustEntity.setOperateDate(date);
-        Boolean flag = entrustService.abandonEntrust(entrustEntity);
-        if (flag) {
-            return ResultUtil.success("成功");
-        }
-        return ResultUtil.error(678, "作废委托失败！");
-
+        return ResultUtil.success(entrustService.abandonEntrust(entrustEntity));
     }
 
     /**
@@ -289,7 +280,7 @@ public class EntrustController {
         if (entrustHistoryEntity.getState() == null) {
             entrustHistoryEntity.setState(0);
         }
-        if (entrustHistoryEntity.getState() != 0 && entrustHistoryEntity.getState() != 144 && entrustHistoryEntity.getState() != 1 && entrustHistoryEntity.getState()!=200) {
+        if (entrustHistoryEntity.getState() != 0 && entrustHistoryEntity.getState() != 144 && entrustHistoryEntity.getState() != 1 && entrustHistoryEntity.getState()!=200 ||  entrustHistoryEntity.getState() ==null) {
             return ResultUtil.error("必填参数状态有误");
         }
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
@@ -346,6 +337,9 @@ public class EntrustController {
      */
     @GetMapping("/get_entrust_history_detail_test")
     public Result getEntrustHistoryDetailTest(Long id) {
+        if(org.springframework.util.StringUtils.isEmpty(id)){
+            return ResultUtil.error("必传参数id = "+id);
+        }
         return ResultUtil.success(entrustService.getEntrustHistoryDetailTest(id));
     }
 
@@ -627,12 +621,7 @@ public class EntrustController {
     @RequestMapping("/addEntrust_copy")
     public Result addEntrustCopy(@RequestParam("json") String json, MultipartFile[] file) {
         EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
-        Boolean isSuccess = entrustService.addEntrustCopy(entrust, file);
-        if (isSuccess) {
-            return ResultUtil.success("新建委托成功");
-        } else {
-            return ResultUtil.error(678, "新增委托失败！");
-        }
+        return ResultUtil.success(entrustService.addEntrustCopy(entrust, file));
     }
 
     /**

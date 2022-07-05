@@ -68,6 +68,7 @@
                entrustment_no
         FROM test_entrusted_info
         WHERE entrustment_no = #{code}
+        LIMIT 1
     </select>
     <select id="selectEntrustHistoryList" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity"
             parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">

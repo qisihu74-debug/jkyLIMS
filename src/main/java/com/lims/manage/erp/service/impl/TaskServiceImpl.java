@@ -83,6 +83,7 @@ public class TaskServiceImpl implements TaskService {
         TaskListParamVo paramVo = new TaskListParamVo();
         paramVo.setTaskId(taskId);
         // 处理 委托单的文件链接
+        PageHelper.clearPage();
         TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfoTwo(paramVo);
         if (taskDetailInfoVo.getFileUrl() != null) {
             String[] array = taskDetailInfoVo.getFileUrl().split(",");
@@ -447,7 +448,7 @@ public class TaskServiceImpl implements TaskService {
         java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
         taskTestEntity.setReceiveTime(currentDate);
         // 领样时间
-        taskTestEntity.setSampleReceivingTime(currentDate);
+//        taskTestEntity.setSampleReceivingTime(currentDate);
         taskMapper.updateTestTask(taskTestEntity);
         return true;
     }
@@ -459,8 +460,9 @@ public class TaskServiceImpl implements TaskService {
        if(i==0){
            logger.error("批量修改任务单信息失败！");
        }
-        for (int j = 0; j < taskTestEntitys.size(); j++) {
-            TaskTestEntity taskTestEntity = taskTestEntitys.get(i);
+//        for (int j = 0; j < taskTestEntitys.size(); j++) {
+//            TaskTestEntity taskTestEntity = taskTestEntitys.get(i);
+        for(TaskTestEntity taskTestEntity :taskTestEntitys){
             // 根据任务单主键 获取委托单主键
             EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
             if (entrustEntity != null) {
@@ -601,13 +603,13 @@ public class TaskServiceImpl implements TaskService {
                testMap.put("sampleStateDescription", "--");
 
            }
-            //委托单是否留样。
+/*            //委托单是否留样。
            if( taskListVo.getIssueReport()!=null&&taskListVo.getIssueReport().equals("是")){
                 testMap.put("issueReport", "\t√退还\t\t弃样");
             }
             else{
                 testMap.put("issueReport", "\t退还\t\t√弃样");
-            }
+            }*/
             //解析替换文本段落对象
 //            PoiConfig.changeText(doc, testMap);
             //遍历表格,并替换模板
@@ -842,7 +844,7 @@ public class TaskServiceImpl implements TaskService {
         }*/
         // 样品描述
         if(!StringUtils.isEmpty(sampleVo.getOutwardDescribe())){
-            sampleVo.setOutwardDescribe(sampleVo.getOutwardDescribe()+";");
+            sampleVo.setSampleDesc(sampleVo.getOutwardDescribe()+";");
         }
         // 规格/等级
         if(!StringUtils.isEmpty(sampleVo.getSpecs())){
@@ -1244,7 +1246,11 @@ public class TaskServiceImpl implements TaskService {
                 XLSTransformer transformer = new XLSTransformer();
                 InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
                 Workbook workbook = methodPlugTheData(data.getFileUrl(),result, null);
-                SampleServiceImpl.DealWithZip(workbook, data.getTaskCode()+data.getCheckItemName()+"编号"+i+".xls", out);
+                /**
+                 * TODD:7月5日 原始记录命名规则
+                 * 任务单号+模板名称，如果有重复的，后面加序号
+                 */
+                SampleServiceImpl.DealWithZip(workbook, data.getTaskCode()+data.getOriginalName()+(i+1)+".xls", out);
             }
             catch (Exception e){
                 log.info("输出异常\t"+e);

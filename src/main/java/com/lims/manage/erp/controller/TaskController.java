@@ -180,7 +180,7 @@ public class TaskController {
             return ResultUtil.error(201, "token已过期！");
         }
         if (taskTestEntity.getInspector() == null || taskTestEntity.getRecorder() == null || taskTestEntity.getReviewer() == null
-                || taskTestEntity.getReportProducer() == null || taskTestEntity.getSampler() ==null) {
+                || taskTestEntity.getReportProducer() == null || taskTestEntity.getSampler() ==null||taskTestEntity.getSampleReceivingTime()==null) {
             return ResultUtil.error(201, "缺少必填参数！");
         }
         Boolean taskStatus = taskService.getJudgmentTaskList(taskTestEntity.getId());
@@ -210,7 +210,7 @@ public class TaskController {
             return ResultUtil.error(201, "token已过期！");
         }
         if (batchReceiveTaskVo.getInspector() == null || batchReceiveTaskVo.getRecorder() == null || batchReceiveTaskVo.getReviewer() == null
-                || batchReceiveTaskVo.getReportProducer() == null || batchReceiveTaskVo.getSampler() ==null) {
+                || batchReceiveTaskVo.getReportProducer() == null || batchReceiveTaskVo.getSampler() ==null||batchReceiveTaskVo.getSampleReceivingTime()==null) {
             return ResultUtil.error(201, "缺少必填参数！");
         }
         List<Long> ids = batchReceiveTaskVo.getId();
@@ -829,14 +829,6 @@ public class TaskController {
                                        Integer checkItemId,
                                        Integer itemId,
                                        HttpServletResponse response) throws IOException {
-        //从文件服务器获取文件流
-        String originalTemplate = taskService.getOriginalTemplateUrl(checkItemId);
-        if(originalTemplate==null){
-            log.error(checkItemId+"\t无原始记录模板为null");
-        }
-        String[] split = originalTemplate.split("/");
-        String[] split1 = split[4].split("\\?");
-        InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
         Integer[] ids = new Integer[1];
         ids[0] = itemId;
         response.reset();
@@ -846,7 +838,6 @@ public class TaskController {
         response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("原始记录.zip", "UTF-8") );
         ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(ids,response);
         zipOutputStream.flush();
-
     }
 
 

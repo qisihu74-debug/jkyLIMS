@@ -35,7 +35,7 @@ public interface EntrustService {
      */
     Boolean addEntrustTest(EntrustAddVo vo, MultipartFile[] file);
 
-    Boolean addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file);
+    String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file);
 
 
 
@@ -73,7 +73,7 @@ public interface EntrustService {
     /**
      * 实现作废
      */
-    Boolean abandonEntrust(EntrustEntity entrustEntity);
+    String abandonEntrust(EntrustEntity entrustEntity);
 
     /**
      * 查询检测项详细信息
@@ -259,7 +259,7 @@ public interface EntrustService {
      * @param vo
      * @return
      */
-    Boolean addEntrustCopy(EntrustAddVo vo, MultipartFile[] file);
+    String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file);
 
     Long checkEntrustId(Long entrustId);
 

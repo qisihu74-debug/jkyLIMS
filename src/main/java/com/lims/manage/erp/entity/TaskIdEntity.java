@@ -44,4 +44,8 @@ public class TaskIdEntity {
      * 任务编号
      */
     private String taskCode;
+    /**
+     * 原始记录名称
+     */
+    private String originalName;
 }

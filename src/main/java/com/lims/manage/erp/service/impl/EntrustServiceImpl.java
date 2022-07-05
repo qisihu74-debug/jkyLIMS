@@ -428,7 +428,7 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized Boolean addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) {
+    public synchronized String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) {
         //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
         long id = GenID.getID();
@@ -437,6 +437,7 @@ public class EntrustServiceImpl implements EntrustService {
         Integer code = null;
         String currentTime = DateUtil.getTodayString().substring(0, 6);
         //获取当前最大样品编号
+        PageHelper.clearPage();
         Integer entrustNum = entityMapper.selectMaxNo();
         if (entrustNum != null && entrustNum > 0) {
             String substring = entrustNum.toString().substring(0, 6);
@@ -450,14 +451,16 @@ public class EntrustServiceImpl implements EntrustService {
         }
         basisInfo.setEntrustmentNo(code);
         // 通过委托编号 查询是否存在
+        PageHelper.clearPage();
         if (entityMapper.getByData(basisInfo.getEntrustmentNo()) != null) {
-            return false;
+            return "新增委托失败!:\t委托编号已存在\t"+basisInfo.getEntrustmentNo();
         }
         // 通过样品ID 查询委托单信息和样品Id 绑定关系 （==null 正常，!=null false）
         if (!CollectionUtils.isEmpty(vo.getSamples())) {
             for (SampleEntity sampleEntity : vo.getSamples()) {
+                PageHelper.clearPage();
                 if (entityMapper.getEntrustIdBySampleId(sampleEntity.getId()) != null) {
-                    return false;
+                    return "新增委托失败!:\t样品与委托单与建立关系\t"+sampleEntity.getId();
                 }
             }
         }
@@ -562,6 +565,7 @@ public class EntrustServiceImpl implements EntrustService {
             testCompanyJsonEntity.setContacts(basisInfo.getEntrustPeople());
             testCompanyJsonEntity.setContactWay(basisInfo.getEntrustPhone());
             testCompanyJsonEntity.setType("1");
+            PageHelper.clearPage();
             String entrustCompanystr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (entrustCompanystr == null) {
                 // 保存新的委托联系人姓名 和所属委托单位公司id
@@ -582,6 +586,7 @@ public class EntrustServiceImpl implements EntrustService {
                 testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
             }
             testCompanyJsonEntity.setType("2");
+            PageHelper.clearPage();
             String WitnessUintstr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (WitnessUintstr == null) {
                 // 保存新的见证联系人姓名 和所属见证单位公司id
@@ -606,7 +611,7 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setDepartment(department);
         }
         entityMapper.insertEntrustInfo(basisInfo);
-        return true;
+        return "新建委托成功";
     }
 
 
@@ -620,7 +625,7 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateEntrust(EntrustAddVo vo, MultipartFile[] file) {
-        EntrustEntity basisInfo = new EntrustEntity(vo);
+       /* EntrustEntity basisInfo = new EntrustEntity(vo);
         Integer code = vo.getEntrustmentNo();
         //附件存在上传附件到服务器
         if (file != null) {
@@ -716,7 +721,7 @@ public class EntrustServiceImpl implements EntrustService {
         //得到总价钱，再保存委托基本信息
         basisInfo.setPaymentCount(totalMoney + "");
         //存放委托基本信息==》test_entrusted
-        entityMapper.updateEntrustInfo(basisInfo);
+        entityMapper.updateEntrustInfo(basisInfo);*/
         return true;
     }
 
@@ -1649,7 +1654,13 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public Boolean abandonEntrust(EntrustEntity entrustEntity) {
+    public String abandonEntrust(EntrustEntity entrustEntity) {
+        //查询当前委托单下的任务单数量
+        Integer reportStateTaskNum = entityMapper.getReportStateTaskNum(entrustEntity.getId());
+        if(reportStateTaskNum>0){
+            //已发布
+            return "作废委托失败！:\t 委托单已经发布";
+         }
         entrustEntity.setState(144);
         entityMapper.updateEntrustInfo(entrustEntity);
         List<Integer> sampleIds = entityMapper.getSampleId(entrustEntity.getId());
@@ -1663,7 +1674,7 @@ public class EntrustServiceImpl implements EntrustService {
             // 1.0 样品与委托单已存在 1.1、删除样品id
             entityMapper.removeTestEntrustedSampleDetailsRel(entrustEntity.getId());
         }
-        return true;
+        return "作废委托单成功";
     }
 
     @Override
@@ -1828,9 +1839,7 @@ public class EntrustServiceImpl implements EntrustService {
 //            }
 //        }
 //        PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
-        System.out.println("entrustHistoryEntity.getPageNum()"+entrustHistoryEntity.getPageNum() +"\t entrustHistoryEntity.getPageSize()" + entrustHistoryEntity.getPageSize());
         PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
-        System.out.println(result.getList());
         return result;
     }
 
@@ -2912,7 +2921,7 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) {
+    public String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) {
         // 获取前台得到的 vo.getId()
         long old = vo.getId();
         //存放委托基本信息==》test_entrusted
@@ -2923,6 +2932,7 @@ public class EntrustServiceImpl implements EntrustService {
         Integer code = null;
         String currentTime = DateUtil.getTodayString().substring(0, 6);
         //获取当前最大委托编号
+        PageHelper.clearPage();
         Integer entrustNum = entityMapper.selectMaxNo();
         if (entrustNum != null && entrustNum > 0) {
             String substring = entrustNum.toString().substring(0, 6);
@@ -2936,8 +2946,9 @@ public class EntrustServiceImpl implements EntrustService {
         }
         basisInfo.setEntrustmentNo(code);
         // 通过委托编号 查询是否存在
+        PageHelper.clearPage();
         if (entityMapper.getByData(basisInfo.getEntrustmentNo()) != null) {
-            return false;
+            return "再来一单新增委托失败!:\t委托编号已存在\t"+basisInfo.getEntrustmentNo();
         }
         // 处理copy后的样品集合
         if(!vo.getSamples().isEmpty()){
@@ -2946,8 +2957,9 @@ public class EntrustServiceImpl implements EntrustService {
 //         通过样品ID 查询委托单信息和样品Id 绑定关系 （==null 正常，!=null false）
         if (!CollectionUtils.isEmpty(vo.getSamples())) {
             for (SampleEntity sampleEntity : vo.getSamples()) {
+                PageHelper.clearPage();
                 if (entityMapper.getEntrustIdBySampleId(sampleEntity.getId()) != null) {
-                    return false;
+                    return "再来一单新增委托失败!:\t样品与委托单与建立关系\t"+sampleEntity.getId();
                 }
             }
         }
@@ -3115,6 +3127,7 @@ public class EntrustServiceImpl implements EntrustService {
             testCompanyJsonEntity.setContacts(basisInfo.getEntrustPeople());
             testCompanyJsonEntity.setContactWay(basisInfo.getEntrustPhone());
             testCompanyJsonEntity.setType("1");
+            PageHelper.clearPage();
             String entrustCompanystr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (entrustCompanystr == null) {
                 // 保存新的委托联系人姓名 和所属委托单位公司id
@@ -3135,6 +3148,7 @@ public class EntrustServiceImpl implements EntrustService {
                 testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
             }
             testCompanyJsonEntity.setType("2");
+            PageHelper.clearPage();
             String WitnessUintstr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (WitnessUintstr == null) {
                 // 保存新的见证联系人姓名 和所属见证单位公司id
@@ -3159,7 +3173,7 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setDepartment(department);
         }
         entityMapper.insertEntrustInfo(basisInfo);
-        return true;
+        return "再来一单新建委托成功";
     }
 
     @Override
