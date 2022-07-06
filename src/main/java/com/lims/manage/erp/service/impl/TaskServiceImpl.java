@@ -644,6 +644,21 @@ public class TaskServiceImpl implements TaskService {
                 }
                 if (samples.size() > 5) {
                     AsposeUtil.addRows(tables.get(0), 4, samples.size() - 5);
+                    //遍历表格插入数据
+                    XWPFTable table1 = tables.get(j);
+                    List<XWPFTableRow> rows1 = table1.getRows();
+                    for (int i = 1; i < rows1.size(); i++) {
+                        List<XWPFTableCell> cells = rows1.get(i).getTableCells();
+                        for (int j1 = 0; j1 < cells.size(); j1++) {
+                            XWPFTableCell cell = cells.get(j1);
+
+                            // 设置水平居中,需要ooxml-schemas包支持
+                            CTTc cttc = cell.getCTTc();
+                            CTTcPr ctPr = cttc.addNewTcPr();
+                            ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
+                            cttc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
+                        }
+                    }
                 }
 
                 for (int i = 0; i < samples.size(); i++) {
@@ -693,7 +708,7 @@ public class TaskServiceImpl implements TaskService {
             }
             // 提供资料
             if (j == 1) {
-                rows.get(0).getTableCells().get(0).setText(taskDetailInfoVo.getPresentInformation());
+                rows.get(0).getTableCells().get(1).setText(taskDetailInfoVo.getPresentInformation());
                 // 取样方式
                 rows.get(1).getTableCells().get(1).setText(taskDetailInfoVo.getSamplingMethod());
                 // 检验目的

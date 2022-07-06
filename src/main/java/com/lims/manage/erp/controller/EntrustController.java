@@ -277,12 +277,6 @@ public class EntrustController {
         if (entrustHistoryEntity.getPageNum() == null || entrustHistoryEntity.getPageSize() == null) {
             return ResultUtil.error("缺少分页参数");
         }
-        if (entrustHistoryEntity.getState() == null) {
-            entrustHistoryEntity.setState(0);
-        }
-        if (entrustHistoryEntity.getState() != 0 && entrustHistoryEntity.getState() != 144 && entrustHistoryEntity.getState() != 1 && entrustHistoryEntity.getState()!=200 ||  entrustHistoryEntity.getState() ==null) {
-            return ResultUtil.error("必填参数状态有误");
-        }
         return ResultUtil.success(entrustService.getEntrustHistoryList(entrustHistoryEntity));
     }
 
@@ -419,7 +413,14 @@ public class EntrustController {
 //        entity.setRequiredCompletionTime(new java.sql.Date(vo.getRequestDate().getTime()));
         // 丁连春：任务单完成时间 以委托单下单时间为准
         entity.setRequiredCompletionTime(vo.getRequestDate());
+        // 任务单下单日期等于委托单受理日期
         entity.setOrderTime(vo.getAcceptanceDate());
+        // 任务单提供资料等于委托单提供资料
+        if(!org.springframework.util.StringUtils.isEmpty(vo.getPresentInformation())){
+            entity.setPresentInformation(vo.getPresentInformation());
+        }else {
+            entity.setPresentInformation("--");
+        }
         Boolean flag = entrustService.distributionTask412(entity);
         if (flag) {
             /*logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"账户："+ShiroUtils.getUserInfo().getUsername()+"发布任务成功编号为："+vo.getEntrustmentNo(),

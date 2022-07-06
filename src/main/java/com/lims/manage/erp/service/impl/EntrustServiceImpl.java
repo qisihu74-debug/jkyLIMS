@@ -1816,7 +1816,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 获取状态
         List<EntrustHistoryEntity> dataList = new ArrayList<>();
-        if (entrustHistoryEntity.getState() == 1) {
+        if (!StringUtils.isEmpty(entrustHistoryEntity.getState())&&entrustHistoryEntity.getState() == 1) {
 //            PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
             PageHelper.clearPage();
             dataList = entityMapper.selectEntrustHistoryTaskListRelease_of(entrustHistoryEntity);
@@ -2536,6 +2536,7 @@ public class EntrustServiceImpl implements EntrustService {
             vo.setState(0);
             vo.setReportComplete(2);
             vo.setOrderer(ShiroUtils.getUserInfo().getName());
+            vo.setPresentInformation(entity.getPresentInformation());
 //            if(deptId.equals(dept)){
             if (entity.getDeptIds().contains(deptId)) {
                 vo.setIssueReport("是");
