@@ -512,7 +512,7 @@ public class ReportServiceImpl implements ReportService {
             for (ReportRecordDetailEntity e : checkInfos) {
                 e.setRecordId(reportRecordEntity1.getId());
                 e.setTaskId(vo.getTaskId());
-                List<Long> checkItemIds = recordDetailEntityMapper.getCheckItemIds(reportRecordEntity1.getId());
+                List<Long> checkItemIds = recordDetailEntityMapper.getCheckItemIds(reportRecordEntity1.getId(),vo.getTaskId());
                 if (checkItemIds.contains(e.getCheckItemId())) {
                     recordDetailEntityMapper.updateByRecordIdSelective(e);
                 } else {
