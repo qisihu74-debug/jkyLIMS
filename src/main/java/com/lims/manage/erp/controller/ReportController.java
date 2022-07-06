@@ -517,7 +517,7 @@ public class ReportController {
 
     @GetMapping("/getTemplateList")
     public Result getTemplateList(Long id) {
-        return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList(id));
+        return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList0706(id));
     }
 
     /**

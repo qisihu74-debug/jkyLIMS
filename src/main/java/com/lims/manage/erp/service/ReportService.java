@@ -173,6 +173,13 @@ public interface ReportService {
     List<ReportTemplateEntity> getReportTemplateList(Long id);
 
     /**
+     * 查询每组样品的报告信息
+     * @param id
+     * @return
+     */
+    List<ReportProductRelVo> getReportTemplateList0706(Long id);
+
+    /**
      * 查询存在委托单报告信息
      * @param entrustId
      * @return
