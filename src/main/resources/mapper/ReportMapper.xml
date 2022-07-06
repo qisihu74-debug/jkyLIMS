@@ -42,7 +42,7 @@
     <resultMap id="reportCheckMap" type="com.lims.manage.erp.vo.ReportHistoryDetailVo">
         <result property="sampleName" column="sample_name"></result>
         <collection property="checkItemInfo" ofType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
-            <id property="checkItemName" column="check_item_name"></id>
+            <result property="checkItemName" column="check_item_name"></result>
             <result property="checkItemId" column="check_item_id"></result>
             <result property="specsContent" column="specs_content"></result>
             <result property="checkResult" column="check_result"></result>
