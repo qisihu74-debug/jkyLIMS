@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.ReportTemplateEntity;
+import com.lims.manage.erp.vo.ReportProductRelVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -24,4 +25,12 @@ public interface ReportTemplateEntityMapper {
 
     List<ReportTemplateEntity> getReportTemplateListOld(String productId);
     List<ReportTemplateEntity> getReportTemplateList(@Param("allReportId") List<Long> allReportId);
+    List<ReportTemplateEntity> getReportTemplateList0706(@Param("entrustId") Long entrustId,@Param("sampleId") Integer sampleId);
+
+    /**
+     *
+     * @param entrustId
+     * @return
+     */
+    List<ReportProductRelVo> getSampleIdByEntrust(Long entrustId);
 }

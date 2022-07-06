@@ -56,7 +56,7 @@ public interface ReportRecordDetailEntityMapper {
      * @param recordId
      * @return
      */
-    List<Long> getCheckItemIds(Long recordId);
+    List<Long> getCheckItemIds(Long recordId,Long taskId);
 
     @Select("SELECT distinct \n" +
             "\trrd.check_item_name As name \n" +

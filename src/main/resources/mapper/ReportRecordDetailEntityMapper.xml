@@ -203,6 +203,7 @@
             test_report_record_detail
         WHERE
             record_id = #{recordId,jdbcType=BIGINT}
+            and task_id = #{taskId,jdbcType=BIGINT}
     </select>
 
     <delete id="deleteByEntrustIdandCheckItemId" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
