@@ -523,8 +523,7 @@
             </if>
         </trim>
         ORDER BY
-        t2.entrustment_no desc,
-        t1.required_completion_time desc
+        t1.code desc
 
     </select>
     <select id="getCorrelationTask" resultType="java.lang.String">
