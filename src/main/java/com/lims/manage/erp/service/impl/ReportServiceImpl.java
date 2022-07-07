@@ -186,8 +186,19 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo makeReport(Integer pageNum, Integer pageSize, String search) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        PageHelper.startPage(pageNum, pageSize);
         List<ReportListVo> list = reportMapper.getReportList2(userTeamIds, search);
+        for (ReportListVo reportListVo : list) {
+            StringBuilder sampleName = new StringBuilder();
+            List<String> sampleNames = reportMapper.getSampleNames(reportListVo.getId());
+            for (int j = 0; j <sampleNames.size(); j++) {
+                sampleName.append(sampleNames.get(j));
+                if(j != sampleNames.size()-1){
+                    sampleName.append("/");
+                }
+            }
+            reportListVo.setSampleName(sampleName.toString());
+        }
+        PageHelper.startPage(pageNum, pageSize);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -196,8 +207,20 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        PageHelper.startPage(pageNum, pageSize);
         List<ReportListVo> list = reportMapper.reportDownloadList(userTeamIds, search);
+        for (ReportListVo reportListVo : list) {
+            List<String> sampleNames = reportMapper.getSampleNames(reportListVo.getId());
+            StringBuilder sampleName = new StringBuilder();
+            for (int i = 0; i < sampleNames.size(); i++) {
+                sampleName.append(sampleNames.get(i));
+                if(i != sampleNames.size()-1){
+                    sampleName.append("/");
+                }
+            }
+            reportListVo.setSampleName(sampleName.toString());
+        }
+        PageHelper.clearPage();
+        PageHelper.startPage(pageNum, pageSize);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -384,6 +407,8 @@ public class ReportServiceImpl implements ReportService {
         ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
         List<ReportSampleDetailVo> samples = reportDetail.getSamples();
         //处理每组样品下检测项
+        StringBuilder sampleName = new StringBuilder();
+        int i = 0;
         for (ReportSampleDetailVo reportSampleDetailVo : samples) {
             List<ReportCheckItemDetailVo> result = Lists.newArrayList();
             List<SampleItemEntity> temp = Lists.newArrayList();
@@ -452,7 +477,13 @@ public class ReportServiceImpl implements ReportService {
                 result.addAll(checkItems);
             }
             reportSampleDetailVo.setCheckItems(result);
+            sampleName.append(reportSampleDetailVo.getSampleName());
+            if(i != samples.size() -1){
+                sampleName.append("/");
+            }
+            i++;
         }
+        reportDetail.setSampleName(sampleName.toString());
         reportDetail.setSamples(samples);
         return reportDetail;
     }
@@ -1102,7 +1133,7 @@ public class ReportServiceImpl implements ReportService {
                                 String issuer, Long verifyerId, Long issuerId, String code,
                                 String conclusion,String additional,String mixInfo,String type) {
         //解析code
-        Map<Integer,List<String>> map = JSON.parseObject(code, Map.class);
+        Map<String,List<String>> map = JSON.parseObject(code, Map.class);
         List<ParamEntity> entities = Lists.newArrayList();
         Boolean flag = false;
         String url = "";
@@ -1110,11 +1141,11 @@ public class ReportServiceImpl implements ReportService {
             //下载模板填充数据
             MinioClient client = MinIoUtil.minioClient;
             try {
-                for (Integer s:map.keySet()) {
+                for (String s:map.keySet()) {
                     List<String> list = map.get(s);
                     for (String ss:list) {
                         ParamEntity paramEntity = new ParamEntity();
-                        paramEntity.setSampleId(s);
+                        paramEntity.setSampleId(Integer.parseInt(s));
                         paramEntity.setUrl(ss);
                         entities.add(paramEntity);
                     }
@@ -1758,7 +1789,8 @@ public class ReportServiceImpl implements ReportService {
     public ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) {
         //2代表报告头2页
         String key = "——";
-        int totalPage = 2;
+        //int totalPage = 2;
+        int totalPageNew = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
         //处理坐标提示信息
         ReportResBean resBean = new ReportResBean();
@@ -1777,6 +1809,7 @@ public class ReportServiceImpl implements ReportService {
             //写入数据
             List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
             if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
+                totalPageNew = doc.getProperties().getExtendedProperties().getUnderlyingProperties().getPages()+totalPageNew;
                 int size = doc.getTables().size();
                 //处理表格
                 Iterator<XWPFTable> it = doc.getTablesIterator();
@@ -1784,7 +1817,7 @@ public class ReportServiceImpl implements ReportService {
                 int i = 1;
                 //获取表格信息
                 while (it.hasNext()) {
-                    totalPage++;
+                    //totalPage++;
                     index++;
                     XWPFTable table = it.next();
                     List<XWPFTableRow> rows = table.getRows();
@@ -1818,9 +1851,9 @@ public class ReportServiceImpl implements ReportService {
                         if (start != null && end != null){
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
                             if (s.equals(e)){
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(s));
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,s);
                             }else {
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(s) + "~" + sdf.format(e));
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,s + "~" + e);
                             }
                         }
                         //主要仪器
@@ -1917,7 +1950,7 @@ public class ReportServiceImpl implements ReportService {
         InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
         XWPFDocument topDoc = new XWPFDocument(fileStream);;
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
-        setReportTop(topDoc,entrustAddVo,reportRecordEntity,totalPage);
+        setReportTop(topDoc,entrustAddVo,reportRecordEntity,totalPageNew);
         //报告头部合并顺序1
         map.put(1,topDoc);
         //将报告合并成一个完整的word
@@ -1953,7 +1986,8 @@ public class ReportServiceImpl implements ReportService {
         }
         //2代表报告头2页
         String key = "——";
-        int totalPage = 2;
+        //int totalPage = 2;
+        int totalPageNew = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
         //处理坐标提示信息
         ReportResBean resBean = new ReportResBean();
@@ -1970,6 +2004,7 @@ public class ReportServiceImpl implements ReportService {
             client.statObject(bluckName, fileName);
             InputStream object = client.getObject(bluckName, fileName);
             doc = new XWPFDocument(object);
+            totalPageNew = doc.getProperties().getExtendedProperties().getUnderlyingProperties().getPages()+totalPageNew;
             //写入数据
             List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
             if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
@@ -1980,7 +2015,7 @@ public class ReportServiceImpl implements ReportService {
                 int i = 1;
                 //获取表格信息
                 while (it.hasNext()) {
-                    totalPage++;
+                    //totalPage++;
                     index++;
                     XWPFTable table = it.next();
                     List<XWPFTableRow> rows = table.getRows();
@@ -2014,9 +2049,9 @@ public class ReportServiceImpl implements ReportService {
                         if (start != null && end != null){
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
                             if (s.equals(e)){
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(s));
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,s);
                             }else {
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(s) + "~" + sdf.format(e));
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,s + "~" + e);
                             }
                         }
                         //主要仪器
@@ -2130,7 +2165,7 @@ public class ReportServiceImpl implements ReportService {
         InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
         XWPFDocument topDoc = new XWPFDocument(fileStream);
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
-        setReportTop(topDoc,entrustAddVo,reportRecordEntity,totalPage);
+        setReportTop(topDoc,entrustAddVo,reportRecordEntity,totalPageNew);
         //报告头部合并顺序1
         map.put(1,topDoc);
         //将报告合并成一个完整的word

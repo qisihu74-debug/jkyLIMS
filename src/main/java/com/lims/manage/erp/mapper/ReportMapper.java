@@ -32,6 +32,13 @@ public interface ReportMapper {
     List<ReportListVo> reportDownloadList(@Param("deptIds") List<Long> deptIds,@Param("reportCode") String reportCode);
 
     /**
+     * 查询委托下样品名字
+     * @param entrustId
+     * @return
+     */
+    List<String> getSampleNames(Long entrustId);
+
+    /**
      * 查询下载报告列表--科室
      *
      * @return
