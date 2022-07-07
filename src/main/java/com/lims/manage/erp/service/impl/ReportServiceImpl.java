@@ -1114,7 +1114,7 @@ public class ReportServiceImpl implements ReportService {
                                 String issuer, Long verifyerId, Long issuerId, String code,
                                 String conclusion,String additional,String mixInfo,String type) {
         //解析code
-        Map<Integer,List<String>> map = JSON.parseObject(code, Map.class);
+        Map<String,List<String>> map = JSON.parseObject(code, Map.class);
         List<ParamEntity> entities = Lists.newArrayList();
         Boolean flag = false;
         String url = "";
@@ -1122,11 +1122,11 @@ public class ReportServiceImpl implements ReportService {
             //下载模板填充数据
             MinioClient client = MinIoUtil.minioClient;
             try {
-                for (Integer s:map.keySet()) {
+                for (String s:map.keySet()) {
                     List<String> list = map.get(s);
                     for (String ss:list) {
                         ParamEntity paramEntity = new ParamEntity();
-                        paramEntity.setSampleId(s);
+                        paramEntity.setSampleId(Integer.parseInt(s));
                         paramEntity.setUrl(ss);
                         entities.add(paramEntity);
                     }
