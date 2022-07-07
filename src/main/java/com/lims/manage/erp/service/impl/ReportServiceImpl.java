@@ -2176,6 +2176,7 @@ public class ReportServiceImpl implements ReportService {
                 String des = delItemDes(sampleEntity.getJudgmentBasisVos(),templateEntity.getReportFileUri(),entrustId);
                 String judgeBasis = getJudgeBasis(entrustId);
                 ConclusionEntity conclusionEntity =  new ConclusionEntity();
+                conclusionEntity.setSampleId(sampleEntity.getId());
                 conclusionEntity.setUrl(templateEntity.getReportFileUri());
                 conclusionEntity.setConclusion("经检测，该"+sampleEntity.getSampleName()+"样品,"+des+"均符合"+judgeBasis+"中的技术要求。");
                 StringBuilder stringBuilder = new StringBuilder();

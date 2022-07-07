@@ -6,10 +6,20 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.AlertEntity;
+import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
+import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.ReportResBean;
+import com.lims.manage.erp.entity.ReqBean;
+import com.lims.manage.erp.entity.SealEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
+import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
-//import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -35,14 +45,11 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.xmlpull.v1.XmlPullParserException;
@@ -61,6 +68,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+//import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 
 @Slf4j
 @RestController
@@ -655,11 +664,12 @@ public class ReportController {
                 alertService.deleteByEntrustId(reqBean.getId());
                 alertService.saveBatch(list);
             }
+            //TODO 上传是否保留？
+            url = MinIoUtil.upload("report-download", reqBean.getId() + ".pdf", inputStream, "application/octet-stream");
             ServletOutputStream outputStream = response.getOutputStream();
             int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
             inputStream.close();
             outputStream.close();
-            url = MinIoUtil.upload("report-download", reqBean.getId() + ".pdf", inputStream, "application/octet-stream");
         }catch (Exception e){
             logger.error("预览合并后的报告异常:{}",e);
         }
