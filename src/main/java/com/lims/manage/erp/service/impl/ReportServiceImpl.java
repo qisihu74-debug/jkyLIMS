@@ -1798,10 +1798,11 @@ public class ReportServiceImpl implements ReportService {
             client.statObject(bluckName, fileName);
             InputStream object = client.getObject(bluckName, fileName);
             doc = new XWPFDocument(object);
+            totalPageNew = doc.getProperties().getExtendedProperties().getUnderlyingProperties().getPages()+totalPageNew;
+            logger.debug("报告页数:{}",totalPageNew);
             //写入数据
             List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
             if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
-                totalPageNew = doc.getProperties().getExtendedProperties().getUnderlyingProperties().getPages()+totalPageNew;
                 int size = doc.getTables().size();
                 //处理表格
                 Iterator<XWPFTable> it = doc.getTablesIterator();
@@ -1942,6 +1943,7 @@ public class ReportServiceImpl implements ReportService {
         InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
         XWPFDocument topDoc = new XWPFDocument(fileStream);;
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
+        logger.debug("本次报告总页数:{}",totalPageNew);
         setReportTop(topDoc,entrustAddVo,reportRecordEntity,totalPageNew);
         //报告头部合并顺序1
         map.put(1,topDoc);
