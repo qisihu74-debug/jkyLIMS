@@ -483,6 +483,7 @@ public class ReportServiceImpl implements ReportService {
             }
             i++;
         }
+        reportDetail.setSampleName(sampleName.toString());
         reportDetail.setSamples(samples);
         return reportDetail;
     }
