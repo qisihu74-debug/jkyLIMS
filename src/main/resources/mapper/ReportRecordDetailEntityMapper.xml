@@ -11,12 +11,14 @@
             <arg column="check_result" jdbcType="VARCHAR" javaType="java.lang.String"/>
             <arg column="judge_result" jdbcType="VARCHAR" javaType="java.lang.String"/>
             <arg column="coordinate" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="origin_url" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="task_id" jdbcType="BIGINT" javaType="java.lang.Long"/>
+            <arg column="sample_id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
         </constructor>
     </resultMap>
     <sql id="Base_Column_List">
-        id
-        , record_id, check_item_id, check_item_name, specs_content, check_result, judge_result,
-    coordinate
+        id, record_id, check_item_id, check_item_name, specs_content, check_result, judge_result,
+        coordinate,origin_url,task_id,sample_id
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -28,7 +30,7 @@
         select
         *
         from test_report_record_detail
-        where record_id = #{recordId} and check_item_id = #{checkItemId}
+        where record_id = #{recordId} and check_item_id = #{checkItemId} and sample_id = #{sampleId}
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
@@ -39,10 +41,10 @@
     <insert id="insert" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
         insert into test_report_record_detail (id, record_id, check_item_id,
                                                check_item_name, specs_content, check_result,
-                                               judge_result, coordinate,origin_url,task_id)
+                                               judge_result, coordinate,origin_url,task_id,sample_id)
         values (#{id,jdbcType=BIGINT}, #{recordId,jdbcType=BIGINT}, #{checkItemId,jdbcType=BIGINT},
                 #{checkItemName,jdbcType=VARCHAR}, #{specsContent,jdbcType=VARCHAR}, #{checkResult,jdbcType=VARCHAR},
-                #{judgeResult,jdbcType=VARCHAR}, #{coordinate,jdbcType=VARCHAR},#{originUrl},#{taskId})
+                #{judgeResult,jdbcType=VARCHAR}, #{coordinate,jdbcType=VARCHAR},#{originUrl},#{taskId},#{sampleId})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
         insert into test_report_record_detail
@@ -175,7 +177,7 @@
                 origin_url = #{originUrl},
             </if>
         </set>
-        where record_id = #{recordId,jdbcType=BIGINT} and check_item_id = #{checkItemId,jdbcType=BIGINT}
+        where record_id = #{recordId,jdbcType=BIGINT} and check_item_id = #{checkItemId,jdbcType=BIGINT} and sample_id = #{sampleId}
     </update>
 
     <select id="getCheckInfoByRecordId" resultType="com.lims.manage.erp.entity.ReportRecordDetailEntity" parameterType="java.lang.Long">
@@ -204,6 +206,7 @@
         WHERE
             record_id = #{recordId,jdbcType=BIGINT}
             and task_id = #{taskId,jdbcType=BIGINT}
+            and sample_id = #{sampleId,jdbcType=INTEGER}
     </select>
 
     <delete id="deleteByEntrustIdandCheckItemId" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
