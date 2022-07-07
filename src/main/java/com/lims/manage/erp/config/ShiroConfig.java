@@ -37,8 +37,8 @@ public class ShiroConfig {
     private String host;
     @Value("${spring.redis.port}")
     private int port;
-    @Value("${spring.redis.timeout}")
-    private int timeout;
+  /*  @Value("${spring.redis.timeout}")
+    private int timeout;*/
     @Value("${spring.redis.password}")
     private  String password;
     /**
@@ -147,7 +147,7 @@ public class ShiroConfig {
         RedisManager redisManager = new RedisManager();
         redisManager.setHost(host);
         redisManager.setPort(port);
-        redisManager.setTimeout(timeout);
+        //redisManager.setTimeout(timeout);
         redisManager.setPassword(password);
         return redisManager;
     }
@@ -164,7 +164,6 @@ public class ShiroConfig {
         RedisCacheManager redisCacheManager = new RedisCacheManager();
         redisCacheManager.setRedisManager(redisManager());
         redisCacheManager.setKeyPrefix(CACHE_KEY);
-        redisCacheManager.setExpire(3*3600*1000);
         // 配置缓存的话要求放在session里面的实体类必须有个id标识
         redisCacheManager.setPrincipalIdFieldName("userId");
         return redisCacheManager;
@@ -192,7 +191,7 @@ public class ShiroConfig {
         redisSessionDAO.setRedisManager(redisManager());
         redisSessionDAO.setSessionIdGenerator(sessionIdGenerator());
         redisSessionDAO.setKeyPrefix(SESSION_KEY);
-        redisSessionDAO.setExpire(3*3600*1000);
+        redisSessionDAO.setExpire(2*3600);
         return redisSessionDAO;
     }
 

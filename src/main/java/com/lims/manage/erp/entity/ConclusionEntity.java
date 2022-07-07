@@ -12,6 +12,7 @@ import lombok.Data;
  */
 @Data
 public class ConclusionEntity {
+    private int sampleId;
     /**
      * 报告模板地址
      */

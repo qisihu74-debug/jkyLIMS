@@ -1,13 +1,18 @@
 package com.lims.manage.erp.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
+import com.lims.manage.erp.entity.EntrustPamentEntity;
+import com.lims.manage.erp.entity.EntrustSampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.TestCompanyJsonEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.EntrustSampleInfoVo;
 import com.lims.manage.erp.vo.HistoryEntrustDataVo;
 import com.lims.manage.erp.vo.LabelValueVo;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -442,4 +447,19 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Select("select id from test_entrusted_info where id=#{entrustId}")
     Long checkEntrustId(@Param("entrustId") Long entrustId);
+
+    /**
+     * 根据委托单id和样品id获取待出报告的参数
+     * @param entrustId
+     * @param sampleId
+     */
+    @Select("SELECT DISTINCT\n" +
+            "\trrd.check_item_id\n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel escr\n" +
+            "LEFT JOIN test_report_record_detail rrd ON escr.task_id = rrd.task_id\n" +
+            "WHERE\n" +
+            "\tescr.entrust_id = #{entrustId}\n" +
+            "AND escr.sample_id = #{sampleId}")
+    List<Long> getItemIdByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") int sampleId);
 }
