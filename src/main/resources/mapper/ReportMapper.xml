@@ -287,24 +287,51 @@
         order by t2.code desc
     </select>
 
+<!--    <select id="reportDownloadList" resultType="com.lims.manage.erp.vo.ReportListVo">-->
+<!--        SELECT DISTINCT t1.id,-->
+<!--                        t1.entrust_test_type,-->
+<!--                        t2.id task_id,-->
+<!--                        t2.task_code,-->
+<!--                        t6.report_code,-->
+<!--                        t4.sample_name,-->
+<!--                        t1.actual_price count_price,-->
+<!--                        t4.product_id,-->
+<!--                        DATE_FORMAT(t1.request_date, '%Y-%m-%d') request_date-->
+<!--        FROM test_entrusted_info t1-->
+<!--                 LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id-->
+<!--                 LEFT JOIN test_entrusted_sample_details_rel t3 ON t1.id = t3.entrustment_id-->
+<!--                 LEFT JOIN test_sample t4 ON t3.sample_id = t4.id-->
+<!--                 left join test_entrusted_sample_checkitem_rel t5 on t1.id = t5.entrust_id and t4.id = t5.sample_id-->
+<!--                 left join test_report_record t6 on t1.id = t6.entrustment_id-->
+<!--        where t2.issue_report = '是'-->
+<!--            AND t6.state = 1-->
+<!--        <if test="reportCode!=null and reportCode!=''">-->
+<!--            and t6.report_code like CONCAT('%',#{reportCode},'%')-->
+<!--        </if>-->
+<!--        <if test="deptIds!=null">-->
+<!--            and t2.dept_id in-->
+<!--            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">-->
+<!--                #{id}-->
+<!--            </foreach>-->
+<!--        </if>-->
+<!--        order by t6.report_code desc-->
+<!--    </select>-->
     <select id="reportDownloadList" resultType="com.lims.manage.erp.vo.ReportListVo">
-        SELECT DISTINCT t1.id,
-                        t1.entrust_test_type,
-                        t2.id task_id,
-                        t2.task_code,
-                        t6.report_code,
-                        t4.sample_name,
-                        t1.actual_price count_price,
-                        t4.product_id,
-                        DATE_FORMAT(t1.request_date, '%Y-%m-%d') request_date
-        FROM test_entrusted_info t1
-                 LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
-                 LEFT JOIN test_entrusted_sample_details_rel t3 ON t1.id = t3.entrustment_id
-                 LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
-                 left join test_entrusted_sample_checkitem_rel t5 on t1.id = t5.entrust_id and t4.id = t5.sample_id
-                 left join test_report_record t6 on t1.id = t6.entrustment_id
-        where t2.issue_report = '是'
-            AND t6.state = 1
+        SELECT DISTINCT
+        t1.id,
+        t1.entrust_test_type,
+        t2.id task_id,
+        t2.task_code,
+        t6.report_code,
+        t1.actual_price count_price,
+        DATE_FORMAT( t1.request_date, '%Y-%m-%d' ) request_date
+        FROM
+        test_entrusted_info t1
+        LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
+        LEFT JOIN test_report_record t6 ON t1.id = t6.entrustment_id
+        WHERE
+        t2.issue_report = '是'
+        AND t6.state = 1
         <if test="reportCode!=null and reportCode!=''">
             and t6.report_code like CONCAT('%',#{reportCode},'%')
         </if>
@@ -315,6 +342,16 @@
             </foreach>
         </if>
         order by t6.report_code desc
+    </select>
+
+    <select id="getSampleNames" resultType="java.lang.String">
+        SELECT
+            t2.alias_name
+        FROM
+            test_entrusted_sample_details_rel t1
+                LEFT JOIN test_sample t2 ON t1.sample_id = t2.id
+        WHERE
+            t1.entrustment_id = #{entrustId}
     </select>
 
     <select id="getReportList3" resultType="com.lims.manage.erp.vo.ReportListVo">
