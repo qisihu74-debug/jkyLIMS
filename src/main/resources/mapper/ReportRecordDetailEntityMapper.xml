@@ -177,7 +177,7 @@
                 origin_url = #{originUrl},
             </if>
         </set>
-        where record_id = #{recordId,jdbcType=BIGINT} and check_item_id = #{checkItemId,jdbcType=BIGINT}
+        where record_id = #{recordId,jdbcType=BIGINT} and check_item_id = #{checkItemId,jdbcType=BIGINT} and sample_id = #{sampleId}
     </update>
 
     <select id="getCheckInfoByRecordId" resultType="com.lims.manage.erp.entity.ReportRecordDetailEntity" parameterType="java.lang.Long">
