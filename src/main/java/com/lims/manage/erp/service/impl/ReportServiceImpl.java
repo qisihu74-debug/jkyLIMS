@@ -952,7 +952,7 @@ public class ReportServiceImpl implements ReportService {
             for (int i = 0; i < list.size(); i++) {
                 result.append(list.get(i));
                 if (list.size() - 1 != i) {
-                    result.append(",");
+                    result.append("、");
                 }
             }
         }
@@ -1799,7 +1799,7 @@ public class ReportServiceImpl implements ReportService {
                         //样品信息
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
                         WordUtils.replaceCellText(rows.get(6).getCell(1),key,"样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
-                                + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
+                                + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~","~"))
                                 + "；样品数量：" + (sampleEntity.getSampleQuantity() == null ? "——" : sampleEntity.getSampleQuantity())
                                 + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
                                 + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
@@ -1813,12 +1813,14 @@ public class ReportServiceImpl implements ReportService {
                         //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
                         Date start = taskMapper.getStartTime(id);
                         Date end = taskMapper.getEndTime(id);
+                        String s = DateUtil.formatDate(start);
+                        String e = DateUtil.formatDate(end);
                         if (start != null && end != null){
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-                            if (start.equals(end)){
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(start));
+                            if (s.equals(e)){
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(s));
                             }else {
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(start) + "~" + sdf.format(end));
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(s) + "~" + sdf.format(e));
                             }
                         }
                         //主要仪器
@@ -1993,7 +1995,7 @@ public class ReportServiceImpl implements ReportService {
                         //样品信息
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
                         WordUtils.replaceCellText(rows.get(6).getCell(1),key,"样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
-                                + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode())
+                                + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~","~"))
                                 + "；样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
                                 + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutward()) ? "——" : sampleEntity.getOutward())
                                 + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
@@ -2007,12 +2009,14 @@ public class ReportServiceImpl implements ReportService {
                         //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
                         Date start = taskMapper.getStartTime(id);
                         Date end = taskMapper.getEndTime(id);
+                        String s = DateUtil.formatDate(start);
+                        String e = DateUtil.formatDate(end);
                         if (start != null && end != null){
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-                            if (start.equals(end)){
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(start));
+                            if (s.equals(e)){
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(s));
                             }else {
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(start) + "~" + sdf.format(end));
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(s) + "~" + sdf.format(e));
                             }
                         }
                         //主要仪器

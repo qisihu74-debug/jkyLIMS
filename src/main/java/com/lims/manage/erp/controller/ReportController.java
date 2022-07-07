@@ -664,12 +664,12 @@ public class ReportController {
                 alertService.deleteByEntrustId(reqBean.getId());
                 alertService.saveBatch(list);
             }
-            //TODO 上传是否保留？
-            url = MinIoUtil.upload("report-download", reqBean.getId() + ".pdf", inputStream, "application/octet-stream");
             ServletOutputStream outputStream = response.getOutputStream();
             int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
             inputStream.close();
             outputStream.close();
+            //TODO 上传是否保留？
+            url = MinIoUtil.upload("report-download", reqBean.getId() + ".pdf", inputStream, "application/octet-stream");
         }catch (Exception e){
             logger.error("预览合并后的报告异常:{}",e);
         }

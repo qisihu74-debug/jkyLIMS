@@ -150,7 +150,7 @@ public class AsposeUtil {
         }
     }
     public static ByteArrayOutputStream word2pdf4(XWPFDocument document) {
-        getLicense();
+        //getLicense();
         ByteArrayOutputStream b1 = null;
         try {
             //XWPFDocument->Document
