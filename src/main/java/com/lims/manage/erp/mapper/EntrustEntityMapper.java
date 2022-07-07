@@ -460,6 +460,6 @@ public interface EntrustEntityMapper extends BaseMapper {
             "LEFT JOIN test_report_record_detail rrd ON escr.task_id = rrd.task_id\n" +
             "WHERE\n" +
             "\tescr.entrust_id = #{entrustId}\n" +
-            "AND escr.sample_id = #{sampleId}")
+            "AND escr.sample_id = #{sampleId} And escr.sample_id=rrd.sample_id")
     List<Long> getItemIdByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") int sampleId);
 }
