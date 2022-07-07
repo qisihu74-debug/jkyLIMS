@@ -407,6 +407,8 @@ public class ReportServiceImpl implements ReportService {
         ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
         List<ReportSampleDetailVo> samples = reportDetail.getSamples();
         //处理每组样品下检测项
+        StringBuilder sampleName = new StringBuilder();
+        int i = 0;
         for (ReportSampleDetailVo reportSampleDetailVo : samples) {
             List<ReportCheckItemDetailVo> result = Lists.newArrayList();
             List<SampleItemEntity> temp = Lists.newArrayList();
@@ -475,6 +477,11 @@ public class ReportServiceImpl implements ReportService {
                 result.addAll(checkItems);
             }
             reportSampleDetailVo.setCheckItems(result);
+            sampleName.append(reportSampleDetailVo.getSampleName());
+            if(i != samples.size() -1){
+                sampleName.append("/");
+            }
+            i++;
         }
         reportDetail.setSamples(samples);
         return reportDetail;
