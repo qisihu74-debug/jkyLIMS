@@ -2709,6 +2709,7 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public HistoryEntrustDataVo getHistoryData(String name, Integer type) {
         HistoryEntrustDataVo data = new HistoryEntrustDataVo();
+        PageHelper.clearPage();
         HistoryEntrustDataVo jsonData = entityMapper.getHistoryData(name);
         if (jsonData != null) {
             data.setProjectName(jsonData.getProjectName());

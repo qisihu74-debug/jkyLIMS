@@ -148,7 +148,6 @@
         <result property="requiredCompletionTime" column="requiredCompletionTime"></result>
         <result property="inspector" column="inspector"></result>
         <result property="cost" column="task_price"></result>
-        <result property="sampleName" column="sampleName"></result>
         <result property="state" column="state"></result>
         <result property="recorder" column="recorder"></result>
         <result property="reviewer" column="reviewer"></result>
@@ -481,7 +480,7 @@
         t1.orderer,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
         t1.inspector,
-        t1.task_price as cost,
+        t1.task_price,
         t4.sample_name sampleName,
         t4.product_id,
         t4.id sampleId,

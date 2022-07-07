@@ -335,6 +335,8 @@ public class SampleServiceImpl implements SampleService {
                 for (int i = 1; i <= maxNumber; i++) {
                     InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
                     StringBuilder fileName = new StringBuilder("");
+                    // 在样品标签中 test_sample  别名  = 产品名
+                    sampleTagInfo.setSampleName(sampleTagInfo.getAliasName());
                     sampleTagInfo.setSampleCode(sampleCodeStr + String.valueOf(i));
                     fileName.append(sampleTagInfo.getSampleCode());
                     fileName.append("样品标签.xlsx");
@@ -370,6 +372,8 @@ public class SampleServiceImpl implements SampleService {
                 else {
                     sampleTagInfo.setOutward("");
                 }
+                // 在样品标签中 test_sample  别名  = 产品名
+                sampleTagInfo.setSampleName(sampleTagInfo.getAliasName());
                 fileName.append(sampleTagInfo.getSampleCode());
                 fileName.append("样品标签.xlsx");
                 result.put("result", sampleTagInfo);
@@ -446,6 +450,8 @@ public class SampleServiceImpl implements SampleService {
 
 
             InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-template.xlsx");
+            // 在样品标签中 test_sample  别名  = 产品名
+            sampleTagInfo.setSampleName(sampleTagInfo.getAliasName());
             StringBuilder fileName = new StringBuilder("");
             fileName.append(sampleData.getSampleCode());
             fileName.append("样品标签.xlsx");
