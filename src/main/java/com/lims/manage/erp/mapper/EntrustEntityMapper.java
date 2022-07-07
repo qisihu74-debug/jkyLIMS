@@ -6,6 +6,7 @@ import com.lims.manage.erp.entity.EntrustHistoryEntity;
 import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
 import com.lims.manage.erp.entity.EntrustPamentEntity;
 import com.lims.manage.erp.entity.EntrustSampleEntity;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
@@ -454,12 +455,12 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @param sampleId
      */
     @Select("SELECT DISTINCT\n" +
-            "\trrd.check_item_id\n" +
+            "\trrd.check_item_id,rrd.check_item_name,rrd.sample_id,rrd.coordinate,rrd.check_result,rrd.specs_content,rrd.judge_result\n" +
             "FROM\n" +
             "\ttest_entrusted_sample_checkitem_rel escr\n" +
             "LEFT JOIN test_report_record_detail rrd ON escr.task_id = rrd.task_id\n" +
             "WHERE\n" +
             "\tescr.entrust_id = #{entrustId}\n" +
             "AND escr.sample_id = #{sampleId} And escr.sample_id=rrd.sample_id")
-    List<Long> getItemIdByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") int sampleId);
+    List<ReportRecordDetailEntity> getItemIdByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") int sampleId);
 }
