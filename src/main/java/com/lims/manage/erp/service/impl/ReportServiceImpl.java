@@ -1758,7 +1758,8 @@ public class ReportServiceImpl implements ReportService {
     public ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) {
         //2代表报告头2页
         String key = "——";
-        int totalPage = 2;
+        //int totalPage = 2;
+        int totalPageNew = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
         //处理坐标提示信息
         ReportResBean resBean = new ReportResBean();
@@ -1777,6 +1778,7 @@ public class ReportServiceImpl implements ReportService {
             //写入数据
             List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
             if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
+                totalPageNew = doc.getProperties().getExtendedProperties().getUnderlyingProperties().getPages()+totalPageNew;
                 int size = doc.getTables().size();
                 //处理表格
                 Iterator<XWPFTable> it = doc.getTablesIterator();
@@ -1784,7 +1786,7 @@ public class ReportServiceImpl implements ReportService {
                 int i = 1;
                 //获取表格信息
                 while (it.hasNext()) {
-                    totalPage++;
+                    //totalPage++;
                     index++;
                     XWPFTable table = it.next();
                     List<XWPFTableRow> rows = table.getRows();
@@ -1818,9 +1820,9 @@ public class ReportServiceImpl implements ReportService {
                         if (start != null && end != null){
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
                             if (s.equals(e)){
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(s));
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,s);
                             }else {
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(s) + "~" + sdf.format(e));
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,s + "~" + e);
                             }
                         }
                         //主要仪器
@@ -1917,7 +1919,7 @@ public class ReportServiceImpl implements ReportService {
         InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
         XWPFDocument topDoc = new XWPFDocument(fileStream);;
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
-        setReportTop(topDoc,entrustAddVo,reportRecordEntity,totalPage);
+        setReportTop(topDoc,entrustAddVo,reportRecordEntity,totalPageNew);
         //报告头部合并顺序1
         map.put(1,topDoc);
         //将报告合并成一个完整的word
@@ -1953,7 +1955,8 @@ public class ReportServiceImpl implements ReportService {
         }
         //2代表报告头2页
         String key = "——";
-        int totalPage = 2;
+        //int totalPage = 2;
+        int totalPageNew = 2;
         Map<Integer,XWPFDocument> map = new HashedMap();
         //处理坐标提示信息
         ReportResBean resBean = new ReportResBean();
@@ -1970,6 +1973,7 @@ public class ReportServiceImpl implements ReportService {
             client.statObject(bluckName, fileName);
             InputStream object = client.getObject(bluckName, fileName);
             doc = new XWPFDocument(object);
+            totalPageNew = doc.getProperties().getExtendedProperties().getUnderlyingProperties().getPages()+totalPageNew;
             //写入数据
             List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
             if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
@@ -1980,7 +1984,7 @@ public class ReportServiceImpl implements ReportService {
                 int i = 1;
                 //获取表格信息
                 while (it.hasNext()) {
-                    totalPage++;
+                    //totalPage++;
                     index++;
                     XWPFTable table = it.next();
                     List<XWPFTableRow> rows = table.getRows();
@@ -2014,9 +2018,9 @@ public class ReportServiceImpl implements ReportService {
                         if (start != null && end != null){
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
                             if (s.equals(e)){
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(s));
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,s);
                             }else {
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,sdf.format(s) + "~" + sdf.format(e));
+                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,s + "~" + e);
                             }
                         }
                         //主要仪器
@@ -2130,7 +2134,7 @@ public class ReportServiceImpl implements ReportService {
         InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
         XWPFDocument topDoc = new XWPFDocument(fileStream);
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
-        setReportTop(topDoc,entrustAddVo,reportRecordEntity,totalPage);
+        setReportTop(topDoc,entrustAddVo,reportRecordEntity,totalPageNew);
         //报告头部合并顺序1
         map.put(1,topDoc);
         //将报告合并成一个完整的word
