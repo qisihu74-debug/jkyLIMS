@@ -70,6 +70,9 @@ ALTER TABLE `test_entrusted_info`
 --增加报告合并时间
 ALTER TABLE `test_report_record`
     ADD COLUMN `combine_time`  datetime DEFAULT NULL COMMENT '报告合并时间' AFTER `category`;
+--增加sample_id字段
+ALTER TABLE `test_report_record_detail`
+    ADD COLUMN `sample_id`  int COMMENT '样品ID' AFTER `task_id`;
 --task表增加（任务单提供资料相等委托单）字段
 ALTER TABLE `test_task`
 ADD COLUMN `present_information`  varchar(255) COMMENT '任务单提供资料相等委托单' AFTER `task_price`;

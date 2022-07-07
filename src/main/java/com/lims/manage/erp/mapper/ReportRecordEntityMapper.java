@@ -129,7 +129,7 @@ public interface ReportRecordEntityMapper {
      * @param year
      * @return
      */
-    Integer getMaxCode(String year);
+    Integer getMaxCode(String year,String code);
 
     /**
      * 根据委托单id查询所用报告模板名称

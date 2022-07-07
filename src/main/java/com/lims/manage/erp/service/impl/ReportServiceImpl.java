@@ -6,7 +6,25 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.ParamEntity;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
+import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
+import com.lims.manage.erp.entity.QiYueSuoSealEntity;
+import com.lims.manage.erp.entity.QuotaEntity;
+import com.lims.manage.erp.entity.QuotaRes;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.ReportResBean;
+import com.lims.manage.erp.entity.ReportTemplateEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.SealEntity;
+import com.lims.manage.erp.entity.TeamTreeStructureEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
+import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
@@ -383,6 +401,7 @@ public class ReportServiceImpl implements ReportService {
                     //将父级原始记录传递给子级
                     for (SampleItemEntity nodeItem : nodeItems) {
                         nodeItem.setOriginUrl(reportCheckItemDetailVo.getOriginUrl());
+                        nodeItem.setSampleId(Integer.parseInt(reportSampleDetailVo.getSampleId()+""));
                         tempNodeItems.add(nodeItem);
                     }
                     temp.addAll(tempNodeItems);
@@ -409,7 +428,7 @@ public class ReportServiceImpl implements ReportService {
                         continue;
                     }
                     ReportCheckItemDetailVo vo = new ReportCheckItemDetailVo();
-                    ReportRecordDetailEntity entity = recordDetailEntityMapper.selectByRecordIdAndItemId(recordId, sampleItemEntity.getCheckItemId().intValue());
+                    ReportRecordDetailEntity entity = recordDetailEntityMapper.selectByRecordIdAndItemId(recordId, sampleItemEntity.getCheckItemId().intValue(),Integer.parseInt(sampleItemEntity.getSampleId()+""));
                     if(recordId != null && entity != null){
                         vo.setCheckItemId(entity.getCheckItemId());
                         vo.setCheckItemName(entity.getCheckItemName());
@@ -501,7 +520,7 @@ public class ReportServiceImpl implements ReportService {
             for (ReportRecordDetailEntity e : checkInfos) {
                 e.setRecordId(reportRecordEntity1.getId());
                 e.setTaskId(vo.getTaskId());
-                List<Long> checkItemIds = recordDetailEntityMapper.getCheckItemIds(reportRecordEntity1.getId(),vo.getTaskId());
+                List<Long> checkItemIds = recordDetailEntityMapper.getCheckItemIds(reportRecordEntity1.getId(),vo.getTaskId(),e.getSampleId());
                 if (checkItemIds.contains(e.getCheckItemId())) {
                     recordDetailEntityMapper.updateByRecordIdSelective(e);
                 } else {
@@ -579,7 +598,7 @@ public class ReportServiceImpl implements ReportService {
             //生成报告编号
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
             String year = sdf.format(new Date());
-            Integer maxCode = recordEntityMapper.getMaxCode(year);
+            Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
             if (maxCode == null) {
                 reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-0001");
             } else {
@@ -628,7 +647,7 @@ public class ReportServiceImpl implements ReportService {
         //生成报告编号
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
         String year = sdf.format(new Date());
-        Integer maxCode = recordEntityMapper.getMaxCode(year);
+        Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
         if (maxCode == null) {
             reportRecordEntity.setReportCode("ZX-" + year + "-YC-0001");
         } else {
@@ -1082,19 +1101,31 @@ public class ReportServiceImpl implements ReportService {
     public Boolean uploadReport(String reportCode, MultipartFile file, String verifyer,
                                 String issuer, Long verifyerId, Long issuerId, String code,
                                 String conclusion,String additional,String mixInfo,String type) {
+        //解析code
+        Map<Integer,List<String>> map = JSON.parseObject(code, Map.class);
+        List<ParamEntity> entities = Lists.newArrayList();
         Boolean flag = false;
         String url = "";
         if (file == null){
             //下载模板填充数据
             MinioClient client = MinIoUtil.minioClient;
             try {
-                List<String> keys = JSONArray.parseArray(code, String.class);
+                for (Integer s:map.keySet()) {
+                    List<String> list = map.get(s);
+                    for (String ss:list) {
+                        ParamEntity paramEntity = new ParamEntity();
+                        paramEntity.setSampleId(s);
+                        paramEntity.setUrl(ss);
+                        entities.add(paramEntity);
+                    }
+                }
                 List<String> conclusions = JSONArray.parseArray(conclusion, String.class);
                 List<String> additionals = JSONArray.parseArray(additional, String.class);
                 List<ConclusionEntity> list = Lists.newArrayList();
-                for (int i=0;i<keys.size();i++) {
+                for (int i=0;i<entities.size();i++) {
                     ConclusionEntity conclusionEntity = new ConclusionEntity();
-                    conclusionEntity.setUrl(keys.get(i));
+                    conclusionEntity.setUrl(entities.get(i).getUrl());
+                    conclusionEntity.setSampleId(entities.get(i).getSampleId());
                     conclusionEntity.setConclusion(conclusions.get(i));
                     conclusionEntity.setAdditional(additionals.get(i));
                     list.add(conclusionEntity);
@@ -1808,7 +1839,7 @@ public class ReportServiceImpl implements ReportService {
                     }
                     //过滤每个报告模板的检测项
                     List<ReportRecordDetailEntity> entities = Lists.newArrayList();
-
+                    List<ReportRecordDetailEntity> entities1 = Lists.newArrayList();
                     String[] split11 = conclusionEntity.getUrl().split("\\?");
                     String[] strings11 = split11[0].split("\\/");
                     String fileName11 = strings11[4];
@@ -1820,8 +1851,18 @@ public class ReportServiceImpl implements ReportService {
                             }
                         }
                     }
+                    //过滤每组样品的检测项(根据委托单id和样品id)
+                    List<Long> list1 = entrustEntityMapper.getItemIdByEntrustIdAndSampleId(id,conclusionEntity.getSampleId());
+                    //获取每组样品检测项生成到报告上的参数
+                    for (ReportRecordDetailEntity entity:entities) {
+                        for (Long itemId:list1) {
+                            if (entity.getCheckItemId().equals(itemId)){
+                                entities1.add(entity);
+                            }
+                        }
+                    }
                     //存放检测数据checkItemList为该报告模板所属的检测项
-                    for (ReportRecordDetailEntity item : entities) {
+                    for (ReportRecordDetailEntity item : entities1) {
                         if (org.apache.commons.lang3.StringUtils.isNotEmpty(item.getCoordinate())){
                             int last = testProductDao.isLast(item.getCheckItemId().intValue());
                             int page = 0;
