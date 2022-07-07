@@ -69,4 +69,8 @@ public class TaskVo {
      * 任务单价格
      */
     private Double taskPrice;
+    /**
+     * 任务单提供资料相等委托单
+     */
+    private String presentInformation;
 }

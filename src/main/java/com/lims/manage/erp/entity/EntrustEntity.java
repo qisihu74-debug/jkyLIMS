@@ -340,6 +340,7 @@ public class EntrustEntity {
         this.discount=vo.getDiscount();
         this.actualPrice=vo.getActualPrice();
         this.systemPrice=vo.getSystemPrice();
+        this.presentInformation=vo.getPresentInformation();
     }
 
 
