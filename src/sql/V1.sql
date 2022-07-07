@@ -70,5 +70,8 @@ ALTER TABLE `test_entrusted_info`
 --增加报告合并时间
 ALTER TABLE `test_report_record`
     ADD COLUMN `combine_time`  datetime DEFAULT NULL COMMENT '报告合并时间' AFTER `category`;
+--增加sample_id字段
+ALTER TABLE `test_report_record_detail`
+    ADD COLUMN `sample_id`  int COMMENT '样品ID' AFTER `task_id`;
 
 
