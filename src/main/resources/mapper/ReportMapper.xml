@@ -258,22 +258,49 @@
           and t5.state = 3
     </select>
 
+<!--    <select id="getReportList2" resultType="com.lims.manage.erp.vo.ReportListVo">-->
+<!--        SELECT DISTINCT t1.id,-->
+<!--                        t2.id task_id,-->
+<!--                        t2.task_code,-->
+<!--                        t4.sample_name,-->
+<!--                        t2.task_price as countPrice,-->
+<!--                        DATE_FORMAT(t1.request_date, '%Y-%m-%d') request_date-->
+<!--        FROM test_entrusted_info t1-->
+<!--                 LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id-->
+<!--                 LEFT JOIN test_entrusted_sample_details_rel t3 ON t1.id = t3.entrustment_id-->
+<!--                 LEFT JOIN test_sample t4 ON t3.sample_id = t4.id-->
+<!--                 left join test_entrusted_sample_checkitem_rel t5 on t1.id = t5.entrust_id and t4.id = t5.sample_id-->
+<!--                 left join test_report_record t6 on t2.id = t6.task_id-->
+<!--        where t2.task_code is not null-->
+<!--          and t2.state = 6-->
+<!--          and t2.report_complete = 2-->
+<!--        <if test="taskCode!=null and taskCode!=''">-->
+<!--            and t2.task_code like CONCAT('%',#{taskCode},'%')-->
+<!--        </if>-->
+<!--        <if test="deptIds!=null">-->
+<!--            and t2.dept_id in-->
+<!--            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">-->
+<!--                #{id}-->
+<!--            </foreach>-->
+<!--        </if>-->
+<!--        GROUP BY t2.id-->
+<!--        order by t2.code desc-->
+<!--    </select>-->
     <select id="getReportList2" resultType="com.lims.manage.erp.vo.ReportListVo">
-        SELECT DISTINCT t1.id,
-                        t2.id task_id,
-                        t2.task_code,
-                        t4.sample_name,
-                        t2.task_price as countPrice,
-                        DATE_FORMAT(t1.request_date, '%Y-%m-%d') request_date
-        FROM test_entrusted_info t1
-                 LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
-                 LEFT JOIN test_entrusted_sample_details_rel t3 ON t1.id = t3.entrustment_id
-                 LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
-                 left join test_entrusted_sample_checkitem_rel t5 on t1.id = t5.entrust_id and t4.id = t5.sample_id
-                 left join test_report_record t6 on t2.id = t6.task_id
-        where t2.task_code is not null
-          and t2.state = 6
-          and t2.report_complete = 2
+        SELECT DISTINCT
+            t1.id,
+            t2.id task_id,
+            t2.task_code,
+            t2.task_price AS countPrice,
+            DATE_FORMAT( t1.request_date, '%Y-%m-%d' ) request_date
+        FROM
+            test_entrusted_info t1
+            LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
+            LEFT JOIN test_report_record t6 ON t2.id = t6.task_id
+        WHERE
+            t2.task_code IS NOT NULL
+            AND t2.state = 6
+            AND t2.report_complete = 2
         <if test="taskCode!=null and taskCode!=''">
             and t2.task_code like CONCAT('%',#{taskCode},'%')
         </if>
