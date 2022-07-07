@@ -598,7 +598,7 @@ public class ReportServiceImpl implements ReportService {
             //生成报告编号
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
             String year = sdf.format(new Date());
-            Integer maxCode = recordEntityMapper.getMaxCode(year);
+            Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
             if (maxCode == null) {
                 reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-0001");
             } else {
@@ -647,7 +647,7 @@ public class ReportServiceImpl implements ReportService {
         //生成报告编号
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
         String year = sdf.format(new Date());
-        Integer maxCode = recordEntityMapper.getMaxCode(year);
+        Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
         if (maxCode == null) {
             reportRecordEntity.setReportCode("ZX-" + year + "-YC-0001");
         } else {

@@ -638,11 +638,12 @@
 
     <select id="getMaxCode" resultType="java.lang.Integer">
         SELECT
-            MAX( SUBSTR( report_code FROM 12 )+0 )
+            MAX( SUBSTR( report_code FROM 13 )+0 )
         FROM
             test_report_record
         WHERE
             report_code LIKE CONCAT('%',#{year},'%')
+            AND report_code LIKE CONCAT('%',#{code},'%')
     </select>
 
     <select id="getAllReportCode" resultType="java.lang.String">
