@@ -196,8 +196,20 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        PageHelper.startPage(pageNum, pageSize);
         List<ReportListVo> list = reportMapper.reportDownloadList(userTeamIds, search);
+        for (ReportListVo reportListVo : list) {
+            List<String> sampleNames = reportMapper.getSampleNames(reportListVo.getId());
+            StringBuilder sampleName = new StringBuilder();
+            for (int i = 0; i < sampleNames.size(); i++) {
+                sampleName.append(sampleNames.get(i));
+                if(i != sampleNames.size()-1){
+                    sampleName.append("/");
+                }
+            }
+            reportListVo.setSampleName(sampleName.toString());
+        }
+        PageHelper.clearPage();
+        PageHelper.startPage(pageNum, pageSize);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
