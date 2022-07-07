@@ -8,8 +8,8 @@
         <result property="reportCount" column="report_count"></result>
         <result property="reportType" column="report_type"></result>
         <result property="taskCode" column="task_code"></result>
-        <result property="sampleName" column="sample_name"></result>
-        <result property="productId" column="product_id1"></result>
+<!--        <result property="sampleName" column="sample_name"></result>-->
+<!--        <result property="productId" column="product_id1"></result>-->
         <result property="countPrice" column="count_price"></result>
         <result property="requestDate" column="request_date"></result>
         <result property="entrustTestType" column="entrust_test_type"></result>
@@ -95,8 +95,8 @@
                t1.report_count,
                t1.report_type,
                t2.task_code,
-               t4.product_id product_id1,
-               t4.sample_name,
+--                t4.product_id product_id1,
+--                t4.sample_name,
                t1.count_price,
             DATE (t1.request_date) request_date,
             t3.sample_id,
