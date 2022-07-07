@@ -383,6 +383,7 @@ public class ReportServiceImpl implements ReportService {
                     //将父级原始记录传递给子级
                     for (SampleItemEntity nodeItem : nodeItems) {
                         nodeItem.setOriginUrl(reportCheckItemDetailVo.getOriginUrl());
+                        nodeItem.setSampleId(Integer.parseInt(reportSampleDetailVo.getSampleId()+""));
                         tempNodeItems.add(nodeItem);
                     }
                     temp.addAll(tempNodeItems);
@@ -409,7 +410,7 @@ public class ReportServiceImpl implements ReportService {
                         continue;
                     }
                     ReportCheckItemDetailVo vo = new ReportCheckItemDetailVo();
-                    ReportRecordDetailEntity entity = recordDetailEntityMapper.selectByRecordIdAndItemId(recordId, sampleItemEntity.getCheckItemId().intValue());
+                    ReportRecordDetailEntity entity = recordDetailEntityMapper.selectByRecordIdAndItemId(recordId, sampleItemEntity.getCheckItemId().intValue(),Integer.parseInt(sampleItemEntity.getSampleId()+""));
                     if(recordId != null && entity != null){
                         vo.setCheckItemId(entity.getCheckItemId());
                         vo.setCheckItemName(entity.getCheckItemName());
@@ -501,7 +502,7 @@ public class ReportServiceImpl implements ReportService {
             for (ReportRecordDetailEntity e : checkInfos) {
                 e.setRecordId(reportRecordEntity1.getId());
                 e.setTaskId(vo.getTaskId());
-                List<Long> checkItemIds = recordDetailEntityMapper.getCheckItemIds(reportRecordEntity1.getId(),vo.getTaskId());
+                List<Long> checkItemIds = recordDetailEntityMapper.getCheckItemIds(reportRecordEntity1.getId(),vo.getTaskId(),e.getSampleId());
                 if (checkItemIds.contains(e.getCheckItemId())) {
                     recordDetailEntityMapper.updateByRecordIdSelective(e);
                 } else {

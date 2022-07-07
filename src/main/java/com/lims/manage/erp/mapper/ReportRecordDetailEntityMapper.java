@@ -19,7 +19,7 @@ public interface ReportRecordDetailEntityMapper {
 
     ReportRecordDetailEntity selectByPrimaryKey(Long id);
 
-    ReportRecordDetailEntity selectByRecordIdAndItemId(@Param("recordId") Long recordId,@Param("checkItemId") Integer checkItemId);
+    ReportRecordDetailEntity selectByRecordIdAndItemId(@Param("recordId") Long recordId,@Param("checkItemId") Integer checkItemId,@Param("sampleId") Integer sampleId);
 
     int updateByPrimaryKeySelective(ReportRecordDetailEntity record);
 
@@ -56,7 +56,7 @@ public interface ReportRecordDetailEntityMapper {
      * @param recordId
      * @return
      */
-    List<Long> getCheckItemIds(Long recordId,Long taskId);
+    List<Long> getCheckItemIds(Long recordId,Long taskId,Integer sampleId);
 
     @Select("SELECT distinct \n" +
             "\trrd.check_item_name As name \n" +

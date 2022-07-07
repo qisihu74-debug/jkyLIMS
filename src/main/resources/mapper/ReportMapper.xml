@@ -130,6 +130,7 @@
             left join test_report_record_detail t9 on t8.id = t9.record_id
             AND t5.check_item_id = t9.check_item_id
             AND t2.id = t9.task_id
+            AND t4.id = t9.sample_id
         WHERE t2.id = #{taskId} and t5.task_id = #{taskId}
         <if test="deptIds!=null">
             and t5.dept_id in
