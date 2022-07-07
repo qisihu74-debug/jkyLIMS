@@ -642,7 +642,7 @@
         FROM
             test_report_record
         WHERE
-            report_code LIKE CONCAT('%',#{year},'%')
+            report_code LIKE CONCAT('%-',#{year},'-%')
             AND report_code LIKE CONCAT('%',#{code},'%')
     </select>
 
