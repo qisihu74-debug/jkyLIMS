@@ -1790,7 +1790,7 @@ public class ReportServiceImpl implements ReportService {
         //2代表报告头2页
         String key = "——";
         //int totalPage = 2;
-        int totalPageNew = 2;
+        int totalPageNew = 0;
         Map<Integer,XWPFDocument> map = new HashedMap();
         //处理坐标提示信息
         ReportResBean resBean = new ReportResBean();
@@ -1888,12 +1888,12 @@ public class ReportServiceImpl implements ReportService {
                         }
                     }
                     //过滤每组样品的检测项(根据委托单id和样品id)
-                    List<Long> list1 = entrustEntityMapper.getItemIdByEntrustIdAndSampleId(id,conclusionEntity.getSampleId());
+                    List<ReportRecordDetailEntity> list1 = entrustEntityMapper.getItemIdByEntrustIdAndSampleId(id,conclusionEntity.getSampleId());
                     //获取每组样品检测项生成到报告上的参数
                     for (ReportRecordDetailEntity entity:entities) {
-                        for (Long itemId:list1) {
-                            if (entity.getCheckItemId().equals(itemId)){
-                                entities1.add(entity);
+                        for (ReportRecordDetailEntity itemId:list1) {
+                            if (entity.getCheckItemId().equals(itemId.getCheckItemId())){
+                                entities1.add(itemId);
                             }
                         }
                     }
@@ -1989,7 +1989,7 @@ public class ReportServiceImpl implements ReportService {
         //2代表报告头2页
         String key = "——";
         //int totalPage = 2;
-        int totalPageNew = 2;
+        int totalPageNew = 0;
         Map<Integer,XWPFDocument> map = new HashedMap();
         //处理坐标提示信息
         ReportResBean resBean = new ReportResBean();

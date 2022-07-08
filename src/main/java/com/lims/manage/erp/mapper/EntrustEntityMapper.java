@@ -6,13 +6,11 @@ import com.lims.manage.erp.entity.EntrustHistoryEntity;
 import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
 import com.lims.manage.erp.entity.EntrustPamentEntity;
 import com.lims.manage.erp.entity.EntrustSampleEntity;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.EntrustSampleInfoVo;
-import com.lims.manage.erp.vo.HistoryEntrustDataVo;
-import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -83,6 +81,12 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @param list
      */
     void batchUpdateEntrustSampleItem(@Param("list") List<SampleItemEntity> list);
+
+    /**
+     * 批量修改任务单价格
+     * @param list
+     */
+    void batchUpdateTaskPrice(@Param("list") List<TaskPriceVo> list);
 
     /**
      * 批量删除委托单下的检测项
@@ -454,12 +458,12 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @param sampleId
      */
     @Select("SELECT DISTINCT\n" +
-            "\trrd.check_item_id\n" +
+            "\trrd.check_item_id,rrd.check_item_name,rrd.sample_id,rrd.coordinate,rrd.check_result,rrd.specs_content,rrd.judge_result\n" +
             "FROM\n" +
             "\ttest_entrusted_sample_checkitem_rel escr\n" +
             "LEFT JOIN test_report_record_detail rrd ON escr.task_id = rrd.task_id\n" +
             "WHERE\n" +
             "\tescr.entrust_id = #{entrustId}\n" +
-            "AND escr.sample_id = #{sampleId}")
-    List<Long> getItemIdByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") int sampleId);
+            "AND escr.sample_id = #{sampleId} And escr.sample_id=rrd.sample_id")
+    List<ReportRecordDetailEntity> getItemIdByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") int sampleId);
 }

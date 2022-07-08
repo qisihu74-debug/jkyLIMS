@@ -1460,7 +1460,13 @@ public class EntrustServiceImpl implements EntrustService {
         List<SampleEntity> samples = vo.getSamples();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
         if (!CollectionUtils.isEmpty(samples)) {
+            //存放要删除的检测项
+            List<SampleItemEntity> deleteCheckItems = Lists.newArrayList();
+            //存放最新的检测项
+            List<SampleItemEntity> allNewCheckItems = Lists.newArrayList();
+            //处理检测项
             for (int i = 0; i < samples.size(); i++) {
+
                 SampleEntity sampleEntity = samples.get(i);
                 SampleEntity sampleEntityOld = oldEntrustInfo.getSamples().get(i);
                 //修改样品判定依据
@@ -1482,6 +1488,7 @@ public class EntrustServiceImpl implements EntrustService {
                 List<SampleItemEntity> sampleCheckItemOld = entityMapper.getAllOldCheckItemInfo(sampleEntityOld.getId(),basisInfo.getId());
                 //新检测项信息
                 List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
+                allNewCheckItems.addAll(sampleCheckItem);
                 //存放修改的检测项
                 List<SampleItemEntity> updateList = Lists.newArrayList();
                 if(!CollectionUtils.isEmpty(sampleCheckItemOld) && !CollectionUtils.isEmpty(sampleCheckItem)){
@@ -1563,6 +1570,8 @@ public class EntrustServiceImpl implements EntrustService {
                             sampleCheckItemOld.remove(sampleItemEntity);
                         }
                     }
+                    //把要删除的检测项存放到循环外
+                    deleteCheckItems.addAll(sampleCheckItemOld);
                     //删除委托检测项表中的检测项
                     entityMapper.batchDeleteEntrustSampleItem(sampleCheckItemOld);
                     //根据委托单Id查询报告数据主键
@@ -1588,6 +1597,53 @@ public class EntrustServiceImpl implements EntrustService {
                         reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
                     }
                 }
+            }
+            //处理任务单价格
+            List<Long> taskIds = Lists.newArrayList();
+            if(!CollectionUtils.isEmpty(allNewCheckItems)){
+                for (SampleItemEntity sampleItemEntity : allNewCheckItems) {
+                    taskIds.add(sampleItemEntity.getTaskId());
+                }
+            }
+//            Map<Long,Double> taskPriceMap = Maps.newHashMap();
+            List<TaskPriceVo> priceVos = Lists.newArrayList();
+            if(!CollectionUtils.isEmpty(taskIds)){
+                for (Long taskId : taskIds) {
+                    double taskPrice = 0D;
+                    for (SampleItemEntity sampleItemEntity : allNewCheckItems) {
+                        if(Objects.equals(taskId, sampleItemEntity.getTaskId())){
+                            double price = sampleItemEntity.getUnitPrice() * sampleItemEntity.getTimes() * Double.parseDouble(vo.getDiscount());
+                            taskPrice = taskPrice + price;
+                        }
+                    }
+//                    taskPriceMap.put(taskId,taskPrice);
+                    TaskPriceVo taskPriceVo = new TaskPriceVo(taskId,taskPrice);
+                    priceVos.add(taskPriceVo);
+                }
+            }
+            //处理老检测项价钱
+            if(!CollectionUtils.isEmpty(priceVos)){
+                for (TaskPriceVo taskPriceVo : priceVos) {
+                    Double price = taskPriceVo.getPrice();
+                    Long taskId = taskPriceVo.getTaskId();
+                    if (!CollectionUtils.isEmpty(deleteCheckItems)) {
+                        for (SampleItemEntity sampleItemEntity : deleteCheckItems) {
+                            if(sampleItemEntity != null){
+                                Integer state1 = sampleItemEntity.getState();
+                                Long taskId1 = sampleItemEntity.getTaskId();
+                                if (state1 >= 2) {//检测项已完成
+                                    double completePrice = sampleItemEntity.getUnitPrice() * sampleItemEntity.getTimes() * Double.parseDouble(vo.getDiscount());
+                                    if (Objects.equals(taskId1, taskId)) {
+                                        price = price + completePrice;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    taskPriceVo.setPrice(price);
+                }
+                //批量更新任务单价格
+                entityMapper.batchUpdateTaskPrice(priceVos);
             }
         }
         if (totalMoney != 0) {
