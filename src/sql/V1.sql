@@ -77,5 +77,25 @@ ALTER TABLE `test_report_record_detail`
 ALTER TABLE `test_task`
 ADD COLUMN `present_information`  varchar(255) COMMENT '任务单提供资料相等委托单' AFTER `task_price`;
 
+-- test_entrusted_info 文件中间表增加 test_entrust_file_rel
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for test_entrust_file_rel
+-- ----------------------------
+DROP TABLE IF EXISTS `test_entrust_file_rel`;
+CREATE TABLE `test_entrust_file_rel`  (
+  `id` int(0) NOT NULL AUTO_INCREMENT,
+  `entrust_id` bigint(0) DEFAULT NULL COMMENT '委托单id',
+  `file_url` varchar(1024) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '文件链接',
+  `file_url_str` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '文件名。',
+  `create_time` datetime(0) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '创建时间',
+  `update_time` datetime(0) DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 39 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
 
 

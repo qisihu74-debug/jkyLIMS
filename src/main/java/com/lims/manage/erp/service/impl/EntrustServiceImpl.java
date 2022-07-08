@@ -8,6 +8,8 @@ import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.*;
@@ -27,6 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -71,6 +75,8 @@ public class EntrustServiceImpl implements EntrustService {
     private ReportRecordEntityMapper recordEntityMapper;
     @Autowired
     private TestSampleEntityService testSampleEntityService;
+    @Autowired
+    private EntrustFileTableDao entrustFileTableDao;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -465,30 +471,10 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         //附件存在上传附件到服务器
-        if (file != null) {
-            StringBuilder stringBuilder = new StringBuilder();
-            StringBuilder stringfileUrlStr = new StringBuilder();
-            // 根据file文件数量 规定文件名存储编号规则
+        if (file.length != 0) {
             for (MultipartFile multipartFile : file) {
-                Long fileCode = GenID.getID();
-                String name = multipartFile.getOriginalFilename();
-                String[] strings = name.split("\\.");
-                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, fileCode + "." + strings[strings.length - 1]);
-                stringBuilder.append(upload);
-                stringBuilder.append(",");
-                // 存放上传文件的名称带后缀如：（文件编号&委托文档资料.pdf,文件编号&原始文档.docx）
-                stringfileUrlStr.append(fileCode + "&" + name);
-                stringfileUrlStr.append(",");
-            }
-            String fileUrl = stringBuilder.toString();
-            if (!StringUtils.isEmpty(fileUrl)) {
-                String substring = fileUrl.substring(0, fileUrl.length() - 1);
-                basisInfo.setFileUrl(substring);
-            }
-            String fileUrlStr = stringfileUrlStr.toString();
-            if (!StringUtils.isEmpty(fileUrlStr)) {
-                String substring = fileUrlStr.substring(0, fileUrlStr.length() - 1);
-                basisInfo.setFileUrlStr(substring);
+                // 通过委托单新id 处理附件操作
+                uploading(basisInfo.getId(), multipartFile);
             }
         }
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
@@ -731,49 +717,10 @@ public class EntrustServiceImpl implements EntrustService {
     public synchronized Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file) {
         EntrustEntity basisInfo = new EntrustEntity(vo);
         //附件存在上传附件到服务器
-        if (file != null) {
-            // 查询委托单下 文件信息(entrustData.getFileUrl(),entrustData.getFileUrlStr(),获取后缀进行删除操作)
-            EntrustAddVo entrustData = entityMapper.selectByKeyId(basisInfo.getId());
-            if (entrustData.getFileUrl() != null && !entrustData.getFileUrl().isEmpty()) {
-                // 去清除 MinIo 桶数据。
-                try {
-                    String[] strings2 = entrustData.getFileUrlStr().split(",");
-                    for (int i = 0; i < strings2.length; i++) {
-                        String[] strings3 = strings2[i].split("\\.");
-                        if (strings3.length >= 2) {
-                            String[] strings4 = strings3[0].split("&");
-                            // 获取 文件编号
-                            Long fileCode = Long.parseLong(strings4[0]);
-                            MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure, fileCode + "." + strings3[1]);
-                        }
-                    }
-                } catch (Exception e) {
-                    logger.info("修改委托下清除 MinIo 桶数据 出错");
-                }
-            }
-
-            StringBuilder stringBuilder = new StringBuilder();
-            StringBuilder stringfileUrlStr = new StringBuilder();
+        if (file.length!=0) {
             for (MultipartFile multipartFile : file) {
-                Long fileCode = GenID.getID();
-                String name = multipartFile.getOriginalFilename();
-                String[] strings = name.split("\\.");
-                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, fileCode + "." + strings[strings.length - 1]);
-                stringBuilder.append(upload);
-                stringBuilder.append(",");
-                // 存放上传文件的名称带后缀如：（文件编号&委托文档资料.pdf,文件编号&原始文档.docx）
-                stringfileUrlStr.append(fileCode + "&" + name);
-                stringfileUrlStr.append(",");
-            }
-            String fileUrl = stringBuilder.toString();
-            if (!StringUtils.isEmpty(fileUrl)) {
-                String substring = fileUrl.substring(0, fileUrl.length() - 1);
-                basisInfo.setFileUrl(substring);
-            }
-            String fileUrlStr = stringfileUrlStr.toString();
-            if (!StringUtils.isEmpty(fileUrlStr)) {
-                String substring = fileUrlStr.substring(0, fileUrlStr.length() - 1);
-                basisInfo.setFileUrlStr(substring);
+                // 通过委托单新id 处理附件操作
+                uploading(basisInfo.getId(), multipartFile);
             }
         }
         //更新委托单收费记录信息
@@ -1896,24 +1843,16 @@ public class EntrustServiceImpl implements EntrustService {
         }
         /**
          * 委托单文件file 处理
+         * 通过委托单id 查询相应附件集合
          */
-        if(!StringUtils.isEmpty(entrustAddVo.getFileUrl())&&!StringUtils.isEmpty(entrustAddVo.getFileUrlStr())){
-            // 使用逗号 分割文件附件链接
-            String[] files = entrustAddVo.getFileUrl().split(",");
-            // 使用逗号 分割文件名称
-            String[] fileUrlStrs = entrustAddVo.getFileUrlStr().split(",");
-            List<LabelValueVo> fileArrays = new ArrayList<>();
-            for(int i=0;i<files.length;i++){
-             LabelValueVo labelValueVo = new LabelValueVo();
-                labelValueVo.setLabel(files[i]);
-                labelValueVo.setText(fileUrlStrs[i]);
-                fileArrays.add(labelValueVo);
-            }
-            entrustAddVo.setFileArrays(fileArrays);
+        List<EntrustFileTableEntity> fileList = entrustFileTableDao.getEntrustFileTableEntityList(entrustAddVo.getId());
+        if(CollectionUtils.isEmpty(fileList)){
+            // 返回空集合
+            List<EntrustFileTableEntity> fileListNull = new ArrayList<>();
+            entrustAddVo.setFileArrays(fileListNull);
         }
         else {
-            List<LabelValueVo> fileArrays = new ArrayList<>();
-            entrustAddVo.setFileArrays(fileArrays);
+            entrustAddVo.setFileArrays(fileList);
         }
         if (entrustAddVo.getOperateUser() != null) {
             // 获取做废人id 查询账号姓名
@@ -2331,24 +2270,16 @@ public class EntrustServiceImpl implements EntrustService {
         }
         /**
          * 委托单文件file 处理
+         * 通过委托单id 查询相应附件集合
          */
-        if(!StringUtils.isEmpty(entrustAddVo.getFileUrl())&&!StringUtils.isEmpty(entrustAddVo.getFileUrlStr())){
-            // 使用逗号 分割文件附件链接
-            String[] files = entrustAddVo.getFileUrl().split(",");
-            // 使用逗号 分割文件名称
-            String[] fileUrlStrs = entrustAddVo.getFileUrlStr().split(",");
-            List<LabelValueVo> fileArrays = new ArrayList<>();
-            for(int i=0;i<files.length;i++){
-                LabelValueVo labelValueVo = new LabelValueVo();
-                labelValueVo.setLabel(files[i]);
-                labelValueVo.setText(fileUrlStrs[i]);
-                fileArrays.add(labelValueVo);
-            }
-            entrustAddVo.setFileArrays(fileArrays);
+        List<EntrustFileTableEntity> fileList = entrustFileTableDao.getEntrustFileTableEntityList(entrustAddVo.getId());
+        if(CollectionUtils.isEmpty(fileList)){
+            // 返回空集合
+            List<EntrustFileTableEntity> fileListNull = new ArrayList<>();
+            entrustAddVo.setFileArrays(fileListNull);
         }
         else {
-            List<LabelValueVo> fileArrays = new ArrayList<>();
-            entrustAddVo.setFileArrays(fileArrays);
+            entrustAddVo.setFileArrays(fileList);
         }
         // —— 支付方式。
 //        entrustAddVo.setPaymentMethod(entityMapper.getTestEntrustedInfoMethodName(entrustmentId));
@@ -2879,9 +2810,7 @@ public class EntrustServiceImpl implements EntrustService {
         // 通过委托单id 获取copy 数据。
         EntrustAddVo entrustAddVo = getEntrustHistoryDetailTest(entrustmentId);
         // 清除上传的 附件
-        entrustAddVo.setFileUrl(null);
-        entrustAddVo.setFileUrlStr(null);
-        entrustAddVo.setFileArrays(null);
+        entrustAddVo.setFileArrays(new ArrayList<>());
         // 处理印章数组。
         if (entrustAddVo.getSealTypes() != null && entrustAddVo.getSealTypes().length > 0) {
             entrustAddVo.setSealTypes(entrustAddVo.getSealType().split(","));
@@ -2966,30 +2895,9 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
 //        附件存在上传附件到服务器
-        if (file != null) {
-            StringBuilder stringBuilder = new StringBuilder();
-            StringBuilder stringfileUrlStr = new StringBuilder();
-            // 根据file文件数量 规定文件名存储编号规则
+        if (file.length != 0) {
             for (MultipartFile multipartFile : file) {
-                Long fileCode = GenID.getID();
-                String name = multipartFile.getOriginalFilename();
-                String[] strings = name.split("\\.");
-                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, fileCode + "." + strings[strings.length - 1]);
-                stringBuilder.append(upload);
-                stringBuilder.append(",");
-                // 存放上传文件的名称带后缀如：（文件编号&委托文档资料.pdf,文件编号&原始文档.docx）
-                stringfileUrlStr.append(fileCode + "&" + name);
-                stringfileUrlStr.append(",");
-            }
-            String fileUrl = stringBuilder.toString();
-            if (!StringUtils.isEmpty(fileUrl)) {
-                String substring = fileUrl.substring(0, fileUrl.length() - 1);
-                basisInfo.setFileUrl(substring);
-            }
-            String fileUrlStr = stringfileUrlStr.toString();
-            if (!StringUtils.isEmpty(fileUrlStr)) {
-                String substring = fileUrlStr.substring(0, fileUrlStr.length() - 1);
-                basisInfo.setFileUrlStr(substring);
+                uploading(basisInfo.getId(),multipartFile);
             }
         }
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
@@ -3284,5 +3192,76 @@ public class EntrustServiceImpl implements EntrustService {
         }
         return false;
     }
+
+    /**
+     * 单个 委托单附件新增
+     * @param id
+     * @param multipartFile
+     * @return
+     */
+    @Override
+    public Boolean uploading(Long id, MultipartFile multipartFile) {
+        EntrustFileTableEntity entrustFileTableEntity = new EntrustFileTableEntity();
+        entrustFileTableEntity.setEntrustId(id);
+        //附件存在上传附件到服务器
+//        if (file.length != 0) {
+            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringfileUrlStr = new StringBuilder();
+            // 根据file文件数量 规定文件名存储编号规则
+//            for (MultipartFile multipartFile : file) {
+                Long fileCode = GenID.getID();
+                String name = multipartFile.getOriginalFilename();
+                String[] strings = name.split("\\.");
+
+                String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, fileCode + "." + strings[strings.length - 1]);
+                stringBuilder.append(upload);
+                stringBuilder.append(",");
+                // 存放上传文件的名称带后缀如：（文件编号&委托文档资料.pdf,文件编号&原始文档.docx）
+                stringfileUrlStr.append(fileCode + "&" + name);
+                stringfileUrlStr.append(",");
+//            }
+            String fileUrl = stringBuilder.toString();
+            if (!StringUtils.isEmpty(fileUrl)) {
+                String substring = fileUrl.substring(0, fileUrl.length() - 1);
+                entrustFileTableEntity.setFileUrl(substring);
+            }
+            String fileUrlStr = stringfileUrlStr.toString();
+            if (!StringUtils.isEmpty(fileUrlStr)) {
+                String substring = fileUrlStr.substring(0, fileUrlStr.length() - 1);
+                entrustFileTableEntity.setFileUrlStr(substring);
+            }
+//        }
+        entrustFileTableEntity.setCarateTime(new Date());
+        entrustFileTableDao.insertEntrustFileTableEntity(entrustFileTableEntity);
+        return true;
+
+    }
+
+    @Override
+    public Boolean removeding(Integer id) {
+        // 根据附件id 查询文件名称 进行删除minIo文件服务器中内容。
+        EntrustFileTableEntity entrustFileTableEntity = entrustFileTableDao.getEntrustFileTableEntityId(id);
+        if (entrustFileTableEntity != null && entrustFileTableEntity.getFileUrl() != null) {
+            // 去清除 MinIo 桶数据。
+            try {
+                String[] strings2 = entrustFileTableEntity.getFileUrlStr().split(",");
+                for (int i = 0; i < strings2.length; i++) {
+                    String[] strings3 = strings2[i].split("\\.");
+                    if (strings3.length >= 2) {
+                        String[] strings4 = strings3[0].split("&");
+                        // 获取 文件编号
+                        Long fileCode = Long.parseLong(strings4[0]);
+                        MinIoUtil.deleteFile(BucketsConst.buckets_entrust_enclosure, fileCode + "." + strings3[1]);
+                    }
+                }
+            } catch (Exception e) {
+                logger.info("修改委托下清除 MinIo 桶数据 出错");
+            }
+        }
+
+        entrustFileTableDao.deleteEntrustFileTableEntity(id);
+        return true;
+    }
+
 
 }

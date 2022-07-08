@@ -54,6 +54,8 @@ public class TaskServiceImpl implements TaskService {
     private TeamMapper teamMapper;
     @Autowired
     private TestSampleEntityMapper testSampleEntityMapper;
+    @Autowired
+    private EntrustFileTableDao entrustFileTableDao;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -85,16 +87,25 @@ public class TaskServiceImpl implements TaskService {
         // 处理 委托单的文件链接
         PageHelper.clearPage();
         TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfoTwo(paramVo);
-        if (taskDetailInfoVo.getFileUrl() != null) {
-            String[] array = taskDetailInfoVo.getFileUrl().split(",");
-            taskDetailInfoVo.setArray(array);
-        }
         //TODO dlc 补充任务单价格
         if(StringUtils.isEmpty(taskDetailInfoVo.getCost())){
             taskDetailInfoVo.setCost("--");
         }
         // 获取文件附件
         Long entrustId = taskMapper.getEntrustIdByTaskId(taskId);
+        /**
+         * 委托单文件file 处理
+         * 通过委托单id 查询相应附件集合
+         */
+        List<EntrustFileTableEntity> fileList = entrustFileTableDao.getEntrustFileTableEntityList(entrustId);
+        if(CollectionUtils.isEmpty(fileList)){
+            // 返回空集合
+            List<EntrustFileTableEntity> fileListNull = new ArrayList<>();
+            taskDetailInfoVo.setFileArrays(fileListNull);
+        }
+        else {
+            taskDetailInfoVo.setFileArrays(fileList);
+        }
         List<String> strings = entrustEntityMapper.getSampleStandard(entrustId);
         StringBuilder stringBuilder = new StringBuilder();
         if (strings != null && !strings.isEmpty()) {
@@ -626,6 +637,7 @@ public class TaskServiceImpl implements TaskService {
                         SampleEntity entity = new SampleEntity(node);
                         SampleDetailVo sampleDetailVo = new SampleDetailVo();
                         sampleDetailVo.setSampleName(entity.getAliasName());
+                        sampleDetailVo.setAliasName(entity.getAliasName());
                         sampleDetailVo.setSpecs(entity.getSpecs());
                         sampleDetailVo.setBatchNumber(entity.getBatchNumber());
                         sampleDetailVo.setSampleQuantity(entity.getSampleQuantity());
@@ -846,24 +858,22 @@ public class TaskServiceImpl implements TaskService {
         TemplateSampleVo sampleVo = sampleEntityMapper.getOriginalSampleInfo(sampleId);
 
         // 得到样品信息数据; 分割。
-        sampleVo.setSampleName(sampleVo.getSampleName() + "；");
-        sampleVo.setSampleNumber(sampleVo.getSampleNumber() + "；");
-        sampleVo.setSampleQuantity(sampleVo.getSampleQuantity() + "；");
-        // 处理样品 外观描述，和 外观
-/*        if (sampleVo.getOutwardDescribe() != null && !sampleVo.getOutwardDescribe().equals("") && sampleVo.getSampleDesc() != null && !sampleVo.getSampleDesc().equals("")) {
-            sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1) + "\t" + sampleVo.getOutwardDescribe());
-        } else {
-            if (sampleVo.getSampleDesc() != null && !sampleVo.getSampleDesc().equals("")) {
-                sampleVo.setSampleDesc(sampleVo.getSampleDesc().substring(1, sampleVo.getSampleDesc().length() - 1));
-            }
-        }*/
+        sampleVo.setSampleName(!StringUtils.isEmpty(sampleVo.getSampleName())?sampleVo.getSampleName() + "；":"/；");
+        sampleVo.setSampleNumber(!StringUtils.isEmpty(sampleVo.getSampleNumber())?sampleVo.getSampleNumber() + "；":"/；");
+        sampleVo.setSampleQuantity(!StringUtils.isEmpty(sampleVo.getSampleQuantity())?sampleVo.getSampleQuantity() + "；":"/；");
         // 样品描述
         if(!StringUtils.isEmpty(sampleVo.getOutwardDescribe())){
-            sampleVo.setSampleDesc(sampleVo.getOutwardDescribe()+";");
+            sampleVo.setSampleDesc(sampleVo.getOutwardDescribe()+"；");
+        }
+        else {
+            sampleVo.setSampleDesc("/；");
         }
         // 规格/等级
         if(!StringUtils.isEmpty(sampleVo.getSpecs())){
-            sampleVo.setSpecs(sampleVo.getSpecs()+";");
+            sampleVo.setSpecs(sampleVo.getSpecs()+"；");
+        }
+        else {
+            sampleVo.setSpecs("/；");
         }
 
         //获取检测依据
@@ -899,23 +909,6 @@ public class TaskServiceImpl implements TaskService {
                 sampleTime.append("样品描述：");
                 sampleTime.append(sampleEntity.getOutwardDescribe()== null ? "——": sampleEntity.getOutwardDescribe());
                 sampleTime.append("；");
-//                StringBuilder outward = new StringBuilder();
-/*                if(sampleEntity.getOutward() != null){
-                    outward.append(sampleEntity.getOutward());
-                    if(sampleEntity.getOutwardDescribe() != null){
-                        outward.append(",");
-                        outward.append(sampleEntity.getOutwardDescribe());
-                    }
-                }else{
-                    if(sampleEntity.getOutwardDescribe() != null){
-                        outward.append(sampleEntity.getOutwardDescribe());
-                    }
-                }
-                if("".equals(outward.toString())){
-                    outward.append("——");
-                }
-                outward.append("；");
-                sampleTime.append(outward);*/
                 sampleTime.append("来样时间：");
                 sampleTime.append(sampleEntity.getReceivedDate());
             }
@@ -1236,16 +1229,15 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public ZipOutputStream packagingWorkbookZip(Integer[] Ids, HttpServletResponse response) throws IOException {
+    public ZipOutputStream packagingWorkbookZip(List<TaskIdEntity> dataEntitys, HttpServletResponse response) throws IOException {
         // 通过输入参数 返回 对应的处理成功的EXCEL数据。
         ServletOutputStream outputStream = response.getOutputStream();
         ZipOutputStream out = new ZipOutputStream(outputStream);
 
         // 批量获取 检测项id（有可能对应多个模板） 再进行填充。
         // 通过检测项id 获取 相应的 id关联信息。
-        List<TaskIdEntity> ids = taskMapper.selectconditionId(Ids);
-        for(int i=0; i<ids.size(); i++ ){
-            TaskIdEntity data = ids.get(i);
+        for(int i=0; i<dataEntitys.size(); i++ ){
+            TaskIdEntity data = dataEntitys.get(i);
             // 有序信息。
             OriginalRecordDataVo originalData = getOriginalData(data.getTaskId(), data.getSampleId(),data.getCheckItemId(), data.getIdItem());
             Map<String, OriginalRecordDataVo> result = Maps.newHashMap();

@@ -18,10 +18,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.util.AsposeUtil;
-import com.lims.manage.erp.util.FileAndFolderUtil;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
@@ -660,4 +652,31 @@ public class EntrustController {
             return ResultUtil.success(publish);
         }
     }
+
+    /**
+     * 委托单附件单个上传
+     */
+    @RequestMapping("/uploading/{id}")
+    public Result uploading(@PathVariable("id") Long id, MultipartFile[] file) {
+        if (id == null && "".equals(id)) {
+            return ResultUtil.error("缺少必填参数！");
+        }
+        if (file.length == 0) {
+            return ResultUtil.error("委托file文件为空！");
+        }
+        for(MultipartFile multipartFile:file){
+            entrustService.uploading(id,multipartFile);
+        }
+        return ResultUtil.error("样品文件上传成功");
+    }
+
+    /**
+     * 删除文件id
+     */
+    @RequestMapping("/removeding/{id}")
+    public Result removeding(@PathVariable("id") Integer id) {
+        entrustService.removeding(id);
+        return ResultUtil.success("样品文件删除成功");
+    }
+
 }

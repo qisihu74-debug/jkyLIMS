@@ -1,6 +1,7 @@
 package com.lims.manage.erp.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lims.manage.erp.entity.EntrustFileTableEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import lombok.Data;
@@ -260,8 +261,8 @@ public class EntrustAddVo {
      */
     ReportProgressVo reportProgress;
     /**
-     * 文件附件集合
+     * 委托单附件集合
      */
-    List<LabelValueVo> fileArrays;
+    List<EntrustFileTableEntity> fileArrays;
 
 }

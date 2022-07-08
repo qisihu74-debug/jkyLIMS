@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.result.Result;
@@ -804,13 +805,19 @@ public class TaskController {
         if(taskStatsVo.getIntegers().length==0||taskStatsVo.getIntegers()==null){
             log.info("批量下载原始记录 integers = "+ taskStatsVo.getIntegers().toString());
         }
-        response.reset();
-        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-        response.setContentType("application/zip");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("原始记录.zip", "UTF-8") );
-        ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(taskStatsVo.getIntegers(),response);
-        zipOutputStream.flush();
+        // 效验 检测项url信息模板
+        // 通过检测项id 获取 相应的 id关联信息。
+        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(taskStatsVo.getIntegers());
+        // 判断 压缩数据=null 返回 null
+        if(!CollectionUtils.isEmpty(dataEntitys)) {
+            response.reset();
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            response.setContentType("application/zip");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录.zip", "UTF-8"));
+            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys, response);
+            zipOutputStream.flush();
+        }
     }
 
     /**
@@ -831,13 +838,20 @@ public class TaskController {
                                        HttpServletResponse response) throws IOException {
         Integer[] ids = new Integer[1];
         ids[0] = itemId;
-        response.reset();
-        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-        response.setContentType("application/zip");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("原始记录.zip", "UTF-8") );
-        ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(ids,response);
-        zipOutputStream.flush();
+        // 效验 检测项url信息模板
+        // 通过检测项id 获取 相应的 id关联信息。
+        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
+        // 判断 压缩数据=null 返回 null
+        if(!CollectionUtils.isEmpty(dataEntitys)){
+            response.reset();
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            response.setContentType("application/zip");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("原始记录.zip", "UTF-8") );
+            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys,response);
+            zipOutputStream.flush();
+        }
+
     }
 
 

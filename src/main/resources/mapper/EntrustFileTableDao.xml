@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.EntrustFileTableDao">
+    <insert id="insertEntrustFileTableEntity" parameterType="com.lims.manage.erp.entity.EntrustFileTableEntity">
+        insert into test_entrust_file_rel(entrust_id,file_url,file_url_str,create_time) values (#{entrustId},#{fileUrl},#{fileUrlStr},#{carateTime})
+    </insert>
+
+    <select id="getEntrustFileTableEntityList" resultType="com.lims.manage.erp.entity.EntrustFileTableEntity">
+				SELECT
+				id,
+				file_url,
+				file_url_str
+				FROM
+				test_entrust_file_rel
+				WHERE entrust_id = #{entrustId}
+    </select>
+
+	<delete id="deleteEntrustFileTableEntity">
+		delete from test_entrust_file_rel where id = #{id}
+	</delete>
+
+	<select id="getEntrustFileTableEntityId" resultType="com.lims.manage.erp.entity.EntrustFileTableEntity">
+		SELECT
+			id,
+			file_url,
+			file_url_str,
+			create_time,
+			update_time
+			FROM
+			test_entrust_file_rel
+			WHERE id = #{id}
+	</select>
+</mapper>

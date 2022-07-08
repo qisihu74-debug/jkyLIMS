@@ -278,5 +278,6 @@ public class SampleEntity {
         this.cubicMeterConsumption = entity.getCubicMeterConsumption();
         this.pid = entity.getPid();
         this.isUse = entity.getIsUse();
+        this.aliasName = entity.getAliasName();
     }
 }

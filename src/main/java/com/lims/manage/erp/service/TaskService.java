@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -205,7 +206,7 @@ public interface TaskService {
     String batchReview(TaskStatsVo taskStatsVo);
 
 
-    ZipOutputStream packagingWorkbookZip(Integer[] ids, HttpServletResponse response) throws IOException;
+    ZipOutputStream packagingWorkbookZip(List<TaskIdEntity> dataEntitys, HttpServletResponse response) throws IOException;
 
     /**
      * 查询任务列表——并设置分页

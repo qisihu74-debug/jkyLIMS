@@ -269,4 +269,16 @@ public interface EntrustService {
      * @return
      */
     Boolean isPublish(Long entrustId);
+
+    /**
+     *  单个委托单文件上传
+     */
+    Boolean uploading(Long id, MultipartFile multipartFile);
+
+    /**
+     * 删除文件id
+     * @param id
+     * @return
+     */
+    Boolean removeding(Integer id);
 }

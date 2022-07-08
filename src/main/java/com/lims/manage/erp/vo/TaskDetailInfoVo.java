@@ -1,5 +1,6 @@
 package com.lims.manage.erp.vo;
 
+import com.lims.manage.erp.entity.EntrustFileTableEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import lombok.Data;
 
@@ -58,6 +59,11 @@ public class TaskDetailInfoVo {
      * @param taskId
      */
     private String reportCode;
+
+    /**
+     * 委托单附件集合
+     */
+    List<EntrustFileTableEntity> fileArrays;
 
 
     public TaskDetailInfoVo(Long taskId) {
