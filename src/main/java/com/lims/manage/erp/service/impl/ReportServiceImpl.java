@@ -1790,7 +1790,7 @@ public class ReportServiceImpl implements ReportService {
         //2代表报告头2页
         String key = "——";
         //int totalPage = 2;
-        int totalPageNew = 2;
+        int totalPageNew = 0;
         Map<Integer,XWPFDocument> map = new HashedMap();
         //处理坐标提示信息
         ReportResBean resBean = new ReportResBean();
@@ -1989,7 +1989,7 @@ public class ReportServiceImpl implements ReportService {
         //2代表报告头2页
         String key = "——";
         //int totalPage = 2;
-        int totalPageNew = 2;
+        int totalPageNew = 0;
         Map<Integer,XWPFDocument> map = new HashedMap();
         //处理坐标提示信息
         ReportResBean resBean = new ReportResBean();
