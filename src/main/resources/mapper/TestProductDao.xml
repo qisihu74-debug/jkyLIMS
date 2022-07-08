@@ -25,7 +25,8 @@
 
     <select id="getJudges" parameterType="java.lang.Integer" resultType="com.lims.manage.erp.vo.LabelValueVo">
         SELECT t2.id VALUE,
-	    t2.CODE label
+	    t2.CODE label,
+	    t2.name text
         FROM
             ( SELECT * FROM test_product_standard_file_rel WHERE product_id = #{productId} ) t1
             LEFT JOIN test_standard_file t2
