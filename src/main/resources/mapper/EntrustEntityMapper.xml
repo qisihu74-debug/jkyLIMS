@@ -433,6 +433,16 @@
         </foreach>
     </update>
 
+    <update id="batchUpdateTaskPrice" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update test_task
+            <set>
+                task_price = #{item.price}
+            </set>
+            where id = #{item.taskId}
+        </foreach>
+    </update>
+
     <delete id="batchDeleteEntrustSampleItem" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
             delete from test_entrusted_sample_checkitem_rel where entrust_id = #{item.entrustId} and check_item_id = #{item.checkItemId} and sample_id = #{item.sampleId}
@@ -797,7 +807,9 @@
             check_item_name,
             check_item_id,
             standard_id,
-            times
+            times,
+            state,
+            unit_price
         FROM
             test_entrusted_sample_checkitem_rel where sample_id = #{sampleId} and entrust_id = #{entrustId} order by LENGTH(check_item_name)
     </select>

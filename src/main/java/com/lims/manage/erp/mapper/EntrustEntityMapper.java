@@ -10,10 +10,7 @@ import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.EntrustSampleInfoVo;
-import com.lims.manage.erp.vo.HistoryEntrustDataVo;
-import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -84,6 +81,12 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @param list
      */
     void batchUpdateEntrustSampleItem(@Param("list") List<SampleItemEntity> list);
+
+    /**
+     * 批量修改任务单价格
+     * @param list
+     */
+    void batchUpdateTaskPrice(@Param("list") List<TaskPriceVo> list);
 
     /**
      * 批量删除委托单下的检测项
