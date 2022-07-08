@@ -217,6 +217,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     <select id="selectTestStandardList" resultType="com.lims.manage.erp.vo.JudgmentBasisVo">
         SELECT
         t1.id as id,
+        t1.task_id AS taskId,
         t1.sample_id as sampleId,
         t2.check_item_id AS checkItemId,
         t1.check_item_name AS checkItemName,
