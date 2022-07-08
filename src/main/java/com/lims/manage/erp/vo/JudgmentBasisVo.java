@@ -72,4 +72,8 @@ public class JudgmentBasisVo {
      * 检测项pid
      */
     private Integer checkItemPid;
+    /**
+     * 任务ID
+     */
+    private Long taskId;
 }

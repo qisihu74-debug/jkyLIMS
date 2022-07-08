@@ -86,5 +86,13 @@ public class SampleItemEntity {
      * 原始记录
      */
     private String originUrl;
+    /**
+     * 检测项状态
+     */
+    private Integer state;
+    /**
+     * 任务ID
+     */
+    private Long taskId;
 
 }
