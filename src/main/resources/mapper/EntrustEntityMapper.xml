@@ -429,13 +429,13 @@
                 standard_id = #{item.standardId},
                 times = #{item.times}
             </set>
-            where entrust_id = #{item.entrustId} and check_item_id = #{item.checkItemId}
+            where entrust_id = #{item.entrustId} and check_item_id = #{item.checkItemId} and sample_id = #{item.sampleId}
         </foreach>
     </update>
 
     <delete id="batchDeleteEntrustSampleItem" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
-            delete from test_entrusted_sample_checkitem_rel where entrust_id = #{item.entrustId} and check_item_id = #{item.checkItemId}
+            delete from test_entrusted_sample_checkitem_rel where entrust_id = #{item.entrustId} and check_item_id = #{item.checkItemId} and sample_id = #{item.sampleId}
         </foreach>
     </delete>
 
