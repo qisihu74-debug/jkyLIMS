@@ -1246,7 +1246,7 @@ public class EntrustServiceImpl implements EntrustService {
         //查询当前委托单下的任务单数量
         Integer reportStateTaskNum = entityMapper.getReportStateTaskNum(vo.getId());
         if(reportStateTaskNum>0){//已发布
-            return updatePublishedEntrust0621(vo);
+            return updatePublishedEntrust0711(vo);
         }else{//未发布
             return updateEntrustTestNewSampleEnscript0621(vo);
         }
@@ -1654,6 +1654,192 @@ public class EntrustServiceImpl implements EntrustService {
 //            basisInfo.setPaymentCount(totalMoney + "");2022年5月20日修改，委托单价格不在后台计算
             basisInfo.setState(state);
             //存放委托基本信息==》test_entrusted
+            entityMapper.updateEntrustInfo(basisInfo);
+        }
+        return true;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    Boolean updatePublishedEntrust0711(EntrustAddVo vo){
+        EntrustEntity basisInfo = new EntrustEntity(vo);
+        //获取委托单原有信息
+        EntrustAddVo oldEntrustInfo = getEntrustHistoryDetailTest(basisInfo.getId());
+        //当前委托单状态
+        Integer state = oldEntrustInfo.getState();
+        //查询报告状态
+        String reportState = entityMapper.getReportState(basisInfo.getId());
+        // 删除判定依据id
+        entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
+        int totalMoney = 0;
+        boolean flag = false;
+        //样品
+        List<SampleEntity> samples = vo.getSamples();
+        List<EntrustSampleEntity> list1 = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(samples)) {
+            //存放要删除的检测项
+            List<SampleItemEntity> deleteCheckItems = Lists.newArrayList();
+            //存放最新的检测项
+            List<SampleItemEntity> allNewCheckItems = Lists.newArrayList();
+            //处理检测项
+            for (int i = 0; i < samples.size(); i++) {
+                SampleEntity sampleEntity = samples.get(i);
+                SampleEntity sampleEntityOld = oldEntrustInfo.getSamples().get(i);
+                //修改样品判定依据
+                List<JudgmentBasisVo> standardFileIds = sampleEntity.getStandardFileIdStr();
+                if (!CollectionUtils.isEmpty(standardFileIds)) {
+                    for (JudgmentBasisVo integer : standardFileIds) {
+                        EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
+                        sampleEntity1.setSampleId(sampleEntity.getId());
+                        sampleEntity1.setStandardId(integer.getStandardId());
+                        sampleEntity1.setEntrustmentId(basisInfo.getId());
+                        list1.add(sampleEntity1);
+                    }
+                }
+                //保存样品判定依据
+                if (!CollectionUtils.isEmpty(list1)) {
+                    entityMapper.BatchSaveSampleStandard(list1);
+                }
+                //原有检测项信息
+                List<SampleItemEntity> sampleCheckItemOld = entityMapper.getAllOldCheckItemInfo(sampleEntityOld.getId(),basisInfo.getId());
+                //新检测项信息
+                List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
+                allNewCheckItems.addAll(sampleCheckItem);
+                //存放修改的检测项
+                List<SampleItemEntity> updateList = Lists.newArrayList();
+                if(!CollectionUtils.isEmpty(sampleCheckItemOld) && !CollectionUtils.isEmpty(sampleCheckItem)){
+                    for (int k = 0; k < sampleCheckItemOld.size(); k++) {
+                        SampleItemEntity sampleItemEntity = sampleCheckItemOld.get(k);
+                        if(sampleItemEntity!=null){
+                            Long checkItemId = sampleItemEntity.getCheckItemId();
+                            for (int m = 0; m < sampleCheckItem.size(); m++) {
+                                SampleItemEntity sampleItemEntity1 = sampleCheckItem.get(m);
+                                if(sampleItemEntity1 != null){
+                                    Long checkItemId1 = sampleItemEntity1.getCheckItemId();
+                                    if(checkItemId1.equals(checkItemId)){
+                                        updateList.add(sampleItemEntity1);
+                                        sampleCheckItemOld.set(k,null);
+                                        sampleCheckItem.set(m,null);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                //增加新的检测项
+                if (!CollectionUtils.isEmpty(sampleCheckItem)) {
+                    List<SampleItemEntity> saveList = Lists.newArrayList();
+                    for (SampleItemEntity entity : sampleCheckItem) {
+                        if(entity != null){
+                            //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+                            entity.setSampleId(sampleEntity.getId());
+                            entity.setEntrustId(basisInfo.getId());
+                            saveList.add(entity);
+                        }
+                    }
+                    if(!CollectionUtils.isEmpty(saveList)){
+                        entityMapper.BatchSaveEntrustSampleItem(saveList);
+                        state = 0;
+                        flag = true;
+                        //修改报告的状态，和审批，复核信息
+                        if(!"2".equals(reportState)){
+                            ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
+                            reportApprovalVo.setState(2);
+                            reportApprovalVo.setEntrustmentId(basisInfo.getId());
+                            reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
+                        }
+                    }
+                }
+                //修改原有检测项
+                if (!CollectionUtils.isEmpty(updateList)){
+                    entityMapper.batchUpdateEntrustSampleItem(updateList);
+                }
+                //删除原有检测项——判断是否删除有子检测项的
+                if (sampleCheckItemOld != null && !CollectionUtils.isEmpty(sampleCheckItemOld)){
+                    List<SampleItemEntity> temp = Lists.newArrayList();
+                    for (SampleItemEntity sampleItemEntity : sampleCheckItemOld) {
+                        if (sampleItemEntity != null) {
+                            temp.add(sampleItemEntity);
+                        }
+                    }
+                    //把要删除的检测项存放到循环外
+                    deleteCheckItems.addAll(temp);
+                    //删除委托检测项表中的检测项
+                    if(!CollectionUtils.isEmpty(temp)){
+                        entityMapper.batchDeleteEntrustSampleItem(temp);
+                    }
+                    //根据委托单Id查询报告数据主键
+                    List<ReportRecordDetailEntity> detailEntityList = Lists.newArrayList();
+                    Long reportId = entityMapper.getReportId(basisInfo.getId());
+                    for (SampleItemEntity sampleItemEntity : sampleCheckItemOld) {
+                        ReportRecordDetailEntity entity = new ReportRecordDetailEntity();
+                        if(sampleItemEntity != null){
+                            entity.setCheckItemId(sampleItemEntity.getCheckItemId());
+                            entity.setRecordId(reportId);
+                            entity.setSampleId(sampleItemEntity.getSampleId());
+                            detailEntityList.add(entity);
+                        }
+                    }
+                    //并且删除报告详情表中关联检测项
+                    if(!CollectionUtils.isEmpty(detailEntityList)){
+                        reportRecordDetailEntityMapper.deleteByEntrustIdandCheckItemId(detailEntityList);
+                    }
+                    //修改报告的状态，和审批，复核信息
+                    if(!"2".equals(reportState)){
+                        ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
+                        reportApprovalVo.setState(2);
+                        reportApprovalVo.setEntrustmentId(basisInfo.getId());
+                        reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
+                    }
+                }
+            }
+            //处理任务单价格
+            List<Long> taskIds = Lists.newArrayList();
+            if(!CollectionUtils.isEmpty(allNewCheckItems)){
+                for (SampleItemEntity sampleItemEntity : allNewCheckItems) {
+                    taskIds.add(sampleItemEntity.getTaskId());
+                }
+            }
+            List<TaskPriceVo> priceVos = Lists.newArrayList();
+            if(!CollectionUtils.isEmpty(taskIds)){
+                for (Long taskId : taskIds) {
+                    double taskPrice = 0D;
+                    for (SampleItemEntity sampleItemEntity : allNewCheckItems) {
+                        if(Objects.equals(taskId, sampleItemEntity.getTaskId())){
+                            double price = sampleItemEntity.getUnitPrice() * sampleItemEntity.getTimes() * Double.parseDouble(vo.getDiscount());
+                            taskPrice = taskPrice + price;
+                        }
+                    }
+                    TaskPriceVo taskPriceVo = new TaskPriceVo(taskId,taskPrice);
+                    priceVos.add(taskPriceVo);
+                }
+            }
+            //处理老检测项价钱
+            if(!CollectionUtils.isEmpty(priceVos)){
+                for (TaskPriceVo taskPriceVo : priceVos) {
+                    Double price = taskPriceVo.getPrice();
+                    Long taskId = taskPriceVo.getTaskId();
+                    if (!CollectionUtils.isEmpty(deleteCheckItems)) {
+                        for (SampleItemEntity sampleItemEntity : deleteCheckItems) {
+                            if(sampleItemEntity != null){
+                                Integer state1 = sampleItemEntity.getState();
+                                Long taskId1 = sampleItemEntity.getTaskId();
+                                if (state1 >= 2) {//检测项已完成
+                                    double completePrice = sampleItemEntity.getUnitPrice() * sampleItemEntity.getTimes() * Double.parseDouble(vo.getDiscount());
+                                    if (Objects.equals(taskId1, taskId)) {
+                                        price = price + completePrice;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    taskPriceVo.setPrice(price);
+                }
+                //批量更新任务单价格
+                entityMapper.batchUpdateTaskPrice(priceVos);
+            }
+        }
+        if (flag) {
+            basisInfo.setState(state);
             entityMapper.updateEntrustInfo(basisInfo);
         }
         return true;
