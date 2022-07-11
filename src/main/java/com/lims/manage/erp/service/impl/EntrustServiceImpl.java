@@ -1564,16 +1564,19 @@ public class EntrustServiceImpl implements EntrustService {
                 //删除原有检测项——判断是否删除有子检测项的
                 if (sampleCheckItemOld != null && !CollectionUtils.isEmpty(sampleCheckItemOld)){
                     //
+                    List<SampleItemEntity> temp = Lists.newArrayList();
                     for (int j = 0; j < sampleCheckItemOld.size(); j++) {
                         SampleItemEntity sampleItemEntity = sampleCheckItemOld.get(i);
-                        if(sampleItemEntity == null ){
-                            sampleCheckItemOld.remove(sampleItemEntity);
+                        if(sampleItemEntity != null ){
+                            temp.add(sampleItemEntity);
                         }
                     }
                     //把要删除的检测项存放到循环外
-                    deleteCheckItems.addAll(sampleCheckItemOld);
+                    deleteCheckItems.addAll(temp);
                     //删除委托检测项表中的检测项
-                    entityMapper.batchDeleteEntrustSampleItem(sampleCheckItemOld);
+                    if(!CollectionUtils.isEmpty(temp)){
+                        entityMapper.batchDeleteEntrustSampleItem(temp);
+                    }
                     //根据委托单Id查询报告数据主键
                     List<ReportRecordDetailEntity> detailEntityList = Lists.newArrayList();
                     Long reportId = entityMapper.getReportId(basisInfo.getId());
