@@ -281,6 +281,7 @@ public class TaskServiceImpl implements TaskService {
         }
         List<TaskListVo> personList = new ArrayList<>();
 //        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        PageHelper.clearPage();
         personList = taskMapper.getTaskListContainsSample(paramVo);
         // 补充样品名称信息
         if(!CollectionUtils.isEmpty(personList)){
@@ -1313,9 +1314,11 @@ public class TaskServiceImpl implements TaskService {
         List<TaskListVo> personList = new ArrayList<>();
         if (paramVo.getState() != null && paramVo.getState() != 1) {
 //            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+            PageHelper.clearPage();
             personList = taskMapper.getTaskListContainsSample(paramVo);
         }
         else {
+            PageHelper.clearPage();
             personList = taskMapper.getTaskListTwoGreater(paramVo);
         }
         // 手动分页

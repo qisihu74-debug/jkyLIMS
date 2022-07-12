@@ -457,6 +457,13 @@
             <if test="state!=null">
                 and t1.state=#{state}
             </if>
+            <if test="state==null">
+                and (t1.state=1
+                    or t1.state=3
+                    or t1.state=4
+                    or t1.state=6
+                )
+            </if>
             <if test="inspector!=null and inspector!='' and deptIds!=null ">
                 and ( t1.inspector LIKE CONCAT('%',#{inspector},'%') or t1.reviewer LIKE CONCAT('%',#{reviewer},'%')
                             or t1.dept_id in
@@ -466,7 +473,6 @@
                 )
             </if>
         </trim>
-        and t1.state!=0 and t1.state !=1
         ORDER BY
         t1.code desc
 
