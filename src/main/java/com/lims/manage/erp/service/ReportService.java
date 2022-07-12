@@ -335,6 +335,7 @@ public interface ReportService {
      * @return
      */
     ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id);
+    ReportResBean submitDownLoad1(MinioClient client, List<ConclusionEntity> list, Long id);
 
     /**
      * 获取委托单下各个报告模板所需的检测结论和附加声明的文案

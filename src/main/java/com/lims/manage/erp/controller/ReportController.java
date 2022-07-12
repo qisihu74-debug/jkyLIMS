@@ -8,6 +8,7 @@ import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.AlertEntity;
 import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
@@ -31,6 +32,7 @@ import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.PDFHelper3;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
@@ -85,6 +87,8 @@ public class ReportController {
     private ReportApprovalMapper reportApprovalMapper;
     @Autowired
     private AlertService alertService;
+    @Autowired
+    private QiYueSuoEntity qiYueSuoEntity;
 //    @Autowired
 //    private ReportRecordEntityMapper recordEntityMapper;
 
@@ -975,5 +979,73 @@ public class ReportController {
     public Result getSealer(){
         List<TestTeam> list = reportService.getSealer();
         return ResultUtil.success(list);
+    }
+
+    @RequestMapping("previewDownLoad1")
+    public void previewDownLoad1(@RequestParam("json") String json, HttpServletResponse response) {
+        json = "{\"id\":1656670371659335,\"list\":[{\"url\":\"http://121.89.242.0:9000/file-resources/1653308619762103.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220523%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220523T122339Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=36508788f305c2f692143d7467915267abd08f6e340a2838e869d737dae0b361\",\"conclusion\":\"经检测，该土样品,回弹模量均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：一禅；2.见证单位：甘肃华路捷公路工程技术咨询有限公司；3.见证人：张瑞涛；4.委托方提供：无 ；\"},{\"url\":\"http://121.89.242.0:9000/file-resources/1649645324684109.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220411%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220411T024844Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=621bfddf70c4e5bb952335fb438e58223f8d47677bb38b0c932c602071685008\",\"conclusion\":\"经检测，该土样品,粗粒土和巨粒土最大干密度均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：一禅；2.见证单位：甘肃华路捷公路工程技术咨询有限公司；3.见证人：张瑞涛；4.委托方提供：无 ；\"}],\"type\":\"原材检测\",\"mixInfo\":{}}";
+        String decode = "";
+        String url = "";
+        try {
+            json = json.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+            json = json.replaceAll("\\+", "%2B");
+            decode = URLDecoder.decode(json, "UTF-8");
+        }catch (Exception e){
+            logger.error("处理json参数转码错误:{}",e);
+        }
+        String unescapeJava = StringEscapeUtils.unescapeJava(decode);
+        //String substring = unescapeJava.substring(1, unescapeJava.length() - 1);
+        ReqBean reqBean = JSON.parseObject(unescapeJava,ReqBean.class);
+       /* if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
+            return null;
+        }*/
+        //从文件服务器拉取文件
+        MinioClient client = MinIoUtil.minioClient;
+        ReportResBean resBean = null;
+        if ("原材检测".equals(reqBean.getType())){
+            resBean = reportService.submitDownLoad1(client, reqBean.getList(), reqBean.getId());
+        }else {
+            resBean = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
+        }
+        url = resBean.getUrl();
+        //预览excel转pdf
+        String[] split = url.split("\\?");
+        String[] strings = split[0].split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        try {
+            String path = qiYueSuoEntity.getAutographPath()+GenID.getID()+".pdf";
+            client.statObject(bluckName, fileName);
+            InputStream object = client.getObject(bluckName, fileName);
+            //相应pdf
+            ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(object,path);
+            InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+            //TODO 设置签名信息
+            //设置提醒信息
+            //保存告警信息
+            List<AlertEntity> list = Lists.newArrayList();
+            Map<String, String> map = resBean.getMap();
+            Set<String> set = map.keySet();
+            for (String s:set) {
+                AlertEntity entity = new AlertEntity();
+                entity.setId(GenID.getID());
+                entity.setCheckItemName(s);
+                entity.setDescrib(map.get(s));
+                entity.setEntrustId(reqBean.getId());
+                list.add(entity);
+            }
+            if (CollectionUtils.isNotEmpty(list)){
+                alertService.deleteByEntrustId(reqBean.getId());
+                alertService.saveBatch(list);
+            }
+            ServletOutputStream outputStream = response.getOutputStream();
+            int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+            inputStream.close();
+            outputStream.close();
+            //TODO 上传是否保留？
+            url = MinIoUtil.upload("report-download", reqBean.getId() + ".pdf", inputStream, "application/octet-stream");
+        }catch (Exception e){
+            logger.error("预览合并后的报告异常:{}",e);
+        }
     }
 }
