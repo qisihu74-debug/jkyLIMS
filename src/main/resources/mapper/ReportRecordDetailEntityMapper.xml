@@ -213,7 +213,9 @@
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
             delete
             from test_report_record_detail
-            where record_id = #{item.recordId} and check_item_id = #{item.checkItemId}
+            where record_id = #{item.recordId}
+            and check_item_id = #{item.checkItemId}
+            and sample_id = #{item.sampleId}
         </foreach>
     </delete>
 

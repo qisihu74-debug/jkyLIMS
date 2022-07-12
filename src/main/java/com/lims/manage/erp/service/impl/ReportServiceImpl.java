@@ -207,6 +207,8 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        PageHelper.clearPage();
+        PageHelper.startPage(pageNum, pageSize);
         List<ReportListVo> list = reportMapper.reportDownloadList(userTeamIds, search);
         for (ReportListVo reportListVo : list) {
             List<String> sampleNames = reportMapper.getSampleNames(reportListVo.getId());
@@ -219,8 +221,6 @@ public class ReportServiceImpl implements ReportService {
             }
             reportListVo.setSampleName(sampleName.toString());
         }
-        PageHelper.clearPage();
-        PageHelper.startPage(pageNum, pageSize);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
