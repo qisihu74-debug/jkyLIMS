@@ -117,6 +117,8 @@ public interface TaskService {
      */
     Boolean getJudgmentTaskList(Long id);
 
+    List<String> getSampleOutward(Long taskId);
+
     /**
      * 查询原始记录表头信息
      * @param taskId
