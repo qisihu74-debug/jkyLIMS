@@ -5,6 +5,7 @@ import com.lims.manage.erp.vo.EntrustAddVo;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.text.DecimalFormat;
 import java.util.Date;
 @Data
 public class EntrustEntity {
@@ -249,6 +250,7 @@ public class EntrustEntity {
     */
     private Long department;
 
+    DecimalFormat df = new DecimalFormat("#.00");
 
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,
@@ -338,7 +340,7 @@ public class EntrustEntity {
         this.mixingWay=vo.getMixingWay();
         this.taskSource=vo.getTaskSource();
         this.discount=vo.getDiscount();
-        this.actualPrice=vo.getActualPrice();
+        this.actualPrice=df.format(Double.parseDouble(vo.getActualPrice()));
         this.systemPrice=vo.getSystemPrice();
         this.presentInformation=vo.getPresentInformation();
     }

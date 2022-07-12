@@ -847,4 +847,14 @@
                             </if>
                         </where>
     </select>
+
+    <select id="selectTaskTestEntityList" resultType="com.lims.manage.erp.entity.TaskTestEntity">
+        SELECT
+        t2.state,
+        t2.id
+        FROM
+        test_entrusted_info as t1
+        LEFT JOIN test_task as t2 ON t1.id = t2.entrustment_id
+        WHERE t2.entrustment_id = #{entrustmentId}
+    </select>
 </mapper>

@@ -457,6 +457,13 @@
             <if test="state!=null">
                 and t1.state=#{state}
             </if>
+            <if test="state==null">
+                and (t1.state=1
+                    or t1.state=3
+                    or t1.state=4
+                    or t1.state=6
+                )
+            </if>
             <if test="inspector!=null and inspector!='' and deptIds!=null ">
                 and ( t1.inspector LIKE CONCAT('%',#{inspector},'%') or t1.reviewer LIKE CONCAT('%',#{reviewer},'%')
                             or t1.dept_id in
@@ -521,6 +528,12 @@
                 and t1.state <![CDATA[ >= #{state} ]]>
                 and t1.state !=2
             </if>
+            <if test="state==null">
+                and (t1.state <![CDATA[ >= 1 ]]>
+                or t1.state !=2
+                or t1.state = 0
+                )
+            </if>
         </trim>
         ORDER BY
         t1.code desc
@@ -558,6 +571,8 @@
             <if test="sampleReceivingTime!=null">sample_receiving_time=#{sampleReceivingTime},</if>
             <if test="sampleStateDescription!=null">sample_state_description=#{sampleStateDescription},</if>
             <if test="sampler!=null and sampler!=''">sampler=#{sampler},</if>
+            <if test="requiredCompletionTime!=null">required_completion_time=#{requiredCompletionTime},</if>
+            <if test="orderTime!=null">order_time=#{orderTime},</if>
         </trim>
         where id = #{id}
     </update>
@@ -575,6 +590,7 @@
                 <if test="item.receiver!=null and item.receiver!=''">receiver=#{item.receiver},</if>
                 <if test="item.state!=null">state=#{item.state},</if>
                 <if test="item.receiveTime!=null">receive_time=#{item.receiveTime},</if>
+                <if test="item.sampleStateDescription!=null">sample_state_description=#{item.sampleStateDescription},</if>
             </trim>
             where id = #{item.id}
         </foreach>
@@ -912,5 +928,16 @@
             test_task
         WHERE
             entrustment_id = #{entrustmentId}
+    </select>
+
+    <select id="getSampleOutward" resultType="java.lang.String" >
+        SELECT
+            t3.outward_describe
+        FROM
+            test_task t1
+                LEFT JOIN test_entrusted_sample_details_rel t2 ON t1.entrustment_id = t2.entrustment_id
+                LEFT JOIN test_sample t3 ON t2.sample_id = t3.id
+        WHERE
+            t1.id = #{taskId}
     </select>
 </mapper>

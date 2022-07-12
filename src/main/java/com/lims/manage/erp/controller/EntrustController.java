@@ -117,7 +117,7 @@ public class EntrustController {
      */
     @RequestMapping("/updateEntrust_test_new")
 //    @RequiresPermissions("entrust:entrust:updateEntrust")
-    public Result updateEntrustTestNew(@RequestParam("json") String json, MultipartFile[] file) {
+    public Result updateEntrustTestNew(@RequestParam("json") String json, MultipartFile[] file) throws ParseException {
         EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
         Boolean isSuccess = entrustService.updateEntrustTestNew(entrust, file);
         if (isSuccess) {

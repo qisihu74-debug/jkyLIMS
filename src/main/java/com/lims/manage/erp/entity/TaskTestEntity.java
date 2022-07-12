@@ -124,11 +124,15 @@ public class TaskTestEntity {
      * 样品状态描述
      */
     private String sampleStateDescription;
+    /**
+     * 提供资料
+     */
+    private String presentInformation;
 
     public TaskTestEntity() {
     }
 
-    public TaskTestEntity(Long id, BatchReceiveTaskVo vo,Integer state,Date currentDate) {
+    public TaskTestEntity(Long id, BatchReceiveTaskVo vo,Integer state,Date currentDate,String outward) {
         this.id = id;
         this.inspector = vo.getInspector();
         this.recorder = vo.getRecorder();
@@ -139,5 +143,6 @@ public class TaskTestEntity {
         this.receiver = vo.getReceiver();
         this.state=state;
         this.receiveTime = currentDate;
+        this.sampleStateDescription = outward;
     }
 }

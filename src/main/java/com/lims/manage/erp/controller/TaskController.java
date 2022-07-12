@@ -222,9 +222,20 @@ public class TaskController {
             java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
             for (Long id : ids) {
                 Boolean taskStatus = taskService.getJudgmentTaskList(id);
+                //查询样品外观描述
+                List<String> sampleOutward = taskService.getSampleOutward(id);
+                StringBuilder outward = new StringBuilder();
+                if(!CollectionUtils.isEmpty(sampleOutward)){
+                    for (int i = 0; i < sampleOutward.size(); i++) {
+                        outward.append(sampleOutward.get(i));
+                        if(i!=sampleOutward.size()-1){
+                            outward.append("/");
+                        }
+                    }
+                }
                 if (taskStatus) {
                     //构造修改对象，状态1==（领样/任务单领取）
-                    TaskTestEntity entity = new TaskTestEntity(id,batchReceiveTaskVo,1,currentDate);
+                    TaskTestEntity entity = new TaskTestEntity(id,batchReceiveTaskVo,1,currentDate,outward.toString());
                     batchUpdate.add(entity);
                 }else{
                     return ResultUtil.error(678, "选择的任务单中包含已领取任务单，请刷新页面后重新领取！");
@@ -280,7 +291,7 @@ public class TaskController {
      */
     @RequestMapping("/getTaskList")
     public Result getTaskInfo(@RequestBody TaskListParamVo paramVo) {
-        if (paramVo == null || paramVo.getState() == null || paramVo.getPageNum() == null || paramVo.getPageSize() == null) {
+        if (paramVo == null  || paramVo.getPageNum() == null || paramVo.getPageSize() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             // 验证登录人信息 和部门 存入
@@ -311,7 +322,7 @@ public class TaskController {
     @PostMapping(value = "/getTaskList_two")
     public Result getTaskInfo_two(@RequestBody TaskListParamVo paramVo) {
 
-        if (paramVo == null || paramVo.getState() == null || paramVo.getPageNum() == null || paramVo.getPageSize() == null) {
+        if (paramVo == null || paramVo.getPageNum() == null || paramVo.getPageSize() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
             // 验证登录人信息 和部门 存入

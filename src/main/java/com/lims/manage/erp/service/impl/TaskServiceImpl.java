@@ -281,7 +281,22 @@ public class TaskServiceImpl implements TaskService {
         }
         List<TaskListVo> personList = new ArrayList<>();
 //        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        PageHelper.clearPage();
         personList = taskMapper.getTaskListContainsSample(paramVo);
+        // 补充样品名称信息
+        if(!CollectionUtils.isEmpty(personList)){
+            for(TaskListVo taskListVo :personList)
+            {
+                StringBuilder stringBuilder = new StringBuilder();
+                if(!CollectionUtils.isEmpty(taskListVo.getSampleList())){
+                    for(SamplePrivateInfoVo samplePrivateInfoVo:taskListVo.getSampleList()){
+                        stringBuilder.append(samplePrivateInfoVo.getAliasName());
+                        stringBuilder.append("、");
+                    }
+                    taskListVo.setSampleName(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
+                }
+            }
+        }
         // 手动分页
         Integer pageNum =  paramVo.getPageNum();
         Integer pageSize = paramVo.getPageSize();
@@ -562,6 +577,11 @@ public class TaskServiceImpl implements TaskService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<String> getSampleOutward(Long taskId) {
+        return taskMapper.getSampleOutward(taskId);
     }
 
     @SneakyThrows
@@ -1294,11 +1314,11 @@ public class TaskServiceImpl implements TaskService {
         List<TaskListVo> personList = new ArrayList<>();
         if (paramVo.getState() != null && paramVo.getState() != 1) {
 //            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+            PageHelper.clearPage();
             personList = taskMapper.getTaskListContainsSample(paramVo);
         }
-
-        if (paramVo.getState() == 1) {
-//            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        else {
+            PageHelper.clearPage();
             personList = taskMapper.getTaskListTwoGreater(paramVo);
         }
         // 手动分页
@@ -1347,8 +1367,7 @@ public class TaskServiceImpl implements TaskService {
             // 分页后 逻辑处理
             methodManualPages((List<TaskListVo>) pagingVo.getList());
             return pagingVo;
-        }
-        else {
+        } else {
             if (!CollectionUtils.isEmpty(personList)) {
                 pagingVo.setList(personList);
             }
@@ -1388,9 +1407,11 @@ public class TaskServiceImpl implements TaskService {
                 }
                 List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
                 List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
+                //外观描述
+                StringBuilder outward = new StringBuilder();
                 if(!CollectionUtils.isEmpty(sampleList)) {
+                    int i = 0;
                     for (SamplePrivateInfoVo samplePrivateInfoVo : sampleList) {
-                        sampleListVo.setOutward(samplePrivateInfoVo.getOutward());
                         String state = service.findStateBySampleId(samplePrivateInfoVo.getId(), entrustEntityMapper, taskMapper);
                         samplePrivateInfoVo.setState(state);
                         //TODO PSH查询子原材样品信息
@@ -1398,9 +1419,16 @@ public class TaskServiceImpl implements TaskService {
                         if (!CollectionUtils.isEmpty(nodeSampleList1)) {
                             nodeSampleList.addAll(nodeSampleList1);
                         }
+                        outward.append(samplePrivateInfoVo.getOutward());
+                        if(i != sampleList.size()-1){
+                            outward.append("/");
+                        }
+                        i++;
                     }
                     sampleList.addAll(nodeSampleList);
                 }
+                //将多组样品放到领取任务中；
+                sampleListVo.setOutward(outward.toString());
                 //增加关联委托单信息
                 StringBuilder correlationTask = new StringBuilder();
                 List<String> correlationTaskList = taskMapper.getCorrelationTask(sampleListVo.getTaskId());

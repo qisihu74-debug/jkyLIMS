@@ -49,7 +49,7 @@ public interface EntrustService {
     /**
      * 修改委托测试 new
      */
-    Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file);
+    Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file) throws ParseException;
 
     /**
      * 修改委托样品测试 new 暂时废弃 （勿删！！）
