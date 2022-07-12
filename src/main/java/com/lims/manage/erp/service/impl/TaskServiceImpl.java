@@ -564,6 +564,11 @@ public class TaskServiceImpl implements TaskService {
         return false;
     }
 
+    @Override
+    public List<String> getSampleOutward(Long taskId) {
+        return taskMapper.getSampleOutward(taskId);
+    }
+
     @SneakyThrows
     @Override
     public XWPFDocument downloadEntrust(TaskDetailInfoVo taskDetailInfoVo, InputStream object) {

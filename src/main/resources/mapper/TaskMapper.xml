@@ -575,6 +575,7 @@
                 <if test="item.receiver!=null and item.receiver!=''">receiver=#{item.receiver},</if>
                 <if test="item.state!=null">state=#{item.state},</if>
                 <if test="item.receiveTime!=null">receive_time=#{item.receiveTime},</if>
+                <if test="item.sampleStateDescription!=null">sample_state_description=#{item.sampleStateDescription},</if>
             </trim>
             where id = #{item.id}
         </foreach>
@@ -912,5 +913,16 @@
             test_task
         WHERE
             entrustment_id = #{entrustmentId}
+    </select>
+
+    <select id="getSampleOutward" resultType="java.lang.String" >
+        SELECT
+            t3.outward_describe
+        FROM
+            test_task t1
+                LEFT JOIN test_entrusted_sample_details_rel t2 ON t1.entrustment_id = t2.entrustment_id
+                LEFT JOIN test_sample t3 ON t2.sample_id = t3.id
+        WHERE
+            t1.id = #{taskId}
     </select>
 </mapper>

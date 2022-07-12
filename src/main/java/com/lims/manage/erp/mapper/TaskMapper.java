@@ -412,4 +412,11 @@ public interface TaskMapper extends BaseMapper {
      */
     @Select("SELECT dept_id FROM test_task WHERE entrustment_id = #{entrustId} LIMIT 1")
     Long getDeptByEntrustId(Long entrustId);
+
+    /**
+     * 查询样品的外观描述
+     * @param taskId
+     * @return
+     */
+    List<String> getSampleOutward(Long taskId);
 }

@@ -128,7 +128,7 @@ public class TaskTestEntity {
     public TaskTestEntity() {
     }
 
-    public TaskTestEntity(Long id, BatchReceiveTaskVo vo,Integer state,Date currentDate) {
+    public TaskTestEntity(Long id, BatchReceiveTaskVo vo,Integer state,Date currentDate,String outward) {
         this.id = id;
         this.inspector = vo.getInspector();
         this.recorder = vo.getRecorder();
@@ -139,5 +139,6 @@ public class TaskTestEntity {
         this.receiver = vo.getReceiver();
         this.state=state;
         this.receiveTime = currentDate;
+        this.sampleStateDescription = outward;
     }
 }
