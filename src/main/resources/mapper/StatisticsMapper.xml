@@ -211,13 +211,14 @@
         <result property="requestDate" column="requestDate"></result>
         <result property="finishDate" column="finishDate"></result>
         <result property="reportCode" column="report_code"></result>
-        <result property="state" column="report_state"></result>
+        <result property="state" column="state"></result>
+        <result property="cost" column="cost"></result>
         <result property="entrustmentId" column="entrustment_id"></result>
         <result property="discount" column="discount"></result>
         <result property="reportType" column="type"></result>
         <collection property="sampleDetailList" ofType="com.lims.manage.erp.vo.SampleDetailVo">
             <id property="id" column="sample_id"></id>
-            <result property="sampleName" column="sample_name"></result>
+            <result property="sampleName" column="alias_name"></result>
             <collection property="checkItemInfoList" ofType="com.lims.manage.erp.vo.CheckItemInfoVo">
                 <id property="checkItemId" column="check_item_id"></id>
                 <result property="checkItemName" column="check_item_name"></result>
@@ -241,11 +242,12 @@
         t1.required_completion_time requestDate,
         t1.review_time finishDate,
         t2.report_code,
-        t2.state report_state,
+        t1.state,
+        t1.task_price cost,
         t2.type,
         t1.entrustment_id,
         t4.id sample_id,
-		t4.sample_name ,
+		t4.alias_name ,
         t5.id as itemId,
         t5.times,
         t5.unit_price,

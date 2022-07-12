@@ -1310,9 +1310,7 @@ public class TaskServiceImpl implements TaskService {
 //            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
             personList = taskMapper.getTaskListContainsSample(paramVo);
         }
-
-        if (paramVo.getState() == 1) {
-//            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        else {
             personList = taskMapper.getTaskListTwoGreater(paramVo);
         }
         // 手动分页

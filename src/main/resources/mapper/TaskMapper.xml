@@ -466,6 +466,7 @@
                 )
             </if>
         </trim>
+        and t1.state!=0 and t1.state !=1
         ORDER BY
         t1.code desc
 
@@ -520,6 +521,12 @@
             <if test="state!=null">
                 and t1.state <![CDATA[ >= #{state} ]]>
                 and t1.state !=2
+            </if>
+            <if test="state==null">
+                and (t1.state <![CDATA[ >= 1 ]]>
+                or t1.state !=2
+                or t1.state = 0
+                )
             </if>
         </trim>
         ORDER BY

@@ -435,40 +435,21 @@ public class StatisticsServiceImpl implements StatisticsService {
             if(!taskDetailInfoVo.getSampleDetailList().isEmpty())
             {
                 Set<String> set = new HashSet<>();
-                Integer testPrice = 0;
                 for (SampleDetailVo sampleEntity : taskDetailInfoVo.getSampleDetailList()) {
                     set.add(sampleEntity.getSampleName());
-                    if(!sampleEntity.getCheckItemInfoList().isEmpty()){
-                        for (CheckItemInfoVo sampleItemInstrumentEntity : sampleEntity.getCheckItemInfoList()) {
-                            // 进行强转 子类 继承 父类信息。
-                            // times 次数 * 单价 UnitPrice = 此次检测价格。
-                            if (sampleItemInstrumentEntity.getTimes() != 0 && sampleItemInstrumentEntity.getCheckPrice() != null) {
-                                testPrice += sampleItemInstrumentEntity.getTimes() * Integer.parseInt(sampleItemInstrumentEntity.getCheckPrice());
-                            }
-                        }
-                    }
                 }
-                // 委托单的 折扣率
-//                String discount = statisticsMapper.getDiscount(taskDetailInfoVo.getEntrustmentId());
-                if(taskDetailInfoVo.getDiscount()!=null&&!"".equals(taskDetailInfoVo.getDiscount())){
-                    Double fromString= new Double(taskDetailInfoVo.getDiscount());
-                    String a_str = String.format("%.2f", fromString); //以字符串形式保留位数，此处保留2位小数
-                    double a_1 = Double.parseDouble(a_str); //将字符串转回double类型
-                    String sunStr = String.format("%.2f", testPrice * a_1); //以字符串形式保留位数，此处保留2位小数
-                    taskDetailInfoVo.setCost(sunStr);
+                StringBuilder stringBuilder = new StringBuilder();
+                for(String str:set){
+                    stringBuilder.append(str);
                 }
-                else {
-                    taskDetailInfoVo.setCost(testPrice.toString());
-                }
-
-                taskDetailInfoVo.setSampleName(set.toString());
+                taskDetailInfoVo.setSampleName(stringBuilder.toString());
                 // 任务单 state = 6.原始记录已复核， 其余都未复核
                 taskDetailInfoVo.setTaskStatus(taskDetailInfoVo.getState() != null && taskDetailInfoVo.getState() >= 6 ? "完成" : "未完成");
                 TaskStatsVo data = new TaskStatsVo();
                 data.setTaskId(taskDetailInfoVo.getTaskId());
                 data.setTaskCode(taskDetailInfoVo.getTaskCode());
                 data.setRequestDate(taskDetailInfoVo.getRequestDate());
-                data.setFinishDate(taskDetailInfoVo.getFinishDate());
+                data.setFinishDate(taskDetailInfoVo.getFinishDate()!=null?taskDetailInfoVo.getFinishDate():null);
                 data.setCost(taskDetailInfoVo.getCost());
                 data.setReportCode(taskDetailInfoVo.getReportCode());
 //                data.setReportType(taskDetailInfoVo.getReportType());
