@@ -1347,8 +1347,7 @@ public class TaskServiceImpl implements TaskService {
             // 分页后 逻辑处理
             methodManualPages((List<TaskListVo>) pagingVo.getList());
             return pagingVo;
-        }
-        else {
+        } else {
             if (!CollectionUtils.isEmpty(personList)) {
                 pagingVo.setList(personList);
             }
@@ -1388,9 +1387,11 @@ public class TaskServiceImpl implements TaskService {
                 }
                 List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
                 List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
+                //外观描述
+                StringBuilder outward = new StringBuilder();
                 if(!CollectionUtils.isEmpty(sampleList)) {
+                    int i = 0;
                     for (SamplePrivateInfoVo samplePrivateInfoVo : sampleList) {
-                        sampleListVo.setOutward(samplePrivateInfoVo.getOutward());
                         String state = service.findStateBySampleId(samplePrivateInfoVo.getId(), entrustEntityMapper, taskMapper);
                         samplePrivateInfoVo.setState(state);
                         //TODO PSH查询子原材样品信息
@@ -1398,9 +1399,16 @@ public class TaskServiceImpl implements TaskService {
                         if (!CollectionUtils.isEmpty(nodeSampleList1)) {
                             nodeSampleList.addAll(nodeSampleList1);
                         }
+                        outward.append(samplePrivateInfoVo.getOutward());
+                        if(i != sampleList.size()-1){
+                            outward.append("/");
+                        }
+                        i++;
                     }
                     sampleList.addAll(nodeSampleList);
                 }
+                //将多组样品放到领取任务中；
+                sampleListVo.setOutward(outward.toString());
                 //增加关联委托单信息
                 StringBuilder correlationTask = new StringBuilder();
                 List<String> correlationTaskList = taskMapper.getCorrelationTask(sampleListVo.getTaskId());
