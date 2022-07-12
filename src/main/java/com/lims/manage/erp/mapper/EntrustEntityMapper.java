@@ -1,15 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustHistoryEntity;
-import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
-import com.lims.manage.erp.entity.EntrustPamentEntity;
-import com.lims.manage.erp.entity.EntrustSampleEntity;
-import com.lims.manage.erp.entity.ReportRecordDetailEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -466,4 +458,10 @@ public interface EntrustEntityMapper extends BaseMapper {
             "\tescr.entrust_id = #{entrustId}\n" +
             "AND escr.sample_id = #{sampleId} And escr.sample_id=rrd.sample_id")
     List<ReportRecordDetailEntity> getItemIdByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") int sampleId);
+
+    /**
+     * 通过委托单id 查询任务单信息
+     */
+    List<TaskTestEntity> selectTaskTestEntityList(@Param("entrustmentId") Long entrustmentId);
+
 }

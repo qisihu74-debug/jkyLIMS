@@ -282,6 +282,20 @@ public class TaskServiceImpl implements TaskService {
         List<TaskListVo> personList = new ArrayList<>();
 //        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
         personList = taskMapper.getTaskListContainsSample(paramVo);
+        // 补充样品名称信息
+        if(!CollectionUtils.isEmpty(personList)){
+            for(TaskListVo taskListVo :personList)
+            {
+                StringBuilder stringBuilder = new StringBuilder();
+                if(!CollectionUtils.isEmpty(taskListVo.getSampleList())){
+                    for(SamplePrivateInfoVo samplePrivateInfoVo:taskListVo.getSampleList()){
+                        stringBuilder.append(samplePrivateInfoVo.getAliasName());
+                        stringBuilder.append("、");
+                    }
+                    taskListVo.setSampleName(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
+                }
+            }
+        }
         // 手动分页
         Integer pageNum =  paramVo.getPageNum();
         Integer pageSize = paramVo.getPageSize();

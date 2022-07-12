@@ -714,7 +714,7 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file) {
+    public synchronized Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file) throws ParseException {
         EntrustEntity basisInfo = new EntrustEntity(vo);
         //附件存在上传附件到服务器
         if (file.length!=0) {
@@ -743,6 +743,7 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
         // 通过委托单id 获取公司名称。
+        PageHelper.clearPage();
         basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(), 1));
         if (!StringUtils.isEmpty(basisInfo.getEntrustCompany()) && !StringUtils.isEmpty(basisInfo.getEntrustPeople())  &&!StringUtils.isEmpty(basisInfo.getEntrustPhone())) {
             // 通过单位和类型 查看联系人和手机号是否存在
@@ -751,6 +752,7 @@ public class EntrustServiceImpl implements EntrustService {
             testCompanyJsonEntity.setContacts(basisInfo.getEntrustPeople());
             testCompanyJsonEntity.setContactWay(basisInfo.getEntrustPhone());
             testCompanyJsonEntity.setType("1");
+            PageHelper.clearPage();
             String entrustCompanystr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (entrustCompanystr == null) {
                 // 保存新的委托联系人姓名 和所属委托单位公司id
@@ -772,9 +774,11 @@ public class EntrustServiceImpl implements EntrustService {
                 testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
             }
             testCompanyJsonEntity.setType("2");
+            PageHelper.clearPage();
             String WitnessUintstr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
             if (WitnessUintstr == null) {
                 // 保存新的见证联系人姓名 和所属见证单位公司id
+                PageHelper.clearPage();
                 Integer companyId = entityMapper.getCompanyId(basisInfo.getWitnessUint(), 2);
                 TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
                 testCustomerEntity.setCompanyId(companyId);
@@ -811,6 +815,10 @@ public class EntrustServiceImpl implements EntrustService {
             }
             entityMapper.updateSampleCompany(entities);
         }
+        // 修改委托信息后： 触发联动效果。 同步更新任务单对应字段。
+        methodModifyTheTask(basisInfo.getId());
+        // 修改委托信息后： 触发联动效果。同步更新样品信息
+        methodModifyTheSample(basisInfo.getId());
         return true;
     }
 
@@ -918,7 +926,6 @@ public class EntrustServiceImpl implements EntrustService {
             //存放委托基本信息==》test_entrusted
             entityMapper.updateEntrustInfo(basisInfo);
         }
-
         return true;
     }
 
@@ -2213,6 +2220,7 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public EntrustAddVo getEntrustDistributionDetail(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info
+        PageHelper.clearPage();
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         List<LabelValueVo> allTestRoom = Lists.newArrayList();
 
@@ -3173,6 +3181,9 @@ public class EntrustServiceImpl implements EntrustService {
                         if(!samplePidSub.isEmpty()){
                             for(SampleEntity sampleEntity1:samplePidSub){
                                 SampleDetailAddVo sampleDetailAddVo = new SampleDetailAddVo(sampleEntity1);
+                                // 增加 样品数量 与来样时间
+                                sampleDetailAddVo.setSampleQuantity(sampleEntity1.getSampleQuantity());
+                                sampleDetailAddVo.setReceivedDate(new Date());
                                 subset.add(sampleDetailAddVo);
                             }
                         }
@@ -3227,6 +3238,9 @@ public class EntrustServiceImpl implements EntrustService {
                                     oldSampleData.setCompanyId(entrustCompanyId);
                                     // 其他信息不变更
                                     SampleDetailAddVo sampleDetailAddVo = new SampleDetailAddVo(oldSampleData);
+                                    // 增加 样品数量 与来样时间
+                                    sampleDetailAddVo.setSampleQuantity(oldSampleData.getSampleQuantity());
+                                    sampleDetailAddVo.setReceivedDate(new Date());
                                     samples.add(sampleDetailAddVo);
                                     // 样品为原材的。
                                     List<TestSampleEntity> addSamples = testSampleEntityService.batchInsertSampleCopy(samples);
@@ -3317,6 +3331,75 @@ public class EntrustServiceImpl implements EntrustService {
 
         entrustFileTableDao.deleteEntrustFileTableEntity(id);
         return true;
+    }
+
+    /**
+     * 修改委托信息后： 触发联动效果。 同步更新任务单对应字段。
+     * @param id 委托单id
+     */
+    void methodModifyTheTask(Long id){
+        // 通过委托单id 查询任务单信息
+        List<TaskTestEntity> taskList = entityMapper.selectTaskTestEntityList(id);
+        if(!CollectionUtils.isEmpty(taskList)){
+            // 获取委托单详情
+            EntrustAddVo vo = entityMapper.selectByKeyId(id);
+//            通过委托单id 查询任务单信息   state = 试验未开始前 进行 update
+            for(TaskTestEntity taskTestEntity :taskList){
+                if(taskTestEntity.getState()<=2){
+                    // 进行update任务单 同步
+                    // 丁连春：任务单完成时间 以委托单下单时间为准
+                    taskTestEntity.setRequiredCompletionTime(vo.getRequestDate());
+                    // 任务单下单日期等于委托单受理日期
+                    taskTestEntity.setOrderTime(vo.getAcceptanceDate());
+                    // 任务单提供资料等于委托单提供资料
+                    if(!org.springframework.util.StringUtils.isEmpty(vo.getPresentInformation())){
+                        taskTestEntity.setPresentInformation(vo.getPresentInformation());
+                    }else {
+                        taskTestEntity.setPresentInformation("--");
+                    }
+                    // update
+                    taskMapper.updateTestTask(taskTestEntity);
+                }
+            }
+        }
+
+    }
+
+    /**
+     * 修改委托信息后： 触发联动效果。 同步更新样品对应字段。
+     * @param id 委托单id
+     */
+    void methodModifyTheSample(Long id) throws ParseException {
+        // 通过委托单id 查询样品信息集合
+        List<SampleEntity> sampleEntityList = sampleEntityMapper.selectSampleListGroup(id);
+        if(!CollectionUtils.isEmpty(sampleEntityList)){
+            // 获取委托单详情
+            EntrustAddVo vo = entityMapper.selectByKeyId(id);
+            for(SampleEntity sampleData:sampleEntityList){
+                // 比较样品签收时间 < 委托单受理日期
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Date date1 = sdf.parse(sampleData.getReceivedDate());
+                // 测试此日期是否在指定日期之后。
+                if (!vo.getAcceptanceDate().after(date1)) {
+                    // 签收时间 =委托单受理日期
+                    sampleData.setReceivedDate(sdf.format(vo.getAcceptanceDate()));
+                    // update样品信息
+                    sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
+                }
+                // 处理配合比信息
+                if(!sampleData.getSampleType().equals("原材")&&!vo.getAcceptanceDate().after(date1)){
+                    // 获取配合比信息
+                    List<SampleEntity> sampleEntities = sampleEntityMapper.selectByPid(sampleData.getId());
+                    if(CollectionUtils.isEmpty(sampleEntities)){
+                        for(SampleEntity sampleEntity:sampleEntities){
+                            sampleEntity.setReceivedDate(sampleData.getReceivedDate());
+                            // update样品信息
+                            sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
+                        }
+                    }
+                }
+            }
+        }
     }
 
 

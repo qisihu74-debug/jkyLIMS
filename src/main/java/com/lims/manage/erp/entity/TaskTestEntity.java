@@ -124,6 +124,10 @@ public class TaskTestEntity {
      * 样品状态描述
      */
     private String sampleStateDescription;
+    /**
+     * 提供资料
+     */
+    private String presentInformation;
 
     public TaskTestEntity() {
     }

@@ -558,6 +558,8 @@
             <if test="sampleReceivingTime!=null">sample_receiving_time=#{sampleReceivingTime},</if>
             <if test="sampleStateDescription!=null">sample_state_description=#{sampleStateDescription},</if>
             <if test="sampler!=null and sampler!=''">sampler=#{sampler},</if>
+            <if test="requiredCompletionTime!=null">required_completion_time=#{requiredCompletionTime},</if>
+            <if test="orderTime!=null">order_time=#{orderTime},</if>
         </trim>
         where id = #{id}
     </update>

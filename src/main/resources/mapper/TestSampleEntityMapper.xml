@@ -497,7 +497,8 @@
             alias_name              = #{aliasName,jdbcType=VARCHAR},
             sample_remark           = #{sampleRemark,jdbcType=VARCHAR},
             unit_ratio              = #{unitRatio,jdbcType=VARCHAR},
-            cubic_meter_consumption = #{cubicMeterConsumption,jdbcType=VARCHAR}
+            cubic_meter_consumption = #{cubicMeterConsumption,jdbcType=VARCHAR},
+            sample_quantity = #{sampleQuantity,jdbcType=VARCHAR}
         where id = #{id,jdbcType=INTEGER}
     </update>
 
