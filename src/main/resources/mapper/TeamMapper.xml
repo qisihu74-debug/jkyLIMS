@@ -81,4 +81,13 @@
         </where>
         limit 1
     </select>
+
+    <select id="getTeamIdByUserId" resultType="java.lang.Long">
+        SELECT
+            team_id
+        FROM
+            test_technicist
+        WHERE
+            user_id = #{userId}
+    </select>
 </mapper>

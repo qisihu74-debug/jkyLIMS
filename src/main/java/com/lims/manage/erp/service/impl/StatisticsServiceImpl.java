@@ -6,7 +6,9 @@ import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.StatisticsMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
 import com.lims.manage.erp.service.StatisticsService;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +31,9 @@ public class StatisticsServiceImpl implements StatisticsService {
     private StatisticsMapper statisticsMapper;
     @Autowired
     private TaskMapper taskMapper;
+
+    @Autowired
+    private TeamMapper teamMapper;
 
 
 
@@ -552,5 +557,16 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public List<LabelValueVo> getAreas() {
         return statisticsMapper.getAreas();
+    }
+
+    @Override
+    public List<TeamTreeStructureEntity> getChirds() {
+        List<TeamTreeStructureEntity> result = Lists.newArrayList();
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        if(userId != null){
+            Long teamId = teamMapper.getTeamIdByUserId(userId);
+            result = teamMapper.getChirds(teamId);
+        }
+        return result;
     }
 }

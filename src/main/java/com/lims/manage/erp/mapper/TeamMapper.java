@@ -234,4 +234,10 @@ public interface TeamMapper extends BaseMapper {
      */
     List<TestCheckItemTeamRel> getDepartmentList(@Param("deptIds")List<Long> deptIds);
 
+    /**
+     * 获取用户的团队ID
+     * @param userId
+     * @return
+     */
+    Long getTeamIdByUserId(Long userId);
 }

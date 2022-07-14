@@ -356,4 +356,9 @@ public class StatisticsController {
     public Result getAreas() {
         return ResultUtil.success("查询区域信息成功！", statisticsService.getAreas());
     }
+
+    @GetMapping("/getTeamInfo")
+    public Result getTeamInfo() {
+        return ResultUtil.success("查询部门信息成功！", statisticsService.getChirds());
+    }
 }
