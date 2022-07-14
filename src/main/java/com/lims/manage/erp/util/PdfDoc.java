@@ -1,10 +1,20 @@
 package com.lims.manage.erp.util;
 
 import com.itextpdf.text.Image;
-import com.itextpdf.text.pdf.*;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
 import com.lims.manage.erp.entity.Doc;
 import com.lims.manage.erp.entity.KeyPosition;
 import com.lims.manage.erp.entity.PdfKeywordFinder;
+import org.apache.commons.lang.StringUtils;
+import org.apache.pdfbox.cos.COSString;
+import org.apache.pdfbox.exceptions.COSVisitorException;
+import org.apache.pdfbox.pdfparser.PDFStreamParser;
+import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,6 +140,53 @@ public class PdfDoc implements Doc {
 
     }
 
+    /**
+     *
+     * @param sourPath 原pdf
+     * @param savePath 新pdf
+     * @Param waterContent 水印内容
+     */
+    @SuppressWarnings("unchecked")
+    public static void removePdfWatermark(String sourPath ,String savePath,String waterContent) {
+        if (StringUtils.isEmpty(waterContent)){
+            waterContent = " Evaluation Warning : The document was created with Spire.PDF for Java.";
+        }
+        try {
+            //读取源文件
+            PDDocument helloDocument = PDDocument.load(new File(sourPath));
+            List<PDPage> allPages = helloDocument.getDocumentCatalog().getAllPages();
+            for(PDPage pdPage : allPages) {
+                PDStream contents = pdPage.getContents();
+                PDFStreamParser parser = new PDFStreamParser(contents.getStream());
+                parser.parse();
+                List<Object> tokens = parser.getTokens();
+                for (int j = 0; j < tokens.size(); j++) {
+                    Object o = tokens.get(j);
+                    if (o instanceof COSString){
+                        COSString cosString = (COSString)o;
+                        String operation = cosString.getString();
+                        if (operation.equals(waterContent)) {
+                            cosString.reset();
+                        }
+                    }
+                }
+                PDStream updatedStream = new PDStream(helloDocument);
+                OutputStream out = updatedStream.createOutputStream();
+                ContentStreamWriter tokenWriter = new ContentStreamWriter(out);
+                tokenWriter.writeTokens(tokens);
+                pdPage.setContents(updatedStream);
+            }
+            //Output file name
+            helloDocument.save(savePath);
+            helloDocument.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (COSVisitorException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
     public String getDocPath() {
         return docPath;

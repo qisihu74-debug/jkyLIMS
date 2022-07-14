@@ -205,6 +205,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo makeReport(Integer pageNum, Integer pageSize, String search) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        PageHelper.startPage(pageNum, pageSize);
         List<ReportListVo> list = reportMapper.getReportList2(userTeamIds, search);
         for (ReportListVo reportListVo : list) {
             StringBuilder sampleName = new StringBuilder();
@@ -217,7 +218,6 @@ public class ReportServiceImpl implements ReportService {
             }
             reportListVo.setSampleName(sampleName.toString());
         }
-        PageHelper.startPage(pageNum, pageSize);
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -1982,6 +1982,9 @@ public class ReportServiceImpl implements ReportService {
         String url = MinIoUtil.upload("report-download", multipartFile, reportRecordEntity.getReportCode() + ".docx");
         StringBuilder stringBuilder = new StringBuilder();
         for (ConclusionEntity entity:list) {
+            if (entity.getUrl().contains("?")){
+                entity.setUrl(entity.getUrl().substring(0,url.indexOf("?")));
+            }
             stringBuilder.append(entity.getUrl());
             stringBuilder.append("&&");
         }
@@ -2026,24 +2029,24 @@ public class ReportServiceImpl implements ReportService {
                     //存放表头信息
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 0) {
-                        cells.get(0,15).setValue("河南省公路工程试验检测中心有限公司");
-                        cells.get(2,5).setValue(reportRecordEntity.getReportCode());
-                        cells.get(3,1).setValue(entrustHistoryDetail.getEntrustCompany());
-                        cells.get(3,3).setValue(entrustHistoryDetail.getProjectName());
-                        cells.get(4,1).setValue(entrustHistoryDetail.getProjectPart());
+                        //cells.get(0,15).setValue("河南省公路工程试验检测中心有限公司");
+                        cells.get("O3").setValue(reportRecordEntity.getReportCode());
+                        cells.get("D4").setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getEntrustCompany())?"——":entrustHistoryDetail.getEntrustCompany());
+                        cells.get("M4").setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectName())?"——":entrustHistoryDetail.getProjectName());
+                        cells.get("D5").setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectPart())?"——":entrustHistoryDetail.getProjectPart());
                         //样品信息
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
-                        cells.get(5,1).setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
+                        cells.get("D6").setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
                                 + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~","~"))
                                 + "；样品数量：" + (sampleEntity.getSampleQuantity() == null ? "——" : sampleEntity.getSampleQuantity())
                                 + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
                                 + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                         //检测依据
                         String checkBasis = getCheckBasis(id);
-                        cells.get(6,1).setValue(checkBasis.equals("") ? "——" : checkBasis);
+                        cells.get("D7").setValue(checkBasis.equals("") ? "——" : checkBasis);
                         //判定依据
                         String judgeBasis = getJudgeBasis(id);
-                        cells.get(6,3).setValue(judgeBasis.equals("") ? "——" : judgeBasis);
+                        cells.get("M7").setValue(judgeBasis.equals("") ? "——" : judgeBasis);
                         //检测日期 TODO 实验开始日期 -实验结束日期 时间起始相同展示一个时间即可
                         //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
                         Date start = taskMapper.getStartTime(id);
@@ -2053,26 +2056,26 @@ public class ReportServiceImpl implements ReportService {
                         if (start != null && end != null){
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
                             if (s.equals(e)){
-                                cells.get(7,1).setValue(s);
+                                cells.get("D8").setValue(s);
                             }else {
-                                cells.get(7,1).setValue(s + "~" + e);
+                                cells.get("D8").setValue(s + "~" + e);
                             }
                         }
                         //主要仪器
                         String equipment = getEquipment(id);
-                        cells.get(8,1).setValue(equipment.equals("") ? "——" : equipment);
+                        cells.get("D9").setValue(equipment.equals("") ? "——" : equipment);
                         //委托编号
-                        cells.get(9,1).setValue(entrustHistoryDetail.getEntrustmentNo() + "");
+                        cells.get("D10").setValue(entrustHistoryDetail.getEntrustmentNo() + "");
                         //检测类别
-                        cells.get(9,3).setValue(entrustHistoryDetail.getCheckPurpose());
+                        cells.get("M10").setValue(entrustHistoryDetail.getCheckPurpose());
                         //批号
-                        cells.get(10,1).setValue(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
+                        cells.get("D11").setValue(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
                         //生产厂家
-                        cells.get(10,3).setValue(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+                        cells.get("M11").setValue(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
                         //规格等级
-                        cells.get(11,1).setValue(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
+                        cells.get("M12").setValue(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
                         //代表数量
-                        cells.get(11,3).setValue(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
+                        cells.get("M12").setValue(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
                     }
                     //过滤每个报告模板的检测项
                     List<ReportRecordDetailEntity> entities = Lists.newArrayList();
@@ -2135,8 +2138,8 @@ public class ReportServiceImpl implements ReportService {
                     if (i==size-1){
                         Worksheet worksheet1 = doc.getWorksheets().get(size - 1);
                         int maxRow = worksheet1.getCells().getMaxRow();
-                        cells.get(maxRow-2,0).setValue("检测结论："+conclusionEntity.getConclusion());
-                        cells.get(maxRow-1,0).setValue("附加声明："+conclusionEntity.getAdditional());
+                        cells.get("A21").setValue("检测结论："+conclusionEntity.getConclusion());
+                        cells.get("A22").setValue("附加声明："+conclusionEntity.getAdditional());
                     }
                 }
                 //按照顺序存放doc
@@ -2388,6 +2391,9 @@ public class ReportServiceImpl implements ReportService {
         resBean.setUrl(url);
         StringBuilder stringBuilder = new StringBuilder();
         for (ConclusionEntity entity:list) {
+            if (entity.getUrl().contains("?")){
+                entity.setUrl(entity.getUrl().substring(0,url.indexOf("?")));
+            }
             stringBuilder.append(entity.getUrl());
             stringBuilder.append("&&");
         }
@@ -2419,11 +2425,11 @@ public class ReportServiceImpl implements ReportService {
     private void setReportTop1(Workbook topDoc, EntrustAddVo entrustAddVo,ReportRecordEntity reportRecordEntity,int totalPage) {
         Worksheet worksheet = topDoc.getWorksheets().get(0);
         Cells cells = worksheet.getCells();
-        cells.get(7,21).setValue(reportRecordEntity.getReportCode());
-        cells.get(8,21).setValue(totalPage+"");
-        cells.get(33,6).setValue(reportRecordEntity.getSampleName());
-        cells.get(34,6).setValue(entrustAddVo.getEntrustCompany());
-        cells.get(35,6).setValue(entrustAddVo.getCheckPurpose());
+        cells.get("Y6").setValue(reportRecordEntity.getReportCode());
+        cells.get("Y7").setValue(totalPage+"");
+        cells.get("J32").setValue(reportRecordEntity.getSampleName());
+        cells.get("J33").setValue(entrustAddVo.getEntrustCompany());
+        cells.get("J34").setValue(entrustAddVo.getCheckPurpose());
     }
 
     @Override
