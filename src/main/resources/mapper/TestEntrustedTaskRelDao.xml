@@ -182,9 +182,6 @@
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
             update test_entrusted_task_rel
             <set>
-                <if test="item.state != null">
-                    state = #{item.state},
-                </if>
                 <if test="item.department != null and item.department != '' ">
                     department = #{item.department,jdbcType=VARCHAR},
                 </if>

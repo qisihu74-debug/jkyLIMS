@@ -310,5 +310,5 @@ public interface EntrustService {
      * @param list
      * @return
      */
-    int updateEntrustedTaskRelEntityList(List<TestEntrustedTaskRelEntity> list);
+    Boolean updateEntrustedTaskRelEntityList(List<TestEntrustedTaskRelEntity> list);
 }

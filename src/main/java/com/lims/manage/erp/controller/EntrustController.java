@@ -728,8 +728,11 @@ public class EntrustController {
      */
     @PostMapping("/updateEntrustedTaskRelEntityList")
     public Result updateEntrustedTaskRelEntityList(@RequestBody List<TestEntrustedTaskRelEntity> list){
-
-        return null;
+       if(CollectionUtils.isEmpty(list)){
+           return ResultUtil.error("批量修改数据集不能为空");
+       }
+        entrustService.updateEntrustedTaskRelEntityList(list);
+        return ResultUtil.success("批量修改成功！！！");
     }
 
 }
