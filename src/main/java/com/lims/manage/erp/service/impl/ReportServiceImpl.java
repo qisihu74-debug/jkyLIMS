@@ -2770,7 +2770,7 @@ public class ReportServiceImpl implements ReportService {
             ids = null;
         }
         PageHelper.startPage(pageNum,pageSize);
-        List<ReportRecordEntity> list = reportMapper.historyList(reportCode,reportType,sealType,ids,new Date(startDate),new Date(endDate));
+        List<ReportRecordEntity> list = reportMapper.historyList(reportCode,reportType,sealType,ids,startDate==null?null:new Date(startDate),endDate==null?null:new Date(endDate));
         for (ReportRecordEntity entity:list) {
             if (org.apache.commons.lang.StringUtils.isNotEmpty(entity.getSealer())){
                 entity.setSealer(entity.getSealer().split("&")[0]);
