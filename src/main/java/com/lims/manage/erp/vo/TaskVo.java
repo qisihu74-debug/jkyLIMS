@@ -1,5 +1,6 @@
 package com.lims.manage.erp.vo;
 
+import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -73,4 +74,9 @@ public class TaskVo {
      * 任务单提供资料相等委托单
      */
     private String presentInformation;
+
+    /**
+     * 任务单流转 需要业务员提供信息
+     */
+    List<TestEntrustedTaskRelEntity> taskRelEntities;
 }

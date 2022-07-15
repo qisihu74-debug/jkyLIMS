@@ -98,4 +98,29 @@ CREATE TABLE `test_entrust_file_rel`  (
 SET FOREIGN_KEY_CHECKS = 1;
 
 
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for test_entrusted_task_rel
+-- ----------------------------
+DROP TABLE IF EXISTS `test_entrusted_task_rel`;
+CREATE TABLE `test_entrusted_task_rel`  (
+  `id` int(0) NOT NULL AUTO_INCREMENT COMMENT '流转单id',
+  `department` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '部门id&部门名称',
+  `task_flow_date` datetime(0) DEFAULT NULL COMMENT '任务流转日期',
+  `type` int(0) DEFAULT NULL COMMENT '报告类型（0,最终报告，1中间报告）',
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+  `user_id` bigint(0) DEFAULT NULL COMMENT '用户id',
+  `address_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '用户姓名',
+  `task_id` bigint(0) NOT NULL COMMENT '任务单id',
+  `create_date` datetime(0) DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '创建日期',
+  `update_date` datetime(0) DEFAULT NULL COMMENT '更新时间',
+  `entrust_id` bigint(0) NOT NULL COMMENT '委托单id',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
 

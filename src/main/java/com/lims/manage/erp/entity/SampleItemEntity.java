@@ -53,7 +53,7 @@ public class SampleItemEntity {
     /**
      * 单价
      */
-    private Integer unitPrice;
+    private Double unitPrice;
     /**
      * 开始时间
      */

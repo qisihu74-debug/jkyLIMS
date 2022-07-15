@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.TestEntrustedTaskRelDao">
+    <select id="getDeptByEntrustIdList" resultType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
+        SELECT
+        t1.id AS taskId,
+        t1.dept_id AS deptId,
+        t1.required_completion_time as taskFlowDate,
+        t2.name AS deptName
+        FROM
+        test_task as t1
+        LEFT JOIN test_team as t2 ON t1.dept_id = t2.id
+        WHERE t1.entrustment_id = #{entrustId}
+    </select>
+
+    <insert id="addList" keyProperty="id" useGeneratedKeys="true">
+        insert into test_entrusted_task_rel (
+        id,
+        department,
+        task_flow_date,
+        type,
+        remark,
+        user_id,
+        address_name,
+        task_id,
+        entrust_id)
+        values
+        <foreach collection="lists" item="entity" separator=",">
+            (   #{entity.id,jdbcType=INTEGER},
+                #{entity.department,jdbcType=VARCHAR},
+                #{entity.taskFlowDate},
+                #{entity.type,jdbcType=INTEGER},
+                #{entity.remark,jdbcType=VARCHAR},
+                #{entity.userId,jdbcType=BIGINT},
+                #{entity.addressName,jdbcType=VARCHAR},
+                #{entity.taskId,jdbcType=BIGINT},
+                #{entity.entrustId,jdbcType=BIGINT})
+        </foreach>
+    </insert>
+
+    <select id="getTaskList" resultType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
+    SELECT
+        id,
+        department,
+        task_flow_date,
+        type,
+        remark,
+        user_id,
+        address_name,
+        task_id
+    FROM
+    test_entrusted_task_rel
+    WHERE task_id = #{taskId}
+    </select>
+    <update id="updateData" parameterType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
+        update test_entrusted_task_rel
+        <set>
+        <if test="department != null and department != '' ">
+            department = #{department,jdbcType=VARCHAR},
+        </if>
+        <if test="taskFlowDate != null">
+            task_flow_date = #{taskFlowDate},
+        </if>
+        <if test="type != null">
+            type = #{type,jdbcType=INTEGER},
+        </if>
+        <if test="remark != null and remark != ''">
+            remark = #{remark,jdbcType=VARCHAR},
+        </if>
+        <if test="userId != null">
+            user_id = #{userId,jdbcType=BIGINT},
+        </if>
+        <if test="addressName != null  and addressName != ''">
+            address_name = #{addressName,jdbcType=VARCHAR},
+        </if>
+        <if test="taskId != null">
+            task_id = #{taskId,jdbcType=BIGINT},
+        </if>
+        <if test="entrustId != null">
+            entrust_id = #{entrustId,jdbcType=BIGINT},
+        </if>
+        <if test="createDate != null">
+            create_date = #{createDate},
+        </if>
+        <if test="updateDate != null">
+            update_date = #{updateDate},
+        </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deletedData">
+        delete from test_entrusted_task_rel where id = #{id}
+    </delete>
+
+    <insert id="addData" parameterType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
+        insert into test_entrusted_task_rel
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,
+            <if test="department != null and department != '' ">
+                department,
+            </if>
+            <if test="taskFlowDate != null">
+                task_flow_date ,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="remark != null and remark != ''">
+                remark,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="addressName != null and addressName != '' ">
+                address_name,
+            </if>
+            <if test="taskId != null">
+                task_id,
+            </if>
+            <if test="entrustId != null">
+                entrust_id,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+            <if test="updateDate != null">
+                update_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            id,
+            <if test="department != null and department != '' ">
+                #{department,jdbcType=VARCHAR},
+            </if>
+            <if test="taskFlowDate != null">
+               #{taskFlowDate},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null and remark != ''">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=BIGINT},
+            </if>
+            <if test="addressName != null and addressName != ''">
+               #{addressName,jdbcType=VARCHAR},
+            </if>
+            <if test="taskId != null">
+               #{taskId,jdbcType=BIGINT},
+            </if>
+            <if test="entrustId != null">
+               #{entrustId,jdbcType=BIGINT},
+            </if>
+            <if test="createDate != null">
+               #{createDate},
+            </if>
+            <if test="updateDate != null">
+               #{updateDate},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="getEntrustTaskRelList" resultType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
+        SELECT
+        t1.id,
+        t1.task_flow_date,
+        t1.type,
+        t1.remark,
+        t1.task_id,
+        t2.task_code
+        FROM
+        test_entrusted_task_rel as t1
+        LEFT JOIN test_task as t2 ON t1.task_id = t2.id
+        WHERE t1.entrust_id = #{entrustId}
+    </select>
+
+    <update id="updateEntrustedTaskRelEntityList">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update test_entrusted_task_rel
+            <set>
+                <if test="item.department != null and item.department != '' ">
+                    department = #{item.department,jdbcType=VARCHAR},
+                </if>
+                <if test="item.taskFlowDate != null">
+                    task_flow_date = #{item.taskFlowDate},
+                </if>
+                <if test="item.type != null">
+                    type = #{item.type,jdbcType=INTEGER},
+                </if>
+                <if test="item.remark != null and item.remark != ''">
+                    remark = #{item.remark,jdbcType=VARCHAR},
+                </if>
+                <if test="item.userId != null">
+                    user_id = #{item.userId,jdbcType=BIGINT},
+                </if>
+                <if test="item.addressName != null  and item.addressName != ''">
+                    address_name = #{item.addressName,jdbcType=VARCHAR},
+                </if>
+                <if test="item.taskId != null">
+                    task_id = #{item.taskId,jdbcType=BIGINT},
+                </if>
+                <if test="item.entrustId != null">
+                    entrust_id = #{item.entrustId,jdbcType=BIGINT},
+                </if>
+                <if test="item.createDate != null">
+                    create_date = #{item.createDate},
+                </if>
+                <if test="item.updateDate != null">
+                    update_date = #{item.updateDate},
+                </if>
+            </set>
+            where id = #{item.id,jdbcType=INTEGER}
+        </foreach>
+    </update>
+
+</mapper>

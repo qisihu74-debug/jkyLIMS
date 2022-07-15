@@ -2,17 +2,13 @@ package com.lims.manage.erp.service;
 
 import com.alibaba.fastjson.JSONException;
 import com.github.pagehelper.PageInfo;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustHistoryEntity;
-import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
-import com.lims.manage.erp.entity.TaskEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -281,4 +277,38 @@ public interface EntrustService {
      * @return
      */
     Boolean removeding(Integer id);
+
+    /**
+     * 修改任务流转要求
+     * @param testEntrustedTaskRelEntity
+     * @return
+     */
+    Boolean updateTestEntrustedTaskRelEntity(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity);
+
+    /**
+     * 删除任务流转要求
+     * @return
+     */
+    Boolean removeTestEntrustedTask(Integer id);
+
+    /**
+     * 新增任务流转要求
+     * @param testEntrustedTaskRelEntity
+     * @return
+     */
+    Boolean addTestEntrustedTaskRelEntity(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity);
+
+    /**
+     * 通过委托单id 获取流转单信息集合
+     * @param entrustId
+     * @return
+     */
+    List<TestEntrustedTaskRelEntity> getEntrustTaskRelList(Long entrustId);
+
+    /**
+     * 支持批量修改
+     * @param list
+     * @return
+     */
+    Boolean updateEntrustedTaskRelEntityList(List<TestEntrustedTaskRelEntity> list);
 }

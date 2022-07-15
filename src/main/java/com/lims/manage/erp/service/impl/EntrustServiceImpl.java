@@ -77,6 +77,8 @@ public class EntrustServiceImpl implements EntrustService {
     private TestSampleEntityService testSampleEntityService;
     @Autowired
     private EntrustFileTableDao entrustFileTableDao;
+    @Autowired
+    private TestEntrustedTaskRelDao testEntrustedTaskRelDao;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -129,7 +131,7 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
-        int totalMoney = 0;
+        Double totalMoney = 0D;
         List<SampleEntity> samples = vo.getSamples();
         List<EntrustSampleEntity> list = new ArrayList<>();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
@@ -155,7 +157,7 @@ public class EntrustServiceImpl implements EntrustService {
                 if (!CollectionUtils.isEmpty(sampleCheckItem)) {
                     //计算检测项总价钱
                     for (SampleItemEntity entity : sampleCheckItem) {
-                        int money = entity.getTimes() * entity.getUnitPrice();
+                        double money = entity.getTimes() * entity.getUnitPrice();
                         totalMoney = totalMoney + money;
                     }
                     //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
@@ -263,7 +265,7 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
-        int totalMoney = 0;
+        Double totalMoney = 0D;
         List<SampleEntity> samples = vo.getSamples();
         List<EntrustSampleEntity> list = new ArrayList<>();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
@@ -330,7 +332,7 @@ public class EntrustServiceImpl implements EntrustService {
                             for (SampleItemEntity entity1 : ItemList) {
                                 //计算检测项总价钱
                                 if (entity1.getUnitPrice() != null && entity1.getUnitPrice() >= 0) {
-                                    int money = entity.getTimes() * entity1.getUnitPrice();
+                                     double money = entity.getTimes() * entity1.getUnitPrice();
                                     totalMoney = totalMoney + money;
                                 }
                                 //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
@@ -904,7 +906,7 @@ public class EntrustServiceImpl implements EntrustService {
                         }
                         sampleItemEntity.setTimes(entity.getTimes());
                         if (entity.getCheckPrice() != null && !entity.getCheckPrice().equals("")) {
-                            sampleItemEntity.setUnitPrice(Integer.parseInt(entity.getCheckPrice()));
+                            sampleItemEntity.setUnitPrice(Double.parseDouble(entity.getCheckPrice()));
                         }
                         sampleItemList.add(sampleItemEntity);
                     }
@@ -956,7 +958,7 @@ public class EntrustServiceImpl implements EntrustService {
         entityMapper.removeTestEntrustedSampleCheckitemRel(basisInfo.getId());
 
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
-        int totalMoney = 0;
+        Double totalMoney = 0D;
         List<SampleEntity> samples = vo.getSamples();
         List<EntrustSampleEntity> list = new ArrayList<>();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
@@ -1024,7 +1026,7 @@ public class EntrustServiceImpl implements EntrustService {
                             for (SampleItemEntity entity1 : ItemList) {
                                 //计算检测项总价钱
                                 if (entity1.getUnitPrice() != null && entity1.getUnitPrice() >= 0) {
-                                    int money = entity.getTimes() * entity1.getUnitPrice();
+                                    double money = entity.getTimes() * entity1.getUnitPrice();
                                     totalMoney = totalMoney + money;
                                 }
                                 //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
@@ -1088,7 +1090,7 @@ public class EntrustServiceImpl implements EntrustService {
         entityMapper.removeTestEntrustedSampleCheckitemRel(basisInfo.getId());
 
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
-        int totalMoney = 0;
+        Double totalMoney = 0D;
         List<SampleEntity> samples = vo.getSamples();
         List<EntrustSampleEntity> list = new ArrayList<>();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
@@ -1139,7 +1141,7 @@ public class EntrustServiceImpl implements EntrustService {
                             for (SampleItemEntity entity1 : ItemList) {
                                 //计算检测项总价钱
                                 if (entity1.getUnitPrice() != null && entity1.getUnitPrice() >= 0) {
-                                    int money = entity.getTimes() * entity1.getUnitPrice();
+                                    double money = entity.getTimes() * entity1.getUnitPrice();
                                     totalMoney = totalMoney + money;
                                 }
                                 //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
@@ -1192,7 +1194,7 @@ public class EntrustServiceImpl implements EntrustService {
         entityMapper.removeTestEntrustedSampleCheckitemRel(basisInfo.getId());
 
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
-        int totalMoney = 0;
+        Double totalMoney = 0D;
         List<SampleEntity> samples = vo.getSamples();
         List<EntrustSampleEntity> list = new ArrayList<>();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
@@ -1220,7 +1222,7 @@ public class EntrustServiceImpl implements EntrustService {
                     for (SampleItemEntity entity : sampleCheckItem) {
                         //计算检测项总价钱
                         if (entity.getUnitPrice() != null && entity.getUnitPrice() >= 0) {
-                            int money = entity.getTimes() * entity.getUnitPrice();
+                            double money = entity.getTimes() * entity.getUnitPrice();
                             totalMoney = totalMoney + money;
                         }
                         //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
@@ -1275,7 +1277,7 @@ public class EntrustServiceImpl implements EntrustService {
         String reportState = entityMapper.getReportState(basisInfo.getId());
         // 删除判定依据id
         entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
-        int totalMoney = 0;
+        Double totalMoney = 0D;
         //样品
         List<SampleEntity> samples = vo.getSamples();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
@@ -1367,7 +1369,7 @@ public class EntrustServiceImpl implements EntrustService {
                             for (SampleItemEntity entity1 : ItemList) {
                                 //计算检测项总价钱
                                 if (entity1.getUnitPrice() != null && entity1.getUnitPrice() >= 0) {
-                                    int money = entity.getTimes() * entity1.getUnitPrice();
+                                    double money = entity.getTimes() * entity1.getUnitPrice();
                                     totalMoney = totalMoney + money;
                                 }
                                 //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
@@ -1394,7 +1396,7 @@ public class EntrustServiceImpl implements EntrustService {
                     for (SampleItemEntity entity1 : updateList) {
                         //计算检测项总价钱
                         if (entity1.getUnitPrice() != null && entity1.getUnitPrice() >= 0) {
-                            int money = entity1.getTimes() * entity1.getUnitPrice();
+                            double money = entity1.getTimes() * entity1.getUnitPrice();
                             totalMoney = totalMoney + money;
                         }
                     }
@@ -1462,7 +1464,7 @@ public class EntrustServiceImpl implements EntrustService {
         String reportState = entityMapper.getReportState(basisInfo.getId());
         // 删除判定依据id
         entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
-        int totalMoney = 0;
+        Double totalMoney = 0D;
         //样品
         List<SampleEntity> samples = vo.getSamples();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
@@ -1539,7 +1541,7 @@ public class EntrustServiceImpl implements EntrustService {
                     for (SampleItemEntity entity : sampleCheckItem) {
                         //计算检测项总价钱
                         if (entity.getUnitPrice() != null && entity.getUnitPrice() >= 0) {
-                            int money = entity.getTimes() * entity.getUnitPrice();
+                            double money = entity.getTimes() * entity.getUnitPrice();
                             totalMoney = totalMoney + money;
                         }
                         //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
@@ -1561,7 +1563,7 @@ public class EntrustServiceImpl implements EntrustService {
                     for (SampleItemEntity entity1 : updateList) {
                         //计算检测项总价钱
                         if (entity1.getUnitPrice() != null && entity1.getUnitPrice() >= 0) {
-                            int money = entity1.getTimes() * entity1.getUnitPrice();
+                            double money = entity1.getTimes() * entity1.getUnitPrice();
                             totalMoney = totalMoney + money;
                         }
                     }
@@ -1847,10 +1849,11 @@ public class EntrustServiceImpl implements EntrustService {
                 entityMapper.batchUpdateTaskPrice(priceVos);
             }
         }
-        if (flag) {
-            basisInfo.setState(state);
-            entityMapper.updateEntrustInfo(basisInfo);
-        }
+//        if (flag) {
+//
+//        }
+        basisInfo.setState(state);
+        entityMapper.updateEntrustInfo(basisInfo);
         return true;
     }
 
@@ -2206,6 +2209,19 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                 }
                 taskProgressVo.setStateVoList(stateVoList);
+                // 根据任务单 id 查 流转单 列表
+                List<TestEntrustedTaskRelEntity> taskOrderFlowList = Lists.newArrayList();
+                taskOrderFlowList = testEntrustedTaskRelDao.getTaskList(taskProgressVo.getTaskId());
+                if(!CollectionUtils.isEmpty(taskOrderFlowList)){
+                    for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity :taskOrderFlowList){
+                        // 处理信息 部门id&部门名称 获取为 部门名称
+                        if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getDepartment())){
+                            String[] deptIds = testEntrustedTaskRelEntity.getDepartment().split("&");
+                            testEntrustedTaskRelEntity.setDeptName(deptIds[1]);
+                        }
+                    }
+                }
+                taskProgressVo.setTaskOrderFlowList(taskOrderFlowList);
             }
         }
         return taskProgressList;
@@ -2745,6 +2761,18 @@ public class EntrustServiceImpl implements EntrustService {
         taskMapper.batchSave(vos);
         //更新委托单状态
         taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
+        // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
+        if(!CollectionUtils.isEmpty(entity.getTaskRelEntities())){
+            // 补充发布人ID和姓名
+            SysUserEntity userEntity = ShiroUtils.getUserInfo();
+            List<TestEntrustedTaskRelEntity> TaskRelEntities = entity.getTaskRelEntities();
+            for(TestEntrustedTaskRelEntity taskdata:TaskRelEntities){
+                taskdata.setUserId(userEntity.getUserId());
+                taskdata.setAddressName(userEntity.getName());
+                taskdata.setCreateDate(new Date());
+            }
+            methodDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
+        }
         return true;
     }
 
@@ -3156,7 +3184,7 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
-        int totalMoney = 0;
+        Double totalMoney = 0D;
         List<SampleEntity> samples = vo.getSamples();
         List<EntrustSampleEntity> list = new ArrayList<>();
         List<EntrustSampleEntity> list1 = new ArrayList<>();
@@ -3234,7 +3262,7 @@ public class EntrustServiceImpl implements EntrustService {
                         // 正常存储检测项即可。
                         //计算检测项总价钱
                         if (entity.getUnitPrice() != null && entity.getUnitPrice() >= 0) {
-                            int money = entity.getTimes() * entity.getUnitPrice();
+                            double money = entity.getTimes() * entity.getUnitPrice();
                             totalMoney = totalMoney + money;
                         }
                         //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
@@ -3591,6 +3619,101 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
         }
+    }
+
+
+    /**
+     * 分配任务： 任务单流转 需要业务员提供信息
+     * @param id 委托单id
+     * @param taskRelEntities 任务单流转列表
+     */
+    void methodDistributionOfFlow(Long id, List<TestEntrustedTaskRelEntity> taskRelEntities){
+        // 通过委托单id 获取任务列表信息：
+        List<TestEntrustedTaskRelEntity> testEntrustedTaskRelEntityList = testEntrustedTaskRelDao.getDeptByEntrustIdList(id);
+        // 补充信息。testEntrustedTaskRelEntityList 集合中 taskId 补充存入
+        for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity:taskRelEntities)
+        {
+            // 处理信息 部门id&部门名称 获取为 部门ID
+            if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getDepartment())){
+                String[] deptIds = testEntrustedTaskRelEntity.getDepartment().split("&");
+                testEntrustedTaskRelEntity.setDeptId(Integer.parseInt(deptIds[0]));
+            }
+            for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity1 :testEntrustedTaskRelEntityList)
+            {
+                if(testEntrustedTaskRelEntity1.getDeptId().equals(testEntrustedTaskRelEntity.getDeptId())){
+                    testEntrustedTaskRelEntity.setTaskId(testEntrustedTaskRelEntity1.getTaskId());
+                    testEntrustedTaskRelEntity.setDepartment(testEntrustedTaskRelEntity1.getDeptId()+"&"+testEntrustedTaskRelEntity1.getDeptName());
+                    // 如果传入的日期（taskFlowDate）为空 则存入 任务单 required_completion_time
+                    if(StringUtils.isEmpty(testEntrustedTaskRelEntity.getTaskFlowDate())){
+                        testEntrustedTaskRelEntity.setTaskFlowDate(testEntrustedTaskRelEntity1.getTaskFlowDate());
+                    }
+                    testEntrustedTaskRelEntity.setEntrustId(id);
+                }
+            }
+        }
+        // 进行批量 add操作
+        testEntrustedTaskRelDao.addList(taskRelEntities);
+    }
+
+    /**
+     * 修改任务流转要求
+     * @param testEntrustedTaskRelEntity
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateTestEntrustedTaskRelEntity(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity) {
+        testEntrustedTaskRelEntity.setUpdateDate(new Date());
+        testEntrustedTaskRelDao.updateData(testEntrustedTaskRelEntity);
+        return true;
+    }
+
+    /**
+     * 删除任务流转要求
+     * @param id
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean removeTestEntrustedTask(Integer id) {
+        testEntrustedTaskRelDao.deletedData(id);
+        return true;
+    }
+
+    /**
+     * 新增任务流转要求
+     * @param testEntrustedTaskRelEntity
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean addTestEntrustedTaskRelEntity(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity) {
+        testEntrustedTaskRelEntity.setCreateDate(new Date());
+        testEntrustedTaskRelDao.addData(testEntrustedTaskRelEntity);
+        return true;
+    }
+
+    /**
+     * 通过委托单id 获取流转单信息集合
+     * @param entrustId
+     * @return
+     */
+    @Override
+    public List<TestEntrustedTaskRelEntity> getEntrustTaskRelList(Long entrustId) {
+
+        return testEntrustedTaskRelDao.getEntrustTaskRelList(entrustId);
+    }
+
+    /**
+     *  支持批量修改
+     * @param list
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateEntrustedTaskRelEntityList(List<TestEntrustedTaskRelEntity> list) {
+        testEntrustedTaskRelDao.updateEntrustedTaskRelEntityList(list);
+        return true;
     }
 
 
