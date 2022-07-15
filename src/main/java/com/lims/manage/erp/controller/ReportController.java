@@ -981,8 +981,40 @@ public class ReportController {
      * @return
      */
     @GetMapping("exportRecords")
-    public void exportRecords(String reportCode, String reportType, String sealType,Long startDate,Long endDate){
-        reportService.exportRecords(reportCode,reportType,sealType,startDate,endDate);
+    public void exportRecords(String reportCode, String reportType, String sealType,String startDate,String endDate,HttpServletResponse response){
+        if ("null".equals(reportType)){
+            reportType = null;
+        }
+        if ("null".equals(sealType)){
+            sealType = null;
+        }
+        if ("null".equals(startDate)){
+            startDate = null;
+        }
+        if ("null".equals(endDate)){
+            endDate = null;
+        }
+        Long s = null;
+        Long e = null;
+        if (startDate != null){
+            s = Long.parseLong(startDate);
+        }
+        if (endDate != null){
+            e = Long.parseLong(endDate);
+        }
+        byte[] bytes = reportService.exportRecords(reportCode, reportType, sealType, s, e);
+        //响应数据流
+        try {
+            ServletOutputStream outputStream = response.getOutputStream();
+            response.reset();
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=sealRecords.xlsx");
+            outputStream.write(bytes);
+        }catch (Exception e1){
+            logger.error("导出盖章历史失败:{}",e1);
+        }
+
     }
 
     /**

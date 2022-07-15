@@ -405,5 +405,5 @@ public interface ReportService {
 
     List<TestTeam> getSealer();
 
-    void exportRecords(String reportCode, String reportType, String sealType, Long startDate, Long endDate);
+    byte[] exportRecords(String reportCode, String reportType, String sealType, Long startDate, Long endDate);
 }

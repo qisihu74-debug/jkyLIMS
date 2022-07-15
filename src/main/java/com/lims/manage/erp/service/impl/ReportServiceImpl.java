@@ -2804,7 +2804,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void exportRecords(String reportCode, String reportType, String sealType, Long startDate, Long endDate) {
+    public byte[] exportRecords(String reportCode, String reportType, String sealType, Long startDate, Long endDate) {
         //每个团队看子集大团队任务产生的报告列表
         Long userId = ShiroUtils.getUserInfo().getUserId();
         List<Integer> ids = Lists.newArrayList();
@@ -2825,33 +2825,83 @@ public class ReportServiceImpl implements ReportService {
         if (ids.size()<=0){
             ids = null;
         }
-        List<ReportRecordEntity> list = reportMapper.exportRecords(reportCode,reportType,sealType,ids,new Date(startDate),new Date(endDate));
+        List<ReportRecordEntity> list = reportMapper.exportRecords(reportCode,reportType,sealType,ids,startDate==null?null:new Date(startDate),endDate==null?null:new Date(endDate));
+        byte[] bytes = null;
         try {
-            exportExcel(list);
+            bytes = exportExcel(list,qiYueSuoEntity.getAutographPath()+"sealList.xlsx");
         }catch (Exception e){
             log.error("报告历史记录导出失败:{}",e);
         }
+        return bytes;
     }
 
     /**
      * 导出盖章历史数据
      * @param list
      */
-    private static void exportExcel(List<ReportRecordEntity> list) throws Exception {
+    private byte[] exportExcel(List<ReportRecordEntity> list,String basePath) throws Exception {
+        PDFHelper3.getLicense();
         //处理检测人、记录人，审核、签发人，日期，报告分数，产值
         InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "报告盖章登记表.xlsx");
         Workbook workbook = new Workbook(fileStream);
         Worksheet worksheet = workbook.getWorksheets().get(0);
         Cells cells = worksheet.getCells();
-        int row = 3;
-        int colum = 1;
-        String value1 = cells.get(2,0).getValue().toString();
-        String value = cells.get(3,0).getValue().toString();
+        int n = 4;
+        String row = "B";
         for (ReportRecordEntity entity:list) {
             //报告编号
-            cells.get(row,colum).setValue(entity.getEntrustmentNo());
-
+            cells.get(row+n).setValue(entity.getReportCode());
+            row = getNextUpEn(row);
+            cells.get(row+n).setValue(entity.getSampleName());
+            row = getNextUpEn(row);
+            cells.get(row+n).setValue(entity.getInspector().split("&")[0]+","+entity.getRecorder().split("&")[0]);
+            row = getNextUpEn(row);
+            cells.get(row+n).setValue(entity.getVerifyer());
+            row = getNextUpEn(row);
+            cells.get(row+n).setValue(entity.getIssuer());
+            row = getNextUpEn(row);
+            cells.get(row+n).setValue(DateUtil.formatDate(entity.getIssuerTime()));
+            row = getNextUpEn(row);
+            cells.get(row+n).setValue(DateUtil.formatDate(entity.getSealTime()));
+            row = getNextUpEn(row);
+            //盖章类型
+            String sealType = entity.getSealType();
+            if (sealType.contains("甲级")){
+                cells.get(row+n).setValue("√");
+            }
+            row = getNextUpEn(row);
+            if (sealType.contains("CMA")){
+                cells.get(row+n).setValue("√");
+            }
+            row = getNextUpEn(row);
+            if (sealType.contains("CNAS")){
+                cells.get(row+n).setValue("√");
+            }
+            row = getNextUpEn(row);
+            //报告分数
+            Integer number = entity.getNumber();
+            cells.get(row+n).setValue(1);
+            row = getNextUpEn(row);
+            cells.get(row+n).setValue(number-1);
+            row = getNextUpEn(row);
+            cells.get(row+n).setValue(number);
+            row = getNextUpEn(row);
+            //报告产值
+            cells.get(row+n).setValue(entity.getActualPrice());
+            row = getNextUpEn(row);
+            //报告类型
+            cells.get(row+n).setValue("");
+            //委托编号
+            row = getNextUpEn(row);
+            cells.get(row+n).setValue(entity.getEntrustmentNo());
+            row = "B";
+            n++;
         }
+        workbook.save(basePath);
+        File file = new File(basePath);
+        byte[] bytes = FileAndFolderUtil.file2byte(file);
+
+        return bytes;
     }
 
     /**
@@ -2887,4 +2937,43 @@ public class ReportServiceImpl implements ReportService {
         }
         return finalWork;
     }
+
+    /**
+     * 获取下一个字母
+     * @param en
+     * @return
+     */
+    public static String getNextUpEn(String en){
+        char lastE = 'a';
+        char st = en.toCharArray()[0];
+        if(Character.isUpperCase(st)){
+            if(en.equals("Z")){
+                return "A";
+            }
+            if(en==null || en.equals("")){
+                return "A";
+            }
+            lastE = 'Z';
+        }else{
+            if(en.equals("z")){
+                return "a";
+            }
+            if(en==null || en.equals("")){
+                return "a";
+            }
+            lastE = 'z';
+        }
+        int lastEnglish = (int)lastE;
+        char[] c = en.toCharArray();
+        if(c.length>1){
+            return null;
+        }else{
+            int now = (int)c[0];
+            if(now >= lastEnglish)
+                return null;
+            char uppercase = (char)(now+1);
+            return String.valueOf(uppercase);
+        }
+    }
+
 }
