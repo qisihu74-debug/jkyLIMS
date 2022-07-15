@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.TeamTreeStructureEntity;
 import com.lims.manage.erp.vo.*;
 
 import java.io.IOException;
@@ -103,4 +104,6 @@ public interface StatisticsService {
      * @return
      */
     List<LabelValueVo> getAreas();
+
+    List<TeamTreeStructureEntity> getChirds();
 }

@@ -1715,15 +1715,17 @@ public class EntrustServiceImpl implements EntrustService {
                 List<SampleItemEntity> updateList = Lists.newArrayList();
                 if(!CollectionUtils.isEmpty(sampleCheckItemOld) && !CollectionUtils.isEmpty(sampleCheckItem)){
                     for (int k = 0; k < sampleCheckItemOld.size(); k++) {
-                        SampleItemEntity sampleItemEntity = sampleCheckItemOld.get(k);
-                        if(sampleItemEntity!=null){
-                            Long checkItemId = sampleItemEntity.getCheckItemId();
+                        SampleItemEntity oldItem = sampleCheckItemOld.get(k);
+                        if(oldItem!=null){
+                            Long oldItemId = oldItem.getCheckItemId();
                             for (int m = 0; m < sampleCheckItem.size(); m++) {
-                                SampleItemEntity sampleItemEntity1 = sampleCheckItem.get(m);
-                                if(sampleItemEntity1 != null){
-                                    Long checkItemId1 = sampleItemEntity1.getCheckItemId();
-                                    if(checkItemId1.equals(checkItemId)){
-                                        updateList.add(sampleItemEntity1);
+                                SampleItemEntity newItem = sampleCheckItem.get(m);
+                                if(newItem != null){
+                                    Long newItemId = newItem.getCheckItemId();
+                                    if(newItemId.equals(oldItemId)){
+                                        newItem.setSampleId(oldItem.getSampleId());
+                                        newItem.setEntrustId(oldItem.getEntrustId());
+                                        updateList.add(newItem);
                                         sampleCheckItemOld.set(k,null);
                                         sampleCheckItem.set(m,null);
                                     }
