@@ -427,6 +427,7 @@
             update test_entrusted_sample_checkitem_rel
             <set>
                 standard_id = #{item.standardId},
+                unit_price = #{item.unitPrice},
                 times = #{item.times}
             </set>
             where entrust_id = #{item.entrustId} and check_item_id = #{item.checkItemId} and sample_id = #{item.sampleId}
