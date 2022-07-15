@@ -413,8 +413,10 @@ public class StatisticsServiceImpl implements StatisticsService {
             result.addAll(reportPrice);
         }else{
             List<Long> nodeTeam = teamMapper.getNodeTeamId(Long.parseLong(paramVo.getTeamId()));
-            List<TeamOutputValueVo> reportPrice = statisticsMapper.teamStatistics0715(paramVo.getBeginDate(), paramVo.getEndDate(), nodeTeam);
-            result.addAll(reportPrice);
+            if(nodeTeam.size()>1){
+                List<TeamOutputValueVo> reportPrice = statisticsMapper.teamStatistics0715(paramVo.getBeginDate(), paramVo.getEndDate(), nodeTeam);
+                result.addAll(reportPrice);
+            }
             List<TeamOutputValueVo> node = statisticsMapper.teamStatisticsNode0715(paramVo.getBeginDate(), paramVo.getEndDate(), nodeTeam);
             result.addAll(node);
         }
