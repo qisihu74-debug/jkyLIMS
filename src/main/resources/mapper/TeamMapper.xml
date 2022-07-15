@@ -53,6 +53,23 @@
 
     </select>
 
+    <select id="getAllSecondTeam" resultType="com.lims.manage.erp.entity.TeamTreeStructureEntity">
+        SELECT
+            *
+        FROM
+            test_team
+        WHERE
+            pid = 0
+    </select>
+    <select id="getAllSecondTeamId" resultType="java.lang.Long">
+        SELECT
+            id
+        FROM
+            test_team
+        WHERE
+            pid = 0
+    </select>
+
     <select id="getDeptAll" resultType="com.lims.manage.erp.entity.TeamTreeStructureEntity">
         	   SELECT
                     id as id,

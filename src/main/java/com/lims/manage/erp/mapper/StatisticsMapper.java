@@ -82,6 +82,34 @@ public interface StatisticsMapper {
     List<TeamOutputValueVo> teamStatistics(StatisticsParamVo paramVo);
 
     /**
+     * 父级报告产值
+     * @param beginDate
+     * @param endDate
+     * @param deptIds
+     * @return
+     */
+    List<TeamOutputValueVo> teamParentReportStatistics(@Param("beginDate") String beginDate,@Param("endDate") String endDate,@Param("deptIds") List<Long> deptIds);
+
+    /**
+     * 父级任务产值
+     * @param beginDate
+     * @param endDate
+     * @param deptIds
+     * @return
+     */
+    List<TeamOutputValueVo> teamParentTaskStatistics(@Param("beginDate") String beginDate,@Param("endDate") String endDate,@Param("deptIds") List<Long> deptIds);
+
+    /**
+     *
+     * @param beginDate
+     * @param endDate
+     * @param deptIds
+     * @return
+     */
+    List<TeamOutputValueVo> teamStatistics0715(@Param("beginDate") String beginDate,@Param("endDate") String endDate,@Param("deptIds") List<Long> deptIds);
+    List<TeamOutputValueVo> teamStatisticsNode0715(@Param("beginDate") String beginDate,@Param("endDate") String endDate,@Param("deptIds") List<Long> deptIds);
+
+    /**
      * 部门产值统计--子级
      * @param paramVo
      * @return
