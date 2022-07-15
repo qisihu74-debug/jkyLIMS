@@ -963,12 +963,26 @@ public class ReportController {
      * @return
      */
     @GetMapping("historyList")
-    public Result historyList(String reportCode, String reportType, String sealType,Integer pageNum,Integer pageSize){
+    public Result historyList(String reportCode, String reportType, String sealType,Integer pageNum,Integer pageSize,Long startDate,Long endDate){
         if (pageNum == null || pageSize == null){
             return ResultUtil.error("缺少分页参数");
         }
-        PageInfo<ReportRecordEntity> pageInfo = reportService.historyList(reportCode,reportType,sealType,pageNum,pageSize);
+        PageInfo<ReportRecordEntity> pageInfo = reportService.historyList(reportCode,reportType,sealType,pageNum,pageSize,startDate,endDate);
         return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * 导出数据
+     * @param reportCode
+     * @param reportType
+     * @param sealType
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    @GetMapping("exportRecords")
+    public void exportRecords(String reportCode, String reportType, String sealType,Long startDate,Long endDate){
+        reportService.exportRecords(reportCode,reportType,sealType,startDate,endDate);
     }
 
     /**

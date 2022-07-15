@@ -719,7 +719,6 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo sealList(String search, Integer pageNum, Integer pageSize, String reportType, String state,Integer reportTypeStatus) {
-        PageHelper.startPage(pageNum, pageSize);
         if (StringUtils.isEmpty(state)) {
             state = "1";
         }
@@ -743,6 +742,7 @@ public class ReportServiceImpl implements ReportService {
         if (ids.size()<=0){
             ids = null;
         }
+        PageHelper.startPage(pageNum, pageSize);
         List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state,reportTypeStatus,ids);
         for (ReportRecordEntity recordEntity:list) {
             if ("0".equals(recordEntity.getType())){
@@ -2748,7 +2748,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public PageInfo<ReportRecordEntity> historyList(String reportCode, String reportType, String sealType, Integer pageNum, Integer pageSize) {
+    public PageInfo<ReportRecordEntity> historyList(String reportCode, String reportType, String sealType, Integer pageNum, Integer pageSize,Long startDate,Long endDate) {
         //每个团队看子集大团队任务产生的报告列表
         Long userId = ShiroUtils.getUserInfo().getUserId();
         List<Integer> ids = Lists.newArrayList();
@@ -2770,7 +2770,7 @@ public class ReportServiceImpl implements ReportService {
             ids = null;
         }
         PageHelper.startPage(pageNum,pageSize);
-        List<ReportRecordEntity> list = reportMapper.historyList(reportCode,reportType,sealType,ids);
+        List<ReportRecordEntity> list = reportMapper.historyList(reportCode,reportType,sealType,ids,new Date(startDate),new Date(endDate));
         for (ReportRecordEntity entity:list) {
             if (org.apache.commons.lang.StringUtils.isNotEmpty(entity.getSealer())){
                 entity.setSealer(entity.getSealer().split("&")[0]);
@@ -2800,6 +2800,57 @@ public class ReportServiceImpl implements ReportService {
             return idsByTeamId;
         }else {
             return null;
+        }
+    }
+
+    @Override
+    public void exportRecords(String reportCode, String reportType, String sealType, Long startDate, Long endDate) {
+        //每个团队看子集大团队任务产生的报告列表
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        List<Integer> ids = Lists.newArrayList();
+        //校验用户id是否分配团队
+        int teamId = testTechnicistDao.getSealer(userId);
+        if (teamId > 0) {
+            //获取顶级团队
+            Long topTeamId = teamMapper.getTopDepartment((long) teamId);
+            if (topTeamId == null){
+                topTeamId = (long)teamId;
+            }
+            //获取顶级团队下的所有下级团队
+            List<TeamTreeStructureEntity> chirds = teamMapper.getChirds(topTeamId);
+            for (TeamTreeStructureEntity entity:chirds) {
+                ids.add(Integer.valueOf(entity.getId()+""));
+            }
+        }
+        if (ids.size()<=0){
+            ids = null;
+        }
+        List<ReportRecordEntity> list = reportMapper.exportRecords(reportCode,reportType,sealType,ids,new Date(startDate),new Date(endDate));
+        try {
+            exportExcel(list);
+        }catch (Exception e){
+            log.error("报告历史记录导出失败:{}",e);
+        }
+    }
+
+    /**
+     * 导出盖章历史数据
+     * @param list
+     */
+    private static void exportExcel(List<ReportRecordEntity> list) throws Exception {
+        //处理检测人、记录人，审核、签发人，日期，报告分数，产值
+        InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "报告盖章登记表.xlsx");
+        Workbook workbook = new Workbook(fileStream);
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        Cells cells = worksheet.getCells();
+        int row = 3;
+        int colum = 1;
+        String value1 = cells.get(2,0).getValue().toString();
+        String value = cells.get(3,0).getValue().toString();
+        for (ReportRecordEntity entity:list) {
+            //报告编号
+            cells.get(row,colum).setValue(entity.getEntrustmentNo());
+
         }
     }
 

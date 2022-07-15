@@ -401,7 +401,9 @@ public interface ReportService {
 
     Long getEntrustIdById(Long id);
 
-    PageInfo<ReportRecordEntity> historyList(String reportCode, String reportType, String sealType, Integer pageNum, Integer pageSize);
+    PageInfo<ReportRecordEntity> historyList(String reportCode, String reportType, String sealType, Integer pageNum, Integer pageSize,Long startDate,Long endDate);
 
     List<TestTeam> getSealer();
+
+    void exportRecords(String reportCode, String reportType, String sealType, Long startDate, Long endDate);
 }

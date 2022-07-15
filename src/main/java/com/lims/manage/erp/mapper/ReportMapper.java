@@ -175,5 +175,10 @@ public interface ReportMapper {
     @Select("select entrustment_id from test_report_record where id=#{id}")
     Long getEntrustIdById(@Param("id") Long id);
 
-    List<ReportRecordEntity> historyList(@Param("reportCode") String reportCode, @Param("reportType") String reportType, @Param("sealType") String sealType,@Param("ids") List<Integer> ids);
+    List<ReportRecordEntity> historyList(@Param("reportCode") String reportCode, @Param("reportType") String reportType, @Param("sealType") String sealType,
+                                         @Param("ids") List<Integer> ids,@Param("startDate") Date startDate,@Param("endDate") Date endDate);
+
+
+    List<ReportRecordEntity> exportRecords(@Param("reportCode") String reportCode, @Param("reportType") String reportType, @Param("sealType") String sealType,
+                                           @Param("ids") List<Integer> ids,@Param("startDate") Date startDate,@Param("endDate") Date endDate);
 }
