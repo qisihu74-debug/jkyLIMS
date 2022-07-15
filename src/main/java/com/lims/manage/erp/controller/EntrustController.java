@@ -731,6 +731,13 @@ public class EntrustController {
        if(CollectionUtils.isEmpty(list)){
            return ResultUtil.error("批量修改数据集不能为空");
        }
+        // 操作人id 与name 存入
+        SysUserEntity userEntity = ShiroUtils.getUserInfo();
+       for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity:list){
+           testEntrustedTaskRelEntity.setUserId(userEntity.getUserId());
+           testEntrustedTaskRelEntity.setAddressName(userEntity.getName());
+           testEntrustedTaskRelEntity.setUpdateDate(new Date());
+       }
         entrustService.updateEntrustedTaskRelEntityList(list);
         return ResultUtil.success("批量修改成功！！！");
     }
