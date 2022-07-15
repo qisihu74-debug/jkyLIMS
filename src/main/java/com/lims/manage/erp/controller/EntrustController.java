@@ -4,13 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustHistoryEntity;
-import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.TaskEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -677,6 +671,65 @@ public class EntrustController {
     public Result removeding(@PathVariable("id") Integer id) {
         entrustService.removeding(id);
         return ResultUtil.success("样品文件删除成功");
+    }
+
+    /**
+     * 修改任务流转要求
+     */
+    @PostMapping("/updateTestEntrustedTaskRelEntity")
+    public Result updateTestEntrustedTaskRelEntity(@RequestBody TestEntrustedTaskRelEntity testEntrustedTaskRelEntity){
+        if(testEntrustedTaskRelEntity.getId()==null){
+            return ResultUtil.error("缺少必填参数！");
+        }
+        // 操作人id 与name 存入
+        SysUserEntity userEntity = ShiroUtils.getUserInfo();
+        testEntrustedTaskRelEntity.setUserId(userEntity.getUserId());
+        testEntrustedTaskRelEntity.setAddressName(userEntity.getName());
+        entrustService.updateTestEntrustedTaskRelEntity(testEntrustedTaskRelEntity);
+        return ResultUtil.success("修改任务流转要求成功！！！");
+    }
+    /**
+     * 删除任务流转要求
+     */
+    @GetMapping("/removeTestEntrustedTask/{id}")
+    public Result removeTestEntrustedTask(@PathVariable("id") Integer id) {
+        entrustService.removeTestEntrustedTask(id);
+        return ResultUtil.success("删除任务流转要求成功！！！");
+    }
+
+    /**
+     * 新增任务流转要求
+     */
+    @PostMapping("/addTestEntrustedTaskRelEntity")
+    public Result addTestEntrustedTaskRelEntity(@RequestBody TestEntrustedTaskRelEntity testEntrustedTaskRelEntity){
+        if(testEntrustedTaskRelEntity.getTaskId()==null ||testEntrustedTaskRelEntity.getEntrustId()==null){
+            return ResultUtil.error("缺少必填参数！");
+        }
+        // 操作人id 与name 存入
+        SysUserEntity userEntity = ShiroUtils.getUserInfo();
+        testEntrustedTaskRelEntity.setUserId(userEntity.getUserId());
+        testEntrustedTaskRelEntity.setAddressName(userEntity.getName());
+        entrustService.addTestEntrustedTaskRelEntity(testEntrustedTaskRelEntity);
+        return ResultUtil.success("新增任务流转要求成功！！！");
+    }
+
+    /**
+     * 通过委托单id 获取流转单信息集合
+     * @param id 委托单id
+     * @return
+     */
+    @GetMapping("/getEntrustTaskRelList/{id}")
+    public Result getEntrustTaskRelList(@PathVariable("id") Long id) {
+        return ResultUtil.success(entrustService.getEntrustTaskRelList(id));
+    }
+
+    /**
+     * 支持批量修改
+     */
+    @PostMapping("/updateEntrustedTaskRelEntityList")
+    public Result updateEntrustedTaskRelEntityList(@RequestBody List<TestEntrustedTaskRelEntity> list){
+
+        return null;
     }
 
 }

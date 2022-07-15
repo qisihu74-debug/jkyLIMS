@@ -1,11 +1,16 @@
 package com.lims.manage.erp.vo;
 
+import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
 public class TaskProgressVo {
+    /**
+     * 任务单id
+     */
+    private Long taskId;
     /**
      * 任务编号
      */
@@ -43,4 +48,8 @@ public class TaskProgressVo {
      * 状态信息
      */
     List<TaskProgressStateVo> stateVoList;
+    /**
+     * 任务单流转集合
+     */
+    List<TestEntrustedTaskRelEntity> taskOrderFlowList;
 }

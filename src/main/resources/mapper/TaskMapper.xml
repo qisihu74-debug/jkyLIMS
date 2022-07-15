@@ -917,6 +917,7 @@
 
     <select id="getTaskStateByEntrustId" resultType="com.lims.manage.erp.vo.TaskProgressVo" >
         SELECT
+            id as taskId,
             task_code,
             state,
             order_time,

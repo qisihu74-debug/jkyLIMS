@@ -77,6 +77,8 @@ public class EntrustServiceImpl implements EntrustService {
     private TestSampleEntityService testSampleEntityService;
     @Autowired
     private EntrustFileTableDao entrustFileTableDao;
+    @Autowired
+    private TestEntrustedTaskRelDao testEntrustedTaskRelDao;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -2204,6 +2206,18 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                 }
                 taskProgressVo.setStateVoList(stateVoList);
+                // 根据任务单 id 查 流转单 列表
+                List<TestEntrustedTaskRelEntity> taskOrderFlowList = testEntrustedTaskRelDao.getTaskList(taskProgressVo.getTaskId());
+                if(!CollectionUtils.isEmpty(taskOrderFlowList)){
+                    for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity :taskOrderFlowList){
+                        // 处理信息 部门id&部门名称 获取为 部门名称
+                        if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getDepartment())){
+                            String[] deptIds = testEntrustedTaskRelEntity.getDepartment().split("&");
+                            testEntrustedTaskRelEntity.setDeptName(deptIds[1]);
+                        }
+                    }
+                    taskProgressVo.setTaskOrderFlowList(taskOrderFlowList);
+                }
             }
         }
         return taskProgressList;
@@ -2743,6 +2757,18 @@ public class EntrustServiceImpl implements EntrustService {
         taskMapper.batchSave(vos);
         //更新委托单状态
         taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
+        // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
+        if(!CollectionUtils.isEmpty(entity.getTaskRelEntities())){
+            // 补充发布人ID和姓名
+            SysUserEntity userEntity = ShiroUtils.getUserInfo();
+            List<TestEntrustedTaskRelEntity> TaskRelEntities = entity.getTaskRelEntities();
+            for(TestEntrustedTaskRelEntity taskdata:TaskRelEntities){
+                taskdata.setUserId(userEntity.getUserId());
+                taskdata.setAddressName(userEntity.getName());
+                taskdata.setCreateDate(new Date());
+            }
+            methodDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
+        }
         return true;
     }
 
@@ -3589,6 +3615,100 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
         }
+    }
+
+
+    /**
+     * 分配任务： 任务单流转 需要业务员提供信息
+     * @param id 委托单id
+     * @param taskRelEntities 任务单流转列表
+     */
+    void methodDistributionOfFlow(Long id, List<TestEntrustedTaskRelEntity> taskRelEntities){
+        // 通过委托单id 获取任务列表信息：
+        List<TestEntrustedTaskRelEntity> testEntrustedTaskRelEntityList = testEntrustedTaskRelDao.getDeptByEntrustIdList(id);
+        // 补充信息。testEntrustedTaskRelEntityList 集合中 taskId 补充存入
+        for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity:taskRelEntities)
+        {
+            // 处理信息 部门id&部门名称 获取为 部门ID
+            if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getDepartment())){
+                String[] deptIds = testEntrustedTaskRelEntity.getDepartment().split("&");
+                testEntrustedTaskRelEntity.setDeptId(Integer.parseInt(deptIds[0]));
+            }
+            for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity1 :testEntrustedTaskRelEntityList)
+            {
+                if(testEntrustedTaskRelEntity1.getDeptId().equals(testEntrustedTaskRelEntity.getDeptId())){
+                    testEntrustedTaskRelEntity.setTaskId(testEntrustedTaskRelEntity1.getTaskId());
+                    testEntrustedTaskRelEntity.setDepartment(testEntrustedTaskRelEntity1.getDeptId()+"&"+testEntrustedTaskRelEntity1.getDeptName());
+                    // 如果传入的日期（taskFlowDate）为空 则存入 任务单 required_completion_time
+                    if(StringUtils.isEmpty(testEntrustedTaskRelEntity.getTaskFlowDate())){
+                        testEntrustedTaskRelEntity.setTaskFlowDate(testEntrustedTaskRelEntity1.getTaskFlowDate());
+                    }
+                    testEntrustedTaskRelEntity.setEntrustId(id);
+                }
+            }
+        }
+        // 进行批量 add操作
+        testEntrustedTaskRelDao.addList(taskRelEntities);
+    }
+
+    /**
+     * 修改任务流转要求
+     * @param testEntrustedTaskRelEntity
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateTestEntrustedTaskRelEntity(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity) {
+        testEntrustedTaskRelEntity.setUpdateDate(new Date());
+        testEntrustedTaskRelDao.updateData(testEntrustedTaskRelEntity);
+        return true;
+    }
+
+    /**
+     * 删除任务流转要求
+     * @param id
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean removeTestEntrustedTask(Integer id) {
+        testEntrustedTaskRelDao.deletedData(id);
+        return true;
+    }
+
+    /**
+     * 新增任务流转要求
+     * @param testEntrustedTaskRelEntity
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean addTestEntrustedTaskRelEntity(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity) {
+        testEntrustedTaskRelEntity.setCreateDate(new Date());
+        testEntrustedTaskRelDao.addData(testEntrustedTaskRelEntity);
+        return true;
+    }
+
+    /**
+     * 通过委托单id 获取流转单信息集合
+     * @param entrustId
+     * @return
+     */
+    @Override
+    public List<TestEntrustedTaskRelEntity> getEntrustTaskRelList(Long entrustId) {
+
+        return testEntrustedTaskRelDao.getEntrustTaskRelList(entrustId);
+    }
+
+    /**
+     *  支持批量修改
+     * @param list
+     * @return
+     */
+    @Override
+    public int updateEntrustedTaskRelEntityList(List<TestEntrustedTaskRelEntity> list) {
+
+        return 0;
     }
 
 
