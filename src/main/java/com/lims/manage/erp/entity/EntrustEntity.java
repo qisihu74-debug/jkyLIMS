@@ -340,7 +340,7 @@ public class EntrustEntity {
         this.mixingWay=vo.getMixingWay();
         this.taskSource=vo.getTaskSource();
         this.discount=vo.getDiscount();
-        this.actualPrice=df.format(Double.parseDouble(vo.getActualPrice()));
+        this.actualPrice= vo.getActualPrice() == null ? null : df.format(Double.parseDouble(vo.getActualPrice()));
         this.systemPrice=vo.getSystemPrice();
         this.presentInformation=vo.getPresentInformation();
     }
