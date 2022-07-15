@@ -6,7 +6,7 @@ package com.lims.manage.erp.result;
 
 public enum ResultEnum {
     //可自行定义，与前端交互
-    UNKNOWN_ERROR(-1,"未知错误"),
+    UNKNOWN_ERROR(500,"未知错误"),
     SUCCESS(200,"成功"),
     STUDENT_NOT_EXIST(1,"用户不存在"),
     STUDENT_IS_EXISTS(2,"条形码不存在"),

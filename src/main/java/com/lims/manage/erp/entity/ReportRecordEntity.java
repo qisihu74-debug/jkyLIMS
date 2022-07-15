@@ -18,6 +18,21 @@ public class ReportRecordEntity {
      */
     private Long entrustmentId;
     /**
+     * 委托单实际价格
+     */
+    @TableField(exist = false)
+    private String actualPrice;
+    /**
+     * 检测人
+     */
+    @TableField(exist = false)
+    private String inspector;
+    /**
+     * 记录人
+     */
+    @TableField(exist = false)
+    private String recorder;
+    /**
      * 报告编号
      */
     private String reportCode;

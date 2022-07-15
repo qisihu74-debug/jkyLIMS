@@ -687,9 +687,58 @@
         <if test="sealType != null and sealType != ''">
             AND category = #{sealType}
         </if>
+        <if test="startDate != null and endDate != null">
+            AND seal_time &gt;= #{startDate} and seal_time &lt;= #{endDate}
+        </if>
     </select>
 
-    <select id="">
-
+    <select id="exportRecords" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+        t1.id,
+        t1.entrustment_id,
+        t4.entrustment_no,
+        t4.actual_price As actualPrice,
+        t3.inspector,
+        t3.recorder,
+        t1.verifyer,
+        t1.issuer,
+        t1.number,
+        t1.report_code,
+        t1.sample_name,
+        t1.required_completion_time,
+        t1.report_url,
+        t1.number,
+        t1.issuer_time,
+        t1.seal_type,
+        t1.sealer,
+        t1.seal_time,
+        t1.type,
+        t1.category,
+        t1.qys_state,
+        t1.contract_id
+        FROM
+        test_report_record t1
+        LEFT JOIN test_task t3 ON t1.entrustment_id = t3.entrustment_id
+        left join test_entrusted_info t4 on t1.entrustment_id=t4.id
+        WHERE
+        t1.state >= 7
+        <if test="ids != null">
+            AND t3.dept_id IN
+            <foreach collection="ids" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        <if test="reportCode !=null and reportCode != ''">
+            AND report_code like concat(concat('%',#{reportCode}),'%')
+        </if>
+        <if test="reportType != null and reportType != ''">
+            AND type = #{reportType}
+        </if>
+        <if test="sealType != null and sealType != ''">
+            AND category = #{sealType}
+        </if>
+        <if test="startDate != null and endDate != null">
+            AND seal_time &gt;= #{startDate} and seal_time &lt;= #{endDate}
+        </if>
     </select>
 </mapper>
