@@ -3731,6 +3731,27 @@ public class EntrustServiceImpl implements EntrustService {
         List<TestEntrustedTaskRelVo> list = Lists.newArrayList();
         PageHelper.clearPage();
         list = testEntrustedTaskRelDao.getTaskStatisticsList(testEntrustedTaskRelVo);
+        if(!CollectionUtils.isEmpty(list)){
+            for(TestEntrustedTaskRelVo testEntrustedTaskRelVo1:list){
+                // 遍历输出数据
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getRemark()))
+                {
+                    testEntrustedTaskRelVo1.setRemark("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getAddressName())){
+                    testEntrustedTaskRelVo1.setAddressName("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskCode())){
+                    testEntrustedTaskRelVo1.setTaskCode("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskSource())){
+                    testEntrustedTaskRelVo1.setTaskSource("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getReportCode())){
+                    testEntrustedTaskRelVo1.setReportCode("--");
+                }
+            }
+        }
         PageInfo<TestEntrustedTaskRelVo> result = PageInfoUtils.list2PageInfo(list, testEntrustedTaskRelVo.getPageNum(), testEntrustedTaskRelVo.getPageSize());
         return result;
     }

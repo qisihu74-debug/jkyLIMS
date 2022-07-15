@@ -84,4 +84,11 @@ public class TestEntrustedTaskRelVo {
      * 当前展示页数量
      */
     private Integer pageSize;
+
+    /**
+     * 委托日期
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
+    private Date acceptanceDate;
 }
