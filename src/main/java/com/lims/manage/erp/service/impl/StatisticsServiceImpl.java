@@ -406,10 +406,21 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public PageInfo teamStatistics(StatisticsParamVo paramVo) {
+        List<TeamOutputValueVo> result = Lists.newArrayList();
+        if(paramVo.getTeamId() == null){
+            //查询父级报告产值
+            List<TeamOutputValueVo> reportPrice = statisticsMapper.teamStatistics0715(paramVo.getBeginDate(), paramVo.getEndDate(), null);
+            result.addAll(reportPrice);
+        }else{
+            List<Long> nodeTeam = teamMapper.getNodeTeamId(Long.parseLong(paramVo.getTeamId()));
+            List<TeamOutputValueVo> reportPrice = statisticsMapper.teamStatistics0715(paramVo.getBeginDate(), paramVo.getEndDate(), nodeTeam);
+            result.addAll(reportPrice);
+            List<TeamOutputValueVo> node = statisticsMapper.teamStatisticsNode0715(paramVo.getBeginDate(), paramVo.getEndDate(), nodeTeam);
+            result.addAll(node);
+        }
         PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
-        List<TeamOutputValueVo> list = statisticsMapper.teamStatistics(paramVo);
-        PageInfo<TeamOutputValueVo> result = new PageInfo<>(list);
-        return result;
+        PageInfo<TeamOutputValueVo> resultPage = new PageInfo<>(result);
+        return resultPage;
     }
 
     @Override

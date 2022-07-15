@@ -58,6 +58,19 @@ public interface TeamMapper extends BaseMapper {
                    "                SELECT c.* FROM test_team c ,td WHERE c.pid = td.id\n" +
                    "            ) SELECT * FROM td ORDER BY td.id")
     List<TeamTreeStructureEntity> getChirds(Long teamId);
+    @Select("WITH RECURSIVE td AS (\n" +
+            "                SELECT * FROM test_team WHERE id = #{teamId} \n" +
+            "                UNION ALL \n" +
+            "                SELECT c.* FROM test_team c ,td WHERE c.pid = td.id\n" +
+            "            ) SELECT id FROM td ORDER BY td.id")
+    List<Long> getNodeTeamId(Long teamId);
+
+    /**
+     * 查询2级团队
+     * @return
+     */
+    List<TeamTreeStructureEntity> getAllSecondTeam();
+    List<Long> getAllSecondTeamId();
 
     /**
      * 获取team下所有userId
