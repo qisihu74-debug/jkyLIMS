@@ -924,7 +924,8 @@
             receive_time,
             start_detection_time,
             end_detection_time,
-            review_time
+            review_time,
+            dept_id
         FROM
             test_task
         WHERE

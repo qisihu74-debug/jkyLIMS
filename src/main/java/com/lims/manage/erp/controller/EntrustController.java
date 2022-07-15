@@ -681,10 +681,9 @@ public class EntrustController {
         if(testEntrustedTaskRelEntity.getId()==null){
             return ResultUtil.error("缺少必填参数！");
         }
-        // 操作人id 与name 存入
-        SysUserEntity userEntity = ShiroUtils.getUserInfo();
-        testEntrustedTaskRelEntity.setUserId(userEntity.getUserId());
-        testEntrustedTaskRelEntity.setAddressName(userEntity.getName());
+        // 操作人id 与name 为空
+        testEntrustedTaskRelEntity.setUserId(null);
+        testEntrustedTaskRelEntity.setAddressName(null);
         entrustService.updateTestEntrustedTaskRelEntity(testEntrustedTaskRelEntity);
         return ResultUtil.success("修改任务流转要求成功！！！");
     }
@@ -731,15 +730,25 @@ public class EntrustController {
        if(CollectionUtils.isEmpty(list)){
            return ResultUtil.error("批量修改数据集不能为空");
        }
-        // 操作人id 与name 存入
-        SysUserEntity userEntity = ShiroUtils.getUserInfo();
+        // 操作人id 与name null
        for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity:list){
-           testEntrustedTaskRelEntity.setUserId(userEntity.getUserId());
-           testEntrustedTaskRelEntity.setAddressName(userEntity.getName());
+           testEntrustedTaskRelEntity.setUserId(null);
+           testEntrustedTaskRelEntity.setAddressName(null);
            testEntrustedTaskRelEntity.setUpdateDate(new Date());
        }
         entrustService.updateEntrustedTaskRelEntityList(list);
         return ResultUtil.success("批量修改成功！！！");
+    }
+
+    /**
+     * 当天任务统计
+     */
+    @GetMapping("/getTaskStatisticsList")
+    public Result taskStatisticsList(TestEntrustedTaskRelVo testEntrustedTaskRelVo){
+        if (testEntrustedTaskRelVo.getPageNum() == null || testEntrustedTaskRelVo.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数");
+        }
+        return ResultUtil.success(entrustService.taskStatisticsList(testEntrustedTaskRelVo));
     }
 
 }

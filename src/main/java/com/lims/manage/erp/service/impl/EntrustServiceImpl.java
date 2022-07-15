@@ -3689,6 +3689,10 @@ public class EntrustServiceImpl implements EntrustService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean addTestEntrustedTaskRelEntity(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity) {
         testEntrustedTaskRelEntity.setCreateDate(new Date());
+        // 通过部门id 获取name值。
+        PageHelper.clearPage();
+        String deptName = teamMapper.getTeamIdByName(testEntrustedTaskRelEntity.getDeptId());
+        testEntrustedTaskRelEntity.setDepartment(testEntrustedTaskRelEntity.getDeptId()+"&"+deptName);
         testEntrustedTaskRelDao.addData(testEntrustedTaskRelEntity);
         return true;
     }
@@ -3700,7 +3704,7 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     public List<TestEntrustedTaskRelEntity> getEntrustTaskRelList(Long entrustId) {
-
+        PageHelper.clearPage();
         return testEntrustedTaskRelDao.getEntrustTaskRelList(entrustId);
     }
 
@@ -3714,6 +3718,21 @@ public class EntrustServiceImpl implements EntrustService {
     public Boolean updateEntrustedTaskRelEntityList(List<TestEntrustedTaskRelEntity> list) {
         testEntrustedTaskRelDao.updateEntrustedTaskRelEntityList(list);
         return true;
+    }
+
+    /**
+     * 当天任务统计
+     * @param testEntrustedTaskRelVo
+     * @return
+     */
+    @Override
+    public PageInfo taskStatisticsList(TestEntrustedTaskRelVo testEntrustedTaskRelVo) {
+
+        List<TestEntrustedTaskRelVo> list = Lists.newArrayList();
+        PageHelper.clearPage();
+        list = testEntrustedTaskRelDao.getTaskStatisticsList(testEntrustedTaskRelVo);
+        PageInfo<TestEntrustedTaskRelVo> result = PageInfoUtils.list2PageInfo(list, testEntrustedTaskRelVo.getPageNum(), testEntrustedTaskRelVo.getPageSize());
+        return result;
     }
 
 

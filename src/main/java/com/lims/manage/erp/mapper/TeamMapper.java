@@ -240,4 +240,10 @@ public interface TeamMapper extends BaseMapper {
      * @return
      */
     Long getTeamIdByUserId(Long userId);
+
+    /**
+     * 获取部门名称
+     */
+    @Select("SELECT name FROM test_team WHERE id = #{deptId} LIMIT 1")
+    String getTeamIdByName(@Param("deptId") Integer deptId);
 }
