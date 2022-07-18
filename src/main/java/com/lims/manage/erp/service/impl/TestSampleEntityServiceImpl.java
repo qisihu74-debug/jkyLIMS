@@ -48,12 +48,12 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
     private int getNewSampleCode() {
         //获取数据库当前年份最大的样品编号
-        String maxNumber = sampleEntityMapper.getMaxNumber(sdf.format(now));
-        int newMax;
+        Integer maxNumber = sampleEntityMapper.getMaxNumber(sdf.format(now));
+        Integer newMax;
         if (maxNumber == null) {
             newMax = 0;
-        } else {
-            newMax = Integer.parseInt(maxNumber);
+        }else{
+            newMax = maxNumber;
         }
         return newMax;
     }
@@ -387,7 +387,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         int newMax = getNewSampleCode();
         for (int i = 0; i < samples.size(); i++) {
             int code = newMax + i + 1;
-            String codeStr = new DecimalFormat("0000").format(code);
+            String codeStr = new DecimalFormat("00000").format(code);
             String sampleCode;
             if (samples.get(i).getQuantityPerGroup() > 1) {
                 String numStr = new DecimalFormat("00").format(samples.get(i).getQuantityPerGroup());
@@ -422,7 +422,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         Integer newId = testSampleEntityMapper.getMaxId() + 1;
         SampleDetailAddVo vo = new SampleDetailAddVo(samples, newId);
         int newMax = getNewSampleCode() + 1;
-        String codeStr = new DecimalFormat("0000").format(newMax);
+        String codeStr = new DecimalFormat("00000").format(newMax);
         String sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
         TestSampleEntity mainSample = new TestSampleEntity(vo, sampleCode,null);
         param.add(mainSample);

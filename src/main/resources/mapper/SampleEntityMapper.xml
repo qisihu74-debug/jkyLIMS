@@ -1022,7 +1022,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         </foreach>
     </select>
 
-    <select id="getMaxNumber" resultType="java.lang.String" parameterType="string">
+    <select id="getMaxNumber" resultType="java.lang.Integer" parameterType="string">
         SELECT MAX(SUBSTR(sample_code, 9, 5) + 0) maxNum
         FROM test_sample
         WHERE sample_code LIKE CONCAT('%-', #{year}, '-%')

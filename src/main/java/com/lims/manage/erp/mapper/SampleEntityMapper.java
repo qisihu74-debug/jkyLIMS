@@ -196,7 +196,7 @@ public interface SampleEntityMapper {
      * @param year
      * @return
      */
-    String getMaxNumber(String year);
+    Integer getMaxNumber(String year);
 
     /**
      * 查询原始记录模板表头样品信息
