@@ -3562,9 +3562,7 @@ public class EntrustServiceImpl implements EntrustService {
         if(!CollectionUtils.isEmpty(taskList)){
             // 获取委托单详情
             EntrustAddVo vo = entityMapper.selectByKeyId(id);
-//            通过委托单id 查询任务单信息   state = 试验未开始前 进行 update
             for(TaskTestEntity taskTestEntity :taskList){
-                if(taskTestEntity.getState()<=2){
                     // 进行update任务单 同步
                     // 丁连春：任务单完成时间 以委托单下单时间为准
                     taskTestEntity.setRequiredCompletionTime(vo.getRequestDate());
@@ -3578,7 +3576,6 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                     // update
                     taskMapper.updateTestTask(taskTestEntity);
-                }
             }
         }
 
@@ -3689,6 +3686,10 @@ public class EntrustServiceImpl implements EntrustService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean addTestEntrustedTaskRelEntity(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity) {
         testEntrustedTaskRelEntity.setCreateDate(new Date());
+        // 通过部门id 获取name值。
+        PageHelper.clearPage();
+        String deptName = teamMapper.getTeamIdByName(testEntrustedTaskRelEntity.getDeptId());
+        testEntrustedTaskRelEntity.setDepartment(testEntrustedTaskRelEntity.getDeptId()+"&"+deptName);
         testEntrustedTaskRelDao.addData(testEntrustedTaskRelEntity);
         return true;
     }
@@ -3700,7 +3701,7 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     public List<TestEntrustedTaskRelEntity> getEntrustTaskRelList(Long entrustId) {
-
+        PageHelper.clearPage();
         return testEntrustedTaskRelDao.getEntrustTaskRelList(entrustId);
     }
 
@@ -3714,6 +3715,42 @@ public class EntrustServiceImpl implements EntrustService {
     public Boolean updateEntrustedTaskRelEntityList(List<TestEntrustedTaskRelEntity> list) {
         testEntrustedTaskRelDao.updateEntrustedTaskRelEntityList(list);
         return true;
+    }
+
+    /**
+     * 当天任务统计
+     * @param testEntrustedTaskRelVo
+     * @return
+     */
+    @Override
+    public PageInfo taskStatisticsList(TestEntrustedTaskRelVo testEntrustedTaskRelVo) {
+
+        List<TestEntrustedTaskRelVo> list = Lists.newArrayList();
+        PageHelper.clearPage();
+        list = testEntrustedTaskRelDao.getTaskStatisticsList(testEntrustedTaskRelVo);
+        if(!CollectionUtils.isEmpty(list)){
+            for(TestEntrustedTaskRelVo testEntrustedTaskRelVo1:list){
+                // 遍历输出数据
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getRemark()))
+                {
+                    testEntrustedTaskRelVo1.setRemark("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getAddressName())){
+                    testEntrustedTaskRelVo1.setAddressName("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskCode())){
+                    testEntrustedTaskRelVo1.setTaskCode("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskSource())){
+                    testEntrustedTaskRelVo1.setTaskSource("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getReportCode())){
+                    testEntrustedTaskRelVo1.setReportCode("--");
+                }
+            }
+        }
+        PageInfo<TestEntrustedTaskRelVo> result = PageInfoUtils.list2PageInfo(list, testEntrustedTaskRelVo.getPageNum(), testEntrustedTaskRelVo.getPageSize());
+        return result;
     }
 
 

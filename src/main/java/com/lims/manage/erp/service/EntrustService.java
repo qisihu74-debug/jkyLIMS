@@ -311,4 +311,11 @@ public interface EntrustService {
      * @return
      */
     Boolean updateEntrustedTaskRelEntityList(List<TestEntrustedTaskRelEntity> list);
+
+    /**
+     * 当天任务统计
+     * @param testEntrustedTaskRelVo
+     * @return
+     */
+    PageInfo taskStatisticsList(TestEntrustedTaskRelVo testEntrustedTaskRelVo);
 }

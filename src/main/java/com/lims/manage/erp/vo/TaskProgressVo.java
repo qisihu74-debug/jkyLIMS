@@ -52,4 +52,9 @@ public class TaskProgressVo {
      * 任务单流转集合
      */
     List<TestEntrustedTaskRelEntity> taskOrderFlowList;
+
+    /**
+     * 部门id
+     */
+    private Integer deptId;
 }

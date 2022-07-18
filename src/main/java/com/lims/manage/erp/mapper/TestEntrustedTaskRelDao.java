@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
+import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -58,6 +59,13 @@ public interface TestEntrustedTaskRelDao {
      * @return
      */
     int updateEntrustedTaskRelEntityList(@Param("list") List<TestEntrustedTaskRelEntity> list);
+
+    /**
+     * 当天任务统计 查询
+     * @param testEntrustedTaskRelVo
+     * @return
+     */
+    List<TestEntrustedTaskRelVo> getTaskStatisticsList(TestEntrustedTaskRelVo testEntrustedTaskRelVo);
 
 
 
