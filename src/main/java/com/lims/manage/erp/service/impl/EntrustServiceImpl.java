@@ -3562,9 +3562,7 @@ public class EntrustServiceImpl implements EntrustService {
         if(!CollectionUtils.isEmpty(taskList)){
             // 获取委托单详情
             EntrustAddVo vo = entityMapper.selectByKeyId(id);
-//            通过委托单id 查询任务单信息   state = 试验未开始前 进行 update
             for(TaskTestEntity taskTestEntity :taskList){
-                if(taskTestEntity.getState()<=2){
                     // 进行update任务单 同步
                     // 丁连春：任务单完成时间 以委托单下单时间为准
                     taskTestEntity.setRequiredCompletionTime(vo.getRequestDate());
@@ -3578,7 +3576,6 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                     // update
                     taskMapper.updateTestTask(taskTestEntity);
-                }
             }
         }
 
