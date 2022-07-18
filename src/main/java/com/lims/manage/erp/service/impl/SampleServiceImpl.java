@@ -71,13 +71,13 @@ public class SampleServiceImpl implements SampleService {
                     if (i % addParamVo.getQuantityPerGroup() == 0) {
                         newMax = newMax + 1;
                     }
-                    String num = String.format("%0" + 4 + "d", newMax);
+                    String num = String.format("%0" + 5 + "d", newMax);
                     StringBuilder prefix = code.append(num);
                     String suffix = String.format("%0" + 2 + "d", i % addParamVo.getQuantityPerGroup() + 1);
                     sampleCode = prefix + "_" + suffix;
                 } else {
                     //生成样品编号
-                    String num = String.format("%0" + 4 + "d", newMax + 1);
+                    String num = String.format("%0" + 5 + "d", newMax + 1);
                     StringBuilder prefix = code.append(num);
                     String suffix = String.format("%0" + 2 + "d", i + 1);
                     if (addParamVo.getQuantityPerGroup() > 1) {
@@ -124,7 +124,7 @@ public class SampleServiceImpl implements SampleService {
         } else {
             StringBuilder code = new StringBuilder("YP-" + sdf.format(now) + "-");
             //生成样品编号
-            String num = String.format("%0" + 4 + "d", newMax + 1);
+            String num = String.format("%0" + 5 + "d", newMax + 1);
             StringBuilder sampleCode = code.append(num);
             SampleEntity sampleEntity = new SampleEntity(addParamVo, null, productName, sampleCode.toString(), null, insertFlag);
             result = sampleEntityMapper.insert(sampleEntity);

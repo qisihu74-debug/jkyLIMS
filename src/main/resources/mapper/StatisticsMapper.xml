@@ -483,6 +483,7 @@
         SELECT
         t1.teamId,
         t1.teamName,
+        t1.teamCode,
         t1.taskPrice,
         t2.actualReportPrice
         FROM
@@ -490,6 +491,7 @@
         SELECT
         t2.id teamId,
         t2.NAME teamName,
+        t2.code teamCode,
         t1.`VALUE` taskPrice
         FROM
         (
@@ -524,16 +526,13 @@
         SELECT
         t2.id teamId,
         t2.`name` teamName,
-        t1.
-        VALUE
-        actualReportPrice
+        t2.code teamCode,
+        t1.VALUE actualReportPrice
         FROM
         (
         SELECT
         t3.pid,
-        SUM( t2.task_price )
-        VALUE
-
+        SUM( t2.task_price ) VALUE
         FROM
         test_report_record t1
         LEFT JOIN test_task t2 ON t1.entrustment_id = t2.entrustment_id
@@ -562,6 +561,7 @@
         SELECT
         t1.teamId,
         t1.teamName,
+        t1.teamCode,
         t1.taskPrice,
         t2.actualReportPrice
         FROM
@@ -569,6 +569,7 @@
         SELECT
         t2.id teamId,
         t2.NAME teamName,
+        t2.code teamCode,
         t1.`VALUE` taskPrice
         FROM
         (
@@ -603,16 +604,13 @@
         SELECT
         t2.id teamId,
         t2.`name` teamName,
-        t1.
-        VALUE
-        actualReportPrice
+        t2.code teamCode,
+        t1.VALUE actualReportPrice
         FROM
         (
         SELECT
         t3.id,
-        SUM( t2.task_price )
-        VALUE
-
+        SUM( t2.task_price ) VALUE
         FROM
         test_report_record t1
         LEFT JOIN test_task t2 ON t1.entrustment_id = t2.entrustment_id
