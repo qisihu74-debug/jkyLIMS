@@ -5,17 +5,63 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.config.PoiConfig;
-import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustFileTableEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
+import com.lims.manage.erp.entity.TaskIdEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TaskTestTeamEntity;
+import com.lims.manage.erp.entity.TestInstrumentEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.entity.TreeEntity;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.EntrustFileTableDao;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
+import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
+import com.lims.manage.erp.mapper.TestDetectionDao;
+import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.service.TaskService;
-import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.ConvertUtil;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.OriginalRecordDataVo;
+import com.lims.manage.erp.vo.OriginalRecordParamVo;
+import com.lims.manage.erp.vo.PagingToolVo;
+import com.lims.manage.erp.vo.PersonInfoVo;
+import com.lims.manage.erp.vo.ReceiveSampleListVo;
+import com.lims.manage.erp.vo.ReceiveSampleParamVo;
+import com.lims.manage.erp.vo.ReviewVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.SamplePrivateInfoVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.TaskListParamVo;
+import com.lims.manage.erp.vo.TaskListVo;
+import com.lims.manage.erp.vo.TaskStatsItemVo;
+import com.lims.manage.erp.vo.TaskStatsVo;
+import com.lims.manage.erp.vo.TeamVo;
+import com.lims.manage.erp.vo.TemplateSampleVo;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xwpf.usermodel.*;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTc;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTcPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc;
@@ -31,9 +77,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.net.URLEncoder;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipOutputStream;
 
 @Service
@@ -531,7 +584,7 @@ public class TaskServiceImpl implements TaskService {
         // 获取当前用户所在科室id
         Long department = teamMapper.getTeamIdByUid(UserLong);
         // 获取顶级部门 为空则是当前部门
-        Long topDepartment = teamMapper.getTopDepartment(department);
+        Long topDepartment = this.getTopDepartment(department);
         if(StringUtils.isEmpty(topDepartment)){
             topDepartment = department;
         }
@@ -1445,5 +1498,32 @@ public class TaskServiceImpl implements TaskService {
                 sampleListVo.setCorrelationTaskCode(correlationTask.toString());
             }
         }
+    }
+
+    /**
+     * 获取顶级部门id
+     * @return
+     */
+    public Long getTopDepartment(Long id){
+        Long topId = null;
+        List<TreeEntity> treeList = com.google.api.client.util.Lists.newArrayList();
+        List<TestTeam> list = teamMapper.getTopDepartment(id);
+        if (list.size() == 0){
+            return id;
+        }
+        if (list.size() == 1){
+            topId = Long.valueOf(list.get(0).getId()+"");
+        }else {
+            for (TestTeam team:list) {
+                TreeEntity entity = new TreeEntity();
+                entity.setId(team.getId()+"");
+                entity.setPid(team.getPid()+"");
+                treeList.add(entity);
+            }
+            //获取最顶级部门id
+            List<TreeEntity> treeData = ConvertUtil.list2TreeList(treeList,"id","pid","children");
+            topId = Long.valueOf(treeData.get(0).getId());
+        }
+        return topId;
     }
 }

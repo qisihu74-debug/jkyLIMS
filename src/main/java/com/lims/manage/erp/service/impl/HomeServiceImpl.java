@@ -3,13 +3,27 @@ package com.lims.manage.erp.service.impl;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
-
 import com.lims.manage.erp.controller.UserFuctionController;
-import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.*;
-import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.entity.HomeAfficheEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.SysRoleFunctionParent;
+import com.lims.manage.erp.entity.TeamTreeStructureEntity;
+import com.lims.manage.erp.entity.TestCheckItemTeamRel;
+import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.entity.TreeEntity;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.HomeAfficheDao;
+import com.lims.manage.erp.mapper.HomeMapper;
+import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.ReportMapper;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
+import com.lims.manage.erp.mapper.SysRoleFuncMenuDao;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
+import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.service.HomeService;
 import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.ConvertUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.LabelValueVo;
@@ -23,7 +37,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class HomeServiceImpl implements HomeService {
@@ -226,7 +246,7 @@ public class HomeServiceImpl implements HomeService {
         Long department = teamMapper.getTeamIdByUid(userId);
         if(!StringUtils.isEmpty(department)){
             // 获取顶级部门 为空则是当前部门
-            Long topDepartment = teamMapper.getTopDepartment(department);
+            Long topDepartment = this.getTopDepartment(department);
             if(StringUtils.isEmpty(topDepartment)){
                 topDepartment = department;
             }
@@ -465,5 +485,32 @@ public class HomeServiceImpl implements HomeService {
                     break;
             }
         }
+    }
+
+    /**
+     * 获取顶级部门id
+     * @return
+     */
+    public Long getTopDepartment(Long id){
+        Long topId = null;
+        List<TreeEntity> treeList = Lists.newArrayList();
+        List<TestTeam> list = teamMapper.getTopDepartment(id);
+        if (list.size() == 0){
+            return id;
+        }
+        if (list.size() == 1){
+            topId = Long.valueOf(list.get(0).getId()+"");
+        }else {
+            for (TestTeam team:list) {
+                TreeEntity entity = new TreeEntity();
+                entity.setId(team.getId()+"");
+                entity.setPid(team.getPid()+"");
+                treeList.add(entity);
+            }
+            //获取最顶级部门id
+            List<TreeEntity> treeData = ConvertUtil.list2TreeList(treeList,"id","pid","children");
+            topId = Long.valueOf(treeData.get(0).getId());
+        }
+        return topId;
     }
 }

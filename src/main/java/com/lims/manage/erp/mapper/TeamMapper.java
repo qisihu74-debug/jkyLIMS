@@ -6,7 +6,6 @@ import com.lims.manage.erp.entity.TeamTreeStructureEntity;
 import com.lims.manage.erp.entity.TestCheckItemTeamRel;
 import com.lims.manage.erp.entity.TestTeam;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
@@ -170,7 +169,7 @@ public interface TeamMapper extends BaseMapper {
      * 通过mysql 寻找顶级部门 为空 则就是顶级部门
      */
     @Select(" SELECT\n" +
-            " tb1.id\n" +
+            " tb1.id,tb1.pid \n" +
             "FROM\n" +
             " (\n" +
             "  WITH RECURSIVE cte AS (\n" +
@@ -199,7 +198,7 @@ public interface TeamMapper extends BaseMapper {
             " ) tb1\n" +
             "WHERE\n" +
             " tb1.id != #{deptId}")
-    Long getTopDepartment(Long deptId);
+    List<TestTeam> getTopDepartment(Long deptId);
 
     /**
      *
