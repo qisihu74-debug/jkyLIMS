@@ -578,7 +578,11 @@ public class StatisticsServiceImpl implements StatisticsService {
         Long userId = ShiroUtils.getUserInfo().getUserId();
         if(userId != null){
             Long teamId = teamMapper.getTeamIdByUserId(userId);
-            result = teamMapper.getChirds(teamId);
+            if(teamId == null){
+                result = teamMapper.getAllTeams();
+            }else{
+                result = teamMapper.getChirds(teamId);
+            }
         }
         return result;
     }

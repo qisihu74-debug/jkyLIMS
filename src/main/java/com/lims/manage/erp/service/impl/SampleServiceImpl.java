@@ -54,12 +54,12 @@ public class SampleServiceImpl implements SampleService {
         //获取数据库当前年份最大的样品编号
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
         Date now = new Date();
-        String maxNumber = sampleEntityMapper.getMaxNumber(sdf.format(now));
+        Integer maxNumber = sampleEntityMapper.getMaxNumber(sdf.format(now));
         int newMax;
         if (maxNumber == null) {
             newMax = 0;
         } else {
-            newMax = Integer.parseInt(maxNumber);
+            newMax = maxNumber;
         }
         if (details != null) {
             for (int i = 0; i < details.size(); i++) {

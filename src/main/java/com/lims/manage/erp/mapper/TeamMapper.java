@@ -58,6 +58,8 @@ public interface TeamMapper extends BaseMapper {
                    "                SELECT c.* FROM test_team c ,td WHERE c.pid = td.id\n" +
                    "            ) SELECT * FROM td ORDER BY td.id")
     List<TeamTreeStructureEntity> getChirds(Long teamId);
+    @Select("SELECT * FROM test_team where status = 0 and del_flag = 0")
+    List<TeamTreeStructureEntity> getAllTeams();
     @Select("WITH RECURSIVE td AS (\n" +
             "                SELECT * FROM test_team WHERE id = #{teamId} \n" +
             "                UNION ALL \n" +

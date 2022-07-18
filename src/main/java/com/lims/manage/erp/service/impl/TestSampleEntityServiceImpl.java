@@ -48,12 +48,12 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
     private int getNewSampleCode() {
         //获取数据库当前年份最大的样品编号
-        String maxNumber = sampleEntityMapper.getMaxNumber(sdf.format(now));
-        int newMax;
+        Integer maxNumber = sampleEntityMapper.getMaxNumber(sdf.format(now));
+        Integer newMax;
         if (maxNumber == null) {
             newMax = 0;
-        } else {
-            newMax = Integer.parseInt(maxNumber);
+        }else{
+            newMax = maxNumber;
         }
         return newMax;
     }
