@@ -29,6 +29,7 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
@@ -967,6 +968,12 @@ public class ReportController {
         if (pageNum == null || pageSize == null){
             return ResultUtil.error("缺少分页参数");
         }
+        if (startDate != null){
+            startDate = DateUtil.getDayStartMs(startDate);
+        }
+        if (endDate != null){
+            endDate = DateUtil.getDayEndMs(endDate);
+        }
         PageInfo<ReportRecordEntity> pageInfo = reportService.historyList(reportCode,reportType,sealType,pageNum,pageSize,startDate,endDate);
         return ResultUtil.success(pageInfo);
     }
@@ -998,9 +1005,11 @@ public class ReportController {
         Long e = null;
         if (startDate != null){
             s = Long.parseLong(startDate);
+            s = DateUtil.getDayStartMs(s);
         }
         if (endDate != null){
             e = Long.parseLong(endDate);
+            e = DateUtil.getDayEndMs(e);
         }
         byte[] bytes = reportService.exportRecords(reportCode, reportType, sealType, s, e);
         //响应数据流
