@@ -103,6 +103,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -2848,6 +2849,8 @@ public class ReportServiceImpl implements ReportService {
         Cells cells = worksheet.getCells();
         int n = 4;
         String row = "B";
+        //设置标题
+        cells.get("A1").setValue(Calendar.getInstance().get(Calendar.YEAR)+"年度检测报告盖章登记表");
         for (ReportRecordEntity entity:list) {
             //报告编号
             cells.get(row+n).setValue(entity.getReportCode());
