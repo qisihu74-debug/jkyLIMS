@@ -2890,7 +2890,7 @@ public class ReportServiceImpl implements ReportService {
             cells.get(row+n).setValue(number);
             row = getNextUpEn(row);
             //报告产值
-            cells.get(row+n).setValue(entity.getActualPrice());
+            cells.get(row+n).setValue(Double.valueOf(entity.getActualPrice()));
             row = getNextUpEn(row);
             //报告类型
             cells.get(row+n).setValue("");
