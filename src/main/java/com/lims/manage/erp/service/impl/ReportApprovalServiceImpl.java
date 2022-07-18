@@ -18,6 +18,7 @@ import com.lims.manage.erp.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -514,7 +515,13 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
                 sealTypeArray = taskDetailInfoVo.getSealTypeTicket().split(",");
             }
         }
-        taskDetailInfoVo.setSealTypeArray(sealTypeArray);
+        // 判断印章数组内容
+        if(StringUtils.isEmpty(sealTypeArray[0])){
+            taskDetailInfoVo.setSealTypeArray(new String[0]);
+        }
+        else {
+            taskDetailInfoVo.setSealTypeArray(sealTypeArray);
+        }
         if (taskDetailInfoVo == null) {
             return new TaskDetailInfoVo(id);
         }

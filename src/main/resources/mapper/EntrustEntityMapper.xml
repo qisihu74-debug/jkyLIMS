@@ -603,7 +603,7 @@
             <if test="state != null">state=#{state},</if>
             <if test="remark != null and remark!=''">remark=#{remark},</if>
             <if test="fileUrl != null and fileUrl!=''">file_url=#{fileUrl},</if>
-            <if test="sealType != null and sealType!=''">seal_type=#{sealType},</if>
+            seal_type=#{sealType},
             <if test="isSave != null and isSave!=''">is_save=#{isSave},</if>
             <if test="countPrice != null and countPrice!=''">count_price=#{countPrice},</if>
             <if test="address != null and address!=''">address=#{address},</if>
