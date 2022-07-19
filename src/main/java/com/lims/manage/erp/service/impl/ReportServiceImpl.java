@@ -28,6 +28,7 @@ import com.lims.manage.erp.entity.TeamTreeStructureEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.entity.TreeEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
@@ -50,6 +51,7 @@ import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.mapper.TestTechnicistDao;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.ConvertUtil;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
@@ -730,7 +732,7 @@ public class ReportServiceImpl implements ReportService {
         int teamId = testTechnicistDao.getSealer(userId);
         if (teamId > 0) {
             //获取顶级团队
-            Long topTeamId = teamMapper.getTopDepartment((long) teamId);
+            Long topTeamId = this.getTopDepartment((long) teamId);
             //获取顶级团队下的所有下级团队
             if (topTeamId == null){
                 topTeamId = (long)teamId;
@@ -2757,7 +2759,7 @@ public class ReportServiceImpl implements ReportService {
         int teamId = testTechnicistDao.getSealer(userId);
         if (teamId > 0) {
             //获取顶级团队
-            Long topTeamId = teamMapper.getTopDepartment((long) teamId);
+            Long topTeamId = this.getTopDepartment((long) teamId);
             if (topTeamId == null){
                 topTeamId = (long)teamId;
             }
@@ -2791,7 +2793,7 @@ public class ReportServiceImpl implements ReportService {
         Long userId = ShiroUtils.getUserInfo().getUserId();
         //校验用户id是否分配团队
         int teamId = testTechnicistDao.getSealer(userId);
-        Long aLong = teamMapper.getTopDepartment((long) teamId);
+        Long aLong = this.getTopDepartment((long) teamId);
         if (aLong == null){
             aLong = (long)teamId;
         }
@@ -2813,7 +2815,7 @@ public class ReportServiceImpl implements ReportService {
         int teamId = testTechnicistDao.getSealer(userId);
         if (teamId > 0) {
             //获取顶级团队
-            Long topTeamId = teamMapper.getTopDepartment((long) teamId);
+            Long topTeamId = this.getTopDepartment((long) teamId);
             if (topTeamId == null){
                 topTeamId = (long)teamId;
             }
@@ -2890,7 +2892,7 @@ public class ReportServiceImpl implements ReportService {
             cells.get(row+n).setValue(number);
             row = getNextUpEn(row);
             //报告产值
-            cells.get(row+n).setValue(entity.getActualPrice());
+            cells.get(row+n).setValue(Double.valueOf(entity.getActualPrice()));
             row = getNextUpEn(row);
             //报告类型
             cells.get(row+n).setValue("");
@@ -2979,4 +2981,30 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
+    /**
+     * 获取顶级部门id
+     * @return
+     */
+    public Long getTopDepartment(Long id){
+        Long topId = null;
+        List<TreeEntity> treeList = com.google.api.client.util.Lists.newArrayList();
+        List<TestTeam> list = teamMapper.getTopDepartment(id);
+        if (list.size() == 0){
+            return id;
+        }
+        if (list.size() == 1){
+            topId = Long.valueOf(list.get(0).getId()+"");
+        }else {
+            for (TestTeam team:list) {
+                TreeEntity entity = new TreeEntity();
+                entity.setId(team.getId()+"");
+                entity.setPid(team.getPid()+"");
+                treeList.add(entity);
+            }
+            //获取最顶级部门id
+            List<TreeEntity> treeData = ConvertUtil.list2TreeList(treeList,"id","pid","children");
+            topId = Long.valueOf(treeData.get(0).getId());
+        }
+        return topId;
+    }
 }
