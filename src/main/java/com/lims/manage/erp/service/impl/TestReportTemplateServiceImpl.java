@@ -3,10 +3,9 @@ package com.lims.manage.erp.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TestProductItem;
+import com.lims.manage.erp.entity.TestReportTemplate;
 import com.lims.manage.erp.entity.TestReportTemplateProductRef;
 import com.lims.manage.erp.mapper.TestReportTemplateDao;
-import com.lims.manage.erp.entity.TestReportTemplate;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
@@ -139,8 +138,10 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
         QueryWrapper<TestReportTemplate> queryWrapper=new QueryWrapper<>();
         queryWrapper.orderByDesc("create_time");
         queryWrapper.eq("del_flag",0);
-
-        queryWrapper.in("id",this.getTemplateIdList(id));
+        List<Integer> templateIdList = this.getTemplateIdList(id);
+        if (templateIdList.size()>0){
+            queryWrapper.in("id",templateIdList);
+        }
         List<TestReportTemplate> testReportTemplates=this.list(queryWrapper);
         return ResultUtil.success(testReportTemplates);
     }
