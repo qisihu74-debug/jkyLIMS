@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
@@ -508,6 +509,15 @@ public class EntrustServiceImpl implements EntrustService {
                         entity.setSampleId(sampleEntity.getId());
                         //委托单ID
                         entity.setEntrustId(basisInfo.getId());
+                        //处理检测项名称中包含中文（），《》
+                        String checkItemName = entity.getCheckItemName();
+                        char char1 = '（';
+                        char char2 = '）';
+                        char char3 = '，';
+                        char char4 = '《';
+                        char char5 = '》';
+                        String newItemName = StrUtil.removeAll(checkItemName, char1, char2, char3, char4, char5);
+                        entity.setCheckItemName(newItemName);
                     }
                 }
                 entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
