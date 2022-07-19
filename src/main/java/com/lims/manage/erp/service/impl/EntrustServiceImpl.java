@@ -2445,7 +2445,8 @@ public class EntrustServiceImpl implements EntrustService {
         // 联系地址
 //        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
         // 通过委托ID 样品集合 → test_sample
-        List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
+        List<SampleEntity> sampleCollection = Lists.newArrayList();
+        sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
         //暂存配合比下的的样品信息
         List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 样品信息 进行补充 检测依据集合，检测项集合
@@ -2453,7 +2454,8 @@ public class EntrustServiceImpl implements EntrustService {
             // 样品下 检测项、检测依据 补充。
             // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
             if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144) {
-                List<JudgmentBasisVo> list = sampleEntityMapper.getCheckItemNoDistribution(sampleEntity.getId(), entrustmentId);
+                List<JudgmentBasisVo> list = Lists.newArrayList();
+                         list = sampleEntityMapper.getCheckItemNoDistribution(sampleEntity.getId(), entrustmentId);
                 // 遍历检测项数据处理 价格为空的不展示（删除） 暂时废弃
 //                if (list != null && !list.isEmpty()) {
 //                    Iterator<JudgmentBasisVo> it = list.iterator();
@@ -2502,8 +2504,8 @@ public class EntrustServiceImpl implements EntrustService {
                         data.setTestingRoomList(testingRoomList);
                         allTestRoom.addAll(testingRoomList);
                     }
-                    sampleEntity.setJudgmentBasisVos(list);
                 }
+                sampleEntity.setJudgmentBasisVos(list);
             }
             //补充配合比样品的原材样品信息
             if (sampleEntity.getSampleType().contains("配合比")) {
@@ -2517,6 +2519,7 @@ public class EntrustServiceImpl implements EntrustService {
         LinkedHashSet<LabelValueVo> hashSet = new LinkedHashSet<>(allTestRoom);
         ArrayList<LabelValueVo> allTestRooms = new ArrayList<>(hashSet);
         entrustAddVo.setAllTestRoom(allTestRooms);
+        entrustAddVo.setTaskProgressList(new ArrayList<>());
         return entrustAddVo;
     }
 
