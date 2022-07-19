@@ -2084,6 +2084,7 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
+        PageHelper.clearPage();
         //暂存配合比下的的样品信息
         List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 通过委托ID 委托单信息 → test_entrusted_info
