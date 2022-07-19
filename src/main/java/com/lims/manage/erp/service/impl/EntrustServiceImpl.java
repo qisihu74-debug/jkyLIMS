@@ -744,6 +744,9 @@ public class EntrustServiceImpl implements EntrustService {
             }
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
+        else {
+            basisInfo.setSealType(null);
+        }
         // 通过委托单id 获取公司名称。
         PageHelper.clearPage();
         basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(), 1));
@@ -2529,6 +2532,9 @@ public class EntrustServiceImpl implements EntrustService {
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         if (entrustAddVo.getSealType() != null) {
             entrustAddVo.setSealTypes(entrustAddVo.getSealType().split(","));
+        }
+        else {
+            entrustAddVo.setSealTypes(new String[0]);
         }
         // 通过委托单id 获取缴费记录 依据id 同价价格
         String total = entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId);
