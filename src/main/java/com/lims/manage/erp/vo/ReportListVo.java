@@ -24,6 +24,10 @@ public class ReportListVo {
      */
     private Integer state;
     private Integer productId;
+    /**
+     * 任务流转ID
+     */
+    private Integer taskFlowId;
     private String entrustmentNo;
 
     private List<Long> deptIds;
