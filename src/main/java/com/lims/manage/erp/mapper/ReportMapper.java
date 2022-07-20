@@ -154,10 +154,10 @@ public interface ReportMapper {
     /**
      * 获取中间报告列表
      * @param deptIds
-     * @param entrustmentNo
+     * @param taskCode
      * @return
      */
-    List<ReportListVo> getMiddleReportList(@Param("deptIds") List<Long> deptIds,@Param("entrustmentNo") String entrustmentNo);
+    List<ReportListVo> getMiddleReportList(@Param("deptIds") List<Long> deptIds,@Param("state") Integer state,@Param("taskCode") String taskCode);
 
     /**
      * 查询可做中间报告的检测项详情

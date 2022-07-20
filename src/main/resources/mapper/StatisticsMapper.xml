@@ -534,7 +534,7 @@
         t3.pid,
         SUM( t2.task_price ) VALUE
         FROM
-        test_report_record t1
+        (select * from test_report_record where issuer_time is not null) t1
         LEFT JOIN test_task t2 ON t1.entrustment_id = t2.entrustment_id
         LEFT JOIN test_team t3 ON t2.dept_id = t3.id
         WHERE
@@ -612,7 +612,7 @@
         t3.id,
         SUM( t2.task_price ) VALUE
         FROM
-        test_report_record t1
+        (select * from test_report_record where issuer_time is not null) t1
         LEFT JOIN test_task t2 ON t1.entrustment_id = t2.entrustment_id
         LEFT JOIN test_team t3 ON t2.dept_id = t3.id
         WHERE

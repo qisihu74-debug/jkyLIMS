@@ -89,7 +89,9 @@ public class TestEntrustedTaskRelEntity {
     @DateTimeFormat(pattern="yyyy-MM-dd")
     @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date updateDate;
-
-
+    /**
+     * 中间报告任务流转状态（0，未完成；1，已完成）
+     */
+    private Integer state;
 
 }

@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
@@ -515,6 +516,15 @@ public class EntrustServiceImpl implements EntrustService {
                         entity.setSampleId(sampleEntity.getId());
                         //委托单ID
                         entity.setEntrustId(basisInfo.getId());
+                        //处理检测项名称中包含中文（），《》
+                        String checkItemName = entity.getCheckItemName();
+                        char char1 = '（';
+                        char char2 = '）';
+                        char char3 = '，';
+                        char char4 = '《';
+                        char char5 = '》';
+                        String newItemName = StrUtil.removeAll(checkItemName, char1, char2, char3, char4, char5);
+                        entity.setCheckItemName(newItemName);
                     }
                 }
                 entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
@@ -3707,6 +3717,10 @@ public class EntrustServiceImpl implements EntrustService {
         PageHelper.clearPage();
         String deptName = teamMapper.getTeamIdByName(testEntrustedTaskRelEntity.getDeptId());
         testEntrustedTaskRelEntity.setDepartment(testEntrustedTaskRelEntity.getDeptId()+"&"+deptName);
+        //设置中间报告任务流转状态（0，未完成；1，已完成）
+        if(testEntrustedTaskRelEntity.getType() == 1){
+            testEntrustedTaskRelEntity.setState(0);
+        }
         testEntrustedTaskRelDao.addData(testEntrustedTaskRelEntity);
         return true;
     }
