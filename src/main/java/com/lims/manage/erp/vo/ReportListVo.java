@@ -20,6 +20,10 @@ public class ReportListVo {
      */
     private String reportCompleteTime;
     /**
+     * 备注
+     */
+    private String remark;
+    /**
      * state 状态
      */
     private Integer state;
