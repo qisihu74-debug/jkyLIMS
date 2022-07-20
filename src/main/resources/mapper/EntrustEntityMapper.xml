@@ -858,4 +858,90 @@
         LEFT JOIN test_task as t2 ON t1.id = t2.entrustment_id
         WHERE t2.entrustment_id = #{entrustmentId}
     </select>
+
+    <resultMap id="ClientOrderdetailMap" type="com.lims.manage.erp.vo.ClientOrderdetailVo">
+        <result property="entrustmentNo" column="entrustment_no"></result>
+        <result property="entrustCompany" column="entrust_company"></result>
+        <result property="entrustCompanyId" column="entrust_company_id"></result>
+        <result property="entrustPeople" column="entrust_people"></result>
+        <result property="projectName" column="project_name"></result>
+        <result property="projectPart" column="project_part"></result>
+        <result property="systemPrice" column="system_price"></result>
+        <result property="requestDate" column="request_date"></result>
+        <result property="acceptanceDate" column="acceptance_date"></result>
+        <result property="entrustPeople" column="entrust_people"></result>
+        <result property="acceptanceDate" column="acceptance_date"></result>
+        <collection property="samples" ofType="com.lims.manage.erp.entity.SampleEntity">
+            <result property="id" column="sampleId"></result>
+            <result property="sampleName" column="alias_name"></result>
+            <result property="specs" column="specs"></result>
+            <result property="batchNumber" column="batch_number"></result>
+             <collection property="sampleCheckItem" ofType="com.lims.manage.erp.entity.SampleItemEntity">
+                 <result property="id" column="itemId"></result>
+                 <result property="checkItemName" column="check_item_name"></result>
+                 <result property="checkItemId" column="check_item_id"></result>
+             </collection>
+        </collection>
+        <collection property="taskEntities" ofType="com.lims.manage.erp.entity.TaskEntity">
+            <result property="id" column="taskId"></result>
+            <result property="code" column="task_code"></result>
+        </collection>
+        <collection property="reportRecordEntities" ofType="com.lims.manage.erp.entity.ReportRecordEntity">
+            <result property="id" column="reportId"></result>
+            <result property="reportCode" column="report_code"></result>
+            <result property="reportTime" column="report_time"></result>
+        </collection>
+    </resultMap>
+
+    <select id="selectClientOrderdetailVoList" resultMap="ClientOrderdetailMap">
+        SELECT
+        t1.entrustment_no,
+        t1.acceptance_date,
+        t1.request_date,
+        t1.entrust_people ,
+        t1.project_name ,
+        t1.project_part ,
+        t1.entrust_company ,
+        t1.entrust_company_id ,
+        t1.system_price,
+        t3.id sampleId,
+        t3.alias_name ,
+        t3.specs,
+        t3.batch_number,
+        t4.id itemId,
+        t4.check_item_name,
+        t4.check_item_id,
+        t5.id taskId,
+        t5.task_code,
+        t6.id reportId,
+        t6.report_code,
+        t6.report_time
+        FROM
+        test_entrusted_info as t1
+        LEFT JOIN test_entrusted_sample_details_rel as t2 ON t1.id = t2.entrustment_id
+        LEFT JOIN test_sample as t3 ON t3.id = t2.sample_id
+        LEFT JOIN test_entrusted_sample_checkitem_rel as t4 ON t4.sample_id = t3.id
+        LEFT JOIN test_task as t5 ON t5.entrustment_id = t1.id
+        LEFT JOIN test_report_record as t6 ON t6.entrustment_id = t1.id
+        WHERE
+        1=1
+        <if test="companyIds!=null">
+            and t1.entrust_company_id in
+            <foreach collection="companyIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        <if test="projectName!=null and projectName!=''">
+            and t1.project_name LIKE CONCAT('%',#{projectName},'%')
+        </if>
+        <if test="projectPart!=null and projectPart!=''">
+            and t1.project_part LIKE CONCAT('%',#{projectPart},'%')
+        </if>
+        <if test="acceptancebeganDate!=null">
+            and date_format(t1.acceptance_date,'%Y-%m-%d')&gt;= #{acceptancebeganDate,jdbcType=DATE}
+        </if>
+        <if test="acceptanceoverDate!=null">
+            and date_format(t1.acceptance_date,'%Y-%m-%d')&lt;= #{acceptanceoverDate,jdbcType=DATE}
+        </if>
+    </select>
 </mapper>

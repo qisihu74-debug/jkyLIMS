@@ -14,6 +14,11 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -33,6 +38,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
@@ -3761,6 +3768,190 @@ public class EntrustServiceImpl implements EntrustService {
         }
         PageInfo<TestEntrustedTaskRelVo> result = PageInfoUtils.list2PageInfo(list, testEntrustedTaskRelVo.getPageNum(), testEntrustedTaskRelVo.getPageSize());
         return result;
+    }
+
+    @Override
+    public PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo) {
+        List<ClientOrderdetailVo> list = Lists.newArrayList();
+        PageHelper.clearPage();
+        list = entityMapper.selectClientOrderdetailVoList(clientOrderdetailVo);
+        if(!CollectionUtils.isEmpty(list)){
+            for(ClientOrderdetailVo clientOrderdetailVo1 :list){
+                HashSet<String> SampleNameSet = new HashSet<>();
+                HashSet<String> SpecsSet = new HashSet<>();
+                HashSet<String> BatchNumberSet = new HashSet<>();
+                HashSet<String> CheckItemNameSet = new HashSet<>();
+                // 处理样品信息及检测项信息
+                if(!CollectionUtils.isEmpty(clientOrderdetailVo1.getSamples())){
+                    for(SampleEntity sampleEntity :clientOrderdetailVo1.getSamples()){
+                        if(!StringUtils.isEmpty(sampleEntity.getSampleName())){
+                            SampleNameSet.add(sampleEntity.getSampleName());
+                        }
+                        if(!StringUtils.isEmpty(sampleEntity.getSpecs())){
+                            SpecsSet.add(sampleEntity.getSpecs());
+                        }
+                        if(!StringUtils.isEmpty(sampleEntity.getBatchNumber())){
+                            BatchNumberSet.add(sampleEntity.getBatchNumber());
+                        }
+                        if(!CollectionUtils.isEmpty(sampleEntity.getSampleCheckItem())){
+                            for(SampleItemEntity sampleItemEntity :sampleEntity.getSampleCheckItem())
+                            {
+                                CheckItemNameSet.add(sampleItemEntity.getCheckItemName());
+                            }
+                        }
+                    }
+                }
+                StringBuilder SampleNameB = new StringBuilder();
+                for(String SampleName:SampleNameSet){
+                    SampleNameB.append(SampleName);
+                    SampleNameB.append("、");
+                }
+                StringBuilder SpecsB = new StringBuilder();
+                for(String specs:SpecsSet){
+                    SpecsB.append(specs);
+                    SpecsB.append("、");
+                }
+                StringBuilder BatchNumberB = new StringBuilder();
+                for(String BatchNumber:BatchNumberSet){
+                    BatchNumberB.append(BatchNumber);
+                    BatchNumberB.append("、");
+                }
+                StringBuilder CheckItemNameB = new StringBuilder();
+                for(String CheckItemName:CheckItemNameSet){
+                    CheckItemNameB.append(CheckItemName);
+                    CheckItemNameB.append("、");
+                }
+                if(SampleNameB.length()>1){
+                    clientOrderdetailVo1.setSampleName(SampleNameB.deleteCharAt(SampleNameB.length()-1).toString());
+                }
+                else {
+                    clientOrderdetailVo1.setSampleName("--");
+                }
+                if(SpecsB.length()>1){
+                    clientOrderdetailVo1.setSpecs(SpecsB.deleteCharAt(SpecsB.length()-1).toString());
+                }
+                else {
+                    clientOrderdetailVo1.setSpecs("--");
+                }
+                if(BatchNumberB.length()>1){
+                    clientOrderdetailVo1.setBatchNumber(BatchNumberB.deleteCharAt(BatchNumberB.length()-1).toString());
+                }
+                else {
+                    clientOrderdetailVo1.setBatchNumber("--");
+                }
+                if(CheckItemNameB.length()>1){
+                    clientOrderdetailVo1.setCheckItemName(CheckItemNameB.deleteCharAt(CheckItemNameB.length()-1).toString());
+                }
+                else {
+                    clientOrderdetailVo1.setCheckItemName("--");
+                }
+                // 处理任务单信息。
+                StringBuilder taskCodeB = new StringBuilder();
+                if(!CollectionUtils.isEmpty(clientOrderdetailVo1.getTaskEntities())){
+                    for(TaskEntity taskEntity : clientOrderdetailVo1.getTaskEntities()){
+                        taskCodeB.append(taskEntity.getCode());
+                        taskCodeB.append("、");
+                    }
+                }
+                // 报告编号 和 发出日期
+                StringBuilder reportCodeB = new StringBuilder();
+                StringBuilder reportTimeB = new StringBuilder();
+                if(!CollectionUtils.isEmpty(clientOrderdetailVo1.getReportRecordEntities())){
+                    for(ReportRecordEntity reportRecordEntity : clientOrderdetailVo1.getReportRecordEntities()){
+                        reportCodeB.append(reportRecordEntity.getReportCode());
+                        reportCodeB.append("、");
+                        if(reportRecordEntity.getReportTime()!=null){
+                        reportTimeB.append(DateUtil.formatDate(reportRecordEntity.getReportTime()));
+                        reportTimeB.append("、");
+                      }
+                    }
+                }
+                if(reportCodeB.length()>1){
+                    clientOrderdetailVo1.setReportCode(reportCodeB.deleteCharAt(reportCodeB.length()-1).toString());
+                }else {
+                    clientOrderdetailVo1.setReportCode("--");
+                }
+                if(reportTimeB.length()>1){
+                    clientOrderdetailVo1.setReportTime(reportTimeB.deleteCharAt(reportTimeB.length()-1).toString());
+                }
+                else {
+                    clientOrderdetailVo1.setReportTime("--");
+                }
+                if(taskCodeB.length()>1){
+                    clientOrderdetailVo1.setTaskCode(taskCodeB.deleteCharAt(taskCodeB.length()-1).toString());
+                }
+                else {
+                    clientOrderdetailVo1.setTaskCode("--");
+                }
+            }
+        }
+        PageInfo<ClientOrderdetailVo> result = PageInfoUtils.list2PageInfo(list, clientOrderdetailVo.getPageNum(), clientOrderdetailVo.getPageSize());
+        return result;
+    }
+
+    @Override
+    public InputStream exportPersonDetails(List<ClientOrderdetailVo> list,ClientOrderdetailVo clientOrderdetailVo) throws IOException {
+        //创建HSSFWorkbook对象(excel的文档对象)
+        HSSFWorkbook wb = new HSSFWorkbook();
+//建立新的sheet对象（excel的表单）
+        HSSFSheet sheet = wb.createSheet("sheet0");
+        // 设计第一行合并信息
+        CellRangeAddress regionx = new CellRangeAddress(0, 0, 0, 13);
+        sheet.addMergedRegion(regionx);
+        // 第一行 标题
+        HSSFRow row0 = sheet.createRow(0);
+        HSSFCell cell_00 = row0.createCell(0);
+        cell_00.setCellValue("委托单位+委托详情表（时间段）");
+//        cell_00.setCellStyle(style);
+//在sheet里创建第二行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
+        HSSFRow row1 = sheet.createRow(1);
+        //创建单元格并设置单元格内容
+        row1.createCell(0).setCellValue("委托编号");
+        row1.createCell(1).setCellValue("委托日期");
+        row1.createCell(2).setCellValue("要求完成日期");
+        row1.createCell(3).setCellValue("委托人");
+        row1.createCell(4).setCellValue("工程名称");
+        row1.createCell(5).setCellValue("工程部位");
+        row1.createCell(6).setCellValue("样品名称");
+        row1.createCell(7).setCellValue("规格/等级");
+        row1.createCell(8).setCellValue("批号/编号");
+        row1.createCell(9).setCellValue("检测项目");
+        row1.createCell(10).setCellValue("检验费用");
+        row1.createCell(11).setCellValue("任务单编号");
+        row1.createCell(12).setCellValue("报告编号");
+        row1.createCell(13).setCellValue("报告发放日期");
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        for (int i = 0; i < list.size(); i++) {
+            ClientOrderdetailVo personVo = list.get(i);
+            //在sheet里创建第三行
+            HSSFRow row3 = sheet.createRow(i + 2);
+            row3.createCell(0).setCellValue(personVo.getEntrustmentNo());
+            if (personVo.getAcceptanceDate() != null) {
+                String dateString = formatter.format(personVo.getAcceptanceDate());
+                row3.createCell(1).setCellValue(dateString);
+            }
+            if (personVo.getRequestDate() != null) {
+                String dateString = formatter.format(personVo.getRequestDate());
+                row3.createCell(2).setCellValue(dateString);
+            }
+            row3.createCell(3).setCellValue(personVo.getEntrustPeople());
+            row3.createCell(4).setCellValue(personVo.getProjectName());
+            row3.createCell(5).setCellValue(personVo.getProjectPart());
+            row3.createCell(6).setCellValue(personVo.getSampleName());
+            row3.createCell(7).setCellValue(personVo.getSpecs());
+            row3.createCell(8).setCellValue(personVo.getBatchNumber());
+            row3.createCell(9).setCellValue(personVo.getCheckItemName());
+            row3.createCell(10).setCellValue(personVo.getSystemPrice());
+            row3.createCell(11).setCellValue(personVo.getTaskCode());
+            row3.createCell(12).setCellValue(personVo.getReportCode());
+            row3.createCell(13).setCellValue(personVo.getReportTime());
+        }
+        //输出Excel文件 字节输出流
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        wb.write(os);
+        os.close();
+        return new ByteArrayInputStream(os.toByteArray());
     }
 
 
