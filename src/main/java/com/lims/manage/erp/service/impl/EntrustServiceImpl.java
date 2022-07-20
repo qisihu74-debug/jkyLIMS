@@ -3788,6 +3788,9 @@ public class EntrustServiceImpl implements EntrustService {
     public PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo) {
         List<ClientOrderdetailVo> list = Lists.newArrayList();
         PageHelper.clearPage();
+        if(clientOrderdetailVo.getCompanyIds().length==0){
+            clientOrderdetailVo.setCompanyIds(null);
+        }
         list = entityMapper.selectClientOrderdetailVoList(clientOrderdetailVo);
         if(!CollectionUtils.isEmpty(list)){
             for(ClientOrderdetailVo clientOrderdetailVo1 :list){
@@ -3916,6 +3919,7 @@ public class EntrustServiceImpl implements EntrustService {
         HSSFRow row0 = sheet.createRow(0);
         HSSFCell cell_00 = row0.createCell(0);
         cell_00.setCellValue("委托单位+委托详情表（时间段）");
+//        cell_00.setCellStyle();
 //        cell_00.setCellStyle(style);
 //在sheet里创建第二行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
         HSSFRow row1 = sheet.createRow(1);
