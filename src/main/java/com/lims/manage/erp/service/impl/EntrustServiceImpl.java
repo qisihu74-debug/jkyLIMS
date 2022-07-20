@@ -3710,6 +3710,10 @@ public class EntrustServiceImpl implements EntrustService {
         PageHelper.clearPage();
         String deptName = teamMapper.getTeamIdByName(testEntrustedTaskRelEntity.getDeptId());
         testEntrustedTaskRelEntity.setDepartment(testEntrustedTaskRelEntity.getDeptId()+"&"+deptName);
+        //设置中间报告任务流转状态（0，未完成；1，已完成）
+        if(testEntrustedTaskRelEntity.getType() == 1){
+            testEntrustedTaskRelEntity.setState(0);
+        }
         testEntrustedTaskRelDao.addData(testEntrustedTaskRelEntity);
         return true;
     }
