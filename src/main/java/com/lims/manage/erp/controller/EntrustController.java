@@ -755,7 +755,7 @@ public class EntrustController {
      */
     @GetMapping("/getClientList")
     public Result getClientList(ClientOrderdetailVo clientOrderdetailVo){
-        if (clientOrderdetailVo.getPageNum() == null || clientOrderdetailVo.getPageSize() == null ||clientOrderdetailVo.getCompanyIds()==null) {
+        if (clientOrderdetailVo.getPageNum() == null || clientOrderdetailVo.getPageSize() == null ) {
             return ResultUtil.error("缺少分页参数或必填参数");
         }
         return ResultUtil.success(entrustService.getClientList(clientOrderdetailVo));
