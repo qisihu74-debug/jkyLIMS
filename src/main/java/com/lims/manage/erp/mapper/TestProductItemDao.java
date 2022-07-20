@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestProductItem;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
@@ -56,5 +55,15 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
     List<Long> getItemsByTemplateUrl(@Param("url") String url);
 
     List<Long> getItemsByTemplateLikeUrl(@Param("url") String url);
+
+    @Select({"<script>",
+            " SELECT ",
+            " coordinate",
+            " FROM test_product_item WHERE check_item_id in ",
+            "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
+            "#{item}",
+            "</foreach>",
+            "</script>"})
+    List<String> getContentByIds(@Param("items") List<Long> items);
 }
 

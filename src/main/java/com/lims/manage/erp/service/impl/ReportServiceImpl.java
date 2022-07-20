@@ -2,6 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.aspose.cells.Cell;
 import com.aspose.cells.Cells;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
@@ -95,6 +96,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -1199,16 +1201,23 @@ public class ReportServiceImpl implements ReportService {
             }
         }else {
             try {
-                //如果上传的是word转为pdf
+                //如果上传的是excel转为pdf
                 String originalFilename = file.getOriginalFilename();
+                if (!originalFilename.contains(".xls")){
+                    return false;
+                }
+                if (!originalFilename.contains(".xlsx")){
+                    return false;
+                }
                 if (originalFilename.contains(".pdf")){
                     url = MinIoUtil.upload("report-download", file, GenID.getID() + ".pdf");
                     flag = true;
                 }else {
-                    XWPFDocument document = new XWPFDocument(file.getInputStream());
-                    ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(document);
-                    InputStream inputStream = FileAndFolderUtil.parseOut(b1);
-                    url = MinIoUtil.upload("report-download", GenID.getID() + ".pdf", inputStream, "application/octet-stream");
+                    InputStream inputStream = file.getInputStream();
+                    //excel转pdf
+                    ByteArrayOutputStream byteArrayOutputStream = PDFHelper3.excel2pdf2(inputStream, qiYueSuoEntity.getAutographPath() + GenID.getID() + ".pdf");
+                    InputStream inputStream1 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                    url = MinIoUtil.upload("report-download", GenID.getID() + ".pdf", inputStream1, "application/octet-stream");
                     flag = true;
                 }
             } catch (Exception e) {
@@ -1223,17 +1232,15 @@ public class ReportServiceImpl implements ReportService {
             String[] strings = split[0].split("\\/");
             String bluckName = strings[3];
             String fileName = strings[4];
-            XWPFDocument doc = null;
             try {
                 client.statObject(bluckName, fileName);
                 InputStream object = client.getObject(bluckName, fileName);
-                doc = new XWPFDocument(object);
                 //相应pdf
-                ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
+                ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(object,qiYueSuoEntity.getAutographPath()+GenID.getID()+".pdf");
                 InputStream inputStream = FileAndFolderUtil.parseOut(b1);
                 url = MinIoUtil.upload("report-download", reportCode + ".pdf", inputStream, "application/octet-stream");
             }catch (Exception e){
-                logger.error("word转pdf异常");
+                logger.error("Excel转pdf异常");
             }
         }
         //更新签名
@@ -1806,7 +1813,7 @@ public class ReportServiceImpl implements ReportService {
         return lis;
     }
 
-    @SneakyThrows
+    /*@SneakyThrows
     @Override
     public ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) {
         //2代表报告头2页
@@ -1995,11 +2002,11 @@ public class ReportServiceImpl implements ReportService {
         //存放提示信息
         resBean.setUrl(url);
         return resBean;
-    }
+    }*/
 
     @SneakyThrows
     @Override
-    public ReportResBean submitDownLoad1(MinioClient client, List<ConclusionEntity> list, Long id) {
+    public ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) {
         int totalPageNew = 0;
         Map<Integer, Integer> countMap = new LinkedHashMap();
         Map<Integer, Workbook> map = new LinkedHashMap<>();
@@ -2009,7 +2016,6 @@ public class ReportServiceImpl implements ReportService {
         ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
         int index = 1;
         for (ConclusionEntity conclusionEntity:list) {
-            conclusionEntity.setUrl("http://192.168.2.35:9000/file-resources/掺合料.xls");
             String[] split = conclusionEntity.getUrl().split("\\?");
             String[] strings = split[0].split("\\/");
             String bluckName = strings[3];
@@ -2029,56 +2035,100 @@ public class ReportServiceImpl implements ReportService {
                 for (int i = 0;i<size;i++){
                     Worksheet worksheet = doc.getWorksheets().get(i);
                     Cells cells = worksheet.getCells();
+                    int maxRow = cells.getMaxRow();
+                    int column = cells.getMaxColumn();
                     //存放表头信息
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 0) {
-                        //cells.get(0,15).setValue("河南省公路工程试验检测中心有限公司");
-                        cells.get("O3").setValue(reportRecordEntity.getReportCode());
-                        cells.get("D4").setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getEntrustCompany())?"——":entrustHistoryDetail.getEntrustCompany());
-                        cells.get("M4").setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectName())?"——":entrustHistoryDetail.getProjectName());
-                        cells.get("D5").setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectPart())?"——":entrustHistoryDetail.getProjectPart());
                         //样品信息
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
-                        cells.get("D6").setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
-                                + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~","~"))
-                                + "；样品数量：" + (sampleEntity.getSampleQuantity() == null ? "——" : sampleEntity.getSampleQuantity())
-                                + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
-                                + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                         //检测依据
                         String checkBasis = getCheckBasis(id);
-                        cells.get("D7").setValue(checkBasis.equals("") ? "——" : checkBasis);
                         //判定依据
                         String judgeBasis = getJudgeBasis(id);
-                        cells.get("M7").setValue(judgeBasis.equals("") ? "——" : judgeBasis);
-                        //检测日期 TODO 实验开始日期 -实验结束日期 时间起始相同展示一个时间即可
                         //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
                         Date start = taskMapper.getStartTime(id);
                         Date end = taskMapper.getEndTime(id);
                         String s = DateUtil.formatDate(start);
                         String e = DateUtil.formatDate(end);
-                        if (start != null && end != null){
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-                            if (s.equals(e)){
-                                cells.get("D8").setValue(s);
-                            }else {
-                                cells.get("D8").setValue(s + "~" + e);
-                            }
-                        }
                         //主要仪器
                         String equipment = getEquipment(id);
-                        cells.get("D9").setValue(equipment.equals("") ? "——" : equipment);
-                        //委托编号
-                        cells.get("D10").setValue(entrustHistoryDetail.getEntrustmentNo() + "");
-                        //检测类别
-                        cells.get("M10").setValue(entrustHistoryDetail.getCheckPurpose());
-                        //批号
-                        cells.get("D11").setValue(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
-                        //生产厂家
-                        cells.get("M11").setValue(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
-                        //规格等级
-                        cells.get("M12").setValue(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
-                        //代表数量
-                        cells.get("M12").setValue(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
+
+                        for (int n=0;n<maxRow;n++) {
+                            for (int j=0;j<column;j++) {
+                                Cell cell = cells.get(n, j);
+                                if (cell != null){
+                                    Object value = cell.getValue();
+                                    if (value != null){
+                                        String string = value.toString();
+                                        if ("${检测单位名称}".equals(string)){
+                                            cells.get(n,j).setValue("检测单位名称：河南省公路工程试验检测中心有限公司");
+                                        }
+                                        if ("${报告编号}".equals(string)){
+                                            cells.get(n,j).setValue(reportRecordEntity.getReportCode());
+                                        }
+                                        if ("${委托单位}".equals(string)){
+                                            cells.get(n,j).setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getEntrustCompany())?"——":entrustHistoryDetail.getEntrustCompany());
+                                        }
+                                        if ("${工程名称}".equals(string)){
+                                            cells.get(n,j).setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectName())?"——":entrustHistoryDetail.getProjectName());
+                                        }
+                                        if ("${工程部位}".equals(string)){
+                                            cells.get(n,j).setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectPart())?"——":entrustHistoryDetail.getProjectPart());
+                                        }
+                                        if ("${样品信息}".equals(string)){
+                                            cells.get(n,j).setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
+                                                    + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~","~"))
+                                                    + "；样品数量：" + (sampleEntity.getSampleQuantity() == null ? "——" : sampleEntity.getSampleQuantity())
+                                                    + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
+                                                    + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                                        }
+                                        if ("${检测依据}".equals(string)){
+                                            cells.get(n,j).setValue(checkBasis.equals("") ? "——" : checkBasis);
+                                        }
+                                        if ("${判定依据}".equals(string)){
+                                            cells.get(n,j).setValue(judgeBasis.equals("") ? "——" : judgeBasis);
+                                        }
+                                        if ("${检测日期}".equals(string)){
+                                            if (start != null && end != null){
+                                                if (s.equals(e)){
+                                                    cells.get(n,j).setValue(s);
+                                                }else {
+                                                    cells.get(n,j).setValue(s + "~" + e);
+                                                }
+                                            }
+                                        }
+                                        if ("${仪器设备}".equals(string)){
+                                            cells.get(n,j).setValue(equipment.equals("") ? "——" : equipment);
+                                        }
+                                        if ("${委托编号}".equals(string)){
+                                            //委托编号
+                                            cells.get(n,j).setValue(entrustHistoryDetail.getEntrustmentNo() + "");
+                                        }
+                                        if ("${检测类别}".equals(string)){
+                                            //检测类别
+                                            cells.get(n,j).setValue(entrustHistoryDetail.getCheckPurpose());
+                                        }
+                                        if ("${批号}".equals(string)){
+                                            //批号
+                                            cells.get(n,j).setValue(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
+                                        }
+                                        if ("${生产厂家}".equals(string)){
+                                            //生产厂家
+                                            cells.get(n,j).setValue(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+                                        }
+                                        if ("${规格}".equals(string)){
+                                            //规格等级
+                                            cells.get(n,j).setValue(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
+                                        }
+                                        if ("${代表数量}".equals(string)){
+                                            //代表数量
+                                            cells.get(n,j).setValue(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     //过滤每个报告模板的检测项
                     List<ReportRecordDetailEntity> entities = Lists.newArrayList();
@@ -2108,29 +2158,46 @@ public class ReportServiceImpl implements ReportService {
                     for (ReportRecordDetailEntity item : entities1) {
                         if (org.apache.commons.lang3.StringUtils.isNotEmpty(item.getCoordinate())){
                             int last = testProductDao.isLast(item.getCheckItemId().intValue());
-                            int page = 0;
-                            int row = 0;
-                            int column = 0;
+                            //技术指标
+                            String specsContent = "";
+                            //检测结果
+                            String checkResult = "";
+                            //判定结果
+                            String judgeResult = "";
                             if (last == 0) {
                                 try {
-                                    page = Integer.parseInt(item.getCoordinate().split(",")[0]);
-                                    row = Integer.parseInt(item.getCoordinate().split(",")[1]);
-                                    column = Integer.parseInt(item.getCoordinate().split(",")[2]);
+                                    //1A1,1B2,1C3&1D1根据坐标填充数据 TODO
+                                    specsContent = item.getCoordinate().split(",")[0];
+                                    checkResult = item.getCoordinate().split(",")[1];
+                                    judgeResult = item.getCoordinate().split(",")[2];
                                 }catch (Exception e){
                                     mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标格式错误");
                                     logger.error("检测项在报告中的坐标格式错误:{}",e);
                                     continue;
                                 }
-                                if (i == page-1) {
-                                    try {
-                                        cells.get(row,column + 1).setValue(item.getSpecsContent());
-                                        cells.get(row,column + 2).setValue(item.getCheckResult());
-                                        cells.get(row,column + 3).setValue(item.getJudgeResult());
-                                    }catch (Exception e){
-                                        mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标错误");
-                                        logger.error("检测项在报告中的坐标错误:{}",e);
-                                        continue;
+                                try {
+                                    String[] specs = specsContent.split("&");
+                                    String[] checks = checkResult.split("&");
+                                    String[] judes = judgeResult.split("&");
+                                    for (String spec:specs) {
+                                        if (StringUtils.isNotEmpty(specsContent) && Integer.parseInt(spec.substring(0, 1)) == i+1){
+                                            cells.get(spec.substring(1)).setValue(StringUtils.isEmpty(item.getSpecsContent())?"——":item.getSpecsContent());
+                                        }
                                     }
+                                    for (String check:checks) {
+                                        if (StringUtils.isNotEmpty(checkResult) && Integer.parseInt(check.substring(0,1)) == i+1){
+                                            cells.get(check.substring(1)).setValue(StringUtils.isEmpty(item.getCheckResult())?"——":item.getCheckResult());
+                                        }
+                                    }
+                                    for (String jude:judes) {
+                                        if (StringUtils.isNotEmpty(judgeResult) && Integer.parseInt(jude.substring(0,1)) == i+1){
+                                            cells.get(jude.substring(1)).setValue(StringUtils.isEmpty(item.getJudgeResult())?"——":item.getJudgeResult());
+                                        }
+                                    }
+                                }catch (Exception e){
+                                    logger.error("检测项在报告中的坐标错误:{}",e);
+                                    System.out.println("======="+JSON.toJSONString(e));
+                                    continue;
                                 }
                             }
                         }else {
@@ -2140,9 +2207,26 @@ public class ReportServiceImpl implements ReportService {
                     //处理附加声明和检测结论
                     if (i==size-1){
                         Worksheet worksheet1 = doc.getWorksheets().get(size - 1);
-                        int maxRow = worksheet1.getCells().getMaxRow();
-                        cells.get("A21").setValue("检测结论："+conclusionEntity.getConclusion());
-                        cells.get("A22").setValue("附加声明："+conclusionEntity.getAdditional());
+                        Cells cells1 = worksheet1.getCells();
+                        int maxRow1 = cells.getMaxRow();
+                        int column1 = cells.getMaxColumn();
+                        for (int n=0;n<maxRow1;n++) {
+                            for (int j = 0; j < column1; j++) {
+                                Cell cell = cells1.get(n, j);
+                                if (cell != null) {
+                                    Object value = cell.getValue();
+                                    if (value != null) {
+                                        String string = value.toString();
+                                        if ("${检测结论}".equals(string)) {
+                                            cells.get(n, j).setValue("检测结论："+conclusionEntity.getConclusion());
+                                        }
+                                        if ("${附加声明}".equals(string)){
+                                            cells.get(n, j).setValue("附加声明："+conclusionEntity.getAdditional());
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 //按照顺序存放doc
@@ -2158,16 +2242,10 @@ public class ReportServiceImpl implements ReportService {
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
         logger.debug("本次报告总页数:{}",totalPageNew);
         setReportTop1(topDoc,entrustAddVo,reportRecordEntity,totalPageNew);
-        //报告头部合并顺序1
-        //map.put(0,topDoc);
-        /*Map<Integer,Workbook> result = new HashMap<>();
-        map.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .forEachOrdered(x->result.put(x.getKey(),x.getValue()));*/
         //合并成一个excel
         Workbook document = workbookCopy(topDoc,map);
-        //处理页码 TODO
-
+        //处理页码
+        handlerPage(document,countMap);
         //上传合并完成的excel到服务器
         long name = GenID.getID();
         String path = qiYueSuoEntity.getAutographPath()+name+".xlsx";
@@ -2185,6 +2263,47 @@ public class ReportServiceImpl implements ReportService {
         resBean.setUrl(url);
         FileAndFolderUtil.delete(path);
         return resBean;
+    }
+
+    /**
+     * 处理合并完整的excel每个报告的页码
+     * @param document
+     * @param countMap
+     */
+    private void handlerPage(Workbook document, Map<Integer, Integer> countMap) {
+        //报告总页数
+        int total = document.getWorksheets().getCount() - 2;
+        //填充每个子报告每页的页码
+        Set<Integer> keySet = countMap.keySet();
+        int index = 2;
+        int count = 1;
+        for (Integer page:keySet) {
+            //每个报告有几个sheet
+            Integer integer = countMap.get(page);
+            for (int i =0;i<integer;i++) {
+                Worksheet worksheet = document.getWorksheets().get(index);
+                Cells cells = worksheet.getCells();
+                int maxRow = cells.getMaxRow();
+                int column = cells.getMaxColumn();
+                for (int n=0;n<maxRow;n++) {
+                    for (int j = 0; j < column; j++) {
+                        Cell cell = cells.get(n, j);
+                        if (cell != null) {
+                            Object value = cell.getValue();
+                            if (value != null) {
+                                String string = value.toString();
+                                if ("第 ${page} 页，共 ${total} 页".equals(string)) {
+                                    cells.get(n, j).setValue("第"+ count+"页，共"+ total +"页");
+                                }
+                            }
+                        }
+                    }
+                }
+                count++;
+                index++;
+            }
+        }
+
     }
 
     @SneakyThrows

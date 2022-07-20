@@ -611,7 +611,7 @@ public class ReportController {
      * @param json
      * @return
      */
-    @RequestMapping("previewDownLoad")
+    /*@RequestMapping("previewDownLoad")
     public void previewDownLoad(@RequestParam("json") String json, HttpServletResponse response) {
         //json = "{\"id\":1654743132971144,\"list\":[{\"url\":\"http://121.89.242.0:9000/file-resources/1649661309796156.docx\",\"conclusion\":\"经检测，该水泥混凝土样品,均符合JTG/T 3650-2020中的技术要求。\",\"additional\":\"1.委托人：陈海伟；2.见证单位：江苏中源工程管理股份有限公司；3.见证人：小王；4.委托方提供：无 ；\"}],\"type\":\"配合比\",\"mixInfo\":{\"id\":32,\"sampleId\":820,\"entrustmentId\":1654743132971144,\"designStrength\":\"5\",\"intensityConfiguration\":\"4\",\"antifreezeLevel\":\"54\",\"waterBinderRatio\":\"54\",\"unitWaterUse\":\"54\",\"sandRatio\":\"5\",\"designSlump\":\"54\",\"mixingWay\":\"45\"}}";
         String decode = "";
@@ -626,9 +626,9 @@ public class ReportController {
         String unescapeJava = StringEscapeUtils.unescapeJava(decode);
         String substring = unescapeJava.substring(1, unescapeJava.length() - 1);
         ReqBean reqBean = JSON.parseObject(substring,ReqBean.class);
-       /* if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
+       *//* if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
             return null;
-        }*/
+        }*//*
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
         ReportResBean resBean = null;
@@ -678,7 +678,7 @@ public class ReportController {
         }catch (Exception e){
             logger.error("预览合并后的报告异常:{}",e);
         }
-    }
+    }*/
 
     @GetMapping("download")
     public String downReport(Long id) {
@@ -1036,9 +1036,9 @@ public class ReportController {
         return ResultUtil.success(list);
     }
 
-    @RequestMapping("previewDownLoad1")
-    public void previewDownLoad1(@RequestParam("json") String json, HttpServletResponse response) {
-        json = "{\"id\":1656670371659335,\"list\":[{\"url\":\"http://121.89.242.0:9000/file-resources/1653308619762103.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220523%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220523T122339Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=36508788f305c2f692143d7467915267abd08f6e340a2838e869d737dae0b361\",\"conclusion\":\"经检测，该土样品,回弹模量均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：一禅；2.见证单位：甘肃华路捷公路工程技术咨询有限公司；3.见证人：张瑞涛；4.委托方提供：无 ；\"},{\"url\":\"http://121.89.242.0:9000/file-resources/1649645324684109.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220411%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220411T024844Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=621bfddf70c4e5bb952335fb438e58223f8d47677bb38b0c932c602071685008\",\"conclusion\":\"经检测，该土样品,粗粒土和巨粒土最大干密度均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：一禅；2.见证单位：甘肃华路捷公路工程技术咨询有限公司；3.见证人：张瑞涛；4.委托方提供：无 ；\"}],\"type\":\"原材检测\",\"mixInfo\":{}}";
+    @RequestMapping("previewDownLoad")
+    public void previewDownLoad(@RequestParam("json") String json, HttpServletResponse response) {
+        //json = "{\"id\":1658287642955105,\"list\":[{\"url\":\"http://121.89.242.0:9000/file-resources/1653308619762103.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220523%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220523T122339Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=36508788f305c2f692143d7467915267abd08f6e340a2838e869d737dae0b361\",\"conclusion\":\"经检测，该土样品,回弹模量均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：一禅；2.见证单位：甘肃华路捷公路工程技术咨询有限公司；3.见证人：张瑞涛；4.委托方提供：无 ；\"},{\"url\":\"http://121.89.242.0:9000/file-resources/1649645324684109.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220411%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220411T024844Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=621bfddf70c4e5bb952335fb438e58223f8d47677bb38b0c932c602071685008\",\"conclusion\":\"经检测，该土样品,粗粒土和巨粒土最大干密度均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：一禅；2.见证单位：甘肃华路捷公路工程技术咨询有限公司；3.见证人：张瑞涛；4.委托方提供：无 ；\"}],\"type\":\"原材检测\",\"mixInfo\":{}}";
         String decode = "";
         String url = "";
         try {
@@ -1049,16 +1049,13 @@ public class ReportController {
             logger.error("处理json参数转码错误:{}",e);
         }
         String unescapeJava = StringEscapeUtils.unescapeJava(decode);
-        //String substring = unescapeJava.substring(1, unescapeJava.length() - 1);
-        ReqBean reqBean = JSON.parseObject(unescapeJava,ReqBean.class);
-       /* if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
-            return null;
-        }*/
+        String substring = unescapeJava.substring(1, unescapeJava.length() - 1);
+        ReqBean reqBean = JSON.parseObject(substring,ReqBean.class);
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
         ReportResBean resBean = null;
         if ("原材检测".equals(reqBean.getType())){
-            resBean = reportService.submitDownLoad1(client, reqBean.getList(), reqBean.getId());
+            resBean = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
         }else {
             resBean = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
         }
