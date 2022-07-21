@@ -15,10 +15,7 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -87,6 +84,8 @@ public class EntrustServiceImpl implements EntrustService {
     private EntrustFileTableDao entrustFileTableDao;
     @Autowired
     private TestEntrustedTaskRelDao testEntrustedTaskRelDao;
+    @Autowired
+    private TestTeamDao testTeamDao;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -3626,9 +3625,10 @@ public class EntrustServiceImpl implements EntrustService {
                 if (!vo.getAcceptanceDate().after(date1)) {
                     // 签收时间 =委托单受理日期
                     sampleData.setReceivedDate(sdf.format(vo.getAcceptanceDate()));
-                    // update样品信息
-                    sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
                 }
+                sampleData.setCompanyId(vo.getEntrustCompanyId());
+                // update样品信息
+                sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
                 // 处理配合比信息
                 if(!sampleData.getSampleType().equals("原材")&&!vo.getAcceptanceDate().after(date1)){
                     // 获取配合比信息
@@ -3788,7 +3788,7 @@ public class EntrustServiceImpl implements EntrustService {
     public PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo) {
         List<ClientOrderdetailVo> list = Lists.newArrayList();
         PageHelper.clearPage();
-        if(clientOrderdetailVo.getCompanyIds().length==0){
+        if(clientOrderdetailVo.getCompanyIds()!=null&&clientOrderdetailVo.getCompanyIds().length==0){
             clientOrderdetailVo.setCompanyIds(null);
         }
         list = entityMapper.selectClientOrderdetailVoList(clientOrderdetailVo);
@@ -3916,9 +3916,32 @@ public class EntrustServiceImpl implements EntrustService {
         CellRangeAddress regionx = new CellRangeAddress(0, 0, 0, 13);
         sheet.addMergedRegion(regionx);
         // 第一行 标题
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        StringBuilder deptBuilder = new StringBuilder();
+        if(clientOrderdetailVo.getCompanyIds()!=null&&clientOrderdetailVo.getCompanyIds().length>0){
+            PageHelper.clearPage();
+            List<TestCompanyJsonEntity> CompanyList  = entityMapper.getCompanyList(clientOrderdetailVo.getCompanyIds());
+            for(TestCompanyJsonEntity testCompanyJsonEntity :CompanyList){
+                deptBuilder.append(testCompanyJsonEntity.getCompanyName());
+                deptBuilder.append("、");
+            }
+        }
+        if(deptBuilder.length()>0){
+            deptBuilder = deptBuilder.deleteCharAt(deptBuilder.length()-1);
+        }
+        deptBuilder.append("委托详情表");
+        if(clientOrderdetailVo.getAcceptancebeganDate()!=null&&clientOrderdetailVo.getAcceptanceoverDate()!=null){
+            String Begandate = formatter.format(clientOrderdetailVo.getAcceptancebeganDate());
+            String Overdate = formatter.format(clientOrderdetailVo.getAcceptanceoverDate());
+            deptBuilder.append(Begandate+"~"+Overdate);
+        }
         HSSFRow row0 = sheet.createRow(0);
         HSSFCell cell_00 = row0.createCell(0);
-        cell_00.setCellValue("委托单位+委托详情表（时间段）");
+//        cell_00.setCellValue("委托单位+委托详情表（时间段）");
+        cell_00.setCellValue(deptBuilder.toString());
+        HSSFCellStyle style=wb.createCellStyle();
+        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);//水平居中
+        cell_00.setCellStyle(style);
 //        cell_00.setCellStyle();
 //        cell_00.setCellStyle(style);
 //在sheet里创建第二行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
@@ -3939,7 +3962,7 @@ public class EntrustServiceImpl implements EntrustService {
         row1.createCell(12).setCellValue("报告编号");
         row1.createCell(13).setCellValue("报告发放日期");
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
         for (int i = 0; i < list.size(); i++) {
             ClientOrderdetailVo personVo = list.get(i);
             //在sheet里创建第三行

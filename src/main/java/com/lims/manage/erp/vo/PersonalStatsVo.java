@@ -20,7 +20,7 @@ public class PersonalStatsVo {
     /**
      * 科室ID
      */
-    private Long deptId;
+    private String teamId;
 
     /**
      * 科室名称

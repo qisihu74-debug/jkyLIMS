@@ -67,8 +67,8 @@ public class StatisticsController {
 //        TaskStatsVo taskStatsVo = new TaskStatsVo();
 
 //        if(taskStatsVo.getPageNum()==null||taskStatsVo.getPageSize()==null){
-            taskStatsVo.setPageNum(0);
-            taskStatsVo.setPageSize(0);
+            taskStatsVo.setPageNum(1);
+            taskStatsVo.setPageSize(1000000);
 //        }
         PagingToolVo list = statisticsService.taskQuery1111(taskStatsVo);
         String fileName = "任务统计结果";
@@ -119,8 +119,8 @@ public class StatisticsController {
     public void personalStatsExport(@RequestBody PersonalStatsVo personalStatsVo, HttpServletResponse response) throws IOException {
         BufferedOutputStream bos = null;
 //        PersonalStatsVo personalStatsVo = new PersonalStatsVo();
-        personalStatsVo.setPageNum(null);
-        personalStatsVo.setPageSize(null);
+        personalStatsVo.setPageNum(1);
+        personalStatsVo.setPageSize(1000000);
         PageInfo list = statisticsService.personalStats(personalStatsVo);
         String fileName = "个人工作量统计";
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");

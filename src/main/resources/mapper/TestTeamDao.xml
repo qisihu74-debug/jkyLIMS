@@ -54,6 +54,5 @@
         </foreach>
         on duplicate key update
          name = values(name) , pid = values(pid) , code = values(code) , team_lead = values(team_lead) , team_lead1 = values(team_lead1) , lead_tel = values(lead_tel) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , remark = values(remark)     </insert>
-
 </mapper>
 

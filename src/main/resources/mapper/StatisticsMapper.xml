@@ -263,8 +263,11 @@
         LEFT JOIN test_entrusted_sample_checkitem_rel AS t5 ON t5.sample_id = t4.id
         LEFT JOIN test_entrusted_info as t6 ON t1.entrustment_id = t6.id
         WHERE 1=1
-        <if test="deptId!=null">
-            and t1.dept_id = #{deptId}
+        <if test="nodeTeam!=null">
+            and t1.dept_id in
+            <foreach collection="nodeTeam" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
         </if>
         <if test="requestDate!=null">
             and t1.required_completion_time <![CDATA[ <= ]]>  #{requestDate}

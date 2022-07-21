@@ -117,8 +117,9 @@ public class StatisticsServiceImpl implements StatisticsService {
     public PageInfo personalStats(PersonalStatsVo personalStats) {
         // 部门部门 集合。
         List<Long> deptIds = new ArrayList<>();
-        if(personalStats.getDeptId()!=null){
-            deptIds.add(personalStats.getDeptId());
+        if(!org.springframework.util.StringUtils.isEmpty(personalStats.getTeamId())){
+            List<Long> nodeTeam = teamMapper.getNodeTeamId(Long.parseLong(personalStats.getTeamId()));
+            deptIds.addAll(nodeTeam);
         }
         // in 查询 遍历出所有人员信息。
         if(personalStats.getPageNum()!=null&&personalStats.getPageSize()!=null){
@@ -447,6 +448,10 @@ public class StatisticsServiceImpl implements StatisticsService {
     public PagingToolVo taskQuery1111(TaskStatsVo taskStatsVo) {
         // 分页数据
         List<TaskStatsVo> personList = new ArrayList<>();
+        if(!org.springframework.util.StringUtils.isEmpty(taskStatsVo.getTeamId())){
+            List<Long> nodeTeam = teamMapper.getNodeTeamId(Long.parseLong(taskStatsVo.getTeamId()));
+            taskStatsVo.setNodeTeam(nodeTeam);
+        }
         List<TaskStatsVo> list = statisticsMapper.getTaskList(taskStatsVo);
         // 遍历list数据
         for(TaskStatsVo taskDetailInfoVo :list){

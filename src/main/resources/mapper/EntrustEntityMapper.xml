@@ -944,4 +944,21 @@
             and date_format(t1.acceptance_date,'%Y-%m-%d')&lt;= #{acceptanceoverDate,jdbcType=DATE}
         </if>
     </select>
+
+    <select id="getCompanyList" resultType="com.lims.manage.erp.entity.TestCompanyJsonEntity">
+        SELECT
+        company_id,
+        company_name
+        FROM
+        test_company
+        WHERE 1=1
+        <if test="companyIds!=null">
+            and company_id in
+            <foreach collection="companyIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
+
 </mapper>
