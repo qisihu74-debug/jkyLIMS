@@ -378,7 +378,7 @@ public interface ReportService {
      * @param search
      * @return
      */
-    PageInfo middleReportList(Integer pageNum,Integer pageSize,String search);
+    PageInfo middleReportList(Integer pageNum,Integer pageSize,Integer state,String search);
 
     /**
      * 查询可制作中间报告的检测项详情

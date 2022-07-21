@@ -895,11 +895,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("/middleReportList")
-    public Result getSampleListmiddleReportList(Integer pageNum,Integer pageSize,String search) {
+    public Result getSampleListmiddleReportList(Integer pageNum,Integer pageSize,Integer state,String search) {
         if (pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少分页参数！");
         }
-        return ResultUtil.success("获取可制作中间报告列表成功！", reportService.middleReportList(pageNum,pageSize,search));
+        return ResultUtil.success("获取可制作中间报告列表成功！", reportService.middleReportList(pageNum,pageSize,state,search));
     }
 
     /**

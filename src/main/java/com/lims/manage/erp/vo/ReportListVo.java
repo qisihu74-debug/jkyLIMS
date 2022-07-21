@@ -20,10 +20,18 @@ public class ReportListVo {
      */
     private String reportCompleteTime;
     /**
+     * 备注
+     */
+    private String remark;
+    /**
      * state 状态
      */
     private Integer state;
     private Integer productId;
+    /**
+     * 任务流转ID
+     */
+    private Integer taskFlowId;
     private String entrustmentNo;
 
     private List<Long> deptIds;

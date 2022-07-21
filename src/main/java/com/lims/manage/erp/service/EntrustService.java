@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.List;
@@ -318,4 +319,16 @@ public interface EntrustService {
      * @return
      */
     PageInfo taskStatisticsList(TestEntrustedTaskRelVo testEntrustedTaskRelVo);
+
+    /**
+     * 客户委托查询
+     * @param clientOrderdetailVo
+     * @return
+     */
+    PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo);
+
+    /**
+     * 导出Excel 表
+     */
+    InputStream exportPersonDetails(List<ClientOrderdetailVo> list,ClientOrderdetailVo clientOrderdetailVo) throws IOException;
 }

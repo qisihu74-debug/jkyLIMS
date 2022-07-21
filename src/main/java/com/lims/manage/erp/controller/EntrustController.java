@@ -2,6 +2,7 @@ package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
+import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
@@ -26,9 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.Date;
@@ -750,5 +749,53 @@ public class EntrustController {
         }
         return ResultUtil.success(entrustService.taskStatisticsList(testEntrustedTaskRelVo));
     }
+
+    /**
+     * 客户委托查询
+     */
+    @GetMapping("/getClientList")
+    public Result getClientList(ClientOrderdetailVo clientOrderdetailVo){
+        if (clientOrderdetailVo.getPageNum() == null || clientOrderdetailVo.getPageSize() == null ) {
+            return ResultUtil.error("缺少分页参数或必填参数");
+        }
+        return ResultUtil.success(entrustService.getClientList(clientOrderdetailVo));
+    }
+
+    /**
+     * 客户委托查询 导出
+     * @param clientOrderdetailVo
+     * @param response
+     * @throws IOException
+     */
+    @GetMapping("/getClientListExport")
+    public void getClientListExport(ClientOrderdetailVo clientOrderdetailVo,HttpServletResponse response) throws IOException {
+        clientOrderdetailVo.setPageNum(1);
+        clientOrderdetailVo.setPageSize(100000);
+        BufferedOutputStream bos = null;
+        String fileName = "企业委托单详情表"+DateUtil.formatDate(new Date());
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename="
+                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+        PageInfo pageInfo = entrustService.getClientList(clientOrderdetailVo);
+        List<ClientOrderdetailVo> list = Lists.newArrayList();
+        if(!CollectionUtils.isEmpty(pageInfo.getList())){
+            System.out.println(pageInfo.getList().size());
+            list =  pageInfo.getList();
+        }
+        InputStream inputStream = entrustService.exportPersonDetails(list,clientOrderdetailVo);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+    }
+
+
 
 }

@@ -45,4 +45,9 @@ public class TaskListVo {
      * 样品描述信息
      */
     private String sampleStateDescription;
+
+    /**
+     * 任务流转日期
+     */
+    private String taskFlowDate;
 }
