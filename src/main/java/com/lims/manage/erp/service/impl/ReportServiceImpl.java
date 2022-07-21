@@ -2309,6 +2309,14 @@ public class ReportServiceImpl implements ReportService {
     @SneakyThrows
     @Override
     public ReportResBean submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id,TestSampleMixInfoEntity mixInfoEntity) {
+        int totalPageNew = 0;
+        Map<Integer, Integer> countMap = new LinkedHashMap();
+        Map<Integer,Workbook> map = new HashedMap();
+        //处理坐标提示信息
+        ReportResBean resBean = new ReportResBean();
+        Map<String,String> mesMap = new HashedMap();
+        ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
+        int index = 1;
         //配合比实验，设计到原材的报告模板忽略
         List<ConclusionEntity> conclusionEntityList = Lists.newArrayList();
         for (ConclusionEntity entity :list) {
@@ -2320,176 +2328,288 @@ public class ReportServiceImpl implements ReportService {
                 conclusionEntityList.add(entity);
             }
         }
-        //2代表报告头2页
-        String key = "——";
-        //int totalPage = 2;
-        int totalPageNew = 0;
-        Map<Integer,XWPFDocument> map = new HashedMap();
-        //处理坐标提示信息
-        ReportResBean resBean = new ReportResBean();
-        Map<String,String> mesMap = new HashedMap();
-
-        ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
-        int index = 1;
         for (ConclusionEntity conclusionEntity:conclusionEntityList) {
             String[] split = conclusionEntity.getUrl().split("\\?");
             String[] strings = split[0].split("\\/");
             String bluckName = strings[3];
             String fileName = strings[4];
-            XWPFDocument doc = null;
+            Workbook doc = null;
             client.statObject(bluckName, fileName);
             InputStream object = client.getObject(bluckName, fileName);
-            doc = new XWPFDocument(object);
-            totalPageNew = doc.getProperties().getExtendedProperties().getUnderlyingProperties().getPages()+totalPageNew;
+            doc = new Workbook(object);
+            totalPageNew = doc.getWorksheets().getCount()+totalPageNew;
             //写入数据
             List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
             if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
-                int size = doc.getTables().size();
+                int size = doc.getWorksheets().getCount();
+                countMap.put(index,size);
                 //处理表格
-                Iterator<XWPFTable> it = doc.getTablesIterator();
-                //表格索引
-                int i = 1;
-                //获取表格信息
-                while (it.hasNext()) {
-                    //totalPage++;
-                    index++;
-                    XWPFTable table = it.next();
-                    List<XWPFTableRow> rows = table.getRows();
+                for (int i = 0;i<size;i++){
+                    Worksheet worksheet = doc.getWorksheets().get(i);
+                    Cells cells = worksheet.getCells();
+                    int maxRow = cells.getMaxRow();
+                    int column = cells.getMaxColumn();
                     //存放表头信息
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
-                    if (i == 1) {
-                        WordUtils.replaceCellText(rows.get(3).getCell(1),key,"河南省公路工程试验检测中心有限公司");
-                        WordUtils.replaceCellText(rows.get(3).getCell(3),key,reportRecordEntity.getReportCode());
-                        WordUtils.replaceCellText(rows.get(4).getCell(1),key,entrustHistoryDetail.getEntrustCompany());
-                        WordUtils.replaceCellText(rows.get(4).getCell(3),key,entrustHistoryDetail.getProjectName());
-                        WordUtils.replaceCellText(rows.get(5).getCell(1),key,entrustHistoryDetail.getProjectPart());
+                    if (i == 0) {
                         //样品信息
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
-                        WordUtils.replaceCellText(rows.get(6).getCell(1),key,"样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
-                                + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~","~"))
-                                + "；样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
-                                + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutward()) ? "——" : sampleEntity.getOutward())
-                                + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                         //检测依据
                         String checkBasis = getCheckBasis(id);
-                        WordUtils.replaceCellText(rows.get(7).getCell(1),key,checkBasis.equals("") ? "——" : checkBasis);
                         //判定依据
                         String judgeBasis = getJudgeBasis(id);
-                        WordUtils.replaceCellText(rows.get(7).getCell(3),key,judgeBasis.equals("") ? "——" : judgeBasis);
-                        //检测日期
                         //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
                         Date start = taskMapper.getStartTime(id);
                         Date end = taskMapper.getEndTime(id);
                         String s = DateUtil.formatDate(start);
                         String e = DateUtil.formatDate(end);
-                        if (start != null && end != null){
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-                            if (s.equals(e)){
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,s);
-                            }else {
-                                WordUtils.replaceCellText(rows.get(8).getCell(1),key,s + "~" + e);
-                            }
-                        }
                         //主要仪器
                         String equipment = getEquipment(id);
-                        WordUtils.replaceCellText(rows.get(9).getCell(1),key,equipment.equals("") ? "——" : equipment);
-                        //委托编号
-                        WordUtils.replaceCellText(rows.get(10).getCell(1),key,entrustHistoryDetail.getEntrustmentNo() + "");
-                        //检测类别
-                        WordUtils.replaceCellText(rows.get(10).getCell(3),key,entrustHistoryDetail.getCheckPurpose());
-                        //设计参数
-                        if (mixInfoEntity != null){
-                            WordUtils.replaceCellText(rows.get(11).getCell(1),key,mixInfoEntity.getDesignStrength());
-                            WordUtils.replaceCellText(rows.get(11).getCell(3),key,mixInfoEntity.getIntensityConfiguration());
-                            WordUtils.replaceCellText(rows.get(12).getCell(1),key,mixInfoEntity.getAntifreezeLevel());
-                            WordUtils.replaceCellText(rows.get(12).getCell(3),key,mixInfoEntity.getWaterBinderRatio());
-                            WordUtils.replaceCellText(rows.get(13).getCell(1),key,mixInfoEntity.getUnitWaterUse());
-                            WordUtils.replaceCellText(rows.get(13).getCell(3),key,mixInfoEntity.getSandRatio());
-                            WordUtils.replaceCellText(rows.get(14).getCell(1),key,mixInfoEntity.getDesignSlump());
-                            WordUtils.replaceCellText(rows.get(14).getCell(3),key,mixInfoEntity.getMixingWay());
-                        }else {
-                            TestSampleMixInfoEntity entity = mixInfoEntityMapper.selectByEntrustId(id);
-                            if (entity != null){
-                                WordUtils.replaceCellText(rows.get(11).getCell(1),key,entity.getDesignStrength());
-                                WordUtils.replaceCellText(rows.get(11).getCell(3),key,entity.getIntensityConfiguration());
-                                WordUtils.replaceCellText(rows.get(12).getCell(1),key,entity.getAntifreezeLevel());
-                                WordUtils.replaceCellText(rows.get(12).getCell(3),key,entity.getWaterBinderRatio());
-                                WordUtils.replaceCellText(rows.get(13).getCell(1),key,entity.getUnitWaterUse());
-                                WordUtils.replaceCellText(rows.get(13).getCell(3),key,entity.getSandRatio());
-                                WordUtils.replaceCellText(rows.get(14).getCell(1),key,entity.getDesignSlump());
-                                WordUtils.replaceCellText(rows.get(14).getCell(3),key,entity.getMixingWay());
-                            }
-                        }
-                        //填充配合比下原材样品信息
-                        List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(entrustHistoryDetail.getSamples().get(0).getId());
-                        if (testSampleEntities.size()>7){
-                            AsposeUtil.addRows(table,16,testSampleEntities.size()-7);
-                        }
-                        for (int j=0;j<testSampleEntities.size();j++) {
-                            WordUtils.replaceCellText(rows.get(j+16).getCell(0),key,testSampleEntities.get(j).getSampleName());
-                            WordUtils.replaceCellText(rows.get(j+16).getCell(1),key,testSampleEntities.get(j).getSpecs());
-                            WordUtils.replaceCellText(rows.get(j+16).getCell(2),key,testSampleEntities.get(j).getManufacturer());
-                            WordUtils.replaceCellText(rows.get(j+16).getCell(3),key,testSampleEntities.get(j).getBatchNumber());
-                            WordUtils.replaceCellText(rows.get(j+16).getCell(4),key,testSampleEntities.get(j).getGeneration());
-                            WordUtils.replaceCellText(rows.get(j+16).getCell(5),key,testSampleEntities.get(j).getOutward());
-                            WordUtils.replaceCellText(rows.get(j+16).getCell(6),key,testSampleEntities.get(j).getSampleCode());
-                        }
-                    }
-                    if (i==size){
-                        //过滤每个报告模板的检测项
-                        List<ReportRecordDetailEntity> entities = Lists.newArrayList();
+                        //如果样品数量超出模板行数,和定位样品信息要插入的位置
+                        int insertRow = 0;
+                        int indexName = 0;
+                        int indexGg = 0;
+                        int indexCd = 0;
+                        int indexPh = 0;
+                        int indexNum = 0;
+                        int indexZt =0;
+                        int indexBh = 0;
 
-                        String[] split11 = conclusionEntity.getUrl().split("\\?");
-                        String[] strings11 = split11[0].split("\\/");
-                        String fileName11 = strings11[4];
-                        List<Long> longList = itemDao.getItemsByTemplateLikeUrl(fileName11);
-                        for (ReportRecordDetailEntity entity:checkItemList) {
-                            for (Long itemId:longList) {
-                                if (entity.getCheckItemId().equals(itemId)){
-                                    entities.add(entity);
-                                }
-                            }
-                        }
-                        //存放检测数据checkItemList为该报告模板所属的检测项
-                        for (ReportRecordDetailEntity item : entities) {
-                            if (org.apache.commons.lang3.StringUtils.isNotEmpty(item.getCoordinate())){
-                                int last = testProductDao.isLast(item.getCheckItemId().intValue());
-                                int page = 0;
-                                int row = 0;
-                                int column = 0;
-                                if (last == 0) {
-                                    try {
-                                        page = Integer.parseInt(item.getCoordinate().split(",")[0]);
-                                        row = Integer.parseInt(item.getCoordinate().split(",")[1]);
-                                        column = Integer.parseInt(item.getCoordinate().split(",")[2]);
-                                    }catch (Exception e){
-                                        mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标格式错误");
-                                        logger.error("检测项在报告中的坐标格式错误:{}",e);
-                                        continue;
-                                    }
-                                    if (i == page) {
-                                        try {
-                                            WordUtils.replaceCellText(rows.get(row).getCell(column + 1),key,item.getCheckResult());
-                                        }catch (Exception e){
-                                            mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标错误");
-                                            logger.error("检测项在报告中的坐标错误:{}",e);
-                                            continue;
+                        for (int n=0;n<maxRow;n++) {
+                            for (int j = 0; j < column; j++) {
+                                Cell cell = cells.get(n, j);
+                                if (cell != null) {
+                                    Object value = cell.getValue();
+                                    if (value != null) {
+                                        String string = value.toString();
+                                        if ("${检测单位名称}".equals(string)){
+                                            cells.get(n,j).setValue("检测单位名称：河南省公路工程试验检测中心有限公司");
+                                        }
+                                        if ("${报告编号}".equals(string)){
+                                            cells.get(n,j).setValue(reportRecordEntity.getReportCode());
+                                        }
+                                        if ("${委托单位}".equals(string)){
+                                            cells.get(n,j).setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getEntrustCompany())?"——":entrustHistoryDetail.getEntrustCompany());
+                                        }
+                                        if ("${工程名称}".equals(string)){
+                                            cells.get(n,j).setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectName())?"——":entrustHistoryDetail.getProjectName());
+                                        }
+                                        if ("${工程部位}".equals(string)){
+                                            cells.get(n,j).setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectPart())?"——":entrustHistoryDetail.getProjectPart());
+                                        }
+                                        if ("${样品信息}".equals(string)){
+                                            cells.get(n,j).setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
+                                                    + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~","~"))
+                                                    + "；样品数量：" + (sampleEntity.getSampleQuantity() == null ? "——" : sampleEntity.getSampleQuantity())
+                                                    + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
+                                                    + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                                        }
+                                        if ("${检测依据}".equals(string)){
+                                            cells.get(n,j).setValue(checkBasis.equals("") ? "——" : checkBasis);
+                                        }
+                                        if ("${判定依据}".equals(string)){
+                                            cells.get(n,j).setValue(judgeBasis.equals("") ? "——" : judgeBasis);
+                                        }
+                                        if ("${检测日期}".equals(string)){
+                                            if (start != null && end != null){
+                                                if (s.equals(e)){
+                                                    cells.get(n,j).setValue(s);
+                                                }else {
+                                                    cells.get(n,j).setValue(s + "~" + e);
+                                                }
+                                            }
+                                        }
+                                        if ("${仪器设备}".equals(string)){
+                                            cells.get(n,j).setValue(equipment.equals("") ? "——" : equipment);
+                                        }
+                                        if ("${委托编号}".equals(string)){
+                                            //委托编号
+                                            cells.get(n,j).setValue(entrustHistoryDetail.getEntrustmentNo() + "");
+                                        }
+                                        if ("${检测类别}".equals(string)){
+                                            //检测类别
+                                            cells.get(n,j).setValue(entrustHistoryDetail.getCheckPurpose());
+                                        }
+                                        if ("${批号}".equals(string)){
+                                            //批号
+                                            cells.get(n,j).setValue(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
+                                        }
+                                        if ("${生产厂家}".equals(string)){
+                                            //生产厂家
+                                            cells.get(n,j).setValue(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+                                        }
+                                        if ("${规格}".equals(string)){
+                                            //规格等级
+                                            cells.get(n,j).setValue(sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs());
+                                        }
+                                        if ("${代表数量}".equals(string)){
+                                            //代表数量
+                                            cells.get(n,j).setValue(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
+                                        }
+                                        //设计参数
+                                        if (mixInfoEntity != null){
+                                            if ("${设计强度}".equals(string)){
+                                                cells.get(n,j).setValue(mixInfoEntity.getDesignStrength() == null ? "——" : mixInfoEntity.getDesignStrength());
+                                            }
+                                            if ("${配制强度}".equals(string)){
+                                                cells.get(n,j).setValue(mixInfoEntity.getIntensityConfiguration() == null ? "——" : mixInfoEntity.getIntensityConfiguration());
+                                            }
+                                            if ("${等级}".equals(string)){
+                                                cells.get(n,j).setValue(mixInfoEntity.getAntifreezeLevel() == null ? "——" : mixInfoEntity.getAntifreezeLevel());
+                                            }
+
+                                            if ("${水胶比}".equals(string)){
+                                                cells.get(n,j).setValue(mixInfoEntity.getWaterBinderRatio() == null ? "——" : mixInfoEntity.getWaterBinderRatio());
+                                            }
+                                            if ("${单位用水量}".equals(string)){
+                                                cells.get(n,j).setValue(mixInfoEntity.getUnitWaterUse() == null ? "——" : mixInfoEntity.getUnitWaterUse());
+                                            }
+                                            if ("${砂率}".equals(string)){
+                                                cells.get(n,j).setValue(mixInfoEntity.getSandRatio() == null ? "——" : mixInfoEntity.getSandRatio());
+                                            }
+                                            if ("${设计坍落度}".equals(string)){
+                                                cells.get(n,j).setValue(mixInfoEntity.getDesignSlump() == null ? "——" : mixInfoEntity.getDesignSlump());
+                                            }
+                                            if ("${拌和方式}".equals(string)){
+                                                cells.get(n,j).setValue(mixInfoEntity.getMixingWay() == null ? "——" : mixInfoEntity.getMixingWay());
+                                            }
+                                        }else {
+                                            TestSampleMixInfoEntity entity = mixInfoEntityMapper.selectByEntrustId(id);
+                                            if (entity != null){
+                                                if ("${设计强度}".equals(string)){
+                                                    cells.get(n,j).setValue(entity.getDesignStrength() == null ? "——" : entity.getDesignStrength());
+                                                }
+                                                if ("${配制强度}".equals(string)){
+                                                    cells.get(n,j).setValue(entity.getIntensityConfiguration() == null ? "——" : entity.getIntensityConfiguration());
+                                                }
+                                                if ("${等级}".equals(string)){
+                                                    cells.get(n,j).setValue(entity.getAntifreezeLevel() == null ? "——" : entity.getAntifreezeLevel());
+                                                }
+
+                                                if ("${水胶比}".equals(string)){
+                                                    cells.get(n,j).setValue(entity.getWaterBinderRatio() == null ? "——" : entity.getWaterBinderRatio());
+                                                }
+                                                if ("${单位用水量}".equals(string)){
+                                                    cells.get(n,j).setValue(entity.getUnitWaterUse() == null ? "——" : entity.getUnitWaterUse());
+                                                }
+                                                if ("${砂率}".equals(string)){
+                                                    cells.get(n,j).setValue(entity.getSandRatio() == null ? "——" : entity.getSandRatio());
+                                                }
+                                                if ("${设计坍落度}".equals(string)){
+                                                    cells.get(n,j).setValue(entity.getDesignSlump() == null ? "——" : entity.getDesignSlump());
+                                                }
+                                                if ("${拌和方式}".equals(string)){
+                                                    cells.get(n,j).setValue(entity.getMixingWay() == null ? "——" : entity.getMixingWay());
+                                                }
+                                                if ("材料名称".equals(string)){
+                                                    insertRow = n;
+                                                    indexName = j;
+                                                }
+                                                if ("规格".equals(string)){
+                                                    indexGg = j;
+                                                }
+                                                if ("生产厂家/产地".equals(string)){
+                                                    indexCd = j;
+                                                }
+                                                if ("生产批号".equals(string)){
+                                                    indexPh = j;
+                                                }
+                                                if ("样品数量".equals(string)){
+                                                    indexNum = j;
+                                                }
+                                                if ("样品状态".equals(string)){
+                                                    indexZt = j;
+                                                }
+                                                if ("样品编号".equals(string)){
+                                                    indexBh = j;
+                                                }
+                                            }
+                                        }
+                                        //填充配合比下原材样品信息
+                                        List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(entrustHistoryDetail.getSamples().get(0).getId());
+                                        if (testSampleEntities.size()>11){
+                                            //获取要插入的位置行
+                                            cells.insertRows(insertRow+1,testSampleEntities.size()-11);
+                                        }
+                                        for (int m=0;m<testSampleEntities.size();m++) {
+                                            cells.get(m+insertRow+1,indexName+1).setValue(testSampleEntities.get(j).getSampleName());
+                                            cells.get(m+insertRow+1,indexGg+1).setValue(testSampleEntities.get(j).getSpecs());
+                                            cells.get(m+insertRow+1,indexCd+1).setValue(testSampleEntities.get(j).getManufacturer());
+                                            cells.get(m+insertRow+1,indexPh+1).setValue(testSampleEntities.get(j).getBatchNumber());
+                                            cells.get(m+insertRow+1,indexNum+1).setValue(testSampleEntities.get(j).getGeneration());
+                                            cells.get(m+insertRow+1,indexZt+1).setValue(testSampleEntities.get(j).getOutward());
+                                            cells.get(m+insertRow+1,indexBh+1).setValue(testSampleEntities.get(j).getSampleCode());
                                         }
                                     }
                                 }
-                            }else {
-                                mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标未录入");
                             }
                         }
-                        //处理附加声明和检测结论
-                        XWPFTable xwpfTable = doc.getTables().get(size - 1);
-                        int size1 = xwpfTable.getRows().size();
-                        rows.get(size1-3).getCell(0).removeParagraph(0);
-                        rows.get(size1-3).getCell(0).setText("检测结论："+conclusionEntity.getConclusion());
-                        rows.get(size1-2).getCell(0).removeParagraph(0);
-                        rows.get(size1-2).getCell(0).setText("附加声明："+conclusionEntity.getAdditional());
                     }
-                    i++;
+                    //过滤每个报告模板的检测项
+                    List<ReportRecordDetailEntity> entities = Lists.newArrayList();
+
+                    String[] split11 = conclusionEntity.getUrl().split("\\?");
+                    String[] strings11 = split11[0].split("\\/");
+                    String fileName11 = strings11[4];
+                    List<Long> longList = itemDao.getItemsByTemplateLikeUrl(fileName11);
+                    for (ReportRecordDetailEntity entity:checkItemList) {
+                        for (Long itemId:longList) {
+                            if (entity.getCheckItemId().equals(itemId)){
+                                entities.add(entity);
+                            }
+                        }
+                    }
+                    //存放检测数据checkItemList为该报告模板所属的检测项
+                    for (ReportRecordDetailEntity item : entities) {
+                        if (org.apache.commons.lang3.StringUtils.isNotEmpty(item.getCoordinate())){
+                            int last = testProductDao.isLast(item.getCheckItemId().intValue());
+                            //检测结果
+                            String checkResult = "";
+                            if (last == 0) {
+                                try {
+                                    checkResult = item.getCoordinate();
+                                }catch (Exception e){
+                                    mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标格式错误");
+                                    logger.error("检测项在报告中的坐标格式错误:{}",e);
+                                    continue;
+                                }
+                                try {
+                                    if (StringUtils.isNotEmpty(checkResult) && Integer.parseInt(checkResult.substring(0, 1)) == i+1){
+                                        cells.get(checkResult.substring(1)).setValue(StringUtils.isEmpty(item.getCheckResult())?"——":item.getCheckResult());
+                                    }
+                                }catch (Exception e){
+                                    mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标错误");
+                                    logger.error("检测项在报告中的坐标错误:{}",e);
+                                    continue;
+                                }
+                            }
+                        }else {
+                            mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标未录入");
+                        }
+                    }
+                    if (i==size-1){
+                        Worksheet worksheet1 = doc.getWorksheets().get(size - 1);
+                        Cells cells1 = worksheet1.getCells();
+                        int maxRow1 = cells.getMaxRow();
+                        int column1 = cells.getMaxColumn();
+                        for (int n=0;n<maxRow1;n++) {
+                            for (int j = 0; j < column1; j++) {
+                                Cell cell = cells1.get(n, j);
+                                if (cell != null) {
+                                    Object value = cell.getValue();
+                                    if (value != null) {
+                                        String string = value.toString();
+                                        if ("${检测结论}".equals(string)) {
+                                            cells.get(n, j).setValue("检测结论："+conclusionEntity.getConclusion());
+                                        }
+                                        if ("${附加声明}".equals(string)){
+                                            cells.get(n, j).setValue("附加声明："+conclusionEntity.getAdditional());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 //按照顺序存放doc
                 map.put(index,doc);
@@ -2499,18 +2619,20 @@ public class ReportServiceImpl implements ReportService {
         resBean.setMap(mesMap);
         //获取报告头部模板填充头部数据
         InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
-        XWPFDocument topDoc = new XWPFDocument(fileStream);
+        Workbook topDoc = new Workbook(fileStream);
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
-        setReportTop(topDoc,entrustAddVo,reportRecordEntity,totalPageNew);
-        //报告头部合并顺序1
-        map.put(1,topDoc);
-        //将报告合并成一个完整的word
-        XWPFDocument document = AsposeUtil.mergeDoc(map);
+        setReportTop1(topDoc,entrustAddVo,reportRecordEntity,totalPageNew);
+        //合并成一个excel
+        Workbook document = workbookCopy(topDoc,map);
+        //处理页码
+        handlerPage(document,countMap);
         //上传合并完成的doc到服务器
-        MultipartFile multipartFile = AsposeUtil.xwpfDocumentToCommonsMultipartFile(document, reportRecordEntity.getReportCode() + ".pdf");
-        //MultipartFile file = (MultipartFile) document;
-        String url = MinIoUtil.upload("report-download", multipartFile, reportRecordEntity.getReportCode() + ".docx");
-        resBean.setUrl(url);
+        long name = GenID.getID();
+        String path = qiYueSuoEntity.getAutographPath()+name+".xlsx";
+        document.save(path);
+        File file = new File(path);
+        MultipartFile fileToMultipart = AsposeUtil.fileToMultipart(file, name + "");
+        String url = MinIoUtil.upload("report-download", fileToMultipart, reportRecordEntity.getReportCode() + ".docx");
         StringBuilder stringBuilder = new StringBuilder();
         for (ConclusionEntity entity:list) {
             if (entity.getUrl().contains("?")){
@@ -2520,6 +2642,8 @@ public class ReportServiceImpl implements ReportService {
             stringBuilder.append("&&");
         }
         updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
+        resBean.setUrl(url);
+        FileAndFolderUtil.delete(path);
         return resBean;
     }
 
