@@ -19,6 +19,7 @@ import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -768,7 +769,7 @@ public class EntrustController {
      * @throws IOException
      */
     @GetMapping("/getClientListExport")
-    public void getClientListExport(ClientOrderdetailVo clientOrderdetailVo,HttpServletResponse response) throws IOException {
+    public void getClientListExport(ClientOrderdetailVo clientOrderdetailVo,HttpServletResponse response) throws Exception {
         clientOrderdetailVo.setPageNum(1);
         clientOrderdetailVo.setPageSize(100000);
         BufferedOutputStream bos = null;

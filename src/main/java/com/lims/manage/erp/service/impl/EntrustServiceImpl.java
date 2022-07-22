@@ -2,6 +2,9 @@ package com.lims.manage.erp.service.impl;
 
 
 import cn.hutool.core.util.StrUtil;
+import com.aspose.cells.Cells;
+import com.aspose.cells.Workbook;
+import com.aspose.cells.Worksheet;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
@@ -15,7 +18,10 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
+import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -36,10 +42,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -86,6 +89,8 @@ public class EntrustServiceImpl implements EntrustService {
     private TestEntrustedTaskRelDao testEntrustedTaskRelDao;
     @Autowired
     private TestTeamDao testTeamDao;
+    @Autowired
+    private QiYueSuoEntity qiYueSuoEntity;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -3906,15 +3911,14 @@ public class EntrustServiceImpl implements EntrustService {
         return result;
     }
 
+
+
     @Override
-    public InputStream exportPersonDetails(List<ClientOrderdetailVo> list,ClientOrderdetailVo clientOrderdetailVo) throws IOException {
-        //创建HSSFWorkbook对象(excel的文档对象)
-        HSSFWorkbook wb = new HSSFWorkbook();
-//建立新的sheet对象（excel的表单）
-        HSSFSheet sheet = wb.createSheet("sheet0");
-        // 设计第一行合并信息
-        CellRangeAddress regionx = new CellRangeAddress(0, 0, 0, 13);
-        sheet.addMergedRegion(regionx);
+    public InputStream exportPersonDetails(List<ClientOrderdetailVo> list,ClientOrderdetailVo clientOrderdetailVo) throws Exception {
+        InputStream fileStream = MinIoUtil.getFileStream("entrust-template", "客户委托详情表.xlsx");
+        Workbook workbook = new Workbook(fileStream);
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        Cells cells = worksheet.getCells();
         // 第一行 标题
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         StringBuilder deptBuilder = new StringBuilder();
@@ -3935,62 +3939,55 @@ public class EntrustServiceImpl implements EntrustService {
             String Overdate = formatter.format(clientOrderdetailVo.getAcceptanceoverDate());
             deptBuilder.append(Begandate+"~"+Overdate);
         }
-        HSSFRow row0 = sheet.createRow(0);
-        HSSFCell cell_00 = row0.createCell(0);
-//        cell_00.setCellValue("委托单位+委托详情表（时间段）");
-        cell_00.setCellValue(deptBuilder.toString());
-        HSSFCellStyle style=wb.createCellStyle();
-        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);//水平居中
-        cell_00.setCellStyle(style);
-//        cell_00.setCellStyle();
-//        cell_00.setCellStyle(style);
-//在sheet里创建第二行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
-        HSSFRow row1 = sheet.createRow(1);
-        //创建单元格并设置单元格内容
-        row1.createCell(0).setCellValue("委托编号");
-        row1.createCell(1).setCellValue("委托日期");
-        row1.createCell(2).setCellValue("要求完成日期");
-        row1.createCell(3).setCellValue("委托人");
-        row1.createCell(4).setCellValue("工程名称");
-        row1.createCell(5).setCellValue("工程部位");
-        row1.createCell(6).setCellValue("样品名称");
-        row1.createCell(7).setCellValue("规格/等级");
-        row1.createCell(8).setCellValue("批号/编号");
-        row1.createCell(9).setCellValue("检测项目");
-        row1.createCell(10).setCellValue("检验费用");
-        row1.createCell(11).setCellValue("任务单编号");
-        row1.createCell(12).setCellValue("报告编号");
-        row1.createCell(13).setCellValue("报告发放日期");
-
-
+        cells.get("A1").setValue(deptBuilder.toString());
+        Integer n = 3;
+        String row = "A";
+        ReportServiceImpl letterCycle = new ReportServiceImpl();
         for (int i = 0; i < list.size(); i++) {
             ClientOrderdetailVo personVo = list.get(i);
             //在sheet里创建第三行
-            HSSFRow row3 = sheet.createRow(i + 2);
-            row3.createCell(0).setCellValue(personVo.getEntrustmentNo());
+            cells.get(row+n).setValue(personVo.getEntrustmentNo());
+            row = letterCycle.getNextUpEn(row);
             if (personVo.getAcceptanceDate() != null) {
                 String dateString = formatter.format(personVo.getAcceptanceDate());
-                row3.createCell(1).setCellValue(dateString);
+                cells.get(row+n).setValue(dateString);
             }
+            row = letterCycle.getNextUpEn(row);
             if (personVo.getRequestDate() != null) {
                 String dateString = formatter.format(personVo.getRequestDate());
-                row3.createCell(2).setCellValue(dateString);
+                cells.get(row+n).setValue(dateString);
             }
-            row3.createCell(3).setCellValue(personVo.getEntrustPeople());
-            row3.createCell(4).setCellValue(personVo.getProjectName());
-            row3.createCell(5).setCellValue(personVo.getProjectPart());
-            row3.createCell(6).setCellValue(personVo.getSampleName());
-            row3.createCell(7).setCellValue(personVo.getSpecs());
-            row3.createCell(8).setCellValue(personVo.getBatchNumber());
-            row3.createCell(9).setCellValue(personVo.getCheckItemName());
-            row3.createCell(10).setCellValue(personVo.getSystemPrice());
-            row3.createCell(11).setCellValue(personVo.getTaskCode());
-            row3.createCell(12).setCellValue(personVo.getReportCode());
-            row3.createCell(13).setCellValue(personVo.getReportTime());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getEntrustPeople());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getProjectName());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getProjectPart());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getSampleName());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getSpecs());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getBatchNumber());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getCheckItemName());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getSystemPrice());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getTaskCode());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getReportCode());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getReportTime());
+            row = "A";
+            n++;
         }
         //输出Excel文件 字节输出流
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        wb.write(os);
+        workbook.save(qiYueSuoEntity.getAutographPath()+"sealList.xlsx");
+        File file = new File(qiYueSuoEntity.getAutographPath()+"sealList.xlsx");
+        byte[] bytes = FileAndFolderUtil.file2byte(file);
+        os.write(bytes);
         os.close();
         return new ByteArrayInputStream(os.toByteArray());
     }
