@@ -2473,6 +2473,28 @@ public class ReportServiceImpl implements ReportService {
                                             if ("${拌和方式}".equals(string)){
                                                 cells.get(n,j).setValue(mixInfoEntity.getMixingWay() == null ? "——" : mixInfoEntity.getMixingWay());
                                             }
+                                            if ("材料名称".equals(string)){
+                                                insertRow = n;
+                                                indexName = j;
+                                            }
+                                            if ("规格".equals(string)){
+                                                indexGg = j;
+                                            }
+                                            if ("生产厂家/产地".equals(string)){
+                                                indexCd = j;
+                                            }
+                                            if ("生产批号".equals(string)){
+                                                indexPh = j;
+                                            }
+                                            if ("样品数量".equals(string)){
+                                                indexNum = j;
+                                            }
+                                            if ("样品状态".equals(string)){
+                                                indexZt = j;
+                                            }
+                                            if ("样品编号".equals(string)){
+                                                indexBh = j;
+                                            }
                                         }else {
                                             TestSampleMixInfoEntity entity = mixInfoEntityMapper.selectByEntrustId(id);
                                             if (entity != null){
@@ -2525,29 +2547,29 @@ public class ReportServiceImpl implements ReportService {
                                                 }
                                             }
                                         }
-                                        //填充配合比下原材样品信息
-                                        List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(entrustHistoryDetail.getSamples().get(0).getId());
-                                        if (testSampleEntities.size()>11){
-                                            //获取要插入的位置行
-                                            cells.insertRows(insertRow+1,testSampleEntities.size()-11);
-                                        }
-                                        for (int m=0;m<testSampleEntities.size();m++) {
-                                            cells.get(m+insertRow+1,indexName+1).setValue(testSampleEntities.get(j).getSampleName());
-                                            cells.get(m+insertRow+1,indexGg+1).setValue(testSampleEntities.get(j).getSpecs());
-                                            cells.get(m+insertRow+1,indexCd+1).setValue(testSampleEntities.get(j).getManufacturer());
-                                            cells.get(m+insertRow+1,indexPh+1).setValue(testSampleEntities.get(j).getBatchNumber());
-                                            cells.get(m+insertRow+1,indexNum+1).setValue(testSampleEntities.get(j).getGeneration());
-                                            cells.get(m+insertRow+1,indexZt+1).setValue(testSampleEntities.get(j).getOutward());
-                                            cells.get(m+insertRow+1,indexBh+1).setValue(testSampleEntities.get(j).getSampleCode());
-                                        }
                                     }
                                 }
                             }
                         }
+                        //填充配合比下原材样品信息
+                        List<TestSampleEntity> testSampleEntities = testSampleEntityMapper.selectByPid(entrustHistoryDetail.getSamples().get(0).getId());
+                        if (testSampleEntities.size()>11){
+                            //获取要插入的位置行
+                            cells.insertRows(insertRow+1,testSampleEntities.size()-11);
+                        }
+                        for (int m=0;m<testSampleEntities.size();m++) {
+                            cells.get(m+insertRow+1,indexName).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getSampleName())?"——":testSampleEntities.get(m).getSampleName());
+                            cells.get(m+insertRow+1,indexGg).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getSpecs())?"——":testSampleEntities.get(m).getSpecs());
+                            cells.get(m+insertRow+1,indexCd).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getManufacturer())?"——":testSampleEntities.get(m).getManufacturer());
+                            cells.get(m+insertRow+1,indexPh).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getBatchNumber())?"——":testSampleEntities.get(m).getBatchNumber());
+                            cells.get(m+insertRow+1,indexNum).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getGeneration())?"——":testSampleEntities.get(m).getGeneration());
+                            cells.get(m+insertRow+1,indexZt).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getOutward())?"——":testSampleEntities.get(m).getOutward());
+                            cells.get(m+insertRow+1,indexBh).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getSampleCode())?"——":testSampleEntities.get(m).getSampleCode());
+                        }
                     }
                     //过滤每个报告模板的检测项
                     List<ReportRecordDetailEntity> entities = Lists.newArrayList();
-
+                    List<ReportRecordDetailEntity> entities1 = Lists.newArrayList();
                     String[] split11 = conclusionEntity.getUrl().split("\\?");
                     String[] strings11 = split11[0].split("\\/");
                     String fileName11 = strings11[4];
@@ -2559,8 +2581,19 @@ public class ReportServiceImpl implements ReportService {
                             }
                         }
                     }
+
+                    //过滤每组样品的检测项(根据委托单id和样品id)
+                    List<ReportRecordDetailEntity> list1 = entrustEntityMapper.getItemIdByEntrustIdAndSampleId(id,conclusionEntity.getSampleId());
+                    //获取每组样品检测项生成到报告上的参数
+                    for (ReportRecordDetailEntity entity:entities) {
+                        for (ReportRecordDetailEntity itemId:list1) {
+                            if (entity.getCheckItemId().equals(itemId.getCheckItemId())){
+                                entities1.add(itemId);
+                            }
+                        }
+                    }
                     //存放检测数据checkItemList为该报告模板所属的检测项
-                    for (ReportRecordDetailEntity item : entities) {
+                    for (ReportRecordDetailEntity item : entities1) {
                         if (org.apache.commons.lang3.StringUtils.isNotEmpty(item.getCoordinate())){
                             int last = testProductDao.isLast(item.getCheckItemId().intValue());
                             //检测结果
@@ -2618,7 +2651,7 @@ public class ReportServiceImpl implements ReportService {
         //存放提示信息
         resBean.setMap(mesMap);
         //获取报告头部模板填充头部数据
-        InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.docx");
+        InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.xls");
         Workbook topDoc = new Workbook(fileStream);
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
         setReportTop1(topDoc,entrustAddVo,reportRecordEntity,totalPageNew);
@@ -2632,7 +2665,7 @@ public class ReportServiceImpl implements ReportService {
         document.save(path);
         File file = new File(path);
         MultipartFile fileToMultipart = AsposeUtil.fileToMultipart(file, name + "");
-        String url = MinIoUtil.upload("report-download", fileToMultipart, reportRecordEntity.getReportCode() + ".docx");
+        String url = MinIoUtil.upload("report-download", fileToMultipart, reportRecordEntity.getReportCode() + ".xlsx");
         StringBuilder stringBuilder = new StringBuilder();
         for (ConclusionEntity entity:list) {
             if (entity.getUrl().contains("?")){
