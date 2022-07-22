@@ -775,9 +775,9 @@ public class EntrustController {
         BufferedOutputStream bos = null;
         String fileName = "企业委托单详情表"+DateUtil.formatDate(new Date());
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-        response.setContentType("application/vnd.ms-excel;charset=UTF-8");
-//        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment;filename="+new String(fileName.getBytes("UTF-8"), "ISO-8859-1")+".xls");
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode(fileName+".xlsx", "UTF-8") );
         PageInfo pageInfo = entrustService.getClientList(clientOrderdetailVo);
         List<ClientOrderdetailVo> list = Lists.newArrayList();
         if(!CollectionUtils.isEmpty(pageInfo.getList())){
