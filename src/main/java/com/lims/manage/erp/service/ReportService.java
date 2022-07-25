@@ -406,4 +406,8 @@ public interface ReportService {
     List<TestTeam> getSealer();
 
     byte[] exportRecords(String reportCode, String reportType, String sealType, Long startDate, Long endDate);
+
+    List<String> inspectorList(String search);
+
+    int updateInspector(String reportCode, String inspector);
 }

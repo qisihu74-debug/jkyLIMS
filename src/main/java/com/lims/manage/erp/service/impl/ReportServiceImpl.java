@@ -3025,4 +3025,19 @@ public class ReportServiceImpl implements ReportService {
         }
         return topId;
     }
+
+    @Override
+    public List<String> inspectorList(String search) {
+        //获取检测人员
+
+        return testTechnicistDao.inspectorList(search);
+    }
+
+    @Override
+    public int updateInspector(String reportCode, String inspector) {
+
+
+        return reportMapper.updateInspector(reportCode,inspector);
+    }
+
 }

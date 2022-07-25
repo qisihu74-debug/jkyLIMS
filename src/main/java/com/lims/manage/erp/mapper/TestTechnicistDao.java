@@ -1,18 +1,16 @@
 package com.lims.manage.erp.mapper;
 
-import java.util.List;
-
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TestTeam;
-import com.lims.manage.erp.vo.TestTeamVo;
+import com.lims.manage.erp.entity.TestTechnicist;
 import com.lims.manage.erp.vo.TestTechnicistVo;
 import org.apache.ibatis.annotations.Param;
-import com.lims.manage.erp.entity.TestTechnicist;
 import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * 技术人员(TestTechnicistVo)表数据库访问层
@@ -43,5 +41,7 @@ int insertOrUpdateBatch(@Param("entities") List<TestTechnicist> entities);
 
     @Select("select team_id from test_technicist where user_id=#{userId}")
     int getSealer(@Param("userId") Long userId);
+
+    List<String> inspectorList(@Param("search") String search);
 }
 

@@ -1103,4 +1103,34 @@ public class ReportController {
             logger.error("预览合并后的报告异常:{}",e);
         }
     }
+
+    /**
+     * 报告合并获取检测人列表
+     * @param search
+     * @return
+     */
+    @GetMapping("inspectorList")
+    public Result inspectorList(String search){
+        List<String> list = reportService.inspectorList(search);
+        return ResultUtil.success(list);
+    }
+
+    /**
+     * 更新报告中签字的检测人
+     * @param reportCode
+     * @param inspector
+     * @return
+     */
+    @GetMapping("updateInspector")
+    public Result updateInspector(String reportCode, String inspector){
+        if (StringUtils.isEmpty(reportCode)){
+            return ResultUtil.error("缺少必要参数");
+        }
+        int i = reportService.updateInspector(reportCode,inspector);
+        if (i>0){
+            return ResultUtil.success("设置成功");
+        }else {
+            return ResultUtil.error("设置失败");
+        }
+    }
 }
