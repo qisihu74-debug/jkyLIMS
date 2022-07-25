@@ -107,7 +107,7 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public synchronized Boolean addEntrust(EntrustAddVo vo, MultipartFile[] file) {
-        //存放委托基本信息==》test_entrusted
+/*        //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
         basisInfo.setId(GenID.getID());
         //设置委托编号
@@ -200,7 +200,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
         //得到总价钱，再保存委托基本信息
         basisInfo.setCountPrice(totalMoney + "");
-        entityMapper.insertEntrustInfo(basisInfo);
+        entityMapper.insertEntrustInfo(basisInfo);*/
         return true;
     }
 
@@ -215,7 +215,7 @@ public class EntrustServiceImpl implements EntrustService {
     @Transactional(rollbackFor = Exception.class)
     public synchronized Boolean addEntrustTest(EntrustAddVo vo, MultipartFile[] file) {
 
-        //存放委托基本信息==》test_entrusted
+      /*  //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
         long id = GenID.getID();
         basisInfo.setId(id);
@@ -442,13 +442,13 @@ public class EntrustServiceImpl implements EntrustService {
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
         }
-        entityMapper.insertEntrustInfo(basisInfo);
+        entityMapper.insertEntrustInfo(basisInfo);*/
         return true;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) {
+    public String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file){
         //存放委托基本信息==》test_entrusted
         EntrustEntity basisInfo = new EntrustEntity(vo);
         long id = GenID.getID();
