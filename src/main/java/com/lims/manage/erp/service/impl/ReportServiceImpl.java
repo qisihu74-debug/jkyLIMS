@@ -2757,11 +2757,14 @@ public class ReportServiceImpl implements ReportService {
                     vo.setCoordinate(sampleItemEntity.getCoordinate());
                     vo.setOriginUrl(sampleItemEntity.getOriginUrl());
                     vo.setSampleId(sampleItemEntity.getSampleId());
+                    Long checkItemId = vo.getCheckItemId();
+                    Integer sampleId = vo.getSampleId();
                     //设置上次报告制作记录
                     if(!CollectionUtils.isEmpty(checkInfoByRecordId)){
                         for (ReportRecordDetailEntity reportRecordDetailEntity : checkInfoByRecordId) {
-                            if(vo.getCheckItemId() == reportRecordDetailEntity.getCheckItemId() &&
-                                    vo.getSampleId() == reportRecordDetailEntity.getSampleId()){
+                            Long checkItemId1 = reportRecordDetailEntity.getCheckItemId();
+                            Integer sampleId1 = reportRecordDetailEntity.getSampleId();
+                            if(checkItemId.equals(checkItemId1) && sampleId.equals(sampleId1)){
                                 vo.setSpecsContent(reportRecordDetailEntity.getSpecsContent());
                                 vo.setCheckResult(reportRecordDetailEntity.getCheckResult());
                                 vo.setJudgeResult(reportRecordDetailEntity.getJudgeResult());
