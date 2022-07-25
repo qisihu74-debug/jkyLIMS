@@ -909,7 +909,7 @@ public class ReportController {
      */
     @GetMapping("/middleReportDetail")
     public Result middleReportDetail(Integer taskFlowId,Long taskId) {
-        if(taskId == null){
+        if(taskId == null || taskFlowId == null){
             return ResultUtil.error("缺少必要的参数!");
         }
         return ResultUtil.success("查询中间报告详情成功！", reportService.getMiddleReportDetail(taskFlowId,taskId));

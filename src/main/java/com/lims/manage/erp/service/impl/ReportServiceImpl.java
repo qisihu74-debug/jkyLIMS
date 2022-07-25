@@ -639,10 +639,10 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    @Transactional()
+    @Transactional
     @Override
     public Boolean middleReportPreserve(ReportPreserveVo vo) {
-//        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
+        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.getLatestReport(vo.getEntrustmentId());
         //获取父级code
         Long deptId = taskMapper.getDeptByEntrustId(vo.getEntrustmentId());
         String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
@@ -2677,8 +2677,9 @@ public class ReportServiceImpl implements ReportService {
     public ReportDetailVo getMiddleReportDetail(Integer taskFlowId, Long taskId) {
 //        Long recordId = recordEntityMapper.getRecordId(taskId);
 //        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        Long entrustId = taskMapper.getEntrustId(taskId);
         ReportDetailVo reportDetail;
-        reportDetail = reportMapper.getMiddleReportDetail(taskFlowId,taskId);
+        reportDetail = reportMapper.getMiddleReportDetail(taskFlowId,entrustId);
         if(reportDetail == null){
             reportDetail = new ReportDetailVo();
             reportDetail.setSamples(Lists.newArrayList());

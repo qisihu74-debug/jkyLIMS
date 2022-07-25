@@ -459,6 +459,17 @@
         FROM test_report_record
         where entrustment_id = #{entrustId,jdbcType=BIGINT}
     </select>
+    <select id="getLatestReport" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
+            parameterType="java.lang.Long">
+        SELECT
+            *
+        FROM
+            test_report_record
+        WHERE
+            entrust_id = #{entrustId,jdbcType=BIGINT}
+          AND report_complete_time = ( SELECT MAX( report_complete_time )
+          FROM test_report_record WHERE entrust_id = #{entrustId,jdbcType=BIGINT} )
+    </select>
 
     <select id="selectByRecordId" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
             parameterType="java.lang.Long">

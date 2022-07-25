@@ -69,6 +69,13 @@ public interface ReportRecordEntityMapper {
      */
     ReportRecordEntity selectByEntrustId(Long entrustId);
 
+    /**
+     * 获取最新报告制作数据
+     * @param entrustId
+     * @return
+     */
+    ReportRecordEntity getLatestReport(Long entrustId);
+
     ReportNodeVo getReportNodeByEntrustId(Long entrustId);
 
     /**
