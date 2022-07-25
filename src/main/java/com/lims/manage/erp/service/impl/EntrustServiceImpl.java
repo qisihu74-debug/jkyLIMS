@@ -515,7 +515,7 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) {
+    public synchronized String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file){
         if (MapUtils.queue.size() == 0){
             MapUtils.queue.add("mark");
             //存放委托基本信息==》test_entrusted
@@ -692,7 +692,7 @@ public class EntrustServiceImpl implements EntrustService {
             MapUtils.queue.clear();
             return "新建委托成功";
         }else {
-            return "新建委托失败";
+            return "新建委托失败,请再次点击保存尝试";
         }
     }
 
@@ -3239,7 +3239,9 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) {
+    public synchronized String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) {
+        if(MapUtils.queueCopy.size()==0){
+            MapUtils.queueCopy.add("mark");
         // 获取前台得到的 vo.getId()
         long old = vo.getId();
         //存放委托基本信息==》test_entrusted
@@ -3470,7 +3472,11 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setDepartment(department);
         }
         entityMapper.insertEntrustInfo(basisInfo);
-        return "再来一单新建委托成功";
+        MapUtils.queueCopy.clear();
+            return "新建委托成功";
+        }else {
+            return "再来一单新建委托失败,请再次点击保存尝试";
+        }
     }
 
     @Override
