@@ -1153,7 +1153,7 @@ public class ReportServiceImpl implements ReportService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean uploadReport(String reportCode, MultipartFile file, String verifyer,
                                 String issuer, Long verifyerId, Long issuerId, String code,
-                                String conclusion,String additional,String mixInfo,String type) {
+                                String conclusion,String additional,String mixInfo,String type,String inspector) {
         //解析code
         Map<String,List<String>> map = JSON.parseObject(code, Map.class);
         List<ParamEntity> entities = Lists.newArrayList();
@@ -1241,7 +1241,7 @@ public class ReportServiceImpl implements ReportService {
         //设置签名信息
         String url1 = "";
         try {
-            url1 = insertPicToPdf(url,Long.parseLong(reportCode));
+            url1 = insertPicToPdf(url,Long.parseLong(reportCode),inspector);
             logger.info("设置签名信息：{}",url1);
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)){
                 url = url1;
@@ -2573,11 +2573,11 @@ public class ReportServiceImpl implements ReportService {
      * @throws Exception
      */
     @Override
-    public String insertPicToPdf(String pdfUrl, Long entrustId) throws Exception {
+    public String insertPicToPdf(String pdfUrl, Long entrustId,String inspector) throws Exception {
         HashSet<String> delList = new HashSet<>();
         ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(entrustId);//审核人、签发人
         logger.info("查询签发复合信息:{}",JSON.toJSONString(detailByEntrustId));
-        List<String> stringList = taskMapper.getInspectorByEntrustId(entrustId);
+        /*List<String> stringList = taskMapper.getInspectorByEntrustId(entrustId);
         List<String> stringList1 = Lists.newArrayList();
         for (String string:stringList) {
             String[] split = string.split(",");
@@ -2589,14 +2589,15 @@ public class ReportServiceImpl implements ReportService {
         for (String s:stringList1) {
             String[] split1 = s.split("&");
             list1.add(Long.parseLong(split1[1]));
-        }
+        }*/
         String verUrl = sysUserDao.getSignatureById(detailByEntrustId.getVerifyerId());
         logger.info("签发人:{}",verUrl);
         String issUrl = sysUserDao.getSignatureById(detailByEntrustId.getIssuerId());
         logger.info("批准人:{}",issUrl);
         List<String> checkUrl = Lists.newArrayList();
-        for (Long uId:list1) {
-            String signature = sysUserDao.getSignatureById(uId);
+        String[] split = inspector.split(",");
+        for (String name:split) {
+            String signature = sysUserDao.getInspectorByName(name);
             logger.info("实验人:{}",signature);
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(signature)){
                 checkUrl.add(signature);
@@ -2657,6 +2658,7 @@ public class ReportServiceImpl implements ReportService {
         for (String del:delList) {
             FileAndFolderUtil.delete(del);
         }
+        reportMapper.updateInspector(detailByEntrustId.getReportCode(),inspector);
         return url;
     }
 
