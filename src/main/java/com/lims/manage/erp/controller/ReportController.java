@@ -781,7 +781,7 @@ public class ReportController {
      * @return
      */
     @PostMapping(value = "uploadReport")
-    public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("verifyer") String verifyer,
+    public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file,
                                @RequestParam("code") String code,@RequestParam("conclusion") String conclusion
             ,@RequestParam("additional") String additional,@RequestParam("mixInfo") String mixInfo,@RequestParam("type") String type) {
@@ -789,7 +789,7 @@ public class ReportController {
             return ResultUtil.error("缺少参数！");
         }
         Boolean flag = reportService.uploadReport(reportCode,file,verifyer.split("&")[0],issuer.split("&")[0]
-                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional,mixInfo,type);
+                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional,mixInfo,type,inspector);
         if (flag) {
             return ResultUtil.success("报告文件上传成功！");
         }else {
@@ -869,7 +869,7 @@ public class ReportController {
     @GetMapping("testInsert")
     public void test(String url,Long entrustId) {
         try {
-            String s = reportService.insertPicToPdf(url, entrustId);
+            String s = reportService.insertPicToPdf(url, entrustId,null);
             System.out.println("============="+s);
         }catch (Exception e){
             logger.error("===");
@@ -1113,24 +1113,5 @@ public class ReportController {
     public Result inspectorList(String search){
         List<String> list = reportService.inspectorList(search);
         return ResultUtil.success(list);
-    }
-
-    /**
-     * 更新报告中签字的检测人
-     * @param reportCode
-     * @param inspector
-     * @return
-     */
-    @GetMapping("updateInspector")
-    public Result updateInspector(String reportCode, String inspector){
-        if (StringUtils.isEmpty(reportCode)){
-            return ResultUtil.error("缺少必要参数");
-        }
-        int i = reportService.updateInspector(reportCode,inspector);
-        if (i>0){
-            return ResultUtil.success("设置成功");
-        }else {
-            return ResultUtil.error("设置失败");
-        }
     }
 }
