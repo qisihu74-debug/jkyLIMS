@@ -5,6 +5,7 @@
 
     <resultMap id="reportDetailMap" type="com.lims.manage.erp.vo.ReportDetailVo">
         <result property="id" column="id"></result>
+        <result property="taskFlowId" column="taskFlowId"></result>
         <result property="reportCount" column="report_count"></result>
         <result property="reportType" column="report_type"></result>
         <result property="taskCode" column="task_code"></result>
@@ -586,50 +587,23 @@
 
     <select id="getMiddleReportDetail" resultMap="reportDetailMap">
         SELECT
-        t1.id taskId,
-        t2.id,
-        t1.task_code,
-        t2.entrustment_no,
-        t2.entrust_test_type,
-        t4.product_id product_id1,
-        t4.sample_name,
-        DATE ( t2.request_date ) request_date,
-        t4.product_id,
-        t3.sample_id,
-        t4.sample_code,
-        t4.sample_name sample_name1,
-        t4.specs,
-        t4.outward,
-        t4.product_id,
-        t5.id id_item,
-        t5.state,
-        t6.check_item_id,
-        t5.check_item_name,
-        t9.specs_content,
-        t9.check_result,
-        t9.judge_result,
-        t6.coordinate
+            #{taskFlowId} taskFlowId,
+            t1.entrust_id id,
+            t3.id sample_id,
+            t3.product_id,
+            t3.sample_code,
+            t3.alias_name sample_name1,
+            t3.outward_describe outward,
+            t3.specs,
+            t1.check_item_id,
+            t1.check_item_name,
+            t1.id id_item,
+            t1.origin_url,
+            t2.coordinate
         FROM
-        test_task t1
-        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
-        LEFT JOIN test_entrusted_sample_details_rel t3 ON t1.entrustment_id = t3.entrustment_id
-        LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
-        LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.entrustment_id = t5.entrust_id
-        AND t4.id = t5.sample_id
-        LEFT JOIN test_product_item t6 ON t5.check_item_id = t6.check_item_id
-        LEFT JOIN test_report_record t8 ON t1.id = t8.entrustment_id
-        LEFT JOIN test_report_record_detail t9 ON t8.id = t9.record_id
-        AND t5.check_item_id = t9.check_item_id
-        WHERE
-        t1.state = 3
-        AND t5.state = 3
-        AND t1.id = #{taskId}
-        <if test="deptIds!=null">
-            and t1.dept_id in
-            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
-                #{id}
-            </foreach>
-        </if>
+            ( SELECT * FROM test_entrusted_sample_checkitem_rel WHERE state >= 3 AND task_id = #{taskId} ) t1
+                LEFT JOIN test_product_item t2 ON t1.check_item_id = t2.check_item_id
+                LEFT JOIN test_sample t3 ON t1.sample_id = t3.id
     </select>
 
     <select id="getDetailByEntrustId" resultType="com.lims.manage.erp.entity.ReportRecordEntity">

@@ -908,11 +908,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("/middleReportDetail")
-    public Result middleReportDetail(Long taskId) {
+    public Result middleReportDetail(Integer taskFlowId,Long taskId) {
         if(taskId == null){
             return ResultUtil.error("缺少必要的参数!");
         }
-        return ResultUtil.success("查询中间报告详情成功！", reportService.getMiddleReportDetail(taskId));
+        return ResultUtil.success("查询中间报告详情成功！", reportService.getMiddleReportDetail(taskFlowId,taskId));
     }
 
     @PostMapping("/middleReportPreserve")

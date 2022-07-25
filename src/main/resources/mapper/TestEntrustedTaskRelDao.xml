@@ -24,7 +24,8 @@
         user_id,
         address_name,
         task_id,
-        entrust_id)
+        entrust_id,
+        state)
         values
         <foreach collection="lists" item="entity" separator=",">
             (   #{entity.id,jdbcType=INTEGER},
@@ -35,7 +36,8 @@
                 #{entity.userId,jdbcType=BIGINT},
                 #{entity.addressName,jdbcType=VARCHAR},
                 #{entity.taskId,jdbcType=BIGINT},
-                #{entity.entrustId,jdbcType=BIGINT})
+                #{entity.entrustId,jdbcType=BIGINT},
+                #{entity.state,jdbcType=INTEGER})
         </foreach>
     </insert>
 
@@ -86,6 +88,18 @@
         <if test="updateDate != null">
             update_date = #{updateDate},
         </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateMiddleReportState" parameterType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
+        update test_entrusted_task_rel
+        <set>
+            <if test="state != null">
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="recordId != null">
+                record_id = #{recordId,jdbcType=BIGINT},
+            </if>
         </set>
         where id = #{id,jdbcType=INTEGER}
     </update>

@@ -9,46 +9,11 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.lims.manage.erp.entity.ConclusionEntity;
-import com.lims.manage.erp.entity.ParamEntity;
-import com.lims.manage.erp.entity.QiYueSuoEntity;
-import com.lims.manage.erp.entity.QiYueSuoReqBean;
-import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
-import com.lims.manage.erp.entity.QiYueSuoSealEntity;
-import com.lims.manage.erp.entity.QuotaEntity;
-import com.lims.manage.erp.entity.QuotaRes;
-import com.lims.manage.erp.entity.ReportRecordDetailEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.ReportResBean;
-import com.lims.manage.erp.entity.ReportTemplateEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.entity.SealEntity;
-import com.lims.manage.erp.entity.TeamTreeStructureEntity;
-import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
-import com.lims.manage.erp.entity.TestTeam;
-import com.lims.manage.erp.entity.TreeEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.ReportApprovalMapper;
-import com.lims.manage.erp.mapper.ReportMapper;
-import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.SysUserDao;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestProductDao;
-import com.lims.manage.erp.mapper.TestProductItemDao;
-import com.lims.manage.erp.mapper.TestReportQualifcationDao;
-import com.lims.manage.erp.mapper.TestReportTemplateDao;
-import com.lims.manage.erp.mapper.TestSampleEntityMapper;
-import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
-import com.lims.manage.erp.mapper.TestTechnicistDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.ConvertUtil;
@@ -165,6 +130,8 @@ public class ReportServiceImpl implements ReportService {
     private QiYueSuoEntity qiYueSuoEntity;
     @Autowired
     private TestTechnicistDao testTechnicistDao;
+    @Autowired
+    private TestEntrustedTaskRelDao taskRelDao;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -672,7 +639,7 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    @Transactional
+    @Transactional()
     @Override
     public Boolean middleReportPreserve(ReportPreserveVo vo) {
 //        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
@@ -689,32 +656,31 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
-//        List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
-//        if(allReportComplete.contains(2)){
-//            reportRecordEntity.setState(2+"");
-//        }else{
-//            reportRecordEntity.setState(1+"");
-//            reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-//        }
-//        reportRecordEntity.setState(3+"");
         //生成报告编号
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
         String year = sdf.format(new Date());
         Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
         if (maxCode == null) {
-            reportRecordEntity.setReportCode("ZX-" + year + "-YC-0001");
+            reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-0001");
         } else {
             int newCode = maxCode + 1;
-            reportRecordEntity.setReportCode("ZX-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
+            reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
         }
         reportRecordEntity.setId(recordId);
         reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
         //设置为中间报告
         reportRecordEntity.setType(1+"");
-//        //修改任务报告状态
-//        taskMapper.updateReportStatus(vo.getReportComplete(), vo.getTaskId());
         int insert = recordEntityMapper.insert(reportRecordEntity);
         if (insert < 1) {
+            return false;
+        }
+        //修改任务流转中间报告的状态和recordId
+        TestEntrustedTaskRelEntity relEntity = new TestEntrustedTaskRelEntity();
+        relEntity.setId(vo.getTaskFlowId());
+        relEntity.setState(1);
+        relEntity.setRecordId(recordId);
+        int i = taskRelDao.updateMiddleReportState(relEntity);
+        if (i < 1) {
             return false;
         }
         return true;
@@ -2708,21 +2674,96 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ReportDetailVo getMiddleReportDetail(Long taskId) {
-        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        ReportDetailVo reportDetail = reportMapper.getMiddleReportDetail(taskId, userTeamIds);
+    public ReportDetailVo getMiddleReportDetail(Integer taskFlowId, Long taskId) {
+//        Long recordId = recordEntityMapper.getRecordId(taskId);
+//        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        ReportDetailVo reportDetail;
+        reportDetail = reportMapper.getMiddleReportDetail(taskFlowId,taskId);
+        if(reportDetail == null){
+            reportDetail = new ReportDetailVo();
+            reportDetail.setSamples(Lists.newArrayList());
+            return reportDetail;
+        }
         List<ReportSampleDetailVo> samples = reportDetail.getSamples();
+        //处理每组样品下检测项
+        StringBuilder sampleName = new StringBuilder();
+        int i = 0;
         for (ReportSampleDetailVo reportSampleDetailVo : samples) {
+            List<ReportCheckItemDetailVo> result = Lists.newArrayList();
+            List<SampleItemEntity> temp = Lists.newArrayList();
             List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
+            //查询子级检测项信息
             for (int j = 0; j < checkItems.size(); j++) {
                 ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
                 int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
                 if (last > 0) {
+                    //移除有子检测项的父检测项
                     checkItems.remove(reportCheckItemDetailVo);
+                    //查询该父检测项下的子检测项信息
+                    List<SampleItemEntity> nodeItems = entrustEntityMapper.getItemRecursionList(reportCheckItemDetailVo.getCheckItemId());
+                    List<SampleItemEntity> tempNodeItems = Lists.newArrayList();
+                    //将父级原始记录传递给子级
+                    for (SampleItemEntity nodeItem : nodeItems) {
+                        nodeItem.setOriginUrl(reportCheckItemDetailVo.getOriginUrl());
+                        nodeItem.setSampleId(Integer.parseInt(reportSampleDetailVo.getSampleId()+""));
+                        tempNodeItems.add(nodeItem);
+                    }
+                    temp.addAll(tempNodeItems);
                 }
             }
-            reportSampleDetailVo.setCheckItems(checkItems);
+            //拼接父检测项名称和子检测项名称
+            HashMap<Long, SampleItemEntity> itemMap = new HashMap<>();
+            if(!CollectionUtils.isEmpty(temp)){
+                for (SampleItemEntity entity0 : temp) {
+                    itemMap.put(entity0.getCheckItemId(), entity0);
+                }
+                for (SampleItemEntity entity2 : temp) {
+                    SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
+                    if (sampleItemEntity != null && entity2.getUnitPrice() == null) {
+                        entity2.setCheckItemName(sampleItemEntity.getCheckItemName() + "-" + entity2.getCheckItemName());
+                    }
+                }
+            }
+            if(!CollectionUtils.isEmpty(temp)){
+                for (SampleItemEntity sampleItemEntity : temp) {
+                    //去除父检测项
+                    int last = testProductDao.isLast(sampleItemEntity.getCheckItemId().intValue());
+                    if (last > 0) {
+                        continue;
+                    }
+                    ReportCheckItemDetailVo vo = new ReportCheckItemDetailVo();
+//                    ReportRecordDetailEntity entity = recordDetailEntityMapper.selectByRecordIdAndItemId(recordId, sampleItemEntity.getCheckItemId().intValue(),Integer.parseInt(sampleItemEntity.getSampleId()+""));
+//                    if(recordId != null && entity != null){
+//                        vo.setCheckItemId(entity.getCheckItemId());
+//                        vo.setCheckItemName(entity.getCheckItemName());
+//                        vo.setCoordinate(entity.getCoordinate());
+//                        vo.setOriginUrl(entity.getOriginUrl());
+//
+//                        vo.setId(entity.getId());
+//                        vo.setSpecsContent(entity.getSpecsContent());
+//                        vo.setCheckResult(entity.getCheckResult());
+//                        vo.setJudgeResult(entity.getJudgeResult());
+//                    }else{
+//
+//                    }
+                    vo.setCheckItemId(sampleItemEntity.getCheckItemId());
+                    vo.setCheckItemName(sampleItemEntity.getCheckItemName());
+                    vo.setCoordinate(sampleItemEntity.getCoordinate());
+                    vo.setOriginUrl(sampleItemEntity.getOriginUrl());
+                    result.add(vo);
+                }
+            }
+            if(!CollectionUtils.isEmpty(checkItems)){
+                result.addAll(checkItems);
+            }
+            reportSampleDetailVo.setCheckItems(result);
+            sampleName.append(reportSampleDetailVo.getSampleName());
+            if(i != samples.size() -1){
+                sampleName.append("/");
+            }
+            i++;
         }
+        reportDetail.setSampleName(sampleName.toString());
         reportDetail.setSamples(samples);
         return reportDetail;
     }

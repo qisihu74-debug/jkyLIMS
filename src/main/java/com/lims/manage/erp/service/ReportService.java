@@ -385,7 +385,7 @@ public interface ReportService {
      * @param taskId
      * @return
      */
-    ReportDetailVo getMiddleReportDetail(Long taskId);
+    ReportDetailVo getMiddleReportDetail(Integer taskFlowId,Long taskId);
 
     String getUrlById(Long id);
 

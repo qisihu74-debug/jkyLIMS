@@ -93,5 +93,9 @@ public class TestEntrustedTaskRelEntity {
      * 中间报告任务流转状态（0，未完成；1，已完成）
      */
     private Integer state;
+    /**
+     * 中间报告数据主键id
+     */
+    private Long recordId;
 
 }

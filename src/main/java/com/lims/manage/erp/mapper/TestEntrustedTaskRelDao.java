@@ -40,6 +40,13 @@ public interface TestEntrustedTaskRelDao {
     int updateData(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity);
 
     /**
+     * 修改中间报告状态
+     * @param testEntrustedTaskRelEntity
+     * @return
+     */
+    int updateMiddleReportState(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity);
+
+    /**
      * 进行删除 操作
      */
     int deletedData(@Param("id") Integer id);

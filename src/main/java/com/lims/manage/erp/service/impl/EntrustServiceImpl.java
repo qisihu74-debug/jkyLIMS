@@ -3660,15 +3660,13 @@ public class EntrustServiceImpl implements EntrustService {
         // 通过委托单id 获取任务列表信息：
         List<TestEntrustedTaskRelEntity> testEntrustedTaskRelEntityList = testEntrustedTaskRelDao.getDeptByEntrustIdList(id);
         // 补充信息。testEntrustedTaskRelEntityList 集合中 taskId 补充存入
-        for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity:taskRelEntities)
-        {
+        for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity:taskRelEntities) {
             // 处理信息 部门id&部门名称 获取为 部门ID
             if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getDepartment())){
                 String[] deptIds = testEntrustedTaskRelEntity.getDepartment().split("&");
                 testEntrustedTaskRelEntity.setDeptId(Integer.parseInt(deptIds[0]));
             }
-            for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity1 :testEntrustedTaskRelEntityList)
-            {
+            for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity1 :testEntrustedTaskRelEntityList) {
                 if(testEntrustedTaskRelEntity1.getDeptId().equals(testEntrustedTaskRelEntity.getDeptId())){
                     testEntrustedTaskRelEntity.setTaskId(testEntrustedTaskRelEntity1.getTaskId());
                     testEntrustedTaskRelEntity.setDepartment(testEntrustedTaskRelEntity1.getDeptId()+"&"+testEntrustedTaskRelEntity1.getDeptName());
@@ -3678,6 +3676,10 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                     testEntrustedTaskRelEntity.setEntrustId(id);
                 }
+            }
+            //设置中间报告的完成状态
+            if(testEntrustedTaskRelEntity.getType().equals(1)){
+                testEntrustedTaskRelEntity.setState(0);
             }
         }
         // 进行批量 add操作
