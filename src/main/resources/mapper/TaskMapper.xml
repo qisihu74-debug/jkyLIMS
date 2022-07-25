@@ -943,4 +943,7 @@
         WHERE
             t1.id = #{taskId}
     </select>
+    <select id="getEntrustId" resultType="java.lang.Long" >
+        select entrustment_id from test_task where id = #{taskId}
+    </select>
 </mapper>

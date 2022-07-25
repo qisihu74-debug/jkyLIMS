@@ -419,4 +419,11 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     List<String> getSampleOutward(Long taskId);
+
+    /**
+     * 查询委托单ID
+     * @param taskId
+     * @return
+     */
+    Long getEntrustId(Long taskId);
 }
