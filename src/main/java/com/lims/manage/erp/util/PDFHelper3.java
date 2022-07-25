@@ -5,6 +5,9 @@ import com.aspose.cells.PdfSaveOptions;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.WorksheetCollection;
 import com.aspose.slides.Presentation;
+import com.aspose.words.Document;
+import com.aspose.words.ImageSaveOptions;
+import com.aspose.words.PageSet;
 import com.aspose.words.SaveFormat;
 import com.spire.pdf.PdfDocument;
 import com.spire.pdf.PdfPageBase;
@@ -16,7 +19,12 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
+import java.awt.*;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -129,6 +138,62 @@ public class PDFHelper3 {
      * @param file
      * @param basePath
      */
+    public static void pdf2Ppt(MultipartFile file, String basePath) {
+        FileInputStream inputStream = null;
+        File toFile = AsposeUtil.MultipartFileToFile(file);
+        long old = System.currentTimeMillis();
+        try {
+            File fileDoc = new File(basePath);
+            FileOutputStream os = new FileOutputStream(fileDoc);
+            inputStream = new FileInputStream(toFile);
+            com.aspose.pdf.Document doc = new com.aspose.pdf.Document(inputStream);//加载源文件数据
+            System.out.println("开始转换");
+            doc.save(os, com.aspose.pdf.SaveFormat.Pptx);//设置转换文件类型并转换
+            os.close();
+            //去除水印
+            removeWatermark(new File(basePath));
+            //转化用时
+            long now = System.currentTimeMillis();
+            System.out.println("Pdf 转 ppt共耗时：" + ((now - old) / 1000.0) + "秒");
+        } catch (Exception e) {
+            System.out.println("Pdf 转 ppt 失败...");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * pdf转word
+     * @param file
+     * @param basePath
+     */
+    public static void pdf2Excel(MultipartFile file, String basePath) {
+        FileInputStream inputStream = null;
+        File toFile = AsposeUtil.MultipartFileToFile(file);
+        long old = System.currentTimeMillis();
+        try {
+            File fileDoc = new File(basePath);
+            FileOutputStream os = new FileOutputStream(fileDoc);
+            inputStream = new FileInputStream(toFile);
+            com.aspose.pdf.Document doc = new com.aspose.pdf.Document(inputStream);//加载源文件数据
+            System.out.println("开始转换");
+            doc.save(os, com.aspose.pdf.SaveFormat.Excel);//设置转换文件类型并转换
+            os.close();
+            //去除水印
+            removeWatermark(new File(basePath));
+            //转化用时
+            long now = System.currentTimeMillis();
+            System.out.println("Pdf 转 excel共耗时：" + ((now - old) / 1000.0) + "秒");
+        } catch (Exception e) {
+            System.out.println("Pdf 转 excel 失败...");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * pdf转word
+     * @param file
+     * @param basePath
+     */
     public static void pdf2doc(MultipartFile file, String basePath) {
         FileInputStream inputStream = null;
         File toFile = AsposeUtil.MultipartFileToFile(file);
@@ -175,6 +240,26 @@ public class PDFHelper3 {
         } catch (Exception e) {
             System.out.println("word 转 pdf 失败...");
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * word转图片
+     * @param file
+     * @param basePath
+     */
+    public static void doc2Img(MultipartFile file, String basePath) {
+        FileInputStream inputStream = null;
+        File toFile = AsposeUtil.MultipartFileToFile(file);
+        try {
+            InputStream inStream = new FileInputStream(toFile);
+            Document doc = new Document();
+            int pageCount = doc.getPageCount();
+            List<BufferedImage> wordToImg = wordToImg(inStream,pageCount+2);//
+            BufferedImage mergeImage = mergeImage(false, wordToImg);
+            ImageIO.write(mergeImage, "jpg",new File( basePath));
+        }catch (Exception e){
+
         }
     }
 
@@ -422,4 +507,108 @@ public class PDFHelper3 {
     public static void main(String[] args) {
         setPdfStyle("D:\\Users\\Administrator\\Desktop\\office-tools\\merge(1).pdf");
     }
+
+    /**
+     * @Description: word和txt文件转换图片
+     */
+    private static List<BufferedImage> wordToImg(InputStream inputStream, int pageNum) throws Exception {
+        try {
+            long old = System.currentTimeMillis();
+            Document doc = new Document(inputStream);
+            ImageSaveOptions options = new ImageSaveOptions(SaveFormat.PNG);
+            options.setPrettyFormat(true);
+            options.setUseAntiAliasing(true);
+            options.setUseHighQualityRendering(true);
+            int pageCount = doc.getPageCount();
+            if (pageCount > pageNum) {//生成前pageCount张
+                pageCount = pageNum;
+            }
+            List<BufferedImage> imageList = new ArrayList<BufferedImage>();
+            for (int i = 0; i < pageCount; i++) {
+                OutputStream output = new ByteArrayOutputStream();
+                PageSet pageSet = new PageSet(i);
+                options.setPageSet(pageSet);
+                doc.save(output, options);
+                ImageInputStream imageInputStream = javax.imageio.ImageIO.createImageInputStream(parse(output));
+                imageList.add(javax.imageio.ImageIO.read(imageInputStream));
+
+            }
+            return imageList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    //outputStream转inputStream
+    public static ByteArrayInputStream parse(OutputStream out) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos = (ByteArrayOutputStream) out;
+        ByteArrayInputStream swapStream = new ByteArrayInputStream(baos.toByteArray());
+        return swapStream;
+    }
+
+    /**
+     * 合并任数量的图片成一张图片
+     *
+     * @param isHorizontal true代表水平合并，fasle代表垂直合并
+     * @param imgs         待合并的图片数组
+     * @return
+     * @throws IOException
+     */
+    public static BufferedImage mergeImage(boolean isHorizontal, List<BufferedImage> imgs) throws IOException {
+        // 生成新图片
+        BufferedImage destImage = null;
+        // 计算新图片的长和高
+        int allw = 0, allh = 0, allwMax = 0, allhMax = 0;
+        // 获取总长、总宽、最长、最宽
+        for (int i = 0; i < imgs.size(); i++) {
+            BufferedImage img = imgs.get(i);
+            allw += img.getWidth();
+
+            if (imgs.size() != i + 1) {
+                allh += img.getHeight() + 5;
+            } else {
+                allh += img.getHeight();
+            }
+
+
+            if (img.getWidth() > allwMax) {
+                allwMax = img.getWidth();
+            }
+            if (img.getHeight() > allhMax) {
+                allhMax = img.getHeight();
+            }
+        }
+        // 创建新图片
+        if (isHorizontal) {
+            destImage = new BufferedImage(allw, allhMax, BufferedImage.TYPE_INT_RGB);
+        } else {
+            destImage = new BufferedImage(allwMax, allh, BufferedImage.TYPE_INT_RGB);
+        }
+        Graphics2D g2 = (Graphics2D) destImage.getGraphics();
+        g2.setBackground(Color.LIGHT_GRAY);
+        g2.clearRect(0, 0, allw, allh);
+        g2.setPaint(Color.RED);
+
+        // 合并所有子图片到新图片
+        int wx = 0, wy = 0;
+        for (int i = 0; i < imgs.size(); i++) {
+            BufferedImage img = imgs.get(i);
+            int w1 = img.getWidth();
+            int h1 = img.getHeight();
+            // 从图片中读取RGB
+            int[] ImageArrayOne = new int[w1 * h1];
+            ImageArrayOne = img.getRGB(0, 0, w1, h1, ImageArrayOne, 0, w1); // 逐行扫描图像中各个像素的RGB到数组中
+            if (isHorizontal) { // 水平方向合并
+                destImage.setRGB(wx, 0, w1, h1, ImageArrayOne, 0, w1); // 设置上半部分或左半部分的RGB
+            } else { // 垂直方向合并
+                destImage.setRGB(0, wy, w1, h1, ImageArrayOne, 0, w1); // 设置上半部分或左半部分的RGB
+            }
+            wx += w1;
+            wy += h1 + 5;
+        }
+        return destImage;
+    }
+
 }
