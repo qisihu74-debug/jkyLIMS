@@ -79,7 +79,7 @@ public class EntrustController {
     //@RequiresPermissions("entrust:entrust:addEntrust")
     public Result addEntrustTest(@RequestParam("json") String json, MultipartFile[] file) {
         EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
-         return ResultUtil.success(entrustService.addEntrustTest0620(entrust, file));
+        return ResultUtil.success( entrustService.addEntrustTest0620(entrust, file));
     }
 
 

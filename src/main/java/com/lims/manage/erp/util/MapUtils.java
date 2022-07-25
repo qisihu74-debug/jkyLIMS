@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class MapUtils {
     public static final ConcurrentLinkedQueue queue = new ConcurrentLinkedQueue();
+    public static final ConcurrentLinkedQueue queueCopy = new ConcurrentLinkedQueue();
     /**
      * 百度地图请求秘钥
      */
