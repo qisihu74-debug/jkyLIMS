@@ -2,17 +2,13 @@ package com.lims.manage.erp.util;
 
 
 import com.alibaba.fastjson.JSONObject;
-import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author gjl
@@ -23,6 +19,7 @@ import java.util.Set;
  * @Copyright © 河南交科院
  */
 public class MapUtils {
+    public static final ConcurrentLinkedQueue queue = new ConcurrentLinkedQueue();
     /**
      * 百度地图请求秘钥
      */
