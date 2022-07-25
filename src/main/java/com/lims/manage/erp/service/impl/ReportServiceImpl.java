@@ -642,7 +642,6 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     @Override
     public Boolean middleReportPreserve(ReportPreserveVo vo) {
-        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.getLatestReport(vo.getEntrustmentId());
         //获取父级code
         Long deptId = taskMapper.getDeptByEntrustId(vo.getEntrustmentId());
         String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
@@ -2685,6 +2684,12 @@ public class ReportServiceImpl implements ReportService {
             reportDetail.setSamples(Lists.newArrayList());
             return reportDetail;
         }
+        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.getLatestReport(entrustId);
+        List<ReportRecordDetailEntity> checkInfoByRecordId = Lists.newArrayList();
+        if(reportRecordEntity1 != null){
+            checkInfoByRecordId = recordDetailEntityMapper.getCheckInfoByRecordId(reportRecordEntity1.getId());
+        }
+
         List<ReportSampleDetailVo> samples = reportDetail.getSamples();
         //处理每组样品下检测项
         StringBuilder sampleName = new StringBuilder();
@@ -2751,11 +2756,41 @@ public class ReportServiceImpl implements ReportService {
                     vo.setCheckItemName(sampleItemEntity.getCheckItemName());
                     vo.setCoordinate(sampleItemEntity.getCoordinate());
                     vo.setOriginUrl(sampleItemEntity.getOriginUrl());
+                    vo.setSampleId(sampleItemEntity.getSampleId());
+                    //设置上次报告制作记录
+                    if(!CollectionUtils.isEmpty(checkInfoByRecordId)){
+                        for (ReportRecordDetailEntity reportRecordDetailEntity : checkInfoByRecordId) {
+                            if(vo.getCheckItemId() == reportRecordDetailEntity.getCheckItemId() &&
+                                    vo.getSampleId() == reportRecordDetailEntity.getSampleId()){
+                                vo.setSpecsContent(reportRecordDetailEntity.getSpecsContent());
+                                vo.setCheckResult(reportRecordDetailEntity.getCheckResult());
+                                vo.setJudgeResult(reportRecordDetailEntity.getJudgeResult());
+                            }
+                        }
+                    }
                     result.add(vo);
                 }
             }
             if(!CollectionUtils.isEmpty(checkItems)){
-                result.addAll(checkItems);
+                List<ReportCheckItemDetailVo> detailVos = Lists.newArrayList();
+                for (ReportCheckItemDetailVo reportCheckItemDetailVo:checkItems) {
+                    Long checkItemId = reportCheckItemDetailVo.getCheckItemId();
+                    Integer sampleId = reportCheckItemDetailVo.getSampleId();
+                    //设置上次报告制作记录
+                    if(!CollectionUtils.isEmpty(checkInfoByRecordId)){
+                        for (ReportRecordDetailEntity reportRecordDetailEntity : checkInfoByRecordId) {
+                            Long checkItemId1 = reportRecordDetailEntity.getCheckItemId();
+                            Integer sampleId1 = reportRecordDetailEntity.getSampleId();
+                            if(checkItemId.equals(checkItemId1) && sampleId.equals(sampleId1)){
+                                reportCheckItemDetailVo.setSpecsContent(reportRecordDetailEntity.getSpecsContent());
+                                reportCheckItemDetailVo.setCheckResult(reportRecordDetailEntity.getCheckResult());
+                                reportCheckItemDetailVo.setJudgeResult(reportRecordDetailEntity.getJudgeResult());
+                            }
+                        }
+                    }
+                    detailVos.add(reportCheckItemDetailVo);
+                }
+                result.addAll(detailVos);
             }
             reportSampleDetailVo.setCheckItems(result);
             sampleName.append(reportSampleDetailVo.getSampleName());

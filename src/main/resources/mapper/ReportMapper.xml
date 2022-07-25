@@ -32,6 +32,7 @@
                 <result property="judgeResult" column="judge_result"></result>
                 <result property="coordinate" column="coordinate"></result>
                 <result property="originUrl" column="origin_url"></result>
+                <result property="sampleId" column="sample_id"></result>
                 <collection property="specsContents" ofType="com.lims.manage.erp.vo.ReportSpecsContentVo">
                     <result property="value" column="value"></result>
                     <result property="label" column="label"></result>
