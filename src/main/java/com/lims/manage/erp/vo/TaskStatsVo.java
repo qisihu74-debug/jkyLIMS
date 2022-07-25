@@ -19,7 +19,7 @@ public class TaskStatsVo {
     /**
      * 科室ID
      */
-    private Long deptId;
+    private String teamId;
     /**
      * 任务编号纯数字
      */
@@ -120,5 +120,10 @@ public class TaskStatsVo {
     private String remark;
 
     private Integer[] integers;
+
+    /**
+     * 部门信息id集合
+     */
+    private List<Long> nodeTeam;
 
 }

@@ -466,6 +466,22 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         testSampleEntityMapper.insertBatchMixSamples(param);
         return mixInfoEntity;
     }
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Boolean judgmentSampleUnit(Integer id, Integer companyId) {
+        //        根据样品ID 判断 样品与委托单是否绑定 、绑定 产品id是否变动，变动 则清除委托单下检测项信息。
+        TestSampleEntity testSampleEntity = testSampleEntityMapper.selectByPrimaryKey(id);
+        if(testSampleEntity.getIsUse()==1&&!testSampleEntity.getCompanyId().equals(companyId)){
+            return false;
+        }
+        if(!testSampleEntity.getCompanyId().equals(companyId)){
+            TestSampleEntity record = new TestSampleEntity();
+            record.setId(id);
+            record.setCompanyId(companyId);
+            testSampleEntityMapper.updateByPrimaryKeySelective(record);
+        }
+        return true;
+    }
 
     /**
      * 根据样品id 处理 是否需要变更。

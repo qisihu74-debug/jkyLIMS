@@ -19,6 +19,7 @@ import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -768,15 +769,15 @@ public class EntrustController {
      * @throws IOException
      */
     @GetMapping("/getClientListExport")
-    public void getClientListExport(ClientOrderdetailVo clientOrderdetailVo,HttpServletResponse response) throws IOException {
+    public void getClientListExport(ClientOrderdetailVo clientOrderdetailVo,HttpServletResponse response) throws Exception {
         clientOrderdetailVo.setPageNum(1);
         clientOrderdetailVo.setPageSize(100000);
         BufferedOutputStream bos = null;
         String fileName = "企业委托单详情表"+DateUtil.formatDate(new Date());
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
-        response.setHeader("Content-Disposition", "attachment; filename="
-                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode(fileName+".xlsx", "UTF-8") );
         PageInfo pageInfo = entrustService.getClientList(clientOrderdetailVo);
         List<ClientOrderdetailVo> list = Lists.newArrayList();
         if(!CollectionUtils.isEmpty(pageInfo.getList())){
