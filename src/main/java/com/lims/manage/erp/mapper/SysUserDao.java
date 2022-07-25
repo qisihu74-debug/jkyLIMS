@@ -95,4 +95,7 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
      */
     @Select("select signature_url from sys_user where user_id = #{userId}")
     String getSignatureById(@Param("userId") Long userId);
+
+    @Select("select signature_url from sys_user where name = #{name} LIMIT 1;")
+    String getInspectorByName(@Param("name") String name);
 }

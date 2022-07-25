@@ -10,26 +10,81 @@ import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.*;
-import com.lims.manage.erp.result.Result;
-import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustFileTableEntity;
+import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
+import com.lims.manage.erp.entity.EntrustPamentEntity;
+import com.lims.manage.erp.entity.EntrustSampleEntity;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TaskEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TestCompanyEntity;
+import com.lims.manage.erp.entity.TestCompanyJsonEntity;
+import com.lims.manage.erp.entity.TestCustomerEntity;
+import com.lims.manage.erp.entity.TestCustomerJsonEntity;
+import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
+import com.lims.manage.erp.entity.TestInitDataEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
+import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.EntrustFileTableDao;
+import com.lims.manage.erp.mapper.ProductItemEntityMapper;
+import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
+import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.SysUserDao;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
+import com.lims.manage.erp.mapper.TestCompanyDao;
+import com.lims.manage.erp.mapper.TestCustomerDao;
+import com.lims.manage.erp.mapper.TestEntrustedTaskRelDao;
+import com.lims.manage.erp.mapper.TestProductDao;
+import com.lims.manage.erp.mapper.TestSampleEntityMapper;
+import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
+import com.lims.manage.erp.mapper.TestTeamDao;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.TestSampleEntityService;
-import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.*;
-import net.sf.jxls.transformer.XLSTransformer;
-import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellRangeAddress;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MapUtils;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.PageInfoUtils;
+import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.CheckItemDeptVo;
+import com.lims.manage.erp.vo.CheckItemDetailVo;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
+import com.lims.manage.erp.vo.ClientOrderdetailVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.EntrustSampleInfoVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.ReportApprovalVo;
+import com.lims.manage.erp.vo.ReportNodeVo;
+import com.lims.manage.erp.vo.ReportProgressStateVo;
+import com.lims.manage.erp.vo.ReportProgressVo;
+import com.lims.manage.erp.vo.SampleDetailAddVo;
+import com.lims.manage.erp.vo.SamplesAddVo;
+import com.lims.manage.erp.vo.TaskPriceVo;
+import com.lims.manage.erp.vo.TaskProgressStateVo;
+import com.lims.manage.erp.vo.TaskProgressVo;
+import com.lims.manage.erp.vo.TaskVo;
+import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
+import com.lims.manage.erp.vo.UpdateReportTeamVo;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,16 +93,28 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -448,179 +515,185 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file){
-        //存放委托基本信息==》test_entrusted
-        EntrustEntity basisInfo = new EntrustEntity(vo);
-        long id = GenID.getID();
-        basisInfo.setId(id);
-        //设置委托编号
-        Integer code = null;
-        String currentTime = DateUtil.getTodayString().substring(0, 6);
-        //获取当前最大样品编号
-        PageHelper.clearPage();
-        Integer entrustNum = entityMapper.selectMaxNo();
-        if (entrustNum != null && entrustNum > 0) {
-            String substring = entrustNum.toString().substring(0, 6);
-            if (substring.equals(currentTime)) {
-                code = entrustNum + 1;
+    public synchronized String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) {
+        if (MapUtils.queue.size() == 0){
+            MapUtils.queue.add("mark");
+            //存放委托基本信息==》test_entrusted
+            EntrustEntity basisInfo = new EntrustEntity(vo);
+            long id = GenID.getID();
+            basisInfo.setId(id);
+            //设置委托编号
+            Integer code = null;
+            String currentTime = DateUtil.getTodayString().substring(0, 6);
+            //获取当前最大样品编号
+            PageHelper.clearPage();
+            Integer entrustNum = entityMapper.selectMaxNo();
+            if (entrustNum != null && entrustNum > 0) {
+                String substring = entrustNum.toString().substring(0, 6);
+                if (substring.equals(currentTime)) {
+                    code = entrustNum + 1;
+                } else {
+                    code = Integer.parseInt(currentTime + "0001");
+                }
             } else {
                 code = Integer.parseInt(currentTime + "0001");
             }
-        } else {
-            code = Integer.parseInt(currentTime + "0001");
-        }
-        basisInfo.setEntrustmentNo(code);
-        // 通过委托编号 查询是否存在
-        PageHelper.clearPage();
-        if (entityMapper.getByData(basisInfo.getEntrustmentNo()) != null) {
-            return "新增委托失败!:\t委托编号已存在\t"+basisInfo.getEntrustmentNo();
-        }
-        // 通过样品ID 查询委托单信息和样品Id 绑定关系 （==null 正常，!=null false）
-        if (!CollectionUtils.isEmpty(vo.getSamples())) {
-            for (SampleEntity sampleEntity : vo.getSamples()) {
+            basisInfo.setEntrustmentNo(code);
+            // 通过委托编号 查询是否存在
+            PageHelper.clearPage();
+            if (entityMapper.getByData(basisInfo.getEntrustmentNo()) != null) {
+                return "新增委托失败!:\t委托编号已存在\t"+basisInfo.getEntrustmentNo();
+            }
+            // 通过样品ID 查询委托单信息和样品Id 绑定关系 （==null 正常，!=null false）
+            if (!CollectionUtils.isEmpty(vo.getSamples())) {
+                for (SampleEntity sampleEntity : vo.getSamples()) {
+                    PageHelper.clearPage();
+                    if (entityMapper.getEntrustIdBySampleId(sampleEntity.getId()) != null) {
+                        return "新增委托失败!:\t样品与委托单与建立关系\t"+sampleEntity.getId();
+                    }
+                }
+            }
+            //附件存在上传附件到服务器
+            if (file.length != 0) {
+                for (MultipartFile multipartFile : file) {
+                    // 通过委托单新id 处理附件操作
+                    uploading(basisInfo.getId(), multipartFile);
+                }
+            }
+            //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
+            List<SampleEntity> samples = vo.getSamples();
+            List<EntrustSampleEntity> list = new ArrayList<>();
+            List<EntrustSampleEntity> list1 = new ArrayList<>();
+            if (!CollectionUtils.isEmpty(samples)) {
+                for (SampleEntity sampleEntity : samples) {
+                    sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
+                    EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
+                    entrustSampleEntity.setEntrustmentId(basisInfo.getId());
+                    entrustSampleEntity.setSampleId(sampleEntity.getId());
+                    list.add(entrustSampleEntity);
+                    List<Integer> standardFileIds = sampleEntity.getStandardFileIds();
+                    if (!CollectionUtils.isEmpty(standardFileIds)) {
+                        for (Integer integer : standardFileIds) {
+                            EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
+                            sampleEntity1.setSampleId(sampleEntity.getId());
+                            sampleEntity1.setStandardId(integer);
+                            sampleEntity1.setEntrustmentId(basisInfo.getId());
+                            list1.add(sampleEntity1);
+                        }
+                    }
+                    //样品下检测项
+                    List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
+                    if (!CollectionUtils.isEmpty(sampleCheckItem)) {
+                        for (SampleItemEntity entity : sampleCheckItem) {
+                            //样品ID
+                            entity.setSampleId(sampleEntity.getId());
+                            //委托单ID
+                            entity.setEntrustId(basisInfo.getId());
+                            //处理检测项名称中包含中文（），《》
+                            String checkItemName = entity.getCheckItemName();
+                            char char1 = '（';
+                            char char2 = '）';
+                            char char3 = '，';
+                            char char4 = '《';
+                            char char5 = '》';
+                            String newItemName = StrUtil.removeAll(checkItemName, char1, char2, char3, char4, char5);
+                            entity.setCheckItemName(newItemName);
+                        }
+                    }
+                    entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
+                    //根据委托检测类别关联 配合比检测信息和委托单ID
+                    if (vo.getEntrustTestType().contains("配合比")) {
+                        TestSampleMixInfoEntity record = new TestSampleMixInfoEntity();
+                        record.setEntrustmentId(id);
+                        record.setSampleId(sampleEntity.getId());
+                        mixInfoEntityMapper.updateBySampleId(record);
+                    }
+                }
+                if (!CollectionUtils.isEmpty(list)) {
+                    entityMapper.BatchSaveEntrustSample(list);
+                }
+                if (!CollectionUtils.isEmpty(list1)) {
+                    entityMapper.BatchSaveSampleStandard(list1);
+                }
+            }
+            //更新委托单收费记录信息
+            if (!StringUtils.isEmpty(vo.getPaymentRecord())) {
+                EntrustPamentEntity pamentEntity = new EntrustPamentEntity();
+                pamentEntity.setEntrustmentId(basisInfo.getId());
+                pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
+                pamentEntity.setPrice(vo.getPaymentRecord());
+                entityMapper.saveEntrustPayRecord(pamentEntity);
+            }
+            basisInfo.setState(0);
+            // 解析印章数组
+            if (vo.getSealTypes() != null && vo.getSealTypes().length > 0) {
+                StringBuilder sealTypes = new StringBuilder();
+                for (int i = 0; i < vo.getSealTypes().length; i++) {
+                    sealTypes.append(vo.getSealTypes()[i]);
+                    sealTypes.append(",");
+                }
+                basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
+            }
+            // 通过委托单id 获取公司名称。
+            basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(), 1));
+            // 通过委托单位和类型 查看联系人和手机号是否存在
+            if (!StringUtils.isEmpty(basisInfo.getEntrustCompany()) && !StringUtils.isEmpty(basisInfo.getEntrustPeople()) && !StringUtils.isEmpty(basisInfo.getEntrustPhone())) {
+                TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
+                testCompanyJsonEntity.setCompanyName(basisInfo.getEntrustCompany());
+                testCompanyJsonEntity.setContacts(basisInfo.getEntrustPeople());
+                testCompanyJsonEntity.setContactWay(basisInfo.getEntrustPhone());
+                testCompanyJsonEntity.setType("1");
                 PageHelper.clearPage();
-                if (entityMapper.getEntrustIdBySampleId(sampleEntity.getId()) != null) {
-                    return "新增委托失败!:\t样品与委托单与建立关系\t"+sampleEntity.getId();
-                }
-            }
-        }
-        //附件存在上传附件到服务器
-        if (file.length != 0) {
-            for (MultipartFile multipartFile : file) {
-                // 通过委托单新id 处理附件操作
-                uploading(basisInfo.getId(), multipartFile);
-            }
-        }
-        //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
-        List<SampleEntity> samples = vo.getSamples();
-        List<EntrustSampleEntity> list = new ArrayList<>();
-        List<EntrustSampleEntity> list1 = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(samples)) {
-            for (SampleEntity sampleEntity : samples) {
-                sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
-                EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
-                entrustSampleEntity.setEntrustmentId(basisInfo.getId());
-                entrustSampleEntity.setSampleId(sampleEntity.getId());
-                list.add(entrustSampleEntity);
-                List<Integer> standardFileIds = sampleEntity.getStandardFileIds();
-                if (!CollectionUtils.isEmpty(standardFileIds)) {
-                    for (Integer integer : standardFileIds) {
-                        EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
-                        sampleEntity1.setSampleId(sampleEntity.getId());
-                        sampleEntity1.setStandardId(integer);
-                        sampleEntity1.setEntrustmentId(basisInfo.getId());
-                        list1.add(sampleEntity1);
-                    }
-                }
-                //样品下检测项
-                List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
-                if (!CollectionUtils.isEmpty(sampleCheckItem)) {
-                    for (SampleItemEntity entity : sampleCheckItem) {
-                        //样品ID
-                        entity.setSampleId(sampleEntity.getId());
-                        //委托单ID
-                        entity.setEntrustId(basisInfo.getId());
-                        //处理检测项名称中包含中文（），《》
-                        String checkItemName = entity.getCheckItemName();
-                        char char1 = '（';
-                        char char2 = '）';
-                        char char3 = '，';
-                        char char4 = '《';
-                        char char5 = '》';
-                        String newItemName = StrUtil.removeAll(checkItemName, char1, char2, char3, char4, char5);
-                        entity.setCheckItemName(newItemName);
-                    }
-                }
-                entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
-                //根据委托检测类别关联 配合比检测信息和委托单ID
-                if (vo.getEntrustTestType().contains("配合比")) {
-                    TestSampleMixInfoEntity record = new TestSampleMixInfoEntity();
-                    record.setEntrustmentId(id);
-                    record.setSampleId(sampleEntity.getId());
-                    mixInfoEntityMapper.updateBySampleId(record);
-                }
-            }
-            if (!CollectionUtils.isEmpty(list)) {
-                entityMapper.BatchSaveEntrustSample(list);
-            }
-            if (!CollectionUtils.isEmpty(list1)) {
-                entityMapper.BatchSaveSampleStandard(list1);
-            }
-        }
-        //更新委托单收费记录信息
-        if (!StringUtils.isEmpty(vo.getPaymentRecord())) {
-            EntrustPamentEntity pamentEntity = new EntrustPamentEntity();
-            pamentEntity.setEntrustmentId(basisInfo.getId());
-            pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
-            pamentEntity.setPrice(vo.getPaymentRecord());
-            entityMapper.saveEntrustPayRecord(pamentEntity);
-        }
-        basisInfo.setState(0);
-        // 解析印章数组
-        if (vo.getSealTypes() != null && vo.getSealTypes().length > 0) {
-            StringBuilder sealTypes = new StringBuilder();
-            for (int i = 0; i < vo.getSealTypes().length; i++) {
-                sealTypes.append(vo.getSealTypes()[i]);
-                sealTypes.append(",");
-            }
-            basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
-        }
-        // 通过委托单id 获取公司名称。
-        basisInfo.setEntrustCompany(entityMapper.getCompanyNameId(basisInfo.getEntrustCompanyId(), 1));
-        // 通过委托单位和类型 查看联系人和手机号是否存在
-        if (!StringUtils.isEmpty(basisInfo.getEntrustCompany()) && !StringUtils.isEmpty(basisInfo.getEntrustPeople()) && !StringUtils.isEmpty(basisInfo.getEntrustPhone())) {
-            TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
-            testCompanyJsonEntity.setCompanyName(basisInfo.getEntrustCompany());
-            testCompanyJsonEntity.setContacts(basisInfo.getEntrustPeople());
-            testCompanyJsonEntity.setContactWay(basisInfo.getEntrustPhone());
-            testCompanyJsonEntity.setType("1");
-            PageHelper.clearPage();
-            String entrustCompanystr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
-            if (entrustCompanystr == null) {
-                // 保存新的委托联系人姓名 和所属委托单位公司id
+                String entrustCompanystr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
+                if (entrustCompanystr == null) {
+                    // 保存新的委托联系人姓名 和所属委托单位公司id
 //                Integer companyId = entityMapper.getCompanyId(basisInfo.getEntrustCompany(), 1);
-                TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
-                testCustomerEntity.setCompanyId(basisInfo.getEntrustCompanyId());
-                testCustomerEntity.setContacts(basisInfo.getEntrustPeople());
-                testCustomerEntity.setPhone(basisInfo.getEntrustPhone());
-                testCustomerDao.insertTestCustomer(testCustomerEntity);
-            }
-        }
-        // 通过见证单位和类型 查看联系人 （手机号可以不填）
-        if (!StringUtils.isEmpty(basisInfo.getWitnessUint()) && !StringUtils.isEmpty(basisInfo.getWitnessPerson())) {
-            TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
-            testCompanyJsonEntity.setCompanyName(basisInfo.getWitnessUint());
-            testCompanyJsonEntity.setContacts(basisInfo.getWitnessPerson());
-            if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())){
-                testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
-            }
-            testCompanyJsonEntity.setType("2");
-            PageHelper.clearPage();
-            String WitnessUintstr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
-            if (WitnessUintstr == null) {
-                // 保存新的见证联系人姓名 和所属见证单位公司id
-                Integer companyId = entityMapper.getCompanyId(basisInfo.getWitnessUint(), 2);
-                TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
-                testCustomerEntity.setCompanyId(companyId);
-                testCustomerEntity.setContacts(basisInfo.getWitnessPerson());
-                if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())){
-                    testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
+                    TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
+                    testCustomerEntity.setCompanyId(basisInfo.getEntrustCompanyId());
+                    testCustomerEntity.setContacts(basisInfo.getEntrustPeople());
+                    testCustomerEntity.setPhone(basisInfo.getEntrustPhone());
+                    testCustomerDao.insertTestCustomer(testCustomerEntity);
                 }
-                testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
+            // 通过见证单位和类型 查看联系人 （手机号可以不填）
+            if (!StringUtils.isEmpty(basisInfo.getWitnessUint()) && !StringUtils.isEmpty(basisInfo.getWitnessPerson())) {
+                TestCompanyJsonEntity testCompanyJsonEntity = new TestCompanyJsonEntity();
+                testCompanyJsonEntity.setCompanyName(basisInfo.getWitnessUint());
+                testCompanyJsonEntity.setContacts(basisInfo.getWitnessPerson());
+                if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())){
+                    testCompanyJsonEntity.setContactWay(basisInfo.getWitnessPhone());
+                }
+                testCompanyJsonEntity.setType("2");
+                PageHelper.clearPage();
+                String WitnessUintstr = entityMapper.GetDelegateInformation(testCompanyJsonEntity);
+                if (WitnessUintstr == null) {
+                    // 保存新的见证联系人姓名 和所属见证单位公司id
+                    Integer companyId = entityMapper.getCompanyId(basisInfo.getWitnessUint(), 2);
+                    TestCustomerEntity testCustomerEntity = new TestCustomerEntity();
+                    testCustomerEntity.setCompanyId(companyId);
+                    testCustomerEntity.setContacts(basisInfo.getWitnessPerson());
+                    if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())){
+                        testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
+                    }
+                    testCustomerDao.insertTestCustomer(testCustomerEntity);
+                }
+            }
+            // 获取当前用户所在科室id
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            Long department = teamMapper.getTeamIdByUid(userInfo.getUserId());
+            // 委托单创建人所属部门
+            if(StringUtils.isEmpty(department)){
+                basisInfo.setDepartment(null);
+            }
+            else {
+                basisInfo.setDepartment(department);
+            }
+            entityMapper.insertEntrustInfo(basisInfo);
+            MapUtils.queue.clear();
+            return "新建委托成功";
+        }else {
+            return "新建委托失败";
         }
-        // 获取当前用户所在科室id
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        Long department = teamMapper.getTeamIdByUid(userInfo.getUserId());
-        // 委托单创建人所属部门
-        if(StringUtils.isEmpty(department)){
-            basisInfo.setDepartment(null);
-        }
-        else {
-            basisInfo.setDepartment(department);
-        }
-        entityMapper.insertEntrustInfo(basisInfo);
-        return "新建委托成功";
     }
 
 
@@ -3660,15 +3733,13 @@ public class EntrustServiceImpl implements EntrustService {
         // 通过委托单id 获取任务列表信息：
         List<TestEntrustedTaskRelEntity> testEntrustedTaskRelEntityList = testEntrustedTaskRelDao.getDeptByEntrustIdList(id);
         // 补充信息。testEntrustedTaskRelEntityList 集合中 taskId 补充存入
-        for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity:taskRelEntities)
-        {
+        for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity:taskRelEntities) {
             // 处理信息 部门id&部门名称 获取为 部门ID
             if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getDepartment())){
                 String[] deptIds = testEntrustedTaskRelEntity.getDepartment().split("&");
                 testEntrustedTaskRelEntity.setDeptId(Integer.parseInt(deptIds[0]));
             }
-            for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity1 :testEntrustedTaskRelEntityList)
-            {
+            for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity1 :testEntrustedTaskRelEntityList) {
                 if(testEntrustedTaskRelEntity1.getDeptId().equals(testEntrustedTaskRelEntity.getDeptId())){
                     testEntrustedTaskRelEntity.setTaskId(testEntrustedTaskRelEntity1.getTaskId());
                     testEntrustedTaskRelEntity.setDepartment(testEntrustedTaskRelEntity1.getDeptId()+"&"+testEntrustedTaskRelEntity1.getDeptName());
@@ -3678,6 +3749,10 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                     testEntrustedTaskRelEntity.setEntrustId(id);
                 }
+            }
+            //设置中间报告的完成状态
+            if(testEntrustedTaskRelEntity.getType().equals(1)){
+                testEntrustedTaskRelEntity.setState(0);
             }
         }
         // 进行批量 add操作

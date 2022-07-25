@@ -781,7 +781,7 @@ public class ReportController {
      * @return
      */
     @PostMapping(value = "uploadReport")
-    public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("verifyer") String verifyer,
+    public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file,
                                @RequestParam("code") String code,@RequestParam("conclusion") String conclusion
             ,@RequestParam("additional") String additional,@RequestParam("mixInfo") String mixInfo,@RequestParam("type") String type) {
@@ -789,7 +789,7 @@ public class ReportController {
             return ResultUtil.error("缺少参数！");
         }
         Boolean flag = reportService.uploadReport(reportCode,file,verifyer.split("&")[0],issuer.split("&")[0]
-                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional,mixInfo,type);
+                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional,mixInfo,type,inspector);
         if (flag) {
             return ResultUtil.success("报告文件上传成功！");
         }else {
@@ -869,7 +869,7 @@ public class ReportController {
     @GetMapping("testInsert")
     public void test(String url,Long entrustId) {
         try {
-            String s = reportService.insertPicToPdf(url, entrustId);
+            String s = reportService.insertPicToPdf(url, entrustId,null);
             System.out.println("============="+s);
         }catch (Exception e){
             logger.error("===");
@@ -908,11 +908,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("/middleReportDetail")
-    public Result middleReportDetail(Long taskId) {
+    public Result middleReportDetail(Integer taskFlowId,Long taskId) {
         if(taskId == null){
             return ResultUtil.error("缺少必要的参数!");
         }
-        return ResultUtil.success("查询中间报告详情成功！", reportService.getMiddleReportDetail(taskId));
+        return ResultUtil.success("查询中间报告详情成功！", reportService.getMiddleReportDetail(taskFlowId,taskId));
     }
 
     @PostMapping("/middleReportPreserve")
@@ -1102,5 +1102,16 @@ public class ReportController {
         }catch (Exception e){
             logger.error("预览合并后的报告异常:{}",e);
         }
+    }
+
+    /**
+     * 报告合并获取检测人列表
+     * @param search
+     * @return
+     */
+    @GetMapping("inspectorList")
+    public Result inspectorList(String search){
+        List<String> list = reportService.inspectorList(search);
+        return ResultUtil.success(list);
     }
 }

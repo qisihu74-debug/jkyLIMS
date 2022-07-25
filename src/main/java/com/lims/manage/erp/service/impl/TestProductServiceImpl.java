@@ -203,7 +203,10 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
         List<TestProductStandardFileRel> testProductStandardFileRels=testProductStandardFileRelService.list(new QueryWrapper<TestProductStandardFileRel>().eq("product_id",testProduct.getProductId()));
         List<Integer> StandarInteger=new ArrayList<>();
         for (TestProductStandardFileRel testProductStandardFileRel : testProductStandardFileRels) {
-            StandarInteger.add(testStandardFileService.getById(testProductStandardFileRel.getStandardFileId()).getId());
+            TestStandardFile byId = testStandardFileService.getById(testProductStandardFileRel.getStandardFileId());
+            if (byId != null){
+                StandarInteger.add(byId.getId());
+            }
         }
         testProductItemVo.setStandardRelIds(StandarInteger);
         //获取并设置产品等级

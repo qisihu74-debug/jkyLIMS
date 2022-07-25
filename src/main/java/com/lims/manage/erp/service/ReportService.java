@@ -318,7 +318,7 @@ public interface ReportService {
      * @return
      */
     Boolean uploadReport(String reportCode, MultipartFile file, String verifyer, String issuer,Long verifyerId,
-                         Long issuerId,String code,String conclusion,String additional,String mixInfo,String type);
+                         Long issuerId,String code,String conclusion,String additional,String mixInfo,String type,String inspector);
 
     /**
      * 根据委托单id查询报告编号和名称
@@ -362,7 +362,7 @@ public interface ReportService {
 
     String reportUrl(Long entrustId);
 
-    String insertPicToPdf(String url, Long entrustId) throws Exception;
+    String insertPicToPdf(String url, Long entrustId,String inspector) throws Exception;
 
     /**
      * 报告查询列表
@@ -385,7 +385,7 @@ public interface ReportService {
      * @param taskId
      * @return
      */
-    ReportDetailVo getMiddleReportDetail(Long taskId);
+    ReportDetailVo getMiddleReportDetail(Integer taskFlowId,Long taskId);
 
     String getUrlById(Long id);
 
@@ -406,4 +406,8 @@ public interface ReportService {
     List<TestTeam> getSealer();
 
     byte[] exportRecords(String reportCode, String reportType, String sealType, Long startDate, Long endDate);
+
+    List<String> inspectorList(String search);
+
+    int updateInspector(String reportCode, String inspector);
 }

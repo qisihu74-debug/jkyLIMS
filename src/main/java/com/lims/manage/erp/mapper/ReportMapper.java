@@ -162,10 +162,10 @@ public interface ReportMapper {
     /**
      * 查询可做中间报告的检测项详情
      * @param taskId
-     * @param deptIds
+     * @param taskFlowId
      * @return
      */
-    ReportDetailVo getMiddleReportDetail(Long taskId,List<Long> deptIds);
+    ReportDetailVo getMiddleReportDetail(@Param("taskFlowId") Integer taskFlowId,@Param("taskId") Long taskId);
 
     @Select("select report_url from test_report_record where id=#{id}")
     String getUrlById(@Param("id") Long id);
@@ -181,4 +181,7 @@ public interface ReportMapper {
 
     List<ReportRecordEntity> exportRecords(@Param("reportCode") String reportCode, @Param("reportType") String reportType, @Param("sealType") String sealType,
                                            @Param("ids") List<Integer> ids,@Param("startDate") Date startDate,@Param("endDate") Date endDate);
+
+    @Select("update test_report_record set inspector=#{inspector} where report_code=#{reportCode}")
+    int updateInspector(@Param("reportCode") String reportCode, @Param("inspector") String inspector);
 }
