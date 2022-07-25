@@ -9,46 +9,11 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.lims.manage.erp.entity.ConclusionEntity;
-import com.lims.manage.erp.entity.ParamEntity;
-import com.lims.manage.erp.entity.QiYueSuoEntity;
-import com.lims.manage.erp.entity.QiYueSuoReqBean;
-import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
-import com.lims.manage.erp.entity.QiYueSuoSealEntity;
-import com.lims.manage.erp.entity.QuotaEntity;
-import com.lims.manage.erp.entity.QuotaRes;
-import com.lims.manage.erp.entity.ReportRecordDetailEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.ReportResBean;
-import com.lims.manage.erp.entity.ReportTemplateEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.entity.SealEntity;
-import com.lims.manage.erp.entity.TeamTreeStructureEntity;
-import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
-import com.lims.manage.erp.entity.TestTeam;
-import com.lims.manage.erp.entity.TreeEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.ReportApprovalMapper;
-import com.lims.manage.erp.mapper.ReportMapper;
-import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.SysUserDao;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestProductDao;
-import com.lims.manage.erp.mapper.TestProductItemDao;
-import com.lims.manage.erp.mapper.TestReportQualifcationDao;
-import com.lims.manage.erp.mapper.TestReportTemplateDao;
-import com.lims.manage.erp.mapper.TestSampleEntityMapper;
-import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
-import com.lims.manage.erp.mapper.TestTechnicistDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.ConvertUtil;
@@ -165,6 +130,8 @@ public class ReportServiceImpl implements ReportService {
     private QiYueSuoEntity qiYueSuoEntity;
     @Autowired
     private TestTechnicistDao testTechnicistDao;
+    @Autowired
+    private TestEntrustedTaskRelDao taskRelDao;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -672,7 +639,7 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    @Transactional
+    @Transactional()
     @Override
     public Boolean middleReportPreserve(ReportPreserveVo vo) {
 //        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
@@ -689,32 +656,31 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
-//        List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
-//        if(allReportComplete.contains(2)){
-//            reportRecordEntity.setState(2+"");
-//        }else{
-//            reportRecordEntity.setState(1+"");
-//            reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-//        }
-//        reportRecordEntity.setState(3+"");
         //生成报告编号
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
         String year = sdf.format(new Date());
         Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
         if (maxCode == null) {
-            reportRecordEntity.setReportCode("ZX-" + year + "-YC-0001");
+            reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-0001");
         } else {
             int newCode = maxCode + 1;
-            reportRecordEntity.setReportCode("ZX-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
+            reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
         }
         reportRecordEntity.setId(recordId);
         reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
         //设置为中间报告
         reportRecordEntity.setType(1+"");
-//        //修改任务报告状态
-//        taskMapper.updateReportStatus(vo.getReportComplete(), vo.getTaskId());
         int insert = recordEntityMapper.insert(reportRecordEntity);
         if (insert < 1) {
+            return false;
+        }
+        //修改任务流转中间报告的状态和recordId
+        TestEntrustedTaskRelEntity relEntity = new TestEntrustedTaskRelEntity();
+        relEntity.setId(vo.getTaskFlowId());
+        relEntity.setState(1);
+        relEntity.setRecordId(recordId);
+        int i = taskRelDao.updateMiddleReportState(relEntity);
+        if (i < 1) {
             return false;
         }
         return true;
@@ -2708,11 +2674,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ReportDetailVo getMiddleReportDetail(Long taskId) {
+    public ReportDetailVo getMiddleReportDetail(Integer taskFlowId, Long taskId) {
 //        Long recordId = recordEntityMapper.getRecordId(taskId);
 //        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         ReportDetailVo reportDetail;
-        reportDetail = reportMapper.getMiddleReportDetail(taskId);
+        reportDetail = reportMapper.getMiddleReportDetail(taskFlowId,taskId);
         if(reportDetail == null){
             reportDetail = new ReportDetailVo();
             reportDetail.setSamples(Lists.newArrayList());

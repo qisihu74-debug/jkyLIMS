@@ -162,10 +162,10 @@ public interface ReportMapper {
     /**
      * 查询可做中间报告的检测项详情
      * @param taskId
-     * @param deptIds
+     * @param taskFlowId
      * @return
      */
-    ReportDetailVo getMiddleReportDetail(Long taskId);
+    ReportDetailVo getMiddleReportDetail(@Param("taskFlowId") Integer taskFlowId,@Param("taskId") Long taskId);
 
     @Select("select report_url from test_report_record where id=#{id}")
     String getUrlById(@Param("id") Long id);

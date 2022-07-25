@@ -13,5 +13,6 @@ public class ReportPreserveVo extends ReportRecordEntity {
     private Long taskId;
     private Boolean isOver;
     private Integer reportComplete;
+    private Integer taskFlowId;
     private List<ReportRecordDetailEntity> checkInfos;
 }

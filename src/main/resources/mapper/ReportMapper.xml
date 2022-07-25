@@ -5,6 +5,7 @@
 
     <resultMap id="reportDetailMap" type="com.lims.manage.erp.vo.ReportDetailVo">
         <result property="id" column="id"></result>
+        <result property="taskFlowId" column="taskFlowId"></result>
         <result property="reportCount" column="report_count"></result>
         <result property="reportType" column="report_type"></result>
         <result property="taskCode" column="task_code"></result>
@@ -586,6 +587,7 @@
 
     <select id="getMiddleReportDetail" resultMap="reportDetailMap">
         SELECT
+            #{taskFlowId} taskFlowId,
             t1.entrust_id id,
             t3.id sample_id,
             t3.product_id,

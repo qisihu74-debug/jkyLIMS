@@ -91,6 +91,18 @@
         </set>
         where id = #{id,jdbcType=INTEGER}
     </update>
+    <update id="updateMiddleReportState" parameterType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
+        update test_entrusted_task_rel
+        <set>
+            <if test="state != null">
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="recordId != null">
+                record_id = #{recordId,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
 
     <delete id="deletedData">
         delete from test_entrusted_task_rel where id = #{id}
