@@ -165,7 +165,7 @@ public interface ReportMapper {
      * @param deptIds
      * @return
      */
-    ReportDetailVo getMiddleReportDetail(Long taskId,List<Long> deptIds);
+    ReportDetailVo getMiddleReportDetail(Long taskId);
 
     @Select("select report_url from test_report_record where id=#{id}")
     String getUrlById(@Param("id") Long id);
