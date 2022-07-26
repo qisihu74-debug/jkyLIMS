@@ -680,6 +680,16 @@ public class ReportServiceImpl implements ReportService {
         return true;
     }
 
+    @Transactional
+    @Override
+    public Boolean middleReportUpdate(ReportPreserveVo vo) {
+        List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
+        for (ReportRecordDetailEntity e : checkInfos) {
+            recordDetailEntityMapper.updateById(e);
+        }
+        return true;
+    }
+
     @Override
     public PageInfo sealList(String search, Integer pageNum, Integer pageSize, String reportType, String state,Integer reportTypeStatus) {
         if (StringUtils.isEmpty(state)) {
@@ -2958,6 +2968,7 @@ public class ReportServiceImpl implements ReportService {
                                 vo.setSpecsContent(reportRecordDetailEntity.getSpecsContent());
                                 vo.setCheckResult(reportRecordDetailEntity.getCheckResult());
                                 vo.setJudgeResult(reportRecordDetailEntity.getJudgeResult());
+                                vo.setId(reportRecordDetailEntity.getId());
                             }
                         }
                     }
@@ -2978,6 +2989,7 @@ public class ReportServiceImpl implements ReportService {
                                 reportCheckItemDetailVo.setSpecsContent(reportRecordDetailEntity.getSpecsContent());
                                 reportCheckItemDetailVo.setCheckResult(reportRecordDetailEntity.getCheckResult());
                                 reportCheckItemDetailVo.setJudgeResult(reportRecordDetailEntity.getJudgeResult());
+                                reportCheckItemDetailVo.setId(reportRecordDetailEntity.getId());
                             }
                         }
                     }

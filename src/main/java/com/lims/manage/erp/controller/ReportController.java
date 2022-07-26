@@ -929,12 +929,34 @@ public class ReportController {
         }
     }
 
+    /**
+     * 中间报告历史修改详情接口
+     * @param taskFlowId
+     * @param taskId
+     * @param recordId
+     * @return
+     */
     @GetMapping("/middleReportEdit")
     public Result middleReportEdit(Integer taskFlowId,Long taskId,Long recordId) {
         if(taskId == null || taskFlowId == null || recordId == null){
             return ResultUtil.error("缺少必要的参数!");
         }
         return ResultUtil.success("查询中间报告详情成功！", reportService.middleReportEdit(taskFlowId,taskId,recordId));
+    }
+
+    /**
+     * 中间报告修改保存接口
+     * @param vo
+     * @return
+     */
+    @PostMapping("/middleReportUpdate")
+    public Result middleReportUpdate(@RequestBody ReportPreserveVo vo) {
+        Boolean preserve = reportService.middleReportUpdate(vo);
+        if (preserve) {
+            return ResultUtil.success("修改成功！", preserve);
+        } else {
+            return ResultUtil.error(ResultEnum.PRESERVE_FAIL.getCode(), ResultEnum.PRESERVE_FAIL.getMsg());
+        }
     }
 
     /**

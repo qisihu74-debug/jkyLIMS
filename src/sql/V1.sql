@@ -130,7 +130,7 @@ ALTER TABLE `test_entrusted_task_rel`
     ADD COLUMN `record_id`  BIGINT COMMENT '报告主键ID' AFTER `state`;
 
 ALTER TABLE `test_report_record`
-ADD COLUMN `inspector`  varchar(255) NULL COMMENT '报告中签字检测人' AFTER `entrust_id`;
+    ADD COLUMN `entrust_id`  BIGINT COMMENT '委托单ID用于中间报告查询' AFTER `combine_time`;
 
-
-
+ALTER TABLE `test_report_record`
+    ADD COLUMN `inspector`  VARCHAR(255) COMMENT '报告中签字检测人' AFTER `entrust_id`;
