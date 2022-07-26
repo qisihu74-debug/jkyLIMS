@@ -10,6 +10,7 @@ public class ReportCheckItemDetailVo {
     private Long checkItemId;
     private Integer state;
     private Integer sampleId;
+    private Long taskId;
     private String checkItemName;
     private String specsContent;
     private String checkResult;

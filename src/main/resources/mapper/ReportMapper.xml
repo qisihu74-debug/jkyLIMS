@@ -33,6 +33,7 @@
                 <result property="coordinate" column="coordinate"></result>
                 <result property="originUrl" column="origin_url"></result>
                 <result property="sampleId" column="sample_id"></result>
+                <result property="taskId" column="task_id"></result>
                 <collection property="specsContents" ofType="com.lims.manage.erp.vo.ReportSpecsContentVo">
                     <result property="value" column="value"></result>
                     <result property="label" column="label"></result>
@@ -600,7 +601,8 @@
             t1.check_item_name,
             t1.id id_item,
             t1.origin_url,
-            t2.coordinate
+            t2.coordinate,
+            t1.task_id
         FROM
             ( SELECT * FROM test_entrusted_sample_checkitem_rel WHERE entrust_id = #{entrustId} ) t1
                 LEFT JOIN test_product_item t2 ON t1.check_item_id = t2.check_item_id
