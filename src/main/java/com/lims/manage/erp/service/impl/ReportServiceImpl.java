@@ -631,6 +631,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean middleReportPreserve(ReportPreserveVo vo) {
         //获取父级code
+        PageHelper.clearPage();
         Long deptId = taskMapper.getDeptByEntrustId(vo.getEntrustmentId());
         String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
         long recordId = GenID.getID();
