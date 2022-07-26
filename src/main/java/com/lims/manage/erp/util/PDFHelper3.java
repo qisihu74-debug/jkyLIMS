@@ -7,7 +7,6 @@ import com.aspose.cells.WorksheetCollection;
 import com.aspose.slides.Presentation;
 import com.aspose.words.Document;
 import com.aspose.words.ImageSaveOptions;
-import com.aspose.words.PageSet;
 import com.aspose.words.SaveFormat;
 import com.spire.pdf.PdfDocument;
 import com.spire.pdf.PdfPageBase;
@@ -526,8 +525,7 @@ public class PDFHelper3 {
             List<BufferedImage> imageList = new ArrayList<BufferedImage>();
             for (int i = 0; i < pageCount; i++) {
                 OutputStream output = new ByteArrayOutputStream();
-                PageSet pageSet = new PageSet(i);
-                options.setPageSet(pageSet);
+                options.setPageIndex(i);
                 doc.save(output, options);
                 ImageInputStream imageInputStream = javax.imageio.ImageIO.createImageInputStream(parse(output));
                 imageList.add(javax.imageio.ImageIO.read(imageInputStream));
