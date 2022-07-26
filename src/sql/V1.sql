@@ -129,4 +129,8 @@ ALTER TABLE `test_entrusted_task_rel`
 ALTER TABLE `test_entrusted_task_rel`
     ADD COLUMN `record_id`  BIGINT COMMENT '报告主键ID' AFTER `state`;
 
+ALTER TABLE `test_report_record`
+ADD COLUMN `inspector`  varchar(255) NULL COMMENT '报告中签字检测人' AFTER `entrust_id`;
+
+
 
