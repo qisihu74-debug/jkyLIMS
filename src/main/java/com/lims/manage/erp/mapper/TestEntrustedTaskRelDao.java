@@ -74,6 +74,11 @@ public interface TestEntrustedTaskRelDao {
      */
     List<TestEntrustedTaskRelVo> getTaskStatisticsList(TestEntrustedTaskRelVo testEntrustedTaskRelVo);
 
-
+    /**
+     * 根据ID主键查询
+     * @param taskFlowId
+     * @return
+     */
+    TestEntrustedTaskRelVo getTaskFlowById(Integer taskFlowId);
 
 }

@@ -946,4 +946,8 @@
     <select id="getEntrustId" resultType="java.lang.Long" >
         select entrustment_id from test_task where id = #{taskId}
     </select>
+
+    <select id="getTaskTestEntityById" resultType="com.lims.manage.erp.entity.TaskTestEntity" >
+        select entrustment_id,task_code from test_task where id = #{taskId}
+    </select>
 </mapper>

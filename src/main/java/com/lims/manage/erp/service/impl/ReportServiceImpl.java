@@ -27,19 +27,7 @@ import com.lims.manage.erp.util.PageInfoUtils;
 import com.lims.manage.erp.util.PdfDoc;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.WordUtils;
-import com.lims.manage.erp.vo.ConcreteSampleVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
-import com.lims.manage.erp.vo.ReportDetailListParamVo;
-import com.lims.manage.erp.vo.ReportDetailListVo;
-import com.lims.manage.erp.vo.ReportDetailVo;
-import com.lims.manage.erp.vo.ReportHistoryDetailVo;
-import com.lims.manage.erp.vo.ReportListVo;
-import com.lims.manage.erp.vo.ReportPreserveVo;
-import com.lims.manage.erp.vo.ReportProductRelVo;
-import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -642,7 +630,6 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     @Override
     public Boolean middleReportPreserve(ReportPreserveVo vo) {
-        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.getLatestReport(vo.getEntrustmentId());
         //获取父级code
         Long deptId = taskMapper.getDeptByEntrustId(vo.getEntrustmentId());
         String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
@@ -655,7 +642,7 @@ public class ReportServiceImpl implements ReportService {
                 return false;
             }
         }
-        ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
+        ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo,vo.getEntrustmentId());
         //生成报告编号
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
         String year = sdf.format(new Date());
@@ -668,6 +655,12 @@ public class ReportServiceImpl implements ReportService {
         }
         reportRecordEntity.setId(recordId);
         reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+        reportRecordEntity.setState(3+"");//设置为待发起审批
+        EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(vo.getEntrustmentId());
+        reportRecordEntity.setNumber(entrustAddVo.getReportCount());
+        reportRecordEntity.setReportType(entrustAddVo.getReportType());
+        reportRecordEntity.setSealType(entrustAddVo.getSealType());
+        reportRecordEntity.setEntrustId(vo.getEntrustmentId());
         //设置为中间报告
         reportRecordEntity.setType(1+"");
         int insert = recordEntityMapper.insert(reportRecordEntity);
@@ -2677,7 +2670,9 @@ public class ReportServiceImpl implements ReportService {
     public ReportDetailVo getMiddleReportDetail(Integer taskFlowId, Long taskId) {
 //        Long recordId = recordEntityMapper.getRecordId(taskId);
 //        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        Long entrustId = taskMapper.getEntrustId(taskId);
+//        Long entrustId = taskMapper.getEntrustId(taskId);
+        TaskTestEntity taskTestEntity = taskMapper.getTaskTestEntityById(taskId);
+        Long entrustId = taskTestEntity.getEntrustmentId();
         ReportDetailVo reportDetail;
         reportDetail = reportMapper.getMiddleReportDetail(taskFlowId,entrustId);
         if(reportDetail == null){
@@ -2685,6 +2680,12 @@ public class ReportServiceImpl implements ReportService {
             reportDetail.setSamples(Lists.newArrayList());
             return reportDetail;
         }
+        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.getLatestReport(entrustId);
+        List<ReportRecordDetailEntity> checkInfoByRecordId = Lists.newArrayList();
+        if(reportRecordEntity1 != null){
+            checkInfoByRecordId = recordDetailEntityMapper.getCheckInfoByRecordId(reportRecordEntity1.getId());
+        }
+
         List<ReportSampleDetailVo> samples = reportDetail.getSamples();
         //处理每组样品下检测项
         StringBuilder sampleName = new StringBuilder();
@@ -2707,6 +2708,7 @@ public class ReportServiceImpl implements ReportService {
                     for (SampleItemEntity nodeItem : nodeItems) {
                         nodeItem.setOriginUrl(reportCheckItemDetailVo.getOriginUrl());
                         nodeItem.setSampleId(Integer.parseInt(reportSampleDetailVo.getSampleId()+""));
+                        nodeItem.setTaskId(reportCheckItemDetailVo.getTaskId());
                         tempNodeItems.add(nodeItem);
                     }
                     temp.addAll(tempNodeItems);
@@ -2751,11 +2753,45 @@ public class ReportServiceImpl implements ReportService {
                     vo.setCheckItemName(sampleItemEntity.getCheckItemName());
                     vo.setCoordinate(sampleItemEntity.getCoordinate());
                     vo.setOriginUrl(sampleItemEntity.getOriginUrl());
+                    vo.setSampleId(sampleItemEntity.getSampleId());
+                    vo.setTaskId(sampleItemEntity.getTaskId());
+                    Long checkItemId = vo.getCheckItemId();
+                    Integer sampleId = vo.getSampleId();
+                    //设置上次报告制作记录
+                    if(!CollectionUtils.isEmpty(checkInfoByRecordId)){
+                        for (ReportRecordDetailEntity reportRecordDetailEntity : checkInfoByRecordId) {
+                            Long checkItemId1 = reportRecordDetailEntity.getCheckItemId();
+                            Integer sampleId1 = reportRecordDetailEntity.getSampleId();
+                            if(checkItemId.equals(checkItemId1) && sampleId.equals(sampleId1)){
+                                vo.setSpecsContent(reportRecordDetailEntity.getSpecsContent());
+                                vo.setCheckResult(reportRecordDetailEntity.getCheckResult());
+                                vo.setJudgeResult(reportRecordDetailEntity.getJudgeResult());
+                            }
+                        }
+                    }
                     result.add(vo);
                 }
             }
             if(!CollectionUtils.isEmpty(checkItems)){
-                result.addAll(checkItems);
+                List<ReportCheckItemDetailVo> detailVos = Lists.newArrayList();
+                for (ReportCheckItemDetailVo reportCheckItemDetailVo:checkItems) {
+                    Long checkItemId = reportCheckItemDetailVo.getCheckItemId();
+                    Integer sampleId = reportCheckItemDetailVo.getSampleId();
+                    //设置上次报告制作记录
+                    if(!CollectionUtils.isEmpty(checkInfoByRecordId)){
+                        for (ReportRecordDetailEntity reportRecordDetailEntity : checkInfoByRecordId) {
+                            Long checkItemId1 = reportRecordDetailEntity.getCheckItemId();
+                            Integer sampleId1 = reportRecordDetailEntity.getSampleId();
+                            if(checkItemId.equals(checkItemId1) && sampleId.equals(sampleId1)){
+                                reportCheckItemDetailVo.setSpecsContent(reportRecordDetailEntity.getSpecsContent());
+                                reportCheckItemDetailVo.setCheckResult(reportRecordDetailEntity.getCheckResult());
+                                reportCheckItemDetailVo.setJudgeResult(reportRecordDetailEntity.getJudgeResult());
+                            }
+                        }
+                    }
+                    detailVos.add(reportCheckItemDetailVo);
+                }
+                result.addAll(detailVos);
             }
             reportSampleDetailVo.setCheckItems(result);
             sampleName.append(reportSampleDetailVo.getSampleName());
@@ -2766,6 +2802,11 @@ public class ReportServiceImpl implements ReportService {
         }
         reportDetail.setSampleName(sampleName.toString());
         reportDetail.setSamples(samples);
+        //获取中间报告需求信息
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        TestEntrustedTaskRelVo taskFlowById = taskRelDao.getTaskFlowById(taskFlowId);
+        reportDetail.setRequestDate(sdf.format(taskFlowById.getTaskFlowDate()));
+        reportDetail.setTaskCode(taskTestEntity.getTaskCode());
         return reportDetail;
     }
 

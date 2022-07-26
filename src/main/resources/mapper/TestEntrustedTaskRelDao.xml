@@ -270,5 +270,8 @@
             and t2.task_source LIKE CONCAT('%',#{taskSource},'%')
         </if>
     </select>
+    <select id="getTaskFlowById" resultType="com.lims.manage.erp.vo.TestEntrustedTaskRelVo">
+        select * from test_entrusted_task_rel where id = #{taskFlowId}
+    </select>
 
 </mapper>

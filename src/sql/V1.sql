@@ -123,4 +123,10 @@ CREATE TABLE `test_entrusted_task_rel`  (
 SET FOREIGN_KEY_CHECKS = 1;
 
 
+ALTER TABLE `test_entrusted_task_rel`
+    ADD COLUMN `state`  int COMMENT '任务流转状态（0，未完成；1，已完成）' AFTER `entrust_id`;
+
+ALTER TABLE `test_entrusted_task_rel`
+    ADD COLUMN `record_id`  BIGINT COMMENT '报告主键ID' AFTER `state`;
+
 

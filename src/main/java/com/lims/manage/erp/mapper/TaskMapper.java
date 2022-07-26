@@ -426,4 +426,11 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     Long getEntrustId(Long taskId);
+
+    /**
+     * 根据主键获取任务信息
+     * @param taskId
+     * @return
+     */
+    TaskTestEntity getTaskTestEntityById(Long taskId);
 }
