@@ -27,19 +27,7 @@ import com.lims.manage.erp.util.PageInfoUtils;
 import com.lims.manage.erp.util.PdfDoc;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.WordUtils;
-import com.lims.manage.erp.vo.ConcreteSampleVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
-import com.lims.manage.erp.vo.ReportDetailListParamVo;
-import com.lims.manage.erp.vo.ReportDetailListVo;
-import com.lims.manage.erp.vo.ReportDetailVo;
-import com.lims.manage.erp.vo.ReportHistoryDetailVo;
-import com.lims.manage.erp.vo.ReportListVo;
-import com.lims.manage.erp.vo.ReportPreserveVo;
-import com.lims.manage.erp.vo.ReportProductRelVo;
-import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -654,7 +642,7 @@ public class ReportServiceImpl implements ReportService {
                 return false;
             }
         }
-        ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
+        ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo,vo.getEntrustId());
         //生成报告编号
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
         String year = sdf.format(new Date());
@@ -2804,6 +2792,11 @@ public class ReportServiceImpl implements ReportService {
         }
         reportDetail.setSampleName(sampleName.toString());
         reportDetail.setSamples(samples);
+        //获取中间报告需求信息
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        TestEntrustedTaskRelVo taskFlowById = taskRelDao.getTaskFlowById(taskFlowId);
+        reportDetail.setRequestDate(sdf.format(taskFlowById.getTaskFlowDate()));
+        reportDetail.setReportCode(taskFlowById.getReportCode());
         return reportDetail;
     }
 

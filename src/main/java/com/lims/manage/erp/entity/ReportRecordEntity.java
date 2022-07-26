@@ -18,6 +18,10 @@ public class ReportRecordEntity {
      */
     private Long entrustmentId;
     /**
+     * 委托单ID用于中间报告数据查询
+     */
+    private Long entrustId;
+    /**
      * 委托单实际价格
      */
     @TableField(exist = false)
@@ -228,6 +232,33 @@ public class ReportRecordEntity {
         this.waybill = vo.getWaybill() == null ? null : vo.getWaybill();
         this.operateTime = vo.getOperateTime() == null ? null : vo.getOperateTime();
         this.taskId = vo.getTaskId() == null ? null : vo.getTaskId();
+    }
+    public ReportRecordEntity(ReportPreserveVo vo,Long entrustId) {
+        this.reportCode = vo.getReportCode() == null ? null : vo.getReportCode();
+        this.sampleName = vo.getSampleName() == null ? null : vo.getSampleName();
+        this.price = vo.getPrice() == null ? null : vo.getPrice();
+        this.requiredCompletionTime = vo.getRequiredCompletionTime() == null ? null : vo.getRequiredCompletionTime();
+        this.taskCode = vo.getTaskCode() == null ? null : vo.getTaskCode();
+        this.state = vo.getState() == null ? null : vo.getState();
+        this.number = vo.getNumber() == null ? null : vo.getNumber();
+        this.reportType = vo.getReportType() == null ? null : vo.getReportType();
+        this.verifyerTime = vo.getVerifyerTime() == null ? null : vo.getVerifyerTime();
+        this.issuerTime = vo.getIssuerTime() == null ? null : vo.getIssuerTime();
+        this.sealType = vo.getSealType() == null ? null : vo.getSealType();
+        this.applyReason = vo.getApplyReason() == null ? null : vo.getApplyReason();
+        this.issuReason = vo.getIssuReason() == null ? null : vo.getIssuReason();
+        this.verifyer = vo.getVerifyer() == null ? null : vo.getVerifyer();
+        this.issuer = vo.getIssuer() == null ? null : vo.getIssuer();
+        this.applicant = vo.getApplicant() == null ? null : vo.getApplicant();
+        this.sealer = vo.getSealer() == null ? null : vo.getSealer();
+        this.sealTime = vo.getSealTime() == null ? null : vo.getSealTime();
+        this.reportManager = vo.getReportManager() == null ? null : vo.getReportManager();
+        this.reportTime = vo.getReportTime() == null ? null : vo.getReportTime();
+        this.addressee = vo.getAddressee() == null ? null : vo.getAddressee();
+        this.waybill = vo.getWaybill() == null ? null : vo.getWaybill();
+        this.operateTime = vo.getOperateTime() == null ? null : vo.getOperateTime();
+        this.taskId = vo.getTaskId() == null ? null : vo.getTaskId();
+        this.entrustId = entrustId;
     }
 
     /**
