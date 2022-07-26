@@ -7,6 +7,7 @@
         SELECT
         id,
         entrustment_id,
+        entrust_id,
         sample_name,
         price AS cost,
         required_completion_time,

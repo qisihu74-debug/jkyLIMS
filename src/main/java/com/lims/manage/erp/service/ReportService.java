@@ -410,4 +410,6 @@ public interface ReportService {
     List<String> inspectorList(String search);
 
     int updateInspector(String reportCode, String inspector);
+
+    ReportRecordEntity getDetailByEntrustIdZj(Long entrustId);
 }

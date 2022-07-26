@@ -421,6 +421,10 @@ public class ReportController {
             return ResultUtil.error("缺少必要参数");
         }
         ReportRecordEntity bean = reportService.getDetailByEntrustId(entrustId);
+        //TODO 兼容中间报告
+        if (bean == null){
+            bean = reportService.getDetailByEntrustIdZj(entrustId);
+        }
         byte[] bytes = reportService.downloadQysFile(entrustId, contractId, name, contact);
         response.reset();
         response.setHeader("Access-Control-Expose-Headers","Content-Disposition");

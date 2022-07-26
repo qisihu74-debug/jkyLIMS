@@ -151,6 +151,7 @@ public interface ReportMapper {
     String getUrlByEntrustId(@Param("entrustId") Long entrustId);
 
     ReportRecordEntity getDetailByEntrustId(@Param("entrustId") Long entrustId);
+    ReportRecordEntity getDetailByEntrustIdZj(@Param("entrustId") Long entrustId);
     /**
      * 获取中间报告列表
      * @param deptIds
@@ -184,4 +185,10 @@ public interface ReportMapper {
 
     @Select("update test_report_record set inspector=#{inspector} where report_code=#{reportCode}")
     int updateInspector(@Param("reportCode") String reportCode, @Param("inspector") String inspector);
+
+    @Select("select report_url from test_report_record where entrust_id=#{entrustId}")
+    String getUrlByZjEntrustId(@Param("entrustId") Long entrustId);
+
+    @Select("select entrust_id from test_report_record where id=#{id}")
+    Long getZjEntrustIdById(@Param("id") Long id);
 }

@@ -612,6 +612,9 @@
     <select id="getDetailByEntrustId" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         select * from test_report_record where entrustment_id=#{entrustId}
     </select>
+    <select id="getDetailByEntrustIdZj" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        select * from test_report_record where entrust_id=#{entrustId}
+    </select>
 
     <update id="updateCategory" parameterType="com.lims.manage.erp.entity.SealEntity">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">

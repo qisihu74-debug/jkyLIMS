@@ -699,12 +699,17 @@ public class ReportServiceImpl implements ReportService {
             ids = null;
         }
         PageHelper.startPage(pageNum, pageSize);
+        //TODO 兼容中间报告
         List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state,reportTypeStatus,ids);
         for (ReportRecordEntity recordEntity:list) {
             if ("0".equals(recordEntity.getType())){
                 recordEntity.setType("最终报告");
             }else {
                 recordEntity.setType("中间报告");
+            }
+            //TODO 兼容中间报告
+            if (recordEntity.getEntrustmentId() == null){
+                recordEntity.setEntrustId(recordEntity.getEntrustmentId());
             }
         }
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
@@ -1220,6 +1225,11 @@ public class ReportServiceImpl implements ReportService {
         return reportMapper.getDetailByEntrustId(entrustId);
     }
 
+    @Override
+    public ReportRecordEntity getDetailByEntrustIdZj(Long entrustId) {
+        return reportMapper.getDetailByEntrustIdZj(entrustId);
+    }
+
     public String downLoadNew(MinioClient client, String code, Long id, List<Long> checkIds) throws Exception {
         String[] split = code.split("\\?");
         String[] strings = split[0].split("\\/");
@@ -1607,6 +1617,10 @@ public class ReportServiceImpl implements ReportService {
         try {
             //url = downLoad(client,code,entrustId);
             url = reportMapper.getUrlByEntrustId(entrustId);
+            //TODO 兼容中间报告
+            if (StringUtils.isEmpty(url)){
+                url = reportMapper.getUrlByZjEntrustId(entrustId);
+            }
         } catch (Exception e) {
             logger.error("盖章下载报告文件失败:{}", e);
             return false;
@@ -1630,7 +1644,13 @@ public class ReportServiceImpl implements ReportService {
                 if (response != null && response.getCode() == 0) {
                     //根据委托id存储文档id
                     List<QiYueSuoDocment> result = response.getResult();
-                    entityMapper.updateDocIdAndState(entrustId, result.get(0).getDocumentId(), "2");
+                    //TODO 兼容中间报告
+                    Long aLong = entityMapper.checkExist(entrustId);
+                    if (aLong == null){
+                        entityMapper.updateDocIdAndStateZj(entrustId, result.get(0).getDocumentId(), "2");
+                    }else {
+                        entityMapper.updateDocIdAndState(entrustId, result.get(0).getDocumentId(), "2");
+                    }
                     entityMapper.updateSeal(result.get(0).getDocumentId());
                 }
             } else {
@@ -1643,27 +1663,51 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
-        List<ReportRecordEntity> entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        List<ReportRecordEntity> entity = Lists.newArrayList();
+        //TODO 兼容中间报告
+        Long aLong = entityMapper.checkExist(reqBean.getEntrustId());
+        if (aLong == null){
+            entity = entityMapper.selectMessageByZjEntrustId(reqBean.getEntrustId());
+        }else {
+            entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        }
         List<String> docs = new ArrayList<>();
         docs.add(entity.get(0).getQysDocmentId());
         reqBean.setDocuments(docs);
         QiYueSuoResponse response = qiYueSuoHnadler.createbycategory(reqBean);
         //根据委托id存储文档id
-        entityMapper.updateContractIdAndState(reqBean.getEntrustId(), response.getContractId(), "3");
+        //TODO 兼容中间报告
+        if (aLong == null){
+            entityMapper.updateContractIdAndStateZj(reqBean.getEntrustId(), response.getContractId(), "3");
+        }else {
+            entityMapper.updateContractIdAndState(reqBean.getEntrustId(), response.getContractId(), "3");
+        }
         return response;
     }
 
     @Override
     public QiYueSuoResponse signurl(QiYueSuoSeaLBean reqBean) {
         //设置合同标识
-        List<ReportRecordEntity> entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        List<ReportRecordEntity> entity = Lists.newArrayList();
+        //TODO 兼容中间报告
+        Long aLong = entityMapper.checkExist(reqBean.getEntrustId());
+        if (aLong == null){
+            entity = entityMapper.selectMessageByZjEntrustId(reqBean.getEntrustId());
+        }else {
+            entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        }
         reqBean.setContractId(Long.valueOf(entity.get(0).getContractId()));
         QiYueSuoResponse response = qiYueSuoHnadler.signurl(reqBean);
         //根据委托更新报告签署url
         //设置盖章人和盖章时间
         Long userId = ShiroUtils.getUserInfo().getUserId();
         String sysUserName = sysUserDao.getSysUserName(userId);
-        entityMapper.updateUrlAndState(reqBean.getEntrustId(), response.getSignUrl(), "4",sysUserName+"&"+userId+"",new Date(System.currentTimeMillis()));
+        //TODO 兼容中间报告
+        if (aLong == null){
+            entityMapper.updateUrlAndStateZj(reqBean.getEntrustId(), response.getSignUrl(), "4",sysUserName+"&"+userId+"",new Date(System.currentTimeMillis()));
+        }else {
+            entityMapper.updateUrlAndState(reqBean.getEntrustId(), response.getSignUrl(), "4",sysUserName+"&"+userId+"",new Date(System.currentTimeMillis()));
+        }
         return response;
     }
 
@@ -1771,6 +1815,8 @@ public class ReportServiceImpl implements ReportService {
         ReportResBean resBean = new ReportResBean();
         Map<String,String> mesMap = new HashedMap();
         ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
+        //TODO 兼容中间报告
+
         int index = 1;
         for (ConclusionEntity conclusionEntity:list) {
             String[] split = conclusionEntity.getUrl().split("\\?");
@@ -2397,7 +2443,13 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public String reportUrl(Long entrustId) {
-        return reportMapper.getUrlByEntrustId(entrustId);
+        //TODO 兼容中间报告
+        String url = "";
+        url = reportMapper.getUrlByEntrustId(entrustId);
+        if (StringUtils.isEmpty(url)){
+            url = reportMapper.getUrlByZjEntrustId(entrustId);
+        }
+        return url;
     }
 
     @Override
@@ -2840,7 +2892,13 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Long getEntrustIdById(Long id) {
-        return reportMapper.getEntrustIdById(id);
+        //TODO 兼容中间报告
+        Long entrustIdById = null;
+        entrustIdById = reportMapper.getEntrustIdById(id);
+        if (entrustIdById == null){
+            entrustIdById = reportMapper.getZjEntrustIdById(id);
+        }
+        return entrustIdById;
     }
 
     @Override

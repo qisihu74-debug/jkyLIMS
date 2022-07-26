@@ -1,11 +1,17 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
-import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TaskEntity;
+import com.lims.manage.erp.entity.TestCompanyJsonEntity;
+import com.lims.manage.erp.entity.TestCustomerJsonEntity;
+import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -13,23 +19,44 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.CheckItemDeptVo;
+import com.lims.manage.erp.vo.CheckItemParamVo;
+import com.lims.manage.erp.vo.ClientOrderdetailVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.TaskVo;
+import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
+import com.lims.manage.erp.vo.UpdateIssueReportVo;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.net.URLEncoder;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -469,7 +496,7 @@ public class EntrustController {
      * @param response
      */
     @RequestMapping("previewEntrust")
-    public void preview(Long entrustId, HttpServletResponse response) {
+    public void preview(Long id, HttpServletResponse response) {
         String message = entrustService.getMessage();
         String[] strings = message.split("/");
         String fileName = strings[1];
@@ -477,13 +504,8 @@ public class EntrustController {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(strings[0], fileName);
             //填充数据
-            //校验是否是委托单id
-            Long id = entrustService.checkEntrustId(entrustId);
-            if (id == null){
-                Long entrustIdById = reportService.getEntrustIdById(entrustId);
-                entrustId = entrustIdById;
-            }
-            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
+            Long entrustIdById = reportService.getEntrustIdById(id);
+            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustIdById);
             log.debug("====aaa:{}",JSON.toJSONString(detail));
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
             //相应pdf
