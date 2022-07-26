@@ -877,8 +877,25 @@ public class ReportServiceImpl implements ReportService {
         return result;
     }
     @Override
-    public List<ReportProductRelVo> getReportTemplateList0706(Long id) {
-        List<ReportProductRelVo> result = templateEntityMapper.getSampleIdByEntrust(id);
+    public List<ReportProductRelVo> getReportTemplateList0706(Long id,Long recordId) {
+        //用于中间报告去除多余模板
+        List<Integer> sampleIds = Lists.newArrayList();
+        if(recordId != null){
+//            sampleIds = recordDetailEntityMapper.getSampleIds(recordId);
+            List<ReportRecordDetailEntity> checkInfos = recordDetailEntityMapper.getCheckInfoByRecordId(recordId);
+            for (int i = 0; i < checkInfos.size(); i++) {
+                ReportRecordDetailEntity reportRecordDetailEntity = checkInfos.get(i);
+                String checkResult = reportRecordDetailEntity.getCheckResult();
+                Integer sampleId = reportRecordDetailEntity.getSampleId();
+                if(checkResult != null && !sampleIds.contains(sampleId)){
+                    sampleIds.add(sampleId);
+                }
+            }
+        }
+        if(CollectionUtils.isEmpty(sampleIds)){
+            sampleIds = null;
+        }
+        List<ReportProductRelVo> result = templateEntityMapper.getSampleIdByEntrust(id,sampleIds);
         if(!CollectionUtils.isEmpty(result)){
             for (ReportProductRelVo reportProductRelVo : result) {
                 List<ReportTemplateEntity> reportTemplateList0706 = templateEntityMapper.getReportTemplateList0706(id, reportProductRelVo.getSampleId());
@@ -2750,6 +2767,128 @@ public class ReportServiceImpl implements ReportService {
 //                    }else{
 //
 //                    }
+                    vo.setCheckItemId(sampleItemEntity.getCheckItemId());
+                    vo.setCheckItemName(sampleItemEntity.getCheckItemName());
+                    vo.setCoordinate(sampleItemEntity.getCoordinate());
+                    vo.setOriginUrl(sampleItemEntity.getOriginUrl());
+                    vo.setSampleId(sampleItemEntity.getSampleId());
+                    vo.setTaskId(sampleItemEntity.getTaskId());
+                    Long checkItemId = vo.getCheckItemId();
+                    Integer sampleId = vo.getSampleId();
+                    //设置上次报告制作记录
+                    if(!CollectionUtils.isEmpty(checkInfoByRecordId)){
+                        for (ReportRecordDetailEntity reportRecordDetailEntity : checkInfoByRecordId) {
+                            Long checkItemId1 = reportRecordDetailEntity.getCheckItemId();
+                            Integer sampleId1 = reportRecordDetailEntity.getSampleId();
+                            if(checkItemId.equals(checkItemId1) && sampleId.equals(sampleId1)){
+                                vo.setSpecsContent(reportRecordDetailEntity.getSpecsContent());
+                                vo.setCheckResult(reportRecordDetailEntity.getCheckResult());
+                                vo.setJudgeResult(reportRecordDetailEntity.getJudgeResult());
+                            }
+                        }
+                    }
+                    result.add(vo);
+                }
+            }
+            if(!CollectionUtils.isEmpty(checkItems)){
+                List<ReportCheckItemDetailVo> detailVos = Lists.newArrayList();
+                for (ReportCheckItemDetailVo reportCheckItemDetailVo:checkItems) {
+                    Long checkItemId = reportCheckItemDetailVo.getCheckItemId();
+                    Integer sampleId = reportCheckItemDetailVo.getSampleId();
+                    //设置上次报告制作记录
+                    if(!CollectionUtils.isEmpty(checkInfoByRecordId)){
+                        for (ReportRecordDetailEntity reportRecordDetailEntity : checkInfoByRecordId) {
+                            Long checkItemId1 = reportRecordDetailEntity.getCheckItemId();
+                            Integer sampleId1 = reportRecordDetailEntity.getSampleId();
+                            if(checkItemId.equals(checkItemId1) && sampleId.equals(sampleId1)){
+                                reportCheckItemDetailVo.setSpecsContent(reportRecordDetailEntity.getSpecsContent());
+                                reportCheckItemDetailVo.setCheckResult(reportRecordDetailEntity.getCheckResult());
+                                reportCheckItemDetailVo.setJudgeResult(reportRecordDetailEntity.getJudgeResult());
+                            }
+                        }
+                    }
+                    detailVos.add(reportCheckItemDetailVo);
+                }
+                result.addAll(detailVos);
+            }
+            reportSampleDetailVo.setCheckItems(result);
+            sampleName.append(reportSampleDetailVo.getSampleName());
+            if(i != samples.size() -1){
+                sampleName.append("/");
+            }
+            i++;
+        }
+        reportDetail.setSampleName(sampleName.toString());
+        reportDetail.setSamples(samples);
+        //获取中间报告需求信息
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        TestEntrustedTaskRelVo taskFlowById = taskRelDao.getTaskFlowById(taskFlowId);
+        reportDetail.setRequestDate(sdf.format(taskFlowById.getTaskFlowDate()));
+        reportDetail.setTaskCode(taskTestEntity.getTaskCode());
+        return reportDetail;
+    }
+
+    @Override
+    public ReportDetailVo middleReportEdit(Integer taskFlowId, Long taskId,Long recordId) {
+        TaskTestEntity taskTestEntity = taskMapper.getTaskTestEntityById(taskId);
+        Long entrustId = taskTestEntity.getEntrustmentId();
+        ReportDetailVo reportDetail = reportMapper.getMiddleReportDetail(taskFlowId,entrustId);
+        if(reportDetail == null){
+            reportDetail = new ReportDetailVo();
+            reportDetail.setSamples(Lists.newArrayList());
+            return reportDetail;
+        }
+        //获取历史检测项检测结果数据
+        List<ReportRecordDetailEntity> checkInfoByRecordId = recordDetailEntityMapper.getCheckInfoByRecordId(recordId);
+        List<ReportSampleDetailVo> samples = reportDetail.getSamples();
+        //处理每组样品下检测项
+        StringBuilder sampleName = new StringBuilder();
+        int i = 0;
+        for (ReportSampleDetailVo reportSampleDetailVo : samples) {
+            List<ReportCheckItemDetailVo> result = Lists.newArrayList();
+            List<SampleItemEntity> temp = Lists.newArrayList();
+            List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
+            //查询子级检测项信息
+            for (int j = 0; j < checkItems.size(); j++) {
+                ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
+                int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
+                if (last > 0) {
+                    //移除有子检测项的父检测项
+                    checkItems.remove(reportCheckItemDetailVo);
+                    //查询该父检测项下的子检测项信息
+                    List<SampleItemEntity> nodeItems = entrustEntityMapper.getItemRecursionList(reportCheckItemDetailVo.getCheckItemId());
+                    List<SampleItemEntity> tempNodeItems = Lists.newArrayList();
+                    //将父级原始记录传递给子级
+                    for (SampleItemEntity nodeItem : nodeItems) {
+                        nodeItem.setOriginUrl(reportCheckItemDetailVo.getOriginUrl());
+                        nodeItem.setSampleId(Integer.parseInt(reportSampleDetailVo.getSampleId()+""));
+                        nodeItem.setTaskId(reportCheckItemDetailVo.getTaskId());
+                        tempNodeItems.add(nodeItem);
+                    }
+                    temp.addAll(tempNodeItems);
+                }
+            }
+            //拼接父检测项名称和子检测项名称
+            HashMap<Long, SampleItemEntity> itemMap = new HashMap<>();
+            if(!CollectionUtils.isEmpty(temp)){
+                for (SampleItemEntity entity0 : temp) {
+                    itemMap.put(entity0.getCheckItemId(), entity0);
+                }
+                for (SampleItemEntity entity2 : temp) {
+                    SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
+                    if (sampleItemEntity != null && entity2.getUnitPrice() == null) {
+                        entity2.setCheckItemName(sampleItemEntity.getCheckItemName() + "-" + entity2.getCheckItemName());
+                    }
+                }
+            }
+            if(!CollectionUtils.isEmpty(temp)){
+                for (SampleItemEntity sampleItemEntity : temp) {
+                    //去除父检测项
+                    int last = testProductDao.isLast(sampleItemEntity.getCheckItemId().intValue());
+                    if (last > 0) {
+                        continue;
+                    }
+                    ReportCheckItemDetailVo vo = new ReportCheckItemDetailVo();
                     vo.setCheckItemId(sampleItemEntity.getCheckItemId());
                     vo.setCheckItemName(sampleItemEntity.getCheckItemName());
                     vo.setCoordinate(sampleItemEntity.getCoordinate());
