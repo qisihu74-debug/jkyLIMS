@@ -526,8 +526,7 @@ public class PDFHelper3 {
             List<BufferedImage> imageList = new ArrayList<BufferedImage>();
             for (int i = 0; i < pageCount; i++) {
                 OutputStream output = new ByteArrayOutputStream();
-                PageSet pageSet = new PageSet(i);
-                options.setPageSet(pageSet);
+                options.setPageIndex(i);
                 doc.save(output, options);
                 ImageInputStream imageInputStream = javax.imageio.ImageIO.createImageInputStream(parse(output));
                 imageList.add(javax.imageio.ImageIO.read(imageInputStream));

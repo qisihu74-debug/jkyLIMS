@@ -33,7 +33,7 @@ public interface EntrustService {
      */
     Boolean addEntrustTest(EntrustAddVo vo, MultipartFile[] file);
 
-    String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file);
+    String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) throws InterruptedException;
 
 
 
@@ -257,7 +257,7 @@ public interface EntrustService {
      * @param vo
      * @return
      */
-    String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file);
+    String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) throws InterruptedException;
 
     Long checkEntrustId(Long entrustId);
 
