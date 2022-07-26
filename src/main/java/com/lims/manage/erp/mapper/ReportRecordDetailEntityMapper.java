@@ -74,4 +74,6 @@ public interface ReportRecordDetailEntityMapper {
      * @return
      */
     int deleteByEntrustIdandCheckItemId(@Param("list")List<ReportRecordDetailEntity> list);
+
+    List<Integer> getSampleIds(Long recordId);
 }

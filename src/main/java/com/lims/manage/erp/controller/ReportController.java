@@ -534,8 +534,8 @@ public class ReportController {
     }
 
     @GetMapping("/getTemplateList")
-    public Result getTemplateList(Long id) {
-        return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList0706(id));
+    public Result getTemplateList(Long id,Long recordId) {
+        return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList0706(id,recordId));
     }
 
     /**
@@ -927,6 +927,14 @@ public class ReportController {
         } else {
             return ResultUtil.error(ResultEnum.PRESERVE_FAIL.getCode(), ResultEnum.PRESERVE_FAIL.getMsg());
         }
+    }
+
+    @GetMapping("/middleReportEdit")
+    public Result middleReportEdit(Integer taskFlowId,Long taskId,Long recordId) {
+        if(taskId == null || taskFlowId == null || recordId == null){
+            return ResultUtil.error("缺少必要的参数!");
+        }
+        return ResultUtil.success("查询中间报告详情成功！", reportService.middleReportEdit(taskFlowId,taskId,recordId));
     }
 
     /**

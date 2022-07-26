@@ -105,8 +105,15 @@ public class EntrustController {
     @RequestMapping("/addEntrust_Test")
     //@RequiresPermissions("entrust:entrust:addEntrust")
     public Result addEntrustTest(@RequestParam("json") String json, MultipartFile[] file) {
-        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
-        return ResultUtil.success( entrustService.addEntrustTest0620(entrust, file));
+        try {
+            EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
+            return ResultUtil.success(entrustService.addEntrustTest0620(entrust, file));
+        }
+        catch (Exception e){
+            MapUtils.queue.clear();
+            return ResultUtil.error("新建委托失败,请联系管理员！！！");
+        }
+
     }
 
 
@@ -632,8 +639,15 @@ public class EntrustController {
      */
     @RequestMapping("/addEntrust_copy")
     public Result addEntrustCopy(@RequestParam("json") String json, MultipartFile[] file) {
-        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
-        return ResultUtil.success(entrustService.addEntrustCopy(entrust, file));
+        try {
+            EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
+            return ResultUtil.success(entrustService.addEntrustCopy(entrust, file));
+        }
+        catch (Exception e){
+            MapUtils.queueCopy.clear();
+            return ResultUtil.error("再来一单新建委托失败,请联系管理员！！！");
+        }
+
     }
 
     /**

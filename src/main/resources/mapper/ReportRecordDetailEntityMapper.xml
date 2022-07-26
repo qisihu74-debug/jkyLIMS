@@ -209,6 +209,15 @@
             and sample_id = #{sampleId,jdbcType=INTEGER}
     </select>
 
+    <select id="getSampleIds" resultType="java.lang.Integer">
+        SELECT DISTINCT
+            sample_id
+        FROM
+            test_report_record_detail
+        WHERE
+            record_id = #{recordId}
+    </select>
+
     <delete id="deleteByEntrustIdandCheckItemId" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
             delete

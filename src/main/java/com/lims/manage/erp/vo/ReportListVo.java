@@ -8,6 +8,7 @@ import java.util.List;
 public class ReportListVo {
     private Long id;
     private Long taskId;
+    private Long recordId;
     private String taskCode;
     private String reportCode;
     private String sampleName;

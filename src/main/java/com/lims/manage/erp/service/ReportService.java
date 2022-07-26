@@ -177,7 +177,7 @@ public interface ReportService {
      * @param id
      * @return
      */
-    List<ReportProductRelVo> getReportTemplateList0706(Long id);
+    List<ReportProductRelVo> getReportTemplateList0706(Long id,Long recordId);
 
     /**
      * 查询存在委托单报告信息
@@ -386,6 +386,8 @@ public interface ReportService {
      * @return
      */
     ReportDetailVo getMiddleReportDetail(Integer taskFlowId,Long taskId);
+
+    ReportDetailVo middleReportEdit(Integer taskFlowId,Long taskId,Long recordId);
 
     String getUrlById(Long id);
 

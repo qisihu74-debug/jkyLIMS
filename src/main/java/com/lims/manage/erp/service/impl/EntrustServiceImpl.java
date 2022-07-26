@@ -61,27 +61,7 @@ import com.lims.manage.erp.util.MapUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.PageInfoUtils;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.CheckItemDeptVo;
-import com.lims.manage.erp.vo.CheckItemDetailVo;
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.lims.manage.erp.vo.ClientOrderdetailVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.EntrustSampleInfoVo;
-import com.lims.manage.erp.vo.HistoryEntrustDataVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.ReportApprovalVo;
-import com.lims.manage.erp.vo.ReportNodeVo;
-import com.lims.manage.erp.vo.ReportProgressStateVo;
-import com.lims.manage.erp.vo.ReportProgressVo;
-import com.lims.manage.erp.vo.SampleDetailAddVo;
-import com.lims.manage.erp.vo.SamplesAddVo;
-import com.lims.manage.erp.vo.TaskPriceVo;
-import com.lims.manage.erp.vo.TaskProgressStateVo;
-import com.lims.manage.erp.vo.TaskProgressVo;
-import com.lims.manage.erp.vo.TaskVo;
-import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
-import com.lims.manage.erp.vo.UpdateReportTeamVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -515,7 +495,7 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file){
+    public synchronized String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) throws InterruptedException {
         if (MapUtils.queue.size() == 0){
             MapUtils.queue.add("mark");
             //存放委托基本信息==》test_entrusted
@@ -566,7 +546,33 @@ public class EntrustServiceImpl implements EntrustService {
             List<EntrustSampleEntity> list1 = new ArrayList<>();
             if (!CollectionUtils.isEmpty(samples)) {
                 for (SampleEntity sampleEntity : samples) {
-                    sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
+                    // 获取样品详情
+                    PageHelper.clearPage();
+                    TemplateSampleVo sampleEntityData  = sampleEntityMapper.getOriginalSampleInfo(sampleEntity.getId());
+                    System.out.println(sampleEntityData);
+                    /**
+                     * update样品数据
+                     */
+                    SampleEntity sampleData = new SampleEntity();
+                    sampleData.setId(sampleEntity.getId());
+                    sampleData.setIsUse(1);
+                    sampleData.setReceivedDate(sampleEntityData.getSampleTime());
+                    // 比较样品签收时间 < 委托单受理日期
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    try {
+                        Date date1 = sdf.parse(sampleData.getReceivedDate());
+                        // 测试此日期是否在指定日期之后。
+                        if (!vo.getAcceptanceDate().after(date1)) {
+                            // 签收时间 =委托单受理日期
+                            sampleData.setReceivedDate(sdf.format(vo.getAcceptanceDate()));
+                        }
+                    }
+                    catch (Exception e){
+                        e.getMessage();
+                        System.out.println(e);
+                    }
+                    // update样品信息
+                    sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
                     EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                     entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                     entrustSampleEntity.setSampleId(sampleEntity.getId());
@@ -692,6 +698,8 @@ public class EntrustServiceImpl implements EntrustService {
             MapUtils.queue.clear();
             return "新建委托成功";
         }else {
+            Thread.sleep(200);
+            MapUtils.queue.clear();
             return "新建委托失败,请再次点击保存尝试";
         }
     }
@@ -3246,7 +3254,7 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) {
+    public synchronized String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) throws InterruptedException {
         if(MapUtils.queueCopy.size()==0){
             MapUtils.queueCopy.add("mark");
         // 获取前台得到的 vo.getId()
@@ -3482,6 +3490,8 @@ public class EntrustServiceImpl implements EntrustService {
         MapUtils.queueCopy.clear();
             return "新建委托成功";
         }else {
+            Thread.sleep(200);
+            MapUtils.queueCopy.clear();
             return "再来一单新建委托失败,请再次点击保存尝试";
         }
     }
