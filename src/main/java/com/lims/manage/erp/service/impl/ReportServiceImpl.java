@@ -2664,7 +2664,9 @@ public class ReportServiceImpl implements ReportService {
     public ReportDetailVo getMiddleReportDetail(Integer taskFlowId, Long taskId) {
 //        Long recordId = recordEntityMapper.getRecordId(taskId);
 //        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        Long entrustId = taskMapper.getEntrustId(taskId);
+//        Long entrustId = taskMapper.getEntrustId(taskId);
+        TaskTestEntity taskTestEntity = taskMapper.getTaskTestEntityById(taskId);
+        Long entrustId = taskTestEntity.getEntrustmentId();
         ReportDetailVo reportDetail;
         reportDetail = reportMapper.getMiddleReportDetail(taskFlowId,entrustId);
         if(reportDetail == null){
@@ -2796,7 +2798,7 @@ public class ReportServiceImpl implements ReportService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         TestEntrustedTaskRelVo taskFlowById = taskRelDao.getTaskFlowById(taskFlowId);
         reportDetail.setRequestDate(sdf.format(taskFlowById.getTaskFlowDate()));
-        reportDetail.setReportCode(taskFlowById.getReportCode());
+        reportDetail.setTaskCode(taskTestEntity.getTaskCode());
         return reportDetail;
     }
 
