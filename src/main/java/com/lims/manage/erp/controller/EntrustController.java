@@ -22,6 +22,7 @@ import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.MapUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.CheckItemDeptVo;
@@ -503,7 +504,7 @@ public class EntrustController {
      * @param response
      */
     @RequestMapping("previewEntrust")
-    public void preview(Long id, HttpServletResponse response) {
+    public void preview(Long entrustId, HttpServletResponse response) {
         String message = entrustService.getMessage();
         String[] strings = message.split("/");
         String fileName = strings[1];
@@ -511,8 +512,13 @@ public class EntrustController {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(strings[0], fileName);
             //填充数据
-            Long entrustIdById = reportService.getEntrustIdById(id);
-            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustIdById);
+            //校验是否是委托单id
+            Long id = entrustService.checkEntrustId(entrustId);
+            if (id == null){
+                Long entrustIdById = reportService.getEntrustIdById(entrustId);
+                entrustId = entrustIdById;
+            }
+            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             log.debug("====aaa:{}",JSON.toJSONString(detail));
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
             //相应pdf
