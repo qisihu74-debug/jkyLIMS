@@ -642,7 +642,7 @@ public class ReportServiceImpl implements ReportService {
                 return false;
             }
         }
-        ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo,vo.getEntrustId());
+        ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo,vo.getEntrustmentId());
         //生成报告编号
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
         String year = sdf.format(new Date());
@@ -655,6 +655,12 @@ public class ReportServiceImpl implements ReportService {
         }
         reportRecordEntity.setId(recordId);
         reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+        reportRecordEntity.setState(3+"");//设置为待发起审批
+        EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(vo.getEntrustmentId());
+        reportRecordEntity.setNumber(entrustAddVo.getReportCount());
+        reportRecordEntity.setReportType(entrustAddVo.getReportType());
+        reportRecordEntity.setSealType(entrustAddVo.getSealType());
+        reportRecordEntity.setEntrustId(vo.getEntrustmentId());
         //设置为中间报告
         reportRecordEntity.setType(1+"");
         int insert = recordEntityMapper.insert(reportRecordEntity);
@@ -2702,6 +2708,7 @@ public class ReportServiceImpl implements ReportService {
                     for (SampleItemEntity nodeItem : nodeItems) {
                         nodeItem.setOriginUrl(reportCheckItemDetailVo.getOriginUrl());
                         nodeItem.setSampleId(Integer.parseInt(reportSampleDetailVo.getSampleId()+""));
+                        nodeItem.setTaskId(reportCheckItemDetailVo.getTaskId());
                         tempNodeItems.add(nodeItem);
                     }
                     temp.addAll(tempNodeItems);
@@ -2747,6 +2754,7 @@ public class ReportServiceImpl implements ReportService {
                     vo.setCoordinate(sampleItemEntity.getCoordinate());
                     vo.setOriginUrl(sampleItemEntity.getOriginUrl());
                     vo.setSampleId(sampleItemEntity.getSampleId());
+                    vo.setTaskId(sampleItemEntity.getTaskId());
                     Long checkItemId = vo.getCheckItemId();
                     Integer sampleId = vo.getSampleId();
                     //设置上次报告制作记录
