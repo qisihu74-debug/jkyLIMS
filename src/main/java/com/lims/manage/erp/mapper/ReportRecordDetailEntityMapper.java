@@ -41,6 +41,8 @@ public interface ReportRecordDetailEntityMapper {
      */
     int updateByRecordIdSelective(ReportRecordDetailEntity record);
 
+    int updateById(ReportRecordDetailEntity record);
+
     /**
      * 根据recordId获取检测项信息
      *
