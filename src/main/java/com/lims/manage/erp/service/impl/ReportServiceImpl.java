@@ -2740,7 +2740,9 @@ public class ReportServiceImpl implements ReportService {
                     sampleName.append("/");
                 }
             }
+            String entrustTestType = entrustEntityMapper.getEntrustTestType(reportListVo.getId());
             reportListVo.setSampleName(sampleName.toString());
+            reportListVo.setEntrustTestType(entrustTestType);
         }
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
