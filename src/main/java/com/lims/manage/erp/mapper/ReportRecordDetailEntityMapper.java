@@ -41,6 +41,8 @@ public interface ReportRecordDetailEntityMapper {
      */
     int updateByRecordIdSelective(ReportRecordDetailEntity record);
 
+    int updateById(ReportRecordDetailEntity record);
+
     /**
      * 根据recordId获取检测项信息
      *
@@ -74,4 +76,6 @@ public interface ReportRecordDetailEntityMapper {
      * @return
      */
     int deleteByEntrustIdandCheckItemId(@Param("list")List<ReportRecordDetailEntity> list);
+
+    List<Integer> getSampleIds(Long recordId);
 }

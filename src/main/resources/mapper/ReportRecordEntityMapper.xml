@@ -358,6 +358,7 @@
         SELECT distinct
         t1.id,
         t1.entrustment_id,
+        t1.entrust_id,
         t1.report_code,
         t1.sample_name,
         t1.required_completion_time,
@@ -450,6 +451,22 @@
         FROM
             test_report_record
         where entrustment_id = #{entrustId,jdbcType=BIGINT}
+    </select>
+
+    <select id="getReportNodeByZjEntrustId" resultType="com.lims.manage.erp.vo.ReportNodeVo"
+            parameterType="java.lang.Long">
+        SELECT
+            report_code,
+            state,
+            report_complete_time,
+            combine_time,
+            verifyer_time,
+            issuer_time,
+            seal_time,
+            operate_time
+        FROM
+            test_report_record
+        where entrust_id = #{entrustId,jdbcType=BIGINT}
     </select>
 
     <select id="selectByEntrustId" resultType="com.lims.manage.erp.entity.ReportRecordEntity"

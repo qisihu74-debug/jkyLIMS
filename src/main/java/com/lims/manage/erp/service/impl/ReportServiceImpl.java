@@ -631,6 +631,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean middleReportPreserve(ReportPreserveVo vo) {
         //获取父级code
+        PageHelper.clearPage();
         Long deptId = taskMapper.getDeptByEntrustId(vo.getEntrustmentId());
         String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
         long recordId = GenID.getID();
@@ -679,6 +680,16 @@ public class ReportServiceImpl implements ReportService {
         return true;
     }
 
+    @Transactional
+    @Override
+    public Boolean middleReportUpdate(ReportPreserveVo vo) {
+        List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
+        for (ReportRecordDetailEntity e : checkInfos) {
+            recordDetailEntityMapper.updateById(e);
+        }
+        return true;
+    }
+
     @Override
     public PageInfo sealList(String search, Integer pageNum, Integer pageSize, String reportType, String state,Integer reportTypeStatus) {
         if (StringUtils.isEmpty(state)) {
@@ -705,12 +716,17 @@ public class ReportServiceImpl implements ReportService {
             ids = null;
         }
         PageHelper.startPage(pageNum, pageSize);
+        //TODO 兼容中间报告
         List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state,reportTypeStatus,ids);
         for (ReportRecordEntity recordEntity:list) {
             if ("0".equals(recordEntity.getType())){
                 recordEntity.setType("最终报告");
             }else {
                 recordEntity.setType("中间报告");
+            }
+            //TODO 兼容中间报告
+            if (recordEntity.getEntrustmentId() == null){
+                recordEntity.setEntrustId(recordEntity.getEntrustmentId());
             }
         }
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
@@ -876,8 +892,25 @@ public class ReportServiceImpl implements ReportService {
         return result;
     }
     @Override
-    public List<ReportProductRelVo> getReportTemplateList0706(Long id) {
-        List<ReportProductRelVo> result = templateEntityMapper.getSampleIdByEntrust(id);
+    public List<ReportProductRelVo> getReportTemplateList0706(Long id,Long recordId) {
+        //用于中间报告去除多余模板
+        List<Integer> sampleIds = Lists.newArrayList();
+        if(recordId != null){
+//            sampleIds = recordDetailEntityMapper.getSampleIds(recordId);
+            List<ReportRecordDetailEntity> checkInfos = recordDetailEntityMapper.getCheckInfoByRecordId(recordId);
+            for (int i = 0; i < checkInfos.size(); i++) {
+                ReportRecordDetailEntity reportRecordDetailEntity = checkInfos.get(i);
+                String checkResult = reportRecordDetailEntity.getCheckResult();
+                Integer sampleId = reportRecordDetailEntity.getSampleId();
+                if(checkResult != null && !sampleIds.contains(sampleId)){
+                    sampleIds.add(sampleId);
+                }
+            }
+        }
+        if(CollectionUtils.isEmpty(sampleIds)){
+            sampleIds = null;
+        }
+        List<ReportProductRelVo> result = templateEntityMapper.getSampleIdByEntrust(id,sampleIds);
         if(!CollectionUtils.isEmpty(result)){
             for (ReportProductRelVo reportProductRelVo : result) {
                 List<ReportTemplateEntity> reportTemplateList0706 = templateEntityMapper.getReportTemplateList0706(id, reportProductRelVo.getSampleId());
@@ -1224,6 +1257,11 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ReportRecordEntity getDetailByEntrustId(Long entrustId) {
         return reportMapper.getDetailByEntrustId(entrustId);
+    }
+
+    @Override
+    public ReportRecordEntity getDetailByEntrustIdZj(Long entrustId) {
+        return reportMapper.getDetailByEntrustIdZj(entrustId);
     }
 
     public String downLoadNew(MinioClient client, String code, Long id, List<Long> checkIds) throws Exception {
@@ -1613,6 +1651,10 @@ public class ReportServiceImpl implements ReportService {
         try {
             //url = downLoad(client,code,entrustId);
             url = reportMapper.getUrlByEntrustId(entrustId);
+            //TODO 兼容中间报告
+            if (StringUtils.isEmpty(url)){
+                url = reportMapper.getUrlByZjEntrustId(entrustId);
+            }
         } catch (Exception e) {
             logger.error("盖章下载报告文件失败:{}", e);
             return false;
@@ -1636,7 +1678,13 @@ public class ReportServiceImpl implements ReportService {
                 if (response != null && response.getCode() == 0) {
                     //根据委托id存储文档id
                     List<QiYueSuoDocment> result = response.getResult();
-                    entityMapper.updateDocIdAndState(entrustId, result.get(0).getDocumentId(), "2");
+                    //TODO 兼容中间报告
+                    Long aLong = entityMapper.checkExist(entrustId);
+                    if (aLong == null){
+                        entityMapper.updateDocIdAndStateZj(entrustId, result.get(0).getDocumentId(), "2");
+                    }else {
+                        entityMapper.updateDocIdAndState(entrustId, result.get(0).getDocumentId(), "2");
+                    }
                     entityMapper.updateSeal(result.get(0).getDocumentId());
                 }
             } else {
@@ -1649,27 +1697,51 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
-        List<ReportRecordEntity> entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        List<ReportRecordEntity> entity = Lists.newArrayList();
+        //TODO 兼容中间报告
+        Long aLong = entityMapper.checkExist(reqBean.getEntrustId());
+        if (aLong == null){
+            entity = entityMapper.selectMessageByZjEntrustId(reqBean.getEntrustId());
+        }else {
+            entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        }
         List<String> docs = new ArrayList<>();
         docs.add(entity.get(0).getQysDocmentId());
         reqBean.setDocuments(docs);
         QiYueSuoResponse response = qiYueSuoHnadler.createbycategory(reqBean);
         //根据委托id存储文档id
-        entityMapper.updateContractIdAndState(reqBean.getEntrustId(), response.getContractId(), "3");
+        //TODO 兼容中间报告
+        if (aLong == null){
+            entityMapper.updateContractIdAndStateZj(reqBean.getEntrustId(), response.getContractId(), "3");
+        }else {
+            entityMapper.updateContractIdAndState(reqBean.getEntrustId(), response.getContractId(), "3");
+        }
         return response;
     }
 
     @Override
     public QiYueSuoResponse signurl(QiYueSuoSeaLBean reqBean) {
         //设置合同标识
-        List<ReportRecordEntity> entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        List<ReportRecordEntity> entity = Lists.newArrayList();
+        //TODO 兼容中间报告
+        Long aLong = entityMapper.checkExist(reqBean.getEntrustId());
+        if (aLong == null){
+            entity = entityMapper.selectMessageByZjEntrustId(reqBean.getEntrustId());
+        }else {
+            entity = entityMapper.selectMessageByEntrustId(reqBean.getEntrustId());
+        }
         reqBean.setContractId(Long.valueOf(entity.get(0).getContractId()));
         QiYueSuoResponse response = qiYueSuoHnadler.signurl(reqBean);
         //根据委托更新报告签署url
         //设置盖章人和盖章时间
         Long userId = ShiroUtils.getUserInfo().getUserId();
         String sysUserName = sysUserDao.getSysUserName(userId);
-        entityMapper.updateUrlAndState(reqBean.getEntrustId(), response.getSignUrl(), "4",sysUserName+"&"+userId+"",new Date(System.currentTimeMillis()));
+        //TODO 兼容中间报告
+        if (aLong == null){
+            entityMapper.updateUrlAndStateZj(reqBean.getEntrustId(), response.getSignUrl(), "4",sysUserName+"&"+userId+"",new Date(System.currentTimeMillis()));
+        }else {
+            entityMapper.updateUrlAndState(reqBean.getEntrustId(), response.getSignUrl(), "4",sysUserName+"&"+userId+"",new Date(System.currentTimeMillis()));
+        }
         return response;
     }
 
@@ -1777,6 +1849,8 @@ public class ReportServiceImpl implements ReportService {
         ReportResBean resBean = new ReportResBean();
         Map<String,String> mesMap = new HashedMap();
         ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
+        //TODO 兼容中间报告
+
         int index = 1;
         for (ConclusionEntity conclusionEntity:list) {
             String[] split = conclusionEntity.getUrl().split("\\?");
@@ -2403,7 +2477,13 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public String reportUrl(Long entrustId) {
-        return reportMapper.getUrlByEntrustId(entrustId);
+        //TODO 兼容中间报告
+        String url = "";
+        url = reportMapper.getUrlByEntrustId(entrustId);
+        if (StringUtils.isEmpty(url)){
+            url = reportMapper.getUrlByZjEntrustId(entrustId);
+        }
+        return url;
     }
 
     @Override
@@ -2660,7 +2740,9 @@ public class ReportServiceImpl implements ReportService {
                     sampleName.append("/");
                 }
             }
+            String entrustTestType = entrustEntityMapper.getEntrustTestType(reportListVo.getId());
             reportListVo.setSampleName(sampleName.toString());
+            reportListVo.setEntrustTestType(entrustTestType);
         }
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
@@ -2811,6 +2893,130 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public ReportDetailVo middleReportEdit(Integer taskFlowId, Long taskId,Long recordId) {
+        TaskTestEntity taskTestEntity = taskMapper.getTaskTestEntityById(taskId);
+        Long entrustId = taskTestEntity.getEntrustmentId();
+        ReportDetailVo reportDetail = reportMapper.getMiddleReportDetail(taskFlowId,entrustId);
+        if(reportDetail == null){
+            reportDetail = new ReportDetailVo();
+            reportDetail.setSamples(Lists.newArrayList());
+            return reportDetail;
+        }
+        //获取历史检测项检测结果数据
+        List<ReportRecordDetailEntity> checkInfoByRecordId = recordDetailEntityMapper.getCheckInfoByRecordId(recordId);
+        List<ReportSampleDetailVo> samples = reportDetail.getSamples();
+        //处理每组样品下检测项
+        StringBuilder sampleName = new StringBuilder();
+        int i = 0;
+        for (ReportSampleDetailVo reportSampleDetailVo : samples) {
+            List<ReportCheckItemDetailVo> result = Lists.newArrayList();
+            List<SampleItemEntity> temp = Lists.newArrayList();
+            List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
+            //查询子级检测项信息
+            for (int j = 0; j < checkItems.size(); j++) {
+                ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
+                int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
+                if (last > 0) {
+                    //移除有子检测项的父检测项
+                    checkItems.remove(reportCheckItemDetailVo);
+                    //查询该父检测项下的子检测项信息
+                    List<SampleItemEntity> nodeItems = entrustEntityMapper.getItemRecursionList(reportCheckItemDetailVo.getCheckItemId());
+                    List<SampleItemEntity> tempNodeItems = Lists.newArrayList();
+                    //将父级原始记录传递给子级
+                    for (SampleItemEntity nodeItem : nodeItems) {
+                        nodeItem.setOriginUrl(reportCheckItemDetailVo.getOriginUrl());
+                        nodeItem.setSampleId(Integer.parseInt(reportSampleDetailVo.getSampleId()+""));
+                        nodeItem.setTaskId(reportCheckItemDetailVo.getTaskId());
+                        tempNodeItems.add(nodeItem);
+                    }
+                    temp.addAll(tempNodeItems);
+                }
+            }
+            //拼接父检测项名称和子检测项名称
+            HashMap<Long, SampleItemEntity> itemMap = new HashMap<>();
+            if(!CollectionUtils.isEmpty(temp)){
+                for (SampleItemEntity entity0 : temp) {
+                    itemMap.put(entity0.getCheckItemId(), entity0);
+                }
+                for (SampleItemEntity entity2 : temp) {
+                    SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
+                    if (sampleItemEntity != null && entity2.getUnitPrice() == null) {
+                        entity2.setCheckItemName(sampleItemEntity.getCheckItemName() + "-" + entity2.getCheckItemName());
+                    }
+                }
+            }
+            if(!CollectionUtils.isEmpty(temp)){
+                for (SampleItemEntity sampleItemEntity : temp) {
+                    //去除父检测项
+                    int last = testProductDao.isLast(sampleItemEntity.getCheckItemId().intValue());
+                    if (last > 0) {
+                        continue;
+                    }
+                    ReportCheckItemDetailVo vo = new ReportCheckItemDetailVo();
+                    vo.setCheckItemId(sampleItemEntity.getCheckItemId());
+                    vo.setCheckItemName(sampleItemEntity.getCheckItemName());
+                    vo.setCoordinate(sampleItemEntity.getCoordinate());
+                    vo.setOriginUrl(sampleItemEntity.getOriginUrl());
+                    vo.setSampleId(sampleItemEntity.getSampleId());
+                    vo.setTaskId(sampleItemEntity.getTaskId());
+                    Long checkItemId = vo.getCheckItemId();
+                    Integer sampleId = vo.getSampleId();
+                    //设置上次报告制作记录
+                    if(!CollectionUtils.isEmpty(checkInfoByRecordId)){
+                        for (ReportRecordDetailEntity reportRecordDetailEntity : checkInfoByRecordId) {
+                            Long checkItemId1 = reportRecordDetailEntity.getCheckItemId();
+                            Integer sampleId1 = reportRecordDetailEntity.getSampleId();
+                            if(checkItemId.equals(checkItemId1) && sampleId.equals(sampleId1)){
+                                vo.setSpecsContent(reportRecordDetailEntity.getSpecsContent());
+                                vo.setCheckResult(reportRecordDetailEntity.getCheckResult());
+                                vo.setJudgeResult(reportRecordDetailEntity.getJudgeResult());
+                                vo.setId(reportRecordDetailEntity.getId());
+                            }
+                        }
+                    }
+                    result.add(vo);
+                }
+            }
+            if(!CollectionUtils.isEmpty(checkItems)){
+                List<ReportCheckItemDetailVo> detailVos = Lists.newArrayList();
+                for (ReportCheckItemDetailVo reportCheckItemDetailVo:checkItems) {
+                    Long checkItemId = reportCheckItemDetailVo.getCheckItemId();
+                    Integer sampleId = reportCheckItemDetailVo.getSampleId();
+                    //设置上次报告制作记录
+                    if(!CollectionUtils.isEmpty(checkInfoByRecordId)){
+                        for (ReportRecordDetailEntity reportRecordDetailEntity : checkInfoByRecordId) {
+                            Long checkItemId1 = reportRecordDetailEntity.getCheckItemId();
+                            Integer sampleId1 = reportRecordDetailEntity.getSampleId();
+                            if(checkItemId.equals(checkItemId1) && sampleId.equals(sampleId1)){
+                                reportCheckItemDetailVo.setSpecsContent(reportRecordDetailEntity.getSpecsContent());
+                                reportCheckItemDetailVo.setCheckResult(reportRecordDetailEntity.getCheckResult());
+                                reportCheckItemDetailVo.setJudgeResult(reportRecordDetailEntity.getJudgeResult());
+                                reportCheckItemDetailVo.setId(reportRecordDetailEntity.getId());
+                            }
+                        }
+                    }
+                    detailVos.add(reportCheckItemDetailVo);
+                }
+                result.addAll(detailVos);
+            }
+            reportSampleDetailVo.setCheckItems(result);
+            sampleName.append(reportSampleDetailVo.getSampleName());
+            if(i != samples.size() -1){
+                sampleName.append("/");
+            }
+            i++;
+        }
+        reportDetail.setSampleName(sampleName.toString());
+        reportDetail.setSamples(samples);
+        //获取中间报告需求信息
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        TestEntrustedTaskRelVo taskFlowById = taskRelDao.getTaskFlowById(taskFlowId);
+        reportDetail.setRequestDate(sdf.format(taskFlowById.getTaskFlowDate()));
+        reportDetail.setTaskCode(taskTestEntity.getTaskCode());
+        return reportDetail;
+    }
+
+    @Override
     public String getUrlById(Long id) {
         return reportMapper.getUrlById(id);
     }
@@ -2850,7 +3056,13 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Long getEntrustIdById(Long id) {
-        return reportMapper.getEntrustIdById(id);
+        //TODO 兼容中间报告
+        Long entrustIdById = null;
+        entrustIdById = reportMapper.getEntrustIdById(id);
+        if (entrustIdById == null){
+            entrustIdById = reportMapper.getZjEntrustIdById(id);
+        }
+        return entrustIdById;
     }
 
     @Override

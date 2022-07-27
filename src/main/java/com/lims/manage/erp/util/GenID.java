@@ -5,6 +5,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -16,20 +17,28 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Copyright © 河南交科院
  */
 public class GenID {
-    static AtomicInteger atomicInteger = new AtomicInteger(100);
+    private static AtomicInteger atomicInteger = new AtomicInteger(0);
+    private static int ID_LENGTH = 16;
 
     public synchronized static long getID() {
-        int increment = atomicInteger.getAndIncrement();
-        String s = null;
-        if(increment<999999) {
-            s = System.currentTimeMillis() + "" + increment;
-        }else {
+        //  生成最大4位随技术
+        int i2 = ThreadLocalRandom.current().nextInt(9999);
+        String timeStr = String.valueOf(System.currentTimeMillis());
+        // 取出时间串前面相同的部分
+        timeStr = timeStr.substring(5);
+        // 递增生成最大9999的递增ID
+        if (atomicInteger.get() == 9999) {
             atomicInteger.set(0);
-            increment = atomicInteger.getAndIncrement();
-            s = System.currentTimeMillis() + "" + increment;
         }
-        long id = Long.parseLong(s);
-        return id;
+        int i1 = atomicInteger.getAndIncrement();
+        String id = timeStr.concat(String.valueOf(i2)).concat(i1+"");
+        // 严格控制ID长度，如果过长 从最前面截取
+        if (id.length() > ID_LENGTH) {
+            // 计算多了多少位
+            int surplusLenth = id.length() - ID_LENGTH;
+            id = id.substring(surplusLenth);
+        }
+        return Long.valueOf(id);
     }
 
     public static String getUUID() {
@@ -53,7 +62,12 @@ public class GenID {
         return orderNum;
     }
 
-    public static void main(String[] args) {
-        System.out.println(GenID.getUUID().length());
+    public static void main(String[] args) throws InterruptedException {
+        for (int i=0;i<10000;i++) {
+            Thread.sleep(1000);
+            System.out.println(GenID.getID());
+            i++;
+        }
+
     }
 }

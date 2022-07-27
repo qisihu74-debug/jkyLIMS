@@ -1,12 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.google.common.collect.Lists;
-import com.lims.manage.erp.entity.DingUserEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TeamTreeStructureEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
@@ -14,14 +9,23 @@ import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TeamMapper;
 import com.lims.manage.erp.service.ReportApprovalService;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.ReportApprovalVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @Author: DLC
@@ -44,6 +48,12 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         PageHelper.startPage(pageNum, pageSize);
         Set<Long> ids = getNextIdsToTeam();
         List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalList(search,ids,reportTypeStatus);
+        //TODO 兼容中间报告
+        for (ReportApprovalVo bean:list) {
+            if (bean.getEntrustmentId() == null){
+                bean.setEntrustmentId(bean.getEntrustId());
+            }
+        }
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
     }
@@ -233,6 +243,12 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     public PageInfo getVerify_list(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
         PageHelper.startPage(pageNum, pageSize);
         List<ReportApprovalVo> list = reportApprovalMapper.getVerifyList(search,getNextIdsToTeam(),reportTypeStatus);
+        //TODO 兼容中间报告
+        for (ReportApprovalVo bean:list) {
+            if (bean.getEntrustmentId() == null){
+                bean.setEntrustmentId(bean.getEntrustId());
+            }
+        }
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
     }

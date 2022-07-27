@@ -2341,7 +2341,14 @@ public class EntrustServiceImpl implements EntrustService {
     private ReportProgressVo dealReportState(Long entrustmentId){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ReportProgressVo result;
-        ReportNodeVo reportRecordEntity = recordEntityMapper.getReportNodeByEntrustId(entrustmentId);
+        //TODO 兼容中间报告
+        ReportNodeVo reportRecordEntity = null;
+        Long id = recordEntityMapper.checkExist(entrustmentId);
+        if (id == null){
+            reportRecordEntity = recordEntityMapper.getReportNodeByZjEntrustId(entrustmentId);
+        }else {
+            reportRecordEntity = recordEntityMapper.getReportNodeByEntrustId(entrustmentId);
+        }
         if(reportRecordEntity == null){
             result = null;
         }else{

@@ -111,6 +111,13 @@ public interface ReportService {
     Boolean middleReportPreserve(ReportPreserveVo vo);
 
     /**
+     * 中间报告修改保存接口
+     * @param vo
+     * @return
+     */
+    Boolean middleReportUpdate(ReportPreserveVo vo);
+
+    /**
      * 待盖章和历史盖章列表查询
      * @param search
      * @param pageNum
@@ -177,7 +184,7 @@ public interface ReportService {
      * @param id
      * @return
      */
-    List<ReportProductRelVo> getReportTemplateList0706(Long id);
+    List<ReportProductRelVo> getReportTemplateList0706(Long id,Long recordId);
 
     /**
      * 查询存在委托单报告信息
@@ -387,6 +394,8 @@ public interface ReportService {
      */
     ReportDetailVo getMiddleReportDetail(Integer taskFlowId,Long taskId);
 
+    ReportDetailVo middleReportEdit(Integer taskFlowId,Long taskId,Long recordId);
+
     String getUrlById(Long id);
 
     Boolean category(SealEntity ids);
@@ -410,4 +419,6 @@ public interface ReportService {
     List<String> inspectorList(String search);
 
     int updateInspector(String reportCode, String inspector);
+
+    ReportRecordEntity getDetailByEntrustIdZj(Long entrustId);
 }

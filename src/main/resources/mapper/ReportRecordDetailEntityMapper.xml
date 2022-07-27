@@ -179,6 +179,22 @@
         </set>
         where record_id = #{recordId,jdbcType=BIGINT} and check_item_id = #{checkItemId,jdbcType=BIGINT} and sample_id = #{sampleId}
     </update>
+    <update id="updateById" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        update test_report_record_detail
+        <set>
+            check_item_name = #{checkItemName,jdbcType=VARCHAR},
+            <if test="specsContent != null">
+                specs_content = #{specsContent,jdbcType=VARCHAR},
+            </if>
+            <if test="checkResult != null">
+                check_result = #{checkResult,jdbcType=VARCHAR},
+            </if>
+            <if test="judgeResult != null">
+                judge_result = #{judgeResult,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
 
     <select id="getCheckInfoByRecordId" resultType="com.lims.manage.erp.entity.ReportRecordDetailEntity" parameterType="java.lang.Long">
         select *
@@ -207,6 +223,15 @@
             record_id = #{recordId,jdbcType=BIGINT}
             and task_id = #{taskId,jdbcType=BIGINT}
             and sample_id = #{sampleId,jdbcType=INTEGER}
+    </select>
+
+    <select id="getSampleIds" resultType="java.lang.Integer">
+        SELECT DISTINCT
+            sample_id
+        FROM
+            test_report_record_detail
+        WHERE
+            record_id = #{recordId}
     </select>
 
     <delete id="deleteByEntrustIdandCheckItemId" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
