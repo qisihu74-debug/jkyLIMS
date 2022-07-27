@@ -19,40 +19,14 @@ import java.util.List;
 import java.util.Map;
 
 public interface EntrustService {
-    /**
-     * 新增委托
-     * @param vo
-     * @return
-     */
-    Boolean addEntrust(EntrustAddVo vo, MultipartFile[] file);
 
-    /**
-     * 新增委托测试丁
-     * @param vo
-     * @return
-     */
-    Boolean addEntrustTest(EntrustAddVo vo, MultipartFile[] file);
 
     String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) throws InterruptedException;
-
-
-
-
-
-    /**
-     * 修改委托
-     */
-    Boolean updateEntrust(EntrustAddVo vo, MultipartFile[] file);
 
     /**
      * 修改委托测试 new
      */
     Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file) throws ParseException;
-
-    /**
-     * 修改委托样品测试 new 暂时废弃 （勿删！！）
-     */
-    Boolean updateEntrustTestNewSample(EntrustAddVo vo);
 
     /**
      * 修改委托样品测试 new 3.23

@@ -49,6 +49,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import sun.security.util.Debug;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -77,25 +78,6 @@ public class EntrustController {
     private ReportService reportService;
 
     /**
-     * 新增委托 废弃
-     *
-     * @param json
-     * @param file
-     * @return
-     */
-    @RequestMapping("/addEntrust")
-    //@RequiresPermissions("entrust:entrust:addEntrust")
-    public Result addEntrust(@RequestParam("json") String json, MultipartFile[] file) {
-        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
-        Boolean isSuccess = entrustService.addEntrust(entrust, file);
-        if (isSuccess) {
-            return ResultUtil.success();
-        } else {
-            return ResultUtil.error(678, "新增委托失败！");
-        }
-    }
-
-    /**
      * 新增委托 使用中丁
      *
      * 丁 7月5日 : 返回字符串效验信息。
@@ -111,30 +93,12 @@ public class EntrustController {
             return ResultUtil.success(entrustService.addEntrustTest0620(entrust, file));
         }
         catch (Exception e){
+            // 日志输出。
+            Debug.println("新增委托日志异常输出\t",e+"");
             MapUtils.queue.clear();
             return ResultUtil.error("新建委托失败,请联系管理员！！！");
         }
 
-    }
-
-
-    /**
-     * 修改委托 废弃
-     *
-     * @param json
-     * @param file
-     * @return
-     */
-    @RequestMapping("/updateEntrust")
-//    @RequiresPermissions("entrust:entrust:updateEntrust")
-    public Result updateEntrust(@RequestParam("json") String json, MultipartFile[] file) {
-        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
-        Boolean isSuccess = entrustService.updateEntrust(entrust, file);
-        if (isSuccess) {
-            return ResultUtil.success("修改成功");
-        } else {
-            return ResultUtil.error(678, "修改委托失败！");
-        }
     }
 
     /**
@@ -650,6 +614,8 @@ public class EntrustController {
             return ResultUtil.success(entrustService.addEntrustCopy(entrust, file));
         }
         catch (Exception e){
+            // 日志输出。
+            Debug.println("新增委托再来一单日志异常输出\t",e+"");
             MapUtils.queueCopy.clear();
             return ResultUtil.error("再来一单新建委托失败,请联系管理员！！！");
         }
