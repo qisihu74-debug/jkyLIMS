@@ -267,4 +267,6 @@ public interface ReportRecordEntityMapper {
 
     @Update("update test_report_record set contract_id=#{contractId},qys_state=#{state} where entrust_id=#{entrustId}")
     void updateContractIdAndStateZj(@Param("entrustId") Long entrustId, @Param("contractId") Long contractId, @Param("state") String state);
+
+    ReportRecordEntity selectByEntrustIdZj(@Param("entrustId") Long entrustId);
 }

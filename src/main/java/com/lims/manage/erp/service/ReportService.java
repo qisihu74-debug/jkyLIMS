@@ -11,6 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.util.List;
 
+/**
+ * @author Administrator
+ */
 public interface ReportService {
     /**
      * 查询可制作报告列表
@@ -57,7 +60,7 @@ public interface ReportService {
 
     /**
      * 获取报告详情
-     * @param id
+     * @param recordId
      * @return
      */
     ReportSampleDetailVo getReportList_history_details(Long recordId,Long taskId);
