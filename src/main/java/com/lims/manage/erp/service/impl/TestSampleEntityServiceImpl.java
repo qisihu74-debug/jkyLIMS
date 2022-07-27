@@ -5,13 +5,21 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.SampleFileTableEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.TestSampleCollectionJSON;
+import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.SampleFileTableDao;
+import com.lims.manage.erp.mapper.TestSampleEntityMapper;
+import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
-import com.lims.manage.erp.vo.SampleJudgeBasisVo;
 import com.lims.manage.erp.vo.SampleSimpleListVo;
 import com.lims.manage.erp.vo.SamplesAddVo;
 import org.slf4j.Logger;
@@ -49,6 +57,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     private int getNewSampleCode() {
         //获取数据库当前年份最大的样品编号
         Integer maxNumber = sampleEntityMapper.getMaxNumber(sdf.format(now));
+        logger.debug("样品编号:{}",maxNumber);
         Integer newMax;
         if (maxNumber == null) {
             newMax = 0;

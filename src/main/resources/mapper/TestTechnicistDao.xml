@@ -73,7 +73,7 @@ FROM
 	test_technicist tab2
 LEFT JOIN sys_user tab1 ON tab2.user_id = tab1.user_id
 WHERE
-	tab2.team_id >0
+	tab2.team_id >0 and tab1.name is not null
 	<if test="search != null and search != ''">
         AND tab1.name LIKE CONCAT('%',#{search},'%')
     </if>
