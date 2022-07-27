@@ -476,6 +476,13 @@
         FROM test_report_record
         where entrustment_id = #{entrustId,jdbcType=BIGINT}
     </select>
+    <select id="selectByEntrustIdZj" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
+            parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM test_report_record
+        where entrust_id = #{entrustId,jdbcType=BIGINT}
+    </select>
     <select id="getLatestReport" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
             parameterType="java.lang.Long">
         SELECT
@@ -549,6 +556,7 @@
             </if>
         </set>
         where entrustment_id = #{entrustmentId,jdbcType=BIGINT}
+        or entrust_id = #{entrustmentId,jdbcType=BIGINT}
     </update>
 
     <select id="getSendList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">

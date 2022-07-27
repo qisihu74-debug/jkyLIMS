@@ -9,11 +9,49 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.ParamEntity;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
+import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
+import com.lims.manage.erp.entity.QiYueSuoSealEntity;
+import com.lims.manage.erp.entity.QuotaEntity;
+import com.lims.manage.erp.entity.QuotaRes;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.ReportResBean;
+import com.lims.manage.erp.entity.ReportTemplateEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.SealEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TeamTreeStructureEntity;
+import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
+import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.entity.TreeEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.ReportMapper;
+import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
+import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
+import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.SysUserDao;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
+import com.lims.manage.erp.mapper.TestEntrustedTaskRelDao;
+import com.lims.manage.erp.mapper.TestProductDao;
+import com.lims.manage.erp.mapper.TestProductItemDao;
+import com.lims.manage.erp.mapper.TestReportQualifcationDao;
+import com.lims.manage.erp.mapper.TestReportTemplateDao;
+import com.lims.manage.erp.mapper.TestSampleEntityMapper;
+import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
+import com.lims.manage.erp.mapper.TestTechnicistDao;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.ConvertUtil;
@@ -27,7 +65,20 @@ import com.lims.manage.erp.util.PageInfoUtils;
 import com.lims.manage.erp.util.PdfDoc;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.WordUtils;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.ConcreteSampleVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
+import com.lims.manage.erp.vo.ReportDetailListParamVo;
+import com.lims.manage.erp.vo.ReportDetailListVo;
+import com.lims.manage.erp.vo.ReportDetailVo;
+import com.lims.manage.erp.vo.ReportHistoryDetailVo;
+import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.ReportProductRelVo;
+import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -275,6 +326,7 @@ public class ReportServiceImpl implements ReportService {
         return pageInfo;
     }
 
+    @Override
     public PageInfo reportDownloadListHistory(String search, Integer pageNum, Integer pageSize) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         PageHelper.startPage(pageNum, pageSize);
@@ -1229,10 +1281,17 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         //更新签名
-        reportMapper.updateVerAndIss(reportCode, verifyer, issuer, verifyerId,new Date(System.currentTimeMillis()), issuerId);
+        Long along = recordEntityMapper.checkExist(Long.parseLong(reportCode));
+        //TODO (报告) 兼容中间报告
+        if (along == null){
+            reportMapper.updateVerAndIssZj(reportCode, verifyer, issuer, verifyerId,new Date(System.currentTimeMillis()), issuerId);
+        }else {
+            reportMapper.updateVerAndIss(reportCode, verifyer, issuer, verifyerId,new Date(System.currentTimeMillis()), issuerId);
+        }
         //设置签名信息
         String url1 = "";
         try {
+            //TODO (报告) 兼容中间报告
             url1 = insertPicToPdf(url,Long.parseLong(reportCode),inspector);
             logger.info("设置签名信息：{}",url1);
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)){
@@ -1244,11 +1303,17 @@ public class ReportServiceImpl implements ReportService {
         if (url.contains("?")){
            url = url.substring(0,url.indexOf("?"));
         }
-        reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
+        //TODO (报告) 兼容中间报告
+        if (along == null){
+            reportMapper.updateUrlZj(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
+        }else {
+            reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
+        }
         logger.info("签名信息更新成功！:{}",reportCode+":"+url);
         //更新配合比信息
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(mixInfo)){
             TestSampleMixInfoEntity entity = JSON.parseObject(mixInfo,TestSampleMixInfoEntity.class);
+            //TODO (报告) 兼容中间报告
             mixInfoEntityMapper.updateByEntrustId(reportCode,entity);
         }
         return flag;
@@ -1848,8 +1913,14 @@ public class ReportServiceImpl implements ReportService {
         //处理坐标提示信息
         ReportResBean resBean = new ReportResBean();
         Map<String,String> mesMap = new HashedMap();
-        ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
+        ReportRecordEntity reportRecordEntity = null;
         //TODO 兼容中间报告
+        Long aLong = recordEntityMapper.checkExist(id);
+        if (aLong == null){
+            reportRecordEntity = selectByEntrustIdZj(id);
+        }else {
+            reportRecordEntity = selectByEntrustId(id);
+        }
 
         int index = 1;
         for (ConclusionEntity conclusionEntity:list) {
@@ -1878,6 +1949,7 @@ public class ReportServiceImpl implements ReportService {
                     XWPFTable table = it.next();
                     List<XWPFTableRow> rows = table.getRows();
                     //存放表头信息
+                    //TODO（报告） 兼容中间报告
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 1) {
                         WordUtils.replaceCellText(rows.get(3).getCell(1),key,"河南省公路工程试验检测中心有限公司");
@@ -2028,6 +2100,10 @@ public class ReportServiceImpl implements ReportService {
         //存放提示信息
         resBean.setUrl(url);
         return resBean;
+    }
+
+    private ReportRecordEntity selectByEntrustIdZj(Long id) {
+        return recordEntityMapper.selectByEntrustIdZj(id);
     }
 
     @SneakyThrows
@@ -2250,7 +2326,14 @@ public class ReportServiceImpl implements ReportService {
         ReportResBean resBean = new ReportResBean();
         Map<String,String> mesMap = new HashedMap();
 
-        ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
+        ReportRecordEntity reportRecordEntity = null;
+        //TODO 兼容中间报告
+        Long aLong = recordEntityMapper.checkExist(id);
+        if (aLong == null){
+            reportRecordEntity = selectByEntrustIdZj(id);
+        }else {
+            reportRecordEntity = selectByEntrustId(id);
+        }
         int index = 1;
         for (ConclusionEntity conclusionEntity:conclusionEntityList) {
             String[] split = conclusionEntity.getUrl().split("\\?");
@@ -2277,6 +2360,7 @@ public class ReportServiceImpl implements ReportService {
                     XWPFTable table = it.next();
                     List<XWPFTableRow> rows = table.getRows();
                     //存放表头信息
+                    //TODO（报告） 兼容中间报告
                     EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 1) {
                         WordUtils.replaceCellText(rows.get(3).getCell(1),key,"河南省公路工程试验检测中心有限公司");
@@ -2614,21 +2698,15 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public String insertPicToPdf(String pdfUrl, Long entrustId,String inspector) throws Exception {
         HashSet<String> delList = new HashSet<>();
-        ReportRecordEntity detailByEntrustId = reportMapper.getDetailByEntrustId(entrustId);//审核人、签发人
-        logger.info("查询签发复合信息:{}",JSON.toJSONString(detailByEntrustId));
-        /*List<String> stringList = taskMapper.getInspectorByEntrustId(entrustId);
-        List<String> stringList1 = Lists.newArrayList();
-        for (String string:stringList) {
-            String[] split = string.split(",");
-            for (String s:split) {
-                stringList1.add(s);
-            }
+        //TODO (报告) 兼容中间报告
+        ReportRecordEntity detailByEntrustId = null;
+        Long aLong = recordEntityMapper.checkExist(entrustId);
+        if (aLong == null){
+            detailByEntrustId = reportMapper.getDetailByEntrustId(entrustId);//审核人、签发人
+        }else {
+            detailByEntrustId = reportMapper.getDetailByEntrustId(entrustId);//审核人、签发人
         }
-        List<Long> list1 = Lists.newArrayList();//检测人
-        for (String s:stringList1) {
-            String[] split1 = s.split("&");
-            list1.add(Long.parseLong(split1[1]));
-        }*/
+        logger.info("查询签发复合信息:{}",JSON.toJSONString(detailByEntrustId));
         String verUrl = sysUserDao.getSignatureById(detailByEntrustId.getVerifyerId());
         logger.info("签发人:{}",verUrl);
         String issUrl = sysUserDao.getSignatureById(detailByEntrustId.getIssuerId());
