@@ -87,11 +87,11 @@ public interface ReportMapper {
     List<ReportCheckItemDetailVo> getReportCheckItemList(@Param("id") Long id,@Param("deptIds") List<Long> deptIds,@Param("taskId") Long taskId);
 
     /**
-     * 根据任务单ID查询检测项信息
-     * @param taskId
+     * 根据recordId查询检测项信息
+     * @param recordId
      * @return
      */
-    List<ReportCheckItemDetailVo> getReportCheckItemListByTaskId(@Param("taskId") Long taskId);
+    List<ReportCheckItemDetailVo> getReportCheckItemListByRecordId(@Param("recordId") Long recordId,@Param("taskId") Long taskId);
 
     /**
      * 查询判定依据
@@ -204,4 +204,6 @@ public interface ReportMapper {
                    @Param("verifyer") String verifyer, @Param("issuer") String issuer,
                    @Param("verifyerId") Long verifyerId, @Param("issuerId") Long issuerId,
                    @Param("now")Date now,@Param("applicant") String applicant);
+
+    ReportDetailVo getReportDetailZj(Long taskId,List<Long> deptIds);
 }

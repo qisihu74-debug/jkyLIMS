@@ -807,11 +807,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("getResult")
-    public Result getResut(Long entrustId){
+    public Result getResut(Long entrustId,Integer reportType){
         if (entrustId == null){
             return ResultUtil.error("缺少必要的参数");
         }
-        List<ConclusionEntity> list = reportService.getResut(entrustId);
+        List<ConclusionEntity> list = reportService.getResut(entrustId,reportType);
         return ResultUtil.success(list);
     }
 
@@ -1148,4 +1148,5 @@ public class ReportController {
         List<String> list = reportService.inspectorList(search);
         return ResultUtil.success(list);
     }
+
 }

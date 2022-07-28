@@ -143,6 +143,56 @@
         </if>
     </select>
 
+    <select id="getReportDetailZj" resultMap="reportDetailMap">
+        SELECT t1.id,
+        t1.report_count,
+        t1.report_type,
+        t2.task_code,
+        --                t4.product_id product_id1,
+        --                t4.sample_name,
+        t1.count_price,
+        DATE (t1.request_date) request_date,
+        t3.sample_id,
+        t4.sample_code,
+        t4.sample_name sample_name1,
+        t4.specs,
+        t4.outward,
+        t4.product_id,
+        t5.id id_item,
+        t5.state,
+        t5.origin_url,
+        t6.check_item_id,
+        t5.check_item_name,
+        t9.specs_content,
+        t9.check_result,
+        t9.judge_result,
+        t6.coordinate,
+        t7.specs_content value,
+        CONCAT(t7.check_basis_code, ":", t7.condition_value) label
+        FROM
+        test_entrusted_info t1
+        LEFT JOIN test_task t2
+        ON t2.entrustment_id = t1.id
+        LEFT JOIN test_entrusted_sample_details_rel t3 ON t1.id = t3.entrustment_id
+        LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
+        LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.id = t5.entrust_id
+        AND t4.id = t5.sample_id
+        LEFT JOIN test_product_item t6 ON t5.check_item_id = t6.check_item_id
+        LEFT JOIN test_report_qualifcation t7 ON t6.check_item_id = t7.check_item_id
+        left join test_report_record t8 on t1.id = t8.entrust_id
+        left join test_report_record_detail t9 on t8.id = t9.record_id
+        AND t5.check_item_id = t9.check_item_id
+        AND t2.id = t9.task_id
+        AND t4.id = t9.sample_id
+        WHERE t2.id = #{taskId} and t5.task_id = #{taskId}
+        <if test="deptIds!=null">
+            and t5.dept_id in
+            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
     <select id="getReportDetail0621" resultMap="reportDetailMap">
         SELECT t1.id,
                t1.report_count,
@@ -511,7 +561,7 @@
             </foreach>
         </if>
     </select>
-    <select id="getReportCheckItemListByTaskId" resultType="com.lims.manage.erp.vo.ReportCheckItemDetailVo">
+    <select id="getReportCheckItemListByRecordId" resultType="com.lims.manage.erp.vo.ReportCheckItemDetailVo">
         SELECT
             id AS checkItemId,
             check_item_name AS checkItemName,
@@ -521,7 +571,8 @@
         FROM
             test_report_record_detail
         WHERE
-            task_id = #{taskId}
+            record_id = #{recordId}
+            AND task_id = #{taskId}
     </select>
 
     <select id="getJudgeBasis" resultType="java.lang.String">

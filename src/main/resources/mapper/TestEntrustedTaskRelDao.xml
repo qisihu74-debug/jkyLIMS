@@ -274,4 +274,15 @@
         select * from test_entrusted_task_rel where id = #{taskFlowId}
     </select>
 
+    <select id="getEntrustMidReport" resultType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
+        SELECT
+            *
+        FROM
+            test_entrusted_task_rel
+        WHERE
+            type = 1
+          AND entrust_id = #{entrustId}
+          AND id != #{taskFlowId}
+    </select>
+
 </mapper>
