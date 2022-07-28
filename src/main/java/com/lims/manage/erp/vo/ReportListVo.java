@@ -36,5 +36,9 @@ public class ReportListVo {
     private String entrustmentNo;
 
     private List<Long> deptIds;
+    /**
+     * 中间报告是否可以编辑
+     */
+    private Boolean flag;
 
 }
