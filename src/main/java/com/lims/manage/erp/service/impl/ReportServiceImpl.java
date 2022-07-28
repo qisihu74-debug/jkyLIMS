@@ -2593,20 +2593,26 @@ public class ReportServiceImpl implements ReportService {
         List<SampleEntity> samples = entrustHistoryDetail.getSamples();
         for (ReportTemplateEntity templateEntity:templateList) {
             for (SampleEntity sampleEntity :samples) {
-                String des = delItemDes(sampleEntity.getJudgmentBasisVos(),templateEntity.getReportFileUri(),entrustId);
-                String judgeBasis = getJudgeBasis(entrustId);
-                ConclusionEntity conclusionEntity =  new ConclusionEntity();
-                conclusionEntity.setSampleId(sampleEntity.getId());
-                conclusionEntity.setUrl(templateEntity.getReportFileUri());
-                conclusionEntity.setConclusion("经检测，该"+sampleEntity.getSampleName()+"样品,"+des+"均符合"+judgeBasis+"中的技术要求。");
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("1.委托人："+entrustHistoryDetail.getEntrustPeople()+"；");
-                stringBuilder.append("2."+(StringUtils.isEmpty(entrustHistoryDetail.getWitnessUint())?"见证单位：无":"见证单位："+entrustHistoryDetail.getWitnessUint())+"；");
-                stringBuilder.append("3."+(StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson())?"见证人：无":"见证人："+entrustHistoryDetail.getWitnessPerson())+"；");
-                stringBuilder.append("4.委托方提供："+ (StringUtils.isEmpty(entrustHistoryDetail.getRemark())?"无":entrustHistoryDetail.getRemark())+" ；");
-                conclusionEntity.setAdditional(stringBuilder.toString());
-                list.add(conclusionEntity);
+                if (Integer.parseInt(templateEntity.getProductId()) == sampleEntity.getProductId()){
+                    sampleEntity.setFileUrl(templateEntity.getReportFileUri());
+                }
             }
+        }
+        //处理模板下不同样品描述
+        String judgeBasis = getJudgeBasis(entrustId);
+        for (SampleEntity sampleEntity :samples) {
+            ConclusionEntity conclusionEntity =  new ConclusionEntity();
+            conclusionEntity.setSampleId(sampleEntity.getId());
+            conclusionEntity.setUrl(sampleEntity.getFileUrl());
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("1.委托人："+entrustHistoryDetail.getEntrustPeople()+"；");
+            stringBuilder.append("2."+(StringUtils.isEmpty(entrustHistoryDetail.getWitnessUint())?"见证单位：无":"见证单位："+entrustHistoryDetail.getWitnessUint())+"；");
+            stringBuilder.append("3."+(StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson())?"见证人：无":"见证人："+entrustHistoryDetail.getWitnessPerson())+"；");
+            stringBuilder.append("4.委托方提供："+ (StringUtils.isEmpty(entrustHistoryDetail.getRemark())?"无":entrustHistoryDetail.getRemark())+" ；");
+            conclusionEntity.setAdditional(stringBuilder.toString());
+            String sampleDes = sampleEntity.getSampleName()+" "+"样品,"+delItemDes(sampleEntity.getJudgmentBasisVos(),sampleEntity.getFileUrl(),entrustId);
+            conclusionEntity.setConclusion("经检测，该"+sampleDes+"均符合"+judgeBasis+"中的技术要求。");
+            list.add(conclusionEntity);
         }
         return list;
     }
