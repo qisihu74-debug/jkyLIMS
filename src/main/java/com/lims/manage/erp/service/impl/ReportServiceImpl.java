@@ -413,19 +413,25 @@ public class ReportServiceImpl implements ReportService {
     public ReportDetailVo getReportDetail(Long taskId) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
-        List<ReportSampleDetailVo> samples = reportDetail.getSamples();
-        for (ReportSampleDetailVo reportSampleDetailVo : samples) {
-            List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
-            for (int j = 0; j < checkItems.size(); j++) {
-                ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
-                int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
-                if (last > 0) {
-                    checkItems.remove(reportCheckItemDetailVo);
-                }
-            }
-            reportSampleDetailVo.setCheckItems(checkItems);
+        //兼容中间报告
+        if (reportDetail == null){
+            reportDetail = reportMapper.getReportDetailZj(taskId, userTeamIds);
         }
-        reportDetail.setSamples(samples);
+        if (reportDetail != null){
+            List<ReportSampleDetailVo> samples = reportDetail.getSamples();
+            for (ReportSampleDetailVo reportSampleDetailVo : samples) {
+                List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
+                for (int j = 0; j < checkItems.size(); j++) {
+                    ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
+                    int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
+                    if (last > 0) {
+                        checkItems.remove(reportCheckItemDetailVo);
+                    }
+                }
+                reportSampleDetailVo.setCheckItems(checkItems);
+            }
+            reportDetail.setSamples(samples);
+        }
         return reportDetail;
     }
 
@@ -434,86 +440,92 @@ public class ReportServiceImpl implements ReportService {
         Long recordId = recordEntityMapper.getRecordId(taskId);
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
-        List<ReportSampleDetailVo> samples = reportDetail.getSamples();
-        //处理每组样品下检测项
-        StringBuilder sampleName = new StringBuilder();
-        int i = 0;
-        for (ReportSampleDetailVo reportSampleDetailVo : samples) {
-            List<ReportCheckItemDetailVo> result = Lists.newArrayList();
-            List<SampleItemEntity> temp = Lists.newArrayList();
-            List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
-            //查询子级检测项信息
-            for (int j = 0; j < checkItems.size(); j++) {
-                ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
-                int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
-                if (last > 0) {
-                    //移除有子检测项的父检测项
-                    checkItems.remove(reportCheckItemDetailVo);
-                    //查询该父检测项下的子检测项信息
-                    List<SampleItemEntity> nodeItems = entrustEntityMapper.getItemRecursionList(reportCheckItemDetailVo.getCheckItemId());
-                    List<SampleItemEntity> tempNodeItems = Lists.newArrayList();
-                    //将父级原始记录传递给子级
-                    for (SampleItemEntity nodeItem : nodeItems) {
-                        nodeItem.setOriginUrl(reportCheckItemDetailVo.getOriginUrl());
-                        nodeItem.setSampleId(Integer.parseInt(reportSampleDetailVo.getSampleId()+""));
-                        tempNodeItems.add(nodeItem);
-                    }
-                    temp.addAll(tempNodeItems);
-                }
-            }
-            //拼接父检测项名称和子检测项名称
-            HashMap<Long, SampleItemEntity> itemMap = new HashMap<>();
-            if(!CollectionUtils.isEmpty(temp)){
-                for (SampleItemEntity entity0 : temp) {
-                    itemMap.put(entity0.getCheckItemId(), entity0);
-                }
-                for (SampleItemEntity entity2 : temp) {
-                    SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
-                    if (sampleItemEntity != null && entity2.getUnitPrice() == null) {
-                        entity2.setCheckItemName(sampleItemEntity.getCheckItemName() + "-" + entity2.getCheckItemName());
-                    }
-                }
-            }
-            if(!CollectionUtils.isEmpty(temp)){
-                for (SampleItemEntity sampleItemEntity : temp) {
-                    //去除父检测项
-                    int last = testProductDao.isLast(sampleItemEntity.getCheckItemId().intValue());
-                    if (last > 0) {
-                        continue;
-                    }
-                    ReportCheckItemDetailVo vo = new ReportCheckItemDetailVo();
-                    ReportRecordDetailEntity entity = recordDetailEntityMapper.selectByRecordIdAndItemId(recordId, sampleItemEntity.getCheckItemId().intValue(),Integer.parseInt(sampleItemEntity.getSampleId()+""));
-                    if(recordId != null && entity != null){
-                        vo.setCheckItemId(entity.getCheckItemId());
-                        vo.setCheckItemName(entity.getCheckItemName());
-                        vo.setCoordinate(entity.getCoordinate());
-                        vo.setOriginUrl(entity.getOriginUrl());
-
-                        vo.setId(entity.getId());
-                        vo.setSpecsContent(entity.getSpecsContent());
-                        vo.setCheckResult(entity.getCheckResult());
-                        vo.setJudgeResult(entity.getJudgeResult());
-                    }else{
-                        vo.setCheckItemId(sampleItemEntity.getCheckItemId());
-                        vo.setCheckItemName(sampleItemEntity.getCheckItemName());
-                        vo.setCoordinate(sampleItemEntity.getCoordinate());
-                        vo.setOriginUrl(sampleItemEntity.getOriginUrl());
-                    }
-                    result.add(vo);
-                }
-            }
-            if(!CollectionUtils.isEmpty(checkItems)){
-                result.addAll(checkItems);
-            }
-            reportSampleDetailVo.setCheckItems(result);
-            sampleName.append(reportSampleDetailVo.getSampleName());
-            if(i != samples.size() -1){
-                sampleName.append("/");
-            }
-            i++;
+        //兼容中间报告
+        if (reportDetail == null){
+            reportDetail = reportMapper.getReportDetailZj(taskId, userTeamIds);
         }
-        reportDetail.setSampleName(sampleName.toString());
-        reportDetail.setSamples(samples);
+        if (reportDetail != null){
+            List<ReportSampleDetailVo> samples = reportDetail.getSamples();
+            //处理每组样品下检测项
+            StringBuilder sampleName = new StringBuilder();
+            int i = 0;
+            for (ReportSampleDetailVo reportSampleDetailVo : samples) {
+                List<ReportCheckItemDetailVo> result = Lists.newArrayList();
+                List<SampleItemEntity> temp = Lists.newArrayList();
+                List<ReportCheckItemDetailVo> checkItems = reportSampleDetailVo.getCheckItems();
+                //查询子级检测项信息
+                for (int j = 0; j < checkItems.size(); j++) {
+                    ReportCheckItemDetailVo reportCheckItemDetailVo = checkItems.get(j);
+                    int last = testProductDao.isLast(reportCheckItemDetailVo.getCheckItemId().intValue());
+                    if (last > 0) {
+                        //移除有子检测项的父检测项
+                        checkItems.remove(reportCheckItemDetailVo);
+                        //查询该父检测项下的子检测项信息
+                        List<SampleItemEntity> nodeItems = entrustEntityMapper.getItemRecursionList(reportCheckItemDetailVo.getCheckItemId());
+                        List<SampleItemEntity> tempNodeItems = Lists.newArrayList();
+                        //将父级原始记录传递给子级
+                        for (SampleItemEntity nodeItem : nodeItems) {
+                            nodeItem.setOriginUrl(reportCheckItemDetailVo.getOriginUrl());
+                            nodeItem.setSampleId(Integer.parseInt(reportSampleDetailVo.getSampleId()+""));
+                            tempNodeItems.add(nodeItem);
+                        }
+                        temp.addAll(tempNodeItems);
+                    }
+                }
+                //拼接父检测项名称和子检测项名称
+                HashMap<Long, SampleItemEntity> itemMap = new HashMap<>();
+                if(!CollectionUtils.isEmpty(temp)){
+                    for (SampleItemEntity entity0 : temp) {
+                        itemMap.put(entity0.getCheckItemId(), entity0);
+                    }
+                    for (SampleItemEntity entity2 : temp) {
+                        SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
+                        if (sampleItemEntity != null && entity2.getUnitPrice() == null) {
+                            entity2.setCheckItemName(sampleItemEntity.getCheckItemName() + "-" + entity2.getCheckItemName());
+                        }
+                    }
+                }
+                if(!CollectionUtils.isEmpty(temp)){
+                    for (SampleItemEntity sampleItemEntity : temp) {
+                        //去除父检测项
+                        int last = testProductDao.isLast(sampleItemEntity.getCheckItemId().intValue());
+                        if (last > 0) {
+                            continue;
+                        }
+                        ReportCheckItemDetailVo vo = new ReportCheckItemDetailVo();
+                        ReportRecordDetailEntity entity = recordDetailEntityMapper.selectByRecordIdAndItemId(recordId, sampleItemEntity.getCheckItemId().intValue(),Integer.parseInt(sampleItemEntity.getSampleId()+""));
+                        if(recordId != null && entity != null){
+                            vo.setCheckItemId(entity.getCheckItemId());
+                            vo.setCheckItemName(entity.getCheckItemName());
+                            vo.setCoordinate(entity.getCoordinate());
+                            vo.setOriginUrl(entity.getOriginUrl());
+
+                            vo.setId(entity.getId());
+                            vo.setSpecsContent(entity.getSpecsContent());
+                            vo.setCheckResult(entity.getCheckResult());
+                            vo.setJudgeResult(entity.getJudgeResult());
+                        }else{
+                            vo.setCheckItemId(sampleItemEntity.getCheckItemId());
+                            vo.setCheckItemName(sampleItemEntity.getCheckItemName());
+                            vo.setCoordinate(sampleItemEntity.getCoordinate());
+                            vo.setOriginUrl(sampleItemEntity.getOriginUrl());
+                        }
+                        result.add(vo);
+                    }
+                }
+                if(!CollectionUtils.isEmpty(checkItems)){
+                    result.addAll(checkItems);
+                }
+                reportSampleDetailVo.setCheckItems(result);
+                sampleName.append(reportSampleDetailVo.getSampleName());
+                if(i != samples.size() -1){
+                    sampleName.append("/");
+                }
+                i++;
+            }
+            reportDetail.setSampleName(sampleName.toString());
+            reportDetail.setSamples(samples);
+        }
         return reportDetail;
     }
 
@@ -1872,42 +1884,48 @@ public class ReportServiceImpl implements ReportService {
         Map<String, List<QuotaEntity>> map = new HashMap<>();
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         ReportDetailVo reportDetail = reportMapper.getReportDetail(taskId, userTeamIds);
-        Set<Long> ids = new HashSet<>();
-        for (ReportSampleDetailVo bean : reportDetail.getSamples()) {
-            //获取检测id
-            List<ReportCheckItemDetailVo> checkItems = bean.getCheckItems();
-            for (ReportCheckItemDetailVo detailVo : checkItems) {
-                ids.add(detailVo.getCheckItemId());
-            }
+        //兼容中间报告
+        if (reportDetail == null){
+            reportDetail = reportMapper.getReportDetailZj(taskId, userTeamIds);
         }
-        //获取检测项下的子检测项
-        List<Long> itemIds = itemDao.getChirldsByIds(ids);
-        List<QuotaEntity> list = dao.getListById(itemIds);
-        for (QuotaEntity bean : list) {
-            if (map.get(bean.getConditionValue()) == null) {
-                List<QuotaEntity> quotaEntityList = Lists.newArrayList();
-                QuotaEntity quotaEntity = new QuotaEntity();
-                quotaEntity.setCheckItemId(bean.getCheckItemId());
-                quotaEntity.setSpecsContent(bean.getSpecsContent());
-                quotaEntityList.add(quotaEntity);
-                map.put(bean.getConditionValue(), quotaEntityList);
-            } else {
-                List<QuotaEntity> entities = map.get(bean.getConditionValue());
-                QuotaEntity quota = new QuotaEntity();
-                quota.setCheckItemId(bean.getCheckItemId());
-                quota.setSpecsContent(bean.getSpecsContent());
-                entities.add(quota);
-                map.put(bean.getConditionValue(), entities);
-            }
-        }
-        //处理map
         List<QuotaRes> lis = Lists.newArrayList();
-        Set<String> set = map.keySet();
-        for (String key : set) {
-            QuotaRes res = new QuotaRes();
-            res.setKey(key);
-            res.setValue(map.get(key));
-            lis.add(res);
+        if (reportDetail != null){
+            Set<Long> ids = new HashSet<>();
+            for (ReportSampleDetailVo bean : reportDetail.getSamples()) {
+                //获取检测id
+                List<ReportCheckItemDetailVo> checkItems = bean.getCheckItems();
+                for (ReportCheckItemDetailVo detailVo : checkItems) {
+                    ids.add(detailVo.getCheckItemId());
+                }
+            }
+            //获取检测项下的子检测项
+            List<Long> itemIds = itemDao.getChirldsByIds(ids);
+            List<QuotaEntity> list = dao.getListById(itemIds);
+            for (QuotaEntity bean : list) {
+                if (map.get(bean.getConditionValue()) == null) {
+                    List<QuotaEntity> quotaEntityList = Lists.newArrayList();
+                    QuotaEntity quotaEntity = new QuotaEntity();
+                    quotaEntity.setCheckItemId(bean.getCheckItemId());
+                    quotaEntity.setSpecsContent(bean.getSpecsContent());
+                    quotaEntityList.add(quotaEntity);
+                    map.put(bean.getConditionValue(), quotaEntityList);
+                } else {
+                    List<QuotaEntity> entities = map.get(bean.getConditionValue());
+                    QuotaEntity quota = new QuotaEntity();
+                    quota.setCheckItemId(bean.getCheckItemId());
+                    quota.setSpecsContent(bean.getSpecsContent());
+                    entities.add(quota);
+                    map.put(bean.getConditionValue(), entities);
+                }
+            }
+            //处理map
+            Set<String> set = map.keySet();
+            for (String key : set) {
+                QuotaRes res = new QuotaRes();
+                res.setKey(key);
+                res.setValue(map.get(key));
+                lis.add(res);
+            }
         }
         return lis;
     }
@@ -1985,8 +2003,13 @@ public class ReportServiceImpl implements ReportService {
                         Date start = taskMapper.getStartTime(id);
                         Date end = taskMapper.getEndTime(id);
                         String s = DateUtil.formatDate(start);
-                        String e = DateUtil.formatDate(end);
-                        if (start != null && end != null){
+                        String e = "";
+                        if (end == null){
+                            e = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                        }else {
+                            e = DateUtil.formatDate(end);
+                        }
+                        if (s != null && e != null){
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
                             if (s.equals(e)){
                                 WordUtils.replaceCellText(rows.get(8).getCell(1),key,s);
@@ -2396,7 +2419,12 @@ public class ReportServiceImpl implements ReportService {
                         Date start = taskMapper.getStartTime(id);
                         Date end = taskMapper.getEndTime(id);
                         String s = DateUtil.formatDate(start);
-                        String e = DateUtil.formatDate(end);
+                        String e = "";
+                        if (end == null){
+                            e = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                        }else {
+                            e = DateUtil.formatDate(end);
+                        }
                         if (start != null && end != null){
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
                             if (s.equals(e)){
