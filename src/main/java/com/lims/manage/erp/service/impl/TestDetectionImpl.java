@@ -55,17 +55,6 @@ public class TestDetectionImpl implements TestDetectionService {
                 sampleItemInstrumentEntity.setState(1);
                 // 检测项 开始时间更新
                 testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
-                // 检测项下 仪器表 新增
-                // 开始试验  检测项与不关联仪器信息
-//                TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
-//                testChItemInstrumentMiddleEntity.setSidItem(sampleItemInstrumentEntity.getItemId());
-//                testChItemInstrumentMiddleEntity.setStartTime(data.getStartTime());
-//                if (CollectionUtils.isNotEmpty(sampleItemInstrumentEntity.getIds())) {
-//                    for (Integer id : sampleItemInstrumentEntity.getIds()) {
-//                        testChItemInstrumentMiddleEntity.setIntrusmentId(id);
-//                        testDetectionDao.addItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
-//                    }
-//                }
             }
         }
         // 根据 任务单id  开始检测时间 判定是否为空
@@ -75,7 +64,6 @@ public class TestDetectionImpl implements TestDetectionService {
             // 任务单状态 == 实验中
             taskTestEntity.setState(3);
             //任务单 开始试验时间 年月日
-//            taskTestEntity.setStartDetectionTime(new Date(DateUtil.getDayStartMs(System.currentTimeMillis())));
             taskTestEntity.setStartDetectionTime(new Date(System.currentTimeMillis()));
             taskMapper.updateTestTask(taskTestEntity);
             // 根据任务单主键 获取委托单主键
@@ -185,15 +173,6 @@ public class TestDetectionImpl implements TestDetectionService {
         for (SampleDetailVo sampleDetailVo : dataGather.getSampleDetailList()) {
             for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
                 SampleItemInstrumentEntity dataDisplay = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(checkItemInfoVo.getItemId());
-//                // 附件不上传的话 返回 状态为 state ==1
-//                if (dataDisplay.getState() == 2 && dataDisplay.getOriginUrl() == null) {
-//                    dataDisplay.setState(1);
-//                    testDetectionDao.updateSampleItemInstrumentEntity(dataDisplay);
-//                }
-//                // 检测项未 全部开检 并且 原始记录 未上传
-//                if (dataDisplay.getState() != 2 && dataDisplay.getOriginUrl() == null) {
-//                    return false;
-//                }
                // 检测项未 全部开检 则任务单无法结束试验
                 if (dataDisplay.getState() != null && dataDisplay.getState()<2) {
                     return false;

@@ -193,7 +193,10 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
                 String[] strings = name.split("\\.");
 
                 String upload = MinIoUtil.upload(BucketsConst.buckets_sample_enclosure, multipartFile, fileCode + "." + strings[strings.length - 1]);
-                stringBuilder.append(upload);
+                if(!StringUtils.isEmpty(upload)){
+                    String[] fileUrls = upload.split("\\?");
+                    stringBuilder.append(fileUrls[0]);
+                }
                 stringBuilder.append(",");
                 // 存放上传文件的名称带后缀如：（文件编号&委托文档资料.pdf,文件编号&原始文档.docx）
                 stringfileUrlStr.append(fileCode + "&" + name);

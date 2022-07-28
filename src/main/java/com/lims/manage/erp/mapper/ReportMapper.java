@@ -204,4 +204,6 @@ public interface ReportMapper {
                    @Param("verifyer") String verifyer, @Param("issuer") String issuer,
                    @Param("verifyerId") Long verifyerId, @Param("issuerId") Long issuerId,
                    @Param("now")Date now,@Param("applicant") String applicant);
+
+    ReportDetailVo getReportDetailZj(Long taskId,List<Long> deptIds);
 }
