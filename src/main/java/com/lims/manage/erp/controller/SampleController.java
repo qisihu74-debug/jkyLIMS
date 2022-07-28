@@ -400,7 +400,7 @@ public class SampleController {
         if (id == null && "".equals(id)) {
             return ResultUtil.error("缺少必填参数！");
         }
-        if (file == null) {
+        if (file.length == 0) {
             return ResultUtil.error("样品file文件为空！");
         }
         // 处理file文件后缀

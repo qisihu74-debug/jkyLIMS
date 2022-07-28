@@ -631,14 +631,10 @@
             <if test="systemPrice != null and systemPrice!=''">system_price=#{systemPrice},</if>
             <if test="department != null">department=#{department},</if>
         </trim>
-        <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            <if test="id!=null">
-                and id = #{id}
-            </if>
+            where id = #{id}
             <if test="entrustmentNo!=null">
                 and entrustment_no = #{entrustmentNo}
             </if>
-        </trim>
     </update>
     <select id="getSampleIdSet" resultType="integer">
         SELECT sample_id

@@ -746,7 +746,9 @@ public class EntrustServiceImpl implements EntrustService {
                         entity.setSampleId(sampleEntity.getId());
                         entity.setEntrustId(basisInfo.getId());
                     }
-                    entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
+                    if(!CollectionUtils.isEmpty(sampleCheckItem)){
+                        entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
+                    }
                 }
             }
             if (!CollectionUtils.isEmpty(list)) {
@@ -3008,7 +3010,10 @@ public class EntrustServiceImpl implements EntrustService {
                 String[] strings = name.split("\\.");
 
                 String upload = MinIoUtil.upload(BucketsConst.buckets_entrust_enclosure, multipartFile, fileCode + "." + strings[strings.length - 1]);
-                stringBuilder.append(upload);
+                if(!StringUtils.isEmpty(upload)){
+                    String[] fileUrls = upload.split("\\?");
+                    stringBuilder.append(fileUrls[0]);
+                }
                 stringBuilder.append(",");
                 // 存放上传文件的名称带后缀如：（文件编号&委托文档资料.pdf,文件编号&原始文档.docx）
                 stringfileUrlStr.append(fileCode + "&" + name);

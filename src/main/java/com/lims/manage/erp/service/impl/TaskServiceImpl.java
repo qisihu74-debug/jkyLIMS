@@ -1167,9 +1167,7 @@ public class TaskServiceImpl implements TaskService {
                         return "当前任务单下检测项未全部复核成功";
                     }
                 }
-                // 修改test_task state 状态 为6：
-//                Long testTaskId = taskMapper.getTestTaskId(sampleItemInstrumentEntity2.getEntrustId(), sampleItemInstrumentEntity2.getDeptId());
-                Long testTaskId = taskMapper.getReturnTaskId(itemId);
+                Long testTaskId = sampleItemInstrumentEntity2.getTaskId();
                 TaskTestEntity taskTestEntity = new TaskTestEntity();
                 taskTestEntity.setId(testTaskId);
                 taskTestEntity.setState(6);
