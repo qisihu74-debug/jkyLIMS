@@ -3413,9 +3413,20 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public int updateInspector(String reportCode, String inspector) {
-
-
         return reportMapper.updateInspector(reportCode,inspector);
+    }
+
+    /**
+     *             物理章
+     * 移动中间报告数据到中间报告数据表
+     * test_report_record-->test_report_record_mid
+     * @param record
+     */
+    public void moveReportRecord(Long record){
+        ReportRecordEntity byRecordId = recordEntityMapper.getByRecordId(record);
+        ReportRecordMidEntity midEntity = new ReportRecordMidEntity(byRecordId);
+        int insert = midReportMapper.insert(midEntity);
+        int i = recordEntityMapper.deleteByPrimaryKey(record);
     }
 
 }
