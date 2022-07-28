@@ -1148,4 +1148,5 @@ public class ReportController {
         List<String> list = reportService.inspectorList(search);
         return ResultUtil.success(list);
     }
+
 }

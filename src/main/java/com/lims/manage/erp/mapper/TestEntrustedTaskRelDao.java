@@ -81,4 +81,12 @@ public interface TestEntrustedTaskRelDao {
      */
     TestEntrustedTaskRelVo getTaskFlowById(Integer taskFlowId);
 
+    /**
+     * 获取委托下的中间报告
+     * @param entrustId
+     * @param taskFlowId
+     * @return
+     */
+    List<TestEntrustedTaskRelEntity> getEntrustMidReport(Long entrustId, Integer taskFlowId);
+
 }
