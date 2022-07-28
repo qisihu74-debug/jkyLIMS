@@ -181,6 +181,7 @@ public interface ReportService {
      */
     List<ReportTemplateEntity> getReportTemplateListOld(String productId);
     List<ReportTemplateEntity> getReportTemplateList(Long id);
+    List<ReportTemplateEntity> getMiddleReportTemplateList(Long id);
 
     /**
      * 查询每组样品的报告信息
@@ -352,7 +353,7 @@ public interface ReportService {
      * @param entrustId
      * @return
      */
-    List<ConclusionEntity> getResut(Long entrustId);
+    List<ConclusionEntity> getResut(Long entrustId,Integer reportType);
 
     /**
      * 查询配合比检测信息

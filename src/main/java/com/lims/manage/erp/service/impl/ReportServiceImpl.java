@@ -399,7 +399,7 @@ public class ReportServiceImpl implements ReportService {
         }
         // 获取检测项
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemListByTaskId(taskId);
+        List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemListByRecordId(recordId,taskId);
         reportSampleDetailVo.setCheckItems(checkItemList);
         return reportSampleDetailVo;
     }
@@ -938,6 +938,16 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportTemplateEntity> getReportTemplateList(Long id) {
         List<ReportTemplateEntity> result = Lists.newArrayList();
         List<Long> allReportId = entityMapper.getAllReportId(id);
+        if (!CollectionUtils.isEmpty(allReportId)) {
+            result = templateEntityMapper.getReportTemplateList(allReportId);
+        }
+        return result;
+    }
+
+    @Override
+    public List<ReportTemplateEntity> getMiddleReportTemplateList(Long id) {
+        List<ReportTemplateEntity> result = Lists.newArrayList();
+        List<Long> allReportId = entityMapper.getAllMiddleReportId(id);
         if (!CollectionUtils.isEmpty(allReportId)) {
             result = templateEntityMapper.getReportTemplateList(allReportId);
         }
@@ -2571,8 +2581,13 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ConclusionEntity> getResut(Long entrustId) {
-        List<ReportTemplateEntity> templateList = reportService.getReportTemplateList(entrustId);
+    public List<ConclusionEntity> getResut(Long entrustId,Integer reportType) {
+        List<ReportTemplateEntity> templateList;
+        if(reportType != null){//中间报告查询
+            templateList = reportService.getMiddleReportTemplateList(entrustId);
+        }else{//最终报告查询
+            templateList = reportService.getReportTemplateList(entrustId);
+        }
         List<ConclusionEntity> list = Lists.newArrayList();
         EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(entrustId);
         List<SampleEntity> samples = entrustHistoryDetail.getSamples();
