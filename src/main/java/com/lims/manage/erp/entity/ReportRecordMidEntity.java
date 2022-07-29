@@ -72,11 +72,11 @@ public class ReportRecordMidEntity {
 
     private String templateName;
 
-    private Long qysDocmentId;
+    private String qysDocmentId;
 
     private String qysState;
 
-    private Long contractId;
+    private String contractId;
 
     private String signUrl;
 
@@ -93,4 +93,54 @@ public class ReportRecordMidEntity {
     private String inspector;
 
     private String reportUrl;
+
+    public ReportRecordMidEntity() {
+    }
+
+    public ReportRecordMidEntity(ReportRecordEntity recordEntity) {
+        this.id = recordEntity.getId();
+        this.entrustmentId = recordEntity.getEntrustmentId();
+        this.reportCode = recordEntity.getReportCode();
+        this.sampleName = recordEntity.getSampleName();
+        this.price = recordEntity.getPrice();
+        this.requiredCompletionTime = recordEntity.getRequiredCompletionTime();
+        this.taskCode = recordEntity.getTaskCode();
+        this.state = recordEntity.getState();
+        this.number = recordEntity.getNumber();
+        this.reportType = recordEntity.getReportType();
+        this.verifyerTime = recordEntity.getVerifyerTime();
+        this.issuerTime = recordEntity.getIssuerTime();
+        this.sealType = recordEntity.getSealType();
+        this.sealUrl = recordEntity.getSealUrl();
+        this.applyReason = recordEntity.getApplyReason();
+        this.issuReason = recordEntity.getIssuReason();
+        this.verifyer = recordEntity.getVerifyer();
+        this.verifyerId = recordEntity.getVerifyerId();
+        this.issuer = recordEntity.getIssuer();
+        this.issuerId = recordEntity.getIssuerId();
+        this.applicant = recordEntity.getApplicant();
+        this.sealer = recordEntity.getSealer();
+        this.sealTime = recordEntity.getSealTime();
+        this.reportManager = recordEntity.getReportManager();
+        this.reportTime = recordEntity.getReportTime();
+        this.addressee = recordEntity.getAddressee();
+        this.waybill = recordEntity.getWaybill();
+        this.operateTime = recordEntity.getOperateTime();
+        this.email = recordEntity.getEmail();
+        this.reportPhone = recordEntity.getReportPhone();
+        this.reportMailingAddress = recordEntity.getReportMailingAddress();
+        this.reportCompleteTime = recordEntity.getReportCompleteTime();
+        this.templateName = recordEntity.getTemplateName();
+        this.qysDocmentId = recordEntity.getQysDocmentId();
+        this.qysState = recordEntity.getQysState();
+        this.contractId = recordEntity.getContractId();
+        this.signUrl = recordEntity.getSignUrl();
+        this.taskId = recordEntity.getTaskId();
+        this.type = recordEntity.getType();
+        this.category = recordEntity.getCategory();
+        this.combineTime = recordEntity.getCombineTime();
+        this.entrustId = recordEntity.getEntrustId();
+        this.inspector = recordEntity.getInspector();
+        this.reportUrl = recordEntity.getReportUrl();
+    }
 }

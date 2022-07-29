@@ -621,10 +621,12 @@
             t1.task_flow_date requestDate,
             t1.remark,
             t1.record_id recordId,
-            t1.state
+            t1.state,
+            t3.state reportState
         FROM
             test_entrusted_task_rel t1
         LEFT JOIN test_task t2 ON t1.task_id = t2.id
+        LEFT JOIN test_report_record t3 ON t1.record_id = t3.id
         WHERE
             t1.type = 1
             AND t1.state = #{state}

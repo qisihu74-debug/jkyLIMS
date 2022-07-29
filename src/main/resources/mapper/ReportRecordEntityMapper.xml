@@ -377,7 +377,7 @@
         FROM
         test_report_record t1
         LEFT JOIN test_product t2 ON t1.sample_name = t2.product_name
-        LEFT JOIN test_task t3 ON t1.entrustment_id = t3.entrustment_id
+        LEFT JOIN test_task t3 ON t1.entrustment_id = t3.entrustment_id or t1.entrust_id = t3.entrustment_id
         WHERE t1.state =6
         <if test="ids != null">
             AND t3.dept_id IN
@@ -476,6 +476,7 @@
         FROM test_report_record
         where entrustment_id = #{entrustId,jdbcType=BIGINT}
     </select>
+
     <select id="selectByEntrustIdZj" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
             parameterType="java.lang.Long">
         SELECT
@@ -483,6 +484,10 @@
         FROM test_report_record
         where entrust_id = #{entrustId,jdbcType=BIGINT}
     </select>
+    <select id="getMidReportNum" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM test_report_record WHERE entrust_id = #{entrustId}
+    </select>
+
     <select id="getLatestReport" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
             parameterType="java.lang.Long">
         SELECT

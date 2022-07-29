@@ -255,7 +255,7 @@ public interface ReportRecordEntityMapper {
      */
     List<ReportRecordEntity> getSealListCount(@Param("ids") List<Long> ids);
 
-    @Select("select entrustment_id from test_report_record where  entrustment_id=#{entrustmentId}")
+    @Select("select distinct entrustment_id from test_report_record where  entrustment_id=#{entrustmentId}")
     Long checkExist(@Param("entrustmentId") Long entrustmentId);
 
     ReportNodeVo getReportNodeByZjEntrustId(@Param("entrustId") Long entrustmentId);
@@ -270,4 +270,17 @@ public interface ReportRecordEntityMapper {
     void updateContractIdAndStateZj(@Param("entrustId") Long entrustId, @Param("contractId") Long contractId, @Param("state") String state);
 
     ReportRecordEntity selectByEntrustIdZj(@Param("entrustId") Long entrustId);
+
+    @Select("select entrust_id from test_report_record where id = #{id}")
+    Long getZjEntrustIdById(@Param("id") Long id);
+
+    @Select("select id from test_report_record where entrust_id = #{entrustId}")
+    Long getIdByZjEntrustId(@Param("entrustId") Long entrustId);
+
+    /**
+     * 查询中间报告数量
+     * @param entrustId
+     * @return
+     */
+    Integer getMidReportNum(Long entrustId);
 }

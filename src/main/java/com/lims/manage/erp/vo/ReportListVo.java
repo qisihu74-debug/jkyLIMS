@@ -40,5 +40,12 @@ public class ReportListVo {
      * 中间报告是否可以编辑
      */
     private Boolean flag;
+    /**
+     * state 状态
+     */
+    private Integer reportState;
+
+    private String contractId;//合同id
+    private String category;//印章分类，PHYSICS(物理章),ELECTRONIC(电子章)
 
 }
