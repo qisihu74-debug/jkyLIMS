@@ -9,11 +9,51 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.ParamEntity;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
+import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
+import com.lims.manage.erp.entity.QiYueSuoSealEntity;
+import com.lims.manage.erp.entity.QuotaEntity;
+import com.lims.manage.erp.entity.QuotaRes;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.ReportRecordMidEntity;
+import com.lims.manage.erp.entity.ReportResBean;
+import com.lims.manage.erp.entity.ReportTemplateEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.SealEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TeamTreeStructureEntity;
+import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
+import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.entity.TreeEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.ReportMapper;
+import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
+import com.lims.manage.erp.mapper.ReportRecordMidEntityMapper;
+import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
+import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.SysUserDao;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
+import com.lims.manage.erp.mapper.TestEntrustedTaskRelDao;
+import com.lims.manage.erp.mapper.TestProductDao;
+import com.lims.manage.erp.mapper.TestProductItemDao;
+import com.lims.manage.erp.mapper.TestReportQualifcationDao;
+import com.lims.manage.erp.mapper.TestReportTemplateDao;
+import com.lims.manage.erp.mapper.TestSampleEntityMapper;
+import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
+import com.lims.manage.erp.mapper.TestTechnicistDao;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.ConvertUtil;
@@ -52,7 +92,6 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
-import org.apache.xpath.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1794,6 +1833,10 @@ public class ReportServiceImpl implements ReportService {
         }else {
             entityMapper.updateUrlAndState(reqBean.getEntrustId(), response.getSignUrl(), "4",sysUserName+"&"+userId+"",new Date(System.currentTimeMillis()));
         }
+        if (StringUtils.isNotEmpty(response.getSignUrl()) && aLong == null){
+            Long id = recordEntityMapper.getIdByZjEntrustId(reqBean.getEntrustId());
+            moveReportRecord(id);
+        }
         return response;
     }
 
@@ -1967,8 +2010,13 @@ public class ReportServiceImpl implements ReportService {
                         //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
                         Date start = taskMapper.getStartTime(id);
                         Date end = taskMapper.getEndTime(id);
-                        String s = DateUtil.formatDate(start);
+                        String s = "";
                         String e = "";
+                        if (start == null){
+                            s = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                        }else {
+                            s = DateUtil.formatDate(start);
+                        }
                         if (end == null){
                             e = DateUtil.formatDate(new Date(System.currentTimeMillis()));
                         }else {
@@ -2383,14 +2431,19 @@ public class ReportServiceImpl implements ReportService {
                         //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
                         Date start = taskMapper.getStartTime(id);
                         Date end = taskMapper.getEndTime(id);
-                        String s = DateUtil.formatDate(start);
                         String e = "";
+                        String s = "";
+                        if (start == null){
+                            s = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                        }else {
+                            s = DateUtil.formatDate(start);
+                        }
                         if (end == null){
                             e = DateUtil.formatDate(new Date(System.currentTimeMillis()));
                         }else {
                             e = DateUtil.formatDate(end);
                         }
-                        if (start != null && end != null){
+                        if (s != null && e != null){
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
                             if (s.equals(e)){
                                 WordUtils.replaceCellText(rows.get(8).getCell(1),key,s);
@@ -3131,8 +3184,10 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean category(SealEntity sealEntity) {
         List<SealEntity> list = Lists.newArrayList();
+        List<Long> ids = Lists.newArrayList();
         for (Long id:sealEntity.getId()) {
             SealEntity entity = new SealEntity();
             entity.setSealer(sealEntity.getSealer());
@@ -3140,15 +3195,21 @@ public class ReportServiceImpl implements ReportService {
             entity.setSealType(sealEntity.getSealType());
             entity.setKey(id);
             list.add(entity);
+            Long idById = recordEntityMapper.getZjEntrustIdById(id);
+            if (idById != null){
+                ids.add(idById);
+            }
         }
         //设置状态和用章类型
-        try {
-            reportMapper.updateCategory(list);
-            return true;
-        }catch (Exception e){
-            logger.error("更新印章类型失败:{}",e);
-            return false;
+        reportMapper.updateCategory(list);
+        //如果是中间报告，移除中间报到到新表
+        if (ids.size()>=1){
+            for (Long id:ids) {
+                moveReportRecord(id);
+                log.info("移除中间报告id:{}",id);
+            }
         }
+        return true;
     }
 
     @Override
