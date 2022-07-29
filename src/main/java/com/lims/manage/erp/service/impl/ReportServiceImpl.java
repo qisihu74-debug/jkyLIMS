@@ -2888,23 +2888,32 @@ public class ReportServiceImpl implements ReportService {
             String entrustTestType = entrustEntityMapper.getEntrustTestType(reportListVo.getId());
             reportListVo.setSampleName(sampleName.toString());
             reportListVo.setEntrustTestType(entrustTestType);
-            //判断该条数据是否可以编辑
-            Boolean flag = true;
-            List<TestEntrustedTaskRelEntity> entrustMidReport = taskRelDao.getEntrustMidReport(reportListVo.getId(), reportListVo.getTaskFlowId());
-            if(!CollectionUtils.isEmpty(entrustMidReport)){
-                for (TestEntrustedTaskRelEntity relEntity : entrustMidReport) {
-                    Long recordId = relEntity.getRecordId();
-                    if (recordId == null){
-                        flag = false;
-                    }else{
-                        ReportRecordMidEntity reportRecordMidEntity = midReportMapper.selectByPrimaryKey(recordId);
-                        if(reportRecordMidEntity == null){
+            if(state == 0){
+                //判断该条数据是否可以编辑
+                Boolean flag = true;
+                List<TestEntrustedTaskRelEntity> entrustMidReport = taskRelDao.getEntrustMidReport(reportListVo.getId(), reportListVo.getTaskFlowId());
+                if(!CollectionUtils.isEmpty(entrustMidReport)){
+                    for (TestEntrustedTaskRelEntity relEntity : entrustMidReport) {
+                        Long recordId = relEntity.getRecordId();
+                        if (recordId == null){
                             flag = false;
+                        }else{
+                            ReportRecordMidEntity reportRecordMidEntity = midReportMapper.selectByPrimaryKey(recordId);
+                            if(reportRecordMidEntity == null){
+                                flag = false;
+                            }
                         }
                     }
                 }
+                reportListVo.setFlag(flag);
+            }else if(state == 1){//
+                if(reportListVo.getState() == null){
+                    ReportRecordMidEntity midEntity = midReportMapper.selectByPrimaryKey(reportListVo.getRecordId());
+                    if(midEntity != null){
+                        reportListVo.setState(Integer.parseInt(midEntity.getState()));
+                    }
+                }
             }
-            reportListVo.setFlag(flag);
         }
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
