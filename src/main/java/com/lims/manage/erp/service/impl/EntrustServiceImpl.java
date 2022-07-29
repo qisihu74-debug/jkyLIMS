@@ -50,6 +50,7 @@ import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.service.EntrustService;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.Const;
@@ -136,6 +137,8 @@ public class EntrustServiceImpl implements EntrustService {
     private TestEntrustedTaskRelDao testEntrustedTaskRelDao;
     @Autowired
     private QiYueSuoEntity qiYueSuoEntity;
+    @Autowired
+    private LogManagerService logManagerService;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -234,6 +237,14 @@ public class EntrustServiceImpl implements EntrustService {
                         }
                     }
                     if(!CollectionUtils.isEmpty(sampleCheckItem)){
+                        //记录日志
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append("委托编号为\t"+basisInfo.getEntrustmentNo());
+                        for(SampleItemEntity sampleItemEntity:sampleCheckItem){
+                            stringBuilder.append("\t检测项名称为\t"+sampleItemEntity.getCheckItemName()+"\t单价为\t"+sampleItemEntity.getUnitPrice()+"\t检测样次\t"+sampleItemEntity.getTimes()
+                            +"\t检测项依据为\t"+sampleItemEntity.getStandardId());
+                        }
+                        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增委托-批量保存委托样品下检测项信息\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
                         entityMapper.BatchSaveEntrustSampleItem(sampleCheckItem);
                     }
                     //根据委托检测类别关联 配合比检测信息和委托单ID
@@ -241,13 +252,30 @@ public class EntrustServiceImpl implements EntrustService {
                         TestSampleMixInfoEntity record = new TestSampleMixInfoEntity();
                         record.setEntrustmentId(id);
                         record.setSampleId(sampleEntity.getId());
+                        //记录日志
+                        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "根据委托检测类别关联 配合比检测信息和委托单ID"
+                                +"\t委托编号为\t"+basisInfo.getEntrustmentNo()+"\t设计强度（MPa）\t"+record.getDesignStrength()+"\t配制强度（MPa）\t"+record.getIntensityConfiguration()
+                                +"\t抗（渗、冻）等级\t"+record.getAntifreezeLevel()+"\t水胶比\t"+record.getWaterBinderRatio()+"\t单位用水量（kg）\t"+record.getUnitWaterUse()
+                                +"\t砂率（%）\t"+record.getSandRatio()+"\t设计坍落度（mm）\t"+record.getDesignSlump()+"\t拌和方式\t"+record.getMixingWay()+"\t样品id\t"+record.getSampleId(), Const.ENTRUST_FOUND, true);
                         mixInfoEntityMapper.updateBySampleId(record);
                     }
                 }
                 if (!CollectionUtils.isEmpty(list)) {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append("委托编号"+basisInfo.getEntrustmentNo());
+                    for(EntrustSampleEntity entrustSampleEntity:list){
+                        stringBuilder.append("\t样品id\t"+entrustSampleEntity.getSampleId());
+                    }
+                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "委托单与样品建立关系\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
                     entityMapper.BatchSaveEntrustSample(list);
                 }
                 if (!CollectionUtils.isEmpty(list1)) {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append("委托编号"+basisInfo.getEntrustmentNo());
+                    for(EntrustSampleEntity entrustSampleEntity:list1){
+                        stringBuilder.append("\t样品id\t"+entrustSampleEntity.getSampleId()+"\t样品委托依据\t"+entrustSampleEntity.getStandardId());
+                    }
+                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "保存委托单样品，判定依据信息\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
                     entityMapper.BatchSaveSampleStandard(list1);
                 }
             }
@@ -257,6 +285,7 @@ public class EntrustServiceImpl implements EntrustService {
                 pamentEntity.setEntrustmentId(basisInfo.getId());
                 pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
                 pamentEntity.setPrice(vo.getPaymentRecord());
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增委托缴费记录新增\t"+"\t委托编号\t"+basisInfo.getEntrustmentNo()+"\t委托单收费记录\t"+pamentEntity.getPrice(), Const.ENTRUST_FOUND, true);
                 entityMapper.saveEntrustPayRecord(pamentEntity);
             }
             basisInfo.setState(0);
@@ -287,6 +316,9 @@ public class EntrustServiceImpl implements EntrustService {
                     testCustomerEntity.setCompanyId(basisInfo.getEntrustCompanyId());
                     testCustomerEntity.setContacts(basisInfo.getEntrustPeople());
                     testCustomerEntity.setPhone(basisInfo.getEntrustPhone());
+                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " " +
+                            "新增 委托公司下联系人信息\t联系人"+testCustomerEntity.getContacts()
+                            +"\t联系人手机号\t"+testCustomerEntity.getPhone()+"\t委托单位为\t"+testCompanyJsonEntity.getCompanyName(), Const.ENTRUST_FOUND, true);
                     testCustomerDao.insertTestCustomer(testCustomerEntity);
                 }
             }
@@ -310,6 +342,8 @@ public class EntrustServiceImpl implements EntrustService {
                     if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())){
                         testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
                     }
+                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " 新增 见证单位下联系人信息\t联系人姓名"+testCustomerEntity.getContacts()
+                            +"\t见证人联系方式"+testCustomerEntity.getPhone()+"\t见证单位\t"+testCompanyJsonEntity.getCompanyName(), Const.ENTRUST_FOUND, true);
                     testCustomerDao.insertTestCustomer(testCustomerEntity);
                 }
             }
@@ -323,6 +357,10 @@ public class EntrustServiceImpl implements EntrustService {
             else {
                 basisInfo.setDepartment(department);
             }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " 新增委托信息成功\t委托编号为\t"+basisInfo.getEntrustmentNo()+"\t委托单位\t"+basisInfo.getEntrustCompany()
+                   +"\t委托人\t"+basisInfo.getEntrustPeople()+ "\t要求完成时间\t"+(new Timestamp(basisInfo.getRequestDate().getTime()))+"\t委托检测类别\t"+basisInfo.getEntrustTestType()+"\t检测目的\t"+basisInfo.getCheckPurpose()
+                    +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
+                    +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount(), Const.ENTRUST_FOUND, true);
             entityMapper.insertEntrustInfo(basisInfo);
             MapUtils.queue.clear();
             return "新建委托成功";
@@ -350,7 +388,7 @@ public class EntrustServiceImpl implements EntrustService {
             pamentEntity.setEntrustmentId(basisInfo.getId());
             pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
             pamentEntity.setPrice(vo.getPaymentRecord());
-//            pamentEntity.setOperator(ShiroUtils.getUserInfo().getUsername());
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "修改委托：缴费记录新增\t"+"\t委托编号\t"+basisInfo.getEntrustmentNo()+"\t委托单收费记录\t"+pamentEntity.getPrice(), Const.ENTRUST_FOUND, true);
             entityMapper.saveEntrustPayRecord(pamentEntity);
         }
         //存放委托基本信息==》test_entrusted
@@ -385,6 +423,9 @@ public class EntrustServiceImpl implements EntrustService {
                 testCustomerEntity.setCompanyId(basisInfo.getEntrustCompanyId());
                 testCustomerEntity.setContacts(basisInfo.getEntrustPeople());
                 testCustomerEntity.setPhone(basisInfo.getEntrustPhone());
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " " +
+                        "新增 委托公司下联系人信息\t联系人"+testCustomerEntity.getContacts()
+                        +"\t联系人手机号\t"+testCustomerEntity.getPhone()+"\t委托单位为\t"+testCompanyJsonEntity.getCompanyName(), Const.ENTRUST_FOUND, true);
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
         }
@@ -410,6 +451,8 @@ public class EntrustServiceImpl implements EntrustService {
                 if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())) {
                     testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
                 }
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " 新增 见证单位下联系人信息\t联系人姓名"+testCustomerEntity.getContacts()
+                        +"\t见证人联系方式"+testCustomerEntity.getPhone()+"\t见证单位\t"+testCompanyJsonEntity.getCompanyName(), Const.ENTRUST_FOUND, true);
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
         }
@@ -426,8 +469,17 @@ public class EntrustServiceImpl implements EntrustService {
         else {
             basisInfo.setDepartment(department);
         }
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("变更前"+"\t委托单位\t"+vo.getEntrustCompany()
+                        +"\t委托人\t"+vo.getEntrustPeople()+ "\t要求完成时间\t"+(new Timestamp(vo.getRequestDate().getTime()))+"\t委托检测类别\t"+vo.getEntrustTestType()+"\t检测目的\t"+vo.getCheckPurpose()
+                        +"\t业务受理人\t"+vo.getBusinessAcceptor()+"\t报告份数\t"+vo.getReportCount()+"\t受理日期\t"+(new Timestamp(vo.getAcceptanceDate().getTime())));
+        stringBuilder.append("\n变更后"+"\t委托单位\t"+basisInfo.getEntrustCompany()
+                +"\t委托人\t"+basisInfo.getEntrustPeople()+ "\t要求完成时间\t"+(new Timestamp(basisInfo.getRequestDate().getTime()))+"\t委托检测类别\t"+basisInfo.getEntrustTestType()+"\t检测目的\t"+basisInfo.getCheckPurpose()
+                +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
+                +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " 更新委托：成功\t委托编号为\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
         entityMapper.updateEntrustInfo(basisInfo);
-        //修改样品委托单位
+/*        //修改样品委托单位
         List<Integer> sampleIds = entityMapper.getAllSampleIdentrustmentId(basisInfo.getId());
         if(!CollectionUtils.isEmpty(sampleIds)){
             List<TestSampleEntity> entities = Lists.newArrayList();
@@ -438,7 +490,7 @@ public class EntrustServiceImpl implements EntrustService {
                 entities.add(entity);
             }
             entityMapper.updateSampleCompany(entities);
-        }
+        }*/
         // 修改委托信息后： 触发联动效果。 同步更新任务单对应字段。
         methodModifyTheTask(basisInfo.getId());
         // 修改委托信息后： 触发联动效果。同步更新样品信息
@@ -2780,13 +2832,35 @@ public class EntrustServiceImpl implements EntrustService {
                         entity.setTimes(entity.getTimes());
                         ItemList.add(entity);
                     }
-                    entityMapper.BatchSaveEntrustSampleItem(ItemList);
+                    if(!CollectionUtils.isEmpty(ItemList)){
+                        //记录日志
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append("委托编号为\t"+basisInfo.getEntrustmentNo());
+                        for(SampleItemEntity sampleItemEntity:sampleCheckItem){
+                            stringBuilder.append("\t检测项名称为\t"+sampleItemEntity.getCheckItemName()+"\t单价为\t"+sampleItemEntity.getUnitPrice()+"\t检测样次\t"+sampleItemEntity.getTimes()
+                                    +"\t检测项依据为\t"+sampleItemEntity.getStandardId());
+                        }
+                        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：委托-批量保存委托样品下检测项信息\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
+                        entityMapper.BatchSaveEntrustSampleItem(ItemList);
                     }
+                }
             }
             if (!CollectionUtils.isEmpty(list)) {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("委托编号"+basisInfo.getEntrustmentNo());
+                for(EntrustSampleEntity entrustSampleEntity:list){
+                    stringBuilder.append("\t样品id\t"+entrustSampleEntity.getSampleId());
+                }
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：委托单与样品建立关系\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
                 entityMapper.BatchSaveEntrustSample(list);
             }
             if (!CollectionUtils.isEmpty(list1)) {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("委托编号"+basisInfo.getEntrustmentNo());
+                for(EntrustSampleEntity entrustSampleEntity:list1){
+                    stringBuilder.append("\t样品id\t"+entrustSampleEntity.getSampleId()+"\t样品委托依据\t"+entrustSampleEntity.getStandardId());
+                }
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：委托单样品，判定依据信息\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
                 entityMapper.BatchSaveSampleStandard(list1);
             }
         }
@@ -2796,6 +2870,7 @@ public class EntrustServiceImpl implements EntrustService {
             pamentEntity.setEntrustmentId(basisInfo.getId());
             pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
             pamentEntity.setPrice(vo.getPaymentRecord());
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：委托缴费记录新增\t"+"\t委托编号\t"+basisInfo.getEntrustmentNo()+"\t委托单收费记录\t"+pamentEntity.getPrice(), Const.ENTRUST_FOUND, true);
             entityMapper.saveEntrustPayRecord(pamentEntity);
         }
         //得到总价钱，再保存委托基本信息
@@ -2827,6 +2902,9 @@ public class EntrustServiceImpl implements EntrustService {
                 testCustomerEntity.setCompanyId(basisInfo.getEntrustCompanyId());
                 testCustomerEntity.setContacts(basisInfo.getEntrustPeople());
                 testCustomerEntity.setPhone(basisInfo.getEntrustPhone());
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " " +
+                        "新增 委托公司下联系人信息\t联系人"+testCustomerEntity.getContacts()
+                        +"\t联系人手机号\t"+testCustomerEntity.getPhone()+"\t委托单位为\t"+testCompanyJsonEntity.getCompanyName(), Const.ENTRUST_FOUND, true);
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
         }
@@ -2851,6 +2929,8 @@ public class EntrustServiceImpl implements EntrustService {
                 if(!StringUtils.isEmpty(basisInfo.getWitnessPhone())){
                     testCustomerEntity.setPhone(basisInfo.getWitnessPhone());
                 }
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " 新增 见证单位下联系人信息\t联系人姓名"+testCustomerEntity.getContacts()
+                        +"\t见证人联系方式"+testCustomerEntity.getPhone()+"\t见证单位\t"+testCompanyJsonEntity.getCompanyName(), Const.ENTRUST_FOUND, true);
                 testCustomerDao.insertTestCustomer(testCustomerEntity);
             }
         }
@@ -2864,6 +2944,10 @@ public class EntrustServiceImpl implements EntrustService {
         else {
             basisInfo.setDepartment(department);
         }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " 新增再来一单委托：信息成功\t委托编号为\t"+basisInfo.getEntrustmentNo()+"\t委托单位\t"+basisInfo.getEntrustCompany()
+                    +"\t委托人\t"+basisInfo.getEntrustPeople()+ "\t要求完成时间\t"+(new Timestamp(basisInfo.getRequestDate().getTime()))+"\t委托检测类别\t"+basisInfo.getEntrustTestType()+"\t检测目的\t"+basisInfo.getCheckPurpose()
+                    +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
+                    +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount(), Const.ENTRUST_FOUND, true);
         entityMapper.insertEntrustInfo(basisInfo);
         MapUtils.queueCopy.clear();
             return "新建委托成功";
@@ -3073,6 +3157,17 @@ public class EntrustServiceImpl implements EntrustService {
             // 获取委托单详情
             EntrustAddVo vo = entityMapper.selectByKeyId(id);
             for(TaskTestEntity taskTestEntity :taskList){
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("任务单编号 = "+taskTestEntity.getCode());
+                stringBuilder.append("原任务单完成时间 = ");
+                if(taskTestEntity.getRequiredCompletionTime()!=null){
+                    stringBuilder.append(new Timestamp(taskTestEntity.getRequiredCompletionTime().getTime()));
+                }
+                stringBuilder.append("原任务单下单日期 = ");
+                if(taskTestEntity.getOrderTime()!=null){
+                    stringBuilder.append(new Timestamp(taskTestEntity.getOrderTime().getTime()));
+                }
+                stringBuilder.append("原任务提供资料 = "+taskTestEntity.getPresentInformation());
                     // 进行update任务单 同步
                     // 丁连春：任务单完成时间 以委托单下单时间为准
                     taskTestEntity.setRequiredCompletionTime(vo.getRequestDate());
@@ -3085,7 +3180,17 @@ public class EntrustServiceImpl implements EntrustService {
                         taskTestEntity.setPresentInformation("--");
                     }
                     // update
-                    taskMapper.updateTestTask(taskTestEntity);
+                stringBuilder.append("变更后任务单完成时间 = ");
+                if(taskTestEntity.getRequiredCompletionTime()!=null){
+                    stringBuilder.append(new Timestamp(taskTestEntity.getRequiredCompletionTime().getTime()));
+                }
+                stringBuilder.append("变更后任务单下单日期 = ");
+                if(taskTestEntity.getOrderTime()!=null){
+                    stringBuilder.append(new Timestamp(taskTestEntity.getOrderTime().getTime()));
+                }
+                stringBuilder.append("变更后任务提供资料 = "+taskTestEntity.getPresentInformation());
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "更新委托：任务单变更\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
+                taskMapper.updateTestTask(taskTestEntity);
             }
         }
 
@@ -3102,8 +3207,13 @@ public class EntrustServiceImpl implements EntrustService {
             // 获取委托单详情
             EntrustAddVo vo = entityMapper.selectByKeyId(id);
             for(SampleEntity sampleData:sampleEntityList){
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("样品编号"+sampleData.getSampleCode());
+                stringBuilder.append("原样品委托单位"+sampleData.getCompanyId());
                 sampleData.setCompanyId(vo.getEntrustCompanyId());
+                stringBuilder.append("变更后样品委托单位"+sampleData.getCompanyId());
                 // update样品信息
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "更新委托：样品信息\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
                 sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
             }
         }
@@ -3495,6 +3605,7 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
         }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "处理样品来样时间与委托单受理日期:\t委托单受理日期为:"+(new Timestamp(AcceptanceDate.getTime()))+"\t样品编号"+sampleEntityData.getSampleNumber()+"\t样品来样时间为\t" +sampleEntityData.getSampleTime() + "\t变更后样品来样时间为\t"+sampleData.getReceivedDate(), Const.ENTRUST_FOUND, true);
     }
 
 

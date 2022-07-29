@@ -276,4 +276,11 @@ public interface ReportRecordEntityMapper {
 
     @Select("select id from test_report_record where entrust_id = #{entrustId}")
     Long getIdByZjEntrustId(@Param("entrustId") Long entrustId);
+
+    /**
+     * 查询中间报告数量
+     * @param entrustId
+     * @return
+     */
+    Integer getMidReportNum(Long entrustId);
 }

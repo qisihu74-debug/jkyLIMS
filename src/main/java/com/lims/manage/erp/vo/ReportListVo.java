@@ -46,5 +46,6 @@ public class ReportListVo {
     private Integer reportState;
 
     private String contractId;//合同id
+    private String category;//印章分类，PHYSICS(物理章),ELECTRONIC(电子章)
 
 }

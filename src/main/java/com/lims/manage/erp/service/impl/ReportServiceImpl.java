@@ -794,7 +794,7 @@ public class ReportServiceImpl implements ReportService {
             }
             //TODO 兼容中间报告
             if (recordEntity.getEntrustmentId() == null){
-                recordEntity.setEntrustId(recordEntity.getEntrustmentId());
+                recordEntity.setEntrustmentId(recordEntity.getEntrustId());
             }
         }
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
@@ -2891,27 +2891,32 @@ public class ReportServiceImpl implements ReportService {
             if(state == 0){
                 //判断该条数据是否可以编辑
                 Boolean flag = true;
-                List<TestEntrustedTaskRelEntity> entrustMidReport = taskRelDao.getEntrustMidReport(reportListVo.getId(), reportListVo.getTaskFlowId());
-                if(!CollectionUtils.isEmpty(entrustMidReport)){
-                    for (TestEntrustedTaskRelEntity relEntity : entrustMidReport) {
-                        Long recordId = relEntity.getRecordId();
-                        if (recordId == null){
-                            flag = false;
-                        }else{
-                            ReportRecordMidEntity reportRecordMidEntity = midReportMapper.selectByPrimaryKey(recordId);
-                            if(reportRecordMidEntity == null){
-                                flag = false;
-                            }
-                        }
-                    }
+//                List<TestEntrustedTaskRelEntity> entrustMidReport = taskRelDao.getEntrustMidReport(reportListVo.getId(), reportListVo.getTaskFlowId());
+//                if(!CollectionUtils.isEmpty(entrustMidReport)){
+//                    for (TestEntrustedTaskRelEntity relEntity : entrustMidReport) {
+//                        Long recordId = relEntity.getRecordId();
+//                        if (recordId == null){
+//                            flag = false;
+//                        }else{
+//                            ReportRecordMidEntity reportRecordMidEntity = midReportMapper.selectByPrimaryKey(recordId);
+//                            if(reportRecordMidEntity == null){
+//                                flag = false;
+//                            }
+//                        }
+//                    }
+//                }
+                Integer midReportNum = entityMapper.getMidReportNum(reportListVo.getId());
+                if(midReportNum>0){
+                    flag = false;
                 }
                 reportListVo.setFlag(flag);
             }else if(state == 1){//查询历史时
-                if(reportListVo.getState() == null){
+                if(reportListVo.getReportState() == null){
                     ReportRecordMidEntity midEntity = midReportMapper.selectByPrimaryKey(reportListVo.getRecordId());
                     if(midEntity != null){
                         reportListVo.setReportState(Integer.parseInt(midEntity.getState()));
                         reportListVo.setContractId(midEntity.getContractId());
+                        reportListVo.setCategory(midEntity.getCategory());
                     }
                 }
             }
