@@ -3205,10 +3205,7 @@ public class ReportServiceImpl implements ReportService {
             entity.setSealType(sealEntity.getSealType());
             entity.setKey(id);
             list.add(entity);
-            Long idById = recordEntityMapper.getZjEntrustIdById(id);
-            if (idById != null){
-                ids.add(idById);
-            }
+            ids.add(id);
         }
         //设置状态和用章类型
         reportMapper.updateCategory(list);
