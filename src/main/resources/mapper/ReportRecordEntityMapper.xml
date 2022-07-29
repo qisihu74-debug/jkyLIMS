@@ -476,6 +476,7 @@
         FROM test_report_record
         where entrustment_id = #{entrustId,jdbcType=BIGINT}
     </select>
+
     <select id="selectByEntrustIdZj" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
             parameterType="java.lang.Long">
         SELECT
@@ -483,6 +484,10 @@
         FROM test_report_record
         where entrust_id = #{entrustId,jdbcType=BIGINT}
     </select>
+    <select id="getMidReportNum" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM test_report_record WHERE entrust_id = #{entrustId}
+    </select>
+
     <select id="getLatestReport" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
             parameterType="java.lang.Long">
         SELECT

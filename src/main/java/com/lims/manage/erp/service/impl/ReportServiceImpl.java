@@ -2891,19 +2891,23 @@ public class ReportServiceImpl implements ReportService {
             if(state == 0){
                 //判断该条数据是否可以编辑
                 Boolean flag = true;
-                List<TestEntrustedTaskRelEntity> entrustMidReport = taskRelDao.getEntrustMidReport(reportListVo.getId(), reportListVo.getTaskFlowId());
-                if(!CollectionUtils.isEmpty(entrustMidReport)){
-                    for (TestEntrustedTaskRelEntity relEntity : entrustMidReport) {
-                        Long recordId = relEntity.getRecordId();
-                        if (recordId == null){
-                            flag = false;
-                        }else{
-                            ReportRecordMidEntity reportRecordMidEntity = midReportMapper.selectByPrimaryKey(recordId);
-                            if(reportRecordMidEntity == null){
-                                flag = false;
-                            }
-                        }
-                    }
+//                List<TestEntrustedTaskRelEntity> entrustMidReport = taskRelDao.getEntrustMidReport(reportListVo.getId(), reportListVo.getTaskFlowId());
+//                if(!CollectionUtils.isEmpty(entrustMidReport)){
+//                    for (TestEntrustedTaskRelEntity relEntity : entrustMidReport) {
+//                        Long recordId = relEntity.getRecordId();
+//                        if (recordId == null){
+//                            flag = false;
+//                        }else{
+//                            ReportRecordMidEntity reportRecordMidEntity = midReportMapper.selectByPrimaryKey(recordId);
+//                            if(reportRecordMidEntity == null){
+//                                flag = false;
+//                            }
+//                        }
+//                    }
+//                }
+                Integer midReportNum = entityMapper.getMidReportNum(reportListVo.getId());
+                if(midReportNum>0){
+                    flag = false;
                 }
                 reportListVo.setFlag(flag);
             }else if(state == 1){//查询历史时
@@ -2912,6 +2916,7 @@ public class ReportServiceImpl implements ReportService {
                     if(midEntity != null){
                         reportListVo.setReportState(Integer.parseInt(midEntity.getState()));
                         reportListVo.setContractId(midEntity.getContractId());
+                        reportListVo.setCategory(midEntity.getCategory());
                     }
                 }
             }
