@@ -40,5 +40,9 @@ public class ReportListVo {
      * 中间报告是否可以编辑
      */
     private Boolean flag;
+    /**
+     * state 状态
+     */
+    private Integer reportState;
 
 }
