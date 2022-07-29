@@ -2907,7 +2907,7 @@ public class ReportServiceImpl implements ReportService {
                 }
                 reportListVo.setFlag(flag);
             }else if(state == 1){//查询历史时
-                if(reportListVo.getState() == null){
+                if(reportListVo.getReportState() == null){
                     ReportRecordMidEntity midEntity = midReportMapper.selectByPrimaryKey(reportListVo.getRecordId());
                     if(midEntity != null){
                         reportListVo.setReportState(Integer.parseInt(midEntity.getState()));

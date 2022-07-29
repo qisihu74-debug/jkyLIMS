@@ -107,11 +107,18 @@
   <sql id="Blob_Column_List" >
     report_url
   </sql>
-  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+  <select id="selectByPrimaryKey1" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
     select 
     <include refid="Base_Column_List" />
     ,
     <include refid="Blob_Column_List" />
+    from test_report_record_mid
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectByPrimaryKey" resultType="com.lims.manage.erp.entity.ReportRecordMidEntity" parameterType="java.lang.Long" >
+    select
+    *
     from test_report_record_mid
     where id = #{id,jdbcType=BIGINT}
   </select>

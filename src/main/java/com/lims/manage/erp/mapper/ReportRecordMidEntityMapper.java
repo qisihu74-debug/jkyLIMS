@@ -13,6 +13,7 @@ public interface ReportRecordMidEntityMapper {
 
     int insertSelective(ReportRecordMidEntity record);
 
+    ReportRecordMidEntity selectByPrimaryKey1(Long id);
     ReportRecordMidEntity selectByPrimaryKey(Long id);
 
     int updateByPrimaryKeySelective(ReportRecordMidEntity record);
