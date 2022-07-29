@@ -2769,7 +2769,7 @@ public class ReportServiceImpl implements ReportService {
         ReportRecordEntity detailByEntrustId = null;
         Long aLong = recordEntityMapper.checkExist(entrustId);
         if (aLong == null){
-            detailByEntrustId = reportMapper.getDetailByEntrustId(entrustId);//审核人、签发人
+            detailByEntrustId = reportMapper.getDetailByEntrustIdZj(entrustId);//审核人、签发人
         }else {
             detailByEntrustId = reportMapper.getDetailByEntrustId(entrustId);//审核人、签发人
         }
