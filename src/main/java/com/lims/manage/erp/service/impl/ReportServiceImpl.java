@@ -2906,11 +2906,12 @@ public class ReportServiceImpl implements ReportService {
                     }
                 }
                 reportListVo.setFlag(flag);
-            }else if(state == 1){//
+            }else if(state == 1){//查询历史时
                 if(reportListVo.getState() == null){
                     ReportRecordMidEntity midEntity = midReportMapper.selectByPrimaryKey(reportListVo.getRecordId());
                     if(midEntity != null){
-                        reportListVo.setState(Integer.parseInt(midEntity.getState()));
+                        reportListVo.setReportState(Integer.parseInt(midEntity.getState()));
+                        reportListVo.setContractId(midEntity.getContractId());
                     }
                 }
             }

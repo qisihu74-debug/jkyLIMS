@@ -45,4 +45,6 @@ public class ReportListVo {
      */
     private Integer reportState;
 
+    private String contractId;//合同id
+
 }
