@@ -724,7 +724,7 @@ public class ReportServiceImpl implements ReportService {
         }
         reportRecordEntity.setId(recordId);
         reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-        reportRecordEntity.setState(3+"");//设置为待发起审批
+        reportRecordEntity.setState(1+"");//报告已合成，设置为待发起审批
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(vo.getEntrustmentId());
         reportRecordEntity.setNumber(entrustAddVo.getReportCount());
         reportRecordEntity.setReportType(entrustAddVo.getReportType());
