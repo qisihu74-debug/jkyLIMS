@@ -255,7 +255,7 @@ public interface ReportRecordEntityMapper {
      */
     List<ReportRecordEntity> getSealListCount(@Param("ids") List<Long> ids);
 
-    @Select("select entrustment_id from test_report_record where  entrustment_id=#{entrustmentId}")
+    @Select("select distinct entrustment_id from test_report_record where  entrustment_id=#{entrustmentId}")
     Long checkExist(@Param("entrustmentId") Long entrustmentId);
 
     ReportNodeVo getReportNodeByZjEntrustId(@Param("entrustId") Long entrustmentId);
