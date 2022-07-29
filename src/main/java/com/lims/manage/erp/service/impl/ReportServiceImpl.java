@@ -794,7 +794,7 @@ public class ReportServiceImpl implements ReportService {
             }
             //TODO 兼容中间报告
             if (recordEntity.getEntrustmentId() == null){
-                recordEntity.setEntrustId(recordEntity.getEntrustmentId());
+                recordEntity.setEntrustmentId(recordEntity.getEntrustId());
             }
         }
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
