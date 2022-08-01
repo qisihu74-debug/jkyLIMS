@@ -622,7 +622,7 @@ public class ReportServiceImpl implements ReportService {
                 }else{
                     reportRecordEntity1.setState(1+"");
                     reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
-                    reportRecordEntity1.setReportCode(getMaxCode(vo.getEntrustId()));
+                    reportRecordEntity1.setReportCode(getMaxCode(vo.getEntrustmentId()));
                 }
             }
 //            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
@@ -663,7 +663,7 @@ public class ReportServiceImpl implements ReportService {
                 }else{
                     reportRecordEntity.setState(1+"");
                     reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-                    reportRecordEntity.setReportCode(getMaxCode(vo.getEntrustId()));
+                    reportRecordEntity.setReportCode(getMaxCode(vo.getEntrustmentId()));
                 }
             }
 //            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
@@ -743,7 +743,7 @@ public class ReportServiceImpl implements ReportService {
 //            int newCode = maxCode + 1;
 //            reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
 //        }
-        reportRecordEntity.setReportCode(getMaxCode(vo.getEntrustId()));
+        reportRecordEntity.setReportCode(getMaxCode(vo.getEntrustmentId()));
         reportRecordEntity.setId(recordId);
         reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
         reportRecordEntity.setState(1+"");//报告已合成，设置为待发起审批
