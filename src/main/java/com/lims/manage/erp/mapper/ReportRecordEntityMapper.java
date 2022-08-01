@@ -137,6 +137,12 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     Integer getMaxCode(String year,String code);
+    /**
+     * 查询当前年 最大报告编号--中间
+     * @param year
+     * @return
+     */
+    Integer getMaxCodeMid(String year,String code);
 
     /**
      * 根据委托单id查询所用报告模板名称

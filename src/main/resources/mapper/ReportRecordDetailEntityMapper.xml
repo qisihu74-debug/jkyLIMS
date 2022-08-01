@@ -46,6 +46,18 @@
                 #{checkItemName,jdbcType=VARCHAR}, #{specsContent,jdbcType=VARCHAR}, #{checkResult,jdbcType=VARCHAR},
                 #{judgeResult,jdbcType=VARCHAR}, #{coordinate,jdbcType=VARCHAR},#{originUrl},#{taskId},#{sampleId})
     </insert>
+
+    <insert id="batchInsert" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        insert into test_report_record_detail (record_id, check_item_id,
+                                               check_item_name, specs_content, check_result,
+                                               judge_result, coordinate,origin_url,task_id,sample_id)
+        values
+            <foreach collection="records" item="item" open="" separator="," close="">
+        (#{item.recordId,jdbcType=BIGINT}, #{item.checkItemId,jdbcType=BIGINT},
+                #{item.checkItemName,jdbcType=VARCHAR}, #{item.specsContent,jdbcType=VARCHAR}, #{item.checkResult,jdbcType=VARCHAR},
+                #{item.judgeResult,jdbcType=VARCHAR}, #{item.coordinate,jdbcType=VARCHAR},#{item.originUrl},#{item.taskId},#{item.sampleId})
+            </foreach>
+    </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
         insert into test_report_record_detail
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -178,6 +190,35 @@
             </if>
         </set>
         where record_id = #{recordId,jdbcType=BIGINT} and check_item_id = #{checkItemId,jdbcType=BIGINT} and sample_id = #{sampleId}
+    </update>
+
+    <update id="batchUpdateRecords" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update test_report_record_detail
+            <set>
+                <if test="item.checkItemName != null">
+                    check_item_name = #{item.checkItemName,jdbcType=VARCHAR},
+                </if>
+                <if test="item.specsContent != null">
+                    specs_content = #{item.specsContent,jdbcType=VARCHAR},
+                </if>
+                <if test="item.checkResult != null">
+                    check_result = #{item.checkResult,jdbcType=VARCHAR},
+                </if>
+                <if test="item.judgeResult != null">
+                    judge_result = #{item.judgeResult,jdbcType=VARCHAR},
+                </if>
+                <if test="item.coordinate != null">
+                    coordinate = #{item.coordinate,jdbcType=VARCHAR},
+                </if>
+                <if test="item.originUrl != null">
+                    origin_url = #{item.originUrl},
+                </if>
+            </set>
+            where record_id = #{item.recordId,jdbcType=BIGINT}
+                and check_item_id = #{item.checkItemId,jdbcType=BIGINT}
+                and sample_id = #{item.sampleId}
+        </foreach>
     </update>
     <update id="updateById" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
         update test_report_record_detail
