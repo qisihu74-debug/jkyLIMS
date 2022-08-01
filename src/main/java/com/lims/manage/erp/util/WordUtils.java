@@ -179,7 +179,7 @@ public class WordUtils {
                 }
             }
         }else {
-            cell.removeParagraph(0);
+            //cell.removeParagraph(0);
             cell.setText(value);
         }
     }

@@ -622,6 +622,7 @@ public class ReportServiceImpl implements ReportService {
                 }else{
                     reportRecordEntity1.setState(1+"");
                     reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
+                    reportRecordEntity1.setReportCode(getMaxCode(vo.getEntrustmentId()));
                 }
             }
 //            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
@@ -640,8 +641,8 @@ public class ReportServiceImpl implements ReportService {
             return true;
         } else {
             //获取父级code
-            Long deptId = taskMapper.getDeptByEntrustId(vo.getEntrustmentId());
-            String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
+//            Long deptId = taskMapper.getDeptByEntrustId(vo.getEntrustmentId());
+//            String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
             long recordId = GenID.getID();
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
             for (ReportRecordDetailEntity e : checkInfos) {
@@ -662,6 +663,7 @@ public class ReportServiceImpl implements ReportService {
                 }else{
                     reportRecordEntity.setState(1+"");
                     reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+                    reportRecordEntity.setReportCode(getMaxCode(vo.getEntrustmentId()));
                 }
             }
 //            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
@@ -672,15 +674,18 @@ public class ReportServiceImpl implements ReportService {
 //                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
 //            }
             //生成报告编号
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-            String year = sdf.format(new Date());
-            Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
-            if (maxCode == null) {
-                reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-0001");
-            } else {
-                int newCode = maxCode + 1;
-                reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
-            }
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+//            String year = sdf.format(new Date());
+//            Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
+//            if (maxCode == null) {
+//                reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-0001");
+//            } else {
+//                int newCode = maxCode + 1;
+//                reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
+//            }
+            //设置报告编号
+
+
             reportRecordEntity.setId(recordId);
             reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
             //设置为最终报告
@@ -695,17 +700,33 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
+    private String getMaxCode(Long entrustId){
+        //获取父级code
+        Long deptId = taskMapper.getDeptByEntrustId(entrustId);
+        String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+        String year = sdf.format(new Date());
+        Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
+        if (maxCode == null) {
+            return topDepartmentCode+"-" + year + "-YC-0001";
+        } else {
+            int newCode = maxCode + 1;
+            return topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode);
+        }
+    }
+
     @Transactional
     @Override
     public Boolean middleReportPreserve(ReportPreserveVo vo) {
         //获取父级code
         PageHelper.clearPage();
-        Long deptId = taskMapper.getDeptByEntrustId(vo.getEntrustmentId());
-        String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
+//        Long deptId = taskMapper.getDeptByEntrustId(vo.getEntrustmentId());
+//        String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
         long recordId = GenID.getID();
         List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
         for (ReportRecordDetailEntity e : checkInfos) {
             e.setRecordId(recordId);
+            e.setId(null);
             int insert1 = recordDetailEntityMapper.insert(e);
             if (insert1 < 1) {
                 return false;
@@ -713,15 +734,16 @@ public class ReportServiceImpl implements ReportService {
         }
         ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo,vo.getEntrustmentId());
         //生成报告编号
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-        String year = sdf.format(new Date());
-        Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
-        if (maxCode == null) {
-            reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-0001");
-        } else {
-            int newCode = maxCode + 1;
-            reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
-        }
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+//        String year = sdf.format(new Date());
+//        Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
+//        if (maxCode == null) {
+//            reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-0001");
+//        } else {
+//            int newCode = maxCode + 1;
+//            reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
+//        }
+        reportRecordEntity.setReportCode(getMaxCode(vo.getEntrustmentId()));
         reportRecordEntity.setId(recordId);
         reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
         reportRecordEntity.setState(1+"");//报告已合成，设置为待发起审批
