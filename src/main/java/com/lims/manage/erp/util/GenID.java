@@ -1,12 +1,13 @@
 package com.lims.manage.erp.util;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author gjl
@@ -17,28 +18,27 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Copyright © 河南交科院
  */
 public class GenID {
-    private static AtomicInteger atomicInteger = new AtomicInteger(0);
-    private static int ID_LENGTH = 16;
+    private static final long EPOCH = 1479533469598L; //开始时间,固定一个小于当前时间的毫秒数
+    private static final int max12bit = 4095;
+    private static final long max41bit= 1099511627775L;
+    private static String machineId = "" ; // 机器ID
 
     public synchronized static long getID() {
-        //  生成最大4位随技术
-        int i2 = ThreadLocalRandom.current().nextInt(9999);
-        String timeStr = String.valueOf(System.currentTimeMillis());
-        // 取出时间串前面相同的部分
-        timeStr = timeStr.substring(5);
-        // 递增生成最大9999的递增ID
-        if (atomicInteger.get() == 9999) {
-            atomicInteger.set(0);
+        long time = System.currentTimeMillis() - EPOCH  + max41bit;
+        // 二进制的 毫秒级时间戳
+        String base = Long.toBinaryString(time);
+
+        // 序列数
+        String randomStr = StringUtils.leftPad(Integer.toBinaryString(new Random().nextInt(max12bit)),12,'0');
+        if(StringUtils.isNotEmpty(machineId)){
+            machineId = StringUtils.leftPad(machineId, 10, '0');
         }
-        int i1 = atomicInteger.getAndIncrement();
-        String id = timeStr.concat(String.valueOf(i2)).concat(i1+"");
-        // 严格控制ID长度，如果过长 从最前面截取
-        if (id.length() > ID_LENGTH) {
-            // 计算多了多少位
-            int surplusLenth = id.length() - ID_LENGTH;
-            id = id.substring(surplusLenth);
-        }
-        return Long.valueOf(id);
+
+        //拼接
+        String appendStr = base + machineId + randomStr;
+        // 转化为十进制 返回
+        BigInteger bi = new BigInteger(appendStr, 2);
+        return  Long.valueOf(bi.toString());
     }
 
     public static String getUUID() {

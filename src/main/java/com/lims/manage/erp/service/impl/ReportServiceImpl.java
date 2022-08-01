@@ -1833,10 +1833,6 @@ public class ReportServiceImpl implements ReportService {
         }else {
             entityMapper.updateUrlAndState(reqBean.getEntrustId(), response.getSignUrl(), "4",sysUserName+"&"+userId+"",new Date(System.currentTimeMillis()));
         }
-        if (StringUtils.isNotEmpty(response.getSignUrl()) && aLong == null){
-            Long id = recordEntityMapper.getIdByZjEntrustId(reqBean.getEntrustId());
-            moveReportRecord(id);
-        }
         return response;
     }
 
@@ -1850,12 +1846,19 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void callback(Long contractId) {
-        //根据contractId查询任务id
         Long entrustId = entityMapper.getEntrustIdByCid(contractId);
+        Long id = entityMapper.getIdByCid(contractId);
         //更新状态，更新
-        taskMapper.updateEntrustById(entrustId, 10);
+        if (entrustId == null){
+            Long idByCid = entityMapper.getEntrustByCid(contractId);
+            taskMapper.updateEntrustById(idByCid, 10);
+        }else {
+            taskMapper.updateEntrustById(entrustId, 10);
+        }
         //更新报告状态
         entityMapper.updateFileState(contractId, "5");
+        //移除中间报告
+        moveReportRecord(id);
         logger.debug("接收契约锁回调参数进行数据更新完成！");
     }
 
