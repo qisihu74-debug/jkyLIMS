@@ -214,8 +214,8 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     public TaskDetailInfoVo getDetails(Long id) {
         // 查询报告单详情  要区分 中间报告 还是 最终报告。 reportTypeStatus
         ReportApprovalVo reportApprovalVo = reportApprovalMapper.getReportApprovalDetail(id);
-        // reportTypeStatus!=null 并且是中间报告的话
-        if(reportApprovalVo.getReportTypeStatus()!=null&&reportApprovalVo.getReportTypeStatus()==1){
+        // reportApprovalVo.getEntrustId() 中间报告 != null
+        if(!StringUtils.isEmpty(reportApprovalVo.getEntrustId())){
             // 审批报告详情 处理中间报告方法
             TaskDetailInfoVo data = approvalMiddleMethod(id);
             return data;
@@ -475,9 +475,9 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             return new TaskDetailInfoVo(id);
         }
         // 样品展示  样品的检测项信息展示
-        if (taskDetailInfoVo.getEntrustmentId() != null) {
+        if (taskDetailInfoVo.getEntrustId() != null) {
             // 通过委托id 获取样品信息 及以下的 处理。
-            List<SampleDetailVo> sampleDetailVoList = reportApprovalMapper.getSampleDetailList(taskDetailInfoVo.getEntrustmentId());
+            List<SampleDetailVo> sampleDetailVoList = reportApprovalMapper.getSampleDetailList(taskDetailInfoVo.getEntrustId());
             for (SampleDetailVo sampleDetailVo : sampleDetailVoList) {
                 if (!sampleDetailVo.getCheckItemInfoList().isEmpty()) {
                     for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
