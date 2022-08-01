@@ -519,6 +519,9 @@
     <update id="updateByEntrustIdSelective" parameterType="com.lims.manage.erp.entity.ReportRecordEntity">
         update test_report_record
         <set>
+            <if test="reportCode != null">
+                report_code = #{reportCode,jdbcType=VARCHAR},
+            </if>
             <if test="state != null">
                 state = #{state,jdbcType=VARCHAR},
             </if>
