@@ -943,6 +943,9 @@
         <if test="acceptanceoverDate!=null">
             and date_format(t1.acceptance_date,'%Y-%m-%d')&lt;= #{acceptanceoverDate,jdbcType=DATE}
         </if>
+        <if test="entrustPeople!=null">
+            and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+        </if>
     </select>
 
     <select id="getCompanyList" resultType="com.lims.manage.erp.entity.TestCompanyJsonEntity">
