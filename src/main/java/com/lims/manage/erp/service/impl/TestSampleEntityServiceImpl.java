@@ -16,9 +16,12 @@ import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.SampleFileTableDao;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestSampleEntityService;
+import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
 import com.lims.manage.erp.vo.SampleSimpleListVo;
 import com.lims.manage.erp.vo.SamplesAddVo;
@@ -31,6 +34,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,6 +53,8 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     private TestSampleMixInfoEntityMapper mixInfoEntityMapper;
     @Autowired
     private EntrustEntityMapper entrustEntityMapper;
+    @Autowired
+    private LogManagerService logManagerService;
     Logger logger = LoggerFactory.getLogger(TestSampleEntityServiceImpl.class);
 
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -422,6 +428,19 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             TestSampleEntity entity = new TestSampleEntity(samples.get(i), sampleCode,outwardStr.toString());
             entities.add(entity);
         }
+        if(!CollectionUtils.isEmpty(entities)){
+            StringBuilder stringBuilder1 = new StringBuilder();
+            for(TestSampleEntity testSampleEntity :entities){
+                stringBuilder1.append("样品主键\t"+testSampleEntity.getId()+"\t样品编号\t"+testSampleEntity.getSampleCode());
+                stringBuilder1.append("产品名称\t"+testSampleEntity.getSampleName()+"样品别名\t"+testSampleEntity.getAliasName());
+                stringBuilder1.append("委托单位\t"+testSampleEntity.getCompanyId()+"规格等级\t"+testSampleEntity.getSpecs());
+                stringBuilder1.append("委托检测类别\t"+testSampleEntity.getSampleType());
+                if(testSampleEntity.getCheckDate()!=null){
+                    stringBuilder1.append("来样时间"+(new Timestamp(testSampleEntity.getCheckDate().getTime())));
+                }
+            }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：新增原材样品\t"+stringBuilder1.toString(), Const.ENTRUST_FOUND, true);
+        }
         testSampleEntityMapper.insertBatch(entities);
         return entities;
     }
@@ -474,7 +493,26 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         TestSampleMixInfoEntity mixInfoEntity = new TestSampleMixInfoEntity(samples, newId);
         mixInfoEntity.setEntrustmentId(id);
         //插入配合比参数信息
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("新增 配合比id="+newId+"配合比样品id"+mixInfoEntity.getSampleId());
+        stringBuilder.append("\t设计强度（MPa）\t"+mixInfoEntity.getDesignStrength()+"\t配制强度（MPa）\t"+mixInfoEntity.getIntensityConfiguration()
+                +"\t抗（渗、冻）等级\t"+mixInfoEntity.getAntifreezeLevel()+"\t水胶比\t"+mixInfoEntity.getWaterBinderRatio()+"\t单位用水量（kg）\t"+mixInfoEntity.getUnitWaterUse()
+                +"\t砂率（%）\t"+mixInfoEntity.getSandRatio()+"\t设计坍落度（mm）\t"+mixInfoEntity.getDesignSlump()+"\t拌和方式\t"+mixInfoEntity.getMixingWay()+"\t样品id\t"+mixInfoEntity.getSampleId());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：插入配合比参数信息\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
         mixInfoEntityMapper.insert(mixInfoEntity);
+        if(!CollectionUtils.isEmpty(param)){
+            StringBuilder stringBuilder1 = new StringBuilder();
+            for(TestSampleEntity testSampleEntity:param){
+                stringBuilder1.append("配合比主键\t"+testSampleEntity.getId()+"\t样品编号\t"+testSampleEntity.getSampleCode());
+                stringBuilder1.append("产品名称\t"+testSampleEntity.getSampleName()+"样品别名\t"+testSampleEntity.getAliasName());
+                stringBuilder1.append("委托单位\t"+testSampleEntity.getCompanyId()+"规格等级\t"+testSampleEntity.getSpecs());
+                stringBuilder1.append("委托检测类别\t"+testSampleEntity.getSampleType());
+                if(testSampleEntity.getCheckDate()!=null){
+                    stringBuilder1.append("来样时间"+(new Timestamp(testSampleEntity.getCheckDate().getTime())));
+                }
+            }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：新增配合比样品\t"+stringBuilder1.toString(), Const.ENTRUST_FOUND, true);
+        }
         testSampleEntityMapper.insertBatchMixSamples(param);
         return mixInfoEntity;
     }

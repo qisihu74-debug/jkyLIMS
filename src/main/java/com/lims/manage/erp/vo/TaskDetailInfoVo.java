@@ -25,6 +25,10 @@ public class TaskDetailInfoVo {
      */
     private Long entrustmentId;
     /**
+     * 中间报告的委托单id存储字段
+     */
+    private Long entrustId;
+    /**
      * 判定依据
      */
     private String judgmentBasis;

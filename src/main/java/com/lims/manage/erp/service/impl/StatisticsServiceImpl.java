@@ -449,9 +449,11 @@ public class StatisticsServiceImpl implements StatisticsService {
         // 分页数据
         List<TaskStatsVo> personList = new ArrayList<>();
         if(!org.springframework.util.StringUtils.isEmpty(taskStatsVo.getTeamId())){
+            PageHelper.clearPage();
             List<Long> nodeTeam = teamMapper.getNodeTeamId(Long.parseLong(taskStatsVo.getTeamId()));
             taskStatsVo.setNodeTeam(nodeTeam);
         }
+        PageHelper.clearPage();
         List<TaskStatsVo> list = statisticsMapper.getTaskList(taskStatsVo);
         // 遍历list数据
         for(TaskStatsVo taskDetailInfoVo :list){

@@ -1,7 +1,6 @@
 package com.lims.manage.erp.controller;
 
 
-import com.lims.manage.erp.entity.SysLog;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserRoleEntity;
 import com.lims.manage.erp.result.Result;

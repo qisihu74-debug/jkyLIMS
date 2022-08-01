@@ -208,6 +208,9 @@ public interface ReportRecordEntityMapper {
     @Select("select entrustment_id from test_report_record where contract_id=#{contractId}")
     Long getEntrustIdByCid(@Param("contractId") Long contractId);
 
+    @Select("select id from test_report_record where contract_id=#{contractId}")
+    Long getIdByCid(@Param("contractId") Long contractId);
+
     @Select("select qys_docment_id,contract_id,sign_url,qys_state from test_report_record where entrustment_id=#{entrustId}")
     List<ReportRecordEntity> selectMessageByEntrustId(@Param("entrustId") long entrustId);
 
@@ -283,4 +286,7 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     Integer getMidReportNum(Long entrustId);
+
+    @Select("select entrust_id from test_report_record where contract_id = #{contractId}")
+    Long getEntrustByCid(@Param("contractId") Long contractId);
 }
