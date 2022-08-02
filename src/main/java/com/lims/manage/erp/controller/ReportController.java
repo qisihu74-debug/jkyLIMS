@@ -998,7 +998,7 @@ public class ReportController {
      * @return
      */
     @GetMapping("historyList")
-    public Result historyList(String reportCode, String reportType, String sealType,Integer pageNum,Integer pageSize,Long startDate,Long endDate){
+    public Result historyList(String search, String reportType, String sealType,Integer pageNum,Integer pageSize,Long startDate,Long endDate){
         if (pageNum == null || pageSize == null){
             return ResultUtil.error("缺少分页参数");
         }
@@ -1008,7 +1008,7 @@ public class ReportController {
         if (endDate != null){
             endDate = DateUtil.getDayEndMs(endDate);
         }
-        PageInfo<ReportRecordEntity> pageInfo = reportService.historyList(reportCode,reportType,sealType,pageNum,pageSize,startDate,endDate);
+        PageInfo<ReportRecordEntity> pageInfo = reportService.historyList(search,reportType,sealType,pageNum,pageSize,startDate,endDate);
         return ResultUtil.success(pageInfo);
     }
 
