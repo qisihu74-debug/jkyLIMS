@@ -5,26 +5,8 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.config.PoiConfig;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustFileTableEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
-import com.lims.manage.erp.entity.TaskIdEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TaskTestTeamEntity;
-import com.lims.manage.erp.entity.TestInstrumentEntity;
-import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.entity.TestTeam;
-import com.lims.manage.erp.entity.TreeEntity;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.EntrustFileTableDao;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestDetectionDao;
-import com.lims.manage.erp.mapper.TestSampleEntityMapper;
+import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.Const;
@@ -79,6 +61,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -109,6 +92,8 @@ public class TaskServiceImpl implements TaskService {
     private TestSampleEntityMapper testSampleEntityMapper;
     @Autowired
     private EntrustFileTableDao entrustFileTableDao;
+    @Autowired
+    private TestEntrustedTaskRelDao testEntrustedTaskRelDao;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -526,8 +511,19 @@ public class TaskServiceImpl implements TaskService {
         // 抢单时间
         java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
         taskTestEntity.setReceiveTime(currentDate);
-        // 领样时间
-//        taskTestEntity.setSampleReceivingTime(currentDate);
+        // 通过任务单id 获取详情 任务单下单时间 = 领样时间
+        TaskDetailInfoVo taskDetails = taskMapper.getTaskDetailInfo(taskTestEntity.getId());
+        // 字符串转日期
+        if(!StringUtils.isEmpty(taskDetails.getOrderTime())){
+            try {
+                Date yyyy_MM_dd = new SimpleDateFormat("yyyy-MM-dd").parse(taskDetails.getOrderTime());
+                // 领样时间
+                taskTestEntity.setSampleReceivingTime(yyyy_MM_dd);
+            }
+            catch (Exception e){
+                e.fillInStackTrace();
+            }
+        }
         taskMapper.updateTestTask(taskTestEntity);
         return true;
     }
@@ -535,6 +531,21 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean batchPostGrabASingle(List<TaskTestEntity> taskTestEntitys) {
+        for(TaskTestEntity taskTestEntity :taskTestEntitys){
+            // 通过任务单id 获取详情 任务单下单时间 = 领样时间
+            TaskDetailInfoVo taskDetails = taskMapper.getTaskDetailInfo(taskTestEntity.getId());
+            // 字符串转日期
+            if(!StringUtils.isEmpty(taskDetails.getOrderTime())){
+                try {
+                    Date yyyy_MM_dd = new SimpleDateFormat("yyyy-MM-dd").parse(taskDetails.getOrderTime());
+                    // 领样时间
+                    taskTestEntity.setSampleReceivingTime(yyyy_MM_dd);
+                }
+                catch (Exception e){
+                    e.fillInStackTrace();
+                }
+            }
+        }
         int i = taskMapper.batchUpdateTestTask(taskTestEntitys);
        if(i==0){
            logger.error("批量修改任务单信息失败！");
@@ -1156,9 +1167,7 @@ public class TaskServiceImpl implements TaskService {
                         return "当前任务单下检测项未全部复核成功";
                     }
                 }
-                // 修改test_task state 状态 为6：
-//                Long testTaskId = taskMapper.getTestTaskId(sampleItemInstrumentEntity2.getEntrustId(), sampleItemInstrumentEntity2.getDeptId());
-                Long testTaskId = taskMapper.getReturnTaskId(itemId);
+                Long testTaskId = sampleItemInstrumentEntity2.getTaskId();
                 TaskTestEntity taskTestEntity = new TaskTestEntity();
                 taskTestEntity.setId(testTaskId);
                 taskTestEntity.setState(6);
@@ -1472,7 +1481,9 @@ public class TaskServiceImpl implements TaskService {
                         if (!CollectionUtils.isEmpty(nodeSampleList1)) {
                             nodeSampleList.addAll(nodeSampleList1);
                         }
-                        outward.append(samplePrivateInfoVo.getOutward());
+                        if(!StringUtils.isEmpty(samplePrivateInfoVo.getOutward())){
+                            outward.append(samplePrivateInfoVo.getOutward());
+                        }
                         if(i != sampleList.size()-1){
                             outward.append("/");
                         }
@@ -1496,6 +1507,25 @@ public class TaskServiceImpl implements TaskService {
                     }
                 }
                 sampleListVo.setCorrelationTaskCode(correlationTask.toString());
+                // 通过任务单id 补充 任务流转日期信息
+                List<TestEntrustedTaskRelEntity> TaskList = Lists.newArrayList();
+                TaskList = testEntrustedTaskRelDao.getTaskList(sampleListVo.getTaskId());
+                if(!CollectionUtils.isEmpty(TaskList)){
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity:TaskList){
+                        stringBuilder.append(DateUtil.formatDate(testEntrustedTaskRelEntity.getTaskFlowDate()));
+                        stringBuilder.append("、");
+                    }
+                    if(stringBuilder.length()>1){
+                        sampleListVo.setTaskFlowDate(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
+                    }
+                    else{
+                        sampleListVo.setTaskFlowDate("——");
+                    }
+                }
+                else {
+                    sampleListVo.setTaskFlowDate("——");
+                }
             }
         }
     }

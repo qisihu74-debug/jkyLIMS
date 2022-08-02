@@ -1,14 +1,21 @@
 package com.lims.manage.erp.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.*;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -191,6 +198,37 @@ public class HttpDownloadUtil {
         }
         return m.group(1);
 
+    }
+
+    /**
+     *
+     * @description: 将输入流输出到页面
+     * @author: Jeff
+     * @date: 2019年12月7日
+     * @param resp
+     * @param inputStream
+     */
+    public static void writeFile(HttpServletResponse resp, InputStream inputStream) {
+        OutputStream out = null;
+        try {
+            out = resp.getOutputStream();
+            int len = 0;
+            byte[] b = new byte[1024];
+            while ((len = inputStream.read(b)) != -1) {
+                out.write(b, 0, len);
+            }
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
 

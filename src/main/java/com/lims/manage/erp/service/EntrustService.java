@@ -6,51 +6,27 @@ import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.vo.*;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
 public interface EntrustService {
-    /**
-     * 新增委托
-     * @param vo
-     * @return
-     */
-    Boolean addEntrust(EntrustAddVo vo, MultipartFile[] file);
-
-    /**
-     * 新增委托测试丁
-     * @param vo
-     * @return
-     */
-    Boolean addEntrustTest(EntrustAddVo vo, MultipartFile[] file);
-
-    String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file);
 
 
-
-
-
-    /**
-     * 修改委托
-     */
-    Boolean updateEntrust(EntrustAddVo vo, MultipartFile[] file);
+    String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) throws InterruptedException;
 
     /**
      * 修改委托测试 new
      */
     Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file) throws ParseException;
-
-    /**
-     * 修改委托样品测试 new 暂时废弃 （勿删！！）
-     */
-    Boolean updateEntrustTestNewSample(EntrustAddVo vo);
 
     /**
      * 修改委托样品测试 new 3.23
@@ -255,7 +231,7 @@ public interface EntrustService {
      * @param vo
      * @return
      */
-    String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file);
+    String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) throws InterruptedException;
 
     Long checkEntrustId(Long entrustId);
 
@@ -318,4 +294,16 @@ public interface EntrustService {
      * @return
      */
     PageInfo taskStatisticsList(TestEntrustedTaskRelVo testEntrustedTaskRelVo);
+
+    /**
+     * 客户委托查询
+     * @param clientOrderdetailVo
+     * @return
+     */
+    PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo);
+
+    /**
+     * 导出Excel 表
+     */
+    InputStream exportPersonDetails(List<ClientOrderdetailVo> list,ClientOrderdetailVo clientOrderdetailVo) throws Exception;
 }

@@ -373,6 +373,12 @@ public class SampleController {
         if (sampleEntity == null || sampleEntity.getId() == null) {
             return ResultUtil.error("缺少必要参数！");
         }
+         //   根据样品ID 和委托单位 id 实现变更样品委托单位
+        if(sampleEntity.getId()!=null&&sampleEntity.getCompanyId()!=null){
+             if(testSampleEntityService.judgmentSampleUnit(sampleEntity.getId(),sampleEntity.getCompanyId())==false){
+                 return ResultUtil.error("样品委托单位变更失败，样品已关联委托单信息！！！");
+            }
+        }
         int i;
         if(sampleEntity.getSampleType().contains("配合比")){
             i = testSampleEntityService.updateSampleBatch(sampleEntity);
@@ -394,7 +400,7 @@ public class SampleController {
         if (id == null && "".equals(id)) {
             return ResultUtil.error("缺少必填参数！");
         }
-        if (file == null) {
+        if (file.length == 0) {
             return ResultUtil.error("样品file文件为空！");
         }
         // 处理file文件后缀

@@ -24,7 +24,8 @@
         user_id,
         address_name,
         task_id,
-        entrust_id)
+        entrust_id,
+        state)
         values
         <foreach collection="lists" item="entity" separator=",">
             (   #{entity.id,jdbcType=INTEGER},
@@ -35,7 +36,8 @@
                 #{entity.userId,jdbcType=BIGINT},
                 #{entity.addressName,jdbcType=VARCHAR},
                 #{entity.taskId,jdbcType=BIGINT},
-                #{entity.entrustId,jdbcType=BIGINT})
+                #{entity.entrustId,jdbcType=BIGINT},
+                #{entity.state,jdbcType=INTEGER})
         </foreach>
     </insert>
 
@@ -89,6 +91,18 @@
         </set>
         where id = #{id,jdbcType=INTEGER}
     </update>
+    <update id="updateMiddleReportState" parameterType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
+        update test_entrusted_task_rel
+        <set>
+            <if test="state != null">
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="recordId != null">
+                record_id = #{recordId,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
 
     <delete id="deletedData">
         delete from test_entrusted_task_rel where id = #{id}
@@ -128,6 +142,9 @@
             <if test="updateDate != null">
                 update_date,
             </if>
+            <if test="state != null">
+                state,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             id,
@@ -160,6 +177,9 @@
             </if>
             <if test="updateDate != null">
                #{updateDate},
+            </if>
+            <if test="state != null">
+                #{state},
             </if>
         </trim>
     </insert>
@@ -249,6 +269,20 @@
         <if test="taskSource!=null and taskSource!='' ">
             and t2.task_source LIKE CONCAT('%',#{taskSource},'%')
         </if>
+    </select>
+    <select id="getTaskFlowById" resultType="com.lims.manage.erp.vo.TestEntrustedTaskRelVo">
+        select * from test_entrusted_task_rel where id = #{taskFlowId}
+    </select>
+
+    <select id="getEntrustMidReport" resultType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
+        SELECT
+            *
+        FROM
+            test_entrusted_task_rel
+        WHERE
+            type = 1
+          AND entrust_id = #{entrustId}
+          AND id != #{taskFlowId}
     </select>
 
 </mapper>

@@ -181,7 +181,7 @@ public class TaskController {
             return ResultUtil.error(201, "token已过期！");
         }
         if (taskTestEntity.getInspector() == null || taskTestEntity.getRecorder() == null || taskTestEntity.getReviewer() == null
-                || taskTestEntity.getReportProducer() == null || taskTestEntity.getSampler() ==null||taskTestEntity.getSampleReceivingTime()==null) {
+                || taskTestEntity.getReportProducer() == null || taskTestEntity.getSampler() ==null) {
             return ResultUtil.error(201, "缺少必填参数！");
         }
         Boolean taskStatus = taskService.getJudgmentTaskList(taskTestEntity.getId());
@@ -211,7 +211,7 @@ public class TaskController {
             return ResultUtil.error(201, "token已过期！");
         }
         if (batchReceiveTaskVo.getInspector() == null || batchReceiveTaskVo.getRecorder() == null || batchReceiveTaskVo.getReviewer() == null
-                || batchReceiveTaskVo.getReportProducer() == null || batchReceiveTaskVo.getSampler() ==null||batchReceiveTaskVo.getSampleReceivingTime()==null) {
+                || batchReceiveTaskVo.getReportProducer() == null || batchReceiveTaskVo.getSampler() ==null) {
             return ResultUtil.error(201, "缺少必填参数！");
         }
         List<Long> ids = batchReceiveTaskVo.getId();

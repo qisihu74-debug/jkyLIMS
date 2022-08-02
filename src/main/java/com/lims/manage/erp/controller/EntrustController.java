@@ -1,10 +1,17 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
+import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
-import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TaskEntity;
+import com.lims.manage.erp.entity.TestCompanyJsonEntity;
+import com.lims.manage.erp.entity.TestCustomerJsonEntity;
+import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -13,7 +20,15 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.CheckItemDeptVo;
+import com.lims.manage.erp.vo.CheckItemParamVo;
+import com.lims.manage.erp.vo.ClientOrderdetailVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.TaskVo;
+import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
+import com.lims.manage.erp.vo.UpdateIssueReportVo;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -21,15 +36,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import sun.security.util.Debug;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -49,25 +73,6 @@ public class EntrustController {
     private ReportService reportService;
 
     /**
-     * 新增委托 废弃
-     *
-     * @param json
-     * @param file
-     * @return
-     */
-    @RequestMapping("/addEntrust")
-    //@RequiresPermissions("entrust:entrust:addEntrust")
-    public Result addEntrust(@RequestParam("json") String json, MultipartFile[] file) {
-        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
-        Boolean isSuccess = entrustService.addEntrust(entrust, file);
-        if (isSuccess) {
-            return ResultUtil.success();
-        } else {
-            return ResultUtil.error(678, "新增委托失败！");
-        }
-    }
-
-    /**
      * 新增委托 使用中丁
      *
      * 丁 7月5日 : 返回字符串效验信息。
@@ -78,28 +83,17 @@ public class EntrustController {
     @RequestMapping("/addEntrust_Test")
     //@RequiresPermissions("entrust:entrust:addEntrust")
     public Result addEntrustTest(@RequestParam("json") String json, MultipartFile[] file) {
-        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
-         return ResultUtil.success(entrustService.addEntrustTest0620(entrust, file));
-    }
-
-
-    /**
-     * 修改委托 废弃
-     *
-     * @param json
-     * @param file
-     * @return
-     */
-    @RequestMapping("/updateEntrust")
-//    @RequiresPermissions("entrust:entrust:updateEntrust")
-    public Result updateEntrust(@RequestParam("json") String json, MultipartFile[] file) {
-        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
-        Boolean isSuccess = entrustService.updateEntrust(entrust, file);
-        if (isSuccess) {
-            return ResultUtil.success("修改成功");
-        } else {
-            return ResultUtil.error(678, "修改委托失败！");
+        try {
+            EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
+            return ResultUtil.success(entrustService.addEntrustTest0620(entrust, file));
         }
+        catch (Exception e){
+            // 日志输出。
+            Debug.println("新增委托日志异常输出\t",e+"");
+            MapUtils.queue.clear();
+            return ResultUtil.error("新建委托失败,请联系管理员！！！");
+        }
+
     }
 
     /**
@@ -610,8 +604,17 @@ public class EntrustController {
      */
     @RequestMapping("/addEntrust_copy")
     public Result addEntrustCopy(@RequestParam("json") String json, MultipartFile[] file) {
-        EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
-        return ResultUtil.success(entrustService.addEntrustCopy(entrust, file));
+        try {
+            EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
+            return ResultUtil.success(entrustService.addEntrustCopy(entrust, file));
+        }
+        catch (Exception e){
+            // 日志输出。
+            Debug.println("新增委托再来一单日志异常输出\t",e+"");
+            MapUtils.queueCopy.clear();
+            return ResultUtil.error("再来一单新建委托失败,请联系管理员！！！");
+        }
+
     }
 
     /**
@@ -750,5 +753,53 @@ public class EntrustController {
         }
         return ResultUtil.success(entrustService.taskStatisticsList(testEntrustedTaskRelVo));
     }
+
+    /**
+     * 客户委托查询
+     */
+    @GetMapping("/getClientList")
+    public Result getClientList(ClientOrderdetailVo clientOrderdetailVo){
+        if (clientOrderdetailVo.getPageNum() == null || clientOrderdetailVo.getPageSize() == null ) {
+            return ResultUtil.error("缺少分页参数或必填参数");
+        }
+        return ResultUtil.success(entrustService.getClientList(clientOrderdetailVo));
+    }
+
+    /**
+     * 客户委托查询 导出
+     * @param clientOrderdetailVo
+     * @param response
+     * @throws IOException
+     */
+    @GetMapping("/getClientListExport")
+    public void getClientListExport(ClientOrderdetailVo clientOrderdetailVo,HttpServletResponse response) throws Exception {
+        clientOrderdetailVo.setPageNum(1);
+        clientOrderdetailVo.setPageSize(100000);
+        BufferedOutputStream bos = null;
+        String fileName = "企业委托单详情表"+DateUtil.formatDate(new Date());
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode(fileName+".xlsx", "UTF-8") );
+        PageInfo pageInfo = entrustService.getClientList(clientOrderdetailVo);
+        List<ClientOrderdetailVo> list = Lists.newArrayList();
+        if(!CollectionUtils.isEmpty(pageInfo.getList())){
+            System.out.println(pageInfo.getList().size());
+            list =  pageInfo.getList();
+        }
+        InputStream inputStream = entrustService.exportPersonDetails(list,clientOrderdetailVo);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+    }
+
+
 
 }

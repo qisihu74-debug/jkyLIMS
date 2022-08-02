@@ -40,6 +40,13 @@ public interface TestEntrustedTaskRelDao {
     int updateData(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity);
 
     /**
+     * 修改中间报告状态
+     * @param testEntrustedTaskRelEntity
+     * @return
+     */
+    int updateMiddleReportState(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity);
+
+    /**
      * 进行删除 操作
      */
     int deletedData(@Param("id") Integer id);
@@ -67,6 +74,19 @@ public interface TestEntrustedTaskRelDao {
      */
     List<TestEntrustedTaskRelVo> getTaskStatisticsList(TestEntrustedTaskRelVo testEntrustedTaskRelVo);
 
+    /**
+     * 根据ID主键查询
+     * @param taskFlowId
+     * @return
+     */
+    TestEntrustedTaskRelVo getTaskFlowById(Integer taskFlowId);
 
+    /**
+     * 获取委托下的中间报告
+     * @param entrustId
+     * @param taskFlowId
+     * @return
+     */
+    List<TestEntrustedTaskRelEntity> getEntrustMidReport(Long entrustId, Integer taskFlowId);
 
 }

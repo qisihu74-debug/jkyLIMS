@@ -11,6 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.util.List;
 
+/**
+ * @author Administrator
+ */
 public interface ReportService {
     /**
      * 查询可制作报告列表
@@ -57,7 +60,7 @@ public interface ReportService {
 
     /**
      * 获取报告详情
-     * @param id
+     * @param recordId
      * @return
      */
     ReportSampleDetailVo getReportList_history_details(Long recordId,Long taskId);
@@ -109,6 +112,13 @@ public interface ReportService {
      * @return
      */
     Boolean middleReportPreserve(ReportPreserveVo vo);
+
+    /**
+     * 中间报告修改保存接口
+     * @param vo
+     * @return
+     */
+    Boolean middleReportUpdate(ReportPreserveVo vo);
 
     /**
      * 待盖章和历史盖章列表查询
@@ -171,13 +181,14 @@ public interface ReportService {
      */
     List<ReportTemplateEntity> getReportTemplateListOld(String productId);
     List<ReportTemplateEntity> getReportTemplateList(Long id);
+    List<ReportTemplateEntity> getMiddleReportTemplateList(Long id);
 
     /**
      * 查询每组样品的报告信息
      * @param id
      * @return
      */
-    List<ReportProductRelVo> getReportTemplateList0706(Long id);
+    List<ReportProductRelVo> getReportTemplateList0706(Long id,Long recordId);
 
     /**
      * 查询存在委托单报告信息
@@ -318,7 +329,7 @@ public interface ReportService {
      * @return
      */
     Boolean uploadReport(String reportCode, MultipartFile file, String verifyer, String issuer,Long verifyerId,
-                         Long issuerId,String code,String conclusion,String additional,String mixInfo,String type);
+                         Long issuerId,String code,String conclusion,String additional,String mixInfo,String type,String inspector);
 
     /**
      * 根据委托单id查询报告编号和名称
@@ -342,7 +353,7 @@ public interface ReportService {
      * @param entrustId
      * @return
      */
-    List<ConclusionEntity> getResut(Long entrustId);
+    List<ConclusionEntity> getResut(Long entrustId,Integer reportType);
 
     /**
      * 查询配合比检测信息
@@ -362,7 +373,7 @@ public interface ReportService {
 
     String reportUrl(Long entrustId);
 
-    String insertPicToPdf(String url, Long entrustId) throws Exception;
+    String insertPicToPdf(String url, Long entrustId,String inspector) throws Exception;
 
     /**
      * 报告查询列表
@@ -378,14 +389,16 @@ public interface ReportService {
      * @param search
      * @return
      */
-    PageInfo middleReportList(Integer pageNum,Integer pageSize,String search);
+    PageInfo middleReportList(Integer pageNum,Integer pageSize,Integer state,String search);
 
     /**
      * 查询可制作中间报告的检测项详情
      * @param taskId
      * @return
      */
-    ReportDetailVo getMiddleReportDetail(Long taskId);
+    ReportDetailVo getMiddleReportDetail(Integer taskFlowId,Long taskId);
+
+    ReportDetailVo middleReportEdit(Integer taskFlowId,Long taskId,Long recordId);
 
     String getUrlById(Long id);
 
@@ -406,4 +419,11 @@ public interface ReportService {
     List<TestTeam> getSealer();
 
     byte[] exportRecords(String reportCode, String reportType, String sealType, Long startDate, Long endDate);
+
+    List<String> inspectorList(String search);
+
+    int updateInspector(String reportCode, String inspector);
+
+    ReportRecordEntity getDetailByEntrustIdZj(Long entrustId);
+
 }

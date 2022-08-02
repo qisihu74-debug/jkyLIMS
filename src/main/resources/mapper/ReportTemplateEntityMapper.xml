@@ -149,5 +149,11 @@
                 LEFT JOIN test_sample t2 ON t1.sample_id = t2.id
         WHERE
             entrustment_id = #{entrustId}
+        <if test="sampleIds!=null">
+            and t2.id in
+            <foreach collection="sampleIds" item="sampleId" index="index" open="(" close=")" separator=",">
+                #{sampleId}
+            </foreach>
+        </if>
     </select>
 </mapper>

@@ -123,4 +123,63 @@ CREATE TABLE `test_entrusted_task_rel`  (
 SET FOREIGN_KEY_CHECKS = 1;
 
 
+ALTER TABLE `test_entrusted_task_rel`
+    ADD COLUMN `state`  int COMMENT '任务流转状态（0，未完成；1，已完成）' AFTER `entrust_id`;
 
+ALTER TABLE `test_entrusted_task_rel`
+    ADD COLUMN `record_id`  BIGINT COMMENT '报告主键ID' AFTER `state`;
+
+ALTER TABLE `test_report_record`
+    ADD COLUMN `entrust_id`  BIGINT COMMENT '委托单ID用于中间报告查询' AFTER `combine_time`;
+
+ALTER TABLE `test_report_record`
+    ADD COLUMN `inspector`  VARCHAR(255) COMMENT '报告中签字检测人' AFTER `entrust_id`;
+
+--新增test_report_record_mid转存中间报告数据
+CREATE TABLE `test_report_record_mid`  (
+                                           `id` bigint(0) NOT NULL COMMENT '主键id',
+                                           `entrustment_id` bigint(0) NULL DEFAULT NULL COMMENT '委托单ID',
+                                           `report_code` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '报告编号',
+                                           `sample_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '样品名称',
+                                           `price` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '本单费用',
+                                           `required_completion_time` datetime(0) NULL DEFAULT NULL COMMENT '要求完成日期',
+                                           `task_code` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '任务编号',
+                                           `state` varchar(2) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.报告合并完成待审批，4.已审批待签发5.签发已抢单（废弃），6已签发，7已盖章，8已邮寄',
+                                           `report_url` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '模板地址',
+                                           `number` int(0) NULL DEFAULT NULL COMMENT '报告份数',
+                                           `report_type` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '取报告方式',
+                                           `verifyer_time` datetime(0) NULL DEFAULT NULL COMMENT '审批时间',
+                                           `issuer_time` datetime(0) NULL DEFAULT NULL COMMENT '签发时间',
+                                           `seal_type` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '盖章类型',
+                                           `seal_url` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '印章类型对应的图片url',
+                                           `apply_reason` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '审批驳回原因',
+                                           `issu_reason` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '签发驳回原因',
+                                           `verifyer` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '审核人姓名',
+                                           `verifyer_id` bigint(0) NULL DEFAULT NULL COMMENT '复核人id',
+                                           `issuer` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '签发人',
+                                           `issuer_id` bigint(0) NULL DEFAULT NULL COMMENT '签发人id',
+                                           `applicant` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '报告提交申请人',
+                                           `sealer` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '盖章人',
+                                           `seal_time` datetime(0) NULL DEFAULT NULL COMMENT '盖章时间',
+                                           `report_manager` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '报告发出人',
+                                           `report_time` datetime(0) NULL DEFAULT NULL COMMENT '报告发出时间',
+                                           `addressee` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '领取报告人员',
+                                           `waybill` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '运单编号',
+                                           `operate_time` datetime(0) NULL DEFAULT NULL COMMENT '操作时间，报告发出后录入数据时的时间',
+                                           `email` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '电子邮箱',
+                                           `report_phone` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '收件电话',
+                                           `report_mailing_address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '报告邮寄地址',
+                                           `report_complete_time` datetime(0) NULL DEFAULT NULL COMMENT '报告生成时间（state=1时）',
+                                           `template_name` varchar(1024) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+                                           `qys_docment_id` bigint(0) NULL DEFAULT NULL COMMENT '契约锁文档id',
+                                           `qys_state` varchar(2) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '1' COMMENT '契约锁报告状态1合同待发起,2合同待创建，3合同待签署，4合同待盖章，5合同待下载',
+                                           `contract_id` bigint(0) NULL DEFAULT NULL COMMENT '合同id',
+                                           `sign_url` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '契约锁合同盖章url地址',
+                                           `task_id` bigint(0) NULL DEFAULT NULL COMMENT '任务ID',
+                                           `type` varchar(2) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '0,最终报告，1中间报告',
+                                           `category` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '印章分类，PHYSICS(物理章),ELECTRONIC(电子章)',
+                                           `combine_time` datetime(0) NULL DEFAULT NULL COMMENT '报告合并时间',
+                                           `entrust_id` bigint(0) NULL DEFAULT NULL COMMENT '委托单ID用于中间报告查询',
+                                           `inspector` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '报告中签字检测人',
+                                           PRIMARY KEY (`id`) USING BTREE
+)

@@ -66,5 +66,17 @@
         on duplicate key update
          user_id = values(user_id) , team_id = values(team_id) , post_name = values(post_name) , post_grade = values(post_grade) , certificate_name = values(certificate_name) , certificate_url = values(certificate_url) , skill = values(skill) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , remark = values(remark)     </insert>
 
+    <select id="inspectorList" resultType="String">
+        SELECT
+	tab1.name
+FROM
+	test_technicist tab2
+LEFT JOIN sys_user tab1 ON tab2.user_id = tab1.user_id
+WHERE
+	tab2.team_id >0 and tab1.name is not null
+	<if test="search != null and search != ''">
+        AND tab1.name LIKE CONCAT('%',#{search},'%')
+    </if>
+    </select>
 </mapper>
 

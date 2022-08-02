@@ -68,7 +68,7 @@
                                         report_time, addressee, waybill,
                                         operate_time, email, report_phone,
                                         report_mailing_address, report_complete_time,
-                                        task_id,type)
+                                        task_id,type,entrust_id)
         values (#{id,jdbcType=BIGINT}, #{entrustmentId,jdbcType=BIGINT}, #{reportCode,jdbcType=VARCHAR},
                 #{sampleName,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{requiredCompletionTime,jdbcType=TIMESTAMP},
                 #{taskCode,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR}, #{number,jdbcType=INTEGER},
@@ -79,7 +79,7 @@
                 #{reportTime,jdbcType=TIMESTAMP}, #{addressee,jdbcType=VARCHAR}, #{waybill,jdbcType=VARCHAR},
                 #{operateTime,jdbcType=TIMESTAMP}, #{email,jdbcType=VARCHAR}, #{reportPhone,jdbcType=VARCHAR},
                 #{reportMailingAddress,jdbcType=VARCHAR}, #{reportCompleteTime,jdbcType=TIMESTAMP},
-                #{taskId,jdbcType=BIGINT},#{type,jdbcType=INTEGER})
+                #{taskId,jdbcType=BIGINT},#{type,jdbcType=INTEGER},#{entrustId,jdbcType=BIGINT})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordEntity">
         insert into test_report_record
@@ -358,6 +358,7 @@
         SELECT distinct
         t1.id,
         t1.entrustment_id,
+        t1.entrust_id,
         t1.report_code,
         t1.sample_name,
         t1.required_completion_time,
@@ -376,7 +377,7 @@
         FROM
         test_report_record t1
         LEFT JOIN test_product t2 ON t1.sample_name = t2.product_name
-        LEFT JOIN test_task t3 ON t1.entrustment_id = t3.entrustment_id
+        LEFT JOIN test_task t3 ON t1.entrustment_id = t3.entrustment_id or t1.entrust_id = t3.entrustment_id
         WHERE t1.state =6
         <if test="ids != null">
             AND t3.dept_id IN
@@ -452,12 +453,51 @@
         where entrustment_id = #{entrustId,jdbcType=BIGINT}
     </select>
 
+    <select id="getReportNodeByZjEntrustId" resultType="com.lims.manage.erp.vo.ReportNodeVo"
+            parameterType="java.lang.Long">
+        SELECT
+            report_code,
+            state,
+            report_complete_time,
+            combine_time,
+            verifyer_time,
+            issuer_time,
+            seal_time,
+            operate_time
+        FROM
+            test_report_record
+        where entrust_id = #{entrustId,jdbcType=BIGINT}
+    </select>
+
     <select id="selectByEntrustId" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
             parameterType="java.lang.Long">
         SELECT
         <include refid="Base_Column_List"/>
         FROM test_report_record
         where entrustment_id = #{entrustId,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectByEntrustIdZj" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
+            parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM test_report_record
+        where entrust_id = #{entrustId,jdbcType=BIGINT}
+    </select>
+    <select id="getMidReportNum" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM test_report_record WHERE entrust_id = #{entrustId}
+    </select>
+
+    <select id="getLatestReport" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
+            parameterType="java.lang.Long">
+        SELECT
+            *
+        FROM
+            test_report_record
+        WHERE
+            entrust_id = #{entrustId,jdbcType=BIGINT}
+          AND report_complete_time = ( SELECT MAX( report_complete_time )
+          FROM test_report_record WHERE entrust_id = #{entrustId,jdbcType=BIGINT} )
     </select>
 
     <select id="selectByRecordId" resultType="com.lims.manage.erp.entity.ReportRecordEntity"
@@ -479,6 +519,9 @@
     <update id="updateByEntrustIdSelective" parameterType="com.lims.manage.erp.entity.ReportRecordEntity">
         update test_report_record
         <set>
+            <if test="reportCode != null">
+                report_code = #{reportCode,jdbcType=VARCHAR},
+            </if>
             <if test="state != null">
                 state = #{state,jdbcType=VARCHAR},
             </if>
@@ -521,6 +564,7 @@
             </if>
         </set>
         where entrustment_id = #{entrustmentId,jdbcType=BIGINT}
+        or entrust_id = #{entrustmentId,jdbcType=BIGINT}
     </update>
 
     <select id="getSendList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
@@ -645,6 +689,15 @@
             report_code LIKE CONCAT('%-',#{year},'-%')
             AND report_code LIKE CONCAT('%',#{code},'%')
     </select>
+    <select id="getMaxCodeMid" resultType="java.lang.Integer">
+        SELECT
+            MAX( SUBSTR( report_code FROM 13 )+0 )
+        FROM
+            test_report_record_mid
+        WHERE
+            report_code LIKE CONCAT('%-',#{year},'-%')
+            AND report_code LIKE CONCAT('%',#{code},'%')
+    </select>
 
     <select id="getAllReportCode" resultType="java.lang.String">
         SELECT DISTINCT
@@ -672,6 +725,18 @@
             report_file_uri IS NOT NULL
           AND entrustment_id = #{entrustId}
 --             entrustment_id = 1647480232433100
+    </select>
+    <select id="getAllMiddleReportId" resultType="java.lang.Long">
+        SELECT DISTINCT
+            t4.id
+        FROM
+            test_report_record t1
+                LEFT JOIN test_report_record_detail t2 ON t1.id = t2.record_id
+                LEFT JOIN test_product_item t3 ON t2.check_item_id = t3.check_item_id
+                LEFT JOIN test_report_template t4 ON t3.report_model_id = t4.id
+        WHERE
+            report_file_uri IS NOT NULL
+          AND entrust_id = #{entrustId}
     </select>
 
     <select id="getCheckReportRel" resultType="com.lims.manage.erp.vo.LabelValueVo">

@@ -85,4 +85,12 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      */
     TestSampleMixInfoEntity batchInsertMixSampleCopy(SamplesAddVo samples, long id);
 
+    /**
+     * 通过样品id 与 委托单位id 处理。
+     * @param id
+     * @param companyId
+     * @return
+     */
+    Boolean judgmentSampleUnit(Integer id,Integer companyId);
+
 }

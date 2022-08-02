@@ -421,6 +421,10 @@ public class ReportController {
             return ResultUtil.error("缺少必要参数");
         }
         ReportRecordEntity bean = reportService.getDetailByEntrustId(entrustId);
+        //TODO 兼容中间报告
+        if (bean == null){
+            bean = reportService.getDetailByEntrustIdZj(entrustId);
+        }
         byte[] bytes = reportService.downloadQysFile(entrustId, contractId, name, contact);
         response.reset();
         response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
@@ -530,8 +534,8 @@ public class ReportController {
     }
 
     @GetMapping("/getTemplateList")
-    public Result getTemplateList(Long id) {
-        return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList0706(id));
+    public Result getTemplateList(Long id,Long recordId) {
+        return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateList0706(id,recordId));
     }
 
     /**
@@ -781,7 +785,7 @@ public class ReportController {
      * @return
      */
     @PostMapping(value = "uploadReport")
-    public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("verifyer") String verifyer,
+    public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file,
                                @RequestParam("code") String code,@RequestParam("conclusion") String conclusion
             ,@RequestParam("additional") String additional,@RequestParam("mixInfo") String mixInfo,@RequestParam("type") String type) {
@@ -789,7 +793,7 @@ public class ReportController {
             return ResultUtil.error("缺少参数！");
         }
         Boolean flag = reportService.uploadReport(reportCode,file,verifyer.split("&")[0],issuer.split("&")[0]
-                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional,mixInfo,type);
+                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional,mixInfo,type,inspector);
         if (flag) {
             return ResultUtil.success("报告文件上传成功！");
         }else {
@@ -803,11 +807,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("getResult")
-    public Result getResut(Long entrustId){
+    public Result getResut(Long entrustId,Integer reportType){
         if (entrustId == null){
             return ResultUtil.error("缺少必要的参数");
         }
-        List<ConclusionEntity> list = reportService.getResut(entrustId);
+        List<ConclusionEntity> list = reportService.getResut(entrustId,reportType);
         return ResultUtil.success(list);
     }
 
@@ -869,7 +873,7 @@ public class ReportController {
     @GetMapping("testInsert")
     public void test(String url,Long entrustId) {
         try {
-            String s = reportService.insertPicToPdf(url, entrustId);
+            String s = reportService.insertPicToPdf(url, entrustId,null);
             System.out.println("============="+s);
         }catch (Exception e){
             logger.error("===");
@@ -895,11 +899,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("/middleReportList")
-    public Result getSampleListmiddleReportList(Integer pageNum,Integer pageSize,String search) {
+    public Result getSampleListmiddleReportList(Integer pageNum,Integer pageSize,Integer state,String search) {
         if (pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少分页参数！");
         }
-        return ResultUtil.success("获取可制作中间报告列表成功！", reportService.middleReportList(pageNum,pageSize,search));
+        return ResultUtil.success("获取可制作中间报告列表成功！", reportService.middleReportList(pageNum,pageSize,state,search));
     }
 
     /**
@@ -908,11 +912,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("/middleReportDetail")
-    public Result middleReportDetail(Long taskId) {
-        if(taskId == null){
+    public Result middleReportDetail(Integer taskFlowId,Long taskId) {
+        if(taskId == null || taskFlowId == null){
             return ResultUtil.error("缺少必要的参数!");
         }
-        return ResultUtil.success("查询中间报告详情成功！", reportService.getMiddleReportDetail(taskId));
+        return ResultUtil.success("查询中间报告详情成功！", reportService.getMiddleReportDetail(taskFlowId,taskId));
     }
 
     @PostMapping("/middleReportPreserve")
@@ -920,6 +924,36 @@ public class ReportController {
         Boolean preserve = reportService.middleReportPreserve(vo);
         if (preserve) {
             return ResultUtil.success("保存成功！", preserve);
+        } else {
+            return ResultUtil.error(ResultEnum.PRESERVE_FAIL.getCode(), ResultEnum.PRESERVE_FAIL.getMsg());
+        }
+    }
+
+    /**
+     * 中间报告历史修改详情接口
+     * @param taskFlowId
+     * @param taskId
+     * @param recordId
+     * @return
+     */
+    @GetMapping("/middleReportEdit")
+    public Result middleReportEdit(Integer taskFlowId,Long taskId,Long recordId) {
+        if(taskId == null || taskFlowId == null || recordId == null){
+            return ResultUtil.error("缺少必要的参数!");
+        }
+        return ResultUtil.success("查询中间报告详情成功！", reportService.middleReportEdit(taskFlowId,taskId,recordId));
+    }
+
+    /**
+     * 中间报告修改保存接口
+     * @param vo
+     * @return
+     */
+    @PostMapping("/middleReportUpdate")
+    public Result middleReportUpdate(@RequestBody ReportPreserveVo vo) {
+        Boolean preserve = reportService.middleReportUpdate(vo);
+        if (preserve) {
+            return ResultUtil.success("修改成功！", preserve);
         } else {
             return ResultUtil.error(ResultEnum.PRESERVE_FAIL.getCode(), ResultEnum.PRESERVE_FAIL.getMsg());
         }
@@ -964,7 +998,7 @@ public class ReportController {
      * @return
      */
     @GetMapping("historyList")
-    public Result historyList(String reportCode, String reportType, String sealType,Integer pageNum,Integer pageSize,Long startDate,Long endDate){
+    public Result historyList(String search, String reportType, String sealType,Integer pageNum,Integer pageSize,Long startDate,Long endDate){
         if (pageNum == null || pageSize == null){
             return ResultUtil.error("缺少分页参数");
         }
@@ -974,7 +1008,7 @@ public class ReportController {
         if (endDate != null){
             endDate = DateUtil.getDayEndMs(endDate);
         }
-        PageInfo<ReportRecordEntity> pageInfo = reportService.historyList(reportCode,reportType,sealType,pageNum,pageSize,startDate,endDate);
+        PageInfo<ReportRecordEntity> pageInfo = reportService.historyList(search,reportType,sealType,pageNum,pageSize,startDate,endDate);
         return ResultUtil.success(pageInfo);
     }
 
@@ -1100,4 +1134,16 @@ public class ReportController {
             logger.error("预览合并后的报告异常:{}",e);
         }
     }
+
+    /**
+     * 报告合并获取检测人列表
+     * @param search
+     * @return
+     */
+    @GetMapping("inspectorList")
+    public Result inspectorList(String search){
+        List<String> list = reportService.inspectorList(search);
+        return ResultUtil.success(list);
+    }
+
 }

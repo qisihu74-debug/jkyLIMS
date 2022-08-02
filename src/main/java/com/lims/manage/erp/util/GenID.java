@@ -1,11 +1,13 @@
 package com.lims.manage.erp.util;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author gjl
@@ -16,20 +18,27 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Copyright © 河南交科院
  */
 public class GenID {
-    static AtomicInteger atomicInteger = new AtomicInteger(100);
+    private static final long EPOCH = 1659323575416L; //开始时间,固定一个小于当前时间的毫秒数
+    private static final int max12bit = 4095;
+    private static final long max41bit= 1099511627775L;
+    private static String machineId = "" ; // 机器ID
 
     public synchronized static long getID() {
-        int increment = atomicInteger.getAndIncrement();
-        String s = null;
-        if(increment<999999) {
-            s = System.currentTimeMillis() + "" + increment;
-        }else {
-            atomicInteger.set(0);
-            increment = atomicInteger.getAndIncrement();
-            s = System.currentTimeMillis() + "" + increment;
+        long time = System.currentTimeMillis() - EPOCH  + max41bit;
+        // 二进制的 毫秒级时间戳
+        String base = Long.toBinaryString(time);
+
+        // 序列数
+        String randomStr = StringUtils.leftPad(Integer.toBinaryString(new Random().nextInt(max12bit)),12,'0');
+        if(StringUtils.isNotEmpty(machineId)){
+            machineId = StringUtils.leftPad(machineId, 10, '0');
         }
-        long id = Long.parseLong(s);
-        return id;
+
+        //拼接
+        String appendStr = base + machineId + randomStr;
+        // 转化为十进制 返回
+        BigInteger bi = new BigInteger(appendStr, 2);
+        return  Long.valueOf(bi.toString());
     }
 
     public static String getUUID() {
@@ -53,7 +62,12 @@ public class GenID {
         return orderNum;
     }
 
-    public static void main(String[] args) {
-        System.out.println(GenID.getUUID().length());
+    public static void main(String[] args) throws InterruptedException {
+        for (int i=0;i<10000;i++) {
+            Thread.sleep(1000);
+            System.out.println(GenID.getID());
+            i++;
+        }
+
     }
 }

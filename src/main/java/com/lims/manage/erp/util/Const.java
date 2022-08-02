@@ -115,6 +115,10 @@ public class Const {
      */
     public static final String PARTNERSHIP_MANAGEMENT_LOG = "19";
     /**
+     * 委托创建
+     */
+    public static final String ENTRUST_FOUND = "20";
+    /**
      * 常规图片后缀名大全。
      */
    public static final  String[] nameSuffixS ={"tiff","pjp","jfif","bmp","webp","pjpeg","avif","tif","jpg","svgz","png","xbm","dib","jxl","jpeg","gif","svg","ico"};

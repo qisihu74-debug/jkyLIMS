@@ -22,6 +22,10 @@ public class ReportApprovalVo {
      */
     private Long entrustmentId;
     /**
+     * 中间报告的委托单id存储字段
+     */
+    private Long entrustId;
+    /**
      * 任务单编号
      */
     private String taskCode;

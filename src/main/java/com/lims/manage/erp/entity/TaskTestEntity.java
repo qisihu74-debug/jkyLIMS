@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lims.manage.erp.vo.BatchReceiveTaskVo;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -64,6 +65,7 @@ public class TaskTestEntity {
      * 领样时间
      */
     @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern ="yyyy-MM-dd HH:mm:ss" , timezone ="GMT+8")
     private Date sampleReceivingTime;
     /**
      * 检测人

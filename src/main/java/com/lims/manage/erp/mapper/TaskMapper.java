@@ -1,8 +1,29 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
+import com.lims.manage.erp.entity.TaskEntity;
+import com.lims.manage.erp.entity.TaskIdEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TaskTestTeamEntity;
+import com.lims.manage.erp.entity.TeamTreeStructureEntity;
+import com.lims.manage.erp.entity.TestInstrumentEntity;
+import com.lims.manage.erp.vo.CheckItemDeptVo;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.PersonInfoVo;
+import com.lims.manage.erp.vo.ReceiveSampleListVo;
+import com.lims.manage.erp.vo.ReceiveSampleParamVo;
+import com.lims.manage.erp.vo.ReviewVo;
+import com.lims.manage.erp.vo.SamplePrivateInfoVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.TaskListParamVo;
+import com.lims.manage.erp.vo.TaskListVo;
+import com.lims.manage.erp.vo.TaskProgressVo;
+import com.lims.manage.erp.vo.TaskStatsItemVo;
+import com.lims.manage.erp.vo.TaskVo;
+import com.lims.manage.erp.vo.UpdateReportTeamVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -419,4 +440,19 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     List<String> getSampleOutward(Long taskId);
+
+    /**
+     * 查询委托单ID
+     * @param taskId
+     * @return
+     */
+    Long getEntrustId(Long taskId);
+
+    /**
+     * 根据主键获取任务信息
+     * @param taskId
+     * @return
+     */
+    TaskTestEntity getTaskTestEntityById(Long taskId);
+
 }

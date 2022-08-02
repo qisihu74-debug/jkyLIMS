@@ -15,5 +15,4 @@ public class ReportTemplateEntity {
     private String reportFileUri;
 
     private String isAvailable;
-
 }

@@ -5,14 +5,14 @@ import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
 import com.lims.manage.erp.vo.ReportDetailListVo;
 import com.lims.manage.erp.vo.ReportNodeVo;
-import org.apache.ibatis.annotations.Param;
-
-import java.util.Date;
-import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.List;
 
 @Mapper
 @Component
@@ -68,6 +68,13 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     ReportRecordEntity selectByEntrustId(Long entrustId);
+
+    /**
+     * 获取最新报告制作数据
+     * @param entrustId
+     * @return
+     */
+    ReportRecordEntity getLatestReport(Long entrustId);
 
     ReportNodeVo getReportNodeByEntrustId(Long entrustId);
 
@@ -130,6 +137,12 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     Integer getMaxCode(String year,String code);
+    /**
+     * 查询当前年 最大报告编号--中间
+     * @param year
+     * @return
+     */
+    Integer getMaxCodeMid(String year,String code);
 
     /**
      * 根据委托单id查询所用报告模板名称
@@ -168,6 +181,16 @@ public interface ReportRecordEntityMapper {
                            @Param("sealer") String sealer, @Param("sealTime") Date sealTime);
 
     /**
+     * 根据委托单id更新，报告签署url地址和状态
+     * @param entrustId
+     * @param signUrl
+     * @param state
+     */
+    @Update("update test_report_record set sign_url=#{signUrl},qys_state=#{state},sealer=#{sealer},seal_time=#{sealTime} where entrust_id=#{entrustId}")
+    void updateUrlAndStateZj(@Param("entrustId") Long entrustId, @Param("signUrl") String signUrl, @Param("state") String state,
+                           @Param("sealer") String sealer, @Param("sealTime") Date sealTime);
+
+    /**
      * 下载契约锁报告状态更新
      * @param enstustId
      * @param state
@@ -191,6 +214,9 @@ public interface ReportRecordEntityMapper {
     @Select("select entrustment_id from test_report_record where contract_id=#{contractId}")
     Long getEntrustIdByCid(@Param("contractId") Long contractId);
 
+    @Select("select id from test_report_record where contract_id=#{contractId}")
+    Long getIdByCid(@Param("contractId") Long contractId);
+
     @Select("select qys_docment_id,contract_id,sign_url,qys_state from test_report_record where entrustment_id=#{entrustId}")
     List<ReportRecordEntity> selectMessageByEntrustId(@Param("entrustId") long entrustId);
 
@@ -201,6 +227,7 @@ public interface ReportRecordEntityMapper {
      */
     List<String> getAllReportCode(Long entrustId);
     List<Long> getAllReportId(Long entrustId);
+    List<Long> getAllMiddleReportId(Long entrustId);
 
     /**
      * 查询报告与检测项关系
@@ -237,5 +264,35 @@ public interface ReportRecordEntityMapper {
      */
     List<ReportRecordEntity> getSealListCount(@Param("ids") List<Long> ids);
 
+    @Select("select distinct entrustment_id from test_report_record where  entrustment_id=#{entrustmentId}")
+    Long checkExist(@Param("entrustmentId") Long entrustmentId);
 
+    ReportNodeVo getReportNodeByZjEntrustId(@Param("entrustId") Long entrustmentId);
+
+    @Select("update test_report_record set qys_docment_id=#{docId},qys_state=#{state} where entrust_id=#{entrustId}")
+    void updateDocIdAndStateZj(@Param("entrustId") Long entrustId, @Param("docId") Long docId, @Param("state") String state);
+
+    @Select("select qys_docment_id,contract_id,sign_url,qys_state from test_report_record where entrust_id=#{entrustId}")
+    List<ReportRecordEntity> selectMessageByZjEntrustId(@Param("entrustId") long entrustId);
+
+    @Update("update test_report_record set contract_id=#{contractId},qys_state=#{state} where entrust_id=#{entrustId}")
+    void updateContractIdAndStateZj(@Param("entrustId") Long entrustId, @Param("contractId") Long contractId, @Param("state") String state);
+
+    ReportRecordEntity selectByEntrustIdZj(@Param("entrustId") Long entrustId);
+
+    @Select("select entrust_id from test_report_record where id = #{id}")
+    Long getZjEntrustIdById(@Param("id") Long id);
+
+    @Select("select id from test_report_record where entrust_id = #{entrustId}")
+    Long getIdByZjEntrustId(@Param("entrustId") Long entrustId);
+
+    /**
+     * 查询中间报告数量
+     * @param entrustId
+     * @return
+     */
+    Integer getMidReportNum(Long entrustId);
+
+    @Select("select entrust_id from test_report_record where contract_id = #{contractId}")
+    Long getEntrustByCid(@Param("contractId") Long contractId);
 }

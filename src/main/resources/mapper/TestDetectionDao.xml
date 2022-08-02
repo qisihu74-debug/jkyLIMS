@@ -77,7 +77,8 @@
         t1.origin_url As originUrl,
         t1.file_url_str as fileUrlStr,
         t1.entrust_id as entrustId,
-        t1.dept_id as deptId
+        t1.dept_id as deptId,
+        t1.task_id as taskId
         FROM
         test_entrusted_sample_checkitem_rel as t1
         LEFT JOIN test_product_item as t2 ON t1.check_item_id = t2.check_item_id

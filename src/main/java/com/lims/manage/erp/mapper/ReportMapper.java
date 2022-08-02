@@ -87,11 +87,11 @@ public interface ReportMapper {
     List<ReportCheckItemDetailVo> getReportCheckItemList(@Param("id") Long id,@Param("deptIds") List<Long> deptIds,@Param("taskId") Long taskId);
 
     /**
-     * 根据任务单ID查询检测项信息
-     * @param taskId
+     * 根据recordId查询检测项信息
+     * @param recordId
      * @return
      */
-    List<ReportCheckItemDetailVo> getReportCheckItemListByTaskId(@Param("taskId") Long taskId);
+    List<ReportCheckItemDetailVo> getReportCheckItemListByRecordId(@Param("recordId") Long recordId,@Param("taskId") Long taskId);
 
     /**
      * 查询判定依据
@@ -123,7 +123,7 @@ public interface ReportMapper {
      */
     @Update("update test_report_record set report_url=#{url},verifyer=#{verifyer},issuer=#{issuer}," +
             "verifyer_id=#{verifyerId},issuer_id=#{issuerId},report_complete_time=#{now},state='3'," +
-            "applicant=#{applicant} where entrustment_id=#{entrustId}")
+            "applicant=#{applicant} where entrustment_id=#{entrustId} ")
     void updateUrl(@Param("entrustId") String reportCode, @Param("url") String url,
                    @Param("verifyer") String verifyer, @Param("issuer") String issuer,
                    @Param("verifyerId") Long verifyerId, @Param("issuerId") Long issuerId,
@@ -151,21 +151,22 @@ public interface ReportMapper {
     String getUrlByEntrustId(@Param("entrustId") Long entrustId);
 
     ReportRecordEntity getDetailByEntrustId(@Param("entrustId") Long entrustId);
+    ReportRecordEntity getDetailByEntrustIdZj(@Param("entrustId") Long entrustId);
     /**
      * 获取中间报告列表
      * @param deptIds
-     * @param entrustmentNo
+     * @param taskCode
      * @return
      */
-    List<ReportListVo> getMiddleReportList(@Param("deptIds") List<Long> deptIds,@Param("entrustmentNo") String entrustmentNo);
+    List<ReportListVo> getMiddleReportList(@Param("deptIds") List<Long> deptIds,@Param("state") Integer state,@Param("taskCode") String taskCode);
 
     /**
      * 查询可做中间报告的检测项详情
-     * @param taskId
-     * @param deptIds
+     * @param entrustId
+     * @param taskFlowId
      * @return
      */
-    ReportDetailVo getMiddleReportDetail(Long taskId,List<Long> deptIds);
+    ReportDetailVo getMiddleReportDetail(@Param("taskFlowId") Integer taskFlowId,@Param("entrustId") Long entrustId);
 
     @Select("select report_url from test_report_record where id=#{id}")
     String getUrlById(@Param("id") Long id);
@@ -181,4 +182,28 @@ public interface ReportMapper {
 
     List<ReportRecordEntity> exportRecords(@Param("reportCode") String reportCode, @Param("reportType") String reportType, @Param("sealType") String sealType,
                                            @Param("ids") List<Integer> ids,@Param("startDate") Date startDate,@Param("endDate") Date endDate);
+
+    @Select("update test_report_record set inspector=#{inspector} where report_code=#{reportCode}")
+    int updateInspector(@Param("reportCode") String reportCode, @Param("inspector") String inspector);
+
+    @Select("select report_url from test_report_record where entrust_id=#{entrustId}")
+    String getUrlByZjEntrustId(@Param("entrustId") Long entrustId);
+
+    @Select("select entrust_id from test_report_record where id=#{id}")
+    Long getZjEntrustIdById(@Param("id") Long id);
+
+    @Update("update test_report_record set verifyer=#{verifyer},issuer=#{issuer}," +
+            "verifyer_id=#{verifyerId},issuer_id=#{issuerId},combine_time=#{combineTime} where entrust_id=#{entrustId}")
+    void updateVerAndIssZj(@Param("entrustId") String reportCode, @Param("verifyer") String verifyer, @Param("issuer") String issuer,
+                         @Param("verifyerId") Long verifyerId,@Param("combineTime") Date combineTime, @Param("issuerId") Long issuerId);
+
+    @Update("update test_report_record set report_url=#{url},verifyer=#{verifyer},issuer=#{issuer}," +
+            "verifyer_id=#{verifyerId},issuer_id=#{issuerId},report_complete_time=#{now},state='3'," +
+            "applicant=#{applicant} where entrust_id=#{entrustId} ")
+    void updateUrlZj(@Param("entrustId") String reportCode, @Param("url") String url,
+                   @Param("verifyer") String verifyer, @Param("issuer") String issuer,
+                   @Param("verifyerId") Long verifyerId, @Param("issuerId") Long issuerId,
+                   @Param("now")Date now,@Param("applicant") String applicant);
+
+    ReportDetailVo getReportDetailZj(Long taskId,List<Long> deptIds);
 }

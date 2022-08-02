@@ -464,4 +464,13 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     List<TaskTestEntity> selectTaskTestEntityList(@Param("entrustmentId") Long entrustmentId);
 
+    /**
+     * 客户委托详情
+     */
+    List<ClientOrderdetailVo> selectClientOrderdetailVoList(ClientOrderdetailVo clientOrderdetailVo);
+
+    /**
+     * 通过委托单id集合 获取委托单位信息。
+     */
+    List<TestCompanyJsonEntity> getCompanyList(@Param("companyIds") Integer[] companyIds);
 }
