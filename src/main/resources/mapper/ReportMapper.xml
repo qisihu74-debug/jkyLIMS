@@ -618,7 +618,7 @@
             t2.id taskId,
             t2.task_code taskCode,
             t2.task_price countPrice,
-            t1.task_flow_date requestDate,
+            STR_TO_DATE(t1.task_flow_date,'%Y-%m-%d') requestDate,
             t1.remark,
             t1.record_id recordId,
             t1.state,
@@ -632,6 +632,12 @@
             AND t1.state = #{state}
         <if test="taskCode!=null and taskCode!=''">
             and t2.task_code like CONCAT('%',#{taskCode},'%')
+        </if>
+        <if test="deptIds!=null">
+            and t2.dept_id in
+            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
         </if>
         order by t1.id desc
     </select>
