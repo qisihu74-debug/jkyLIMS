@@ -1428,6 +1428,7 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String abandonEntrust(EntrustEntity entrustEntity) {
         //查询当前委托单下的任务单数量
         Integer reportStateTaskNum = entityMapper.getReportStateTaskNum(entrustEntity.getId());
@@ -1448,6 +1449,10 @@ public class EntrustServiceImpl implements EntrustService {
             // 1.0 样品与委托单已存在 1.1、删除样品id
             entityMapper.removeTestEntrustedSampleDetailsRel(entrustEntity.getId());
         }
+        // 删除判定依据id
+        entityMapper.removeTestEntrustedSampleStandardRel(entrustEntity.getId());
+        // 删除样品下检测项
+        entityMapper.removeTestEntrustedSampleCheckitemRel(entrustEntity.getId());
         return "作废委托单成功";
     }
 

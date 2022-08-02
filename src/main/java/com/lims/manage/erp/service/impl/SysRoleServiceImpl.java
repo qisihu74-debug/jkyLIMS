@@ -3,8 +3,10 @@ package com.lims.manage.erp.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.SysRoleEntity;
 import com.lims.manage.erp.mapper.SysRoleDao;
+import com.lims.manage.erp.mapper.SysRoleFuncMenuDao;
 import com.lims.manage.erp.service.SysRoleService;
 import com.lims.manage.erp.util.GenID;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,8 @@ import java.util.List;
 @Service("sysRoleService")
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleDao, SysRoleEntity> implements SysRoleService {
 
+    @Autowired
+    private SysRoleFuncMenuDao sysRoleFuncMenuDao;
     /**
      * 通过用户ID查询角色集合
      * @Author gjl
@@ -53,7 +57,10 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleDao, SysRoleEntity> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteSysRoleByUserId(Long roleId) {
+        //根据角色id删除角色下菜单
+        sysRoleFuncMenuDao.delFuncByRoleId(roleId);
         return baseMapper.deleteById(roleId);
     }
 }
