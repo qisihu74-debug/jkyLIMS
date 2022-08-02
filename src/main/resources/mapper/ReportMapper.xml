@@ -622,7 +622,8 @@
             t1.remark,
             t1.record_id recordId,
             t1.state,
-            t3.state reportState
+            t3.state reportState,
+            IFNULL(t3.report_code,'——') reportCode
         FROM
             test_entrusted_task_rel t1
         LEFT JOIN test_task t2 ON t1.task_id = t2.id
