@@ -1244,11 +1244,17 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         //更新签名
-        reportMapper.updateVerAndIss(reportCode, verifyer, issuer, verifyerId,new Date(System.currentTimeMillis()), issuerId);
+        Long along = recordEntityMapper.checkExist(Long.parseLong(reportCode));
+        //TODO (报告) 兼容中间报告
+        if (along == null){
+            reportMapper.updateVerAndIssZj(reportCode, verifyer, issuer, verifyerId,new Date(System.currentTimeMillis()), issuerId);
+        }else {
+            reportMapper.updateVerAndIss(reportCode, verifyer, issuer, verifyerId,new Date(System.currentTimeMillis()), issuerId);
+        }
         //设置签名信息
         String url1 = "";
         try {
-            url1 = insertPicToPdf(url,Long.parseLong(reportCode));
+            url1 = insertPicToPdf(url,Long.parseLong(reportCode),,inspector);
             logger.info("设置签名信息：{}",url1);
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)){
                 url = url1;
@@ -1259,7 +1265,12 @@ public class ReportServiceImpl implements ReportService {
         if (url.contains("?")){
            url = url.substring(0,url.indexOf("?"));
         }
-        reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
+        //TODO (报告) 兼容中间报告
+        if (along == null){
+            reportMapper.updateUrlZj(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
+        }else {
+            reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
+        }
         logger.info("签名信息更新成功！:{}",reportCode+":"+url);
         //更新配合比信息
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(mixInfo)){
@@ -2013,7 +2024,14 @@ public class ReportServiceImpl implements ReportService {
         //处理坐标提示信息
         ReportResBean resBean = new ReportResBean();
         Map<String,String> mesMap = new HashedMap();
-        ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
+        ReportRecordEntity reportRecordEntity = null;
+        //TODO 兼容中间报告
+        Long aLong = recordEntityMapper.checkExist(id);
+        if (aLong == null){
+            reportRecordEntity = selectByEntrustIdZj(id);
+        }else {
+            reportRecordEntity = selectByEntrustId(id);
+        }
         int index = 1;
         for (ConclusionEntity conclusionEntity:list) {
             String[] split = conclusionEntity.getUrl().split("\\?");
@@ -2049,8 +2067,18 @@ public class ReportServiceImpl implements ReportService {
                         //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
                         Date start = taskMapper.getStartTime(id);
                         Date end = taskMapper.getEndTime(id);
-                        String s = DateUtil.formatDate(start);
-                        String e = DateUtil.formatDate(end);
+                        String s = "";
+                        String e = "";
+                        if (start == null){
+                            s = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                        }else {
+                            s = DateUtil.formatDate(start);
+                        }
+                        if (end == null){
+                            e = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                        }else {
+                            e = DateUtil.formatDate(end);
+                        }
                         //主要仪器
                         String equipment = getEquipment(id);
 
@@ -2090,7 +2118,7 @@ public class ReportServiceImpl implements ReportService {
                                             cells.get(n,j).setValue(judgeBasis.equals("") ? "——" : judgeBasis);
                                         }
                                         if ("${检测日期}".equals(string)){
-                                            if (start != null && end != null){
+                                            if (s != null && e != null){
                                                 if (s.equals(e)){
                                                     cells.get(n,j).setValue(s);
                                                 }else {
@@ -2315,7 +2343,14 @@ public class ReportServiceImpl implements ReportService {
         //处理坐标提示信息
         ReportResBean resBean = new ReportResBean();
         Map<String,String> mesMap = new HashedMap();
-        ReportRecordEntity reportRecordEntity = selectByEntrustId(id);
+        ReportRecordEntity reportRecordEntity = null;
+        //TODO 兼容中间报告
+        Long aLong = recordEntityMapper.checkExist(id);
+        if (aLong == null){
+            reportRecordEntity = selectByEntrustIdZj(id);
+        }else {
+            reportRecordEntity = selectByEntrustId(id);
+        }
         int index = 1;
         //配合比实验，设计到原材的报告模板忽略
         List<ConclusionEntity> conclusionEntityList = Lists.newArrayList();
@@ -2361,8 +2396,18 @@ public class ReportServiceImpl implements ReportService {
                         //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
                         Date start = taskMapper.getStartTime(id);
                         Date end = taskMapper.getEndTime(id);
-                        String s = DateUtil.formatDate(start);
-                        String e = DateUtil.formatDate(end);
+                        String e = "";
+                        String s = "";
+                        if (start == null){
+                            s = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                        }else {
+                            s = DateUtil.formatDate(start);
+                        }
+                        if (end == null){
+                            e = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                        }else {
+                            e = DateUtil.formatDate(end);
+                        }
                         //主要仪器
                         String equipment = getEquipment(id);
                         //如果样品数量超出模板行数,和定位样品信息要插入的位置
@@ -2411,7 +2456,7 @@ public class ReportServiceImpl implements ReportService {
                                             cells.get(n,j).setValue(judgeBasis.equals("") ? "——" : judgeBasis);
                                         }
                                         if ("${检测日期}".equals(string)){
-                                            if (start != null && end != null){
+                                            if (s != null && e != null){
                                                 if (s.equals(e)){
                                                     cells.get(n,j).setValue(s);
                                                 }else {
