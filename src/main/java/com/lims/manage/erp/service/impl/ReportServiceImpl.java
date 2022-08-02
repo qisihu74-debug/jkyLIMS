@@ -722,7 +722,7 @@ public class ReportServiceImpl implements ReportService {
         Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
         if(maxCode != null){
             Integer maxCodeMid = recordEntityMapper.getMaxCodeMid(year,topDepartmentCode);
-            if(maxCode < maxCodeMid){
+            if(maxCodeMid != null && maxCode < maxCodeMid){
                 maxCode = maxCodeMid;
             }
         }
