@@ -57,6 +57,8 @@ public class TestReportTemplateController extends ApiController {
         for (TestReportTemplate bean:iPage.getRecords()) {
             if (StringUtils.isNotEmpty(bean.getReportFileUri())){
                 bean.setReportFileUri(bean.getReportFileUri().substring(0,bean.getReportFileUri().indexOf("?")));
+                String substring = bean.getReportFileUri().substring(bean.getReportFileUri().lastIndexOf(".") + 1);
+                bean.setRemark(substring);
             }
         }
         return ResultUtil.success(iPage);
