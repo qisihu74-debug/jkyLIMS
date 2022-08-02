@@ -3579,10 +3579,13 @@ public class ReportServiceImpl implements ReportService {
      * @param record
      */
     public void moveReportRecord(Long record){
-        ReportRecordEntity byRecordId = recordEntityMapper.getByRecordId(record);
-        ReportRecordMidEntity midEntity = new ReportRecordMidEntity(byRecordId);
-        int insert = midReportMapper.insert(midEntity);
-        int i = recordEntityMapper.deleteByPrimaryKey(record);
+        Long id = recordEntityMapper.getTypeById(record);
+        if (id == null){
+            ReportRecordEntity byRecordId = recordEntityMapper.getByRecordId(record);
+            ReportRecordMidEntity midEntity = new ReportRecordMidEntity(byRecordId);
+            int insert = midReportMapper.insert(midEntity);
+            int i = recordEntityMapper.deleteByPrimaryKey(record);
+        }
     }
 
 }
