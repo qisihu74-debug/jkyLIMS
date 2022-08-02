@@ -1,14 +1,27 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
+import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.ReportResBean;
+import com.lims.manage.erp.entity.ReportTemplateEntity;
+import com.lims.manage.erp.entity.SealEntity;
+import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
+import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.http.QiYueSuoResponse;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.ReportDetailListParamVo;
+import com.lims.manage.erp.vo.ReportDetailVo;
+import com.lims.manage.erp.vo.ReportHistoryDetailVo;
+import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.ReportProductRelVo;
+import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -139,17 +152,6 @@ public interface ReportService {
     Boolean seal(Long entrustId,String title,String fileType);
 
     /**
-     * 报告预览
-     *
-     * @param reportCode
-     * @param detailEntityList
-     * @param object
-     * @param sealUrls
-     * @return
-     */
-    XWPFDocument preview(String reportCode,List<ReportRecordDetailEntity> detailEntityList, EntrustAddVo detail, InputStream object, String[] sealUrls);
-
-    /**
      * 根据报告编号获取报告模板地址、印章地址
      *
      * @param reportCode
@@ -242,24 +244,6 @@ public interface ReportService {
     int updateReportUrl(Long id,String url,String code);
 
     /**
-     * 报告下载
-     * @return
-     * @param client
-     * @param code
-     * @param id
-     */
-    String downLoad(MinioClient client, String code, Long id) throws Exception;
-
-    /**
-     * 下载报告--根据检测项ID存放数据
-     * @param client
-     * @param id
-     * @return
-     * @throws Exception
-     */
-    String downLoad2(MinioClient client, Long id) throws Exception;
-
-    /**
      * 根据检测项ID下载报告
      * @param client
      * @param code
@@ -345,7 +329,6 @@ public interface ReportService {
      * @param id
      * @return
      */
-    //ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id);
     ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id);
 
     /**

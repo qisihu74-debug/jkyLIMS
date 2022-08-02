@@ -5,13 +5,11 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
-import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.AlertEntity;
 import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
-import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportResBean;
 import com.lims.manage.erp.entity.ReqBean;
@@ -28,14 +26,12 @@ import com.lims.manage.erp.service.AlertService;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.PDFHelper3;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import io.minio.MinioClient;
@@ -44,7 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +59,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -444,49 +438,6 @@ public class ReportController {
     }
 
     /**
-     * 报告预览
-     *
-     * @param reportCode
-     * @return
-     */
-    @GetMapping("preview")
-    public Result preview(String reportCode, HttpServletResponse response) {
-        if (StringUtils.isEmpty(reportCode)) {
-            return ResultUtil.error("缺少必要参数！");
-        }
-        try {
-            //根据报告模板url获取文件名
-            ReportRecordEntity entity = reportService.getUrlByCode(reportCode);
-            String reportName = "";
-            String reportUrl = entity.getReportUrl();
-            if (StringUtils.isNotEmpty(reportUrl)) {
-                reportName = reportUrl.substring(reportUrl.lastIndexOf("/") + 1);
-            }
-            //查询报告详细信息
-            List<ReportRecordDetailEntity> detailEntityList = reportService.getReportDetailByCode(reportCode);
-            MinioClient client = MinIoUtil.minioClient;
-            InputStream object = client.getObject(BucketsConst.buckets_report, reportName);
-            //填充数据
-            Long entrustId = reportService.getEntrustIdByCode(reportCode);
-            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
-            String sealUrl = entity.getSealUrl();
-            XWPFDocument document = reportService.preview(reportCode, detailEntityList, detail, object, sealUrl.split(","));
-            //TODO pdf转换、设置盖章
-            response.reset();
-            response.setContentType("application/x-msdownload");
-            response.setCharacterEncoding("UTF-8");
-            reportName = URLEncoder.encode(reportName, "UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + reportName);
-            OutputStream outputStream = response.getOutputStream();
-            document.write(outputStream);
-            outputStream.close();
-        } catch (Exception ex) {
-            log.info("报告预览失败：", ex.getMessage());
-        }
-        return null;
-    }
-
-    /**
      * 预览报告模板
      *
      * @param reportCode
@@ -539,41 +490,6 @@ public class ReportController {
     }
 
     /**
-     * 下载报告
-     *
-     * @param id
-     * @param code
-     * @param response
-     * @return
-     */
-    @GetMapping("downloadold")
-    public String downloadold(Long id, String code, HttpServletResponse response) {
-        //从文件服务器拉取文件
-        MinioClient client = MinIoUtil.minioClient;
-        String url = "";
-        try {
-            //先查询委托检测的类别：原材，配合比。
-            //是原材的话，调用原材检测的报告生成方法。
-            url = reportService.downLoad(client,code,id);
-            //是配合比的话，调用配合比报告生成方法。
-            //遍历检测项查出有多少报告
-        } catch (MinioException e) {
-            System.out.println("Error occurred: " + e);
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return url;
-    }
-
-    /**
      * 合并报告下载，支持多个报告模板，支持报告合并
      * @param reqBean
      * @return
@@ -611,13 +527,13 @@ public class ReportController {
     }
 
     /**
-     * 合并报告预览，支持多个报告模板，支持报告合并
+     * 合并报告预览
      * @param json
-     * @return
+     * @param response
      */
-    /*@RequestMapping("previewDownLoad")
+    @RequestMapping("previewDownLoad")
     public void previewDownLoad(@RequestParam("json") String json, HttpServletResponse response) {
-        //json = "{\"id\":1654743132971144,\"list\":[{\"url\":\"http://121.89.242.0:9000/file-resources/1649661309796156.docx\",\"conclusion\":\"经检测，该水泥混凝土样品,均符合JTG/T 3650-2020中的技术要求。\",\"additional\":\"1.委托人：陈海伟；2.见证单位：江苏中源工程管理股份有限公司；3.见证人：小王；4.委托方提供：无 ；\"}],\"type\":\"配合比\",\"mixInfo\":{\"id\":32,\"sampleId\":820,\"entrustmentId\":1654743132971144,\"designStrength\":\"5\",\"intensityConfiguration\":\"4\",\"antifreezeLevel\":\"54\",\"waterBinderRatio\":\"54\",\"unitWaterUse\":\"54\",\"sandRatio\":\"5\",\"designSlump\":\"54\",\"mixingWay\":\"45\"}}";
+        //json = "{\"id\":1658287642955105,\"list\":[{\"url\":\"http://121.89.242.0:9000/file-resources/1653308619762103.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220523%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220523T122339Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=36508788f305c2f692143d7467915267abd08f6e340a2838e869d737dae0b361\",\"conclusion\":\"经检测，该土样品,回弹模量均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：一禅；2.见证单位：甘肃华路捷公路工程技术咨询有限公司；3.见证人：张瑞涛；4.委托方提供：无 ；\"},{\"url\":\"http://121.89.242.0:9000/file-resources/1649645324684109.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220411%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220411T024844Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=621bfddf70c4e5bb952335fb438e58223f8d47677bb38b0c932c602071685008\",\"conclusion\":\"经检测，该土样品,粗粒土和巨粒土最大干密度均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：一禅；2.见证单位：甘肃华路捷公路工程技术咨询有限公司；3.见证人：张瑞涛；4.委托方提供：无 ；\"}],\"type\":\"原材检测\",\"mixInfo\":{}}";
         String decode = "";
         String url = "";
         try {
@@ -630,9 +546,6 @@ public class ReportController {
         String unescapeJava = StringEscapeUtils.unescapeJava(decode);
         String substring = unescapeJava.substring(1, unescapeJava.length() - 1);
         ReqBean reqBean = JSON.parseObject(substring,ReqBean.class);
-       *//* if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
-            return null;
-        }*//*
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
         ReportResBean resBean = null;
@@ -642,18 +555,17 @@ public class ReportController {
             resBean = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
         }
         url = resBean.getUrl();
-        //预览word转pdf
+        //预览excel转pdf
         String[] split = url.split("\\?");
         String[] strings = split[0].split("\\/");
         String bluckName = strings[3];
         String fileName = strings[4];
-        XWPFDocument doc = null;
         try {
+            String path = qiYueSuoEntity.getAutographPath()+GenID.getID()+".pdf";
             client.statObject(bluckName, fileName);
             InputStream object = client.getObject(bluckName, fileName);
-            doc = new XWPFDocument(object);
             //相应pdf
-            ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
+            ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(object,path);
             InputStream inputStream = FileAndFolderUtil.parseOut(b1);
             //TODO 设置签名信息
             //设置提醒信息
@@ -682,34 +594,6 @@ public class ReportController {
         }catch (Exception e){
             logger.error("预览合并后的报告异常:{}",e);
         }
-    }*/
-
-    @GetMapping("download")
-    public String downReport(Long id) {
-        //从文件服务器拉取文件
-        MinioClient client = MinIoUtil.minioClient;
-        String url = "";
-        try {
-            //先查询委托检测的类别：原材，配合比。
-            //是原材的话，调用原材检测的报告生成方法。
-            url = reportService.downLoad2(client,id);
-            //是配合比的话，调用配合比报告生成方法。
-            //遍历检测项查出有多少报告
-        } catch (MinioException e) {
-            System.out.println("Error occurred: " + e);
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        //根据委托单ID查询检测项的所属报告
-        return url;
     }
 
     /**
@@ -739,41 +623,6 @@ public class ReportController {
     @GetMapping("/isApprove")
     public Result isApprove(Long id) {
         return ResultUtil.success(reportService.isApprove(id));
-    }
-
-    /**
-     * 测试
-     *
-     * @param entrustId
-     */
-    @GetMapping("testPdf")
-    public void testPdf(Long entrustId) {
-        String fileName = "BD20210021.docx";
-        try {
-            MinioClient client = MinIoUtil.minioClient;
-            InputStream object = client.getObject(BucketsConst.buckets_entrust_template, fileName);
-            //填充数据
-            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
-            XWPFDocument document = entrustService.downloadEntrust(detail, object);
-            FileAndFolderUtil.convertDocxToPdf(document, "D:/VPS/11.pdf");
-        } catch (Exception e) {
-            logger.error("转换失败:{}", e);
-        }
-    }
-
-    /**
-     * 测试
-     */
-    @GetMapping("test")
-    public void test() {
-        try {
-            MinioClient client = MinIoUtil.minioClient;
-            InputStream object = client.getObject(BucketsConst.buckets_entrust_template, "BGLQ21001F.docx");
-            XWPFDocument document = new XWPFDocument(object);
-            AsposeUtil.word2pdf(document, "D:\\VPS\\22.pdf");
-        } catch (Exception e) {
-            logger.error("转换失败:{}", e);
-        }
     }
 
     /**
@@ -992,7 +841,7 @@ public class ReportController {
 
     /**
      * 查询盖章列表
-     * @param reportCode
+     * @param search
      * @param reportType
      * @param sealType
      * @return
@@ -1068,71 +917,6 @@ public class ReportController {
     public Result getSealer(){
         List<TestTeam> list = reportService.getSealer();
         return ResultUtil.success(list);
-    }
-
-    @RequestMapping("previewDownLoad")
-    public void previewDownLoad(@RequestParam("json") String json, HttpServletResponse response) {
-        //json = "{\"id\":1658287642955105,\"list\":[{\"url\":\"http://121.89.242.0:9000/file-resources/1653308619762103.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220523%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220523T122339Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=36508788f305c2f692143d7467915267abd08f6e340a2838e869d737dae0b361\",\"conclusion\":\"经检测，该土样品,回弹模量均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：一禅；2.见证单位：甘肃华路捷公路工程技术咨询有限公司；3.见证人：张瑞涛；4.委托方提供：无 ；\"},{\"url\":\"http://121.89.242.0:9000/file-resources/1649645324684109.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20220411%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220411T024844Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=621bfddf70c4e5bb952335fb438e58223f8d47677bb38b0c932c602071685008\",\"conclusion\":\"经检测，该土样品,粗粒土和巨粒土最大干密度均符合JTG 3430-2020中的技术要求。\",\"additional\":\"1.委托人：一禅；2.见证单位：甘肃华路捷公路工程技术咨询有限公司；3.见证人：张瑞涛；4.委托方提供：无 ；\"}],\"type\":\"原材检测\",\"mixInfo\":{}}";
-        String decode = "";
-        String url = "";
-        try {
-            json = json.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
-            json = json.replaceAll("\\+", "%2B");
-            decode = URLDecoder.decode(json, "UTF-8");
-        }catch (Exception e){
-            logger.error("处理json参数转码错误:{}",e);
-        }
-        String unescapeJava = StringEscapeUtils.unescapeJava(decode);
-        String substring = unescapeJava.substring(1, unescapeJava.length() - 1);
-        ReqBean reqBean = JSON.parseObject(substring,ReqBean.class);
-        //从文件服务器拉取文件
-        MinioClient client = MinIoUtil.minioClient;
-        ReportResBean resBean = null;
-        if ("原材检测".equals(reqBean.getType())){
-            resBean = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
-        }else {
-            resBean = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
-        }
-        url = resBean.getUrl();
-        //预览excel转pdf
-        String[] split = url.split("\\?");
-        String[] strings = split[0].split("\\/");
-        String bluckName = strings[3];
-        String fileName = strings[4];
-        try {
-            String path = qiYueSuoEntity.getAutographPath()+GenID.getID()+".pdf";
-            client.statObject(bluckName, fileName);
-            InputStream object = client.getObject(bluckName, fileName);
-            //相应pdf
-            ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(object,path);
-            InputStream inputStream = FileAndFolderUtil.parseOut(b1);
-            //TODO 设置签名信息
-            //设置提醒信息
-            //保存告警信息
-            List<AlertEntity> list = Lists.newArrayList();
-            Map<String, String> map = resBean.getMap();
-            Set<String> set = map.keySet();
-            for (String s:set) {
-                AlertEntity entity = new AlertEntity();
-                entity.setId(GenID.getID());
-                entity.setCheckItemName(s);
-                entity.setDescrib(map.get(s));
-                entity.setEntrustId(reqBean.getId());
-                list.add(entity);
-            }
-            if (CollectionUtils.isNotEmpty(list)){
-                alertService.deleteByEntrustId(reqBean.getId());
-                alertService.saveBatch(list);
-            }
-            ServletOutputStream outputStream = response.getOutputStream();
-            int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
-            inputStream.close();
-            outputStream.close();
-            //TODO 上传是否保留？
-            url = MinIoUtil.upload("report-download", reqBean.getId() + ".pdf", inputStream, "application/octet-stream");
-        }catch (Exception e){
-            logger.error("预览合并后的报告异常:{}",e);
-        }
     }
 
     /**
