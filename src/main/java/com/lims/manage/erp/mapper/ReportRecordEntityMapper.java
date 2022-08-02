@@ -295,4 +295,7 @@ public interface ReportRecordEntityMapper {
 
     @Select("select entrust_id from test_report_record where contract_id = #{contractId}")
     Long getEntrustByCid(@Param("contractId") Long contractId);
+
+    @Select("select entrustment_id from test_report_record where id=#{id}")
+    Long getTypeById(@Param("id") Long id);
 }
