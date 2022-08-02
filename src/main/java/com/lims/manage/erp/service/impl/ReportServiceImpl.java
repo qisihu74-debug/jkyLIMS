@@ -592,15 +592,19 @@ public class ReportServiceImpl implements ReportService {
     public Boolean preserve(ReportPreserveVo vo) {
         ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
         if (reportRecordEntity1 != null) {
+            List<ReportRecordDetailEntity> insertList = Lists.newArrayList();
+            List<ReportRecordDetailEntity> updateList = Lists.newArrayList();
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
             for (ReportRecordDetailEntity e : checkInfos) {
                 e.setRecordId(reportRecordEntity1.getId());
                 e.setTaskId(vo.getTaskId());
                 List<Long> checkItemIds = recordDetailEntityMapper.getCheckItemIds(reportRecordEntity1.getId(),vo.getTaskId(),e.getSampleId());
                 if (checkItemIds.contains(e.getCheckItemId())) {
-                    recordDetailEntityMapper.updateByRecordIdSelective(e);
+                    updateList.add(e);
+//                    recordDetailEntityMapper.updateByRecordIdSelective(e);
                 } else {
-                    recordDetailEntityMapper.insert(e);
+                    insertList.add(e);
+//                    recordDetailEntityMapper.insert(e);
                 }
 //                int insert1;
 //                if (checkItemIds.contains(e.getCheckItemId())) {
@@ -611,6 +615,14 @@ public class ReportServiceImpl implements ReportService {
 //                if (insert1 < 1) {
 //                    return false;
 //                }
+            }
+            //批量更新
+            if(!CollectionUtils.isEmpty(updateList)){
+                recordDetailEntityMapper.batchUpdateRecords(updateList);
+            }
+            //批量插入
+            if(!CollectionUtils.isEmpty(insertList)){
+                recordDetailEntityMapper.batchInsert(insertList);
             }
             //校验其他任务单是否完成
             if(vo.getReportComplete() == 2){
@@ -645,14 +657,17 @@ public class ReportServiceImpl implements ReportService {
 //            String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
             long recordId = GenID.getID();
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
+            List<ReportRecordDetailEntity> tempCheckInfos = Lists.newArrayList();
             for (ReportRecordDetailEntity e : checkInfos) {
                 e.setRecordId(recordId);
                 e.setTaskId(vo.getTaskId());
-                int insert1 = recordDetailEntityMapper.insert(e);
-                if (insert1 < 1) {
-                    return false;
-                }
+//                int insert1 = recordDetailEntityMapper.insert(e);
+//                if (insert1 < 1) {
+//                    return false;
+//                }
+                tempCheckInfos.add(e);
             }
+            recordDetailEntityMapper.batchInsert(tempCheckInfos);
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
             if(vo.getReportComplete() == 2){
                 reportRecordEntity.setState(2+"");
@@ -684,8 +699,6 @@ public class ReportServiceImpl implements ReportService {
 //                reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
 //            }
             //设置报告编号
-
-
             reportRecordEntity.setId(recordId);
             reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
             //设置为最终报告
@@ -707,6 +720,12 @@ public class ReportServiceImpl implements ReportService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
         String year = sdf.format(new Date());
         Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
+        if(maxCode != null){
+            Integer maxCodeMid = recordEntityMapper.getMaxCodeMid(year,topDepartmentCode);
+            if(maxCodeMid != null && maxCode < maxCodeMid){
+                maxCode = maxCodeMid;
+            }
+        }
         if (maxCode == null) {
             return topDepartmentCode+"-" + year + "-YC-0001";
         } else {
@@ -724,14 +743,17 @@ public class ReportServiceImpl implements ReportService {
 //        String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
         long recordId = GenID.getID();
         List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
+        List<ReportRecordDetailEntity> tempCheckInfos = Lists.newArrayList();
         for (ReportRecordDetailEntity e : checkInfos) {
             e.setRecordId(recordId);
             e.setId(null);
-            int insert1 = recordDetailEntityMapper.insert(e);
-            if (insert1 < 1) {
-                return false;
-            }
+//            int insert1 = recordDetailEntityMapper.insert(e);
+//            if (insert1 < 1) {
+//                return false;
+//            }
+            tempCheckInfos.add(e);
         }
+        recordDetailEntityMapper.batchInsert(tempCheckInfos);
         ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo,vo.getEntrustmentId());
         //生成报告编号
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");

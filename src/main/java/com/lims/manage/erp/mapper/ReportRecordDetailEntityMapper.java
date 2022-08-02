@@ -15,6 +15,8 @@ public interface ReportRecordDetailEntityMapper {
 
     int insert(ReportRecordDetailEntity record);
 
+    int batchInsert(@Param("records") List<ReportRecordDetailEntity> records);
+
     int insertSelective(ReportRecordDetailEntity record);
 
     ReportRecordDetailEntity selectByPrimaryKey(Long id);
@@ -40,6 +42,8 @@ public interface ReportRecordDetailEntityMapper {
      * @return
      */
     int updateByRecordIdSelective(ReportRecordDetailEntity record);
+
+    int batchUpdateRecords(@Param("list") List<ReportRecordDetailEntity> list);
 
     int updateById(ReportRecordDetailEntity record);
 
