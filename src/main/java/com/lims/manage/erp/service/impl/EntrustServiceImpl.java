@@ -85,17 +85,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -2319,7 +2309,18 @@ public class EntrustServiceImpl implements EntrustService {
             vo.setId(id);
             vo.setTaskPrice(taskPrice);
             String teamCode = taskMapper.getTeamCode(deptId);
-            Integer integer = taskMapper.selectMaxNoByCode(teamCode);
+            //编号问题--查询当月任务编号
+            Date now = new Date(System.currentTimeMillis());
+            Calendar startTime = Calendar.getInstance();
+            int year = startTime.get(Calendar.YEAR) - 20;
+            // 这里初始化时间，然后设置年份。只以年份为基准，不看时间
+            startTime.clear();
+            startTime.set(Calendar.YEAR, year);
+            SimpleDateFormat formatter = new SimpleDateFormat("yyMM");
+            formatter.setLenient(false);
+            formatter.set2DigitYearStart(startTime.getTime());
+            String format = formatter.format(now);
+            Integer integer = taskMapper.selectMaxNoByCode(teamCode+format);
             Integer code = null;
             if (integer == null) {
                 String currentTime = DateUtil.getTodayString().substring(2, 6);

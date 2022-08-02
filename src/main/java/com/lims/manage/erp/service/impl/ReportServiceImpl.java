@@ -2379,7 +2379,11 @@ public class ReportServiceImpl implements ReportService {
             stringBuilder.append(entity.getUrl());
             stringBuilder.append("&&");
         }
-        updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
+        String name1 = "";
+        if (StringUtils.isNotEmpty(stringBuilder.toString())){
+            name1 = stringBuilder.toString().substring(0,stringBuilder.length()-2);
+        }
+        updateReportUrl(reportRecordEntity.getId(), url, name1);
         //存放提示信息
         resBean.setUrl(url);
         FileAndFolderUtil.delete(path);
@@ -2627,7 +2631,11 @@ public class ReportServiceImpl implements ReportService {
             stringBuilder.append(entity.getUrl());
             stringBuilder.append("&&");
         }
-        updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
+        String name = "";
+        if (StringUtils.isNotEmpty(stringBuilder.toString())){
+            name = stringBuilder.toString().substring(0,stringBuilder.length()-2);
+        }
+        updateReportUrl(reportRecordEntity.getId(), url, name);
         return resBean;
     }
 
