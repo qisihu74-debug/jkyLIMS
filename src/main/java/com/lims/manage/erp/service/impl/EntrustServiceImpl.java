@@ -2293,6 +2293,7 @@ public class EntrustServiceImpl implements EntrustService {
                 deptIds.add(vo.getDeptId());
             }
         }
+        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entity.getEntrustmentId());
         //创建任务对象
         List<TaskVo> vos = Lists.newArrayList();
         for (Long deptId : deptIds) {
@@ -2308,23 +2309,15 @@ public class EntrustServiceImpl implements EntrustService {
             long id = GenID.getID();
             vo.setId(id);
             vo.setTaskPrice(taskPrice);
+            //根据委托单号月份确定任务单ID
             String teamCode = taskMapper.getTeamCode(deptId);
-            //编号问题--查询当月任务编号
-            Date now = new Date(System.currentTimeMillis());
-            Calendar startTime = Calendar.getInstance();
-            int year = startTime.get(Calendar.YEAR) - 20;
-            // 这里初始化时间，然后设置年份。只以年份为基准，不看时间
-            startTime.clear();
-            startTime.set(Calendar.YEAR, year);
-            SimpleDateFormat formatter = new SimpleDateFormat("yyMM");
-            formatter.setLenient(false);
-            formatter.set2DigitYearStart(startTime.getTime());
-            String format = formatter.format(now);
+            String entrustmentNo = entrustAddVo.getEntrustmentNo()+"";
+            String format = entrustmentNo.substring(2, 6);
             Integer integer = taskMapper.selectMaxNoByCode(teamCode+format);
             Integer code = null;
             if (integer == null) {
                 String currentTime = DateUtil.getTodayString().substring(2, 6);
-                code = Integer.parseInt(currentTime + "001");
+                code = Integer.parseInt(format + "001");
             } else {
                 code = integer + 1;
             }
