@@ -2137,7 +2137,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<ConclusionEntity> getResut(Long entrustId,Integer reportType) {
         List<ReportTemplateEntity> templateList;
-        if(reportType != null){//中间报告查询
+        if(reportType == 1){//中间报告查询
             templateList = reportService.getMiddleReportTemplateList(entrustId);
         }else{//最终报告查询
             templateList = reportService.getReportTemplateList(entrustId);
