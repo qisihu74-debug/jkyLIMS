@@ -1,6 +1,7 @@
 package com.lims.manage.erp.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lims.manage.erp.vo.EntrustSampleInfoVo;
 import com.lims.manage.erp.vo.TaskCodeVo;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -82,4 +83,8 @@ public class EntrustHistoryEntity {
      * 任务编号参数
      */
     private String taskCodeParam;
+    /**
+     * 样品信息
+     */
+    private List<EntrustSampleInfoVo> sampleInfoVos;
 }
