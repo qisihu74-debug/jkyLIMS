@@ -85,17 +85,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -1438,6 +1428,7 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String abandonEntrust(EntrustEntity entrustEntity) {
         //查询当前委托单下的任务单数量
         Integer reportStateTaskNum = entityMapper.getReportStateTaskNum(entrustEntity.getId());
@@ -1458,6 +1449,10 @@ public class EntrustServiceImpl implements EntrustService {
             // 1.0 样品与委托单已存在 1.1、删除样品id
             entityMapper.removeTestEntrustedSampleDetailsRel(entrustEntity.getId());
         }
+        // 删除判定依据id
+        entityMapper.removeTestEntrustedSampleStandardRel(entrustEntity.getId());
+        // 删除样品下检测项
+        entityMapper.removeTestEntrustedSampleCheckitemRel(entrustEntity.getId());
         return "作废委托单成功";
     }
 
@@ -2298,6 +2293,7 @@ public class EntrustServiceImpl implements EntrustService {
                 deptIds.add(vo.getDeptId());
             }
         }
+        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entity.getEntrustmentId());
         //创建任务对象
         List<TaskVo> vos = Lists.newArrayList();
         for (Long deptId : deptIds) {
@@ -2313,12 +2309,15 @@ public class EntrustServiceImpl implements EntrustService {
             long id = GenID.getID();
             vo.setId(id);
             vo.setTaskPrice(taskPrice);
+            //根据委托单号月份确定任务单ID
             String teamCode = taskMapper.getTeamCode(deptId);
-            Integer integer = taskMapper.selectMaxNoByCode(teamCode);
+            String entrustmentNo = entrustAddVo.getEntrustmentNo()+"";
+            String format = entrustmentNo.substring(2, 6);
+            Integer integer = taskMapper.selectMaxNoByCode(teamCode+format);
             Integer code = null;
             if (integer == null) {
                 String currentTime = DateUtil.getTodayString().substring(2, 6);
-                code = Integer.parseInt(currentTime + "001");
+                code = Integer.parseInt(format + "001");
             } else {
                 code = integer + 1;
             }

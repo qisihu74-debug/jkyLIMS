@@ -468,7 +468,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean postGrabASingle(TaskTestEntity taskTestEntity) {
-        // 抢单
+        /*// 抢单
         taskTestEntity.setState(1);
         // 根据角色查询团队名
         if (taskTestEntity.getReceiver() != null) {
@@ -491,7 +491,7 @@ public class TaskServiceImpl implements TaskService {
             taskTestEntity.setReceiveTime(currentDate);
             taskMapper.updateTestTask(taskTestEntity);
             return true;
-        }
+        }*/
         return false;
     }
 
@@ -764,15 +764,15 @@ public class TaskServiceImpl implements TaskService {
                     // 规格/等级
                     rows.get(i + 2).getTableCells().get(1).setText(sampleDetailVo.getSpecs());
                     // 批号/编号
-//                    rows.get(i + 1).getTableCells().get(2).setText(sampleDetailVo.getBatchNumber());
+                    rows.get(i + 2).getTableCells().get(2).setText(sampleDetailVo.getBatchNumber());
                     // 样品数量
-                    rows.get(i + 2).getTableCells().get(2).setText(sampleDetailVo.getSampleQuantity());
+                    rows.get(i + 2).getTableCells().get(3).setText(sampleDetailVo.getSampleQuantity());
                     // 样品产地
-//                    rows.get(i + 1).getTableCells().get(4).setText(sampleDetailVo.getManufacturer());
+                    rows.get(i + 2).getTableCells().get(4).setText("--");
                     //样品编号
-                    rows.get(i + 2).getTableCells().get(3).setText(sampleDetailVo.getSampleCode());
+                    rows.get(i + 2).getTableCells().get(5).setText(sampleDetailVo.getSampleCode());
                     // 备注
-                    rows.get(i + 2).getTableCells().get(4).setText(sampleDetailVo.getSampleRemark());
+                    rows.get(i + 2).getTableCells().get(6).setText(sampleDetailVo.getSampleRemark());
                     /**
 //                    // 处理检测项 依据名去除 只保留编号。
 //                    if (sampleDetailVo.getCheckItemInfoList() != null) {

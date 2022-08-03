@@ -1651,7 +1651,11 @@ public class ReportServiceImpl implements ReportService {
             stringBuilder.append(entity.getUrl());
             stringBuilder.append("&&");
         }
-        updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
+        String name1 = "";
+        if (StringUtils.isNotEmpty(stringBuilder.toString())){
+            name1 = stringBuilder.toString().substring(0,stringBuilder.length()-2);
+        }
+        updateReportUrl(reportRecordEntity.getId(), url, name1);
         //存放提示信息
         resBean.setUrl(url);
         FileAndFolderUtil.delete(path);
@@ -2094,9 +2098,13 @@ public class ReportServiceImpl implements ReportService {
             stringBuilder.append(entity.getUrl());
             stringBuilder.append("&&");
         }
-        updateReportUrl(reportRecordEntity.getId(), url, stringBuilder.toString().substring(0,stringBuilder.length()-2));
         resBean.setUrl(url);
         FileAndFolderUtil.delete(path);
+        String name1 = "";
+        if (StringUtils.isNotEmpty(stringBuilder.toString())){
+            name1 = stringBuilder.toString().substring(0,stringBuilder.length()-2);
+        }
+        updateReportUrl(reportRecordEntity.getId(), url, name1);
         return resBean;
     }
 
@@ -3024,10 +3032,13 @@ public class ReportServiceImpl implements ReportService {
      * @param record
      */
     public void moveReportRecord(Long record){
-        ReportRecordEntity byRecordId = recordEntityMapper.getByRecordId(record);
-        ReportRecordMidEntity midEntity = new ReportRecordMidEntity(byRecordId);
-        int insert = midReportMapper.insert(midEntity);
-        int i = recordEntityMapper.deleteByPrimaryKey(record);
+        Long id = recordEntityMapper.getTypeById(record);
+        if (id == null){
+            ReportRecordEntity byRecordId = recordEntityMapper.getByRecordId(record);
+            ReportRecordMidEntity midEntity = new ReportRecordMidEntity(byRecordId);
+            int insert = midReportMapper.insert(midEntity);
+            int i = recordEntityMapper.deleteByPrimaryKey(record);
+        }
     }
 
 }
