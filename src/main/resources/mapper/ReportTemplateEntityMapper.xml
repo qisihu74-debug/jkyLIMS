@@ -123,6 +123,17 @@
         </foreach>
     </select>
 
+    <select id="getProductIdsByIds" resultType="com.lims.manage.erp.entity.ReportTemplateEntity">
+        select
+        template_id As id,
+        product_id As productId
+        from test_report_template_product_ref
+        where template_id in
+        <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
     <select id="getReportTemplateList0706" resultType="com.lims.manage.erp.entity.ReportTemplateEntity">
         SELECT DISTINCT
             t3.id,

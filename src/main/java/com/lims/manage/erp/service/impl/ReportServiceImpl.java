@@ -869,6 +869,24 @@ public class ReportServiceImpl implements ReportService {
         if (!CollectionUtils.isEmpty(allReportId)) {
             result = templateEntityMapper.getReportTemplateList(allReportId);
         }
+        //根据ids获取所属的产品id集合
+        Map<Integer,List<String>> map = new HashedMap();
+        List<ReportTemplateEntity> list = templateEntityMapper.getProductIdsByIds(allReportId);
+        for (ReportTemplateEntity entity:list) {
+            if (map.get(entity.getId()) == null){
+                List<String> stringList = Lists.newArrayList();
+                stringList.add(entity.getProductId());
+                map.put(entity.getId(),stringList);
+            }else {
+                List<String> strings = map.get(entity.getId());
+                strings.add(entity.getProductId());
+                map.put(entity.getId(),strings);
+            }
+        }
+
+        for (ReportTemplateEntity bean:result) {
+            bean.setProductIds(map.get(bean.getId()));
+        }
         return result;
     }
 
@@ -878,6 +896,24 @@ public class ReportServiceImpl implements ReportService {
         List<Long> allReportId = entityMapper.getAllMiddleReportId(id);
         if (!CollectionUtils.isEmpty(allReportId)) {
             result = templateEntityMapper.getReportTemplateList(allReportId);
+        }
+        //根据ids获取所属的产品id集合
+        Map<Integer,List<String>> map = new HashedMap();
+        List<ReportTemplateEntity> list = templateEntityMapper.getProductIdsByIds(allReportId);
+        for (ReportTemplateEntity entity:list) {
+            if (map.get(entity.getId()) == null){
+                List<String> stringList = Lists.newArrayList();
+                stringList.add(entity.getProductId());
+                map.put(entity.getId(),stringList);
+            }else {
+                List<String> strings = map.get(entity.getId());
+                strings.add(entity.getProductId());
+                map.put(entity.getId(),strings);
+            }
+        }
+
+        for (ReportTemplateEntity bean:result) {
+            bean.setProductIds(map.get(bean.getId()));
         }
         return result;
     }
@@ -2137,6 +2173,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<ConclusionEntity> getResut(Long entrustId,Integer reportType) {
         List<ReportTemplateEntity> templateList;
+        //TODO 需要从报告模板和产品关系表中查询产品ids
         if(reportType == 1){//中间报告查询
             templateList = reportService.getMiddleReportTemplateList(entrustId);
         }else{//最终报告查询
@@ -2147,7 +2184,7 @@ public class ReportServiceImpl implements ReportService {
         List<SampleEntity> samples = entrustHistoryDetail.getSamples();
         for (ReportTemplateEntity templateEntity:templateList) {
             for (SampleEntity sampleEntity :samples) {
-                if (Integer.parseInt(templateEntity.getProductId()) == sampleEntity.getProductId()){
+                if (templateEntity.getProductIds().contains(sampleEntity.getProductId()+"")){
                     sampleEntity.setFileUrl(templateEntity.getReportFileUri());
                 }
             }
@@ -3021,8 +3058,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public int updateInspector(String reportCode, String inspector) {
-        return reportMapper.updateInspector(reportCode,inspector);
+    public void updateInspector(String reportCode, String inspector) {
+        reportMapper.updateInspector(reportCode,inspector);
     }
 
     /**

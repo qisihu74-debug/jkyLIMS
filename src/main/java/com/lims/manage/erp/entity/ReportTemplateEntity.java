@@ -2,6 +2,8 @@ package com.lims.manage.erp.entity;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ReportTemplateEntity {
     private Integer id;
@@ -15,4 +17,6 @@ public class ReportTemplateEntity {
     private String reportFileUri;
 
     private String isAvailable;
+
+    private List<String> productIds;
 }

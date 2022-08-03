@@ -33,4 +33,6 @@ public interface ReportTemplateEntityMapper {
      * @return
      */
     List<ReportProductRelVo> getSampleIdByEntrust(@Param("entrustId") Long entrustId,@Param("sampleIds") List<Integer> sampleIds);
+
+    List<ReportTemplateEntity> getProductIdsByIds(@Param("list") List<Long> list);
 }

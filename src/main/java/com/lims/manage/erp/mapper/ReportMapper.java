@@ -184,7 +184,7 @@ public interface ReportMapper {
                                            @Param("ids") List<Integer> ids,@Param("startDate") Date startDate,@Param("endDate") Date endDate);
 
     @Select("update test_report_record set inspector=#{inspector} where report_code=#{reportCode}")
-    int updateInspector(@Param("reportCode") String reportCode, @Param("inspector") String inspector);
+    void updateInspector(@Param("reportCode") String reportCode, @Param("inspector") String inspector);
 
     @Select("select report_url from test_report_record where entrust_id=#{entrustId}")
     String getUrlByZjEntrustId(@Param("entrustId") Long entrustId);
