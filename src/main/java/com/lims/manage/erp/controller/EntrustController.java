@@ -1,6 +1,7 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.EntrustEntity;
@@ -200,6 +201,7 @@ public class EntrustController {
     @PostMapping("add_new_company_two")
     public Result methodPostTwo(@RequestBody TestCompanyJsonEntity testCompanyEntity) {
         if (testCompanyEntity.getCompanyName() != null && testCompanyEntity.getType() != null) {
+            PageHelper.clearPage();
             if (entrustEntityMapper.getCompanyName(testCompanyEntity.getCompanyName(), Integer.parseInt(testCompanyEntity.getType())) != null) {
                 return ResultUtil.error(201, "单位名称已存在");
             }

@@ -119,6 +119,18 @@ public class Const {
      */
     public static final String ENTRUST_FOUND = "20";
     /**
+     * 委托附件处理
+     */
+    public static final String ENTRUST_file = "21";
+    /**
+     * 任务流转单
+     */
+    public static final String TASK_FLOW = "22";
+    /**
+     * 单位信息
+     */
+    public static final String Applicant_Info = "23";
+    /**
      * 常规图片后缀名大全。
      */
    public static final  String[] nameSuffixS ={"tiff","pjp","jfif","bmp","webp","pjpeg","avif","tif","jpg","svgz","png","xbm","dib","jxl","jpeg","gif","svg","ico"};
