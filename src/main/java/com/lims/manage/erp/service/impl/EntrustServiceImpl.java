@@ -1606,6 +1606,47 @@ public class EntrustServiceImpl implements EntrustService {
         return true;
     }
 
+//    public PageInfo getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
+//        if (entrustHistoryEntity.getDateInterval() != null) {
+//            String[] strArry = entrustHistoryEntity.getDateInterval().split("~");
+//            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//            for (int i = 0; i <= strArry.length - 1; i++) {
+//                if (i == 0) {
+//                    entrustHistoryEntity.setStartDate(dateFormat.parse(strArry[i]));
+//                }
+//                if (i == 1) {
+//                    entrustHistoryEntity.setEndingDate(dateFormat.parse(strArry[i]));
+//                }
+//            }
+//        }
+//        // 获取状态
+//        List<EntrustHistoryEntity> dataList = new ArrayList<>();
+//        if (!StringUtils.isEmpty(entrustHistoryEntity.getState())&&entrustHistoryEntity.getState() == 1) {
+////            PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+//            PageHelper.clearPage();
+//            dataList = entityMapper.selectEntrustHistoryTaskListRelease_of(entrustHistoryEntity);
+//            //存放任务编号
+////            if(!CollectionUtils.isEmpty(dataList)){
+////                for (EntrustHistoryEntity entrustHistoryEntity1 : dataList) {
+////                    entrustHistoryEntity1.setTaskCodes(entityMapper.getTaskCode(entrustHistoryEntity1.getId()));
+////                }
+////            }
+//            PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+////            PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
+//            return result;
+//        }
+////        PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+//        PageHelper.clearPage();
+//        dataList = entityMapper.selectEntrustTaskHistoryList(entrustHistoryEntity);
+////        if(!CollectionUtils.isEmpty(dataList)){
+////            for (EntrustHistoryEntity entrustHistoryEntity1 : dataList) {
+////                entrustHistoryEntity1.setTaskCodes(entityMapper.getTaskCode(entrustHistoryEntity1.getId()));
+////            }
+////        }
+////        PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
+//        PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+//        return result;
+//    }
     @Override
     public PageInfo getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
         if (entrustHistoryEntity.getDateInterval() != null) {
@@ -1623,28 +1664,18 @@ public class EntrustServiceImpl implements EntrustService {
         // 获取状态
         List<EntrustHistoryEntity> dataList = new ArrayList<>();
         if (!StringUtils.isEmpty(entrustHistoryEntity.getState())&&entrustHistoryEntity.getState() == 1) {
-//            PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
             PageHelper.clearPage();
             dataList = entityMapper.selectEntrustHistoryTaskListRelease_of(entrustHistoryEntity);
-            //存放任务编号
-//            if(!CollectionUtils.isEmpty(dataList)){
-//                for (EntrustHistoryEntity entrustHistoryEntity1 : dataList) {
-//                    entrustHistoryEntity1.setTaskCodes(entityMapper.getTaskCode(entrustHistoryEntity1.getId()));
-//                }
-//            }
-            PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
-//            PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
-            return result;
+        }else{
+            PageHelper.clearPage();
+            dataList = entityMapper.selectEntrustTaskHistoryList(entrustHistoryEntity);
         }
-//        PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
-        PageHelper.clearPage();
-        dataList = entityMapper.selectEntrustTaskHistoryList(entrustHistoryEntity);
-//        if(!CollectionUtils.isEmpty(dataList)){
-//            for (EntrustHistoryEntity entrustHistoryEntity1 : dataList) {
-//                entrustHistoryEntity1.setTaskCodes(entityMapper.getTaskCode(entrustHistoryEntity1.getId()));
-//            }
-//        }
-//        PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
+        if(!CollectionUtils.isEmpty(dataList)){
+            for (EntrustHistoryEntity entity : dataList) {
+                List<EntrustSampleInfoVo> entrustSampleInfos = entityMapper.getEntrustSampleInfos(entity.getId());
+                entity.setSampleInfoVos(entrustSampleInfos);
+            }
+        }
         PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
         return result;
     }
