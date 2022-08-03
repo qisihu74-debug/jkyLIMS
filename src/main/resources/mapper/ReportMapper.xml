@@ -687,7 +687,7 @@
     </update>
 
     <select id="historyList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
-        SELECT
+        SELECT distinct
         t1.id,
         t1.entrustment_id,
         t1.report_code,
