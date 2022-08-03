@@ -1555,18 +1555,36 @@ public class ReportServiceImpl implements ReportService {
                                     String[] checks = checkResult.split("&");
                                     String[] judes = judgeResult.split("&");
                                     for (String spec:specs) {
-                                        if (StringUtils.isNotEmpty(specsContent) && Integer.parseInt(spec.substring(0, 1)) == i+1){
-                                            cells.get(spec.substring(1)).setValue(StringUtils.isEmpty(item.getSpecsContent())?"——":item.getSpecsContent());
+                                        if (size > 1){
+                                            if (StringUtils.isNotEmpty(specsContent) && Integer.parseInt(spec.substring(0, 1)) == i+1){
+                                                cells.get(spec.substring(1)).setValue(StringUtils.isEmpty(item.getSpecsContent())?"——":item.getSpecsContent());
+                                            }
+                                        }else {
+                                            if (StringUtils.isNotEmpty(specsContent)){
+                                                cells.get(spec).setValue(StringUtils.isEmpty(item.getSpecsContent())?"——":item.getSpecsContent());
+                                            }
                                         }
                                     }
                                     for (String check:checks) {
-                                        if (StringUtils.isNotEmpty(checkResult) && Integer.parseInt(check.substring(0,1)) == i+1){
-                                            cells.get(check.substring(1)).setValue(StringUtils.isEmpty(item.getCheckResult())?"——":item.getCheckResult());
+                                        if (size > 1){
+                                            if (StringUtils.isNotEmpty(checkResult) && Integer.parseInt(check.substring(0,1)) == i+1){
+                                                cells.get(check.substring(1)).setValue(StringUtils.isEmpty(item.getCheckResult())?"——":item.getCheckResult());
+                                            }
+                                        }else {
+                                            if (StringUtils.isNotEmpty(checkResult)){
+                                                cells.get(check).setValue(StringUtils.isEmpty(item.getCheckResult())?"——":item.getCheckResult());
+                                            }
                                         }
                                     }
                                     for (String jude:judes) {
-                                        if (StringUtils.isNotEmpty(judgeResult) && Integer.parseInt(jude.substring(0,1)) == i+1){
-                                            cells.get(jude.substring(1)).setValue(StringUtils.isEmpty(item.getJudgeResult())?"——":item.getJudgeResult());
+                                        if (size > 1){
+                                            if (StringUtils.isNotEmpty(judgeResult) && Integer.parseInt(jude.substring(0,1)) == i+1){
+                                                cells.get(jude.substring(1)).setValue(StringUtils.isEmpty(item.getJudgeResult())?"——":item.getJudgeResult());
+                                            }
+                                        }else {
+                                            if (StringUtils.isNotEmpty(judgeResult)){
+                                                cells.get(jude).setValue(StringUtils.isEmpty(item.getJudgeResult())?"——":item.getJudgeResult());
+                                            }
                                         }
                                     }
                                 }catch (Exception e){
@@ -2003,8 +2021,14 @@ public class ReportServiceImpl implements ReportService {
                                     continue;
                                 }
                                 try {
-                                    if (StringUtils.isNotEmpty(checkResult) && Integer.parseInt(checkResult.substring(0, 1)) == i+1){
-                                        cells.get(checkResult.substring(1)).setValue(StringUtils.isEmpty(item.getCheckResult())?"——":item.getCheckResult());
+                                    if (size > 1){
+                                        if (StringUtils.isNotEmpty(checkResult) && Integer.parseInt(checkResult.substring(0, 1)) == i+1){
+                                            cells.get(checkResult.substring(1)).setValue(StringUtils.isEmpty(item.getCheckResult())?"——":item.getCheckResult());
+                                        }
+                                    }else {
+                                        if (StringUtils.isNotEmpty(checkResult)){
+                                            cells.get(checkResult).setValue(StringUtils.isEmpty(item.getCheckResult())?"——":item.getCheckResult());
+                                        }
                                     }
                                 }catch (Exception e){
                                     mesMap.put(item.getCheckItemName(),"检测项在报告中的坐标错误");
