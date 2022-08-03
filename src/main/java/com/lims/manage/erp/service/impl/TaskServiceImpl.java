@@ -468,7 +468,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean postGrabASingle(TaskTestEntity taskTestEntity) {
-        // 抢单
+        /*// 抢单
         taskTestEntity.setState(1);
         // 根据角色查询团队名
         if (taskTestEntity.getReceiver() != null) {
@@ -491,7 +491,7 @@ public class TaskServiceImpl implements TaskService {
             taskTestEntity.setReceiveTime(currentDate);
             taskMapper.updateTestTask(taskTestEntity);
             return true;
-        }
+        }*/
         return false;
     }
 
