@@ -99,7 +99,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
         // 处理 委托单的文件链接
         TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfo(taskId);
-        if (taskDetailInfoVo.getFileUrl() != null) {
+/*        if (taskDetailInfoVo.getFileUrl() != null) {
             String[] array = taskDetailInfoVo.getFileUrl().split(",");
             taskDetailInfoVo.setArray(array);
         }
@@ -113,7 +113,7 @@ public class TaskServiceImpl implements TaskService {
                 stringBuilder.append(",");
             }
             taskDetailInfoVo.setJudgmentBasis(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
-        }
+        }*/
 
         return taskDetailInfoVo;
     }

@@ -147,7 +147,7 @@ public class TaskController {
      */
     @PostMapping("postGrabASingle")
     public Result postGrabASingle(@RequestBody TaskTestEntity taskTestEntity) {
-        if (ShiroUtils.getUserInfo() != null) {
+/*        if (ShiroUtils.getUserInfo() != null) {
             // 抢单人
             Long strLong = ShiroUtils.getUserInfo().getUserId();
             String str1 = String.valueOf(strLong);
@@ -160,7 +160,7 @@ public class TaskController {
                 return ResultUtil.success("抢单成功");
             }
             return ResultUtil.error(678, "抢单失败！");
-        }
+        }*/
         return ResultUtil.error(678, "当前任务单已经被抢！");
     }
 
@@ -475,7 +475,7 @@ public class TaskController {
      * @param taskId
      * @param response
      */
-    @RequestMapping("downloadEntrust")
+/*    @RequestMapping("downloadEntrust")
     public void downloadEntrust(Long taskId, HttpServletResponse response) {
         String fileName = "taskOrder1.docx";
         try {
@@ -497,35 +497,7 @@ public class TaskController {
             log.info("导出失败：", ex.getMessage());
         }
     }
-
-    /**
-     * 下载任务通知单——二次开发 丁 线上使用中
-     * 废弃 变更需求 world 已经废弃。
-     * @param taskId
-     * @param response
-     */
-//    @GetMapping("downloadEntrust_two")
-//    public void downloadEntrust_two(Long taskId, HttpServletResponse response) {
-//        String fileName = "taskOrder3.docx";
-//        try {
-//            MinioClient client = MinIoUtil.minioClient;
-//            InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
-//            TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId, null);
-//            XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
-//            response.reset();
-//            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-//            response.setContentType("application/x-msdownload");
-//            response.setCharacterEncoding("UTF-8");
-//            fileName = URLEncoder.encode(fileName, "UTF-8");
-//            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
-//            OutputStream outputStream = response.getOutputStream();
-//            document.write(outputStream);
-//            //document.close();
-//            outputStream.close();
-//        } catch (Exception ex) {
-//            log.info("导出失败：{}", ex);
-//        }
-//    }
+    */
     /**
      * 下载任务通知单——二次开发 丁 线上使用中
      * 变更需求 world 转 pdf。

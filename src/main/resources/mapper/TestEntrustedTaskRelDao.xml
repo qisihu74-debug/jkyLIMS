@@ -25,7 +25,8 @@
         address_name,
         task_id,
         entrust_id,
-        state)
+        state,
+        create_date)
         values
         <foreach collection="lists" item="entity" separator=",">
             (   #{entity.id,jdbcType=INTEGER},
@@ -37,7 +38,8 @@
                 #{entity.addressName,jdbcType=VARCHAR},
                 #{entity.taskId,jdbcType=BIGINT},
                 #{entity.entrustId,jdbcType=BIGINT},
-                #{entity.state,jdbcType=INTEGER})
+                #{entity.state,jdbcType=INTEGER},
+                #{entity.createDate})
         </foreach>
     </insert>
 

@@ -1453,6 +1453,12 @@ public class EntrustServiceImpl implements EntrustService {
         entityMapper.removeTestEntrustedSampleStandardRel(entrustEntity.getId());
         // 删除样品下检测项
         entityMapper.removeTestEntrustedSampleCheckitemRel(entrustEntity.getId());
+        /**
+         *  增加日志
+         */
+        StringBuilder stringBuilder1 = new StringBuilder();
+        stringBuilder1.append("废弃委托单  委托单id:"+entrustEntity.getId()+" 状态为:"+entrustEntity.getState());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.ENTRUST_FOUND, true);
         return "作废委托单成功";
     }
 
@@ -1475,11 +1481,15 @@ public class EntrustServiceImpl implements EntrustService {
     public Map<String, List<LabelValueVo>> returnEntrustData() {
         Map<String, List<LabelValueVo>> map = new HashMap<>();
         // type =1 委托单位
+        PageHelper.clearPage();
         List<LabelValueVo> EntrustCompany = testCompanyDao.selectEntrustCompanyList(1);
         // type =2 见证单位
+        PageHelper.clearPage();
         List<LabelValueVo> witnessCompany = testCompanyDao.selectEntrustCompanyList(2);
+        PageHelper.clearPage();
         List<TestInitDataEntity> ReturnBasisData = testCompanyDao.selectEntrustBasis();
         // 团队信息
+        PageHelper.clearPage();
         List<LabelValueVo> arryTeam = testCompanyDao.selectTestTeam();
 //        1 = 委托方式： 2=取样方式 ： 3=检测目的：4 ： 取报告方式 5：样品外观  6：签章类型： 7：用户来源： 8：设备类型  9：支付方式
         // 委托方式 type =1
@@ -1575,10 +1585,68 @@ public class EntrustServiceImpl implements EntrustService {
         testCompanyEntity1.setType(testCompanyEntity.getType());
         testCompanyEntity1.setAddress(testCompanyEntity.getAddress());
         testCompanyEntity1.setAddTime(new java.util.Date());
+        /**
+         *  增加日志
+         */
+        StringBuilder stringBuilder1 = new StringBuilder();
+        // 变更前：
+        stringBuilder1.append("新增单位信息：单位名称:"+testCompanyEntity1.getCompanyName());
+        stringBuilder1.append(" 单位类型：");
+        if(!StringUtils.isEmpty(testCompanyEntity1.getType())){
+            if(testCompanyEntity1.getType().equals(1)){
+                stringBuilder1.append("委托单位");
+            }
+            if(testCompanyEntity1.getType().equals(2)){
+                stringBuilder1.append("见证单位");
+            }
+        }
+        stringBuilder1.append(" 单位地址："+testCompanyEntity1.getAddress());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.Applicant_Info, true);
         testCompanyDao.insert(testCompanyEntity1);
         return true;
     }
 
+//    public PageInfo getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
+//        if (entrustHistoryEntity.getDateInterval() != null) {
+//            String[] strArry = entrustHistoryEntity.getDateInterval().split("~");
+//            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//            for (int i = 0; i <= strArry.length - 1; i++) {
+//                if (i == 0) {
+//                    entrustHistoryEntity.setStartDate(dateFormat.parse(strArry[i]));
+//                }
+//                if (i == 1) {
+//                    entrustHistoryEntity.setEndingDate(dateFormat.parse(strArry[i]));
+//                }
+//            }
+//        }
+//        // 获取状态
+//        List<EntrustHistoryEntity> dataList = new ArrayList<>();
+//        if (!StringUtils.isEmpty(entrustHistoryEntity.getState())&&entrustHistoryEntity.getState() == 1) {
+////            PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+//            PageHelper.clearPage();
+//            dataList = entityMapper.selectEntrustHistoryTaskListRelease_of(entrustHistoryEntity);
+//            //存放任务编号
+////            if(!CollectionUtils.isEmpty(dataList)){
+////                for (EntrustHistoryEntity entrustHistoryEntity1 : dataList) {
+////                    entrustHistoryEntity1.setTaskCodes(entityMapper.getTaskCode(entrustHistoryEntity1.getId()));
+////                }
+////            }
+//            PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+////            PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
+//            return result;
+//        }
+////        PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+//        PageHelper.clearPage();
+//        dataList = entityMapper.selectEntrustTaskHistoryList(entrustHistoryEntity);
+////        if(!CollectionUtils.isEmpty(dataList)){
+////            for (EntrustHistoryEntity entrustHistoryEntity1 : dataList) {
+////                entrustHistoryEntity1.setTaskCodes(entityMapper.getTaskCode(entrustHistoryEntity1.getId()));
+////            }
+////        }
+////        PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
+//        PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
+//        return result;
+//    }
     @Override
     public PageInfo getEntrustHistoryList(EntrustHistoryEntity entrustHistoryEntity) throws ParseException {
         if (entrustHistoryEntity.getDateInterval() != null) {
@@ -1596,28 +1664,18 @@ public class EntrustServiceImpl implements EntrustService {
         // 获取状态
         List<EntrustHistoryEntity> dataList = new ArrayList<>();
         if (!StringUtils.isEmpty(entrustHistoryEntity.getState())&&entrustHistoryEntity.getState() == 1) {
-//            PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
             PageHelper.clearPage();
             dataList = entityMapper.selectEntrustHistoryTaskListRelease_of(entrustHistoryEntity);
-            //存放任务编号
-//            if(!CollectionUtils.isEmpty(dataList)){
-//                for (EntrustHistoryEntity entrustHistoryEntity1 : dataList) {
-//                    entrustHistoryEntity1.setTaskCodes(entityMapper.getTaskCode(entrustHistoryEntity1.getId()));
-//                }
-//            }
-            PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
-//            PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
-            return result;
+        }else{
+            PageHelper.clearPage();
+            dataList = entityMapper.selectEntrustTaskHistoryList(entrustHistoryEntity);
         }
-//        PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
-        PageHelper.clearPage();
-        dataList = entityMapper.selectEntrustTaskHistoryList(entrustHistoryEntity);
-//        if(!CollectionUtils.isEmpty(dataList)){
-//            for (EntrustHistoryEntity entrustHistoryEntity1 : dataList) {
-//                entrustHistoryEntity1.setTaskCodes(entityMapper.getTaskCode(entrustHistoryEntity1.getId()));
-//            }
-//        }
-//        PageInfo<EntrustHistoryEntity> result = new PageInfo<>(dataList);
+        if(!CollectionUtils.isEmpty(dataList)){
+            for (EntrustHistoryEntity entity : dataList) {
+                List<EntrustSampleInfoVo> entrustSampleInfos = entityMapper.getEntrustSampleInfos(entity.getId());
+                entity.setSampleInfoVos(entrustSampleInfos);
+            }
+        }
         PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
         return result;
     }
@@ -2111,6 +2169,7 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public EntrustAddVo getEntrustHistoryDetailTest(Long entrustmentId) {
         // 通过委托ID 委托单信息 → test_entrusted_info
+        PageHelper.clearPage();
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         if (entrustAddVo.getSealType() != null) {
             entrustAddVo.setSealTypes(entrustAddVo.getSealType().split(","));
@@ -2119,6 +2178,7 @@ public class EntrustServiceImpl implements EntrustService {
             entrustAddVo.setSealTypes(new String[0]);
         }
         // 通过委托单id 获取缴费记录 依据id 同价价格
+        PageHelper.clearPage();
         String total = entityMapper.getTestEntrustedPaymentRecordInfoPrice(entrustmentId);
         if(total!=null&&total.length()>0){
             entrustAddVo.setPaymentRecordShow(total);
@@ -2132,6 +2192,7 @@ public class EntrustServiceImpl implements EntrustService {
          * 委托单文件file 处理
          * 通过委托单id 查询相应附件集合
          */
+        PageHelper.clearPage();
         List<EntrustFileTableEntity> fileList = entrustFileTableDao.getEntrustFileTableEntityList(entrustAddVo.getId());
         if(CollectionUtils.isEmpty(fileList)){
             // 返回空集合
@@ -2146,11 +2207,13 @@ public class EntrustServiceImpl implements EntrustService {
         // 联系地址
 //        entrustAddVo.setAdress(entityMapper.getEntrustingParty(entrustmentId));
         // 通过委托ID 样品集合 → test_sample
+        PageHelper.clearPage();
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
         // 处理信息 样品下检测项信息无价格不展示。
         for (SampleEntity sampleEntity0 : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
             List<JudgmentBasisVo> listJson = Lists.newArrayList();
+            PageHelper.clearPage();
             List<JudgmentBasisVo> itemList = sampleEntityMapper.selectTestStandardList(sampleEntity0.getId(), entrustmentId);
             Iterator<JudgmentBasisVo> it = itemList.iterator();
             while (it.hasNext()) {
@@ -2166,18 +2229,21 @@ public class EntrustServiceImpl implements EntrustService {
         for (SampleEntity sampleEntity : sampleCollection) {
             // 补充样品下 依据集合
             List<JudgmentBasisVo> standardList = Lists.newArrayList();
+            PageHelper.clearPage();
             standardList.addAll(sampleEntityMapper.getSampleBasisList(sampleEntity.getId(), entrustAddVo.getId()));
             sampleEntity.setStandardFileIdStr(standardList);
             //补充检测项可选的全部检测依据
             if (!CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVoStr())) {
                 for (JudgmentBasisVo judgmentBasisVo : sampleEntity.getJudgmentBasisVoStr()) {
                     List<LabelValueVo> allCheckBasis = Lists.newArrayList();
+                    PageHelper.clearPage();
                     allCheckBasis.addAll(testProductDao.getAllCheckBasis(judgmentBasisVo.getCheckItemId()));
                     judgmentBasisVo.setCheckBasisList(allCheckBasis);
                 }
             }
             //补充产品可选的全部判定依据
             List<LabelValueVo> judges = Lists.newArrayList();
+            PageHelper.clearPage();
             judges.addAll(testProductDao.getJudges(sampleEntity.getProductId()));
             sampleEntity.setAllStandardFileList(judges);
         }
@@ -3114,6 +3180,12 @@ public class EntrustServiceImpl implements EntrustService {
             }
 //        }
         entrustFileTableEntity.setCarateTime(new Date());
+        StringBuilder stringBuilder1 = new StringBuilder();
+        stringBuilder1.append("委托单id为："+entrustFileTableEntity.getEntrustId());
+        stringBuilder1.append("文件附件链接："+entrustFileTableEntity.getFileUrl());
+        stringBuilder1.append("文件附件名称:"+entrustFileTableEntity.getFileUrlStr());
+        //增加日志
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "委托附件新增\t"+stringBuilder1.toString(), Const.ENTRUST_file, true);
         entrustFileTableDao.insertEntrustFileTableEntity(entrustFileTableEntity);
         return true;
 
@@ -3140,7 +3212,12 @@ public class EntrustServiceImpl implements EntrustService {
                 logger.info("修改委托下清除 MinIo 桶数据 出错");
             }
         }
-
+        StringBuilder stringBuilder1 = new StringBuilder();
+        stringBuilder1.append("委托单id为："+entrustFileTableEntity.getEntrustId());
+        stringBuilder1.append("文件附件链接："+entrustFileTableEntity.getFileUrl());
+        stringBuilder1.append("文件附件名称:"+entrustFileTableEntity.getFileUrlStr());
+        //增加日志
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "委托附件删除\t"+stringBuilder1.toString(), Const.ENTRUST_file, true);
         entrustFileTableDao.deleteEntrustFileTableEntity(id);
         return true;
     }
@@ -3250,6 +3327,30 @@ public class EntrustServiceImpl implements EntrustService {
                 testEntrustedTaskRelEntity.setState(0);
             }
         }
+        /**
+         *  增加日志
+         */
+        if(!CollectionUtils.isEmpty(taskRelEntities)){
+            StringBuilder stringBuilder1 = new StringBuilder();
+            for (TestEntrustedTaskRelEntity testEntrustedTaskRelEntity : taskRelEntities){
+                stringBuilder1.append("新增任务流转：委托单id:"+testEntrustedTaskRelEntity.getEntrustId()+"流转日期：");
+                if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getTaskFlowDate())){
+                    stringBuilder1.append(new Timestamp(testEntrustedTaskRelEntity.getTaskFlowDate().getTime()));
+                }
+                stringBuilder1.append("备注："+testEntrustedTaskRelEntity.getRemark()+"报告类型：");
+                if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getType())){
+                    if(testEntrustedTaskRelEntity.getType().equals(1)){
+                        stringBuilder1.append("中间报告");
+                    }
+                    if(testEntrustedTaskRelEntity.getType().equals(0)){
+                        stringBuilder1.append("最终报告");
+                    }
+                }
+                stringBuilder1.append("任务单id："+testEntrustedTaskRelEntity.getTaskId());
+                stringBuilder1.append("部门信息："+testEntrustedTaskRelEntity.getDepartment());
+            }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.TASK_FLOW, true);
+        }
         // 进行批量 add操作
         testEntrustedTaskRelDao.addList(taskRelEntities);
     }
@@ -3263,6 +3364,39 @@ public class EntrustServiceImpl implements EntrustService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateTestEntrustedTaskRelEntity(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity) {
         testEntrustedTaskRelEntity.setUpdateDate(new Date());
+        // 查询任务流转详情
+        TestEntrustedTaskRelVo testEntrustedTaskRelVo = testEntrustedTaskRelDao.getTaskFlowById(testEntrustedTaskRelEntity.getId());
+        StringBuilder stringBuilder1 = new StringBuilder();
+        // 变更前：
+        stringBuilder1.append("修改任务流转前：id:"+testEntrustedTaskRelVo.getId()+"流转日期：");
+        if(!StringUtils.isEmpty(testEntrustedTaskRelVo.getTaskFlowDate())){
+            stringBuilder1.append(new Timestamp(testEntrustedTaskRelVo.getTaskFlowDate().getTime()));
+        }
+        stringBuilder1.append("备注："+testEntrustedTaskRelVo.getRemark()+"报告类型：");
+        if(!StringUtils.isEmpty(testEntrustedTaskRelVo.getType())){
+            if(testEntrustedTaskRelVo.getType().equals(1)){
+                stringBuilder1.append("中间报告");
+            }
+            if(testEntrustedTaskRelVo.getType().equals(0)){
+                stringBuilder1.append("最终报告");
+            }
+        }
+        // 变更后：
+        stringBuilder1.append("\n修改任务流转后：id:"+testEntrustedTaskRelEntity.getId()+"流转日期：");
+        if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getTaskFlowDate())){
+            stringBuilder1.append(new Timestamp(testEntrustedTaskRelEntity.getTaskFlowDate().getTime()));
+        }
+        stringBuilder1.append("备注："+testEntrustedTaskRelEntity.getRemark()+"报告类型：");
+        if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getType())){
+            if(testEntrustedTaskRelEntity.getType().equals(1)){
+                stringBuilder1.append("中间报告");
+            }
+            if(testEntrustedTaskRelEntity.getType().equals(0)){
+                stringBuilder1.append("最终报告");
+            }
+        }
+        //增加日志
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "修改任务流转\n"+stringBuilder1.toString(), Const.TASK_FLOW, true);
         testEntrustedTaskRelDao.updateData(testEntrustedTaskRelEntity);
         return true;
     }
@@ -3275,6 +3409,25 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean removeTestEntrustedTask(Integer id) {
+        // 查询任务流转详情
+        TestEntrustedTaskRelVo testEntrustedTaskRelVo = testEntrustedTaskRelDao.getTaskFlowById(id);
+        StringBuilder stringBuilder1 = new StringBuilder();
+        // 变更前：
+        stringBuilder1.append("删除任务流转详情：id:"+testEntrustedTaskRelVo.getId()+"流转日期：");
+        if(!StringUtils.isEmpty(testEntrustedTaskRelVo.getTaskFlowDate())){
+            stringBuilder1.append(new Timestamp(testEntrustedTaskRelVo.getTaskFlowDate().getTime()));
+        }
+        stringBuilder1.append("备注："+testEntrustedTaskRelVo.getRemark()+"报告类型：");
+        if(!StringUtils.isEmpty(testEntrustedTaskRelVo.getType())){
+            if(testEntrustedTaskRelVo.getType().equals(1)){
+                stringBuilder1.append("中间报告");
+            }
+            if(testEntrustedTaskRelVo.getType().equals(0)){
+                stringBuilder1.append("最终报告");
+            }
+        }
+        //增加日志
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.ENTRUST_file, true);
         testEntrustedTaskRelDao.deletedData(id);
         return true;
     }
@@ -3296,6 +3449,27 @@ public class EntrustServiceImpl implements EntrustService {
         if(testEntrustedTaskRelEntity.getType() == 1){
             testEntrustedTaskRelEntity.setState(0);
         }
+        /**
+         *  增加日志
+         */
+        StringBuilder stringBuilder1 = new StringBuilder();
+        // 变更前：
+        stringBuilder1.append("新增任务流转：委托单id:"+testEntrustedTaskRelEntity.getEntrustId()+"流转日期：");
+        if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getTaskFlowDate())){
+            stringBuilder1.append(new Timestamp(testEntrustedTaskRelEntity.getTaskFlowDate().getTime()));
+        }
+        stringBuilder1.append("备注："+testEntrustedTaskRelEntity.getRemark()+"报告类型：");
+        if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getType())){
+            if(testEntrustedTaskRelEntity.getType().equals(1)){
+                stringBuilder1.append("中间报告");
+            }
+            if(testEntrustedTaskRelEntity.getType().equals(0)){
+                stringBuilder1.append("最终报告");
+            }
+        }
+        stringBuilder1.append("任务单id："+testEntrustedTaskRelEntity.getTaskId());
+        stringBuilder1.append("部门信息："+testEntrustedTaskRelEntity.getDepartment());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.TASK_FLOW, true);
         testEntrustedTaskRelDao.addData(testEntrustedTaskRelEntity);
         return true;
     }
