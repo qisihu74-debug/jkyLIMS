@@ -343,6 +343,7 @@ public class PDFHelper3 {
             FileOutputStream fileOS = new FileOutputStream(basePath);
             PdfSaveOptions pdfSaveOptions = new PdfSaveOptions();
             pdfSaveOptions.setOnePagePerSheet(true);
+            pdfSaveOptions.setDefaultFont("");
             //设置合规性类型
             //当excel中对应的sheet页宽度太大时，在PDF中会拆断并分页。此处等比缩放。
             autoDraw(wb,reverse);

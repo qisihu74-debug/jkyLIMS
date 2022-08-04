@@ -894,6 +894,22 @@ public class ReportController {
             e = Long.parseLong(endDate);
             e = DateUtil.getDayEndMs(e);
         }
+        String time1 = "";
+        String time2 = "";
+        String desc = "";
+        if (s != null){
+            time1 = DateUtil.getDayString(s);
+        }
+        if (e != null){
+            time2 = DateUtil.getDayString(e);
+        }
+        if (StringUtils.isNotEmpty(time1)){
+            if (time1.equals(time2)){
+                desc = "("+time1+"）";
+            }else {
+                desc = "("+time1 + "~" + time2+"）";
+            }
+        }
         byte[] bytes = reportService.exportRecords(reportCode, reportType, sealType, s, e);
         //响应数据流
         try {
@@ -901,7 +917,9 @@ public class ReportController {
             response.reset();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=sealRecords.xlsx");
+            response.setHeader("Content-Disposition",
+                    "attachment;filename=" + new String(("报告盖章登记表" + desc+".xlsx").getBytes("gb2312"), "ISO8859-1"));
+            //response.setHeader("Content-Disposition", "attachment;fileName=sealRecords.xlsx");
             outputStream.write(bytes);
         }catch (Exception e1){
             logger.error("导出盖章历史失败:{}",e1);

@@ -828,6 +828,9 @@ public class ReportServiceImpl implements ReportService {
         //TODO 兼容中间报告
         List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state,reportTypeStatus,ids);
         for (ReportRecordEntity recordEntity:list) {
+            if (StringUtils.isNotEmpty(recordEntity.getSealType()) && recordEntity.getSealType().contains("null")){
+                recordEntity.setSealType("");
+            }
             if ("0".equals(recordEntity.getType())){
                 recordEntity.setType("最终报告");
             }else {
@@ -1087,10 +1090,7 @@ public class ReportServiceImpl implements ReportService {
             try {
                 //如果上传的是excel转为pdf
                 String originalFilename = file.getOriginalFilename();
-                if (!originalFilename.contains(".xls")){
-                    return false;
-                }
-                if (!originalFilename.contains(".xlsx")){
+                if ((!originalFilename.contains(".xls")) && (!originalFilename.contains(".xlsx"))){
                     return false;
                 }
                 if (originalFilename.contains(".pdf")){
@@ -2814,8 +2814,13 @@ public class ReportServiceImpl implements ReportService {
         if (ids.size()<=0){
             ids = null;
         }
+        List<ReportRecordEntity> list;
         PageHelper.startPage(pageNum,pageSize);
-        List<ReportRecordEntity> list = reportMapper.historyList(reportCode,reportType,sealType,ids,startDate==null?null:new Date(startDate),endDate==null?null:new Date(endDate));
+        if (Integer.parseInt(reportType) == 0 || StringUtils.isEmpty(reportType)){
+            list = reportMapper.historyList(reportCode,reportType,sealType,ids,startDate==null?null:new Date(startDate),endDate==null?null:new Date(endDate));
+        }else {
+            list = reportMapper.historyListZj(reportCode,reportType,sealType,ids,startDate==null?null:new Date(startDate),endDate==null?null:new Date(endDate));
+        }
         for (ReportRecordEntity entity:list) {
             if (org.apache.commons.lang.StringUtils.isNotEmpty(entity.getSealer())){
                 entity.setSealer(entity.getSealer().split("&")[0]);
@@ -2870,7 +2875,10 @@ public class ReportServiceImpl implements ReportService {
         if (ids.size()<=0){
             ids = null;
         }
+        //导出中间报告和最终报告
         List<ReportRecordEntity> list = reportMapper.exportRecords(reportCode,reportType,sealType,ids,startDate==null?null:new Date(startDate),endDate==null?null:new Date(endDate));
+        List<ReportRecordEntity> list1 = reportMapper.exportRecordsZj(reportCode,reportType,sealType,ids,startDate==null?null:new Date(startDate),endDate==null?null:new Date(endDate));
+        list.addAll(list1);
         byte[] bytes = null;
         try {
             bytes = exportExcel(list,qiYueSuoEntity.getAutographPath()+"sealList.xlsx");
@@ -2934,7 +2942,9 @@ public class ReportServiceImpl implements ReportService {
             cells.get(row+n).setValue(number);
             row = getNextUpEn(row);
             //报告产值
-            cells.get(row+n).setValue(Double.valueOf(entity.getActualPrice()));
+            if (StringUtils.isNotEmpty(entity.getActualPrice())){
+                cells.get(row+n).setValue(Double.valueOf(entity.getActualPrice()));
+            }
             row = getNextUpEn(row);
             //报告类型
             cells.get(row+n).setValue("");
@@ -2958,6 +2968,7 @@ public class ReportServiceImpl implements ReportService {
     private static Workbook workbookCopy(Workbook finalWork,Map<Integer, Workbook> map) {
         PDFHelper3.getLicense();
         Set<Integer> keySet = map.keySet();
+        int num = 1;
         try {
             for (Integer key:keySet) {
                 Workbook workbook = map.get(key);
@@ -2968,11 +2979,12 @@ public class ReportServiceImpl implements ReportService {
                     Worksheet worksheet = workbook.getWorksheets().get(i);
                     String name = worksheet.getName();
                     // 判断合并后的 工作簿中是否已经存在了该sheet名称, 重复则+ 1
-                    String newSheetName = null != finalWork.getWorksheets().get(name) ? name + 1 : name;
+                    String newSheetName = null != finalWork.getWorksheets().get(name) ? name + num : name;
                     // 开始合并
                     Worksheet worksheetS = finalWork.getWorksheets().add(newSheetName);
                     worksheetS.copy(worksheet);
                     int count1 = finalWork.getWorksheets().getCount();
+                    num ++;
                     log.info("页数:{}",count1);
                 }
             }

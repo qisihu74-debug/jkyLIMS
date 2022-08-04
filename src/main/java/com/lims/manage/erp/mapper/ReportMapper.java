@@ -179,8 +179,14 @@ public interface ReportMapper {
     List<ReportRecordEntity> historyList(@Param("reportCode") String reportCode, @Param("reportType") String reportType, @Param("sealType") String sealType,
                                          @Param("ids") List<Integer> ids,@Param("startDate") Date startDate,@Param("endDate") Date endDate);
 
+    List<ReportRecordEntity> historyListZj(@Param("reportCode") String reportCode, @Param("reportType") String reportType, @Param("sealType") String sealType,
+                                         @Param("ids") List<Integer> ids,@Param("startDate") Date startDate,@Param("endDate") Date endDate);
+
 
     List<ReportRecordEntity> exportRecords(@Param("reportCode") String reportCode, @Param("reportType") String reportType, @Param("sealType") String sealType,
+                                           @Param("ids") List<Integer> ids,@Param("startDate") Date startDate,@Param("endDate") Date endDate);
+
+    List<ReportRecordEntity> exportRecordsZj(@Param("reportCode") String reportCode, @Param("reportType") String reportType, @Param("sealType") String sealType,
                                            @Param("ids") List<Integer> ids,@Param("startDate") Date startDate,@Param("endDate") Date endDate);
 
     @Select("update test_report_record set inspector=#{inspector} where report_code=#{reportCode}")
