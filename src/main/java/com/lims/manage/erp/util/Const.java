@@ -131,6 +131,14 @@ public class Const {
      */
     public static final String Applicant_Info = "23";
     /**
+     * 任务领取
+     */
+    public static final String TASK_GET = "24";
+    /**
+     * 试验检测
+     */
+    public static final String TASK_TEST = "25";
+    /**
      * 常规图片后缀名大全。
      */
    public static final  String[] nameSuffixS ={"tiff","pjp","jfif","bmp","webp","pjpeg","avif","tif","jpg","svgz","png","xbm","dib","jxl","jpeg","gif","svg","ico"};

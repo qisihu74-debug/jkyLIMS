@@ -600,7 +600,7 @@ public class TaskController {
     }
 
     /**
-     * 删除附件
+     * 删除附件post_select_instrument
      * @param itemId
      * @return
      */

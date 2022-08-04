@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.lims.manage.erp.config.PoiConfig;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.Const;
@@ -61,6 +62,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -94,6 +96,8 @@ public class TaskServiceImpl implements TaskService {
     private EntrustFileTableDao entrustFileTableDao;
     @Autowired
     private TestEntrustedTaskRelDao testEntrustedTaskRelDao;
+    @Autowired
+    private LogManagerService logManagerService;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -505,9 +509,6 @@ public class TaskServiceImpl implements TaskService {
             //更新任务单状态为已领样
             taskMapper.updateEntrustById(taskTestEntity.getId(), 2);
         }
-        // 更新样品状态 test_sample state = 1。 在检。
-        //更新样品状态为领样
-//        sampleEntityMapper.updateSampleState(paramVo.getSampleId(),1);
         // 抢单时间
         java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
         taskTestEntity.setReceiveTime(currentDate);
@@ -524,6 +525,18 @@ public class TaskServiceImpl implements TaskService {
                 e.fillInStackTrace();
             }
         }
+        //记录日志
+        StringBuilder stringBuilder1 = new StringBuilder();
+        stringBuilder1.append(" 任务id"+taskTestEntity.getId());
+        stringBuilder1.append(" 任务编号:"+taskTestEntity.getCode());
+        stringBuilder1.append(" 检测人:"+taskTestEntity.getInspector());
+        stringBuilder1.append(" 记录人:"+taskTestEntity.getRecorder());
+        stringBuilder1.append(" 复核人:"+taskTestEntity.getReviewer());
+        stringBuilder1.append(" 报告制作人:"+taskTestEntity.getReportProducer());
+        stringBuilder1.append(" 记录人:"+taskTestEntity.getRecorder());
+        stringBuilder1.append(" 样品状态描述:"+taskTestEntity.getSampleStateDescription());
+        stringBuilder1.append(" 领样人:"+taskTestEntity.getSampler());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "任务单领取\n\t"+stringBuilder1.toString(), Const.TASK_GET, true);
         taskMapper.updateTestTask(taskTestEntity);
         return true;
     }
@@ -545,6 +558,22 @@ public class TaskServiceImpl implements TaskService {
                     e.fillInStackTrace();
                 }
             }
+        }
+        if(!CollectionUtils.isEmpty(taskTestEntitys)){
+            //记录日志
+            StringBuilder stringBuilder1 = new StringBuilder();
+            for(TaskTestEntity taskTestEntity  : taskTestEntitys){
+                stringBuilder1.append(" 任务id"+taskTestEntity.getId());
+                stringBuilder1.append(" 任务编号:"+taskTestEntity.getCode());
+                stringBuilder1.append(" 检测人:"+taskTestEntity.getInspector());
+                stringBuilder1.append(" 记录人:"+taskTestEntity.getRecorder());
+                stringBuilder1.append(" 复核人:"+taskTestEntity.getReviewer());
+                stringBuilder1.append(" 报告制作人:"+taskTestEntity.getReportProducer());
+                stringBuilder1.append(" 记录人:"+taskTestEntity.getRecorder());
+                stringBuilder1.append(" 样品状态描述:"+taskTestEntity.getSampleStateDescription());
+                stringBuilder1.append(" 领样人:"+taskTestEntity.getSampler());
+            }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "任务单领取\n\t"+stringBuilder1.toString(), Const.TASK_GET, true);
         }
         int i = taskMapper.batchUpdateTestTask(taskTestEntitys);
        if(i==0){
@@ -1032,6 +1061,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int uploadOriginalRecord(OriginalRecordParamVo paramVo, MultipartFile file) {
         //获取委托单信息
         EntrustEntity entrustBaseInfo = taskMapper.getEntrustBaseInfo(paramVo.getTaskId());
@@ -1049,6 +1079,10 @@ public class TaskServiceImpl implements TaskService {
             String name = file.getOriginalFilename();
             String[] strings = name.split("\\.");
             upload = MinIoUtil.upload("upload-original-record", file, entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + "." + strings[strings.length - 1]);
+            if(!StringUtils.isEmpty(upload)){
+                String[] arrays = upload.split("\\?");
+                upload = arrays[0];
+            }
             fileUrlStr = entrustBaseInfo.getId() + "-" + paramVo.getSampleId() + "-" + paramVo.getCheckItemId() + "." + strings[strings.length - 1];
             fileName = strings[0] + "." + strings[strings.length - 1];
         }
@@ -1058,10 +1092,17 @@ public class TaskServiceImpl implements TaskService {
                 taskMapper.updateEntrustById(entrustBaseInfo.getId(), 5);
             }
         }
+        //记录日志
+        StringBuilder stringBuilder1 = new StringBuilder();
+        stringBuilder1.append(" 检测项id"+sampleItemInstrumentEntity.getItemId());
+        stringBuilder1.append(" 检测项附件名:"+fileUrlStr + ":" + fileName);
+        stringBuilder1.append(" 附件链接:"+ upload );
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "上传附件\n\t"+stringBuilder1.toString(), Const.TASK_GET, true);
         return taskMapper.updateOriginalFile(upload, entrustBaseInfo.getId(), paramVo.getSampleId(), paramVo.getCheckItemId(), fileUrlStr, fileName);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean uploadingBatch(List<Integer> ids, MultipartFile file) {
         List<SampleItemInstrumentEntity> entityList = new ArrayList<>();
         for (Integer id : ids) {
@@ -1075,6 +1116,10 @@ public class TaskServiceImpl implements TaskService {
                 String name = file.getOriginalFilename();
                 String[] strings = name.split("\\.");
                 upload = MinIoUtil.upload("upload-original-record", file, fileUrlLongId + "." + strings[strings.length - 1]);
+                if(!StringUtils.isEmpty(upload)){
+                    String[] arrays = upload.split("\\?");
+                    upload = arrays[0];
+                }
                 fileUrlStr = fileUrlLongId + "." + strings[strings.length - 1];
                 fileName = strings[0] + "." + strings[strings.length - 1];
             }
@@ -1083,6 +1128,17 @@ public class TaskServiceImpl implements TaskService {
             sampleItemInstrumentEntity.setFileUrlStr(fileUrlStr);
             sampleItemInstrumentEntity.setItemFileName(fileName);
             entityList.add(sampleItemInstrumentEntity);
+        }
+
+        if(!CollectionUtils.isEmpty(entityList)){
+            //记录日志
+            StringBuilder stringBuilder1 = new StringBuilder();
+            for(SampleItemInstrumentEntity sampleItemInstrumentEntity : entityList){
+                stringBuilder1.append(" 检测项id"+sampleItemInstrumentEntity.getItemId());
+                stringBuilder1.append(" 检测项附件名:"+sampleItemInstrumentEntity.getFileUrlStr() + ":" + sampleItemInstrumentEntity.getItemFileName());
+                stringBuilder1.append(" 附件链接:"+ sampleItemInstrumentEntity.getOriginUrl() );
+            }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "上传附件\n\t"+stringBuilder1.toString(), Const.TASK_GET, true);
         }
         taskMapper.updateTestEntrustedSampleCheckitemRel(entityList);
         return true;
@@ -1148,11 +1204,26 @@ public class TaskServiceImpl implements TaskService {
                 testDetectionDao.updateTaskPassorno(sampleItemInstrumentEntity);
                 // 删除设备仪器
                 testDetectionDao.deleteInstrument(itemId);
+                //记录日志
+                StringBuilder stringBuilder1 = new StringBuilder();
+                stringBuilder1.append(" 检测项id"+sampleItemInstrumentEntity.getItemId());
+                stringBuilder1.append(" 检测项附件清除:");
+                stringBuilder1.append(" 检测项开始时间清除:");
+                stringBuilder1.append(" 检测项结束时间清除:");
+                stringBuilder1.append(" 检测项描述信息:"+sampleItemInstrumentEntity.getOpinion());
+                stringBuilder1.append(" 删除设备仪器记录:");
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-驳回\n\t"+stringBuilder1.toString(), Const.TASK_TEST, true);
                 return "撤回成功，检测项回到初始状态";
             }
             if (state == 3) {
                 // 检测项复核通过
                 taskMapper.updateState(itemId, 3, opinion);
+                //记录日志
+                StringBuilder stringBuilder1 = new StringBuilder();
+                stringBuilder1.append(" 检测项id"+itemId);
+                stringBuilder1.append(" 检测项描述信息:"+opinion);
+                stringBuilder1.append(" 检测项状态: " + state);
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-复核通过\n\t"+stringBuilder1.toString(), Const.TASK_TEST, true);
                 SampleItemInstrumentEntity sampleItemInstrumentEntity2 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
                 if (sampleItemInstrumentEntity2 != null && sampleItemInstrumentEntity2.getEntrustId() != null) {
                     EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(sampleItemInstrumentEntity2.getEntrustId());
@@ -1173,10 +1244,22 @@ public class TaskServiceImpl implements TaskService {
                 taskTestEntity.setState(6);
                 // 任务单 复核成功 记录复核时间。
                 taskTestEntity.setReviewTime(new Date(System.currentTimeMillis()));
+                //记录日志
+                StringBuilder stringBuilder2 = new StringBuilder();
+                stringBuilder2.append(" 任务单id"+testTaskId);
+                stringBuilder2.append("  任务单复核时间 :"+new Timestamp(taskTestEntity.getReviewTime().getTime()));
+                stringBuilder2.append(" 任务单状态: " + state);
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-任务单复核成功\n\t"+stringBuilder2.toString(), Const.TASK_TEST, true);
                 taskMapper.updateTestTask(taskTestEntity);
                 return "任务单复核成功";
             }
         }
+        //记录日志
+        StringBuilder stringBuilder2 = new StringBuilder();
+        stringBuilder2.append(" 检测项id"+itemId);
+        stringBuilder2.append(" 检测项描述信息:"+opinion);
+        stringBuilder2.append(" 检测项状态: " + state);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-检测项状态驳回\n\t"+stringBuilder2.toString(), Const.TASK_TEST, true);
         // state = 4 检测项状态驳回
         int status = taskMapper.updateState(itemId, state, opinion);
         if (status > 0) {
@@ -1206,12 +1289,21 @@ public class TaskServiceImpl implements TaskService {
             }
         }
         SampleItemInstrumentEntity sampleItemInstrumentEntity = new SampleItemInstrumentEntity();
-        sampleItemInstrumentEntity.setStartTime(null);
+        if(!StringUtils.isEmpty(sampleItemInstrumentEntity2.getStartTime())){
+            sampleItemInstrumentEntity.setStartTime(sampleItemInstrumentEntity2.getStartTime());
+        }
         sampleItemInstrumentEntity.setItemId(itemId);
         sampleItemInstrumentEntity.setOriginUrl(null);
         sampleItemInstrumentEntity.setFileUrlStr(null);
-        sampleItemInstrumentEntity.setEndTime(null);
+        if(!StringUtils.isEmpty(sampleItemInstrumentEntity2.getEndTime())){
+            sampleItemInstrumentEntity.setEndTime(sampleItemInstrumentEntity2.getEndTime());
+        }
         sampleItemInstrumentEntity.setItemFileName(null);
+        //记录日志
+        StringBuilder stringBuilder2 = new StringBuilder();
+        stringBuilder2.append(" 检测项id"+itemId);
+        stringBuilder2.append(" 检测项附件清除:"+sampleItemInstrumentEntity2.getOriginUrl());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-删除附件\n\t"+stringBuilder2.toString(), Const.TASK_TEST, true);
         testDetectionDao.updateTaskPassorno(sampleItemInstrumentEntity);
         return "成功";
     }
@@ -1223,6 +1315,17 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public int updatePersonInfo(PersonInfoVo vo) {
+        //记录日志
+        StringBuilder stringBuilder1 = new StringBuilder();
+        stringBuilder1.append(" 任务id"+vo.getTaskId());
+        stringBuilder1.append(" 检测人:"+vo.getInspector());
+        stringBuilder1.append(" 记录人:"+vo.getRecorder());
+        stringBuilder1.append(" 复核人:"+vo.getReviewer());
+        stringBuilder1.append(" 报告制作人:"+vo.getReportProducer());
+        stringBuilder1.append(" 记录人:"+vo.getRecorder());
+        stringBuilder1.append(" 样品状态描述:"+vo.getSampleStateDescription());
+        stringBuilder1.append(" 领样人:"+vo.getSampler());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "任务单修改\n\t"+stringBuilder1.toString(), Const.TASK_GET, true);
         return taskMapper.updatePersonInfo(vo);
     }
 
@@ -1288,6 +1391,16 @@ public class TaskServiceImpl implements TaskService {
             list.add(taskStatsItemVo);
             itemId = taskStatsVo.getIntegers()[i];
         }
+        if(!CollectionUtils.isEmpty(list)){
+            //记录日志
+            StringBuilder stringBuilder1 = new StringBuilder();
+            for(TaskStatsItemVo taskStatsItemVo :list){
+                stringBuilder1.append(" 检测项id"+taskStatsItemVo.getItemId());
+                stringBuilder1.append(" 检测项描述信息:"+taskStatsItemVo.getRemark());
+                stringBuilder1.append(" 检测项状态: " + taskStatsItemVo.getState());
+            }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-复核\n\t"+stringBuilder1.toString(), Const.TASK_TEST, true);
+        }
         taskMapper.batchReview(list);
         // 通过任务单 获取检测项状态 =3 通过状态
         if(taskStatsVo.getState()==3){
@@ -1304,6 +1417,12 @@ public class TaskServiceImpl implements TaskService {
             taskTestEntity.setState(6);
             // 任务单 复核成功 记录复核时间。
             taskTestEntity.setReviewTime(new Date(System.currentTimeMillis()));
+            //记录日志
+            StringBuilder stringBuilder2 = new StringBuilder();
+            stringBuilder2.append(" 任务单id"+taskStatsVo.getTaskId());
+            stringBuilder2.append("  任务单复核时间 :"+new Timestamp(taskTestEntity.getReviewTime().getTime()));
+            stringBuilder2.append(" 任务单状态: " + taskTestEntity.getState());
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-任务单复核成功\n\t"+stringBuilder2.toString(), Const.TASK_TEST, true);
             taskMapper.updateTestTask(taskTestEntity);
             return "任务单复核成功";
         }
