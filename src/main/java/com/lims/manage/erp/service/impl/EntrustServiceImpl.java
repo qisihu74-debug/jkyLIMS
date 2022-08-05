@@ -355,7 +355,7 @@ public class EntrustServiceImpl implements EntrustService {
             MapUtils.queue.clear();
             return "新建委托成功";
         }
-            return "新建委托失败,！！！";
+            return "当前网络不稳定，请稍候重试！！！";
     }
 
     @Override
@@ -3014,7 +3014,7 @@ public class EntrustServiceImpl implements EntrustService {
         MapUtils.queueCopy.clear();
         return "新建委托成功";
         }
-            return "新建委托失败！！！";
+        return "当前网络不稳定，请稍候重试！！！";
     }
 
     @Override
