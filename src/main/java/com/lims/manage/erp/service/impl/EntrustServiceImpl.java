@@ -354,11 +354,8 @@ public class EntrustServiceImpl implements EntrustService {
             entityMapper.insertEntrustInfo(basisInfo);
             MapUtils.queue.clear();
             return "新建委托成功";
-        }else {
-            Thread.sleep(200);
-            MapUtils.queue.clear();
-            return "新建委托失败,请再次点击保存尝试";
         }
+            return "新建委托失败,！！！";
     }
 
     @Override
@@ -3015,14 +3012,9 @@ public class EntrustServiceImpl implements EntrustService {
                     +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount(), Const.ENTRUST_FOUND, true);
         entityMapper.insertEntrustInfo(basisInfo);
         MapUtils.queueCopy.clear();
-            return "新建委托成功";
-        }else {
-            // 日志输出。
-            Debug.println("新增委托再来一单日志队列输出\t",vo+"");
-            Thread.sleep(200);
-            MapUtils.queueCopy.clear();
-            return "再来一单新建委托失败,请再次点击保存尝试";
+        return "新建委托成功";
         }
+            return "新建委托失败！！！";
     }
 
     @Override
