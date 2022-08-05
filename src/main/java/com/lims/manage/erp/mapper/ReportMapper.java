@@ -39,6 +39,13 @@ public interface ReportMapper {
     List<String> getSampleNames(Long entrustId);
 
     /**
+     * 委托下的任务单号
+     * @param entrustId
+     * @return
+     */
+    List<String> getTaskCodes(Long entrustId);
+
+    /**
      * 查询下载报告列表--科室
      *
      * @return

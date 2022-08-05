@@ -44,6 +44,8 @@ public class ReportRecordEntity {
      * 样品名称
      */
     private String sampleName;
+    @TableField(exist = false)
+    private String aliasName;
     /**
      * 本单价钱
      */
