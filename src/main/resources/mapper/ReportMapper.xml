@@ -474,10 +474,10 @@
         DATE_FORMAT(t1.report_complete_time,'%Y-%m-%d') as reportCompleteTime,
         t1.report_url as reportUrl
         FROM
-        test_report_record t1 left join test_task t2 on t1.entrustment_id = t2.entrustment_id
+        test_task t2
+        LEFT JOIN test_report_record t1 ON t1.entrustment_id = t2.entrustment_id
         WHERE
         t2.report_complete = 1
-        and t1.report_complete_time is not NULL
         <if test="taskCode!=null and taskCode!=''">
             and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
         </if>
