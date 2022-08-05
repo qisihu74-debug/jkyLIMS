@@ -23,6 +23,10 @@ import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.apache.xmlbeans.XmlOptions;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTc;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTcPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
@@ -333,6 +337,11 @@ public class AsposeUtil {
                     XWPFTableCell newCell = targetRow.addNewTableCell();
                     //复制单元格的样式给新单元格
                     newCell.getCTTc().setTcPr(sourceCell.getCTTc().getTcPr());
+                    //设置单元格居中
+                    CTTc ctTc = newCell.getCTTc();
+                    CTTcPr ctTcPr = ctTc.addNewTcPr();
+                    ctTcPr.addNewVAlign().setVal(STVerticalJc.CENTER);
+                    ctTc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
                     //得到复制单元格的段落
                     List<XWPFParagraph> sourceParagraphs = sourceCell.getParagraphs();
                     if (org.springframework.util.StringUtils.isEmpty(sourceCell.getText())) {
