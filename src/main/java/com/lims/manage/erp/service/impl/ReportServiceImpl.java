@@ -240,6 +240,7 @@ public class ReportServiceImpl implements ReportService {
         PageHelper.startPage(pageNum, pageSize);
         List<ReportListVo> list = reportMapper.reportDownloadList(userTeamIds, search);
         for (ReportListVo reportListVo : list) {
+            //设置样品信息
             List<String> sampleNames = reportMapper.getSampleNames(reportListVo.getId());
             StringBuilder sampleName = new StringBuilder();
             for (int i = 0; i < sampleNames.size(); i++) {
@@ -249,6 +250,9 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
             reportListVo.setSampleName(sampleName.toString());
+            //设置任务单号
+            List<String> taskCodes = reportMapper.getTaskCodes(reportListVo.getId());
+            reportListVo.setTaskCodes(taskCodes);
         }
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
@@ -335,6 +339,11 @@ public class ReportServiceImpl implements ReportService {
         reportListVo.setReportCode(search);
         reportListVo.setDeptIds(userTeamIds);
         List<ReportListVo> list = reportMapper.reportDownloadListHistory(reportListVo);
+        //设置任务单号
+        for (ReportListVo reportListVo1 : list) {
+            List<String> taskCodes = reportMapper.getTaskCodes(reportListVo1.getId());
+            reportListVo1.setTaskCodes(taskCodes);
+        }
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
