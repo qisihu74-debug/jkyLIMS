@@ -589,6 +589,7 @@ public class ReportServiceImpl implements ReportService {
     public Boolean preserve(ReportPreserveVo vo) {
         ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(vo.getEntrustmentId());
         if (reportRecordEntity1 != null) {
+            //处理报告检测项数据
             List<ReportRecordDetailEntity> insertList = Lists.newArrayList();
             List<ReportRecordDetailEntity> updateList = Lists.newArrayList();
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
@@ -598,20 +599,9 @@ public class ReportServiceImpl implements ReportService {
                 List<Long> checkItemIds = recordDetailEntityMapper.getCheckItemIds(reportRecordEntity1.getId(),vo.getTaskId(),e.getSampleId());
                 if (checkItemIds.contains(e.getCheckItemId())) {
                     updateList.add(e);
-//                    recordDetailEntityMapper.updateByRecordIdSelective(e);
                 } else {
                     insertList.add(e);
-//                    recordDetailEntityMapper.insert(e);
                 }
-//                int insert1;
-//                if (checkItemIds.contains(e.getCheckItemId())) {
-//                    insert1 = recordDetailEntityMapper.updateByRecordIdSelective(e);
-//                } else {
-//                    insert1 = recordDetailEntityMapper.insert(e);
-//                }
-//                if (insert1 < 1) {
-//                    return false;
-//                }
             }
             //批量更新
             if(!CollectionUtils.isEmpty(updateList)){
@@ -621,7 +611,7 @@ public class ReportServiceImpl implements ReportService {
             if(!CollectionUtils.isEmpty(insertList)){
                 recordDetailEntityMapper.batchInsert(insertList);
             }
-            //校验其他任务单是否完成
+            //处理报告数据
             if(vo.getReportComplete() == 2){
                 reportRecordEntity1.setState(2+"");
             }else{
@@ -631,16 +621,11 @@ public class ReportServiceImpl implements ReportService {
                 }else{
                     reportRecordEntity1.setState(1+"");
                     reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
-                    reportRecordEntity1.setReportCode(getMaxCode(vo.getEntrustmentId()));
+                    if(reportRecordEntity1.getReportCode() == null){//当前任务单号为空时才会设置新的报告编号
+                        reportRecordEntity1.setReportCode(getMaxCode(vo.getEntrustmentId()));
+                    }
                 }
             }
-//            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
-//            if(allReportComplete.contains(2)){
-//                reportRecordEntity1.setState(2+"");
-//            }else{
-//                reportRecordEntity1.setState(1+"");
-//                reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
-//            }
             //修改任务报告状态
             taskMapper.updateReportStatus(vo.getReportComplete(), vo.getTaskId());
             int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
@@ -649,26 +634,21 @@ public class ReportServiceImpl implements ReportService {
             }
             return true;
         } else {
-            //获取父级code
-//            Long deptId = taskMapper.getDeptByEntrustId(vo.getEntrustmentId());
-//            String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
+            //保存报告检测项数据
             long recordId = GenID.getID();
             List<ReportRecordDetailEntity> checkInfos = vo.getCheckInfos();
             List<ReportRecordDetailEntity> tempCheckInfos = Lists.newArrayList();
             for (ReportRecordDetailEntity e : checkInfos) {
                 e.setRecordId(recordId);
                 e.setTaskId(vo.getTaskId());
-//                int insert1 = recordDetailEntityMapper.insert(e);
-//                if (insert1 < 1) {
-//                    return false;
-//                }
                 tempCheckInfos.add(e);
             }
             recordDetailEntityMapper.batchInsert(tempCheckInfos);
+            //保存报告数据
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity(vo);
-            if(vo.getReportComplete() == 2){
+            if(vo.getReportComplete() == 2){//未完成
                 reportRecordEntity.setState(2+"");
-            }else{
+            }else{//该任务单已完成，判断有没有其他任务单，和其他任务单状态
                 List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
                 if(allReportComplete.contains(2)){
                     reportRecordEntity.setState(2+"");
@@ -678,26 +658,7 @@ public class ReportServiceImpl implements ReportService {
                     reportRecordEntity.setReportCode(getMaxCode(vo.getEntrustmentId()));
                 }
             }
-//            List<Integer> allReportComplete = taskMapper.getAllReportComplete(vo.getEntrustmentId(),vo.getTaskId());
-//            if(allReportComplete.contains(2)){
-//                reportRecordEntity.setState(2+"");
-//            }else{
-//                reportRecordEntity.setState(1+"");
-//                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-//            }
-            //生成报告编号
-//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-//            String year = sdf.format(new Date());
-//            Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
-//            if (maxCode == null) {
-//                reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-0001");
-//            } else {
-//                int newCode = maxCode + 1;
-//                reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
-//            }
-            //设置报告编号
             reportRecordEntity.setId(recordId);
-            reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
             //设置为最终报告
             reportRecordEntity.setType(0+"");
             //修改任务报告状态
