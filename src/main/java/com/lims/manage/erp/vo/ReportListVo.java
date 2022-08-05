@@ -10,6 +10,7 @@ public class ReportListVo {
     private Long taskId;
     private Long recordId;
     private String taskCode;
+    private List<String> taskCodes;
     private String reportCode;
     private String sampleName;
     private String countPrice;
