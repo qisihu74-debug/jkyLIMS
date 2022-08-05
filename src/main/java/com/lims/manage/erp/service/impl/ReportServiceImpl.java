@@ -873,20 +873,24 @@ public class ReportServiceImpl implements ReportService {
             result = templateEntityMapper.getReportTemplateList(allReportId);
         }
         //根据ids获取所属的产品id集合
+        List<ReportTemplateEntity> list = null;
         Map<Integer,List<String>> map = new HashedMap();
-        List<ReportTemplateEntity> list = templateEntityMapper.getProductIdsByIds(allReportId);
-        for (ReportTemplateEntity entity:list) {
-            if (map.get(entity.getId()) == null){
-                List<String> stringList = Lists.newArrayList();
-                stringList.add(entity.getProductId());
-                map.put(entity.getId(),stringList);
-            }else {
-                List<String> strings = map.get(entity.getId());
-                strings.add(entity.getProductId());
-                map.put(entity.getId(),strings);
+        if (allReportId.size()>0){
+            list = templateEntityMapper.getProductIdsByIds(allReportId);
+        }
+        if (!CollectionUtils.isEmpty(list)){
+            for (ReportTemplateEntity entity:list) {
+                if (map.get(entity.getId()) == null){
+                    List<String> stringList = Lists.newArrayList();
+                    stringList.add(entity.getProductId());
+                    map.put(entity.getId(),stringList);
+                }else {
+                    List<String> strings = map.get(entity.getId());
+                    strings.add(entity.getProductId());
+                    map.put(entity.getId(),strings);
+                }
             }
         }
-
         for (ReportTemplateEntity bean:result) {
             bean.setProductIds(map.get(bean.getId()));
         }
@@ -901,20 +905,24 @@ public class ReportServiceImpl implements ReportService {
             result = templateEntityMapper.getReportTemplateList(allReportId);
         }
         //根据ids获取所属的产品id集合
+        List<ReportTemplateEntity> list = null;
         Map<Integer,List<String>> map = new HashedMap();
-        List<ReportTemplateEntity> list = templateEntityMapper.getProductIdsByIds(allReportId);
-        for (ReportTemplateEntity entity:list) {
-            if (map.get(entity.getId()) == null){
-                List<String> stringList = Lists.newArrayList();
-                stringList.add(entity.getProductId());
-                map.put(entity.getId(),stringList);
-            }else {
-                List<String> strings = map.get(entity.getId());
-                strings.add(entity.getProductId());
-                map.put(entity.getId(),strings);
+        if (allReportId.size()>0){
+            list = templateEntityMapper.getProductIdsByIds(allReportId);
+        }
+        if (!CollectionUtils.isEmpty(list)){
+            for (ReportTemplateEntity entity:list) {
+                if (map.get(entity.getId()) == null){
+                    List<String> stringList = Lists.newArrayList();
+                    stringList.add(entity.getProductId());
+                    map.put(entity.getId(),stringList);
+                }else {
+                    List<String> strings = map.get(entity.getId());
+                    strings.add(entity.getProductId());
+                    map.put(entity.getId(),strings);
+                }
             }
         }
-
         for (ReportTemplateEntity bean:result) {
             bean.setProductIds(map.get(bean.getId()));
         }
@@ -1090,7 +1098,11 @@ public class ReportServiceImpl implements ReportService {
             try {
                 //如果上传的是excel转为pdf
                 String originalFilename = file.getOriginalFilename();
-                if ((!originalFilename.contains(".xls")) && (!originalFilename.contains(".xlsx"))){
+                boolean b = false;
+                if (originalFilename.contains(".xls") || originalFilename.contains(".xlsx") || originalFilename.contains(".pdf")){
+                    b = true;
+                }
+                if (!b){
                     return false;
                 }
                 if (originalFilename.contains(".pdf")){
@@ -1408,6 +1420,7 @@ public class ReportServiceImpl implements ReportService {
         ReportResBean resBean = new ReportResBean();
         Map<String,String> mesMap = new HashedMap();
         ReportRecordEntity reportRecordEntity = null;
+        EntrustAddVo entrustHistoryDetail = null;
         //TODO 兼容中间报告
         Long aLong = recordEntityMapper.checkExist(id);
         if (aLong == null){
@@ -1439,7 +1452,7 @@ public class ReportServiceImpl implements ReportService {
                     int maxRow = cells.getMaxRow();
                     int column = cells.getMaxColumn();
                     //存放表头信息
-                    EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
+                    entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 0) {
                         //样品信息
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
@@ -1488,7 +1501,7 @@ public class ReportServiceImpl implements ReportService {
                                             cells.get(n,j).setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectPart())?"——":entrustHistoryDetail.getProjectPart());
                                         }
                                         if ("${样品信息}".equals(string)){
-                                            cells.get(n,j).setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
+                                            cells.get(n,j).setValue("样品名称：" + (sampleEntity.getAliasName() == null ? "——" : sampleEntity.getAliasName())
                                                     + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~","~"))
                                                     + "；样品数量：" + (sampleEntity.getSampleQuantity() == null ? "——" : sampleEntity.getSampleQuantity())
                                                     + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
@@ -1670,7 +1683,7 @@ public class ReportServiceImpl implements ReportService {
         Workbook topDoc = new Workbook(fileStream);
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
         logger.debug("本次报告总页数:{}",totalPageNew);
-        setReportTop1(topDoc,entrustAddVo,reportRecordEntity,totalPageNew);
+        setReportTop1(topDoc,entrustAddVo,reportRecordEntity,totalPageNew,entrustHistoryDetail);
         //合并成一个excel
         Workbook document = workbookCopy(topDoc,map);
         //处理页码
@@ -1753,6 +1766,7 @@ public class ReportServiceImpl implements ReportService {
         ReportResBean resBean = new ReportResBean();
         Map<String,String> mesMap = new HashedMap();
         ReportRecordEntity reportRecordEntity = null;
+        EntrustAddVo entrustHistoryDetail = null;
         //TODO 兼容中间报告
         Long aLong = recordEntityMapper.checkExist(id);
         if (aLong == null){
@@ -1794,7 +1808,7 @@ public class ReportServiceImpl implements ReportService {
                     int maxRow = cells.getMaxRow();
                     int column = cells.getMaxColumn();
                     //存放表头信息
-                    EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
+                    entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 0) {
                         //样品信息
                         SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
@@ -2114,7 +2128,7 @@ public class ReportServiceImpl implements ReportService {
         InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.xls");
         Workbook topDoc = new Workbook(fileStream);
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
-        setReportTop1(topDoc,entrustAddVo,reportRecordEntity,totalPageNew);
+        setReportTop1(topDoc,entrustAddVo,reportRecordEntity,totalPageNew,entrustHistoryDetail);
         //合并成一个excel
         Workbook document = workbookCopy(topDoc,map);
         //处理页码
@@ -2149,12 +2163,25 @@ public class ReportServiceImpl implements ReportService {
      * @param topDoc
      * @param entrustAddVo
      */
-    private void setReportTop1(Workbook topDoc, EntrustAddVo entrustAddVo,ReportRecordEntity reportRecordEntity,int totalPage) {
+    private void setReportTop1(Workbook topDoc, EntrustAddVo entrustAddVo,ReportRecordEntity reportRecordEntity,int totalPage,EntrustAddVo entrustHistoryDetail) {
         Worksheet worksheet = topDoc.getWorksheets().get(0);
         Cells cells = worksheet.getCells();
         cells.get("Y6").setValue(reportRecordEntity.getReportCode());
         cells.get("Y7").setValue(totalPage+"");
-        cells.get("J32").setValue(reportRecordEntity.getSampleName());
+        //TODO 设置为样品别名
+        List<SampleEntity> samples = entrustHistoryDetail.getSamples();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i=0;i<samples.size();i++){
+            if (StringUtils.isNotEmpty(samples.get(i).getAliasName())){
+                stringBuilder.append(samples.get(i).getAliasName());
+            }else {
+                stringBuilder.append(samples.get(i).getSampleName());
+            }
+            if (samples.size()-1 != i){
+                stringBuilder.append("、");
+            }
+        }
+        cells.get("J32").setValue(stringBuilder.toString());
         cells.get("J33").setValue(entrustAddVo.getEntrustCompany());
         cells.get("J34").setValue(entrustAddVo.getCheckPurpose());
     }
