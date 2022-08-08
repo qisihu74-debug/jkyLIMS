@@ -917,9 +917,7 @@ public class ReportController {
             response.reset();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition",
-                    "attachment;filename=" + new String(("报告盖章登记表" + desc+".xlsx").getBytes("gb2312"), "ISO8859-1"));
-            //response.setHeader("Content-Disposition", "attachment;fileName=sealRecords.xlsx");
+            response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("报告盖章登记表"+ desc+".xlsx", "UTF-8") );
             outputStream.write(bytes);
         }catch (Exception e1){
             logger.error("导出盖章历史失败:{}",e1);
