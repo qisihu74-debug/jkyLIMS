@@ -1667,14 +1667,24 @@ public class EntrustServiceImpl implements EntrustService {
             PageHelper.clearPage();
             dataList = entityMapper.selectEntrustTaskHistoryList(entrustHistoryEntity);
         }
-        if(!CollectionUtils.isEmpty(dataList)){
-            for (EntrustHistoryEntity entity : dataList) {
+        PageInfo pageInfo = new PageInfo();
+        //分页
+        List<EntrustHistoryEntity> subList;
+        if (dataList.size() > 10 && dataList.size() / 10 >= entrustHistoryEntity.getPageNum()) {
+            subList = dataList.subList((entrustHistoryEntity.getPageNum() - 1) * entrustHistoryEntity.getPageSize(), entrustHistoryEntity.getPageNum() * entrustHistoryEntity.getPageSize());
+        } else {
+            subList = dataList.subList((entrustHistoryEntity.getPageNum() - 1) * entrustHistoryEntity.getPageSize(), dataList.size());
+        }
+        //设置样品信息
+        if(!CollectionUtils.isEmpty(subList)){
+            for (EntrustHistoryEntity entity : subList) {
                 List<EntrustSampleInfoVo> entrustSampleInfos = entityMapper.getEntrustSampleInfos(entity.getId());
                 entity.setSampleInfoVos(entrustSampleInfos);
             }
         }
-        PageInfo<EntrustHistoryEntity> result = PageInfoUtils.list2PageInfo(dataList, entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
-        return result;
+        pageInfo.setList(subList);
+        pageInfo.setTotal(dataList.size());
+        return pageInfo;
     }
 
     @Override
