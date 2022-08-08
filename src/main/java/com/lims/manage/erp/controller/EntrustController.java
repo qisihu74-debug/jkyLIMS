@@ -91,7 +91,6 @@ public class EntrustController {
         catch (Exception e){
             // 日志输出。
             Debug.println("新增委托日志异常输出\t",e+"");
-            MapUtils.queue.clear();
             return ResultUtil.error("新建委托失败,请联系管理员！！！");
         }
 
@@ -613,7 +612,6 @@ public class EntrustController {
         catch (Exception e){
             // 日志输出。
             Debug.println("新增委托再来一单日志异常输出\t",e+"");
-            MapUtils.queueCopy.clear();
             return ResultUtil.error("再来一单新建委托失败,请联系管理员！！！");
         }
 

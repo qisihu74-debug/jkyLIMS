@@ -138,9 +138,7 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) throws InterruptedException {
-        if (MapUtils.queue.size() == 0){
-            MapUtils.queue.add("mark");
+    public synchronized String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) throws Exception {
             //存放委托基本信息==》test_entrusted
             EntrustEntity basisInfo = new EntrustEntity(vo);
             long id = GenID.getID();
@@ -352,10 +350,7 @@ public class EntrustServiceImpl implements EntrustService {
                     +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
                     +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount(), Const.ENTRUST_FOUND, true);
             entityMapper.insertEntrustInfo(basisInfo);
-            MapUtils.queue.clear();
             return "新建委托成功";
-        }
-            return "当前网络不稳定，请稍候重试！！！";
     }
 
     @Override
@@ -2791,9 +2786,7 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) throws InterruptedException {
-        if(MapUtils.queueCopy.size()==0){
-            MapUtils.queueCopy.add("mark");
+    public synchronized String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) throws Exception {
         // 获取前台得到的 vo.getId()
         long old = vo.getId();
         //存放委托基本信息==》test_entrusted
@@ -3011,10 +3004,7 @@ public class EntrustServiceImpl implements EntrustService {
                     +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
                     +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount(), Const.ENTRUST_FOUND, true);
         entityMapper.insertEntrustInfo(basisInfo);
-        MapUtils.queueCopy.clear();
         return "新建委托成功";
-        }
-        return "当前网络不稳定，请稍候重试！！！";
     }
 
     @Override
