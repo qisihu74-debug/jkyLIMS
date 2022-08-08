@@ -243,6 +243,16 @@ public interface ReportRecordEntityMapper {
 
     List<ReportDetailListVo> reportList(ReportDetailListParamVo paramVo);
 
+    /**
+     * 报告查询--不带任务单号
+     * @param paramVo
+     * @return
+     */
+    List<ReportDetailListVo> reportList0808(ReportDetailListParamVo paramVo);
+    List<ReportDetailListVo> reportListMid0808(ReportDetailListParamVo paramVo);
+    List<ReportDetailListVo> reportListTask0808(ReportDetailListParamVo paramVo);
+    List<ReportDetailListVo> reportListTaskMid0808(ReportDetailListParamVo paramVo);
+
     @Update("update test_report_record set category = '电子章' where qys_docment_id = #{documentId}")
     void updateSeal(@Param("documentId") Long documentId);
 

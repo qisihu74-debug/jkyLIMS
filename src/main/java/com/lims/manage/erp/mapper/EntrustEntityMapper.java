@@ -473,4 +473,11 @@ public interface EntrustEntityMapper extends BaseMapper {
      * 通过委托单id集合 获取委托单位信息。
      */
     List<TestCompanyJsonEntity> getCompanyList(@Param("companyIds") Integer[] companyIds);
+
+    /**
+     * 查询委托下的任务和团队信息
+     * @param entrustId
+     * @return
+     */
+    List<TaskCodeVo> getTaskAndTeam(Long entrustId);
 }

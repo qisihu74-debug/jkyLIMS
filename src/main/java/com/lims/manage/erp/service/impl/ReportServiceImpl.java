@@ -67,18 +67,7 @@ import com.lims.manage.erp.util.PDFHelper3;
 import com.lims.manage.erp.util.PageInfoUtils;
 import com.lims.manage.erp.util.PdfDoc;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
-import com.lims.manage.erp.vo.ReportDetailListParamVo;
-import com.lims.manage.erp.vo.ReportDetailListVo;
-import com.lims.manage.erp.vo.ReportDetailVo;
-import com.lims.manage.erp.vo.ReportHistoryDetailVo;
-import com.lims.manage.erp.vo.ReportListVo;
-import com.lims.manage.erp.vo.ReportPreserveVo;
-import com.lims.manage.erp.vo.ReportProductRelVo;
-import com.lims.manage.erp.vo.ReportSampleDetailVo;
-import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -2406,12 +2395,36 @@ public class ReportServiceImpl implements ReportService {
                 e.printStackTrace();
             }
         }
-        List<ReportDetailListVo> reportDetailListVos = entityMapper.reportList(paramVo);
-        PageInfo<ReportDetailListVo> pageInfo = PageInfoUtils.pageList(reportDetailListVos,paramVo.getPageNum(),
-                paramVo.getPageSize());
-//        PageInfo<ReportDetailListVo> pageInfo = PageInfoUtils.list2PageInfo(reportDetailListVos,
-//                paramVo.getPageNum(),
-//                paramVo.getPageSize());
+        PageHelper.startPage(paramVo.getPageNum(),paramVo.getPageSize());
+        List<ReportDetailListVo> reportDetailListVos;
+        if(paramVo.getReportTypeStatus() == 0){//最终报告查询
+            if(paramVo.getTaskCode() == null){//无任务单号多条
+                reportDetailListVos = entityMapper.reportList0808(paramVo);
+                //处理任务单号
+                if(!CollectionUtils.isEmpty(reportDetailListVos)){
+                    for (ReportDetailListVo reportDetailListVo : reportDetailListVos) {
+                        List<TaskCodeVo> taskAndTeam = entrustEntityMapper.getTaskAndTeam(reportDetailListVo.getEntrustId());
+                        reportDetailListVo.setTaskCodes(taskAndTeam);
+                    }
+                }
+            }else{//有任务单号单条
+                reportDetailListVos = entityMapper.reportListTask0808(paramVo);
+            }
+        }else{//中间报告查询
+            if(paramVo.getTaskCode() == null){//无任务单号多条
+                reportDetailListVos = entityMapper.reportListMid0808(paramVo);
+                //处理任务单号
+                if(!CollectionUtils.isEmpty(reportDetailListVos)){
+                    for (ReportDetailListVo reportDetailListVo : reportDetailListVos) {
+                        List<TaskCodeVo> taskAndTeam = entrustEntityMapper.getTaskAndTeam(reportDetailListVo.getEntrustId());
+                        reportDetailListVo.setTaskCodes(taskAndTeam);
+                    }
+                }
+            }else{//有任务单号单条
+                reportDetailListVos = entityMapper.reportListTaskMid0808(paramVo);
+            }
+        }
+        PageInfo<ReportDetailListVo> pageInfo = new PageInfo<>(reportDetailListVos);
         return pageInfo;
     }
 

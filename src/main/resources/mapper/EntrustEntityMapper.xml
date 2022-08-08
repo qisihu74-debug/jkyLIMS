@@ -963,5 +963,16 @@
         </if>
     </select>
 
+    <select id="getTaskAndTeam" resultType="com.lims.manage.erp.vo.TaskCodeVo">
+        SELECT
+            t1.task_code taskCode,
+            t2.name teamName
+        FROM
+            test_task AS t1
+                LEFT JOIN test_team AS t2 ON t1.dept_id = t2.id
+        WHERE
+            t1.entrustment_id = #{entrustId}
+    </select>
+
 
 </mapper>

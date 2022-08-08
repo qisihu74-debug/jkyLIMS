@@ -7,6 +7,10 @@ import java.util.List;
 @Data
 public class ReportDetailListVo {
     /**
+     * 委托单ID
+     */
+    private Long entrustId;
+    /**
      * 委托单编号
      */
     private String entrustmentNo;
