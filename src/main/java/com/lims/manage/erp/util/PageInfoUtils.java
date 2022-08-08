@@ -2,6 +2,7 @@ package com.lims.manage.erp.util;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.vo.ReportDetailListVo;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -44,6 +45,20 @@ public class PageInfoUtils {
         pageInfo.setSize(pageInfo.getList().size());
         int starRow = arrayList.size() < pageSize * pageNum ? 1 + pageSize * (pageNum - 1) : 0;
         pageInfo.setStartRow(starRow);
+        return pageInfo;
+    }
+
+    public static PageInfo<ReportDetailListVo> pageList(List<ReportDetailListVo> list, Integer pageNum, Integer pageSize){
+        PageInfo pageInfo = new PageInfo();
+        //分页
+        List<ReportDetailListVo> subList;
+        if (list.size() > 10 && list.size() / 10 >= pageNum) {
+            subList = list.subList((pageNum - 1) * pageSize, pageNum * pageSize);
+        } else {
+            subList = list.subList((pageNum - 1) * pageSize, list.size());
+        }
+        pageInfo.setList(subList);
+        pageInfo.setTotal(list.size());
         return pageInfo;
     }
 }

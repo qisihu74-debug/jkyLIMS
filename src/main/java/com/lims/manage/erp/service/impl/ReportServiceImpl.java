@@ -2407,9 +2407,11 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         List<ReportDetailListVo> reportDetailListVos = entityMapper.reportList(paramVo);
-        PageInfo<ReportDetailListVo> pageInfo = PageInfoUtils.list2PageInfo(reportDetailListVos,
-                paramVo.getPageNum(),
+        PageInfo<ReportDetailListVo> pageInfo = PageInfoUtils.pageList(reportDetailListVos,paramVo.getPageNum(),
                 paramVo.getPageSize());
+//        PageInfo<ReportDetailListVo> pageInfo = PageInfoUtils.list2PageInfo(reportDetailListVos,
+//                paramVo.getPageNum(),
+//                paramVo.getPageSize());
         return pageInfo;
     }
 
