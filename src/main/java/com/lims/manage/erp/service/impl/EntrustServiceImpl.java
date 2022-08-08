@@ -3511,8 +3511,25 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
         }
-        PageInfo<TestEntrustedTaskRelVo> result = PageInfoUtils.list2PageInfo(list, testEntrustedTaskRelVo.getPageNum(), testEntrustedTaskRelVo.getPageSize());
-        return result;
+        Integer pageNum = testEntrustedTaskRelVo.getPageNum();
+        Integer pageSize = testEntrustedTaskRelVo.getPageSize();
+        if(StringUtils.isEmpty(pageNum)||pageNum<=0){
+            pageNum = 1;
+        }
+        if(StringUtils.isEmpty(pageSize)||pageSize<=0){
+            pageSize = 10;
+        }
+        PageInfo pageInfo = new PageInfo();
+        //分页
+        List<TestEntrustedTaskRelVo> subList;
+        if (list.size() > 10 && list.size() / 10 >= pageNum) {
+            subList = list.subList((pageNum - 1) * pageSize, pageNum * pageSize);
+        } else {
+            subList = list.subList((pageNum - 1) * pageSize, list.size());
+        }
+        pageInfo.setList(subList);
+        pageInfo.setTotal(list.size());
+        return pageInfo;
     }
 
     @Override
@@ -3633,8 +3650,25 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
         }
-        PageInfo<ClientOrderdetailVo> result = PageInfoUtils.list2PageInfo(list, clientOrderdetailVo.getPageNum(), clientOrderdetailVo.getPageSize());
-        return result;
+            Integer pageNum = clientOrderdetailVo.getPageNum();
+            Integer pageSize = clientOrderdetailVo.getPageSize();
+            if(StringUtils.isEmpty(pageNum)||pageNum<=0){
+                pageNum = 1;
+            }
+            if(StringUtils.isEmpty(pageSize)||pageSize<=0){
+                pageSize = 10;
+            }
+            PageInfo pageInfo = new PageInfo();
+            //分页
+            List<ClientOrderdetailVo> subList;
+            if (list.size() > 10 && list.size() / 10 >= pageNum) {
+                subList = list.subList((pageNum - 1) * pageSize, pageNum * pageSize);
+            } else {
+                subList = list.subList((pageNum - 1) * pageSize, list.size());
+            }
+            pageInfo.setList(subList);
+            pageInfo.setTotal(list.size());
+            return pageInfo;
     }
 
 
