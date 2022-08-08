@@ -21,7 +21,7 @@ import java.util.Map;
 public interface EntrustService {
 
 
-    String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) throws InterruptedException;
+    String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) throws Exception;
 
     /**
      * 修改委托测试 new
@@ -231,7 +231,7 @@ public interface EntrustService {
      * @param vo
      * @return
      */
-    String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) throws InterruptedException;
+    String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) throws Exception;
 
     Long checkEntrustId(Long entrustId);
 
