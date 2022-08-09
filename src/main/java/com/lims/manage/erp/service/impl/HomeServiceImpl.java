@@ -280,7 +280,7 @@ public class HomeServiceImpl implements HomeService {
         methodRenurnData(menuIdList, strings, personalMenu);
         if (personalMenu != null) {
             // 统计看板数据。
-            methodTaskKanbanData(deptIds, personalMenu,isDepartment,department);
+            methodTaskKanbanData(deptIds, personalMenu,isDepartment,department,userId);
         }
         return personalMenu;
     }
@@ -317,8 +317,9 @@ public class HomeServiceImpl implements HomeService {
      * @param returnData 用户拥有菜单数据
      * @param isDepartment 是否有无所属科室  （验证团队与检测项是否存在） ：true = 存在 false = B不存在
      * @param department 获取当前用户所在科室id
+     * @param userId 获取当前用户id
      */
-    void methodTaskKanbanData(List<Long> deptIds, List<LabelValueVo> returnData,Boolean isDepartment,Long department ) {
+    void methodTaskKanbanData(List<Long> deptIds, List<LabelValueVo> returnData,Boolean isDepartment,Long department,Long userId ) {
         /**
          *  一：1、无所属科室 （查询时全部的）
          * 	二： 1、所属团队 ： 部门信息唯一。
@@ -373,20 +374,6 @@ public class HomeServiceImpl implements HomeService {
             }else{
                 reportInt = reportList.size();
             }
-            // 报告审核
-            List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, null,null);
-            if(CollectionUtils.isEmpty(approvalList)){
-                approvalInt = 0;
-            }else {
-                approvalInt = approvalList.size();
-            }
-            // 报告签发
-            List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, null,null);
-            if(CollectionUtils.isEmpty(verifyList)){
-                verifyInt = 0;
-            }else {
-                verifyInt = verifyList.size();
-            }
             // 待发出报告
             List<ReportRecordEntity> sendList = reportRecordEntityMapper.getSendListCount("1", null);
             if(CollectionUtils.isEmpty(sendList)){
@@ -414,20 +401,6 @@ public class HomeServiceImpl implements HomeService {
             else {
                 reportInt = reportList.size();
             }
-            // 报告审核
-            List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, listUser,null);
-            if(CollectionUtils.isEmpty(approvalList)){
-                approvalInt = 0;
-            } else{
-                approvalInt = approvalList.size();
-            }
-            // 报告签发
-            List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, listUser,null);
-            if(CollectionUtils.isEmpty(verifyList)){
-                verifyInt = 0;
-            }else {
-                verifyInt = verifyList.size();
-            }
             // 待发出报告
             List<ReportRecordEntity> sendList = reportRecordEntityMapper.getSendListCount("1", departmentIds);
             if(CollectionUtils.isEmpty(sendList)){
@@ -453,6 +426,25 @@ public class HomeServiceImpl implements HomeService {
             else {
                 entrustCount = entrustEntityMapper.selectCountUnallocated(0,deptIds);
             }
+        }
+        /**
+         *  用户id
+         */
+        Set<Long> userList = new HashSet<>();
+        userList.add(userId);
+        // 报告审核
+            List<ReportApprovalVo> approvalList = reportApprovalMapper.getReportApprovalList(null, userList,null);
+            if(CollectionUtils.isEmpty(approvalList)){
+                approvalInt = 0;
+            } else{
+                approvalInt = approvalList.size();
+            }
+        // 报告签发
+        List<ReportApprovalVo> verifyList = reportApprovalMapper.getVerifyList(null, userList,null);
+        if(CollectionUtils.isEmpty(verifyList)){
+            verifyInt = 0;
+        }else {
+            verifyInt = verifyList.size();
         }
         // 循环 输出赋值。
         for (LabelValueVo data : returnData) {
