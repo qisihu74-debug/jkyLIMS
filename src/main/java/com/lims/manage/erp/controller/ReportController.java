@@ -316,14 +316,14 @@ public class ReportController {
      * @return
      */
     @GetMapping("sealApprove")
-    public Result seal(Long entrustId,String title,String fileType) {
+    public Result seal(Long entrustId,String title,String fileType,String reportType) {
         if (entrustId == null) {
             return ResultUtil.error("缺少必要的参数！");
         }
         if (StringUtils.isEmpty(title) || StringUtils.isEmpty(fileType)){
             return ResultUtil.error("缺少合同发起参数！");
         }
-        Boolean flag = reportService.seal(entrustId,title,fileType);
+        Boolean flag = reportService.seal(entrustId,title,fileType,reportType);
         if (flag) {
             return ResultUtil.success("向契约锁发起盖章合同申请成功!");
         } else {
@@ -503,9 +503,9 @@ public class ReportController {
         MinioClient client = MinIoUtil.minioClient;
         ReportResBean resBean = null;
         if ("原材检测".equals(reqBean.getType())){
-            resBean = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+            resBean = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId(),reqBean.getReportType());
         }else {
-            resBean = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
+            resBean = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo(),reqBean.getReportType());
         }
         //保存告警信息
         List<AlertEntity> list = Lists.newArrayList();
@@ -550,9 +550,9 @@ public class ReportController {
         MinioClient client = MinIoUtil.minioClient;
         ReportResBean resBean = null;
         if ("原材检测".equals(reqBean.getType())){
-            resBean = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId());
+            resBean = reportService.submitDownLoad(client, reqBean.getList(), reqBean.getId(),reqBean.getReportType());
         }else {
-            resBean = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo());
+            resBean = reportService.submitDownLoadMix(client, reqBean.getList(), reqBean.getId(),reqBean.getMixInfo(),reqBean.getReportType());
         }
         url = resBean.getUrl();
         //预览excel转pdf
@@ -637,12 +637,12 @@ public class ReportController {
     public Result uploadReport(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file,
                                @RequestParam("code") String code,@RequestParam("conclusion") String conclusion
-            ,@RequestParam("additional") String additional,@RequestParam("mixInfo") String mixInfo,@RequestParam("type") String type) {
+            ,@RequestParam("additional") String additional,@RequestParam("mixInfo") String mixInfo,@RequestParam("type") String type,@RequestParam("reportType") String reportType) {
         if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数！");
         }
         Boolean flag = reportService.uploadReport(reportCode,file,verifyer.split("&")[0],issuer.split("&")[0]
-                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional,mixInfo,type,inspector);
+                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),code,conclusion,additional,mixInfo,type,inspector,reportType);
         if (flag) {
             return ResultUtil.success("报告文件上传成功！");
         }else {
@@ -717,17 +717,6 @@ public class ReportController {
         }catch (Exception e){
             logger.error("预览合并后的报告异常:{}",e);
         }
-    }
-
-    @GetMapping("testInsert")
-    public void test(String url,Long entrustId) {
-        try {
-            String s = reportService.insertPicToPdf(url, entrustId,null);
-            System.out.println("============="+s);
-        }catch (Exception e){
-            logger.error("===");
-        }
-
     }
 
     @PostMapping("reportList")

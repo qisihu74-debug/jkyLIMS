@@ -40,4 +40,5 @@ public class QiYueSuoSeaLBean {
      *接收人姓名
      */
     private String receiverName;
+    private String reportType;
 }

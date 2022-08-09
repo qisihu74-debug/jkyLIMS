@@ -57,11 +57,31 @@ import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.MapUtils;
 import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.PageInfoUtils;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.CheckItemDeptVo;
+import com.lims.manage.erp.vo.CheckItemDetailVo;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
+import com.lims.manage.erp.vo.ClientOrderdetailVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.EntrustSampleInfoVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.ReportApprovalVo;
+import com.lims.manage.erp.vo.ReportNodeVo;
+import com.lims.manage.erp.vo.ReportProgressStateVo;
+import com.lims.manage.erp.vo.ReportProgressVo;
+import com.lims.manage.erp.vo.SampleDetailAddVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.SamplesAddVo;
+import com.lims.manage.erp.vo.TaskPriceVo;
+import com.lims.manage.erp.vo.TaskProgressStateVo;
+import com.lims.manage.erp.vo.TaskProgressVo;
+import com.lims.manage.erp.vo.TaskVo;
+import com.lims.manage.erp.vo.TemplateSampleVo;
+import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
+import com.lims.manage.erp.vo.UpdateReportTeamVo;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -85,7 +105,17 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -1873,7 +1903,7 @@ public class EntrustServiceImpl implements EntrustService {
         ReportProgressVo result;
         //TODO 兼容中间报告
         ReportNodeVo reportRecordEntity = null;
-        Long id = recordEntityMapper.checkExist(entrustmentId);
+        Long id = recordEntityMapper.checkExist(entrustmentId,"0");
         if (id == null){
             reportRecordEntity = recordEntityMapper.getReportNodeByZjEntrustId(entrustmentId);
         }else {

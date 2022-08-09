@@ -1034,7 +1034,7 @@ public class ReportServiceImpl implements ReportService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean uploadReport(String reportCode, MultipartFile file, String verifyer,
                                 String issuer, Long verifyerId, Long issuerId, String code,
-                                String conclusion,String additional,String mixInfo,String type,String inspector) {
+                                String conclusion,String additional,String mixInfo,String type,String inspector,String reportType) {
         //解析code
         Map<String,List<String>> map = JSON.parseObject(code, Map.class);
         List<ParamEntity> entities = Lists.newArrayList();
@@ -1067,10 +1067,10 @@ public class ReportServiceImpl implements ReportService {
                 ReportResBean resBean = null;
                 if ("配合比".equals(type)){
                     TestSampleMixInfoEntity mixInfoEntity = JSON.parseObject(mixInfo,TestSampleMixInfoEntity.class);
-                    resBean = this.submitDownLoadMix(client, list, Long.parseLong(reportCode),mixInfoEntity);
+                    resBean = this.submitDownLoadMix(client, list, Long.parseLong(reportCode),mixInfoEntity,reportType);
                     url = resBean.getUrl();
                 }else {
-                    resBean = this.submitDownLoad(client, list, Long.parseLong(reportCode));
+                    resBean = this.submitDownLoad(client, list, Long.parseLong(reportCode),reportType);
                     url = resBean.getUrl();
                 }
                 flag = true;
@@ -1124,7 +1124,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         //更新签名
-        Long along = recordEntityMapper.checkExist(Long.parseLong(reportCode));
+        Long along = recordEntityMapper.checkExist(Long.parseLong(reportCode),reportType);
         //TODO (报告) 兼容中间报告
         if (along == null){
             reportMapper.updateVerAndIssZj(reportCode, verifyer, issuer, verifyerId,new Date(System.currentTimeMillis()), issuerId);
@@ -1135,7 +1135,7 @@ public class ReportServiceImpl implements ReportService {
         String url1 = "";
         try {
             //TODO (报告) 兼容中间报告
-            url1 = insertPicToPdf(url,Long.parseLong(reportCode),inspector);
+            url1 = insertPicToPdf(url,Long.parseLong(reportCode),inspector,reportType);
             logger.info("设置签名信息：{}",url1);
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)){
                 url = url1;
@@ -1189,7 +1189,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Boolean seal(Long entrustId, String title, String fileType) {
+    public Boolean seal(Long entrustId, String title, String fileType,String reportType) {
         //step1 根据文件类型创建合同文档
         String url = "";
         try {
@@ -1223,7 +1223,7 @@ public class ReportServiceImpl implements ReportService {
                     //根据委托id存储文档id
                     List<QiYueSuoDocment> result = response.getResult();
                     //TODO 兼容中间报告
-                    Long aLong = entityMapper.checkExist(entrustId);
+                    Long aLong = entityMapper.checkExist(entrustId,reportType);
                     if (aLong == null){
                         entityMapper.updateDocIdAndStateZj(entrustId, result.get(0).getDocumentId(), "2");
                     }else {
@@ -1243,7 +1243,7 @@ public class ReportServiceImpl implements ReportService {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();
         //TODO 兼容中间报告
-        Long aLong = entityMapper.checkExist(reqBean.getEntrustId());
+        Long aLong = entityMapper.checkExist(reqBean.getEntrustId(),reqBean.getReportType());
         if (aLong == null){
             entity = entityMapper.selectMessageByZjEntrustId(reqBean.getEntrustId());
         }else {
@@ -1268,7 +1268,7 @@ public class ReportServiceImpl implements ReportService {
         //设置合同标识
         List<ReportRecordEntity> entity = Lists.newArrayList();
         //TODO 兼容中间报告
-        Long aLong = entityMapper.checkExist(reqBean.getEntrustId());
+        Long aLong = entityMapper.checkExist(reqBean.getEntrustId(),reqBean.getReportType());
         if (aLong == null){
             entity = entityMapper.selectMessageByZjEntrustId(reqBean.getEntrustId());
         }else {
@@ -1396,7 +1396,7 @@ public class ReportServiceImpl implements ReportService {
 
     @SneakyThrows
     @Override
-    public ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id) {
+    public ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id,String reportType) {
         int totalPageNew = 0;
         Map<Integer, Integer> countMap = new LinkedHashMap();
         Map<Integer, Workbook> map = new LinkedHashMap<>();
@@ -1406,7 +1406,7 @@ public class ReportServiceImpl implements ReportService {
         ReportRecordEntity reportRecordEntity = null;
         EntrustAddVo entrustHistoryDetail = null;
         //TODO 兼容中间报告
-        Long aLong = recordEntityMapper.checkExist(id);
+        Long aLong = recordEntityMapper.checkExist(id,reportType);
         if (aLong == null){
             reportRecordEntity = selectByEntrustIdZj(id);
         }else {
@@ -1742,7 +1742,7 @@ public class ReportServiceImpl implements ReportService {
 
     @SneakyThrows
     @Override
-    public ReportResBean submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id,TestSampleMixInfoEntity mixInfoEntity) {
+    public ReportResBean submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id,TestSampleMixInfoEntity mixInfoEntity,String reportType) {
         int totalPageNew = 0;
         Map<Integer, Integer> countMap = new LinkedHashMap();
         Map<Integer,Workbook> map = new HashedMap();
@@ -1752,7 +1752,7 @@ public class ReportServiceImpl implements ReportService {
         ReportRecordEntity reportRecordEntity = null;
         EntrustAddVo entrustHistoryDetail = null;
         //TODO 兼容中间报告
-        Long aLong = recordEntityMapper.checkExist(id);
+        Long aLong = recordEntityMapper.checkExist(id,reportType);
         if (aLong == null){
             reportRecordEntity = selectByEntrustIdZj(id);
         }else {
@@ -2319,11 +2319,11 @@ public class ReportServiceImpl implements ReportService {
      * @throws Exception
      */
     @Override
-    public String insertPicToPdf(String pdfUrl, Long entrustId,String inspector) throws Exception {
+    public String insertPicToPdf(String pdfUrl, Long entrustId,String inspector,String reportType) throws Exception {
         HashSet<String> delList = new HashSet<>();
         //TODO (报告) 兼容中间报告
         ReportRecordEntity detailByEntrustId = null;
-        Long aLong = recordEntityMapper.checkExist(entrustId);
+        Long aLong = recordEntityMapper.checkExist(entrustId,reportType);
         if (aLong == null){
             detailByEntrustId = reportMapper.getDetailByEntrustIdZj(entrustId);//审核人、签发人
         }else {

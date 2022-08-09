@@ -720,16 +720,6 @@
                  LEFT JOIN test_standard_file t2 ON t1.standard_id = t2.id
     </select>
 
-    <select id="getJudgeBasisRe" resultType="java.lang.String">
-        SELECT
-        CONCAT(t2.CODE, "《", t2.`name`, "》")
-        FROM (SELECT standard_id
-              FROM test_entrusted_sample_standard_rel
-              WHERE sample_id = #{sampleId}
-                AND entrustment_id = #{entrustId}) t1
-                 LEFT JOIN test_standard_file t2 ON t1.standard_id = t2.id
-    </select>
-
     <select id="getOriginalTemplate" resultType="java.lang.String">
         SELECT NAME
         FROM test_original_record_template

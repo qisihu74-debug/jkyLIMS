@@ -1,5 +1,5 @@
 /**
-  * Copyright 2022 bejson.com 
+  * Copyright 2022 bejson.com
   */
 package com.lims.manage.erp.entity;
 import lombok.Data;
@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Data
 public class QiYueSuoReqBean {
+    private String reportType;
     /**
      * 合同创建人手机号码
      */
