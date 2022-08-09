@@ -52,7 +52,8 @@
         remark,
         user_id,
         address_name,
-        task_id
+        task_id,
+        record_id
     FROM
     test_entrusted_task_rel
     WHERE task_id = #{taskId}

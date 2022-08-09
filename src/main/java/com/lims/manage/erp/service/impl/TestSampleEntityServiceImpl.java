@@ -339,6 +339,17 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             String replace2 = replace1.replace("\"", "");
             sampleEntity.setOutward(replace2);
         }
+        //修改样品数量时，处理样品编号
+        StringBuilder newSampleCode = new StringBuilder();
+        String sampleCode = sampleEntity.getSampleCode();
+        String prefix = sampleCode.substring(0, 13);
+        newSampleCode.append(prefix);
+        if(sampleEntity.getQuantityPerGroup() > 1){
+            newSampleCode.append("-01~");
+            String numStr = new DecimalFormat("00").format(sampleEntity.getQuantityPerGroup());
+            newSampleCode.append(numStr);
+        }
+        sampleEntity.setSampleCode(newSampleCode.toString());
         return testSampleEntityMapper.updateByPrimaryKeyNotAll(sampleEntity);
     }
 

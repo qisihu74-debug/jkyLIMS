@@ -17,6 +17,10 @@ public class ReqBean {
     private List<ConclusionEntity> list;
     private Long id;
     private String type;
+    /**
+     * 报告类型 0最终报告，1中间报告
+     */
+    private String reportType;
     private TestSampleMixInfoEntity mixInfo;
 
 }

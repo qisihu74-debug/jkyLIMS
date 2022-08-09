@@ -38,6 +38,11 @@
         from test_report_record_detail
         where id = #{id,jdbcType=BIGINT}
     </delete>
+    <delete id="deleteByRecordId" parameterType="java.lang.Long">
+        delete
+        from test_report_record_detail
+        where record_id = #{recordId,jdbcType=BIGINT}
+    </delete>
     <insert id="insert" parameterType="com.lims.manage.erp.entity.ReportRecordDetailEntity">
         insert into test_report_record_detail (id, record_id, check_item_id,
                                                check_item_name, specs_content, check_result,
