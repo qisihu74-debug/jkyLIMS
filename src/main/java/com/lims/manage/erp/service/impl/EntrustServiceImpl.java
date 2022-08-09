@@ -2762,6 +2762,8 @@ public class EntrustServiceImpl implements EntrustService {
             String[] sealTypes = new String[0];
             entrustAddVo.setSealTypes(sealTypes);
         }
+        // 业务受理人：=登录人
+        entrustAddVo.setBusinessAcceptor(ShiroUtils.getUserInfo().getName());
         List<SampleEntity> sampleCollection = entrustAddVo.getSamples();
         Integer sampleId = 0;
             if (!CollectionUtils.isEmpty(sampleCollection))
