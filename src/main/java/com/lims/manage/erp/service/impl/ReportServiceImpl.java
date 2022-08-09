@@ -2456,6 +2456,9 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo middleReportList(Integer pageNum, Integer pageSize,Integer state, String search) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        if(userTeamIds.size() == 0){
+            userTeamIds = null;
+        }
         PageHelper.startPage(pageNum, pageSize);
         List<ReportListVo> list = reportMapper.getMiddleReportList(userTeamIds,state, search);
         for (ReportListVo reportListVo : list) {

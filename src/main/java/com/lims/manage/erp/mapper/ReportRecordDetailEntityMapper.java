@@ -13,6 +13,13 @@ import java.util.List;
 public interface ReportRecordDetailEntityMapper {
     int deleteByPrimaryKey(Long id);
 
+    /**
+     * 根据报告主键删除报告详情信息
+     * @param recordId
+     * @return
+     */
+    int deleteByRecordId(Long recordId);
+
     int insert(ReportRecordDetailEntity record);
 
     int batchInsert(@Param("records") List<ReportRecordDetailEntity> records);
