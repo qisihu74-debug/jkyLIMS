@@ -637,6 +637,7 @@
             t1.remark,
             t1.record_id recordId,
             t1.state,
+            t3.type As reportType,
             IFNULL( t3.state, t4.state ) reportState,
             IFNULL( IFNULL( t3.report_code, t4.report_code ), '——' ) reportCode
         FROM
