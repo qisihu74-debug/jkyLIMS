@@ -107,6 +107,8 @@ public interface ReportMapper {
      */
     List<String> getJudgeBasis(Long id);
 
+    List<String> getJudgeBasisRe(Long id);
+
     /**
      * 查询检测依据
      * @param id

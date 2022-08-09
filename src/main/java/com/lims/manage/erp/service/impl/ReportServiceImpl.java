@@ -64,10 +64,21 @@ import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.HttpDownloadUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.PDFHelper3;
-import com.lims.manage.erp.util.PageInfoUtils;
 import com.lims.manage.erp.util.PdfDoc;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
+import com.lims.manage.erp.vo.ReportDetailListParamVo;
+import com.lims.manage.erp.vo.ReportDetailListVo;
+import com.lims.manage.erp.vo.ReportDetailVo;
+import com.lims.manage.erp.vo.ReportHistoryDetailVo;
+import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.ReportProductRelVo;
+import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.vo.TaskCodeVo;
+import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -955,6 +966,20 @@ public class ReportServiceImpl implements ReportService {
     public String getJudgeBasis(Long id) {
         StringBuilder result = new StringBuilder("");
         List<String> judgeBasis = reportMapper.getJudgeBasis(id);
+        if (!CollectionUtils.isEmpty(judgeBasis)) {
+            for (int i = 0; i < judgeBasis.size(); i++) {
+                result.append(judgeBasis.get(i));
+                if (judgeBasis.size() - 1 != i) {
+                    result.append(",");
+                }
+            }
+        }
+        return result.toString();
+    }
+
+    public String getJudgeBasisRe(Long id) {
+        StringBuilder result = new StringBuilder("");
+        List<String> judgeBasis = reportMapper.getJudgeBasisRe(id);
         if (!CollectionUtils.isEmpty(judgeBasis)) {
             for (int i = 0; i < judgeBasis.size(); i++) {
                 result.append(judgeBasis.get(i));
@@ -2176,7 +2201,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         //处理模板下不同样品描述
-        String judgeBasis = getJudgeBasis(entrustId);
+        String judgeBasis = getJudgeBasisRe(entrustId);
         for (SampleEntity sampleEntity :samples) {
             ConclusionEntity conclusionEntity =  new ConclusionEntity();
             conclusionEntity.setSampleId(sampleEntity.getId());
