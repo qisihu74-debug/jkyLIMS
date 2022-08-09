@@ -3450,6 +3450,13 @@ public class EntrustServiceImpl implements EntrustService {
         }
         //增加日志
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.ENTRUST_file, true);
+        //删除任务流转时同步删除未完成的中间报告数据
+        if(testEntrustedTaskRelVo.getRecordId() != null){
+            //删除报告信息
+            recordEntityMapper.deleteByPrimaryKey(testEntrustedTaskRelVo.getRecordId());
+            //删除检测项信息
+            reportRecordDetailEntityMapper.deleteByRecordId(testEntrustedTaskRelVo.getRecordId());
+        }
         testEntrustedTaskRelDao.deletedData(id);
         return true;
     }

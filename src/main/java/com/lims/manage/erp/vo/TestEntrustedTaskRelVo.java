@@ -91,4 +91,8 @@ public class TestEntrustedTaskRelVo {
     @DateTimeFormat(pattern="yyyy-MM-dd")
     @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date acceptanceDate;
+    /**
+     * 报告信息主键
+     */
+    private Long recordId;
 }
