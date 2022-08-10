@@ -19,6 +19,10 @@ import java.util.List;
 public class ClientOrderdetailVo {
 
     /**
+     * 委托单id
+     */
+    private Long entrustmentId;
+    /**
      * 委托单编号
      */
     private Integer entrustmentNo;

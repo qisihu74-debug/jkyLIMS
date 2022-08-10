@@ -194,6 +194,11 @@ public class SampleEntity {
      */
     @TableField(exist = false)
     private Integer oldSampleid ;
+    /**
+     * 委托单id
+     */
+    @TableField(exist = false)
+    private Long entrustId;
 
     /**
      * 样品下检测项、检测依据、总价

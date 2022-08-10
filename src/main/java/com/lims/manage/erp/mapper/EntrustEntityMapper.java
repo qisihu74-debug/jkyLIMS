@@ -480,4 +480,15 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     List<TaskCodeVo> getTaskAndTeam(Long entrustId);
+//    测试信息： 获取委托列表
+    List<ClientOrderdetailVo> getEntrustList(ClientOrderdetailVo clientOrderdetailVo);
+    // 获取样品信息
+    List<SampleEntity> getSampleList(@Param("entrustIds") List<Long> entrustIds);
+    // 获取任务单列表
+    List<TaskEntity> getTaskList(@Param("entrustIds") List<Long> entrustIds);
+    // 获取报告列表
+    List<ReportRecordEntity> getReportRecordList(@Param("entrustIds") List<Long> entrustIds);
+    // 获取检测项列表
+    List<SampleItemEntity> getSampleItemList(@Param("entrustIds") List<Long> entrustIds);
+
 }

@@ -781,7 +781,7 @@ public class EntrustController {
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode(fileName+".xlsx", "UTF-8") );
-        PageInfo pageInfo = entrustService.getClientList(clientOrderdetailVo);
+        PageInfo pageInfo = entrustService.getClientListExport(clientOrderdetailVo);
         List<ClientOrderdetailVo> list = Lists.newArrayList();
         if(!CollectionUtils.isEmpty(pageInfo.getList())){
             System.out.println(pageInfo.getList().size());

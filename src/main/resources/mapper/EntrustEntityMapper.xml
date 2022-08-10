@@ -973,5 +973,100 @@
             t1.entrustment_id = #{entrustId}
     </select>
 
+    <select id="getEntrustList" resultType="com.lims.manage.erp.vo.ClientOrderdetailVo">
+        SELECT
+        id as entrustmentId,
+        entrustment_no,
+        acceptance_date,
+        request_date,
+        entrust_people ,
+        project_name ,
+        project_part ,
+        entrust_company ,
+        entrust_company_id ,
+        system_price
+        FROM
+        test_entrusted_info
+        WHERE
+        1=1
+        <if test="companyIds!=null">
+            and entrust_company_id in
+            <foreach collection="companyIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        <if test="projectName!=null and projectName!=''">
+            and project_name LIKE CONCAT('%',#{projectName},'%')
+        </if>
+        <if test="projectPart!=null and projectPart!=''">
+            and project_part LIKE CONCAT('%',#{projectPart},'%')
+        </if>
+        <if test="acceptancebeganDate!=null">
+            and date_format(acceptance_date,'%Y-%m-%d')&gt;= #{acceptancebeganDate,jdbcType=DATE}
+        </if>
+        <if test="acceptanceoverDate!=null">
+            and date_format(acceptance_date,'%Y-%m-%d')&lt;= #{acceptanceoverDate,jdbcType=DATE}
+        </if>
+        <if test="entrustPeople!=null">
+            and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+        </if>
+    </select>
+
+    <select id="getSampleList" resultType="com.lims.manage.erp.entity.SampleEntity">
+    SELECT
+        t1.id sampleId,
+        t1.alias_name ,
+        t1.specs,
+        t1.batch_number,
+        t2.entrustment_id as entrustId
+    FROM
+    test_sample as t1
+    LEFT JOIN test_entrusted_sample_details_rel as t2 ON t1.id = t2.sample_id
+    WHERE t2.entrustment_id in
+        <foreach collection="entrustIds" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getTaskList" resultType="com.lims.manage.erp.entity.TaskEntity">
+        SELECT
+        id taskId,
+        task_code code,
+        entrustment_id  entrustmentId
+        FROM
+        test_task
+        WHERE entrustment_id in
+        <foreach collection="entrustIds" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getReportRecordList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+	SELECT
+		id,
+		report_code reportCode,
+		report_time reportTime,
+        entrustment_id entrustId
+		FROM
+		test_report_record
+		where entrustment_id in
+        <foreach collection="entrustIds" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+    <select id="getSampleItemList" resultType="com.lims.manage.erp.entity.SampleItemEntity">
+        SELECT
+            id itemId,
+            check_item_name,
+            check_item_id,
+            entrust_id entrustId
+        FROM
+        test_entrusted_sample_checkitem_rel
+        WHERE entrust_id in
+        <foreach collection="entrustIds" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
 
 </mapper>

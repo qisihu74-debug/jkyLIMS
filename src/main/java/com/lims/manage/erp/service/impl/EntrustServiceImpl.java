@@ -3568,6 +3568,10 @@ public class EntrustServiceImpl implements EntrustService {
         if(StringUtils.isEmpty(pageSize)||pageSize<=0){
             pageSize = 10;
         }
+        // 如果页码展示数量大于最大数 返回最大数值
+        if(pageSize>list.size()){
+            pageSize = list.size();
+        }
         PageInfo pageInfo = new PageInfo();
         //分页
         List<TestEntrustedTaskRelVo> subList;
@@ -3582,7 +3586,7 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo) {
+    public PageInfo getClientListExport(ClientOrderdetailVo clientOrderdetailVo) {
         List<ClientOrderdetailVo> list = Lists.newArrayList();
         PageHelper.clearPage();
         if(clientOrderdetailVo.getCompanyIds()!=null&&clientOrderdetailVo.getCompanyIds().length==0){
@@ -3591,6 +3595,12 @@ public class EntrustServiceImpl implements EntrustService {
         list = entityMapper.selectClientOrderdetailVoList(clientOrderdetailVo);
         if(!CollectionUtils.isEmpty(list)){
             for(ClientOrderdetailVo clientOrderdetailVo1 :list){
+                if(StringUtils.isEmpty(clientOrderdetailVo1.getProjectName())){
+                    clientOrderdetailVo1.setProjectName("--");
+                }
+                if(StringUtils.isEmpty(clientOrderdetailVo1.getProjectPart())){
+                    clientOrderdetailVo1.setProjectPart("--");
+                }
                 HashSet<String> SampleNameSet = new HashSet<>();
                 HashSet<String> SpecsSet = new HashSet<>();
                 HashSet<String> BatchNumberSet = new HashSet<>();
@@ -3706,6 +3716,10 @@ public class EntrustServiceImpl implements EntrustService {
             }
             if(StringUtils.isEmpty(pageSize)||pageSize<=0){
                 pageSize = 10;
+            }
+            // 如果页码展示数量大于最大数 返回最大数值
+            if(pageSize>list.size()){
+                pageSize = list.size();
             }
             PageInfo pageInfo = new PageInfo();
             //分页
@@ -3845,6 +3859,177 @@ public class EntrustServiceImpl implements EntrustService {
         }
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "处理样品来样时间与委托单受理日期:\t委托单受理日期为:"+(new Timestamp(AcceptanceDate.getTime()))+"\t样品编号"+sampleEntityData.getSampleNumber()+"\t样品来样时间为\t" +sampleEntityData.getSampleTime() + "\t变更后样品来样时间为\t"+sampleData.getReceivedDate(), Const.ENTRUST_FOUND, true);
     }
+    @Override
+    public PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo) {
+        List<ClientOrderdetailVo> list = Lists.newArrayList();
+        PageHelper.clearPage();
+        if(clientOrderdetailVo.getCompanyIds()!=null&&clientOrderdetailVo.getCompanyIds().length==0){
+            clientOrderdetailVo.setCompanyIds(null);
+        }
+        list = entityMapper.getEntrustList(clientOrderdetailVo);
+        // 处理分页数据：
+        Integer pageNum = clientOrderdetailVo.getPageNum();
+        Integer pageSize = clientOrderdetailVo.getPageSize();
+        if(StringUtils.isEmpty(pageNum)||pageNum<=0){
+            pageNum = 1;
+        }
+        if(StringUtils.isEmpty(pageSize)||pageSize<=0){
+            pageSize = 10;
+        }
+        PageInfo pageInfo = new PageInfo();
+        //分页
+        List<ClientOrderdetailVo> subList;
+        if (list.size() > 10 && list.size() / 10 >= pageNum) {
+            subList = list.subList((pageNum - 1) * pageSize, pageNum * pageSize);
+        } else {
+            subList = list.subList((pageNum - 1) * pageSize, list.size());
+        }
+        pageInfo.setList(subList);
+        pageInfo.setTotal(list.size());
+        // 处理List信息：
+        if(!CollectionUtils.isEmpty(subList)){
+            // 根据委托单主键条件进行搜索
+            List<Long> entrustIds = new ArrayList<>();
+            for(ClientOrderdetailVo clientOrderdetailVo0 :subList){
+                if(StringUtils.isEmpty(clientOrderdetailVo0.getProjectName())){
+                    clientOrderdetailVo0.setProjectName("--");
+                }
+                if(StringUtils.isEmpty(clientOrderdetailVo0.getProjectPart())){
+                    clientOrderdetailVo0.setProjectPart("--");
+                }
+                entrustIds.add(clientOrderdetailVo0.getEntrustmentId());
+            }
+            // 根据委托单id 获取 样品信息
+            List<SampleEntity> sampleList = entityMapper.getSampleList(entrustIds);
+            // 获取检测项列表
+            List<SampleItemEntity> itemList  = entityMapper.getSampleItemList(entrustIds);
+            // 获取任务单列表
+            List<TaskEntity> taskList = entityMapper.getTaskList(entrustIds);
+            // 获取报告列表
+            List<ReportRecordEntity> reportList = entityMapper.getReportRecordList(entrustIds);
+            for(ClientOrderdetailVo clientOrderdetailVo1 :subList){
+
+                HashSet<String> SampleNameSet = new HashSet<>();
+                HashSet<String> SpecsSet = new HashSet<>();
+                HashSet<String> BatchNumberSet = new HashSet<>();
+                HashSet<String> CheckItemNameSet = new HashSet<>();
+                if(!CollectionUtils.isEmpty(sampleList)){
+                    for(SampleEntity sampleEntity :sampleList){
+                       if(sampleEntity.getEntrustId().equals(clientOrderdetailVo1.getEntrustmentId())){
+                           if(!StringUtils.isEmpty(sampleEntity.getSampleName())){
+                               SampleNameSet.add(sampleEntity.getSampleName());
+                           }
+                           if(!StringUtils.isEmpty(sampleEntity.getSpecs())){
+                               SpecsSet.add(sampleEntity.getSpecs());
+                           }
+                           if(!StringUtils.isEmpty(sampleEntity.getBatchNumber())){
+                               BatchNumberSet.add(sampleEntity.getBatchNumber());
+                           }
+                       }
+                    }
+                }
+                // 处理检测项信息：
+                if(!CollectionUtils.isEmpty(itemList)){
+                    for(SampleItemEntity sampleItemEntity :itemList)
+                    {
+                        if(sampleItemEntity.getEntrustId()!=null&&sampleItemEntity.getEntrustId().equals(clientOrderdetailVo1.getEntrustmentId())){
+                            CheckItemNameSet.add(sampleItemEntity.getCheckItemName());
+                        }
+                    }
+                }
+                StringBuilder SampleNameB = new StringBuilder();
+                for(String SampleName:SampleNameSet){
+                    SampleNameB.append(SampleName);
+                    SampleNameB.append("、");
+                }
+                StringBuilder SpecsB = new StringBuilder();
+                for(String specs:SpecsSet){
+                    SpecsB.append(specs);
+                    SpecsB.append("、");
+                }
+                StringBuilder BatchNumberB = new StringBuilder();
+                for(String BatchNumber:BatchNumberSet){
+                    BatchNumberB.append(BatchNumber);
+                    BatchNumberB.append("、");
+                }
+                StringBuilder CheckItemNameB = new StringBuilder();
+                for(String CheckItemName:CheckItemNameSet){
+                    CheckItemNameB.append(CheckItemName);
+                    CheckItemNameB.append("、");
+                }
+                if(SampleNameB.length()>1){
+                    clientOrderdetailVo1.setSampleName(SampleNameB.deleteCharAt(SampleNameB.length()-1).toString());
+                }
+                else {
+                    clientOrderdetailVo1.setSampleName("--");
+                }
+                if(SpecsB.length()>1){
+                    clientOrderdetailVo1.setSpecs(SpecsB.deleteCharAt(SpecsB.length()-1).toString());
+                }
+                else {
+                    clientOrderdetailVo1.setSpecs("--");
+                }
+                if(BatchNumberB.length()>1){
+                    clientOrderdetailVo1.setBatchNumber(BatchNumberB.deleteCharAt(BatchNumberB.length()-1).toString());
+                }
+                else {
+                    clientOrderdetailVo1.setBatchNumber("--");
+                }
+                if(CheckItemNameB.length()>1){
+                    clientOrderdetailVo1.setCheckItemName(CheckItemNameB.deleteCharAt(CheckItemNameB.length()-1).toString());
+                }
+                else {
+                    clientOrderdetailVo1.setCheckItemName("--");
+                }
+                // 处理任务单信息。
+                StringBuilder taskCodeB = new StringBuilder();
+                if(!CollectionUtils.isEmpty(taskList)){
+                    for(TaskEntity taskEntity : taskList){
+                        if(taskEntity.getEntrustmentId()!=null&&taskEntity.getEntrustmentId().equals(clientOrderdetailVo1.getEntrustmentId())){
+                        taskCodeB.append(taskEntity.getCode());
+                        taskCodeB.append("、");
+                        }
+                    }
+                }
+                // 报告编号 和 发出日期
+                StringBuilder reportCodeB = new StringBuilder();
+                StringBuilder reportTimeB = new StringBuilder();
+                if(!CollectionUtils.isEmpty(reportList)){
+                    for(ReportRecordEntity reportRecordEntity : reportList){
+                        if(reportRecordEntity.getEntrustId()!=null&&reportRecordEntity.getEntrustId().equals(clientOrderdetailVo1.getEntrustmentId())){
+                            if(reportRecordEntity.getReportCode()!=null){
+                                reportCodeB.append(reportRecordEntity.getReportCode());
+                                reportCodeB.append("、");
+                            }
+                            if(reportRecordEntity.getReportTime()!=null){
+                                reportTimeB.append(DateUtil.formatDate(reportRecordEntity.getReportTime()));
+                                reportTimeB.append("、");
+                            }
+                        }
+                    }
+                }
+                if(reportCodeB.length()>1){
+                    clientOrderdetailVo1.setReportCode(reportCodeB.deleteCharAt(reportCodeB.length()-1).toString());
+                }else {
+                    clientOrderdetailVo1.setReportCode("--");
+                }
+                if(reportTimeB.length()>1){
+                    clientOrderdetailVo1.setReportTime(reportTimeB.deleteCharAt(reportTimeB.length()-1).toString());
+                }
+                else {
+                    clientOrderdetailVo1.setReportTime("--");
+                }
+                if(taskCodeB.length()>1){
+                    clientOrderdetailVo1.setTaskCode(taskCodeB.deleteCharAt(taskCodeB.length()-1).toString());
+                }
+                else {
+                    clientOrderdetailVo1.setTaskCode("--");
+                }
+            }
+        }
+        return pageInfo;
+    }
+
 
 
 }
