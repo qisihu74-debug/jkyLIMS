@@ -105,23 +105,23 @@ public interface ReportMapper {
      * @param id
      * @return
      */
-    List<String> getJudgeBasis(Long id);
+    List<String> getJudgeBasis(Long id,Integer sampleId);
 
-    List<String> getJudgeBasisRe(Long id);
+    List<String> getJudgeBasisRe(Long id,Integer sampleId);
 
     /**
      * 查询检测依据
      * @param id
      * @return
      */
-    List<String> getCheckBasis(Long id);
+    List<String> getCheckBasis(Long id,Integer sampleId);
 
     /**
      * 查询设备
      * @param id
      * @return
      */
-    List<String> getEquipment(Long id);
+    List<String> getEquipment(Long id,Integer sampleId);
 
     int updateReportUrl(Long id,String url,String code);
 

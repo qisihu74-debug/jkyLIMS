@@ -225,21 +225,21 @@ public interface ReportService {
      * @param id
      * @return
      */
-    String getJudgeBasis(Long id);
+    String getJudgeBasis(Long id,Integer sampleId);
 
     /**
      * 查询检测依据
      * @param id
      * @return
      */
-    String getCheckBasis(Long id);
+    String getCheckBasis(Long id,Integer sampleId);
 
     /**
      * 查询设备
      * @param id
      * @return
      */
-    String getEquipment(Long id);
+    String getEquipment(Long id,Integer sampleId);
 
     int updateReportUrl(Long id,String url,String code);
 

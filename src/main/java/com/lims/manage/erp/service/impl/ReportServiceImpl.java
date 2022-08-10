@@ -963,9 +963,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public String getJudgeBasis(Long id) {
+    public String getJudgeBasis(Long id,Integer sampleId) {
         StringBuilder result = new StringBuilder("");
-        List<String> judgeBasis = reportMapper.getJudgeBasis(id);
+        List<String> judgeBasis = reportMapper.getJudgeBasis(id,sampleId);
         if (!CollectionUtils.isEmpty(judgeBasis)) {
             for (int i = 0; i < judgeBasis.size(); i++) {
                 result.append(judgeBasis.get(i));
@@ -977,9 +977,9 @@ public class ReportServiceImpl implements ReportService {
         return result.toString();
     }
 
-    public String getJudgeBasisRe(Long id) {
+    public String getJudgeBasisRe(Long id,Integer sampleId) {
         StringBuilder result = new StringBuilder("");
-        List<String> judgeBasis = reportMapper.getJudgeBasisRe(id);
+        List<String> judgeBasis = reportMapper.getJudgeBasisRe(id,sampleId);
         if (!CollectionUtils.isEmpty(judgeBasis)) {
             for (int i = 0; i < judgeBasis.size(); i++) {
                 result.append(judgeBasis.get(i));
@@ -992,9 +992,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public String getCheckBasis(Long id) {
+    public String getCheckBasis(Long id,Integer sampleId) {
         StringBuilder result = new StringBuilder("");
-        List<String> checkBasis = reportMapper.getCheckBasis(id);
+        List<String> checkBasis = reportMapper.getCheckBasis(id,sampleId);
         if (!CollectionUtils.isEmpty(checkBasis)) {
             for (int i = 0; i < checkBasis.size(); i++) {
                 result.append(checkBasis.get(i));
@@ -1007,9 +1007,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public String getEquipment(Long id) {
+    public String getEquipment(Long id,Integer sampleId) {
         StringBuilder result = new StringBuilder("");
-        List<String> equipment = reportMapper.getEquipment(id);
+        List<String> equipment = reportMapper.getEquipment(id,sampleId);
         List<String> list = null;
         if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(equipment)){
             list=equipment.stream().distinct().collect(Collectors.toList());
@@ -1405,6 +1405,9 @@ public class ReportServiceImpl implements ReportService {
         Map<String,String> mesMap = new HashedMap();
         ReportRecordEntity reportRecordEntity = null;
         EntrustAddVo entrustHistoryDetail = null;
+        //存放表头信息
+        entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
+        SampleEntity sampleEntity = null;
         //TODO 兼容中间报告
         Long aLong = recordEntityMapper.checkExist(id,reportType);
         if (aLong == null){
@@ -1414,8 +1417,12 @@ public class ReportServiceImpl implements ReportService {
         }
         int index = 1;
         for (ConclusionEntity conclusionEntity:list) {
-            String[] split = conclusionEntity.getUrl().split("\\?");
-            String[] strings = split[0].split("\\/");
+            for (SampleEntity entity:entrustHistoryDetail.getSamples()) {
+                if (conclusionEntity.getSampleId() == entity.getId()){
+                    sampleEntity = entity;
+                }
+            }
+            String[] strings = conclusionEntity.getUrl().split("\\/");
             String bluckName = strings[3];
             String fileName = strings[4];
             Workbook doc = null;
@@ -1435,15 +1442,11 @@ public class ReportServiceImpl implements ReportService {
                     Cells cells = worksheet.getCells();
                     int maxRow = cells.getMaxRow();
                     int column = cells.getMaxColumn();
-                    //存放表头信息
-                    entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 0) {
-                        //样品信息
-                        SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
                         //检测依据
-                        String checkBasis = getCheckBasis(id);
+                        String checkBasis = getCheckBasis(id,sampleEntity.getId());
                         //判定依据
-                        String judgeBasis = getJudgeBasis(id);
+                        String judgeBasis = getJudgeBasis(id,sampleEntity.getId());
                         //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
                         Date start = taskMapper.getStartTime(id);
                         Date end = taskMapper.getEndTime(id);
@@ -1460,7 +1463,7 @@ public class ReportServiceImpl implements ReportService {
                             e = DateUtil.formatDate(end);
                         }
                         //主要仪器
-                        String equipment = getEquipment(id);
+                        String equipment = getEquipment(id,sampleEntity.getId());
 
                         for (int n=0;n<maxRow;n++) {
                             for (int j=0;j<column;j++) {
@@ -1541,8 +1544,7 @@ public class ReportServiceImpl implements ReportService {
                     //过滤每个报告模板的检测项
                     List<ReportRecordDetailEntity> entities = Lists.newArrayList();
                     List<ReportRecordDetailEntity> entities1 = Lists.newArrayList();
-                    String[] split11 = conclusionEntity.getUrl().split("\\?");
-                    String[] strings11 = split11[0].split("\\/");
+                    String[] strings11 = conclusionEntity.getUrl().split("\\/");
                     String fileName11 = strings11[4];
                     List<Long> longList = itemDao.getItemsByTemplateLikeUrl(fileName11);
                     for (ReportRecordDetailEntity entity:checkItemList) {
@@ -1751,6 +1753,9 @@ public class ReportServiceImpl implements ReportService {
         Map<String,String> mesMap = new HashedMap();
         ReportRecordEntity reportRecordEntity = null;
         EntrustAddVo entrustHistoryDetail = null;
+        //存放表头信息
+        entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
+        SampleEntity sampleEntity = null;
         //TODO 兼容中间报告
         Long aLong = recordEntityMapper.checkExist(id,reportType);
         if (aLong == null){
@@ -1771,8 +1776,12 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         for (ConclusionEntity conclusionEntity:conclusionEntityList) {
-            String[] split = conclusionEntity.getUrl().split("\\?");
-            String[] strings = split[0].split("\\/");
+            for (SampleEntity entity:entrustHistoryDetail.getSamples()) {
+                if (conclusionEntity.getSampleId() == entity.getId()){
+                    sampleEntity = entity;
+                }
+            }
+            String[] strings = conclusionEntity.getUrl().split("\\/");
             String bluckName = strings[3];
             String fileName = strings[4];
             Workbook doc = null;
@@ -1791,15 +1800,12 @@ public class ReportServiceImpl implements ReportService {
                     Cells cells = worksheet.getCells();
                     int maxRow = cells.getMaxRow();
                     int column = cells.getMaxColumn();
-                    //存放表头信息
-                    entrustHistoryDetail = entrustService.getEntrustHistoryDetail(id);
                     if (i == 0) {
                         //样品信息
-                        SampleEntity sampleEntity = entrustHistoryDetail.getSamples().get(0);
                         //检测依据
-                        String checkBasis = getCheckBasis(id);
+                        String checkBasis = getCheckBasis(id,sampleEntity.getId());
                         //判定依据
-                        String judgeBasis = getJudgeBasis(id);
+                        String judgeBasis = getJudgeBasis(id,sampleEntity.getId());
                         //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
                         Date start = taskMapper.getStartTime(id);
                         Date end = taskMapper.getEndTime(id);
@@ -1816,7 +1822,7 @@ public class ReportServiceImpl implements ReportService {
                             e = DateUtil.formatDate(end);
                         }
                         //主要仪器
-                        String equipment = getEquipment(id);
+                        String equipment = getEquipment(id,sampleEntity.getId());
                         //如果样品数量超出模板行数,和定位样品信息要插入的位置
                         int insertRow = 0;
                         int indexName = 0;
@@ -2022,8 +2028,7 @@ public class ReportServiceImpl implements ReportService {
                     //过滤每个报告模板的检测项
                     List<ReportRecordDetailEntity> entities = Lists.newArrayList();
                     List<ReportRecordDetailEntity> entities1 = Lists.newArrayList();
-                    String[] split11 = conclusionEntity.getUrl().split("\\?");
-                    String[] strings11 = split11[0].split("\\/");
+                    String[] strings11 = conclusionEntity.getUrl().split("\\/");
                     String fileName11 = strings11[4];
                     List<Long> longList = itemDao.getItemsByTemplateLikeUrl(fileName11);
                     for (ReportRecordDetailEntity entity:checkItemList) {
@@ -2200,9 +2205,9 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
         }
-        //处理模板下不同样品描述
-        String judgeBasis = getJudgeBasisRe(entrustId);
         for (SampleEntity sampleEntity :samples) {
+            //处理模板下不同样品描述
+            String judgeBasis = getJudgeBasisRe(entrustId,sampleEntity.getId());
             ConclusionEntity conclusionEntity =  new ConclusionEntity();
             conclusionEntity.setSampleId(sampleEntity.getId());
             conclusionEntity.setUrl(sampleEntity.getFileUrl());

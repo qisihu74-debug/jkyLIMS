@@ -587,21 +587,21 @@
         SELECT distinct t2.code
         FROM test_entrusted_sample_standard_rel t1
                  LEFT JOIN test_standard_file t2 ON t1.standard_id = t2.id
-        WHERE t1.entrustment_id = #{id}
+        WHERE t1.entrustment_id = #{id} and t1.sample_id=#{sampleId}
     </select>
 
     <select id="getJudgeBasisRe" resultType="java.lang.String">
         SELECT distinct CONCAT(t2.CODE, "《", t2.`name`, "》")
         FROM test_entrusted_sample_standard_rel t1
                  LEFT JOIN test_standard_file t2 ON t1.standard_id = t2.id
-        WHERE t1.entrustment_id = #{id}
+        WHERE t1.entrustment_id = #{id} and t1.sample_id=#{sampleId}
     </select>
 
     <select id="getCheckBasis" resultType="java.lang.String">
         SELECT distinct t2.code
         FROM test_entrusted_sample_checkitem_rel t1
                  LEFT JOIN test_standard_file t2 ON t1.standard_id = t2.id
-        WHERE t1.entrust_id = #{id}
+        WHERE t1.entrust_id = #{id} and t1.sample_id = #{sampleId}
     </select>
 
     <select id="getEquipment" resultType="java.lang.String">
@@ -610,7 +610,7 @@
                  LEFT JOIN test_product_item_instrument_middle_rel t2 ON t1.id = t2.id_item
                  LEFT JOIN test_instrument t3 ON t2.intrusment_id = t3.id
         WHERE t3.NAME IS NOT NULL
-          AND t1.entrust_id = #{id}
+          AND t1.entrust_id = #{id} and t1.sample_id = #{sampleId}
     </select>
 
     <update id="updateReportUrl">
