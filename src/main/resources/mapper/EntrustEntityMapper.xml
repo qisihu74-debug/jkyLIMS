@@ -425,6 +425,7 @@
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
             update test_entrusted_sample_checkitem_rel
             <set>
+                check_item_name = #{item.checkItemName},
                 standard_id = #{item.standardId},
                 unit_price = #{item.unitPrice},
                 times = #{item.times}
