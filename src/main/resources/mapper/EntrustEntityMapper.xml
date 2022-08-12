@@ -329,6 +329,8 @@
 <!--    </select>-->
     <select id="getEntrustSampleInfos" resultType="com.lims.manage.erp.vo.EntrustSampleInfoVo">
         SELECT
+            t3.id sampleId,
+            t3.sample_type sampleType,
             IFNULL( t3.alias_name, "——" ) aliasName,
             IFNULL( t3.specs, "——" ) specs,
             IFNULL( t3.outward_describe, "——" ) outwardDescribe
