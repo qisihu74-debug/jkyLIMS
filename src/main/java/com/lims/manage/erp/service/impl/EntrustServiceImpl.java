@@ -4032,6 +4032,15 @@ public class EntrustServiceImpl implements EntrustService {
         return pageInfo;
     }
 
-
+    @Override
+    public boolean acceptEntrust(Long id) {
+        try {
+            entityMapper.acceptEntrust(id,new Date(System.currentTimeMillis()));
+            return true;
+        }catch (Exception e){
+            logger.error("受理委托单失败:{}",e);
+            return false;
+        }
+    }
 
 }

@@ -800,6 +800,20 @@ public class EntrustController {
         bos.close();
     }
 
-
+    /**
+     * 对客户下的委托单进行受理
+     */
+    @GetMapping("acceptEntrust")
+    public Result acceptEntrust(Long id){
+        if (id == null){
+            return ResultUtil.error("缺少必要参数");
+        }
+        boolean b = entrustService.acceptEntrust(id);
+        if (b){
+            return ResultUtil.success("受理成功");
+        }else {
+            return ResultUtil.error("受理失败");
+        }
+    }
 
 }

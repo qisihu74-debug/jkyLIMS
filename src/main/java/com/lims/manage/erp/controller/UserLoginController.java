@@ -1,17 +1,22 @@
 package com.lims.manage.erp.controller;
 
 
+import com.google.api.client.util.Lists;
+import com.lims.manage.erp.entity.DynamicImg;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserRoleEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.DynamicImgService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.SysUserRoleService;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.SHA256Util;
 import com.lims.manage.erp.util.ShiroUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -20,11 +25,14 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,6 +50,8 @@ public class UserLoginController {
     private SysUserService sysUserService;
     @Autowired
     private SysUserRoleService sysUserRoleService;
+    @Autowired
+    private DynamicImgService dynamicImgService;
 
     /**
      * 登录
@@ -148,4 +158,55 @@ public class UserLoginController {
         return ResultUtil.success("用户退出登陆成功！");
     }
 
+    /**
+     * 管理员上传客户委托系统的轮播图片
+     * @return
+     */
+    @PostMapping("uploadImgs")
+    public Result uploadImgs(MultipartFile[] file){
+        if (file == null){
+            return ResultUtil.error("缺少必要参数");
+        }
+        List<DynamicImg> list = Lists.newArrayList();
+        for (MultipartFile multipartFile:file) {
+            String name = multipartFile.getOriginalFilename();
+            String url = MinIoUtil.upload("active-img", multipartFile, name);
+            DynamicImg img = new DynamicImg();
+            img.setTitle(name);
+            img.setImgUrl(url);
+            list.add(img);
+        }
+        boolean batch = dynamicImgService.saveBatch(list);
+        if (batch){
+            return ResultUtil.success("上传成功");
+        }else {
+            return ResultUtil.error("上传失败");
+        }
+    }
+
+    /**
+     * 查询已上传的图片
+     * @return
+     */
+    @PostMapping("getImgList")
+    public Result getImgList(){
+        return ResultUtil.success(dynamicImgService.list());
+    }
+
+    /**
+     * 删除图片
+     * @return
+     */
+    @GetMapping("deleteImg")
+    public Result deleteImg(String id){
+        if (StringUtils.isEmpty(id)){
+            return ResultUtil.error("缺少必要的参数");
+        }
+        boolean b = dynamicImgService.removeById(id);
+        if (b){
+            return ResultUtil.success("删除成功");
+        }else {
+            return ResultUtil.error("删除失败");
+        }
+    }
 }
