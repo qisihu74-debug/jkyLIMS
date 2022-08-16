@@ -173,7 +173,7 @@ public class UserLoginController {
             String url = MinIoUtil.upload("active-img", multipartFile, name);
             DynamicImg img = new DynamicImg();
             img.setTitle(name);
-            img.setImgUrl(url);
+            img.setImgUrl(url.substring(0,url.indexOf("?")));
             list.add(img);
         }
         boolean batch = dynamicImgService.saveBatch(list);

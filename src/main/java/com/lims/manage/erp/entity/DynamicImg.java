@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -15,7 +16,7 @@ import lombok.Data;
 @Data
 @TableName("sys_csos_img")
 public class DynamicImg {
-    @TableId
+    @TableId(type = IdType.AUTO)
     private String id;
     private String title;
     private String imgUrl;
