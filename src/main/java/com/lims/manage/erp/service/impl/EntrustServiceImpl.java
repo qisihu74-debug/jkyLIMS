@@ -4034,8 +4034,9 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public boolean acceptEntrust(Long id) {
+        String username = ShiroUtils.getUserInfo().getUsername();
         try {
-            entityMapper.acceptEntrust(id,new Date(System.currentTimeMillis()));
+            entityMapper.acceptEntrust(id,new Date(System.currentTimeMillis()),username);
             return true;
         }catch (Exception e){
             logger.error("受理委托单失败:{}",e);

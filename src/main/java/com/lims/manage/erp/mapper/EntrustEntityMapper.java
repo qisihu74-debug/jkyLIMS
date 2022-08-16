@@ -511,6 +511,6 @@ public interface EntrustEntityMapper extends BaseMapper {
     // 获取检测项列表
     List<SampleItemEntity> getSampleItemList(@Param("entrustIds") List<Long> entrustIds);
 
-    @Update("update test_entrusted_info set audit_state=1 and audit_date=#{date} where id = #{id}")
-    void acceptEntrust(@Param("id") Long id, @Param("date") Date date);
+    @Update("update test_entrusted_info set audit_state=1,audit_date=#{date},audit_user=#{name} where id = #{id}")
+    void acceptEntrust(@Param("id") Long id, @Param("date") Date date,@Param("name") String name);
 }
