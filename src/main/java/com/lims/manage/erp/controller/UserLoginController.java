@@ -1,6 +1,10 @@
 package com.lims.manage.erp.controller;
 
 
+import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.DynamicImg;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -24,10 +28,12 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -163,20 +169,27 @@ public class UserLoginController {
      * @return
      */
     @PostMapping("uploadImgs")
-    public Result uploadImgs(MultipartFile[] file){
+    public Result uploadImgs(@RequestParam(value = "json") String json, MultipartFile[] file){
+        DynamicImg dynamicImg = JSON.parseObject(json,DynamicImg.class);
         if (file == null){
             return ResultUtil.error("缺少必要参数");
         }
-        List<DynamicImg> list = Lists.newArrayList();
+        List<String> urls = Lists.newArrayList();
         for (MultipartFile multipartFile:file) {
             String name = multipartFile.getOriginalFilename();
             String url = MinIoUtil.upload("active-img", multipartFile, name);
-            DynamicImg img = new DynamicImg();
-            img.setTitle(name);
-            img.setImgUrl(url.substring(0,url.indexOf("?")));
-            list.add(img);
+            String substring = url.substring(0, url.indexOf("?"));
+            urls.add(substring);
         }
-        boolean batch = dynamicImgService.saveBatch(list);
+        String s = "";
+        for (int i =0;i<urls.size();i++){
+            s = s + urls.get(i);
+            if (i != urls.size()-1){
+                s = s + ",";
+            }
+        }
+        dynamicImg.setImgUrl(s);
+        boolean batch = dynamicImgService.save(dynamicImg);
         if (batch){
             return ResultUtil.success("上传成功");
         }else {
@@ -190,7 +203,16 @@ public class UserLoginController {
      */
     @PostMapping("getImgList")
     public Result getImgList(){
-        return ResultUtil.success(dynamicImgService.list());
+        DynamicImg dynamicImg = dynamicImgService.list().get(0);
+        List<String> list = Lists.newArrayList();
+        if (StringUtils.isNotEmpty(dynamicImg.getImgUrl())){
+            String[] strings = dynamicImg.getImgUrl().split(",");
+            for (String url:strings) {
+                list.add(url);
+            }
+        }
+        dynamicImg.setUrls(list);
+        return ResultUtil.success(list);
     }
 
     /**
@@ -198,15 +220,38 @@ public class UserLoginController {
      * @return
      */
     @GetMapping("deleteImg")
-    public Result deleteImg(String id){
-        if (StringUtils.isEmpty(id)){
+    @Transactional(rollbackFor = Exception.class)
+    public Result deleteImg(String url){
+        if (StringUtils.isEmpty(url)){
             return ResultUtil.error("缺少必要的参数");
         }
-        boolean b = dynamicImgService.removeById(id);
-        if (b){
-            return ResultUtil.success("删除成功");
-        }else {
-            return ResultUtil.error("删除失败");
+        LambdaQueryWrapper<DynamicImg> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        DynamicImg dynamicImg = dynamicImgService.getOne(lambdaQueryWrapper);
+        String[] split = dynamicImg.getImgUrl().split(",");
+        List<String> urls = Lists.newArrayList();
+        for (String s:split) {
+            if (!s.equals(url)){
+                urls.add(s);
+            }
         }
+        //组装url
+        String ss = "";
+        for (int i =0;i<urls.size();i++){
+            ss = ss + urls.get(i);
+            if (i != urls.size()-1){
+                ss = ss + ",";
+            }
+        }
+       //更新url
+        LambdaUpdateWrapper<DynamicImg> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.eq(DynamicImg::getId,dynamicImg.getId());
+        updateWrapper.set(DynamicImg::getImgUrl,ss);
+        dynamicImgService.update(null,updateWrapper);
+        //删除文件服务器的图片
+        String[] strings = url.split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        MinIoUtil.deleteFile(bluckName,fileName);
+        return ResultUtil.success("删除成功");
     }
 }

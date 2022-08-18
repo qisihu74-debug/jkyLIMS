@@ -1,9 +1,12 @@
 package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author gjl
@@ -20,4 +23,9 @@ public class DynamicImg {
     private String id;
     private String title;
     private String imgUrl;
+    private String content;
+    private String filingInfo;
+    private String topDesc;
+    @TableField(exist = false)
+    private List<String> urls;
 }
