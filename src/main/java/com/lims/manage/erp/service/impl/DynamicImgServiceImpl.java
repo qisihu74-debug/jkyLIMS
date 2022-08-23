@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.DynamicImg;
 import com.lims.manage.erp.mapper.DynamicImgDao;
 import com.lims.manage.erp.service.DynamicImgService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,4 +17,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DynamicImgServiceImpl extends ServiceImpl<DynamicImgDao, DynamicImg> implements DynamicImgService {
+    @Autowired
+    private DynamicImgDao dynamicImgDao;
+
+    @Override
+    public void delete() {
+        dynamicImgDao.deleteImg();
+    }
 }
