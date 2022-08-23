@@ -945,6 +945,7 @@
         <if test="entrustPeople!=null">
             and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
         </if>
+        ORDER BY t1.entrustment_no asc, t1.request_date asc
     </select>
 
     <select id="getCompanyList" resultType="com.lims.manage.erp.entity.TestCompanyJsonEntity">
