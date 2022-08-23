@@ -50,7 +50,7 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
      */
     Boolean updateUserInfo(UserInfoVo vo);
 
-    @Select("SELECT user_id,username FROM sys_user WHERE state = 'NORMAL'")
+    @Select("SELECT user_id,username,name,mobile FROM sys_user WHERE state = 'NORMAL'")
     List<SysUserEntity> GetUserList();
 
     List<SysUserTreeEntity> selectUserinfoList(SysUserTreeEntity sysUserTreeEntity);

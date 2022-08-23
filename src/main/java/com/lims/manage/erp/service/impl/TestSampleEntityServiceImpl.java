@@ -342,8 +342,16 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         //修改样品数量时，处理样品编号
         StringBuilder newSampleCode = new StringBuilder();
         String sampleCode = sampleEntity.getSampleCode();
-        String prefix = sampleCode.substring(0, 13);
-        newSampleCode.append(prefix);
+        String prefix = sampleCode.substring(0,8);
+        String code = sampleCode.substring(8);
+        int i = code.indexOf("-");
+        String num;
+        if(i > 0){
+            num = code.substring(0, i);
+        }else{
+            num = code;
+        }
+        newSampleCode.append(prefix+num);
         if(sampleEntity.getQuantityPerGroup() > 1){
             newSampleCode.append("-01~");
             String numStr = new DecimalFormat("00").format(sampleEntity.getQuantityPerGroup());

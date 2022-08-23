@@ -790,13 +790,11 @@
     </select>
 
     <select id="exportRecords" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
-        SELECT
+        SELECT distinct
         t1.id,
         t1.entrustment_id,
         t4.entrustment_no,
         t4.actual_price As actualPrice,
-        t3.inspector,
-        t3.recorder,
         t1.verifyer,
         t1.issuer,
         t1.number,
@@ -812,6 +810,7 @@
         t1.type,
         t1.category,
         t1.qys_state,
+        t1.inspector,
         t1.contract_id
         FROM
         test_report_record t1
@@ -841,12 +840,10 @@
     </select>
 
     <select id="exportRecordsZj" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
-        SELECT
+        SELECT distinct
         t1.id,
         t1.entrustment_id,
         t4.entrustment_no,
-        t3.inspector,
-        t3.recorder,
         t1.verifyer,
         t1.issuer,
         t1.number,
@@ -862,6 +859,7 @@
         t1.type,
         t1.category,
         t1.qys_state,
+        t1.inspector,
         t1.contract_id
         FROM
         test_report_record_mid t1

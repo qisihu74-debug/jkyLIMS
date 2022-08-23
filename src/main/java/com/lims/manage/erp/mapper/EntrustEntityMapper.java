@@ -1,13 +1,33 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
+import com.lims.manage.erp.entity.EntrustPamentEntity;
+import com.lims.manage.erp.entity.EntrustSampleEntity;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.TaskEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TestCompanyJsonEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.vo.ClientOrderdetailVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.EntrustSampleInfoVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.TaskCodeVo;
+import com.lims.manage.erp.vo.TaskPriceVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -491,4 +511,6 @@ public interface EntrustEntityMapper extends BaseMapper {
     // 获取检测项列表
     List<SampleItemEntity> getSampleItemList(@Param("entrustIds") List<Long> entrustIds);
 
+    @Update("update test_entrusted_info set audit_state=1,audit_date=#{date},audit_user=#{name} where id = #{id}")
+    void acceptEntrust(@Param("id") Long id, @Param("date") Date date,@Param("name") String name);
 }

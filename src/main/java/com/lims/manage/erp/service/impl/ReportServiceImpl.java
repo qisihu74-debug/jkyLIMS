@@ -2954,7 +2954,7 @@ public class ReportServiceImpl implements ReportService {
             row = getNextUpEn(row);
             cells.get(row+n).setValue(entity.getSampleName());
             row = getNextUpEn(row);
-            cells.get(row+n).setValue(entity.getInspector().split("&")[0]+","+entity.getRecorder().split("&")[0]);
+            cells.get(row+n).setValue(entity.getInspector());
             row = getNextUpEn(row);
             cells.get(row+n).setValue(entity.getVerifyer());
             row = getNextUpEn(row);

@@ -1,17 +1,26 @@
 package com.lims.manage.erp.controller;
 
 
+import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.api.client.util.Lists;
+import com.lims.manage.erp.entity.DynamicImg;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserRoleEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.DynamicImgService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.SysUserRoleService;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.SHA256Util;
 import com.lims.manage.erp.util.ShiroUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -19,12 +28,17 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,6 +56,8 @@ public class UserLoginController {
     private SysUserService sysUserService;
     @Autowired
     private SysUserRoleService sysUserRoleService;
+    @Autowired
+    private DynamicImgService dynamicImgService;
 
     /**
      * 登录
@@ -148,4 +164,94 @@ public class UserLoginController {
         return ResultUtil.success("用户退出登陆成功！");
     }
 
+    /**
+     * 管理员上传客户委托系统的轮播图片
+     * @return
+     */
+    @PostMapping("uploadImgs")
+    public Result uploadImgs(@RequestParam(value = "json") String json, MultipartFile[] file){
+        DynamicImg dynamicImg = JSON.parseObject(json,DynamicImg.class);
+        if (file == null){
+            return ResultUtil.error("缺少必要参数");
+        }
+        List<String> urls = Lists.newArrayList();
+        for (MultipartFile multipartFile:file) {
+            String name = multipartFile.getOriginalFilename();
+            String url = MinIoUtil.upload("active-img", multipartFile, name);
+            String substring = url.substring(0, url.indexOf("?"));
+            urls.add(substring);
+        }
+        String s = "";
+        for (int i =0;i<urls.size();i++){
+            s = s + urls.get(i);
+            if (i != urls.size()-1){
+                s = s + ",";
+            }
+        }
+        dynamicImg.setImgUrl(s);
+        boolean batch = dynamicImgService.save(dynamicImg);
+        if (batch){
+            return ResultUtil.success("上传成功");
+        }else {
+            return ResultUtil.error("上传失败");
+        }
+    }
+
+    /**
+     * 查询已上传的图片
+     * @return
+     */
+    @PostMapping("getImgList")
+    public Result getImgList(){
+        DynamicImg dynamicImg = dynamicImgService.list().get(0);
+        List<String> list = Lists.newArrayList();
+        if (StringUtils.isNotEmpty(dynamicImg.getImgUrl())){
+            String[] strings = dynamicImg.getImgUrl().split(",");
+            for (String url:strings) {
+                list.add(url);
+            }
+        }
+        dynamicImg.setUrls(list);
+        return ResultUtil.success(list);
+    }
+
+    /**
+     * 删除图片
+     * @return
+     */
+    @GetMapping("deleteImg")
+    @Transactional(rollbackFor = Exception.class)
+    public Result deleteImg(String url){
+        if (StringUtils.isEmpty(url)){
+            return ResultUtil.error("缺少必要的参数");
+        }
+        LambdaQueryWrapper<DynamicImg> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        DynamicImg dynamicImg = dynamicImgService.getOne(lambdaQueryWrapper);
+        String[] split = dynamicImg.getImgUrl().split(",");
+        List<String> urls = Lists.newArrayList();
+        for (String s:split) {
+            if (!s.equals(url)){
+                urls.add(s);
+            }
+        }
+        //组装url
+        String ss = "";
+        for (int i =0;i<urls.size();i++){
+            ss = ss + urls.get(i);
+            if (i != urls.size()-1){
+                ss = ss + ",";
+            }
+        }
+       //更新url
+        LambdaUpdateWrapper<DynamicImg> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.eq(DynamicImg::getId,dynamicImg.getId());
+        updateWrapper.set(DynamicImg::getImgUrl,ss);
+        dynamicImgService.update(null,updateWrapper);
+        //删除文件服务器的图片
+        String[] strings = url.split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        MinIoUtil.deleteFile(bluckName,fileName);
+        return ResultUtil.success("删除成功");
+    }
 }

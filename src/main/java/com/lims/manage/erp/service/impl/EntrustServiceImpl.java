@@ -1342,6 +1342,7 @@ public class EntrustServiceImpl implements EntrustService {
                     if(!CollectionUtils.isEmpty(saveList)){
                         entityMapper.BatchSaveEntrustSampleItem(saveList);
                         state = 0;
+                        logger.info("委托单编号："+oldEntrustInfo.getEntrustmentNo()+"有新增检测项，状态值已变更为"+state);
                         flag = true;
                         //修改报告的状态，和审批，复核信息
                         if(!"2".equals(reportState)){
@@ -1445,6 +1446,7 @@ public class EntrustServiceImpl implements EntrustService {
 //
 //        }
         basisInfo.setState(state);
+        logger.info("委托单编号："+oldEntrustInfo.getEntrustmentNo()+"的委托单的状态为"+state);
         entityMapper.updateEntrustInfo(basisInfo);
         return true;
     }
@@ -4030,6 +4032,16 @@ public class EntrustServiceImpl implements EntrustService {
         return pageInfo;
     }
 
-
+    @Override
+    public boolean acceptEntrust(Long id) {
+        String username = ShiroUtils.getUserInfo().getUsername();
+        try {
+            entityMapper.acceptEntrust(id,new Date(System.currentTimeMillis()),username);
+            return true;
+        }catch (Exception e){
+            logger.error("受理委托单失败:{}",e);
+            return false;
+        }
+    }
 
 }
