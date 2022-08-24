@@ -6,6 +6,7 @@ import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.mapper.ReportMapper;
 import com.lims.manage.erp.service.DeptService;
 import com.lims.manage.erp.util.AccessTokenSingleton;
+import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.taobao.api.ApiException;
@@ -86,16 +87,18 @@ public class DingDeptJob {
                 if(!StringUtils.isEmpty(reportRecordEntity.getContractId())&&
                         StringUtils.isEmpty(reportRecordEntity.getSealUrl())){
                     // 进行填充本地盖章url
-                    InputStream inputStream = mehtodSealReport(reportRecordEntity.getContractId());
-                    // 进行存放至 minIO 服务器
-                    long id = GenID.getID();
-                    String sealName = MinIoUtil.upload("report-pdf", id + ".zip", inputStream, "application/pdf");
-                   StringBuilder stringBuilder = new StringBuilder();
-                    if(!StringUtils.isEmpty(sealName)){
-                        String[] fileUrls = sealName.split("\\?");
-                        stringBuilder.append(fileUrls[0]);
-                    }
-                    System.out.println("印章报告zip存储\t"+"");
+                    InputStream inputStream = mehtodSealReport(reportRecordEntity.getContractId(),reportRecordEntity.getReportCode());
+                   if(inputStream!=null){
+                       // 进行存放至 minIO 服务器
+                       long id = GenID.getID();
+                       String sealName = MinIoUtil.upload("report-pdf", id + ".pdf", inputStream, "application/pdf");
+                       StringBuilder stringBuilder = new StringBuilder();
+                       if(!StringUtils.isEmpty(sealName)){
+                           String[] fileUrls = sealName.split("\\?");
+                           stringBuilder.append(fileUrls[0]);
+                       }
+                       System.out.println("印章报告zip存储\t"+sealName);
+                   }
                 }
             }
         }
@@ -106,13 +109,19 @@ public class DingDeptJob {
      * @param ContractId
      * @return
      */
-    private InputStream mehtodSealReport(String ContractId){
+    private InputStream mehtodSealReport(String ContractId,String reportCode)  {
         byte[] inputStream = qiYueSuoHnadler.downloadQysFile(Long.parseLong(ContractId),
                 "郭家林", "18337165257");
         InputStream sbs = new ByteArrayInputStream(inputStream);
-        // 获取 zip里面报告内容
-
-        return sbs;
+        //
+        InputStream inputStream1 = null;
+        try {
+            inputStream1  = FileAndFolderUtil.getZipFileByName(sbs, "签署摘要" + ".pdf");
+        }
+        catch (Exception e){
+            //
+        }
+        return inputStream1;
 
     }
 
