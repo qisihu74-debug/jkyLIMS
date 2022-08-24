@@ -477,8 +477,9 @@ public class FileAndFolderUtil {
         }
         zin.close();
         //将OutputStream转为inputstream
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ByteArrayInputStream swapStream = new ByteArrayInputStream(baos.toByteArray());
+        //OutputStream转 ByteArrayInputStream
+        ByteArrayOutputStream bos = (ByteArrayOutputStream)out;
+        ByteArrayInputStream swapStream = new ByteArrayInputStream(bos.toByteArray());
         InputStream inputStream1 = swapStream;
         return inputStream1;
     }
