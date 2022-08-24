@@ -2,16 +2,15 @@ package com.lims.manage.erp.job;
 
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.DingDeptEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.mapper.ReportMapper;
 import com.lims.manage.erp.service.DeptService;
 import com.lims.manage.erp.util.AccessTokenSingleton;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.vo.ReportSealvVo;
 import com.taobao.api.ApiException;
 import lombok.extern.slf4j.Slf4j;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -73,22 +73,21 @@ public class DingDeptJob {
         service.saveOrUpdateBatch(deptList);
     }
     @Async
-    @Scheduled(fixedRate = 10000L)
-    public void task() {
-//        System.out.println("当前线程：" + Thread.currentThread().getName() + " 当前时间" + LocalDateTime.now());
+    @Scheduled(cron = "0 0 * * * ?")
+    public void task() throws IOException {
         // 电子印章报告集合
-        List<ReportRecordEntity> list = Lists.newArrayList();
+        List<ReportSealvVo> list = Lists.newArrayList();
         list.addAll(reportMapper.getSealIsNullLastList());
         list.addAll(reportMapper.getSealIsNullMiddleList());
-        System.out.println("印章list数据\t"+list);
+        logger.info("印章list数据\t"+list);
         if(!CollectionUtils.isEmpty(list)){
             // 获取盖章报告 契约锁合同id contractId
-            for(ReportRecordEntity reportRecordEntity:list){
+            for(ReportSealvVo reportRecordEntity:list){
                 if(!StringUtils.isEmpty(reportRecordEntity.getContractId())&&
-                        StringUtils.isEmpty(reportRecordEntity.getSealUrl())){
+                        StringUtils.isEmpty(reportRecordEntity.getSealReportUrl())){
                     // 进行填充本地盖章url
                     InputStream inputStream = mehtodSealReport(reportRecordEntity.getContractId(),reportRecordEntity.getReportCode());
-                   if(inputStream!=null){
+                   if(inputStream.available()!=0){
                        // 进行存放至 minIO 服务器
                        long id = GenID.getID();
                        String sealName = MinIoUtil.upload("report-pdf", id + ".pdf", inputStream, "application/pdf");
@@ -97,7 +96,17 @@ public class DingDeptJob {
                            String[] fileUrls = sealName.split("\\?");
                            stringBuilder.append(fileUrls[0]);
                        }
-                       System.out.println("印章报告zip存储\t"+sealName);
+                       logger.info("报告id\t"+reportRecordEntity.getId()+"印章报告zip存储\t"+sealName+
+                               "报告编号\t"+reportRecordEntity.getReportCode());
+                       // update 更新中间报告数据
+                       reportRecordEntity.setSealReportUrl(sealName);
+                       if(reportRecordEntity.getType().equals(0)){
+                           reportMapper.updateReportSealMid(reportRecordEntity);
+                       }
+                       // update 最终报告数据
+                       if(reportRecordEntity.getType().equals(1)){
+                           reportMapper.updateReportSealLast(reportRecordEntity);
+                       }
                    }
                 }
             }
@@ -109,17 +118,17 @@ public class DingDeptJob {
      * @param ContractId
      * @return
      */
-    private InputStream mehtodSealReport(String ContractId,String reportCode)  {
-        byte[] inputStream = qiYueSuoHnadler.downloadQysFile(Long.parseLong(ContractId),
+    private InputStream mehtodSealReport(Long ContractId,String reportCode)  {
+        byte[] inputStream = qiYueSuoHnadler.downloadQysFile(ContractId,
                 "郭家林", "18337165257");
         InputStream sbs = new ByteArrayInputStream(inputStream);
-        //
         InputStream inputStream1 = null;
         try {
-            inputStream1  = FileAndFolderUtil.getZipFileByName(sbs, "签署摘要" + ".pdf");
+            inputStream1  = FileAndFolderUtil.getZipFileByName(sbs, reportCode + ".pdf");
         }
         catch (Exception e){
-            //
+        System.out.println(e);
+        inputStream1 = null;
         }
         return inputStream1;
 

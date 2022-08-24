@@ -11,6 +11,7 @@ import org.docx4j.fonts.IdentityPlusMapper;
 import org.docx4j.fonts.Mapper;
 import org.docx4j.fonts.PhysicalFonts;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,7 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -466,11 +468,13 @@ public class FileAndFolderUtil {
         ZipEntry ze = null;
         List<byte[]> list = Lists.newArrayList();
         while ((ze = zin.getNextEntry()) != null) {
-            if (ze.getName().equals(fileName)) {
+            if (!ze.getName().equals("签署摘要.pdf")&&ze.getName()!=null) {
                 byte[] buffer = new byte[9000];
                 int len;
                 while ((len = zin.read(buffer)) != -1) {
-                    list.add(buffer);
+                    byte[] newBytes = new byte[len];
+                    System.arraycopy(buffer, 0, newBytes, 0, len);
+                    list.add(newBytes);
                 }
                 break;
             }

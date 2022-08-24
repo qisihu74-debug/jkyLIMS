@@ -226,12 +226,24 @@ public interface ReportMapper {
      * 最终报告：本地印章Url 未存放
      * @return
      */
-    List<ReportRecordEntity> getSealIsNullLastList();
+    List<ReportSealvVo> getSealIsNullLastList();
 
     /**
      * 中间报告：本地印章Url 未存放
      * @return
      */
-    List<ReportRecordEntity> getSealIsNullMiddleList();
+    List<ReportSealvVo> getSealIsNullMiddleList();
 
+    /**
+     * update 最终报告电子章：
+     * @return
+     */
+    int updateReportSealLast(ReportSealvVo reportSealvVo);
+
+    /**
+     * update 中间报告电子章：
+     * @param reportSealvVo
+     * @return
+     */
+    int updateReportSealMid(ReportSealvVo reportSealvVo);
 }
