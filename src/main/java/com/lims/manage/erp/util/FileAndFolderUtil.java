@@ -28,6 +28,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * @author gjl
@@ -450,4 +452,34 @@ public class FileAndFolderUtil {
         return null;
     }
 
+    /**
+     * 获取压缩包下指定文件
+     * @param inputStream
+     * @param fileName
+     * @return
+     * @throws Exception
+     */
+    public static InputStream getZipFileByName(InputStream inputStream,String fileName) throws Exception{
+        OutputStream out = new FileOutputStream(fileName);
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream );
+        ZipInputStream zin = new ZipInputStream(bufferedInputStream);
+        ZipEntry ze = null;
+        while ((ze = zin.getNextEntry()) != null) {
+            if (ze.getName().equals(fileName)) {
+                byte[] buffer = new byte[9000];
+                int len;
+                while ((len = zin.read(buffer)) != -1) {
+                    out.write(buffer, 0, len);
+                }
+                out.close();
+                break;
+            }
+        }
+        zin.close();
+        //将OutputStream转为inputstream
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayInputStream swapStream = new ByteArrayInputStream(baos.toByteArray());
+        InputStream inputStream1 = swapStream;
+        return inputStream1;
+    }
 }
