@@ -12,4 +12,5 @@ import com.lims.manage.erp.entity.DynamicImg;
  * @Copyright © 河南交科院
  */
 public interface DynamicImgService extends IService<DynamicImg> {
+    void delete();
 }
