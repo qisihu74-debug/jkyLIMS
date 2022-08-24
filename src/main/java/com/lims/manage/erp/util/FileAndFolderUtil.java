@@ -1,6 +1,7 @@
 package com.lims.manage.erp.util;
 
 
+import com.google.api.client.util.Lists;
 import com.lowagie.text.pdf.BaseFont;
 import fr.opensagres.xdocreport.itext.extension.font.IFontProvider;
 import org.apache.poi.xwpf.converter.pdf.PdfConverter;
@@ -460,27 +461,43 @@ public class FileAndFolderUtil {
      * @throws Exception
      */
     public static InputStream getZipFileByName(InputStream inputStream,String fileName) throws Exception{
-        OutputStream out = new FileOutputStream(fileName);
         BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream );
         ZipInputStream zin = new ZipInputStream(bufferedInputStream);
         ZipEntry ze = null;
+        List<byte[]> list = Lists.newArrayList();
         while ((ze = zin.getNextEntry()) != null) {
             if (ze.getName().equals(fileName)) {
                 byte[] buffer = new byte[9000];
                 int len;
                 while ((len = zin.read(buffer)) != -1) {
-                    out.write(buffer, 0, len);
+                    list.add(buffer);
                 }
-                out.close();
                 break;
             }
         }
+        byte[] mergeBytes = mergeBytes(list);
+        InputStream input = new ByteArrayInputStream(mergeBytes);
         zin.close();
-        //将OutputStream转为inputstream
-        //OutputStream转 ByteArrayInputStream
-        ByteArrayOutputStream bos = (ByteArrayOutputStream)out;
-        ByteArrayInputStream swapStream = new ByteArrayInputStream(bos.toByteArray());
-        InputStream inputStream1 = swapStream;
-        return inputStream1;
+        return input;
+    }
+
+    /**
+     * 合并多个字节数组到一个字节数组
+     *
+     * @param list 动态字节数字参数
+     * @return byte[] 合并后的字节数字
+     */
+    private static byte[] mergeBytes(List<byte[]> list) {
+        int lengthByte = 0;
+        for (byte[] value : list) {
+            lengthByte += value.length;
+        }
+        byte[] allBytes = new byte[lengthByte];
+        int countLength = 0;
+        for (byte[] b : list) {
+            System.arraycopy(b, 0, allBytes, countLength, b.length);
+            countLength += b.length;
+        }
+        return allBytes;
     }
 }
