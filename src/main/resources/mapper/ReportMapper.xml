@@ -887,4 +887,18 @@
         </if>
         order by t1.seal_time desc
     </select>
+    <select id="getSealIsNullLastList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+        *
+        FROM
+        test_report_record
+        WHERE category = "电子章" and seal_report_url is NULL
+    </select>
+    <select id="getSealIsNullMiddleList" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+        *
+        FROM
+        test_report_record_mid
+        WHERE category = "电子章" and seal_report_url is NULL
+    </select>
 </mapper>

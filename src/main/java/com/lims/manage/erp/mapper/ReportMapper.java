@@ -221,4 +221,17 @@ public interface ReportMapper {
                    @Param("now")Date now,@Param("applicant") String applicant);
 
     ReportDetailVo getReportDetailZj(Long taskId,List<Long> deptIds);
+
+    /**
+     * 最终报告：本地印章Url 未存放
+     * @return
+     */
+    List<ReportRecordEntity> getSealIsNullLastList();
+
+    /**
+     * 中间报告：本地印章Url 未存放
+     * @return
+     */
+    List<ReportRecordEntity> getSealIsNullMiddleList();
+
 }
