@@ -895,10 +895,11 @@
         contract_id,
         entrust_id as entrustId,
         1 as type,
-        seal_report_url
+        seal_report_url,
+        applicant
         FROM
         test_report_record
-        WHERE category = "电子章" and seal_report_url is NULL
+        WHERE category = "电子章" and state >=6 and seal_report_url is NULL
     </select>
     <select id="getSealIsNullMiddleList" resultType="com.lims.manage.erp.vo.ReportSealvVo">
         SELECT
@@ -907,10 +908,11 @@
         contract_id,
         entrust_id as entrustId,
         0 as type,
-        seal_report_url
+        seal_report_url,
+        applicant
         FROM
         test_report_record_mid
-        WHERE category = "电子章" and seal_report_url is NULL
+        WHERE category = "电子章" and state >=6 and seal_report_url is NULL
     </select>
     <update id="updateReportSealLast" parameterType="com.lims.manage.erp.vo.ReportSealvVo">
         update  test_report_record set seal_report_url = #{sealReportUrl} where id = #{id}

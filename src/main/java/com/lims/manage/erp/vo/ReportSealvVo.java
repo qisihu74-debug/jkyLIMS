@@ -40,4 +40,8 @@ public class ReportSealvVo {
      * type 1最终报告 0 是中间报告
      */
     private Integer type;
+    /**
+     * 报告提交申请人
+     */
+    private String applicant;
 }

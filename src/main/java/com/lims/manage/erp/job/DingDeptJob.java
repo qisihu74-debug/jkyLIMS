@@ -1,7 +1,9 @@
 package com.lims.manage.erp.job;
 
+import com.github.pagehelper.PageHelper;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.DingDeptEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.mapper.ReportMapper;
 import com.lims.manage.erp.service.DeptService;
 import com.lims.manage.erp.util.AccessTokenSingleton;
@@ -77,7 +79,9 @@ public class DingDeptJob {
     public void task() throws IOException {
         // 电子印章报告集合
         List<ReportSealvVo> list = Lists.newArrayList();
+        PageHelper.clearPage();
         list.addAll(reportMapper.getSealIsNullLastList());
+        PageHelper.clearPage();
         list.addAll(reportMapper.getSealIsNullMiddleList());
         logger.info("印章list数据\t"+list);
         if(!CollectionUtils.isEmpty(list)){
@@ -85,8 +89,12 @@ public class DingDeptJob {
             for(ReportSealvVo reportRecordEntity:list){
                 if(!StringUtils.isEmpty(reportRecordEntity.getContractId())&&
                         StringUtils.isEmpty(reportRecordEntity.getSealReportUrl())){
+                    // 根据报告提交申请人 查询手机号
+                    PageHelper.clearPage();
+                    SysUserEntity sysUserEntity = reportMapper.selectUserMobile(reportRecordEntity.getApplicant());
                     // 进行填充本地盖章url
-                    InputStream inputStream = mehtodSealReport(reportRecordEntity.getContractId(),reportRecordEntity.getReportCode());
+                    InputStream inputStream = mehtodSealReport(reportRecordEntity.getContractId(),
+                            reportRecordEntity.getReportCode(),sysUserEntity.getName(),sysUserEntity.getMobile());
                    if(inputStream.available()!=0){
                        // 进行存放至 minIO 服务器
                        long id = GenID.getID();
@@ -118,16 +126,15 @@ public class DingDeptJob {
      * @param ContractId
      * @return
      */
-    private InputStream mehtodSealReport(Long ContractId,String reportCode)  {
-        byte[] inputStream = qiYueSuoHnadler.downloadQysFile(ContractId,
-                "郭家林", "18337165257");
+    private InputStream mehtodSealReport(Long ContractId,String reportCode,String name,String mobile)  {
+        byte[] inputStream = qiYueSuoHnadler.downloadQysFile(ContractId, name, mobile);
         InputStream sbs = new ByteArrayInputStream(inputStream);
         InputStream inputStream1 = null;
         try {
             inputStream1  = FileAndFolderUtil.getZipFileByName(sbs, reportCode + ".pdf");
         }
         catch (Exception e){
-        System.out.println(e);
+        logger.error(String.valueOf(e));
         inputStream1 = null;
         }
         return inputStream1;

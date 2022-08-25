@@ -510,7 +510,8 @@
                                         discount,
                                         actual_price,
                                         system_price,
-                                        department)
+                                        department,
+                                        audit_state)
         values (#{id},
                 #{entrustmentNo},
                 #{entrustType},
@@ -560,7 +561,8 @@
                 #{discount},
                 #{actualPrice},
                 #{systemPrice},
-                #{department})
+                #{department},
+                #{auditState})
 
     </insert>
     <select id="GetDelegateInformation" resultType="String">

@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SealEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -246,4 +247,12 @@ public interface ReportMapper {
      * @return
      */
     int updateReportSealMid(ReportSealvVo reportSealvVo);
+
+    /**
+     * 根据姓名 获取 手机号
+     * @param name
+     * @return
+     */
+    @Select("SELECT user_id,mobile,name FROM sys_user WHERE name = #{name} LIMIT 1")
+    SysUserEntity selectUserMobile(@Param("name") String name);
 }
