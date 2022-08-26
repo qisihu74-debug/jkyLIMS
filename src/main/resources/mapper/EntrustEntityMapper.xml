@@ -356,36 +356,35 @@
         t1.acceptance_date AS acceptance_date
         FROM
         test_entrusted_info AS t1
-        <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            <if test="entrustmentNo!=null and entrustmentNo!=''">
-                and t1.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
-            </if>
-            <if test="entrustCompany!=null and entrustCompany!=''">
-                and t1.entrust_company LIKE CONCAT('%',#{entrustCompany},'%')
-            </if>
-            <if test="entrustPeople!=null and entrustPeople!=''">
-                and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
-            </if>
-            <if test="projectName!=null and projectName!=''">
-                and t1.project_name LIKE CONCAT('%',#{projectName},'%')
-            </if>
-            <if test="entrustPeople!=null and entrustPeople!=''">
-                and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
-            </if>
-            <if test="businessAcceptor!=null and businessAcceptor!=''">
-                and t1.business_acceptor LIKE CONCAT('%',#{businessAcceptor},'%')
-            </if>
-            <if test="startDate!=null">
-                and <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>
-            </if>
-            <if test="endingDate!=null">
-                and
-                <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
-            </if>
-            <if test="state!=null">
-                and t1.state = #{state}
-            </if>
-        </trim>
+        where audit_state =1
+        <if test="entrustmentNo!=null and entrustmentNo!=''">
+            and t1.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
+        </if>
+        <if test="entrustCompany!=null and entrustCompany!=''">
+            and t1.entrust_company LIKE CONCAT('%',#{entrustCompany},'%')
+        </if>
+        <if test="entrustPeople!=null and entrustPeople!=''">
+            and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+        </if>
+        <if test="projectName!=null and projectName!=''">
+            and t1.project_name LIKE CONCAT('%',#{projectName},'%')
+        </if>
+        <if test="entrustPeople!=null and entrustPeople!=''">
+            and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+        </if>
+        <if test="businessAcceptor!=null and businessAcceptor!=''">
+            and t1.business_acceptor LIKE CONCAT('%',#{businessAcceptor},'%')
+        </if>
+        <if test="startDate!=null">
+            and <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>
+        </if>
+        <if test="endingDate!=null">
+            and
+            <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
+        </if>
+        <if test="state!=null">
+            and t1.state = #{state}
+        </if>
         ORDER BY t1.entrustment_no DESC
     </select>
     <insert id="BatchSaveEntrustSample" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
@@ -513,7 +512,8 @@
                                         discount,
                                         actual_price,
                                         system_price,
-                                        department)
+                                        department,
+                                        audit_state)
         values (#{id},
                 #{entrustmentNo},
                 #{entrustType},
@@ -563,7 +563,8 @@
                 #{discount},
                 #{actualPrice},
                 #{systemPrice},
-                #{department})
+                #{department},
+                #{auditState})
 
     </insert>
     <select id="GetDelegateInformation" resultType="String">
@@ -951,6 +952,7 @@
         <if test="entrustPeople!=null">
             and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
         </if>
+        ORDER BY t1.entrustment_no asc, t1.request_date asc
     </select>
 
     <select id="getCompanyList" resultType="com.lims.manage.erp.entity.TestCompanyJsonEntity">

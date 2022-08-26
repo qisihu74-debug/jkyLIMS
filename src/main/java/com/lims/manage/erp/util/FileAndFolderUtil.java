@@ -1,6 +1,7 @@
 package com.lims.manage.erp.util;
 
 
+import com.google.api.client.util.Lists;
 import com.lowagie.text.pdf.BaseFont;
 import fr.opensagres.xdocreport.itext.extension.font.IFontProvider;
 import org.apache.poi.xwpf.converter.pdf.PdfConverter;
@@ -10,6 +11,7 @@ import org.docx4j.fonts.IdentityPlusMapper;
 import org.docx4j.fonts.Mapper;
 import org.docx4j.fonts.PhysicalFonts;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +29,10 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * @author gjl
@@ -450,4 +455,53 @@ public class FileAndFolderUtil {
         return null;
     }
 
+    /**
+     * 获取压缩包下指定文件
+     * @param inputStream
+     * @param fileName
+     * @return
+     * @throws Exception
+     */
+    public static InputStream getZipFileByName(InputStream inputStream,String fileName) throws Exception{
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream );
+        ZipInputStream zin = new ZipInputStream(bufferedInputStream);
+        ZipEntry ze = null;
+        List<byte[]> list = Lists.newArrayList();
+        while ((ze = zin.getNextEntry()) != null) {
+            if (!ze.getName().equals("签署摘要.pdf")&&ze.getName()!=null) {
+                byte[] buffer = new byte[9000];
+                int len;
+                while ((len = zin.read(buffer)) != -1) {
+                    byte[] newBytes = new byte[len];
+                    System.arraycopy(buffer, 0, newBytes, 0, len);
+                    list.add(newBytes);
+                }
+                break;
+            }
+        }
+        byte[] mergeBytes = mergeBytes(list);
+        InputStream input = new ByteArrayInputStream(mergeBytes);
+        zin.close();
+        return input;
+    }
+
+    /**
+     * 合并多个字节数组到一个字节数组
+     *
+     * @param list 动态字节数字参数
+     * @return byte[] 合并后的字节数字
+     */
+    private static byte[] mergeBytes(List<byte[]> list) {
+        int lengthByte = 0;
+        for (byte[] value : list) {
+            lengthByte += value.length;
+        }
+        byte[] allBytes = new byte[lengthByte];
+        int countLength = 0;
+        for (byte[] b : list) {
+            System.arraycopy(b, 0, allBytes, countLength, b.length);
+            countLength += b.length;
+        }
+        return allBytes;
+    }
 }

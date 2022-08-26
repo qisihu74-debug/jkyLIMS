@@ -250,6 +250,11 @@ public class EntrustEntity {
     */
     private Long department;
 
+    /**
+     * 0未审核，1已审核
+     */
+    private String auditState;
+
     DecimalFormat df = new DecimalFormat("#.00");
 
 

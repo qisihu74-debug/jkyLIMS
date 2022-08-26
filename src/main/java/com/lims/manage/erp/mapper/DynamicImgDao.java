@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.DynamicImg;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -16,4 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Mapper
 public interface DynamicImgDao extends BaseMapper<DynamicImg> {
+
+    @Delete("delete from sys_csos_img")
+    void deleteImg();
 }

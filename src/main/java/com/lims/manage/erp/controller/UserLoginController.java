@@ -19,6 +19,7 @@ import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.SHA256Util;
 import com.lims.manage.erp.util.ShiroUtils;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -189,6 +190,7 @@ public class UserLoginController {
             }
         }
         dynamicImg.setImgUrl(s);
+        dynamicImgService.delete();
         boolean batch = dynamicImgService.save(dynamicImg);
         if (batch){
             return ResultUtil.success("上传成功");
@@ -201,7 +203,7 @@ public class UserLoginController {
      * 查询已上传的图片
      * @return
      */
-    @PostMapping("getImgList")
+    @GetMapping("getImgList")
     public Result getImgList(){
         DynamicImg dynamicImg = dynamicImgService.list().get(0);
         List<String> list = Lists.newArrayList();
@@ -213,6 +215,21 @@ public class UserLoginController {
         }
         dynamicImg.setUrls(list);
         return ResultUtil.success(list);
+    }
+
+    /**
+     * 查询已上传的图片
+     * @return
+     */
+    @GetMapping("getTitle")
+    public Result getImg(){
+        DynamicImg dynamicImg = dynamicImgService.list().get(0);
+        Map<String,String> map = new HashedMap();
+        map.put("title",dynamicImg.getTitle());
+        map.put("content",dynamicImg.getContent());
+        map.put("filingInfo",dynamicImg.getFilingInfo());
+        map.put("topDesc",dynamicImg.getTopDesc());
+        return ResultUtil.success(map);
     }
 
     /**

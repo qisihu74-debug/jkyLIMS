@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SealEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -221,4 +222,37 @@ public interface ReportMapper {
                    @Param("now")Date now,@Param("applicant") String applicant);
 
     ReportDetailVo getReportDetailZj(Long taskId,List<Long> deptIds);
+
+    /**
+     * 最终报告：本地印章Url 未存放
+     * @return
+     */
+    List<ReportSealvVo> getSealIsNullLastList();
+
+    /**
+     * 中间报告：本地印章Url 未存放
+     * @return
+     */
+    List<ReportSealvVo> getSealIsNullMiddleList();
+
+    /**
+     * update 最终报告电子章：
+     * @return
+     */
+    int updateReportSealLast(ReportSealvVo reportSealvVo);
+
+    /**
+     * update 中间报告电子章：
+     * @param reportSealvVo
+     * @return
+     */
+    int updateReportSealMid(ReportSealvVo reportSealvVo);
+
+    /**
+     * 根据姓名 获取 手机号
+     * @param name
+     * @return
+     */
+    @Select("SELECT user_id,mobile,name FROM sys_user WHERE name = #{name} LIMIT 1")
+    SysUserEntity selectUserMobile(@Param("name") String name);
 }
