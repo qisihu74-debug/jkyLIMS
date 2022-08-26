@@ -122,6 +122,7 @@
         <result property="projectName" column="project_name"></result>
         <result property="businessAcceptor" column="business_acceptor"></result>
         <result property="acceptanceDate" column="acceptance_date"></result>
+        <result property="sampleLogisticsNo" column="sampleLogisticsNo"></result>
         <result property="state" column="state"></result>
         <collection property="taskCodes" ofType="com.lims.manage.erp.vo.TaskCodeVo">
             <result property="taskCode" column="taskCode"></result>
@@ -140,6 +141,7 @@
         t1.business_acceptor,
         t1.acceptance_date,
         t1.state,
+        t1.sample_logistics_no sampleLogisticsNo,
         IFNULL( t2.task_code, "——" ) taskCode,
         IFNULL(t3.name,"——") teamName
         FROM
@@ -237,6 +239,7 @@
         t1.business_acceptor,
         t1.acceptance_date,
         t1.state,
+        t1.sample_logistics_no sampleLogisticsNo,
         IFNULL( t2.task_code, "——" ) taskCode,
         IFNULL(t3.name,"——") teamName
         FROM

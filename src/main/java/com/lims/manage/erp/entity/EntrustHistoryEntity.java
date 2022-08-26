@@ -84,6 +84,14 @@ public class EntrustHistoryEntity {
      */
     private String taskCodeParam;
     /**
+     * 物流单号
+     */
+    private String sampleLogisticsNo;
+    /**
+     * 物流单号数组
+     */
+    private List<String> sampleLogisticsNoArr;
+    /**
      * 样品信息
      */
     private List<EntrustSampleInfoVo> sampleInfoVos;
