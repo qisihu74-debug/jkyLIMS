@@ -40,6 +40,24 @@
         WHERE
             company_id = #{companyId}
     </select>
+    <select id="selectEntrustCompanyData" resultType="com.lims.manage.erp.entity.TestCompanyEntity">
+        SELECT
+        company_id ,
+        company_name,
+        type,
+        address
+        FROM
+        test_company
+        WHERE
+        1=1
+        <if test="companyName!=null and companyName!='' ">
+            AND company_name = #{companyName}
+        </if>
+        <if test="type!=null">
+            AND type = #{type}
+        </if>
+        LIMIT 1
+    </select>
 
 
 

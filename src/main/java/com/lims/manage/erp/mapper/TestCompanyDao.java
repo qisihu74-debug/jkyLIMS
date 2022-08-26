@@ -5,6 +5,7 @@ import com.lims.manage.erp.entity.TestCompanyEntity;
 import com.lims.manage.erp.entity.TestCustomerJsonEntity;
 import com.lims.manage.erp.entity.TestInitDataEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.TestCompanyVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -42,4 +43,11 @@ public interface TestCompanyDao extends BaseMapper<TestCompanyEntity> {
      * @return
      */
     List<TestCustomerJsonEntity> selectPeopleInformation(Integer companyId);
+
+    /**
+     * 根据单位信息条件 查询详情
+     * @param testCompanyClientVo
+     * @return
+     */
+    TestCompanyEntity selectEntrustCompanyData(TestCompanyVo testCompanyClientVo);
 }

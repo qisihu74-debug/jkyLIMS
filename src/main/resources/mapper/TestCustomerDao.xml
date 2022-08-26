@@ -32,4 +32,17 @@
         </trim>
     </insert>
 
+    <select id="getTestCustomerClientList" resultType="com.lims.manage.erp.vo.TestCustomerVo">
+        SELECT
+        customer_id Id,
+        contacts contacts,
+        phone contactWay
+        FROM
+        `test_customer`
+        WHERE company_id = #{companyId}
+        <if test="contacts!=null and contacts!=''">
+            and contacts = #{contacts}
+        </if>
+    </select>
+
 </mapper>

@@ -513,4 +513,12 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Update("update test_entrusted_info set audit_state=1,audit_date=#{date},audit_user=#{name} where id = #{id}")
     void acceptEntrust(@Param("id") Long id, @Param("date") Date date,@Param("name") String name);
+
+    /**
+     * 查询委托单是否客户委托
+     * @param entrustId
+     * @return
+     */
+    @Select("SELECT admin_id FROM `test_entrusted_info` WHERE id = #{entrustId}")
+    String selectEntrustClientStatus(@Param("entrustId")Long entrustId);
 }

@@ -3,8 +3,11 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestCompanyEntity;
 import com.lims.manage.erp.entity.TestCustomerEntity;
+import com.lims.manage.erp.vo.TestCustomerVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @Author: DLC
@@ -20,5 +23,10 @@ public interface TestCustomerDao extends BaseMapper<TestCompanyEntity> {
      * @return
      */
     int insertTestCustomer(TestCustomerEntity testCustomerEntity);
+
+    /**
+     * 通过公司id 效验联系人 是否存在
+     */
+    List<TestCustomerVo> getTestCustomerClientList(TestCustomerEntity testCustomerClientEntity);
 
 }

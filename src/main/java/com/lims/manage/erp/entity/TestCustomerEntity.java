@@ -33,5 +33,11 @@ public class TestCustomerEntity implements Serializable {
      */
     private String phone;
 
+    public TestCustomerEntity() {
+    }
 
+    public TestCustomerEntity(Integer companyId, String contacts) {
+        this.companyId = companyId;
+        this.contacts = contacts;
+    }
 }
