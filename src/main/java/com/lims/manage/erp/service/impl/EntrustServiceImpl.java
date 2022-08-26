@@ -2797,6 +2797,27 @@ public class EntrustServiceImpl implements EntrustService {
         if (entityMapper.getByData(basisInfo.getEntrustmentNo()) != null) {
             return "再来一单新增委托失败!:\t委托编号已存在\t"+basisInfo.getEntrustmentNo();
         }
+        /**
+         *  处理委托单位信息
+         */
+        TestCompanyVo companyClientVo = new TestCompanyVo();
+        companyClientVo.setType(1);
+        companyClientVo.setCompanyName(basisInfo.getEntrustCompany());
+        companyClientVo.setContacts(!StringUtils.isEmpty(basisInfo.getEntrustPeople()) ? basisInfo.getEntrustPeople() : null);
+        companyClientVo.setContactWay(!StringUtils.isEmpty(basisInfo.getEntrustPhone()) ? basisInfo.getEntrustPhone() : null);
+        /**
+         *  使用方法处理委托单位信息
+         */
+        Integer entrustCompanyId = methodUnit(companyClientVo);
+        basisInfo.setEntrustCompanyId(entrustCompanyId);
+        //处理见证单位信息
+        TestCompanyVo witnessCompanyClientVo = new TestCompanyVo();
+        witnessCompanyClientVo.setType(2);
+        witnessCompanyClientVo.setCompanyName(!StringUtils.isEmpty(basisInfo.getWitnessUint()) ? basisInfo.getWitnessUint() : null);
+        witnessCompanyClientVo.setContacts(!StringUtils.isEmpty(basisInfo.getWitnessPerson()) ? basisInfo.getWitnessPerson() : null);
+        witnessCompanyClientVo.setContactWay(!StringUtils.isEmpty(basisInfo.getWitnessPhone()) ? basisInfo.getWitnessPhone() : null);
+        // 处理见证单位信息
+        methodUnit(witnessCompanyClientVo);
         // 处理copy后的样品集合
         if(!vo.getSamples().isEmpty()){
             methodCopySamples(vo.getSamples(),old,id,basisInfo.getEntrustCompanyId());
@@ -2922,27 +2943,6 @@ public class EntrustServiceImpl implements EntrustService {
             }
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
-            /**
-             *  处理委托单位信息
-             */
-            TestCompanyVo companyClientVo = new TestCompanyVo();
-            companyClientVo.setType(1);
-            companyClientVo.setCompanyName(basisInfo.getEntrustCompany());
-            companyClientVo.setContacts(!StringUtils.isEmpty(basisInfo.getEntrustPeople()) ? basisInfo.getEntrustPeople() : null);
-            companyClientVo.setContactWay(!StringUtils.isEmpty(basisInfo.getEntrustPhone()) ? basisInfo.getEntrustPhone() : null);
-            /**
-             *  使用方法处理委托单位信息
-             */
-            Integer entrustCompanyId = methodUnit(companyClientVo);
-            basisInfo.setEntrustCompanyId(entrustCompanyId);
-            //处理见证单位信息
-            TestCompanyVo witnessCompanyClientVo = new TestCompanyVo();
-            witnessCompanyClientVo.setType(2);
-            witnessCompanyClientVo.setCompanyName(!StringUtils.isEmpty(basisInfo.getWitnessUint()) ? basisInfo.getWitnessUint() : null);
-            witnessCompanyClientVo.setContacts(!StringUtils.isEmpty(basisInfo.getWitnessPerson()) ? basisInfo.getWitnessPerson() : null);
-            witnessCompanyClientVo.setContactWay(!StringUtils.isEmpty(basisInfo.getWitnessPhone()) ? basisInfo.getWitnessPhone() : null);
-            // 处理见证单位信息
-            methodUnit(witnessCompanyClientVo);
         // 获取当前用户所在科室id
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         Long department = teamMapper.getTeamIdByUid(userInfo.getUserId());
