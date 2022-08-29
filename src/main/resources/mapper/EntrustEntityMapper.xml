@@ -636,6 +636,7 @@
             <if test="actualPrice != null and actualPrice!=''">actual_price=#{actualPrice},</if>
             <if test="systemPrice != null and systemPrice!=''">system_price=#{systemPrice},</if>
             <if test="department != null">department=#{department},</if>
+            <if test="auditState != null and auditState!=''">audit_state=#{auditState},</if>
         </trim>
             where id = #{id}
             <if test="entrustmentNo!=null">

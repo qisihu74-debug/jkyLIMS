@@ -414,6 +414,8 @@ public class EntrustServiceImpl implements EntrustService {
                 +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
                 +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount());
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " 更新委托：成功\t委托编号为\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
+        // 委托单已经 审核
+        basisInfo.setAuditState("1");
         entityMapper.updateEntrustInfo(basisInfo);
 /*        //修改样品委托单位
         List<Integer> sampleIds = entityMapper.getAllSampleIdentrustmentId(basisInfo.getId());
@@ -1386,21 +1388,6 @@ public class EntrustServiceImpl implements EntrustService {
          }
         entrustEntity.setState(144);
         entityMapper.updateEntrustInfo(entrustEntity);
-        List<Integer> sampleIds = entityMapper.getSampleId(entrustEntity.getId());
-        if (!CollectionUtils.isEmpty(sampleIds)) {
-            for (Integer sampleId : sampleIds) {
-                sampleEntityMapper.updateSampleUse(sampleId, 0);
-            }
-        }
-        // 删除 委托单id与样品id 中间表关系。
-        if (!CollectionUtils.isEmpty(sampleIds)) {
-            // 1.0 样品与委托单已存在 1.1、删除样品id
-            entityMapper.removeTestEntrustedSampleDetailsRel(entrustEntity.getId());
-        }
-        // 删除判定依据id
-        entityMapper.removeTestEntrustedSampleStandardRel(entrustEntity.getId());
-        // 删除样品下检测项
-        entityMapper.removeTestEntrustedSampleCheckitemRel(entrustEntity.getId());
         /**
          *  增加日志
          */
