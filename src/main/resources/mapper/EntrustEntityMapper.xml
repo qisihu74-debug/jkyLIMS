@@ -124,6 +124,7 @@
         <result property="acceptanceDate" column="acceptance_date"></result>
         <result property="sampleLogisticsNo" column="sampleLogisticsNo"></result>
         <result property="state" column="state"></result>
+        <result property="auditState" column="auditState"></result>
         <collection property="taskCodes" ofType="com.lims.manage.erp.vo.TaskCodeVo">
             <result property="taskCode" column="taskCode"></result>
             <result property="teamName" column="teamName"></result>
@@ -141,6 +142,7 @@
         t1.business_acceptor,
         t1.acceptance_date,
         t1.state,
+        t1.audit_state auditState,
         t1.sample_logistics_no sampleLogisticsNo,
         IFNULL( t2.task_code, "——" ) taskCode,
         IFNULL(t3.name,"——") teamName
@@ -239,6 +241,7 @@
         t1.business_acceptor,
         t1.acceptance_date,
         t1.state,
+        t1.audit_state auditState,
         t1.sample_logistics_no sampleLogisticsNo,
         IFNULL( t2.task_code, "——" ) taskCode,
         IFNULL(t3.name,"——") teamName
@@ -637,6 +640,7 @@
             <if test="systemPrice != null and systemPrice!=''">system_price=#{systemPrice},</if>
             <if test="department != null">department=#{department},</if>
             <if test="auditState != null and auditState!=''">audit_state=#{auditState},</if>
+            <if test="auditUser != null and auditUser!=''">audit_user=#{auditUser},</if>
         </trim>
             where id = #{id}
             <if test="entrustmentNo!=null">

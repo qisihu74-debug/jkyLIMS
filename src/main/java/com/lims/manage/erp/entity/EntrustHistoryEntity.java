@@ -95,4 +95,9 @@ public class EntrustHistoryEntity {
      * 样品信息
      */
     private List<EntrustSampleInfoVo> sampleInfoVos;
+
+    /**
+     * 委托单状态 0未审核，1已审核
+     */
+    private Integer auditState;
 }

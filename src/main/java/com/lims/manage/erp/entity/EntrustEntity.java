@@ -255,6 +255,11 @@ public class EntrustEntity {
      */
     private String auditState;
 
+    /**
+     *受理人
+     */
+    private String auditUser;
+
     DecimalFormat df = new DecimalFormat("#.00");
 
 

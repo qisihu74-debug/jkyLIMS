@@ -414,9 +414,6 @@ public class EntrustServiceImpl implements EntrustService {
                 +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
                 +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount());
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " 更新委托：成功\t委托编号为\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
-        // 委托单已经 审核
-        basisInfo.setAuditState("1");
-        entityMapper.updateEntrustInfo(basisInfo);
 /*        //修改样品委托单位
         List<Integer> sampleIds = entityMapper.getAllSampleIdentrustmentId(basisInfo.getId());
         if(!CollectionUtils.isEmpty(sampleIds)){
@@ -3931,15 +3928,41 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean acceptEntrust(Long id) {
         String username = ShiroUtils.getUserInfo().getUsername();
-        try {
-            entityMapper.acceptEntrust(id,new Date(System.currentTimeMillis()),username);
-            return true;
-        }catch (Exception e){
-            logger.error("受理委托单失败:{}",e);
-            return false;
+        String name = ShiroUtils.getUserInfo().getName();
+        // 处理样品信息
+        List<Integer> sampleIds = entityMapper.getAllSampleIdentrustmentId(id);
+        if(!CollectionUtils.isEmpty(sampleIds)) {
+            for (Integer sampleId : sampleIds) {
+                // 更新样品状态：
+                TestSampleEntity record = new TestSampleEntity();
+                record.setId(sampleId);
+                record.setInspector(name);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    record.setReceivedDate(sdf.format(new Date()));
+                } catch (Exception e) {
+                    Debug.println("受理时:\t", e + "  update样品状态时");
+                }
+                testSampleEntityMapper.updateByPrimaryKeySelective(record);
+            }
         }
+        // 受理委托单信息
+        EntrustEntity basisInfo = new EntrustEntity();
+        // 委托单已经 审核
+        basisInfo.setAuditState("1");
+        basisInfo.setAuditUser(username);
+        basisInfo.setId(id);
+        // 业务受理人
+        basisInfo.setBusinessAcceptor(name);
+        // 是否留样 ： 否
+        basisInfo.setIsSave("否");
+        // 委托检测类别（原材检测 配合比）
+        basisInfo.setEntrustTestType("原材检测");
+        entityMapper.updateEntrustInfo(basisInfo);
+        return true;
     }
 
     /**
