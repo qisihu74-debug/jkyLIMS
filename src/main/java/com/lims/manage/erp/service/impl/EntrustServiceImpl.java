@@ -1409,6 +1409,19 @@ public class EntrustServiceImpl implements EntrustService {
         // type =1 委托单位
         PageHelper.clearPage();
         List<LabelValueVo> EntrustCompany = testCompanyDao.selectEntrustCompanyList(1);
+        // 查询委托单下 所有委托单位信息
+        PageHelper.clearPage();
+        List<LabelValueVo> EntustCompanys = new ArrayList<>();
+        List<String> entustCompanys = testCompanyDao.selectEntrustCompanys();
+        if(!CollectionUtils.isEmpty(entustCompanys)){
+            for(int i=0;i<entustCompanys.size();i++){
+                LabelValueVo labelValueVo = new LabelValueVo();
+                String company = entustCompanys.get(i);
+                labelValueVo.setLabel(company);
+                labelValueVo.setValue((long) i);
+                EntustCompanys.add(labelValueVo);
+            }
+        }
         // type =2 见证单位
         PageHelper.clearPage();
         List<LabelValueVo> witnessCompany = testCompanyDao.selectEntrustCompanyList(2);
@@ -1465,6 +1478,7 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         map.put("entrustCompany", EntrustCompany);
+        map.put("entrustCompanys", EntustCompanys);
         map.put("witnessCompany", witnessCompany);
         map.put("arryEntrust", arryEntrust);
         map.put("arrySampling", arrySampling);
@@ -3480,8 +3494,9 @@ public class EntrustServiceImpl implements EntrustService {
     public PageInfo getClientListExport(ClientOrderdetailVo clientOrderdetailVo) {
         List<ClientOrderdetailVo> list = Lists.newArrayList();
         PageHelper.clearPage();
-        if(clientOrderdetailVo.getCompanyIds()!=null&&clientOrderdetailVo.getCompanyIds().length==0){
-            clientOrderdetailVo.setCompanyIds(null);
+        clientOrderdetailVo.setCompanyIds(null);
+        if(clientOrderdetailVo.getCompanyStrs()!=null&&clientOrderdetailVo.getCompanyStrs().length==0){
+            clientOrderdetailVo.setCompanyStrs(null);
         }
         list = entityMapper.selectClientOrderdetailVoList(clientOrderdetailVo);
         if(!CollectionUtils.isEmpty(list)){
@@ -3637,11 +3652,9 @@ public class EntrustServiceImpl implements EntrustService {
         // 第一行 标题
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         StringBuilder deptBuilder = new StringBuilder();
-        if(clientOrderdetailVo.getCompanyIds()!=null&&clientOrderdetailVo.getCompanyIds().length>0){
-            PageHelper.clearPage();
-            List<TestCompanyJsonEntity> CompanyList  = entityMapper.getCompanyList(clientOrderdetailVo.getCompanyIds());
-            for(TestCompanyJsonEntity testCompanyJsonEntity :CompanyList){
-                deptBuilder.append(testCompanyJsonEntity.getCompanyName());
+        if(clientOrderdetailVo.getCompanyStrs()!=null&&clientOrderdetailVo.getCompanyStrs().length>0){
+            for(int i=0; i < clientOrderdetailVo.getCompanyStrs().length;i++){
+                deptBuilder.append(clientOrderdetailVo.getCompanyStrs()[i]);
                 deptBuilder.append("、");
             }
         }
@@ -3755,8 +3768,9 @@ public class EntrustServiceImpl implements EntrustService {
     public PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo) {
         List<ClientOrderdetailVo> list = Lists.newArrayList();
         PageHelper.clearPage();
-        if(clientOrderdetailVo.getCompanyIds()!=null&&clientOrderdetailVo.getCompanyIds().length==0){
-            clientOrderdetailVo.setCompanyIds(null);
+        clientOrderdetailVo.setCompanyIds(null);
+        if(clientOrderdetailVo.getCompanyStrs()!=null&&clientOrderdetailVo.getCompanyStrs().length==0){
+            clientOrderdetailVo.setCompanyStrs(null);
         }
         list = entityMapper.getEntrustList(clientOrderdetailVo);
         // 处理分页数据：
@@ -3925,8 +3939,9 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean acceptEntrust(Long id) {
-        String username = ShiroUtils.getUserInfo().getUsername();
-        String name = ShiroUtils.getUserInfo().getName();
+        SysUserEntity user = ShiroUtils.getUserInfo();
+        String username = user.getUsername();
+        String name = user.getName();
         // 处理样品信息
         List<Integer> sampleIds = entityMapper.getAllSampleIdentrustmentId(id);
         if(!CollectionUtils.isEmpty(sampleIds)) {
@@ -3956,6 +3971,14 @@ public class EntrustServiceImpl implements EntrustService {
         basisInfo.setIsSave("否");
         // 委托检测类别（原材检测 配合比）
         basisInfo.setEntrustTestType("原材检测");
+        Long department = teamMapper.getTeamIdByUid(user.getUserId());
+        // 委托单创建人所属部门
+        if(StringUtils.isEmpty(department)){
+            basisInfo.setDepartment(null);
+        }
+        else {
+            basisInfo.setDepartment(department);
+        }
         entityMapper.updateEntrustInfo(basisInfo);
         return true;
     }

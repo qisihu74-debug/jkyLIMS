@@ -936,10 +936,10 @@
         LEFT JOIN test_report_record as t6 ON t6.entrustment_id = t1.id
         WHERE
         1=1
-        <if test="companyIds!=null">
-            and t1.entrust_company_id in
-            <foreach collection="companyIds" item="id" index="index" open="(" close=")" separator=",">
-                #{id}
+        <if test="companyStrs!=null">
+            and t1.entrust_company in
+            <foreach collection="companyStrs" item="name" index="index" open="(" close=")" separator=",">
+                #{name}
             </foreach>
         </if>
         <if test="projectName!=null and projectName!=''">
@@ -1002,10 +1002,10 @@
         test_entrusted_info
         WHERE
         1=1
-        <if test="companyIds!=null">
-            and entrust_company_id in
-            <foreach collection="companyIds" item="id" index="index" open="(" close=")" separator=",">
-                #{id}
+        <if test="companyStrs!=null">
+            and entrust_company in
+            <foreach collection="companyStrs" item="name" index="index" open="(" close=")" separator=",">
+                #{name}
             </foreach>
         </if>
         <if test="projectName!=null and projectName!=''">

@@ -7,6 +7,7 @@ import com.lims.manage.erp.entity.TestInitDataEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.TestCompanyVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -50,4 +51,15 @@ public interface TestCompanyDao extends BaseMapper<TestCompanyEntity> {
      * @return
      */
     TestCompanyEntity selectEntrustCompanyData(TestCompanyVo testCompanyClientVo);
+
+    /**
+     * 查询委托单下 所有委托单位信息
+     * @return
+     */
+    @Select("SELECT\n" +
+            "DISTINCT(entrust_company)\n" +
+            "FROM\n" +
+            "test_entrusted_info\n" +
+            "WHERE entrust_company is not null and entrust_company !=''")
+    List<String> selectEntrustCompanys();
 }
