@@ -52,13 +52,7 @@ import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestSampleEntityService;
-import com.lims.manage.erp.util.AsposeUtil;
-import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.FileAndFolderUtil;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
@@ -3636,6 +3630,7 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public InputStream exportPersonDetails(List<ClientOrderdetailVo> list,ClientOrderdetailVo clientOrderdetailVo) throws Exception {
         InputStream fileStream = MinIoUtil.getFileStream("entrust-template", "客户委托详情表.xlsx");
+        PDFHelper3.getLicense();
         Workbook workbook = new Workbook(fileStream);
         Worksheet worksheet = workbook.getWorksheets().get(0);
         Cells cells = worksheet.getCells();
