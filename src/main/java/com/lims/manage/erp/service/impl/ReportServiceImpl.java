@@ -1491,6 +1491,8 @@ public class ReportServiceImpl implements ReportService {
                                             cells.get(n,j).setValue("样品名称：" + (sampleEntity.getAliasName() == null ? "——" : sampleEntity.getAliasName())
                                                     + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~","~"))
                                                     + "；样品数量：" + (sampleEntity.getSampleQuantity() == null ? "——" : sampleEntity.getSampleQuantity())
+                                                    + "；代表批量：" + (sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration())
+                                                    + "；规格等级：" + (sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs()))
                                                     + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
                                                     + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                                         }
@@ -1859,6 +1861,8 @@ public class ReportServiceImpl implements ReportService {
                                             cells.get(n,j).setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
                                                     + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~","~"))
                                                     + "；样品数量：" + (sampleEntity.getSampleQuantity() == null ? "——" : sampleEntity.getSampleQuantity())
+                                                    + "；代表批量：" + (sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration())
+                                                    + "；规格等级：" + (sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs())
                                                     + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
                                                     + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
                                         }
