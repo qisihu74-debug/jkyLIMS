@@ -11,6 +11,7 @@ import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.CodeService;
+import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -106,9 +107,14 @@ public class CodeController {
         queryWrapper.eq(org.apache.commons.lang3.StringUtils.isNotEmpty(state),CodeEntity::getState,state);
         queryWrapper.like(org.apache.commons.lang3.StringUtils.isNotEmpty(name),CodeEntity::getName,name);
         queryWrapper.like(org.apache.commons.lang3.StringUtils.isNotEmpty(usedCompany),CodeEntity::getUsedCompany,usedCompany);
+        queryWrapper.orderByDesc(CodeEntity::getCreateTime);
         PageHelper.startPage(pageNum,pageSize);
         List<CodeEntity> list = codeService.list(queryWrapper);
         PageInfo<CodeEntity> pageInfo = new PageInfo<>(list);
+        for (CodeEntity codeEntity:pageInfo.getList()) {
+            codeEntity.setCreateTime(DateUtil.conversionTime(Long.parseLong(codeEntity.getCreateTime())));
+            codeEntity.setUseTime(DateUtil.conversionTime(Long.parseLong(codeEntity.getUseTime())));
+        }
         return ResultUtil.success(pageInfo);
     }
 
