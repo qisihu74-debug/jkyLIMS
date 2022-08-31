@@ -19,6 +19,7 @@ import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.SHA256Util;
 import com.lims.manage.erp.util.ShiroUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,8 +40,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @Description 用户登录
@@ -190,7 +193,31 @@ public class UserLoginController {
             }
         }
         dynamicImg.setImgUrl(s);
+        List<DynamicImg> list = dynamicImgService.list();
+        DynamicImg img = null;
+        if (CollectionUtils.isNotEmpty(list)){
+            img = list.get(0);
+        }
         dynamicImgService.delete();
+        //从新设置url
+        String[] split = img.getImgUrl().split(",");
+        String[] split1 = dynamicImg.getImgUrl().split(",");
+        Set<String> set = new HashSet<>();
+        for (String url:split) {
+            set.add(url);
+        }
+        for (String url:split1) {
+            set.add(url);
+        }
+        String ss = "";
+        Object[] objects = set.toArray();
+        for (int i =0;i<objects.length;i++){
+            ss = ss + objects[i];
+            if (i != set.size()-1){
+                ss = ss + ",";
+            }
+        }
+        dynamicImg.setImgUrl(ss);
         boolean batch = dynamicImgService.save(dynamicImg);
         if (batch){
             return ResultUtil.success("上传成功");

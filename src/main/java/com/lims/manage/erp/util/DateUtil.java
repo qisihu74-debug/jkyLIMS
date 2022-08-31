@@ -1,9 +1,16 @@
 package com.lims.manage.erp.util;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author gjl
@@ -374,5 +381,17 @@ public class DateUtil {
         return sdf.format(date);
     }
 
+    /**
+     * 时间戳转 2021-06-01 26：30：10
+     * @param timeStamp
+     * @return
+     */
+    public static String conversionTime(Long timeStamp) {
+        //yyyy-MM-dd HH:mm:ss 转换的时间格式  可以自定义
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        //转换
+        String time = sdf.format(new Date(timeStamp));
+        return time;
+    }
 
 }
