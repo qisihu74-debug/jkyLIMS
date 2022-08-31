@@ -262,6 +262,18 @@ public class EntrustEntity {
 
     DecimalFormat df = new DecimalFormat("#.00");
 
+    /**
+     * 审核日期
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
+    private Date auditDate;
+
+    /**
+     * 收报告单位地址
+     */
+    private String reportReceivingUnit;
+
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,
                          String witnessUint, String witnessPerson, String witnessPhone, String projectName,
@@ -353,6 +365,7 @@ public class EntrustEntity {
         this.actualPrice= vo.getActualPrice() == null ? null : df.format(Double.parseDouble(vo.getActualPrice()));
         this.systemPrice=vo.getSystemPrice();
         this.presentInformation=vo.getPresentInformation();
+        this.reportReceivingUnit = vo.getReportReceivingUnit();
     }
 
 

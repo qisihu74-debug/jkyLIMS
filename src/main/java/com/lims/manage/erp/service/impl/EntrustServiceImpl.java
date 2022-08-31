@@ -408,18 +408,7 @@ public class EntrustServiceImpl implements EntrustService {
                 +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
                 +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount());
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " 更新委托：成功\t委托编号为\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
-/*        //修改样品委托单位
-        List<Integer> sampleIds = entityMapper.getAllSampleIdentrustmentId(basisInfo.getId());
-        if(!CollectionUtils.isEmpty(sampleIds)){
-            List<TestSampleEntity> entities = Lists.newArrayList();
-            for (int i = 0; i < sampleIds.size(); i++) {
-                TestSampleEntity entity = new TestSampleEntity();
-                entity.setId(sampleIds.get(i));
-                entity.setCompanyId(basisInfo.getEntrustCompanyId());
-                entities.add(entity);
-            }
-            entityMapper.updateSampleCompany(entities);
-        }*/
+        entityMapper.updateEntrustInfo(basisInfo);
         // 修改委托信息后： 触发联动效果。 同步更新任务单对应字段。
         methodModifyTheTask(basisInfo.getId());
         // 修改委托信息后： 触发联动效果。同步更新样品信息
@@ -560,7 +549,7 @@ public class EntrustServiceImpl implements EntrustService {
             //得到总价钱，再保存委托基本信息
             basisInfo.setPaymentCount(totalMoney + "");
             //存放委托基本信息==》test_entrusted
-            entityMapper.updateEntrustInfo(basisInfo);
+            entityMapper.updateEntrustInfos(basisInfo);
         }
 
         return true;
@@ -665,7 +654,7 @@ public class EntrustServiceImpl implements EntrustService {
             //得到总价钱，再保存委托基本信息
 //            basisInfo.setPaymentCount(totalMoney + "");2022年5月20日修改，不在后台计算检测项价格
             //存放委托基本信息==》test_entrusted
-            entityMapper.updateEntrustInfo(basisInfo);
+            entityMapper.updateEntrustInfos(basisInfo);
         }
         return true;
     }
@@ -743,7 +732,7 @@ public class EntrustServiceImpl implements EntrustService {
             //得到总价钱，再保存委托基本信息
 //            basisInfo.setPaymentCount(totalMoney + "");2022年5月20日修改，不在后台计算检测项价格
             //存放委托基本信息==》test_entrusted
-            entityMapper.updateEntrustInfo(basisInfo);
+            entityMapper.updateEntrustInfos(basisInfo);
         }
         return true;
     }
@@ -953,7 +942,7 @@ public class EntrustServiceImpl implements EntrustService {
 //            basisInfo.setPaymentCount(totalMoney + "");2022年5月20日修改，委托单价格不在后台计算
             basisInfo.setState(state);
             //存放委托基本信息==》test_entrusted
-            entityMapper.updateEntrustInfo(basisInfo);
+            entityMapper.updateEntrustInfos(basisInfo);
         }
         return true;
     }
@@ -1172,7 +1161,7 @@ public class EntrustServiceImpl implements EntrustService {
 //            basisInfo.setPaymentCount(totalMoney + "");2022年5月20日修改，委托单价格不在后台计算
             basisInfo.setState(state);
             //存放委托基本信息==》test_entrusted
-            entityMapper.updateEntrustInfo(basisInfo);
+            entityMapper.updateEntrustInfos(basisInfo);
         }
         return true;
     }
@@ -1364,7 +1353,7 @@ public class EntrustServiceImpl implements EntrustService {
 //        }
         basisInfo.setState(state);
         logger.info("委托单编号："+oldEntrustInfo.getEntrustmentNo()+"的委托单的状态为"+state);
-        entityMapper.updateEntrustInfo(basisInfo);
+        entityMapper.updateEntrustInfos(basisInfo);
         return true;
     }
 
@@ -1378,7 +1367,7 @@ public class EntrustServiceImpl implements EntrustService {
             return "作废委托失败！:\t 委托单已经发布";
          }
         entrustEntity.setState(144);
-        entityMapper.updateEntrustInfo(entrustEntity);
+        entityMapper.updateEntrustInfos(entrustEntity);
         /**
          *  增加日志
          */
@@ -2494,7 +2483,7 @@ public class EntrustServiceImpl implements EntrustService {
                     //TODO +1
                     rows.get(3).getTableCells().get(2).setText(detail.getReportCount().toString());//报告分数
                     rows.get(3).getTableCells().get(4).setText(detail.getReportType() == null ? "——" : detail.getReportType());//取报告方式
-                    rows.get(3).getTableCells().get(6).setText(detail.getAddress() == null ? "——" : detail.getEntrustCompany());//收报告单位
+                    rows.get(3).getTableCells().get(6).setText(detail.getReportReceivingUnit() == null ? "——" : detail.getReportReceivingUnit());//收报告单位
                     rows.get(4).getTableCells().get(2).setText(detail.getAddress() == null ? "——" : detail.getAddress());//联系地址
                     rows.get(4).getTableCells().get(4).setText(detail.getAddressee() == null ? "——" : detail.getAddressee());//联系人
                     rows.get(4).getTableCells().get(6).setText(detail.getMobile() == null ? "——" : detail.getMobile());//联系方式
@@ -3979,7 +3968,9 @@ public class EntrustServiceImpl implements EntrustService {
         else {
             basisInfo.setDepartment(department);
         }
-        entityMapper.updateEntrustInfo(basisInfo);
+        // 审核时间 默认当天
+        basisInfo.setAuditDate(new Date());
+        entityMapper.updateEntrustInfos(basisInfo);
         return true;
     }
 

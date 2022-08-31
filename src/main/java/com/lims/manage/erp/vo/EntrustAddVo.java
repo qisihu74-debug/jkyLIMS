@@ -265,4 +265,9 @@ public class EntrustAddVo {
      */
     List<EntrustFileTableEntity> fileArrays;
 
+    /**
+     * 收报告单位
+     */
+    private String reportReceivingUnit;
+
 }

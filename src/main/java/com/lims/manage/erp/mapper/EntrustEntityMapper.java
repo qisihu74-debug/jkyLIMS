@@ -521,4 +521,11 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     @Select("SELECT admin_id FROM `test_entrusted_info` WHERE id = #{entrustId}")
     String selectEntrustClientStatus(@Param("entrustId")Long entrustId);
+
+    /**
+     * 修改委托信息适用于 判断值非空
+     * @param basisInfo
+     * @return
+     */
+    int updateEntrustInfos(EntrustEntity basisInfo);
 }
