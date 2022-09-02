@@ -471,17 +471,17 @@ public class TaskController {
 
     /**
      * 下载任务通知单 废弃 页面已经不使用
-     *
+     * 下载doc 任务单信息
      * @param taskId
      * @param response
      */
-/*    @RequestMapping("downloadEntrust")
+    @RequestMapping("downloadEntrust")
     public void downloadEntrust(Long taskId, HttpServletResponse response) {
-        String fileName = "taskOrder1.docx";
+        String fileName = "taskOrder11.docx";
         try {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
-            TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfo(taskId);
+            TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId,null);
             XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
             response.reset();
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
@@ -497,7 +497,7 @@ public class TaskController {
             log.info("导出失败：", ex.getMessage());
         }
     }
-    */
+
     /**
      * 下载任务通知单——二次开发 丁 线上使用中
      * 变更需求 world 转 pdf。

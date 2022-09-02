@@ -686,7 +686,7 @@ public class TaskServiceImpl implements TaskService {
         //                原材表格逐行赋值
         StringBuilder stringBuilder = new StringBuilder();
         // 检测项信息集合
-        Map<Integer,CheckItemInfoVo> checkItemInfoVoMap = new HashMap<>();
+        Map<String,CheckItemInfoVo> checkItemInfoVoMap = new HashMap<>();
         // 通过任务单 获取对应的任务单中信息。
         TaskListVo taskListVo = taskMapper.selectTaskListDetails(taskDetailInfoVo.getTaskId());
         Integer cost = 0;
@@ -823,10 +823,12 @@ public class TaskServiceImpl implements TaskService {
 //                        }
 //                    }
                      */
-                    //6月22日 (多组样品有相同的检测项无法预览任务单；产品标准、检测项都要去重展示；没有价格的子检测项目不展示)
+                    //6月22日 (多组样品有相同的检测项无法预览任务单；产品标准、检测项都要去重展示；没有价格的子检测项目不展示) 废弃
+                    //9月2日  检测项名称一致和标准规范一致。进行去重。
                     if(!StringUtils.isEmpty(sampleDetailVo.getCheckItemInfoList())){
                         for(CheckItemInfoVo checkItemInfoVo :sampleDetailVo.getCheckItemInfoList()){
-                            checkItemInfoVoMap.put(checkItemInfoVo.getCheckItemId(),checkItemInfoVo);
+                            checkItemInfoVoMap.put(checkItemInfoVo.getCheckItemName()+String.valueOf(checkItemInfoVo.getStandardId()),
+                                    checkItemInfoVo);
                         }
                     }
                 }
@@ -855,8 +857,9 @@ public class TaskServiceImpl implements TaskService {
                     }
                 }
                 // 检测项目及检验依据
-                // 6月22日 (多组样品有相同的检测项无法预览任务单；产品标准、检测项都要去重展示；没有价格的子检测项目不展示)
-                for (Integer key : checkItemInfoVoMap.keySet()) {
+                // 6月22日 (多组样品有相同的检测项无法预览任务单；产品标准、检测项都要去重展示；没有价格的子检测项目不展示) 废弃
+                // 9月2日  检测项名称一致和标准规范一致。进行去重。
+                for (String key : checkItemInfoVoMap.keySet()) {
                     CheckItemInfoVo checkItemInfoVo = checkItemInfoVoMap.get(key);
                     String name = checkItemInfoVo.getCheckItemName();
                     stringBuilder.append(name);
@@ -907,7 +910,7 @@ public class TaskServiceImpl implements TaskService {
 
                 // 塞入数据
                 int serialNumber = 9;
-                for (Integer key : checkItemInfoVoMap.keySet()) {
+                for (String key : checkItemInfoVoMap.keySet()) {
                     CheckItemInfoVo checkItemInfoVo = checkItemInfoVoMap.get(key);
                     rows.get(serialNumber).getTableCells().get(1).setText(checkItemInfoVo.getCheckItemName());
                     serialNumber+=1;
