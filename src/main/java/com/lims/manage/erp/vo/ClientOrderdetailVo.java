@@ -59,7 +59,7 @@ public class ClientOrderdetailVo {
      */
     private Integer entrustCompanyId;
     /**
-     * 应收价格
+     * 应收价格变动 实收价格 9月7号
      */
     private double systemPrice;
     /**

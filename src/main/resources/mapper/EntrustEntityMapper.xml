@@ -917,7 +917,7 @@
         t1.project_part ,
         t1.entrust_company ,
         t1.entrust_company_id ,
-        t1.system_price,
+        t1.actual_price system_price,
         t3.id sampleId,
         t3.alias_name ,
         t3.specs,
@@ -1000,7 +1000,7 @@
         project_part ,
         entrust_company ,
         entrust_company_id ,
-        system_price
+        actual_price as systemPrice
         FROM
         test_entrusted_info
         WHERE

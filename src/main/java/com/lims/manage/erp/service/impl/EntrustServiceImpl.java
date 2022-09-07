@@ -3751,7 +3751,10 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
         }
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "处理样品来样时间与委托单受理日期:\t委托单受理日期为:"+(new Timestamp(AcceptanceDate.getTime()))+"\t样品编号"+sampleEntityData.getSampleNumber()+"\t样品来样时间为\t" +sampleEntityData.getSampleTime() + "\t变更后样品来样时间为\t"+sampleData.getReceivedDate(), Const.ENTRUST_FOUND, true);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "处理样品来样时间与委托单受理日期:\t" +
+                "委托单受理日期为:"+(new Timestamp(AcceptanceDate.getTime()))+
+                "\t样品编号"+sampleEntityData.getSampleNumber()+"\t样品来样时间为\t" +sampleEntityData.getSampleTime() +
+                "\t变更后样品来样时间为\t"+sampleData.getReceivedDate(), Const.ENTRUST_FOUND, true);
     }
     @Override
     public PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo) {
