@@ -183,3 +183,151 @@ CREATE TABLE `test_report_record_mid`  (
                                            `inspector` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '报告中签字检测人',
                                            PRIMARY KEY (`id`) USING BTREE
 )
+
+-- 客户委托系统后新增 2022-09-01 --
+SET FOREIGN_KEY_CHECKS=0;
+DROP TABLE IF EXISTS `test_company_client`;
+CREATE TABLE `test_company_client` (
+  `company_id` int NOT NULL AUTO_INCREMENT COMMENT '单位id',
+  `company_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '单位名称',
+  `type` varchar(2) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '单位类型：1（客户/委托单位），2（见证单位）',
+  `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '单位地址',
+  `contacts` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '企业联系人',
+  `mobile` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '企业联系电话',
+  `phone` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '企业座机电话',
+  `code` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '邮政编码',
+  `billing_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '开票名称',
+  `billing_number` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '开票税号',
+  `billing_address` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '开票地址',
+  `billing_mobile` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '开票电话',
+  `opening_bank` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '开户行',
+  `account_number` int DEFAULT NULL COMMENT '开户行账号',
+  `business_license` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '营业执照url',
+  `enclosure` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '附件url',
+  `add_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `admin_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '客户下单的客户id',
+  PRIMARY KEY (`company_id`),
+  KEY `id_index` (`company_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=4937 DEFAULT CHARSET=utf8;
+
+SET FOREIGN_KEY_CHECKS=0;
+DROP TABLE IF EXISTS `test_customer_client`;
+CREATE TABLE `test_customer_client` (
+  `customer_id` int NOT NULL AUTO_INCREMENT COMMENT '客户id',
+  `customer_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '客户姓名',
+  `company_id` int NOT NULL COMMENT '单位主键',
+  `company_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '客户企业名称',
+  `customer_abbreviation` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '客户简称',
+  `contacts` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '联系人',
+  `phone` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '联系方式',
+  `remark` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '备注',
+  `creator_user_id` int DEFAULT NULL COMMENT '推荐人id',
+  `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+  `next_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT 'crm数据当前位置（同步crm使用）',
+  PRIMARY KEY (`customer_id`),
+  KEY `cid_index` (`company_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=11041 DEFAULT CHARSET=utf8 COMMENT='客户信息';
+
+SET FOREIGN_KEY_CHECKS=0;
+DROP TABLE IF EXISTS `sys_custom_function`;
+CREATE TABLE `sys_custom_function` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '菜单id',
+  `parent_id` bigint NOT NULL DEFAULT '0' COMMENT '菜单父id',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '菜单名称',
+  `sort` int NOT NULL DEFAULT '0' COMMENT '菜单顺序',
+  `obj_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '组件名称',
+  `icon_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '菜单图标名称',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_index` (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=168 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='菜单功能';
+
+SET FOREIGN_KEY_CHECKS=0;
+DROP TABLE IF EXISTS `sys_custom`;
+CREATE TABLE `sys_custom` (
+  `admin_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '主键客户id',
+  `user_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '客户代表id',
+  `admin_name` varchar(255) DEFAULT NULL COMMENT '客户名称',
+  `pass_word` varchar(255) DEFAULT NULL COMMENT '密码',
+  `nick` varchar(255) DEFAULT NULL COMMENT '账号',
+  `contact` varchar(255) DEFAULT NULL COMMENT '联系人',
+  `mobile` varchar(255) DEFAULT NULL COMMENT '手机号',
+  `address` varchar(255) DEFAULT NULL COMMENT '地址',
+  `company_name` varchar(255) DEFAULT NULL COMMENT '企业名称',
+  `project_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '工程名称',
+  `verification_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '企业验证码',
+  `code` varchar(255) DEFAULT NULL COMMENT '邮政编码',
+  `billing_name` varchar(255) DEFAULT NULL COMMENT '开票名称',
+  `number` varchar(255) DEFAULT NULL COMMENT '增值税号',
+  `billing_address` varchar(255) DEFAULT NULL COMMENT '开票地址',
+  `billing_phone` varchar(255) DEFAULT NULL COMMENT '开票电话',
+  `bank` varchar(255) DEFAULT NULL COMMENT '开户行',
+  `bank_account` varchar(255) DEFAULT NULL COMMENT '开户行账号',
+  `business_url` varchar(255) DEFAULT NULL COMMENT '营业执照url',
+  `appendix_url` varchar(255) DEFAULT NULL COMMENT '附件url',
+  PRIMARY KEY (`admin_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+SET FOREIGN_KEY_CHECKS=0;
+DROP TABLE IF EXISTS `sys_csos_img`;
+CREATE TABLE `sys_csos_img` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) DEFAULT NULL COMMENT '标题',
+  `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '内容',
+  `filing_info` varchar(255) DEFAULT NULL COMMENT '备案信息',
+  `img_url` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `top_desc` varchar(255) DEFAULT NULL COMMENT '首页顶部文本描述',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+SET FOREIGN_KEY_CHECKS=0;
+DROP TABLE IF EXISTS `sys_code`;
+CREATE TABLE `sys_code` (
+  `id` varchar(255) NOT NULL COMMENT '主键id',
+  `user_id` varchar(255) DEFAULT NULL COMMENT '客户代表id',
+  `name` varchar(255) DEFAULT NULL COMMENT '客户代表姓名',
+  `mobile` varchar(255) DEFAULT NULL COMMENT '客户代表联系方式',
+  `state` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '0待使用，1已使用',
+  `code` varchar(255) DEFAULT NULL COMMENT '验证码',
+  `number` int DEFAULT NULL COMMENT '生成个数',
+  `used_company` varchar(255) DEFAULT NULL COMMENT '客户注册时绑定的客户单位名称',
+  `create_time` bigint DEFAULT NULL COMMENT '验证码创建时间',
+  `use_time` bigint DEFAULT NULL COMMENT '验证码使用时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+ALTER TABLE `test_entrusted_info`
+ADD COLUMN `admin_id`  varchar(255) NULL COMMENT '客户下单的客户id' AFTER `report_receiving_unit`;
+
+ALTER TABLE `test_entrusted_info`
+ADD COLUMN `audit_state`  varchar(255) NULL COMMENT '0未审核，1已审核' AFTER `report_receiving_unit`;
+
+ALTER TABLE `test_entrusted_info`
+ADD COLUMN `evaluate_state`  varchar(255) NULL COMMENT '0,待评价，1已评价' AFTER `report_receiving_unit`;
+
+ALTER TABLE `test_entrusted_info`
+ADD COLUMN `evaluate_content`  varchar(255) NULL COMMENT '评价内容' AFTER `report_receiving_unit`;
+
+ALTER TABLE `test_entrusted_info`
+ADD COLUMN `sample_logistics_no`  varchar(255) NULL COMMENT '样品邮寄单号' AFTER `report_receiving_unit`;
+
+ALTER TABLE `test_entrusted_info`
+ADD COLUMN `audit_date`  datetime NULL COMMENT '审核日期' AFTER `report_receiving_unit`;
+
+ALTER TABLE `test_entrusted_info`
+ADD COLUMN `audit_user`  varchar(255) NULL COMMENT '受理人' AFTER `report_receiving_unit`;
+
+ALTER TABLE `test_entrusted_info`
+ADD COLUMN `client_request_date`  datetime NULL COMMENT '客户期望完成时间' AFTER `report_receiving_unit`;
+
+ALTER TABLE `test_entrusted_info`
+ADD COLUMN `report_receiving_unit`  varchar(255) NULL COMMENT '收报告单位' AFTER `report_receiving_unit`;
+
+ALTER TABLE `test_entrusted_info`
+ADD COLUMN `client_entrust_company_id`  int NULL COMMENT '客户委托单位id' AFTER `report_receiving_unit`;
+
+ALTER TABLE `test_report_record`
+ADD COLUMN `seal_report_url`  varchar(255) NULL COMMENT '电子报告盖章完成url' AFTER `inspector`;
+
+ALTER TABLE `test_report_record_mid`
+ADD COLUMN `seal_report_url`  varchar(255) NULL COMMENT '电子报告盖章完成url' AFTER `inspector`;
