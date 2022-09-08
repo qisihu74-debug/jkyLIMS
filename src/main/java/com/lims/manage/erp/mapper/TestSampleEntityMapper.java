@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.SampleJudgeBasisVo;
 import com.lims.manage.erp.vo.SampleSimpleListVo;
 import org.apache.ibatis.annotations.Mapper;
@@ -87,4 +88,15 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
      * 获取委托状态，委托id
      */
     EntrustEntity selectEntrustState(Integer sampleId);
+
+    /**
+     * 根据委托单位id  查询委托单位信息
+     */
+    @Select("SELECT company_name FROM test_company WHERE company_id = #{companyId}")
+    String getCompanyName(@Param("companyId") Integer companyId);
+
+    /**
+     * 根据样品id 查询委托单下 委托单位信息
+     */
+    EntrustAddVo getEntrustCompanyName(@Param("sampleId")Integer sampleId);
 }

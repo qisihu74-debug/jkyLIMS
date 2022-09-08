@@ -152,6 +152,13 @@ public class TestSampleEntity {
      */
     private String mixingWay;
 
+    /**
+     * 委托单位信息String类型
+     */
+    @TableField(exist = false)
+    private String companyIdStr;
+
+
 
 
     public TestSampleEntity() {

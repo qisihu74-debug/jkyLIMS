@@ -22,6 +22,7 @@ import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
 import com.lims.manage.erp.vo.SampleSimpleListVo;
 import com.lims.manage.erp.vo.SamplesAddVo;
@@ -324,6 +325,27 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 //                    fileArrays.add(testSampleCollectionJSON);
 //                }
 //            }
+            // 处理样品下委托单位信息 ： 0为未使用，1为已使用
+            if(entity.getIsUse()==0){
+                // 查询业务科室下委托单位。
+                StringBuffer stringBuffer = new StringBuffer();
+                String EntrustCompany = testSampleEntityMapper.getCompanyName(entity.getCompanyId());
+                stringBuffer.append(EntrustCompany+"&"+entity.getCompanyId());
+                entity.setCompanyIdStr(stringBuffer.toString());
+            }
+            else {
+                // 查询委托单下 委托单位信息。
+                EntrustAddVo entrustAddVo = testSampleEntityMapper.getEntrustCompanyName(entity.getId());
+                StringBuffer stringBuffer = new StringBuffer();
+                if(entrustAddVo!=null){
+                    if(entrustAddVo.getEntrustCompanyId()!=null){
+                        stringBuffer.append(entrustAddVo.getEntrustCompany()+"&"+entrustAddVo.getEntrustCompanyId());
+                    }else {
+                        stringBuffer.append(entrustAddVo.getEntrustCompany()+"&"+entrustAddVo.getClientEntrustCompanyId());
+                    }
+                }
+                entity.setCompanyIdStr(stringBuffer.toString());
+            }
         }
         return entity;
     }

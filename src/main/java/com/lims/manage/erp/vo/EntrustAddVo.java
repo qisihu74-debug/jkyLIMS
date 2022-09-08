@@ -269,5 +269,9 @@ public class EntrustAddVo {
      * 收报告单位
      */
     private String reportReceivingUnit;
+    /**
+     * 客户委托单位id
+     */
+    private Integer clientEntrustCompanyId;
 
 }
