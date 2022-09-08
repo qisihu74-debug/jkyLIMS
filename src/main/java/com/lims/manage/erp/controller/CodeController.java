@@ -113,7 +113,9 @@ public class CodeController {
         PageInfo<CodeEntity> pageInfo = new PageInfo<>(list);
         for (CodeEntity codeEntity:pageInfo.getList()) {
             codeEntity.setCreateTime(DateUtil.conversionTime(Long.parseLong(codeEntity.getCreateTime())));
-            codeEntity.setUseTime(DateUtil.conversionTime(Long.parseLong(codeEntity.getUseTime())));
+            if (codeEntity.getUseTime() != null){
+                codeEntity.setUseTime(DateUtil.conversionTime(Long.parseLong(codeEntity.getUseTime())));
+            }
         }
         return ResultUtil.success(pageInfo);
     }
