@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang=""><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="/jkyErp/favicon.ico"><title>公路水运试验室原材检测管理信息系统</title><style>html,
+        body,
+        #app {
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+        
+        .chromeframe {
+            margin: 0.2em 0;
+            background: #409EFF;
+            color: #000;
+            padding: 0.1em 0;
+        }
+        
+        .dark #loader-wrapper {
+            background-color: #141414;
+        }
+        
+        #loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999999;
+            background-color: #fff;
+        }
+        
+        #loader {
+            display: block;
+            position: relative;
+            left: 50%;
+            top: 50%;
+            width: 50px;
+            height: 50px;
+            margin: -25px 0 0 -25px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            /* COLOR 1 */
+            border-top-color: #409EFF;
+            -webkit-animation: spin 2s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -ms-animation: spin 2s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -moz-animation: spin 2s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -o-animation: spin 2s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            animation: spin 2s linear infinite;
+            /* Chrome, Firefox 16+, IE 10+, Opera */
+            z-index: 1001;
+        }
+        
+        #loader:before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            /* COLOR 2 */
+            border-top-color: #409EFF;
+            -webkit-animation: spin 3s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -moz-animation: spin 3s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -o-animation: spin 3s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -ms-animation: spin 3s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            animation: spin 3s linear infinite;
+            /* Chrome, Firefox 16+, IE 10+, Opera */
+        }
+        
+        #loader:after {
+            content: "";
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: #409EFF;
+            /* COLOR 3 */
+            -moz-animation: spin 1.5s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -o-animation: spin 1.5s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -ms-animation: spin 1.5s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -webkit-animation: spin 1.5s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            animation: spin 1.5s linear infinite;
+            /* Chrome, Firefox 16+, IE 10+, Opera */
+        }
+        
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+                /* Chrome, Opera 15+, Safari 3.1+ */
+                -ms-transform: rotate(0deg);
+                /* IE 9 */
+                transform: rotate(0deg);
+                /* Firefox 16+, IE 10+, Opera */
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+                /* Chrome, Opera 15+, Safari 3.1+ */
+                -ms-transform: rotate(360deg);
+                /* IE 9 */
+                transform: rotate(360deg);
+                /* Firefox 16+, IE 10+, Opera */
+            }
+        }
+        
+        @keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+                /* Chrome, Opera 15+, Safari 3.1+ */
+                -ms-transform: rotate(0deg);
+                /* IE 9 */
+                transform: rotate(0deg);
+                /* Firefox 16+, IE 10+, Opera */
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+                /* Chrome, Opera 15+, Safari 3.1+ */
+                -ms-transform: rotate(360deg);
+                /* IE 9 */
+                transform: rotate(360deg);
+                /* Firefox 16+, IE 10+, Opera */
+            }
+        }
+        
+        .loaded #loader {
+            opacity: 0;
+            -webkit-transition: all 0.3s ease-out;
+            transition: all 0.3s ease-out;
+        }
+        
+        .loaded #loader-wrapper {
+            visibility: hidden;
+            -webkit-transform: translateY(-100%);
+            /* Chrome, Opera 15+, Safari 3.1+ */
+            -ms-transform: translateY(-100%);
+            /* IE 9 */
+            transform: translateY(-100%);
+            /* Firefox 16+, IE 10+, Opera */
+            -webkit-transition: all 0.3s 1s ease-out;
+            transition: all 0.3s 1s ease-out;
+        }
+        /* JavaScript Turned Off */
+        
+        .no-js #loader-wrapper {
+            display: none;
+        }
+        
+        .no-js h1 {
+            color: #222222;
+        }
+        
+        #loader-wrapper .load_title {
+            font-family: 'Open Sans';
+            color: #409EFF;
+            font-size: 19px;
+            width: 100%;
+            text-align: center;
+            z-index: 9999999999999;
+            position: absolute;
+            top: calc(50% + 60px);
+            opacity: 1;
+            line-height: 30px;
+        }</style><link href="/jkyErp/css/about.de37d136.css" rel="prefetch"><link href="/jkyErp/css/chunk-02f89a54.c0e7e5fe.css" rel="prefetch"><link href="/jkyErp/css/chunk-03ab3e52.5046f6ed.css" rel="prefetch"><link href="/jkyErp/css/chunk-06c6cafe.57ac0247.css" rel="prefetch"><link href="/jkyErp/css/chunk-09131a60.daeee934.css" rel="prefetch"><link href="/jkyErp/css/chunk-0d48e6f5.a5fd9dad.css" rel="prefetch"><link href="/jkyErp/css/chunk-185b8008.7f7eed86.css" rel="prefetch"><link href="/jkyErp/css/chunk-19ccf540.7e35da3f.css" rel="prefetch"><link href="/jkyErp/css/chunk-1bc22bcb.4f18cacb.css" rel="prefetch"><link href="/jkyErp/css/chunk-1d784228.a875048e.css" rel="prefetch"><link href="/jkyErp/css/chunk-1e533101.c8fed7a7.css" rel="prefetch"><link href="/jkyErp/css/chunk-1e99632b.7f7eed86.css" rel="prefetch"><link href="/jkyErp/css/chunk-1ff57363.a1f3c29b.css" rel="prefetch"><link href="/jkyErp/css/chunk-21070cf8.dfdd6379.css" rel="prefetch"><link href="/jkyErp/css/chunk-254fe342.a5324702.css" rel="prefetch"><link href="/jkyErp/css/chunk-2592e561.b9266bcb.css" rel="prefetch"><link href="/jkyErp/css/chunk-26bab5f5.cacbd5ec.css" rel="prefetch"><link href="/jkyErp/css/chunk-293d0024.b421effb.css" rel="prefetch"><link href="/jkyErp/css/chunk-29bd2681.9c1eeb1c.css" rel="prefetch"><link href="/jkyErp/css/chunk-2c724964.9ca9afbe.css" rel="prefetch"><link href="/jkyErp/css/chunk-2f73467e.cec9c02a.css" rel="prefetch"><link href="/jkyErp/css/chunk-3218d3ff.e4e6c07b.css" rel="prefetch"><link href="/jkyErp/css/chunk-35cc3db9.13db2473.css" rel="prefetch"><link href="/jkyErp/css/chunk-3641360d.6f452f52.css" rel="prefetch"><link href="/jkyErp/css/chunk-3d395630.61dd419c.css" rel="prefetch"><link href="/jkyErp/css/chunk-4269ea29.cce969d3.css" rel="prefetch"><link href="/jkyErp/css/chunk-49b3074a.8280f935.css" rel="prefetch"><link href="/jkyErp/css/chunk-4a3219c0.e94e1dff.css" rel="prefetch"><link href="/jkyErp/css/chunk-4c2df48e.243aa801.css" rel="prefetch"><link href="/jkyErp/css/chunk-4dceba18.87790bbe.css" rel="prefetch"><link href="/jkyErp/css/chunk-57aae376.56438c92.css" rel="prefetch"><link href="/jkyErp/css/chunk-58809a5b.cce969d3.css" rel="prefetch"><link href="/jkyErp/css/chunk-58e6c12d.d6856443.css" rel="prefetch"><link href="/jkyErp/css/chunk-5dff3eec.62118070.css" rel="prefetch"><link href="/jkyErp/css/chunk-5eb45ea7.33e341cb.css" rel="prefetch"><link href="/jkyErp/css/chunk-66c3e93b.cce969d3.css" rel="prefetch"><link href="/jkyErp/css/chunk-66d9ffb0.79f083fd.css" rel="prefetch"><link href="/jkyErp/css/chunk-693c2f1e.a3b7aa95.css" rel="prefetch"><link href="/jkyErp/css/chunk-693e9737.e94e1dff.css" rel="prefetch"><link href="/jkyErp/css/chunk-6a19b963.ffd714e7.css" rel="prefetch"><link href="/jkyErp/css/chunk-6bc92b3e.7f7eed86.css" rel="prefetch"><link href="/jkyErp/css/chunk-70753972.cd5af0d0.css" rel="prefetch"><link href="/jkyErp/css/chunk-70fe8042.a9f079f0.css" rel="prefetch"><link href="/jkyErp/css/chunk-711e42e3.98edfd5e.css" rel="prefetch"><link href="/jkyErp/css/chunk-76a964e6.19161e6d.css" rel="prefetch"><link href="/jkyErp/css/chunk-7c538a2e.8afd06c4.css" rel="prefetch"><link href="/jkyErp/css/chunk-7f13b952.9d17ce3a.css" rel="prefetch"><link href="/jkyErp/css/chunk-81f2f5ee.f8b63e7d.css" rel="prefetch"><link href="/jkyErp/css/chunk-977114da.d6f78606.css" rel="prefetch"><link href="/jkyErp/css/chunk-9b402866.7ac25bd6.css" rel="prefetch"><link href="/jkyErp/css/chunk-a170dc42.191878aa.css" rel="prefetch"><link href="/jkyErp/css/chunk-ad40f5ac.f1f94ed8.css" rel="prefetch"><link href="/jkyErp/css/chunk-ba11ab32.9afe3d49.css" rel="prefetch"><link href="/jkyErp/css/chunk-c78fba7e.244c5cf3.css" rel="prefetch"><link href="/jkyErp/css/chunk-c7c6b58a.0a17bfe8.css" rel="prefetch"><link href="/jkyErp/css/chunk-d24358c4.62118070.css" rel="prefetch"><link href="/jkyErp/css/chunk-d3c67b74.d710434f.css" rel="prefetch"><link href="/jkyErp/css/chunk-d9e42d98.4d8eacf3.css" rel="prefetch"><link href="/jkyErp/css/chunk-da8389e8.e4c099a7.css" rel="prefetch"><link href="/jkyErp/css/chunk-dba7217e.0166d3b6.css" rel="prefetch"><link href="/jkyErp/css/chunk-e6e96412.7f7eed86.css" rel="prefetch"><link href="/jkyErp/css/chunk-fc34e0fa.62118070.css" rel="prefetch"><link href="/jkyErp/css/chunk-fc8e2db6.6d506fcc.css" rel="prefetch"><link href="/jkyErp/js/about.62f73630.js" rel="prefetch"><link href="/jkyErp/js/chunk-02f89a54.426dc0c4.js" rel="prefetch"><link href="/jkyErp/js/chunk-03ab3e52.25fe70a7.js" rel="prefetch"><link href="/jkyErp/js/chunk-06c6cafe.ab223b93.js" rel="prefetch"><link href="/jkyErp/js/chunk-09131a60.2785d65a.js" rel="prefetch"><link href="/jkyErp/js/chunk-0d48e6f5.b534a7c0.js" rel="prefetch"><link href="/jkyErp/js/chunk-185b8008.3251fd9f.js" rel="prefetch"><link href="/jkyErp/js/chunk-19ccf540.0d8dff02.js" rel="prefetch"><link href="/jkyErp/js/chunk-1bc22bcb.215f617e.js" rel="prefetch"><link href="/jkyErp/js/chunk-1d784228.32a843c7.js" rel="prefetch"><link href="/jkyErp/js/chunk-1e533101.602cc79d.js" rel="prefetch"><link href="/jkyErp/js/chunk-1e99632b.907460b2.js" rel="prefetch"><link href="/jkyErp/js/chunk-1ff57363.b7341078.js" rel="prefetch"><link href="/jkyErp/js/chunk-21070cf8.2dca9c49.js" rel="prefetch"><link href="/jkyErp/js/chunk-254fe342.72163803.js" rel="prefetch"><link href="/jkyErp/js/chunk-2592e561.9e4453dd.js" rel="prefetch"><link href="/jkyErp/js/chunk-26bab5f5.6b2b3d6e.js" rel="prefetch"><link href="/jkyErp/js/chunk-293d0024.08c32346.js" rel="prefetch"><link href="/jkyErp/js/chunk-29bd2681.74839b68.js" rel="prefetch"><link href="/jkyErp/js/chunk-2c724964.05c1ae9d.js" rel="prefetch"><link href="/jkyErp/js/chunk-2d0b2c43.a375de0c.js" rel="prefetch"><link href="/jkyErp/js/chunk-2d216f6a.e59a6621.js" rel="prefetch"><link href="/jkyErp/js/chunk-2d22c0a4.a14d43c1.js" rel="prefetch"><link href="/jkyErp/js/chunk-2f73467e.99e124f8.js" rel="prefetch"><link href="/jkyErp/js/chunk-3218d3ff.9a7708df.js" rel="prefetch"><link href="/jkyErp/js/chunk-35cc3db9.9195582a.js" rel="prefetch"><link href="/jkyErp/js/chunk-3641360d.13364cfc.js" rel="prefetch"><link href="/jkyErp/js/chunk-3d395630.9d9d9e2d.js" rel="prefetch"><link href="/jkyErp/js/chunk-4269ea29.f38ab7f0.js" rel="prefetch"><link href="/jkyErp/js/chunk-49b3074a.470c6214.js" rel="prefetch"><link href="/jkyErp/js/chunk-4a3219c0.667490cd.js" rel="prefetch"><link href="/jkyErp/js/chunk-4c2df48e.b04129a9.js" rel="prefetch"><link href="/jkyErp/js/chunk-4dceba18.6d4364c9.js" rel="prefetch"><link href="/jkyErp/js/chunk-57aae376.4b36a68d.js" rel="prefetch"><link href="/jkyErp/js/chunk-58809a5b.e2858a35.js" rel="prefetch"><link href="/jkyErp/js/chunk-58e6c12d.e843be3c.js" rel="prefetch"><link href="/jkyErp/js/chunk-5dff3eec.f9e2ca01.js" rel="prefetch"><link href="/jkyErp/js/chunk-5eb45ea7.58cc78c5.js" rel="prefetch"><link href="/jkyErp/js/chunk-66c3e93b.598b17c8.js" rel="prefetch"><link href="/jkyErp/js/chunk-66d9ffb0.c2ab6268.js" rel="prefetch"><link href="/jkyErp/js/chunk-693c2f1e.755d7844.js" rel="prefetch"><link href="/jkyErp/js/chunk-693e9737.d1cae36c.js" rel="prefetch"><link href="/jkyErp/js/chunk-6a19b963.43c2fbd4.js" rel="prefetch"><link href="/jkyErp/js/chunk-6bc92b3e.af9f9702.js" rel="prefetch"><link href="/jkyErp/js/chunk-70753972.58d83d13.js" rel="prefetch"><link href="/jkyErp/js/chunk-70fe8042.a784a8ff.js" rel="prefetch"><link href="/jkyErp/js/chunk-711e42e3.2e51c298.js" rel="prefetch"><link href="/jkyErp/js/chunk-76a964e6.ac58c05d.js" rel="prefetch"><link href="/jkyErp/js/chunk-7c538a2e.08861dc9.js" rel="prefetch"><link href="/jkyErp/js/chunk-7f13b952.d79a7dd7.js" rel="prefetch"><link href="/jkyErp/js/chunk-81f2f5ee.cb37d347.js" rel="prefetch"><link href="/jkyErp/js/chunk-977114da.615a77f6.js" rel="prefetch"><link href="/jkyErp/js/chunk-9b402866.c91900a8.js" rel="prefetch"><link href="/jkyErp/js/chunk-a170dc42.7d008828.js" rel="prefetch"><link href="/jkyErp/js/chunk-ad40f5ac.4697e6da.js" rel="prefetch"><link href="/jkyErp/js/chunk-ba11ab32.a1bf50c6.js" rel="prefetch"><link href="/jkyErp/js/chunk-c78fba7e.ac8767ed.js" rel="prefetch"><link href="/jkyErp/js/chunk-c7c6b58a.3ef468f1.js" rel="prefetch"><link href="/jkyErp/js/chunk-d24358c4.b7f33d0a.js" rel="prefetch"><link href="/jkyErp/js/chunk-d3c67b74.d7e8bf38.js" rel="prefetch"><link href="/jkyErp/js/chunk-d9e42d98.80223549.js" rel="prefetch"><link href="/jkyErp/js/chunk-da8389e8.09c52a47.js" rel="prefetch"><link href="/jkyErp/js/chunk-dba7217e.9c3a20e0.js" rel="prefetch"><link href="/jkyErp/js/chunk-e6e96412.fe47e739.js" rel="prefetch"><link href="/jkyErp/js/chunk-fc34e0fa.e59b8fbc.js" rel="prefetch"><link href="/jkyErp/js/chunk-fc8e2db6.c3ae322b.js" rel="prefetch"><link href="/jkyErp/css/app.f54a4370.css" rel="preload" as="style"><link href="/jkyErp/js/app.f77063b0.js" rel="preload" as="script"><link href="/jkyErp/js/chunk-vendors.ca70c17a.js" rel="preload" as="script"><link href="/jkyErp/css/app.f54a4370.css" rel="stylesheet"></head><body><noscript><strong>We're sorry but jky_erp doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id="app"><div id="loader-wrapper"><div id="loader"></div><div class="load_title">正在加载，请耐心等待!</div></div></div><script src="/jkyErp/js/chunk-vendors.ca70c17a.js"></script><script src="/jkyErp/js/app.f77063b0.js"></script></body></html>
