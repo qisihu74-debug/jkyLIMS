@@ -314,38 +314,6 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             //根据主样品信息查询配合比检测信息
             TestSampleMixInfoEntity mixInfoEntity = mixInfoEntityMapper.selectBySampleId(id);
             entity.setMixInfo(mixInfoEntity);
-            // 处理原始记录名称
-//            if (entity.getFile() != null && entity.getFileUrlStr() != null) {
-//                String[] file = entity.getFile().split(",");
-//                String[] fileUrlStr = entity.getFileUrlStr().split(",");
-//                for (int i = 0; i < file.length; i++) {
-//                    TestSampleCollectionJSON testSampleCollectionJSON = new TestSampleCollectionJSON();
-//                    testSampleCollectionJSON.setLable(fileUrlStr[i]);
-//                    testSampleCollectionJSON.setValue(file[i]);
-//                    fileArrays.add(testSampleCollectionJSON);
-//                }
-//            }
-            // 处理样品下委托单位信息 ： 0为未使用，1为已使用
-            if(entity.getIsUse()==0){
-                // 查询业务科室下委托单位。
-                StringBuffer stringBuffer = new StringBuffer();
-                String EntrustCompany = testSampleEntityMapper.getCompanyName(entity.getCompanyId());
-                stringBuffer.append(EntrustCompany+"&"+entity.getCompanyId());
-                entity.setCompanyIdStr(stringBuffer.toString());
-            }
-            else {
-                // 查询委托单下 委托单位信息。
-                EntrustAddVo entrustAddVo = testSampleEntityMapper.getEntrustCompanyName(entity.getId());
-                StringBuffer stringBuffer = new StringBuffer();
-                if(entrustAddVo!=null){
-                    if(entrustAddVo.getEntrustCompanyId()!=null){
-                        stringBuffer.append(entrustAddVo.getEntrustCompany()+"&"+entrustAddVo.getEntrustCompanyId());
-                    }else {
-                        stringBuffer.append(entrustAddVo.getEntrustCompany()+"&"+entrustAddVo.getClientEntrustCompanyId());
-                    }
-                }
-                entity.setCompanyIdStr(stringBuffer.toString());
-            }
         }
         return entity;
     }
