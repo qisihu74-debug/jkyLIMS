@@ -322,4 +322,11 @@ public interface EntrustService {
     PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo);
 
     boolean acceptEntrust(Long id);
+
+    /**
+     * auditState（未受理）不能修改信息
+     * @param id
+     * @return false
+     */
+    Boolean efficacyState(Long id);
 }
