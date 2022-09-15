@@ -107,6 +107,10 @@ public class EntrustController {
 //    @RequiresPermissions("entrust:entrust:updateEntrust")
     public Result updateEntrustTestNew(@RequestParam("json") String json, MultipartFile[] file) throws ParseException {
         EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
+        // 通过委托单状态 auditState（未受理）不能修改信息
+        if(!entrustService.efficacyState(entrust.getId())){
+            return ResultUtil.error(678, "修改委托失败！委托单未受理");
+        }
         Boolean isSuccess = entrustService.updateEntrustTestNew(entrust, file);
         if (isSuccess) {
             return ResultUtil.success("修改委托成功");
@@ -124,6 +128,10 @@ public class EntrustController {
     @PostMapping("/updateEntrust_test_new_sample")
 //    @RequiresPermissions("entrust:entrust:updateEntrust")
     public Result updateEntrustTestNewSample(@RequestBody EntrustAddVo entrust) {
+        // 通过委托单状态 auditState（未受理）不能修改信息
+        if(!entrustService.efficacyState(entrust.getId())){
+            return ResultUtil.error(678, "修改委托失败！委托单未受理");
+        }
         Boolean isSuccess = entrustService.updateEntrustCheckItem(entrust);
         if (isSuccess) {
             return ResultUtil.success("修改委托下样品成功");

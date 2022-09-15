@@ -4023,4 +4023,14 @@ public class EntrustServiceImpl implements EntrustService {
         return null;
     }
 
+    @Override
+    public Boolean efficacyState(Long id) {
+        // 效验委托单状态
+        Integer bit = entityMapper.selectEntustAuditState(id);
+        if(bit.equals(1)){
+            return true;
+        }
+        return false;
+    }
+
 }
