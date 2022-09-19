@@ -536,4 +536,18 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     @Select("SELECT audit_state FROM test_entrusted_info WHERE id = #{entrustId} LIMIT 1")
     Integer selectEntustAuditState(@Param("entrustId") Long entrustId);
+
+    /**
+     * 根据委托单位 返回报告人员信息：
+     * @param entrustCompany
+     * @return
+     */
+    HistoryEntrustDataVo getContactWayData(@Param("entrustCompany") String entrustCompany);
+
+    /**
+     * 返回收报告单位
+     * @param entrustCompany
+     * @return
+     */
+    String getReportReceivingUnit(@Param("entrustCompany") String entrustCompany);
 }

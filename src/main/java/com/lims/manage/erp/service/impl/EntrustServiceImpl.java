@@ -2547,6 +2547,16 @@ public class EntrustServiceImpl implements EntrustService {
         } else {
             data.setUnitData(new ArrayList<TestCompanyJsonEntity>());
         }
+        // type = 1
+        if(type !=null && type.equals(1)){
+            HistoryEntrustDataVo historyEntrustDataVo = entityMapper.getContactWayData(name);
+            if(!StringUtils.isEmpty(historyEntrustDataVo)){
+                data.setAddress(historyEntrustDataVo.getAddress());
+                data.setAddressee(historyEntrustDataVo.getAddressee());
+                data.setMobile(historyEntrustDataVo.getMobile());
+            }
+            data.setReportReceivingUnit(entityMapper.getReportReceivingUnit(name));
+        }
         return data;
     }
 

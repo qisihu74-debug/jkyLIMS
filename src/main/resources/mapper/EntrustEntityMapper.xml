@@ -1151,5 +1151,33 @@
         </if>
     </update>
 
+    <select id="getContactWayData" resultType="com.lims.manage.erp.vo.HistoryEntrustDataVo">
+        SELECT
+            addressee,
+            mobile,
+            address
+        FROM
+            test_entrusted_info
+        WHERE
+            entrust_company = #{entrustCompany}
+            AND address IS NOT NULL
+        ORDER BY
+            entrustment_no DESC
+            LIMIT 1
+    </select>
+
+    <select id="getReportReceivingUnit" resultType="java.lang.String">
+        SELECT
+            report_receiving_unit
+        FROM
+            test_entrusted_info
+        WHERE
+            entrust_company = #{entrustCompany}
+			and report_receiving_unit is not null
+        ORDER BY
+            entrustment_no DESC
+            LIMIT 1
+    </select>
+
 
 </mapper>

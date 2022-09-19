@@ -66,19 +66,7 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.PDFHelper3;
 import com.lims.manage.erp.util.PdfDoc;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
-import com.lims.manage.erp.vo.ReportDetailListParamVo;
-import com.lims.manage.erp.vo.ReportDetailListVo;
-import com.lims.manage.erp.vo.ReportDetailVo;
-import com.lims.manage.erp.vo.ReportHistoryDetailVo;
-import com.lims.manage.erp.vo.ReportListVo;
-import com.lims.manage.erp.vo.ReportPreserveVo;
-import com.lims.manage.erp.vo.ReportProductRelVo;
-import com.lims.manage.erp.vo.ReportSampleDetailVo;
-import com.lims.manage.erp.vo.TaskCodeVo;
-import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -949,6 +937,20 @@ public class ReportServiceImpl implements ReportService {
     public PageInfo getSendList0623(String search, String reportType, Integer pageNum, Integer pageSize, String type,String category,Integer reportTypeStatus) {
         PageHelper.startPage(pageNum, pageSize);
         List<ReportRecordEntity> list = entityMapper.getSendList0623(search, reportType, type,category,reportTypeStatus);
+        if(!CollectionUtils.isEmpty(list)){
+            for(ReportRecordEntity reportRecordEntity :list){
+                // 判断收件人为 null 则根据委托单位查询
+                if(org.springframework.util.StringUtils.isEmpty(reportRecordEntity.getAddressee()) &&
+                        !org.springframework.util.StringUtils.isEmpty(reportRecordEntity.getEntrustCompany())){
+                    HistoryEntrustDataVo historyEntrustDataVo = entrustEntityMapper.getContactWayData(reportRecordEntity.getEntrustCompany());
+                    if(!org.springframework.util.StringUtils.isEmpty(historyEntrustDataVo)){
+                        reportRecordEntity.setReportMailingAddress(historyEntrustDataVo.getAddress());
+                        reportRecordEntity.setAddressee(historyEntrustDataVo.getAddressee());
+                        reportRecordEntity.setReportPhone(historyEntrustDataVo.getMobile());
+                    }
+                }
+            }
+        }
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }

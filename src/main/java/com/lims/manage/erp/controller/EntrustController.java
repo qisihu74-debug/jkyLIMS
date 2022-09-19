@@ -108,6 +108,7 @@ public class EntrustController {
     public Result updateEntrustTestNew(@RequestParam("json") String json, MultipartFile[] file) throws ParseException {
         EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
         // 通过委托单状态 auditState（未受理）不能修改信息
+        PageHelper.clearPage();
         if(!entrustService.efficacyState(entrust.getId())){
             return ResultUtil.error(678, "修改委托失败！委托单未受理");
         }
@@ -129,6 +130,7 @@ public class EntrustController {
 //    @RequiresPermissions("entrust:entrust:updateEntrust")
     public Result updateEntrustTestNewSample(@RequestBody EntrustAddVo entrust) {
         // 通过委托单状态 auditState（未受理）不能修改信息
+        PageHelper.clearPage();
         if(!entrustService.efficacyState(entrust.getId())){
             return ResultUtil.error(678, "修改委托失败！委托单未受理");
         }

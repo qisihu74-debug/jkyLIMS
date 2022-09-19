@@ -13,4 +13,20 @@ public class HistoryEntrustDataVo {
      * 单位对象
      */
     List<TestCompanyJsonEntity> unitData;
+    /**
+     * 收件人
+     */
+    private String addressee;
+    /**
+     * 电话
+     */
+    private String mobile;
+    /**
+     * 地址
+     */
+    private String address;
+    /**
+     * 收报告单位
+     */
+    private String reportReceivingUnit;
 }
