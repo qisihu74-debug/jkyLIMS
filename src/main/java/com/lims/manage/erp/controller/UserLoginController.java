@@ -200,14 +200,19 @@ public class UserLoginController {
         }
         dynamicImgService.delete();
         //从新设置url
-        String[] split = img.getImgUrl().split(",");
-        String[] split1 = dynamicImg.getImgUrl().split(",");
+        String[] split1 = null;
+                String[] split = img.getImgUrl().split(",");
+        if (StringUtils.isNotEmpty(dynamicImg.getImgUrl())){
+            split1 = dynamicImg.getImgUrl().split(",");
+        }
         Set<String> set = new HashSet<>();
         for (String url:split) {
             set.add(url);
         }
-        for (String url:split1) {
-            set.add(url);
+        if (split1 != null && split1.length>0){
+            for (String url:split1) {
+                set.add(url);
+            }
         }
         String ss = "";
         Object[] objects = set.toArray();
