@@ -319,6 +319,13 @@ public class EntrustServiceImpl implements EntrustService {
             else {
                 basisInfo.setDepartment(department);
             }
+            // 判断取报告方式 非邮寄的话 清空状态
+            if(!StringUtils.isEmpty(basisInfo.getReportType()) && !basisInfo.getReportType().equals("邮寄")){
+                basisInfo.setAddress(null);
+                basisInfo.setMobile(null);
+                basisInfo.setAddressee(null);
+                basisInfo.setReportReceivingUnit(null);
+            }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " 新增委托信息成功\t委托编号为\t"+basisInfo.getEntrustmentNo()+"\t委托单位\t"+basisInfo.getEntrustCompany()
                    +"\t委托人\t"+basisInfo.getEntrustPeople()+ "\t要求完成时间\t"+(new Timestamp(basisInfo.getRequestDate().getTime()))+"\t委托检测类别\t"+basisInfo.getEntrustTestType()+"\t检测目的\t"+basisInfo.getCheckPurpose()
                     +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
@@ -408,6 +415,13 @@ public class EntrustServiceImpl implements EntrustService {
                 +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
                 +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount());
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " 更新委托：成功\t委托编号为\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
+        // 判断取报告方式 非邮寄的话 清空状态
+        if(!StringUtils.isEmpty(basisInfo.getReportType()) && !basisInfo.getReportType().equals("邮寄")){
+            basisInfo.setAddress(null);
+            basisInfo.setMobile(null);
+            basisInfo.setAddressee(null);
+            basisInfo.setReportReceivingUnit(null);
+        }
         entityMapper.updateEntrustInfo(basisInfo);
         // 修改委托信息后： 触发联动效果。 同步更新任务单对应字段。
         methodModifyTheTask(basisInfo.getId());
@@ -2949,6 +2963,13 @@ public class EntrustServiceImpl implements EntrustService {
                     +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
                     +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount(), Const.ENTRUST_FOUND, true);
         basisInfo.setAuditState("1");
+        // 判断取报告方式 非邮寄的话 清空状态
+        if(!StringUtils.isEmpty(basisInfo.getReportType()) && !basisInfo.getReportType().equals("邮寄")){
+            basisInfo.setAddress(null);
+            basisInfo.setMobile(null);
+            basisInfo.setAddressee(null);
+            basisInfo.setReportReceivingUnit(null);
+        }
         entityMapper.insertEntrustInfo(basisInfo);
         return "新建委托成功";
     }

@@ -616,9 +616,6 @@
             seal_type=#{sealType},
             <if test="isSave != null and isSave!=''">is_save=#{isSave},</if>
             <if test="countPrice != null and countPrice!=''">count_price=#{countPrice},</if>
-            <if test="address != null and address!=''">address=#{address},</if>
-            <if test="addressee != null and addressee!=''">addressee=#{addressee},</if>
-            <if test="mobile != null and mobile!=''">mobile=#{mobile},</if>
             <if test="mailbox != null and mailbox!=''">mailbox=#{mailbox},</if>
             <if test="operateUser != null">operate_user=#{operateUser},</if>
             <if test="operateDate != null">operate_date=#{operateDate},</if>
@@ -643,7 +640,10 @@
             <if test="auditState != null and auditState!=''">audit_state=#{auditState},</if>
             <if test="auditUser != null and auditUser!=''">audit_user=#{auditUser},</if>
             <if test="auditDate != null">audit_date=#{auditDate},</if>
-            <if test="reportReceivingUnit != null and reportReceivingUnit!=''">report_receiving_unit=#{reportReceivingUnit},</if>
+            address=#{address},
+            addressee=#{addressee},
+            mobile=#{mobile},
+            report_receiving_unit=#{reportReceivingUnit},
         </trim>
             where id = #{id}
             <if test="entrustmentNo!=null">
