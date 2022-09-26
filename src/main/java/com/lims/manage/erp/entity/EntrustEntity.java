@@ -273,6 +273,15 @@ public class EntrustEntity {
      * 收报告单位地址
      */
     private String reportReceivingUnit;
+    /**
+     * 编号类别
+     */
+    private String entrustCategory;
+
+    /**
+     *编号类别——编号
+     */
+    private String entrustCategoryType;
 
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,

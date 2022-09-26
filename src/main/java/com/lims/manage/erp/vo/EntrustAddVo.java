@@ -274,4 +274,14 @@ public class EntrustAddVo {
      */
     private Integer clientEntrustCompanyId;
 
+    /**
+     * 编号类别
+     */
+    private String entrustCategory;
+
+    /**
+     *编号类别——编号
+     */
+    private String entrustCategoryType;
+
 }
