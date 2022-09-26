@@ -287,8 +287,10 @@ public class UserLoginController {
         String ss = "";
         for (int i =0;i<urls.size();i++){
             ss = ss + urls.get(i);
-            if (i != urls.size()-1){
-                ss = ss + ",";
+            if (urls.size()>1){
+                if (i != urls.size()-1){
+                    ss = ss + ",";
+                }
             }
         }
        //更新url
