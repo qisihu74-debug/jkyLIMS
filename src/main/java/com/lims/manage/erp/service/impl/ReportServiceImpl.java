@@ -674,18 +674,36 @@ public class ReportServiceImpl implements ReportService {
         String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
         String year = sdf.format(new Date());
-        Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
-        if(maxCode != null){
-            Integer maxCodeMid = recordEntityMapper.getMaxCodeMid(year,topDepartmentCode);
-            if(maxCodeMid != null && maxCode < maxCodeMid){
-                maxCode = maxCodeMid;
+        //判断委托编号类型
+        String entrustCategoryType = recordEntityMapper.getEntrustCategoryType(entrustId);
+        if(entrustCategoryType != null){
+            Integer maxCode = recordEntityMapper.getOtherMaxCode(year,topDepartmentCode,entrustCategoryType);
+            if(maxCode != null){
+                Integer maxCodeMid = recordEntityMapper.getOtherMaxCodeMid(year,topDepartmentCode,entrustCategoryType);
+                if(maxCodeMid != null && maxCode < maxCodeMid){
+                    maxCode = maxCodeMid;
+                }
             }
-        }
-        if (maxCode == null) {
-            return topDepartmentCode+"-" + year + "-YC-0001";
-        } else {
-            int newCode = maxCode + 1;
-            return topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode);
+            if (maxCode == null) {
+                return topDepartmentCode+"-" + year + "-"+entrustCategoryType+"-0001";
+            } else {
+                int newCode = maxCode + 1;
+                return topDepartmentCode+"-" + year + "-"+entrustCategoryType+"-" + new DecimalFormat("0000").format(newCode);
+            }
+        }else{
+            Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
+            if(maxCode != null){
+                Integer maxCodeMid = recordEntityMapper.getMaxCodeMid(year,topDepartmentCode);
+                if(maxCodeMid != null && maxCode < maxCodeMid){
+                    maxCode = maxCodeMid;
+                }
+            }
+            if (maxCode == null) {
+                return topDepartmentCode+"-" + year + "-YC-0001";
+            } else {
+                int newCode = maxCode + 1;
+                return topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode);
+            }
         }
     }
 
