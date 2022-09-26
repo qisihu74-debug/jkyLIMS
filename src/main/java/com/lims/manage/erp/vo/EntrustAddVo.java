@@ -284,4 +284,9 @@ public class EntrustAddVo {
      */
     private String entrustCategoryType;
 
+    /**
+     * 委托编号——String
+     */
+    private String entrustmentNostr;
+
 }

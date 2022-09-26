@@ -14,13 +14,7 @@ import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.vo.ClientOrderdetailVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.EntrustSampleInfoVo;
-import com.lims.manage.erp.vo.HistoryEntrustDataVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.TaskCodeVo;
-import com.lims.manage.erp.vo.TaskPriceVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -550,4 +544,10 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     String getReportReceivingUnit(@Param("entrustCompany") String entrustCompany);
+
+    /**
+     * 获取最大委托单编号 根据类型进行过滤
+     * @return
+     */
+    EntrustCategoryVo selectEntrustMaxNo(@Param("categoryType") String categoryType);
 }

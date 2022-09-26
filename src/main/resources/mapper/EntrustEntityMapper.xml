@@ -6,7 +6,7 @@
     </select>
     <select id="selectByKeyId" resultType="com.lims.manage.erp.vo.EntrustAddVo">
         select id,
-               entrustment_no,
+               IFNULL(CONCAT(entrust_category_type,entrustment_no),entrustment_no) as entrustmentNostr,
                entrust_type,
                entrust_company,
                entrust_company_id,
@@ -54,7 +54,8 @@
                discount,
                system_price,
                actual_price,
-               report_receiving_unit
+               report_receiving_unit,
+               entrust_category
         from test_entrusted_info
         where id = #{id}
     </select>
@@ -518,7 +519,9 @@
                                         system_price,
                                         department,
                                         audit_state,
-                                        report_receiving_unit)
+                                        report_receiving_unit,
+                                        entrust_category,
+                                        entrust_category_type)
         values (#{id},
                 #{entrustmentNo},
                 #{entrustType},
@@ -570,7 +573,9 @@
                 #{systemPrice},
                 #{department},
                 #{auditState},
-                #{reportReceivingUnit})
+                #{reportReceivingUnit},
+                #{entrustCategory},
+                #{entrustCategoryType})
 
     </insert>
     <select id="GetDelegateInformation" resultType="String">
@@ -1177,6 +1182,30 @@
         ORDER BY
             entrustment_no DESC
             LIMIT 1
+    </select>
+
+    <select id="selectEntrustMaxNo" resultType="com.lims.manage.erp.vo.EntrustCategoryVo">
+    SELECT
+	entrustment_no AS entrustmentNo,
+	entrust_category_type AS entrustCategoryType,
+	entrust_category AS entrustCategory ,
+	IFNULL(CONCAT(entrust_category_type,entrustment_no),entrustment_no) AS entrustmentNoStr
+    FROM
+        test_entrusted_info
+    WHERE
+        1 = 1
+        <if test="categoryType == null">
+            and  entrust_category_type IS NULL
+        </if>
+        <if test="categoryType != null and categoryType='BD' ">
+            entrust_category_type = "BD"
+        </if>
+        <if test="categoryType != null and categoryType='MN' ">
+            entrust_category_type = "MN"
+        </if>
+    ORDER BY
+        entrustment_no DESC
+        LIMIT 1 FOR UPDATE;
     </select>
 
 

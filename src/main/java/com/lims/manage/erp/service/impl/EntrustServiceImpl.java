@@ -148,20 +148,11 @@ public class EntrustServiceImpl implements EntrustService {
             //设置委托编号
             Integer code = null;
             String currentTime = DateUtil.getTodayString().substring(0, 6);
-            //获取当前最大样品编号
-            PageHelper.clearPage();
-            Integer entrustNum = entityMapper.selectMaxNo();
-            if (entrustNum != null && entrustNum > 0) {
-                String substring = entrustNum.toString().substring(0, 6);
-                if (substring.equals(currentTime)) {
-                    code = entrustNum + 1;
-                } else {
-                    code = Integer.parseInt(currentTime + "0001");
-                }
-            } else {
-                code = Integer.parseInt(currentTime + "0001");
-            }
-            basisInfo.setEntrustmentNo(code);
+            //获取并设置委托编号，相应的类别
+            EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),currentTime);
+            basisInfo.setEntrustmentNo(entrustCategoryVo.getEntrustmentNo());
+            basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
+            basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
             // 通过委托编号 查询是否存在
             PageHelper.clearPage();
             if (entityMapper.getByData(basisInfo.getEntrustmentNo()) != null) {
@@ -1450,6 +1441,8 @@ public class EntrustServiceImpl implements EntrustService {
         List<LabelValueVo> arryEquipment = new ArrayList<>();
         // 11：支付方式
         List<LabelValueVo> arryPayment = new ArrayList<>();
+        // 15：编号类别
+        List<LabelValueVo> numberCategory = new ArrayList<>();
         for (TestInitDataEntity testInitDataEntity : ReturnBasisData) {
             LabelValueVo labelValueVo = new LabelValueVo();
             labelValueVo.setLabel(testInitDataEntity.getName());
@@ -1476,6 +1469,9 @@ public class EntrustServiceImpl implements EntrustService {
                 case 11:
                     arryPayment.add(labelValueVo);
                     break;
+                case 15:
+                    numberCategory.add(labelValueVo);
+                    break;
                 default:
                     break;
             }
@@ -1491,6 +1487,7 @@ public class EntrustServiceImpl implements EntrustService {
         map.put("arrySeal", arrySeal);
         map.put("arryTeam", arryTeam);
         map.put("arryPayment", arryPayment);
+        map.put("numberCategory", numberCategory);
         return map;
     }
 
@@ -2783,20 +2780,11 @@ public class EntrustServiceImpl implements EntrustService {
         //设置委托编号
         Integer code = null;
         String currentTime = DateUtil.getTodayString().substring(0, 6);
-        //获取当前最大委托编号
-        PageHelper.clearPage();
-        Integer entrustNum = entityMapper.selectMaxNo();
-        if (entrustNum != null && entrustNum > 0) {
-            String substring = entrustNum.toString().substring(0, 6);
-            if (substring.equals(currentTime)) {
-                code = entrustNum + 1;
-            } else {
-                code = Integer.parseInt(currentTime + "0001");
-            }
-        } else {
-            code = Integer.parseInt(currentTime + "0001");
-        }
-        basisInfo.setEntrustmentNo(code);
+        //获取并设置委托编号，相应的类别
+        EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),currentTime);
+        basisInfo.setEntrustmentNo(entrustCategoryVo.getEntrustmentNo());
+        basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
+        basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
         // 通过委托编号 查询是否存在
         PageHelper.clearPage();
         if (entityMapper.getByData(basisInfo.getEntrustmentNo()) != null) {
@@ -4062,6 +4050,63 @@ public class EntrustServiceImpl implements EntrustService {
             return true;
         }
         return false;
+    }
+
+    /**
+     * null 常规原材试验、MN模拟试验、BD比对试验
+     * @param EntrustCategory 常规原材试验、模拟试验、比对试验
+     * @param currentTime 时间
+     * @return
+     */
+    public EntrustCategoryVo returnEntrustCategoryVo(String EntrustCategory,String currentTime)
+    {
+        // 接收按类型返回数据
+        EntrustCategoryVo data = new EntrustCategoryVo();
+        // 入参
+        String categoryType = null;
+        if(StringUtils.isEmpty(EntrustCategory)){
+            // 常规原材试验或参数null
+            PageHelper.clearPage();
+            data = entityMapper.selectEntrustMaxNo(categoryType);
+        }
+        else if(!StringUtils.isEmpty(EntrustCategory) && EntrustCategory.equals("常规原材试验")){
+            // 常规原材试验或参数null
+            PageHelper.clearPage();
+            data = entityMapper.selectEntrustMaxNo(categoryType);
+        }
+        else if(!StringUtils.isEmpty(EntrustCategory) && EntrustCategory.equals("模拟试验")){
+            categoryType = "MN";
+            PageHelper.clearPage();
+            data = entityMapper.selectEntrustMaxNo(categoryType);
+        }
+        else if(!StringUtils.isEmpty(EntrustCategory) && EntrustCategory.equals("比对试验")){
+            categoryType = "BD";
+            PageHelper.clearPage();
+            data = entityMapper.selectEntrustMaxNo(categoryType);
+        }
+        Integer code = 0;
+        if(!StringUtils.isEmpty(data)){
+            if (data.getEntrustmentNo() != null && data.getEntrustmentNo() > 0) {
+                String substring = data.getEntrustmentNo().toString().substring(0, 6);
+                if (substring.equals(currentTime)) {
+                    code = data.getEntrustmentNo() + 1;
+                } else {
+                    code = Integer.parseInt(currentTime + "0001");
+                }
+            } else {
+                code = Integer.parseInt(currentTime + "0001");
+            }
+            data.setEntrustmentNo(code);
+            data.setEntrustCategoryType(categoryType);
+            data.setEntrustCategory((EntrustCategory!=null?EntrustCategory:"常规原材试验"));
+        }
+        else {
+            code = Integer.parseInt(currentTime + "0001");
+            data.setEntrustmentNo(code);
+            data.setEntrustCategoryType(categoryType);
+            data.setEntrustCategory((EntrustCategory!=null?EntrustCategory:"常规原材试验"));
+        }
+        return data;
     }
 
 }
