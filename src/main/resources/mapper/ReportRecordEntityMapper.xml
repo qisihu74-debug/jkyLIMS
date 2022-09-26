@@ -689,6 +689,26 @@
             report_code LIKE CONCAT('%-',#{year},'-%')
             AND report_code LIKE CONCAT('%',#{code},'%')
     </select>
+
+    <select id="getOtherMaxCode" resultType="java.lang.Integer">
+        SELECT
+            MAX( SUBSTR( report_code FROM 13 )+0 )
+        FROM
+            test_report_record
+        WHERE
+            report_code LIKE CONCAT('%-',#{year},'-%')
+            AND report_code LIKE CONCAT('%',#{code},'%')
+            AND report_code LIKE CONCAT('%-',#{type},'-%')
+    </select>
+
+    <select id="getEntrustCategoryType" resultType="java.lang.String">
+        SELECT
+            entrust_category_type
+        FROM
+            `test_entrusted_info`
+        WHERE
+            id = #{entrustId}
+    </select>
     <select id="getMaxCodeMid" resultType="java.lang.Integer">
         SELECT
             MAX( SUBSTR( report_code FROM 13 )+0 )
@@ -697,6 +717,16 @@
         WHERE
             report_code LIKE CONCAT('%-',#{year},'-%')
             AND report_code LIKE CONCAT('%',#{code},'%')
+    </select>
+    <select id="getOtherMaxCodeMid" resultType="java.lang.Integer">
+        SELECT
+            MAX( SUBSTR( report_code FROM 13 )+0 )
+        FROM
+            test_report_record_mid
+        WHERE
+            report_code LIKE CONCAT('%-',#{year},'-%')
+            AND report_code LIKE CONCAT('%',#{code},'%')
+            AND report_code LIKE CONCAT('%-',#{type},'-%')
     </select>
 
     <select id="getAllReportCode" resultType="java.lang.String">

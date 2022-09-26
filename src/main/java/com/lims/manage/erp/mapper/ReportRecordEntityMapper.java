@@ -137,12 +137,37 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     Integer getMaxCode(String year,String code);
+
+    /**
+     *
+     * @param year
+     * @param code
+     * @param type
+     * @return
+     */
+    Integer getOtherMaxCode(String year,String code,String type);
+
+    /**
+     * 获取委托编号类别
+     * @param entrustId
+     * @return
+     */
+    String getEntrustCategoryType(Long entrustId);
     /**
      * 查询当前年 最大报告编号--中间
      * @param year
      * @return
      */
     Integer getMaxCodeMid(String year,String code);
+
+    /**
+     *
+     * @param year
+     * @param code
+     * @param type
+     * @return
+     */
+    Integer getOtherMaxCodeMid(String year,String code,String type);
 
     /**
      * 根据委托单id查询所用报告模板名称
