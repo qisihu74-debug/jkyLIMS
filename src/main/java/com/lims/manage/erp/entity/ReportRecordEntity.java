@@ -202,6 +202,11 @@ public class ReportRecordEntity {
      * 报告合并时间
      */
     private Date combineTime;
+    /**
+     * 委托编号——String
+     */
+    @TableField(exist = false)
+    private String entrustmentNostr;
 
 
     public ReportRecordEntity() {

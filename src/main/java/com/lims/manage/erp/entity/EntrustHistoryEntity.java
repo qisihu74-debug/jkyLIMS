@@ -100,4 +100,14 @@ public class EntrustHistoryEntity {
      * 委托单状态 0未审核，1已审核
      */
     private Integer auditState;
+
+    /**
+     * 委托编号String类型
+     */
+    private String entrustmentNostr;
+
+    /**
+     * 编号类别
+     */
+    private String entrustCategoryType;
 }

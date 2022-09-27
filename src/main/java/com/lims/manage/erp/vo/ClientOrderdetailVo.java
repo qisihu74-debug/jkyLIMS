@@ -143,4 +143,8 @@ public class ClientOrderdetailVo {
      * 委托单位id 数组
      */
     private String[] companyStrs;
+    /**
+     * 委托单编号
+     */
+    private String entrustmentNostr;
 }

@@ -56,16 +56,7 @@ import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.mapper.TestTechnicistDao;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.util.AsposeUtil;
-import com.lims.manage.erp.util.ConvertUtil;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.FileAndFolderUtil;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.HttpDownloadUtil;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.PDFHelper3;
-import com.lims.manage.erp.util.PdfDoc;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
@@ -2448,6 +2439,12 @@ public class ReportServiceImpl implements ReportService {
                 logger.error("====报告查询列表结束时间转换失败====");
                 e.printStackTrace();
             }
+        }
+        //拆分委托编号
+        if(!StringUtils.isEmpty(paramVo.getEntrustmentNostr())){
+            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(paramVo.getEntrustmentNostr());
+            paramVo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
+            paramVo.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));
         }
         PageHelper.startPage(paramVo.getPageNum(),paramVo.getPageSize());
         List<ReportDetailListVo> reportDetailListVos;

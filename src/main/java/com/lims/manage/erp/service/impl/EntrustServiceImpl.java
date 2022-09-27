@@ -155,7 +155,7 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
             // 通过委托编号 查询是否存在
             PageHelper.clearPage();
-            if (entityMapper.getByData(basisInfo.getEntrustmentNo()) != null) {
+            if (entityMapper.getByDataEntrustMaxNo(basisInfo.getEntrustmentNo(),basisInfo.getEntrustCategoryType()) != null) {
                 return "新增委托失败!:\t委托编号已存在\t"+basisInfo.getEntrustmentNo();
             }
             // 通过样品ID 查询委托单信息和样品Id 绑定关系 （==null 正常，!=null false）
@@ -1601,6 +1601,12 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
         }
+        //拆分委托编号
+        if(!StringUtils.isEmpty(entrustHistoryEntity.getEntrustmentNostr())){
+            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(entrustHistoryEntity.getEntrustmentNostr());
+            entrustHistoryEntity.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
+            entrustHistoryEntity.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));
+        }
         // 获取状态
         List<EntrustHistoryEntity> dataList = new ArrayList<>();
         if (!StringUtils.isEmpty(entrustHistoryEntity.getState())&&entrustHistoryEntity.getState() == 1) {
@@ -1658,6 +1664,12 @@ public class EntrustServiceImpl implements EntrustService {
                     entrustHistoryEntity.setEndingDate(dateFormat.parse(strArry[i]));
                 }
             }
+        }
+        //拆分委托编号
+        if(!StringUtils.isEmpty(entrustHistoryEntity.getEntrustmentNostr())){
+            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(entrustHistoryEntity.getEntrustmentNostr());
+            entrustHistoryEntity.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
+            entrustHistoryEntity.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));
         }
         PageHelper.clearPage();
         PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
@@ -2422,7 +2434,7 @@ public class EntrustServiceImpl implements EntrustService {
                 rows = tables.get(j).getRows();
                 if (j == 0) {
                     //设置模板数据
-                    rows.get(2).getTableCells().get(8).setText("№." + detail.getEntrustmentNo());//委托单位
+                    rows.get(2).getTableCells().get(8).setText("№." + detail.getEntrustmentNostr());//委托编号 替换
                     rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
                     rows.get(4).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getWitnessUint())?"——":detail.getWitnessUint());//见证单位
                     rows.get(5).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getProjectName())?"——":detail.getProjectName());//工程名称
@@ -2787,7 +2799,7 @@ public class EntrustServiceImpl implements EntrustService {
         basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
         // 通过委托编号 查询是否存在
         PageHelper.clearPage();
-        if (entityMapper.getByData(basisInfo.getEntrustmentNo()) != null) {
+        if (entityMapper.getByDataEntrustMaxNo(basisInfo.getEntrustmentNo(),basisInfo.getEntrustCategoryType()) != null) {
             return "再来一单新增委托失败!:\t委托编号已存在\t"+basisInfo.getEntrustmentNo();
         }
         /**
@@ -3450,6 +3462,12 @@ public class EntrustServiceImpl implements EntrustService {
     public PageInfo taskStatisticsList(TestEntrustedTaskRelVo testEntrustedTaskRelVo) {
 
         List<TestEntrustedTaskRelVo> list = Lists.newArrayList();
+        //拆分委托编号
+        if(!StringUtils.isEmpty(testEntrustedTaskRelVo.getEntrustmentNostr())){
+            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(testEntrustedTaskRelVo.getEntrustmentNostr());
+            testEntrustedTaskRelVo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
+            testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo());
+        }
         PageHelper.clearPage();
         list = testEntrustedTaskRelDao.getTaskStatisticsList(testEntrustedTaskRelVo);
         if(!CollectionUtils.isEmpty(list)){
@@ -3682,7 +3700,7 @@ public class EntrustServiceImpl implements EntrustService {
         for (int i = 0; i < list.size(); i++) {
             ClientOrderdetailVo personVo = list.get(i);
             //在sheet里创建第三行
-            cells.get(row+n).setValue(personVo.getEntrustmentNo());
+            cells.get(row+n).setValue(personVo.getEntrustmentNostr());
             row = letterCycle.getNextUpEn(row);
             if (personVo.getAcceptanceDate() != null) {
                 String dateString = formatter.format(personVo.getAcceptanceDate());

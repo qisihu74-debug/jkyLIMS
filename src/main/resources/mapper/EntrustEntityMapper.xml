@@ -6,6 +6,7 @@
     </select>
     <select id="selectByKeyId" resultType="com.lims.manage.erp.vo.EntrustAddVo">
         select id,
+               entrustment_no,
                IFNULL(CONCAT(entrust_category_type,entrustment_no),entrustment_no) as entrustmentNostr,
                entrust_type,
                entrust_company,
@@ -127,6 +128,7 @@
         <result property="sampleLogisticsNo" column="sampleLogisticsNo"></result>
         <result property="state" column="state"></result>
         <result property="auditState" column="auditState"></result>
+        <result property="entrustmentNostr" column="entrustmentNostr"></result>
         <collection property="taskCodes" ofType="com.lims.manage.erp.vo.TaskCodeVo">
             <result property="taskCode" column="taskCode"></result>
             <result property="teamName" column="teamName"></result>
@@ -138,6 +140,7 @@
         SELECT
         t1.id,
         t1.entrustment_no,
+        IFNULL( CONCAT( t1.entrust_category_type, t1.entrustment_no ), t1.entrustment_no ) AS entrustmentNostr,
         t1.entrust_company,
         t1.entrust_people,
         t1.project_name,
@@ -183,8 +186,11 @@
             <if test="taskCodeParam!=null and taskCodeParam!=''">
                 and t2.task_code LIKE CONCAT('%',#{taskCodeParam},'%')
             </if>
+            <if test="entrustCategoryType!=null">
+                and t1.entrust_category_type = #{entrustCategoryType}
+            </if>
         </trim>
-        ORDER BY entrustment_no DESC
+        ORDER BY t1.acceptance_date desc,entrustment_no DESC
     </select>
 
     <select id="selectEntrustHistoryListRelease_of" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity"
@@ -237,6 +243,7 @@
         SELECT
         t1.id,
         t1.entrustment_no,
+        IFNULL( CONCAT( t1.entrust_category_type, t1.entrustment_no ), t1.entrustment_no ) AS entrustmentNostr,
         t1.entrust_company,
         t1.entrust_people,
         t1. project_name,
@@ -282,8 +289,11 @@
             <if test="taskCodeParam!=null">
                 and t2.task_code LIKE CONCAT('%',#{taskCodeParam},'%')
             </if>
+            <if test="entrustCategoryType!=null">
+                and t1.entrust_category_type = #{entrustCategoryType}
+            </if>
         </trim>
-        ORDER BY t1.entrustment_no DESC
+        ORDER BY t1.acceptance_date desc, t1.entrustment_no DESC
     </select>
 
 
@@ -355,6 +365,7 @@
         SELECT
         t1.id AS id,
         t1.entrustment_no AS entrustment_no,
+        IFNULL( CONCAT( t1.entrust_category_type, t1.entrustment_no ), t1.entrustment_no ) AS entrustmentNostr,
         t1.entrust_company AS entrust_company,
         t1.entrust_people AS entrust_people,
         t1.business_acceptor AS business_acceptor,
@@ -390,7 +401,10 @@
         <if test="state!=null">
             and t1.state = #{state}
         </if>
-        ORDER BY t1.entrustment_no DESC
+        <if test="entrustCategoryType!=null">
+            and t1.entrust_category_type = #{entrustCategoryType}
+        </if>
+        ORDER BY t1.acceptance_date desc,t1.entrustment_no DESC
     </select>
     <insert id="BatchSaveEntrustSample" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
         INSERT into test_entrusted_sample_details_rel(sample_id,
@@ -890,6 +904,7 @@
         <result property="acceptanceDate" column="acceptance_date"></result>
         <result property="entrustPeople" column="entrust_people"></result>
         <result property="acceptanceDate" column="acceptance_date"></result>
+        <result property="entrustmentNostr" column="entrustmentNostr"></result>
         <collection property="samples" ofType="com.lims.manage.erp.entity.SampleEntity">
             <result property="id" column="sampleId"></result>
             <result property="sampleName" column="alias_name"></result>
@@ -915,6 +930,7 @@
     <select id="selectClientOrderdetailVoList" resultMap="ClientOrderdetailMap">
         SELECT
         t1.entrustment_no,
+        IFNULL( CONCAT( t1.entrust_category_type, t1.entrustment_no ), t1.entrustment_no ) AS entrustmentNostr,
         t1.acceptance_date,
         t1.request_date,
         t1.entrust_people ,
@@ -998,6 +1014,7 @@
         SELECT
         id as entrustmentId,
         entrustment_no,
+        IFNULL( CONCAT( entrust_category_type, entrustment_no ), entrustment_no ) AS entrustmentNostr,
         acceptance_date,
         request_date,
         entrust_people ,
@@ -1197,15 +1214,32 @@
         <if test="categoryType == null">
             and  entrust_category_type IS NULL
         </if>
-        <if test="categoryType != null and categoryType='BD' ">
-            entrust_category_type = "BD"
+        <if test="categoryType != null and categoryType=='BD' ">
+            and entrust_category_type = "BD"
         </if>
-        <if test="categoryType != null and categoryType='MN' ">
-            entrust_category_type = "MN"
+        <if test="categoryType != null and categoryType=='MN' ">
+            and entrust_category_type = "MN"
         </if>
     ORDER BY
         entrustment_no DESC
         LIMIT 1 FOR UPDATE;
+    </select>
+
+    <select id="getByDataEntrustMaxNo" resultType="com.lims.manage.erp.vo.EntrustAddVo">
+        SELECT id,
+               entrustment_no
+        FROM test_entrusted_info
+        WHERE entrustment_no = #{code}
+        <if test="categoryType == null">
+            and  entrust_category_type IS NULL
+        </if>
+        <if test="categoryType != null and categoryType=='BD' ">
+            and entrust_category_type = "BD"
+        </if>
+        <if test="categoryType != null and categoryType=='MN' ">
+            and entrust_category_type = "MN"
+        </if>
+        LIMIT 1
     </select>
 
 

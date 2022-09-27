@@ -611,6 +611,7 @@
             t1.id,
             t1.report_code,
             t2.entrustment_no,
+            IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
             t2.entrust_company,
             t1.sample_name,
             t1.number,
@@ -803,6 +804,7 @@
         <result property="addressee" column="addressee"></result>
         <result property="reportTime" column="report_time"></result>
         <result property="reportTypeStatus" column="reportTypeStatus"></result>
+        <result property="entrustmentNostr" column="entrustmentNostr"></result>
         <collection property="taskCodes" ofType="com.lims.manage.erp.vo.TaskCodeVo">
             <result property="taskCode" column="taskCode"></result>
             <result property="teamName" column="teamName"></result>
@@ -864,6 +866,7 @@
         SELECT
         t1.entrustment_id entrustId,
         t2.entrustment_no,
+        IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
         t1.report_code,
         t1.category,
         t1.sample_name,
@@ -898,6 +901,9 @@
             <if test="reportTypeStatus!=null">
                 and t1.type = #{reportTypeStatus}
             </if>
+            <if test="entrustCategoryType!=null">
+                and t2.entrust_category_type = #{entrustCategoryType}
+            </if>
         </trim>
         ORDER BY
         t2.entrustment_no
@@ -907,6 +913,7 @@
         SELECT
         t1.entrust_id entrustId,
         t2.entrustment_no,
+        IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
         t1.report_code,
         t1.category,
         t1.sample_name,
@@ -940,6 +947,9 @@
             </if>
             <if test="reportTypeStatus!=null">
                 and t1.type = #{reportTypeStatus}
+            </if>
+            <if test="entrustCategoryType!=null">
+                and t2.entrust_category_type = #{entrustCategoryType}
             </if>
         </trim>
         ORDER BY
@@ -990,6 +1000,9 @@
             <if test="reportTypeStatus!=null">
                 and t1.type = #{reportTypeStatus}
             </if>
+            <if test="entrustCategoryType!=null">
+                and t2.entrust_category_type = #{entrustCategoryType}
+            </if>
         </trim>
         ORDER BY
         t2.entrustment_no
@@ -998,6 +1011,7 @@
             parameterType="com.lims.manage.erp.vo.ReportDetailListParamVo">
         SELECT
         t2.entrustment_no,
+        IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
         t1.report_code,
         t1.category,
         t1.sample_name,
@@ -1038,6 +1052,9 @@
             </if>
             <if test="reportTypeStatus!=null">
                 and t1.type = #{reportTypeStatus}
+            </if>
+            <if test="entrustCategoryType!=null">
+                and t2.entrust_category_type = #{entrustCategoryType}
             </if>
         </trim>
         ORDER BY

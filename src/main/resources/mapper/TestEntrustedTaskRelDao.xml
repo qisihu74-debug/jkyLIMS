@@ -249,6 +249,7 @@
         t1.type,
         t3.task_code,
         t2.entrustment_no as entrustNo,
+        IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
         t2.task_source,
         t3.end_detection_time testEndTime,
         t4.report_code,
@@ -271,6 +272,9 @@
         </if>
         <if test="taskSource!=null and taskSource!='' ">
             and t2.task_source LIKE CONCAT('%',#{taskSource},'%')
+        </if>
+        <if test="entrustCategoryType!=null">
+            and t2.entrust_category_type = #{entrustCategoryType}
         </if>
     </select>
     <select id="getTaskFlowById" resultType="com.lims.manage.erp.vo.TestEntrustedTaskRelVo">

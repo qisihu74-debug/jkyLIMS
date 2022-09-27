@@ -56,4 +56,8 @@ public class ReportDetailListVo {
      * 物理章、电子章
      */
     private String category;
+    /**
+     * 委托编号——String
+     */
+    private String entrustmentNostr;
 }

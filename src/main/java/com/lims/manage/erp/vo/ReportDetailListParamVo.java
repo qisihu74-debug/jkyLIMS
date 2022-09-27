@@ -47,4 +47,12 @@ public class ReportDetailListParamVo {
      * 物理章、电子章
      */
     private String category;
+    /**
+     * 委托编号——String
+     */
+    private String entrustmentNostr;
+    /**
+     * 委托编号类别： null 常规原材试验、MN模拟试验、BD比对试验
+     */
+    private String entrustCategoryType;
 }
