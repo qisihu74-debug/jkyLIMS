@@ -394,6 +394,15 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public PageInfo areaStatistics(StatisticsParamVo paramVo) {
+        String flag = "left";
+        PageHelper.clearPage();
+        int entrust = statisticsMapper.areaStatisticsEntrust(paramVo);
+        PageHelper.clearPage();
+        int report = statisticsMapper.areaStatisticsReport(paramVo);
+        if(entrust<report){
+            flag = "right";
+        }
+        paramVo.setFlag(flag);
         PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
         List<AreaStatisticsResultVo> list = statisticsMapper.areaStatistics(paramVo);
         PageInfo<AreaStatisticsResultVo> result = new PageInfo<>(list);

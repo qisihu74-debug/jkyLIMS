@@ -10,4 +10,5 @@ public class StatisticsParamVo {
     private String teamId;
     private Integer pageNum;
     private Integer pageSize;
+    private String flag;
 }
