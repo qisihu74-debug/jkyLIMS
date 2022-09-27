@@ -73,6 +73,8 @@ public interface StatisticsMapper {
      * @return
      */
     List<AreaStatisticsResultVo> areaStatistics(StatisticsParamVo paramVo);
+    int areaStatisticsEntrust(StatisticsParamVo paramVo);
+    int areaStatisticsReport(StatisticsParamVo paramVo);
 
     /**
      * 部门产值统计--父级
