@@ -190,7 +190,7 @@
                 and t1.entrust_category_type = #{entrustCategoryType}
             </if>
         </trim>
-        ORDER BY t1.acceptance_date desc,entrustment_no DESC
+        ORDER BY t1.create_time desc,entrustment_no DESC
     </select>
 
     <select id="selectEntrustHistoryListRelease_of" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity"
@@ -293,7 +293,7 @@
                 and t1.entrust_category_type = #{entrustCategoryType}
             </if>
         </trim>
-        ORDER BY t1.acceptance_date desc, t1.entrustment_no DESC
+        ORDER BY t1.create_time desc, t1.entrustment_no DESC
     </select>
 
 
@@ -404,7 +404,7 @@
         <if test="entrustCategoryType!=null">
             and t1.entrust_category_type = #{entrustCategoryType}
         </if>
-        ORDER BY t1.acceptance_date desc,t1.entrustment_no DESC
+        ORDER BY t1.create_time desc,t1.entrustment_no DESC
     </select>
     <insert id="BatchSaveEntrustSample" parameterType="com.lims.manage.erp.entity.EntrustSampleEntity">
         INSERT into test_entrusted_sample_details_rel(sample_id,
@@ -535,7 +535,8 @@
                                         audit_state,
                                         report_receiving_unit,
                                         entrust_category,
-                                        entrust_category_type)
+                                        entrust_category_type,
+                                        create_time)
         values (#{id},
                 #{entrustmentNo},
                 #{entrustType},
@@ -589,7 +590,8 @@
                 #{auditState},
                 #{reportReceivingUnit},
                 #{entrustCategory},
-                #{entrustCategoryType})
+                #{entrustCategoryType},
+                #{createTime})
 
     </insert>
     <select id="GetDelegateInformation" resultType="String">

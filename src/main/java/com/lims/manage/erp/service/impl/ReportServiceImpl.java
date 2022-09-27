@@ -2444,7 +2444,9 @@ public class ReportServiceImpl implements ReportService {
         if(!StringUtils.isEmpty(paramVo.getEntrustmentNostr())){
             EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(paramVo.getEntrustmentNostr());
             paramVo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
-            paramVo.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));
+            if(entrustCategoryVo.getEntrustmentNo()!=null){
+                paramVo.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));
+            }
         }
         PageHelper.startPage(paramVo.getPageNum(),paramVo.getPageSize());
         List<ReportDetailListVo> reportDetailListVos;

@@ -322,6 +322,7 @@ public class EntrustServiceImpl implements EntrustService {
                     +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
                     +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount(), Const.ENTRUST_FOUND, true);
             basisInfo.setAuditState("1");
+            basisInfo.setCreateTime(new Date());
             entityMapper.insertEntrustInfo(basisInfo);
             return "新建委托成功";
     }
@@ -1605,7 +1606,9 @@ public class EntrustServiceImpl implements EntrustService {
         if(!StringUtils.isEmpty(entrustHistoryEntity.getEntrustmentNostr())){
             EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(entrustHistoryEntity.getEntrustmentNostr());
             entrustHistoryEntity.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
-            entrustHistoryEntity.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));
+            if(!StringUtils.isEmpty(entrustCategoryVo.getEntrustmentNo())){
+                entrustHistoryEntity.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));
+            }
         }
         // 获取状态
         List<EntrustHistoryEntity> dataList = new ArrayList<>();
@@ -1669,7 +1672,9 @@ public class EntrustServiceImpl implements EntrustService {
         if(!StringUtils.isEmpty(entrustHistoryEntity.getEntrustmentNostr())){
             EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(entrustHistoryEntity.getEntrustmentNostr());
             entrustHistoryEntity.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
-            entrustHistoryEntity.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));
+            if(!StringUtils.isEmpty(entrustCategoryVo.getEntrustmentNo())){
+                entrustHistoryEntity.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));
+            }
         }
         PageHelper.clearPage();
         PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
@@ -2970,6 +2975,7 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setAddressee(null);
             basisInfo.setReportReceivingUnit(null);
         }
+        basisInfo.setCreateTime(new Date());
         entityMapper.insertEntrustInfo(basisInfo);
         return "新建委托成功";
     }
@@ -3467,6 +3473,9 @@ public class EntrustServiceImpl implements EntrustService {
             EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(testEntrustedTaskRelVo.getEntrustmentNostr());
             testEntrustedTaskRelVo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
             testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo());
+            if(!StringUtils.isEmpty(entrustCategoryVo.getEntrustmentNo())){
+                testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo());
+            }
         }
         PageHelper.clearPage();
         list = testEntrustedTaskRelDao.getTaskStatisticsList(testEntrustedTaskRelVo);

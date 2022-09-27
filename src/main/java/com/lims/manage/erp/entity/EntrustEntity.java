@@ -283,6 +283,11 @@ public class EntrustEntity {
      */
     private String entrustCategoryType;
 
+    /**
+     * 委托单创建时间供排序使用
+     */
+    private Date createTime;
+
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,
                          String witnessUint, String witnessPerson, String witnessPhone, String projectName,
