@@ -633,7 +633,7 @@ public class EntrustController {
      */
     @GetMapping("/getTaskSource")
     public Result getTaskSource() {
-        String[] arr = {"省内","云南","甘肃","广西","新疆","西藏","杭州","江西","安徽","检测七所","生产管理办","宁夏","西藏"};
+        String[] arr = {"省内","云南","甘肃","广西","新疆","西藏","杭州","江西","安徽","检测七所","生产管理办","宁夏","比对试验","模拟试验"};
         List<LabelValueVo> taskSource = Lists.newArrayList();
         for (int i = 0; i < arr.length; i++) {
             Long value = 1L+i;
