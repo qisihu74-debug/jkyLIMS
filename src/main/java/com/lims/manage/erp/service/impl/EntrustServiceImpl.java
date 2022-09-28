@@ -146,10 +146,10 @@ public class EntrustServiceImpl implements EntrustService {
             long id = GenID.getID();
             basisInfo.setId(id);
             //设置委托编号
-            Integer code = null;
-            String currentTime = DateUtil.getTodayString().substring(0, 6);
+            SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
+            String acceptanceDate = yyyyMMddHH_NOT_.format(basisInfo.getAcceptanceDate()).substring(0,6);
             //获取并设置委托编号，相应的类别
-            EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),currentTime);
+            EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),acceptanceDate);
             basisInfo.setEntrustmentNo(entrustCategoryVo.getEntrustmentNo());
             basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
             basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
@@ -2794,11 +2794,11 @@ public class EntrustServiceImpl implements EntrustService {
         EntrustEntity basisInfo = new EntrustEntity(vo);
         long id = GenID.getID();
         basisInfo.setId(id);
-        //设置委托编号
-        Integer code = null;
-        String currentTime = DateUtil.getTodayString().substring(0, 6);
         //获取并设置委托编号，相应的类别
-        EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),currentTime);
+        SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
+        String acceptanceDate = yyyyMMddHH_NOT_.format(basisInfo.getAcceptanceDate()).substring(0,6);
+        //获取并设置委托编号，相应的类别
+        EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),acceptanceDate);
         basisInfo.setEntrustmentNo(entrustCategoryVo.getEntrustmentNo());
         basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
         basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
@@ -4080,12 +4080,15 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     /**
-     * null 常规原材试验、MN模拟试验、BD比对试验
+     * 生成委托编号
+     * 编号类别： null 常规原材试验、MN模拟试验、BD比对试验
      * @param EntrustCategory 常规原材试验、模拟试验、比对试验
-     * @param currentTime 时间
+     * @param acceptanceDate 受理时间：受理时间（202208）
+     *   受理时间（202208） if 当前月份有委托编号（2022080100）、往后跟委托编号（生成2022080101）
+     *        else 没有（null）(202208+1)则默认 2022080001
      * @return
      */
-    public EntrustCategoryVo returnEntrustCategoryVo(String EntrustCategory,String currentTime)
+    public EntrustCategoryVo returnEntrustCategoryVo(String EntrustCategory,String acceptanceDate)
     {
         // 接收按类型返回数据
         EntrustCategoryVo data = new EntrustCategoryVo();
@@ -4094,44 +4097,47 @@ public class EntrustServiceImpl implements EntrustService {
         if(StringUtils.isEmpty(EntrustCategory)){
             // 常规原材试验或参数null
             PageHelper.clearPage();
-            data = entityMapper.selectEntrustMaxNo(categoryType);
+            data = entityMapper.selectEntrustMaxNo(categoryType,acceptanceDate);
         }
         else if(!StringUtils.isEmpty(EntrustCategory) && EntrustCategory.equals("常规原材试验")){
             // 常规原材试验或参数null
             PageHelper.clearPage();
-            data = entityMapper.selectEntrustMaxNo(categoryType);
+            data = entityMapper.selectEntrustMaxNo(categoryType,acceptanceDate);
         }
         else if(!StringUtils.isEmpty(EntrustCategory) && EntrustCategory.equals("模拟试验")){
             categoryType = "MN";
             PageHelper.clearPage();
-            data = entityMapper.selectEntrustMaxNo(categoryType);
+            data = entityMapper.selectEntrustMaxNo(categoryType,acceptanceDate);
         }
         else if(!StringUtils.isEmpty(EntrustCategory) && EntrustCategory.equals("比对试验")){
             categoryType = "BD";
             PageHelper.clearPage();
-            data = entityMapper.selectEntrustMaxNo(categoryType);
+            data = entityMapper.selectEntrustMaxNo(categoryType,acceptanceDate);
         }
         Integer code = 0;
         if(!StringUtils.isEmpty(data)){
             if (data.getEntrustmentNo() != null && data.getEntrustmentNo() > 0) {
                 String substring = data.getEntrustmentNo().toString().substring(0, 6);
-                if (substring.equals(currentTime)) {
+                if (substring.equals(acceptanceDate)) {
                     code = data.getEntrustmentNo() + 1;
                 } else {
-                    code = Integer.parseInt(currentTime + "0001");
+                    code = Integer.parseInt(acceptanceDate + "0001");
                 }
             } else {
-                code = Integer.parseInt(currentTime + "0001");
+                code = Integer.parseInt(acceptanceDate + "0001");
             }
             data.setEntrustmentNo(code);
             data.setEntrustCategoryType(categoryType);
             data.setEntrustCategory((EntrustCategory!=null?EntrustCategory:"常规原材试验"));
         }
         else {
-            code = Integer.parseInt(currentTime + "0001");
-            data.setEntrustmentNo(code);
-            data.setEntrustCategoryType(categoryType);
-            data.setEntrustCategory((EntrustCategory!=null?EntrustCategory:"常规原材试验"));
+            // 重新赋值
+            EntrustCategoryVo data1 = new EntrustCategoryVo();
+            code = Integer.parseInt(acceptanceDate + "0001");
+            data1.setEntrustmentNo(code);
+            data1.setEntrustCategoryType(categoryType);
+            data1.setEntrustCategory((EntrustCategory!=null?EntrustCategory:"常规原材试验"));
+            return data1;
         }
         return data;
     }

@@ -1222,6 +1222,7 @@
         <if test="categoryType != null and categoryType=='MN' ">
             and entrust_category_type = "MN"
         </if>
+        and DATE_FORMAT(acceptance_date, '%Y%m')=#{acceptanceDate}
     ORDER BY
         entrustment_no DESC
         LIMIT 1 FOR UPDATE;

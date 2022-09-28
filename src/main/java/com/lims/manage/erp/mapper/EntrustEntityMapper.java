@@ -549,7 +549,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      * 获取最大委托单编号 根据类型进行过滤
      * @return
      */
-    EntrustCategoryVo selectEntrustMaxNo(@Param("categoryType") String categoryType);
+    EntrustCategoryVo selectEntrustMaxNo(@Param("categoryType") String categoryType,@Param("acceptanceDate") String acceptanceDate);
 
     /**
      * 通过委托编号 获取委托单id、根据类型进行过滤： 是否存在
