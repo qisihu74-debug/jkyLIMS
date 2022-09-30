@@ -455,4 +455,19 @@ public interface TaskMapper extends BaseMapper {
      */
     TaskTestEntity getTaskTestEntityById(Long taskId);
 
+    /**
+     * 根据任务单id 得到：委托单状态为144 返回 true
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "IF\n" +
+            "\t( t2.state = 144, TRUE, FALSE ) \n" +
+            "FROM\n" +
+            "\ttest_task AS t1\n" +
+            "\tLEFT JOIN test_entrusted_info AS t2 ON t1.entrustment_id = t2.id \n" +
+            "WHERE\n" +
+            "\tt1.id = #{taskId}")
+    Boolean judgeTaskStatus(@Param("taskId") Long taskId);
+
 }

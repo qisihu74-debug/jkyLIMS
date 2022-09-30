@@ -69,6 +69,11 @@ public class TaskDetailInfoVo {
      */
     List<EntrustFileTableEntity> fileArrays;
 
+    /**
+     * 委托单作废原因
+     */
+    private String invalidReason;
+
 
     public TaskDetailInfoVo(Long taskId) {
         this.taskId = taskId;

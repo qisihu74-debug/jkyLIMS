@@ -1563,6 +1563,16 @@ public class TaskServiceImpl implements TaskService {
     }
 
     /**
+     * 根据任务单id 判断 委托状态等于 144 返回true
+     * @param id
+     * @return
+     */
+    @Override
+    public Boolean judgeTaskStatus(Long id) {
+      return  taskMapper.judgeTaskStatus(id);
+    }
+
+    /**
      * 如果原始记录文件不为空 塞数据
      */
     public Workbook methodPlugTheData(String originalTemplate,Map<String, OriginalRecordDataVo> result,HttpServletResponse response) throws InvalidFormatException {

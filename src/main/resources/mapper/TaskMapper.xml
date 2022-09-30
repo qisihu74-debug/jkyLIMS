@@ -86,6 +86,7 @@
         <result property="presentInformation" column="present_information"></result>
         <result property="fileUrl" column="file_url"></result>
         <result property="sealType" column="seal_type"></result>
+        <result property="invalidReason" column="invalid_reason"></result>
         <collection property="sampleDetailList" ofType="com.lims.manage.erp.vo.SampleDetailVo">
             <id property="id" column="sample_id"></id>
             <result property="sampleCode" column="sample_code"></result>
@@ -232,6 +233,7 @@
                t2.present_information,
                t2.file_url,
                t2.seal_type,
+               IFNULL(t2.invalid_reason,null) invalid_reason,
                t3.sample_id,
                t4.sample_name,
                t4.alias_name,
@@ -426,7 +428,7 @@
         t4.alias_name aliasName,
         t4.sample_type sampleType,
         t4.outward_describe outwardDescribe,
-        t1.state,
+        IF(t2.state = 144,144, t1.state) as state,
         t1.recorder,
         t1.reviewer,
         t1.report_producer reportProducer,
@@ -497,7 +499,7 @@
         t4.alias_name aliasName,
         t4.sample_type sampleType,
         t4.outward_describe outwardDescribe,
-        t1.state,
+        IF(t2.state = 144,144, t1.state) as state,
         t1.recorder,
         t1.reviewer,
         t1.report_producer reportProducer,
