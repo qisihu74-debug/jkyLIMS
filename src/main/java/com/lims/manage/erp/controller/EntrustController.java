@@ -52,6 +52,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -826,4 +827,29 @@ public class EntrustController {
         }
     }
 
+    @GetMapping("exportAllEntrust")
+    public void exportAllEntrust() throws Exception{
+
+        String message = entrustService.getMessage();
+        String[] strings = message.split("/");
+        String fileName = strings[1];
+        //获取所有符合条件的委托单id
+        List<EntrustAddVo> list = entrustEntityMapper.getAllEntrustIdBySearch();
+        for (EntrustAddVo bean:list) {
+            try {
+                String path = "D:\\AAEntrust\\"+bean.getEntrustmentNo()+".docx";
+                FileOutputStream outputStream = new FileOutputStream(path);
+                MinioClient client = MinIoUtil.minioClient;
+                InputStream object = client.getObject(strings[0], fileName);
+                //填充数据
+                EntrustAddVo detail = entrustService.getEntrustHistoryDetail(bean.getId());
+                XWPFDocument document = entrustService.downloadEntrust(detail, object);
+                document.write(outputStream);
+                outputStream.close();
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                log.info("导出失败：{}", ex);
+            }
+        }
+    }
 }
