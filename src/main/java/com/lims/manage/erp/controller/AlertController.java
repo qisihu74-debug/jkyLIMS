@@ -23,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/alert/")
 public class AlertController {
+    
     @Autowired
     private AlertService alertService;
 
