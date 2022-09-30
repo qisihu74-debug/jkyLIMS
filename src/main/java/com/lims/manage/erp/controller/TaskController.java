@@ -184,6 +184,10 @@ public class TaskController {
                 || taskTestEntity.getReportProducer() == null || taskTestEntity.getSampler() ==null) {
             return ResultUtil.error(201, "缺少必填参数！");
         }
+        // 委托单144 则不能执行任务单
+        if(taskService.judgeTaskStatus(taskTestEntity.getId())){
+            return ResultUtil.error(678, "领取失败！任务单已废弃！！！");
+        }
         Boolean taskStatus = taskService.getJudgmentTaskList(taskTestEntity.getId());
         if (taskStatus) {
             Boolean flag = taskService.postGrabASingleTwo(taskTestEntity);
@@ -216,11 +220,16 @@ public class TaskController {
         }
         List<Long> ids = batchReceiveTaskVo.getId();
         List<TaskTestEntity> batchUpdate = Lists.newArrayList();
+
         if(CollectionUtils.isEmpty(ids)){
             return ResultUtil.error(678, "请选择要领取的任务单！");
         }else{
             java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
             for (Long id : ids) {
+                // 委托单144 则不能执行任务单
+                if(taskService.judgeTaskStatus(id)){
+                    return ResultUtil.error(678, "批量领取失败！任务单已废弃！！！");
+                }
                 Boolean taskStatus = taskService.getJudgmentTaskList(id);
                 //查询样品外观描述
                 List<String> sampleOutward = taskService.getSampleOutward(id);
@@ -633,6 +642,10 @@ public class TaskController {
             }
             // 通过检测项主键 获取test_task Id
             Long taskId = taskMapper.getReturnTaskId(itemId);
+            // 委托单144 则不能执行任务单
+            if(taskService.judgeTaskStatus(taskId)){
+                return ResultUtil.error(678, "操作失败！任务单已废弃！！！");
+            }
             if (state == 1) {
                 if (testDetectionService.VerifyTheLogin(userInfo.getUserId(), taskId) == false) {
                     return ResultUtil.error("登录人没有被派发检测资格");

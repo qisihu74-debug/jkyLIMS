@@ -1366,12 +1366,12 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String abandonEntrust(EntrustEntity entrustEntity) {
-        //查询当前委托单下的任务单数量
-        Integer reportStateTaskNum = entityMapper.getReportStateTaskNum(entrustEntity.getId());
-        if(reportStateTaskNum>0){
-            //已发布
-            return "作废委托失败！:\t 委托单已经发布";
-         }
+//        //查询当前委托单下的任务单数量
+//        Integer reportStateTaskNum = entityMapper.getReportStateTaskNum(entrustEntity.getId());
+//        if(reportStateTaskNum>0){
+//            //已发布
+//            return "作废委托失败！:\t 委托单已经发布";
+//         }
         entrustEntity.setState(144);
         entityMapper.updateEntrustInfos(entrustEntity);
         /**

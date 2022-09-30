@@ -65,6 +65,10 @@ public class TestDetectionController {
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
+        // 委托单144 则不能执行任务单
+        if(taskService.judgeTaskStatus(sampleItemInstrumentVo.getTaskId())){
+            return ResultUtil.error(678, "开始试验失败！任务单已废弃！！！");
+        }
         if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),sampleItemInstrumentVo.getTaskId())==false){
             return ResultUtil.error("登录人没有被派发检测资格");
         }
@@ -100,6 +104,10 @@ public class TestDetectionController {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
+        }
+        // 委托单144 则不能执行任务单
+        if(taskService.judgeTaskStatus(sampleItemInstrumentVo.getTaskId())){
+            return ResultUtil.error(678, "结束试验失败！任务单已废弃！！！");
         }
         if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),sampleItemInstrumentVo.getTaskId())==false){
             return ResultUtil.error("登录人没有被派发检测资格");

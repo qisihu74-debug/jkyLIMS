@@ -217,4 +217,9 @@ public interface TaskService {
      * @return
      */
     PagingToolVo getTaskList(TaskListParamVo paramVo, String [] deptIds);
+
+    /**
+     * 根据任务单id 判断 委托状态不等于 144
+     */
+    Boolean judgeTaskStatus(Long id);
 }
