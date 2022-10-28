@@ -1,14 +1,6 @@
 package com.lims.manage.erp.crm;
 
-import com.lims.manage.erp.entity.ImagePro;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SysFunction;
-import com.lims.manage.erp.util.ImageToPdfUtils;
-import com.lims.manage.erp.vo.EntrustAddVo;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.Random;
 
 /**
  * @author gjl
@@ -19,16 +11,26 @@ import java.util.List;
  * @Copyright © 河南交科院
  */
 public class TST {
-    public static void main(String[] args) {
-        try {
-            //ImageToPdfUtils.insertImageToPdf("D:\\AAAct\\ZX-2021-SW-1471.pdf","D:\\AAAct\\tupian.pdf","D:\\AAAct\\tupian.jpg");
-            List<ImagePro> imagePros = new ArrayList<>();
-            imagePros.add(new ImagePro(130, 48, 15, "D:\\\\AAAct\\\\tupian.jpg"));
-            ImageToPdfUtils.writeToPdf("D:\\AAAct\\ZX-2021-SW-1471.pdf","D:\\AAAct\\tupian.pdf",imagePros);
-        }catch (Exception e){
-            System.out.println("图片导入pdf成功!");
+    public static void main(String[] args) throws Exception {
+        for (int i =0;i<100;i++){
+           System.out.println("============: "+genRandomNum());
         }
+    }
 
-
+    public static String genRandomNum() {
+        int maxNum = 36;
+        int i;
+        int count = 0;
+        char[] str = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+        StringBuffer pwd = new StringBuffer("");
+        Random r = new Random();
+        while (count < 8) {
+            i = Math.abs(r.nextInt(maxNum));
+            if (i >= 0 && i < str.length) {
+                pwd.append(str[i]);
+                count++;
+            }
+        }
+        return pwd.toString();
     }
 }

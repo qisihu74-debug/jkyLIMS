@@ -1,6 +1,9 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.aspose.words.Document;
+import com.aspose.words.ImportFormatMode;
+import com.aspose.words.SaveFormat;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
@@ -20,7 +23,11 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.util.*;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.CheckItemDeptVo;
 import com.lims.manage.erp.vo.CheckItemParamVo;
 import com.lims.manage.erp.vo.ClientOrderdetailVo;
@@ -52,11 +59,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -835,9 +845,31 @@ public class EntrustController {
         String fileName = strings[1];
         //获取所有符合条件的委托单id
         List<EntrustAddVo> list = entrustEntityMapper.getAllEntrustIdBySearch();
+        List<EntrustAddVo> list1 = Lists.newArrayList();
         for (EntrustAddVo bean:list) {
+            int intValue = bean.getEntrustmentNo().intValue();
+            if (intValue >= 202207001){
+                if (intValue < 2022070060){
+                    list1.add(bean);
+                }
+            }
+        }
+
+        List<EntrustAddVo> noList = Lists.newArrayList();
+        List<EntrustAddVo> yesList = Lists.newArrayList();
+        for (EntrustAddVo bean:list1) {
+            if (bean.getState() == 0){
+                noList.add(bean);
+            }else {
+                if (StringUtils.isEmpty(bean.getEntrustCategoryType())){
+                    yesList.add(bean);
+                }
+
+            }
+        }
+        /*for (EntrustAddVo bean:noList) {
+            String path = "D:\\AAno\\"+bean.getEntrustmentNo()+".docx";
             try {
-                String path = "D:\\AAEntrust\\"+bean.getEntrustmentNo()+".docx";
                 FileOutputStream outputStream = new FileOutputStream(path);
                 MinioClient client = MinIoUtil.minioClient;
                 InputStream object = client.getObject(strings[0], fileName);
@@ -846,10 +878,71 @@ public class EntrustController {
                 XWPFDocument document = entrustService.downloadEntrust(detail, object);
                 document.write(outputStream);
                 outputStream.close();
-                Thread.sleep(100);
+                Thread.sleep(10);
+            } catch (Exception ex) {
+                log.info("导出失败：{}", ex);
+            }
+        }*/
+        for (EntrustAddVo bean:yesList) {
+            String path = "D:\\AAnono\\"+bean.getEntrustmentNo()+".docx";
+            try {
+                FileOutputStream outputStream = new FileOutputStream(path);
+                MinioClient client = MinIoUtil.minioClient;
+                InputStream object = client.getObject(strings[0], fileName);
+                //填充数据
+                EntrustAddVo detail = entrustService.getEntrustHistoryDetail(bean.getId());
+                XWPFDocument document = entrustService.downloadEntrust(detail, object);
+                document.write(outputStream);
+                outputStream.close();
+                Thread.sleep(20);
             } catch (Exception ex) {
                 log.info("导出失败：{}", ex);
             }
         }
+    }
+
+    @GetMapping("merge")
+    public void mergeDoc(){
+        List<File> fileList = getAllFiles("D:\\AAnono");
+        try{
+            Document doc3 = new Document();
+            FileOutputStream fos = new FileOutputStream(new File("D:\\Merge\\merge.docx"));
+            doc3.removeAllChildren();
+            for (File file:fileList) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                Document document = new Document(fileInputStream);
+                doc3.appendDocument(document,ImportFormatMode.USE_DESTINATION_STYLES);
+            }
+            doc3.save(fos, SaveFormat.DOCX);
+            log.info("委托单合并完成");
+            fos.close();
+        }catch(Exception e){
+            log.error("合并委托单失败：{}",e);
+        }
+    }
+
+    /**
+     * 列出目录下的所有文件.
+     * @param path
+     * @return
+     */
+
+    private static List<File> getAllFiles(String path) {
+        List<File> files = new ArrayList<File>();
+        if (!StringUtils.isNotEmpty(path)) {
+            return files;
+        }
+        File root = new File(path);
+        if (root.exists()) {
+            if (root.isDirectory()) {
+                File[] childFiles = root.listFiles();
+                for (File childFile : childFiles) {
+                    files.addAll(getAllFiles(childFile.getAbsolutePath()));
+                }
+            } else {
+                files.add(root);
+            }
+        }
+        return files;
     }
 }
