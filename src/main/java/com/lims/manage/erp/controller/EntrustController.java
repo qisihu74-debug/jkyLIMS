@@ -945,4 +945,14 @@ public class EntrustController {
         }
         return files;
     }
+
+    /**
+     * 委托创建、修改、再来一单 （提供部门信息来源接口 ）
+     *
+     * @return
+     */
+    @GetMapping("get_issue_dept")
+    public Result getIssueDept() {
+        return ResultUtil.success(entrustEntityMapper.getIssueDept());
+    }
 }

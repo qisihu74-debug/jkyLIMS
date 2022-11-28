@@ -113,6 +113,10 @@ public class EntrustAddVo {
      */
     private Integer team;
     /**
+     * 任务接收团队Name
+     */
+    private String teamName;
+    /**
      * 状态
      */
     private Integer state;
