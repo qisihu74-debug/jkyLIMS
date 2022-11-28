@@ -560,4 +560,34 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Select("select DISTINCT id As id,entrustment_no As entrustmentNo,state As state from test_entrusted_info WHERE state != 144")
     List<EntrustAddVo> getAllEntrustIdBySearch();
+
+    /**
+     * 查询顶级部门
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid as value,\n" +
+            "\tname as label\n" +
+            "FROM\n" +
+            "\ttest_team \n" +
+            "WHERE\n" +
+            "\tpid = 0 \n" +
+            "\tAND del_flag =0")
+    List<LabelValueVo> getIssueDept();
+
+    /**
+     * 查询部门名称
+     * @param deptId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid as value,\n" +
+            "\tname as label\n" +
+            "FROM\n" +
+            "\ttest_team \n" +
+            "WHERE\n" +
+            "\tid = #{deptId}\n" +
+            "LIMIT 1\t\n" +
+            "\t")
+    LabelValueVo getIssueDeptById(@Param("deptId") Integer deptId);
 }

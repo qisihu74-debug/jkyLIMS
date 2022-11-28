@@ -76,4 +76,8 @@ public class JudgmentBasisVo {
      * 任务ID
      */
     private Long taskId;
+    /**
+     * 详情检测项-展示推荐团队
+     */
+    private Integer recommendTheTeam;
 }

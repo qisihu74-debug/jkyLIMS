@@ -1703,6 +1703,11 @@ public class EntrustServiceImpl implements EntrustService {
         List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
+        // 查询团队名称
+        if(entrustAddVo.getTeam() != null){
+            LabelValueVo team = entityMapper.getIssueDeptById(entrustAddVo.getTeam());
+            entrustAddVo.setTeamName(team.getLabel());
+        }
         //查询实际缴费
         String total = entityMapper.getRecordCountById(entrustmentId);
         if(total!=null&&total.length()>0){
@@ -2121,6 +2126,25 @@ public class EntrustServiceImpl implements EntrustService {
                             }
                         }
                         data.setTestingRoomList(testingRoomList);
+                        // 委托单有：任务接收团队
+                        if(entrustAddVo.getTeam()!=null){
+                            List<TestTeam> testTeams = new ArrayList<>();
+                            // 检测项下 团队pid == entrustAddVo.getTeam() && 唯一 则存储
+                            if(!CollectionUtils.isEmpty(testingRoomInfoList)){
+                                for(TestTeam testTeam : testingRoomInfoList){
+                                    if(testTeam.getPid().equals(entrustAddVo.getTeam())){
+                                        testTeams.add(testTeam);
+                                    }
+                                }
+                            }
+                            // 检测项 推荐团队 唯一则存储
+                            if(!CollectionUtils.isEmpty(testTeams)&&testTeams.size()==1){
+                                data.setRecommendTheTeam(testTeams.get(0).getId());
+                            }
+                            else {
+                                data.setRecommendTheTeam(null);
+                            }
+                        }
                         allTestRoom.addAll(testingRoomList);
                     }
                 }
