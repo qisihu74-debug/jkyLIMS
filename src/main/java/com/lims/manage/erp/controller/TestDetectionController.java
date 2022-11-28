@@ -45,6 +45,21 @@ public class TestDetectionController {
     }
 
     /**
+     * 查询设备使用人下拉列表
+     * @return
+     */
+    @RequestMapping("getDeviceUser")
+    public Result getDeviceUser() {
+        if (ShiroUtils.getUserInfo() != null) {
+            //设备使用人
+            List<LabelValueVo> deviceUser = taskService.getDeviceUser(ShiroUtils.getUserInfo().getUserId());
+            return ResultUtil.success(deviceUser);
+        }
+        return ResultUtil.error(502, "token过期！");
+    }
+
+
+    /**
      * 检测项 选择仪器集合
      * @param
      * @return

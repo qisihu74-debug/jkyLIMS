@@ -222,4 +222,11 @@ public interface TaskService {
      * 根据任务单id 判断 委托状态不等于 144
      */
     Boolean judgeTaskStatus(Long id);
+
+    /**
+     * 查询设备仪器使用人下拉列表
+     * @param userId
+     * @return
+     */
+    List<LabelValueVo> getDeviceUser(Long userId);
 }
