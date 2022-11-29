@@ -348,7 +348,7 @@ public class SampleServiceImpl implements SampleService {
                     //设置二维码
                     BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(sampleDetailVo.getId() + "");
                     InputStream stream = bufferedImageToInputStream(bufferedImage);
-                    worksheet.getPictures().add(5,1,stream,30,30);
+                    worksheet.getPictures().add(5,3,stream,30,30);
                     //合并sheet
                     Worksheet worksheetS = newBook.getWorksheets().add(list.get(i));
                     worksheetS.copy(worksheet);
@@ -368,7 +368,7 @@ public class SampleServiceImpl implements SampleService {
                     //设置二维码
                     BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(sampleDetailVoList.get(i).getId() + "");
                     InputStream stream = bufferedImageToInputStream(bufferedImage);
-                    worksheet.getPictures().add(5,1,stream,30,30);
+                    worksheet.getPictures().add(5,3,stream,30,30);
                     //合并sheet
                     Worksheet worksheetS = newBook.getWorksheets().add(sampleDetailVoList.get(i).getSampleCode());
                     worksheetS.copy(worksheet);
