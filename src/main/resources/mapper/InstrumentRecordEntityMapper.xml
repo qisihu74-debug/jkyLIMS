@@ -174,4 +174,63 @@
             time          = #{time,jdbcType=TIMESTAMP}
         where id = #{id,jdbcType=BIGINT}
     </update>
+
+    <select id="getInstrumentRecordByTime" resultType="com.lims.manage.erp.vo.InstrumentRecordVo"
+            parameterType="com.lims.manage.erp.vo.DeviceUseTimeVo">
+        SELECT t3.task_code,
+               t1.start_time,
+               t1.end_time
+        FROM test_instrument_use_record t1
+                 LEFT JOIN test_entrusted_sample_checkitem_rel t2 ON t1.esc_rel_id = t2.id
+                 LEFT JOIN test_task t3 ON t2.task_id = t3.id
+        WHERE t1.instrument_id = #{deviceId}
+          AND t1.end_time >= STR_TO_DATE(#{startTime}, '%Y-%m-%d %H:%i:%s')
+        ORDER BY t1.start_time
+    </select>
+
+    <select id="checkTime" resultMap="BaseResultMap"
+            parameterType="com.lims.manage.erp.vo.DeviceUseTimeVo">
+        SELECT id,
+               instrument_id,
+               esc_rel_id,
+               type,
+               start_time,
+               end_time,
+               temperature,
+               humidity,
+               before_status,
+               after_status,
+               USER,
+            time
+        FROM
+            test_instrument_use_record t1
+        WHERE
+            t1.instrument_id = #{deviceId}
+          AND t1.start_time &lt; STR_TO_DATE( #{startTime}
+            , '%Y-%m-%d %H:%i:%s' )
+          AND t1.end_time &gt; STR_TO_DATE( #{startTime}
+            , '%Y-%m-%d %H:%i:%s' )
+        UNION ALL
+        SELECT id,
+               instrument_id,
+               esc_rel_id,
+               type,
+               start_time,
+               end_time,
+               temperature,
+               humidity,
+               before_status,
+               after_status,
+               USER,
+            time
+        FROM
+            test_instrument_use_record t1
+        WHERE
+            t1.instrument_id = #{deviceId}
+          AND t1.start_time &lt; STR_TO_DATE( #{endTime}
+            , '%Y-%m-%d %H:%i:%s' )
+          AND t1.end_time &gt; STR_TO_DATE( #{endTime}
+            , '%Y-%m-%d %H:%i:%s' )
+    </select>
+
 </mapper>

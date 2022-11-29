@@ -1,12 +1,12 @@
 package com.lims.manage.erp.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.InstrumentEntity;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
@@ -153,7 +153,12 @@ public class TestDetectionController {
         return ResultUtil.error(204, "检测项状态改变失败");
     }
 
-
-
-
+    @RequestMapping("/checkDeviceUseTime")
+    public Result checkDeviceUseTime(@RequestBody DeviceUseTimeVo vo) {
+        if (vo == null || vo.getStartTime() == null || vo.getEndTime() == null || vo.getDeviceId() == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        DeviceUseTimeVo vo1 = testDetectionService.checkDeviceUseTime(vo);
+        return ResultUtil.success(vo1);
+    }
 }

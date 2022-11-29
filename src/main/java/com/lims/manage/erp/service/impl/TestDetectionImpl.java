@@ -1,24 +1,20 @@
 package com.lims.manage.erp.service.impl;
 
 import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.InstrumentRecordEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestDetectionDao;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestDetectionService;
 import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.SampleItemInstrumentVo;
-import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -36,6 +32,8 @@ public class TestDetectionImpl implements TestDetectionService {
     TaskMapper taskMapper;
     @Autowired
     private LogManagerService logManagerService;
+    @Autowired
+    private InstrumentRecordEntityMapper instrumentRecordEntityMapper;
 
 
     @Override
@@ -285,6 +283,51 @@ public class TestDetectionImpl implements TestDetectionService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public DeviceUseTimeVo checkDeviceUseTime(DeviceUseTimeVo vo) {
+        DeviceUseTimeVo result = new DeviceUseTimeVo();
+        //校验时间是否冲突
+        List<InstrumentRecordEntity> instrumentRecordVos = instrumentRecordEntityMapper.checkTime(vo);
+        if(CollectionUtils.isEmpty(instrumentRecordVos)){//不冲突
+            result.setFlag(true);
+        }else{//冲突
+            //本次仪器需用时间（秒）
+            long diffSecond = (vo.getEndTime().getTime() - vo.getStartTime().getTime())/1000;
+            List<InstrumentRecordVo> instrumentRecords = instrumentRecordEntityMapper.getInstrumentRecordByTime(vo);
+            if(!CollectionUtils.isEmpty(instrumentRecords)){
+                for (int i = 0; i < instrumentRecords.size(); i++) {
+                    InstrumentRecordVo nearRecord = instrumentRecords.get(i);
+                    //最接近本次开始时间的使用记录结束时间
+                    Date lastEndTime = nearRecord.getEndTime();
+                    //判断是否是最后一条记录
+                    if(i != instrumentRecords.size() -1){
+                        //不是最后一条记录，查询下条记录的开始时间，判断中间的时间间隔能否满足
+                        InstrumentRecordVo nextRecord = instrumentRecords.get(i + 1);
+                        //可用时间间隔（秒）
+                        long timeInterval = (nextRecord.getStartTime().getTime() - lastEndTime.getTime()) / 1000;
+                        //可用时间间隔>=本次仪器需用时间
+                        if(timeInterval >= diffSecond){
+                            result.setStartTime(lastEndTime);
+                            long l = lastEndTime.getTime() + diffSecond * 1000;
+                            Date endTime = new Date(l);
+                            result.setEndTime(endTime);
+                            break;
+                        }
+                    }else{
+                        //是最后一条记录，直接在结束时间后加上本次所需时间
+                        result.setStartTime(lastEndTime);
+                        long l = lastEndTime.getTime() + diffSecond * 1000;
+                        Date endTime = new Date(l);
+                        result.setEndTime(endTime);
+                    }
+                }
+            }
+            result.setFlag(false);
+            result.setInstrumentRecords(instrumentRecords);
+        }
+        return result;
     }
 
 }
