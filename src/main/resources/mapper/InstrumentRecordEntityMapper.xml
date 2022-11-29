@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lims.manage.erp.mapper.InstrumentRecordEntityMapper">
+    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.InstrumentRecordEntity">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="instrument_id" property="instrumentId" jdbcType="BIGINT"/>
+        <result column="esc_rel_id" property="escRelId" jdbcType="BIGINT"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="start_time" property="startTime" jdbcType="TIMESTAMP"/>
+        <result column="end_time" property="endTime" jdbcType="TIMESTAMP"/>
+        <result column="temperature" property="temperature" jdbcType="VARCHAR"/>
+        <result column="humidity" property="humidity" jdbcType="VARCHAR"/>
+        <result column="before_status" property="beforeStatus" jdbcType="VARCHAR"/>
+        <result column="after_status" property="afterStatus" jdbcType="VARCHAR"/>
+        <result column="user" property="user" jdbcType="VARCHAR"/>
+        <result column="time" property="time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , instrument_id, esc_rel_id, type, start_time, end_time, temperature, humidity,
+    before_status, after_status, user, time
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from test_instrument_use_record
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from test_instrument_use_record
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.lims.manage.erp.entity.InstrumentRecordEntity">
+        insert into test_instrument_use_record (id, instrument_id, esc_rel_id,
+                                                type, start_time, end_time,
+                                                temperature, humidity, before_status,
+                                                after_status, user, time)
+        values (#{id,jdbcType=BIGINT}, #{instrumentId,jdbcType=BIGINT}, #{escRelId,jdbcType=BIGINT},
+                #{type,jdbcType=VARCHAR}, #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP},
+                #{temperature,jdbcType=VARCHAR}, #{humidity,jdbcType=VARCHAR}, #{beforeStatus,jdbcType=VARCHAR},
+                #{afterStatus,jdbcType=VARCHAR}, #{user,jdbcType=VARCHAR}, #{time,jdbcType=TIMESTAMP})
+    </insert>
+    <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.InstrumentRecordEntity">
+        insert into test_instrument_use_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="instrumentId != null">
+                instrument_id,
+            </if>
+            <if test="escRelId != null">
+                esc_rel_id,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="startTime != null">
+                start_time,
+            </if>
+            <if test="endTime != null">
+                end_time,
+            </if>
+            <if test="temperature != null">
+                temperature,
+            </if>
+            <if test="humidity != null">
+                humidity,
+            </if>
+            <if test="beforeStatus != null">
+                before_status,
+            </if>
+            <if test="afterStatus != null">
+                after_status,
+            </if>
+            <if test="user != null">
+                user,
+            </if>
+            <if test="time != null">
+                time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="instrumentId != null">
+                #{instrumentId,jdbcType=BIGINT},
+            </if>
+            <if test="escRelId != null">
+                #{escRelId,jdbcType=BIGINT},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null">
+                #{startTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                #{endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="temperature != null">
+                #{temperature,jdbcType=VARCHAR},
+            </if>
+            <if test="humidity != null">
+                #{humidity,jdbcType=VARCHAR},
+            </if>
+            <if test="beforeStatus != null">
+                #{beforeStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="afterStatus != null">
+                #{afterStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="user != null">
+                #{user,jdbcType=VARCHAR},
+            </if>
+            <if test="time != null">
+                #{time,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.InstrumentRecordEntity">
+        update test_instrument_use_record
+        <set>
+            <if test="instrumentId != null">
+                instrument_id = #{instrumentId,jdbcType=BIGINT},
+            </if>
+            <if test="escRelId != null">
+                esc_rel_id = #{escRelId,jdbcType=BIGINT},
+            </if>
+            <if test="type != null">
+                type = #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null">
+                start_time = #{startTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                end_time = #{endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="temperature != null">
+                temperature = #{temperature,jdbcType=VARCHAR},
+            </if>
+            <if test="humidity != null">
+                humidity = #{humidity,jdbcType=VARCHAR},
+            </if>
+            <if test="beforeStatus != null">
+                before_status = #{beforeStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="afterStatus != null">
+                after_status = #{afterStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="user != null">
+                user = #{user,jdbcType=VARCHAR},
+            </if>
+            <if test="time != null">
+                time = #{time,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.InstrumentRecordEntity">
+        update test_instrument_use_record
+        set instrument_id = #{instrumentId,jdbcType=BIGINT},
+            esc_rel_id    = #{escRelId,jdbcType=BIGINT},
+            type          = #{type,jdbcType=VARCHAR},
+            start_time    = #{startTime,jdbcType=TIMESTAMP},
+            end_time      = #{endTime,jdbcType=TIMESTAMP},
+            temperature   = #{temperature,jdbcType=VARCHAR},
+            humidity      = #{humidity,jdbcType=VARCHAR},
+            before_status = #{beforeStatus,jdbcType=VARCHAR},
+            after_status  = #{afterStatus,jdbcType=VARCHAR},
+            user          = #{user,jdbcType=VARCHAR},
+            time          = #{time,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="getInstrumentRecordByTime" resultType="com.lims.manage.erp.vo.InstrumentRecordVo"
+            parameterType="com.lims.manage.erp.vo.DeviceUseTimeVo">
+        SELECT t3.task_code,
+               t1.start_time,
+               t1.end_time
+        FROM test_instrument_use_record t1
+                 LEFT JOIN test_entrusted_sample_checkitem_rel t2 ON t1.esc_rel_id = t2.id
+                 LEFT JOIN test_task t3 ON t2.task_id = t3.id
+        WHERE t1.instrument_id = #{deviceId}
+          AND t1.end_time >= STR_TO_DATE(#{startTime}, '%Y-%m-%d %H:%i:%s')
+        ORDER BY t1.start_time
+    </select>
+
+    <select id="checkTime" resultMap="BaseResultMap"
+            parameterType="com.lims.manage.erp.vo.DeviceUseTimeVo">
+        SELECT id,
+               instrument_id,
+               esc_rel_id,
+               type,
+               start_time,
+               end_time,
+               temperature,
+               humidity,
+               before_status,
+               after_status,
+               USER,
+            time
+        FROM
+            test_instrument_use_record t1
+        WHERE
+            t1.instrument_id = #{deviceId}
+          AND t1.start_time &lt; STR_TO_DATE( #{startTime}
+            , '%Y-%m-%d %H:%i:%s' )
+          AND t1.end_time &gt; STR_TO_DATE( #{startTime}
+            , '%Y-%m-%d %H:%i:%s' )
+        UNION ALL
+        SELECT id,
+               instrument_id,
+               esc_rel_id,
+               type,
+               start_time,
+               end_time,
+               temperature,
+               humidity,
+               before_status,
+               after_status,
+               USER,
+            time
+        FROM
+            test_instrument_use_record t1
+        WHERE
+            t1.instrument_id = #{deviceId}
+          AND t1.start_time &lt; STR_TO_DATE( #{endTime}
+            , '%Y-%m-%d %H:%i:%s' )
+          AND t1.end_time &gt; STR_TO_DATE( #{endTime}
+            , '%Y-%m-%d %H:%i:%s' )
+    </select>
+
+</mapper>

@@ -1572,6 +1572,37 @@ public class TaskServiceImpl implements TaskService {
       return  taskMapper.judgeTaskStatus(id);
     }
 
+    @Override
+    public List<LabelValueVo> getDeviceUser(Long userId) {
+        // 获取当前用户所在科室id
+        Long department = teamMapper.getTeamIdByUid(userId);
+        // 获取顶级部门 为空则是当前部门
+        Long topDepartment = this.getTopDepartment(department);
+        if(StringUtils.isEmpty(topDepartment)){
+            topDepartment = department;
+        }
+        // 获取团队下所有子集团队下技术人员集合
+        List<TestTeam> testTeamList = teamMapper.getIdsByTeamId(topDepartment);
+        List<LabelValueVo> teamVos = Lists.newArrayList();
+        if(CollectionUtils.isEmpty(testTeamList)){
+            // 团队id集合 返回人员信息
+            Set<Long> deptIds = new HashSet<>();
+            deptIds.add(topDepartment);
+            List<LabelValueVo> teamVos0 = taskMapper.getMemberInformation(deptIds);
+            return teamVos0;
+        } else {
+            for(TestTeam testTeam:testTeamList) {
+                if(!StringUtils.isEmpty(testTeam)){
+                    LabelValueVo labelValueVo = new LabelValueVo();
+                    labelValueVo.setLabel(testTeam.getName());
+                    labelValueVo.setValue(testTeam.getUserId());
+                    teamVos.add(labelValueVo);
+                }
+            }
+            return teamVos;
+        }
+    }
+
     /**
      * 如果原始记录文件不为空 塞数据
      */

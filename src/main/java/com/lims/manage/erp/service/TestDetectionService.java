@@ -1,10 +1,10 @@
 package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.entity.InstrumentEntity;
-import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.vo.SampleItemInstrumentVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.DeviceUseTimeVo;
 
 import java.util.List;
 
@@ -63,4 +63,11 @@ public interface TestDetectionService {
      * 依据检测项id 变成 复核
      */
     Boolean Postreview(Integer itemId);
+
+    /**
+     * 校验设备使用时间
+     * @param vo
+     * @return
+     */
+    DeviceUseTimeVo checkDeviceUseTime(DeviceUseTimeVo vo);
 }
