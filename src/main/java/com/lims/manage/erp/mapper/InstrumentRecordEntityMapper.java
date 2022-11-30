@@ -2,6 +2,8 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.InstrumentRecordEntity;
 import com.lims.manage.erp.vo.DeviceUseTimeVo;
+import com.lims.manage.erp.vo.InstrumentRecordListVo;
+import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.InstrumentRecordVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
@@ -37,4 +39,18 @@ public interface InstrumentRecordEntityMapper {
      * @return
      */
     List<InstrumentRecordEntity> checkTime(DeviceUseTimeVo vo);
+
+    /**
+     * 查询设备仪器使用记录
+     * @param paramVo
+     * @return
+     */
+    List<InstrumentRecordListVo> getInstrumentRecord(InstrumentRecordParamVo paramVo);
+
+    /**
+     * 获取设备的code,name,model
+     * @param instrumentId
+     * @return
+     */
+    String getInstrumentInfo(Long instrumentId);
 }
