@@ -46,4 +46,11 @@ public interface InstrumentRecordEntityMapper {
      * @return
      */
     List<InstrumentRecordListVo> getInstrumentRecord(InstrumentRecordParamVo paramVo);
+
+    /**
+     * 获取设备的code,name,model
+     * @param instrumentId
+     * @return
+     */
+    String getInstrumentInfo(Long instrumentId);
 }

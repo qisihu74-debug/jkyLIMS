@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
+import com.google.common.collect.Maps;
 import com.itextpdf.text.io.StreamUtil;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrumentAppraisalRecord;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -174,6 +176,16 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         List<InstrumentRecordListVo> instrumentRecord = instrumentRecordEntityMapper.getInstrumentRecord(paramVo);
         PageInfo<InstrumentRecordListVo> pageInfo = new com.github.pagehelper.PageInfo<>(instrumentRecord);
         return pageInfo;
+    }
+
+    @Override
+    public HashMap<String,Object> exportInstrumentRecord(InstrumentRecordParamVo paramVo) {
+        HashMap<String,Object> result = Maps.newHashMap();
+        List<InstrumentRecordListVo> instrumentRecord = instrumentRecordEntityMapper.getInstrumentRecord(paramVo);
+        result.put("recordList",instrumentRecord);
+        String instrumentInfo = instrumentRecordEntityMapper.getInstrumentInfo(paramVo.getInstrumentId());
+        result.put("deviceInfo",instrumentInfo);
+        return result;
     }
 }
 

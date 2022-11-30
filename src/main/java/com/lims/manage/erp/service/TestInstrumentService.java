@@ -8,10 +8,12 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.entity.TestLaboratory;
 import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.vo.InstrumentRecordListVo;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -32,5 +34,12 @@ public interface TestInstrumentService extends IService<TestInstrument> {
      * @return
      */
     PageInfo getInstrumentRecord(InstrumentRecordParamVo paramVo);
+
+    /**
+     * 导出单个设备的使用记录
+     * @param paramVo
+     * @return
+     */
+    HashMap<String,Object> exportInstrumentRecord(InstrumentRecordParamVo paramVo);
 }
 

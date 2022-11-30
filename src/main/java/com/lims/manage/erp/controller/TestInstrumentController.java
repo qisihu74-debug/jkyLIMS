@@ -15,15 +15,30 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestInstrumentService;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -138,6 +153,29 @@ public class TestInstrumentController extends ApiController {
         }
         PageInfo instrumentRecord = testInstrumentService.getInstrumentRecord(paramVo);
         return ResultUtil.success(instrumentRecord);
+    }
+
+    @PostMapping("/exportInstrumentRecord")
+    public void exportInstrumentRecord(@RequestBody InstrumentRecordParamVo paramVo, HttpServletResponse response) {
+        HashMap<String, Object> stringObjectHashMap = testInstrumentService.exportInstrumentRecord(paramVo);
+        XLSTransformer transformer = new XLSTransformer();
+        InputStream fileStream = MinIoUtil.getFileStream("device-record", "record.xls");
+        Workbook workbook;
+        try {
+            workbook = transformer.transformXLS(fileStream, stringObjectHashMap);
+            workbook.setSheetName(0,stringObjectHashMap.get("deviceInfo").toString()+"使用记录");
+            response.reset();
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("UTF-8");
+            String fileName = URLEncoder.encode(stringObjectHashMap.get("deviceInfo")+"使用记录.xlsx", "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
+            OutputStream outputStream = response.getOutputStream();
+            workbook.write(outputStream);
+            outputStream.close();
+        } catch (IOException | InvalidFormatException e) {
+            e.printStackTrace();
+        }
     }
 }
 
