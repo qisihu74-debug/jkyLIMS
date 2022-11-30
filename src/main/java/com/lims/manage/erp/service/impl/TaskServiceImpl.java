@@ -1205,8 +1205,8 @@ public class TaskServiceImpl implements TaskService {
                 sampleItemInstrumentEntity.setFileUrlStr(null);
                 sampleItemInstrumentEntity.setEndTime(null);
                 testDetectionDao.updateTaskPassorno(sampleItemInstrumentEntity);
-                // 删除设备仪器
-                testDetectionDao.deleteInstrument(itemId);
+                // 撤回后保留设备仪器
+                //testDetectionDao.deleteInstrument(itemId);
                 //记录日志
                 StringBuilder stringBuilder1 = new StringBuilder();
                 stringBuilder1.append(" 检测项id"+sampleItemInstrumentEntity.getItemId());
@@ -1214,7 +1214,7 @@ public class TaskServiceImpl implements TaskService {
                 stringBuilder1.append(" 检测项开始时间清除:");
                 stringBuilder1.append(" 检测项结束时间清除:");
                 stringBuilder1.append(" 检测项描述信息:"+sampleItemInstrumentEntity.getOpinion());
-                stringBuilder1.append(" 删除设备仪器记录:");
+                //stringBuilder1.append(" 删除设备仪器记录:");
                 logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-驳回\n\t"+stringBuilder1.toString(), Const.TASK_TEST, true);
                 return "撤回成功，检测项回到初始状态";
             }
