@@ -7,12 +7,15 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.entity.TestInstrumentType;
 import com.lims.manage.erp.entity.TestLaboratory;
 import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestInstrumentService;
+import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -125,6 +129,15 @@ public class TestInstrumentController extends ApiController {
         }else {
             return ResultUtil.error("数据为空");
         }
+    }
+
+    @PostMapping("/getInstrumentRecord")
+    public Result getInstrumentRecord(@RequestBody InstrumentRecordParamVo paramVo) {
+        if (paramVo == null || paramVo.getPageNum() == null || paramVo.getPageSize() == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        PageInfo instrumentRecord = testInstrumentService.getInstrumentRecord(paramVo);
+        return ResultUtil.success(instrumentRecord);
     }
 }
 

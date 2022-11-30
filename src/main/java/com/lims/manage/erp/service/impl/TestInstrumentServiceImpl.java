@@ -1,15 +1,18 @@
 package com.lims.manage.erp.service.impl;
-
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
 import com.itextpdf.text.io.StreamUtil;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrumentAppraisalRecord;
 import com.lims.manage.erp.entity.TestLaboratory;
+import com.lims.manage.erp.mapper.InstrumentRecordEntityMapper;
 import com.lims.manage.erp.mapper.TestInstrumentDao;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.result.Result;
@@ -17,7 +20,10 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.InstrumentRecordListVo;
+import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -41,6 +47,8 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
     private LogManagerService logManagerService;
     @Resource
     private TestInstrumentAppraisalRecordService testInstrumentAppraisalRecordService;
+    @Autowired
+    private InstrumentRecordEntityMapper instrumentRecordEntityMapper;
 
     @Resource
     private SysOssService sysOssService;
@@ -157,6 +165,15 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
     @Override
     public IPage<TestInstrumentVo> getPageList(Page<TestInstrumentVo> page, QueryWrapper<TestInstrument> queryWrapper) {
         return testInstrumentDao.getPageList(page,queryWrapper);
+    }
+
+    @Override
+    public PageInfo getInstrumentRecord(InstrumentRecordParamVo paramVo) {
+        PageHelper.clearPage();
+        PageHelper.startPage(paramVo.getPageNum(),paramVo.getPageSize());
+        List<InstrumentRecordListVo> instrumentRecord = instrumentRecordEntityMapper.getInstrumentRecord(paramVo);
+        PageInfo<InstrumentRecordListVo> pageInfo = new com.github.pagehelper.PageInfo<>(instrumentRecord);
+        return pageInfo;
     }
 }
 
