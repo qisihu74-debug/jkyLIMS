@@ -45,8 +45,14 @@ public class TestSampleEntity {
     private String sampleRequirement;
 
     private String generation;
-
+    /**
+     * 样品状态：待检0；领样1；在检2；已检3；
+     */
     private String state;
+    /**
+     * 是否留样1.保留2.处置
+     */
+    private String isSave;
 
     private Date checkDate;
 
