@@ -133,7 +133,7 @@ public class TestInstrumentController extends ApiController {
 
     @PostMapping("/getInstrumentRecord")
     public Result getInstrumentRecord(@RequestBody InstrumentRecordParamVo paramVo) {
-        if (paramVo == null || paramVo.getPageNum() == null || paramVo.getPageSize() == null) {
+        if (paramVo == null || paramVo.getPageNum() == null || paramVo.getPageSize() == null || paramVo.getInstrumentId() == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }
         PageInfo instrumentRecord = testInstrumentService.getInstrumentRecord(paramVo);

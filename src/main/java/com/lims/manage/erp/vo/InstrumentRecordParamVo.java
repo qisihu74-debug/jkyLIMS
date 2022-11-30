@@ -8,6 +8,7 @@ import java.util.Date;
 
 @Data
 public class InstrumentRecordParamVo {
+    private Long instrumentId;
     private String taskCode;
     private String instrumentCode;
     private String instrumentName;
