@@ -187,5 +187,21 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         result.put("deviceInfo",instrumentInfo);
         return result;
     }
+
+    @Override
+    public HashMap<String, Object> batchExportInstrumentRecord(List<Long> instrumentIds) {
+        HashMap<String, Object> result = Maps.newHashMap();
+        String key = "recordList";
+        String deviceInfo = "deviceInfo";
+        for (int i = 0; i < instrumentIds.size(); i++) {
+            InstrumentRecordParamVo paramVo = new InstrumentRecordParamVo();
+            paramVo.setInstrumentId(instrumentIds.get(i));
+            List<InstrumentRecordListVo> instrumentRecord = instrumentRecordEntityMapper.getInstrumentRecord(paramVo);
+            result.put(key+i,instrumentRecord);
+            String instrumentInfo = instrumentRecordEntityMapper.getInstrumentInfo(instrumentIds.get(i));
+            result.put(deviceInfo+i,instrumentInfo);
+        }
+        return result;
+    }
 }
 

@@ -1,16 +1,12 @@
 package com.lims.manage.erp.controller;
 
 
-
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.TestInstrument;
-import com.lims.manage.erp.entity.TestInstrumentType;
-import com.lims.manage.erp.entity.TestLaboratory;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -22,9 +18,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,9 +28,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URLEncoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,7 +39,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("testInstrument")
-@Api(value = "仪器设备管理",tags ={"仪器设备管理"})
+@Api(value = "仪器设备管理", tags = {"仪器设备管理"})
 public class TestInstrumentController extends ApiController {
     /**
      * 服务对象
@@ -59,25 +49,26 @@ public class TestInstrumentController extends ApiController {
 
     @GetMapping("/getList")
     public Result getAll(TestInstrument testInstrument) {
-        QueryWrapper<TestInstrument> queryWrapper=new QueryWrapper<>(testInstrument);
+        QueryWrapper<TestInstrument> queryWrapper = new QueryWrapper<>(testInstrument);
         queryWrapper.orderByDesc("create_time");
-        queryWrapper.eq("del_flag",0);
+        queryWrapper.eq("del_flag", 0);
         return ResultUtil.success(this.testInstrumentService.list(queryWrapper));
     }
+
     /**
      * 分页查询所有数据
      *
-     * @param page 分页对象
+     * @param page           分页对象
      * @param testInstrument 查询实体
      * @return 所有数据
      */
     @GetMapping("/list")
     @ApiOperation("分页查询仪器设备信息")
     public Result selectAll(Page<TestInstrumentVo> page, TestInstrument testInstrument) {
-        QueryWrapper<TestInstrument> queryWrapper=new QueryWrapper<>();
-        queryWrapper.eq("i.del_flag",0);
-        if (testInstrument.getName()!=null){
-            queryWrapper.like("i.name",testInstrument.getName());
+        QueryWrapper<TestInstrument> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("i.del_flag", 0);
+        if (testInstrument.getName() != null) {
+            queryWrapper.like("i.name", testInstrument.getName());
         }
         queryWrapper.orderByDesc("i.create_time");
         return ResultUtil.success(this.testInstrumentService.getPageList(page, queryWrapper));
@@ -92,10 +83,10 @@ public class TestInstrumentController extends ApiController {
     @GetMapping("{id}")
     @ApiOperation("根据ID查询仪器设备信息")
     public Result selectOne(@PathVariable Serializable id) {
-        if (id!=null&&id!=""){
-            TestInstrument testInstrument=this.testInstrumentService.getOne(new QueryWrapper<TestInstrument>().eq("id",id).eq("del_flag",0));
+        if (id != null && id != "") {
+            TestInstrument testInstrument = this.testInstrumentService.getOne(new QueryWrapper<TestInstrument>().eq("id", id).eq("del_flag", 0));
             return ResultUtil.success(testInstrument);
-        }else {
+        } else {
             return ResultUtil.error("参数为空");
         }
     }
@@ -109,7 +100,7 @@ public class TestInstrumentController extends ApiController {
     @PostMapping("/add")
     @ApiOperation("添加仪器设备")
     public Result insert(@RequestBody TestInstrument testInstrument) {
-        if (StrUtil.isEmptyIfStr(testInstrument)){
+        if (StrUtil.isEmptyIfStr(testInstrument)) {
             return ResultUtil.error("数据为空");
         }
         return this.testInstrumentService.addInstrument(testInstrument);
@@ -124,7 +115,7 @@ public class TestInstrumentController extends ApiController {
     @PostMapping("/edit")
     @ApiOperation("修改仪器设备")
     public Result update(@RequestBody TestInstrument testInstrument) {
-        if (StrUtil.isEmptyIfStr(testInstrument)){
+        if (StrUtil.isEmptyIfStr(testInstrument)) {
             return ResultUtil.error("数据为空");
         }
         return this.testInstrumentService.updInstrument(testInstrument);
@@ -139,9 +130,9 @@ public class TestInstrumentController extends ApiController {
     @PostMapping("/del")
     @ApiOperation("删除仪器设备")
     public Result delete(@RequestBody List<Long> idList) {
-        if (idList.size()!=0){
+        if (idList.size() != 0) {
             return this.testInstrumentService.delInstruments(idList);
-        }else {
+        } else {
             return ResultUtil.error("数据为空");
         }
     }
@@ -155,6 +146,12 @@ public class TestInstrumentController extends ApiController {
         return ResultUtil.success(instrumentRecord);
     }
 
+    /**
+     * 下载单个设备的使用记录
+     *
+     * @param paramVo
+     * @param response
+     */
     @PostMapping("/exportInstrumentRecord")
     public void exportInstrumentRecord(@RequestBody InstrumentRecordParamVo paramVo, HttpServletResponse response) {
         HashMap<String, Object> stringObjectHashMap = testInstrumentService.exportInstrumentRecord(paramVo);
@@ -163,12 +160,49 @@ public class TestInstrumentController extends ApiController {
         Workbook workbook;
         try {
             workbook = transformer.transformXLS(fileStream, stringObjectHashMap);
-            workbook.setSheetName(0,stringObjectHashMap.get("deviceInfo").toString()+"使用记录");
+            workbook.setSheetName(0, stringObjectHashMap.get("deviceInfo").toString() + "使用记录");
             response.reset();
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            String fileName = URLEncoder.encode(stringObjectHashMap.get("deviceInfo")+"使用记录.xlsx", "UTF-8");
+            String fileName = URLEncoder.encode(stringObjectHashMap.get("deviceInfo") + "使用记录.xlsx", "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
+            OutputStream outputStream = response.getOutputStream();
+            workbook.write(outputStream);
+            outputStream.close();
+        } catch (IOException | InvalidFormatException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 下载多个设备的使用记录
+     *
+     * @param list
+     * @param response
+     */
+    @GetMapping("/batchExportInstrumentRecord")
+    public void batchExportInstrumentRecord(@RequestParam("list") List<Long> list, HttpServletResponse response) {
+//    public void batchExportInstrumentRecord(String ids, HttpServletResponse response) {
+//        List<Long> list = Lists.newArrayList();
+//        String[] split = ids.split("-");
+//        for (int i = 0; i < split.length; i++) {
+//            list.add(Long.parseLong(split[i]));
+//        }
+        HashMap<String, Object> stringObjectHashMap = testInstrumentService.batchExportInstrumentRecord(list);
+        XLSTransformer transformer = new XLSTransformer();
+        InputStream fileStream = MinIoUtil.getFileStream("device-record", "records" + list.size() + ".xls");
+        Workbook workbook;
+        try {
+            workbook = transformer.transformXLS(fileStream, stringObjectHashMap);
+            for (int i = 0; i < list.size(); i++) {
+                workbook.setSheetName(i, stringObjectHashMap.get("deviceInfo" + i).toString() + "使用记录");
+            }
+            response.reset();
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("UTF-8");
+            String fileName = URLEncoder.encode(stringObjectHashMap.get("deviceInfo0") + "等仪器的使用记录.xlsx", "UTF-8");
             response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
             OutputStream outputStream = response.getOutputStream();
             workbook.write(outputStream);
