@@ -71,8 +71,8 @@
     <sql id="Base_Column_List">
         id
         , company_id, sample_name, sample_code, specs, batch_number, manufacturer, sample_origin,
-    outward, save_place, admin, sample_groups, quantity_per_group, inspector, received_date, 
-    sample_requirement, generation, state, check_date, remark, file, product_id, outward_describe, 
+    outward, save_place, admin, sample_groups, quantity_per_group, inspector, received_date,
+    sample_requirement, generation, state, check_date, remark, file, product_id, outward_describe,
     insert_flag, is_use, sample_quantity, alias_name, sample_type, sample_remark
     </sql>
     <sql id="Blob_Column_List">
@@ -631,6 +631,8 @@
         sample_code,
         manufacturer,
         specs,
+        state,
+        is_save,
         inspector,
         generation,
         received_date,
@@ -669,6 +671,12 @@
             </if>
             <if test="sampleCode!=null and sampleCode!=''">
                 and sample_code LIKE CONCAT('%',#{sampleCode},'%')
+            </if>
+            <if test="state!=null and state!=''">
+                and state LIKE = #{state}
+            </if>
+            <if test="isSave!=null and isSave!=''">
+                and is_save LIKE = #{isSave}
             </if>
         </trim>
         order by id DESC,str_to_date( received_date, '%Y-%m-%d' ) desc
