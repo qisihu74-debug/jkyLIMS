@@ -206,9 +206,11 @@
             test_instrument_use_record t1
         WHERE
             t1.instrument_id = #{deviceId}
-          AND t1.start_time &lt; STR_TO_DATE( #{startTime}
+          AND t1.start_time
+         &lt; STR_TO_DATE( #{startTime}
             , '%Y-%m-%d %H:%i:%s' )
-          AND t1.end_time &gt; STR_TO_DATE( #{startTime}
+          AND t1.end_time
+         &gt; STR_TO_DATE( #{startTime}
             , '%Y-%m-%d %H:%i:%s' )
         UNION ALL
         SELECT id,
@@ -227,10 +229,51 @@
             test_instrument_use_record t1
         WHERE
             t1.instrument_id = #{deviceId}
-          AND t1.start_time &lt; STR_TO_DATE( #{endTime}
+          AND t1.start_time
+         &lt; STR_TO_DATE( #{endTime}
             , '%Y-%m-%d %H:%i:%s' )
-          AND t1.end_time &gt; STR_TO_DATE( #{endTime}
+          AND t1.end_time
+         &gt; STR_TO_DATE( #{endTime}
             , '%Y-%m-%d %H:%i:%s' )
+    </select>
+
+    <select id="getInstrumentRecord" resultType="com.lims.manage.erp.vo.InstrumentRecordListVo"
+            parameterType="com.lims.manage.erp.vo.InstrumentRecordParamVo">
+        SELECT
+        t1.id recordId,
+        t2.CODE instrumentCode,
+        t2.NAME instrumentName,
+        t2.model instrumentModel,
+        t4.task_code taskCode,
+        t3.check_item_name checkItem,
+        t1.temperature,
+        t1.humidity,
+        t1.start_time startTime,
+        t1.end_time endTime,
+        t1.type,
+        t1.USER
+        FROM
+        test_instrument_use_record t1
+        LEFT JOIN test_instrument t2 ON t1.instrument_id = t2.id
+        LEFT JOIN test_entrusted_sample_checkitem_rel t3 ON t1.esc_rel_id = t3.id
+        LEFT JOIN test_task t4 ON t3.task_id = t4.id
+        <where>
+            <if test="taskCode!=null">
+                and t4.task_code LIKE CONCAT('%',#{taskCode},'%')
+            </if>
+            <if test="instrumentCode!=null">
+                and t2.code LIKE CONCAT('%',#{instrumentCode},'%')
+            </if>
+            <if test="instrumentName!=null">
+                and t2.name LIKE CONCAT('%',#{instrumentName},'%')
+            </if>
+            <if test="startTime!=null">
+                and t1.start_time &gt;= STR_TO_DATE( #{startTime}, '%Y-%m-%d %H:%i:%s' )
+            </if>
+            <if test="endTime!=null">
+                and t1.end_time &lt;= STR_TO_DATE( #{endTime}, '%Y-%m-%d %H:%i:%s' )
+            </if>
+        </where>
     </select>
 
 </mapper>
