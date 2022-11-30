@@ -1,5 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
+import com.aspose.cells.SaveFormat;
+import com.aspose.cells.Worksheet;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
@@ -11,7 +13,15 @@ import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.SampleService;
 import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.util.PDFHelper3;
+import com.lims.manage.erp.util.QRCodeUtil;
+import com.lims.manage.erp.vo.SampleAddDetailVo;
+import com.lims.manage.erp.vo.SampleAddParamVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.SampleEntrustAddVo;
+import com.lims.manage.erp.vo.SamplePrivateInfoVo;
+import com.lims.manage.erp.vo.SamplePublicInfoVo;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -20,10 +30,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.text.DecimalFormat;
+import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,6 +47,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+@Slf4j
 @Service
 public class SampleServiceImpl implements SampleService {
     @Autowired
@@ -264,6 +280,122 @@ public class SampleServiceImpl implements SampleService {
             methodSampleTypeLineBlend(sampleTagInfo, out);
         }
         return out;
+    }
+
+    @Override
+    public ServletOutputStream downloadNewSampleTab(Integer sampleId,SampleDetailVo sampleTagInfo, HttpServletResponse response) {
+        ServletOutputStream outputStream = null;
+        List<SampleDetailVo> sampleDetailVoList = new ArrayList<>();
+        try {
+            outputStream = response.getOutputStream();
+            List<String> codeList = Lists.newArrayList();
+            if (sampleTagInfo.getSampleType().equals("原材")) {
+                if (sampleTagInfo != null) {
+                    //样品编号格式处理：YP-2022-9200-01~03 情况2：YP-2022-0096
+                    String[] sampleSplits = sampleTagInfo.getSampleCode().split("-");
+                    //获取样品标签编号集合
+                    String s = "";
+                    if (sampleSplits.length > 3) {
+                        String[] strings = sampleSplits[3].split("~");
+                        int startNum = Integer.parseInt(strings[0].substring(1));
+                        int endNum = Integer.parseInt(strings[1].substring(1));
+                        int index = startNum;
+                        for (int i = 0; i < endNum; i++) {
+                            s = sampleSplits[0] + "-" + sampleSplits[1] + "-" + sampleSplits[2] + "-" + index;
+                            codeList.add(s);
+                            index++;
+                        }
+                    } else {
+                        codeList.add(sampleTagInfo.getSampleCode());
+                    }
+                    // 处理样品描述信息 Outward、 outwardDescribe 组合输出
+                    StringBuilder stringBuilder = new StringBuilder();
+                    if (sampleTagInfo.getOutward() != null && sampleTagInfo.getOutward().length() > 0) {
+                        stringBuilder.append(sampleTagInfo.getOutward() + ",");
+                    }
+                    if (sampleTagInfo.getOutwardDescribe() != null && sampleTagInfo.getOutwardDescribe().length() > 0) {
+                        stringBuilder.append(sampleTagInfo.getOutwardDescribe() + ",");
+                    }
+                    if (stringBuilder.length() > 1) {
+                        sampleTagInfo.setOutward(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+                    } else {
+                        sampleTagInfo.setOutward("");
+                    }
+                }
+                sampleTagInfo.setCodeList(codeList);
+                sampleDetailVoList.add(sampleTagInfo);
+            }else {
+                //获取配合比集合。
+                sampleDetailVoList = sampleEntityMapper.getSampleTagInfoPidList(sampleTagInfo.getId());
+            }
+            //填充数据,sampleDetailVoList size=1根据codeList取编号，大于1直接取数据的编号
+            PDFHelper3.getLicense();
+            com.aspose.cells.Workbook newBook = new com.aspose.cells.Workbook();
+            newBook.getWorksheets().clear();
+            if (sampleDetailVoList.size()==1){
+                SampleDetailVo sampleDetailVo = sampleDetailVoList.get(0);
+                List<String> list = sampleDetailVo.getCodeList();
+                for (int i=0;i<list.size();i++) {
+                    //创建一个新的Excel文档
+                    InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-tag.xlsx");
+                    com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
+                    Worksheet worksheet = workbook.getWorksheets().get(0);
+                    //填充数据
+                    worksheet.getCells().get("B2").setValue(list.get(i));
+                    worksheet.getCells().get("B3").setValue(sampleDetailVo.getAliasName());
+                    worksheet.getCells().get("B4").setValue(sampleDetailVo.getSpecs());
+                    worksheet.getCells().get("B5").setValue(sampleDetailVo.getOutwardDescribe());
+                    //设置二维码
+                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(sampleDetailVo.getId() + "");
+                    InputStream stream = bufferedImageToInputStream(bufferedImage);
+                    worksheet.getPictures().add(5,3,stream,30,30);
+                    //合并sheet
+                    Worksheet worksheetS = newBook.getWorksheets().add(list.get(i));
+                    worksheetS.copy(worksheet);
+                }
+            }
+            if (sampleDetailVoList.size()>1){
+                for (int i=0;i<sampleDetailVoList.size();i++) {
+                    //创建一个新的Excel文档
+                    InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-tag.xlsx");
+                    com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
+                    Worksheet worksheet = workbook.getWorksheets().get(0);
+                    //填充数据
+                    worksheet.getCells().get("B2").setValue(sampleDetailVoList.get(i).getSampleCode());
+                    worksheet.getCells().get("B3").setValue(sampleDetailVoList.get(i).getAliasName());
+                    worksheet.getCells().get("B4").setValue(sampleDetailVoList.get(i).getSpecs());
+                    worksheet.getCells().get("B5").setValue(sampleDetailVoList.get(i).getOutwardDescribe());
+                    //设置二维码
+                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(sampleDetailVoList.get(i).getId() + "");
+                    InputStream stream = bufferedImageToInputStream(bufferedImage);
+                    worksheet.getPictures().add(5,3,stream,30,30);
+                    //合并sheet
+                    Worksheet worksheetS = newBook.getWorksheets().add(sampleDetailVoList.get(i).getSampleCode());
+                    worksheetS.copy(worksheet);
+                }
+            }
+            newBook.save(outputStream, SaveFormat.XLSX);
+        }catch (Exception e){
+            log.error("下载样品标签异常:{}",e);
+        }
+        return outputStream;
+    }
+
+    /**
+     * 将BufferedImage转换为InputStream
+     * @param image
+     * @return
+     */
+    public InputStream bufferedImageToInputStream(BufferedImage image){
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "jpg", os);
+            InputStream input = new ByteArrayInputStream(os.toByteArray());
+            return input;
+        } catch (IOException e) {
+            log.error("提示:",e);
+        }
+        return null;
     }
 
     /**

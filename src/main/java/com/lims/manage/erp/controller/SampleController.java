@@ -16,31 +16,38 @@ import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.SampleAddParamVo;
-import com.lims.manage.erp.vo.SampleDetailAddVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
 import com.lims.manage.erp.vo.SamplesAddVo;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.text.DecimalFormat;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipOutputStream;
 
 @Slf4j
@@ -267,6 +274,20 @@ public class SampleController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 下载样品标签
+     */
+    @RequestMapping("/downloadNewSampleTab")
+    public void downloadNewSampleTab(Integer sampleId, HttpServletResponse response) throws IOException {
+        if (sampleId == null){
+            return;
+        }
+        SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
+        ServletOutputStream outputStream = sampleService.downloadNewSampleTab(sampleId,sampleTagInfo, response);
+        outputStream.flush();
+        outputStream.close();
     }
 
     /**

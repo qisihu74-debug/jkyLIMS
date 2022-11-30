@@ -5,13 +5,11 @@ import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
 import com.lims.manage.erp.vo.SamplePublicInfoVo;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
@@ -87,6 +85,5 @@ public interface SampleService {
     ZipOutputStream packagingWorkbookZip(Integer sampleId, HttpServletResponse response) throws IOException;
 
 
-
-
+    ServletOutputStream downloadNewSampleTab(Integer sampleId, SampleDetailVo sampleTagInfo, HttpServletResponse response);
 }
