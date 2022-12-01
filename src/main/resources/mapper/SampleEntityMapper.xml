@@ -1110,4 +1110,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     FROM
 	test_team AS t1
     </select>
+
+    <insert id="saveSampleCirculationRecord">
+        INSERT into test_sample_circulation_record (sample_id,status,time,operator_id,operator_name)
+        VALUES(#{sampleId},#{status},#{time},#{operatorId},#{operatorName})
+    </insert>
 </mapper>

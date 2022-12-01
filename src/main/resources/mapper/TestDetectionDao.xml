@@ -135,4 +135,26 @@
 
     </select>
 
+    <select id="selectItemList" resultType="com.lims.manage.erp.entity.SampleItemEntity">
+        SELECT
+            t2.id,
+            t2.entrust_id,
+            t2.sample_id,
+            t2.state,
+            t2.check_item_name,
+            t2.end_time
+        FROM
+            test_entrusted_sample_checkitem_rel AS t1
+            LEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.entrust_id = t2.entrust_id
+        WHERE
+            t1.id = #{id}
+    </select>
+
+    <update id="batchSampleState" >
+	UPDATE test_sample
+	SET state = 3
+	WHERE
+		id IN ( SELECT sample_id FROM test_entrusted_sample_details_rel WHERE entrustment_id = #{entrustId} )
+    </update>
+
 </mapper>

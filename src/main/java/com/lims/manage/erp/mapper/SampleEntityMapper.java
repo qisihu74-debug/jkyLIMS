@@ -255,4 +255,12 @@ public interface SampleEntityMapper {
             "WHERE\n" +
             "\tt1.sample_id =#{sampleId}")
     String getSampler(@Param("sampleId") Integer sampleId);
+
+    /**
+     * 新增样品流转记录
+     *
+     * @param sampleCirculationRecord
+     * @return
+     */
+    int saveSampleCirculationRecord(SampleCirculationRecord sampleCirculationRecord);
 }

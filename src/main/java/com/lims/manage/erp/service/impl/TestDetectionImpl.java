@@ -2,6 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.InstrumentRecordEntityMapper;
+import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestDetectionDao;
 import com.lims.manage.erp.service.LogManagerService;
@@ -19,7 +20,9 @@ import org.springframework.util.StringUtils;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Author: DLC
@@ -35,6 +38,8 @@ public class TestDetectionImpl implements TestDetectionService {
     private LogManagerService logManagerService;
     @Autowired
     private InstrumentRecordEntityMapper instrumentRecordEntityMapper;
+    @Autowired
+    SampleEntityMapper sampleEntityMapper;
 
 
     @Override
@@ -210,6 +215,8 @@ public class TestDetectionImpl implements TestDetectionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public synchronized Boolean postEndTest(SampleItemInstrumentVo data) {
+        // 获取业务受理人id
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         String stringDate = format.format(data.getEndTime());
         if (stringDate.equals("1970-01-01")) {
@@ -255,6 +262,32 @@ public class TestDetectionImpl implements TestDetectionService {
                 }
                 logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-检测项主键下 仪器表结束时间\n\t"+stringBuilder2.toString(), Const.TASK_TEST, true);
             }
+        }
+        // 获取委托单下 所有检测项 end_time!=NULL、则更新样品状态
+        if(CollectionUtils.isNotEmpty(data.getItemInstrumentEntityList())){
+            boolean bitStatus = true;
+            List<SampleItemEntity> list = testDetectionDao.selectItemList(data.getItemInstrumentEntityList().get(0).getItemId());
+            Set<Integer> setIds = new HashSet<>();
+            for(SampleItemEntity itemEntity : list){
+                    if(itemEntity.getEndTime()==null){
+                        bitStatus = false;
+                    }
+                setIds.add(itemEntity.getSampleId());
+                }
+                if(bitStatus){
+                    // 根据委托单id 批量更新样品状态。
+                    testDetectionDao.batchSampleState(list.get(0).getEntrustId());
+                    for(Integer sampleId :setIds){
+                        // 增加样品样品流转状态
+                        SampleCirculationRecord sa = new SampleCirculationRecord();
+                        sa.setSampleId(sampleId);
+                        sa.setStatus("3");
+                        sa.setOperatorId(userInfo.getUserId());
+                        sa.setOperatorName(userInfo.getName());
+                        sa.setTime(new Date());
+                        sampleEntityMapper.saveSampleCirculationRecord(sa);
+                    }
+                }
         }
         return true;
     }

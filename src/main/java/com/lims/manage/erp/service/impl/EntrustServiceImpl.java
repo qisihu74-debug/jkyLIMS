@@ -10,29 +10,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustFileTableEntity;
-import com.lims.manage.erp.entity.EntrustHistoryEntity;
-import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
-import com.lims.manage.erp.entity.EntrustPamentEntity;
-import com.lims.manage.erp.entity.EntrustSampleEntity;
-import com.lims.manage.erp.entity.QiYueSuoEntity;
-import com.lims.manage.erp.entity.ReportRecordDetailEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TaskEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TestCompanyEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
-import com.lims.manage.erp.entity.TestInitDataEntity;
-import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
-import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.EntrustFileTableDao;
 import com.lims.manage.erp.mapper.ProductItemEntityMapper;
@@ -141,6 +119,8 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public synchronized String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) throws Exception {
+            // 获取业务受理人id
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
             //存放委托基本信息==》test_entrusted
             EntrustEntity basisInfo = new EntrustEntity(vo);
             long id = GenID.getID();
@@ -187,7 +167,13 @@ public class EntrustServiceImpl implements EntrustService {
                     sampleData.setState("0");
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
                     // 增加样品样品流转状态
-
+                    SampleCirculationRecord sa = new SampleCirculationRecord();
+                    sa.setSampleId(sampleData.getId());
+                    sa.setStatus("0");
+                    sa.setOperatorId(userInfo.getUserId());
+                    sa.setOperatorName(vo.getBusinessAcceptor());
+                    sa.setTime(new Date());
+                    sampleEntityMapper.saveSampleCirculationRecord(sa);
                     EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                     entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                     entrustSampleEntity.setSampleId(sampleEntity.getId());
@@ -304,8 +290,7 @@ public class EntrustServiceImpl implements EntrustService {
                 witnessCompanyClientVo.setContactWay(!StringUtils.isEmpty(basisInfo.getWitnessPhone()) ? basisInfo.getWitnessPhone() : null);
                 // 处理见证单位信息
                 methodUnit(witnessCompanyClientVo);
-            // 获取当前用户所在科室id
-            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+                // 获取当前用户所在科室id
             Long department = teamMapper.getTeamIdByUid(userInfo.getUserId());
             // 委托单创建人所属部门
             if(StringUtils.isEmpty(department)){
@@ -2818,6 +2803,8 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public synchronized String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) throws Exception {
+        // 获取业务人员id
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
         // 获取前台得到的 vo.getId()
         long old = vo.getId();
         //存放委托基本信息==》test_entrusted
@@ -2895,8 +2882,18 @@ public class EntrustServiceImpl implements EntrustService {
                 sampleEntity2.setCompanyId(basisInfo.getEntrustCompanyId());
                 // 使用方法 处理样品来样时间 与委托单受理日期
                 methodAcceptanceDate(sampleEntity.getId(),vo.getAcceptanceDate(),sampleEntity2);
+                // 委托单创建 更新样品状态 state 待检0
+                sampleEntity2.setState("0");
                 // update样品信息
                 sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity2);
+                // 增加样品样品流转状态
+                SampleCirculationRecord sa = new SampleCirculationRecord();
+                sa.setSampleId(sampleEntity2.getId());
+                sa.setStatus("0");
+                sa.setOperatorId(userInfo.getUserId());
+                sa.setOperatorName(vo.getBusinessAcceptor());
+                sa.setTime(new Date());
+                sampleEntityMapper.saveSampleCirculationRecord(sa);
                 EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                 entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                 entrustSampleEntity.setSampleId(sampleEntity.getId());
@@ -2984,7 +2981,6 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
         }
         // 获取当前用户所在科室id
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
         Long department = teamMapper.getTeamIdByUid(userInfo.getUserId());
         // 委托单创建人所属部门
         if(StringUtils.isEmpty(department)){
