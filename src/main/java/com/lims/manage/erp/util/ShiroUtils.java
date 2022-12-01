@@ -96,4 +96,39 @@ public class ShiroUtils {
         Authenticator authc = securityManager.getAuthenticator();
         ((LogoutAware) authc).onLogout((SimplePrincipalCollection) attribute);
     }
+
+    /**
+     * 根据用户判断是否已经登陆
+     * @Author gjl
+     * @CreateTime 2021/11/09 13:57
+     * @Param  username  用户名称
+     * @Param  isRemoveSession 是否删除Session
+     * @Return void
+     */
+    public static String getToken(String username){
+        //从缓存中获取Session
+        Session session = null;
+        Collection<Session> sessions = redisSessionDAO.getActiveSessions();
+        Object attribute = null;
+        for(Session sessionInfo : sessions){
+            //遍历Session,找到该用户名称对应的Session
+            attribute = sessionInfo.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
+            if (attribute == null) {
+                continue;
+            }
+            SysUserEntity sysUserEntity = (SysUserEntity) ((SimplePrincipalCollection) attribute).getPrimaryPrincipal();
+            if (sysUserEntity == null) {
+                continue;
+            }
+            if (Objects.equals(sysUserEntity.getUsername(), username)) {
+                session=sessionInfo;
+                break;
+            }
+        }
+        if (session == null||attribute == null) {
+            return null;
+        }
+
+        return session.getId()+"";
+    }
 }

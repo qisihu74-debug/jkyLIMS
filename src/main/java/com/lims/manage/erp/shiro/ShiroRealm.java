@@ -6,7 +6,6 @@ import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.service.SysMenuService;
 import com.lims.manage.erp.service.SysRoleService;
 import com.lims.manage.erp.service.SysUserService;
-import com.lims.manage.erp.util.ShiroUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -95,7 +94,7 @@ public class ShiroRealm extends AuthorizingRealm {
                 getName()
         );
         //验证成功开始踢人(清除缓存和Session)
-        ShiroUtils.deleteCache(username,true);
+        //ShiroUtils.deleteCache(username,true);
         return authenticationInfo;
     }
 }

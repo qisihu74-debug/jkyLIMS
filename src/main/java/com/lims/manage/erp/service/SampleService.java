@@ -2,6 +2,7 @@ package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
 import com.lims.manage.erp.vo.SamplePublicInfoVo;
@@ -86,4 +87,8 @@ public interface SampleService {
 
 
     ServletOutputStream downloadNewSampleTab(Integer sampleId, SampleDetailVo sampleTagInfo, HttpServletResponse response);
+
+    TestSampleEntity sampleInfo(Integer sampleId);
+
+    boolean updateState(Integer sampleId);
 }
