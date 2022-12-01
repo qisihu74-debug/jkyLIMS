@@ -176,7 +176,6 @@ public class TaskServiceImpl implements TaskService {
                         }
 
                         List<TestInstrumentEntity> instrumentEntityList = taskMapper.getInstrumentEntityList(checkItemInfoVo.getItemId());
-//                        List<Integer> result = Lists.newArrayList();
                         // 设置数组 存放
                         int[] arrayInt = new int[instrumentEntityList.size()];
                         if (instrumentEntityList != null && !instrumentEntityList.isEmpty()) {

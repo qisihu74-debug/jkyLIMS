@@ -53,4 +53,12 @@ public interface InstrumentRecordEntityMapper {
      * @return
      */
     String getInstrumentInfo(Long instrumentId);
+
+    /**
+     * 删除检测项的设备使用记录
+     * @param escRelId
+     * @return
+     */
+    int deleteByEscRelId(Integer escRelId);
+
 }

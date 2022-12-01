@@ -281,16 +281,23 @@
         and t9.id in (t1.dept_id )
     </select>
     <select id="getInstrumentEntityList" resultType="com.lims.manage.erp.entity.TestInstrumentEntity">
-    SELECT
-        t2.id,
-        t2.name,
-        t2.code,
-        t2.model
-    FROM
-        test_product_item_instrument_middle_rel AS t1
-        LEFT JOIN test_instrument AS t2 ON t1.intrusment_id = t2.id
-    WHERE
-        t1.id_item = #{idItem}
+        SELECT
+            t2.id,
+            t2.NAME,
+            t2.CODE,
+            t2.model,
+            t3.temperature,
+            t3.humidity,
+            t3.start_time,
+            t3.end_time,
+            t3.USER
+        FROM
+            test_product_item_instrument_middle_rel AS t1
+                LEFT JOIN test_instrument t2 ON t1.intrusment_id = t2.id
+                LEFT JOIN test_instrument_use_record t3 ON t1.id_item = t3.esc_rel_id
+                AND t1.intrusment_id = t3.instrument_id
+        WHERE
+            t1.id_item = #{idItem}
     </select>
     <select id="getSampleList" resultMap="sampleResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT t1.id taskId,

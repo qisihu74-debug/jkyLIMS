@@ -11,14 +11,12 @@ import java.util.List;
  */
 @Data
 public class InstrumentEntity {
-
     /**
      * 检测项主键
      */
     private Integer itemId;
     /**
-     * 仪器列表主键
+     * 仪器记录
      */
-    private List<Integer> ids;
-
+    private List<InstrumentRecordEntity> records;
 }
