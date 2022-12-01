@@ -9,7 +9,7 @@ import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.entity.sampleCirculationRecord;
+import com.lims.manage.erp.entity.SampleCirculationRecord;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
@@ -396,7 +396,7 @@ public class SampleServiceImpl implements SampleService {
         entity.setSpecs(sampleTagInfo.getSpecs());
         entity.setOutwardDescribe(sampleTagInfo.getOutwardDescribe());
         //查询样品流转记录
-        List<sampleCirculationRecord> list = sampleEntityMapper.getRecords(sampleId);
+        List<SampleCirculationRecord> list = sampleEntityMapper.getRecords(sampleId);
         entity.setCirculationCecords(list);
         //根据当前用户设置手机端的扫描操作状态
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -417,8 +417,13 @@ public class SampleServiceImpl implements SampleService {
     }
 
     @Override
-    public boolean updateState(Integer sampleId) {
-        
+    public boolean updateState(Integer sampleId,Integer state) {
+        //2领样，3留样，4处置
+
+
+        //更新样品表状态
+
+        //插入流转记录
 
 
         return false;

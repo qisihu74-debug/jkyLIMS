@@ -3,7 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.TestTeam;
-import com.lims.manage.erp.entity.sampleCirculationRecord;
+import com.lims.manage.erp.entity.SampleCirculationRecord;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -245,7 +245,7 @@ public interface SampleEntityMapper {
             "\ttest_sample_circulation_record\n" +
             "WHERE\n" +
             "\tsample_id = #{sampleId}")
-    List<sampleCirculationRecord> getRecords(@Param("sampleId") Integer sampleId);
+    List<SampleCirculationRecord> getRecords(@Param("sampleId") Integer sampleId);
 
     @Select("SELECT DISTINCT\n" +
             "\tt2.sampler\n" +

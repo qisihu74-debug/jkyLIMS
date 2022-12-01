@@ -15,7 +15,7 @@ import java.util.Date;
  * @Copyright © 河南交科院
  */
 @Data
-public class sampleCirculationRecord {
+public class SampleCirculationRecord {
     private int sampleId;
     /**
      * 状态，1待检，2在检，3已检，4留样，5处置

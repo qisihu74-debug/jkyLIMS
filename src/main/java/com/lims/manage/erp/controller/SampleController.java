@@ -496,14 +496,15 @@ public class SampleController {
     /**
      * 跟新状态
      * @param sampleId
+     * @param state
      * @return
      */
     @RequestMapping("updateState")
-    public Result updateState(Integer sampleId){
-        if (sampleId == null){
+    public Result updateState(Integer sampleId,Integer state){
+        if (sampleId == null || state == null){
             return ResultUtil.error("缺少参数");
         }
-        boolean flag = sampleService.updateState(sampleId);
+        boolean flag = sampleService.updateState(sampleId,state);
         if (flag){
             return ResultUtil.success("操作成功");
         }else {

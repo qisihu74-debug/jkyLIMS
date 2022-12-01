@@ -21,7 +21,7 @@ public class TestSampleEntity {
      * 流转记录
      */
     @TableField(exist = false)
-    private List<sampleCirculationRecord> circulationCecords;
+    private List<SampleCirculationRecord> circulationCecords;
     private Integer id;
 
     private Integer companyId;
