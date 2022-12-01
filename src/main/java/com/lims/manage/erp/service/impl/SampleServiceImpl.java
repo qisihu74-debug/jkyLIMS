@@ -6,10 +6,10 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
+import com.lims.manage.erp.entity.SampleCirculationRecord;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.entity.SampleCirculationRecord;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
@@ -32,6 +32,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -401,15 +402,15 @@ public class SampleServiceImpl implements SampleService {
         //根据当前用户设置手机端的扫描操作状态
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null){
-            entity.setOperateType(1);
+            entity.setOperateType(0);
         }else {
             //判断领样人
             //TODO 根据角色设置是留样还是处置
             String name = sampleEntityMapper.getSampler(sampleId);
             if (StringUtils.isNotEmpty(name) && name.equals(userInfo.getUsername())){
-                entity.setOperateType(2);
-            }else {
                 entity.setOperateType(1);
+            }else {
+                entity.setOperateType(0);
             }
 
         }
@@ -417,16 +418,36 @@ public class SampleServiceImpl implements SampleService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateState(Integer sampleId,Integer state) {
         //2领样，3留样，4处置
-
-
+        List<Integer> ids = sampleEntityMapper.getExist(sampleId,state);
+        if (ids != null && ids.size() >= 1){
+            return false;
+        }
         //更新样品表状态
-
+        if (state == 2){
+            sampleEntityMapper.updateSampleState(sampleId,state);
+        }
+        if (state >= 3){
+            Integer status = null;
+            if (state == 3){
+                status =1;
+            }
+            if (state == 4){
+                status = 2;
+            }
+            sampleEntityMapper.updateIsSave(sampleId,status);
+        }
         //插入流转记录
-
-
-        return false;
+        SampleCirculationRecord record = new SampleCirculationRecord();
+        record.setSampleId(sampleId);
+        record.setStatus(state+"");
+        record.setTime(new Date());
+        record.setOperatorId(ShiroUtils.getUserInfo().getUserId());
+        record.setOperatorName(ShiroUtils.getUserInfo().getUsername());
+        sampleEntityMapper.insertRecord(record);
+        return true;
     }
 
     /**

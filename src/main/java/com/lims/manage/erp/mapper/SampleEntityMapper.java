@@ -5,6 +5,7 @@ import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.entity.SampleCirculationRecord;
 import com.lims.manage.erp.vo.*;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -255,4 +256,18 @@ public interface SampleEntityMapper {
             "WHERE\n" +
             "\tt1.sample_id =#{sampleId}")
     String getSampler(@Param("sampleId") Integer sampleId);
+
+    @Select("SELECT sample_id\n" +
+            "FROM\n" +
+            "\ttest_sample_circulation_record\n" +
+            "WHERE\n" +
+            "\tsample_id = #{sampleId} and status>=#{status}")
+    List<Integer> getExist(@Param("sampleId") Integer sampleId, @Param("status") Integer status);
+
+    @Update("update test_sample set is_save=#{state} where id = #{sampleId}")
+    void updateIsSave(Integer sampleId, Integer state);
+
+    @Insert("insert into test_sample_circulation_record(sample_id,status,time,operator_id,operator_name)" +
+            " values(#{record.sampleId},#{record.status},#{record.time},#{record.operatorId},#{record.operatorName})")
+    void insertRecord(@Param("record") SampleCirculationRecord record);
 }
