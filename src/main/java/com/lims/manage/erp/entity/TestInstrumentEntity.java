@@ -1,6 +1,10 @@
 package com.lims.manage.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.util.Date;
 
 /**
  * @Author: DLC
@@ -39,4 +43,14 @@ public class TestInstrumentEntity {
      * 来自 test_product_item_instrument_middle_rel 下 id_item
      */
     private Integer idItem;
+
+    private String temperature;
+    private String humidity;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date startTime;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date endTime;
+    private String user;
 }
