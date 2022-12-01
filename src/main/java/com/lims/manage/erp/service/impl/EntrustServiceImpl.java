@@ -183,7 +183,11 @@ public class EntrustServiceImpl implements EntrustService {
                     SampleEntity sampleData = new SampleEntity();
                     // 使用方法 处理样品来样时间 与委托单受理日期
                     methodAcceptanceDate(sampleEntity.getId(),vo.getAcceptanceDate(),sampleData);
+                    // 委托单创建 更新样品状态 state 待检0
+                    sampleData.setState("0");
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
+                    // 增加样品样品流转状态
+
                     EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                     entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                     entrustSampleEntity.setSampleId(sampleEntity.getId());
