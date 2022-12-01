@@ -3,6 +3,8 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.SysUserRoleEntity;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,5 +30,7 @@ public interface SysUserRoleDao extends BaseMapper<SysUserRoleEntity> {
      * @return
      */
     Boolean insertNewRole(SysUserRoleEntity newRoles);
-	
+
+    @Select("select distinct role_id from sys_user_role where user_id=#{userId}")
+    List<Long> getRoleIdsByUserId(@Param("userId") Long userId);
 }
