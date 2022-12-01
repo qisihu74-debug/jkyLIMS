@@ -25,7 +25,14 @@ public interface TestDetectionService {
     /**
      *  操作 检测项Id 选择仪器集合 保存
      */
-    Boolean postSelectInstrument(InstrumentEntity instrumentEntity);
+//    Boolean postSelectInstrument(InstrumentEntity instrumentEntity);
+
+    /**
+     * 保存试验所选设备仪器
+     * @param instrumentEntity
+     * @return
+     */
+    Boolean postSelectInstrument1130(InstrumentEntity instrumentEntity);
 
     /**
      * 验证登录人userId 是否具备开始检测资格

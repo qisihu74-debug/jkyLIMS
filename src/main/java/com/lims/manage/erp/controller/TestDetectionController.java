@@ -67,7 +67,7 @@ public class TestDetectionController {
     @PostMapping("/post_select_instrument")
     public Result postSelectInstrument(@RequestBody InstrumentEntity instrumentEntity){
         // 操作 检测项Id 选择仪器集合 保存
-        testDetectionService.postSelectInstrument(instrumentEntity);
+        testDetectionService.postSelectInstrument1130(instrumentEntity);
         return ResultUtil.success("成功");
     }
 

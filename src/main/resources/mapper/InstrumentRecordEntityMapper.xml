@@ -290,4 +290,9 @@
             id = #{instrumentId}
     </select>
 
+    <delete id="deleteByEscRelId" parameterType="java.lang.Integer">
+        delete
+        from test_instrument_use_record
+        where esc_rel_id = #{escRelId}
+    </delete>
 </mapper>
