@@ -110,6 +110,28 @@ public class UserLoginController {
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userData.getUsername()+"登陆成功!", Const.LOGIN_LOG,true);
         return map;
     }
+
+    /**
+     * 登录
+     * @Author gjl
+     * @CreateTime 2021/11/09 9:21
+     */
+    @RequestMapping("/mobileLogin")
+    public Map<String,Object> mobileLogin(@RequestBody SysUserEntity sysUserEntity){
+        String token = ShiroUtils.getToken(sysUserEntity.getUsername());
+
+        Map<String,Object> map = new HashMap<>();
+        map.put("code",200);
+        map.put("msg","登录成功");
+        map.put("token", token);
+        SysUserEntity userData = sysUserService.selectUserByName(sysUserEntity.getUsername());
+        userData.setPassword(null);
+        userData.setSalt(null);
+        map.put("userInfo", userData);
+        logManagerService.addOpSysLog(userData,"手机用户："+userData.getUsername()+"登陆成功!", Const.LOGIN_LOG,true);
+        return map;
+    }
+
     /**
      * 未登录
      * @Author gjl

@@ -479,4 +479,35 @@ public class SampleController {
             }
         }
     }
+
+    /**
+     * 扫描查询样品流转详情
+     * @return
+     */
+    @RequestMapping("sampleInfo")
+    public Result sampleInfo(Integer sampleId){
+        if (sampleId == null){
+            return ResultUtil.error("缺少参数");
+        }
+        TestSampleEntity entity = sampleService.sampleInfo(sampleId);
+        return ResultUtil.success(entity);
+    }
+
+    /**
+     * 跟新状态
+     * @param sampleId
+     * @return
+     */
+    @RequestMapping("updateState")
+    public Result updateState(Integer sampleId){
+        if (sampleId == null){
+            return ResultUtil.error("缺少参数");
+        }
+        boolean flag = sampleService.updateState(sampleId);
+        if (flag){
+            return ResultUtil.success("操作成功");
+        }else {
+            return ResultUtil.error("操作失败");
+        }
+    }
 }

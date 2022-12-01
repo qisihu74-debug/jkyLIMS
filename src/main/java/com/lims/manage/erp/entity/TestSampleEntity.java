@@ -12,6 +12,16 @@ import java.util.List;
 @Data
 @TableName("test_sample")
 public class TestSampleEntity {
+    /**
+     * 扫码操作类型1.查询，2领样，3留样，4处置
+     */
+    @TableField(exist = false)
+    private Integer operateType;
+    /**
+     * 流转记录
+     */
+    @TableField(exist = false)
+    private List<sampleCirculationRecord> circulationCecords;
     private Integer id;
 
     private Integer companyId;

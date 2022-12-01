@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.entity.sampleCirculationRecord;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -236,4 +237,22 @@ public interface SampleEntityMapper {
      */
     List<TestTeam> getAllRoomInfoList();
 
+    @Select("SELECT\n" +
+            "\tSTATUS,\n" +
+            "\ttime,\n" +
+            "\toperator_name\n" +
+            "FROM\n" +
+            "\ttest_sample_circulation_record\n" +
+            "WHERE\n" +
+            "\tsample_id = #{sampleId}")
+    List<sampleCirculationRecord> getRecords(@Param("sampleId") Integer sampleId);
+
+    @Select("SELECT DISTINCT\n" +
+            "\tt2.sampler\n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_details_rel t1\n" +
+            "LEFT JOIN test_task t2 ON t1.entrustment_id = t2.entrustment_id\n" +
+            "WHERE\n" +
+            "\tt1.sample_id =#{sampleId}")
+    String getSampler(@Param("sampleId") Integer sampleId);
 }
