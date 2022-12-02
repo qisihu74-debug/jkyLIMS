@@ -409,7 +409,9 @@ public class SampleServiceImpl implements SampleService {
             //根据用户id获取所拥有的角色id，4领样角色，5留样角色，6样品处置角色，角色初始化时确定死
             List<Long> roles = sysUserRoleDao.getRoleIdsByUserId(userInfo.getUserId());
             for (Long id:roles) {
-                integerList.add(id);
+                if (roles.contains(4) || roles.contains(5) || roles.contains(6)){
+                    integerList.add(id);
+                }
             }
             entity.setOperateType(integerList);
         }
