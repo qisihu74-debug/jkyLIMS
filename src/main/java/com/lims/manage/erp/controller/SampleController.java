@@ -508,7 +508,7 @@ public class SampleController {
         if (flag){
             return ResultUtil.success("操作成功");
         }else {
-            return ResultUtil.error("操作失败");
+            return ResultUtil.error("操作失败,可能其它账号已经操作");
         }
     }
 }

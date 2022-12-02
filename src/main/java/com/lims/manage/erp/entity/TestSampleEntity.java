@@ -16,7 +16,7 @@ public class TestSampleEntity {
      * 扫码操作类型1.查询，2领样，3留样，4处置
      */
     @TableField(exist = false)
-    private Integer operateType;
+    private List<Long> operateType;
     /**
      * 流转记录
      */
