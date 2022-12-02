@@ -270,4 +270,12 @@ public interface SampleEntityMapper {
     @Insert("insert into test_sample_circulation_record(sample_id,status,time,operator_id,operator_name)" +
             " values(#{record.sampleId},#{record.status},#{record.time},#{record.operatorId},#{record.operatorName})")
     void insertRecord(@Param("record") SampleCirculationRecord record);
+
+    /**
+     * 新增样品流转记录
+     *
+     * @param sampleCirculationRecord
+     * @return
+     */
+    int saveSampleCirculationRecord(SampleCirculationRecord sampleCirculationRecord);
 }

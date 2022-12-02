@@ -1,10 +1,12 @@
 package com.lims.manage.erp.mapper;
 
+import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.TestChItemInstrumentMiddleEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
@@ -88,6 +90,22 @@ public interface TestDetectionDao {
      * 根据检测项主键 获取仪器信息
      */
     List<TestChItemInstrumentMiddleEntity> getInstrumentCollection(Integer sidItem);
+
+    /**
+     * 根据检测项id 获取所有检测项信息
+     *
+     * @param id
+     * @return
+     */
+    List<SampleItemEntity> selectItemList(@Param("id") int id);
+
+    /**
+     * 更新样品状态 = 3
+     *
+     * @param entrustId
+     * @return
+     */
+    int batchSampleState(@Param("entrustId") Long entrustId);
 
 
 
