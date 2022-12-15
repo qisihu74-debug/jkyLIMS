@@ -36,8 +36,8 @@ public class TestDetectionController {
     private TaskService taskService;
 
     @RequestMapping("/getTheInstrument")
-    public Result getTheInstrument(Integer checkItemId) {
-        List<TestInstrumentEntity> dataCollect = testDetectionService.getTheInstrument(checkItemId);
+    public Result getTheInstrument(Integer escRelId,Integer checkItemId) {
+        List<TestInstrumentEntity> dataCollect = testDetectionService.getTheInstrument(escRelId,checkItemId);
         if (dataCollect.isEmpty()) {
             return ResultUtil.error(204, "数据为空！");
         }

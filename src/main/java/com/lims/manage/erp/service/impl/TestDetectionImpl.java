@@ -43,8 +43,8 @@ public class TestDetectionImpl implements TestDetectionService {
 
 
     @Override
-    public List<TestInstrumentEntity> getTheInstrument(Integer checkItemId) {
-        return testDetectionDao.selectTheInstrument(checkItemId);
+    public List<TestInstrumentEntity> getTheInstrument(Integer escRelId,Integer checkItemId) {
+        return testDetectionDao.selectTheInstrument(escRelId,checkItemId);
     }
 
     @Override

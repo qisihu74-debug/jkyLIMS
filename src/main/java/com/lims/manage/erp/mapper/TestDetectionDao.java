@@ -23,10 +23,11 @@ public interface TestDetectionDao {
 
     /**
      * 依据检测项 选择设备仪器
+     * @param escRelId
      * @param checkItemId
      * @return
      */
-    List<TestInstrumentEntity> selectTheInstrument(Integer checkItemId);
+    List<TestInstrumentEntity> selectTheInstrument(Integer escRelId,Integer checkItemId);
     /**
      * 针对（/task/passorno） 进行 修改检测项 内容
      * start_time =null,origin_url=null,file_url_str=null

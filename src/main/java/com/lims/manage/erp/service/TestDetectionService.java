@@ -14,7 +14,7 @@ import java.util.List;
  */
 public interface TestDetectionService {
 
-    List<TestInstrumentEntity> getTheInstrument(Integer checkItemId);
+    List<TestInstrumentEntity> getTheInstrument(Integer escRelId,Integer checkItemId);
     /**
      * 开始试验
      * @param data
