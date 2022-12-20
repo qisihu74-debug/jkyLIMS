@@ -286,6 +286,10 @@ public class SampleController {
         }
         SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
         ServletOutputStream outputStream = sampleService.downloadNewSampleTab(sampleId,sampleTagInfo, response);
+        response.reset();
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品标签.xlsx", "UTF-8") );
         outputStream.flush();
         outputStream.close();
     }
