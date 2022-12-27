@@ -407,10 +407,10 @@ public class SampleServiceImpl implements SampleService {
             List<Long> integerList = Lists.newArrayList();
             integerList.add(0L);
             if (userInfo != null){
-                //根据用户id获取所拥有的角色id，4领样角色，5留样角色，6样品处置角色，角色初始化时确定死
+                //根据用户id获取所拥有的角色id，1领样，3留样，4处置，角色初始化时确定死
                 List<Long> roles = sysUserRoleDao.getRoleIdsByUserId(userInfo.getUserId());
                 for (Long id:roles) {
-                    if (roles.contains(4) || roles.contains(5) || roles.contains(6)){
+                    if (id==1 || id==3 || id==4){
                         integerList.add(id);
                     }
                 }
