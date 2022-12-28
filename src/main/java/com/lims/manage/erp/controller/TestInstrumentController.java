@@ -163,7 +163,7 @@ public class TestInstrumentController extends ApiController {
             workbook.setSheetName(0, stringObjectHashMap.get("deviceInfo").toString() + "使用记录");
             response.reset();
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-            response.setContentType("application/x-msdownload");
+            response.setContentType("application/vnd.ms-excel");
             response.setCharacterEncoding("UTF-8");
             String fileName = URLEncoder.encode(stringObjectHashMap.get("deviceInfo") + "使用记录.xlsx", "UTF-8");
             response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
