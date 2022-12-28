@@ -392,30 +392,34 @@ public class SampleServiceImpl implements SampleService {
     @Override
     public TestSampleEntity sampleInfo(Integer sampleId) {
         SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
-        TestSampleEntity entity = new TestSampleEntity();
-        entity.setId(sampleId);
-        entity.setSampleCode(sampleTagInfo.getSampleCode());
-        entity.setSampleName(sampleTagInfo.getSampleName());
-        entity.setSpecs(sampleTagInfo.getSpecs());
-        entity.setOutwardDescribe(sampleTagInfo.getOutwardDescribe());
-        //查询样品流转记录
-        List<SampleCirculationRecord> list = sampleEntityMapper.getRecords(sampleId);
-        entity.setCirculationCecords(list);
-        //根据当前用户设置手机端的扫描操作状态
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        List<Long> integerList = Lists.newArrayList();
-        integerList.add(0L);
-        if (userInfo != null){
-            //根据用户id获取所拥有的角色id，4领样角色，5留样角色，6样品处置角色，角色初始化时确定死
-            List<Long> roles = sysUserRoleDao.getRoleIdsByUserId(userInfo.getUserId());
-            for (Long id:roles) {
-                if (roles.contains(4) || roles.contains(5) || roles.contains(6)){
-                    integerList.add(id);
+        if (sampleTagInfo != null){
+            TestSampleEntity entity = new TestSampleEntity();
+            entity.setId(sampleId);
+            entity.setSampleCode(sampleTagInfo.getSampleCode());
+            entity.setSampleName(sampleTagInfo.getSampleName());
+            entity.setSpecs(sampleTagInfo.getSpecs());
+            entity.setOutwardDescribe(sampleTagInfo.getOutwardDescribe());
+            //查询样品流转记录
+            List<SampleCirculationRecord> list = sampleEntityMapper.getRecords(sampleId);
+            entity.setCirculationCecords(list);
+            //根据当前用户设置手机端的扫描操作状态
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            List<Long> integerList = Lists.newArrayList();
+            integerList.add(0L);
+            if (userInfo != null){
+                //根据用户id获取所拥有的角色id，1领样，3留样，4处置，角色初始化时确定死
+                List<Long> roles = sysUserRoleDao.getRoleIdsByUserId(userInfo.getUserId());
+                for (Long id:roles) {
+                    if (id==1 || id==3 || id==4){
+                        integerList.add(id);
+                    }
                 }
+                entity.setOperateType(integerList);
             }
-            entity.setOperateType(integerList);
+            return entity;
+        }else {
+            return null;
         }
-        return entity;
     }
 
     @Override

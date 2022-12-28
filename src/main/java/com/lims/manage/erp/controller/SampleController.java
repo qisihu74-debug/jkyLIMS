@@ -285,6 +285,10 @@ public class SampleController {
             return;
         }
         SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
+        response.reset();
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品标签.xlsx", "UTF-8") );
         ServletOutputStream outputStream = sampleService.downloadNewSampleTab(sampleId,sampleTagInfo, response);
         outputStream.flush();
         outputStream.close();
@@ -489,7 +493,9 @@ public class SampleController {
         if (sampleId == null){
             return ResultUtil.error("缺少参数");
         }
+        log.info("扫码请求参数:{}",sampleId);
         TestSampleEntity entity = sampleService.sampleInfo(sampleId);
+        log.info("扫码响应结果:{}",JSON.toJSONString(entity));
         return ResultUtil.success(entity);
     }
 

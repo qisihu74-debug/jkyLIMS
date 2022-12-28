@@ -67,8 +67,8 @@ public class ShiroConfig {
         // 注意过滤器配置顺序不能颠倒
         filterChainDefinitionMap.put("/source/**", "anon");
         filterChainDefinitionMap.put("/word/**", "anon");
-
-
+        filterChainDefinitionMap.put("/sample/sampleInfo", "anon");
+        filterChainDefinitionMap.put("/sample/downloadNewSampleTab", "anon");
         filterChainDefinitionMap.put("/userLogin/**", "anon");
         filterChainDefinitionMap.put("/qiyuesuo/**", "anon");
         filterChainDefinitionMap.put("/report/previewDownLoad", "anon");
