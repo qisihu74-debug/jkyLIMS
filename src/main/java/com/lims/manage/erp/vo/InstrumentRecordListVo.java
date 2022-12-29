@@ -24,4 +24,6 @@ public class InstrumentRecordListVo {
     private Date endTime;
     private String type;
     private String user;
+    private String beforeStatus;
+    private String afterStatus;
 }

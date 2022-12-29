@@ -12,6 +12,7 @@ import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestInstrumentService;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.vo.ExportParamVo;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
 import io.swagger.annotations.Api;
@@ -178,24 +179,18 @@ public class TestInstrumentController extends ApiController {
     /**
      * 下载多个设备的使用记录
      *
-     * @param list
+     * @param
      * @param response
      */
-    @GetMapping("/batchExportInstrumentRecord")
-    public void batchExportInstrumentRecord(@RequestParam("list") List<Long> list, HttpServletResponse response) {
-//    public void batchExportInstrumentRecord(String ids, HttpServletResponse response) {
-//        List<Long> list = Lists.newArrayList();
-//        String[] split = ids.split("-");
-//        for (int i = 0; i < split.length; i++) {
-//            list.add(Long.parseLong(split[i]));
-//        }
-        HashMap<String, Object> stringObjectHashMap = testInstrumentService.batchExportInstrumentRecord(list);
+    @PostMapping("/batchExportInstrumentRecord")
+    public void batchExportInstrumentRecord(@RequestBody ExportParamVo vo, HttpServletResponse response) {
+        HashMap<String, Object> stringObjectHashMap = testInstrumentService.batchExportInstrumentRecord(vo.getDeviceId());
         XLSTransformer transformer = new XLSTransformer();
-        InputStream fileStream = MinIoUtil.getFileStream("device-record", "records" + list.size() + ".xls");
+        InputStream fileStream = MinIoUtil.getFileStream("device-record", "records" + vo.getDeviceId().size() + ".xls");
         Workbook workbook;
         try {
             workbook = transformer.transformXLS(fileStream, stringObjectHashMap);
-            for (int i = 0; i < list.size(); i++) {
+            for (int i = 0; i < vo.getDeviceId().size(); i++) {
                 workbook.setSheetName(i, stringObjectHashMap.get("deviceInfo" + i).toString() + "使用记录");
             }
             response.reset();
