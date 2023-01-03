@@ -56,7 +56,7 @@ public class TestSampleEntity {
 
     private String generation;
     /**
-     * 样品状态：待检0；领样1；在检2；已检3；
+     * 样品状态：待检0；1在检,2已检3；
      */
     private String state;
     /**

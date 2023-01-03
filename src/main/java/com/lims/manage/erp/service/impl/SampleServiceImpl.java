@@ -415,6 +415,8 @@ public class SampleServiceImpl implements SampleService {
                     }
                 }
                 entity.setOperateType(integerList);
+            }else {
+                entity.setOperateType(integerList);
             }
             return entity;
         }else {
@@ -437,10 +439,10 @@ public class SampleServiceImpl implements SampleService {
         if (state >= 3){
             Integer status = null;
             if (state == 3){
-                status =1;
+                status =0;
             }
             if (state == 4){
-                status = 2;
+                status = 1;
             }
             sampleEntityMapper.updateIsSave(sampleId,status);
         }

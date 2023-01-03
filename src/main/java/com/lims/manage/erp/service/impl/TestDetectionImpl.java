@@ -281,7 +281,7 @@ public class TestDetectionImpl implements TestDetectionService {
                         // 增加样品样品流转状态
                         SampleCirculationRecord sa = new SampleCirculationRecord();
                         sa.setSampleId(sampleId);
-                        sa.setStatus("3");
+                        sa.setStatus("2");
                         sa.setOperatorId(userInfo.getUserId());
                         sa.setOperatorName(userInfo.getName());
                         sa.setTime(new Date());
