@@ -225,7 +225,7 @@ public interface SampleEntityMapper {
      * @param state
      */
     @Update("update test_sample set state=#{state} where id = #{sampleId}")
-    void updateSampleState(@Param("sampleId") Integer sampleId, @Param("isUse") Integer state);
+    void updateSampleState(@Param("sampleId") Integer sampleId, @Param("state") Integer state);
 
     /**
      * 通过委托单id 获取样品信息集合。

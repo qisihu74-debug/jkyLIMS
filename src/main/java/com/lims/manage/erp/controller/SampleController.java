@@ -45,6 +45,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -505,12 +507,21 @@ public class SampleController {
      * @param state
      * @return
      */
-    @RequestMapping("updateState")
-    public Result updateState(Integer sampleId,Integer state){
+    @GetMapping("updateState")
+    public Result updateState(Integer sampleId, Integer state, String time){
+        System.out.println("领样时间:{}"+time);
+        log.info("领养时间:{}",time);
+        Date date= null;
+        SimpleDateFormat simpleDateFormat =new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            date = simpleDateFormat.parse(time);
+        }catch (Exception e){
+            log.error("时间转换异常:{}",e);
+        }
         if (sampleId == null || state == null){
             return ResultUtil.error("缺少参数");
         }
-        boolean flag = sampleService.updateState(sampleId,state);
+        boolean flag = sampleService.updateState(sampleId,state,date);
         if (flag){
             return ResultUtil.success("操作成功");
         }else {

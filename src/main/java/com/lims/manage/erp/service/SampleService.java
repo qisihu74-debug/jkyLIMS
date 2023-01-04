@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
@@ -90,5 +91,5 @@ public interface SampleService {
 
     TestSampleEntity sampleInfo(Integer sampleId);
 
-    boolean updateState(Integer sampleId,Integer state);
+    boolean updateState(Integer sampleId, Integer state, Date time);
 }

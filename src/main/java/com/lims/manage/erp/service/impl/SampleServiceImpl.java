@@ -426,14 +426,14 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateState(Integer sampleId,Integer state) {
+    public boolean updateState(Integer sampleId,Integer state,Date time) {
         //2领样，3留样，4处置
         List<Integer> ids = sampleEntityMapper.getExist(sampleId,state);
         if (ids != null && ids.size() >= 1){
             return false;
         }
         //更新样品表状态
-        if (state == 2){
+        if (state == 1){
             sampleEntityMapper.updateSampleState(sampleId,state);
         }
         if (state >= 3){
@@ -450,7 +450,7 @@ public class SampleServiceImpl implements SampleService {
         SampleCirculationRecord record = new SampleCirculationRecord();
         record.setSampleId(sampleId);
         record.setStatus(state+"");
-        record.setTime(new Date());
+        record.setTime(time);
         record.setOperatorId(ShiroUtils.getUserInfo().getUserId());
         record.setOperatorName(ShiroUtils.getUserInfo().getUsername());
         sampleEntityMapper.insertRecord(record);
