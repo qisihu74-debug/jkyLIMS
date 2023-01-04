@@ -58,9 +58,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     Logger logger = LoggerFactory.getLogger(TestSampleEntityServiceImpl.class);
 
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-    private final Date now = new Date();
 
     private int getNewSampleCode() {
+        Date now = new Date();
         //获取数据库当前年份最大的样品编号
         PageHelper.clearPage();
         Integer maxNumber = sampleEntityMapper.getMaxNumber(sdf.format(now));
@@ -76,6 +76,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
     @Override
     public Integer batchInsertSample(List<SampleDetailAddVo> samples) {
+        Date now = new Date();
         List<TestSampleEntity> entities = Lists.newArrayList();
         //获取数据库当前年份最大的样品编号
         int newMax = getNewSampleCode();
@@ -110,6 +111,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     @Transactional
     @Override
     public Integer batchInsertMixSample(SamplesAddVo samples) {
+        Date now = new Date();
         List<TestSampleEntity> param = Lists.newArrayList();
         //处理配合比样品数据
         Integer newId = testSampleEntityMapper.getMaxId() + 1;
@@ -415,6 +417,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<TestSampleEntity>  batchInsertSampleCopy(List<SampleDetailAddVo> samples) {
+        Date now = new Date();
         List<TestSampleEntity> entities = Lists.newArrayList();
         //获取数据库当前年份最大的样品编号
         int newMax = getNewSampleCode();
@@ -463,6 +466,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TestSampleMixInfoEntity batchInsertMixSampleCopy(SamplesAddVo samples,long id) {
+        Date now = new Date();
         List<TestSampleEntity> param = Lists.newArrayList();
         //处理配合比样品数据
         Integer newId = testSampleEntityMapper.getMaxId() + 1;
@@ -574,5 +578,4 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             }
         }
     }
-
 }
