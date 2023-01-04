@@ -673,10 +673,10 @@
                 and sample_code LIKE CONCAT('%',#{sampleCode},'%')
             </if>
             <if test="state!=null and state!=''">
-                and state LIKE = #{state}
+                and state = #{state}
             </if>
             <if test="isSave!=null and isSave!=''">
-                and is_save LIKE = #{isSave}
+                and is_save = #{isSave}
             </if>
         </trim>
         order by id DESC,str_to_date( received_date, '%Y-%m-%d' ) desc

@@ -439,10 +439,10 @@ public class SampleServiceImpl implements SampleService {
         if (state >= 3){
             Integer status = null;
             if (state == 3){
-                status =0;
+                status =1;
             }
             if (state == 4){
-                status = 1;
+                status = 2;
             }
             sampleEntityMapper.updateIsSave(sampleId,status);
         }

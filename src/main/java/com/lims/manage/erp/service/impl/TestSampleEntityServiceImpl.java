@@ -22,7 +22,6 @@ import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.SampleDetailAddVo;
 import com.lims.manage.erp.vo.SampleSimpleListVo;
 import com.lims.manage.erp.vo.SamplesAddVo;
@@ -180,6 +179,12 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             String[] split = sampleEntity.getReceivedDate().split("~");
             sampleEntity.setBeginDate(split[0]);
             sampleEntity.setEndDate(split[1]);
+        }
+        if ("2".equals(sampleEntity.getState())){
+            sampleEntity.setState("1");
+        }
+        if ("3".equals(sampleEntity.getState())){
+            sampleEntity.setState("2");
         }
         List<SampleSimpleListVo> simpleList = testSampleEntityMapper.showSimpleList(sampleEntity);
         PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
