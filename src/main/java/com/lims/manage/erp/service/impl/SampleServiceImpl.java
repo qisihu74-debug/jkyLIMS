@@ -12,6 +12,7 @@ import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.mapper.SysUserRoleDao;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
@@ -66,6 +67,8 @@ public class SampleServiceImpl implements SampleService {
     private EntrustEntityMapper mapper;
     @Autowired
     private SysUserRoleDao sysUserRoleDao;
+    @Autowired
+    private SysUserDao userDao;
 
     @Override
     public Integer addSampleData(SampleAddParamVo addParamVo, MultipartFile[] file) {
@@ -439,10 +442,10 @@ public class SampleServiceImpl implements SampleService {
         if (state >= 3){
             Integer status = null;
             if (state == 3){
-                status =0;
+                status =1;
             }
             if (state == 4){
-                status = 1;
+                status = 2;
             }
             sampleEntityMapper.updateIsSave(sampleId,status);
         }
@@ -452,7 +455,7 @@ public class SampleServiceImpl implements SampleService {
         record.setStatus(state+"");
         record.setTime(time);
         record.setOperatorId(ShiroUtils.getUserInfo().getUserId());
-        record.setOperatorName(ShiroUtils.getUserInfo().getUsername());
+        record.setOperatorName(userDao.getSysUserName(ShiroUtils.getUserInfo().getUserId()));
         sampleEntityMapper.insertRecord(record);
         return true;
     }
