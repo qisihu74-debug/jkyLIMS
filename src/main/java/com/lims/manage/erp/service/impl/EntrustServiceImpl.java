@@ -32,6 +32,7 @@ import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
+import io.swagger.models.auth.In;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -53,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -121,6 +123,8 @@ public class EntrustServiceImpl implements EntrustService {
     public synchronized String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) throws Exception {
             // 获取业务受理人id
             SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            // 样品编号变动 = true
+            Boolean sampleStatus = false;
             //存放委托基本信息==》test_entrusted
             EntrustEntity basisInfo = new EntrustEntity(vo);
             long id = GenID.getID();
@@ -162,7 +166,7 @@ public class EntrustServiceImpl implements EntrustService {
                 for (SampleEntity sampleEntity : samples) {
                     SampleEntity sampleData = new SampleEntity();
                     // 使用方法 处理样品来样时间 与委托单受理日期
-                    methodAcceptanceDate(sampleEntity.getId(),vo.getAcceptanceDate(),sampleData);
+                    sampleStatus = methodAcceptanceDate(sampleEntity.getId(),vo.getAcceptanceDate(),sampleData);
                     // 委托单创建 更新样品状态 state 待检0
                     sampleData.setState("0");
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
@@ -313,6 +317,9 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setAuditState("1");
             basisInfo.setCreateTime(new Date());
             entityMapper.insertEntrustInfo(basisInfo);
+            if(sampleStatus){
+                return "新建委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";
+            }
             return "新建委托成功";
     }
 
@@ -733,7 +740,9 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public Boolean updateEntrustCheckItem(EntrustAddVo vo){
+    public String updateEntrustCheckItem(EntrustAddVo vo){
+        // 样品编号变动 = true
+        Boolean sampleStatus = false;
         if(!CollectionUtils.isEmpty(vo.getSamples())){
             // 获取委托单受理日期
             EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(vo.getId());
@@ -741,17 +750,25 @@ public class EntrustServiceImpl implements EntrustService {
             for(SampleEntity sampleEntity1:samples){
                 SampleEntity sampleData = new SampleEntity();
                 // 使用方法 处理样品来样时间 与委托单受理日期
-                methodAcceptanceDate(sampleEntity1.getId(),entrustAddVo.getAcceptanceDate(),sampleData);
+                sampleStatus = methodAcceptanceDate(sampleEntity1.getId(),entrustAddVo.getAcceptanceDate(),sampleData);
                 sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
             }
         }
         //查询当前委托单下的任务单数量
         Integer reportStateTaskNum = entityMapper.getReportStateTaskNum(vo.getId());
         if(reportStateTaskNum>0){//已发布
-            return updatePublishedEntrust0711(vo);
+             if(!updatePublishedEntrust0711(vo)){
+                 return null;
+             }
         }else{//未发布
-            return updateEntrustTestNewSampleEnscript0621(vo);
+            if(!updateEntrustTestNewSampleEnscript0621(vo)){
+                return null;
+            }
         }
+        if(sampleStatus){
+            return "修改委托下样品成功\t"+"委托与样品时间不一致，样品编号及签收时间发生变动";
+        }
+        return "修改委托下样品成功";
     }
 
     /**
@@ -2805,6 +2822,8 @@ public class EntrustServiceImpl implements EntrustService {
     public synchronized String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) throws Exception {
         // 获取业务人员id
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 样品编号变动 = true
+        Boolean sampleStatus = false;
         // 获取前台得到的 vo.getId()
         long old = vo.getId();
         //存放委托基本信息==》test_entrusted
@@ -2881,7 +2900,7 @@ public class EntrustServiceImpl implements EntrustService {
                 sampleEntity2.setCheckDate(sampleEntity.getCheckDate()!=null?sampleEntity.getCheckDate():new Date());
                 sampleEntity2.setCompanyId(basisInfo.getEntrustCompanyId());
                 // 使用方法 处理样品来样时间 与委托单受理日期
-                methodAcceptanceDate(sampleEntity.getId(),vo.getAcceptanceDate(),sampleEntity2);
+                sampleStatus = methodAcceptanceDate(sampleEntity.getId(),vo.getAcceptanceDate(),sampleEntity2);
                 // 委托单创建 更新样品状态 state 待检0
                 sampleEntity2.setState("0");
                 // update样品信息
@@ -3003,6 +3022,9 @@ public class EntrustServiceImpl implements EntrustService {
         }
         basisInfo.setCreateTime(new Date());
         entityMapper.insertEntrustInfo(basisInfo);
+        if(sampleStatus){
+            return "新建委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";
+        }
         return "新建委托成功";
     }
 
@@ -3786,7 +3808,7 @@ public class EntrustServiceImpl implements EntrustService {
      * @param AcceptanceDate 委托单受理日期
      * @param sampleData 样品update 数据
      */
-    private void methodAcceptanceDate(Integer Id,Date AcceptanceDate,SampleEntity sampleData){
+    private Boolean methodAcceptanceDate(Integer Id,Date AcceptanceDate,SampleEntity sampleData){
         // 获取样品详情
         PageHelper.clearPage();
         TemplateSampleVo sampleEntityData  = sampleEntityMapper.getOriginalSampleInfo(Id);
@@ -3796,37 +3818,56 @@ public class EntrustServiceImpl implements EntrustService {
         sampleData.setReceivedDate(sampleEntityData.getSampleTime());
         // 比较样品签收时间 < 委托单受理日期
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        // true：样品签收时间改动
+        Boolean status = false;
         try {
             Date date1 = sdf.parse(sampleData.getReceivedDate());
-            // 测试此日期是否在指定日期之后。
-            if (!AcceptanceDate.after(date1)) {
+            // 测试此日期是否在指定日期之后.时间不平等
+            if (!AcceptanceDate.after(date1)&&!AcceptanceDate.equals(date1)) {
                 // 签收时间 =委托单受理日期
                 sampleData.setReceivedDate(sdf.format(AcceptanceDate));
+                status = true;
             }
         }
         catch (Exception e){
             Debug.println("新增委托日志异常输出:\t",e+"  update样品状态时");
         }
-        // 判断样品类别 处理配合比信息 进行同步时间。
-        if(!sampleEntityData.getSampleType().equals("原材")){
-            // 获取配合比信息：
-            List<SampleDetailVo> sampleTagInfoPidList = Lists.newArrayList();
-            sampleTagInfoPidList = sampleEntityMapper.getSampleTagInfoPidList(Id);
-            if(!CollectionUtils.isEmpty(sampleTagInfoPidList)){
-                // 进行遍历塞配合比收样时间数值。
-                for(SampleDetailVo sampleDetailVo1 :sampleTagInfoPidList){
-                    SampleEntity sampleData1 = new SampleEntity();
-                    sampleData1.setId(sampleDetailVo1.getId());
-                    sampleData1.setReceivedDate(sampleData.getReceivedDate());
-                    // update样品信息
-                    sampleEntityMapper.updateByPrimaryKeySelective(sampleData1);
+        if(status){
+            SampleEntity sampleData1 = new SampleEntity();
+            sampleData1.setId(sampleData.getId());
+            sampleData1.setReceivedDate(sampleData.getReceivedDate());
+            // 处理原材样品编号
+            sampleData1.setSampleCode(methodSampleCode(sampleEntityData.getSampleNumber(),sampleData.getReceivedDate()));
+            // update样品信息
+            sampleEntityMapper.updateByPrimaryKeySelective(sampleData1);
+            // 判断样品类别 处理配合比信息 进行同步时间。
+            if(!sampleEntityData.getSampleType().equals("原材")){
+                // 获取配合比信息：
+                List<SampleDetailVo> sampleTagInfoPidList = Lists.newArrayList();
+                sampleTagInfoPidList = sampleEntityMapper.getSampleTagInfoPidList(Id);
+                if(!CollectionUtils.isEmpty(sampleTagInfoPidList)){
+                    // 进行遍历塞配合比收样时间数值。
+                    for(SampleDetailVo sampleDetailVo1 :sampleTagInfoPidList){
+                        SampleEntity sampleData2 = new SampleEntity();
+                        sampleData2.setId(sampleDetailVo1.getId());
+                        sampleData2.setReceivedDate(sampleData.getReceivedDate());
+                        if(sampleData1.getSampleCode()!=null){
+                         // 处理配合比则 更改样品编号
+                         sampleData2.setSampleCode(methodMixProportionSampleCode(sampleData1.getSampleCode(),sampleDetailVo1.getSampleCode()));
+                        }
+                        // update样品信息
+                        sampleEntityMapper.updateByPrimaryKeySelective(sampleData2);
+                    }
                 }
             }
+            // 记录日志
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "处理样品来样时间与委托单受理日期:\t" +
+                    "委托单受理日期为:"+(new Timestamp(AcceptanceDate.getTime()))+
+                    "\t样品编号"+sampleEntityData.getSampleNumber()+"\t样品来样时间为\t" +sampleEntityData.getSampleTime() +
+                    "\t变更后样品来样时间为\t"+sampleData.getReceivedDate(), Const.ENTRUST_FOUND, true);
+            return true;
         }
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "处理样品来样时间与委托单受理日期:\t" +
-                "委托单受理日期为:"+(new Timestamp(AcceptanceDate.getTime()))+
-                "\t样品编号"+sampleEntityData.getSampleNumber()+"\t样品来样时间为\t" +sampleEntityData.getSampleTime() +
-                "\t变更后样品来样时间为\t"+sampleData.getReceivedDate(), Const.ENTRUST_FOUND, true);
+        return false;
     }
     @Override
     public PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo) {
@@ -4168,4 +4209,64 @@ public class EntrustServiceImpl implements EntrustService {
         return data;
     }
 
+    /**
+     *
+     * @param strSampleCode 样品编号
+     * @param strReceivedDate 样品签收时间
+     * @return 处理后样品编号 String类型
+     */
+    public String methodSampleCode(String strSampleCode,String strReceivedDate){
+        // 处理样品编号:来样时间与样品编号需要一致
+        StringBuffer sampleCode = new StringBuffer();
+        // 样品编号 比对 来样时间 年份不一致 则更改样品编号 为当前年份最大编号。
+        // 截取样品编号
+        String[] sampleCodes = strSampleCode.split("-");
+        // 样品来样时间
+        String[] times = strReceivedDate.split("-");
+        if(!sampleCodes[1].equals(times[0])){
+            // 根据年限 查询最大样品编号
+            Integer maxSampleCode = sampleEntityMapper.getMaxNumber(times[0]);
+            maxSampleCode+=1;
+            // 更改样品年限
+            sampleCodes[1] = String.valueOf(times[0]);
+            // 更改样品编号
+            String suffix = new DecimalFormat("00000").format(maxSampleCode);
+            sampleCodes[2] = suffix;
+            for(int i=0; i<sampleCodes.length; i++){
+                sampleCode.append(sampleCodes[i]);
+                sampleCode.append("-");
+            }
+           if(sampleCode.deleteCharAt(sampleCode.length()-1).toString().length()>1){
+               return sampleCode.toString();
+           }
+        }
+        return null;
+    }
+
+    /**
+     * 处理配合比编号
+     *
+     * @param strCode 原材编号
+     * @param selfNumber 自身编号
+     * @return
+     */
+    public String methodMixProportionSampleCode(String strCode,String selfNumber){
+        String[] sampleCodes = strCode.split("-");
+        String[] numbers = selfNumber.split("-");
+        numbers[1] = sampleCodes[1];
+        // 获取配合比下后缀规则定位 "_"
+        String[] numberSuffixs = numbers[2].split("_");
+        numbers[2] = sampleCodes[2];
+        StringBuffer sampleCode = new StringBuffer();
+        for(int i=0; i<numbers.length; i++){
+            sampleCode.append(numbers[i]);
+            sampleCode.append("-");
+        }
+        if(sampleCode.deleteCharAt(sampleCode.length()-1).toString().length()>1){
+            sampleCode.append("_");
+            sampleCode.append(numberSuffixs[1]);
+         return sampleCode.toString();
+        }
+        return null;
+    }
 }

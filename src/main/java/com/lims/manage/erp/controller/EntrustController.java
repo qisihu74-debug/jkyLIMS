@@ -145,9 +145,9 @@ public class EntrustController {
         if(!entrustService.efficacyState(entrust.getId())){
             return ResultUtil.error(678, "修改委托失败！委托单未受理");
         }
-        Boolean isSuccess = entrustService.updateEntrustCheckItem(entrust);
-        if (isSuccess) {
-            return ResultUtil.success("修改委托下样品成功");
+        String strSuccess = entrustService.updateEntrustCheckItem(entrust);
+        if (strSuccess!=null) {
+            return ResultUtil.success(strSuccess);
         } else {
             return ResultUtil.error(678, "修改委托下样品失败！");
         }
