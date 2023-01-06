@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -667,14 +668,29 @@ public class EntrustServiceImpl implements EntrustService {
         EntrustEntity basisInfo = new EntrustEntity(vo);
         // 判断 样品与委托单是否存在
         List<Integer> sampleIds = entityMapper.getSampleId(basisInfo.getId());
+        // 获取业务受理人id
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 旧样品id
+        List<Integer> oldSampleIds = new ArrayList<>();
+        oldSampleIds.addAll(sampleIds);
+        // 前端返回样品id
+        List<Integer> leadingEndIds = new ArrayList<>();
         if (!CollectionUtils.isEmpty(sampleIds)) {
             for (Integer sampleId : sampleIds) {
                 //修改样品为未使用
                 sampleEntityMapper.updateSampleUse(sampleId, 0);
+                oldSampleIds.add(sampleId);
             }
             // 1.0 样品与委托单已存在 1.1、删除样品id
             entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
         }
+        if(!CollectionUtils.isEmpty(vo.getSamples())){
+            for(SampleEntity leadSample :vo.getSamples()){
+                leadingEndIds.add(leadSample.getId());
+            }
+        }
+        // 进行方法处理 样品状态操作
+        methodSampleIds(oldSampleIds,leadingEndIds,userInfo.getName(),userInfo.getUserId());
         // 删除判定依据id
         entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
         // 删除缴费信息
@@ -4268,5 +4284,45 @@ public class EntrustServiceImpl implements EntrustService {
          return sampleCode.toString();
         }
         return null;
+    }
+
+    /**
+     * 处理样品状态表状态 test_sample_circulation_record
+     * 处理数据：1、差集deleteSampleIds 进行删除
+     * 处理数据：2、差集addSampleIds 进行新增
+     *
+     * @param oldSampleIds 旧样品id
+     * @param leadingEndIds 前端实际存储样品id
+     * @param name  流转人名字
+     * @param userId 用户id
+     */
+    public void methodSampleIds(List<Integer> oldSampleIds, List<Integer> leadingEndIds,String name,Long userId){
+        // 差集
+        List<Integer> deleteList = oldSampleIds.stream()
+                .filter(item -> !leadingEndIds.stream().collect(Collectors.toList()).contains(item))
+                .collect(Collectors.toList());
+        if(!CollectionUtils.isEmpty(deleteList)){
+            for(Integer sampleId : deleteList){
+                // 删除样品流转状态 =0 根据样品id
+                entityMapper.deleteTestSampleCirculationRecordById(sampleId);
+            }
+        }
+        // 获取 新增的样品id数据
+        List<Integer> addList = leadingEndIds.stream()
+                .filter(item -> !oldSampleIds.stream().collect(Collectors.toList()).contains(item))
+                .collect(Collectors.toList());
+        if(!CollectionUtils.isEmpty(addList)){
+            for(Integer sampleId :addList){
+                // 新增样品流转状态
+                // 增加样品样品流转状态
+                SampleCirculationRecord sa = new SampleCirculationRecord();
+                sa.setSampleId(sampleId);
+                sa.setStatus("0");
+                sa.setOperatorId(userId);
+                sa.setOperatorName(name);
+                sa.setTime(new Date());
+                sampleEntityMapper.saveSampleCirculationRecord(sa);
+            }
+        }
     }
 }
