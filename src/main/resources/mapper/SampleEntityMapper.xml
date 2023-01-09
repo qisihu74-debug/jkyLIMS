@@ -793,7 +793,8 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                quantity_per_group quantityPerGroup,
                outward_describe outwardDescribe,
                sample_type sampleType,
-               id
+               id,
+              received_date receivedDate
         FROM test_sample
         WHERE pid = #{sampleId}
     </select>

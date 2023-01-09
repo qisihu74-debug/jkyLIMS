@@ -15,10 +15,7 @@ import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.vo.*;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -590,4 +587,12 @@ public interface EntrustEntityMapper extends BaseMapper {
             "LIMIT 1\t\n" +
             "\t")
     LabelValueVo getIssueDeptById(@Param("deptId") Integer deptId);
+
+    /**
+     * 删除样品流转状态 =0 根据样品id
+     * @param sampleId
+     * @return
+     */
+    @Delete("DELETE FROM test_sample_circulation_record WHERE sample_id = #{sampleId} and  status =0")
+    int deleteTestSampleCirculationRecordById(@Param("sampleId") Integer sampleId);
 }
