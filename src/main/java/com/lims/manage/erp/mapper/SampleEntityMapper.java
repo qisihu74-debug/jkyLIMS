@@ -288,10 +288,10 @@ public interface SampleEntityMapper {
             "\tt2.sample_id =#{sampleId}")
     String getEntrustIsSaveBySampleId(@Param("sampleId") Integer sampleId);
 
-    @Select("SELECT sample_id\n" +
+    @Select("SELECT distinct sample_id\n" +
             "FROM\n" +
             "\ttest_sample_circulation_record\n" +
             "WHERE\n" +
-            "\tsample_id = #{sampleId} and status = '3' or status = '4'")
+            "\tsample_id = #{sampleId} and (status = '3' or status = '4')")
     List<Integer> checkExist(@Param("sampleId") Integer sampleId);
 }

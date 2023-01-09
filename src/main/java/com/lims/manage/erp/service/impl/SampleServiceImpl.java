@@ -398,19 +398,12 @@ public class SampleServiceImpl implements SampleService {
         SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
         if (sampleTagInfo != null){
             TestSampleEntity entity = new TestSampleEntity();
-            //判断委托单样品留样状态
-            String num = sampleEntityMapper.getEntrustIsSaveBySampleId(sampleId);
             List<Integer> ids = sampleEntityMapper.checkExist(sampleId);
             if (ids != null && ids.size() >= 1){
                 //展示五条记录，待检-留样-在检-已检-处置
                 entity.setSaveState(1);
             }else {
-                if ("1".equals(num)){
-                    entity.setSaveState(1);
-                }
-                if ("2".equals(num)){
-                    entity.setSaveState(0);
-                }
+                entity.setSaveState(0);
             }
             entity.setId(sampleId);
             entity.setSampleCode(sampleTagInfo.getSampleCode());
