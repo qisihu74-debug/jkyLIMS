@@ -71,6 +71,9 @@ public class TestInstrumentController extends ApiController {
         if (testInstrument.getName() != null) {
             queryWrapper.like("i.name", testInstrument.getName());
         }
+        if (testInstrument.getCode() != null) {
+            queryWrapper.like("i.code", testInstrument.getCode());
+        }
         queryWrapper.orderByDesc("i.create_time");
         return ResultUtil.success(this.testInstrumentService.getPageList(page, queryWrapper));
     }
