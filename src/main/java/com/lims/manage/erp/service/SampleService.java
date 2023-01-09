@@ -91,5 +91,5 @@ public interface SampleService {
 
     TestSampleEntity sampleInfo(Integer sampleId);
 
-    boolean updateState(Integer sampleId, Integer state, Date time);
+    Integer updateState(Integer sampleId, Integer state, Date time);
 }

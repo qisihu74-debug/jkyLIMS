@@ -510,8 +510,8 @@ public class SampleController {
      */
     @GetMapping("updateState")
     public Result updateState(Integer sampleId, Integer state, String time){
-        System.out.println("领样时间:{}"+time);
-        log.info("领养时间:{}",time);
+        System.out.println("扫码时间:{}"+time);
+        log.info("扫码时间:{}",time);
         Date date= null;
         if (StringUtils.isEmpty(time)){
             date = new Date(System.currentTimeMillis());
@@ -526,11 +526,13 @@ public class SampleController {
         if (sampleId == null || state == null){
             return ResultUtil.error("缺少参数");
         }
-        boolean flag = sampleService.updateState(sampleId,state,date);
-        if (flag){
+        Integer flag = sampleService.updateState(sampleId,state,date);
+        if (flag == 0){
             return ResultUtil.success("操作成功");
-        }else {
+        }else if (flag == 1){
             return ResultUtil.error("操作失败,可能其它账号已经操作");
+        } else{
+            return ResultUtil.error("操作失败,样品未绑定");
         }
     }
 

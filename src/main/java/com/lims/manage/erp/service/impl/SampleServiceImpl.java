@@ -437,11 +437,17 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateState(Integer sampleId,Integer state,Date time) {
+    public Integer updateState(Integer sampleId,Integer state,Date time) {
         //2领样，3留样，4处置
         List<Integer> ids = sampleEntityMapper.getExist(sampleId,state);
         if (ids != null && ids.size() >= 1){
-            return false;
+            return 1;
+        }
+        if (state == 3){
+            List<Integer> exist = sampleEntityMapper.getExist(sampleId, 0);
+            if (CollectionUtils.isEmpty(exist)){
+                return 2;
+            }
         }
         //插入流转记录
         SampleCirculationRecord record = new SampleCirculationRecord();
@@ -455,9 +461,18 @@ public class SampleServiceImpl implements SampleService {
                 status =1;
                 //留样时查询样品接收人和时间
                 SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
-                SysUserEntity one = userDao.getOne(sampleTagInfo.getInspector());
-                record.setOperatorId(one.getUserId());
-                record.setTime(time);
+                SysUserEntity one = userDao.getUserIdByName(sampleTagInfo.getInspector());
+                if (one != null){
+                    record.setOperatorId(one.getUserId());
+                }
+                SimpleDateFormat simpleDateFormat =new SimpleDateFormat("yyyy-MM-dd");
+                Date date = null;
+                try {
+                    date = simpleDateFormat.parse(sampleTagInfo.getReceivedDate());
+                }catch (Exception e){
+                    log.error("时间转换异常:{}",e);
+                }
+                record.setTime(date);
                 record.setOperatorName(sampleTagInfo.getInspector());
             }
             if (state == 4){
@@ -477,7 +492,7 @@ public class SampleServiceImpl implements SampleService {
             record.setOperatorName(userDao.getSysUserName(ShiroUtils.getUserInfo().getUserId()));
         }
         sampleEntityMapper.insertRecord(record);
-        return true;
+        return 0;
     }
 
     /**
