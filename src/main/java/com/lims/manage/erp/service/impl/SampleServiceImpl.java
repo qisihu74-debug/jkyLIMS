@@ -12,6 +12,7 @@ import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.mapper.SysUserRoleDao;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
@@ -28,6 +29,7 @@ import com.lims.manage.erp.vo.SamplePrivateInfoVo;
 import com.lims.manage.erp.vo.SamplePublicInfoVo;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +68,8 @@ public class SampleServiceImpl implements SampleService {
     private EntrustEntityMapper mapper;
     @Autowired
     private SysUserRoleDao sysUserRoleDao;
+    @Autowired
+    private SysUserDao userDao;
 
     @Override
     public Integer addSampleData(SampleAddParamVo addParamVo, MultipartFile[] file) {
@@ -394,11 +398,18 @@ public class SampleServiceImpl implements SampleService {
         SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
         if (sampleTagInfo != null){
             TestSampleEntity entity = new TestSampleEntity();
+            List<Integer> ids = sampleEntityMapper.checkExist(sampleId);
+            if (ids != null && ids.size() >= 1){
+                //展示五条记录，待检-留样-在检-已检-处置
+                entity.setSaveState(1);
+            }else {
+                entity.setSaveState(0);
+            }
             entity.setId(sampleId);
             entity.setSampleCode(sampleTagInfo.getSampleCode());
             entity.setSampleName(sampleTagInfo.getSampleName());
             entity.setSpecs(sampleTagInfo.getSpecs());
-            entity.setOutwardDescribe(sampleTagInfo.getOutwardDescribe());
+            entity.setOutwardDescribe(StringUtils.isEmpty(sampleTagInfo.getOutwardDescribe())?"/":sampleTagInfo.getOutwardDescribe());
             //查询样品流转记录
             List<SampleCirculationRecord> list = sampleEntityMapper.getRecords(sampleId);
             entity.setCirculationCecords(list);
@@ -426,12 +437,20 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateState(Integer sampleId,Integer state,Date time) {
+    public Integer updateState(Integer sampleId,Integer state,Date time) {
         //2领样，3留样，4处置
         List<Integer> ids = sampleEntityMapper.getExist(sampleId,state);
         if (ids != null && ids.size() >= 1){
-            return false;
+            return 1;
         }
+        if (state == 3){
+            List<Integer> exist = sampleEntityMapper.getExist(sampleId, 0);
+            if (CollectionUtils.isEmpty(exist)){
+                return 2;
+            }
+        }
+        //插入流转记录
+        SampleCirculationRecord record = new SampleCirculationRecord();
         //更新样品表状态
         if (state == 1){
             sampleEntityMapper.updateSampleState(sampleId,state);
@@ -439,22 +458,41 @@ public class SampleServiceImpl implements SampleService {
         if (state >= 3){
             Integer status = null;
             if (state == 3){
-                status =0;
+                status =1;
+                //留样时查询样品接收人和时间
+                SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
+                SysUserEntity one = userDao.getUserIdByName(sampleTagInfo.getInspector());
+                if (one != null){
+                    record.setOperatorId(one.getUserId());
+                }
+                SimpleDateFormat simpleDateFormat =new SimpleDateFormat("yyyy-MM-dd");
+                Date date = null;
+                try {
+                    date = simpleDateFormat.parse(sampleTagInfo.getReceivedDate());
+                }catch (Exception e){
+                    log.error("时间转换异常:{}",e);
+                }
+                record.setTime(date);
+                record.setOperatorName(sampleTagInfo.getInspector());
             }
             if (state == 4){
-                status = 1;
+                status = 2;
             }
             sampleEntityMapper.updateIsSave(sampleId,status);
         }
-        //插入流转记录
-        SampleCirculationRecord record = new SampleCirculationRecord();
         record.setSampleId(sampleId);
         record.setStatus(state+"");
-        record.setTime(time);
-        record.setOperatorId(ShiroUtils.getUserInfo().getUserId());
-        record.setOperatorName(ShiroUtils.getUserInfo().getUsername());
+        if (record.getTime() == null){
+            record.setTime(time);
+        }
+        if (record.getOperatorId() == null){
+            record.setOperatorId(ShiroUtils.getUserInfo().getUserId());
+        }
+        if (StringUtils.isEmpty(record.getOperatorName())){
+            record.setOperatorName(userDao.getSysUserName(ShiroUtils.getUserInfo().getUserId()));
+        }
         sampleEntityMapper.insertRecord(record);
-        return true;
+        return 0;
     }
 
     /**

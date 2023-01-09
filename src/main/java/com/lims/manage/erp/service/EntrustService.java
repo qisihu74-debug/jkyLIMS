@@ -48,7 +48,7 @@ public interface EntrustService {
      * @param vo
      * @return
      */
-    Boolean updateEntrustCheckItem(EntrustAddVo vo);
+    String updateEntrustCheckItem(EntrustAddVo vo);
 
     /**
      * 实现作废

@@ -261,7 +261,7 @@ public interface SampleEntityMapper {
             "FROM\n" +
             "\ttest_sample_circulation_record\n" +
             "WHERE\n" +
-            "\tsample_id = #{sampleId} and status>=#{status}")
+            "\tsample_id = #{sampleId} and status=#{status}")
     List<Integer> getExist(@Param("sampleId") Integer sampleId, @Param("status") Integer status);
 
     @Update("update test_sample set is_save=#{state} where id = #{sampleId}")
@@ -278,4 +278,20 @@ public interface SampleEntityMapper {
      * @return
      */
     int saveSampleCirculationRecord(SampleCirculationRecord sampleCirculationRecord);
+
+    @Select("SELECT\n" +
+            "\tt1.is_save\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info t1\n" +
+            "LEFT JOIN test_entrusted_sample_details_rel t2 ON t1.id = t2.entrustment_id\n" +
+            "WHERE\n" +
+            "\tt2.sample_id =#{sampleId}")
+    String getEntrustIsSaveBySampleId(@Param("sampleId") Integer sampleId);
+
+    @Select("SELECT distinct sample_id\n" +
+            "FROM\n" +
+            "\ttest_sample_circulation_record\n" +
+            "WHERE\n" +
+            "\tsample_id = #{sampleId} and (status = '3' or status = '4')")
+    List<Integer> checkExist(@Param("sampleId") Integer sampleId);
 }
