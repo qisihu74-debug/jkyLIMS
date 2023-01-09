@@ -64,6 +64,11 @@ public class TestSampleEntity {
      */
     private String isSave;
 
+    /**
+     * 手机端流转记录展示 0否，1是
+     */
+    private Integer saveState;
+
     private Date checkDate;
 
     private String remark;
