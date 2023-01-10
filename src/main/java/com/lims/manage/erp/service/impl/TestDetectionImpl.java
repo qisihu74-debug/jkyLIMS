@@ -19,10 +19,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @Author: DLC
@@ -275,19 +272,31 @@ public class TestDetectionImpl implements TestDetectionService {
                 setIds.add(itemEntity.getSampleId());
                 }
                 if(bitStatus){
-                    // 根据委托单id 批量更新样品状态。
-                    testDetectionDao.batchSampleState(list.get(0).getEntrustId());
-                    for(Integer sampleId :setIds){
-                        // 增加样品样品流转状态
-                        SampleCirculationRecord sa = new SampleCirculationRecord();
-                        sa.setSampleId(sampleId);
-                        sa.setStatus("2");
-                        sa.setOperatorId(userInfo.getUserId());
-                        sa.setOperatorName(userInfo.getName());
-                        sa.setTime(new Date());
-                        sampleEntityMapper.saveSampleCirculationRecord(sa);
+                    List<Integer> sampleIds = new ArrayList<>();
+                    sampleIds.addAll(setIds);
+                    List<Integer> ids = sampleEntityMapper.sampleStausDisint(sampleIds);
+                    // if ids==null 新增数据
+                    if(CollectionUtils.isEmpty(ids)){
+                        // 根据委托单id 批量更新样品状态。
+                        testDetectionDao.batchSampleState(list.get(0).getEntrustId());
+                        for(Integer sampleId :setIds){
+                            // 增加样品样品流转状态
+                            SampleCirculationRecord sa = new SampleCirculationRecord();
+                            sa.setSampleId(sampleId);
+                            sa.setStatus("2");
+                            sa.setOperatorId(userInfo.getUserId());
+                            sa.setOperatorName(userInfo.getName());
+                            sa.setTime(new Date());
+                            sampleEntityMapper.saveSampleCirculationRecord(sa);
+                        }
+                    }
+                    // if ids != null update数据
+                    if(CollectionUtils.isNotEmpty(ids)){
+                        // 更新样品流转状态
+                        sampleEntityMapper.updateStausDisint(userInfo.getUserId(),userInfo.getName(),new Date(),ids);
                     }
                 }
+
         }
         return true;
     }

@@ -101,7 +101,7 @@ public interface TestDetectionDao {
     List<SampleItemEntity> selectItemList(@Param("id") int id);
 
     /**
-     * 更新样品状态 = 3
+     * 更新样品状态 = 2
      *
      * @param entrustId
      * @return

@@ -12,6 +12,7 @@ import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -294,4 +295,24 @@ public interface SampleEntityMapper {
             "WHERE\n" +
             "\tsample_id = #{sampleId} and (status = '3' or status = '4')")
     List<Integer> checkExist(@Param("sampleId") Integer sampleId);
+
+    /**
+     * 根据样品id 及状态 查询是否存在 存在即update
+     * status =2
+     *
+     * @param sampleIds
+     * @return
+     */
+    List<Integer> sampleStausDisint(@Param("sampleIds") List<Integer> sampleIds);
+
+    /**
+     * 批量处理 样品状态
+     * @param operatorId
+     * @param operatorName
+     * @param time
+     * @param sampleIds
+     * @return
+     */
+    int updateStausDisint(@Param("operatorId")Long operatorId,@Param("operatorName")String operatorName,
+                          @Param("time") Date time, @Param("sampleIds") List<Integer> sampleIds);
 }

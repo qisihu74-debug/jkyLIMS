@@ -1118,4 +1118,26 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         INSERT into test_sample_circulation_record (sample_id,status,time,operator_id,operator_name)
         VALUES(#{sampleId},#{status},#{time},#{operatorId},#{operatorName})
     </insert>
+
+    <select id="sampleStausDisint" resultType="integer">
+        SELECT
+        sample_id
+        FROM
+            `test_sample_circulation_record`
+        WHERE
+            sample_id IN
+            <foreach collection="sampleIds" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            AND STATUS = 2
+    </select>
+    <update id="updateStausDisint" >
+        	UPDATE test_sample_circulation_record
+        	set time = #{time},operator_id = #{operatorId}, operator_name =#{operatorName}
+        	WHERE sample_id IN
+            <foreach collection="sampleIds" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            AND STATUS = 2
+    </update>
 </mapper>
