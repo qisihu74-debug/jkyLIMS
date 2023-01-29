@@ -39,6 +39,16 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      * @return
      */
     PageInfo showSampleList(TestSampleEntity sampleEntity);
+
+    /**
+     * 配合比可选择导入样品列表
+     * @param sampleCode
+     * @param companyId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    PageInfo importSampleList(String sampleCode,Integer companyId,Integer pageNum,Integer pageSize);
     /**
      * 上传样品多个文件
      */

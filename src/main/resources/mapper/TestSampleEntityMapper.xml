@@ -682,6 +682,30 @@
         order by id DESC,str_to_date( received_date, '%Y-%m-%d' ) desc
     </select>
 
+    <select id="importSampleList" resultType="com.lims.manage.erp.vo.SampleSimpleListVo">
+        SELECT
+        distinct
+        product_id,
+        sample_name,
+        sample_code,
+        manufacturer,
+        specs,
+        state,
+        is_save,
+        inspector,
+        generation,
+        received_date,
+        batch_number,
+        sample_type,
+        alias_name
+        FROM
+        test_sample where company_id = #{companyId} and sample_type = '原材'
+        <if test="sampleCode!=null and sampleCode!=''">
+            and sample_code LIKE CONCAT('%',#{sampleCode},'%')
+        </if>
+        order by id DESC,str_to_date( received_date, '%Y-%m-%d' ) desc
+    </select>
+
 
     <resultMap id="sampleJudgeBasisListMap" type="com.lims.manage.erp.vo.SampleJudgeBasisVo">
         <result property="id" column="id"></result>
@@ -788,5 +812,9 @@
 						LEFT JOIN test_entrusted_sample_details_rel as t2 ON t1.id = t2.entrustment_id
 						WHERE t2.sample_id = #{sampleId}
 						LIMIT 1
+    </select>
+
+    <select id="getAllById" resultType="com.lims.manage.erp.entity.TestSampleEntity">
+        SELECT * FROM test_sample where sample_code = #{sampleCode} limit 1
     </select>
 </mapper>
