@@ -110,8 +110,8 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
 
     /**
      * 根据样品ID查询样品所有信息
-     * @param sampleId
+     * @param sampleCode
      * @return
      */
-    TestSampleEntity getAllById(Integer sampleId);
+    TestSampleEntity getAllById(String sampleCode);
 }

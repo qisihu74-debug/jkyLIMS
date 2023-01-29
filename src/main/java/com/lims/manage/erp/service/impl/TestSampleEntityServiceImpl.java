@@ -159,10 +159,10 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         mixInfoEntityMapper.insert(mixInfoEntity);
         //绑定原有原材
         if(!CollectionUtils.isEmpty(samples.getSampleIds())){
-            List<Integer> sampleIds = samples.getSampleIds();
-            for (int j = 0; j < sampleIds.size(); j++) {
-                Integer integer = sampleIds.get(j);
-                TestSampleEntity allById = testSampleEntityMapper.getAllById(integer);
+            List<String> sampleCodes = samples.getSampleIds();
+            for (int j = 0; j < sampleCodes.size(); j++) {
+                String sampleCode1 = sampleCodes.get(j);
+                TestSampleEntity allById = testSampleEntityMapper.getAllById(sampleCode1);
                 allById.setId(null);
                 allById.setPid(newId);
                 param.add(allById);

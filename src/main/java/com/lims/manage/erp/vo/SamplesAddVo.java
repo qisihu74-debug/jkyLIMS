@@ -110,5 +110,5 @@ public class SamplesAddVo {
     }
 
     //用于绑定之前原材
-    private List<Integer> sampleIds;
+    private List<String> sampleIds;
 }
