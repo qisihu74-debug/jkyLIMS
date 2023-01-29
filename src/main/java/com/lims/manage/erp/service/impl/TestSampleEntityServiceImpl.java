@@ -205,6 +205,14 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     }
 
     @Override
+    public PageInfo importSampleList(String sampleCode, Integer companyId, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<SampleSimpleListVo> simpleList = testSampleEntityMapper.importSampleList(sampleCode,companyId);
+        PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
+        return pageInfo;
+    }
+
+    @Override
     public Boolean uploading(Integer id, MultipartFile[] file) {
         SampleFileTableEntity sampleFileTableEntity = new SampleFileTableEntity();
         sampleFileTableEntity.setSampleId(id);

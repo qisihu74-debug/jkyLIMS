@@ -535,4 +535,20 @@ public class SampleController {
         }
     }
 
+    /**
+     * 配合比可选择导入样品列表
+     * @param sampleCode
+     * @param companyId
+     * @return
+     */
+    @GetMapping("/importSampleList")
+    public Result importSampleList(String sampleCode,Integer companyId,Integer pageNum,Integer pageSize) {
+        if (companyId == null) {
+            return ResultUtil.error("请先选择委托单位！");
+        }
+        if (pageNum == null || pageSize == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success(testSampleEntityService.importSampleList(sampleCode,companyId,pageNum,pageSize));
+    }
 }
