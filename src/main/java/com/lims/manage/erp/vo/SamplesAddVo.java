@@ -108,4 +108,7 @@ public class SamplesAddVo {
 //        this.quantityPerGroup = samples.getQuantityPerGroup();
         this.receivedDate = samples.getCheckDate();
     }
+
+    //用于绑定之前原材
+    private List<Integer> sampleIds;
 }

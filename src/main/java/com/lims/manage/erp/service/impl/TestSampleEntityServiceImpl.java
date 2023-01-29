@@ -157,6 +157,17 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         TestSampleMixInfoEntity mixInfoEntity = new TestSampleMixInfoEntity(samples, newId);
         //插入配合比参数信息
         mixInfoEntityMapper.insert(mixInfoEntity);
+        //绑定原有原材
+        if(!CollectionUtils.isEmpty(samples.getSampleIds())){
+            List<Integer> sampleIds = samples.getSampleIds();
+            for (int j = 0; j < sampleIds.size(); j++) {
+                Integer integer = sampleIds.get(j);
+                TestSampleEntity allById = testSampleEntityMapper.getAllById(integer);
+                allById.setId(null);
+                allById.setPid(newId);
+                param.add(allById);
+            }
+        }
         return testSampleEntityMapper.insertBatchMixSamples(param);
     }
 
@@ -189,6 +200,14 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             sampleEntity.setState("2");
         }
         List<SampleSimpleListVo> simpleList = testSampleEntityMapper.showSimpleList(sampleEntity);
+        PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
+        return pageInfo;
+    }
+
+    @Override
+    public PageInfo importSampleList(String sampleCode, Integer companyId, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<SampleSimpleListVo> simpleList = testSampleEntityMapper.importSampleList(sampleCode,companyId);
         PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
         return pageInfo;
     }

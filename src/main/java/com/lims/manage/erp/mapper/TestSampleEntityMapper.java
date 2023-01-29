@@ -65,6 +65,14 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
     List<SampleSimpleListVo> showSimpleList(TestSampleEntity entity);
 
     /**
+     * 配合比可选择导入样品列表
+     * @param sampleCode
+     * @param companyId
+     * @return
+     */
+    List<SampleSimpleListVo> importSampleList(String sampleCode,Integer companyId);
+
+    /**
      * 新增委托--导入样品列表--带判定依据
      * @param entity
      * @return
@@ -99,4 +107,11 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
      * 根据样品id 查询委托单下 委托单位信息
      */
     EntrustAddVo getEntrustCompanyName(@Param("sampleId")Integer sampleId);
+
+    /**
+     * 根据样品ID查询样品所有信息
+     * @param sampleId
+     * @return
+     */
+    TestSampleEntity getAllById(Integer sampleId);
 }
