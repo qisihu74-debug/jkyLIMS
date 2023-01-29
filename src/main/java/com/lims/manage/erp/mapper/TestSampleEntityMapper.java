@@ -99,4 +99,11 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
      * 根据样品id 查询委托单下 委托单位信息
      */
     EntrustAddVo getEntrustCompanyName(@Param("sampleId")Integer sampleId);
+
+    /**
+     * 根据样品ID查询样品所有信息
+     * @param sampleId
+     * @return
+     */
+    TestSampleEntity getAllById(Integer sampleId);
 }

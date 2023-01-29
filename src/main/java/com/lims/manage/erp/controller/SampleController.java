@@ -477,7 +477,6 @@ public class SampleController {
         if (CollectionUtils.isEmpty(samples.getSamples())) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
-
             Integer integer = testSampleEntityService.batchInsertMixSample(samples);
             if (integer > 0) {
                 return ResultUtil.success("添加样品成功！", integer);

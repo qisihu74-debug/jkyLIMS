@@ -1,9 +1,6 @@
 package com.lims.manage.erp.util;
 
-import com.aspose.cells.License;
-import com.aspose.cells.PdfSaveOptions;
-import com.aspose.cells.Workbook;
-import com.aspose.cells.WorksheetCollection;
+import com.aspose.cells.*;
 import com.aspose.slides.Presentation;
 import com.aspose.words.Document;
 import com.aspose.words.ImageSaveOptions;
@@ -14,6 +11,8 @@ import com.spire.pdf.PdfPageBase;
 import com.spire.pdf.PdfPageSize;
 import com.spire.pdf.graphics.PdfMargins;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -22,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
+import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -48,6 +48,7 @@ import java.util.stream.IntStream;
  */
 @Slf4j
 public class PDFHelper3 {
+    private static final int DEFAULT_IMAGE_TYPE = BufferedImage.TYPE_INT_RGB;
     private static InputStream inputStream = null;
     /**
      * 获取license 去除水印
@@ -612,4 +613,100 @@ public class PDFHelper3 {
         return destImage;
     }
 
+    /**
+     * @Description: excel文件转换图片
+     */
+    public static List<BufferedImage> excelToImg(MultipartFile file) {
+        getLicense();
+        Workbook book = null;
+        List<BufferedImage> imageList = new ArrayList<BufferedImage>();
+        try {
+            File file1 = AsposeUtil.MultipartFileToFile(file);
+            InputStream inputStream = new FileInputStream(file1);
+            book = new Workbook(inputStream);
+            WorksheetCollection worksheets = book.getWorksheets();
+            ImageOrPrintOptions imgOptions = new ImageOrPrintOptions();
+            imgOptions.setImageFormat(ImageFormat.getJpeg());
+            imgOptions.setCellAutoFit(true);
+            imgOptions.setOnePagePerSheet(true);
+            for (int i = 0; i < worksheets.getCount(); i++) {
+                Worksheet sheet = worksheets.get(i);
+                OutputStream output = new ByteArrayOutputStream();
+                sheet.getPageSetup().setLeftMargin(-20);
+                sheet.getPageSetup().setRightMargin(0);
+                sheet.getPageSetup().setBottomMargin(0);
+                sheet.getPageSetup().setTopMargin(0);
+                SheetRender render = new SheetRender(sheet, imgOptions);
+                render.toImage(0, output);
+                ByteArrayInputStream parse = parse(output);
+                if (parse != null) {
+                    ImageInputStream imageInputStream = ImageIO.createImageInputStream(parse);
+                    BufferedImage bufferedImage = ImageIO.read(imageInputStream);
+                    imageList.add(bufferedImage);
+                    parse.close();
+                }
+                output.close();
+            }
+            return imageList;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+    /**
+     * 将BufferedImage转换为InputStream
+     * @param image
+     * @return
+     */
+    public static InputStream bufferedImageToInputStream(BufferedImage image){
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "png", os);
+            InputStream input = new ByteArrayInputStream(os.toByteArray());
+            return input;
+        } catch (IOException e) {
+        }
+        return null;
+    }
+
+    /**
+     * @Description: pdf文件转换图片
+     */
+    public static List<BufferedImage> pdfToImg(MultipartFile file) {
+        File file1 = AsposeUtil.MultipartFileToFile(file);
+        try {
+            InputStream inputStream = new FileInputStream(file1);
+            PDDocument pdDocument;
+            pdDocument = PDDocument.load(inputStream);
+            /* dpi越大转换后越清晰，相对转换速度越慢 */
+            int pages = pdDocument.getNumberOfPages();
+            List<PDPage> pageList = pdDocument.getDocumentCatalog().getAllPages();
+            List<BufferedImage> imageList = new ArrayList<BufferedImage>();
+            for (int i = 0; i < pages; i++) {
+                PDPage page =  pageList.get(i);
+                BufferedImage bufferImage = page.convertToImage(DEFAULT_IMAGE_TYPE,72);
+                imageList.add(bufferImage);
+            }
+            return imageList;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
 }

@@ -789,4 +789,8 @@
 						WHERE t2.sample_id = #{sampleId}
 						LIMIT 1
     </select>
+
+    <select id="getAllById" resultType="com.lims.manage.erp.entity.TestSampleEntity">
+        SELECT * FROM test_sample where id = #{sampleId}
+    </select>
 </mapper>

@@ -157,6 +157,17 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         TestSampleMixInfoEntity mixInfoEntity = new TestSampleMixInfoEntity(samples, newId);
         //插入配合比参数信息
         mixInfoEntityMapper.insert(mixInfoEntity);
+        //绑定原有原材
+        if(!CollectionUtils.isEmpty(samples.getSampleIds())){
+            List<Integer> sampleIds = samples.getSampleIds();
+            for (int j = 0; j < sampleIds.size(); j++) {
+                Integer integer = sampleIds.get(j);
+                TestSampleEntity allById = testSampleEntityMapper.getAllById(integer);
+                allById.setId(null);
+                allById.setPid(newId);
+                param.add(allById);
+            }
+        }
         return testSampleEntityMapper.insertBatchMixSamples(param);
     }
 
