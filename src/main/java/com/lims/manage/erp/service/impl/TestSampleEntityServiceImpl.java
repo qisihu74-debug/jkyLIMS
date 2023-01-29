@@ -38,8 +38,11 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 @Service
 public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMapper, TestSampleEntity> implements TestSampleEntityService {
@@ -170,7 +173,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         }
 
         List<SampleSimpleListVo> simpleList = testSampleEntityMapper.getSimpleList(sampleEntity);
-        PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
+        List<SampleSimpleListVo> newDto = simpleList.stream()
+                .collect(Collectors.collectingAndThen(Collectors.toCollection(()->new TreeSet<>(Comparator.comparing(SampleSimpleListVo::getSampleCode))),ArrayList::new));
+        PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(newDto);
         return pageInfo;
     }
 
@@ -189,7 +194,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             sampleEntity.setState("2");
         }
         List<SampleSimpleListVo> simpleList = testSampleEntityMapper.showSimpleList(sampleEntity);
-        PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
+        List<SampleSimpleListVo> newDto = simpleList.stream()
+                .collect(Collectors.collectingAndThen(Collectors.toCollection(()->new TreeSet<>(Comparator.comparing(SampleSimpleListVo::getSampleCode))),ArrayList::new));
+        PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(newDto);
         return pageInfo;
     }
 
