@@ -879,7 +879,6 @@
         test_report_record t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            t1.applicant is not null
             <if test="entrustmentNo!=null and entrustmentNo!=''">
                 and t2.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
             </if>
@@ -926,7 +925,6 @@
         test_report_record_mid t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrust_id = t2.id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            t1.applicant is not null
             <if test="entrustmentNo!=null and entrustmentNo!=''">
                 and t2.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
             </if>
@@ -975,7 +973,6 @@
         LEFT JOIN test_task t3 ON t1.entrustment_id = t3.entrustment_id
         LEFT JOIN test_team t4 ON t3.dept_id = t4.id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            t1.applicant is not null
             <if test="entrustmentNo!=null and entrustmentNo!=''">
                 and t2.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
             </if>
@@ -1028,7 +1025,6 @@
         LEFT JOIN test_task t3 ON t1.entrust_id = t3.entrustment_id
         LEFT JOIN test_team t4 ON t3.dept_id = t4.id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            t1.applicant is not null
             <if test="entrustmentNo!=null and entrustmentNo!=''">
                 and t2.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
             </if>
