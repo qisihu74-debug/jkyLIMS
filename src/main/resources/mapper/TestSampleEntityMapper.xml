@@ -684,7 +684,7 @@
 
     <select id="importSampleList" resultType="com.lims.manage.erp.vo.SampleSimpleListVo">
         SELECT
-        id,
+        distinct
         product_id,
         sample_name,
         sample_code,
@@ -815,6 +815,6 @@
     </select>
 
     <select id="getAllById" resultType="com.lims.manage.erp.entity.TestSampleEntity">
-        SELECT * FROM test_sample where id = #{sampleId}
+        SELECT * FROM test_sample where sample_code = #{sampleCode} limit 1
     </select>
 </mapper>

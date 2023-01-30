@@ -38,8 +38,11 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 @Service
 public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMapper, TestSampleEntity> implements TestSampleEntityService {
@@ -159,10 +162,10 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         mixInfoEntityMapper.insert(mixInfoEntity);
         //绑定原有原材
         if(!CollectionUtils.isEmpty(samples.getSampleIds())){
-            List<Integer> sampleIds = samples.getSampleIds();
-            for (int j = 0; j < sampleIds.size(); j++) {
-                Integer integer = sampleIds.get(j);
-                TestSampleEntity allById = testSampleEntityMapper.getAllById(integer);
+            List<String> sampleCodes = samples.getSampleIds();
+            for (int j = 0; j < sampleCodes.size(); j++) {
+                String sampleCode1 = sampleCodes.get(j);
+                TestSampleEntity allById = testSampleEntityMapper.getAllById(sampleCode1);
                 allById.setId(null);
                 allById.setPid(newId);
                 param.add(allById);
@@ -182,6 +185,10 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
         List<SampleSimpleListVo> simpleList = testSampleEntityMapper.getSimpleList(sampleEntity);
         PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
+        List<SampleSimpleListVo> list = pageInfo.getList();
+        List<SampleSimpleListVo> newDto = list.stream()
+                .collect(Collectors.collectingAndThen(Collectors.toCollection(()->new TreeSet<>(Comparator.comparing(SampleSimpleListVo::getSampleCode))),ArrayList::new));
+        pageInfo.setList(newDto);
         return pageInfo;
     }
 
@@ -201,6 +208,10 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         }
         List<SampleSimpleListVo> simpleList = testSampleEntityMapper.showSimpleList(sampleEntity);
         PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
+        List<SampleSimpleListVo> list = pageInfo.getList();
+        List<SampleSimpleListVo> newDto = list.stream()
+                .collect(Collectors.collectingAndThen(Collectors.toCollection(()->new TreeSet<>(Comparator.comparing(SampleSimpleListVo::getSampleCode))),ArrayList::new));
+        pageInfo.setList(newDto);
         return pageInfo;
     }
 
