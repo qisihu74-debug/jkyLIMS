@@ -691,7 +691,6 @@
         manufacturer,
         specs,
         state,
-        is_save,
         inspector,
         generation,
         received_date,
