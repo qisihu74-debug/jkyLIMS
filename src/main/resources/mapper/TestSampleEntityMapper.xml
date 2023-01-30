@@ -593,7 +593,7 @@
         FROM
         test_sample
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            is_use = 0
+                1=1
             <if test="sampleName!=null and sampleName!=''">
                 and sample_name LIKE CONCAT('%',#{sampleName},'%')
             </if>
