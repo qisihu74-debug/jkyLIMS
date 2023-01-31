@@ -945,7 +945,15 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo getSendList0623(String search, String reportType, Integer pageNum, Integer pageSize, String type,String category,Integer reportTypeStatus) {
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportRecordEntity> list = entityMapper.getSendList0623(search, reportType, type,category,reportTypeStatus);
+        // 查询中间报告或最终报告
+        List<ReportRecordEntity> list = new ArrayList<>();
+        if(reportTypeStatus!=null &&reportTypeStatus==1){
+            // 中间报告
+            list = entityMapper.getSendList20230131MidReport(search, reportType, type,category,reportTypeStatus);
+        }else {
+            // 默认 展示最终报告
+            list = entityMapper.getSendList0623(search, reportType, type,category,reportTypeStatus);
+        }
         if(!CollectionUtils.isEmpty(list)){
             for(ReportRecordEntity reportRecordEntity :list){
                 // 判断收件人为 null 则根据委托单位查询

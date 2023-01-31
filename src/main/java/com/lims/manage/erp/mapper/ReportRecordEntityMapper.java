@@ -109,13 +109,28 @@ public interface ReportRecordEntityMapper {
 
 
     /**
-     * 待邮寄报告列表及已发出报告历史列表查询
+     * 最终报告待邮寄报告列表及已发出报告历史列表查询
      * @param search
      * @param reportType
      * @return
      */
     List<ReportRecordEntity> getSendList(@Param("search") String search, @Param("reportType") String reportType,@Param("type") String type,@Param("reportTypeStatus")Integer reportTypeStatus);
     List<ReportRecordEntity> getSendList0623(@Param("search") String search,
+                                             @Param("reportType") String reportType,
+                                             @Param("type") String type,
+                                             @Param("category") String category,
+                                             @Param("reportTypeStatus")Integer reportTypeStatus);
+
+    /**
+     * 中间报告待邮寄报告列表及已发出报告历史列表查询
+     * @param search
+     * @param reportType
+     * @param type
+     * @param category
+     * @param reportTypeStatus
+     * @return
+     */
+    List<ReportRecordEntity> getSendList20230131MidReport(@Param("search") String search,
                                              @Param("reportType") String reportType,
                                              @Param("type") String type,
                                              @Param("category") String category,
