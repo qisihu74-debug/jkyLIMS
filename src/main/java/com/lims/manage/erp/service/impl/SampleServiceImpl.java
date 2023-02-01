@@ -339,6 +339,12 @@ public class SampleServiceImpl implements SampleService {
             }else {
                 //获取配合比集合。
                 sampleDetailVoList = sampleEntityMapper.getSampleTagInfoPidList(sampleTagInfo.getId());
+                if (org.apache.commons.collections4.CollectionUtils.isEmpty(sampleDetailVoList)){
+                    SampleDetailVo tagInfo = sampleEntityMapper.getSampleTagInfo(sampleTagInfo.getId());
+                    codeList.add(tagInfo.getSampleCode());
+                    tagInfo.setCodeList(codeList);
+                    sampleDetailVoList.add(tagInfo);
+                }
             }
             //填充数据,sampleDetailVoList size=1根据codeList取编号，大于1直接取数据的编号
             PDFHelper3.getLicense();

@@ -800,6 +800,20 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         FROM test_sample
         WHERE pid = #{sampleId}
     </select>
+    <select id="getSampleTagInfo" resultType="com.lims.manage.erp.vo.SampleDetailVo">
+        SELECT sample_code sampleCode,
+               sample_name sampleName,
+               alias_name aliasName,
+               specs,
+               outward,
+               quantity_per_group quantityPerGroup,
+               outward_describe outwardDescribe,
+               sample_type sampleType,
+               id,
+              received_date receivedDate
+        FROM test_sample
+        WHERE id = #{sampleId}
+    </select>
     <delete id="removeSamplesId">
         DELETE
         FROM test_entrusted_sample_details_rel
