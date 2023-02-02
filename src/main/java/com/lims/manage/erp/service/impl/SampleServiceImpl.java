@@ -366,7 +366,7 @@ public class SampleServiceImpl implements SampleService {
                     //设置二维码
                     BufferedImage bufferedImage = QRCodeUtil.getBufferedImage("https://hntri.hkgglclc.com/home/JkyErp/sp?id="+sampleDetailVo.getId());
                     InputStream stream = bufferedImageToInputStream(bufferedImage);
-                    worksheet.getPictures().add(5,3,stream,30,30);
+                    worksheet.getPictures().add(6,4,stream,26,26);
                     //合并sheet
                     Worksheet worksheetS = newBook.getWorksheets().add(list.get(i));
                     worksheetS.copy(worksheet);
