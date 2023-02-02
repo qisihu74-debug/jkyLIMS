@@ -6,6 +6,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.SampleCirculationRecord;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -70,6 +71,8 @@ public class SampleServiceImpl implements SampleService {
     private SysUserRoleDao sysUserRoleDao;
     @Autowired
     private SysUserDao userDao;
+    @Autowired
+    private QiYueSuoEntity qiYueSuoEntity;
 
     @Override
     public Integer addSampleData(SampleAddParamVo addParamVo, MultipartFile[] file) {
@@ -364,7 +367,7 @@ public class SampleServiceImpl implements SampleService {
                     worksheet.getCells().get("B4").setValue(sampleDetailVo.getSpecs());
                     worksheet.getCells().get("B5").setValue(sampleDetailVo.getOutwardDescribe());
                     //设置二维码
-                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage("https://hntri.hkgglclc.com/home/JkyErp/sp?id="+sampleDetailVo.getId());
+                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl()+sampleDetailVo.getId());
                     InputStream stream = bufferedImageToInputStream(bufferedImage);
                     worksheet.getPictures().add(6,4,stream,26,26);
                     //合并sheet

@@ -76,4 +76,9 @@ public class QiYueSuoEntity {
 
     @Value("${autograph.path}")
     private String autographPath;
+
+    @Value("${qrcode.url}")
+    private String qRcodeUrl;
+
+
 }
