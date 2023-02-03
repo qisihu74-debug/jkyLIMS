@@ -560,11 +560,19 @@ public class ReportServiceImpl implements ReportService {
     public Boolean saveMessage(ReportRecordEntity reportRecordEntity) {
         // 8已邮寄
         reportRecordEntity.setState("8");
-        Integer status = entityMapper.updateByPrimaryKeySelective(reportRecordEntity);
+        // 根据 type =0 最终报告 、type =1 中间报告
+        Integer status = 0;
+        if(reportRecordEntity.getType().equals("0")){
+            status = entityMapper.updateByPrimaryKeySelective(reportRecordEntity);
+        }
+        if(reportRecordEntity.getType().equals("1")){
+            ReportRecordMidEntity reportRecordMidEntity = new ReportRecordMidEntity(reportRecordEntity);
+            status = midReportMapper.updateByPrimaryKeySelective(reportRecordMidEntity);
+        }
         if (status == 1) {
             // 根据任务单主键 获取委托单主键 更改委托单状态
             EntrustAddVo entrustAddVo = reportApprovalMapper.getEntrustAddVoDetail(reportRecordEntity.getId());
-            if (entrustAddVo.getState() != null && entrustAddVo.getState() < 200) {
+            if (entrustAddVo !=null &&entrustAddVo.getState() != null && entrustAddVo.getState() < 200) {
                 taskMapper.updateEntrustById(entrustAddVo.getId(), 200);
             }
             return true;
@@ -3166,4 +3174,16 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
+    @Override
+    public Integer getReturnReportType(Long reportId) {
+        ReportRecordEntity reportRecordEntity = entityMapper.getByRecordId(reportId);
+        if(reportRecordEntity != null){
+            return 0;
+        }
+        ReportRecordMidEntity reportMidEntity = midReportMapper.selectByPrimaryKey(reportId);
+        if(reportMidEntity !=null){
+            return 1;
+        }
+        return null;
+    }
 }

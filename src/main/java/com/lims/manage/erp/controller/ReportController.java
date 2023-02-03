@@ -303,6 +303,14 @@ public class ReportController {
         reportRecordEntity.setReportManager(name);
         // 操作时间
         reportRecordEntity.setOperateTime(new Date());
+        // 根据报告id 获取报告类型
+        Integer type = null;
+        // 调用方法 获取 报告类型
+        type = reportService.getReturnReportType(reportRecordEntity.getId());
+        if(type == null){
+            return ResultUtil.error("编辑报告信息失败! 报告单id不存在");
+        }
+        reportRecordEntity.setType(String.valueOf(type));
         Boolean flag = reportService.saveMessage(reportRecordEntity);
         if (flag) {
             return ResultUtil.success("编辑报告信息成功!");
