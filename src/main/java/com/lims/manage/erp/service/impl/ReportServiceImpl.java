@@ -955,13 +955,15 @@ public class ReportServiceImpl implements ReportService {
         PageHelper.startPage(pageNum, pageSize);
         // 查询中间报告或最终报告
         List<ReportRecordEntity> list = new ArrayList<>();
-        if(reportTypeStatus!=null &&reportTypeStatus==1){
-            // 中间报告
-            list = entityMapper.getSendList20230131MidReport(search, reportType, type,category,reportTypeStatus);
-        }else {
-            // 默认 展示最终报告
-            list = entityMapper.getSendList0623(search, reportType, type,category,reportTypeStatus);
-        }
+//        if(reportTypeStatus!=null &&reportTypeStatus==1){
+//            // 中间报告
+//            list = entityMapper.getSendList20230131MidReport(search, reportType, type,category,reportTypeStatus);
+//        }else {
+//            // 默认 展示最终报告
+//            list = entityMapper.getSendList0623(search, reportType, type,category,reportTypeStatus);
+//        }
+        // 查询中间报告 和 最终报告
+        list = entityMapper.getSendList20230203Report(search, reportType, type,category,reportTypeStatus);
         if(!CollectionUtils.isEmpty(list)){
             for(ReportRecordEntity reportRecordEntity :list){
                 // 判断收件人为 null 则根据委托单位查询

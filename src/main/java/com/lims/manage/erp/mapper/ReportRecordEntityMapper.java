@@ -348,4 +348,20 @@ public interface ReportRecordEntityMapper {
 
     @Select("select entrustment_id from test_report_record where id=#{id}")
     Long getTypeById(@Param("id") Long id);
+
+    /**
+     * 报告待邮寄报告列表及已发出报告历史列表查询
+     * @param search
+     * @param reportType
+     * @param type
+     * @param category
+     * @param reportTypeStatus
+     * @return
+     */
+    List<ReportRecordEntity> getSendList20230203Report(@Param("search") String search,
+                                                          @Param("reportType") String reportType,
+                                                          @Param("type") String type,
+                                                          @Param("category") String category,
+                                                          @Param("reportTypeStatus")Integer reportTypeStatus);
+
 }
