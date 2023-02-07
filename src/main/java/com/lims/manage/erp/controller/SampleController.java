@@ -6,7 +6,6 @@ import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -68,8 +67,6 @@ public class SampleController {
     private ProductService productService;
     @Autowired
     private TestSampleEntityService testSampleEntityService;
-    @Autowired
-    private EntrustEntityMapper entityMapper;
 
     /**
      * 新增样品
@@ -292,12 +289,16 @@ public class SampleController {
             return;
         }
         //样品标签2023二月份之前的样品标签（按照收样日期）下载为新版本的二维码标签，否则下载老板的样品标签
-        // 。如果样品未绑定则下载新的样品标签
-        Long bySampleId = entityMapper.getEntrustIdBySampleId(sampleId);
+        // 。
         SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
         if (sampleTagInfo != null){
             response.reset();
-            if (bySampleId == null){
+            //判断样品接收时间
+            String receivedDate = sampleTagInfo.getReceivedDate();
+            Date dateFromStr = DateUtil.timeFormat(receivedDate);
+            SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
+            String str = yyyyMMddHH_NOT_.format(dateFromStr);
+            if (Integer.parseInt(str) >= 20230201){
                 response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
                 response.setCharacterEncoding("UTF-8");
                 response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品标签.xlsx", "UTF-8") );
@@ -305,26 +306,12 @@ public class SampleController {
                 outputStream.flush();
                 outputStream.close();
             }else {
-                //判断样品接收时间
-                String receivedDate = sampleTagInfo.getReceivedDate();
-                Date dateFromStr = DateUtil.timeFormat(receivedDate);
-                SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
-                String str = yyyyMMddHH_NOT_.format(dateFromStr);
-                if (Integer.parseInt(str) >= 20230201){
-                    response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-                    response.setCharacterEncoding("UTF-8");
-                    response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品标签.xlsx", "UTF-8") );
-                    ServletOutputStream outputStream = sampleService.downloadNewSampleTab(sampleId,sampleTagInfo, response);
-                    outputStream.flush();
-                    outputStream.close();
-                }else {
-                    response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-                    response.setContentType("application/zip");
-                    response.setCharacterEncoding("UTF-8");
-                    response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品文件.zip", "UTF-8") );
-                    ZipOutputStream zipOutputStream = sampleService.packagingWorkbookZip(sampleId, response);
-                    zipOutputStream.flush();
-                }
+                response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+                response.setContentType("application/zip");
+                response.setCharacterEncoding("UTF-8");
+                response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品文件.zip", "UTF-8") );
+                ZipOutputStream zipOutputStream = sampleService.packagingWorkbookZip(sampleId, response);
+                zipOutputStream.flush();
             }
         }
     }
