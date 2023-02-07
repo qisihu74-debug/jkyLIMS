@@ -409,4 +409,11 @@ public interface ReportService {
 
     ReportRecordEntity getDetailByEntrustIdZj(Long entrustId);
 
+    /**
+     * 通过 reportId 获取 报告类型
+     * @param reportId
+     * @return type=1(中间报告)、type=0(最终报告)、type=null(报告不存在)
+     */
+    Integer getReturnReportType (Long reportId);
+
 }

@@ -1164,4 +1164,94 @@
         </if>
     </select>
 
+    <select id="getSendList20230203Report" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        (SELECT
+        t1.id,
+        t1.report_code,
+        t2.entrustment_no,
+        IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
+        t2.entrust_company,
+        t1.sample_name,
+        t1.number,
+        t1.type,
+        t1.category,
+        t1.report_complete_time,
+        t1.report_url,
+        t1.report_type,
+        t1.report_time,
+        IFNULL(t1.report_mailing_address,t2.address) reportMailingAddress,
+        IFNULL(t1.addressee,t2.addressee) addressee,
+        IFNULL(t1.report_phone,t2.mobile) report_phone,
+        t1.waybill,
+        IFNULL(t1.email,t2.mailbox) email,
+        t1.report_manager
+        FROM
+        test_report_record t1
+        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+        WHERE 1=1
+        <if test='type == "1"'>
+            AND t1.state = 7
+        </if>
+        <if test='type == "2"'>
+            AND t1.state = 8
+        </if>
+        <if test="search != null and search != ''">
+            AND t1.report_code like CONCAT('%',#{search},'%')
+        </if>
+        <if test="reportType != null and reportType != ''">
+            AND t1.report_type = #{reportType}
+        </if>
+        <if test="reportTypeStatus != null">
+            AND t1.type = #{reportTypeStatus}
+        </if>
+        <if test="category != null">
+            AND t1.category = #{category}
+        </if>
+        order by t1.operate_time desc)
+        UNION
+       ( SELECT
+        t1.id,
+        t1.report_code,
+        t2.entrustment_no,
+        IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
+        t2.entrust_company,
+        t1.sample_name,
+        t1.number,
+        t1.type,
+        t1.category,
+        t1.report_complete_time,
+        t1.report_url,
+        t1.report_type,
+        t1.report_time,
+        IFNULL(t1.report_mailing_address,t2.address) reportMailingAddress,
+        IFNULL(t1.addressee,t2.addressee) addressee,
+        IFNULL(t1.report_phone,t2.mobile) report_phone,
+        t1.waybill,
+        IFNULL(t1.email,t2.mailbox) email,
+        t1.report_manager
+        FROM
+        test_report_record_mid t1
+        LEFT JOIN test_entrusted_info t2 ON t1.entrust_id = t2.id
+        WHERE 1=1
+        <if test='type == "1"'>
+            AND t1.state = 7
+        </if>
+        <if test='type == "2"'>
+            AND t1.state = 8
+        </if>
+        <if test="search != null and search != ''">
+            AND t1.report_code like CONCAT('%',#{search},'%')
+        </if>
+        <if test="reportType != null and reportType != ''">
+            AND t1.report_type = #{reportType}
+        </if>
+        <if test="reportTypeStatus != null">
+            AND t1.type = #{reportTypeStatus}
+        </if>
+        <if test="category != null">
+            AND t1.category = #{category}
+        </if>
+        order by t1.operate_time desc)
+    </select>
+
 </mapper>
