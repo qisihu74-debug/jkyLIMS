@@ -15,4 +15,5 @@ public class SampleDetailVo extends SampleEntity {
     private List<String> standardName;
     private List<CheckItemInfoVo> checkItemInfoList;
     private List<String> codeList;
+    private String receivedDate;
 }

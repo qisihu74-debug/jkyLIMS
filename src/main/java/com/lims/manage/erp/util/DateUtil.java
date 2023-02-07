@@ -72,6 +72,18 @@ public class DateUtil {
         return new Date(year, month, day);
     }
 
+    public static Date timeFormat(String day) {
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");//定义一个formate
+            Date date = simpleDateFormat.parse(day);//将formate型转化成Date数据类型
+            return date;
+        }catch (Exception e){
+
+        }
+        return null;
+    }
+
+
     /**
      * 获取今天的日期 格式：20141202
      * @return String

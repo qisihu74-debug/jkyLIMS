@@ -27,4 +27,8 @@ public class SampleSimpleListVo {
      * 是否留样1.保留2.处置
      */
     private String isSave;
+    /**
+     * 样品保留天数
+     */
+    private Long saveTime;
 }

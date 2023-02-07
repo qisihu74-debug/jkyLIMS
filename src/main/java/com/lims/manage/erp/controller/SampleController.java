@@ -6,6 +6,7 @@ import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -14,6 +15,7 @@ import com.lims.manage.erp.service.ProductService;
 import com.lims.manage.erp.service.SampleService;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
@@ -66,6 +68,8 @@ public class SampleController {
     private ProductService productService;
     @Autowired
     private TestSampleEntityService testSampleEntityService;
+    @Autowired
+    private EntrustEntityMapper entityMapper;
 
     /**
      * 新增样品
@@ -287,14 +291,42 @@ public class SampleController {
         if (sampleId == null){
             return;
         }
+        //样品标签2023二月份之前的样品标签（按照收样日期）下载为新版本的二维码标签，否则下载老板的样品标签
+        // 。如果样品未绑定则下载新的样品标签
+        Long bySampleId = entityMapper.getEntrustIdBySampleId(sampleId);
         SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
-        response.reset();
-        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品标签.xlsx", "UTF-8") );
-        ServletOutputStream outputStream = sampleService.downloadNewSampleTab(sampleId,sampleTagInfo, response);
-        outputStream.flush();
-        outputStream.close();
+        if (sampleTagInfo != null){
+            response.reset();
+            if (bySampleId == null){
+                response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+                response.setCharacterEncoding("UTF-8");
+                response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品标签.xlsx", "UTF-8") );
+                ServletOutputStream outputStream = sampleService.downloadNewSampleTab(sampleId,sampleTagInfo, response);
+                outputStream.flush();
+                outputStream.close();
+            }else {
+                //判断样品接收时间
+                String receivedDate = sampleTagInfo.getReceivedDate();
+                Date dateFromStr = DateUtil.timeFormat(receivedDate);
+                SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
+                String str = yyyyMMddHH_NOT_.format(dateFromStr);
+                if (Integer.parseInt(str) >= 20230201){
+                    response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+                    response.setCharacterEncoding("UTF-8");
+                    response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品标签.xlsx", "UTF-8") );
+                    ServletOutputStream outputStream = sampleService.downloadNewSampleTab(sampleId,sampleTagInfo, response);
+                    outputStream.flush();
+                    outputStream.close();
+                }else {
+                    response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+                    response.setContentType("application/zip");
+                    response.setCharacterEncoding("UTF-8");
+                    response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品文件.zip", "UTF-8") );
+                    ZipOutputStream zipOutputStream = sampleService.packagingWorkbookZip(sampleId, response);
+                    zipOutputStream.flush();
+                }
+            }
+        }
     }
 
     /**
@@ -508,7 +540,7 @@ public class SampleController {
      * @return
      */
     @GetMapping("updateState")
-    public Result updateState(Integer sampleId, Integer state, String time){
+    public Result updateState(Integer sampleId, Integer state, String time,Integer saveTime){
         System.out.println("扫码时间:{}"+time);
         log.info("扫码时间:{}",time);
         Date date= null;
@@ -525,7 +557,7 @@ public class SampleController {
         if (sampleId == null || state == null){
             return ResultUtil.error("缺少参数");
         }
-        Integer flag = sampleService.updateState(sampleId,state,date);
+        Integer flag = sampleService.updateState(sampleId,state,date,saveTime);
         if (flag == 0){
             return ResultUtil.success("操作成功");
         }else if (flag == 1){
@@ -550,5 +582,57 @@ public class SampleController {
             return ResultUtil.error("缺少分页参数！");
         }
         return ResultUtil.success(testSampleEntityService.importSampleList(sampleCode,companyId,pageNum,pageSize));
+    }
+
+    /**
+     * 样品台账列表
+     */
+    @RequestMapping("/SampleTabList")
+    public void SampleTabList() {
+
+    }
+
+    /**
+     * 样品台账列表导出
+     */
+    @RequestMapping("/exportSampleTab")
+    public void exportSampleTab(Integer sampleId, HttpServletResponse response) throws IOException {
+        if (sampleId == null){
+            return;
+        }
+        SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
+        response.reset();
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品入库登记表.xlsx", "UTF-8") );
+        ServletOutputStream outputStream = sampleService.downloadNewSampleTab(sampleId,sampleTagInfo, response);
+        outputStream.flush();
+        outputStream.close();
+    }
+
+    /**
+     * 出入库台账列表
+     */
+    @RequestMapping("/EntrustSampleTabList")
+    public void EntrustSampleTabList() {
+
+    }
+
+    /**
+     * 出入库台账列表导出
+     */
+    @RequestMapping("/exportEntrustSampleTab")
+    public void exportEntrustSampleTab(Integer sampleId, HttpServletResponse response) throws IOException {
+        if (sampleId == null){
+            return;
+        }
+        SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
+        response.reset();
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("委托样品出入库登记表.xlsx", "UTF-8") );
+        ServletOutputStream outputStream = sampleService.downloadNewSampleTab(sampleId,sampleTagInfo, response);
+        outputStream.flush();
+        outputStream.close();
     }
 }

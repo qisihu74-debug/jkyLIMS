@@ -265,8 +265,8 @@ public interface SampleEntityMapper {
             "\tsample_id = #{sampleId} and status=#{status}")
     List<Integer> getExist(@Param("sampleId") Integer sampleId, @Param("status") Integer status);
 
-    @Update("update test_sample set is_save=#{state} where id = #{sampleId}")
-    void updateIsSave(Integer sampleId, Integer state);
+    @Update("update test_sample set is_save=#{state},save_time=#{saveTime} where id = #{sampleId}")
+    void updateIsSave(Integer sampleId, Integer state,Integer saveTime);
 
     @Insert("insert into test_sample_circulation_record(sample_id,status,time,operator_id,operator_name)" +
             " values(#{record.sampleId},#{record.status},#{record.time},#{record.operatorId},#{record.operatorName})")

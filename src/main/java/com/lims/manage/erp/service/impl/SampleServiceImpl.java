@@ -446,7 +446,7 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer updateState(Integer sampleId,Integer state,Date time) {
+    public Integer updateState(Integer sampleId,Integer state,Date time,Integer saveTime) {
         //2领样，3留样，4处置
         List<Integer> ids = sampleEntityMapper.getExist(sampleId,state);
         if (ids != null && ids.size() >= 1){
@@ -487,7 +487,7 @@ public class SampleServiceImpl implements SampleService {
             if (state == 4){
                 status = 2;
             }
-            sampleEntityMapper.updateIsSave(sampleId,status);
+            sampleEntityMapper.updateIsSave(sampleId,status,saveTime);
         }
         record.setSampleId(sampleId);
         record.setStatus(state+"");
