@@ -1184,7 +1184,8 @@
         IFNULL(t1.report_phone,t2.mobile) report_phone,
         t1.waybill,
         IFNULL(t1.email,t2.mailbox) email,
-        t1.report_manager
+        t1.report_manager,
+        t1.operate_time
         FROM
         test_report_record t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
@@ -1207,7 +1208,7 @@
         <if test="category != null">
             AND t1.category = #{category}
         </if>
-        order by t1.operate_time desc)
+        )
         UNION
        ( SELECT
         t1.id,
@@ -1228,7 +1229,8 @@
         IFNULL(t1.report_phone,t2.mobile) report_phone,
         t1.waybill,
         IFNULL(t1.email,t2.mailbox) email,
-        t1.report_manager
+        t1.report_manager,
+        t1.operate_time
         FROM
         test_report_record_mid t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrust_id = t2.id
@@ -1251,7 +1253,8 @@
         <if test="category != null">
             AND t1.category = #{category}
         </if>
-        order by t1.operate_time desc)
+        )
+        order by operate_time desc
     </select>
 
 </mapper>
