@@ -317,6 +317,8 @@ public class EntrustServiceImpl implements EntrustService {
                     +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount(), Const.ENTRUST_FOUND, true);
             basisInfo.setAuditState("1");
             basisInfo.setCreateTime(new Date());
+            // 委托单是否留样1.保留2.废弃 默认：否
+            basisInfo.setIsSave("否");
             entityMapper.insertEntrustInfo(basisInfo);
             if(sampleStatus){
                 return "新建委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";
@@ -3037,6 +3039,8 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setReportReceivingUnit(null);
         }
         basisInfo.setCreateTime(new Date());
+        // 委托单是否留样1.保留2.废弃 默认：否
+        basisInfo.setIsSave("否");
         entityMapper.insertEntrustInfo(basisInfo);
         if(sampleStatus){
             return "新建委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";
