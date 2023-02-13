@@ -955,4 +955,31 @@ public class EntrustController {
     public Result getIssueDept() {
         return ResultUtil.success(entrustEntityMapper.getIssueDept());
     }
+
+    @GetMapping("exportPublishEntrust")
+    public void exportPublishEntrust() throws Exception{
+
+        String message = entrustService.getMessage();
+        String[] strings = message.split("/");
+        String fileName = strings[1];
+        //获取所有符合条件的委托单id
+        List<EntrustAddVo> list = entrustEntityMapper.getPublishEntrustIdBySearch();
+        for (EntrustAddVo bean:list) {
+            String path = "D:\\AAPulish\\"+bean.getEntrustmentNo()+".docx";
+            try {
+                FileOutputStream outputStream = new FileOutputStream(path);
+                MinioClient client = MinIoUtil.minioClient;
+                InputStream object = client.getObject(strings[0], fileName);
+                //填充数据
+                EntrustAddVo detail = entrustService.getEntrustHistoryDetail(bean.getId());
+                XWPFDocument document = entrustService.downloadEntrust(detail, object);
+                document.write(outputStream);
+                outputStream.close();
+                Thread.sleep(20);
+            } catch (Exception ex) {
+                log.info("导出失败：{}", ex);
+            }
+        }
+    }
+
 }
