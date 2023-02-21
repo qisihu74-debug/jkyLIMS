@@ -1,13 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustHistoryEntity;
-import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
-import com.lims.manage.erp.entity.TaskEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
@@ -329,4 +323,13 @@ public interface EntrustService {
      * @return false
      */
     Boolean efficacyState(Long id);
+
+    /**
+     * 通过委托单id 效验新增的样品 是否被使用
+     * @param id 委托单id
+     * @param samples 样品列表
+     * @return true 则跳过，false 样品数据异常
+     */
+    Boolean verifySampleIsUsed(Long id,List<SampleEntity> samples);
+
 }

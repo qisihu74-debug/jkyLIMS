@@ -145,6 +145,12 @@ public class EntrustController {
         if(!entrustService.efficacyState(entrust.getId())){
             return ResultUtil.error(678, "修改委托失败！委托单未受理");
         }
+        // 通过委托单id 效验样品id 是否存在
+        if(!CollectionUtils.isEmpty(entrust.getSamples())){
+            if(!entrustService.verifySampleIsUsed(entrust.getId(),entrust.getSamples())){
+                return ResultUtil.error(678, "修改失败！！！样品数据已经被绑定");
+            }
+        }
         String strSuccess = entrustService.updateEntrustCheckItem(entrust);
         if (strSuccess!=null) {
             return ResultUtil.success(strSuccess);
