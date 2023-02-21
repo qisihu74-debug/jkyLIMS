@@ -69,6 +69,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -4329,4 +4330,30 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
     }
+    @Override
+    public Boolean verifySampleIsUsed(Long id, List<SampleEntity> samples) {
+        // 获取委托单id 获取已占用样品id集合
+        List<Integer> oldSampleIds = sampleEntityMapper.getSampleIsUsed(id);
+        // 委托单id 未绑定样品 返回 true
+        if(oldSampleIds.isEmpty()){
+            return true;
+        }
+        // 前端样品数据源
+        List<Integer> leadingEndIds = new ArrayList<>();
+        samples.stream().forEach(sample -> leadingEndIds.add(sample.getId()));
+        // 获取 差集
+        List<Integer> addList = leadingEndIds.stream()
+                .filter(item -> !oldSampleIds.stream().collect(Collectors.toList()).contains(item))
+                .collect(Collectors.toList());
+        // 比较差集 新增样品id 是否与委托id绑定，绑定则返回 false
+        if(!CollectionUtils.isEmpty(addList)){
+            for(Integer sampleId :addList){
+                if (entityMapper.getEntrustIdBySampleId(sampleId) != null) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 }

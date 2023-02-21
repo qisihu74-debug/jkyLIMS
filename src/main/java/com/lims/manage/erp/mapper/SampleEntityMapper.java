@@ -315,4 +315,12 @@ public interface SampleEntityMapper {
      */
     int updateStausDisint(@Param("operatorId")Long operatorId,@Param("operatorName")String operatorName,
                           @Param("time") Date time, @Param("sampleIds") List<Integer> sampleIds);
+
+    /**
+     *
+     * @param entrustmentId
+     * @return 通过委托单ID 获取已经绑定样品集合
+     */
+    @Select("SELECT sample_id FROM test_entrusted_sample_details_rel WHERE entrustment_id = #{entrustmentId}")
+    List<Integer> getSampleIsUsed(@Param("entrustmentId")Long entrustmentId);
 }

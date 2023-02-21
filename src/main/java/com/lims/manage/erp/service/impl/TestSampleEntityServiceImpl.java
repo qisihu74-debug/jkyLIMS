@@ -182,7 +182,8 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             sampleEntity.setBeginDate(split[0]);
             sampleEntity.setEndDate(split[1]);
         }
-
+        // 查询条件为 样品未分配
+        sampleEntity.setIsUse(0);
         List<SampleSimpleListVo> simpleList = testSampleEntityMapper.getSimpleList(sampleEntity);
         PageInfo<SampleSimpleListVo> pageInfo = new PageInfo<>(simpleList);
         List<SampleSimpleListVo> list = pageInfo.getList();
