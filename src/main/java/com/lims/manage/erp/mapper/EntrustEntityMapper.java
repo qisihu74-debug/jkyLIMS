@@ -558,6 +558,9 @@ public interface EntrustEntityMapper extends BaseMapper {
     @Select("select DISTINCT id As id,entrustment_no As entrustmentNo,state As state from test_entrusted_info WHERE state != 144")
     List<EntrustAddVo> getAllEntrustIdBySearch();
 
+    @Select("select DISTINCT id As id,entrustment_no As entrustmentNo,state As state from test_entrusted_info WHERE state != 144 and state=1 and entrustment_no > 2023010000")
+    List<EntrustAddVo> getPublishEntrustIdBySearch();
+
     /**
      * 查询顶级部门
      * @return
