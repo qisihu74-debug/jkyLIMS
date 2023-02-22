@@ -493,16 +493,12 @@ public class SampleController {
      */
     @RequestMapping("/addMixSamples")
     public Result addMixSamples(@RequestBody SamplesAddVo samples) {
-        if (CollectionUtils.isEmpty(samples.getSamples())) {
-            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
-        } else {
             Integer integer = testSampleEntityService.batchInsertMixSample(samples);
             if (integer > 0) {
                 return ResultUtil.success("添加样品成功！", integer);
             } else {
                 return ResultUtil.error("添加样品失败，请联系管理员！");
             }
-        }
     }
 
     /**
