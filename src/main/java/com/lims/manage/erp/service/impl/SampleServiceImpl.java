@@ -430,8 +430,16 @@ public class SampleServiceImpl implements SampleService {
                 //根据用户id获取所拥有的角色id，1领样，3留样，4处置，角色初始化时确定死
                 List<Long> roles = sysUserRoleDao.getRoleIdsByUserId(userInfo.getUserId());
                 for (Long id:roles) {
-                    if (id==1 || id==3 || id==4){
-                        integerList.add(id);
+                    if (id==11 || id==33 || id==44){
+                        if (id.longValue() == 11){
+                            integerList.add(1L);
+                        }
+                        if (id.longValue() == 33){
+                            integerList.add(3L);
+                        }
+                        if (id.longValue() == 44){
+                            integerList.add(4L);
+                        }
                     }
                 }
                 entity.setOperateType(integerList);
