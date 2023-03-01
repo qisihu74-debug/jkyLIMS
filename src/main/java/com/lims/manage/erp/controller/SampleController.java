@@ -544,7 +544,7 @@ public class SampleController {
         if (sampleId == null || state == null){
             return ResultUtil.error("缺少参数");
         }
-        Integer flag = sampleService.updateState(sampleId,state,date,saveTime);
+        Integer flag = sampleService.updateState(sampleId,state,date,saveTime,sampleRetentionPeriod,sampleProcessMode);
         if (flag == 0){
             return ResultUtil.success("操作成功");
         }else if (flag == 1){

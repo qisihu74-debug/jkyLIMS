@@ -454,7 +454,7 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer updateState(Integer sampleId,Integer state,Date time,Integer saveTime) {
+    public Integer updateState(Integer sampleId,Integer state,Date time,Integer saveTime,Integer sampleRetentionPeriod,String sampleProcessMode) {
         //2领样，3留样，4处置
         List<Integer> ids = sampleEntityMapper.getExist(sampleId,state);
         if (ids != null && ids.size() >= 1){
@@ -491,9 +491,25 @@ public class SampleServiceImpl implements SampleService {
                 }
                 record.setTime(date);
                 record.setOperatorName(sampleTagInfo.getInspector());
+                // 更新 留样天数  (state =3 留样)
+                if(!org.springframework.util.StringUtils.isEmpty(sampleRetentionPeriod)){
+                    SampleEntity sampleEntity1 = new SampleEntity();
+                    sampleEntity1.setId(sampleId);
+                    sampleEntity1.setSampleRetentionPeriod(sampleRetentionPeriod);
+                    // 动态更新
+                    sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity1);
+                }
             }
             if (state == 4){
                 status = 2;
+                // 样品处置方式（state=4处置）
+                if(!org.springframework.util.StringUtils.isEmpty(sampleProcessMode)){
+                    SampleEntity sampleEntity2 = new SampleEntity();
+                    sampleEntity2.setId(sampleId);
+                    sampleEntity2.setSampleProcessMode(sampleProcessMode);
+                    // 动态更新
+                    sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity2);
+                }
             }
             sampleEntityMapper.updateIsSave(sampleId,status,saveTime);
         }

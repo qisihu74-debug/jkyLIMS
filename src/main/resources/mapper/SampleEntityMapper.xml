@@ -623,6 +623,18 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             <if test="isUse != null">
                 is_use=#{isUse,jdbcType=INTEGER},
             </if>
+            <if test="sampleRetentionPeriod != null">
+                sample_retention_period=#{sampleRetentionPeriod,jdbcType=INTEGER},
+            </if>
+            <if test="sampleProcessMode != null">
+                sample_process_mode=#{sampleProcessMode,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleReservedRemrk != null">
+                sample_reserved_remrk=#{sampleReservedRemrk,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleOutPutRemrk != null">
+                sample_out_put_remrk=#{sampleOutPutRemrk,jdbcType=VARCHAR},
+            </if>
         </set>
         where id = #{id,jdbcType=INTEGER}
     </update>
