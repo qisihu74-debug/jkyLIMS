@@ -641,6 +641,13 @@
             <artifactId>javase</artifactId>
             <version>3.3.3</version>
         </dependency>
+
+        <!-- 视频截图 -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv-platform</artifactId>
+            <version>1.5.7</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>

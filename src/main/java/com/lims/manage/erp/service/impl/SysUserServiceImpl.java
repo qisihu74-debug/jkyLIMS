@@ -3,6 +3,7 @@ package com.lims.manage.erp.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.*;
@@ -46,6 +47,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     private SysUserRoleDao sysUserRoleDao;
     @Autowired
     private DingUsertDao dingUsertDao;
+
+    @Override
+    public List<SysUserEntity> getUserNameList() {
+        return this.list(Wrappers.<SysUserEntity>lambdaQuery().select(SysUserEntity::getUserId, SysUserEntity::getName));
+    }
+
+    @Override
+    public List<SysUserEntity> getExceptUserNameList() {
+        return this.list(Wrappers.<SysUserEntity>lambdaQuery().ne(SysUserEntity::getUserId,ShiroUtils.getUserInfo().getUserId()).select(SysUserEntity::getUserId, SysUserEntity::getName));
+    }
 
     /**
      * 根据用户名查询实体

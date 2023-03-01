@@ -20,6 +20,18 @@ import java.util.List;
 public interface SysUserService extends IService<SysUserEntity> {
 
     /**
+     * 获取所有用户名称列表
+     * @return List<SysUserEntity>
+     */
+    List<SysUserEntity> getUserNameList();
+
+    /**
+     * 获取除了当前用户外所有用户名称列表
+     * @return List<SysUserEntity>
+     */
+    List<SysUserEntity> getExceptUserNameList();
+
+    /**
      * 根据用户名查询实体
      * @Author gjl
      * @CreateTime 2021/11/09 16:30

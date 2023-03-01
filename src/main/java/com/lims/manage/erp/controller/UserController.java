@@ -82,6 +82,24 @@ public class UserController {
 //    }
 
     /**
+     * 获取所有用户名称列表
+     * @return Result<?>
+     */
+    @GetMapping(value = "getUserNameList")
+    public Result<?> getUserNameList(){
+        return ResultUtil.success("获取用户名称列表",sysUserService.getUserNameList());
+    }
+
+    /**
+     * 获取除了当前用户外所有用户名称列表
+     * @return Result<?>
+     */
+    @GetMapping(value = "getExceptUserNameList")
+    public Result<?> getExceptUserNameList(){
+        return ResultUtil.success("获取除了当前用户外所有用户名称列表",sysUserService.getExceptUserNameList());
+    }
+
+    /**
      * 获取用户列表——二次开发
      *
      * @return
