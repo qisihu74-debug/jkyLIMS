@@ -520,10 +520,14 @@ public class SampleController {
      * 跟新状态
      * @param sampleId
      * @param state
+     * @param sampleRetentionPeriod  留样天数  (state =3 留样)
+     * @param sampleProcessMode 样品处置方式（state=4处置）
      * @return
      */
     @GetMapping("updateState")
-    public Result updateState(Integer sampleId, Integer state, String time,Integer saveTime){
+    public Result updateState(Integer sampleId, Integer state, String time,Integer saveTime,
+                              Integer sampleRetentionPeriod,String sampleProcessMode){
+        System.out.println("留样天数: == "+sampleRetentionPeriod + " == 样品处置方式 == " + sampleProcessMode);
         System.out.println("扫码时间:{}"+time);
         log.info("扫码时间:{}",time);
         Date date= null;
