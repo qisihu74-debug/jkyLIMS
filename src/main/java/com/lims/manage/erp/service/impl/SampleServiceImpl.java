@@ -18,16 +18,8 @@ import com.lims.manage.erp.mapper.SysUserRoleDao;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.SampleService;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.PDFHelper3;
-import com.lims.manage.erp.util.QRCodeUtil;
-import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.SampleAddDetailVo;
-import com.lims.manage.erp.vo.SampleAddParamVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.SampleEntrustAddVo;
-import com.lims.manage.erp.vo.SamplePrivateInfoVo;
-import com.lims.manage.erp.vo.SamplePublicInfoVo;
+import com.lims.manage.erp.util.*;
+import com.lims.manage.erp.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.lang3.StringUtils;
@@ -49,10 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -818,4 +807,45 @@ public class SampleServiceImpl implements SampleService {
         }
         return results;
     }
+
+    @Override
+    public PageInfo sampleRetentionList(SampleOutPutVo sampleOutPutVo) {
+        // 处理逻辑
+        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
+        // 进行分页
+        PageInfo pageInfo = PagingUtil.pagingUtilityList(sampleOutPutVo.getPageNum(), sampleOutPutVo.getPageSize(), Collections.singletonList(list));
+        return pageInfo;
+    }
+
+    /**
+     * 查询处理样品留样列表、样品出入库列表
+     * @param sampleOutPutVo
+     * @return
+     */
+    public List<SampleOutPutVo> getSampleOutPutVos(SampleOutPutVo sampleOutPutVo){
+        // 查询数据集合
+        List<SampleOutPutVo> sampleList = sampleEntityMapper.sampleOutPutList(sampleOutPutVo);
+        if(!CollectionUtils.isEmpty(sampleList)){
+            for(SampleOutPutVo item :sampleList){
+                if(!CollectionUtils.isEmpty(item.getSampleCirculationRecords())){
+                    for(SampleCirculationRecord sampleCirculationRecord : item.getSampleCirculationRecords()){
+                        if(sampleCirculationRecord.getStatus()!=null && sampleCirculationRecord.getStatus().equals("3")){
+                            // 增加领样信息
+                            item.setSampleHolder(sampleCirculationRecord.getOperatorName());
+                        }
+                        if(sampleCirculationRecord.getStatus()!=null && sampleCirculationRecord.getStatus().equals("4")){
+                            // 增加处置人
+                            item.setHandler(sampleCirculationRecord.getOperatorName());
+                            // 增加处置时间
+                            item.setSellOffDate(sampleCirculationRecord.getTime());
+                        }
+                    }
+                }
+                // 清空 样品流转集合
+                item.setSampleCirculationRecords(new ArrayList<>());
+            }
+        }
+        return sampleList;
+    }
+
 }

@@ -323,4 +323,11 @@ public interface SampleEntityMapper {
      */
     @Select("SELECT sample_id FROM test_entrusted_sample_details_rel WHERE entrustment_id = #{entrustmentId}")
     List<Integer> getSampleIsUsed(@Param("entrustmentId")Long entrustmentId);
+
+    /**
+     * 查询样品 留样列表与出入库列表
+     * @param sampleOutPutVo
+     * @return
+     */
+    List<SampleOutPutVo> sampleOutPutList(SampleOutPutVo sampleOutPutVo);
 }
