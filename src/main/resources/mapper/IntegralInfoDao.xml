@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.IntegralInfoDao">
+
+    <!--  根据用户Id获取用户称号和徽章  -->
+    <select id="getUserIntegralInfo" resultType="com.lims.manage.erp.entity.IntegralInfo">
+        SELECT integralInfo.id,integralInfo.integral_type,integralInfo.integral_num,integralInfo.integral_title,
+            integralInfo.integral_badge
+        FROM (
+            SELECT DISTINCT( integralInfo.id ),integralInfo.integral_type,integralInfo.integral_num,
+                integralInfo.integral_title,integralInfo.integral_badge
+            FROM  t_integral_info integralInfo
+            LEFT JOIN t_user_integral_info userIntegralInfo ON integralInfo.integral_type = userIntegralInfo.integral_type
+            WHERE userIntegralInfo.integral_num <![CDATA[ <= ]]> integralInfo.integral_num
+                <if test="userId!=null and userId !=''">
+                   AND userIntegralInfo.user_id=#{userId}
+                </if>
+            ORDER BY integralInfo.integral_num
+        ) integralInfo
+        GROUP BY
+        integralInfo.integral_type
+    </select>
+
+    <!--  获取用户积分排行榜  -->
+    <select id="getIntegralRankingList" resultType="com.lims.manage.erp.vo.UserIntegralRankingListVo">
+        SELECT @rownum := @rownum + 1 AS row_num,userInfo.user_name,userInfo.integral_num,userInfo.integral_title,
+            (SELECT GROUP_CONCAT( dept.`name` ) FROM sys_dept dept WHERE FIND_IN_SET(dept.id,REPLACE ( REPLACE ( userInfo.department, '[', '' ), ']', '' ))) AS dept_name
+        FROM
+            ( SELECT @rownum := 0 ) r,
+            (SELECT `user`.`name` as user_name,`user`.department,userIntegralInfo.integral_num,integralInfo.integral_title,
+                integralInfo.integral_badge
+            FROM t_user_integral_info userIntegralInfo
+            LEFT JOIN( SELECT DISTINCT( integralInfo.id ),integralInfo.integral_type,integralInfo.integral_num,
+                            integralInfo.integral_title,integralInfo.integral_badge
+                        FROM t_integral_info integralInfo
+                        <where>
+                            <if test="integralType !=null">
+                             integralInfo.integral_type =#{integralType}
+                            </if>
+                        </where>
+                        ORDER BY integralInfo.integral_num DESC
+                        LIMIT 999999
+            ) integralInfo ON integralInfo.integral_type = userIntegralInfo.integral_type
+            LEFT JOIN sys_user `user` ON userIntegralInfo.user_id = `user`.user_id
+            WHERE userIntegralInfo.integral_num <![CDATA[ <= ]]> integralInfo.integral_num
+            GROUP BY userIntegralInfo.user_id
+            ORDER BY userIntegralInfo.integral_num DESC
+        ) userInfo
+    </select>
+
+    <!--  获取优质分享者信息  -->
+    <select id="getShareUserInfo" resultType="com.lims.manage.erp.vo.ShareUserInfoVo">
+        SELECT IntegralInfo.row_num,IntegralInfo.integral_num,IntegralInfo.integral_title,userInfo.`name`,
+            userInfo.create_time,IF( ISNULL( shareInfo.share_num ), 0, shareInfo.share_num ) AS share_num
+        FROM sys_user userInfo
+            LEFT JOIN (
+            SELECT @rownum := @rownum + 1 AS row_num,IntegralInfo.integral_num,IntegralInfo.integral_title,IntegralInfo.user_id
+            FROM (  SELECT @rownum := 0 ) r,
+                 (  SELECT userIntegralInfo.integral_num,integralInfo.integral_title,integralInfo.integral_badge,
+                    userIntegralInfo.user_id
+                    FROM t_user_integral_info userIntegralInfo
+                    LEFT JOIN (
+                        SELECT DISTINCT( integralInfo.id ),integralInfo.integral_type,integralInfo.integral_num,
+                            integralInfo.integral_title,integralInfo.integral_badge
+                        FROM t_integral_info integralInfo
+                        WHERE integralInfo.integral_type = "1"
+                        ORDER BY integralInfo.integral_num DESC
+                        LIMIT 999999
+                    ) integralInfo ON integralInfo.integral_type = userIntegralInfo.integral_type
+                    WHERE userIntegralInfo.integral_num <![CDATA[ <= ]]> integralInfo.integral_num
+                    GROUP BY userIntegralInfo.user_id
+                    ORDER BY userIntegralInfo.integral_num DESC
+                ) IntegralInfo
+        ) IntegralInfo ON userInfo.user_id = IntegralInfo.user_id
+        LEFT JOIN (
+                SELECT count(*) AS share_num,dataInfo.user_id
+                FROM t_data_info dataInfo
+                LEFT JOIN t_data_audit_record auditRecord ON dataInfo.data_id = auditRecord.data_id
+                <where>
+                    <if test="auditStatus!=null">
+                        AND auditRecord.audit_status = #{auditStatus}
+                    </if>
+                </where>
+                GROUP BY dataInfo.user_id
+        ) shareInfo ON userInfo.user_id = shareInfo.user_id
+        <where>
+            <if test="userId!=null and userId!=''">
+                AND userInfo.user_id = #{userId}
+            </if>
+        </where>
+    </select>
+</mapper>

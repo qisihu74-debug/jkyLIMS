@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.DataAuditRecordDao">
+
+    <!--  知识审核列表  -->
+    <select id="pageList" resultType="com.lims.manage.erp.vo.DataAuditRecordVo">
+        SELECT dataInfo.data_id,dataInfo.data_title,dictItem.item_text AS data_type,dataInfo.original,
+            (SELECT GROUP_CONCAT( labelInfo.label_content ) FROM t_label_info labelInfo
+                WHERE FIND_IN_SET(labelInfo.label_id,dataInfo.data_label)) AS data_label,
+            (SELECT GROUP_CONCAT( userInfo.`name` ) FROM sys_user userInfo
+                WHERE FIND_IN_SET( userInfo.user_id,dataInfo.partake_user)) AS partake_user,
+            dataInfo.data_source,dataInfo.up_time,auditRecord.audit_status,userInfo.`name` AS up_user
+        FROM t_data_info dataInfo
+        LEFT JOIN t_dict_item dictItem ON dataInfo.data_type = dictItem.item_id
+        LEFT JOIN t_data_audit_record auditRecord ON dataInfo.data_id = auditRecord.data_id
+        LEFT JOIN sys_user userInfo ON dataInfo.user_id = userInfo.user_id
+        <where>
+            <if test="dataInfo.userId!=null and dataInfo.userId!=''">
+                AND dataInfo.user_id =#{dataInfo.userId}
+            </if>
+            <if test="dataInfo.dataType!=null and dataInfo.dataType!=''">
+                AND dataInfo.data_type =#{dataInfo.dataType}
+            </if>
+            <if test="dataInfo.original!=null">
+                AND dataInfo.original =#{dataInfo.original}
+            </if>
+            <if test="dataInfo.auditStatus!=null">
+                AND auditRecord.audit_status =#{dataInfo.auditStatus}
+            </if>
+            <if test="dataInfo.upUser!=null and dataInfo.upUser!=''">
+                AND dataInfo.user_id =#{dataInfo.upUser}
+            </if>
+            <if test="dataInfo.dataTitle!=null and dataInfo.dataTitle!=''">
+                AND dataInfo.data_title LIKE concat(concat('%',#{dataInfo.dataTitle}),'%')
+            </if>
+            <if test="dataInfo.dataSource!=null and dataInfo.dataSource!=''">
+                AND dataInfo.data_source LIKE concat(concat('%',#{dataInfo.dataSource}),'%')
+            </if>
+            <if test="dataInfo.upTimeBegin != null">
+                <![CDATA[AND DATE_FORMAT(dataInfo.up_time, '%Y-%m-%d') >= DATE_FORMAT(#{dataInfo.upTimeBegin}, '%Y-%m-%d')]]>
+            </if>
+            <if test="dataInfo.upTimeEnd != null">
+                <![CDATA[AND DATE_FORMAT(dataInfo.up_time, '%Y-%m-%d') <= DATE_FORMAT(#{dataInfo.upTimeEnd}, '%Y-%m-%d')]]>
+            </if>
+            <if test="dataInfo.dataLabel!=null and dataInfo.dataLabel!=''">
+                AND FIND_IN_SET(#{dataInfo.dataLabel}, dataInfo.data_label )
+            </if>
+            <if test="dataInfo.partakeUser!=null and dataInfo.partakeUser!=''">
+                AND FIND_IN_SET(#{dataInfo.partakeUser}, dataInfo.partake_user )
+            </if>
+        </where>
+        ORDER BY dataInfo.up_time DESC
+    </select>
+
+</mapper>

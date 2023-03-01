@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.ProblemInfoDao">
+
+    <!--  问答列表  -->
+    <select id="pageList" resultType="com.lims.manage.erp.vo.ProblemInfoVo">
+        SELECT problemInfo.problem_id,problemInfo.problem_title,userInfo.`name` AS user_name,
+               (SELECT GROUP_CONCAT( labelInfo.label_content ) FROM t_label_info labelInfo
+                WHERE FIND_IN_SET( labelInfo.label_id, problemInfo.data_label )) AS data_label,problemInfo.is_top,
+                problemInfo.create_time,problemTypeItem.item_text AS problem_type,problemInfo.problem_type AS problem_type_id,
+                problemInfo.view_num,IF(ISNULL( problemComment.reply_num ), 0, problemComment.reply_num ) AS reply_num
+        FROM t_problem_info problemInfo
+        LEFT JOIN sys_user userInfo ON problemInfo.user_id = userInfo.user_id
+        LEFT JOIN t_dict_item problemTypeItem ON problemInfo.problem_type = problemTypeItem.item_id
+        LEFT JOIN ( SELECT count(*) AS reply_num, problem_id FROM t_problem_comment WHERE ISNULL( parent_comment_id ) GROUP BY problem_id ) problemComment ON problemInfo.problem_id = problemComment.problem_id
+        <where>
+            <if test="problemInfo.problemTitle!=null and problemInfo.problemTitle!=''">
+                <choose>
+                    <when test="searchType">
+                        AND (problemInfo.problem_title LIKE concat(concat('%',#{problemInfo.problemTitle}),'%')
+                        <if test="problemInfo.labelIdList!=null">
+                            <foreach item="item" collection="problemInfo.labelIdList">
+                                OR FIND_IN_SET(#{item.labelId},problemInfo.data_label)
+                            </foreach>
+                        </if>
+                        )
+                    </when>
+                    <otherwise>
+                        AND problemInfo.problem_title LIKE concat(concat('%',#{problemInfo.problemTitle}),'%')
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="problemInfo.dataLabel!=null and problemInfo.dataLabel!=''">
+                <if test="problemInfo.labelIdList!=null">
+                    AND (
+                        <foreach item="item" collection="problemInfo.labelIdList" separator="OR">
+                            FIND_IN_SET(#{item.labelId},problemInfo.data_label)
+                        </foreach>
+                    )
+                </if>
+            </if>
+            <if test="problemInfo.createTimeBegin != null">
+                <![CDATA[AND DATE_FORMAT(problemInfo.create_time, '%Y-%m-%d') >= DATE_FORMAT(#{problemInfo.createTimeBegin}, '%Y-%m-%d')]]>
+            </if>
+            <if test="problemInfo.createTimeEnd != null">
+                <![CDATA[AND DATE_FORMAT(problemInfo.create_time, '%Y-%m-%d') <= DATE_FORMAT(#{problemInfo.createTimeEnd}, '%Y-%m-%d')]]>
+            </if>
+            <if test="problemInfo.userId!=null and problemInfo.userId!=''">
+                AND problemInfo.user_id =#{problemInfo.userId}
+            </if>
+            <if test="problemInfo.problemType!=null and problemInfo.problemType!=''">
+                AND problemInfo.problem_type =#{problemInfo.problemType}
+            </if>
+        </where>
+        ORDER BY problemInfo.is_top DESC, problemInfo.create_time DESC
+    </select>
+
+    <!--  根据问题id增加对应问题的浏览量  -->
+    <update id="addProblemViewNum">
+        UPDATE t_problem_info
+        SET view_num = view_num + 1
+        WHERE problem_id=#{problemId}
+    </update>
+
+    <!--  根据问题Id获取问题详情  -->
+    <select id="getProblemInfo" resultType="com.lims.manage.erp.vo.ProblemInfoVo">
+        SELECT problemInfo.problem_id,problemInfo.problem_title,userInfo.`name` AS user_name,
+               (SELECT GROUP_CONCAT( labelInfo.label_content ) FROM t_label_info labelInfo
+                WHERE FIND_IN_SET( labelInfo.label_id, problemInfo.data_label )) AS data_label,
+               problemInfo.create_time,problemTypeItem.item_text AS problem_type,problemInfo.user_id,
+               problemInfo.view_num,IF(ISNULL( problemComment.reply_num ), 0, problemComment.reply_num ) AS reply_num,problemInfo.problem_content
+        FROM t_problem_info problemInfo
+        LEFT JOIN sys_user userInfo ON problemInfo.user_id = userInfo.user_id
+        LEFT JOIN t_dict_item problemTypeItem ON problemInfo.problem_type = problemTypeItem.item_id
+        LEFT JOIN ( SELECT count(*) AS reply_num, problem_id FROM t_problem_comment
+                    WHERE ISNULL( parent_comment_id ) GROUP BY problem_id
+                    ) problemComment ON problemInfo.problem_id = problemComment.problem_id
+        WHERE problemInfo.problem_id=#{problemId}
+    </select>
+
+    <!--  根据问题id获取评论列表  -->
+    <select id="getProblemCommentList" resultType="com.lims.manage.erp.vo.ProblemCommentVo">
+        SELECT problemComment.comment_id,userInfo.`name` AS user_name,problemComment.create_time,
+            problemComment.comment_content,userIntegral.integral_title,problemComment.user_id,
+            problemCommentRecord.like_num,problemCommentRecord.tap_num,userOperationStatus.like_status,
+            userOperationStatus.tap_status,childrenProblemComment.commentNum
+        FROM t_problem_comment problemComment
+        LEFT JOIN t_problem_comment_record problemCommentRecord ON problemComment.comment_id = problemCommentRecord.comment_id
+        LEFT JOIN sys_user userInfo ON problemComment.user_id = userInfo.user_id
+        LEFT JOIN (
+            SELECT userIntegral.user_id,userIntegral.integral_title
+            FROM(
+                SELECT DISTINCT( userIntegralInfo.user_id ),integralInfo.integral_title
+                FROM t_user_integral_info userIntegralInfo
+                LEFT JOIN t_integral_info integralInfo ON userIntegralInfo.integral_type = integralInfo.integral_type
+                WHERE userIntegralInfo.integral_type = '1'
+                    AND userIntegralInfo.integral_num <![CDATA[ <= ]]> integralInfo.integral_num
+                ORDER BY integralInfo.integral_num
+            ) userIntegral
+            GROUP BY userIntegral.user_id
+        ) userIntegral ON problemComment.user_id = userIntegral.user_id
+        LEFT JOIN (
+            SELECT max( CASE userOperation.operation_type WHEN '17' THEN 1 ELSE 0 END ) like_status,
+                max( CASE userOperation.operation_type WHEN '18' THEN 1 ELSE 0 END ) tap_status,
+                max( CASE userOperation.operation_type WHEN '19' THEN 1 ELSE 0 END ) collect_status,
+                userOperation.event_id
+            FROM t_user_operation_record userOperation
+            <where>
+                <if test="userId!=null and userId!=''">
+                    AND userOperation.user_id = #{userId}
+                </if>
+                <if test="eventType!=null and eventType!=''">
+                    AND userOperation.event_type = #{eventType}
+                </if>
+            </where>
+            GROUP BY userOperation.event_type,userOperation.event_id
+        ) userOperationStatus ON problemComment.comment_id = userOperationStatus.event_id
+        LEFT JOIN (
+            SELECT count(*) AS commentNum, parent_comment_id
+            FROM t_problem_comment
+            GROUP BY parent_comment_id
+        ) childrenProblemComment ON problemComment.comment_id = childrenProblemComment.parent_comment_id
+        <where>
+            <if test="problemId!=null and problemId!=''">
+                AND problemComment.problem_id=#{problemId}
+            </if>
+            <choose>
+                <when test="parentCommentId!=null and parentCommentId!=''">
+                    AND problemComment.parent_comment_id =#{parentCommentId}
+                </when>
+                <otherwise>AND ISNULL( problemComment.parent_comment_id )</otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <!--  根据评论id增加评论点赞数量  -->
+    <update id="addCommentLikeNum">
+        UPDATE t_problem_comment_record
+        SET like_num = like_num + 1
+        WHERE comment_id=#{commentId}
+    </update>
+
+    <!--  根据评论id增加评论点踩数量  -->
+    <update id="addCommentTapNum">
+        UPDATE t_problem_comment_record
+        SET tap_num = tap_num + 1
+        WHERE comment_id=#{commentId}
+    </update>
+
+    <!--  获取急待回答列表  -->
+    <select id="getUrgentProblemList" resultType="HashMap">
+        SELECT problemInfo.problem_id,problemInfo.problem_title
+        FROM t_problem_info problemInfo
+        LEFT JOIN ( SELECT count(*) AS reply_num, problem_id FROM t_problem_comment GROUP BY problem_id ) problemComment ON problemInfo.problem_id = problemComment.problem_id
+        WHERE ISNULL(problemComment.reply_num)
+        LIMIT 5
+    </select>
+
+    <!--  获取问答推荐列表  -->
+    <select id="getProblemRecommendList" resultType="HashMap">
+        SELECT problemInfo.problem_id,problemInfo.problem_title
+        FROM t_problem_info problemInfo
+        LEFT JOIN (
+            SELECT problemComment.problem_id,count(*) AS comment_num,sum( problemCommentRecord.like_num ) AS like_num
+            FROM t_problem_comment problemComment
+            LEFT JOIN t_problem_comment_record problemCommentRecord ON problemComment.comment_id = problemCommentRecord.comment_id
+            GROUP BY problemComment.problem_id
+            ) problemComment ON problemInfo.problem_id = problemComment.problem_id
+        ORDER BY problemComment.like_num DESC
+        LIMIT 10
+    </select>
+</mapper>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.UserOperationRecordDao">
+
+    <!--  根据事件类型和事件id获取用户的操作状态  -->
+    <select id="getUserOperationStatus" resultType="com.lims.manage.erp.vo.UserOperationStatusVo">
+        SELECT max( CASE userOperation.operation_type WHEN '17' THEN 1 ELSE NULL END ) like_status,
+            max( CASE userOperation.operation_type WHEN '18' THEN 1 ELSE NULL END ) tap_status,
+            max( CASE userOperation.operation_type WHEN '19' THEN 1 ELSE NULL END ) collect_status,
+            max( CASE userOperation.operation_type WHEN '20' THEN 1 ELSE NULL END ) complete_status
+        FROM t_user_operation_record userOperation
+        <where>
+            <if test="userOperationRecord.userId!=null and userOperationRecord.userId!=''">
+               AND userOperation.user_id =#{userOperationRecord.userId}
+            </if>
+            <if test="userOperationRecord.eventType!=null and userOperationRecord.eventType!=''">
+                AND userOperation.event_type =#{userOperationRecord.eventType}
+            </if>
+            <if test="userOperationRecord.eventId!=null and userOperationRecord.eventId!=''">
+                AND userOperation.event_id =#{userOperationRecord.eventId}
+            </if>
+        </where>
+    </select>
+
+    <!--  浏览足迹返回结果  -->
+    <resultMap id="BrowseFootstepsMap" type="com.lims.manage.erp.vo.BrowseFootstepsVo">
+        <result property="browseTime" column="browse_time"/>
+        <collection property="browseFootstepsVoList" ofType="com.lims.manage.erp.vo.BrowseFootstepsDetailVo">
+            <id property="id" column="id"/>
+            <result property="eventType" column="event_type"/>
+            <result property="createTime" column="create_time"/>
+            <result property="dataId" column="data_id"/>
+            <result property="dataTitle" column="data_title"/>
+            <result property="dataType" column="data_type"/>
+            <result property="fileSuffix" column="file_suffix"/>
+        </collection>
+    </resultMap>
+
+    <!--  获取用户浏览足迹  -->
+    <select id="getBrowseFootsteps" resultMap="BrowseFootstepsMap">
+        SELECT operationRecord.id,operationRecord.event_type,operationRecord.create_time,
+            CONCAT(DATE_FORMAT( operationRecord.create_time, '%Y-%m-%d ' ),
+                    (CASE DATE_FORMAT( operationRecord.create_time, '%w' )
+                        WHEN 0 THEN '星期日'
+                        WHEN 1 THEN '星期一'
+                        WHEN 2 THEN '星期二'
+                        WHEN 3 THEN '星期三'
+                        WHEN 4 THEN '星期四'
+                        WHEN 5 THEN '星期五'
+                        WHEN 6 THEN '星期六'
+                    END
+                    )) AS browse_time,dataInfo.data_id,dataInfo.data_title,dataInfo.data_type,
+            dataInfo.file_suffix
+        FROM t_user_operation_record operationRecord
+        INNER JOIN t_data_info dataInfo ON operationRecord.event_id = dataInfo.data_id
+            AND operationRecord.event_type = '13'
+        <where>
+            <if test="userId!=null and userId!=''">
+                AND operationRecord.user_id = #{userId}
+            </if>
+            AND operationRecord.operation_type = '16'
+        </where>
+        UNION
+        SELECT operationRecord.id,operationRecord.event_type,operationRecord.create_time,
+           CONCAT(DATE_FORMAT( operationRecord.create_time, '%Y-%m-%d ' ),
+                  (CASE DATE_FORMAT( operationRecord.create_time, '%w' )
+                       WHEN 0 THEN '星期日'
+                       WHEN 1 THEN '星期一'
+                       WHEN 2 THEN '星期二'
+                       WHEN 3 THEN '星期三'
+                       WHEN 4 THEN '星期四'
+                       WHEN 5 THEN '星期五'
+                       WHEN 6 THEN '星期六'
+                      END
+                      )) AS browse_time,problemInfo.problem_id AS data_id,problemInfo.problem_title AS data_title,
+            '' AS data_type,'' AS file_suffix
+        FROM t_user_operation_record operationRecord
+        INNER JOIN t_problem_info problemInfo ON operationRecord.event_id = problemInfo.problem_id
+            AND operationRecord.event_type = '14'
+        <where>
+            <if test="userId!=null and userId!=''">
+                AND operationRecord.user_id = #{userId}
+            </if>
+           AND operationRecord.operation_type = '16'
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!--  获取用户点赞列表  -->
+    <select id="getUserLikeList" resultMap="BrowseFootstepsMap">
+        SELECT operationRecord.id,operationRecord.event_type,operationRecord.create_time,
+            CONCAT(DATE_FORMAT( operationRecord.create_time, '%Y-%m-%d ' ),
+            (CASE DATE_FORMAT( operationRecord.create_time, '%w' )
+            WHEN 0 THEN '星期日'
+            WHEN 1 THEN '星期一'
+            WHEN 2 THEN '星期二'
+            WHEN 3 THEN '星期三'
+            WHEN 4 THEN '星期四'
+            WHEN 5 THEN '星期五'
+            WHEN 6 THEN '星期六'
+            END
+            )) AS browse_time,dataInfo.data_id,dataInfo.data_title,dataInfo.data_type,
+            dataInfo.file_suffix
+        FROM t_user_operation_record operationRecord
+        INNER JOIN t_data_info dataInfo ON operationRecord.event_id = dataInfo.data_id
+        AND operationRecord.event_type = '13'
+        <where>
+            <if test="userId!=null and userId!=''">
+                AND operationRecord.user_id = #{userId}
+            </if>
+            AND operationRecord.operation_type = '17'
+        </where>
+        UNION
+        SELECT operationRecord.id,operationRecord.event_type,operationRecord.create_time,
+        CONCAT(DATE_FORMAT( operationRecord.create_time, '%Y-%m-%d ' ),
+        (CASE DATE_FORMAT( operationRecord.create_time, '%w' )
+        WHEN 0 THEN '星期日'
+        WHEN 1 THEN '星期一'
+        WHEN 2 THEN '星期二'
+        WHEN 3 THEN '星期三'
+        WHEN 4 THEN '星期四'
+        WHEN 5 THEN '星期五'
+        WHEN 6 THEN '星期六'
+        END
+        )) AS browse_time,problemComment.comment_id AS data_id,problemComment.comment_content AS data_title,
+        '' AS data_type,'' AS file_suffix
+        FROM t_user_operation_record operationRecord
+        INNER JOIN t_problem_comment problemComment ON operationRecord.event_id = problemComment.comment_id
+        AND operationRecord.event_type = '15'
+        <where>
+            <if test="userId!=null and userId!=''">
+                AND operationRecord.user_id = #{userId}
+            </if>
+            AND operationRecord.operation_type = '17'
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!--  获取用户收藏列表  -->
+    <select id="getUserCollectList" resultMap="BrowseFootstepsMap">
+        SELECT operationRecord.id,operationRecord.event_type,operationRecord.create_time,
+        CONCAT(DATE_FORMAT( operationRecord.create_time, '%Y-%m-%d ' ),
+        (CASE DATE_FORMAT( operationRecord.create_time, '%w' )
+        WHEN 0 THEN '星期日'
+        WHEN 1 THEN '星期一'
+        WHEN 2 THEN '星期二'
+        WHEN 3 THEN '星期三'
+        WHEN 4 THEN '星期四'
+        WHEN 5 THEN '星期五'
+        WHEN 6 THEN '星期六'
+        END
+        )) AS browse_time,dataInfo.data_id,dataInfo.data_title,dataInfo.data_type,
+        dataInfo.file_suffix
+        FROM t_user_operation_record operationRecord
+        INNER JOIN t_data_info dataInfo ON operationRecord.event_id = dataInfo.data_id
+        AND operationRecord.event_type = '13'
+        <where>
+            <if test="userId!=null and userId!=''">
+                AND operationRecord.user_id = #{userId}
+            </if>
+            AND operationRecord.operation_type = '19'
+        </where>
+        ORDER BY create_time DESC
+    </select>
+</mapper>
