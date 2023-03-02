@@ -35,12 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -618,6 +613,11 @@ public class SampleController {
         outputStream.close();
     }
 
+    /**
+     * 样品留样列表
+     * @param sampleOutPutVo
+     * @return
+     */
     @PostMapping("/sampleRetentionList")
     public Result sampleRetentionList(@RequestBody SampleOutPutVo sampleOutPutVo ){
         if(org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getPageNum()) &&
@@ -626,5 +626,31 @@ public class SampleController {
         }
         System.out.print("请求参数 == sampleOutPutVo ="+ sampleOutPutVo);
         return ResultUtil.success(sampleService.sampleRetentionList(sampleOutPutVo));
+    }
+
+    /**
+     * 样品留样列表 导出
+     * @param sampleOutPutVo
+     * @param response
+     */
+    @PostMapping("/sampleRetentionExport")
+    public void sampleRetentionExport(@RequestBody SampleOutPutVo sampleOutPutVo, HttpServletResponse response ) throws Exception {
+        BufferedOutputStream bos = null;
+        String fileName = "样品出入库登记表";
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename="
+                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+        InputStream inputStream = sampleService.sampleRetentionExport(sampleOutPutVo);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
     }
 }

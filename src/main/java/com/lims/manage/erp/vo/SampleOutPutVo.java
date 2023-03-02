@@ -71,6 +71,8 @@ public class SampleOutPutVo {
     /**
      * 处理日期
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date sellOffDate;
     /**
      * 开始日期

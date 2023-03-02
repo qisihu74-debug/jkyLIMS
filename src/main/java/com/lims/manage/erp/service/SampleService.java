@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -100,4 +101,9 @@ public interface SampleService {
      * @return
      */
     PageInfo sampleRetentionList(SampleOutPutVo sampleOutPutVo);
+
+    /**
+     * 样品留样列表 导出
+     */
+    InputStream sampleRetentionExport(SampleOutPutVo sampleOutPutVo) throws Exception;
 }

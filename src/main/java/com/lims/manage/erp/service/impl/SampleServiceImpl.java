@@ -35,10 +35,7 @@ import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -847,5 +844,17 @@ public class SampleServiceImpl implements SampleService {
         }
         return sampleList;
     }
+    /**
+     * 样品留样列表 导出
+     */
+//    @SneakyThrows
+    @Override
+    public InputStream sampleRetentionExport(SampleOutPutVo sampleOutPutVo) throws Exception {
+        // 处理逻辑
+        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
+        SampleExportUtil sampleExportUtil =new SampleExportUtil();
+        return sampleExportUtil.sampleRetentionExport(list);
+    }
+
 
 }
