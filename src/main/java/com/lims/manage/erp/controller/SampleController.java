@@ -516,7 +516,7 @@ public class SampleController {
      */
     @GetMapping("updateState")
     public Result updateState(Integer sampleId, Integer state, String time,Integer saveTime,
-                              Integer sampleRetentionPeriod,String sampleProcessMode){
+                              Integer sampleRetentionPeriod,String sampleProcessMode,String approver){
         System.out.println("留样天数: == "+sampleRetentionPeriod + " == 样品处置方式 == " + sampleProcessMode);
         System.out.println("扫码时间:{}"+time);
         log.info("扫码时间:{}",time);
@@ -534,7 +534,7 @@ public class SampleController {
         if (sampleId == null || state == null){
             return ResultUtil.error("缺少参数");
         }
-        Integer flag = sampleService.updateState(sampleId,state,date,saveTime,sampleRetentionPeriod,sampleProcessMode);
+        Integer flag = sampleService.updateState(sampleId,state,date,saveTime,sampleRetentionPeriod,sampleProcessMode,approver);
         if (flag == 0){
             return ResultUtil.success("操作成功");
         }else if (flag == 1){
@@ -652,5 +652,14 @@ public class SampleController {
             bos.flush();
         }
         bos.close();
+    }
+
+    /**
+     * 返回技术负责人列表
+     * @return
+     */
+    @GetMapping("/getApprover")
+    public Result getApprover(){
+        return ResultUtil.success(sampleService.getApprover());
     }
 }

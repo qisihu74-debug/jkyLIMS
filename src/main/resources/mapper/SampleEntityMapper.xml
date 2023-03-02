@@ -635,6 +635,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             <if test="sampleOutPutRemrk != null">
                 sample_out_put_remrk=#{sampleOutPutRemrk,jdbcType=VARCHAR},
             </if>
+            <if test="approver != null">
+                approver = #{approver,jdbcType=VARCHAR},
+            </if>
         </set>
         where id = #{id,jdbcType=INTEGER}
     </update>

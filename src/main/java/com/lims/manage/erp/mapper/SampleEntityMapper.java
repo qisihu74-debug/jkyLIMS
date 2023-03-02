@@ -330,4 +330,18 @@ public interface SampleEntityMapper {
      * @return
      */
     List<SampleOutPutVo> sampleOutPutList(SampleOutPutVo sampleOutPutVo);
+    /**
+     * 查询技术负责人
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tt3.user_id as value,\n" +
+            "\tt3.name as label\n" +
+            "FROM\n" +
+            "\tsys_role AS t1\n" +
+            "\tLEFT JOIN sys_user_role AS t2 ON t1.role_id = t2.role_id \n" +
+            "\tLEFT JOIN sys_user as t3 ON t2.user_id = t3.user_id\n" +
+            "WHERE\n" +
+            "\tt1.role_name = \"技术负责人\";")
+    List<LabelValueVo> getApprover();
 }

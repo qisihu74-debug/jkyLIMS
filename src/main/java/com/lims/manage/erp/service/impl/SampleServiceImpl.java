@@ -440,7 +440,8 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer updateState(Integer sampleId,Integer state,Date time,Integer saveTime,Integer sampleRetentionPeriod,String sampleProcessMode) {
+    public Integer updateState(Integer sampleId,Integer state,Date time,Integer saveTime,Integer sampleRetentionPeriod,String sampleProcessMode,
+                               String approver) {
         //2领样，3留样，4处置
         List<Integer> ids = sampleEntityMapper.getExist(sampleId,state);
         if (ids != null && ids.size() >= 1){
@@ -493,6 +494,7 @@ public class SampleServiceImpl implements SampleService {
                     SampleEntity sampleEntity2 = new SampleEntity();
                     sampleEntity2.setId(sampleId);
                     sampleEntity2.setSampleProcessMode(sampleProcessMode);
+                    sampleEntity2.setApprover(approver);
                     // 动态更新
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity2);
                 }
@@ -856,5 +858,9 @@ public class SampleServiceImpl implements SampleService {
         return sampleExportUtil.sampleRetentionExport(list);
     }
 
+    @Override
+    public List<LabelValueVo> getApprover() {
+        return sampleEntityMapper.getApprover();
+    }
 
 }
