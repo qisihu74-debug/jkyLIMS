@@ -1181,6 +1181,10 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     <result property="acceptanceDate" column="acceptance_date"></result>
     <result property="requestDate" column="request_date"></result>
     <result property="taskCode" column="task_code"></result>
+    <result property="outboundDeliveryDate" column="outboundDeliveryDate"></result>
+    <result property="sampleTaker" column="sampleTaker"></result>
+    <result property="taskPublisher" column="taskPublisher"></result>
+    <result property="approver" column="approver"></result>
         <collection property="sampleCirculationRecords" ofType="com.lims.manage.erp.entity.SampleCirculationRecord">
             <result property="sampleId" column="sampleId"></result>
             <result property="status" column="STATUS"></result>
@@ -1198,13 +1202,17 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             t1.sample_process_mode,
             t1.sample_reserved_remrk,
             t1.sample_out_put_remrk,
+            t1.received_date as outboundDeliveryDate,
+            t1.inspector as sampleTaker,
+            t1.approver as approver,
             t3.acceptance_date,
             t3.request_date,
             t4.STATUS,
             t4.operator_id,
             t4.operator_name,
             t4.time,
-            t5.task_code
+            t5.task_code,
+            t5.orderer as taskPublisher
         FROM
             test_sample AS t1
             LEFT JOIN test_entrusted_sample_details_rel AS t2 ON t1.id = t2.sample_id

@@ -863,4 +863,41 @@ public class SampleServiceImpl implements SampleService {
         return sampleEntityMapper.getApprover();
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean sampleRetentionUpdate(SampleOutPutVo sampleOutPutVo) {
+        SampleEntity record = new SampleEntity();
+        record.setId(sampleOutPutVo.getSampleId());
+        record.setSampleReservedRemrk(sampleOutPutVo.getSampleReservedRemrk());
+        sampleEntityMapper.updateByPrimaryKeySelective(record);
+        return true;
+    }
+
+    @Override
+    public PageInfo sampleOutPutList(SampleOutPutVo sampleOutPutVo) {
+        // 处理逻辑
+        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
+        // 进行分页
+        PageInfo pageInfo = PagingUtil.pagingUtilityList(sampleOutPutVo.getPageNum(), sampleOutPutVo.getPageSize(), Collections.singletonList(list));
+        return pageInfo;
+    }
+
+    @Override
+    public InputStream sampleOutPutExport(SampleOutPutVo sampleOutPutVo) throws Exception {
+        // 处理逻辑
+        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
+        SampleExportUtil sampleExportUtil =new SampleExportUtil();
+        return sampleExportUtil.sampleOutPutExport(list);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean sampleOutPutUpdate(SampleOutPutVo sampleOutPutVo) {
+        SampleEntity record = new SampleEntity();
+        record.setId(sampleOutPutVo.getSampleId());
+        record.setSampleOutPutRemrk(sampleOutPutVo.getSampleOutPutRemrk());
+        sampleEntityMapper.updateByPrimaryKeySelective(record);
+        return true;
+    }
+
 }

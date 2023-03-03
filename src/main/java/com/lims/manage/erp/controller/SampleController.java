@@ -662,4 +662,80 @@ public class SampleController {
     public Result getApprover(){
         return ResultUtil.success(sampleService.getApprover());
     }
+
+    /**
+     * 样品留样 更新
+     * @param sampleOutPutVo
+     */
+    @PostMapping("/sampleRetentionUpdate")
+    public Result sampleRetentionUpdate(@RequestBody SampleOutPutVo sampleOutPutVo) {
+        if(org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getSampleId()) ||
+                org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getSampleReservedRemrk())){
+            return ResultUtil.error("缺少必填参数！！！");
+        }
+       Boolean status = sampleService.sampleRetentionUpdate(sampleOutPutVo);
+        if(!status){
+            return ResultUtil.error("更新样品留样备注失败");
+        }
+        return  ResultUtil.success("更新样品留样成功");
+    }
+
+    /**
+     * 样品出入库列表
+     * @param sampleOutPutVo
+     * @return
+     */
+    @PostMapping("/sampleOutPutList")
+    public Result sampleOutPutList(@RequestBody SampleOutPutVo sampleOutPutVo ){
+        if(org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getPageNum()) &&
+                org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getPageSize())){
+            return ResultUtil.error("缺少必填参数！！！");
+        }
+        System.out.print("请求参数 == sampleOutPutVo ="+ sampleOutPutVo);
+        return ResultUtil.success(sampleService.sampleOutPutList(sampleOutPutVo));
+    }
+
+    /**
+     * 样品出入库列表 导出
+     * @param sampleOutPutVo
+     * @param response
+     */
+    @PostMapping("/sampleOutPutExport")
+    public void sampleOutPutExport(@RequestBody SampleOutPutVo sampleOutPutVo, HttpServletResponse response ) throws Exception {
+        BufferedOutputStream bos = null;
+        String fileName = "样品出入库登记表";
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename="
+                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+        InputStream inputStream = sampleService.sampleOutPutExport(sampleOutPutVo);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+    }
+
+    /**
+     * 样品出入库 更新
+     * @param sampleOutPutVo
+     */
+    @PostMapping("/sampleOutPutUpdate")
+    public Result sampleOutPutUpdate(@RequestBody SampleOutPutVo sampleOutPutVo) {
+        if(org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getSampleId()) ||
+                org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getSampleOutPutRemrk())){
+            return ResultUtil.error("缺少必填参数！！！");
+        }
+        Boolean status = sampleService.sampleOutPutUpdate(sampleOutPutVo);
+        if(!status){
+            return ResultUtil.error("更新样品出入库备注失败");
+        }
+        return  ResultUtil.success("更新样品出入库成功");
+    }
+
 }

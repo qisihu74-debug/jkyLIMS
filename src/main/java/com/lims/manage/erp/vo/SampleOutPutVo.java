@@ -98,4 +98,25 @@ public class SampleOutPutVo {
      * 每页展示数量
      */
     private Integer pageSize;
+
+    /**
+     * 样品接收人（任务发布人）
+     */
+    private String taskPublisher;
+
+    /**
+     * 领样人
+     */
+    private String sampleTaker;
+
+    /**
+     *  出库日期
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
+    private Date outboundDeliveryDate;
+    /**
+     * 技术负责人
+     */
+    private String approver;
 }

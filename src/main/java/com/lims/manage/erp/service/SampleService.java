@@ -110,4 +110,30 @@ public interface SampleService {
      * @return
      */
     List<LabelValueVo> getApprover();
+
+    /**
+     * 样品留样栏 更新
+     * @param sampleOutPutVo
+     * @return
+     */
+    Boolean sampleRetentionUpdate(SampleOutPutVo sampleOutPutVo);
+
+    /**
+     * 样品出入库列表
+     * @param sampleOutPutVo
+     * @return
+     */
+    PageInfo sampleOutPutList(SampleOutPutVo sampleOutPutVo);
+
+    /**
+     * 样品出入库列表 导出
+     */
+    InputStream sampleOutPutExport(SampleOutPutVo sampleOutPutVo) throws Exception;
+
+    /**
+     * 样样品出入库列表 更新
+     * @param sampleOutPutVo
+     * @return
+     */
+    Boolean sampleOutPutUpdate(SampleOutPutVo sampleOutPutVo);
 }
