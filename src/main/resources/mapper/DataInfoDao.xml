@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.DataInfoDao">
+
+    <!--  获取优质分享者  -->
+    <select id="getQualityShare" resultType="java.util.HashMap">
+        SELECT userInfo.`name`
+        FROM t_data_info dataInfo
+        INNER JOIN t_data_audit_record dataAudit ON dataInfo.data_id = dataAudit.data_id
+            AND dataAudit.audit_status = 1
+        LEFT JOIN sys_user userInfo ON dataInfo.user_id = userInfo.user_id
+        GROUP BY dataInfo.user_id
+        ORDER BY count(dataInfo.user_id) desc
+        Limit 10
+    </select>
+
+    <!--  我分享的资料/视频  -->
+    <select id="pageList" resultType="com.lims.manage.erp.vo.DataInfoVo">
+        SELECT dataInfo.data_id,dataInfo.data_title,dictItem.item_text AS data_type,dataInfo.original,
+            (SELECT GROUP_CONCAT( labelInfo.label_content ) FROM t_label_info labelInfo
+                WHERE FIND_IN_SET(labelInfo.label_id,dataInfo.data_label)) AS data_label,
+            (SELECT GROUP_CONCAT( userInfo.`name` ) FROM sys_user userInfo
+                WHERE FIND_IN_SET( userInfo.user_id,dataInfo.partake_user)) AS partake_user,
+            dataInfo.data_source,dataInfo.up_time,auditRecord.audit_status,auditRecord.audit_content
+        FROM t_data_info dataInfo
+        LEFT JOIN t_dict_item dictItem ON dataInfo.data_type = dictItem.item_id
+        LEFT JOIN t_data_audit_record auditRecord ON dataInfo.data_id = auditRecord.data_id
+        <where>
+            <if test="dataInfo.userId!=null and dataInfo.userId!=''">
+                AND dataInfo.user_id =#{dataInfo.userId}
+            </if>
+            <if test="dataInfo.dataType!=null and dataInfo.dataType!=''">
+                AND dataInfo.data_type =#{dataInfo.dataType}
+            </if>
+            <if test="dataInfo.original!=null">
+                AND dataInfo.original =#{dataInfo.original}
+            </if>
+            <if test="dataInfo.dataTitle!=null and dataInfo.dataTitle!=''">
+                AND dataInfo.data_title LIKE concat(concat('%',#{dataInfo.dataTitle}),'%')
+            </if>
+            <if test="dataInfo.dataSource!=null and dataInfo.dataSource!=''">
+                AND dataInfo.data_source LIKE concat(concat('%',#{dataInfo.dataSource}),'%')
+            </if>
+            <if test="dataInfo.upTimeBegin != null">
+                <![CDATA[AND DATE_FORMAT(dataInfo.up_time, '%Y-%m-%d') >= DATE_FORMAT(#{dataInfo.upTimeBegin}, '%Y-%m-%d')]]>
+            </if>
+            <if test="dataInfo.upTimeEnd != null">
+                <![CDATA[AND DATE_FORMAT(dataInfo.up_time, '%Y-%m-%d') <= DATE_FORMAT(#{dataInfo.upTimeEnd}, '%Y-%m-%d')]]>
+            </if>
+            <if test="dataInfo.labelIdList!=null">
+                AND (
+                <foreach item="item" collection="dataInfo.labelIdList" separator="OR">
+                    FIND_IN_SET(#{item.labelId},dataInfo.data_label)
+                </foreach>
+                )
+            </if>
+            <if test="dataInfo.partakeUser!=null and dataInfo.partakeUser!=''">
+                AND FIND_IN_SET(#{dataInfo.partakeUser}, dataInfo.partake_user )
+            </if>
+        </where>
+        ORDER BY dataInfo.up_time DESC
+    </select>
+
+    <!--  根据资料id获取资料信息  -->
+    <select id="getDataAuditInfo" resultType="com.lims.manage.erp.vo.DataInfoVo">
+        SELECT dataInfo.data_id,dataInfo.data_title,dictItem.item_text AS data_type,
+            (SELECT GROUP_CONCAT( labelInfo.label_content ) FROM t_label_info labelInfo
+                WHERE FIND_IN_SET( labelInfo.label_id, dataInfo.data_label )) AS data_label,dataInfo.file_suffix,
+            userInfo.`name` AS up_user,dataInfo.up_time,dataInfo.data_url,dataInfo.data_img_url,dataInfo.user_id
+        FROM t_data_info dataInfo
+        LEFT JOIN t_dict_item dictItem ON dataInfo.data_type = dictItem.item_id
+        LEFT JOIN sys_user userInfo ON dataInfo.user_id = userInfo.user_id
+        WHERE dataInfo.data_id = #{dataId}
+    </select>
+
+    <!--  根据资料id获取资料详情  -->
+    <select id="getDataInfoDetail" resultType="com.lims.manage.erp.vo.DataInfoDetailVo">
+        SELECT dataInfo.data_id,dataInfo.data_title,userInfo.`name` AS up_user, dataInfo.up_time,
+            (SELECT GROUP_CONCAT( labelInfo.label_content ) FROM t_label_info labelInfo
+                WHERE FIND_IN_SET( labelInfo.label_id, dataInfo.data_label )) AS data_label,
+            dataInfo.data_url,dataInfo.data_video_url,dataInfo.data_img_url,dataInfo.file_suffix,dataRecord.like_num,
+            dataRecord.tap_num,dataRecord.collect_num,dataRecord.complete_num,dataInfo.user_id,
+            IFNULL( userOperationStatus.like_status, 0 ) AS like_status,
+            IFNULL( userOperationStatus.tap_status, 0 ) AS tap_status,
+            IFNULL( userOperationStatus.collect_status, 0 ) AS collect_status,
+            IFNULL( userOperationStatus.complete_status, 0 ) AS complete_status
+        FROM t_data_info dataInfo
+        LEFT JOIN sys_user userInfo ON dataInfo.user_id = userInfo.user_id
+        LEFT JOIN t_data_record dataRecord ON dataInfo.data_id = dataRecord.data_id
+        LEFT JOIN (
+            SELECT max( CASE userOperation.operation_type WHEN '17' THEN 1 ELSE 0 END ) like_status,
+            max( CASE userOperation.operation_type WHEN '18' THEN 1 ELSE 0 END ) tap_status,
+            max( CASE userOperation.operation_type WHEN '19' THEN 1 ELSE 0 END ) collect_status,
+            max( CASE userOperation.operation_type WHEN '20' THEN 1 ELSE 0 END ) complete_status,
+            userOperation.event_id
+            FROM t_user_operation_record userOperation
+            WHERE  userOperation.user_id = #{userId}
+                AND userOperation.event_type = '13'
+                AND userOperation.event_id=#{dataId}
+        ) userOperationStatus ON dataInfo.data_id = userOperationStatus.event_id
+        WHERE dataInfo.data_id=#{dataId}
+    </select>
+
+    <!--  知识广场-学习资料  -->
+    <select id="getDataInfoList" resultType="com.lims.manage.erp.vo.KsDataInfoVo">
+        SELECT dataInfo.data_id,dataInfo.data_title,dataInfo.data_video_url,dataInfo.file_suffix,
+            userInfo.`name` AS up_user,dataInfo.up_time,dataInfo.user_id
+        FROM t_data_info dataInfo
+        INNER JOIN t_data_audit_record dataAudit ON dataInfo.data_id = dataAudit.data_id
+            AND dataAudit.audit_status = 1
+        LEFT JOIN sys_user userInfo ON dataInfo.user_id = userInfo.user_id
+        <where>
+            <if test="dataInfo.dataType!=null and dataInfo.dataType!=''">
+                AND dataInfo.data_type =#{dataInfo.dataType}
+            </if>
+            <if test="dataInfo.dataTitle!=null and dataInfo.dataTitle!=''">
+                AND (dataInfo.data_title LIKE concat(concat('%',#{dataInfo.dataTitle}),'%')
+                    <if test="dataInfo.labelIdList!=null">
+                        <foreach item="item" collection="dataInfo.labelIdList">
+                            OR FIND_IN_SET(#{item.labelId},dataInfo.data_label)
+                        </foreach>
+                    </if>
+                )
+            </if>
+            <if test="dataInfo.upTimeBegin != null">
+                <![CDATA[AND DATE_FORMAT(dataInfo.up_time, '%Y-%m-%d') >= DATE_FORMAT(#{dataInfo.upTimeBegin}, '%Y-%m-%d')]]>
+            </if>
+            <if test="dataInfo.upTimeEnd != null">
+                <![CDATA[AND DATE_FORMAT(dataInfo.up_time, '%Y-%m-%d') <= DATE_FORMAT(#{dataInfo.upTimeEnd}, '%Y-%m-%d')]]>
+            </if>
+            <if test="dataInfo.dataLabel!=null and dataInfo.dataLabel!=''">
+                AND FIND_IN_SET(#{dataInfo.dataLabel}, dataInfo.data_label )
+            </if>
+        </where>
+        ORDER BY dataInfo.up_time DESC
+    </select>
+
+    <!--  根据资料id增加资料点赞数量  -->
+    <update id="addDataLikeNum">
+        UPDATE t_data_record
+        SET like_num = like_num + 1
+        WHERE data_id=#{dataId}
+    </update>
+
+    <!--  根据资料id增加资料点踩数量  -->
+    <update id="addDataTapNum">
+        UPDATE t_data_record
+        SET tap_num = tap_num + 1
+        WHERE data_id=#{dataId}
+    </update>
+
+    <!--  根据资料id增加资料完成数量  -->
+    <update id="addDataCollectNum">
+        UPDATE t_data_record
+        SET collect_num = collect_num + 1
+        WHERE data_id=#{dataId}
+    </update>
+
+    <!--  根据资料id增加资料完成数量  -->
+    <update id="addDataCompleteNum">
+        UPDATE t_data_record
+        SET complete_num = complete_num + 1
+        WHERE data_id=#{dataId}
+    </update>
+
+    <!-- 根据资料id获取学习心得列表   -->
+    <select id="getProblemCommentList" resultType="com.lims.manage.erp.vo.DataExperienceVo">
+        SELECT dataExperience.id,dataExperience.user_id,userInfo.`name`,dataExperience.create_time,dataExperience.experience_content
+        FROM t_data_experience dataExperience
+        LEFT JOIN sys_user userInfo ON dataExperience.user_id = userInfo.user_id
+        WHERE dataExperience.data_id=#{dataId}
+        ORDER BY dataExperience.create_time DESC
+    </select>
+</mapper>

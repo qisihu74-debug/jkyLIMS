@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.PlanInfoDao">
+
+    <!--  计划详情  -->
+    <resultMap id="planInfoDetail" type="com.lims.manage.erp.vo.PlanInfoVo">
+        <id property="planId" column="plan_id" />
+        <result property="planTitle" column="plan_title"/>
+        <result property="planType" column="plan_type"/>
+        <result property="userId" column="user_id"/>
+        <result property="name" column="name"/>
+        <result property="targetUser" column="target_user"/>
+        <result property="planBeginTime" column="plan_begin_time"/>
+        <result property="planEndTime" column="plan_end_time"/>
+        <result property="planPlace" column="plan_place"/>
+        <result property="planContent" column="plan_content"/>
+        <result property="partakeStatus" column="partake_status"/>
+        <collection property="partakeUserList" ofType="com.lims.manage.erp.entity.SysUserEntity">
+            <id property="userId" column="partake_user_id"/>
+            <result property="name" column="partake_user"/>
+        </collection>
+    </resultMap>
+
+    <!--  计划列表  -->
+    <select id="pageList" resultType="com.lims.manage.erp.vo.PlanInfoVo">
+        SELECT planInfo.plan_id,planInfo.plan_title,planTypeItem.item_text AS plan_type,planInfo.user_id,
+            (SELECT GROUP_CONCAT( userInfo.`name` ) FROM sys_user userInfo
+                WHERE FIND_IN_SET( userInfo.user_id, planInfo.user_id )) AS `name`,
+            planInfo.target_user,planInfo.plan_begin_time,planInfo.plan_end_time,
+            planInfo.plan_place,planInfo.plan_content,userPlanInfo.partake_status
+        FROM t_plan_info planInfo
+        LEFT JOIN t_dict_item planTypeItem ON planInfo.plan_type = planTypeItem.item_id
+        LEFT JOIN t_user_plan_info userPlanInfo ON planInfo.plan_id = userPlanInfo.plan_id
+                AND userPlanInfo.user_id=#{planInfo.partakeUserId}
+        <where>
+            <if test="planInfo.planTitle!=null and planInfo.planTitle!=''">
+                AND planInfo.plan_title LIKE concat(concat('%',#{planInfo.planTitle}),'%')
+            </if>
+            <if test="planInfo.userId!=null and planInfo.userId!=''">
+                AND planInfo.user_id =#{planInfo.userId}
+            </if>
+            <if test="planInfo.planType!=null and planInfo.planType!=''">
+                AND planInfo.plan_type =#{planInfo.planType}
+            </if>
+            <if test="planInfo.planStatus!=null">
+                <choose>
+                    <when test="planInfo.planStatus==0">
+                        <![CDATA[AND DATE_FORMAT(planInfo.plan_begin_time, '%Y-%m-%d %H:%i:%S') > DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%S')]]>
+                    </when>
+                    <when test="planInfo.planStatus==1">
+                        <![CDATA[AND DATE_FORMAT(planInfo.plan_begin_time, '%Y-%m-%d %H:%i:%S') < DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%S')]]>
+                        <![CDATA[AND DATE_FORMAT(planInfo.plan_end_time, '%Y-%m-%d %H:%i:%S') > DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%S')]]>
+                    </when>
+                    <when test="planInfo.planStatus==2">
+                        <![CDATA[AND DATE_FORMAT(planInfo.plan_end_time, '%Y-%m-%d %H:%i:%S') < DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%S')]]>
+                    </when>
+                </choose>
+            </if>
+            <if test="planInfo.partakeStatus!=null and planInfo.partakeStatus!=''">
+                <choose>
+                    <when test="planInfo.partakeStatus=='21'">
+                        AND ISNULL(userPlanInfo.partake_status)
+                    </when>
+                    <otherwise>
+                        AND userPlanInfo.partake_status=#{planInfo.partakeStatus}
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+        ORDER BY planInfo.create_time DESC
+    </select>
+
+    <!--  获取计划详情  -->
+    <select id="getPlanInfoDetail" resultMap="planInfoDetail">
+        SELECT planInfo.plan_id,planInfo.plan_title,planTypeItem.item_text AS plan_type,
+            planInfo.user_id,(SELECT GROUP_CONCAT( userInfo.`name` ) FROM sys_user userInfo
+                              WHERE FIND_IN_SET( userInfo.user_id, planInfo.user_id )) AS `name`,
+            planInfo.target_user,planInfo.plan_begin_time,planInfo.plan_end_time,planInfo.plan_place,
+            planInfo.plan_content,userPlanInfo.user_id AS partake_user_id,
+            partakeUser.`name` AS partake_user
+        FROM t_plan_info planInfo
+        LEFT JOIN t_dict_item planTypeItem ON planInfo.plan_type = planTypeItem.item_id
+        LEFT JOIN t_user_plan_info userPlanInfo ON planInfo.plan_id = userPlanInfo.plan_id
+        LEFT JOIN sys_user partakeUser ON userPlanInfo.user_id = partakeUser.user_id
+        WHERE planInfo.plan_id =#{planId}
+    </select>
+</mapper>
