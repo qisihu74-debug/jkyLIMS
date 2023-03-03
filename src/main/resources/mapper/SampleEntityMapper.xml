@@ -1233,6 +1233,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             <if test="startTime!=null and endTime!=null">
                 and t3.acceptance_date BETWEEN #{startTime} and  #{endTime}
             </if>
+            <if test="taskPublisher!=null">
+                and t5.orderer LIKE CONCAT("%",#{taskPublisher},"%")
+            </if>
         </trim>
     </select>
 </mapper>
