@@ -50,15 +50,15 @@ public class PlanInfoServiceImpl extends ServiceImpl<PlanInfoDao, PlanInfo> impl
     @Override
     public IPage<PlanInfoVo> pageList(Page<PlanInfo> page, PlanInfo planInfo) {
         planInfo.setPartakeUserId(ShiroUtils.getUserInfo().getUserId().toString());
-        return baseMapper.pageList(page,planInfo);
+        return baseMapper.pageList(page, planInfo);
     }
 
     @Override
     public Result<?> addPlanInfo(PlanInfo planInfo, MultipartFile file) {
         //根据用户角色进行判断
-        SysUserRoleEntity sysUserRoleEntity=sysUserRoleService.getOne(Wrappers.< SysUserRoleEntity >lambdaQuery().eq(SysUserRoleEntity::getUserId,ShiroUtils.getUserInfo().getUserId()).eq(SysUserRoleEntity::getRoleId,CommonConstant.USER_ROLE_PLAN));
-        if(sysUserRoleEntity==null){
-            return ResultUtil.error(500,"该用户没有新建权限");
+        SysUserRoleEntity sysUserRoleEntity = sysUserRoleService.getOne(Wrappers.<SysUserRoleEntity>lambdaQuery().eq(SysUserRoleEntity::getUserId, ShiroUtils.getUserInfo().getUserId()).eq(SysUserRoleEntity::getRoleId, CommonConstant.USER_ROLE_PLAN));
+        if (sysUserRoleEntity == null) {
+            return ResultUtil.error(500, "该用户没有新建权限");
         }
         //附件存在上传附件到服务器
         if (file != null) {
@@ -87,18 +87,18 @@ public class PlanInfoServiceImpl extends ServiceImpl<PlanInfoDao, PlanInfo> impl
     public Result<?> enrollPlanInfo(String planId) {
         //根据计划id查询计划信息
         PlanInfo planInfo = this.getById(planId);
-        if(planInfo!=null){
+        if (planInfo != null) {
             //根据当前用户id和计划id查询用户是否已经报名过
-            LambdaQueryWrapper<UserPlanInfo> wrapper= Wrappers.lambdaQuery();
-            wrapper.eq(UserPlanInfo::getUserId,ShiroUtils.getUserInfo().getUserId().toString());
-            wrapper.eq(UserPlanInfo::getPlanId,planId);
-            UserPlanInfo userPlanInfo=userPlanInfoService.getOne(wrapper);
-            if(userPlanInfo!=null){
+            LambdaQueryWrapper<UserPlanInfo> wrapper = Wrappers.lambdaQuery();
+            wrapper.eq(UserPlanInfo::getUserId, ShiroUtils.getUserInfo().getUserId().toString());
+            wrapper.eq(UserPlanInfo::getPlanId, planId);
+            UserPlanInfo userPlanInfo = userPlanInfoService.getOne(wrapper);
+            if (userPlanInfo != null) {
                 return ResultUtil.error("该计划已报名");
             }
             //根据计划的开始时间判断当前是否可以报名
-            if(planInfo.getPlanBeginTime().after(new Date())){
-                userPlanInfo=new UserPlanInfo();
+            if (planInfo.getPlanBeginTime().after(new Date())) {
+                userPlanInfo = new UserPlanInfo();
                 userPlanInfo.setPlanId(planId);
                 userPlanInfo.setUserId(ShiroUtils.getUserInfo().getUserId().toString());
                 userPlanInfo.setEnrollTime(new Date());
@@ -106,10 +106,10 @@ public class PlanInfoServiceImpl extends ServiceImpl<PlanInfoDao, PlanInfo> impl
                 userPlanInfo.setCreateBy(ShiroUtils.getUserInfo().getUsername());
                 userPlanInfo.setCreateTime(new Date());
                 userPlanInfoService.save(userPlanInfo);
-            }else{
+            } else {
                 return ResultUtil.error("当前计划暂无法报名");
             }
-        }else {
+        } else {
             return ResultUtil.error("计划未找到");
         }
         return ResultUtil.success("报名成功");
@@ -117,29 +117,34 @@ public class PlanInfoServiceImpl extends ServiceImpl<PlanInfoDao, PlanInfo> impl
 
     @Override
     public Result<?> delPlanInfo(String planId) {
+        //根据用户角色进行判断
+        SysUserRoleEntity sysUserRoleEntity = sysUserRoleService.getOne(Wrappers.<SysUserRoleEntity>lambdaQuery().eq(SysUserRoleEntity::getUserId, ShiroUtils.getUserInfo().getUserId()).eq(SysUserRoleEntity::getRoleId, CommonConstant.USER_ROLE_PROBLEM_CLASSIFICATION));
+        if (sysUserRoleEntity == null) {
+            return ResultUtil.error(500, "该用户没有计划删除权限");
+        }
         //根据计划id获取计划信息
-        PlanInfo planInfo= this.getById(planId);
+        PlanInfo planInfo = this.getById(planId);
         if (planInfo != null) {
             //如果当前计划不是当前用户创建的则无法删除
-            if(ShiroUtils.getUserInfo().getUserId().toString().equals(planInfo.getUserId())){
-                //如果计划已经开始则无法删除
-                if(planInfo.getPlanBeginTime().after(new Date())){
-                    //如果有附件地址
-                    if (!StringUtils.isEmpty(planInfo.getEnclosureUrl())) {
-                        String fileName = planInfo.getEnclosureUrl().substring(planInfo.getEnclosureUrl().lastIndexOf("/") + 1, planInfo.getEnclosureUrl().lastIndexOf("?" )) ;
-                        MinIoUtil.deleteFile(BucketsConst.file_syn, fileName);
-                    }
-                    this.removeById(planId);
-                    return ResultUtil.success("计划信息删除成功");
-                }else {
-                    return ResultUtil.error(500,"计划开始无法删除");
+            // if(ShiroUtils.getUserInfo().getUserId().toString().equals(planInfo.getUserId())){
+            //如果计划已经开始则无法删除
+            if (planInfo.getPlanBeginTime().after(new Date())) {
+                //如果有附件地址
+                if (!StringUtils.isEmpty(planInfo.getEnclosureUrl())) {
+                    String fileName = planInfo.getEnclosureUrl().substring(planInfo.getEnclosureUrl().lastIndexOf("/") + 1, planInfo.getEnclosureUrl().lastIndexOf("?"));
+                    MinIoUtil.deleteFile(BucketsConst.file_syn, fileName);
                 }
-            }else{
-                return ResultUtil.error(500,"没有删除权限");
+                this.removeById(planId);
+                return ResultUtil.success("计划信息删除成功");
+            } else {
+                return ResultUtil.error(500, "计划开始无法删除");
             }
+            /*}else{
+                return ResultUtil.error(500,"没有删除权限");
+            }*/
 
         } else {
-            return ResultUtil.error(500,"没有找到对应计划信息");
+            return ResultUtil.error(500, "没有找到对应计划信息");
         }
     }
 }

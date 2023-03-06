@@ -44,6 +44,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Description 用户登录
@@ -106,6 +107,11 @@ public class UserLoginController {
         SysUserEntity userData = ShiroUtils.getUserInfo();
         userData.setPassword(null);
         userData.setSalt(null);
+        //获取用户的角色列表
+        List<SysUserRoleEntity> roleIdList = sysUserRoleService.list(Wrappers.<SysUserRoleEntity>lambdaQuery().eq(SysUserRoleEntity::getUserId, ShiroUtils.getUserInfo().getUserId()).select(SysUserRoleEntity::getRoleId));
+        //只保存角色id
+        List<String> roleList=roleIdList.stream().map(a -> String.valueOf(a.getRoleId())).collect(Collectors.toList());
+        userData.setRoleList(roleList);
         map.put("userInfo", userData);
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userData.getUsername()+"登陆成功!", Const.LOGIN_LOG,true);
         return map;
