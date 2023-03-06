@@ -10,6 +10,8 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
+
 /**
  * @Description 系统用户实体
  * @Author gjl
@@ -85,6 +87,12 @@ public class SysUserEntity implements Serializable {
 	private Timestamp time;
 
 	private String signatureUrl;
+
+	/**
+	 * 用户角色id列表
+	 */
+	@TableField(exist = false)
+	private List<String> roleList;
 
 	public SysUserEntity() {
 	}
