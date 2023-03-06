@@ -14,9 +14,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.IntegralRuleService;
 import com.lims.manage.erp.service.UserIntegralInfoService;
 import com.lims.manage.erp.service.UserIntegralRecordService;
-import com.lims.manage.erp.util.RedisUtils;
 import com.lims.manage.erp.util.ShiroUtils;
-import jdk.internal.org.objectweb.asm.Handle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -25,8 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
