@@ -156,7 +156,8 @@ public class SampleExportUtil {
             }
             // 出库日期
             if (sampleOutPutVo.getOutboundDeliveryDate() != null) {
-                cells.get(row+n).setValue(sampleOutPutVo.getOutboundDeliveryDate());
+                String dateString = formatter.format(sampleOutPutVo.getOutboundDeliveryDate());
+                cells.get(row+n).setValue(dateString);
                 row = letterCycle.getNextUpEn(row);
             }
             else {
