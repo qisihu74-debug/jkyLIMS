@@ -3527,15 +3527,6 @@ public class EntrustServiceImpl implements EntrustService {
     public PageInfo taskStatisticsList(TestEntrustedTaskRelVo testEntrustedTaskRelVo) {
 
         List<TestEntrustedTaskRelVo> list = Lists.newArrayList();
-        //拆分委托编号
-        if(!StringUtils.isEmpty(testEntrustedTaskRelVo.getEntrustmentNostr())){
-            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(testEntrustedTaskRelVo.getEntrustmentNostr());
-            testEntrustedTaskRelVo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
-            testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo());
-            if(!StringUtils.isEmpty(entrustCategoryVo.getEntrustmentNo())){
-                testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo());
-            }
-        }
         PageHelper.clearPage();
         list = testEntrustedTaskRelDao.getTaskStatisticsList(testEntrustedTaskRelVo);
         if(!CollectionUtils.isEmpty(list)){

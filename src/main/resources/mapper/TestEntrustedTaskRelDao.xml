@@ -249,7 +249,7 @@
         t1.type,
         t3.id as task_id,
         t3.task_code,
-        t2.entrustment_no as entrustNo,
+        IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) as entrustNo,
         IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
         t2.task_source,
         t3.end_detection_time testEndTime,

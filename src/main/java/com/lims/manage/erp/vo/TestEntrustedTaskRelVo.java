@@ -54,7 +54,7 @@ public class TestEntrustedTaskRelVo {
     /**
      * 委托单编号
      */
-    private Integer entrustNo;
+    private String entrustNo;
 
     /**
      * 报告编号
