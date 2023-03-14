@@ -80,5 +80,6 @@ public class QiYueSuoEntity {
     @Value("${qrcode.url}")
     private String qRcodeUrl;
 
-
+    @Value("${qiyuesuo.jcdw}")
+    private String jcdw;
 }

@@ -1502,7 +1502,7 @@ public class ReportServiceImpl implements ReportService {
                                     if (value != null){
                                         String string = value.toString();
                                         if ("${检测单位名称}".equals(string)){
-                                            cells.get(n,j).setValue("检测单位名称：河南省公路工程试验检测中心有限公司");
+                                            cells.get(n,j).setValue("检测单位名称："+qiYueSuoEntity.getJcdw());
                                         }
                                         if ("${报告编号}".equals(string)){
                                             cells.get(n,j).setValue(reportRecordEntity.getReportCode());
@@ -1872,7 +1872,7 @@ public class ReportServiceImpl implements ReportService {
                                     if (value != null) {
                                         String string = value.toString();
                                         if ("${检测单位名称}".equals(string)){
-                                            cells.get(n,j).setValue("检测单位名称：河南省公路工程试验检测中心有限公司");
+                                            cells.get(n,j).setValue("检测单位名称："+qiYueSuoEntity.getJcdw());
                                         }
                                         if ("${报告编号}".equals(string)){
                                             cells.get(n,j).setValue(reportRecordEntity.getReportCode());
