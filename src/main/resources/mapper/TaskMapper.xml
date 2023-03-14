@@ -959,4 +959,25 @@
     <select id="getTaskTestEntityById" resultType="com.lims.manage.erp.entity.TaskTestEntity" >
         select entrustment_id,task_code from test_task where id = #{taskId}
     </select>
+
+    <select id="getSampleNames" resultType="com.lims.manage.erp.vo.TestEntrustedTaskRelVo">
+        SELECT
+        aa.id as sampleId,
+        aa.sample_name as taskSampleName,
+        bb.task_id as taskId
+    FROM
+        test_sample AS aa
+        RIGHT JOIN (
+    SELECT
+        t1.*
+    FROM
+        test_entrusted_sample_checkitem_rel AS t1
+        RIGHT JOIN ( SELECT id, entrustment_id FROM test_task WHERE id IN
+        <foreach item="item" collection="list" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+         ) AS t2 ON t1.entrust_id = t2.entrustment_id
+        ) AS bb ON aa.id = bb.sample_id
+        GROUP BY CONCAT(bb.task_id,aa.id)
+    </select>
 </mapper>

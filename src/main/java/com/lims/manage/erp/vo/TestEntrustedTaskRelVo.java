@@ -105,5 +105,33 @@ public class TestEntrustedTaskRelVo {
      * 委托编号类别： null 常规原材试验、MN模拟试验、BD比对试验
      */
     private String entrustCategoryType;
+    /**
+     * 任务单id
+     */
+    private Long taskId;
+    /**
+     * 样品名称
+     */
+    private String taskSampleName;
+    /**
+     * 样品id
+     */
+    private Integer sampleId;
+    /**
+     * 中间报告类型
+     */
+    private Integer midReportType;
+
+    /**
+     * 中间 报告编号
+     */
+    private String midReportCode;
+
+    /**
+     * 中间 报告完成日期
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
+    private Date midReportFinishTime;
 
 }

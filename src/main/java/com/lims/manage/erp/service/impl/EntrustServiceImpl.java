@@ -57,17 +57,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -3567,6 +3557,24 @@ public class EntrustServiceImpl implements EntrustService {
                 if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getReportCode())){
                     testEntrustedTaskRelVo1.setReportCode("--");
                 }
+                // 任务流转 type =1 && 中间报告 =1 相等
+                if(testEntrustedTaskRelVo1.getType().equals(testEntrustedTaskRelVo1.getMidReportType())){
+                    // if 中间报告==空
+                    if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportCode())){
+                        testEntrustedTaskRelVo1.setReportCode("--");
+                    }
+                    else {
+                        testEntrustedTaskRelVo1.setReportCode(testEntrustedTaskRelVo1.getMidReportCode());
+                    }
+                    // if 中间报告结束时间 ！= 空
+                    if(!StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportFinishTime()))
+                    {
+                        testEntrustedTaskRelVo1.setReportFinishTime(testEntrustedTaskRelVo1.getMidReportFinishTime());
+                    }
+                    else {
+                        testEntrustedTaskRelVo1.setReportFinishTime(null);
+                    }
+                }
             }
         }
         Integer pageNum = testEntrustedTaskRelVo.getPageNum();
@@ -3589,6 +3597,7 @@ public class EntrustServiceImpl implements EntrustService {
         } else {
             subList = list.subList((pageNum - 1) * pageSize, list.size());
         }
+        getMethodSampleName(subList);
         pageInfo.setList(subList);
         pageInfo.setTotal(list.size());
         return pageInfo;
@@ -4356,4 +4365,35 @@ public class EntrustServiceImpl implements EntrustService {
         return true;
     }
 
+    /**
+     * 根据任务单id 获取所属样品名称。
+     * @param subList
+     */
+    public void getMethodSampleName(List<TestEntrustedTaskRelVo> subList){
+        // 逻辑处理 设置任务单下样品名
+        LinkedList<Long> taskIds = new LinkedList<>();
+        for(TestEntrustedTaskRelVo taskRelVo : subList){
+            if(taskRelVo.getTaskId()!=null){
+                taskIds.add(taskRelVo.getTaskId());
+            }
+        }
+        if(!CollectionUtils.isEmpty(taskIds)){
+            List<TestEntrustedTaskRelVo> list = taskMapper.getSampleNames(taskIds);
+            // 遍历数据
+            for(TestEntrustedTaskRelVo testEntrustedTaskRelVo : subList){
+                StringBuffer stringBuffer = new StringBuffer();
+                // 遍历得到的样品与任务单关系
+                for(TestEntrustedTaskRelVo taskRelVo : list){
+                    if(testEntrustedTaskRelVo.getTaskId()!=null && testEntrustedTaskRelVo.getTaskId().equals(taskRelVo.getTaskId())){
+                        stringBuffer.append(taskRelVo.getTaskSampleName());
+                        stringBuffer.append("、");
+                    }
+                }
+                // 补充任务单下样品名称
+                if(stringBuffer.length()>1){
+                    testEntrustedTaskRelVo.setTaskSampleName(stringBuffer.deleteCharAt(stringBuffer.length()-1).toString());
+                }
+            }
+        }
+    }
 }
