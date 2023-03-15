@@ -980,4 +980,17 @@
         ) AS bb ON aa.id = bb.sample_id
         GROUP BY CONCAT(bb.task_id,aa.id)
     </select>
+
+    <select id="getTaskIds" resultType="com.lims.manage.erp.vo.TestEntrustedTaskRelVo">
+        SELECT
+            id as task_id,
+            task_code
+        FROM
+            test_task
+        WHERE
+            entrustment_id IN
+            <foreach collection="list" item="item" separator="," open="(" close=")" index="">
+                #{item}
+            </foreach>
+    </select>
 </mapper>

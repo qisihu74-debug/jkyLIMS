@@ -463,4 +463,11 @@ public interface TaskMapper extends BaseMapper {
      */
     List<TestEntrustedTaskRelVo> getSampleNames(@Param("list")  List<Long> list);
 
+    /**
+     * 通过委托单id 获取 任务单id列表
+     * @param list
+     * @return
+     */
+    List<TestEntrustedTaskRelVo> getTaskIds(@Param("list")  List<Long> list);
+
 }
