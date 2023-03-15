@@ -968,10 +968,30 @@ public class EntrustController {
         String message = entrustService.getMessage();
         String[] strings = message.split("/");
         String fileName = strings[1];
-        //获取所有符合条件的委托单id
-        List<EntrustAddVo> list = entrustEntityMapper.getPublishEntrustIdBySearch();
-        for (EntrustAddVo bean:list) {
-            String path = "D:\\AAPulish\\"+bean.getEntrustmentNo()+".docx";
+        //获取所有符合条件的委托单id（七所、八月份、土的委托单）
+        //List<EntrustAddVo> list = entrustEntityMapper.getPublishEntrustIdBySearch();
+        //七所八月份
+        List<EntrustAddVo> list7 = entrustEntityMapper.get7Infos();
+        //八所八月份
+        List<EntrustAddVo> list8 = entrustEntityMapper.get8Infos();
+        for (EntrustAddVo bean:list7) {
+            String path = "D:\\20230315export\\2023七所三月份土工布（织物类）\\"+bean.getEntrustmentNo()+".docx";
+            try {
+                FileOutputStream outputStream = new FileOutputStream(path);
+                MinioClient client = MinIoUtil.minioClient;
+                InputStream object = client.getObject(strings[0], fileName);
+                //填充数据
+                EntrustAddVo detail = entrustService.getEntrustHistoryDetail(bean.getId());
+                XWPFDocument document = entrustService.downloadEntrust(detail, object);
+                document.write(outputStream);
+                outputStream.close();
+                Thread.sleep(20);
+            } catch (Exception ex) {
+                log.info("导出失败：{}", ex);
+            }
+        }
+        for (EntrustAddVo bean:list8) {
+            String path = "D:\\20230315export\\2023八所三月份突起路标\\"+bean.getEntrustmentNo()+".docx";
             try {
                 FileOutputStream outputStream = new FileOutputStream(path);
                 MinioClient client = MinIoUtil.minioClient;
