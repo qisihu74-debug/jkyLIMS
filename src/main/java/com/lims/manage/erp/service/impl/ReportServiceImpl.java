@@ -1426,6 +1426,7 @@ public class ReportServiceImpl implements ReportService {
     @SneakyThrows
     @Override
     public ReportResBean submitDownLoad(MinioClient client, List<ConclusionEntity> list, Long id,String reportType) {
+        String info = recordEntityMapper.getInitInfo();
         int totalPageNew = 0;
         Map<Integer, Integer> countMap = new LinkedHashMap();
         Map<Integer, Workbook> map = new LinkedHashMap<>();
@@ -1502,7 +1503,7 @@ public class ReportServiceImpl implements ReportService {
                                     if (value != null){
                                         String string = value.toString();
                                         if ("${检测单位名称}".equals(string)){
-                                            cells.get(n,j).setValue("检测单位名称：河南省公路工程试验检测中心有限公司");
+                                            cells.get(n,j).setValue("检测单位名称："+info);
                                         }
                                         if ("${报告编号}".equals(string)){
                                             cells.get(n,j).setValue(reportRecordEntity.getReportCode());
@@ -1776,6 +1777,7 @@ public class ReportServiceImpl implements ReportService {
     @SneakyThrows
     @Override
     public ReportResBean submitDownLoadMix(MinioClient client, List<ConclusionEntity> list, Long id,TestSampleMixInfoEntity mixInfoEntity,String reportType) {
+        String info = recordEntityMapper.getInitInfo();
         int totalPageNew = 0;
         Map<Integer, Integer> countMap = new LinkedHashMap();
         Map<Integer,Workbook> map = new HashedMap();
@@ -1872,7 +1874,7 @@ public class ReportServiceImpl implements ReportService {
                                     if (value != null) {
                                         String string = value.toString();
                                         if ("${检测单位名称}".equals(string)){
-                                            cells.get(n,j).setValue("检测单位名称：河南省公路工程试验检测中心有限公司");
+                                            cells.get(n,j).setValue("检测单位名称："+info);
                                         }
                                         if ("${报告编号}".equals(string)){
                                             cells.get(n,j).setValue(reportRecordEntity.getReportCode());

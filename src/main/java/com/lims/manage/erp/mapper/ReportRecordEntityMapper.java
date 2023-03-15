@@ -364,4 +364,6 @@ public interface ReportRecordEntityMapper {
                                                           @Param("category") String category,
                                                           @Param("reportTypeStatus")Integer reportTypeStatus);
 
+    @Select("select name from test_init_data where type=20")
+    String getInitInfo();
 }
