@@ -1,6 +1,7 @@
 package com.lims.manage.erp.controller;
 
 import com.lims.manage.erp.constant.BucketsConst;
+import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
@@ -18,6 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 /**
  * @Author: DLC
@@ -43,10 +47,33 @@ public class TaskBatchExportContoller {
      */
     @PostMapping("batchDownloadEntrust")
     public void batchDownloadEntrust(@RequestParam("entrustIds") List<Long> entrustIds, HttpServletResponse response) {
-        String fileName = "taskOrder11.docx";
         try {
             List<TestEntrustedTaskRelVo> list = taskMapper.getTaskIds(entrustIds);
             for(TestEntrustedTaskRelVo testEntrustedTaskRelVo : list){
+                String fileName = "";
+                // 3月15日前
+                String str1 = "taskOrder11.docx";
+                // 2023年3月15日后
+                String str2 = "taskOrder20.docx";
+                // 获取任务单下单时间 进行比较
+                TaskTestEntity taskDetails = taskMapper.getTaskOrderTime(testEntrustedTaskRelVo.getTaskId());
+                if(taskDetails!=null && taskDetails.getOrderTime()!=null){
+                    Date date = null;
+                    //实现将字符串转成⽇期类型
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    try {
+                        date = dateFormat.parse("2023-03-14 23:59:59");
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    // 截止至 2023-03-14 23:59:59 后 任务单附件为  String str2 = "taskOrder20.docx"
+                    if(date.getTime() < taskDetails.getOrderTime().getTime()){
+                        fileName = str2;
+                    }
+                    else {
+                        fileName = str1;
+                    }
+                }
                 MinioClient client = MinIoUtil.minioClient;
                 InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
                 TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(testEntrustedTaskRelVo.getTaskId(),null);

@@ -470,4 +470,12 @@ public interface TaskMapper extends BaseMapper {
      */
     List<TestEntrustedTaskRelVo> getTaskIds(@Param("list")  List<Long> list);
 
+    /**
+     * 获取任务单下单时间
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT id,order_time FROM test_task WHERE id = #{taskId}")
+    TaskTestEntity getTaskOrderTime(@Param("taskId") Long taskId);
+
 }
