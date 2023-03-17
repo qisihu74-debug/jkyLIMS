@@ -464,14 +464,19 @@ public class EntrustController {
      */
     @RequestMapping("downloadEntrust")
     public void downloadEntrust(Long entrustId, HttpServletResponse response) {
+        EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
         String message = entrustService.getMessage();
         String[] strings = message.split("/");
         String fileName = strings[1];
+        //20230314及之前的单子，单位名称用老的BD20210021-old.docx
+        String dayString = DateUtil.getDayString(detail.getAcceptanceDate().getTime());
+        if (Integer.parseInt(dayString)<20230314){
+            fileName = "BD20210021-old.docx";
+        }
         try {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(strings[0], fileName);
             //填充数据
-            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             log.debug("====aaa:{}",JSON.toJSONString(detail));
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
             response.reset();
@@ -494,20 +499,25 @@ public class EntrustController {
      */
     @RequestMapping("previewEntrust")
     public void preview(Long entrustId, HttpServletResponse response) {
+        //校验是否是委托单id
+        Long id = entrustService.checkEntrustId(entrustId);
+        if (id == null){
+            Long entrustIdById = reportService.getEntrustIdById(entrustId);
+            entrustId = entrustIdById;
+        }
+        EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
         String message = entrustService.getMessage();
         String[] strings = message.split("/");
         String fileName = strings[1];
+        //20230314及之前的单子，单位名称用老的BD20210021-old.docx
+        String dayString = DateUtil.getDayString(detail.getAcceptanceDate().getTime());
+        if (Integer.parseInt(dayString)<20230314){
+            fileName = "BD20210021-old.docx";
+        }
         try {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(strings[0], fileName);
             //填充数据
-            //校验是否是委托单id
-            Long id = entrustService.checkEntrustId(entrustId);
-            if (id == null){
-                Long entrustIdById = reportService.getEntrustIdById(entrustId);
-                entrustId = entrustIdById;
-            }
-            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             log.debug("====aaa:{}",JSON.toJSONString(detail));
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
             //相应pdf
