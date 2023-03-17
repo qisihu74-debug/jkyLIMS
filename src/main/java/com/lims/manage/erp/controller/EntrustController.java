@@ -470,7 +470,7 @@ public class EntrustController {
         String fileName = strings[1];
         //20230314及之前的单子，单位名称用老的BD20210021-old.docx
         String dayString = DateUtil.getDayString(detail.getAcceptanceDate().getTime());
-        if (Integer.parseInt(dayString)<20230314){
+        if (Integer.parseInt(dayString)<20230313){
             fileName = "BD20210021-old.docx";
         }
         try {
@@ -511,7 +511,7 @@ public class EntrustController {
         String fileName = strings[1];
         //20230314及之前的单子，单位名称用老的BD20210021-old.docx
         String dayString = DateUtil.getDayString(detail.getAcceptanceDate().getTime());
-        if (Integer.parseInt(dayString)<20230314){
+        if (Integer.parseInt(dayString)<20230313){
             fileName = "BD20210021-old.docx";
         }
         try {
