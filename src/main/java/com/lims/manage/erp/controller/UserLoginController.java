@@ -5,8 +5,10 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.DynamicImg;
+import com.lims.manage.erp.entity.SysLog;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserRoleEntity;
 import com.lims.manage.erp.result.Result;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -332,5 +335,25 @@ public class UserLoginController {
         String fileName = strings[4];
         MinIoUtil.deleteFile(bluckName,fileName);
         return ResultUtil.success("删除成功");
+    }
+
+    /**
+     * 日志列表查询
+     * @param logType
+     * @param pageNum
+     * @param pageSize
+     * @param operator
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    @GetMapping("getLogList")
+    public Result getLogList(Integer logType, Integer pageNum, Integer pageSize,
+                             String operator, Long startDate, Long endDate){
+        if (pageNum == null || pageSize == null){
+            return ResultUtil.error("缺少分页参数");
+        }
+        PageInfo<SysLog> pageInfo = logManagerService.getLogList(logType,pageNum,pageSize,operator,startDate,endDate);
+        return ResultUtil.success(pageInfo);
     }
 }
