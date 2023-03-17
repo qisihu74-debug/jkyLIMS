@@ -520,9 +520,9 @@ public class TaskController {
     @GetMapping("downloadEntrust_two")
     public void downloadEntrust_two(Long taskId, HttpServletResponse response) {
         String fileName = "";
-        // 3月15日前
+        // 3月13日前
         String str1 = "taskOrder11.docx";
-        // 2023年3月14 零点后
+        // 2023年3月13 零点后
         String str2 = "taskOrder20.docx";
         // 获取任务单下单时间 进行比较
         TaskTestEntity taskDetails = taskMapper.getTaskOrderTime(taskId);
@@ -531,11 +531,11 @@ public class TaskController {
             //实现将字符串转成⽇期类型
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
-                date = dateFormat.parse("2023-03-13 23:59:59");
+                date = dateFormat.parse("2023-03-12 23:59:59");
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            // 截止至 2023-03-13 23:59:59 后 任务单附件为  String str2 = "taskOrder20.docx"
+            // 截止至 2023-03-12 23:59:59 后 任务单附件为  String str2 = "taskOrder20.docx"
              if(date.getTime() < taskDetails.getOrderTime().getTime()){
                  fileName = str2;
              }
