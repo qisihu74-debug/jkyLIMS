@@ -4396,4 +4396,47 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void verifyTaskListExists(Long entrustId) {
+        // 根据委托单id 获取任务单 列表
+        List<Long> taskIds = entityMapper.getEntrustTaskIds(entrustId);
+        // 通过委托单id 获取检测项与对应任务单id
+        List<CheckItemInfoVo> items = entityMapper.getEntrustItemVos(entrustId);
+        // 通过任务单列表 循环比较检测项所属任务单id 是否存在
+        if (!CollectionUtils.isEmpty(items)) {
+            // 有必要检查 任务单id 不为空
+            if (!CollectionUtils.isEmpty(taskIds)) {
+                for (Long taskId : taskIds) {
+                    // status = fasle 不存在上述关系 进行更新任务单状态 = 废弃
+                    Boolean status = false;
+                    for (CheckItemInfoVo checkItemInfoVo : items) {
+                        if (checkItemInfoVo.getTaskId().equals(taskId)) {
+                            status = true;
+                        }
+                    }
+                    if (status == false) {
+                        // 更新任务单状态 = 废弃
+                        TaskTestEntity taskTestEntity = new TaskTestEntity();
+                        taskTestEntity.setId(taskId);
+                        taskTestEntity.setState(144);
+                        taskMapper.updateTestTask(taskTestEntity);
+                    }
+                }
+            }
+        } else {
+            // 有必要检查 任务单id 不为空
+            if (!CollectionUtils.isEmpty(taskIds)) {
+                // 遍历任务单状态 全部置为 144
+                for (Long taskId : taskIds) {
+                    // 更新任务单状态 = 废弃
+                    TaskTestEntity taskTestEntity = new TaskTestEntity();
+                    taskTestEntity.setId(taskId);
+                    taskTestEntity.setState(144);
+                    taskMapper.updateTestTask(taskTestEntity);
+                }
+            }
+        }
+    }
 }

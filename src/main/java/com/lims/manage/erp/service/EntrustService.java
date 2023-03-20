@@ -332,4 +332,10 @@ public interface EntrustService {
      */
     Boolean verifySampleIsUsed(Long id,List<SampleEntity> samples);
 
+    /**
+     * 通过委托单id 验证任务单是否包含检测项、进行业务处理。
+     * @param entrustId
+     */
+    void verifyTaskListExists(Long entrustId);
+
 }

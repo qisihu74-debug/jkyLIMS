@@ -155,6 +155,8 @@ public class EntrustController {
         }
         String strSuccess = entrustService.updateEntrustCheckItem(entrust);
         if (strSuccess!=null) {
+            // 业务是：如果原任务单全部参数被删除，原任务单作废。
+            entrustService.verifyTaskListExists(entrust.getId());
             return ResultUtil.success(strSuccess);
         } else {
             return ResultUtil.error(678, "修改委托下样品失败！");
