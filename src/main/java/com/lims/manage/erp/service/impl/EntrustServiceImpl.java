@@ -4439,4 +4439,113 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
     }
+
+    @Override
+    public Boolean verifyDistributionTask(TaskVo entity) {
+        // 通过委托单id 查询任务列表
+        List<TaskProgressVo> taskList = taskMapper.getTaskStateByEntrustId(entity.getEntrustmentId());
+        // 没有任务单
+        if(CollectionUtils.isEmpty(taskList)){
+            return true;
+        }
+        // 任务单列表循环 读取数据
+        for(TaskProgressVo taskProgressVo :taskList){
+            // 遍历检测项 指向的 所属部门
+            for(CheckItemDeptVo checkItemDeptVo : entity.getCheckItemDeptVoList()){
+                // 根据检测项所属团队比对任务单团队一致，并且 任务单state = 4 || state = 6
+                if(checkItemDeptVo.getDeptId().equals(taskProgressVo.getDeptId().longValue())) {
+                    if (taskProgressVo.getState().equals(4) || taskProgressVo.getState().equals(6)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean distributionTask320(TaskVo entity) {
+        List<Long> deptIds = Lists.newArrayList();
+        List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
+        for (CheckItemDeptVo vo : checkItemDeptVoList) {
+            if (!deptIds.contains(vo.getDeptId())) {
+                deptIds.add(vo.getDeptId());
+            }
+        }
+        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entity.getEntrustmentId());
+        //创建任务对象
+        List<TaskVo> vos = Lists.newArrayList();
+        for (Long deptId : deptIds) {
+            //计算本单价格
+            double taskPrice = 0L;
+            for (CheckItemDeptVo vo : checkItemDeptVoList) {
+                if (deptId.equals(vo.getDeptId())) {
+                    taskPrice = taskPrice + ((entity.getDiscount() == null ? 0 : entity.getDiscount()) *
+                            (vo.getCheckPrice() == null ? 0 : vo.getCheckPrice()) * vo.getTimes());
+                }
+            }
+            TaskVo vo = new TaskVo();
+            long id = GenID.getID();
+            vo.setId(id);
+            vo.setTaskPrice(taskPrice);
+            //根据委托单号月份确定任务单ID
+            String teamCode = taskMapper.getTeamCode(deptId);
+            String entrustmentNo = entrustAddVo.getEntrustmentNo()+"";
+            String format = entrustmentNo.substring(2, 6);
+            Integer integer = taskMapper.selectMaxNoByCode(teamCode+format);
+            Integer code = null;
+            if (integer == null) {
+                String currentTime = DateUtil.getTodayString().substring(2, 6);
+                code = Integer.parseInt(format + "001");
+            } else {
+                code = integer + 1;
+            }
+            String codeStr = code + "";
+            vo.setDeptId(deptId);
+            vo.setCode(codeStr);
+            vo.setTaskCode(teamCode + codeStr.substring(0, 4) + "-" + codeStr.substring(4, 7));
+            vo.setEntrustmentId(entity.getEntrustmentId());
+            vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
+            vo.setOrderTime(entity.getOrderTime());
+            vo.setState(0);
+            vo.setReportComplete(2);
+            vo.setOrderer(ShiroUtils.getUserInfo().getName());
+            vo.setPresentInformation(entity.getPresentInformation());
+//            if(deptId.equals(dept)){
+            if (entity.getDeptIds().contains(deptId)) {
+                vo.setIssueReport("是");
+            } else {
+                vo.setIssueReport("否");
+            }
+            vos.add(vo);
+            //更新检测项分配的部门和任务单号
+            List<CheckItemDeptVo> checkItemDeptVoList1 = Lists.newArrayList();
+            for (CheckItemDeptVo checkItemDeptVo : checkItemDeptVoList) {
+                if (deptId.equals(checkItemDeptVo.getDeptId())) {
+                    checkItemDeptVo.setTaskId(id);
+                    checkItemDeptVoList1.add(checkItemDeptVo);
+                }
+            }
+            //更新检测项信息
+            taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
+        }
+        //任务单保存
+        taskMapper.batchSave(vos);
+        //更新委托单状态
+        taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
+        // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
+        if(!CollectionUtils.isEmpty(entity.getTaskRelEntities())){
+            // 补充发布人ID和姓名
+            SysUserEntity userEntity = ShiroUtils.getUserInfo();
+            List<TestEntrustedTaskRelEntity> TaskRelEntities = entity.getTaskRelEntities();
+            for(TestEntrustedTaskRelEntity taskdata:TaskRelEntities){
+                taskdata.setUserId(userEntity.getUserId());
+                taskdata.setAddressName(userEntity.getName());
+                taskdata.setCreateDate(new Date());
+            }
+            methodDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
+        }
+        return true;
+    }
 }

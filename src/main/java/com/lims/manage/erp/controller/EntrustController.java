@@ -391,38 +391,39 @@ public class EntrustController {
     @PostMapping("distributionTask")
     public Result distributionTask(@RequestBody TaskVo entity) {
         if (entity.getEntrustmentId() == null) {
-            return ResultUtil.error(-1, "缺少必要参数");
+            return ResultUtil.error( "缺少必要参数");
         }
         //核查委托单位、委托人、委托人联系方式、样品信息、检测项信息是否完整
         EntrustAddVo vo = entrustService.getEntrustHistoryDetail(entity.getEntrustmentId());
         if(vo.getState() == 1){
-            return ResultUtil.error(-1, "任务已被发布，请重新确认信息！");
+            return ResultUtil.error("任务已被发布，请重新确认信息！");
         }
         if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())) {
-            return ResultUtil.error(-1, "请检查委托人信息是否完整！");
+            return ResultUtil.error( "请检查委托人信息是否完整！");
         }
         List<SampleEntity> samples = vo.getSamples();
         if (CollectionUtils.isEmpty(samples)) {
-            return ResultUtil.error(-1, "请检查委托单样品信息是否完整！");
+            return ResultUtil.error( "请检查委托单样品信息是否完整！");
         }
         if (!CollectionUtils.isEmpty(samples)) {
             for (SampleEntity sampleEntity : samples) {
                 if (CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())) {
-                    return ResultUtil.error(-1, "请检查委托单样品下检测项信息是否完整！");
+                    return ResultUtil.error("请检查委托单样品下检测项信息是否完整！");
                 }
             }
         }
         if (!CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())) {
             for (CheckItemDeptVo checkItemDeptVo : entity.getCheckItemDeptVoList()) {
                 if (checkItemDeptVo.getDeptId() == null) {
-                    return ResultUtil.error(-1, "请确认所有检测项是否分配科室！");
+                    return ResultUtil.error( "请确认所有检测项是否分配科室！");
                 }
             }
         }
-/*        // 下单时间=orderTime (委托单转任务单的时间)
-        entity.setOrderTime(new Date(System.currentTimeMillis()));*/
-        //要求完成时间
-//        entity.setRequiredCompletionTime(new java.sql.Date(vo.getRequestDate().getTime()));
+        // 效验： 任务发布时指向任务单A提示A任务单已完成，分配失败。
+        Boolean status = entrustService.verifyDistributionTask(entity);
+        if(!status){
+            return ResultUtil.error( "分配失败！！！任务单状态已完成试验。");
+        }
         // 丁连春：任务单完成时间 以委托单下单时间为准
         entity.setRequiredCompletionTime(vo.getRequestDate());
         // 任务单下单日期等于委托单受理日期
@@ -433,13 +434,13 @@ public class EntrustController {
         }else {
             entity.setPresentInformation("--");
         }
-        Boolean flag = entrustService.distributionTask412(entity);
+        Boolean flag = entrustService.distributionTask320(entity);
         if (flag) {
             /*logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"账户："+ShiroUtils.getUserInfo().getUsername()+"发布任务成功编号为："+vo.getEntrustmentNo(),
                     Const.ENTRUST_PUBLISH,true);*/
             return ResultUtil.success("委托分配成功！");
         } else {
-            return ResultUtil.error(-1, "委托分配失败！");
+            return ResultUtil.error( "委托分配失败！");
         }
     }
 

@@ -338,4 +338,26 @@ public interface EntrustService {
      */
     void verifyTaskListExists(Long entrustId);
 
+    /**
+     * 效验：在任务单试验完成后不可添加参数。
+     * @param entity
+     * @return false 失败 、true 正常执行。
+     */
+    Boolean verifyDistributionTask(TaskVo entity);
+
+    /**
+     * 任务发布3.12日修改
+     * 修改报告的制作单位选择样式
+     * 权限放到task表
+     * 新增逻辑（
+     * 情况1、 1.1：指定任务单存在相同团队。 合并，成功
+     *        1.2：启用废弃任务单，选择相同团队后。
+     * 情况2、不存在相同团队。 新增任务单即可。
+     *
+     * ）
+     * @param entity
+     * @return
+     */
+    Boolean distributionTask320(TaskVo entity);
+
 }
