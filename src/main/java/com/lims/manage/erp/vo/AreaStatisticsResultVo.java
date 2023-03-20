@@ -11,17 +11,17 @@ public class AreaStatisticsResultVo {
     /**
      * 委托收费额
      */
-    private String actualPrice;
+    private Double actualPrice;
     /**
      * 交费金额
      */
-    private String receivedPrice;
+    private Double receivedPrice;
     /**
      * 报告实收产值
      */
-    private String actualReportPrice;
+    private Double actualReportPrice;
     /**
      * 报告应收产值
      */
-    private String systemReportPrice;
+    private Double systemReportPrice;
 }
