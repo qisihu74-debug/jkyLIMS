@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -537,8 +538,14 @@ public class ReportController {
         String bluckName = strings[3];
         String fileName = strings[4];
         InputStream fileStream = MinIoUtil.getFileStream(bluckName, fileName);
+        response.reset();
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/x-msdownload");
+        response.setCharacterEncoding("UTF-8");
         try {
-            ServletOutputStream outputStream = response.getOutputStream();
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
+            OutputStream outputStream = response.getOutputStream();
             IOUtils.copy(fileStream,outputStream);
             fileStream.close();
             outputStream.close();
