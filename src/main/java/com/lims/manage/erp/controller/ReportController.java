@@ -503,9 +503,9 @@ public class ReportController {
      * @return
      */
     @PostMapping("submitDownLoad")
-    public String submitDownLoad(@RequestBody ReqBean reqBean) {
+    public void submitDownLoad(@RequestBody ReqBean reqBean,HttpServletResponse response) {
         if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
-            return null;
+            return ;
         }
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
@@ -531,7 +531,20 @@ public class ReportController {
             alertService.deleteByEntrustId(reqBean.getId());
             alertService.saveBatch(list);
         }
-        return resBean.getUrl();
+        String url = resBean.getUrl();
+        String[] split = url.split("\\?");
+        String[] strings = split[0].split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        InputStream fileStream = MinIoUtil.getFileStream(bluckName, fileName);
+        try {
+            ServletOutputStream outputStream = response.getOutputStream();
+            IOUtils.copy(fileStream,outputStream);
+            fileStream.close();
+            outputStream.close();
+        }catch (Exception e){
+            logger.error("合并下载报告异常:{}",e);
+        }
     }
 
     /**
