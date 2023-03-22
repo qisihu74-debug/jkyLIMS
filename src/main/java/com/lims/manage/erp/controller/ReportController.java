@@ -964,4 +964,33 @@ public class ReportController {
         return ResultUtil.success(list);
     }
 
+    /**
+     * 知识管理模块下：报告模板、原始记录模板下载
+     * @param url
+     * @param response
+     */
+    @GetMapping("templateDownLoad")
+    public void templateDownLoad(String url,HttpServletResponse response){
+        if (org.apache.commons.lang3.StringUtils.isEmpty(url)){
+            return;
+        }
+        String[] strings = url.split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        InputStream fileStream = MinIoUtil.getFileStream(bluckName, fileName);
+        response.reset();
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/x-msdownload");
+        response.setCharacterEncoding("UTF-8");
+        try {
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
+            OutputStream outputStream = response.getOutputStream();
+            IOUtils.copy(fileStream,outputStream);
+            fileStream.close();
+            outputStream.close();
+        }catch (Exception e){
+            logger.error("合并下载报告异常:{}",e);
+        }
+    }
 }
