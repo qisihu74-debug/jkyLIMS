@@ -128,7 +128,15 @@ public class TaskServiceImpl implements TaskService {
         paramVo.setTaskId(taskId);
         // 处理 委托单的文件链接
         PageHelper.clearPage();
-        TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfoTwo(paramVo);
+        TaskDetailInfoVo taskDetailInfoVo = new TaskDetailInfoVo();
+        // 通过任务单id 查询检测项为空集合 调用其他方法操作
+        List<CheckItemInfoVo> list = taskMapper.getEntrustItemVos(taskId);
+        if(CollectionUtils.isEmpty(list)){
+            // 任务单不包含检测项 进行查询
+            taskDetailInfoVo = taskMapper.getTaskDetailInfoThree(paramVo);
+        }else {
+            taskDetailInfoVo = taskMapper.getTaskDetailInfoTwo(paramVo);
+        }
         //TODO dlc 补充任务单价格
         if(StringUtils.isEmpty(taskDetailInfoVo.getCost())){
             taskDetailInfoVo.setCost("--");
@@ -220,7 +228,15 @@ public class TaskServiceImpl implements TaskService {
             }
         }
         // 处理 委托单的文件链接
-        TaskDetailInfoVo taskDetailInfoVo = taskMapper.getTaskDetailInfoTwo(paramVo);
+        TaskDetailInfoVo taskDetailInfoVo = new TaskDetailInfoVo();
+        // 通过任务单id 查询检测项为空集合 调用其他方法操作
+        List<CheckItemInfoVo> list = taskMapper.getEntrustItemVos(taskId);
+        if(CollectionUtils.isEmpty(list)){
+            // 任务单不包含检测项 进行查询
+            taskDetailInfoVo = taskMapper.getTaskDetailInfoThree(paramVo);
+        }else {
+            taskDetailInfoVo = taskMapper.getTaskDetailInfoTwo(paramVo);
+        }
         if (taskDetailInfoVo.getFileUrl() != null) {
             String[] array = taskDetailInfoVo.getFileUrl().split(",");
             taskDetailInfoVo.setArray(array);
@@ -875,7 +891,10 @@ public class TaskServiceImpl implements TaskService {
                     checkItemInfoVo.setCheckPrice(checkItemInfoVo.getCheckPrice() != null ? checkItemInfoVo.getCheckPrice() : "0");
                     cost += (checkItemInfoVo.getTimes() * Integer.parseInt(checkItemInfoVo.getCheckPrice()));
                 }
-                String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
+                String substring = "";
+                if(stringBuilder.length()>1){
+                    substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
+                }
                 rows.get(2).getTableCells().get(1).setText(substring);
                 // 要求检验完成日期
                 rows.get(3).getTableCells().get(1).setText(taskDetailInfoVo.getRequiredCompletionTime());

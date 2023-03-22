@@ -478,4 +478,24 @@ public interface TaskMapper extends BaseMapper {
     @Select("SELECT id,order_time FROM test_task WHERE id = #{taskId}")
     TaskTestEntity getTaskOrderTime(@Param("taskId") Long taskId);
 
+    /**
+     * 查询任务详情三次开发
+     * @return
+     */
+    TaskDetailInfoVo getTaskDetailInfoThree(TaskListParamVo paramVo);
+
+    /**
+     * 通过任务单id 获取检测项列表
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid AS itemId,\n" +
+            "\tcheck_item_name AS checkItemName ,\n" +
+            "\ttask_id as taskId\n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel \n" +
+            "WHERE\n" +
+            "\ttask_id = #{taskId}")
+    List<CheckItemInfoVo> getEntrustItemVos(@Param("taskId")Long taskId);
 }
