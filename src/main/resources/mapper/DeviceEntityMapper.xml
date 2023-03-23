@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lims.manage.erp.mapper.DeviceEntityMapper">
+    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.DeviceEntity">
+        <constructor>
+            <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="code" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="name" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="files_state" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="model" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="manufacturer" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="serial_number" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="price" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="appraisal_date" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="range" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="level" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="used" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="laboratory_id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="old_code" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="device_admin" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="use_dept" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="calibration_param" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="store_place" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="calibration_period" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="expire_date" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="calibration_number" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="purchase_date" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="is_calibration" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="affirm_way" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="calibration_corporation" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="price_per_hour" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="picture" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="incorporated_date" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="type_id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="is_port" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="validity_date" jdbcType="DATE" javaType="java.util.Date"/>
+            <arg column="content" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="check_price" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="specs" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="traceability_mode" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="contract_url" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="invoice_url" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="remark" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="status" jdbcType="CHAR" javaType="java.lang.String"/>
+            <arg column="del_flag" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+        </constructor>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , code, name, files_state, model, manufacturer, serial_number, price, appraisal_date,
+    range, level, used, laboratory_id, old_code, device_admin, use_dept, calibration_param, 
+    store_place, calibration_period, expire_date, calibration_number, purchase_date, 
+    is_calibration, affirm_way, calibration_corporation, price_per_hour, picture, incorporated_date, 
+    type_id, is_port, validity_date, content, check_price, specs, traceability_mode, 
+    contract_url, invoice_url, remark, status, del_flag, create_time, update_time
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from test_instrument
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete
+        from test_instrument
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.lims.manage.erp.entity.DeviceEntity">
+        insert into test_instrument (id, code, name,
+                                     files_state, model, manufacturer,
+                                     serial_number, price, appraisal_date,
+                                     range, level, used,
+                                     laboratory_id, old_code, device_admin,
+                                     use_dept, calibration_param, store_place,
+                                     calibration_period, expire_date, calibration_number,
+                                     purchase_date, is_calibration, affirm_way,
+                                     calibration_corporation, price_per_hour, picture,
+                                     incorporated_date, type_id, is_port,
+                                     validity_date, content, check_price,
+                                     specs, traceability_mode, contract_url,
+                                     invoice_url, remark, status,
+                                     del_flag, create_time, update_time)
+        values (#{id,jdbcType=INTEGER}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+                #{filesState,jdbcType=VARCHAR}, #{model,jdbcType=VARCHAR}, #{manufacturer,jdbcType=VARCHAR},
+                #{serialNumber,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{appraisalDate,jdbcType=TIMESTAMP},
+                #{range,jdbcType=VARCHAR}, #{level,jdbcType=VARCHAR}, #{used,jdbcType=VARCHAR},
+                #{laboratoryId,jdbcType=INTEGER}, #{oldCode,jdbcType=VARCHAR}, #{deviceAdmin,jdbcType=VARCHAR},
+                #{useDept,jdbcType=VARCHAR}, #{calibrationParam,jdbcType=VARCHAR}, #{storePlace,jdbcType=VARCHAR},
+                #{calibrationPeriod,jdbcType=VARCHAR}, #{expireDate,jdbcType=TIMESTAMP},
+                #{calibrationNumber,jdbcType=VARCHAR},
+                #{purchaseDate,jdbcType=TIMESTAMP}, #{isCalibration,jdbcType=VARCHAR}, #{affirmWay,jdbcType=VARCHAR},
+                #{calibrationCorporation,jdbcType=VARCHAR}, #{pricePerHour,jdbcType=VARCHAR},
+                #{picture,jdbcType=VARCHAR},
+                #{incorporatedDate,jdbcType=TIMESTAMP}, #{typeId,jdbcType=INTEGER}, #{isPort,jdbcType=VARCHAR},
+                #{validityDate,jdbcType=DATE}, #{content,jdbcType=VARCHAR}, #{checkPrice,jdbcType=VARCHAR},
+                #{specs,jdbcType=VARCHAR}, #{traceabilityMode,jdbcType=VARCHAR}, #{contractUrl,jdbcType=VARCHAR},
+                #{invoiceUrl,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, #{status,jdbcType=CHAR},
+                #{delFlag,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+    </insert>
+    <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.DeviceEntity">
+        insert into test_instrument
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="code != null">
+                code,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="filesState != null">
+                files_state,
+            </if>
+            <if test="model != null">
+                model,
+            </if>
+            <if test="manufacturer != null">
+                manufacturer,
+            </if>
+            <if test="serialNumber != null">
+                serial_number,
+            </if>
+            <if test="price != null">
+                price,
+            </if>
+            <if test="appraisalDate != null">
+                appraisal_date,
+            </if>
+            <if test="range != null">
+                range,
+            </if>
+            <if test="level != null">
+                level,
+            </if>
+            <if test="used != null">
+                used,
+            </if>
+            <if test="laboratoryId != null">
+                laboratory_id,
+            </if>
+            <if test="oldCode != null">
+                old_code,
+            </if>
+            <if test="deviceAdmin != null">
+                device_admin,
+            </if>
+            <if test="useDept != null">
+                use_dept,
+            </if>
+            <if test="calibrationParam != null">
+                calibration_param,
+            </if>
+            <if test="storePlace != null">
+                store_place,
+            </if>
+            <if test="calibrationPeriod != null">
+                calibration_period,
+            </if>
+            <if test="expireDate != null">
+                expire_date,
+            </if>
+            <if test="calibrationNumber != null">
+                calibration_number,
+            </if>
+            <if test="purchaseDate != null">
+                purchase_date,
+            </if>
+            <if test="isCalibration != null">
+                is_calibration,
+            </if>
+            <if test="affirmWay != null">
+                affirm_way,
+            </if>
+            <if test="calibrationCorporation != null">
+                calibration_corporation,
+            </if>
+            <if test="pricePerHour != null">
+                price_per_hour,
+            </if>
+            <if test="picture != null">
+                picture,
+            </if>
+            <if test="incorporatedDate != null">
+                incorporated_date,
+            </if>
+            <if test="typeId != null">
+                type_id,
+            </if>
+            <if test="isPort != null">
+                is_port,
+            </if>
+            <if test="validityDate != null">
+                validity_date,
+            </if>
+            <if test="content != null">
+                content,
+            </if>
+            <if test="checkPrice != null">
+                check_price,
+            </if>
+            <if test="specs != null">
+                specs,
+            </if>
+            <if test="traceabilityMode != null">
+                traceability_mode,
+            </if>
+            <if test="contractUrl != null">
+                contract_url,
+            </if>
+            <if test="invoiceUrl != null">
+                invoice_url,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="delFlag != null">
+                del_flag,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="code != null">
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="filesState != null">
+                #{filesState,jdbcType=VARCHAR},
+            </if>
+            <if test="model != null">
+                #{model,jdbcType=VARCHAR},
+            </if>
+            <if test="manufacturer != null">
+                #{manufacturer,jdbcType=VARCHAR},
+            </if>
+            <if test="serialNumber != null">
+                #{serialNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null">
+                #{price,jdbcType=VARCHAR},
+            </if>
+            <if test="appraisalDate != null">
+                #{appraisalDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="range != null">
+                #{range,jdbcType=VARCHAR},
+            </if>
+            <if test="level != null">
+                #{level,jdbcType=VARCHAR},
+            </if>
+            <if test="used != null">
+                #{used,jdbcType=VARCHAR},
+            </if>
+            <if test="laboratoryId != null">
+                #{laboratoryId,jdbcType=INTEGER},
+            </if>
+            <if test="oldCode != null">
+                #{oldCode,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceAdmin != null">
+                #{deviceAdmin,jdbcType=VARCHAR},
+            </if>
+            <if test="useDept != null">
+                #{useDept,jdbcType=VARCHAR},
+            </if>
+            <if test="calibrationParam != null">
+                #{calibrationParam,jdbcType=VARCHAR},
+            </if>
+            <if test="storePlace != null">
+                #{storePlace,jdbcType=VARCHAR},
+            </if>
+            <if test="calibrationPeriod != null">
+                #{calibrationPeriod,jdbcType=VARCHAR},
+            </if>
+            <if test="expireDate != null">
+                #{expireDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="calibrationNumber != null">
+                #{calibrationNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="purchaseDate != null">
+                #{purchaseDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="isCalibration != null">
+                #{isCalibration,jdbcType=VARCHAR},
+            </if>
+            <if test="affirmWay != null">
+                #{affirmWay,jdbcType=VARCHAR},
+            </if>
+            <if test="calibrationCorporation != null">
+                #{calibrationCorporation,jdbcType=VARCHAR},
+            </if>
+            <if test="pricePerHour != null">
+                #{pricePerHour,jdbcType=VARCHAR},
+            </if>
+            <if test="picture != null">
+                #{picture,jdbcType=VARCHAR},
+            </if>
+            <if test="incorporatedDate != null">
+                #{incorporatedDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="typeId != null">
+                #{typeId,jdbcType=INTEGER},
+            </if>
+            <if test="isPort != null">
+                #{isPort,jdbcType=VARCHAR},
+            </if>
+            <if test="validityDate != null">
+                #{validityDate,jdbcType=DATE},
+            </if>
+            <if test="content != null">
+                #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="checkPrice != null">
+                #{checkPrice,jdbcType=VARCHAR},
+            </if>
+            <if test="specs != null">
+                #{specs,jdbcType=VARCHAR},
+            </if>
+            <if test="traceabilityMode != null">
+                #{traceabilityMode,jdbcType=VARCHAR},
+            </if>
+            <if test="contractUrl != null">
+                #{contractUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="invoiceUrl != null">
+                #{invoiceUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=CHAR},
+            </if>
+            <if test="delFlag != null">
+                #{delFlag,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.DeviceEntity">
+        update test_instrument
+        <set>
+            <if test="code != null">
+                code = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="filesState != null">
+                files_state = #{filesState,jdbcType=VARCHAR},
+            </if>
+            <if test="model != null">
+                model = #{model,jdbcType=VARCHAR},
+            </if>
+            <if test="manufacturer != null">
+                manufacturer = #{manufacturer,jdbcType=VARCHAR},
+            </if>
+            <if test="serialNumber != null">
+                serial_number = #{serialNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null">
+                price = #{price,jdbcType=VARCHAR},
+            </if>
+            <if test="appraisalDate != null">
+                appraisal_date = #{appraisalDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="range != null">
+                range = #{range,jdbcType=VARCHAR},
+            </if>
+            <if test="level != null">
+                level = #{level,jdbcType=VARCHAR},
+            </if>
+            <if test="used != null">
+                used = #{used,jdbcType=VARCHAR},
+            </if>
+            <if test="laboratoryId != null">
+                laboratory_id = #{laboratoryId,jdbcType=INTEGER},
+            </if>
+            <if test="oldCode != null">
+                old_code = #{oldCode,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceAdmin != null">
+                device_admin = #{deviceAdmin,jdbcType=VARCHAR},
+            </if>
+            <if test="useDept != null">
+                use_dept = #{useDept,jdbcType=VARCHAR},
+            </if>
+            <if test="calibrationParam != null">
+                calibration_param = #{calibrationParam,jdbcType=VARCHAR},
+            </if>
+            <if test="storePlace != null">
+                store_place = #{storePlace,jdbcType=VARCHAR},
+            </if>
+            <if test="calibrationPeriod != null">
+                calibration_period = #{calibrationPeriod,jdbcType=VARCHAR},
+            </if>
+            <if test="expireDate != null">
+                expire_date = #{expireDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="calibrationNumber != null">
+                calibration_number = #{calibrationNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="purchaseDate != null">
+                purchase_date = #{purchaseDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="isCalibration != null">
+                is_calibration = #{isCalibration,jdbcType=VARCHAR},
+            </if>
+            <if test="affirmWay != null">
+                affirm_way = #{affirmWay,jdbcType=VARCHAR},
+            </if>
+            <if test="calibrationCorporation != null">
+                calibration_corporation = #{calibrationCorporation,jdbcType=VARCHAR},
+            </if>
+            <if test="pricePerHour != null">
+                price_per_hour = #{pricePerHour,jdbcType=VARCHAR},
+            </if>
+            <if test="picture != null">
+                picture = #{picture,jdbcType=VARCHAR},
+            </if>
+            <if test="incorporatedDate != null">
+                incorporated_date = #{incorporatedDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="typeId != null">
+                type_id = #{typeId,jdbcType=INTEGER},
+            </if>
+            <if test="isPort != null">
+                is_port = #{isPort,jdbcType=VARCHAR},
+            </if>
+            <if test="validityDate != null">
+                validity_date = #{validityDate,jdbcType=DATE},
+            </if>
+            <if test="content != null">
+                content = #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="checkPrice != null">
+                check_price = #{checkPrice,jdbcType=VARCHAR},
+            </if>
+            <if test="specs != null">
+                specs = #{specs,jdbcType=VARCHAR},
+            </if>
+            <if test="traceabilityMode != null">
+                traceability_mode = #{traceabilityMode,jdbcType=VARCHAR},
+            </if>
+            <if test="contractUrl != null">
+                contract_url = #{contractUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="invoiceUrl != null">
+                invoice_url = #{invoiceUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=CHAR},
+            </if>
+            <if test="delFlag != null">
+                del_flag = #{delFlag,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.DeviceEntity">
+        update test_instrument
+        set code                    = #{code,jdbcType=VARCHAR},
+            name                    = #{name,jdbcType=VARCHAR},
+            files_state             = #{filesState,jdbcType=VARCHAR},
+            model                   = #{model,jdbcType=VARCHAR},
+            manufacturer            = #{manufacturer,jdbcType=VARCHAR},
+            serial_number           = #{serialNumber,jdbcType=VARCHAR},
+            price                   = #{price,jdbcType=VARCHAR},
+            appraisal_date          = #{appraisalDate,jdbcType=TIMESTAMP},
+            range                   = #{range,jdbcType=VARCHAR},
+            level                   = #{level,jdbcType=VARCHAR},
+            used                    = #{used,jdbcType=VARCHAR},
+            laboratory_id           = #{laboratoryId,jdbcType=INTEGER},
+            old_code                = #{oldCode,jdbcType=VARCHAR},
+            device_admin            = #{deviceAdmin,jdbcType=VARCHAR},
+            use_dept                = #{useDept,jdbcType=VARCHAR},
+            calibration_param       = #{calibrationParam,jdbcType=VARCHAR},
+            store_place             = #{storePlace,jdbcType=VARCHAR},
+            calibration_period      = #{calibrationPeriod,jdbcType=VARCHAR},
+            expire_date             = #{expireDate,jdbcType=TIMESTAMP},
+            calibration_number      = #{calibrationNumber,jdbcType=VARCHAR},
+            purchase_date           = #{purchaseDate,jdbcType=TIMESTAMP},
+            is_calibration          = #{isCalibration,jdbcType=VARCHAR},
+            affirm_way              = #{affirmWay,jdbcType=VARCHAR},
+            calibration_corporation = #{calibrationCorporation,jdbcType=VARCHAR},
+            price_per_hour          = #{pricePerHour,jdbcType=VARCHAR},
+            picture                 = #{picture,jdbcType=VARCHAR},
+            incorporated_date       = #{incorporatedDate,jdbcType=TIMESTAMP},
+            type_id                 = #{typeId,jdbcType=INTEGER},
+            is_port                 = #{isPort,jdbcType=VARCHAR},
+            validity_date           = #{validityDate,jdbcType=DATE},
+            content                 = #{content,jdbcType=VARCHAR},
+            check_price             = #{checkPrice,jdbcType=VARCHAR},
+            specs                   = #{specs,jdbcType=VARCHAR},
+            traceability_mode       = #{traceabilityMode,jdbcType=VARCHAR},
+            contract_url            = #{contractUrl,jdbcType=VARCHAR},
+            invoice_url             = #{invoiceUrl,jdbcType=VARCHAR},
+            remark                  = #{remark,jdbcType=VARCHAR},
+            status                  = #{status,jdbcType=CHAR},
+            del_flag                = #{delFlag,jdbcType=INTEGER},
+            create_time             = #{createTime,jdbcType=TIMESTAMP},
+            update_time             = #{updateTime,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <select id="getNewDevices" resultType="com.lims.manage.erp.entity.DeviceEntity">
+        SELECT
+            *
+        FROM
+            test_instrument_aaa
+    </select>
+    <select id="getOldDevices" resultType="com.lims.manage.erp.entity.DeviceEntity">
+        SELECT
+            *
+        FROM
+            test_instrument
+    </select>
+
+    <select id="getOldDevicesByCode" resultType="com.lims.manage.erp.entity.DeviceEntity" parameterType="java.lang.String">
+        SELECT
+            *
+        FROM
+            test_instrument where code = #{code}
+    </select>
+
+    <insert id="batchInsert" parameterType="com.lims.manage.erp.entity.DeviceEntity">
+        insert into test_instrument_a_check (id,old_id, code, `name`,
+        files_state, model, manufacturer,
+        serial_number, price, appraisal_date,
+        `range`, `level`, used,
+        laboratory_id, old_code, device_admin,
+        use_dept, calibration_param, store_place,
+        calibration_period, expire_date, calibration_number,
+        purchase_date, is_calibration, affirm_way,
+        calibration_corporation, price_per_hour, picture,
+        incorporated_date, type_id, is_port,
+        validity_date, content, check_price,
+        specs, traceability_mode, contract_url,
+        invoice_url, remark, status,
+        del_flag, create_time, update_time)
+        values
+        <foreach collection="items" item="item" open="" separator="," close="">
+            (#{item.id,jdbcType=INTEGER},#{item.oldId,jdbcType=INTEGER}, #{item.code,jdbcType=VARCHAR}, #{item.name,jdbcType=VARCHAR},
+            #{item.filesState,jdbcType=VARCHAR}, #{item.model,jdbcType=VARCHAR}, #{item.manufacturer,jdbcType=VARCHAR},
+            #{item.serialNumber,jdbcType=VARCHAR}, #{item.price,jdbcType=VARCHAR}, #{item.appraisalDate,jdbcType=TIMESTAMP},
+            #{item.range,jdbcType=VARCHAR}, #{item.level,jdbcType=VARCHAR}, #{item.used,jdbcType=VARCHAR},
+            #{item.laboratoryId,jdbcType=INTEGER}, #{item.oldCode,jdbcType=VARCHAR}, #{item.deviceAdmin,jdbcType=VARCHAR},
+            #{item.useDept,jdbcType=VARCHAR}, #{item.calibrationParam,jdbcType=VARCHAR}, #{item.storePlace,jdbcType=VARCHAR},
+            #{item.calibrationPeriod,jdbcType=VARCHAR}, #{item.expireDate,jdbcType=TIMESTAMP},
+            #{item.calibrationNumber,jdbcType=VARCHAR},
+            #{item.purchaseDate,jdbcType=TIMESTAMP}, #{item.isCalibration,jdbcType=VARCHAR}, #{item.affirmWay,jdbcType=VARCHAR},
+            #{item.calibrationCorporation,jdbcType=VARCHAR}, #{item.pricePerHour,jdbcType=VARCHAR},
+            #{item.picture,jdbcType=VARCHAR},
+            #{item.incorporatedDate,jdbcType=TIMESTAMP}, #{item.typeId,jdbcType=INTEGER}, #{item.isPort,jdbcType=VARCHAR},
+            #{item.validityDate,jdbcType=DATE}, #{item.content,jdbcType=VARCHAR}, #{item.checkPrice,jdbcType=VARCHAR},
+            #{item.specs,jdbcType=VARCHAR}, #{item.traceabilityMode,jdbcType=VARCHAR}, #{item.contractUrl,jdbcType=VARCHAR},
+            #{item.invoiceUrl,jdbcType=VARCHAR}, #{item.remark,jdbcType=VARCHAR}, #{item.status,jdbcType=CHAR},
+            #{item.delFlag,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP}, #{item.updateTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+
+</mapper>

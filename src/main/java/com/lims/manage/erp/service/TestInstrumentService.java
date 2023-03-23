@@ -48,5 +48,10 @@ public interface TestInstrumentService extends IService<TestInstrument> {
      * @return
      */
     HashMap<String,Object> batchExportInstrumentRecord(List<Long> instrumentIds);
+
+    /**
+     * 整理设备
+     */
+    void checkDevice();
 }
 
