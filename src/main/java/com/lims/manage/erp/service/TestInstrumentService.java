@@ -83,5 +83,12 @@ public interface TestInstrumentService extends IService<TestInstrument> {
      */
     boolean update(DeviceEntity record);
 
+    /**
+     * 删除设备
+     * @param idList
+     * @return
+     */
+    boolean deleteDevice(List<Long> idList);
+
 }
 

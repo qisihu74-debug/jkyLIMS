@@ -26,6 +26,7 @@ import io.swagger.annotations.ApiOperation;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -287,7 +288,29 @@ public class TestInstrumentController extends ApiController {
         }
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户："+userInfo.getUsername()
                 +"修改设备仪器"+record.getId()+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
-        return ResultUtil.success("设备修改新增！", record);
+        return ResultUtil.success("设备修改成功！", record);
+    }
+
+    /**
+     * 删除设备
+     * @param idList
+     * @return
+     */
+    @PostMapping("deleteDevice")
+    public Result deleteDevice(@RequestParam("idList") List<Long> idList) {
+        if (CollectionUtils.isEmpty(idList)) {
+            return ResultUtil.error("请选择要删除的设备！");
+        }
+        boolean save = testInstrumentService.deleteDevice(idList);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (!save) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
+                    +"删除设备仪器"+idList+"失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
+            return ResultUtil.success("设备删除失败!");
+        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户："+userInfo.getUsername()
+                +"删除设备仪器"+idList+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
+        return ResultUtil.success("设备删除成功！", idList);
     }
 }
 

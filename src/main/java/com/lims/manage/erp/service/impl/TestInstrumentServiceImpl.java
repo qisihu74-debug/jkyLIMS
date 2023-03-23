@@ -27,6 +27,7 @@ import com.lims.manage.erp.vo.TestInstrumentVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -348,6 +349,16 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
     public boolean update(DeviceEntity record) {
         int update = deviceEntityMapper.updateByPrimaryKeySelective(record);
         if (update > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteDevice(List<Long> idList) {
+        int i = deviceEntityMapper.deleteByIds(idList);
+        if (i > 0) {
             return true;
         }
         return false;

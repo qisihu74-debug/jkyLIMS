@@ -612,4 +612,11 @@
             test_instrument
     </select>
 
+    <delete id="deleteByIds" parameterType="java.util.List">
+        delete
+        from test_instrument where id in
+        <foreach collection='idList' item='id' open='(' separator=',' close=')'>
+            #{id}
+        </foreach>
+    </delete>
 </mapper>

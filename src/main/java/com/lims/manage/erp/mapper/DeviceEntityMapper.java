@@ -45,4 +45,11 @@ public interface DeviceEntityMapper {
      */
     Integer getNewId();
 
+    /**
+     * 批量删除设备
+     * @param idList
+     * @return
+     */
+    int deleteByIds(@Param("idList") List<Long> idList);
+
 }
