@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.DeviceEntity;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -48,8 +49,8 @@ public class TestInstrumentController extends ApiController {
     @Resource
     private TestInstrumentService testInstrumentService;
 
-    @GetMapping("/getList")
-    public Result getAll(TestInstrument testInstrument) {
+    @GetMapping("/getAllOld")
+    public Result getAllOld(TestInstrument testInstrument) {
         QueryWrapper<TestInstrument> queryWrapper = new QueryWrapper<>(testInstrument);
         queryWrapper.orderByDesc("create_time");
         queryWrapper.eq("del_flag", 0);
@@ -101,13 +102,22 @@ public class TestInstrumentController extends ApiController {
      * @param testInstrument 实体对象
      * @return 新增结果
      */
-    @PostMapping("/add")
+    @PostMapping("/add_old")
     @ApiOperation("添加仪器设备")
-    public Result insert(@RequestBody TestInstrument testInstrument) {
+    public Result add_old(@RequestBody TestInstrument testInstrument) {
         if (StrUtil.isEmptyIfStr(testInstrument)) {
             return ResultUtil.error("数据为空");
         }
-        return this.testInstrumentService.addInstrument(testInstrument);
+        return this.testInstrumentService.addInstrument_old(testInstrument);
+    }
+
+    @PostMapping("/add")
+    @ApiOperation("添加仪器设备")
+    public Result insert(@RequestBody DeviceEntity deviceEntity) {
+        if (StrUtil.isEmptyIfStr(deviceEntity)) {
+            return ResultUtil.error("数据为空");
+        }
+        return this.testInstrumentService.addInstrument(deviceEntity);
     }
 
     /**
@@ -216,6 +226,23 @@ public class TestInstrumentController extends ApiController {
     @GetMapping("checkDevice")
     public void checkDevice() {
         this.testInstrumentService.checkDevice();
+    }
+
+    /**
+     * 查询设备仪器列表
+     * @param deviceEntity
+     * @return
+     */
+    @PostMapping("/getAllDevice")
+    public Result getAllDevice(@RequestBody DeviceEntity deviceEntity) {
+        if (deviceEntity == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        if (deviceEntity.getPageNum() == null || deviceEntity.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        PageInfo<DeviceEntity> allDevice = testInstrumentService.getAllDevice(deviceEntity);
+        return ResultUtil.success("查询设备仪器列表成功！",allDevice);
     }
 }
 

@@ -32,4 +32,11 @@ public interface DeviceEntityMapper {
     List<DeviceEntity> getOldDevicesByCode(String code);
     int batchInsert(@Param("items") List<DeviceEntity> items);
     /************************************************************/
+    /**
+     * 查询设备仪器列表
+     * @param deviceEntity
+     * @return
+     */
+    List<DeviceEntity> getAllDevice(DeviceEntity deviceEntity);
+
 }

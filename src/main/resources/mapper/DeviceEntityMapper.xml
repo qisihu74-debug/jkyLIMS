@@ -49,8 +49,8 @@
     </resultMap>
     <sql id="Base_Column_List">
         id
-        , code, name, files_state, model, manufacturer, serial_number, price, appraisal_date,
-    range, level, used, laboratory_id, old_code, device_admin, use_dept, calibration_param, 
+        , `code`, `name`, files_state, model, manufacturer, serial_number, price, appraisal_date,
+    `range`, `level`, used, laboratory_id, old_code, device_admin, use_dept, calibration_param,
     store_place, calibration_period, expire_date, calibration_number, purchase_date, 
     is_calibration, affirm_way, calibration_corporation, price_per_hour, picture, incorporated_date, 
     type_id, is_port, validity_date, content, check_price, specs, traceability_mode, 
@@ -539,6 +539,7 @@
         FROM
             test_instrument_aaa
     </select>
+
     <select id="getOldDevices" resultType="com.lims.manage.erp.entity.DeviceEntity">
         SELECT
             *
@@ -588,5 +589,20 @@
             #{item.delFlag,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP}, #{item.updateTime,jdbcType=TIMESTAMP})
         </foreach>
     </insert>
+
+    <select id="getAllDevice" resultType="com.lims.manage.erp.entity.DeviceEntity">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            test_instrument
+        <where>
+            <if test="name!=null">
+                and name like CONCAT('%',#{name,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="code!=null">
+                and code like CONCAT('%',#{code,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+    </select>
 
 </mapper>

@@ -8,8 +8,6 @@ import java.util.Date;
 public class DeviceEntity {
     private Integer id;
 
-    private Integer oldId;
-
     private String code;
 
     private String name;
@@ -91,4 +89,9 @@ public class DeviceEntity {
     private Date createTime;
 
     private Date updateTime;
+
+    private Integer pageSize;
+
+    private Integer pageNum;
+
 }
