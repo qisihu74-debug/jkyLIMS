@@ -130,6 +130,10 @@ public class TaskTestEntity {
      * 提供资料
      */
     private String presentInformation;
+    /**
+     * 任务单价格
+     */
+    private Double taskPrice;
 
     public TaskTestEntity() {
     }
