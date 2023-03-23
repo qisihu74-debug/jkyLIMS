@@ -344,6 +344,15 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         return false;
     }
 
+    @Override
+    public boolean update(DeviceEntity record) {
+        int update = deviceEntityMapper.updateByPrimaryKeySelective(record);
+        if (update > 0) {
+            return true;
+        }
+        return false;
+    }
+
     private String upload(MultipartFile file) {
         String fileName = file.getOriginalFilename();
         String upload = MinIoUtil.upload("", file, fileName);

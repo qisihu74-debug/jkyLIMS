@@ -267,5 +267,27 @@ public class TestInstrumentController extends ApiController {
                 +"添加设备仪器"+record.getId()+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
         return ResultUtil.success("设备添加成功！", record);
     }
+
+    /**
+     * 修改设备
+     * @param record
+     * @return
+     */
+    @PostMapping("updateDevice")
+    public Result updateDevice(@RequestBody DeviceEntity record) {
+        if (record.getId() == null || record.getName() == null || record.getCode() == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        boolean save = testInstrumentService.update(record);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (!save) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
+                    +"修改设备仪器"+record.getId()+"失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
+            return ResultUtil.success("设备修改失败!");
+        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户："+userInfo.getUsername()
+                +"修改设备仪器"+record.getId()+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
+        return ResultUtil.success("设备修改新增！", record);
+    }
 }
 

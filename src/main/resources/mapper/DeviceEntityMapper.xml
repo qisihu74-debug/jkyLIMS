@@ -386,10 +386,10 @@
                 appraisal_date = #{appraisalDate,jdbcType=TIMESTAMP},
             </if>
             <if test="range != null">
-                range = #{range,jdbcType=VARCHAR},
+                `range` = #{range,jdbcType=VARCHAR},
             </if>
             <if test="level != null">
-                level = #{level,jdbcType=VARCHAR},
+                `level` = #{level,jdbcType=VARCHAR},
             </if>
             <if test="used != null">
                 used = #{used,jdbcType=VARCHAR},

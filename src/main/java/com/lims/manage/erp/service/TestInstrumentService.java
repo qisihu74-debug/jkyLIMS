@@ -76,5 +76,12 @@ public interface TestInstrumentService extends IService<TestInstrument> {
      */
     boolean addDevice(DeviceEntity record, MultipartFile picture, MultipartFile contract, MultipartFile invoice);
 
+    /**
+     * 修改设备仪器
+     * @param record
+     * @return
+     */
+    boolean update(DeviceEntity record);
+
 }
 
