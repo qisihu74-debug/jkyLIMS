@@ -1824,6 +1824,19 @@ public class EntrustServiceImpl implements EntrustService {
                 } else if (state == 6) {
                     taskProgressVo.setState(4);
                 }
+                // 任务单state =144 根据日期修改状态
+                if(state == 144){
+                    // 任务单废弃 则根据时间赋予状态
+                    if(taskProgressVo.getOrderTime()!=null){
+                        taskProgressVo.setState(0);
+                    }
+                    if(taskProgressVo.getReceiveTime()!=null){
+                        taskProgressVo.setState(1);
+                    }
+                    if(taskProgressVo.getStartDetectionTime()!=null){
+                        taskProgressVo.setState(2);
+                    }
+                }
                 List<TaskProgressStateVo> stateVoList = Lists.newArrayList();
                 for (int j = 0; j <= 4; j++) {
                     if (j == 0) {
