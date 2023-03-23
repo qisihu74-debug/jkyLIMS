@@ -10,6 +10,7 @@ import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +66,15 @@ public interface TestInstrumentService extends IService<TestInstrument> {
      */
     PageInfo<DeviceEntity> getAllDevice(DeviceEntity deviceEntity);
 
-    Result addInstrument(DeviceEntity deviceEntity);
+    /**
+     * 新增设备
+     * @param record
+     * @param picture
+     * @param contract
+     * @param invoice
+     * @return
+     */
+    boolean addDevice(DeviceEntity record, MultipartFile picture, MultipartFile contract, MultipartFile invoice);
 
 }
 

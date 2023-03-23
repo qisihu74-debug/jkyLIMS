@@ -9,6 +9,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
+import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.DeviceEntityMapper;
 import com.lims.manage.erp.mapper.InstrumentRecordEntityMapper;
@@ -17,6 +18,8 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.InstrumentRecordListVo;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
@@ -24,8 +27,11 @@ import com.lims.manage.erp.vo.TestInstrumentVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 /**
@@ -312,8 +318,45 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
     }
 
     @Override
-    public Result addInstrument(DeviceEntity deviceEntity) {
-        return null;
+    public boolean addDevice(DeviceEntity record, MultipartFile picture, MultipartFile contract, MultipartFile invoice) {
+        //上传附件
+//        if (picture != null && !"blob".equals(picture.getOriginalFilename())) {
+//            String upload = upload(picture);
+//            record.setPicture(upload);
+//        }
+//        if (contract != null && !"blob".equals(contract.getOriginalFilename())) {
+//            String upload = upload(contract);
+//            record.setContractUrl(upload);
+//        }
+//        if (invoice != null && !"blob".equals(invoice.getOriginalFilename())) {
+//            String upload = upload(invoice);
+//            record.setInvoice(upload);
+//        }
+        Integer newId = deviceEntityMapper.getNewId();
+        record.setId(newId);
+        record.setStatus("0");
+        record.setDelFlag(0);
+        record.setCreateTime(new Date());
+        int insert = deviceEntityMapper.insert(record);
+        if (insert > 0) {
+            return true;
+        }
+        return false;
     }
+
+    private String upload(MultipartFile file) {
+        String fileName = file.getOriginalFilename();
+        String upload = MinIoUtil.upload("", file, fileName);
+        String[] split = upload.split("\\?");//去掉返回的URL中的参数
+        String s = split[0];
+        String decode = null;
+        try {
+            decode = URLDecoder.decode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return decode;
+    }
+
 }
 

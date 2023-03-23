@@ -1,6 +1,8 @@
 package com.lims.manage.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -21,7 +23,8 @@ public class DeviceEntity {
     private String serialNumber;
 
     private String price;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date appraisalDate;
 
     private String range;
@@ -43,11 +46,13 @@ public class DeviceEntity {
     private String storePlace;
 
     private String calibrationPeriod;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date expireDate;
 
     private String calibrationNumber;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date purchaseDate;
 
     private String isCalibration;
@@ -59,13 +64,15 @@ public class DeviceEntity {
     private String pricePerHour;
 
     private String picture;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date incorporatedDate;
 
     private Integer typeId;
 
     private String isPort;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date validityDate;
 
     private String content;
@@ -85,9 +92,11 @@ public class DeviceEntity {
     private String status;
 
     private Integer delFlag;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date createTime;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date updateTime;
 
     private Integer pageSize;

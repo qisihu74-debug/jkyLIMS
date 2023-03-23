@@ -68,10 +68,10 @@
         where id = #{id,jdbcType=INTEGER}
     </delete>
     <insert id="insert" parameterType="com.lims.manage.erp.entity.DeviceEntity">
-        insert into test_instrument (id, code, name,
+        insert into test_instrument (id, `code`, `name`,
                                      files_state, model, manufacturer,
                                      serial_number, price, appraisal_date,
-                                     range, level, used,
+                                     `range`, `level`, used,
                                      laboratory_id, old_code, device_admin,
                                      use_dept, calibration_param, store_place,
                                      calibration_period, expire_date, calibration_number,
@@ -603,6 +603,13 @@
                 and code like CONCAT('%',#{code,jdbcType=VARCHAR},'%')
             </if>
         </where>
+    </select>
+
+    <select id="getNewId" resultType="java.lang.Integer">
+        SELECT
+            max( id ) + 1
+        FROM
+            test_instrument
     </select>
 
 </mapper>

@@ -39,4 +39,10 @@ public interface DeviceEntityMapper {
      */
     List<DeviceEntity> getAllDevice(DeviceEntity deviceEntity);
 
+    /**
+     * 设备新ID
+     * @return
+     */
+    Integer getNewId();
+
 }

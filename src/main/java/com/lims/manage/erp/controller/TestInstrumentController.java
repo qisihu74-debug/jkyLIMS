@@ -2,17 +2,22 @@ package com.lims.manage.erp.controller;
 
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.DeviceEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestInstrumentService;
+import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.ExportParamVo;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
@@ -22,6 +27,7 @@ import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -48,6 +54,8 @@ public class TestInstrumentController extends ApiController {
      */
     @Resource
     private TestInstrumentService testInstrumentService;
+    @Resource
+    private LogManagerService logManagerService;
 
     @GetMapping("/getAllOld")
     public Result getAllOld(TestInstrument testInstrument) {
@@ -109,15 +117,6 @@ public class TestInstrumentController extends ApiController {
             return ResultUtil.error("数据为空");
         }
         return this.testInstrumentService.addInstrument_old(testInstrument);
-    }
-
-    @PostMapping("/add")
-    @ApiOperation("添加仪器设备")
-    public Result insert(@RequestBody DeviceEntity deviceEntity) {
-        if (StrUtil.isEmptyIfStr(deviceEntity)) {
-            return ResultUtil.error("数据为空");
-        }
-        return this.testInstrumentService.addInstrument(deviceEntity);
     }
 
     /**
@@ -243,6 +242,30 @@ public class TestInstrumentController extends ApiController {
         }
         PageInfo<DeviceEntity> allDevice = testInstrumentService.getAllDevice(deviceEntity);
         return ResultUtil.success("查询设备仪器列表成功！",allDevice);
+    }
+
+    /**
+     * 新增设备
+     * @param record
+     * @return
+     */
+    @PostMapping("addDevice")
+//    public Result addDevice(@RequestParam("json") String json, MultipartFile picture, MultipartFile contract, MultipartFile invoice) {
+    public Result addDevice(@RequestBody DeviceEntity record) {
+//        DeviceEntity record = JSON.parseObject(json, DeviceEntity.class);
+        if (record.getName() == null || record.getCode() == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        boolean save = testInstrumentService.addDevice(record, null, null, null);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (!save) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
+                    +"添加设备仪器"+record.getId()+"失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
+            return ResultUtil.success("设备添加失败!");
+        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户："+userInfo.getUsername()
+                +"添加设备仪器"+record.getId()+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
+        return ResultUtil.success("设备添加成功！", record);
     }
 }
 
