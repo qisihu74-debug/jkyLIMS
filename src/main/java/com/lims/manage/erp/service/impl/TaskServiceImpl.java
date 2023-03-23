@@ -1568,6 +1568,11 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public Boolean judgeTaskStatus(Long id) {
+        // 委托单 == 144 || 任务单单自身 == 144 ：结果返回 = true
+        Integer state = taskMapper.getJudgmentTaskList(id);
+        if(state!=null && state==144){
+            return true;
+        }
       return  taskMapper.judgeTaskStatus(id);
     }
 
