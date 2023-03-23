@@ -39,7 +39,11 @@ import com.lims.manage.erp.vo.TemplateSampleVo;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.poi.hssf.extractor.ExcelExtractor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
@@ -1432,7 +1436,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public ZipOutputStream packagingWorkbookZip(List<TaskIdEntity> dataEntitys, HttpServletResponse response) throws IOException {
+    public ZipOutputStream packagingWorkbookZip(List<TaskIdEntity> dataEntitys, HttpServletResponse response,Long taskId) throws IOException {
         // 通过输入参数 返回 对应的处理成功的EXCEL数据。
         ServletOutputStream outputStream = response.getOutputStream();
         ZipOutputStream out = new ZipOutputStream(outputStream);
@@ -1455,7 +1459,7 @@ public class TaskServiceImpl implements TaskService {
                 String[] split1 = split[4].split("\\?");
                 XLSTransformer transformer = new XLSTransformer();
                 InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
-                Workbook workbook = methodPlugTheData(data.getFileUrl(),result, null);
+                Workbook workbook = methodPlugTheData(data.getFileUrl(),result, null,taskId);
                 /**
                  * TODD:7月5日 原始记录命名规则
                  * 任务单号+模板名称，如果有重复的，后面加序号
@@ -1610,13 +1614,45 @@ public class TaskServiceImpl implements TaskService {
     /**
      * 如果原始记录文件不为空 塞数据
      */
-    public Workbook methodPlugTheData(String originalTemplate,Map<String, OriginalRecordDataVo> result,HttpServletResponse response) throws InvalidFormatException {
+    public Workbook methodPlugTheData(String originalTemplate,Map<String, OriginalRecordDataVo> result,HttpServletResponse response,Long taskId) throws InvalidFormatException {
         String[] split = originalTemplate.split("/");
         String[] split1 = split[4].split("\\?");
         XLSTransformer transformer = new XLSTransformer();
         InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
         org.apache.poi.ss.usermodel.Workbook workbook = null;
         workbook = transformer.transformXLS(fileStream, result);
+        //处理原始记录下载，单位名称问题
+        java.sql.Date date = entrustEntityMapper.getEntrustDateByTaskId(taskId);
+        String dayString = DateUtil.getDayString(date.getTime());
+        if (Integer.parseInt(dayString) >= 20230313){
+            //河南交科院检验检测认证有限公司
+            Sheet sheet = workbook.getSheetAt(0);
+            //确定要处理的行
+            int rowStart = sheet.getFirstRowNum();
+            int rowEnd = sheet.getLastRowNum();
+            Boolean flag = false;
+            for (int rowNum = rowStart; rowNum < rowEnd; rowNum++) {
+                Row r = sheet.getRow(rowNum);
+                if (r == null) {
+                    continue;
+                }
+                int lastColumn = r.getLastCellNum();
+                for (int cn = 0; cn < lastColumn; cn++) {
+                    Cell c = r.getCell(cn, Row.RETURN_BLANK_AS_NULL);
+                    if (c != null){
+                        String cellValue = c.getStringCellValue();
+                        if ("检测单位名称：河南省公路工程试验检测中心有限公司".equals(cellValue)){
+                            c.setCellValue("检测单位名称：河南交科院检验检测认证有限公司");
+                            flag = true;
+                            break;
+                        }
+                    }
+                }
+                if (flag){
+                    break;
+                }
+            }
+        }
         return workbook;
     }
 
