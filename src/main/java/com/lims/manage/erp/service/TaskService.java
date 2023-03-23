@@ -208,7 +208,7 @@ public interface TaskService {
     String batchReview(TaskStatsVo taskStatsVo);
 
 
-    ZipOutputStream packagingWorkbookZip(List<TaskIdEntity> dataEntitys, HttpServletResponse response) throws IOException;
+    ZipOutputStream packagingWorkbookZip(List<TaskIdEntity> dataEntitys, HttpServletResponse response,Long taskId) throws IOException;
 
     /**
      * 查询任务列表——并设置分页

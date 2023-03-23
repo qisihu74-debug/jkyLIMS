@@ -670,4 +670,13 @@ public interface EntrustEntityMapper extends BaseMapper {
             "WHERE\n" +
             "\tt2.entrust_id = #{entrustId} and task_id is not null ")
     List<CheckItemInfoVo> getEntrustItemVos(@Param("entrustId")Long entrustId);
+
+    @Select("SELECT\n" +
+            "\tt2.acceptance_date \n" +
+            "FROM\n" +
+            "\ttest_task t1\n" +
+            "\tLEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id \n" +
+            "WHERE\n" +
+            "\tt1.id=#{taskId}")
+    java.sql.Date getEntrustDateByTaskId(@Param("taskId") Long taskId);
 }
