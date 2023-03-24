@@ -50,6 +50,11 @@ public interface CommonConstant {
      * 评论点赞数量
      */
     Integer INTEGRAL_RULE_COMMENT_LIKE_NUM=10;
+
+    /**
+     * 完成培训开始计划
+     */
+    String INTEGRAL_RULE_PLAN_COMPLETE="6";
     //===================缓存key======================
     /**
      * 用户签到缓存key
@@ -107,6 +112,11 @@ public interface CommonConstant {
     String PLAN_PARTAKE_STATUS_INCOMPLETE="9";
 
     /**
+     * 计划参与状态-未报名但完成
+     */
+    String PLAN_PARTAKE_STATUS_NO_ENROLL_COMPLETE="22";
+
+    /**
      * 用户操作事件类型-资料
      */
     String USER_OPERATION_EVENT_TYPE_DATA="13";
@@ -120,6 +130,11 @@ public interface CommonConstant {
      * 用户操作事件类型-评论
      */
     String USER_OPERATION_EVENT_TYPE_COMMENT="15";
+
+    /**
+     * 用户操作事件类型-计划类型
+     */
+    String USER_OPERATION_EVENT_TYPE_PLAN="23";
 
     /**
      * 用户操作类型-浏览

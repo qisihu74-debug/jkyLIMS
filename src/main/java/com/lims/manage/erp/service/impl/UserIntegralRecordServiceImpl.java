@@ -14,9 +14,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.IntegralRuleService;
 import com.lims.manage.erp.service.UserIntegralInfoService;
 import com.lims.manage.erp.service.UserIntegralRecordService;
-import com.lims.manage.erp.util.RedisUtils;
 import com.lims.manage.erp.util.ShiroUtils;
-import jdk.internal.org.objectweb.asm.Handle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -25,8 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -83,6 +79,12 @@ public class UserIntegralRecordServiceImpl extends ServiceImpl<UserIntegralRecor
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Integer addUserIntegralRecord(String ruleId, String ruleCacheId, String userId, String eventType, String eventId) {
+        return  addUserIntegralRecord(ruleId,ruleCacheId,userId,eventType,eventId,null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Integer addUserIntegralRecord(String ruleId, String ruleCacheId, String userId, String eventType, String eventId, Integer integralNum) {
         log.info("添加用户积分信息:ruleId:{},ruleCacheId:{},userId:{},eventType:{},eventId:{}",ruleId,ruleCacheId,userId,eventType,eventId);
         //根据积分规则id获取积分的信息
         IntegralRule integralRule = integralRuleService.getById(ruleId);
@@ -111,7 +113,10 @@ public class UserIntegralRecordServiceImpl extends ServiceImpl<UserIntegralRecor
             UserIntegralRecord userIntegralRecord = new UserIntegralRecord();
             userIntegralRecord.setUserId(userId);
             userIntegralRecord.setIntegralType(integralRule.getIntegralType());
-            userIntegralRecord.setIntegralNum(integralRule.getIntegralNum());
+            if(integralNum==null){
+                integralNum=integralRule.getIntegralNum();
+            }
+            userIntegralRecord.setIntegralNum(integralNum);
             userIntegralRecord.setRuleId(integralRule.getRuleId());
             userIntegralRecord.setGainTime(new Date());
             //如果有事件类型和事件id 则进行设置
@@ -133,7 +138,7 @@ public class UserIntegralRecordServiceImpl extends ServiceImpl<UserIntegralRecor
                 userIntegralInfo.setIntegralType(integralRule.getIntegralType());
                 userIntegralInfo.setIntegralNum(0);
             }
-            userIntegralInfo.setIntegralNum(userIntegralInfo.getIntegralNum() + integralRule.getIntegralNum());
+            userIntegralInfo.setIntegralNum(userIntegralInfo.getIntegralNum() + integralNum);
             //更新或添加用户积分信息
             userIntegralInfoService.saveOrUpdate(userIntegralInfo);
             return 1;

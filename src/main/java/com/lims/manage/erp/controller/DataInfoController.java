@@ -104,9 +104,9 @@ public class DataInfoController extends ApiController {
      * @return 单条数据
      */
     @GetMapping("{id}")
-    public Result<?> selectOne(@PathVariable Serializable id) {
+    public Result<?> selectOne(@PathVariable String id) {
         if (!StringUtils.isEmpty(id)){
-            return ResultUtil.success(dataInfoService.getById(id));
+            return ResultUtil.success(dataInfoService.getDataInfoById(id));
         }else {
             return ResultUtil.error("参数为空");
         }

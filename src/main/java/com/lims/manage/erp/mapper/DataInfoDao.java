@@ -40,6 +40,13 @@ public interface DataInfoDao extends BaseMapper<DataInfo> {
     IPage<DataInfoVo> pageList(Page page, @Param("dataInfo") DataInfo dataInfo);
 
     /**
+     * 获取资料详情-用于修改
+     * @param dataId 资料id
+     * @return DataInfo
+     */
+    DataInfo getDataInfoById(@Param("dataId") String dataId);
+
+    /**
      * 根据资料id获取资料信息
      * @param dataId 资料id
      * @return DataInfoVo

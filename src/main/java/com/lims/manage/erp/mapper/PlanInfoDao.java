@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lims.manage.erp.entity.PlanInfo;
+import com.lims.manage.erp.vo.PlanInfoImportVo;
 import com.lims.manage.erp.vo.PlanInfoVo;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 计划信息dao层接口
@@ -29,4 +32,11 @@ public interface PlanInfoDao extends BaseMapper<PlanInfo> {
      * @return PlanInfoVo
      */
     PlanInfoVo getPlanInfoDetail(@Param("planId") String planId);
+
+    /**
+     * 根据计划id获取计划完成人员列表
+     * @param planId 计划id
+     * @return PlanInfoImportVo
+     */
+    List<PlanInfoImportVo> getPlanCompleteInfo(@Param("planId")String planId);
 }

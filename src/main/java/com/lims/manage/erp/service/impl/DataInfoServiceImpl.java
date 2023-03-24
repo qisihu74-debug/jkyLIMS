@@ -128,6 +128,11 @@ public class DataInfoServiceImpl extends ServiceImpl<DataInfoDao, DataInfo> impl
     }
 
     @Override
+    public DataInfo getDataInfoById(String dataId) {
+        return baseMapper.getDataInfoById(dataId);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<?> editDataInfo(DataInfo dataInfo, MultipartFile file) {
         //根据资料id获取资料审核结果
