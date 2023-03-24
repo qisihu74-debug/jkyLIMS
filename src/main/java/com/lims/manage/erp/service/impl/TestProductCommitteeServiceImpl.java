@@ -1,15 +1,13 @@
 package com.lims.manage.erp.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TestProductCommitteeEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.DeptDao;
 import com.lims.manage.erp.mapper.TestProductCommitteeDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.LogManagerService;
-import com.lims.manage.erp.service.SysUserService;
-import com.lims.manage.erp.service.TestProductCommitteeService;
+import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.LabelValueVo;
@@ -33,6 +31,10 @@ public class TestProductCommitteeServiceImpl extends ServiceImpl<TestProductComm
     private SysUserService userService;
     @Resource
     private DeptDao deptDao;
+    @Resource
+    private TestTechnicistService testTechnicistService;
+    @Resource
+    private TestTeamService testTeamService;
 
     @Resource
     private TestProductCommitteeService productCommitteeService;
@@ -65,7 +67,20 @@ public class TestProductCommitteeServiceImpl extends ServiceImpl<TestProductComm
             }
         }
 
-        committeeEntity.setPosition(sysUserEntity.getPosition());
+        if (null != sysUserEntity.getUserId()) {
+            QueryWrapper<TestTechnicist> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("del_flag", 0);
+            queryWrapper.eq("user_id", sysUserEntity.getUserId());
+            TestTechnicist technicist = testTechnicistService.getOne(queryWrapper);
+            if (null != technicist && null != technicist.getTeamId()) {
+                TestTeam testTeam = testTeamService.getById(technicist.getTeamId());
+                if (null != testTeam && StringUtils.isNotBlank(testTeam.getName())) {
+                    committeeEntity.setPosition(testTeam.getName());
+                }
+            }
+        }
+
+
         committeeEntity.setDelFlag(0);
         committeeEntity.setCreateTime(new Date());
         committeeEntity.setUpdateTime(new Date());
