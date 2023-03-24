@@ -210,6 +210,27 @@ public class SampleEntity {
      */
    private  List<JudgmentBasisVo> judgmentBasisVoStr;
 
+    /**
+     * 样品留样期限(d)按照天数
+     */
+    private Integer sampleRetentionPeriod;
+    /**
+     * 样品处置方式
+     */
+    private String sampleProcessMode;
+    /**
+     * 样品留样备注
+     */
+    private String sampleReservedRemrk;
+    /**
+     * 样品出入库备注
+     */
+    private String sampleOutPutRemrk;
+    /**
+     * 负责人
+     */
+    private String approver;
+
     public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo, String sampleName, String sampleCode, String pictureUrl, String insertFlag) {
         this.productId = addParamVo.getSampleName();
         this.companyId = addParamVo.getCompanyId();

@@ -10,6 +10,7 @@ import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.EntrustHistoryEntity;
 import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskEntity;
@@ -83,7 +84,8 @@ public class EntrustController {
     private EntrustEntityMapper entrustEntityMapper;
     @Autowired
     private ReportService reportService;
-
+    @Autowired
+    private QiYueSuoEntity qiYueSuoEntity;
     /**
      * 新增委托 使用中丁
      *
@@ -153,6 +155,8 @@ public class EntrustController {
         }
         String strSuccess = entrustService.updateEntrustCheckItem(entrust);
         if (strSuccess!=null) {
+            // 业务是：如果原任务单全部参数被删除，原任务单作废。
+            entrustService.verifyTaskListExists(entrust.getId());
             return ResultUtil.success(strSuccess);
         } else {
             return ResultUtil.error(678, "修改委托下样品失败！");
@@ -387,38 +391,42 @@ public class EntrustController {
     @PostMapping("distributionTask")
     public Result distributionTask(@RequestBody TaskVo entity) {
         if (entity.getEntrustmentId() == null) {
-            return ResultUtil.error(-1, "缺少必要参数");
+            return ResultUtil.error( "缺少必要参数");
         }
         //核查委托单位、委托人、委托人联系方式、样品信息、检测项信息是否完整
         EntrustAddVo vo = entrustService.getEntrustHistoryDetail(entity.getEntrustmentId());
         if(vo.getState() == 1){
-            return ResultUtil.error(-1, "任务已被发布，请重新确认信息！");
+            return ResultUtil.error("任务已被发布，请重新确认信息！");
         }
         if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())) {
-            return ResultUtil.error(-1, "请检查委托人信息是否完整！");
+            return ResultUtil.error( "请检查委托人信息是否完整！");
         }
         List<SampleEntity> samples = vo.getSamples();
         if (CollectionUtils.isEmpty(samples)) {
-            return ResultUtil.error(-1, "请检查委托单样品信息是否完整！");
+            return ResultUtil.error( "请检查委托单样品信息是否完整！");
         }
         if (!CollectionUtils.isEmpty(samples)) {
             for (SampleEntity sampleEntity : samples) {
                 if (CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())) {
-                    return ResultUtil.error(-1, "请检查委托单样品下检测项信息是否完整！");
+                    return ResultUtil.error("请检查委托单样品下检测项信息是否完整！");
                 }
             }
+        }
+        if (CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())) {
+             return ResultUtil.error( "检测项为空不能发布！！！");
         }
         if (!CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())) {
             for (CheckItemDeptVo checkItemDeptVo : entity.getCheckItemDeptVoList()) {
                 if (checkItemDeptVo.getDeptId() == null) {
-                    return ResultUtil.error(-1, "请确认所有检测项是否分配科室！");
+                    return ResultUtil.error( "请确认所有检测项是否分配科室！");
                 }
             }
         }
-/*        // 下单时间=orderTime (委托单转任务单的时间)
-        entity.setOrderTime(new Date(System.currentTimeMillis()));*/
-        //要求完成时间
-//        entity.setRequiredCompletionTime(new java.sql.Date(vo.getRequestDate().getTime()));
+        // 效验： 任务发布时指向任务单A提示A任务单已完成，分配失败。
+        Boolean status = entrustService.verifyDistributionTask(entity);
+        if(!status){
+            return ResultUtil.error( "分配失败！！！任务单状态已完成试验。");
+        }
         // 丁连春：任务单完成时间 以委托单下单时间为准
         entity.setRequiredCompletionTime(vo.getRequestDate());
         // 任务单下单日期等于委托单受理日期
@@ -429,13 +437,13 @@ public class EntrustController {
         }else {
             entity.setPresentInformation("--");
         }
-        Boolean flag = entrustService.distributionTask412(entity);
+        Boolean flag = entrustService.distributionTask320(entity);
         if (flag) {
             /*logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"账户："+ShiroUtils.getUserInfo().getUsername()+"发布任务成功编号为："+vo.getEntrustmentNo(),
                     Const.ENTRUST_PUBLISH,true);*/
             return ResultUtil.success("委托分配成功！");
         } else {
-            return ResultUtil.error(-1, "委托分配失败！");
+            return ResultUtil.error( "委托分配失败！");
         }
     }
 
@@ -462,14 +470,19 @@ public class EntrustController {
      */
     @RequestMapping("downloadEntrust")
     public void downloadEntrust(Long entrustId, HttpServletResponse response) {
+        EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
         String message = entrustService.getMessage();
         String[] strings = message.split("/");
         String fileName = strings[1];
+        //20230314及之前的单子，单位名称用老的BD20210021-old.docx
+        String dayString = DateUtil.getDayString(detail.getAcceptanceDate().getTime());
+        if (Integer.parseInt(dayString)<20230313){
+            fileName = "BD20210021-old.docx";
+        }
         try {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(strings[0], fileName);
             //填充数据
-            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             log.debug("====aaa:{}",JSON.toJSONString(detail));
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
             response.reset();
@@ -492,20 +505,25 @@ public class EntrustController {
      */
     @RequestMapping("previewEntrust")
     public void preview(Long entrustId, HttpServletResponse response) {
+        //校验是否是委托单id
+        Long id = entrustService.checkEntrustId(entrustId);
+        if (id == null){
+            Long entrustIdById = reportService.getEntrustIdById(entrustId);
+            entrustId = entrustIdById;
+        }
+        EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
         String message = entrustService.getMessage();
         String[] strings = message.split("/");
         String fileName = strings[1];
+        //20230314及之前的单子，单位名称用老的BD20210021-old.docx
+        String dayString = DateUtil.getDayString(detail.getAcceptanceDate().getTime());
+        if (Integer.parseInt(dayString)<20230313){
+            fileName = "BD20210021-old.docx";
+        }
         try {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(strings[0], fileName);
             //填充数据
-            //校验是否是委托单id
-            Long id = entrustService.checkEntrustId(entrustId);
-            if (id == null){
-                Long entrustIdById = reportService.getEntrustIdById(entrustId);
-                entrustId = entrustIdById;
-            }
-            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
             log.debug("====aaa:{}",JSON.toJSONString(detail));
             XWPFDocument document = entrustService.downloadEntrust(detail, object);
             //相应pdf
@@ -587,6 +605,9 @@ public class EntrustController {
         if (itemIds == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
+            if(CollectionUtils.isEmpty(itemIds.getIds())){
+                return ResultUtil.success(new ArrayList<>());
+            }
             return ResultUtil.success(entrustService.getCheckItemInfo(itemIds.getIds()));
         }
     }
@@ -964,14 +985,33 @@ public class EntrustController {
 
     @GetMapping("exportPublishEntrust")
     public void exportPublishEntrust() throws Exception{
-
         String message = entrustService.getMessage();
         String[] strings = message.split("/");
         String fileName = strings[1];
-        //获取所有符合条件的委托单id
-        List<EntrustAddVo> list = entrustEntityMapper.getPublishEntrustIdBySearch();
-        for (EntrustAddVo bean:list) {
-            String path = "D:\\AAPulish\\"+bean.getEntrustmentNo()+".docx";
+        //获取所有符合条件的委托单id（七所、八月份、土的委托单）
+        //List<EntrustAddVo> list = entrustEntityMapper.getPublishEntrustIdBySearch();
+        //七所八月份
+        List<EntrustAddVo> list7 = entrustEntityMapper.get7Infos();
+        //八所八月份
+        List<EntrustAddVo> list8 = entrustEntityMapper.get8Infos();
+        for (EntrustAddVo bean:list7) {
+            String path = "D:\\20230315export\\2023七所三月份土工布（织物类）\\"+bean.getEntrustmentNo()+".docx";
+            try {
+                FileOutputStream outputStream = new FileOutputStream(path);
+                MinioClient client = MinIoUtil.minioClient;
+                InputStream object = client.getObject(strings[0], fileName);
+                //填充数据
+                EntrustAddVo detail = entrustService.getEntrustHistoryDetail(bean.getId());
+                XWPFDocument document = entrustService.downloadEntrust(detail, object);
+                document.write(outputStream);
+                outputStream.close();
+                Thread.sleep(20);
+            } catch (Exception ex) {
+                log.info("导出失败：{}", ex);
+            }
+        }
+        for (EntrustAddVo bean:list8) {
+            String path = "D:\\20230315export\\2023八所三月份突起路标\\"+bean.getEntrustmentNo()+".docx";
             try {
                 FileOutputStream outputStream = new FileOutputStream(path);
                 MinioClient client = MinIoUtil.minioClient;

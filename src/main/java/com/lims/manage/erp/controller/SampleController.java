@@ -18,6 +18,7 @@ import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.SampleOutPutVo;
 import com.lims.manage.erp.vo.SamplesAddVo;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
@@ -26,13 +27,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,12 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -520,10 +510,14 @@ public class SampleController {
      * 跟新状态
      * @param sampleId
      * @param state
+     * @param sampleRetentionPeriod  留样天数  (state =3 留样)
+     * @param sampleProcessMode 样品处置方式（state=4处置）
      * @return
      */
     @GetMapping("updateState")
-    public Result updateState(Integer sampleId, Integer state, String time,Integer saveTime){
+    public Result updateState(Integer sampleId, Integer state, String time,Integer saveTime,
+                              Integer sampleRetentionPeriod,String sampleProcessMode,String approver){
+        System.out.println("留样天数: == "+sampleRetentionPeriod + " == 样品处置方式 == " + sampleProcessMode);
         System.out.println("扫码时间:{}"+time);
         log.info("扫码时间:{}",time);
         Date date= null;
@@ -540,7 +534,7 @@ public class SampleController {
         if (sampleId == null || state == null){
             return ResultUtil.error("缺少参数");
         }
-        Integer flag = sampleService.updateState(sampleId,state,date,saveTime);
+        Integer flag = sampleService.updateState(sampleId,state,date,saveTime,sampleRetentionPeriod,sampleProcessMode,approver);
         if (flag == 0){
             return ResultUtil.success("操作成功");
         }else if (flag == 1){
@@ -618,4 +612,130 @@ public class SampleController {
         outputStream.flush();
         outputStream.close();
     }
+
+    /**
+     * 样品留样列表
+     * @param sampleOutPutVo
+     * @return
+     */
+    @PostMapping("/sampleRetentionList")
+    public Result sampleRetentionList(@RequestBody SampleOutPutVo sampleOutPutVo ){
+        if(org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getPageNum()) &&
+                org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getPageSize())){
+            return ResultUtil.error("缺少必填参数！！！");
+        }
+        System.out.print("请求参数 == sampleOutPutVo ="+ sampleOutPutVo);
+        return ResultUtil.success(sampleService.sampleRetentionList(sampleOutPutVo));
+    }
+
+    /**
+     * 样品留样列表 导出
+     * @param sampleOutPutVo
+     * @param response
+     */
+    @PostMapping("/sampleRetentionExport")
+    public void sampleRetentionExport(@RequestBody SampleOutPutVo sampleOutPutVo, HttpServletResponse response ) throws Exception {
+        BufferedOutputStream bos = null;
+        String fileName = "样品出入库登记表";
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename="
+                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+        InputStream inputStream = sampleService.sampleRetentionExport(sampleOutPutVo);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+    }
+
+    /**
+     * 返回技术负责人列表
+     * @return
+     */
+    @GetMapping("/getApprover")
+    public Result getApprover(){
+        return ResultUtil.success(sampleService.getApprover());
+    }
+
+    /**
+     * 样品留样 更新
+     * @param sampleOutPutVo
+     */
+    @PostMapping("/sampleRetentionUpdate")
+    public Result sampleRetentionUpdate(@RequestBody SampleOutPutVo sampleOutPutVo) {
+        if(org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getSampleId()) ||
+                org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getSampleReservedRemrk())){
+            return ResultUtil.error("缺少必填参数！！！");
+        }
+       Boolean status = sampleService.sampleRetentionUpdate(sampleOutPutVo);
+        if(!status){
+            return ResultUtil.error("更新样品留样备注失败");
+        }
+        return  ResultUtil.success("更新样品留样成功");
+    }
+
+    /**
+     * 样品出入库列表
+     * @param sampleOutPutVo
+     * @return
+     */
+    @PostMapping("/sampleOutPutList")
+    public Result sampleOutPutList(@RequestBody SampleOutPutVo sampleOutPutVo ){
+        if(org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getPageNum()) &&
+                org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getPageSize())){
+            return ResultUtil.error("缺少必填参数！！！");
+        }
+        System.out.print("请求参数 == sampleOutPutVo ="+ sampleOutPutVo);
+        return ResultUtil.success(sampleService.sampleOutPutList(sampleOutPutVo));
+    }
+
+    /**
+     * 样品出入库列表 导出
+     * @param sampleOutPutVo
+     * @param response
+     */
+    @PostMapping("/sampleOutPutExport")
+    public void sampleOutPutExport(@RequestBody SampleOutPutVo sampleOutPutVo, HttpServletResponse response ) throws Exception {
+        BufferedOutputStream bos = null;
+        String fileName = "样品出入库登记表";
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename="
+                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+        InputStream inputStream = sampleService.sampleOutPutExport(sampleOutPutVo);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+    }
+
+    /**
+     * 样品出入库 更新
+     * @param sampleOutPutVo
+     */
+    @PostMapping("/sampleOutPutUpdate")
+    public Result sampleOutPutUpdate(@RequestBody SampleOutPutVo sampleOutPutVo) {
+        if(org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getSampleId()) ||
+                org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getSampleOutPutRemrk())){
+            return ResultUtil.error("缺少必填参数！！！");
+        }
+        Boolean status = sampleService.sampleOutPutUpdate(sampleOutPutVo);
+        if(!status){
+            return ResultUtil.error("更新样品出入库备注失败");
+        }
+        return  ResultUtil.success("更新样品出入库成功");
+    }
+
 }

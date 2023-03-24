@@ -623,6 +623,21 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             <if test="isUse != null">
                 is_use=#{isUse,jdbcType=INTEGER},
             </if>
+            <if test="sampleRetentionPeriod != null">
+                sample_retention_period=#{sampleRetentionPeriod,jdbcType=INTEGER},
+            </if>
+            <if test="sampleProcessMode != null">
+                sample_process_mode=#{sampleProcessMode,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleReservedRemrk != null">
+                sample_reserved_remrk=#{sampleReservedRemrk,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleOutPutRemrk != null">
+                sample_out_put_remrk=#{sampleOutPutRemrk,jdbcType=VARCHAR},
+            </if>
+            <if test="approver != null">
+                approver = #{approver,jdbcType=VARCHAR},
+            </if>
         </set>
         where id = #{id,jdbcType=INTEGER}
     </update>
@@ -1154,4 +1169,75 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             </foreach>
             AND STATUS = 2
     </update>
+
+    <resultMap id="SampleOutPutMap" type="com.lims.manage.erp.vo.SampleOutPutVo">
+    <result property="sampleId" column="sampleId"></result>
+    <result property="sampleCode" column="sample_code"></result>
+    <result property="sampleName" column="sample_name"></result>
+    <result property="sampleRetentionPeriod" column="sample_retention_period"></result>
+    <result property="sampleProcessMode" column="sample_process_mode"></result>
+    <result property="sampleReservedRemrk" column="sample_reserved_remrk"></result>
+    <result property="sampleOutPutRemrk" column="sample_out_put_remrk"></result>
+    <result property="acceptanceDate" column="acceptance_date"></result>
+    <result property="requestDate" column="request_date"></result>
+    <result property="taskCode" column="task_code"></result>
+    <result property="outboundDeliveryDate" column="outboundDeliveryDate"></result>
+    <result property="sampleTaker" column="sampleTaker"></result>
+    <result property="taskPublisher" column="taskPublisher"></result>
+    <result property="approver" column="approver"></result>
+        <collection property="sampleCirculationRecords" ofType="com.lims.manage.erp.entity.SampleCirculationRecord">
+            <result property="sampleId" column="sampleId"></result>
+            <result property="status" column="STATUS"></result>
+            <result property="operatorId" column="operator_id"></result>
+            <result property="operatorName" column="operator_name"></result>
+            <result property="time" column="time"></result>
+        </collection>
+    </resultMap>
+    <select id="sampleOutPutList" resultType="com.lims.manage.erp.vo.SampleOutPutVo" resultMap="SampleOutPutMap">
+        SELECT
+            t1.id as sampleId,
+            t1.sample_code,
+            t1.sample_name,
+            t1.sample_retention_period,
+            t1.sample_process_mode,
+            t1.sample_reserved_remrk,
+            t1.sample_out_put_remrk,
+            t1.received_date as outboundDeliveryDate,
+            t1.inspector as sampleTaker,
+            t1.approver as approver,
+            t3.acceptance_date,
+            t3.request_date,
+            t4.STATUS,
+            t4.operator_id,
+            t4.operator_name,
+            t4.time,
+            t5.task_code,
+            t5.orderer as taskPublisher
+        FROM
+         (	SELECT aa.* FROM  test_sample as aa GROUP BY aa.sample_code ) as t1
+            LEFT JOIN test_entrusted_sample_details_rel AS t2 ON t1.id = t2.sample_id
+            LEFT JOIN test_entrusted_info AS t3 ON t3.id = t2.entrustment_id
+            LEFT JOIN test_sample_circulation_record AS t4 ON t4.sample_id = t1.id
+            LEFT JOIN test_task AS t5 ON t5.entrustment_id = t2.entrustment_id
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="taskCode!=null">
+                and t5.task_code LIKE CONCAT("%",#{taskCode},"%")
+            </if>
+            <if test="sampleCode!=null">
+                and t1.sample_code LIKE CONCAT("%",#{sampleCode},"%")
+            </if>
+            <if test="sampleHolder!=null">
+                and t4.operator_name LIKE CONCAT("%",#{sampleHolder},"%")
+                and t4.STATUS = 3
+            </if>
+            <if test="startTime!=null and endTime!=null">
+                and t3.acceptance_date BETWEEN #{startTime} and  #{endTime}
+            </if>
+            <if test="taskPublisher!=null">
+                and t5.orderer LIKE CONCAT("%",#{taskPublisher},"%")
+            </if>
+            and t5.id is not null
+        </trim>
+        ORDER BY t3.acceptance_date desc, t1.id
+    </select>
 </mapper>

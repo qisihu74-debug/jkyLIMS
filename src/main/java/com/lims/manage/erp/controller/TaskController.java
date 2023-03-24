@@ -50,7 +50,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipOutputStream;
@@ -507,7 +510,7 @@ public class TaskController {
         }
     }
 
-    /**
+    /**downloadOriginalRecord
      * 下载任务通知单——二次开发 丁 线上使用中
      * 变更需求 world 转 pdf。
      *
@@ -516,7 +519,30 @@ public class TaskController {
      */
     @GetMapping("downloadEntrust_two")
     public void downloadEntrust_two(Long taskId, HttpServletResponse response) {
-        String fileName = "taskOrder11.docx";
+        String fileName = "";
+        // 3月13日前
+        String str1 = "taskOrder11.docx";
+        // 2023年3月13 零点后
+        String str2 = "taskOrder20.docx";
+        // 获取任务单下单时间 进行比较
+        TaskTestEntity taskDetails = taskMapper.getTaskOrderTime(taskId);
+        if(taskDetails!=null && taskDetails.getOrderTime()!=null){
+            Date date = null;
+            //实现将字符串转成⽇期类型
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                date = dateFormat.parse("2023-03-12 23:59:59");
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            // 截止至 2023-03-12 23:59:59 后 任务单附件为  String str2 = "taskOrder20.docx"
+             if(date.getTime() < taskDetails.getOrderTime().getTime()){
+                 fileName = str2;
+             }
+             else {
+                 fileName = str1;
+             }
+        }
         String url = "";
         String downloadFileName = "任务单编号";
         try {
@@ -811,7 +837,7 @@ public class TaskController {
             response.setContentType("application/zip");
             response.setCharacterEncoding("UTF-8");
             response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录.zip", "UTF-8"));
-            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys, response);
+            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys, response,null);
             zipOutputStream.flush();
         }
     }
@@ -844,7 +870,7 @@ public class TaskController {
             response.setContentType("application/zip");
             response.setCharacterEncoding("UTF-8");
             response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("原始记录.zip", "UTF-8") );
-            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys,response);
+            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys,response,taskId);
             zipOutputStream.flush();
         }
 

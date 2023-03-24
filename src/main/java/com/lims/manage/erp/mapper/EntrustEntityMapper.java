@@ -598,4 +598,85 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     @Delete("DELETE FROM test_sample_circulation_record WHERE sample_id = #{sampleId} and  status =0")
     int deleteTestSampleCirculationRecordById(@Param("sampleId") Integer sampleId);
+
+    @Select("SELECT DISTINCT\n" +
+            "\tt1.id AS id,\n" +
+            "\tt1.entrustment_no AS entrustmentNo,\n" +
+            "\tt1.state AS state,\n" +
+            "t3.product_name\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info t1\n" +
+            "LEFT JOIN test_entrusted_sample_details_rel t2 ON t1.id=t2.entrustment_id\n" +
+            "LEFT JOIN test_sample t5 ON t2.sample_id=t5.id\n" +
+            "LEFT JOIN test_product t3 ON t5.product_id=t3.product_id\n" +
+            "LEFT JOIN test_task t4 ON t1.id=t4.entrustment_id\n" +
+            "WHERE\n" +
+            "\tt1.state != 144\n" +
+            "AND t1.state = 1\n" +
+            "AND t3.product_name='土工布（织物类）'\n" +
+            "AND 2023030000<t1.entrustment_no AND t1.entrustment_no<2023040000\n" +
+            "AND t4.dept_id IN(231,\n" +
+            "232,\n" +
+            "233,\n" +
+            "234,\n" +
+            "235,\n" +
+            "236)\n")
+    List<EntrustAddVo> get7Infos();
+
+    @Select("SELECT DISTINCT\n" +
+            "\tt1.id AS id,\n" +
+            "\tt1.entrustment_no AS entrustmentNo,\n" +
+            "\tt1.state AS state,\n" +
+            "t3.product_name\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info t1\n" +
+            "LEFT JOIN test_entrusted_sample_details_rel t2 ON t1.id=t2.entrustment_id\n" +
+            "LEFT JOIN test_sample t5 ON t2.sample_id=t5.id\n" +
+            "LEFT JOIN test_product t3 ON t5.product_id=t3.product_id\n" +
+            "LEFT JOIN test_task t4 ON t1.id=t4.entrustment_id\n" +
+            "WHERE\n" +
+            "\tt1.state != 144\n" +
+            "AND t1.state = 1\n" +
+            "AND t3.product_name='突起路标'\n" +
+            "AND 2023030000<t1.entrustment_no AND t1.entrustment_no<2023040000\n" +
+            "AND t4.dept_id IN(237,\n" +
+            "238,\n" +
+            "239\n" +
+            ")")
+    List<EntrustAddVo> get8Infos();
+
+    /**
+     * 根据委托单id 获取任务单 列表
+     * @param entrustId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid \n" +
+            "FROM\n" +
+            "\ttest_task \n" +
+            "WHERE\n" +
+            "\tentrustment_id = #{entrustId} and state != 144")
+    List<Long> getEntrustTaskIds(@Param("entrustId")Long entrustId);
+
+    /**
+     * 通过委托单id 获取检测项与对应任务单id
+     */
+    @Select("SELECT\n" +
+            "\tt2.id as itemId,\n" +
+            "\tt2.check_item_name as checkItemName,\n" +
+            "\tt2.task_id as taskId\n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel AS t2 \n" +
+            "WHERE\n" +
+            "\tt2.entrust_id = #{entrustId} and task_id is not null ")
+    List<CheckItemInfoVo> getEntrustItemVos(@Param("entrustId")Long entrustId);
+
+    @Select("SELECT\n" +
+            "\tt2.acceptance_date \n" +
+            "FROM\n" +
+            "\ttest_task t1\n" +
+            "\tLEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id \n" +
+            "WHERE\n" +
+            "\tt1.id=#{taskId}")
+    java.sql.Date getEntrustDateByTaskId(@Param("taskId") Long taskId);
 }

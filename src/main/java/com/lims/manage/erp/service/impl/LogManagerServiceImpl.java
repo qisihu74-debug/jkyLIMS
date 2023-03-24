@@ -1,10 +1,15 @@
 package com.lims.manage.erp.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.SysLog;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.mapper.LogManagerDao;
 import com.lims.manage.erp.service.LogManagerService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -52,5 +57,32 @@ public class LogManagerServiceImpl extends ServiceImpl<LogManagerDao, SysLog> im
         sysLog.setUserName(sysUser.getUsername());
         sysLog.setIsState(state);
         this.baseMapper.insert(sysLog);
+    }
+
+    @Override
+    public PageInfo<SysLog> getLogList(Integer logType, Integer pageNum, Integer pageSize, String operator, Long startDate, Long endDate) {
+        PageHelper.startPage(pageNum,pageSize);
+        LambdaQueryWrapper<SysLog> queryWrapper = new LambdaQueryWrapper<>();
+        List<Integer> types = Lists.newArrayList();
+        if (logType != null){
+            if (logType == 5){
+                types.add(5);
+                types.add(6);
+                types.add(7);
+                types.add(8);
+                types.add(9);
+            }else {
+                types.add(logType);
+            }
+        }
+        queryWrapper.in(org.apache.commons.collections.CollectionUtils.isNotEmpty(types),SysLog::getType,types)
+                .and(startDate != null || endDate != null, wrapper ->wrapper.ge(startDate != null,SysLog::getOperate_time, startDate == null?null:new Date(startDate))
+                        .or().le(endDate != null,SysLog::getOperate_time,endDate == null?new Date(System.currentTimeMillis()):new Date(endDate))
+                        .or().like(StringUtils.isNotEmpty(operator),SysLog::getUserName,operator)
+                )
+                .orderByDesc(SysLog::getOperate_time);
+        List<SysLog> logs = this.baseMapper.selectList(queryWrapper);
+        PageInfo<SysLog> pageInfo = new PageInfo<>(logs);
+        return pageInfo;
     }
 }

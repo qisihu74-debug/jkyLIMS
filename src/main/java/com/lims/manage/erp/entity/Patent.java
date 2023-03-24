@@ -2,14 +2,15 @@ package com.lims.manage.erp.entity;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * (Patent)表实体类
@@ -17,7 +18,6 @@ import java.util.Date;
  * @author makejava
  * @since 2022-03-08 10:40:15
  */
-@SuppressWarnings("serial")
 @Data
 @TableName("patent")
 public class Patent extends Model<Patent> {
@@ -25,99 +25,37 @@ public class Patent extends Model<Patent> {
     @TableId(type = IdType.AUTO)
     private Integer id;
     //专利名称
-    private String patentname;
-    //专利时间
+    private String patentName;
+    //专利号
+    private String patentId;
+    //专利权人
+    private String patentee;
+    //发明人
+    private String inventor;
+    //专利类型   发明专利/实用新型
+    private String patentType;
+
+    //授权公告日(时间)
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    private Date patenttime;
-    //申请人
-    private String patenproposer;
+    private Date announcementTime;
+    //授权公告号(编码)
+    private String announcementId;
+    //所属产品
+    private String product;
+    //所属产品ID
+    private String productId;
+    //专利内容摘要
+    private String synopsis;
+    //到期时间
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date maturityTime;
+    //创建时间
+    private Date createTime;
     //0默认未删除,1删除
     private Integer delFlag;
-    //资料或者描述
-    private String patentms;
-    //备注
-    private String remark;
-    //启动0 1冻结
-    private String start;
-    //图片
-    private String url;
 
-    private Integer producid;
-    private  String producname;
+    @TableField(exist = false)
+    private List<PatentAuthorization> patentAuthorizations;
 
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getPatentname() {
-        return patentname;
-    }
-
-    public void setPatentname(String patentname) {
-        this.patentname = patentname;
-    }
-
-    public Date getPatenttime() {
-        return patenttime;
-    }
-
-    public void setPatenttime(Date patenttime) {
-        this.patenttime = patenttime;
-    }
-
-    public String getPatenproposer() {
-        return patenproposer;
-    }
-
-    public void setPatenproposer(String patenproposer) {
-        this.patenproposer = patenproposer;
-    }
-
-    public String getPatentms() {
-        return patentms;
-    }
-
-    public void setPatentms(String patentms) {
-        this.patentms = patentms;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
-
-    public String getStart() {
-        return start;
-    }
-
-    public void setStart(String start) {
-        this.start = start;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    /**
-     * 获取主键值
-     *
-     * @return 主键值
-     */
-    @Override
-    protected Serializable pkVal() {
-        return this.id;
-    }
-    }
+}
 

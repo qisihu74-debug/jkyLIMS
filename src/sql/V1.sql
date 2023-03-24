@@ -353,3 +353,13 @@ CREATE TABLE `test_instrument_use_record`  (
   `time` datetime(0) DEFAULT NULL COMMENT '操作日期',
   PRIMARY KEY (`id`) USING BTREE
 )
+
+/*针对sample 下 增加字段*/
+   ALTER TABLE `test_sample` ADD `sample_retention_period` int(0) DEFAULT NULL COMMENT '样品留样期限(d)按照天数';
+  ALTER TABLE `test_sample` ADD `sample_process_mode` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT '样品处置方式';
+  ALTER TABLE `test_sample` ADD `sample_reserved_remrk` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT '样品留样备注';
+  ALTER TABLE `test_sample` ADD `sample_out_put_remrk` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT '样品出入库备注';
+  ALTER TABLE `test_sample` ADD `save_time` int(0) DEFAULT NULL COMMENT '等待删除';
+  ALTER TABLE `test_sample` ADD `approver` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT '技术负责人';
+
+/** sys_role  技术负责人 根据 role_name = "技术负责人" */

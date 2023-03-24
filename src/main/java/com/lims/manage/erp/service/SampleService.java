@@ -3,14 +3,13 @@ package com.lims.manage.erp.service;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.vo.SampleAddParamVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.SamplePublicInfoVo;
+import com.lims.manage.erp.vo.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -91,5 +90,50 @@ public interface SampleService {
 
     TestSampleEntity sampleInfo(Integer sampleId);
 
-    Integer updateState(Integer sampleId, Integer state, Date time,Integer saveTime);
+    Integer updateState(Integer sampleId, Integer state, Date time,Integer saveTime,Integer sampleRetentionPeriod,String sampleProcessMode,
+                        String approver);
+
+    /**
+     * 样品留样列表
+     * @param sampleOutPutVo
+     * @return
+     */
+    PageInfo sampleRetentionList(SampleOutPutVo sampleOutPutVo);
+
+    /**
+     * 样品留样列表 导出
+     */
+    InputStream sampleRetentionExport(SampleOutPutVo sampleOutPutVo) throws Exception;
+
+    /**
+     * 查询技术负责人列表
+     * @return
+     */
+    List<LabelValueVo> getApprover();
+
+    /**
+     * 样品留样栏 更新
+     * @param sampleOutPutVo
+     * @return
+     */
+    Boolean sampleRetentionUpdate(SampleOutPutVo sampleOutPutVo);
+
+    /**
+     * 样品出入库列表
+     * @param sampleOutPutVo
+     * @return
+     */
+    PageInfo sampleOutPutList(SampleOutPutVo sampleOutPutVo);
+
+    /**
+     * 样品出入库列表 导出
+     */
+    InputStream sampleOutPutExport(SampleOutPutVo sampleOutPutVo) throws Exception;
+
+    /**
+     * 样样品出入库列表 更新
+     * @param sampleOutPutVo
+     * @return
+     */
+    Boolean sampleOutPutUpdate(SampleOutPutVo sampleOutPutVo);
 }

@@ -18,16 +18,8 @@ import com.lims.manage.erp.mapper.SysUserRoleDao;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.service.SampleService;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.PDFHelper3;
-import com.lims.manage.erp.util.QRCodeUtil;
-import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.SampleAddDetailVo;
-import com.lims.manage.erp.vo.SampleAddParamVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.SampleEntrustAddVo;
-import com.lims.manage.erp.vo.SamplePrivateInfoVo;
-import com.lims.manage.erp.vo.SamplePublicInfoVo;
+import com.lims.manage.erp.util.*;
+import com.lims.manage.erp.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.lang3.StringUtils;
@@ -43,16 +35,10 @@ import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -313,7 +299,7 @@ public class SampleServiceImpl implements SampleService {
                     if (sampleSplits.length > 3) {
                         String[] strings = sampleSplits[3].split("~");
                         int startNum = Integer.parseInt(strings[0].substring(1));
-                        int endNum = Integer.parseInt(strings[1].substring(1));
+                        int endNum = Integer.parseInt(strings[1]);
                         int index = startNum;
                         for (int i = 0; i < endNum; i++) {
                             s = sampleSplits[0] + "-" + sampleSplits[1] + "-" + sampleSplits[2] + "-" + index;
@@ -454,7 +440,8 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer updateState(Integer sampleId,Integer state,Date time,Integer saveTime) {
+    public Integer updateState(Integer sampleId,Integer state,Date time,Integer saveTime,Integer sampleRetentionPeriod,String sampleProcessMode,
+                               String approver) {
         //2领样，3留样，4处置
         List<Integer> ids = sampleEntityMapper.getExist(sampleId,state);
         if (ids != null && ids.size() >= 1){
@@ -491,9 +478,26 @@ public class SampleServiceImpl implements SampleService {
                 }
                 record.setTime(date);
                 record.setOperatorName(sampleTagInfo.getInspector());
+                // 更新 留样天数  (state =3 留样)
+                if(!org.springframework.util.StringUtils.isEmpty(sampleRetentionPeriod)){
+                    SampleEntity sampleEntity1 = new SampleEntity();
+                    sampleEntity1.setId(sampleId);
+                    sampleEntity1.setSampleRetentionPeriod(sampleRetentionPeriod);
+                    // 动态更新
+                    sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity1);
+                }
             }
             if (state == 4){
                 status = 2;
+                // 样品处置方式（state=4处置）
+                if(!org.springframework.util.StringUtils.isEmpty(sampleProcessMode)){
+                    SampleEntity sampleEntity2 = new SampleEntity();
+                    sampleEntity2.setId(sampleId);
+                    sampleEntity2.setSampleProcessMode(sampleProcessMode);
+                    sampleEntity2.setApprover(approver);
+                    // 动态更新
+                    sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity2);
+                }
             }
             sampleEntityMapper.updateIsSave(sampleId,status,saveTime);
         }
@@ -802,4 +806,98 @@ public class SampleServiceImpl implements SampleService {
         }
         return results;
     }
+
+    @Override
+    public PageInfo sampleRetentionList(SampleOutPutVo sampleOutPutVo) {
+        // 处理逻辑
+        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
+        // 进行分页
+        PageInfo pageInfo = PagingUtil.pagingUtilityList(sampleOutPutVo.getPageNum(), sampleOutPutVo.getPageSize(), Collections.singletonList(list));
+        return pageInfo;
+    }
+
+    /**
+     * 查询处理样品留样列表、样品出入库列表
+     * @param sampleOutPutVo
+     * @return
+     */
+    public List<SampleOutPutVo> getSampleOutPutVos(SampleOutPutVo sampleOutPutVo){
+        // 查询数据集合
+        List<SampleOutPutVo> sampleList = sampleEntityMapper.sampleOutPutList(sampleOutPutVo);
+        if(!CollectionUtils.isEmpty(sampleList)){
+            for(SampleOutPutVo item :sampleList){
+                if(!CollectionUtils.isEmpty(item.getSampleCirculationRecords())){
+                    for(SampleCirculationRecord sampleCirculationRecord : item.getSampleCirculationRecords()){
+                        if(sampleCirculationRecord.getStatus()!=null && sampleCirculationRecord.getStatus().equals("3")){
+                            // 增加领样信息
+                            item.setSampleHolder(sampleCirculationRecord.getOperatorName());
+                        }
+                        if(sampleCirculationRecord.getStatus()!=null && sampleCirculationRecord.getStatus().equals("4")){
+                            // 增加处置人
+                            item.setHandler(sampleCirculationRecord.getOperatorName());
+                            // 增加处置时间
+                            item.setSellOffDate(sampleCirculationRecord.getTime());
+                        }
+                    }
+                }
+                // 清空 样品流转集合
+                item.setSampleCirculationRecords(new ArrayList<>());
+            }
+        }
+        return sampleList;
+    }
+    /**
+     * 样品留样列表 导出
+     */
+//    @SneakyThrows
+    @Override
+    public InputStream sampleRetentionExport(SampleOutPutVo sampleOutPutVo) throws Exception {
+        // 处理逻辑
+        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
+        SampleExportUtil sampleExportUtil =new SampleExportUtil();
+        return sampleExportUtil.sampleRetentionExport(list);
+    }
+
+    @Override
+    public List<LabelValueVo> getApprover() {
+        return sampleEntityMapper.getApprover();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean sampleRetentionUpdate(SampleOutPutVo sampleOutPutVo) {
+        SampleEntity record = new SampleEntity();
+        record.setId(sampleOutPutVo.getSampleId());
+        record.setSampleReservedRemrk(sampleOutPutVo.getSampleReservedRemrk());
+        sampleEntityMapper.updateByPrimaryKeySelective(record);
+        return true;
+    }
+
+    @Override
+    public PageInfo sampleOutPutList(SampleOutPutVo sampleOutPutVo) {
+        // 处理逻辑
+        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
+        // 进行分页
+        PageInfo pageInfo = PagingUtil.pagingUtilityList(sampleOutPutVo.getPageNum(), sampleOutPutVo.getPageSize(), Collections.singletonList(list));
+        return pageInfo;
+    }
+
+    @Override
+    public InputStream sampleOutPutExport(SampleOutPutVo sampleOutPutVo) throws Exception {
+        // 处理逻辑
+        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
+        SampleExportUtil sampleExportUtil =new SampleExportUtil();
+        return sampleExportUtil.sampleOutPutExport(list);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean sampleOutPutUpdate(SampleOutPutVo sampleOutPutVo) {
+        SampleEntity record = new SampleEntity();
+        record.setId(sampleOutPutVo.getSampleId());
+        record.setSampleOutPutRemrk(sampleOutPutVo.getSampleOutPutRemrk());
+        sampleEntityMapper.updateByPrimaryKeySelective(record);
+        return true;
+    }
+
 }

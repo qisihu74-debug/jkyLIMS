@@ -9,21 +9,7 @@ import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
 import com.lims.manage.erp.entity.TeamTreeStructureEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
-import com.lims.manage.erp.vo.CheckItemDeptVo;
-import com.lims.manage.erp.vo.LabelValueTeamVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.PersonInfoVo;
-import com.lims.manage.erp.vo.ReceiveSampleListVo;
-import com.lims.manage.erp.vo.ReceiveSampleParamVo;
-import com.lims.manage.erp.vo.ReviewVo;
-import com.lims.manage.erp.vo.SamplePrivateInfoVo;
-import com.lims.manage.erp.vo.TaskDetailInfoVo;
-import com.lims.manage.erp.vo.TaskListParamVo;
-import com.lims.manage.erp.vo.TaskListVo;
-import com.lims.manage.erp.vo.TaskProgressVo;
-import com.lims.manage.erp.vo.TaskStatsItemVo;
-import com.lims.manage.erp.vo.TaskVo;
-import com.lims.manage.erp.vo.UpdateReportTeamVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -470,4 +456,46 @@ public interface TaskMapper extends BaseMapper {
             "\tt1.id = #{taskId}")
     Boolean judgeTaskStatus(@Param("taskId") Long taskId);
 
+    /**
+     *  通过任务单id 获取所属下的样品名称
+     * @param list
+     * @return
+     */
+    List<TestEntrustedTaskRelVo> getSampleNames(@Param("list")  List<Long> list);
+
+    /**
+     * 通过委托单id 获取 任务单id列表
+     * @param list
+     * @return
+     */
+    List<TestEntrustedTaskRelVo> getTaskIds(@Param("list")  List<Long> list);
+
+    /**
+     * 获取任务单下单时间
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT id,order_time FROM test_task WHERE id = #{taskId}")
+    TaskTestEntity getTaskOrderTime(@Param("taskId") Long taskId);
+
+    /**
+     * 查询任务详情三次开发
+     * @return
+     */
+    TaskDetailInfoVo getTaskDetailInfoThree(TaskListParamVo paramVo);
+
+    /**
+     * 通过任务单id 获取检测项列表
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid AS itemId,\n" +
+            "\tcheck_item_name AS checkItemName ,\n" +
+            "\ttask_id as taskId\n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel \n" +
+            "WHERE\n" +
+            "\ttask_id = #{taskId}")
+    List<CheckItemInfoVo> getEntrustItemVos(@Param("taskId")Long taskId);
 }

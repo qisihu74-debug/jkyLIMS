@@ -471,6 +471,7 @@
                     or t1.state=3
                     or t1.state=4
                     or t1.state=6
+                    or t1.state=144
                 )
             </if>
             <if test="inspector!=null and inspector!='' and deptIds!=null ">
@@ -582,6 +583,7 @@
             <if test="sampler!=null and sampler!=''">sampler=#{sampler},</if>
             <if test="requiredCompletionTime!=null">required_completion_time=#{requiredCompletionTime},</if>
             <if test="orderTime!=null">order_time=#{orderTime},</if>
+            <if test="taskPrice!=null">task_price=#{taskPrice},</if>
         </trim>
         where id = #{id}
     </update>
@@ -935,7 +937,8 @@
             start_detection_time,
             end_detection_time,
             review_time,
-            dept_id
+            dept_id,
+            task_price
         FROM
             test_task
         WHERE
@@ -958,5 +961,80 @@
 
     <select id="getTaskTestEntityById" resultType="com.lims.manage.erp.entity.TaskTestEntity" >
         select entrustment_id,task_code from test_task where id = #{taskId}
+    </select>
+
+    <select id="getSampleNames" resultType="com.lims.manage.erp.vo.TestEntrustedTaskRelVo">
+        SELECT
+        aa.id as sampleId,
+        aa.sample_name as taskSampleName,
+        bb.task_id as taskId
+    FROM
+        test_sample AS aa
+        RIGHT JOIN (
+    SELECT
+        t1.*
+    FROM
+        test_entrusted_sample_checkitem_rel AS t1
+        RIGHT JOIN ( SELECT id, entrustment_id FROM test_task WHERE id IN
+        <foreach item="item" collection="list" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+         ) AS t2 ON t1.entrust_id = t2.entrustment_id
+        ) AS bb ON aa.id = bb.sample_id
+        GROUP BY CONCAT(bb.task_id,aa.id)
+    </select>
+
+    <select id="getTaskIds" resultType="com.lims.manage.erp.vo.TestEntrustedTaskRelVo">
+        SELECT
+            id as task_id,
+            task_code
+        FROM
+            test_task
+        WHERE
+            entrustment_id IN
+            <foreach collection="list" item="item" separator="," open="(" close=")" index="">
+                #{item}
+            </foreach>
+    </select>
+
+    <select id="getTaskDetailInfoThree" resultMap="taskResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
+        SELECT t1.id,
+               t1.task_code                        code,
+               t1.orderer,
+               DATE_FORMAT(t1.order_time, '%Y-%m-%d')               order_time,
+               DATE_FORMAT(t1.required_completion_time, '%Y-%m-%d') required_completion_time,
+               t1.task_price                                       ,
+               t2.sampling_method,
+               t2.check_purpose,
+               t2.present_information,
+               t2.file_url,
+               t2.seal_type,
+               IFNULL(t2.invalid_reason,null) invalid_reason,
+               t3.sample_id,
+               t4.sample_name,
+               t4.alias_name,
+               t4.product_id,
+               t4.sample_code,
+               t4.specs,
+               t4.batch_number,
+               t4.generation,
+               t4.sample_groups,
+               t4.quantity_per_group,
+               t4.sample_origin,
+               t4.manufacturer,
+               t4.received_date,
+               t4.inspector,
+               t4.sample_requirement,
+               t4.outward,
+               t4.picture,
+               t4.sample_quantity,
+               t4.alias_name,
+               t4.sample_remark,
+               t4.sample_type
+        FROM test_task t1
+                 LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+                 LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
+                 LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
+        where t1.id = #{taskId}
     </select>
 </mapper>
