@@ -57,4 +57,9 @@ public class TaskProgressVo {
      * 部门id
      */
     private Integer deptId;
+
+    /**
+     * 任务单价格
+     */
+    private Double taskPrice;
 }

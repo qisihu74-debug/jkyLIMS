@@ -340,8 +340,8 @@
                             t1.id,
                             t1.acceptance_date,
                             t1.task_source,
-                            t1.actual_price,
-                            IFNULL( t2.price, 0 ) receivedPrice
+                            ROUND(IFNULL(t1.actual_price,0),2) actual_price,
+                            ROUND(IFNULL( t2.price, 0 ),2) receivedPrice
                         FROM
                             test_entrusted_info t1
                                 LEFT JOIN test_entrusted_payment_record_info t2 ON t1.id = t2.entrustment_id
@@ -365,8 +365,8 @@
                 ${flag} JOIN (
                 SELECT
                     t1.task_source taskSource,
-                    SUM( t1.actual_price ) actualReportPrice,
-                    SUM( t1.system_price ) systemReportPrice
+                    SUM( ROUND( t1.actual_price, 2 ) ) actualReportPrice,
+                    SUM( ROUND( t1.system_price, 2 ) ) systemReportPrice
                 FROM
                     test_entrusted_info t1
                         LEFT JOIN test_report_record t2 ON t1.id = t2.entrustment_id

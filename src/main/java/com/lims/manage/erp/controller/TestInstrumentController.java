@@ -209,5 +209,13 @@ public class TestInstrumentController extends ApiController {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 整理设备
+     */
+    @GetMapping("checkDevice")
+    public void checkDevice() {
+        this.testInstrumentService.checkDevice();
+    }
 }
 

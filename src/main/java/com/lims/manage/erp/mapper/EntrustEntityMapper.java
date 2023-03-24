@@ -644,4 +644,39 @@ public interface EntrustEntityMapper extends BaseMapper {
             "239\n" +
             ")")
     List<EntrustAddVo> get8Infos();
+
+    /**
+     * 根据委托单id 获取任务单 列表
+     * @param entrustId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid \n" +
+            "FROM\n" +
+            "\ttest_task \n" +
+            "WHERE\n" +
+            "\tentrustment_id = #{entrustId} and state != 144")
+    List<Long> getEntrustTaskIds(@Param("entrustId")Long entrustId);
+
+    /**
+     * 通过委托单id 获取检测项与对应任务单id
+     */
+    @Select("SELECT\n" +
+            "\tt2.id as itemId,\n" +
+            "\tt2.check_item_name as checkItemName,\n" +
+            "\tt2.task_id as taskId\n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel AS t2 \n" +
+            "WHERE\n" +
+            "\tt2.entrust_id = #{entrustId} and task_id is not null ")
+    List<CheckItemInfoVo> getEntrustItemVos(@Param("entrustId")Long entrustId);
+
+    @Select("SELECT\n" +
+            "\tt2.acceptance_date \n" +
+            "FROM\n" +
+            "\ttest_task t1\n" +
+            "\tLEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id \n" +
+            "WHERE\n" +
+            "\tt1.id=#{taskId}")
+    java.sql.Date getEntrustDateByTaskId(@Param("taskId") Long taskId);
 }

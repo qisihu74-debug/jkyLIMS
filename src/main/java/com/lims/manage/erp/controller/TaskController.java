@@ -510,7 +510,7 @@ public class TaskController {
         }
     }
 
-    /**
+    /**downloadOriginalRecord
      * 下载任务通知单——二次开发 丁 线上使用中
      * 变更需求 world 转 pdf。
      *
@@ -837,7 +837,7 @@ public class TaskController {
             response.setContentType("application/zip");
             response.setCharacterEncoding("UTF-8");
             response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录.zip", "UTF-8"));
-            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys, response);
+            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys, response,null);
             zipOutputStream.flush();
         }
     }
@@ -870,7 +870,7 @@ public class TaskController {
             response.setContentType("application/zip");
             response.setCharacterEncoding("UTF-8");
             response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("原始记录.zip", "UTF-8") );
-            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys,response);
+            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys,response,taskId);
             zipOutputStream.flush();
         }
 

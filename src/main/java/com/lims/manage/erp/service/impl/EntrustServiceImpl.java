@@ -1824,6 +1824,19 @@ public class EntrustServiceImpl implements EntrustService {
                 } else if (state == 6) {
                     taskProgressVo.setState(4);
                 }
+                // 任务单state =144 根据日期修改状态
+                if(state == 144){
+                    // 任务单废弃 则根据时间赋予状态
+                    if(taskProgressVo.getOrderTime()!=null){
+                        taskProgressVo.setState(0);
+                    }
+                    if(taskProgressVo.getReceiveTime()!=null){
+                        taskProgressVo.setState(1);
+                    }
+                    if(taskProgressVo.getStartDetectionTime()!=null){
+                        taskProgressVo.setState(2);
+                    }
+                }
                 List<TaskProgressStateVo> stateVoList = Lists.newArrayList();
                 for (int j = 0; j <= 4; j++) {
                     if (j == 0) {
@@ -4395,5 +4408,218 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void verifyTaskListExists(Long entrustId) {
+        // 根据委托单id 获取任务单 列表
+        List<Long> taskIds = entityMapper.getEntrustTaskIds(entrustId);
+        // 通过委托单id 获取检测项与对应任务单id
+        List<CheckItemInfoVo> items = entityMapper.getEntrustItemVos(entrustId);
+        // 通过任务单列表 循环比较检测项所属任务单id 是否存在
+        if (!CollectionUtils.isEmpty(items)) {
+            // 有必要检查 任务单id 不为空
+            if (!CollectionUtils.isEmpty(taskIds)) {
+                for (Long taskId : taskIds) {
+                    // status = fasle 不存在上述关系 进行更新任务单状态 = 废弃
+                    Boolean status = false;
+                    for (CheckItemInfoVo checkItemInfoVo : items) {
+                        if (checkItemInfoVo.getTaskId().equals(taskId)) {
+                            status = true;
+                        }
+                    }
+                    if (status == false) {
+                        // 更新任务单状态 = 废弃
+                        TaskTestEntity taskTestEntity = new TaskTestEntity();
+                        taskTestEntity.setId(taskId);
+                        taskTestEntity.setState(144);
+                        // 价格为0
+                        taskTestEntity.setTaskPrice(0d);
+                        taskMapper.updateTestTask(taskTestEntity);
+                    }
+                }
+            }
+        } else {
+            // 有必要检查 任务单id 不为空
+            if (!CollectionUtils.isEmpty(taskIds)) {
+                // 遍历任务单状态 全部置为 144
+                for (Long taskId : taskIds) {
+                    // 更新任务单状态 = 废弃
+                    TaskTestEntity taskTestEntity = new TaskTestEntity();
+                    taskTestEntity.setId(taskId);
+                    taskTestEntity.setState(144);
+                    // 价格为0
+                    taskTestEntity.setTaskPrice(0d);
+                    taskMapper.updateTestTask(taskTestEntity);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Boolean verifyDistributionTask(TaskVo entity) {
+        // 通过委托单id 查询任务列表
+        List<TaskProgressVo> taskList = taskMapper.getTaskStateByEntrustId(entity.getEntrustmentId());
+        // 没有任务单
+        if(CollectionUtils.isEmpty(taskList)){
+            return true;
+        }
+        // 任务单列表循环 读取数据
+        for(TaskProgressVo taskProgressVo :taskList){
+            // 遍历检测项 指向的 所属部门
+            for(CheckItemDeptVo checkItemDeptVo : entity.getCheckItemDeptVoList()){
+                // 根据检测项所属团队比对任务单团队一致，并且 任务单state = 4 || state = 6
+                if(checkItemDeptVo.getDeptId().equals(taskProgressVo.getDeptId().longValue())) {
+                    if (taskProgressVo.getState().equals(4) || taskProgressVo.getState().equals(6)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 发布时 下拉选择团队：  新增逻辑（
+     *                      * 情况1、 1.1：指定任务单存在相同团队。 合并，成功
+     *                      *        1.2：启用废弃任务单，选择相同团队后。
+     *                      * 情况2、不存在相同团队。 新增任务单即可。
+     * 					都需要统一任务单价格计算。
+     * @param entity
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean distributionTask320(TaskVo entity) {
+        // 通过委托单id 查询任务列表？不存在（正常走发布列表）：存在 （处理情况1、2、3）
+        List<TaskProgressVo> taskList = taskMapper.getTaskStateByEntrustId(entity.getEntrustmentId());
+        // 没有任务单 走新增发布路线
+        if(CollectionUtils.isEmpty(taskList)){
+            Boolean flag = distributionTask412(entity);
+            return flag;
+        }
+
+        // 处理情况1：任务单与检测项指向团队一致的话 更新任务单价格和检测项所属部门
+        methodDistributionTask1(entity,taskList);
+        // 情况2、不存在相同团队。 新增任务单即可。
+        methodDistributionTask2(entity,taskList);
+        return true;
+    }
+
+    /**
+     * 情况1、 1.1：指定任务单存在相同团队。 合并，成功
+     *         1.2：启用废弃任务单，选择相同团队后。
+     * @param entity
+     * @param taskList
+     */
+    void methodDistributionTask1(TaskVo entity,List<TaskProgressVo> taskList){
+        Boolean status = true;
+        // 遍历：通过委托单id下 任务单依次展示
+        for(TaskProgressVo taskProgressVo : taskList){
+            TaskTestEntity taskTestEntity = new TaskTestEntity();
+            taskTestEntity.setId(taskProgressVo.getTaskId());
+            //计算本单价格
+            double taskPrice = taskProgressVo.getTaskPrice();
+            // 任务单 =144 && 检测项重新发布 改变任务单状态
+            if(taskProgressVo.getState().equals(144)){
+                // 状态0未抢单，1.已抢单，2已领样,3实验中，4实验完成
+                Integer state = null;
+                if(taskProgressVo.getOrderTime()!=null){
+                    state = 0;
+                }
+                if(taskProgressVo.getReceiveTime()!=null){
+                    state = 1;
+                }
+                if(taskProgressVo.getStartDetectionTime()!=null){
+                    state = 3;
+                }
+                taskTestEntity.setState(state);
+            }
+            taskTestEntity.setState(taskTestEntity.getState());
+            // 比对部门id 是否出具最终报告标记
+            if (entity.getDeptIds().contains(taskProgressVo.getDeptId())) {
+                taskTestEntity.setIssueReport(0);
+            } else {
+                taskTestEntity.setIssueReport(1);
+            }
+            List<CheckItemDeptVo> checkItemDeptVoList1 = new ArrayList<>();
+            // 遍历待发布检测项列表
+            for(CheckItemDeptVo checkItemDeptVo : entity.getCheckItemDeptVoList()){
+                // if 任务单团队id = 检测项id 批量修改。
+                if(checkItemDeptVo.getDeptId().equals(taskProgressVo.getDeptId().longValue())){
+                    CheckItemDeptVo checkItemDeptVo1 = new CheckItemDeptVo();
+                    checkItemDeptVo1.setId(checkItemDeptVo.getId());
+                    checkItemDeptVo1.setDeptId(checkItemDeptVo.getDeptId());
+                    checkItemDeptVo1.setTaskId(taskProgressVo.getTaskId());
+                    // 任务单此次新增价格
+                    taskPrice = taskPrice + ((entity.getDiscount() == null ? 0 : entity.getDiscount()) *
+                            (checkItemDeptVo.getCheckPrice() == null ? 0 : checkItemDeptVo.getCheckPrice()) * checkItemDeptVo.getTimes());
+                    // 比对任务单团队与检测项团队一致的话 修改检测项所属团队信息。
+                    checkItemDeptVoList1.add(checkItemDeptVo1);
+                }
+                // 设置此次任务单最新价格
+                taskTestEntity.setTaskPrice(taskPrice);
+            }
+            if(!CollectionUtils.isEmpty(checkItemDeptVoList1)){
+                //批量更新检测项信息
+                taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
+            }
+            // 比对任务单价格发生变动则 更新数据
+            if(!taskTestEntity.getTaskPrice().equals(taskProgressVo.getTaskPrice())){
+                // 更新任务单价格并且状态修改为默认值
+                taskMapper.updateTestTask(taskTestEntity);
+                // status = false
+                status = false;
+            }
+        }
+        // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
+        if(!CollectionUtils.isEmpty(entity.getTaskRelEntities()) && !status){
+            // 补充发布人ID和姓名
+            SysUserEntity userEntity = ShiroUtils.getUserInfo();
+            List<TestEntrustedTaskRelEntity> TaskRelEntities = entity.getTaskRelEntities();
+            for(TestEntrustedTaskRelEntity taskdata:TaskRelEntities){
+                taskdata.setUserId(userEntity.getUserId());
+                taskdata.setAddressName(userEntity.getName());
+                taskdata.setCreateDate(new Date());
+            }
+            methodDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
+        }
+    }
+    /**
+     * 情况2、不存在相同团队。 新增任务单即可。
+     * @param entity 新增待发布信息
+     * @param taskList 任务单列表
+     */
+    Boolean methodDistributionTask2(TaskVo entity,List<TaskProgressVo> taskList){
+        // 待发布检测项集合
+        List<CheckItemDeptVo> addItemList = new ArrayList<>();
+        // 遍历检测项
+        for(CheckItemDeptVo checkItemDeptVo : entity.getCheckItemDeptVoList()){
+            // 设置标志位
+            Boolean status = true;
+            // 当前待发布检测项（checkItemDeptVo） 不属于下列任务单（taskList）所属部门 则新增。
+            for(TaskProgressVo taskProgressVo : taskList){
+                // if 任务单团队deptId = 检测项deptId   status = false。
+                if(checkItemDeptVo.getDeptId().equals(taskProgressVo.getDeptId().longValue())){
+                    status = false;
+                }
+            }
+            if(status){
+                CheckItemDeptVo checkItemDeptVo1 = new CheckItemDeptVo();
+                checkItemDeptVo1.setId(checkItemDeptVo.getId());
+                checkItemDeptVo1.setDeptId(checkItemDeptVo.getDeptId());
+                checkItemDeptVo1.setTaskId(null);
+                addItemList.add(checkItemDeptVo1);
+            }
+        }
+        // 待发布检测项集合 不等于空
+        if(!CollectionUtils.isEmpty(addItemList)){
+            // 把数据进行替换。
+            entity.setCheckItemDeptVoList(addItemList);
+            Boolean flag = distributionTask412(entity);
+            return flag;
+        }
+        return true;
     }
 }

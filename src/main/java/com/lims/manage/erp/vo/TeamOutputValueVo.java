@@ -11,9 +11,9 @@ public class TeamOutputValueVo {
     /**
      * 实收报告产值
      */
-    private String actualReportPrice;
+    private Double actualReportPrice;
     /**
      * 应收报告产值
      */
-    private String systemReportPrice;
+    private Double systemReportPrice;
 }
