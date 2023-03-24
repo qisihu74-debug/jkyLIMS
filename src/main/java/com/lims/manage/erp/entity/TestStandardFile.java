@@ -50,6 +50,14 @@ public class TestStandardFile extends Model<TestStandardFile> {
     //备注
     private String remark;
 
+    //标准规范状态
+    private String standardStatus;
+    //发布日期
+    private String releaseDate;
+    //实施日期/作废日期
+    private String implementationDate;
+
+
 
     public Integer getId() {
         return id;
@@ -145,6 +153,30 @@ public class TestStandardFile extends Model<TestStandardFile> {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public String getStandardStatus() {
+        return standardStatus;
+    }
+
+    public void setStandardStatus(String standardStatus) {
+        this.standardStatus = standardStatus;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public String getImplementationDate() {
+        return implementationDate;
+    }
+
+    public void setImplementationDate(String implementationDate) {
+        this.implementationDate = implementationDate;
     }
 
     /**
