@@ -739,12 +739,12 @@ public class EntrustServiceImpl implements EntrustService {
                 entityMapper.BatchSaveSampleStandard(list1);
             }
         }
-        if (totalMoney != 0) {
+//        if (totalMoney != 0) {
             //得到总价钱，再保存委托基本信息
 //            basisInfo.setPaymentCount(totalMoney + "");2022年5月20日修改，不在后台计算检测项价格
             //存放委托基本信息==》test_entrusted
             entityMapper.updateEntrustInfos(basisInfo);
-        }
+//        }
         return true;
     }
 
@@ -2084,6 +2084,12 @@ public class EntrustServiceImpl implements EntrustService {
         // 通过委托ID 委托单信息 → test_entrusted_info
         PageHelper.clearPage();
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
+        // 通过委托单id 查询任务列表。委托单id不包含任务单 设置为 false。
+        if(CollectionUtils.isEmpty(entityMapper.selectTaskTestEntityList(entrustmentId))){
+            entrustAddVo.setIsTaskList(false);
+        }else{
+            entrustAddVo.setIsTaskList(true);
+        }
         List<LabelValueVo> allTestRoom = Lists.newArrayList();
 
         if (entrustAddVo.getOperateUser() != null) {
@@ -2432,10 +2438,12 @@ public class EntrustServiceImpl implements EntrustService {
             vo.setOrderer(ShiroUtils.getUserInfo().getName());
             vo.setPresentInformation(entity.getPresentInformation());
 //            if(deptId.equals(dept)){
-            if (entity.getDeptIds().contains(deptId)) {
-                vo.setIssueReport("是");
-            } else {
-                vo.setIssueReport("否");
+            if(!CollectionUtils.isEmpty(entity.getDeptIds())){
+                if (entity.getDeptIds().contains(deptId)) {
+                    vo.setIssueReport("是");
+                } else {
+                    vo.setIssueReport("否");
+                }
             }
             vos.add(vo);
             //更新检测项分配的部门和任务单号
@@ -2551,14 +2559,16 @@ public class EntrustServiceImpl implements EntrustService {
                                 }
                             }
                         }
-                        String substring = stringBuilder1.toString().substring(0, stringBuilder1.length() - 1);
-                        String[] split = substring.split("，");
-                        Set<String> set = new HashSet<>();
-                        for (String s:split) {
-                            set.add(s);
+                        if(stringBuilder1.length()>1){
+                            String substring = stringBuilder1.toString().substring(0, stringBuilder1.length() - 1);
+                            String[] split = substring.split("，");
+                            Set<String> set = new HashSet<>();
+                            for (String s:split) {
+                                set.add(s);
+                            }
+                            String substring1 = set.toString().substring(1, set.toString().length() - 1);
+                            rows.get(2).getTableCells().get(2).setText(substring1 == null ? "——" : substring1);//检验项目及检测依据 TODO 去重
                         }
-                        String substring1 = set.toString().substring(1, set.toString().length() - 1);
-                        rows.get(2).getTableCells().get(2).setText(substring1 == null ? "——" : substring1);//检验项目及检测依据 TODO 去重
                     }
                     //TODO +1
                     rows.get(3).getTableCells().get(2).setText(detail.getReportCount().toString());//报告分数
@@ -4538,7 +4548,7 @@ public class EntrustServiceImpl implements EntrustService {
             }
             taskTestEntity.setState(taskTestEntity.getState());
             // 比对部门id 是否出具最终报告标记
-            if (entity.getDeptIds().contains(taskProgressVo.getDeptId())) {
+            if (!CollectionUtils.isEmpty(entity.getDeptIds())&&entity.getDeptIds().contains(taskProgressVo.getDeptId())) {
                 taskTestEntity.setIssueReport(0);
             } else {
                 taskTestEntity.setIssueReport(1);

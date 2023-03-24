@@ -412,6 +412,9 @@ public class EntrustController {
                 }
             }
         }
+        if (CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())) {
+             return ResultUtil.error( "检测项为空不能发布！！！");
+        }
         if (!CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())) {
             for (CheckItemDeptVo checkItemDeptVo : entity.getCheckItemDeptVoList()) {
                 if (checkItemDeptVo.getDeptId() == null) {
@@ -602,6 +605,9 @@ public class EntrustController {
         if (itemIds == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
+            if(CollectionUtils.isEmpty(itemIds.getIds())){
+                return ResultUtil.success(new ArrayList<>());
+            }
             return ResultUtil.success(entrustService.getCheckItemInfo(itemIds.getIds()));
         }
     }

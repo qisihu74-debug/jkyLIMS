@@ -292,5 +292,9 @@ public class EntrustAddVo {
      * 委托编号——String
      */
     private String entrustmentNostr;
+    /**
+     * 是否包含任务单 true包含 false不包含
+     */
+    private Boolean isTaskList;
 
 }
