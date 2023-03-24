@@ -2,16 +2,22 @@ package com.lims.manage.erp.controller;
 
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.DeviceEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestInstrumentService;
+import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.ExportParamVo;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
@@ -20,7 +26,9 @@ import io.swagger.annotations.ApiOperation;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -47,9 +55,11 @@ public class TestInstrumentController extends ApiController {
      */
     @Resource
     private TestInstrumentService testInstrumentService;
+    @Resource
+    private LogManagerService logManagerService;
 
-    @GetMapping("/getList")
-    public Result getAll(TestInstrument testInstrument) {
+    @GetMapping("/getAllOld")
+    public Result getAllOld(TestInstrument testInstrument) {
         QueryWrapper<TestInstrument> queryWrapper = new QueryWrapper<>(testInstrument);
         queryWrapper.orderByDesc("create_time");
         queryWrapper.eq("del_flag", 0);
@@ -101,13 +111,13 @@ public class TestInstrumentController extends ApiController {
      * @param testInstrument 实体对象
      * @return 新增结果
      */
-    @PostMapping("/add")
+    @PostMapping("/add_old")
     @ApiOperation("添加仪器设备")
-    public Result insert(@RequestBody TestInstrument testInstrument) {
+    public Result add_old(@RequestBody TestInstrument testInstrument) {
         if (StrUtil.isEmptyIfStr(testInstrument)) {
             return ResultUtil.error("数据为空");
         }
-        return this.testInstrumentService.addInstrument(testInstrument);
+        return this.testInstrumentService.addInstrument_old(testInstrument);
     }
 
     /**
@@ -216,6 +226,91 @@ public class TestInstrumentController extends ApiController {
     @GetMapping("checkDevice")
     public void checkDevice() {
         this.testInstrumentService.checkDevice();
+    }
+
+    /**
+     * 查询设备仪器列表
+     * @param deviceEntity
+     * @return
+     */
+    @PostMapping("/getAllDevice")
+    public Result getAllDevice(@RequestBody DeviceEntity deviceEntity) {
+        if (deviceEntity == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        if (deviceEntity.getPageNum() == null || deviceEntity.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        PageInfo<DeviceEntity> allDevice = testInstrumentService.getAllDevice(deviceEntity);
+        return ResultUtil.success("查询设备仪器列表成功！",allDevice);
+    }
+
+    /**
+     * 新增设备
+     * @param record
+     * @return
+     */
+    @PostMapping("addDevice")
+//    public Result addDevice(@RequestParam("json") String json, MultipartFile picture, MultipartFile contract, MultipartFile invoice) {
+    public Result addDevice(@RequestBody DeviceEntity record) {
+//        DeviceEntity record = JSON.parseObject(json, DeviceEntity.class);
+        if (record.getName() == null || record.getCode() == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        boolean save = testInstrumentService.addDevice(record, null, null, null);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (!save) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
+                    +"添加设备仪器"+record.getId()+"失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
+            return ResultUtil.success("设备添加失败!");
+        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户："+userInfo.getUsername()
+                +"添加设备仪器"+record.getId()+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
+        return ResultUtil.success("设备添加成功！", record);
+    }
+
+    /**
+     * 修改设备
+     * @param record
+     * @return
+     */
+    @PostMapping("updateDevice")
+    public Result updateDevice(@RequestBody DeviceEntity record) {
+        if (record.getId() == null || record.getName() == null || record.getCode() == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        boolean save = testInstrumentService.update(record);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (!save) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
+                    +"修改设备仪器"+record.getId()+"失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
+            return ResultUtil.success("设备修改失败!");
+        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户："+userInfo.getUsername()
+                +"修改设备仪器"+record.getId()+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
+        return ResultUtil.success("设备修改成功！", record);
+    }
+
+    /**
+     * 删除设备
+     * @param idList
+     * @return
+     */
+    @PostMapping("deleteDevice")
+    public Result deleteDevice(@RequestParam("idList") List<Long> idList) {
+        if (CollectionUtils.isEmpty(idList)) {
+            return ResultUtil.error("请选择要删除的设备！");
+        }
+        boolean save = testInstrumentService.deleteDevice(idList);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (!save) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
+                    +"删除设备仪器"+idList+"失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
+            return ResultUtil.success("设备删除失败!");
+        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户："+userInfo.getUsername()
+                +"删除设备仪器"+idList+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
+        return ResultUtil.success("设备删除成功！", idList);
     }
 }
 

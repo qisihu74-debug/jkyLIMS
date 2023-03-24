@@ -1,16 +1,15 @@
 package com.lims.manage.erp.service.impl;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
-import com.itextpdf.text.io.StreamUtil;
+import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.DeviceEntityMapper;
 import com.lims.manage.erp.mapper.InstrumentRecordEntityMapper;
@@ -19,6 +18,8 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.InstrumentRecordListVo;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
@@ -26,8 +27,12 @@ import com.lims.manage.erp.vo.TestInstrumentVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 /**
@@ -54,7 +59,7 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
     @Resource
     private SysOssService sysOssService;
     @Override
-    public Result addInstrument(TestInstrument testInstrument) {
+    public Result addInstrument_old(TestInstrument testInstrument) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if(userInfo==null){
             return ResultUtil.error("token 已过期！");
@@ -228,7 +233,7 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
             System.out.println("设备编号为：【"+code+"】，共找到【"+oldDevicesByCode.size()+"】条旧设备信息！");
             if(CollectionUtils.isEmpty(oldDevicesByCode)){//未找到旧设备，新增
                 id = id + i;
-                deviceEntity.setOldId(id);
+//                deviceEntity.setOldId(id);
                 saveList.add(deviceEntity);
             }else if(oldDevicesByCode.size() > 1){//找到多条，比较其他信息
                 for (int j = 0; j < oldDevicesByCode.size(); j++) {
@@ -241,7 +246,7 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
                             ||code.equals("LQ-201-20") || code.equals("LQ-309-13") || code.equals("-")){//比较name
                         if(name.equals(oldDeviceName)){
                             Integer oldId = oldDevice.getId();
-                            deviceEntity.setOldId(oldId);
+//                            deviceEntity.setOldId(oldId);
                             updateList.add(deviceEntity);
 //                            System.out.println("新设备name=【"+name+"】与旧设备name【"+oldDeviceName+"】匹配成功！");
                             break;
@@ -251,7 +256,7 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
                     }else if(code.equals("LQ-301-31（2个-1）") || code.equals("LQ-301-31（2个-2）")){//比较name和model
                         if(name.equals(oldDeviceName) && model.equals(oldDeviceModel)){
                             Integer oldId = oldDevice.getId();
-                            deviceEntity.setOldId(oldId);
+//                            deviceEntity.setOldId(oldId);
                             updateList.add(deviceEntity);
 //                            System.out.println("新设备name=【"+name+"】--model=【"+model+"与旧设备name【"+oldDeviceName+"】--model=【"+oldDeviceModel+"】匹配成功！");
                             break;
@@ -265,7 +270,7 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
                             || code.equals("LQ-301-31（4个-4）")){//比较model
                         if(model.equals(oldDeviceModel)){
                             Integer oldId = oldDevice.getId();
-                            deviceEntity.setOldId(oldId);
+//                            deviceEntity.setOldId(oldId);
                             updateList.add(deviceEntity);
 //                            System.out.println("新设备model=【"+model+"与旧设备model=【"+oldDeviceModel+"】匹配成功！");
                             break;
@@ -275,7 +280,7 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
                     }else{//比较serial_number
                         if(serialNumber.equals(oldDeviceSerialNumber)){
                             Integer oldId = oldDevice.getId();
-                            deviceEntity.setOldId(oldId);
+//                            deviceEntity.setOldId(oldId);
                             updateList.add(deviceEntity);
 //                            System.out.println("新设备serialNumber=【"+serialNumber+"】与旧设备oldDeviceSerialNumber=【"+oldDeviceSerialNumber+"】匹配成功！");
                             break;
@@ -288,7 +293,7 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
                 DeviceEntity oldDevice = oldDevicesByCode.get(0);
                 String oldDeviceCode = oldDevice.getCode();
                 Integer oldId = oldDevice.getId();
-                deviceEntity.setOldId(oldId);
+//                deviceEntity.setOldId(oldId);
                 updateList.add(deviceEntity);
 //                System.out.println("新设备code=【"+code+"】与旧设备code=【"+oldDeviceCode+"】匹配成功！");
             }else{
@@ -304,5 +309,74 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         long l = (end - start) / 1000;
         System.out.println("共计耗时【"+l+"】秒！");
     }
+
+    @Override
+    public PageInfo<DeviceEntity> getAllDevice(DeviceEntity deviceEntity) {
+        PageHelper.startPage(deviceEntity.getPageNum(), deviceEntity.getPageSize());
+        List<DeviceEntity> allDevice = deviceEntityMapper.getAllDevice(deviceEntity);
+        PageInfo<DeviceEntity> pageInfo = new PageInfo<>(allDevice);
+        return pageInfo;
+    }
+
+    @Override
+    public boolean addDevice(DeviceEntity record, MultipartFile picture, MultipartFile contract, MultipartFile invoice) {
+        //上传附件
+//        if (picture != null && !"blob".equals(picture.getOriginalFilename())) {
+//            String upload = upload(picture);
+//            record.setPicture(upload);
+//        }
+//        if (contract != null && !"blob".equals(contract.getOriginalFilename())) {
+//            String upload = upload(contract);
+//            record.setContractUrl(upload);
+//        }
+//        if (invoice != null && !"blob".equals(invoice.getOriginalFilename())) {
+//            String upload = upload(invoice);
+//            record.setInvoice(upload);
+//        }
+        Integer newId = deviceEntityMapper.getNewId();
+        record.setId(newId);
+        record.setStatus("0");
+        record.setDelFlag(0);
+        record.setCreateTime(new Date());
+        int insert = deviceEntityMapper.insert(record);
+        if (insert > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean update(DeviceEntity record) {
+        int update = deviceEntityMapper.updateByPrimaryKeySelective(record);
+        if (update > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteDevice(List<Long> idList) {
+        int i = deviceEntityMapper.deleteByIds(idList);
+        if (i > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    private String upload(MultipartFile file) {
+        String fileName = file.getOriginalFilename();
+        String upload = MinIoUtil.upload("", file, fileName);
+        String[] split = upload.split("\\?");//去掉返回的URL中的参数
+        String s = split[0];
+        String decode = null;
+        try {
+            decode = URLDecoder.decode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return decode;
+    }
+
 }
 

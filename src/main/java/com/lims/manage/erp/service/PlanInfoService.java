@@ -3,10 +3,15 @@ package com.lims.manage.erp.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lims.manage.erp.entity.PlanFileInfo;
 import com.lims.manage.erp.entity.PlanInfo;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.PlanInfoVo;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * 计划信息业务层接口
@@ -52,4 +57,19 @@ public interface PlanInfoService extends IService<PlanInfo> {
      * @return Result
      */
     Result<?> delPlanInfo(String planId);
+
+    /**
+     * 获取计划报名的用户信息
+     * @param planId 计划id
+     * @param response 返回
+     */
+    void planTemplateExport(String planId, HttpServletResponse response);
+
+    /**
+     * 保存培训考试结果
+     * @param planInfo 培训考试计划结果
+     * @param file 附件
+     * @return Result
+     */
+    Result<?> savePlanResult(PlanInfo planInfo, MultipartFile[] file);
 }
