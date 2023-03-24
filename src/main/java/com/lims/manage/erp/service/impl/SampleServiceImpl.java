@@ -299,7 +299,7 @@ public class SampleServiceImpl implements SampleService {
                     if (sampleSplits.length > 3) {
                         String[] strings = sampleSplits[3].split("~");
                         int startNum = Integer.parseInt(strings[0].substring(1));
-                        int endNum = Integer.parseInt(strings[1].substring(1));
+                        int endNum = Integer.parseInt(strings[1]);
                         int index = startNum;
                         for (int i = 0; i < endNum; i++) {
                             s = sampleSplits[0] + "-" + sampleSplits[1] + "-" + sampleSplits[2] + "-" + index;
