@@ -178,6 +178,50 @@ public class TestDetectionImpl implements TestDetectionService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean postSelectInstrument0328(InstrumentEntity instrumentEntity) {
+        //记录删除之前设备日志
+        StringBuilder stringBuilder1 = new StringBuilder();
+        stringBuilder1.append(" 检测项id"+instrumentEntity.getItemId());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-删除设备仪器\n\t"+stringBuilder1, Const.TASK_TEST, true);
+        //删除之前设备关联关系信息
+        testDetectionDao.deleteInstrument(instrumentEntity.getItemId());
+        //删除之前设备使用记录
+        instrumentRecordEntityMapper.deleteByEscRelId(instrumentEntity.getItemId());
+        //增加检测项设备关联关系，设备的使用记录
+        TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
+        testChItemInstrumentMiddleEntity.setSidItem(instrumentEntity.getItemId());
+        testChItemInstrumentMiddleEntity.setStartTime(new Date());
+        if (CollectionUtils.isNotEmpty(instrumentEntity.getRecords())) {
+            for (InstrumentRecordEntity recordEntity : instrumentEntity.getRecords()) {
+                testChItemInstrumentMiddleEntity.setIntrusmentId(recordEntity.getInstrumentId().intValue());
+                //关联关系
+                testDetectionDao.addItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
+                recordEntity.setId(GenID.getID());
+                recordEntity.setEscRelId(instrumentEntity.getItemId().longValue());
+                recordEntity.setBeforeStatus("正常");
+                recordEntity.setAfterStatus("正常");
+                recordEntity.setType("试验使用");
+                recordEntity.setTime(new Date());
+//                System.out.println("测试："+recordEntity.toString());
+                //使用记录
+//                instrumentRecordEntityMapper.insert(recordEntity);
+            }
+        }
+        //记录本次日志
+        StringBuilder stringBuilder2 = new StringBuilder();
+        stringBuilder2.append(" 检测项id："+instrumentEntity.getItemId());
+        stringBuilder2.append(" 设备仪器id：");
+        if(CollectionUtils.isNotEmpty(instrumentEntity.getRecords())){
+            for (InstrumentRecordEntity entity : instrumentEntity.getRecords()) {
+                stringBuilder2.append(""+entity.getInstrumentId());
+            }
+        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-检测项主键下 仪器表新增设备仪器\n\t"+stringBuilder2.toString(), Const.TASK_TEST, true);
+        return true;
+    }
+
+    @Override
     public Boolean VerifyTheLogin(Long userId, Long taskId) {
         TaskTestEntity data = taskMapper.getTaskOrders(taskId);
         if (data.getInspector() != null) {
