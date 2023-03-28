@@ -1478,7 +1478,7 @@ public class TaskServiceImpl implements TaskService {
                 String[] split1 = split[4].split("\\?");
                 XLSTransformer transformer = new XLSTransformer();
                 InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
-                Workbook workbook = methodPlugTheData(data.getFileUrl(),result, null,taskId);
+                Workbook workbook = methodPlugTheData(data.getFileUrl(),result, null,dataEntitys.get(0).getTaskId());
                 /**
                  * TODD:7月5日 原始记录命名规则
                  * 任务单号+模板名称，如果有重复的，后面加序号
