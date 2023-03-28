@@ -4654,6 +4654,8 @@ public class EntrustServiceImpl implements EntrustService {
             if(!taskTestEntity.getTaskPrice().equals(taskProgressVo.getTaskPrice())){
                 // 更新任务单价格并且状态修改为默认值
                 taskMapper.updateTestTask(taskTestEntity);
+                //更新委托单状态
+                taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
                 // status = false
                 status = false;
             }
