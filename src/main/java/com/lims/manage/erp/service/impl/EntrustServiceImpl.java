@@ -4619,6 +4619,8 @@ public class EntrustServiceImpl implements EntrustService {
                 CheckItemDeptVo checkItemDeptVo1 = new CheckItemDeptVo();
                 checkItemDeptVo1.setId(checkItemDeptVo.getId());
                 checkItemDeptVo1.setDeptId(checkItemDeptVo.getDeptId());
+                checkItemDeptVo1.setCheckPrice(checkItemDeptVo.getCheckPrice());
+                checkItemDeptVo1.setTimes(checkItemDeptVo.getTimes());
                 checkItemDeptVo1.setTaskId(null);
                 addItemList.add(checkItemDeptVo1);
             }
