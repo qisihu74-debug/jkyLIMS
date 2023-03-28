@@ -363,3 +363,124 @@ CREATE TABLE `test_instrument_use_record`  (
   ALTER TABLE `test_sample` ADD `approver` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT '技术负责人';
 
 /** sys_role  技术负责人 根据 role_name = "技术负责人" */
+
+-- 修改的表。专利管理
+DROP TABLE IF EXISTS `patent`;
+CREATE TABLE `patent`  (
+  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `patent_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '专利号',
+  `patent_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '专利名称',
+  `patentee` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '专利权人',
+  `inventor` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '发明人',
+  `patent_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '专利类型',
+  `announcement_time` date NULL DEFAULT NULL COMMENT '授权公告日(时间)',
+  `announcement_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '授权公告号(编码)',
+  `product` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '所属产品',
+  `product_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '所属产品ID',
+  `synopsis` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '专利内容摘要',
+  `maturity_time` date NULL DEFAULT NULL COMMENT '到期日期',
+  `del_flag` int(0) NOT NULL COMMENT '0默认未删除,1删除',
+  `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '专利管理' ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- 标准规范 添加状态，有效期字段
+ALTER TABLE test_standard_file ADD standard_status VARCHAR(10)  CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '标准规范状态。\r\n数据来源：https://openstd.samr.gov.cn/bzgk/gb/gbMainQuery\r\n';
+ALTER TABLE test_standard_file ADD release_date VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '发布日期';
+ALTER TABLE test_standard_file ADD implementation_date VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '实施日期/作废日期';
+
+
+
+
+
+-- 以下是新增的表
+
+-- 专利管理-对外授权情况
+DROP TABLE IF EXISTS `patent_authorization`;
+CREATE TABLE `patent_authorization`  (
+  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `patent_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '专利号',
+  `authorization_date` date NULL DEFAULT NULL COMMENT '授权时间',
+  `authorization_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '授权人',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '专利管理对外授权情况' ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- SOP标准作业指导书
+DROP TABLE IF EXISTS `sop_standard_instruction`;
+CREATE TABLE `sop_standard_instruction`  (
+  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '表ID',
+  `sop_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'SOP编号',
+  `sop_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'SOP名称',
+  `product` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '适用产品/检测项',
+  `product_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '产品ID',
+  `product_parameter` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '适用参数',
+  `product_parameter_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '参数ID',
+  `position_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '所属团队ID',
+  `position` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '所属团队',
+  `del_flag` int(0) NOT NULL COMMENT '0默认未删除,1删除',
+  `facility` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '仪器设备',
+  `facility_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '设备ID',
+  `release_date` date NULL DEFAULT NULL COMMENT '发布日期',
+  `implementation_date` date NULL DEFAULT NULL COMMENT '实施日期',
+  `remarks` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
+  `create_time` timestamp(0) NULL DEFAULT NULL COMMENT '创建时间',
+  `file_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '文件地址',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 38 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'SOP标准作业指导书' ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- 产品委员会
+DROP TABLE IF EXISTS `test_product_committee`;
+CREATE TABLE `test_product_committee`  (
+  `council_id` int(0) NOT NULL AUTO_INCREMENT COMMENT '产品委员会ID',
+  `council_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '人员名称',
+  `department` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '所属部门',
+  `position` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '所属团队',
+  `council_identity` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '人员身份',
+  `del_flag` int(0) NOT NULL COMMENT '0默认未删除,1删除',
+  `create_time` timestamp(0) NULL DEFAULT NULL COMMENT '创建时间',
+  `update_time` timestamp(0) NULL DEFAULT NULL COMMENT '修改时间',
+  `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '用户ID',
+  PRIMARY KEY (`council_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '产品委员会' ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- 知识广场调整
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+SET FOREIGN_KEY_CHECKS=0;
+
+DROP TABLE IF EXISTS `t_plan_file_info`;
+CREATE TABLE `t_plan_file_info`  (
+  `file_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件id',
+  `plan_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '计划id',
+  `file_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件url',
+  `file_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件名称',
+  `file_suffix` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件后缀',
+  `create_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '创建人',
+  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
+  PRIMARY KEY (`file_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '培训/考试计划结果附件信息' ROW_FORMAT = Dynamic;
+
+ALTER TABLE `t_plan_info` ADD COLUMN `plan_remarks` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注' AFTER `enclosure_url`;
+
+ALTER TABLE `t_plan_info` MODIFY COLUMN `enclosure_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '计划附件' AFTER `plan_content`;
+
+ALTER TABLE `t_user_plan_info` ADD COLUMN `examination_remarks` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '培训/考试个人表现' AFTER `examination_scores`;
+
+ALTER TABLE `t_user_plan_info` ADD COLUMN `examination_integral` int(0) NULL DEFAULT NULL COMMENT '培训/考试积分数量' AFTER `examination_remarks`;
+
+ALTER TABLE `t_user_plan_info` MODIFY COLUMN `examination_scores` double NULL DEFAULT NULL COMMENT '培训/考试成绩' AFTER `plan_id`;
+
+SET FOREIGN_KEY_CHECKS = 1;

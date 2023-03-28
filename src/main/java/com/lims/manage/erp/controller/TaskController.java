@@ -837,7 +837,7 @@ public class TaskController {
             response.setContentType("application/zip");
             response.setCharacterEncoding("UTF-8");
             response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录.zip", "UTF-8"));
-            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys, response,null);
+            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys, response,dataEntitys.get(0).getTaskId());
             zipOutputStream.flush();
         }
     }
