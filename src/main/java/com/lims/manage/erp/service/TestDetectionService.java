@@ -35,6 +35,13 @@ public interface TestDetectionService {
     Boolean postSelectInstrument1130(InstrumentEntity instrumentEntity);
 
     /**
+     * 保存试验所选设备仪器--不生成仪器记录
+     * @param instrumentEntity
+     * @return
+     */
+    Boolean postSelectInstrument0328(InstrumentEntity instrumentEntity);
+
+    /**
      * 验证登录人userId 是否具备开始检测资格
      * @param userId
      * @param taskId
