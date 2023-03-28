@@ -50,7 +50,17 @@ public class UserPlanInfo implements Serializable {
     /**
      * 考试成绩
      */
-    private Integer examinationScores;
+    private double examinationScores;
+
+    /**
+     * 培训/考试个人表现
+     */
+    private String examinationRemarks;
+
+    /**
+     * 培训/考试积分数量
+     */
+    private Integer examinationIntegral;
 
     /**
      * 考试结果

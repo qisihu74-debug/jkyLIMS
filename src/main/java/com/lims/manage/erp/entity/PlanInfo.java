@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lims.manage.erp.vo.PlanInfoImportVo;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
+import java.util.List;
 
 
 /**
@@ -71,9 +73,14 @@ public class PlanInfo implements Serializable {
     private String planContent;
 
     /**
-     * 附件地址
+     * 计划附件
      */
     private String enclosureUrl;
+
+    /**
+     * 备注内容
+     */
+    private String planRemarks;
 
     /**
      * 删除标记
@@ -125,4 +132,10 @@ public class PlanInfo implements Serializable {
      */
     @TableField(exist = false)
     private String partakeUserId;
+
+    /**
+     * 考试/培训计划excel导入实体
+     */
+    @TableField(exist = false)
+    private List<PlanInfoImportVo> planImportList;
 }

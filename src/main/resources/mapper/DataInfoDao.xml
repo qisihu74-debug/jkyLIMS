@@ -62,6 +62,17 @@
         ORDER BY dataInfo.up_time DESC
     </select>
 
+    <!--  获取资料详情-用于修改  -->
+    <select id="getDataInfoById" resultType="com.lims.manage.erp.entity.DataInfo">
+        SELECT dataInfo.data_id,dataInfo.data_title,
+                (SELECT GROUP_CONCAT( labelInfo.label_content )
+                FROM t_label_info labelInfo
+                WHERE FIND_IN_SET( labelInfo.label_id, dataInfo.data_label )) AS data_label,
+            dataInfo.data_source,dataInfo.file_name,dataInfo.original,dataInfo.partake_user
+        FROM t_data_info dataInfo
+        WHERE dataInfo.data_id =#{dataId}
+    </select>
+
     <!--  根据资料id获取资料信息  -->
     <select id="getDataAuditInfo" resultType="com.lims.manage.erp.vo.DataInfoVo">
         SELECT dataInfo.data_id,dataInfo.data_title,dictItem.item_text AS data_type,

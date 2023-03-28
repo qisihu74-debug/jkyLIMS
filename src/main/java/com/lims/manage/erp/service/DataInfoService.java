@@ -50,6 +50,13 @@ public interface DataInfoService extends IService<DataInfo> {
     Result<?> addDataInfo(DataInfo dataInfo, MultipartFile file);
 
     /**
+     * 获取资料详情-用于修改
+     * @param dataId 资料id
+     * @return DataInfo
+     */
+    DataInfo getDataInfoById(String dataId);
+
+    /**
      * 修改学习资料/视频
      *
      * @param dataInfo 学习资料信息
