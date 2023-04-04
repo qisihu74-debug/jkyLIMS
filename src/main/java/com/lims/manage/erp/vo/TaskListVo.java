@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -50,4 +51,15 @@ public class TaskListVo {
      * 任务流转日期
      */
     private String taskFlowDate;
+
+    /**
+     * 下单时间
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date orderTime;
+    /**
+     * 设备使用记录 集合
+     */
+    private List<InstrumentRecordListVo> instrumentRecordListVos = new ArrayList<>();
 }
