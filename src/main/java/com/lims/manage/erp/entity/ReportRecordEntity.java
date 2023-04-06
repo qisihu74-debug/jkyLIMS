@@ -53,7 +53,8 @@ public class ReportRecordEntity {
     /**
      * 要求完成时间
      */
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date requiredCompletionTime;
     /**
      * 任务编号
@@ -75,10 +76,14 @@ public class ReportRecordEntity {
     /**
      * 审批时间
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date verifyerTime;
     /**
      * 签发时间
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date issuerTime;
     /**
      * 盖章类型
@@ -120,6 +125,8 @@ public class ReportRecordEntity {
     /**
      * 盖章时间
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date sealTime;
     /**
      * 报告发出人
@@ -169,6 +176,8 @@ public class ReportRecordEntity {
     /**
      * 报告生成时间（state=1时）
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date reportCompleteTime;
     /**
      * 报告模板名称
@@ -201,6 +210,8 @@ public class ReportRecordEntity {
     /**
      * 报告合并时间
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date combineTime;
     /**
      * 委托编号——String
