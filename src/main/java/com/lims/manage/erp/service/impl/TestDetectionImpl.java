@@ -205,7 +205,7 @@ public class TestDetectionImpl implements TestDetectionService {
                 recordEntity.setTime(new Date());
 //                System.out.println("测试："+recordEntity.toString());
                 //使用记录
-//                instrumentRecordEntityMapper.insert(recordEntity);
+                instrumentRecordEntityMapper.insert(recordEntity);
             }
         }
         //记录本次日志

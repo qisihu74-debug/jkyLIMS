@@ -484,3 +484,7 @@ ALTER TABLE `t_user_plan_info` ADD COLUMN `examination_integral` int(0) NULL DEF
 ALTER TABLE `t_user_plan_info` MODIFY COLUMN `examination_scores` double NULL DEFAULT NULL COMMENT '培训/考试成绩' AFTER `plan_id`;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- 仪器使用记录 增加字段（task_id）
+ALTER TABLE `test_instrument_use_record`
+ADD COLUMN `task_id`  bigint NULL COMMENT '任务单id 防止任务单id被删除' AFTER `time`;

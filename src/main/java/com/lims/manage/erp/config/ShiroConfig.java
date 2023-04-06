@@ -78,6 +78,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/task/previewOriginalRecord", "anon");
         filterChainDefinitionMap.put("/testInstrument/exportInstrumentRecord", "anon");
         filterChainDefinitionMap.put("/testInstrument/batchExportInstrumentRecord", "anon");
+        filterChainDefinitionMap.put("/app/testInstrument/taskList", "anon");
         filterChainDefinitionMap.put("/**/web/file_output_stream/getEntrustFileUrls", "anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");

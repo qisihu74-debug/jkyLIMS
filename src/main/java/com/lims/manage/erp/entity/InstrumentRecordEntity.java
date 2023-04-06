@@ -34,4 +34,8 @@ public class InstrumentRecordEntity {
     @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern ="yyyy-MM-dd HH:mm:ss" , timezone ="GMT+8")
     private Date time;
+    /**
+     * 任务单id
+     */
+    private Long taskId;
 }
