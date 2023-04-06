@@ -770,6 +770,31 @@ public class EntrustServiceImpl implements EntrustService {
                  return null;
              }
         }else{//未发布
+            // 记录日志
+            StringBuffer log = new StringBuffer();
+            log.append("未发布:前端提供数据 ");
+            // 记录前端提供数据日志
+            if(vo!=null){
+                if(!CollectionUtils.isEmpty(vo.getSamples())){
+                    for(SampleEntity sampleEntity  : vo.getSamples()){
+                        log.append("样品id"+sampleEntity.getId()+"样品编号"+sampleEntity.getSampleCode());
+                        if(!CollectionUtils.isEmpty(sampleEntity.getSampleCheckItem())){
+                            // 遍历
+                            for(SampleItemEntity sampleItemEntity : sampleEntity.getSampleCheckItem()){
+                                log.append("检测项id"+sampleItemEntity.getId()+"检测项名"+sampleItemEntity.getCheckItemName()
+                                        + "checkItemId"+sampleItemEntity.getCheckItemId()+"单价"+sampleItemEntity.getUnitPrice()
+                                        +"次数"+sampleItemEntity.getTimes()+"所属任务单id"+sampleItemEntity.getTaskId()
+                                        +"依据id"+sampleItemEntity.getStandardId()+" ");
+                            }
+                        }else {
+                            log.append("样品id"+sampleEntity.getId()+"样品编号"+sampleEntity.getSampleCode()+"下提供的检测数据为空");
+                        }
+                    }
+                }
+            }
+            // 未发布 日志
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),
+                    " 修改样品信息：\t"+log, Const.ENTRUST_FOUND, true);
             if(!updateEntrustTestNewSampleEnscript0621(vo)){
                 return null;
             }
@@ -1189,9 +1214,51 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Transactional(rollbackFor = Exception.class)
     Boolean updatePublishedEntrust0711(EntrustAddVo vo){
+        // 记录日志
+        StringBuffer log = new StringBuffer();
+        log.append("样品修改前:旧数据");
         EntrustEntity basisInfo = new EntrustEntity(vo);
         //获取委托单原有信息
         EntrustAddVo oldEntrustInfo = getEntrustHistoryDetailTest(basisInfo.getId());
+        // 记录旧数据日志
+        if(oldEntrustInfo!=null){
+            if(!CollectionUtils.isEmpty(oldEntrustInfo.getSamples())){
+               for(SampleEntity sampleEntity  : oldEntrustInfo.getSamples()){
+                   log.append("样品id"+sampleEntity.getId()+"样品编号"+sampleEntity.getSampleCode()+" ");
+                   if(!CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVoStr())){
+                        // 遍历
+                       for(JudgmentBasisVo sampleItemEntity : sampleEntity.getJudgmentBasisVoStr()){
+                           log.append("检测项id"+sampleItemEntity.getId()+"检测项名"+sampleItemEntity.getCheckItemName()
+                                   + "checkItemId"+sampleItemEntity.getCheckItemId()+"单价"+sampleItemEntity.getCheckPrice()
+                                   +"次数"+sampleItemEntity.getTimes()+"所属任务单id"+sampleItemEntity.getTaskId()
+                                   +"依据id"+sampleItemEntity.getStandardId()+"依据名称"+sampleItemEntity.getStandardName()+" ");
+                       }
+                   } else {
+                       log.append("样品id"+sampleEntity.getId()+"样品编号"+sampleEntity.getSampleCode()+"下提供的检测数据为空 ");
+                   }
+               }
+            }
+        }
+        log.append("前端提供数据");
+        // 记录前端提供数据日志
+        if(vo!=null){
+            if(!CollectionUtils.isEmpty(vo.getSamples())){
+                for(SampleEntity sampleEntity  : vo.getSamples()){
+                    log.append("样品id"+sampleEntity.getId()+"样品编号"+sampleEntity.getSampleCode());
+                    if(!CollectionUtils.isEmpty(sampleEntity.getSampleCheckItem())){
+                        // 遍历
+                        for(SampleItemEntity sampleItemEntity : sampleEntity.getSampleCheckItem()){
+                            log.append("检测项id"+sampleItemEntity.getId()+"检测项名"+sampleItemEntity.getCheckItemName()
+                                    + "checkItemId"+sampleItemEntity.getCheckItemId()+"单价"+sampleItemEntity.getUnitPrice()
+                                    +"次数"+sampleItemEntity.getTimes()+"所属任务单id"+sampleItemEntity.getTaskId()
+                                    +"依据id"+sampleItemEntity.getStandardId()+" ");
+                        }
+                    }else {
+                        log.append("样品id"+sampleEntity.getId()+"样品编号"+sampleEntity.getSampleCode()+"下提供的检测数据为空");
+                    }
+                }
+            }
+        }
         //当前委托单状态
         Integer state = oldEntrustInfo.getState();
         //查询报告状态
@@ -1375,6 +1442,9 @@ public class EntrustServiceImpl implements EntrustService {
         basisInfo.setState(state);
         logger.info("委托单编号："+oldEntrustInfo.getEntrustmentNo()+"的委托单的状态为"+state);
         entityMapper.updateEntrustInfos(basisInfo);
+        // 记录已经发布委托单  原有检测项信息 更新后检测项信息
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),
+                " 修改样品信息：\t"+log, Const.ENTRUST_FOUND, true);
         return true;
     }
 
@@ -4447,6 +4517,9 @@ public class EntrustServiceImpl implements EntrustService {
                         // 价格为0
                         taskTestEntity.setTaskPrice(0d);
                         taskMapper.updateTestTask(taskTestEntity);
+                        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),
+                                " 更新任务单状态\t"+taskTestEntity.getState()+"任务单id"+taskTestEntity.getId(), Const.ENTRUST_FOUND, true);
+
                     }
                 }
             }
@@ -4462,6 +4535,8 @@ public class EntrustServiceImpl implements EntrustService {
                     // 价格为0
                     taskTestEntity.setTaskPrice(0d);
                     taskMapper.updateTestTask(taskTestEntity);
+                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),
+                            " 更新任务单状态\t"+taskTestEntity.getState()+"任务单id"+taskTestEntity.getId(), Const.ENTRUST_FOUND, true);
                 }
             }
         }
@@ -4579,6 +4654,8 @@ public class EntrustServiceImpl implements EntrustService {
             if(!taskTestEntity.getTaskPrice().equals(taskProgressVo.getTaskPrice())){
                 // 更新任务单价格并且状态修改为默认值
                 taskMapper.updateTestTask(taskTestEntity);
+                //更新委托单状态
+                taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
                 // status = false
                 status = false;
             }
@@ -4619,6 +4696,8 @@ public class EntrustServiceImpl implements EntrustService {
                 CheckItemDeptVo checkItemDeptVo1 = new CheckItemDeptVo();
                 checkItemDeptVo1.setId(checkItemDeptVo.getId());
                 checkItemDeptVo1.setDeptId(checkItemDeptVo.getDeptId());
+                checkItemDeptVo1.setCheckPrice(checkItemDeptVo.getCheckPrice());
+                checkItemDeptVo1.setTimes(checkItemDeptVo.getTimes());
                 checkItemDeptVo1.setTaskId(null);
                 addItemList.add(checkItemDeptVo1);
             }

@@ -3,6 +3,7 @@ package com.lims.manage.erp.controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -311,6 +313,38 @@ public class TestInstrumentController extends ApiController {
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户："+userInfo.getUsername()
                 +"删除设备仪器"+idList+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
         return ResultUtil.success("设备删除成功！", idList);
+    }
+
+    /**
+     * 打印设备标签
+     * @param id
+     * @param response
+     */
+    @GetMapping("printDeviceLable")
+    public void printDeviceLable(Integer id, HttpServletResponse response){
+        if (id == null){
+            return;
+        }
+        //根据设备id获取设备详情
+        LambdaQueryWrapper<TestInstrument> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(TestInstrument::getId,id);
+        TestInstrument testInstrument = testInstrumentService.getOne(queryWrapper);
+        if (testInstrument != null){
+            response.reset();
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("UTF-8");
+            try {
+                String fileName = URLEncoder.encode(testInstrument.getName()+"_"+testInstrument.getCode(), "UTF-8");
+                response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
+                ServletOutputStream outputStream = testInstrumentService.printDeviceLable(id,testInstrument, response);
+                outputStream.flush();
+                outputStream.close();
+            }catch (Exception e){
+                logger.error("打印设备标签异常:{}",e);
+            }
+        }
+
     }
 }
 

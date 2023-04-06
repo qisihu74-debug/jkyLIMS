@@ -12,6 +12,8 @@ import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 
@@ -90,5 +92,6 @@ public interface TestInstrumentService extends IService<TestInstrument> {
      */
     boolean deleteDevice(List<Long> idList);
 
+    ServletOutputStream printDeviceLable(Integer id, TestInstrument testInstrument, HttpServletResponse response) throws Exception;
 }
 

@@ -1,6 +1,8 @@
 package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.aspose.cells.SaveFormat;
+import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -20,6 +22,8 @@ import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.PDFHelper3;
+import com.lims.manage.erp.util.QRCodeUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.InstrumentRecordListVo;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
@@ -31,6 +35,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
@@ -364,6 +376,31 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         return false;
     }
 
+    @Override
+    public ServletOutputStream printDeviceLable(Integer id, TestInstrument testInstrument, HttpServletResponse response) throws Exception {
+        ServletOutputStream outputStream = response.getOutputStream();
+        PDFHelper3.getLicense();
+        //填冲数据
+        InputStream fileStream = MinIoUtil.getFileStream("sample-tag", "device-lable.xlsx");
+        InputStream imageStrem = MinIoUtil.getFileStream("sample-tag", "logo.png");
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        //填充数据
+        worksheet.getCells().get("I6").setValue(testInstrument.getName());//设备名称
+        worksheet.getCells().get("I11").setValue(testInstrument.getCode());//设备编号
+        worksheet.getCells().get("I14").setValue(testInstrument.getModel());//设备型号
+        worksheet.getCells().get("I17").setValue(testInstrument.getSerialNumber());//出厂编号
+        //设置二维码
+        BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(id+"");
+
+        InputStream stream = bufferedImageToInputStream(bufferedImage);
+        //设置二维码和logo
+        worksheet.getPictures().add(1,3,imageStrem,30,30);
+        worksheet.getPictures().add(11,19,stream,16,16);
+        workbook.save(outputStream, SaveFormat.XLSX);
+        return outputStream;
+    }
+
     private String upload(MultipartFile file) {
         String fileName = file.getOriginalFilename();
         String upload = MinIoUtil.upload("", file, fileName);
@@ -378,5 +415,16 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         return decode;
     }
 
+    public InputStream bufferedImageToInputStream(BufferedImage image){
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "jpg", os);
+            InputStream input = new ByteArrayInputStream(os.toByteArray());
+            return input;
+        } catch (IOException e) {
+            log.error("提示:",e);
+        }
+        return null;
+    }
 }
 
