@@ -279,7 +279,7 @@
                 and t1.end_time &lt;= STR_TO_DATE( #{endTime}, '%Y-%m-%d %H:%i:%s' )
             </if>
         </where>
-        order by t1.start_time
+        order by t1.time desc
     </select>
 
     <select id="getInstrumentInfo" resultType="java.lang.String"
@@ -297,4 +297,19 @@
         from test_instrument_use_record
         where esc_rel_id = #{escRelId}
     </delete>
+
+    <select id="getIds" resultType="com.lims.manage.erp.vo.InstrumentAppVo">
+        SELECT
+            id AS recordId,
+            instrument_id AS id,
+            esc_rel_id AS escRelId,
+            task_id AS taskId
+        FROM
+            test_instrument_use_record
+        WHERE
+            id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.recordId}
+        </foreach>
+    </select>
 </mapper>

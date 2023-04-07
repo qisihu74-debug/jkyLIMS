@@ -15,11 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.Serializable;
 import java.util.Iterator;
 
 /**
@@ -83,7 +82,7 @@ public class AppTestInstrumentController {
                         Iterator<CheckItemInfoVo> it = sampleDetailVo.getCheckItemInfoList().iterator();
                         while (it.hasNext()) {
                             CheckItemInfoVo checkItemVo = it.next();
-                            if (checkItemVo.getEndTime() != null && (checkItemVo.getState() < 2 && checkItemVo.getState() > 4)) {
+                            if (checkItemVo.getEndTime() != null && (checkItemVo.getState() >= 2 || checkItemVo.getState() >= 3)) {
                                 it.remove();
                             }
                         }
@@ -118,12 +117,52 @@ public class AppTestInstrumentController {
 
     /**
      * 结束试验
+     *
      * @param instrumentVo
      * @return
      */
     @RequestMapping("endToTest")
     public Result endToTest(@RequestBody InstrumentVo instrumentVo) {
-        return ResultUtil.success(appTestInstrumentService.startToTest(instrumentVo));
+        return ResultUtil.success(appTestInstrumentService.endToTest(instrumentVo,1));
+    }
+
+    /**
+     * 结束复核
+     *
+     * @param instrumentVo
+     * @return
+     */
+    @RequestMapping("closingReview")
+    public Result closingReview(@RequestBody InstrumentVo instrumentVo) {
+        return ResultUtil.success(appTestInstrumentService.endToTest(instrumentVo,2));
+    }
+
+    /**
+     * 根据设备id查询设备详细信息
+     *
+     * @param instrumentId
+     * @return
+     */
+    @RequestMapping("getDetails")
+    public Result InstrumentDetails(Long instrumentId) {
+        if (instrumentId == null || instrumentId.equals("")) {
+            return ResultUtil.error("参数为空");
+        }
+        return ResultUtil.success(appTestInstrumentService.InstrumentDetails(instrumentId));
+    }
+
+    /**
+     * 根据记录id返回记录详细信息
+     *
+     * @param recordId
+     * @return
+     */
+    @RequestMapping("getRecordDetails")
+    public Result getRecordDetails(Long recordId) {
+        if (recordId == null || recordId.equals("")) {
+            return ResultUtil.error("参数为空");
+        }
+        return ResultUtil.success(appTestInstrumentService.getRecordDetails(recordId));
     }
 
 

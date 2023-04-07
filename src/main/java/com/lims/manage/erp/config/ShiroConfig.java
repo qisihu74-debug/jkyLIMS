@@ -80,6 +80,8 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/testInstrument/batchExportInstrumentRecord", "anon");
         filterChainDefinitionMap.put("/app/testInstrument/taskList", "anon");
         filterChainDefinitionMap.put("/**/web/file_output_stream/getEntrustFileUrls", "anon");
+        filterChainDefinitionMap.put("/app/accountUsage/*", "anon");
+        filterChainDefinitionMap.put("/app/testInstrument/getDetails", "anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");

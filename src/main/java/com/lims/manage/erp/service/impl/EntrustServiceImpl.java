@@ -743,6 +743,7 @@ public class EntrustServiceImpl implements EntrustService {
             //得到总价钱，再保存委托基本信息
 //            basisInfo.setPaymentCount(totalMoney + "");2022年5月20日修改，不在后台计算检测项价格
             //存放委托基本信息==》test_entrusted
+            basisInfo.setState(0);
             entityMapper.updateEntrustInfos(basisInfo);
 //        }
         return true;
@@ -1436,9 +1437,18 @@ public class EntrustServiceImpl implements EntrustService {
                 entityMapper.batchUpdateTaskPrice(priceVos);
             }
         }
-//        if (flag) {
-//
-//        }
+
+        // 通过检测项 是否有所属团队 设置委托单状态 task!=null 设置state=默认值，task==null 设置待发布 state=1。
+        List<Long> entrustIds = new ArrayList<>();
+        entrustIds.add(vo.getId());
+        List<SampleItemEntity> itemList = entityMapper.getSampleItemList(entrustIds);
+        if(!CollectionUtils.isEmpty(itemList)){
+            for(SampleItemEntity itemData :itemList){
+                if(itemData !=null && itemData.getTaskId()== null){
+                    state = 0;
+                }
+            }
+        }
         basisInfo.setState(state);
         logger.info("委托单编号："+oldEntrustInfo.getEntrustmentNo()+"的委托单的状态为"+state);
         entityMapper.updateEntrustInfos(basisInfo);

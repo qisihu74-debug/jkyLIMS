@@ -1,14 +1,10 @@
 package com.lims.manage.erp.service.impl;
 
 import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.InstrumentRecordEntityMapper;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestDetectionDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.AppTestInstrumentService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.ConvertUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
@@ -42,6 +38,8 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
     TestDetectionDao testDetectionDao;
     @Autowired
     LogManagerService logManagerService;
+    @Autowired
+    TestInstrumentDao testInstrumentDao;
 
     @Override
     public List<TaskListVo> detectionTaskList(String search, Long userId) {
@@ -50,7 +48,7 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
 
     @Override
     public List<TaskListVo> taskList(String search, Long instrumentId) {
-        return taskMapper.taskList(search,instrumentId);
+        return taskMapper.taskList(search, instrumentId);
     }
 
     @Override
@@ -191,14 +189,146 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
         return "开始实验成功";
     }
 
+    /**
+     * 结束试验
+     *
+     * @param instrumentVo 数据源
+     * @param type         类型 （结束试验的话 type = 1、点击提交复核 type =2）
+     * @return
+     */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String endToTest(InstrumentVo instrumentVo, Integer type) {
-        //
         //结束试验的话 列1： 改变endTime 时间。
-        if (type == 1) {
-
-        }
         //点击提交复核 列2： state = 2 待复核。
-        return null;
+        Integer state = null;
+        if (type == 2) {
+            state = 2;
+        }
+        // 遍历 设备使用记录id
+        if (!CollectionUtils.isEmpty(instrumentVo.getInstrumentRecordListVos())) {
+            for (InstrumentRecordListVo instrumentRecordListVo : instrumentVo.getInstrumentRecordListVos()) {
+                // 更新仪器使用记录
+                InstrumentRecordEntity instrumentRecordEntity = new InstrumentRecordEntity();
+                // 仪器使用记录id
+                instrumentRecordEntity.setId(instrumentRecordListVo.getRecordId());
+                // 仪器使用记录结束时间
+                instrumentRecordEntity.setEndTime(instrumentVo.getEndTime());
+                instrumentRecordEntityMapper.updateByPrimaryKeySelective(instrumentRecordEntity);
+
+                //记录日志
+                StringBuilder stringBuilder10 = new StringBuilder();
+                stringBuilder10.append(" 仪器使用记录id：" + instrumentRecordEntity.getId());
+                stringBuilder10.append(" 仪器使用记录结束时间：" + instrumentRecordEntity.getEndTime());
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "APP端更新使用记录id\n\t" + stringBuilder10.toString(), Const.TASK_TEST, true);
+            }
+            // 通过仪器记录id 集合 获取 数据源。
+            // 仪器id
+            Set<Long> instrumentIds = new HashSet<>();
+            // 检测项id
+            Set<Long> itemIds = new HashSet<>();
+            // taskId
+            Set<Long> taskIds = new HashSet<>();
+            // 通过记录id集合 获取所属 记录id、仪器id、检测项id、taskId
+            List<InstrumentAppVo> ids = instrumentRecordEntityMapper.getIds(instrumentVo.getInstrumentRecordListVos());
+            if (!CollectionUtils.isEmpty(ids)) {
+                for (InstrumentAppVo data : ids) {
+                    // 仪器id
+                    instrumentIds.add(data.getId());
+                    // 检测项id
+                    itemIds.add(data.getEscRelId());
+                    // taskId
+                    taskIds.add(data.getTaskId());
+                }
+            }
+            // 更新仪器状态
+            for (Long id : instrumentIds) {
+                InstrumentAppVo instrumentAppVo = new InstrumentAppVo();
+                instrumentAppVo.setId(id);
+                instrumentAppVo.setDeviceState(instrumentVo.getDeviceState());
+                testInstrumentDao.updateInstrument(instrumentAppVo);
+
+                //记录日志
+                StringBuilder stringBuilder11 = new StringBuilder();
+                stringBuilder11.append(" 仪器id：" + instrumentAppVo.getId());
+                stringBuilder11.append(" 仪器状态：" + instrumentAppVo.getDeviceState());
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "APP端更新仪器状态\n\t" + stringBuilder11.toString(), Const.TASK_TEST, true);
+            }
+            // 更新检测项结束时间
+            for (Long id : itemIds) {
+                SampleItemInstrumentEntity sampleItemInstrumentEntity = new SampleItemInstrumentEntity();
+                sampleItemInstrumentEntity.setItemId(id.intValue());
+                sampleItemInstrumentEntity.setEndTime(instrumentVo.getEndTime());
+                sampleItemInstrumentEntity.setState(state);
+                testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
+
+                //记录日志
+                StringBuilder stringBuilder13 = new StringBuilder();
+                stringBuilder13.append(" 检测项id：" + sampleItemInstrumentEntity.getId());
+                stringBuilder13.append(" 检测项状态：" + sampleItemInstrumentEntity.getState());
+                stringBuilder13.append(" 检测项结束时间：" + sampleItemInstrumentEntity.getEndTime());
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "APP端更新检测项\n\t" + stringBuilder13.toString(), Const.TASK_TEST, true);
+            }
+            // 通过任务单id 查询检测项
+            for (Long taskId : taskIds) {
+                Boolean status = true;
+                // 通过任务单id 获取所属检测项列表
+                List<CheckItemInfoVo> itemList = taskMapper.getEntrustItemVos(taskId);
+                if (!CollectionUtils.isEmpty(itemList)) {
+                    for (CheckItemInfoVo checkItemInfoVo : itemList) {
+                        // 检测项未 全部开检 则任务单无法结束试验
+                        if (checkItemInfoVo.getState() != null && checkItemInfoVo.getState() < 2) {
+                            status = false;
+                        }
+                    }
+                }
+                // if status = true 更新任务单为结束。
+                if (status) {
+                    // 更新任务单状态
+                    TaskTestEntity taskTestEntity = new TaskTestEntity();
+                    taskTestEntity.setId(taskId);
+                    // 任务单 == 4 试验完成
+                    taskTestEntity.setState(4);
+                    taskTestEntity.setEndDetectionTime(new Date(System.currentTimeMillis()));
+                    //记录日志
+                    StringBuilder stringBuilder1 = new StringBuilder();
+                    stringBuilder1.append(" 任务单id：" + taskTestEntity.getId());
+                    stringBuilder1.append(" 任务单状态：" + taskTestEntity.getState());
+                    stringBuilder1.append(" 任务结束时间：");
+                    if (!StringUtils.isEmpty(taskTestEntity.getEndDetectionTime())) {
+                        stringBuilder1.append(new Timestamp(taskTestEntity.getEndDetectionTime().getTime()));
+                    }
+                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "APP端试验检测-任务单结束试验\n\t" + stringBuilder1.toString(), Const.TASK_TEST, true);
+                    taskMapper.updateTestTask(taskTestEntity);
+                }
+            }
+        }
+        return "结束试验";
+    }
+
+    @Override
+    public InstrumentAppVo InstrumentDetails(Long id) {
+        InstrumentAppVo InstrumentDetails = testInstrumentDao.selectDetails(id);
+        InstrumentRecordParamVo paramVo = new InstrumentRecordParamVo();
+        paramVo.setInstrumentId(id);
+        // 使用记录
+        List<InstrumentRecordListVo> instrumentRecord = instrumentRecordEntityMapper.getInstrumentRecord(paramVo);
+        Map<String, Object> map = new HashMap<>();
+        if (CollectionUtils.isEmpty(instrumentRecord)) {
+            map.put("usageRecord", new HashMap<>());
+        } else {
+            map.put("usageRecord", instrumentRecord);
+        }
+        map.put("maintenanceRecord", new HashMap<>());
+        map.put("maintenanceLog", new HashMap<>());
+        InstrumentDetails.setRecordFile(map);
+        // 通过设备id 查询仪器记录
+        return InstrumentDetails;
+    }
+
+    @Override
+    public InstrumentAppVo getRecordDetails(Long id) {
+        // 查询记录id详情 、 查询仪器详情
+        return instrumentRecordEntityMapper.selectRecordDetails(id);
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,6 +48,10 @@ public class InstrumentVo {
      */
     private String user;
 
-    private List<CheckItemInfoVo> checkItemInfoList;
+    private List<CheckItemInfoVo> checkItemInfoList = new ArrayList<>();
+    /**
+     * 设备使用记录
+     */
+    private List<InstrumentRecordListVo> instrumentRecordListVos = new ArrayList<>();
 
 }
