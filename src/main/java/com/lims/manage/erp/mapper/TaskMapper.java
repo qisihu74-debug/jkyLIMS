@@ -492,7 +492,9 @@ public interface TaskMapper extends BaseMapper {
     @Select("SELECT\n" +
             "\tid AS itemId,\n" +
             "\tcheck_item_name AS checkItemName ,\n" +
-            "\ttask_id as taskId\n" +
+            "\ttask_id as taskId,\n" +
+            "\tstate as state,\n" +
+            "\tend_time as endTime\n" +
             "FROM\n" +
             "\ttest_entrusted_sample_checkitem_rel \n" +
             "WHERE\n" +

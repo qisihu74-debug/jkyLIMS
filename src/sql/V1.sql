@@ -488,3 +488,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- 仪器使用记录 增加字段（task_id）
 ALTER TABLE `test_instrument_use_record`
 ADD COLUMN `task_id`  bigint NULL COMMENT '任务单id 防止任务单id被删除' AFTER `time`;
+
+-- 仪器 增加字段（device_state）设备状态
+ALTER TABLE `test_instrument`
+ADD COLUMN `device_state`  VARCHAR(50) NULL COMMENT '设备状态' AFTER `update_time`;

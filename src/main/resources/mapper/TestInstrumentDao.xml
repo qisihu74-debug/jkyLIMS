@@ -98,5 +98,31 @@
         on duplicate key update
          type_id = values(type_id) , name = values(name) , laboratory_id = values(laboratory_id) , code = values(code) , old_code = values(old_code) , manufacturer = values(manufacturer) , model = values(model) , serial_number = values(serial_number) , price = values(price) , picture = values(picture) , incorporated_date = values(incorporated_date) , appraisal_date = values(appraisal_date) , is_port = values(is_port) , level = values(level) , validity_date = values(validity_date) , content = values(content) , check_price = values(check_price) , specs = values(specs) , range = values(range) , contract_url = values(contract_url) , invoice_url = values(invoice_url) , remark = values(remark) , device_admin = values(device_admin) , price_per_hour = values(price_per_hour) , traceability_mode = values(traceability_mode) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time)     </insert>
 
+    <select id="selectDetails" resultType="com.lims.manage.erp.vo.InstrumentAppVo">
+        SELECT
+            id,
+            CODE,
+            NAME,
+            model,
+            manufacturer,
+            serial_number,
+            calibration_param,
+            appraisal_date,
+            expire_date,
+            device_state
+        FROM
+            test_instrument
+        WHERE
+            id = #{id}
+    </select>
+
+    <update id="updateInstrument" parameterType="com.lims.manage.erp.vo.InstrumentAppVo">
+        UPDATE test_instrument
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deviceState!=null and deviceState!=''">device_state=#{deviceState},</if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+
 </mapper>
 

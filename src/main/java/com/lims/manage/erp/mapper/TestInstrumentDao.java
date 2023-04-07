@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.lims.manage.erp.entity.TestLaboratory;
+import com.lims.manage.erp.vo.InstrumentAppVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
 import com.lims.manage.erp.vo.TestLaboratoryVo;
 import org.apache.ibatis.annotations.Param;
@@ -39,5 +40,19 @@ int insertOrUpdateBatch(@Param("entities") List<TestInstrument> entities);
 
 
 IPage<TestInstrumentVo> getPageList(IPage<TestInstrumentVo> page, @Param(Constants.WRAPPER) Wrapper<TestInstrument> queryWrapper);
+
+    /**
+     * 查询设备详情
+     * @param id
+     * @return
+     */
+    InstrumentAppVo selectDetails(@Param("id")Long id);
+
+    /**
+     * 动态更新设备
+      * @param instrumentAppVo
+     * @return
+     */
+    int updateInstrument(InstrumentAppVo instrumentAppVo);
 }
 

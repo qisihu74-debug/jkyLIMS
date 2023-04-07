@@ -1,9 +1,6 @@
 package com.lims.manage.erp.service;
 
-import com.lims.manage.erp.vo.InstrumentVo;
-import com.lims.manage.erp.vo.LabelValueTeamVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.TaskListVo;
+import com.lims.manage.erp.vo.*;
 
 import java.util.List;
 
@@ -50,5 +47,17 @@ public interface AppTestInstrumentService {
      * @return
      */
     String endToTest(InstrumentVo instrumentVo,Integer type);
+
+    /**
+     * 根据设备id 查询详情数据
+     */
+    InstrumentAppVo InstrumentDetails(Long id);
+
+    /**
+     * 根据记录id返回记录详细信息
+     */
+    InstrumentAppVo getRecordDetails(Long id);
+
+
 
 }

@@ -1099,7 +1099,8 @@
             id itemId,
             check_item_name,
             check_item_id,
-            entrust_id entrustId
+            entrust_id entrustId,
+            task_id taskId
         FROM
         test_entrusted_sample_checkitem_rel
         WHERE entrust_id in
