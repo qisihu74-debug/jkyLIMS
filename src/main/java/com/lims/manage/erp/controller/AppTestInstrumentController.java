@@ -82,7 +82,7 @@ public class AppTestInstrumentController {
                         Iterator<CheckItemInfoVo> it = sampleDetailVo.getCheckItemInfoList().iterator();
                         while (it.hasNext()) {
                             CheckItemInfoVo checkItemVo = it.next();
-                            if (checkItemVo.getEndTime() != null && (checkItemVo.getState() < 2 && checkItemVo.getState() > 4)) {
+                            if (checkItemVo.getEndTime() != null && (checkItemVo.getState() >= 2 || checkItemVo.getState() >= 3)) {
                                 it.remove();
                             }
                         }

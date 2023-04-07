@@ -860,4 +860,23 @@
 				test_entrusted_info
 				WHERE id = #{entrustmentId}
     </select>
+
+    <select id="selectOrderTaskTest" resultType="com.lims.manage.erp.entity.TaskTestEntity">
+        SELECT
+        id,
+        inspector inspector,
+        reviewer reviewer,
+        orderer,
+        entrustment_id as entrustmentId
+        FROM
+        test_task
+        where 1=1
+        <if test="startDate!=null">
+            and start_detection_time <![CDATA[ >= ]]>  #{startDate}
+        </if>
+        <if test="stopDate!=null">
+            and end_detection_time <![CDATA[ <= ]]>  #{stopDate}
+        </if>
+        GROUP BY(CONCAT(orderer,entrustment_id))
+    </select>
 </mapper>

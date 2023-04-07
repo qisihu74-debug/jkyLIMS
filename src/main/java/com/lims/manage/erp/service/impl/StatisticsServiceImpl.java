@@ -169,6 +169,30 @@ public class StatisticsServiceImpl implements StatisticsService {
                 personalStatsVo.setEntrustNumber(map);
             }
         }
+        // 统计发布人
+        List<TaskTestEntity> orderList = statisticsMapper.selectOrderTaskTest(personalStats);
+        //键的foreach遍历
+        Set<String>keys = nameMap.keySet();
+        for(String key:keys){
+            nameMap.put(key,0);
+        }
+        // 统计发布人
+        for (TaskTestEntity taskTestEntity : orderList) {
+            if (!org.springframework.util.StringUtils.isEmpty(taskTestEntity.getOrderer())) {
+                Integer mapValue = nameMap.get(taskTestEntity.getOrderer());
+                if (mapValue != null) {
+                    nameMap.put(taskTestEntity.getOrderer(), mapValue += 1);
+                }
+            }
+        }
+        // 遍历 委托下 发布人的 统计数量。
+        for (PersonalStatsVo personalStatsVo : perons) {
+            Integer map = nameMap.get(personalStatsVo.getName());
+            if(map!=null){
+                personalStatsVo.setTaskNumber(map);
+            }
+        }
+
         // 统计任务单信息 -- 检测人（指定的在任务领取中） 邓喜旺&1647657004269101
         methodInspectorTask(testList,userIdMap,perons);
 

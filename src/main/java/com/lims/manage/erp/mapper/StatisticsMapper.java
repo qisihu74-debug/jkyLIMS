@@ -130,4 +130,9 @@ public interface StatisticsMapper {
      * 通过委托单id 获取折扣率
      */
     String getDiscount(Long entrustmentId);
+
+    /**
+     * 查询任务单 获取发布人
+     */
+    List<TaskTestEntity> selectOrderTaskTest(PersonalStatsVo personalStats);
 }

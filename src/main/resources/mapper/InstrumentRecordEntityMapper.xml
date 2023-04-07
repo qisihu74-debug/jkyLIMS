@@ -279,7 +279,7 @@
                 and t1.end_time &lt;= STR_TO_DATE( #{endTime}, '%Y-%m-%d %H:%i:%s' )
             </if>
         </where>
-        order by t1.start_time
+        order by t1.time desc
     </select>
 
     <select id="getInstrumentInfo" resultType="java.lang.String"
