@@ -131,17 +131,17 @@ public interface ReportMapper {
      * @param reportCode
      * @param url
      */
-    @Update("update test_report_record set report_url=#{url},verifyer=#{verifyer},issuer=#{issuer}," +
+    @Update("update test_report_record set inspector=#{inspector},report_url=#{url},verifyer=#{verifyer},issuer=#{issuer}," +
             "verifyer_id=#{verifyerId},issuer_id=#{issuerId},report_complete_time=#{now},state='3'," +
             "applicant=#{applicant} where entrustment_id=#{entrustId} ")
-    void updateUrl(@Param("entrustId") String reportCode, @Param("url") String url,
+    void updateUrl(@Param("entrustId") String reportCode,@Param("inspector") String inspector, @Param("url") String url,
                    @Param("verifyer") String verifyer, @Param("issuer") String issuer,
                    @Param("verifyerId") Long verifyerId, @Param("issuerId") Long issuerId,
                    @Param("now")Date now,@Param("applicant") String applicant);
 
-    @Update("update test_report_record set verifyer=#{verifyer},issuer=#{issuer}," +
+    @Update("update test_report_record set inspector=#{inspector},verifyer=#{verifyer},issuer=#{issuer}," +
             "verifyer_id=#{verifyerId},issuer_id=#{issuerId},combine_time=#{combineTime} where entrustment_id=#{entrustId}")
-    void updateVerAndIss(@Param("entrustId") String reportCode, @Param("verifyer") String verifyer, @Param("issuer") String issuer,
+    void updateVerAndIss(@Param("entrustId") String reportCode,@Param("inspector") String inspector, @Param("verifyer") String verifyer, @Param("issuer") String issuer,
                    @Param("verifyerId") Long verifyerId,@Param("combineTime") Date combineTime, @Param("issuerId") Long issuerId);
 
     /**
@@ -208,15 +208,15 @@ public interface ReportMapper {
     @Select("select entrust_id from test_report_record where id=#{id}")
     Long getZjEntrustIdById(@Param("id") Long id);
 
-    @Update("update test_report_record set verifyer=#{verifyer},issuer=#{issuer}," +
+    @Update("update test_report_record set inspector=#{inspector},verifyer=#{verifyer},issuer=#{issuer}," +
             "verifyer_id=#{verifyerId},issuer_id=#{issuerId},combine_time=#{combineTime} where entrust_id=#{entrustId}")
-    void updateVerAndIssZj(@Param("entrustId") String reportCode, @Param("verifyer") String verifyer, @Param("issuer") String issuer,
+    void updateVerAndIssZj(@Param("entrustId") String reportCode,@Param("inspector") String inspector, @Param("verifyer") String verifyer, @Param("issuer") String issuer,
                          @Param("verifyerId") Long verifyerId,@Param("combineTime") Date combineTime, @Param("issuerId") Long issuerId);
 
-    @Update("update test_report_record set report_url=#{url},verifyer=#{verifyer},issuer=#{issuer}," +
+    @Update("update test_report_record set inspector=#{inspector},report_url=#{url},verifyer=#{verifyer},issuer=#{issuer}," +
             "verifyer_id=#{verifyerId},issuer_id=#{issuerId},report_complete_time=#{now},state='3'," +
             "applicant=#{applicant} where entrust_id=#{entrustId} ")
-    void updateUrlZj(@Param("entrustId") String reportCode, @Param("url") String url,
+    void updateUrlZj(@Param("entrustId") String reportCode,@Param("inspector") String inspector, @Param("url") String url,
                    @Param("verifyer") String verifyer, @Param("issuer") String issuer,
                    @Param("verifyerId") Long verifyerId, @Param("issuerId") Long issuerId,
                    @Param("now")Date now,@Param("applicant") String applicant);

@@ -667,7 +667,9 @@ public class ReportController {
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file,
                                @RequestParam("code") String code,@RequestParam("conclusion") String conclusion
             ,@RequestParam("additional") String additional,@RequestParam("mixInfo") String mixInfo,@RequestParam("type") String type,@RequestParam("reportType") String reportType) {
-        if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
+
+        logger.debug("发起审批检测人:{},审核人:{},签发人:{}",inspector,verifyer,issuer);
+        if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer) || org.apache.commons.lang3.StringUtils.isEmpty(inspector)){
             return ResultUtil.error("缺少参数！");
         }
         Boolean flag = reportService.uploadReport(reportCode,file,verifyer.split("&")[0],issuer.split("&")[0]

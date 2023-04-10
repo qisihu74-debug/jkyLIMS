@@ -1156,9 +1156,9 @@ public class ReportServiceImpl implements ReportService {
         Long along = recordEntityMapper.checkExist(Long.parseLong(reportCode),reportType);
         //TODO (报告) 兼容中间报告
         if (along == null){
-            reportMapper.updateVerAndIssZj(reportCode, verifyer, issuer, verifyerId,new Date(System.currentTimeMillis()), issuerId);
+            reportMapper.updateVerAndIssZj(reportCode, inspector,verifyer, issuer, verifyerId,new Date(System.currentTimeMillis()), issuerId);
         }else {
-            reportMapper.updateVerAndIss(reportCode, verifyer, issuer, verifyerId,new Date(System.currentTimeMillis()), issuerId);
+            reportMapper.updateVerAndIss(reportCode, inspector,verifyer, issuer, verifyerId,new Date(System.currentTimeMillis()), issuerId);
         }
         //设置签名信息
         String url1 = "";
@@ -1177,9 +1177,9 @@ public class ReportServiceImpl implements ReportService {
         }
         //TODO (报告) 兼容中间报告
         if (along == null){
-            reportMapper.updateUrlZj(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrlZj(reportCode,inspector, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
         }else {
-            reportMapper.updateUrl(reportCode, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrl(reportCode,inspector, url, verifyer, issuer, verifyerId, issuerId,new Date(),ShiroUtils.getUserInfo().getName());
         }
         logger.info("签名信息更新成功！:{}",reportCode+":"+url);
         //更新配合比信息
