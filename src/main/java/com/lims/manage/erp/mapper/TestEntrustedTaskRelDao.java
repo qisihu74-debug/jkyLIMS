@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
 import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -88,5 +89,8 @@ public interface TestEntrustedTaskRelDao {
      * @return
      */
     List<TestEntrustedTaskRelEntity> getEntrustMidReport(Long entrustId, Integer taskFlowId);
+
+    @Delete("DELETE FROM test_entrusted_task_rel  WHERE task_id =#{taskId}")
+    int deleteTaskId(@Param("taskId")Long taskId);
 
 }

@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * @Author: DLC
@@ -42,10 +44,15 @@ public class AppTestInstrumentController {
      * @return
      */
     @RequestMapping("detectionTaskList")
-    public Result detectionTaskList(String search) {
-        // 验证登录人信息 和部门 存入
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        return ResultUtil.success(appTestInstrumentService.detectionTaskList(search, userInfo.getUserId()));
+    public Result detectionTaskList(String search, Long instrumentId) {
+        // 当前任务单列表 == null ，调用检测任务列表
+        if (CollectionUtils.isEmpty(appTestInstrumentService.taskList(search, instrumentId))) {
+            // 验证登录人信息 和部门 存入
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            return ResultUtil.success(appTestInstrumentService.detectionTaskList(search, userInfo.getUserId()));
+        }
+        // 非空 返回空集合
+        return ResultUtil.error("当前任务列表未全部结束");
     }
 
     /**
@@ -63,34 +70,39 @@ public class AppTestInstrumentController {
     /**
      * 任务单详情（检测项待复核不展示）
      *
-     * @param taskId
+     * @param taskIds
      * @return
      */
     @RequestMapping("taskDetails")
-    public Result taskDetails(Long taskId) {
-        if (StringUtils.isEmpty(taskId)) {
+    @ResponseBody
+    public Result taskDetails(@RequestParam List<Long> taskIds) {
+        if (CollectionUtils.isEmpty(taskIds)) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }
-        // 根据 taskId 展示详情
-        TaskDetailInfoVo taskDetails = taskService.getTaskDetailInfoTwo(taskId, null);
-        if (taskDetails != null) {
-            // 遍历样品
-            if (!CollectionUtils.isEmpty(taskDetails.getSampleDetailList())) {
-                for (SampleDetailVo sampleDetailVo : taskDetails.getSampleDetailList()) {
-                    // 处理 检测项待复核 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回
-                    if (!CollectionUtils.isEmpty(sampleDetailVo.getCheckItemInfoList())) {
-                        Iterator<CheckItemInfoVo> it = sampleDetailVo.getCheckItemInfoList().iterator();
-                        while (it.hasNext()) {
-                            CheckItemInfoVo checkItemVo = it.next();
-                            if (checkItemVo.getEndTime() != null && (checkItemVo.getState() >= 2 || checkItemVo.getState() >= 3)) {
-                                it.remove();
+        List<TaskDetailInfoVo> list = new ArrayList<>();
+        for (Long taskId : taskIds) {
+            // 根据 taskId 展示详情
+            TaskDetailInfoVo taskDetails = taskService.getTaskDetailInfoTwo(taskId, null);
+            if (taskDetails != null) {
+                // 遍历样品
+                if (!CollectionUtils.isEmpty(taskDetails.getSampleDetailList())) {
+                    for (SampleDetailVo sampleDetailVo : taskDetails.getSampleDetailList()) {
+                        // 处理 检测项待复核 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回
+                        if (!CollectionUtils.isEmpty(sampleDetailVo.getCheckItemInfoList())) {
+                            Iterator<CheckItemInfoVo> it = sampleDetailVo.getCheckItemInfoList().iterator();
+                            while (it.hasNext()) {
+                                CheckItemInfoVo checkItemVo = it.next();
+                                if (checkItemVo.getEndTime() != null && (checkItemVo.getState() >= 2 || checkItemVo.getState() >= 3)) {
+                                    it.remove();
+                                }
                             }
                         }
                     }
                 }
             }
+            list.add(taskDetails);
         }
-        return ResultUtil.success("查询任务详情成功！", taskDetails);
+        return ResultUtil.success("查询任务详情成功！", list);
     }
 
     /**
@@ -112,6 +124,12 @@ public class AppTestInstrumentController {
      */
     @RequestMapping("startToTest")
     public Result startToTest(@RequestBody InstrumentVo instrumentVo) {
+        if (instrumentVo == null) {
+            return ResultUtil.error("参数不能为空");
+        }
+        if (CollectionUtils.isEmpty(instrumentVo.getCheckItemInfoList())) {
+            return ResultUtil.error("参数不能为空");
+        }
         return ResultUtil.success(appTestInstrumentService.startToTest(instrumentVo));
     }
 
@@ -123,7 +141,13 @@ public class AppTestInstrumentController {
      */
     @RequestMapping("endToTest")
     public Result endToTest(@RequestBody InstrumentVo instrumentVo) {
-        return ResultUtil.success(appTestInstrumentService.endToTest(instrumentVo,1));
+        if (instrumentVo == null) {
+            return ResultUtil.error("参数不能为空");
+        }
+        if (CollectionUtils.isEmpty(instrumentVo.getCheckItemInfoList())) {
+            return ResultUtil.error("参数不能为空");
+        }
+        return ResultUtil.success(appTestInstrumentService.endToTest(instrumentVo, 1));
     }
 
     /**
@@ -134,7 +158,13 @@ public class AppTestInstrumentController {
      */
     @RequestMapping("closingReview")
     public Result closingReview(@RequestBody InstrumentVo instrumentVo) {
-        return ResultUtil.success(appTestInstrumentService.endToTest(instrumentVo,2));
+        if (instrumentVo == null) {
+            return ResultUtil.error("参数不能为空");
+        }
+        if (CollectionUtils.isEmpty(instrumentVo.getCheckItemInfoList())) {
+            return ResultUtil.error("参数不能为空");
+        }
+        return ResultUtil.success(appTestInstrumentService.endToTest(instrumentVo, 2));
     }
 
     /**
