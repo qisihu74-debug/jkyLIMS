@@ -619,4 +619,16 @@
             #{id}
         </foreach>
     </delete>
+
+    <select id="getDeviceList" resultType="com.lims.manage.erp.vo.LabelValueVo" parameterType="java.lang.String">
+        SELECT
+            t1.value,t1.label
+        FROM
+                ( SELECT id value, CONCAT( `code`, '&amp;', `name`, '&amp;', model ) label,del_flag FROM test_instrument ) t1
+        WHERE
+            t1.del_flag = 0
+        <if test="search!=null">
+            and t1.label LIKE CONCAT('%',#{search},'%')
+        </if>
+    </select>
 </mapper>

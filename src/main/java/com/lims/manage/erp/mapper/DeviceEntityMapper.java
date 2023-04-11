@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.DeviceEntity;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -51,5 +52,11 @@ public interface DeviceEntityMapper {
      * @return
      */
     int deleteByIds(@Param("idList") List<Long> idList);
+
+    /**
+     * 查询设备下拉列表
+     * @return
+     */
+    List<LabelValueVo> getDeviceList(@Param("search") String search);
 
 }

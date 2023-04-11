@@ -21,6 +21,7 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.ExportParamVo;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
+import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -105,6 +106,17 @@ public class TestInstrumentController extends ApiController {
         } else {
             return ResultUtil.error("参数为空");
         }
+    }
+
+    /**
+     * 查询设备下拉列表
+     * @param search
+     * @return
+     */
+    @GetMapping("/getDeviceList")
+    public Result getDeviceList(String search) {
+        List<LabelValueVo> deviceList = testInstrumentService.getDeviceList(search);
+        return ResultUtil.success(deviceList);
     }
 
     /**
