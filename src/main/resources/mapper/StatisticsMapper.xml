@@ -263,6 +263,7 @@
         LEFT JOIN test_entrusted_info as t6 ON t1.entrustment_id = t6.id
         LEFT JOIN test_report_record AS t2 ON t2.entrustment_id = t1.entrustment_id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
+           and t1.id >0
         <if test="nodeTeam!=null">
             and t1.dept_id in
             <foreach collection="nodeTeam" item="id" index="index" open="(" close=")" separator=",">

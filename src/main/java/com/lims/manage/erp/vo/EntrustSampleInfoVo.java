@@ -9,4 +9,5 @@ public class EntrustSampleInfoVo {
     private String aliasName;
     private String specs;
     private String outwardDescribe;
+    private Long entrustId;
 }

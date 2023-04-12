@@ -679,4 +679,11 @@ public interface EntrustEntityMapper extends BaseMapper {
             "WHERE\n" +
             "\tt1.id=#{taskId}")
     java.sql.Date getEntrustDateByTaskId(@Param("taskId") Long taskId);
+
+    /**
+     * 任务发布列表的样品信息
+     * @param list
+     * @return list中entrustId
+     */
+    List<EntrustSampleInfoVo> getEntrustSampleInfoIds(@Param("list") List<EntrustHistoryEntity> list);
 }

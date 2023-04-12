@@ -1724,9 +1724,15 @@ public class EntrustServiceImpl implements EntrustService {
         }
         //设置样品信息
         if(!CollectionUtils.isEmpty(subList)){
+            List<EntrustSampleInfoVo> entrustSampleInfos = entityMapper.getEntrustSampleInfoIds(subList);
             for (EntrustHistoryEntity entity : subList) {
-                List<EntrustSampleInfoVo> entrustSampleInfos = entityMapper.getEntrustSampleInfos(entity.getId());
-                entity.setSampleInfoVos(entrustSampleInfos);
+                List<EntrustSampleInfoVo> sampleInfoVos = new ArrayList<>();
+                for(EntrustSampleInfoVo entrustSampleInfoVo : entrustSampleInfos){
+                    if(entrustSampleInfoVo.getEntrustId().equals(entity.getId())){
+                        sampleInfoVos.add(entrustSampleInfoVo);
+                    }
+                }
+                entity.setSampleInfoVos(sampleInfoVos);
             }
         }
         //设置物流单号信息

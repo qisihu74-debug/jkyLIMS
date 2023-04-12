@@ -144,7 +144,7 @@ public class AppTestInstrumentController {
         if (instrumentVo == null) {
             return ResultUtil.error("参数不能为空");
         }
-        if (CollectionUtils.isEmpty(instrumentVo.getCheckItemInfoList())) {
+        if (CollectionUtils.isEmpty(instrumentVo.getInstrumentRecordListVos())) {
             return ResultUtil.error("参数不能为空");
         }
         return ResultUtil.success(appTestInstrumentService.endToTest(instrumentVo, 1));
@@ -161,7 +161,7 @@ public class AppTestInstrumentController {
         if (instrumentVo == null) {
             return ResultUtil.error("参数不能为空");
         }
-        if (CollectionUtils.isEmpty(instrumentVo.getCheckItemInfoList())) {
+        if (CollectionUtils.isEmpty(instrumentVo.getInstrumentRecordListVos())) {
             return ResultUtil.error("参数不能为空");
         }
         return ResultUtil.success(appTestInstrumentService.endToTest(instrumentVo, 2));
