@@ -347,7 +347,7 @@ public class TestInstrumentController extends ApiController {
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
             try {
-                String fileName = URLEncoder.encode(testInstrument.getName()+"_"+testInstrument.getCode(), "UTF-8");
+                String fileName = URLEncoder.encode(testInstrument.getName()+"_"+testInstrument.getCode()+".xlsx", "UTF-8");
                 response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
                 ServletOutputStream outputStream = testInstrumentService.printDeviceLable(id,testInstrument, response);
                 outputStream.flush();
