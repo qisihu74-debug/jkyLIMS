@@ -27,6 +27,7 @@ import com.lims.manage.erp.util.QRCodeUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.InstrumentRecordListVo;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
+import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -399,6 +400,12 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         worksheet.getPictures().add(11,19,stream,16,16);
         workbook.save(outputStream, SaveFormat.XLSX);
         return outputStream;
+    }
+
+    @Override
+    public List<LabelValueVo> getDeviceList(String search) {
+        List<LabelValueVo> deviceList = deviceEntityMapper.getDeviceList(search);
+        return deviceList;
     }
 
     private String upload(MultipartFile file) {

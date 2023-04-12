@@ -9,6 +9,7 @@ import com.lims.manage.erp.entity.DeviceEntity;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
+import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.TestInstrumentVo;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -93,5 +94,12 @@ public interface TestInstrumentService extends IService<TestInstrument> {
     boolean deleteDevice(List<Long> idList);
 
     ServletOutputStream printDeviceLable(Integer id, TestInstrument testInstrument, HttpServletResponse response) throws Exception;
+
+    /**
+     * 查询设备下拉列表
+     * @param search
+     * @return
+     */
+    List<LabelValueVo> getDeviceList(String search);
 }
 
