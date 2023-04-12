@@ -257,12 +257,12 @@
         t6.discount
         FROM
         test_task AS t1
-        LEFT JOIN test_report_record AS t2 ON t2.entrustment_id = t1.entrustment_id
-				LEFT JOIN test_entrusted_sample_details_rel AS t3 ON t3.entrustment_id = t1.entrustment_id
+		LEFT JOIN test_entrusted_sample_details_rel AS t3 ON t3.entrustment_id = t1.entrustment_id
         LEFT JOIN test_sample AS t4 ON t3.sample_id = t4.id
         LEFT JOIN test_entrusted_sample_checkitem_rel AS t5 ON t5.sample_id = t4.id
         LEFT JOIN test_entrusted_info as t6 ON t1.entrustment_id = t6.id
-        WHERE 1=1
+        LEFT JOIN test_report_record AS t2 ON t2.entrustment_id = t1.entrustment_id
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
         <if test="nodeTeam!=null">
             and t1.dept_id in
             <foreach collection="nodeTeam" item="id" index="index" open="(" close=")" separator=",">
@@ -281,6 +281,7 @@
         <if test="stopDate!=null">
             and t1.end_detection_time <![CDATA[ <= ]]>  #{stopDate}
         </if>
+        </trim>
         ORDER BY t1.task_code DESC
     </select>
 

@@ -567,6 +567,7 @@
         WHERE
                 entrustment_id = ( SELECT entrustment_id FROM test_task WHERE id = #{taskId} )
           AND id != #{taskId}
+          and state != 144
     </select>
     <update id="updateTestTask" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
         UPDATE test_task
@@ -830,7 +831,7 @@
     </update>
 
     <select id="getAllReportComplete" resultType="java.lang.Integer">
-        select report_complete from test_task where entrustment_id = #{entrustmentId} and id != #{taskId}
+        select report_complete from test_task where entrustment_id = #{entrustmentId} and id != #{taskId} and state != 144
     </select>
 
     <update id="batchUpdateCheckItem" parameterType="java.util.List">

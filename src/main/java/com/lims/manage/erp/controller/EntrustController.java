@@ -156,6 +156,7 @@ public class EntrustController {
         String strSuccess = entrustService.updateEntrustCheckItem(entrust);
         if (strSuccess!=null) {
             // 业务是：如果原任务单全部参数被删除，原任务单作废。
+            // 任务单作废 流转信息删除
             entrustService.verifyTaskListExists(entrust.getId());
             return ResultUtil.success(strSuccess);
         } else {
@@ -439,8 +440,6 @@ public class EntrustController {
         }
         Boolean flag = entrustService.distributionTask320(entity);
         if (flag) {
-            /*logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"账户："+ShiroUtils.getUserInfo().getUsername()+"发布任务成功编号为："+vo.getEntrustmentNo(),
-                    Const.ENTRUST_PUBLISH,true);*/
             return ResultUtil.success("委托分配成功！");
         } else {
             return ResultUtil.error( "委托分配失败！");

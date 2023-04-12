@@ -2524,6 +2524,8 @@ public class EntrustServiceImpl implements EntrustService {
                 } else {
                     vo.setIssueReport("否");
                 }
+            }else {
+                vo.setIssueReport("是");
             }
             vos.add(vo);
             //更新检测项分配的部门和任务单号
@@ -2536,6 +2538,15 @@ public class EntrustServiceImpl implements EntrustService {
             }
             //更新检测项信息
             taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
+            // 记录发布任务单的日志
+            StringBuffer stringBuilder1 = new StringBuffer();
+            stringBuilder1.append("任务单发布日志");
+            stringBuilder1.append("任务单id"+vo.getId());
+            stringBuilder1.append("任务单号" + vo.getTaskCode());
+            stringBuilder1.append("委托单id" + vo.getEntrustmentId());
+            stringBuilder1.append("是否出具报告" + vo.getIssueReport());
+            stringBuilder1.append("价格" + vo.getTaskPrice());
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.TASK_FLOW, true);
         }
         //任务单保存
         taskMapper.batchSave(vos);
@@ -4527,6 +4538,8 @@ public class EntrustServiceImpl implements EntrustService {
                         // 价格为0
                         taskTestEntity.setTaskPrice(0d);
                         taskMapper.updateTestTask(taskTestEntity);
+                        // 任务单废弃 删除任务流转要求
+                        testEntrustedTaskRelDao.deleteTaskId(taskId);
                         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),
                                 " 更新任务单状态\t"+taskTestEntity.getState()+"任务单id"+taskTestEntity.getId(), Const.ENTRUST_FOUND, true);
 
@@ -4545,6 +4558,8 @@ public class EntrustServiceImpl implements EntrustService {
                     // 价格为0
                     taskTestEntity.setTaskPrice(0d);
                     taskMapper.updateTestTask(taskTestEntity);
+                    // 任务单废弃 删除任务流转要求
+                    testEntrustedTaskRelDao.deleteTaskId(taskId);
                     logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),
                             " 更新任务单状态\t"+taskTestEntity.getState()+"任务单id"+taskTestEntity.getId(), Const.ENTRUST_FOUND, true);
                 }
