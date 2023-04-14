@@ -68,7 +68,7 @@ public class AppTestInstrumentController {
     }
 
     /**
-     * 任务单详情（检测项待复核不展示）
+     * 任务单详情（检测项复核通过不展示）
      *
      * @param taskIds
      * @return
@@ -92,7 +92,7 @@ public class AppTestInstrumentController {
                             Iterator<CheckItemInfoVo> it = sampleDetailVo.getCheckItemInfoList().iterator();
                             while (it.hasNext()) {
                                 CheckItemInfoVo checkItemVo = it.next();
-                                if (checkItemVo.getEndTime() != null && (checkItemVo.getState() >= 2 || checkItemVo.getState() >= 3)) {
+                                if (checkItemVo.getEndTime() != null && checkItemVo.getState() == 3) {
                                     it.remove();
                                 }
                             }
@@ -147,7 +147,7 @@ public class AppTestInstrumentController {
         if (CollectionUtils.isEmpty(instrumentVo.getInstrumentRecordListVos())) {
             return ResultUtil.error("参数不能为空");
         }
-        return ResultUtil.success(appTestInstrumentService.endToTest(instrumentVo, 1));
+        return ResultUtil.success(appTestInstrumentService.endToTest(instrumentVo, 2));
     }
 
     /**

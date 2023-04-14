@@ -26,4 +26,5 @@ public class InstrumentRecordListVo {
     private String user;
     private String beforeStatus;
     private String afterStatus;
+    private String checkItemName;
 }
