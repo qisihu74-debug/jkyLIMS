@@ -2171,10 +2171,22 @@ public class EntrustServiceImpl implements EntrustService {
         PageHelper.clearPage();
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         // 通过委托单id 查询任务列表。委托单id不包含任务单 设置为 false。
-        if(CollectionUtils.isEmpty(entityMapper.selectTaskTestEntityList(entrustmentId))){
+        List<TaskTestEntity> taskList = entityMapper.selectTaskTestEntityList(entrustmentId);
+        if(CollectionUtils.isEmpty(taskList)){
             entrustAddVo.setIsTaskList(false);
         }else{
-            entrustAddVo.setIsTaskList(true);
+//            entrustAddVo.setIsTaskList(true);
+            // 获取任务单！=144 团队出具报告 进行赋值
+            for(TaskTestEntity taskTestEntity : taskList){
+                // 冒名顶替下 issue_report 转 receiver （类型转换）
+                if(taskTestEntity.getState() !=144 && taskTestEntity.getReceiver().equals("是")){
+                    entrustAddVo.setIsTaskList(true);
+                }
+            }
+            // 没有被赋值 进行
+            if(entrustAddVo.getIsTaskList() == null){
+                entrustAddVo.setIsTaskList(false);
+            }
         }
         List<LabelValueVo> allTestRoom = Lists.newArrayList();
 

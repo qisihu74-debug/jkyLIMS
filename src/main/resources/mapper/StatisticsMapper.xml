@@ -874,10 +874,10 @@
         test_task
         where 1=1
         <if test="startDate!=null">
-            and start_detection_time <![CDATA[ >= ]]>  #{startDate}
+            and create_time <![CDATA[ >= ]]>  #{startDate}
         </if>
         <if test="stopDate!=null">
-            and end_detection_time <![CDATA[ <= ]]>  #{stopDate}
+            and create_time <![CDATA[ <= ]]>  #{stopDate}
         </if>
         GROUP BY(CONCAT(orderer,entrustment_id))
     </select>
