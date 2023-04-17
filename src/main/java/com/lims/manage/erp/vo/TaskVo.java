@@ -79,4 +79,10 @@ public class TaskVo {
      * 任务单流转 需要业务员提供信息
      */
     List<TestEntrustedTaskRelEntity> taskRelEntities;
+
+    /**
+     * 任务单创建时间
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private Date createTime;
 }

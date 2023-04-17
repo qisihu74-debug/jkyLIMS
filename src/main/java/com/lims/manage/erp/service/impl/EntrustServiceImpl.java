@@ -2542,9 +2542,9 @@ public class EntrustServiceImpl implements EntrustService {
                 } else {
                     vo.setIssueReport("否");
                 }
-            }else {
-                vo.setIssueReport("是");
             }
+            // 任务单创建时间
+            vo.setCreateTime(new Date());
             vos.add(vo);
             //更新检测项分配的部门和任务单号
             List<CheckItemDeptVo> checkItemDeptVoList1 = Lists.newArrayList();
@@ -2564,6 +2564,7 @@ public class EntrustServiceImpl implements EntrustService {
             stringBuilder1.append("委托单id" + vo.getEntrustmentId());
             stringBuilder1.append("是否出具报告" + vo.getIssueReport());
             stringBuilder1.append("价格" + vo.getTaskPrice());
+            stringBuilder1.append("任务单创建时间" + vo.getCreateTime());
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.TASK_FLOW, true);
         }
         //任务单保存
