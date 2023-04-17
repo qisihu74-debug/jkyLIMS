@@ -4668,9 +4668,9 @@ public class EntrustServiceImpl implements EntrustService {
             taskTestEntity.setState(taskTestEntity.getState());
             // 比对部门id 是否出具最终报告标记
             if (!CollectionUtils.isEmpty(entity.getDeptIds())&&entity.getDeptIds().contains(taskProgressVo.getDeptId())) {
-                taskTestEntity.setIssueReport(0);
-            } else {
                 taskTestEntity.setIssueReport(1);
+            } else {
+                taskTestEntity.setIssueReport(0);
             }
             List<CheckItemDeptVo> checkItemDeptVoList1 = new ArrayList<>();
             // 遍历待发布检测项列表
