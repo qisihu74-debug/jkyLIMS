@@ -289,4 +289,9 @@ public class ReportRecordEntity {
      */
     private String category;
 
+    /**
+     * 任务流转ID
+     */
+    private Long taskFlowId;
+
 }

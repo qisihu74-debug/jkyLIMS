@@ -93,6 +93,10 @@ public class ReportRecordMidEntity {
     private String inspector;
 
     private String reportUrl;
+    /**
+     * 任务流转ID
+     */
+    private Long taskFlowId;
 
     public ReportRecordMidEntity() {
     }

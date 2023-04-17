@@ -748,6 +748,8 @@ public class ReportServiceImpl implements ReportService {
         reportRecordEntity.setEntrustId(vo.getEntrustmentId());
         //设置为中间报告
         reportRecordEntity.setType(1+"");
+        // 任务单流转id
+        reportRecordEntity.setTaskFlowId(vo.getTaskFlowId().longValue());
         int insert = recordEntityMapper.insert(reportRecordEntity);
         if (insert < 1) {
             return false;
@@ -3173,6 +3175,7 @@ public class ReportServiceImpl implements ReportService {
         if (id == null){
             ReportRecordEntity byRecordId = recordEntityMapper.getByRecordId(record);
             ReportRecordMidEntity midEntity = new ReportRecordMidEntity(byRecordId);
+            midEntity.setTaskFlowId(byRecordId.getTaskFlowId());
             int insert = midReportMapper.insert(midEntity);
             int i = recordEntityMapper.deleteByPrimaryKey(record);
         }
