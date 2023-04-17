@@ -12,4 +12,8 @@ public class TaskCodeVo {
      * 分配的科室
      */
     private String teamName;
+    /**
+     * 任务单状态
+     */
+    private String taskState;
 }

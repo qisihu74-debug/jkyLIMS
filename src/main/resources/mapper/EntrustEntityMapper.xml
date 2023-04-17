@@ -132,6 +132,7 @@
         <collection property="taskCodes" ofType="com.lims.manage.erp.vo.TaskCodeVo">
             <result property="taskCode" column="taskCode"></result>
             <result property="teamName" column="teamName"></result>
+            <result property="taskState" column="taskState"></result>
         </collection>
     </resultMap>
 
@@ -150,7 +151,8 @@
         t1.audit_state auditState,
         t1.sample_logistics_no sampleLogisticsNo,
         IFNULL( t2.task_code, "——" ) taskCode,
-        IFNULL(t3.name,"——") teamName
+        IFNULL(t3.name,"——") teamName,
+        t2.state taskState
         FROM
         test_entrusted_info t1
         left join test_task t2 ON t1.id = t2.entrustment_id
@@ -254,7 +256,8 @@
         t1.audit_state auditState,
         t1.sample_logistics_no sampleLogisticsNo,
         IFNULL( t2.task_code, "——" ) taskCode,
-        IFNULL(t3.name,"——") teamName
+        IFNULL(t3.name,"——") teamName,
+        t2.state taskState
         FROM
         test_entrusted_info t1
         left join test_task t2 ON t1.id = t2.entrustment_id
