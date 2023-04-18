@@ -88,6 +88,13 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/js/**","anon");
         filterChainDefinitionMap.put("/**/favicon.ico","anon");
         filterChainDefinitionMap.put("/**/index.html","anon");
+        //pageOffice放行
+        filterChainDefinitionMap.put("/**/poserver.zz","anon");
+        filterChainDefinitionMap.put("/**/posetup.exe","anon");
+        filterChainDefinitionMap.put("/**/pageoffice.js","anon");
+        filterChainDefinitionMap.put("/**/jquery.min.js","anon");
+        filterChainDefinitionMap.put("/**/pobstyle.css","anon");
+        filterChainDefinitionMap.put("/**/sealsetup.exe","anon");
 
         // 配置shiro默认登录界面地址，前后端分离中登录界面跳转应由前端路由控制，后台仅返回json数据
         shiroFilterFactoryBean.setLoginUrl("index.html");
