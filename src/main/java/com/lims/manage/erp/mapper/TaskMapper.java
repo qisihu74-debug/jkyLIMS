@@ -417,7 +417,7 @@ public interface TaskMapper extends BaseMapper {
      * @param entrustId
      * @return
      */
-    @Select("SELECT dept_id FROM test_task WHERE entrustment_id = #{entrustId} LIMIT 1")
+    @Select("SELECT dept_id FROM test_task WHERE entrustment_id = #{entrustId} and state != 144 LIMIT 1")
     Long getDeptByEntrustId(Long entrustId);
 
     /**
