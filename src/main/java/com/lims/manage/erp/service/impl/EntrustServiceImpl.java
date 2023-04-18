@@ -4775,8 +4775,26 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         PageHelper.clearPage();
+        // 查询 中间报告数据
          list = testEntrustedTaskRelDao.getTaskStatisticsMidList(testEntrustedTaskRelVo);
         if(!CollectionUtils.isEmpty(list)){
+            // 中间报告 中 不包含 最终报告数据
+            List<TestEntrustedTaskRelVo> allList = testEntrustedTaskRelDao.getTaskStatisticsAllList(testEntrustedTaskRelVo);
+          if(!CollectionUtils.isEmpty(allList)){
+              for(TestEntrustedTaskRelVo tt1 : allList){
+                  for(TestEntrustedTaskRelVo tt2 : list){
+                      if(tt2.getId().equals(tt1.getId()) && tt1.getType().equals(tt2.getType())){
+                        // 对 中间数据源赋值。
+                          if(!StringUtils.isEmpty(tt1.getReportCode())){
+                              tt2.setReportCode(tt1.getReportCode());
+                          }
+                          if(!StringUtils.isEmpty(tt1.getReportFinishTime())){
+                              tt2.setReportFinishTime(tt1.getReportFinishTime());
+                          }
+                      }
+                  }
+              }
+          }
             for(TestEntrustedTaskRelVo testEntrustedTaskRelVo1:list){
                 // 遍历输出数据
                 if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getRemark()))
@@ -4792,18 +4810,12 @@ public class EntrustServiceImpl implements EntrustService {
                 if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskSource())){
                     testEntrustedTaskRelVo1.setTaskSource("--");
                 }
-                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getReportCode()) && StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportCode())){
-                    testEntrustedTaskRelVo1.setReportCode("--");
-                    testEntrustedTaskRelVo1.setMidReportCode("--");
-                }
-
-                // if 中间报告==空
-                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportCode())){
-//                    testEntrustedTaskRelVo1.setReportCode("--");
-                    testEntrustedTaskRelVo1.setMidReportCode("--");
-                }
-                else {
+                // if 中间报告!=空 && 最终报告 =null
+                if(!StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportCode()) && StringUtils.isEmpty(testEntrustedTaskRelVo1.getReportCode())){
                     testEntrustedTaskRelVo1.setReportCode(testEntrustedTaskRelVo1.getMidReportCode());
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getReportCode())){
+                    testEntrustedTaskRelVo1.setReportCode("--");
                 }
                 // if 中间报告结束时间 ！= 空
                 if(!StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportFinishTime()))

@@ -101,4 +101,11 @@ public interface TestEntrustedTaskRelDao {
      */
     List<TestEntrustedTaskRelVo> getTaskStatisticsMidList(TestEntrustedTaskRelVo testEntrustedTaskRelVo);
 
+    /**
+     * 当天任务统计 查询 最终报告
+     * @param testEntrustedTaskRelVo
+     * @return
+     */
+    List<TestEntrustedTaskRelVo> getTaskStatisticsAllList(TestEntrustedTaskRelVo testEntrustedTaskRelVo);
+
 }
