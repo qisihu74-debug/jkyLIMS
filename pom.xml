@@ -697,6 +697,13 @@
             <classifier>windows-x86_64</classifier>
         </dependency>
         <!-- 视频截图 调整最小依赖 end -->
+
+        <!-- pageOffice-->
+        <dependency>
+            <groupId>com.zhuozhengsoft</groupId>
+            <artifactId>pageoffice</artifactId>
+            <version>5.4.0.3</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>
