@@ -667,6 +667,11 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
+
+    public String max(Long id){
+        return getMaxCode(id);
+    }
+
     private String getMaxCode(Long entrustId){
         //获取父级code
         Long deptId = taskMapper.getDeptByEntrustId(entrustId);

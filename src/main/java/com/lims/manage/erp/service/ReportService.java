@@ -119,6 +119,8 @@ public interface ReportService {
 
     Boolean preserve(ReportPreserveVo vo);
 
+    String max(Long id);
+
     /**
      * 保存中间报告
      * @param vo
