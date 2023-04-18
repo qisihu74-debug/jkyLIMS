@@ -68,7 +68,7 @@
                                         report_time, addressee, waybill,
                                         operate_time, email, report_phone,
                                         report_mailing_address, report_complete_time,
-                                        task_id,type,entrust_id,task_flow_id)
+                                        task_id,type,entrust_id)
         values (#{id,jdbcType=BIGINT}, #{entrustmentId,jdbcType=BIGINT}, #{reportCode,jdbcType=VARCHAR},
                 #{sampleName,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{requiredCompletionTime,jdbcType=TIMESTAMP},
                 #{taskCode,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR}, #{number,jdbcType=INTEGER},
@@ -79,7 +79,7 @@
                 #{reportTime,jdbcType=TIMESTAMP}, #{addressee,jdbcType=VARCHAR}, #{waybill,jdbcType=VARCHAR},
                 #{operateTime,jdbcType=TIMESTAMP}, #{email,jdbcType=VARCHAR}, #{reportPhone,jdbcType=VARCHAR},
                 #{reportMailingAddress,jdbcType=VARCHAR}, #{reportCompleteTime,jdbcType=TIMESTAMP},
-                #{taskId,jdbcType=BIGINT},#{type,jdbcType=INTEGER},#{entrustId,jdbcType=BIGINT},#{taskFlowId,jdbcType=BIGINT})
+                #{taskId,jdbcType=BIGINT},#{type,jdbcType=INTEGER},#{entrustId,jdbcType=BIGINT})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordEntity">
         insert into test_report_record

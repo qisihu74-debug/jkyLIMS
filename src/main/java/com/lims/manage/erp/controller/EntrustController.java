@@ -798,7 +798,7 @@ public class EntrustController {
         if (testEntrustedTaskRelVo.getPageNum() == null || testEntrustedTaskRelVo.getPageSize() == null) {
             return ResultUtil.error("缺少分页参数");
         }
-        return ResultUtil.success(entrustService.taskStatisticsList(testEntrustedTaskRelVo));
+        return ResultUtil.success(entrustService.taskStatisticsList2(testEntrustedTaskRelVo));
     }
 
     /**

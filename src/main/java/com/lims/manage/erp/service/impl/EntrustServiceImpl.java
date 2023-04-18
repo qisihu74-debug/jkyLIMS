@@ -4755,4 +4755,90 @@ public class EntrustServiceImpl implements EntrustService {
         }
         return true;
     }
+
+    /**
+     * 当天任务统计
+     * @param testEntrustedTaskRelVo
+     * @return
+     */
+    @Override
+    public PageInfo taskStatisticsList2(TestEntrustedTaskRelVo testEntrustedTaskRelVo) {
+
+        List<TestEntrustedTaskRelVo> list = Lists.newArrayList();
+        //拆分委托编号
+        if(!StringUtils.isEmpty(testEntrustedTaskRelVo.getEntrustmentNostr())){
+            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(testEntrustedTaskRelVo.getEntrustmentNostr());
+            testEntrustedTaskRelVo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
+            testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo().toString());
+            if(!StringUtils.isEmpty(entrustCategoryVo.getEntrustmentNo())){
+                testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo().toString());
+            }
+        }
+        PageHelper.clearPage();
+         list = testEntrustedTaskRelDao.getTaskStatisticsMidList(testEntrustedTaskRelVo);
+        if(!CollectionUtils.isEmpty(list)){
+            for(TestEntrustedTaskRelVo testEntrustedTaskRelVo1:list){
+                // 遍历输出数据
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getRemark()))
+                {
+                    testEntrustedTaskRelVo1.setRemark("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getAddressName())){
+                    testEntrustedTaskRelVo1.setAddressName("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskCode())){
+                    testEntrustedTaskRelVo1.setTaskCode("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskSource())){
+                    testEntrustedTaskRelVo1.setTaskSource("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getReportCode()) && StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportCode())){
+                    testEntrustedTaskRelVo1.setReportCode("--");
+                    testEntrustedTaskRelVo1.setMidReportCode("--");
+                }
+
+                // if 中间报告==空
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportCode())){
+//                    testEntrustedTaskRelVo1.setReportCode("--");
+                    testEntrustedTaskRelVo1.setMidReportCode("--");
+                }
+                else {
+                    testEntrustedTaskRelVo1.setReportCode(testEntrustedTaskRelVo1.getMidReportCode());
+                }
+                // if 中间报告结束时间 ！= 空
+                if(!StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportFinishTime()))
+                {
+                    testEntrustedTaskRelVo1.setReportFinishTime(testEntrustedTaskRelVo1.getMidReportFinishTime());
+                }
+                else {
+                    testEntrustedTaskRelVo1.setReportFinishTime(null);
+                }
+
+            }
+        }
+        Integer pageNum = testEntrustedTaskRelVo.getPageNum();
+        Integer pageSize = testEntrustedTaskRelVo.getPageSize();
+        if(StringUtils.isEmpty(pageNum)||pageNum<=0){
+            pageNum = 1;
+        }
+        if(StringUtils.isEmpty(pageSize)||pageSize<=0){
+            pageSize = 10;
+        }
+        // 如果页码展示数量大于最大数 返回最大数值
+        if(pageSize>list.size()){
+            pageSize = list.size();
+        }
+        PageInfo pageInfo = new PageInfo();
+        //分页
+        List<TestEntrustedTaskRelVo> subList;
+        if (list.size() > 10 && list.size() / 10 >= pageNum) {
+            subList = list.subList((pageNum - 1) * pageSize, pageNum * pageSize);
+        } else {
+            subList = list.subList((pageNum - 1) * pageSize, list.size());
+        }
+        getMethodSampleName(subList);
+        pageInfo.setList(subList);
+        pageInfo.setTotal(list.size());
+        return pageInfo;
+    }
 }

@@ -288,10 +288,4 @@ public class ReportRecordEntity {
      * 印章分类，PHYSICS(物理章),ELECTRONIC(电子章)
      */
     private String category;
-
-    /**
-     * 任务流转ID
-     */
-    private Long taskFlowId;
-
 }

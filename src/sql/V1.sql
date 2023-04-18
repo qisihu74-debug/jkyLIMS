@@ -500,9 +500,3 @@ UPDATE `sys_function` SET `name` = '最终报告制作' WHERE `function_id` = 42
 ALTER TABLE `test_task`
     ADD COLUMN `create_time`  datetime DEFAULT NULL COMMENT '任务单创建时间' AFTER `present_information`;
 
-
-    ALTER TABLE `test_report_record`
-    ADD COLUMN `task_flow_id`  bigint DEFAULT NULL COMMENT '任务流转ID' AFTER `seal_report_url`;
-
-		ALTER TABLE `test_report_record_mid`
-    ADD COLUMN `task_flow_id`  bigint DEFAULT NULL COMMENT '任务流转ID' AFTER `seal_report_url`;

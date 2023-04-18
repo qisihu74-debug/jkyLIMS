@@ -299,4 +299,49 @@
           AND id != #{taskFlowId}
     </select>
 
+    <select id="getTaskStatisticsMidList" resultType="com.lims.manage.erp.vo.TestEntrustedTaskRelVo">
+        SELECT
+        t1.id,
+        t1.task_flow_date taskFlowDate,
+        t1.remark remark,
+        t1.address_name addressName,
+        t1.type,
+        t3.id AS task_id,
+        t3.task_code,
+        IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustNo,
+        IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
+        t2.task_source,
+        t3.end_detection_time testEndTime,
+        t4.report_code,
+        t4.seal_time reportFinishTime,
+        t2.acceptance_date,
+        t5.type AS mid_report_type,
+        t5.report_code AS mid_report_code,
+        t5.seal_time AS mid_reportFinishTime
+        FROM
+        test_entrusted_task_rel AS t1
+        LEFT JOIN test_entrusted_info AS t2 ON t1.entrust_id = t2.id
+        LEFT JOIN test_task AS t3 ON t3.id = t1.task_id
+        LEFT JOIN test_report_record AS t4 ON t4.id = t1.record_id
+        LEFT JOIN test_report_record_mid AS t5 ON t5.id = t1.record_id
+        WHERE 1=1
+        <if test="taskFlowDate!=null">
+            and t1.task_flow_date  LIKE CONCAT('%',#{taskFlowDate,jdbcType=DATE},'%')
+        </if>
+        <if test="entrustNo!=null and entrustNo!=''">
+            and t2.entrustment_no LIKE CONCAT('%',#{entrustNo},'%')
+        </if>
+        <if test="taskCode!=null and taskCode!='' ">
+            and t3.task_code LIKE CONCAT('%',#{taskCode},'%')
+        </if>
+        <if test="taskSource!=null and taskSource!='' ">
+            and t2.task_source LIKE CONCAT('%',#{taskSource},'%')
+        </if>
+        <if test="entrustCategoryType!=null">
+            and t2.entrust_category_type = #{entrustCategoryType}
+        </if>
+        and t2.state != 144
+        GROUP BY t1.id
+    </select>
+
 </mapper>
