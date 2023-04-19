@@ -139,6 +139,10 @@ public class Const {
      */
     public static final String TASK_TEST = "25";
     /**
+     * 报告，原始记录
+     */
+    public static final String REPORT_ORIGINAL = "26";
+    /**
      * 常规图片后缀名大全。
      */
    public static final  String[] nameSuffixS ={"tiff","pjp","jfif","bmp","webp","pjpeg","avif","tif","jpg","svgz","png","xbm","dib","jxl","jpeg","gif","svg","ico"};
