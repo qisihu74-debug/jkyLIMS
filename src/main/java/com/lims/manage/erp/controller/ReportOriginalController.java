@@ -11,11 +11,10 @@ import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * 报告，原始记录
@@ -29,24 +28,45 @@ public class ReportOriginalController {
     @Autowired
     private ReportOriginalService reportOriginalService;
 
+    /**
+     * 添加报告
+     *
+     * @param json
+     * @param file
+     * @return
+     */
     @PostMapping("/addReportOriginal")
     public Result addReportOriginal(@RequestParam("json") String json, MultipartFile file) {
         if (file == null) {
             return ResultUtil.error("报告模板不能为空！");
         }
         ReportOriginalEntity reportOriginalEntity = JSON.parseObject(json, ReportOriginalEntity.class);
-        if(reportOriginalEntity.getCode() == null || reportOriginalEntity.getName() == null){
+        if (reportOriginalEntity.getCode() == null || reportOriginalEntity.getName() == null) {
             return ResultUtil.error("缺少必要参数！");
         }
         int i = reportOriginalService.addReportOriginal(reportOriginalEntity, file);
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(i>0){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
-                    +"新增报告原始记录模板成功！", Const.REPORT_ORIGINAL,true);
-            return ResultUtil.success("新增报告原始记录模板成功!",i);
+        if (i > 0) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                    + "新增报告原始记录模板成功！", Const.REPORT_ORIGINAL, true);
+            return ResultUtil.success("新增报告原始记录模板成功!", i);
         }
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
-                +"新增报告原始记录模板失败！", Const.REPORT_ORIGINAL,false);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                + "新增报告原始记录模板失败！", Const.REPORT_ORIGINAL, false);
         return ResultUtil.error("新增报告原始记录模板失败");
+    }
+
+    /**
+     * 查询报告列表
+     *
+     * @param param
+     * @return
+     */
+    @PostMapping("/getReportList")
+    public Result getReportList(@RequestBody ReportOriginalEntity param) {
+        if (param.getPageNum() == null || param.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success("查询报告列表成功!", reportOriginalService.getReportList(param));
     }
 }

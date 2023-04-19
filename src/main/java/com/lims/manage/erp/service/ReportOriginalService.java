@@ -1,7 +1,10 @@
 package com.lims.manage.erp.service;
 
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.ReportOriginalEntity;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface ReportOriginalService {
     /**
@@ -11,4 +14,11 @@ public interface ReportOriginalService {
      * @return
      */
     int addReportOriginal(ReportOriginalEntity entity, MultipartFile file);
+
+    /**
+     * 报告查询列表
+     * @param param
+     * @return
+     */
+    PageInfo getReportList(ReportOriginalEntity param);
 }

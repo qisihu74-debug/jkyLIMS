@@ -23,4 +23,20 @@ public class ReportOriginalEntity {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date updateDate;
+
+    private Integer pageNum;
+    private Integer pageSize;
+
+    public ReportOriginalEntity() {
+    }
+
+    public ReportOriginalEntity(Long id, String code, String name, String url, String remark, Date createDate, Date updateDate) {
+        this.id = id;
+        this.code = code;
+        this.name = name;
+        this.url = url;
+        this.remark = remark;
+        this.createDate = createDate;
+        this.updateDate = updateDate;
+    }
 }

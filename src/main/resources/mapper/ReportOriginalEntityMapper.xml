@@ -118,4 +118,20 @@
             update_date = #{updateDate,jdbcType=TIMESTAMP}
         where id = #{id,jdbcType=BIGINT}
     </update>
+
+    <select id="getReportList" resultType="com.lims.manage.erp.entity.ReportOriginalEntity"
+            parameterType="com.lims.manage.erp.entity.ReportOriginalEntity">
+        select
+        <include refid="Base_Column_List"/>
+        from test_report_original_template
+        <where>
+            <if test="code!=null and code!=''">
+                AND code LIKE concat(concat('%',#{code}),'%')
+            </if>
+            <if test="name!=null and name!=''">
+                AND name LIKE concat(concat('%',#{name}),'%')
+            </if>
+        </where>
+    </select>
+
 </mapper>
