@@ -432,6 +432,7 @@
         SELECT DISTINCT
         t1.id taskId,
         t1.task_code taskCode,
+        t1.code,
         t1.orderer,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
         t1.inspector,
@@ -504,6 +505,7 @@
         SELECT DISTINCT
         t1.id taskId,
         t1.task_code taskCode,
+        t1.code,
         t1.orderer,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') requiredCompletionTime,
         t1.inspector,

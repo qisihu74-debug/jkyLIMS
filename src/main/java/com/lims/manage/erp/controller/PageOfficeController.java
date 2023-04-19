@@ -2,12 +2,16 @@ package com.lims.manage.erp.controller;
 
 import com.lims.manage.erp.entity.ReqParamBean;
 import com.lims.manage.erp.entity.SaveParamBean;
+import com.lims.manage.erp.entity.TaskIdEntity;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
 import com.zhuozhengsoft.pageoffice.excelwriter.Sheet;
 import com.zhuozhengsoft.pageoffice.excelwriter.Workbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author gjl
@@ -28,6 +35,11 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/pageOffice/")
 @RestController
 public class PageOfficeController {
+
+
+    @Autowired
+    PageOfficeService pageOfficeService;
+
     @Value("${autograph.path}")
     private String dir;
 
@@ -39,14 +51,15 @@ public class PageOfficeController {
      */
     @RequestMapping(value ="Excel/editOriginalRecord")
     @ResponseBody
-    public String showExcel(@RequestBody ReqParamBean bean, HttpServletRequest request) {
+    public String showExcel(@RequestBody ReqParamBean bean, HttpServletRequest request) throws IOException {
         String username = ShiroUtils.getUserInfo().getUsername();
         //根据参数获取样品相关信息和检测项相关信息
 
 
         //填充表头信息临时缓存到本地
-
-
+        System.out.println("触发");
+        String url = pageOfficeService.getProductExcelUrl(bean);
+        System.out.println();
 
 
 
@@ -85,6 +98,7 @@ public class PageOfficeController {
         poCtrl.setSaveFilePage("saveOriginalRecord");
         //加载文档
         poCtrl.webOpen("临时本地文件", OpenModeType.xlsNormalEdit, username);
+        poCtrl.webOpen("D:\\Users\\Administrator\\Desktop\\23年4月14日开发\\本地技术模板\\更改为标识符\\水泥.xlsx", OpenModeType.xlsNormalEdit, username);
         //TODO 删除临时文件
 
         return poCtrl.getHtmlCode("PageOfficeCtrl1");
@@ -106,5 +120,4 @@ public class PageOfficeController {
 
         //相关表做更新或者插入操作
     }
-
 }
