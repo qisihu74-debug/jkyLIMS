@@ -10,6 +10,7 @@ import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
+import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportResBean;
 import com.lims.manage.erp.entity.ReqBean;
@@ -34,6 +35,10 @@ import com.lims.manage.erp.util.PDFHelper3;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.zhuozhengsoft.pageoffice.OpenModeType;
+import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
+import com.zhuozhengsoft.pageoffice.excelwriter.Sheet;
+import com.zhuozhengsoft.pageoffice.excelwriter.Workbook;
 import io.minio.MinioClient;
 import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +58,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.xmlpull.v1.XmlPullParserException;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -995,4 +1001,60 @@ public class ReportController {
             logger.error("合并下载报告异常:{}",e);
         }
     }
+
+    @RequestMapping("onlineEdit")
+    public String onlineEdit(@RequestBody ReportEditReq editReq, HttpServletRequest request){
+        String username = ShiroUtils.getUserInfo().getUsername();
+        //根据参数委托相关信息
+
+
+        //填充表头信息临时缓存到本地
+
+
+
+
+
+
+
+        //设置服务页面
+        PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
+        poCtrl.setServerPage("/api/poserver.zz");
+        //禁止拷贝文档内容到外部
+        poCtrl.setDisableCopyOnly(true);
+        //设置委托样品下未勾选检测项对应的指定sheet不可编辑状态 TODO
+        poCtrl.setCustomToolbar(false);
+        Workbook wb = new Workbook();
+
+        //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
+        Sheet sheet1 = wb.openSheet("技术指标");
+        sheet1.setReadOnly(false);
+        //设置当工作表只读时，是否允许用户手动调整行列。
+        sheet1.setAllowAdjustRC(true);
+
+        //此行必须
+        poCtrl.setWriter(wb);
+
+
+        //添加自定义按钮
+        poCtrl.addCustomToolButton("保存", "Save()", 1);
+        poCtrl.addCustomToolButton("打印", "PrintFile()", 6);
+        poCtrl.addCustomToolButton("全屏/还原", "IsFullScreen()", 4);
+        poCtrl.addCustomToolButton("关闭", "CloseFile()", 21);
+        //设置操作栏按钮
+        poCtrl.getRibbonBar().setTabVisible("TabHome", true);//开始
+        poCtrl.getRibbonBar().setTabVisible("TabFormulas", false);//公式
+        poCtrl.getRibbonBar().setTabVisible("TabInsert", false);//插入
+        poCtrl.getRibbonBar().setTabVisible("TabData", false);//数据
+        poCtrl.getRibbonBar().setTabVisible("TabReview", false);//审阅
+        poCtrl.getRibbonBar().setTabVisible("TabView", false);//视图
+        //设置处理文件保存的请求方法
+        poCtrl.setSaveFilePage("saveOriginalRecord");
+        //加载文档
+        poCtrl.webOpen("D:\\Users\\Administrator\\Desktop\\水泥.xlsx", OpenModeType.xlsSubmitForm, "username");
+        //TODO 删除临时文件
+
+        return poCtrl.getHtmlCode("PageOfficeCtrl1");
+    }
+
+
 }
