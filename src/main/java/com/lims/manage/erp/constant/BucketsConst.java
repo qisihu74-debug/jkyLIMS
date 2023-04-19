@@ -50,4 +50,8 @@ public class BucketsConst {
      * 学习资料/视频 资源
      */
     public static final String data_file="data-file-resources";
+    /**
+     * 报告原始记录模板
+     */
+    public static final String report_original="report-original-template";
 }

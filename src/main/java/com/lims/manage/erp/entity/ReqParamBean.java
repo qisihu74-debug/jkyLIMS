@@ -1,6 +1,9 @@
 package com.lims.manage.erp.entity;
 
+import com.lims.manage.erp.vo.TaskStatsItemVo;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author gjl
@@ -12,4 +15,7 @@ import lombok.Data;
  */
 @Data
 public class ReqParamBean {
+
+    private List<TaskStatsItemVo> list;
+
 }
