@@ -558,6 +558,7 @@
         t1.taskPrice,
         t2.actualReportPrice
         FROM
+
         (
         SELECT
         t2.id teamId,
@@ -627,6 +628,88 @@
         ) t1
         LEFT JOIN test_team t2 ON t1.pid = t2.id
         ) t2 ON t1.teamId = t2.teamId
+    </select>
+    <select id="teamStatistics230419" resultType="com.lims.manage.erp.vo.TeamOutputValueVo">
+        SELECT
+        t3.id teamId,
+        t3.name teamName,
+        IFNULL(t3.code,'——') teamCode,
+        IFNULL(t1.taskPrice,0) taskPrice,
+        IFNULL(t2.actualReportPrice,0) actualReportPrice
+        FROM
+        (select
+        t1.id,
+        t1.name,
+        t1.code from test_team t1 where t1.pid = 0) t3 left join
+        (
+        SELECT
+        t2.id teamId,
+        t2.NAME teamName,
+        t2.code teamCode,
+        t1.`VALUE` taskPrice
+        FROM
+        (
+        SELECT
+        t2.pid,
+        SUM( t1.task_price )
+        VALUE
+
+        FROM
+        test_task t1
+        LEFT JOIN test_team t2 ON t1.dept_id = t2.id
+        WHERE
+        t1.review_time IS NOT NULL
+        <if test="beginDate!=null">
+            and <![CDATA[  DATE_FORMAT(t1.review_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
+        </if>
+        <if test="endDate!=null">
+            and <![CDATA[  DATE_FORMAT(t1.review_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
+        </if>
+        <if test="deptIds != null">
+            and t1.dept_id in
+            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        GROUP BY
+        t2.pid
+        ) t1
+        LEFT JOIN test_team t2 ON t1.pid = t2.id
+        ) t1 on t3.id = t1.teamId
+        LEFT JOIN (
+        SELECT
+        t2.id teamId,
+        t2.`name` teamName,
+        t2.code teamCode,
+        t1.VALUE actualReportPrice
+        FROM
+        (
+        SELECT
+        t3.pid,
+        SUM( t2.task_price ) VALUE
+        FROM
+        (select * from test_report_record where issuer_time is not null) t1
+        LEFT JOIN test_task t2 ON t1.entrustment_id = t2.entrustment_id
+        LEFT JOIN test_team t3 ON t2.dept_id = t3.id
+        WHERE
+        pid IS NOT NULL
+        <if test="beginDate!=null">
+            and <![CDATA[  DATE_FORMAT(t1.issuer_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
+        </if>
+        <if test="endDate!=null">
+            and <![CDATA[  DATE_FORMAT(t1.issuer_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
+        </if>
+        <if test="deptIds != null">
+            and t2.dept_id in
+            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        GROUP BY
+        t3.pid
+        ) t1
+        LEFT JOIN test_team t2 ON t1.pid = t2.id
+        ) t2 ON t3.id = t2.teamId
     </select>
     <select id="teamStatisticsNode0715" resultType="com.lims.manage.erp.vo.TeamOutputValueVo">
         SELECT
@@ -844,6 +927,83 @@
                     t3.NAME,
                     t3.id
         ) t2 ON t1.teamId = t2.teamId
+    </select>
+    <select id="teamStatisticsNode0419" resultType="com.lims.manage.erp.vo.TeamOutputValueVo"
+            parameterType="com.lims.manage.erp.vo.StatisticsParamVo">
+        SELECT
+        t3.id teamId,
+        t3.name teamName,
+        IFNULL(t3.code,'——') teamCode,
+        IFNULL(t1.taskPrice,0) taskPrice,
+        IFNULL( t2.actualReportPrice, 0 ) actualReportPrice,
+        IFNULL( t2.systemReportPrice, 0 ) systemReportPrice
+        FROM
+        (select t1.id,
+        t1.name,
+        t1.code from test_team t1 where t1.pid = #{teamId}) t3 left join
+            (
+                SELECT
+                    t3.id teamId,
+                    t3.NAME teamName,
+                    t3.CODE teamCode,
+                    t3.pid,
+                    SUM( IFNULL( t2.discount, 1 ) * IFNULL( t4.unit_price, 0 ) *IFNULL( t4.times, 0 ) ) taskPrice
+                FROM
+                    test_task t1
+                        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+                        LEFT JOIN test_team t3 ON t1.dept_id = t3.id
+                        LEFT JOIN test_entrusted_sample_checkitem_rel t4 ON t1.id = t4.task_id
+                <trim prefix="WHERE" prefixOverrides="AND |OR ">
+                    t1.review_time is not null
+                    <if test="taskSource!=null and taskSource!=''">
+                        and t3.NAME = #{taskSource}
+                    </if>
+                    <if test="teamId!=null and teamId!=''">
+                        and t3.pid = #{teamId}
+                    </if>
+                    <if test="beginDate!=null">
+                        and <![CDATA[  DATE_FORMAT(t1.review_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
+                    </if>
+                    <if test="endDate!=null">
+                        and <![CDATA[  DATE_FORMAT(t1.review_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
+                    </if>
+                </trim>
+                GROUP BY
+                    t3.NAME,
+                    t3.CODE,
+                    t3.id
+        ) t1 on  t3.id = t1.teamId
+                LEFT JOIN (
+                SELECT
+                    t3.id teamId,
+                    t3.NAME teamName,
+                    SUM( IFNULL( t2.discount, 1 ) * IFNULL( t5.unit_price, 0 ) * IFNULL( t5.times, 0 ) ) actualReportPrice,
+                    SUM( IFNULL( t5.unit_price, 0 )) systemReportPrice
+                FROM
+                    test_task t1
+                        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+                        LEFT JOIN test_team t3 ON t1.dept_id = t3.id
+                        LEFT JOIN test_report_record t4 ON t2.id = t4.entrustment_id
+                        LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.id = t5.task_id
+                <trim prefix="WHERE" prefixOverrides="AND |OR ">
+                    t4.seal_time IS NOT NULL
+                    <if test="taskSource!=null and taskSource!=''">
+                        and t3.NAME = #{taskSource}
+                    </if>
+                    <if test="teamId!=null and teamId!=''">
+                        and t3.pid = #{teamId}
+                    </if>
+                    <if test="beginDate!=null">
+                        and <![CDATA[  DATE_FORMAT(t4.seal_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
+                    </if>
+                    <if test="endDate!=null">
+                        and <![CDATA[  DATE_FORMAT(t4.seal_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
+                    </if>
+                </trim>
+                GROUP BY
+                    t3.NAME,
+                    t3.id
+        ) t2 ON t3.id = t2.teamId
     </select>
 
     <select id="getAreas" resultType="com.lims.manage.erp.vo.LabelValueVo">

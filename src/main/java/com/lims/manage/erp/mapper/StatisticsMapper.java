@@ -109,6 +109,7 @@ public interface StatisticsMapper {
      * @return
      */
     List<TeamOutputValueVo> teamStatistics0715(@Param("beginDate") String beginDate,@Param("endDate") String endDate,@Param("deptIds") List<Long> deptIds);
+    List<TeamOutputValueVo> teamStatistics230419(@Param("beginDate") String beginDate,@Param("endDate") String endDate,@Param("deptIds") List<Long> deptIds);
     List<TeamOutputValueVo> teamStatisticsNode0715(@Param("beginDate") String beginDate,@Param("endDate") String endDate,@Param("deptIds") List<Long> deptIds);
 
     /**
@@ -117,6 +118,7 @@ public interface StatisticsMapper {
      * @return
      */
     List<TeamOutputValueVo> teamStatisticsNode(StatisticsParamVo paramVo);
+    List<TeamOutputValueVo> teamStatisticsNode0419(StatisticsParamVo paramVo);
 
     List<TaskStatsVo> getTaskList(TaskStatsVo taskDetailInfoVo);
 

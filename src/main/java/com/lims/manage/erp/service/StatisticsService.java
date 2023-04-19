@@ -63,6 +63,7 @@ public interface StatisticsService {
      * @return
      */
     PageInfo teamStatistics(StatisticsParamVo paramVo);
+    PageInfo teamStatistics0419(StatisticsParamVo paramVo);
 
     /**
      * 部门产值统计--子级
