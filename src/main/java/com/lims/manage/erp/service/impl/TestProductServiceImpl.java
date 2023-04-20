@@ -82,6 +82,12 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
                     }
                 }
             }
+            //保存产品与报告关系
+            Integer productId = testProductItemVo.getTestProduct().getProductId();
+            Long reportId = testProductItemVo.getTestProduct().getReportId();
+            ProductReportRelEntity productReportRelEntity = new ProductReportRelEntity(productId.longValue(),reportId);
+            testProductDao.insertProductReportRel(productReportRelEntity);
+
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品"+testProductItemVo.getTestProduct().getProductId()+"成功!", Const.PRODUCT_MANAGEMENT_LOG,true);
             return ResultUtil.success("添加成功!");
         }else {
@@ -125,6 +131,14 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
                     }
                 }
             }
+            //删除原报告与报告关系
+            Integer productId = testProductItemVo.getTestProduct().getProductId();
+            testProductDao.deleteProductReportRel(productId.longValue());
+            //保存新产品与报告关系
+            Long reportId = testProductItemVo.getTestProduct().getReportId();
+            ProductReportRelEntity productReportRelEntity = new ProductReportRelEntity(productId.longValue(),reportId);
+            testProductDao.insertProductReportRel(productReportRelEntity);
+
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改产品"+testProductItemVo.getTestProduct().getProductId()+"成功!", Const.PRODUCT_MANAGEMENT_LOG,true);
             return ResultUtil.success("修改成功!");
         }else {
