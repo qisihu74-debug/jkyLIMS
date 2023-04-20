@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 /**
  * 报告，原始记录
  */
@@ -68,5 +66,30 @@ public class ReportOriginalController {
             return ResultUtil.error("缺少分页参数！");
         }
         return ResultUtil.success("查询报告列表成功!", reportOriginalService.getReportList(param));
+    }
+
+    /**
+     * 修改报告原始记录模板
+     * @param json
+     * @param file
+     * @return
+     */
+    @PostMapping("/updateReportOriginal")
+    public Result updateReportOriginal(@RequestParam("json") String json, MultipartFile file) {
+        ReportOriginalEntity reportOriginalEntity = JSON.parseObject(json, ReportOriginalEntity.class);
+        if (reportOriginalEntity.getId() == null ||reportOriginalEntity.getCode() == null
+                || reportOriginalEntity.getName() == null || reportOriginalEntity.getUrl() == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        int i = reportOriginalService.updateReportOriginal(reportOriginalEntity, file);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (i > 0) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                    + "修改报告原始记录模板成功！", Const.REPORT_ORIGINAL, true);
+            return ResultUtil.success("修改报告原始记录模板成功!", i);
+        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                + "修改报告原始记录模板失败！", Const.REPORT_ORIGINAL, false);
+        return ResultUtil.error("修改报告原始记录模板失败");
     }
 }

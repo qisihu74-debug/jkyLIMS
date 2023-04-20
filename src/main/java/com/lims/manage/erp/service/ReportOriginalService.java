@@ -21,4 +21,13 @@ public interface ReportOriginalService {
      * @return
      */
     PageInfo getReportList(ReportOriginalEntity param);
+
+    /**
+     * 修改报告模板
+     * @param entity
+     * @param file
+     * @return
+     */
+    int updateReportOriginal(ReportOriginalEntity entity, MultipartFile file);
+
 }
