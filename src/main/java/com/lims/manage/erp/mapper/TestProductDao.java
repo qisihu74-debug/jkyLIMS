@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.lims.manage.erp.entity.ProductReportRelEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.entity.TestProduct;
@@ -77,4 +78,18 @@ public interface TestProductDao extends BaseMapper<TestProduct> {
      * @return
      */
     SampleEntity getProductOutward(Integer productId);
+
+    /**
+     * 插入产品与报告模板关系
+     * @param entity
+     * @return
+     */
+    int insertProductReportRel(ProductReportRelEntity entity);
+
+    /**
+     * 删除原产品与报告模板关系
+     * @param productId
+     * @return
+     */
+    int deleteProductReportRel(@Param("productId") Long productId);
 }

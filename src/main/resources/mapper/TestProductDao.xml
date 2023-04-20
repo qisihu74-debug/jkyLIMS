@@ -122,4 +122,15 @@
         WHERE
             product_id = #{productId}
     </select>
+
+    <insert id="insertProductReportRel" parameterType="com.lims.manage.erp.entity.ProductReportRelEntity">
+        insert into product_report_original_rel (product_id, report_original_id)
+        values (#{productId,jdbcType=BIGINT},#{reportId,jdbcType=BIGINT})
+    </insert>
+
+    <delete id="deleteProductReportRel" parameterType="java.lang.Long">
+        delete
+        from product_report_original_rel
+        where product_id = #{productId,jdbcType=BIGINT}
+    </delete>
 </mapper>

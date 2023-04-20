@@ -44,6 +44,8 @@ public class TestProduct extends Model<TestProduct> {
     private String productPurpose;
     //外观描述
     private String outwardDescribe;
+    //报告ID
+    private Long reportId;
 
     public String getProductPurpose() {
         return productPurpose;
@@ -150,5 +152,13 @@ public class TestProduct extends Model<TestProduct> {
     protected Serializable pkVal() {
         return this.productId;
     }
+
+    public Long getReportId() {
+        return reportId;
     }
+
+    public void setReportId(Long reportId) {
+        this.reportId = reportId;
+    }
+}
 
