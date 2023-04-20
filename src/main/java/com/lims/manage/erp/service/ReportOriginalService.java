@@ -2,6 +2,7 @@ package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.ReportOriginalEntity;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -39,4 +40,12 @@ public interface ReportOriginalService {
      * @return
      */
     boolean deleteReportTemplate(List<Long> idList);
+
+    /**
+     * 查询报告模板下拉列表
+     *
+     * @param param
+     * @return
+     */
+    List<LabelValueVo> getReportSelectList(String param);
 }

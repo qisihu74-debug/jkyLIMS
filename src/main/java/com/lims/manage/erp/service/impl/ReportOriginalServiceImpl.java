@@ -8,6 +8,7 @@ import com.lims.manage.erp.mapper.ReportOriginalEntityMapper;
 import com.lims.manage.erp.service.ReportOriginalService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -67,5 +68,10 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
     public boolean deleteReportTemplate(List<Long> idList) {
         int i = reportOriginalEntityMapper.deleteByIds(idList);
         return i > 0;
+    }
+
+    @Override
+    public List<LabelValueVo> getReportSelectList(String param) {
+        return reportOriginalEntityMapper.getReportSelectList(param);
     }
 }

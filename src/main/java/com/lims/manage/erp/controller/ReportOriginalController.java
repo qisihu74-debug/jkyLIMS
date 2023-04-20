@@ -119,4 +119,15 @@ public class ReportOriginalController {
                 + "删除报告模板" + idList + "成功!", Const.REPORT_ORIGINAL, true);
         return ResultUtil.success("删除报告模板成功！", idList);
     }
+
+    /**
+     * 报告模板下拉列表
+     *
+     * @param param
+     * @return
+     */
+    @GetMapping("/getReportSelectList")
+    public Result getReportSelectList(String param) {
+        return ResultUtil.success("查询报告下拉列表成功!", reportOriginalService.getReportSelectList(param));
+    }
 }

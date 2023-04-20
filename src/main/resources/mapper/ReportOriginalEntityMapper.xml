@@ -141,4 +141,18 @@
             #{id}
         </foreach>
     </delete>
+
+    <select id="getReportSelectList" resultType="com.lims.manage.erp.vo.LabelValueVo"
+            parameterType="java.lang.String">
+        SELECT
+        value,label
+        FROM
+        ( SELECT id VALUE, CONCAT( CODE, "《", NAME, "》" ) label FROM test_report_original_template ) t1
+        <where>
+            <if test="param!=null and param!=''">
+                AND label LIKE concat(concat('%',#{param}),'%')
+            </if>
+        </where>
+    </select>
+
 </mapper>

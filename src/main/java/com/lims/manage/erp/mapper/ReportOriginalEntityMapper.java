@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.ReportOriginalEntity;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -35,4 +36,11 @@ public interface ReportOriginalEntityMapper {
      * @return
      */
     int deleteByIds(@Param("idList") List<Long> idList);
+
+    /**
+     * 查询报告模板下拉列表
+     * @param param
+     * @return
+     */
+    List<LabelValueVo> getReportSelectList(@Param("param") String param);
 }
