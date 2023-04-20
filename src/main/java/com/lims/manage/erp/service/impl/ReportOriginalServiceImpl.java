@@ -8,10 +8,13 @@ import com.lims.manage.erp.mapper.ReportOriginalEntityMapper;
 import com.lims.manage.erp.service.ReportOriginalService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
 
@@ -22,7 +25,8 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
 
     @Override
     public int addReportOriginal(ReportOriginalEntity entity, MultipartFile file) {
-        String upload = MinIoUtil.upload(BucketsConst.report_original, file, entity.getName());
+        String filename = file.getOriginalFilename();
+        String upload = MinIoUtil.upload(BucketsConst.report_original, file, filename);
         String url = upload.substring(0, upload.indexOf("?"));
         entity.setId(GenID.getID());
         entity.setCreateDate(new Date());
@@ -35,5 +39,39 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
         PageHelper.startPage(param.getPageNum(), param.getPageSize());
         List<ReportOriginalEntity> reportList = reportOriginalEntityMapper.getReportList(param);
         return new PageInfo<>(reportList);
+    }
+
+    @Override
+    public int updateReportOriginal(ReportOriginalEntity entity, MultipartFile file) {
+        if (file != null) {
+            //删除之前文件
+            String oldUrl = entity.getUrl();
+            String encodeFileName = oldUrl.substring(oldUrl.lastIndexOf("/") + 1);
+            String decode = null;
+            try {
+                decode = URLDecoder.decode(encodeFileName, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            MinIoUtil.deleteFile(BucketsConst.report_original, decode);
+            //上传新文件
+            String filename = file.getOriginalFilename();
+            String upload = MinIoUtil.upload(BucketsConst.report_original, file, filename);
+            String url = upload.substring(0, upload.indexOf("?"));
+            entity.setUrl(url);
+        }
+        entity.setUpdateDate(new Date());
+        return reportOriginalEntityMapper.updateByPrimaryKeySelective(entity);
+    }
+
+    @Override
+    public boolean deleteReportTemplate(List<Long> idList) {
+        int i = reportOriginalEntityMapper.deleteByIds(idList);
+        return i > 0;
+    }
+
+    @Override
+    public List<LabelValueVo> getReportSelectList(String param) {
+        return reportOriginalEntityMapper.getReportSelectList(param);
     }
 }
