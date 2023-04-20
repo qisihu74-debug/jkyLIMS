@@ -176,7 +176,11 @@ public class SampleEntity {
      * 原材的父ID
      */
     private Integer pid;
-
+    /**
+     * 产品基本模板地址
+     */
+    @TableField(exist = false)
+    private String url;
     /**
      * 0为未使用，1为已使用
      */
