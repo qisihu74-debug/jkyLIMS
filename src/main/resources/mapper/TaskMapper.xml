@@ -921,6 +921,7 @@
             t1.check_item_id as checkItemId,
             t1.task_id as taskId,
             t1.sample_id as sampleId,
+            t1.state,
             t2.file_url as fileUrl,
             t1.check_item_name as checkItemName,
             t3.task_code as taskCode,

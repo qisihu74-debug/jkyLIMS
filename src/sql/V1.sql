@@ -509,3 +509,8 @@ CREATE TABLE `product_report_original_rel`  (
                                                 `product_id` bigint(0) NOT NULL COMMENT '产品ID',
                                                 `report_original_id` bigint(0) NOT NULL COMMENT '报告原始记录模板ID'
 )
+
+-- 样品与委托单中间表时，加入产品Excel 数据加入。
+
+ALTER TABLE `test_entrusted_sample_details_rel`
+ADD COLUMN `product_excel_url`  VARCHAR(255) NULL COMMENT '产品excel模板数据源' AFTER `entrustment_id`;

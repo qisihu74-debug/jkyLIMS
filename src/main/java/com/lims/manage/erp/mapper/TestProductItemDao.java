@@ -65,5 +65,19 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
             "</foreach>",
             "</script>"})
     List<String> getContentByIds(@Param("items") List<Long> items);
+
+    /**
+     * 通过检测项主键 获取样品是否关联产品Excel附件
+     * @param itemId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tt1.product_excel_url \n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_details_rel AS t1\n" +
+            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.sample_id = t2.sample_id \n" +
+            "WHERE\n" +
+            "\tt2.id = #{itemId}")
+    String getProductExcelUrl(@Param("itemId") Integer itemId);
 }
 

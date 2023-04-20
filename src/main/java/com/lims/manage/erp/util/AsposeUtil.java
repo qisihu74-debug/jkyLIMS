@@ -15,6 +15,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -445,6 +446,35 @@ public class AsposeUtil {
             logger.error("excel转换异常:{}",e);
         }
         return bytes;
+    }
+
+    /**
+     *
+     * <p>
+     * description:将workbook对象转化为输入流：过程是利用ByteArrayOutputStream为缓存，在将此ByteArrayOutputStream转化为InputStream
+     * 利用到了ByteArrayOutputStream来做缓存，先将文件写入其中，然后将其转为字节数组，最后利用ByteArrayInputStream转为输入流，供后续使用
+     * </p>
+     * @author AbnerLi
+     * @date 2017年9月29日上午8:56:18
+     * @param workbook
+     * @return
+     */
+    public static InputStream createExcelStream(XSSFWorkbook workbook) {
+        InputStream in = null;
+        try
+        {
+            //临时
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            //创建临时文件
+            workbook.write(out);
+            byte [] bookByteAry = out.toByteArray();
+            in = new ByteArrayInputStream(bookByteAry);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return in;
     }
 
     public static void main(String[] args) {

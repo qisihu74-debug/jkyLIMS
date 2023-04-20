@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.lims.manage.erp.entity.ReqParamBean;
 import com.lims.manage.erp.entity.SaveParamBean;
 import com.lims.manage.erp.entity.TaskIdEntity;
@@ -13,16 +14,14 @@ import com.zhuozhengsoft.pageoffice.excelwriter.Sheet;
 import com.zhuozhengsoft.pageoffice.excelwriter.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author gjl
@@ -42,17 +41,30 @@ public class PageOfficeController {
 
     @Value("${autograph.path}")
     private String dir;
+    @Value("${posyspath}")
+    private String poSysPath;
 
     /**
      * 编辑接口
-     * @param bean
+     * @param json
      * @param request
      * @return
      */
     @RequestMapping(value ="Excel/editOriginalRecord")
-    @ResponseBody
-    public String showExcel(@RequestBody ReqParamBean bean, HttpServletRequest request) throws IOException {
-        String username = ShiroUtils.getUserInfo().getUsername();
+//    @ResponseBody
+//    public String showExcel(@RequestParam("json") String json, HttpServletRequest request) throws IOException {
+    public String showExcel(HttpServletRequest request) throws IOException {
+        System.out.println(request.getMethod());
+        System.out.println(request.getRequestURI());
+        System.out.println(request.getParameterNames().toString());
+        Enumeration<String> parameterNames = request.getParameterNames();
+        System.out.println(request.getParameterMap());
+        Map<String, String[]> parameterMap = request.getParameterMap();
+        
+
+
+        ReqParamBean bean = JSON.parseObject(null, ReqParamBean.class);
+//        String username = ShiroUtils.getUserInfo().getUsername();
         //根据参数获取样品相关信息和检测项相关信息
 
 
@@ -97,8 +109,8 @@ public class PageOfficeController {
         //设置处理文件保存的请求方法
         poCtrl.setSaveFilePage("saveOriginalRecord");
         //加载文档
-        poCtrl.webOpen("临时本地文件", OpenModeType.xlsNormalEdit, username);
-        poCtrl.webOpen("D:\\Users\\Administrator\\Desktop\\23年4月14日开发\\本地技术模板\\更改为标识符\\水泥.xlsx", OpenModeType.xlsNormalEdit, username);
+        poCtrl.webOpen("临时本地文件", OpenModeType.xlsNormalEdit, "丁");
+        poCtrl.webOpen("D:\\Users\\Administrator\\Desktop\\23年4月14日开发\\本地技术模板\\更改为标识符\\水泥.xlsx", OpenModeType.xlsNormalEdit, "丁");
         //TODO 删除临时文件
 
         return poCtrl.getHtmlCode("PageOfficeCtrl1");
@@ -119,5 +131,23 @@ public class PageOfficeController {
 
 
         //相关表做更新或者插入操作
+    }
+
+    /**
+     * 添加PageOffice的服务器端授权程序Servlet（必须）
+     * @return
+     */
+    @Bean
+    public ServletRegistrationBean servletRegistrationBean() {
+        com.zhuozhengsoft.pageoffice.poserver.Server poserver = new com.zhuozhengsoft.pageoffice.poserver.Server();
+        poserver.setSysPath(poSysPath);//设置PageOffice注册成功后,license.lic文件存放的目录
+        ServletRegistrationBean srb = new ServletRegistrationBean(poserver);
+        srb.addUrlMappings("/poserver.zz");
+        srb.addUrlMappings("/posetup.exe");
+        srb.addUrlMappings("/pageoffice.js");
+        srb.addUrlMappings("/jquery.min.js");
+        srb.addUrlMappings("/pobstyle.css");
+        srb.addUrlMappings("/sealsetup.exe");
+        return srb;//
     }
 }
