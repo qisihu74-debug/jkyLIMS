@@ -25,8 +25,6 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
     @Override
     public int addReportOriginal(ReportOriginalEntity entity, MultipartFile file) {
         String filename = file.getOriginalFilename();
-//        String suffix = filename.substring(filename.indexOf("."));
-//        String fileName = entity.getName() + suffix;
         String upload = MinIoUtil.upload(BucketsConst.report_original, file, filename);
         String url = upload.substring(0, upload.indexOf("?"));
         entity.setId(GenID.getID());
@@ -44,7 +42,7 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
 
     @Override
     public int updateReportOriginal(ReportOriginalEntity entity, MultipartFile file) {
-        if(file != null){
+        if (file != null) {
             //删除之前文件
             String oldUrl = entity.getUrl();
             String encodeFileName = oldUrl.substring(oldUrl.lastIndexOf("/") + 1);
@@ -54,7 +52,7 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-            MinIoUtil.deleteFile(BucketsConst.report_original,decode);
+            MinIoUtil.deleteFile(BucketsConst.report_original, decode);
             //上传新文件
             String filename = file.getOriginalFilename();
             String upload = MinIoUtil.upload(BucketsConst.report_original, file, filename);
@@ -63,5 +61,11 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
         }
         entity.setUpdateDate(new Date());
         return reportOriginalEntityMapper.updateByPrimaryKeySelective(entity);
+    }
+
+    @Override
+    public boolean deleteReportTemplate(List<Long> idList) {
+        int i = reportOriginalEntityMapper.deleteByIds(idList);
+        return i > 0;
     }
 }

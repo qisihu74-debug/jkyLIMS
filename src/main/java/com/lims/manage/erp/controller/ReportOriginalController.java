@@ -11,8 +11,11 @@ import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * 报告，原始记录
@@ -70,6 +73,7 @@ public class ReportOriginalController {
 
     /**
      * 修改报告原始记录模板
+     *
      * @param json
      * @param file
      * @return
@@ -77,7 +81,7 @@ public class ReportOriginalController {
     @PostMapping("/updateReportOriginal")
     public Result updateReportOriginal(@RequestParam("json") String json, MultipartFile file) {
         ReportOriginalEntity reportOriginalEntity = JSON.parseObject(json, ReportOriginalEntity.class);
-        if (reportOriginalEntity.getId() == null ||reportOriginalEntity.getCode() == null
+        if (reportOriginalEntity.getId() == null || reportOriginalEntity.getCode() == null
                 || reportOriginalEntity.getName() == null || reportOriginalEntity.getUrl() == null) {
             return ResultUtil.error("缺少必要参数！");
         }
@@ -91,5 +95,28 @@ public class ReportOriginalController {
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
                 + "修改报告原始记录模板失败！", Const.REPORT_ORIGINAL, false);
         return ResultUtil.error("修改报告原始记录模板失败");
+    }
+
+    /**
+     * 删除报告模板
+     *
+     * @param idList
+     * @return
+     */
+    @PostMapping("deleteReportTemplate")
+    public Result deleteReportTemplate(@RequestParam("idList") List<Long> idList) {
+        if (CollectionUtils.isEmpty(idList)) {
+            return ResultUtil.error("请选择要删除的报告模板！");
+        }
+        boolean save = reportOriginalService.deleteReportTemplate(idList);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (!save) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                    + "删除报告模板" + idList + "失败!", Const.REPORT_ORIGINAL, false);
+            return ResultUtil.success("删除报告模板失败!");
+        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                + "删除报告模板" + idList + "成功!", Const.REPORT_ORIGINAL, true);
+        return ResultUtil.success("删除报告模板成功！", idList);
     }
 }

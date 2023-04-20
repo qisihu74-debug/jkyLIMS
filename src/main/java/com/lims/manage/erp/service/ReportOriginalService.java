@@ -17,6 +17,7 @@ public interface ReportOriginalService {
 
     /**
      * 报告查询列表
+     *
      * @param param
      * @return
      */
@@ -24,10 +25,18 @@ public interface ReportOriginalService {
 
     /**
      * 修改报告模板
+     *
      * @param entity
      * @param file
      * @return
      */
     int updateReportOriginal(ReportOriginalEntity entity, MultipartFile file);
 
+    /**
+     * 批量删除报告模板
+     *
+     * @param idList
+     * @return
+     */
+    boolean deleteReportTemplate(List<Long> idList);
 }

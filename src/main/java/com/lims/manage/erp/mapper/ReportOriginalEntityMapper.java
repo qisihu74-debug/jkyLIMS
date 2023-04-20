@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.ReportOriginalEntity;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,4 +28,11 @@ public interface ReportOriginalEntityMapper {
      * @return
      */
     List<ReportOriginalEntity> getReportList(ReportOriginalEntity param);
+
+    /**
+     * 批量删除报告模板
+     * @param idList
+     * @return
+     */
+    int deleteByIds(@Param("idList") List<Long> idList);
 }
