@@ -50,7 +50,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
     private TestProductItemDao testProductItemDao;
 
     @Override
-    public String getProductExcelUrl(ReqParamBean bean) throws IOException {
+    public String getProductExcelUrl(Integer[] ids) throws IOException {
         // 通过检测项主键 获取样品生成附件是否存在。
         String productExcelUrl = testProductItemDao.getProductExcelUrl(77677);
         InputStream fileStream = null;
@@ -76,15 +76,6 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             }
         }
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-//        Integer[] ids = new Integer[bean.getList().size()];
-//        for (int j = 0; j < ids.length; j++) {
-//            ids[j] = bean.getList().get(j).getItemId();
-//        }
-        Integer[] ids = new Integer[4];
-        ids[0] = 77677;
-        ids[1] = 77678;
-        ids[2] = 77679;
-        ids[3] = 77680;
         List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
         Long entrustId = null;
         Integer sampleId = null;

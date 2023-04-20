@@ -2,7 +2,6 @@ package com.lims.manage.erp.util;
 
 import com.lims.manage.erp.entity.SysUserEntity;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
 import org.apache.shiro.authc.LogoutAware;
@@ -11,7 +10,6 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.crazycake.shiro.RedisSessionDAO;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -134,21 +132,4 @@ public class ShiroUtils {
         return session.getId()+"";
     }
 
-    public static String getRedisToken(String token){
-         RedisUtils redisUtils = new RedisUtils();
-        //如果请求头中存在token 则从请求头中获取token
-        if (!StringUtils.isEmpty(token)) {
-            if (token.equals("null")){
-                return null;
-            }
-            Object o = redisUtils.get("shiro:session:" + token);
-            if (o == null){
-                return null;
-            }else {
-                return token;
-            }
-        } else {
-            return null;
-        }
-    }
 }
