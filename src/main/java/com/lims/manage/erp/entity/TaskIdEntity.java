@@ -52,4 +52,8 @@ public class TaskIdEntity {
      * 检测项状态
      */
     private Integer state;
+    /**
+     * 委托单id
+     */
+    private Long entrustmentId;
 }

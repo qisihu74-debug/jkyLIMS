@@ -89,6 +89,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/js/**","anon");
         filterChainDefinitionMap.put("/**/favicon.ico","anon");
         filterChainDefinitionMap.put("/**/index.html","anon");
+        filterChainDefinitionMap.put("/**/POB.html","anon");
         //pageOffice放行
         filterChainDefinitionMap.put("/**/poserver.zz","anon");
         filterChainDefinitionMap.put("/**/posetup.exe","anon");

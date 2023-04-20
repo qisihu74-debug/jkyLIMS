@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,7 +54,7 @@ public class PageOfficeController {
     @RequestMapping(value ="Excel/editOriginalRecord")
 //    @ResponseBody
 //    public String showExcel(@RequestParam("json") String json, HttpServletRequest request) throws IOException {
-    public String showExcel(HttpServletRequest request) throws IOException {
+    public ModelAndView showExcel(HttpServletRequest request,Map<String, Object> map) throws IOException {
         System.out.println(request.getMethod());
         System.out.println(request.getRequestURI());
         System.out.println(request.getParameterNames().toString());
@@ -71,7 +72,7 @@ public class PageOfficeController {
         //填充表头信息临时缓存到本地
         System.out.println("触发");
         String url = pageOfficeService.getProductExcelUrl(bean);
-        System.out.println();
+        System.out.println(url);
 
 
 
@@ -109,11 +110,13 @@ public class PageOfficeController {
         //设置处理文件保存的请求方法
         poCtrl.setSaveFilePage("saveOriginalRecord");
         //加载文档
-        poCtrl.webOpen("临时本地文件", OpenModeType.xlsNormalEdit, "丁");
+//        poCtrl.webOpen("临时本地文件", OpenModeType.xlsNormalEdit, "丁");
         poCtrl.webOpen("D:\\Users\\Administrator\\Desktop\\23年4月14日开发\\本地技术模板\\更改为标识符\\水泥.xlsx", OpenModeType.xlsNormalEdit, "丁");
         //TODO 删除临时文件
 
-        return poCtrl.getHtmlCode("PageOfficeCtrl1");
+        map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
+        ModelAndView mv = new ModelAndView("POB");
+        return mv;
     }
 
     /**

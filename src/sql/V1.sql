@@ -514,3 +514,7 @@ CREATE TABLE `product_report_original_rel`  (
 
 ALTER TABLE `test_entrusted_sample_details_rel`
 ADD COLUMN `product_excel_url`  VARCHAR(255) NULL COMMENT '产品excel模板数据源' AFTER `entrustment_id`;
+
+-- 产品模板Excel
+	ALTER TABLE `test_product`
+ADD COLUMN `product_excel_url`  VARCHAR(255) NULL COMMENT '产品excel模板数据源' AFTER `outward_describe`;

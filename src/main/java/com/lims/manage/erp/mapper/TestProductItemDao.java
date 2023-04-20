@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestProductItem;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 import java.util.Set;
@@ -79,5 +80,34 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
             "WHERE\n" +
             "\tt2.id = #{itemId}")
     String getProductExcelUrl(@Param("itemId") Integer itemId);
+
+    /**
+     * 更新产品excel附件
+     * @param entrustmentId
+     * @param sampleId
+     * @param url
+     * @return
+     */
+    @Update("UPDATE test_entrusted_sample_details_rel \n" +
+            "SET product_excel_url = #{url} \n" +
+            "WHERE\n" +
+            "\tsample_id = #{sampleId} \n" +
+            "\tAND entrustment_id = #{entrustmentId}")
+    int updateProductExcelUrl(@Param("entrustmentId") Long entrustmentId,@Param("sampleId") Integer sampleId,@Param("url") String url);
+
+    /**
+     * 获取原生的 产品Excel Url
+     * @param itemId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tt3.product_excel_url \n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel AS t1\n" +
+            "\tLEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id \n" +
+            "\tLEFT JOIN test_product AS t3 ON t2.product_id = t3.product_id\n" +
+            "WHERE\n" +
+            "\tt1.id = #{itemId}")
+    String getProductExcel(@Param("itemId") Integer itemId);
 }
 
