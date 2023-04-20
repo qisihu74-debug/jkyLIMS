@@ -27,7 +27,7 @@ import java.util.UUID;
 @Component
 public class DownloadUtils {
 
-    @Value("${file.dir}")
+    @Value("${posyspath}")
     String fileDir;
 
     /**
