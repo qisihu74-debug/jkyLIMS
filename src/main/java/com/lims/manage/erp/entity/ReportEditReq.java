@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Data
 public class ReportEditReq {
+    private String token;
     private Long taskId;
     /**
      * 0最终报告，1中间报告
