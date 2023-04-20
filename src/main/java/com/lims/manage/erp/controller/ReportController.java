@@ -45,6 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1003,8 +1004,8 @@ public class ReportController {
     }
 
     @RequestMapping("onlineEdit")
-    public String onlineEdit(@RequestBody ReportEditReq editReq, HttpServletRequest request){
-        String username = ShiroUtils.getUserInfo().getUsername();
+    public String onlineEdit(@Param("json") String json, HttpServletRequest request){
+        //String username = ShiroUtils.getUserInfo().getUsername();
         //根据参数委托相关信息
 
 
@@ -1018,7 +1019,7 @@ public class ReportController {
 
         //设置服务页面
         PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
-        poCtrl.setServerPage("/api/poserver.zz");
+        poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");
         //禁止拷贝文档内容到外部
         poCtrl.setDisableCopyOnly(true);
         //设置委托样品下未勾选检测项对应的指定sheet不可编辑状态 TODO
