@@ -1010,16 +1010,22 @@ public class ReportController {
         }
     }
 
+    /**
+     * 报告在线制作
+     * @param json
+     * @param map
+     * @param request
+     * @return
+     */
     @GetMapping("onlineEdit")
     @ResponseBody
     public ModelAndView onlineEdit(String json, Map<String, Object> map, HttpServletRequest request){
         if (org.apache.commons.lang3.StringUtils.isEmpty(json)){
-
-            return null;
+            return new ModelAndView("error");
         }
         ReportEditReq reportEditReq = JSON.parseObject(json,ReportEditReq.class);
         if (org.apache.commons.lang3.StringUtils.isEmpty(reportEditReq.getToken())){
-            return null;
+            return new ModelAndView("error");
         }else {
             //根据token获取AuthenticationToken
             String token = reportEditReq.getToken();
