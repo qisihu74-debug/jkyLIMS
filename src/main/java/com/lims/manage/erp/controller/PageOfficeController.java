@@ -6,12 +6,15 @@ import com.lims.manage.erp.entity.SaveParamBean;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.PageOfficeService;
+import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
 import com.zhuozhengsoft.pageoffice.excelwriter.Sheet;
 import com.zhuozhengsoft.pageoffice.excelwriter.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -22,6 +25,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -36,6 +40,8 @@ import java.util.*;
 @RestController
 public class PageOfficeController {
 
+    private final static Logger logger = LoggerFactory.getLogger(PageOfficeController.class);
+
 
     @Autowired
     PageOfficeService pageOfficeService;
@@ -47,7 +53,6 @@ public class PageOfficeController {
 
     /**
      * 编辑接口
-     * @param json
      * @param request
      * @return
      */
@@ -73,8 +78,23 @@ public class PageOfficeController {
         System.out.println("触发");
         String url = pageOfficeService.getProductExcelUrl(bean);
         System.out.println(url);
+        InputStream fileStream = null;
+        // 文件url 转  Workbook
+        try {
+            // 获取公网 附件
+            fileStream = FileAndFolderUtil.getInputStream(url);
+        } catch (Exception e) {
+            logger.info("读取产品excel异常 "  + e);
+        }
+//        XSSFWorkbook wb0 = new XSSFWorkbook(fileStream);
+//        Workbook workbook = new XSSFWorkbook(fileStream);
+        // 验证 token 是否存在
+        String[] mapToken = parameterMap.get("token");
+        String strVerify = ShiroUtils.getRedisToken(mapToken[0]);
+        System.out.println("token == " + strVerify);
 
 
+//        PageOfficeCtrl.setSaveDataPage();
 
 
 
@@ -86,7 +106,6 @@ public class PageOfficeController {
         //设置委托样品下未勾选检测项对应的指定sheet不可编辑状态 TODO
         poCtrl.setCustomToolbar(false);
         Workbook wb = new Workbook();
-
         //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
         Sheet sheet1 = wb.openSheet("Sheet1");
         //设置当工作表只读时，是否允许用户手动调整行列。
