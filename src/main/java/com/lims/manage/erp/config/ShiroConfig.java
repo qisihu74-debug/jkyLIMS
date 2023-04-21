@@ -82,12 +82,14 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/**/web/file_output_stream/getEntrustFileUrls", "anon");
         filterChainDefinitionMap.put("/app/accountUsage/*", "anon");
         filterChainDefinitionMap.put("/app/testInstrument/getDetails", "anon");
+        filterChainDefinitionMap.put("/pageOffice/Excel/editOriginalRecord", "anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");
         filterChainDefinitionMap.put("/js/**","anon");
         filterChainDefinitionMap.put("/**/favicon.ico","anon");
         filterChainDefinitionMap.put("/**/index.html","anon");
+        filterChainDefinitionMap.put("/**/POB.html","anon");
         //pageOffice放行
         filterChainDefinitionMap.put("/**/poserver.zz","anon");
         filterChainDefinitionMap.put("/**/posetup.exe","anon");
@@ -95,6 +97,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/**/jquery.min.js","anon");
         filterChainDefinitionMap.put("/**/pobstyle.css","anon");
         filterChainDefinitionMap.put("/**/sealsetup.exe","anon");
+        filterChainDefinitionMap.put("/report/onlineEdit","anon");
 
         // 配置shiro默认登录界面地址，前后端分离中登录界面跳转应由前端路由控制，后台仅返回json数据
         shiroFilterFactoryBean.setLoginUrl("index.html");

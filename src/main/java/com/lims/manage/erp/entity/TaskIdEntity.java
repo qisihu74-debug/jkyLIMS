@@ -48,4 +48,12 @@ public class TaskIdEntity {
      * 原始记录名称
      */
     private String originalName;
+    /**
+     * 检测项状态
+     */
+    private Integer state;
+    /**
+     * 委托单id
+     */
+    private Long entrustmentId;
 }
