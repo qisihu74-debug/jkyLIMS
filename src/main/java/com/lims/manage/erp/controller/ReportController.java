@@ -34,6 +34,7 @@ import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.PDFHelper3;
+import com.lims.manage.erp.util.RedisUtil;
 import com.lims.manage.erp.util.RedisUtils;
 import com.lims.manage.erp.util.ReturnResponse;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -57,6 +58,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -109,11 +111,14 @@ public class ReportController {
     private TaskService taskService;
     @Autowired
     private DownloadUtils downLoad;
+    @Autowired
+    private RedisUtil redisUtil;
 //    @Autowired
 //    private ReportRecordEntityMapper recordEntityMapper;
 
     Logger logger = LoggerFactory.getLogger(ReportController.class);
-
+    @Value("${posyspath}")
+    private String poSysPath;
     /**
      * 查询可制作报告任务单列表
      *
@@ -1108,49 +1113,34 @@ public class ReportController {
             //根据token获取AuthenticationToken
             String token = reportEditReq.getToken();
             //redis校验
-
-
+            String redisToken = redisUtil.getRedisToken(reportEditReq.getToken());
+            if (org.apache.commons.lang3.StringUtils.isEmpty(redisToken)){
+                return new ModelAndView("error");
+            }
         }
-        /*url="http://121.89.242.0:9000/sample-tag/水泥.xlsx";
-        url = URLDecoder.decode(url, "utf-8");
-        ReturnResponse<String> response = downloadUtils.downLoad(url, type, null);
-        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");*/
-
-
-
-        //String username = ShiroUtils.getUserInfo().getUsername();
         //根据参数委托相关信息
         Long entrustId = taskService.getEntrustIdByTaskId(reportEditReq.getTaskId());
+        reportEditReq.setEntrustId(entrustId);
         EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
-
-
-        //填充表头信息临时缓存到本地
-
-
-
-
-
-
-
+        String localPath = reportService.handlerReportMessage(detail,reportEditReq,poSysPath);
         //设置服务页面
         PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
         poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");
         //禁止拷贝文档内容到外部
         poCtrl.setDisableCopyOnly(true);
-        //设置委托样品下未勾选检测项对应的指定sheet不可编辑状态 TODO
+        //指定sheet可编辑状态
         poCtrl.setCustomToolbar(false);
         Workbook wb = new Workbook();
-
-        //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
-        Sheet sheet1 = wb.openSheet("技术指标");
+        Sheet sheet1 = wb.openSheet("第1页");
         sheet1.setReadOnly(false);
         //设置当工作表只读时，是否允许用户手动调整行列。
         sheet1.setAllowAdjustRC(true);
-
+        Sheet sheet2 = wb.openSheet("第2页");
+        sheet2.setReadOnly(false);
+        //设置当工作表只读时，是否允许用户手动调整行列。
+        sheet2.setAllowAdjustRC(true);
         //此行必须
         poCtrl.setWriter(wb);
-
-
         //添加自定义按钮
         poCtrl.addCustomToolButton("保存", "Save()", 1);
         poCtrl.addCustomToolButton("打印", "PrintFile()", 6);
@@ -1164,11 +1154,11 @@ public class ReportController {
         poCtrl.getRibbonBar().setTabVisible("TabReview", false);//审阅
         poCtrl.getRibbonBar().setTabVisible("TabView", false);//视图
         //设置处理文件保存的请求方法
-        poCtrl.setSaveFilePage("saveOriginalRecord");
+        poCtrl.setSaveFilePage("saveReport");
         //加载文档
-        poCtrl.webOpen("D:\\Users\\Administrator\\Desktop\\水泥.xlsx", OpenModeType.xlsSubmitForm, "username");
-        //TODO 删除临时文件
-
+        poCtrl.webOpen(localPath, OpenModeType.xlsSubmitForm, "username");
+        //删除临时文件
+        FileAndFolderUtil.delete(localPath);
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
         //设置模板引擎的html模板
         ModelAndView mv = new ModelAndView("POB");
