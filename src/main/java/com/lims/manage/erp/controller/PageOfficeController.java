@@ -1,12 +1,15 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.aspose.slides.Collections.ArrayList;
 import com.lims.manage.erp.entity.ReqParamBean;
 import com.lims.manage.erp.entity.SaveParamBean;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.PageOfficeService;
+import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.*;
+import com.lims.manage.erp.vo.UserInfoVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
@@ -49,6 +52,8 @@ public class PageOfficeController {
     private TaskMapper taskMapper;
     @Autowired
     RedisUtil redisUtil;
+    @Autowired
+    private TaskService taskService;
 
     @Value("${autograph.path}")
     private String dir;
@@ -95,18 +100,8 @@ public class PageOfficeController {
         poCtrl.setDisableCopyOnly(true);
         //设置委托样品下未勾选检测项对应的指定sheet不可编辑状态 TODO
         poCtrl.setCustomToolbar(false);
-        Workbook wb = new Workbook();
-        //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
-        // 循环设置
-        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
-        for (int i = 0; i < dataEntitys.size(); i++) {
-            TaskIdEntity data = dataEntitys.get(i);
-            Sheet sheet1 = wb.openSheet(data.getOriginalName());
-            //设置当工作表只读时，是否允许用户手动调整行列。
-            sheet1.setAllowAdjustRC(false);
-        }
-        //此行必须
-        poCtrl.setWriter(wb);
+        poCtrl.setFileTitle("另外存");
+
 
 
         //添加自定义按钮
@@ -123,6 +118,23 @@ public class PageOfficeController {
         poCtrl.getRibbonBar().setTabVisible("TabView", false);//视图
         //设置处理文件保存的请求方法
         poCtrl.setSaveFilePage("saveOriginalRecord");
+
+        Workbook wb = new Workbook();
+        //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
+        // 循环设置
+        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
+        for (int i = 0; i < dataEntitys.size(); i++) {
+            TaskIdEntity data = dataEntitys.get(i);
+            Sheet sheet1 = wb.openSheet(data.getOriginalName());
+            //设置当工作表只读时，是否允许用户手动调整行列。
+            sheet1.setAllowAdjustRC(true);
+            // 设置工作表是否只读。
+            //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
+            sheet1.setReadOnly(false);
+        }
+        //此行必须
+        poCtrl.setWriter(wb);
+
         //加载文档
         url = URLDecoder.decode(url, "utf-8");
         String[] strArray = url.split("\\.");
@@ -133,6 +145,23 @@ public class PageOfficeController {
         //TODO 删除临时文件
 
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
+        List<UserInfoVo> userInfoVos = new ArrayList();
+        UserInfoVo userInfoVo = new UserInfoVo();
+        userInfoVo.setDepartmentId("111L");
+        userInfoVo.setName("丁1");
+        userInfoVos.add(userInfoVo);
+
+        UserInfoVo userInfoVo2 = new UserInfoVo();
+        userInfoVo2.setDepartmentId("222L");
+        userInfoVo2.setName("孙2");
+        userInfoVos.add(userInfoVo2);
+
+        UserInfoVo userInfoVo3 = new UserInfoVo();
+        userInfoVo3.setDepartmentId("3333L");
+        userInfoVo3.setName("王3");
+        userInfoVos.add(userInfoVo3);
+
+        map.put("userInfoVos", userInfoVos);
         ModelAndView mv = new ModelAndView("POB");
         return mv;
     }
@@ -143,10 +172,28 @@ public class PageOfficeController {
      * @param request
      * @param response
      */
-    @RequestMapping("saveOriginalRecord")
-    public void save(@RequestBody SaveParamBean bean, HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping("Excel/saveOriginalRecord")
+//    public void save(@RequestBody SaveParamBean bean, HttpServletRequest request, HttpServletResponse response) {
+    public void save(HttpServletRequest request, HttpServletResponse response) {
         FileSaver fs = new FileSaver(request, response);
         fs.saveToFile(dir + fs.getFileName());
+        // 根据人员内容 塞入Excel中
+        List<UserInfoVo> userInfoVos = new ArrayList();
+        UserInfoVo userInfoVo = new UserInfoVo();
+        userInfoVo.setDepartmentId("111L");
+        userInfoVo.setName("丁1");
+        userInfoVos.add(userInfoVo);
+
+        UserInfoVo userInfoVo2 = new UserInfoVo();
+        userInfoVo2.setDepartmentId("222L");
+        userInfoVo2.setName("孙2");
+        userInfoVos.add(userInfoVo2);
+
+        UserInfoVo userInfoVo3 = new UserInfoVo();
+        userInfoVo3.setDepartmentId("3333L");
+        userInfoVo3.setName("王3");
+        userInfoVos.add(userInfoVo3);
+
         fs.close();
         //上传文件到文件服务器、删除本地临时缓存的文件
 

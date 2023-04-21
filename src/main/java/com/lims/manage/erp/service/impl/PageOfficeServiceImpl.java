@@ -10,6 +10,7 @@ import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.OriginalRecordDataVo;
+import com.zhuozhengsoft.pageoffice.FileSaver;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -28,6 +29,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.List;
@@ -109,6 +111,15 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         testProductItemDao.updateProductExcelUrl(entrustId, sampleId, excelUrl);
         System.out.println("excelUrl" + excelUrl);
         return excelUrl;
+    }
+
+    @Override
+    public String saveOriginalRecord(HttpServletRequest request, FileSaver file) {
+        // 检测人集合 、记录人集合 带出签名信息。 存放指定的位置。
+
+        //
+
+        return null;
     }
 
 

@@ -1,22 +1,52 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
 <head>
-    <title>最简单的打开保存Excel文件</title>
+    <title>打开Word文件</title>
 </head>
-<body style="overflow:hidden">
+
+<body>
+<label for="">
+    检测人：
+    <select name="cars">
+        <!--/*@thymesVar id="userInfoVos" type="11"*/-->
+
+        <!--/*@thymesVar id="userId" type="22"*/-->
+        <option th:each="e:${userInfoVos}" th:value="${e.departmentId}" th:text="${e.name}"></option>
+
+    </select>
+</label>
+
+<label for="">
+    记录人：
+    <select name="cars">
+        <option th:each="e:${userInfoVos}" th:value="${e.departmentId}" th:text="${e.name}"></option>
+
+    </select>
+</label>
+
+<button id="save">保存</button>
+
+<div style="width:auto;height:730px;" th:utext="${pageoffice}"></div>
+
+
 <script type="text/javascript">
-    function Save() {
+    var itemids = ''
+    //保存文件
+    var save = document.getElementById("save");
+    save.addEventListener('click', function () {
         document.getElementById("PageOfficeCtrl1").WebSave();
-    }
-
-    function Close() {
+        // window.external.CallParentFunc("refresh();");
         window.external.close();
+    });
+
+    function refresh() {
+        alert('草')
     }
+
+
 </script>
-
-<div style="height:750px;width:auto;" th:utext="${pageoffice}">
-
-</div>
 </body>
+
 </html>

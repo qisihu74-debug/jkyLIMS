@@ -1,7 +1,9 @@
 package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.entity.ReqParamBean;
+import com.zhuozhengsoft.pageoffice.FileSaver;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
@@ -17,5 +19,13 @@ public interface PageOfficeService {
      * @return
      */
     String getProductExcelUrl(Integer[] ids) throws IOException;
+
+    /**
+     * 完成编辑
+     * @param request
+     * @param file
+     * @return
+     */
+    String saveOriginalRecord(HttpServletRequest request, FileSaver file);
 
 }
