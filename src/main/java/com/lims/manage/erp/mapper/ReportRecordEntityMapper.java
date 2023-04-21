@@ -78,8 +78,6 @@ public interface ReportRecordEntityMapper {
 
     ReportNodeVo getReportNodeByEntrustId(Long entrustId);
 
-    List<ReportNodeVo> getReportNodesByEntrustId(Long entrustId);
-
     /**
      * 根据recordId查询委托单信息
      * @param recordId

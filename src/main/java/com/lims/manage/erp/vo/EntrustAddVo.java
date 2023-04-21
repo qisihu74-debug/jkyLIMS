@@ -264,7 +264,6 @@ public class EntrustAddVo {
      * 报告进度
      */
     ReportProgressVo reportProgress;
-    List<ReportProgressVo> reportProgresses;
     /**
      * 委托单附件集合
      */

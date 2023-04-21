@@ -37,5 +37,4 @@ public class ReportNodeVo {
      * 操作时间，报告发出后录入数据时的时间
      */
     private String operateTime;
-    private Integer type;
 }

@@ -14,12 +14,10 @@ public class ReportProgressVo {
      * 报告状态状态
      */
     private Integer state;
-    private Integer type;
 
-    public ReportProgressVo(String reportCode, Integer state,Integer type) {
+    public ReportProgressVo(String reportCode, Integer state) {
         this.reportCode = reportCode;
         this.state = state;
-        this.type = type;
     }
 
     public ReportProgressVo(String reportCode) {
