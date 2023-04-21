@@ -1630,6 +1630,11 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
+    @Override
+    public Long getEntrustIdByTaskId(Long taskId) {
+        return taskMapper.getEntrustIdByTaskId(taskId);
+    }
+
     /**
      * 如果原始记录文件不为空 塞数据
      */

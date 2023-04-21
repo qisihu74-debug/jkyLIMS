@@ -1,5 +1,6 @@
 package com.lims.manage.erp.mapper;
 
+import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
@@ -366,4 +367,14 @@ public interface ReportRecordEntityMapper {
 
     @Select("select name from test_init_data where type=20")
     String getInitInfo();
+
+    @Select("SELECT\n" +
+            "\tproduct_excel_url AS producTexcelUrl,\n" +
+            "\treport_edit_url AS reportEditUrl\n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_details_rel\n" +
+            "WHERE\n" +
+            "\tentrustment_id =#{entrustId}\n" +
+            "AND sample_id =#{sampleId}")
+    ReportEditReq getUrlByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") Integer sampleId);
 }

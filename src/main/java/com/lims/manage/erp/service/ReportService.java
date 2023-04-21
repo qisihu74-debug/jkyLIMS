@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
+import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportResBean;
@@ -12,6 +13,7 @@ import com.lims.manage.erp.entity.SealEntity;
 import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.http.QiYueSuoResponse;
+import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
 import com.lims.manage.erp.vo.ReportDetailVo;
 import com.lims.manage.erp.vo.ReportHistoryDetailVo;
@@ -416,4 +418,5 @@ public interface ReportService {
      */
     Integer getReturnReportType (Long reportId);
 
+    String handlerReportMessage(EntrustAddVo detail, ReportEditReq reportEditReq,String localPath);
 }

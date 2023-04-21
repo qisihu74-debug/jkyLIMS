@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Data
 public class ReportEditReq {
+    private Long entrustId;
     private String token;
     private Long taskId;
     /**
@@ -28,5 +29,25 @@ public class ReportEditReq {
      * 任务流转id
      */
     private Integer taskFlowId;
-    private List<SampleEntity> sampleInfo;
+    private Integer sampleId;
+    /**
+     * 样品名称
+     */
+    private String sampleName;
+    /**
+     * 样品编号
+     */
+    private String sampleCode;
+    /**
+     * 样品模板地址
+     */
+    private String producTexcelUrl;
+    /**
+     * 报告编辑模板
+     */
+    private String reportEditUrl;
+    /**
+     * 样品检测项
+     */
+    private List<SampleItemEntity> sampleCheckItem;
 }

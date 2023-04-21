@@ -18,6 +18,7 @@ import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.QiYueSuoSealEntity;
 import com.lims.manage.erp.entity.QuotaEntity;
 import com.lims.manage.erp.entity.QuotaRes;
+import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportRecordMidEntity;
@@ -58,6 +59,7 @@ import com.lims.manage.erp.mapper.TestTechnicistDao;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
+import com.zhuozhengsoft.pageoffice.OpenModeType;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -82,6 +84,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -151,7 +154,8 @@ public class ReportServiceImpl implements ReportService {
     private TestEntrustedTaskRelDao taskRelDao;
     @Autowired
     private ReportRecordMidEntityMapper midReportMapper;
-
+    @Autowired
+    private DownloadUtils downLoad;
     @Override
     public List<ReportListVo> getReportList() {
         // 报告生成列表
@@ -3189,5 +3193,63 @@ public class ReportServiceImpl implements ReportService {
             return 1;
         }
         return null;
+    }
+
+    @Override
+    public String handlerReportMessage(EntrustAddVo detail, ReportEditReq reportEditReq, String localPath) {
+        //填充数据
+        //根据委托样品信息获取需要填充的模板文件
+        ReportEditReq editReq = entityMapper.getUrlByEntrustIdAndSampleId(reportEditReq.getEntrustId(), reportEditReq.getSampleId());
+        //判断是否是暂存的文件，如果是直接返回，如果不是继续进行
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(editReq.getReportEditUrl())){
+            ReturnResponse<String> response = null;
+            String[] strings = editReq.getReportEditUrl().split("\\/");
+            String fileName = strings[4];
+            String type = fileName.split("\\.")[1];
+            try {
+                String url = URLDecoder.decode(editReq.getReportEditUrl(), "utf-8");
+                response = downLoad.downLoad(url, type, fileName.split("\\.")[0]);
+            }catch (Exception e){
+                log.error("url编码转换异常",e);
+            }
+            return response.getContent();
+        }else {
+            //填充表头信息临时缓存到本地
+            String texcelUrl = editReq.getProducTexcelUrl();
+            String[] strings = texcelUrl.split("\\/");
+            String bluckName = strings[3];
+            String fileName = strings[4];
+            InputStream fileStream = MinIoUtil.getFileStream(bluckName, fileName);
+            Workbook workbook = null;
+            try {
+                workbook = new Workbook(fileStream);
+            } catch (Exception e) {
+                log.error("报告制作加载模板文件失败:{}",e);
+            }
+            String loacl = handlerReportHeader(detail,workbook,localPath,fileName);
+            //更新test_entrusted_sample_details_rel的edit_url
+
+
+
+            return loacl;
+        }
+    }
+
+    /**
+     * 填充基础信息表
+     * @param detail
+     * @param workbook
+     * @param localPath
+     * @param fileName
+     * @return
+     */
+    private String handlerReportHeader(EntrustAddVo detail, Workbook workbook, String localPath, String fileName) {
+        Worksheet worksheet = workbook.getWorksheets().get("基础信息表");
+        //检测单位名称
+        worksheet.getCells().get("B2").setValue("河南交科院检验检测认证有限公司");
+
+
+
+        return localPath+fileName;
     }
 }
