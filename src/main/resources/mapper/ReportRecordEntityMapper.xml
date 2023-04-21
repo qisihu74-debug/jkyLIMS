@@ -479,7 +479,7 @@
             operate_time,
             type
         FROM
-            test_report_record_mid
+            test_report_record
         WHERE
             entrust_id = #{entrustId,jdbcType=BIGINT} UNION ALL
         SELECT
@@ -493,7 +493,7 @@
             operate_time,
             type
         FROM
-            test_report_record
+            test_report_record_mid
         WHERE
             entrust_id = #{entrustId,jdbcType=BIGINT}
     </select>
