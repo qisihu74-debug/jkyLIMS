@@ -229,4 +229,6 @@ public interface TaskService {
      * @return
      */
     List<LabelValueVo> getDeviceUser(Long userId);
+
+    Long getEntrustIdByTaskId(Long taskId);
 }
