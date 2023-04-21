@@ -6,12 +6,14 @@ import com.lims.manage.erp.entity.SaveParamBean;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.PageOfficeService;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
 import com.zhuozhengsoft.pageoffice.excelwriter.Sheet;
 import com.zhuozhengsoft.pageoffice.excelwriter.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -22,6 +24,8 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLDecoder;
 import java.util.*;
 
 /**
@@ -36,9 +40,15 @@ import java.util.*;
 @RestController
 public class PageOfficeController {
 
-
+    private final static Logger logger = LoggerFactory.getLogger(PageOfficeController.class);
+    @Autowired
+    DownloadUtils downloadUtils;
     @Autowired
     PageOfficeService pageOfficeService;
+    @Autowired
+    private TaskMapper taskMapper;
+    @Autowired
+    RedisUtil redisUtil;
 
     @Value("${autograph.path}")
     private String dir;
@@ -47,7 +57,6 @@ public class PageOfficeController {
 
     /**
      * 编辑接口
-     * @param json
      * @param request
      * @return
      */
@@ -55,26 +64,27 @@ public class PageOfficeController {
 //    @ResponseBody
 //    public String showExcel(@RequestParam("json") String json, HttpServletRequest request) throws IOException {
     public ModelAndView showExcel(HttpServletRequest request,Map<String, Object> map) throws IOException {
-        System.out.println(request.getMethod());
-        System.out.println(request.getRequestURI());
-        System.out.println(request.getParameterNames().toString());
-        Enumeration<String> parameterNames = request.getParameterNames();
-        System.out.println(request.getParameterMap());
         Map<String, String[]> parameterMap = request.getParameterMap();
-        
+        String list = parameterMap.get("list")[0];
+        String[] items = list.split(",");
+        Integer[] ids = new Integer[items.length];
+        System.out.println("items == " + items);
+        for(int j =0; j< items.length; j++){
+            ids[j] =Integer.parseInt(items[j]);
+        }
 
 
-        ReqParamBean bean = JSON.parseObject(null, ReqParamBean.class);
+
 //        String username = ShiroUtils.getUserInfo().getUsername();
         //根据参数获取样品相关信息和检测项相关信息
 
 
         //填充表头信息临时缓存到本地
-        System.out.println("触发");
-        String url = pageOfficeService.getProductExcelUrl(bean);
-        System.out.println(url);
-
-
+        String url = pageOfficeService.getProductExcelUrl(ids);
+        // 验证 token 是否存在
+        String[] mapToken = parameterMap.get("token");
+        String strVerify = redisUtil.getRedisToken(mapToken[0]);
+        System.out.println("token == " + strVerify);
 
 
 
@@ -86,11 +96,15 @@ public class PageOfficeController {
         //设置委托样品下未勾选检测项对应的指定sheet不可编辑状态 TODO
         poCtrl.setCustomToolbar(false);
         Workbook wb = new Workbook();
-
         //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
-        Sheet sheet1 = wb.openSheet("Sheet1");
-        //设置当工作表只读时，是否允许用户手动调整行列。
-        sheet1.setAllowAdjustRC(true);
+        // 循环设置
+        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
+        for (int i = 0; i < dataEntitys.size(); i++) {
+            TaskIdEntity data = dataEntitys.get(i);
+            Sheet sheet1 = wb.openSheet(data.getOriginalName());
+            //设置当工作表只读时，是否允许用户手动调整行列。
+            sheet1.setAllowAdjustRC(false);
+        }
         //此行必须
         poCtrl.setWriter(wb);
 
@@ -110,8 +124,12 @@ public class PageOfficeController {
         //设置处理文件保存的请求方法
         poCtrl.setSaveFilePage("saveOriginalRecord");
         //加载文档
-//        poCtrl.webOpen("临时本地文件", OpenModeType.xlsNormalEdit, "丁");
-        poCtrl.webOpen("D:\\Users\\Administrator\\Desktop\\23年4月14日开发\\本地技术模板\\更改为标识符\\水泥.xlsx", OpenModeType.xlsNormalEdit, "丁");
+        url = URLDecoder.decode(url, "utf-8");
+        String[] strArray = url.split("\\.");
+        int suffixIndex = strArray.length - 1;
+        String type = strArray[suffixIndex];
+        ReturnResponse<String> response = downloadUtils.downLoad(url, type, null);
+        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");
         //TODO 删除临时文件
 
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));

@@ -13,15 +13,9 @@ public interface PageOfficeService {
 
     /**
      * 返回的 原始记录表头 塞入 的URL
-     * @param bean
+     * @param ids
      * @return
      */
-    String getProductExcelUrl(ReqParamBean bean) throws IOException;
+    String getProductExcelUrl(Integer[] ids) throws IOException;
 
-    /**
-     * 返回的 原始记录表头 塞入 的URL
-     * @param bean
-     * @return
-     */
-    String getProductExcelUrl0(ReqParamBean bean) throws IOException;
 }
