@@ -1,9 +1,6 @@
 package com.lims.manage.erp.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.aspose.slides.Collections.ArrayList;
-import com.lims.manage.erp.entity.ReqParamBean;
-import com.lims.manage.erp.entity.SaveParamBean;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.service.PageOfficeService;
@@ -27,7 +24,6 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URLDecoder;
 import java.util.*;
 
@@ -77,6 +73,9 @@ public class PageOfficeController {
         for(int j =0; j< items.length; j++){
             ids[j] =Integer.parseInt(items[j]);
         }
+//        JSONObject jsonObject = JSONObject.parseObject(list);
+        // 编辑参数赋值。
+        map.put("items",list);
 
 
 
@@ -141,7 +140,8 @@ public class PageOfficeController {
         int suffixIndex = strArray.length - 1;
         String type = strArray[suffixIndex];
         ReturnResponse<String> response = downloadUtils.downLoad(url, type, null);
-        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");
+        poCtrl.webOpen("D:\\doc\\excel模板\\shuini.xlsx",OpenModeType.xlsNormalEdit,"张三");
+//        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsNormalEdit, "administrator");
         //TODO 删除临时文件
 
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
@@ -175,8 +175,19 @@ public class PageOfficeController {
     @RequestMapping("Excel/saveOriginalRecord")
 //    public void save(@RequestBody SaveParamBean bean, HttpServletRequest request, HttpServletResponse response) {
     public void save(HttpServletRequest request, HttpServletResponse response) {
+        Map<String, String[]> parameterMap = request.getParameterMap();
         FileSaver fs = new FileSaver(request, response);
+        // 检测人
+        String testSet = fs.getFormField("testSet");
+        // 记录人
+        String recordSet = fs.getFormField("recordSet");
+        // 检测参数
+        String items = fs.getFormField("items");
+//        JSONObject jsonObject = JSONObject.parseObject(items);
+        System.out.println("items == " + items);
+//        System.out.println("jsonObject == " + jsonObject);
         fs.saveToFile(dir + fs.getFileName());
+        System.out.println("文件返回值 == " + fs.getFileName());
         // 根据人员内容 塞入Excel中
         List<UserInfoVo> userInfoVos = new ArrayList();
         UserInfoVo userInfoVo = new UserInfoVo();
@@ -199,6 +210,7 @@ public class PageOfficeController {
 
 
         //相关表做更新或者插入操作
+//        return fs.getFileName();
     }
 
     /**
