@@ -601,7 +601,7 @@
         SELECT distinct t2.code
         FROM test_entrusted_sample_checkitem_rel t1
                  LEFT JOIN test_standard_file t2 ON t1.standard_id = t2.id
-        WHERE t1.entrust_id = #{id} and t1.sample_id = #{sampleId}
+        WHERE t1.entrust_id = #{id} and t1.sample_id = #{sampleId} and t1.state &gt;= 2
     </select>
 
     <select id="getEquipment" resultType="java.lang.String">
@@ -610,7 +610,7 @@
                  LEFT JOIN test_product_item_instrument_middle_rel t2 ON t1.id = t2.id_item
                  LEFT JOIN test_instrument t3 ON t2.intrusment_id = t3.id
         WHERE t3.NAME IS NOT NULL
-          AND t1.entrust_id = #{id} and t1.sample_id = #{sampleId}
+          AND t1.entrust_id = #{id} and t1.sample_id = #{sampleId} and t1.state &gt;= 2
     </select>
 
     <update id="updateReportUrl">

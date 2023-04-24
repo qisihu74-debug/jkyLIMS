@@ -84,6 +84,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/app/testInstrument/getDetails", "anon");
         filterChainDefinitionMap.put("/pageOffice/Excel/editOriginalRecord", "anon");
         filterChainDefinitionMap.put("/pageOffice/Excel/saveOriginalRecord", "anon");
+        filterChainDefinitionMap.put("/pageOffice/**", "anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");

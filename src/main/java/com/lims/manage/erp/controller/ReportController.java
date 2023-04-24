@@ -41,6 +41,7 @@ import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
 import com.zhuozhengsoft.pageoffice.excelwriter.Sheet;
@@ -76,6 +77,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -684,7 +686,7 @@ public class ReportController {
     }
 
     /**
-     * 客户上传报告
+     * 报告合成提交审批保存
      * @param reportCode
      * @param verifyer
      * @param issuer
@@ -1025,74 +1027,6 @@ public class ReportController {
         }
     }
 
-    /*@RequestMapping(value = "/onlineEdit", method = RequestMethod.GET)
-    public ModelAndView showWord(String url, HttpServletRequest request, Map<String, Object> map)
-            throws UnsupportedEncodingException {
-        url="http://121.89.242.0:9000/sample-tag/水泥标准模板.xlsx";
-        PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
-        poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");// 设置服务页面
-
-        //禁止拷贝文档内容到外部
-        poCtrl.setDisableCopyOnly(true);
-        //设置委托样品下未勾选检测项对应的指定sheet不可编辑状态 TODO
-        poCtrl.setCustomToolbar(false);
-        Workbook wb = new Workbook();
-
-        //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
-        Sheet sheet1 = wb.openSheet("技术指标");
-        sheet1.setReadOnly(false);
-        //设置当工作表只读时，是否允许用户手动调整行列。
-        sheet1.setAllowAdjustRC(true);
-        Sheet sheet2 = wb.openSheet("第1页");
-        sheet2.setReadOnly(false);
-        //设置当工作表只读时，是否允许用户手动调整行列。
-        sheet2.setAllowAdjustRC(true);
-        Sheet sheet3 = wb.openSheet("第2页");
-        sheet3.setReadOnly(false);
-        //设置当工作表只读时，是否允许用户手动调整行列。
-        sheet3.setAllowAdjustRC(true);
-
-        //此行必须
-        poCtrl.setWriter(wb);
-
-        poCtrl.addCustomToolButton("保存", "Save", 1);// 添加自定义保存按钮
-        // poCtrl.addCustomToolButton("盖章","AddSeal",2);//添加自定义盖章按钮
-        poCtrl.addCustomToolButton("打印", "ShowPrintDlg()", 6);
-        poCtrl.addCustomToolButton("全屏切换", "SwitchFullScreen()", 4);
-        poCtrl.addCustomToolButton("关闭", "close", 21);
-        Map<String, String[]> parameterMap = request.getParameterMap();
-        String urlParam = "?";
-        for (String param : parameterMap.keySet()) {
-            if (param.equals("url")) {
-                continue;
-            }
-            urlParam += param + "=" + parameterMap.get(param)[0] + "&";
-        }
-
-        poCtrl.setSaveFilePage("/save" + urlParam);// 设置处理文件保存的请求方法
-
-        // 打开word
-        // poCtrl.webOpen("d:\\test.doc",OpenModeType.docAdmin,"张三");
-        String[] strArray = url.split("\\.");
-        int suffixIndex = strArray.length - 1;
-        String type = strArray[suffixIndex];
-        url = URLDecoder.decode(url, "utf-8");
-        ReturnResponse<String> response = downLoad.downLoad(url, type, null);
-        if (type.indexOf("doc") != -1) {
-            poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.docAdmin, "administrator");
-        } else if (type.indexOf("xls") != -1) {
-            poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");
-        } else if (type.indexOf("ppt") != -1) {
-            poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.pptNormalEdit, "administrator");
-        } else {
-            poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");
-        }
-
-        map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
-        ModelAndView mv = new ModelAndView("POB");
-        return mv;
-    }*/
-
     /**
      * 报告在线制作
      * @param json
@@ -1101,8 +1035,7 @@ public class ReportController {
      * @return
      */
     @GetMapping("onlineEdit")
-    @ResponseBody
-    public ModelAndView onlineEdit(String json, Map<String, Object> map, HttpServletRequest request){
+    public ModelAndView onlineEdit(@RequestParam("json") String json, Map<String, Object> map, HttpServletRequest request){
         if (org.apache.commons.lang3.StringUtils.isEmpty(json)){
             return new ModelAndView("error");
         }
@@ -1111,7 +1044,6 @@ public class ReportController {
             return new ModelAndView("error");
         }else {
             //根据token获取AuthenticationToken
-            String token = reportEditReq.getToken();
             //redis校验
             String redisToken = redisUtil.getRedisToken(reportEditReq.getToken());
             if (org.apache.commons.lang3.StringUtils.isEmpty(redisToken)){
@@ -1154,16 +1086,70 @@ public class ReportController {
         poCtrl.getRibbonBar().setTabVisible("TabReview", false);//审阅
         poCtrl.getRibbonBar().setTabVisible("TabView", false);//视图
         //设置处理文件保存的请求方法
-        poCtrl.setSaveFilePage("saveReport");
+        poCtrl.setSaveFilePage("saveOnlineReport");
         //加载文档
         poCtrl.webOpen(localPath, OpenModeType.xlsSubmitForm, "username");
         //删除临时文件
         FileAndFolderUtil.delete(localPath);
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
+        map.put("params",json);
         //设置模板引擎的html模板
-        ModelAndView mv = new ModelAndView("POB");
+        ModelAndView mv = new ModelAndView("excel");
         return mv;
     }
 
+    /**
+     * 报告制作保存
+     * @param request
+     * @param response
+     */
+    @RequestMapping("saveOnlineReport")
+    public ModelAndView saveOnlineReport(HttpServletRequest request, HttpServletResponse response){
+        //获取文件
+        FileSaver fs = new FileSaver(request, response);
+        String json = fs.getFormField("params");
+        if (org.apache.commons.lang.StringUtils.isEmpty(json)){
+            return new ModelAndView("error");
+        }
+        ReportEditReq reportEditReq = JSON.parseObject(json,ReportEditReq.class);
+        if (reportEditReq.getTaskId() == null || reportEditReq.getReportType() == null){
+            return new ModelAndView("error");
+        }
+        FileInputStream fileStream = fs.getFileStream();
+        fs.close();
+        Boolean flag = reportService.saveOnlineReport(fileStream,reportEditReq);
+        if (flag){
+            return new ModelAndView("success");
+        }else {
+            return new ModelAndView("error");
+        }
+    }
 
+    /**
+     * 线下报告合并
+     * @param reportCode
+     * @param inspector
+     * @param verifyer
+     * @param issuer
+     * @param file
+     * @return
+     */
+    @PostMapping(value = "offlineReportMerge")
+    public Result offlineReportMerge(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
+                               @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file) {
+        if (file == null || StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
+            return ResultUtil.error("缺少参数");
+        }
+        logger.debug("发起审批检测人:{},审核人:{},签发人:{}",inspector,verifyer,issuer);
+        if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer) || org.apache.commons.lang3.StringUtils.isEmpty(inspector)){
+            return ResultUtil.error("缺少参数！");
+        }
+        Boolean flag = reportService.offlineReportMerge(reportCode,file,verifyer.split("&")[0],issuer.split("&")[0]
+                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),inspector);
+        if (flag) {
+            return ResultUtil.success("报告文件上传成功！");
+        }else {
+            return ResultUtil.error("报告文件上传失败！");
+        }
+    }
 }

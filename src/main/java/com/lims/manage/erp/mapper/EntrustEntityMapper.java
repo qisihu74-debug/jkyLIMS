@@ -686,4 +686,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return list中entrustId
      */
     List<EntrustSampleInfoVo> getEntrustSampleInfoIds(@Param("list") List<EntrustHistoryEntity> list);
+
+    @Update("update test_entrusted_sample_details_rel set report_edit_url=#{url} where entrustment_id=#{entrustId} and sample_id=#{sampleId}")
+    void updateUrlByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") Integer sampleId, @Param("url") String url);
 }

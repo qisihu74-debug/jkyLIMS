@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title>在线报告制作</title>
+    <meta charset="utf-8">
+    <script type="text/javascript">
+        function Save() {
+            document.getElementById("PageOfficeCtrl1").WebSave();
+        }
+
+        function SetFullScreen() {
+            document.getElementById("PageOfficeCtrl1").FullScreen = !document.getElementById("PageOfficeCtrl1").FullScreen;
+        }
+
+        function Close() {
+            window.external.close();
+        }
+    </script>
+</head>
+<body>
+<form id="form2">
+    <div style="font-size: 14px;">
+        <input id="params" name="params" type="hidden" th:value="${params}" style="display: none"/>
+    </div>
+    <div style=" width:auto; height:700px;" th:utext="${pageoffice}"></div>
+</form>
+</body>
+</html>
+
