@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title>在线报告制作</title>
+</head>
+<body style="overflow:hidden">
+<script type="text/javascript">
+    function Save() {
+        document.getElementById("PageOfficeCtrl1").WebSave();
+    }
+
+    function Close() {
+        window.external.close();
+    }
+</script>
+
+<div style="height:750px;width:auto;" th:utext="${pageoffice}">
+</div>
+</body>
+</html>

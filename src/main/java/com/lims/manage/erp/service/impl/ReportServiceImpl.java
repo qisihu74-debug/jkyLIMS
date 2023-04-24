@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.ParamEntity;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
@@ -3226,13 +3227,31 @@ public class ReportServiceImpl implements ReportService {
             } catch (Exception e) {
                 log.error("报告制作加载模板文件失败:{}",e);
             }
-            String loacl = handlerReportHeader(detail,workbook,localPath,fileName);
-            //更新test_entrusted_sample_details_rel的edit_url
-
-
-
+            String loacl = handlerReportHeader(detail,workbook,localPath,fileName,reportEditReq);
             return loacl;
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean saveOnlineReport(FileInputStream fileStream, ReportEditReq reportEditReq) {
+        String fileName = GenID.getID()+".xlsx";
+        //上传文件服务器、更新test_entrusted_sample_details_rel的edit_url
+        String upload = MinIoUtil.upload(BucketsConst.buckets_sample_enclosure, fileName, fileStream, null);
+        String[] split = upload.split("\\?");
+        entrustEntityMapper.updateUrlByEntrustIdAndSampleId(reportEditReq.getEntrustId(),reportEditReq.getSampleId(),split[0]);
+        //1,报告已完成；2,报告未完成
+        Integer complete = reportEditReq.getReportComplete();
+        //报告类型0最终，1中间报告
+        Integer reportType = reportEditReq.getReportType();
+        if (complete == 2){
+
+        }else {
+
+        }
+
+
+        return null;
     }
 
     /**
@@ -3243,13 +3262,67 @@ public class ReportServiceImpl implements ReportService {
      * @param fileName
      * @return
      */
-    private String handlerReportHeader(EntrustAddVo detail, Workbook workbook, String localPath, String fileName) {
+    private String handlerReportHeader(EntrustAddVo detail, Workbook workbook, String localPath, String fileName,ReportEditReq reportEditReq) {
+        String info = recordEntityMapper.getInitInfo();
         Worksheet worksheet = workbook.getWorksheets().get("基础信息表");
         //检测单位名称
-        worksheet.getCells().get("B2").setValue("河南交科院检验检测认证有限公司");
-
-
-
+        worksheet.getCells().get("B2").setValue(info);
+        //委托单位
+        worksheet.getCells().get("B3").setValue(org.apache.commons.lang.StringUtils.isEmpty(detail.getEntrustCompany())?"——":detail.getEntrustCompany());
+        //工程名称
+        worksheet.getCells().get("B4").setValue(org.apache.commons.lang.StringUtils.isEmpty(detail.getProjectName())?"——":detail.getProjectName());
+        //工程部位/用途
+        worksheet.getCells().get("B5").setValue(org.apache.commons.lang.StringUtils.isEmpty(detail.getProjectPart())?"——":detail.getProjectPart());
+        //样品信息
+        //根据样品id获取样品详情
+        SampleDetailVo sampleEntity = sampleEntityMapper.getSampleTagInfo(reportEditReq.getSampleId());
+        worksheet.getCells().get("B5").setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
+                + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~","~"))
+                + "；样品数量：" + (sampleEntity.getSampleQuantity() == null ? "——" : sampleEntity.getSampleQuantity())
+                + "；代表批量：" + (sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration())
+                + "；规格等级：" + (sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs())
+                + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
+                + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+        String checkBasis = getCheckBasis(reportEditReq.getEntrustId(),sampleEntity.getId());
+        String judgeBasis = getJudgeBasis(reportEditReq.getEntrustId(),sampleEntity.getId());
+        //检测依据（只包含已完成的检测项）
+        worksheet.getCells().get("B6").setValue(checkBasis.equals("") ? "——" : checkBasis);
+        //判定依据
+        worksheet.getCells().get("B7").setValue(judgeBasis.equals("") ? "——" : judgeBasis);
+        //检测日期
+        //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
+        Date start = taskMapper.getStartTime(reportEditReq.getEntrustId());
+        Date end = taskMapper.getEndTime(reportEditReq.getEntrustId());
+        String e = "";
+        String s = "";
+        if (start == null){
+            s = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+        }else {
+            s = DateUtil.formatDate(start);
+        }
+        if (end == null){
+            e = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+        }else {
+            e = DateUtil.formatDate(end);
+        }
+        if (s != null && e != null){
+            if (s.equals(e)){
+                worksheet.getCells().get("B8").setValue(s);
+            }else {
+                worksheet.getCells().get("B8").setValue(s + "~" + e);
+            }
+        }
+        //主要仪器设备名称及编号
+        String equipment = getEquipment(reportEditReq.getEntrustId(),reportEditReq.getSampleId());
+        worksheet.getCells().get("B9").setValue(equipment);
+        //委托编号
+        worksheet.getCells().get("B10").setValue(detail.getEntrustmentNo());
+        //检测类别
+        worksheet.getCells().get("B11").setValue(detail.getCheckPurpose());
+        //批号
+        worksheet.getCells().get("B12").setValue(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
+        //生产厂家
+        worksheet.getCells().get("B12").setValue(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
         return localPath+fileName;
     }
 }
