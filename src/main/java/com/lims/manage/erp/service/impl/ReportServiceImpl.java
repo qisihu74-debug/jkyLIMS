@@ -3322,7 +3322,59 @@ public class ReportServiceImpl implements ReportService {
         }
         return flag;
     }
-        /**
+
+    @Override
+    public Boolean offlineReportMerge(String reportCode, MultipartFile file, String verifyer, String issuer, long verifyerId, long issuerId, String inspector) {
+        String url = "";
+        try {
+            //如果上传的是excel转为pdf
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename.contains(".pdf")) {
+                url = MinIoUtil.upload("report-download", file, GenID.getID() + ".pdf");
+            } else {
+                InputStream inputStream = file.getInputStream();
+                //excel转pdf
+                ByteArrayOutputStream byteArrayOutputStream = PDFHelper3.excel2pdf2(inputStream, qiYueSuoEntity.getAutographPath() + GenID.getID() + ".pdf");
+                InputStream inputStream1 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                url = MinIoUtil.upload("report-download", GenID.getID() + ".pdf", inputStream1, "application/octet-stream");
+            }
+        } catch (Exception e) {
+            logger.info("提交审批中上传文件失败:{}", e);
+            return false;
+        }
+        //更新签名
+        String type = recordEntityMapper.getTypeByCode(reportCode);
+        if ("1".equals(type)) {
+            reportMapper.updateVerAndIssZj(reportCode, inspector, verifyer, issuer, verifyerId, new Date(System.currentTimeMillis()), issuerId);
+        } else {
+            reportMapper.updateVerAndIss(reportCode, inspector, verifyer, issuer, verifyerId, new Date(System.currentTimeMillis()), issuerId);
+        }
+        //设置签名信息,根据报告编号获取委托id
+        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
+        String url1 = "";
+        try {
+            url1 = insertPicToPdf(url, entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId(), inspector, type);
+            logger.info("设置签名信息：{}", url1);
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)) {
+                url = url1;
+            }
+        } catch (Exception e) {
+            logger.error("报告签名失败:{}", e);
+        }
+        if (url.contains("?")) {
+            url = url.substring(0, url.indexOf("?"));
+        }
+        //TODO (报告) 兼容中间报告
+        if ("1".equals(type)) {
+            reportMapper.updateUrlZj(reportCode, inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+        } else {
+            reportMapper.updateUrl(reportCode, inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+        }
+        logger.info("签名信息更新成功！:{}", reportCode + ":" + url);
+        return true;
+    }
+
+    /**
          * 填充基础信息表
          * @param detail
          * @param workbook

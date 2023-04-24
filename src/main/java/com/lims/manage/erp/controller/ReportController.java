@@ -686,7 +686,7 @@ public class ReportController {
     }
 
     /**
-     * 客户上传报告
+     * 报告合成提交审批保存
      * @param reportCode
      * @param verifyer
      * @param issuer
@@ -1125,4 +1125,31 @@ public class ReportController {
         }
     }
 
+    /**
+     * 线下报告合并
+     * @param reportCode
+     * @param inspector
+     * @param verifyer
+     * @param issuer
+     * @param file
+     * @return
+     */
+    @PostMapping(value = "offlineReportMerge")
+    public Result offlineReportMerge(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
+                               @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file) {
+        if (file == null || StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
+            return ResultUtil.error("缺少参数");
+        }
+        logger.debug("发起审批检测人:{},审核人:{},签发人:{}",inspector,verifyer,issuer);
+        if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer) || org.apache.commons.lang3.StringUtils.isEmpty(inspector)){
+            return ResultUtil.error("缺少参数！");
+        }
+        Boolean flag = reportService.offlineReportMerge(reportCode,file,verifyer.split("&")[0],issuer.split("&")[0]
+                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),inspector);
+        if (flag) {
+            return ResultUtil.success("报告文件上传成功！");
+        }else {
+            return ResultUtil.error("报告文件上传失败！");
+        }
+    }
 }

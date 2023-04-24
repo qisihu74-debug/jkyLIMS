@@ -422,4 +422,6 @@ public interface ReportService {
     String handlerReportMessage(EntrustAddVo detail, ReportEditReq reportEditReq,String localPath);
 
     Boolean saveOnlineReport(FileInputStream fileStream, ReportEditReq reportEditReq);
+
+    Boolean offlineReportMerge(String reportCode, MultipartFile file, String s, String s1, long parseLong, long parseLong1, String inspector);
 }

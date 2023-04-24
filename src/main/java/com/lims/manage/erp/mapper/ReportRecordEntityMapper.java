@@ -377,4 +377,10 @@ public interface ReportRecordEntityMapper {
             "\tentrustment_id =#{entrustId}\n" +
             "AND sample_id =#{sampleId}")
     ReportEditReq getUrlByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") Integer sampleId);
+
+    @Select("select type from test_report_record where report_code=#{reportCode}")
+    String getTypeByCode(@Param("reportCode") String reportCode);
+
+    @Select("select entrustment_id As entrustmentId,entrust_id As entrustId from test_report_record where report_code=#{reportCode}")
+    ReportRecordEntity getEntrust(@Param("reportCode") String reportCode);
 }
