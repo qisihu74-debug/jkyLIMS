@@ -1101,12 +1101,14 @@ public class ReportController {
 
     /**
      * 报告制作保存
-     * @param json
      * @param request
      * @param response
      */
     @RequestMapping("saveOnlineReport")
-    public ModelAndView saveOnlineReport(String json,HttpServletRequest request, HttpServletResponse response){
+    public ModelAndView saveOnlineReport(HttpServletRequest request, HttpServletResponse response){
+        //获取文件
+        FileSaver fs = new FileSaver(request, response);
+        String json = fs.getFormField("params");
         if (org.apache.commons.lang.StringUtils.isEmpty(json)){
             return new ModelAndView("error");
         }
@@ -1114,8 +1116,6 @@ public class ReportController {
         if (reportEditReq.getTaskId() == null || reportEditReq.getReportType() == null){
             return new ModelAndView("error");
         }
-        //获取文件
-        FileSaver fs = new FileSaver(request, response);
         FileInputStream fileStream = fs.getFileStream();
         fs.close();
         Boolean flag = reportService.saveOnlineReport(fileStream,reportEditReq);
