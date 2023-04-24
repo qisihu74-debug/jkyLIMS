@@ -99,7 +99,22 @@ public class PageOfficeController {
         poCtrl.setDisableCopyOnly(true);
         //设置委托样品下未勾选检测项对应的指定sheet不可编辑状态 TODO
         poCtrl.setCustomToolbar(false);
-        poCtrl.setFileTitle("另外存");
+        Workbook wb = new Workbook();
+        //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
+        // 循环设置
+        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
+        for (int i = 0; i < dataEntitys.size(); i++) {
+            TaskIdEntity data = dataEntitys.get(i);
+            Sheet sheet1 = wb.openSheet(data.getOriginalName());
+            //设置当工作表只读时，是否允许用户手动调整行列。
+            sheet1.setAllowAdjustRC(true);
+            // 设置工作表是否只读。
+            //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
+            sheet1.setReadOnly(false);
+        }
+        //此行必须
+        poCtrl.setWriter(wb);
+
 
 
 
@@ -118,38 +133,22 @@ public class PageOfficeController {
         //设置处理文件保存的请求方法
         poCtrl.setSaveFilePage("saveOriginalRecord");
 
-        Workbook wb = new Workbook();
-        //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
-        // 循环设置
-        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
-        for (int i = 0; i < dataEntitys.size(); i++) {
-            TaskIdEntity data = dataEntitys.get(i);
-            Sheet sheet1 = wb.openSheet(data.getOriginalName());
-            //设置当工作表只读时，是否允许用户手动调整行列。
-            sheet1.setAllowAdjustRC(true);
-            // 设置工作表是否只读。
-            //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
-            sheet1.setReadOnly(false);
-        }
-        //此行必须
-        poCtrl.setWriter(wb);
-
         //加载文档
         url = URLDecoder.decode(url, "utf-8");
         String[] strArray = url.split("\\.");
         int suffixIndex = strArray.length - 1;
         String type = strArray[suffixIndex];
         ReturnResponse<String> response = downloadUtils.downLoad(url, type, null);
-        poCtrl.webOpen("D:\\doc\\excel模板\\shuini.xlsx",OpenModeType.xlsNormalEdit,"张三");
-//        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsNormalEdit, "administrator");
+//        poCtrl.webOpen("D:\\doc\\excel模板\\shuini.xlsx",OpenModeType.xlsNormalEdit,"张三");
+        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsNormalEdit, "administrator");
         //TODO 删除临时文件
 
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
         List<UserInfoVo> userInfoVos = new ArrayList();
-        UserInfoVo userInfoVo = new UserInfoVo();
-        userInfoVo.setDepartmentId("111L");
-        userInfoVo.setName("丁1");
-        userInfoVos.add(userInfoVo);
+//        UserInfoVo userInfoVo = new UserInfoVo();
+//        userInfoVo.setDepartmentId("111L");
+//        userInfoVo.setName("丁1");
+//        userInfoVos.add(userInfoVo);
 
         UserInfoVo userInfoVo2 = new UserInfoVo();
         userInfoVo2.setDepartmentId("222L");
@@ -160,6 +159,11 @@ public class PageOfficeController {
         userInfoVo3.setDepartmentId("3333L");
         userInfoVo3.setName("王3");
         userInfoVos.add(userInfoVo3);
+
+        UserInfoVo userInfoVo4 = new UserInfoVo();
+        userInfoVo4.setDepartmentId("4444L");
+        userInfoVo4.setName("4443");
+        userInfoVos.add(userInfoVo4);
 
         map.put("userInfoVos", userInfoVos);
         ModelAndView mv = new ModelAndView("POB");
