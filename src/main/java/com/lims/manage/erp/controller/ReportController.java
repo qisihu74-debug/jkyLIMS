@@ -1035,8 +1035,7 @@ public class ReportController {
      * @return
      */
     @GetMapping("onlineEdit")
-    @ResponseBody
-    public ModelAndView onlineEdit(String json, Map<String, Object> map, HttpServletRequest request){
+    public ModelAndView onlineEdit(@RequestParam("json") String json, Map<String, Object> map, HttpServletRequest request){
         if (org.apache.commons.lang3.StringUtils.isEmpty(json)){
             return new ModelAndView("error");
         }
