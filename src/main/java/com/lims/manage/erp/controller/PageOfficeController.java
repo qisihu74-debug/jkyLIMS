@@ -178,9 +178,11 @@ public class PageOfficeController {
      */
     @RequestMapping("Excel/saveOriginalRecord")
 //    public void save(@RequestBody SaveParamBean bean, HttpServletRequest request, HttpServletResponse response) {
-    public void save(HttpServletRequest request, HttpServletResponse response) {
+    public void save(HttpServletRequest request, HttpServletResponse response) throws Exception {
         Map<String, String[]> parameterMap = request.getParameterMap();
         FileSaver fs = new FileSaver(request, response);
+        // 实现逻辑操作
+        pageOfficeService.saveOriginalRecord(request,fs);
         // 检测人
         String testSet = fs.getFormField("testSet");
         // 记录人
@@ -190,26 +192,26 @@ public class PageOfficeController {
 //        JSONObject jsonObject = JSONObject.parseObject(items);
         System.out.println("items == " + items);
 //        System.out.println("jsonObject == " + jsonObject);
-        fs.saveToFile(dir + fs.getFileName());
-        System.out.println("文件返回值 == " + fs.getFileName());
-        // 根据人员内容 塞入Excel中
-        List<UserInfoVo> userInfoVos = new ArrayList();
-        UserInfoVo userInfoVo = new UserInfoVo();
-        userInfoVo.setDepartmentId("111L");
-        userInfoVo.setName("丁1");
-        userInfoVos.add(userInfoVo);
-
-        UserInfoVo userInfoVo2 = new UserInfoVo();
-        userInfoVo2.setDepartmentId("222L");
-        userInfoVo2.setName("孙2");
-        userInfoVos.add(userInfoVo2);
-
-        UserInfoVo userInfoVo3 = new UserInfoVo();
-        userInfoVo3.setDepartmentId("3333L");
-        userInfoVo3.setName("王3");
-        userInfoVos.add(userInfoVo3);
-
-        fs.close();
+//        fs.saveToFile(dir + fs.getFileName());
+//        System.out.println("文件返回值 == " + fs.getFileName());
+//        // 根据人员内容 塞入Excel中
+//        List<UserInfoVo> userInfoVos = new ArrayList();
+//        UserInfoVo userInfoVo = new UserInfoVo();
+//        userInfoVo.setDepartmentId("111L");
+//        userInfoVo.setName("丁1");
+//        userInfoVos.add(userInfoVo);
+//
+//        UserInfoVo userInfoVo2 = new UserInfoVo();
+//        userInfoVo2.setDepartmentId("222L");
+//        userInfoVo2.setName("孙2");
+//        userInfoVos.add(userInfoVo2);
+//
+//        UserInfoVo userInfoVo3 = new UserInfoVo();
+//        userInfoVo3.setDepartmentId("3333L");
+//        userInfoVo3.setName("王3");
+//        userInfoVos.add(userInfoVo3);
+//
+//        fs.close();
         //上传文件到文件服务器、删除本地临时缓存的文件
 
 

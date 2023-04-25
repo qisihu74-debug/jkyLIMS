@@ -26,6 +26,6 @@ public interface PageOfficeService {
      * @param file
      * @return
      */
-    String saveOriginalRecord(HttpServletRequest request, FileSaver file);
+    String saveOriginalRecord(HttpServletRequest request, FileSaver file) throws Exception;
 
 }

@@ -1100,4 +1100,18 @@
             or t4.alias_name like CONCAT('%',#{search},'%') )
         </if>
     </select>
+
+    <select id="getUserSignatureUrls" resultType="com.lims.manage.erp.vo.TaskListParamVo">
+        SELECT
+            user_id AS inspector,
+            signature_url AS signatureUrl
+        FROM
+            sys_user
+        WHERE
+            user_id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+        and signature_url is not null
+    </select>
 </mapper>
