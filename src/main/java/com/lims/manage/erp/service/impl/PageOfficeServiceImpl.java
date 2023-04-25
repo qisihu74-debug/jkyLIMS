@@ -7,6 +7,7 @@ import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.ExcelReplaceUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.OriginalRecordDataVo;
@@ -19,6 +20,8 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -96,9 +99,8 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                 // 根据原始记录的 模板名 找到 对应的 sheet名称。
                 XSSFSheet sheet = wb.getSheet(data.getOriginalName());
                 if (sheet != null) {
-                    // 进行指定标识符数据替换
-                    XLSTransformer transformer = new XLSTransformer();
-                    transformer.transformWorkbook(sheet.getWorkbook(), result);
+                    // 替换原始记录模板数据
+                    ExcelReplaceUtil.ExcelReplace(sheet, result);
                 }
             }
         }
