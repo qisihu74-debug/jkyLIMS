@@ -3374,6 +3374,11 @@ public class ReportServiceImpl implements ReportService {
         return true;
     }
 
+    @Override
+    public String handlerReportMerge(String reportCode, String poSysPath) {
+        return null;
+    }
+
     /**
          * 填充基础信息表
          * @param detail

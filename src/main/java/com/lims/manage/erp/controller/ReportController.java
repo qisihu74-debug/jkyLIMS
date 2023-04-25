@@ -39,8 +39,10 @@ import com.lims.manage.erp.util.RedisUtils;
 import com.lims.manage.erp.util.ReturnResponse;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.TeamVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
@@ -1040,16 +1042,7 @@ public class ReportController {
             return new ModelAndView("error");
         }
         ReportEditReq reportEditReq = JSON.parseObject(json,ReportEditReq.class);
-        if (org.apache.commons.lang3.StringUtils.isEmpty(reportEditReq.getToken())){
-            return new ModelAndView("error");
-        }else {
-            //根据token获取AuthenticationToken
-            //redis校验
-            String redisToken = redisUtil.getRedisToken(reportEditReq.getToken());
-            if (org.apache.commons.lang3.StringUtils.isEmpty(redisToken)){
-                return new ModelAndView("error");
-            }
-        }
+        String username = ShiroUtils.getUserInfo().getUsername();
         //根据参数委托相关信息
         Long entrustId = taskService.getEntrustIdByTaskId(reportEditReq.getTaskId());
         reportEditReq.setEntrustId(entrustId);
@@ -1088,7 +1081,7 @@ public class ReportController {
         //设置处理文件保存的请求方法
         poCtrl.setSaveFilePage("saveOnlineReport");
         //加载文档
-        poCtrl.webOpen(localPath, OpenModeType.xlsSubmitForm, "username");
+        poCtrl.webOpen(localPath, OpenModeType.xlsSubmitForm, username);
         //删除临时文件
         FileAndFolderUtil.delete(localPath);
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
@@ -1150,6 +1143,90 @@ public class ReportController {
             return ResultUtil.success("报告文件上传成功！");
         }else {
             return ResultUtil.error("报告文件上传失败！");
+        }
+    }
+
+    /**
+     * 在线报告合并
+     * @param reportCode
+     * @param map
+     * @param request
+     * @return
+     */
+    @GetMapping("/onlineReportMerge")
+    public ModelAndView onlineReportMerge(String reportCode, Map<String, Object> map, HttpServletRequest request){
+        if (StringUtils.isEmpty(reportCode)){
+            return new ModelAndView("error");
+        }
+        String username = "gjl";//ShiroUtils.getUserInfo().getUsername();
+        //根据报告编号合并委托下所用样品的报告模板包含首页、编辑报告页码和填充报告编号
+        String localPath = "D:\\Users\\Administrator\\Desktop\\水泥.xlsx";//reportService.handlerReportMerge(reportCode,poSysPath);
+        //设置服务页面
+        PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
+        poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");
+        //禁止拷贝文档内容到外部
+        poCtrl.setDisableCopyOnly(true);
+        //添加自定义按钮
+        poCtrl.addCustomToolButton("保存", "Save()", 1);
+        poCtrl.addCustomToolButton("打印", "PrintFile()", 6);
+        poCtrl.addCustomToolButton("全屏/还原", "IsFullScreen()", 4);
+        poCtrl.addCustomToolButton("关闭", "CloseFile()", 21);
+        //设置操作栏按钮
+        poCtrl.getRibbonBar().setTabVisible("TabHome", true);//开始
+        poCtrl.getRibbonBar().setTabVisible("TabFormulas", false);//公式
+        poCtrl.getRibbonBar().setTabVisible("TabInsert", false);//插入
+        poCtrl.getRibbonBar().setTabVisible("TabData", false);//数据
+        poCtrl.getRibbonBar().setTabVisible("TabReview", false);//审阅
+        poCtrl.getRibbonBar().setTabVisible("TabView", false);//视图
+        //设置处理文件保存的请求方法
+        poCtrl.setSaveFilePage("onlineReportMergeSave");
+        //加载文档
+        poCtrl.webOpen(localPath, OpenModeType.xlsSubmitForm, username);
+        //删除临时文件
+        //FileAndFolderUtil.delete(localPath);
+        map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
+        map.put("reportCode",reportCode);
+        //设置检测人、审核人、签发人
+        List<String> inspectors = reportService.inspectorList(null);//检测人
+        TeamVo returnList = taskService.getTeamUserNameTwo(1647502446459100L);//审核签发人
+        List<LabelValueVo> approvers = returnList.getApproverVo();
+        List<LabelValueVo> signers = returnList.getSignerVo();
+        map.put("inspectors",inspectors);
+        map.put("approvers",approvers);
+        map.put("signers",signers);
+        //设置模板引擎的html模板
+        ModelAndView mv = new ModelAndView("report");
+        return mv;
+    }
+
+    /**
+     * 保存在线合并报告
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping("onlineReportMergeSave")
+    public ModelAndView onlineReportMergeSave(HttpServletRequest request, HttpServletResponse response){
+        //获取文件
+        FileSaver fs = new FileSaver(request, response);
+        String json = fs.getFormField("reportCode");
+        String json1 = fs.getFormField("approver");
+        String json2 = fs.getFormField("signer");
+        String json3 = fs.getFormField("inspector");
+        if (org.apache.commons.lang.StringUtils.isEmpty(json)){
+            return new ModelAndView("error");
+        }
+        ReportEditReq reportEditReq = JSON.parseObject(json,ReportEditReq.class);
+        if (reportEditReq.getTaskId() == null || reportEditReq.getReportType() == null){
+            return new ModelAndView("error");
+        }
+        FileInputStream fileStream = fs.getFileStream();
+        fs.close();
+        Boolean flag = reportService.saveOnlineReport(fileStream,reportEditReq);
+        if (flag){
+            return new ModelAndView("success");
+        }else {
+            return new ModelAndView("error");
         }
     }
 }
