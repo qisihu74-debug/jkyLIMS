@@ -1,52 +1,52 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
-
 <head>
-    <title>打开Word文件</title>
+    <title></title>
+    <meta charset="utf-8">
+    <script type="text/javascript">
+        function Save() {
+            document.getElementById("PageOfficeCtrl1").WebSave();
+        }
+
+        function SetFullScreen() {
+            document.getElementById("PageOfficeCtrl1").FullScreen = !document.getElementById("PageOfficeCtrl1").FullScreen;
+        }
+
+        function Close() {
+            window.external.close();
+        }
+    </script>
 </head>
-
 <body>
-<label for="">
-    检测人：
-    <select name="cars">
-        <!--/*@thymesVar id="userInfoVos" type="11"*/-->
+<form id="form1">
+    <div style="font-size: 14px;">
+        <label for="">
+            检测人：
+            <select multiple name="cars1" id="testSet"  th:value="testSet">
+                <!--/*@thymesVar id="userInfoVos" type="11"*/-->
 
-        <!--/*@thymesVar id="userId" type="22"*/-->
-        <option th:each="e:${userInfoVos}" th:value="${e.departmentId}" th:text="${e.name}"></option>
+                <!--/*@thymesVar id="userId" type="22"*/-->
+                <option th:each="e:${userInfoVos}" th:value="${e.departmentId}" th:text="${e.name}"></option>
 
-    </select>
-</label>
+            </select>
+        </label>
+        <label for="">
+            记录人：
+            <select multiple name="cars2" id="recordSet" th:value="recordSet">
+                <!--/*@thymesVar id="userInfoVos" type="11"*/-->
 
-<label for="">
-    记录人：
-    <select name="cars">
-        <option th:each="e:${userInfoVos}" th:value="${e.departmentId}" th:text="${e.name}"></option>
+                <!--/*@thymesVar id="userId" type="22"*/-->
+                <option th:each="e:${userInfoVos}" th:value="${e.departmentId}" th:text="${e.name}"></option>
 
-    </select>
-</label>
+            </select>
+        </label>
+        <input id="items" name="items" type="hidden" th:value="${items}" style="display: none"/>
 
-<button id="save">保存</button>
-
-<div style="width:auto;height:730px;" th:utext="${pageoffice}"></div>
-
-
-<script type="text/javascript">
-    var itemids = ''
-    //保存文件
-    var save = document.getElementById("save");
-    save.addEventListener('click', function () {
-        document.getElementById("PageOfficeCtrl1").WebSave();
-        // window.external.CallParentFunc("refresh();");
-        window.external.close();
-    });
-
-    function refresh() {
-        alert('草')
-    }
-
-
-</script>
+        </select>
+    </div>
+    <div style=" width:auto; height:700px;" th:utext="${pageoffice}"></div>
+</form>
 </body>
-
 </html>
+
