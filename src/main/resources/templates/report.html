@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title>在线合并报告</title>
+    <meta charset="utf-8">
+
+    <script type="text/javascript">
+        function Save() {
+            document.getElementById("PageOfficeCtrl1").WebSave();
+        }
+
+        function SetFullScreen() {
+            document.getElementById("PageOfficeCtrl1").FullScreen = !document.getElementById("PageOfficeCtrl1").FullScreen;
+        }
+
+        function Close() {
+            window.external.close();
+        }
+
+    </script>
+</head>
+<body>
+<form id="form3">
+    <div style="font-size: 14px;">
+        <label for="">
+            检测人：
+            <select multip id="inspector" style="width:180px;height: 30px;margin-left: 200px">
+                <option th:each="item : ${inspectors}"
+                        th:value="${item}"
+                        th:text="${item}">
+                </option>
+            </select>
+        </label>
+
+        <label for="">
+            审核人：
+            <select id="approver">
+                    <option value="">请选择签发人</option>
+                    <option th:each="hobby : ${approvers}"
+                            th:value="${hobby.value}+A+${hobby.label}"
+                            th:text="${hobby.label}"></option>
+            </select>
+        </label>
+        <label for="">
+            签发人：
+            <select id="signer">
+                <option value="">请选择签发人</option>
+                <option th:each="hobby : ${signers}"
+                        th:value="${hobby.value}+A+${hobby.label}"
+                        th:text="${hobby.label}"></option>
+            </select>               
+        </label>
+        <input id="reportCode" name="reportCode" type="hidden" th:value="${reportCode}" style="display: none"/>
+    </div>
+    <div style=" width:auto; height:700px;" th:utext="${pageoffice}"></div>
+</form>
+</body>
+<script src="selectMultip.js"></script>
+<script>
+    selectMultip.register("inspector")
+</script>
+</html>
+
