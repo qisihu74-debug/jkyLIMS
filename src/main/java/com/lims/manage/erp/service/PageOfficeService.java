@@ -28,4 +28,12 @@ public interface PageOfficeService {
      */
     String saveOriginalRecord(HttpServletRequest request, FileSaver file) throws Exception;
 
+    /**
+     * 更新样品记录URL
+     * @param excelUrl
+     * @param ids
+     * @return
+     */
+    String updateOriginalRecordUrl(String excelUrl,Integer[] ids);
+
 }

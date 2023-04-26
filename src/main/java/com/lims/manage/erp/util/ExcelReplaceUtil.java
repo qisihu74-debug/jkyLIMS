@@ -143,26 +143,39 @@ public class ExcelReplaceUtil {
                     //获取单元格数据
                     String cellValue = cell.getStringCellValue();
                     if (!cellValue.equals("") && cellValue.equals(excelInsertVo.getRecordType())) {
-                        System.out.println("x == " + (x + 1));
-                        System.out.println("y == " + (y +3));
-                        excelInsertVo.setLeftColumn(y+3);
+//                        System.out.println("x == " + (x + 1));
+//                        System.out.println("y == " + (y + 3));
+                        excelInsertVo.setLeftColumn(y + 3);
                         excelInsertVo.setTopRow(x + 1);
-                        System.out.println("cellValue == " + cellValue);
+//                        System.out.println("cellValue == " + cellValue);
                     }
                 }
             }
         }
     }
 
-    public static void main(String[] args) throws IOException {
-//        removeExcelSheetName("D:\\doc\\e-iceblue\\演示插入结果.xlsx", "Evaluation Warning");
-        InputStream fileStream = new FileInputStream("D:\\doc\\e-iceblue\\演示插入结果.xlsx");
-        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-        ExcelInsertVo excelInsertVo = new ExcelInsertVo();
-        excelInsertVo.setSheetName("水泥密度、比表面积试验检测记录表");
-        excelInsertVo.setRecordType("检测：");
-        getSheetRowAndColumn(excelInsertVo, wb);
-        System.out.println(excelInsertVo);
-
+    /**
+     * 清除指定单元格内容
+     *
+     * @param sheet
+     * @param row
+     * @param columln
+     */
+    private static void removeExcelCellValue(XSSFSheet sheet, int row, int columln) {
+        //锁定要修改的单元格：先找到行，再找到列
+        XSSFRow row1 = sheet.getRow(row);
+        row1.createCell(columln).setCellValue("");
     }
+
+//    public static void main(String[] args) throws IOException {
+////        removeExcelSheetName("D:\\doc\\e-iceblue\\演示插入结果.xlsx", "Evaluation Warning");
+//        InputStream fileStream = new FileInputStream("D:\\doc\\e-iceblue\\演示插入结果.xlsx");
+//        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
+//        ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+//        excelInsertVo.setSheetName("水泥密度、比表面积试验检测记录表");
+//        excelInsertVo.setRecordType("检测：");
+//        getSheetRowAndColumn(excelInsertVo, wb);
+//        System.out.println(excelInsertVo);
+//
+//    }
 }

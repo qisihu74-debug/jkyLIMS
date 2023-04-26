@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestProductItem;
+import com.lims.manage.erp.vo.ExcelInsertVo;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -109,5 +110,20 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
             "WHERE\n" +
             "\tt1.id = #{itemId}")
     String getProductExcel(@Param("itemId") Integer itemId);
+
+    /**
+     * 通过检测项主键 产品Excel及产品附件
+     * @param itemId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tt1.report_edit_url as reportEditUrl, \n" +
+            "\tt1.product_excel_url as productExcelUrl \n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_details_rel AS t1\n" +
+            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.sample_id = t2.sample_id \n" +
+            "WHERE\n" +
+            "\tt2.id = #{itemId}")
+    ExcelInsertVo getExcelUrl(@Param("itemId") Integer itemId);
 }
 

@@ -1,7 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
 import com.google.common.collect.Maps;
-import com.lims.manage.erp.entity.ReqParamBean;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductItemDao;
@@ -12,15 +11,6 @@ import com.lims.manage.erp.vo.OriginalRecordDataVo;
 import com.lims.manage.erp.vo.TaskListParamVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jxls.transformer.XLSTransformer;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -30,11 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,11 +49,11 @@ public class PageOfficeServiceImpl implements PageOfficeService {
     @Override
     public String getProductExcelUrl(Integer[] ids) throws IOException {
         // 通过检测项主键 获取样品生成附件是否存在。
-        String productExcelUrl = testProductItemDao.getProductExcelUrl(77677);
+        String productExcelUrl = testProductItemDao.getProductExcelUrl(ids[0]);
         InputStream fileStream = null;
         if (StringUtils.isEmpty(productExcelUrl)) {
             // -- 开始： 读取产品附件
-            productExcelUrl = testProductItemDao.getProductExcel(77677);
+            productExcelUrl = testProductItemDao.getProductExcel(ids[0]);
             if (StringUtils.isEmpty(productExcelUrl)) {
                 logger.info("读取产品excel为null  检测项主键中产品无产品附件");
                 return null;
@@ -114,7 +100,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         InputStream input = AsposeUtil.createExcelStream(wb);
         // 把 wb 数据 存放上传
         String[] array = productExcelUrl.split("/");
-        String excelUrl = MinIoUtil.upload("file-resources", array[array.length-1], input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        String excelUrl = MinIoUtil.upload("file-resources", GenID.getID() + array[array.length - 1], input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         // 更新 样品Excel附件
         testProductItemDao.updateProductExcelUrl(entrustId, sampleId, excelUrl);
         System.out.println("excelUrl" + excelUrl);
@@ -138,23 +124,25 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         }
 
         // 生成的 完成后的file文件
-        String SaveExcel = dir + file.getFileName();
+        String saveExcel = dir + file.getFileName();
         // 文件路径
-        file.saveToFile(SaveExcel);
-        System.out.println("文件返回值 == " + SaveExcel);
+        file.saveToFile(saveExcel);
+        System.out.println("文件返回值 == " + saveExcel);
         // 查询用户id及签名信息
         // 检测人集合
         List<Long> testSetLong = new ArrayList<>();
-        testSetLong.add(1647502446459100L);
-        testSetLong.add(1647502682230103L);
+        testSetLong.add(Long.valueOf(testSet));
+        // 检测人与记录人不相同时
+        if (!testSet.equals(recordSet)) {
+            testSetLong.add(Long.valueOf(recordSet));
+        }
         // 检测人签名数组图片
         String[] testImags = new String[testSetLong.size()];
         // 调用方法处理 签名图片存放数组中。
         methodUrlImags(testSetLong, testImags);
         // 记录人集合
         List<Long> recordSetLong = new ArrayList<>();
-        recordSetLong.add(1647502446459100L);
-        recordSetLong.add(1647502682230103L);
+        recordSetLong.add(Long.valueOf(recordSet));
         // 记录人签名数组图片
         String[] recordImags = new String[recordSetLong.size()];
         // 调用方法处理 签名图片存放数组中。
@@ -181,18 +169,24 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         String newFilePath = dir + GenID.getID() + file.getFileName();
         System.out.println(" newFilePath == " + newFilePath);
         // 图片插入至excel中     SaveExcel 已经删除。
-        ExcelImageUtils.ExcelInsertImage(SaveExcel, excelInsertVoList, newFilePath);
+        ExcelImageUtils.ExcelInsertImage(saveExcel, excelInsertVoList, newFilePath);
         // 去除excel 中标记
         InputStream fileStream = new FileInputStream(newFilePath);
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-        // 调用方法
+        // 调用方法 清除sheet名 = Evaluation Warning
         ExcelReplaceUtil.removeOtherSheets("Evaluation Warning", wb);
         fileStream.close();
-        OutputStream f = new FileOutputStream("D:\\doc\\e-iceblue\\演示插入结果RemoveSheetName.xlsx");
+        OutputStream f = new FileOutputStream(saveExcel);
         wb.write(f);
         f.close();
-        return null;
+        // 删除附件
+        FileAndFolderUtil.delete(newFilePath);
+        // 删除图片信息
+        // 返回 本地附件输出
+        System.out.println(saveExcel);
+        return saveExcel;
     }
+
 
     /**
      * 私有方法 调用 签名图片存放数组中。
@@ -223,5 +217,12 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         }
     }
 
+    @Override
+    public String updateOriginalRecordUrl(String excelUrl, Integer[] ids) {
+        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
+        // 更新 样品Excel附件
+        testProductItemDao.updateProductExcelUrl(dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId(), excelUrl);
+        return "更新成功";
+    }
 
 }

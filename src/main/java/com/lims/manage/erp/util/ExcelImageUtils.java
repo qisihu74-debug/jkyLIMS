@@ -1,14 +1,15 @@
 package com.lims.manage.erp.util;
 
 import com.lims.manage.erp.vo.ExcelInsertVo;
+import com.spire.ms.System.Collections.IEnumerator;
 import com.spire.xls.*;
+import com.spire.xls.collections.PicturesCollection;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
+import java.io.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Author: DLC
@@ -33,18 +34,37 @@ public class ExcelImageUtils {
         Workbook workbook = new Workbook();
         //加载Excel文档
         workbook.loadFromFile(filePath);
+        Set<String> setSheetName = new HashSet<>();
+        for (ExcelInsertVo excelInsertVo : list) {
+            setSheetName.add(excelInsertVo.getSheetName());
+        }
+        for (String sheetName : setSheetName) {
+            //获取Excel工作表
+            Worksheet sheet = workbook.getWorksheets().get(sheetName);
+            if (sheet != null) {
+                // 清除之前的 旧图片
+                PicturesCollection excelImag = sheet.getPictures();
+                IEnumerator it = excelImag.iterator();
+                int itNext = 0;
+                while (it.hasNext()) {
+                    sheet.getPictures().get(itNext).remove();
+                    itNext += 1;
+                }
+            }
+        }
         for (int i = 0; i < list.size(); i++) {
             ExcelInsertVo data = list.get(i);
             //获取Excel工作表
             Worksheet sheet = workbook.getWorksheets().get(data.getSheetName());
             if (sheet != null) {
-                //设置图表插入的位置
                 // 序号
                 int serialNumber = 0;
+                //设置图表插入的位置
                 ExcelReplaceUtil.getSheetRowAndColumn(data, wb);
+                // 新增图片
                 for (int j = 0; j < data.getImags().length; j++) {
                     if (data.getImags()[j] != null) {
-                        // 清除之前的 旧数据
+                        // 塞入指定位置 图片
                         ExcelPicture pic = sheet.getPictures().add(data.getTopRow() + serialNumber, data.getLeftColumn(), data.getImags()[j]);
                         //设置图片的宽度和高度
                         pic.setWidth(80);
@@ -55,41 +75,41 @@ public class ExcelImageUtils {
             }
         }
         // 删除附件
-//        FileAndFolderUtil.delete(filePath);
+        FileAndFolderUtil.delete(filePath);
         //保存文档
         workbook.saveToFile(newFilePath, ExcelVersion.Version2013);
     }
 
-    public static void main(String[] args) throws IOException {
-        List<ExcelInsertVo> list = new ArrayList<>();
-        ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
-        // 编辑类型
-        excelInsertVo1.setRecordType("检测：");
-        // 签名信息
-        String[] imags = new String[2];
-        imags[0] = "D:\\doc\\image\\1647502446459100.png";
-        imags[1] = "D:\\doc\\image\\1647502446459100.png";
-        excelInsertVo1.setImags(imags);
-        // sheet名称
-        excelInsertVo1.setSheetName("水泥密度、比表面积试验检测记录表");
-        list.add(excelInsertVo1);
-
-        ExcelInsertVo excelInsertVo2 = new ExcelInsertVo();
-        // 编辑类型
-        excelInsertVo2.setRecordType("记录：");
-        // 签名信息
-        String[] imags2 = new String[1];
-        imags2[0] = "D:\\doc\\image\\1647502446459100.png";
-        excelInsertVo2.setImags(imags2);
-        // sheet名称
-        excelInsertVo2.setSheetName("水泥密度、比表面积试验检测记录表");
-        list.add(excelInsertVo2);
-        String filePath = "D:\\doc\\e-iceblue\\演示插入结果RemoveSheetName.xlsx";
-        String newFilePath = "D:\\doc\\e-iceblue\\new演示插入结果.xlsx";
-        // 图片插入至excel中
-        ExcelInsertImage(filePath, list, newFilePath);
-        System.out.println("newFilePath  == " + newFilePath);
-    }
+//    public static void main(String[] args) throws IOException {
+//        List<ExcelInsertVo> list = new ArrayList<>();
+//        ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
+//        // 编辑类型
+//        excelInsertVo1.setRecordType("检测：");
+//        // 签名信息
+//        String[] imags = new String[2];
+//        imags[0] = "D:\\doc\\image\\1647502446459100.png";
+////        imags[1] = "D:\\doc\\image\\1647502446459100.png";
+//        excelInsertVo1.setImags(imags);
+//        // sheet名称
+//        excelInsertVo1.setSheetName("水泥密度、比表面积试验检测记录表");
+//        list.add(excelInsertVo1);
+//
+//        ExcelInsertVo excelInsertVo2 = new ExcelInsertVo();
+//        // 编辑类型
+//        excelInsertVo2.setRecordType("记录：");
+//        // 签名信息
+//        String[] imags2 = new String[1];
+//        imags2[0] = "D:\\doc\\image\\1647502446459100.png";
+//        excelInsertVo2.setImags(imags2);
+//        // sheet名称
+//        excelInsertVo2.setSheetName("水泥密度、比表面积试验检测记录表");
+//        list.add(excelInsertVo2);
+//        String filePath = "D:\\doc\\e-iceblue\\shuini.xlsx";
+//        String newFilePath = "D:\\doc\\e-iceblue\\new演示插入结果.xlsx";
+//        // 图片插入至excel中
+//        ExcelInsertImage(filePath, list, newFilePath);
+//        System.out.println("newFilePath  == " + newFilePath);
+//    }
 
 //    /**
 //     * 转pdf

@@ -29,4 +29,13 @@ public class ExcelInsertVo {
      * 设置图表插入的位置
      */
     int leftColumn;
+    /**
+     * 报告URL附件
+     */
+    String reportEditUrl;
+    /**
+     * 产品URL附件
+     */
+    String productExcelUrl;
+
 }

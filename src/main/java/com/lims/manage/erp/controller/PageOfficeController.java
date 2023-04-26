@@ -3,10 +3,12 @@ package com.lims.manage.erp.controller;
 import com.aspose.slides.Collections.ArrayList;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.UserInfoVo;
+import com.lims.manage.erp.vo.ExcelInsertVo;
+import com.lims.manage.erp.vo.LabelValueVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
@@ -18,12 +20,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.util.*;
 
@@ -50,6 +55,8 @@ public class PageOfficeController {
     RedisUtil redisUtil;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private TestProductItemDao testProductItemDao;
 
     @Value("${autograph.path}")
     private String dir;
@@ -114,10 +121,6 @@ public class PageOfficeController {
         }
         //此行必须
         poCtrl.setWriter(wb);
-
-
-
-
         //添加自定义按钮
         poCtrl.addCustomToolButton("保存", "Save()", 1);
         poCtrl.addCustomToolButton("打印", "PrintFile()", 6);
@@ -132,91 +135,82 @@ public class PageOfficeController {
         poCtrl.getRibbonBar().setTabVisible("TabView", false);//视图
         //设置处理文件保存的请求方法
         poCtrl.setSaveFilePage("saveOriginalRecord");
-
         //加载文档
         url = URLDecoder.decode(url, "utf-8");
         String[] strArray = url.split("\\.");
         int suffixIndex = strArray.length - 1;
         String type = strArray[suffixIndex];
         ReturnResponse<String> response = downloadUtils.downLoad(url, type, null);
-//        poCtrl.webOpen("D:\\doc\\excel模板\\shuini.xlsx",OpenModeType.xlsNormalEdit,"张三");
-        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsNormalEdit, "administrator");
+        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");
         //TODO 删除临时文件
 
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
-        List<UserInfoVo> userInfoVos = new ArrayList();
-//        UserInfoVo userInfoVo = new UserInfoVo();
-//        userInfoVo.setDepartmentId("111L");
-//        userInfoVo.setName("丁1");
-//        userInfoVos.add(userInfoVo);
-
-        UserInfoVo userInfoVo2 = new UserInfoVo();
-        userInfoVo2.setDepartmentId("222L");
-        userInfoVo2.setName("孙2");
-        userInfoVos.add(userInfoVo2);
-
-        UserInfoVo userInfoVo3 = new UserInfoVo();
-        userInfoVo3.setDepartmentId("3333L");
-        userInfoVo3.setName("王3");
-        userInfoVos.add(userInfoVo3);
-
-        UserInfoVo userInfoVo4 = new UserInfoVo();
-        userInfoVo4.setDepartmentId("4444L");
-        userInfoVo4.setName("4443");
-        userInfoVos.add(userInfoVo4);
-
-        map.put("userInfoVos", userInfoVos);
+        List<LabelValueVo> valueVoList = new ArrayList();
+        LabelValueVo labelValueVo1 = new LabelValueVo();
+        labelValueVo1.setValue(1647502446459100L);
+        labelValueVo1.setLabel("guojialin");
+        LabelValueVo labelValueVo2 = new LabelValueVo();
+        labelValueVo2.setValue(1647502682230103L);
+        labelValueVo2.setLabel("xumingyue");
+        valueVoList.add(labelValueVo1);
+        valueVoList.add(labelValueVo2);
+        map.put("valueVoList", valueVoList);
         ModelAndView mv = new ModelAndView("POB");
         return mv;
     }
 
     /**
      * 保存接口
+     *
      * @param bean
      * @param request
      * @param response
      */
     @RequestMapping("Excel/saveOriginalRecord")
 //    public void save(@RequestBody SaveParamBean bean, HttpServletRequest request, HttpServletResponse response) {
-    public void save(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        Map<String, String[]> parameterMap = request.getParameterMap();
+    public ModelAndView save(HttpServletRequest request, HttpServletResponse response) throws Exception {
         FileSaver fs = new FileSaver(request, response);
-        // 实现逻辑操作
-        pageOfficeService.saveOriginalRecord(request,fs);
+        // 实现逻辑操作 -- 完成编辑
+        String flag = pageOfficeService.saveOriginalRecord(request, fs);
         // 检测人
         String testSet = fs.getFormField("testSet");
+        String input_select = fs.getFormField("input_select");
         // 记录人
         String recordSet = fs.getFormField("recordSet");
-        // 检测参数
-        String items = fs.getFormField("items");
-//        JSONObject jsonObject = JSONObject.parseObject(items);
-        System.out.println("items == " + items);
-//        System.out.println("jsonObject == " + jsonObject);
-//        fs.saveToFile(dir + fs.getFileName());
-//        System.out.println("文件返回值 == " + fs.getFileName());
-//        // 根据人员内容 塞入Excel中
-//        List<UserInfoVo> userInfoVos = new ArrayList();
-//        UserInfoVo userInfoVo = new UserInfoVo();
-//        userInfoVo.setDepartmentId("111L");
-//        userInfoVo.setName("丁1");
-//        userInfoVos.add(userInfoVo);
-//
-//        UserInfoVo userInfoVo2 = new UserInfoVo();
-//        userInfoVo2.setDepartmentId("222L");
-//        userInfoVo2.setName("孙2");
-//        userInfoVos.add(userInfoVo2);
-//
-//        UserInfoVo userInfoVo3 = new UserInfoVo();
-//        userInfoVo3.setDepartmentId("3333L");
-//        userInfoVo3.setName("王3");
-//        userInfoVos.add(userInfoVo3);
-//
-//        fs.close();
-        //上传文件到文件服务器、删除本地临时缓存的文件
-
-
-        //相关表做更新或者插入操作
-//        return fs.getFileName();
+        // 保存本地Excel 包含签名信息
+        if (!StringUtils.isEmpty(flag)) {
+            // 检测参数
+            String list = fs.getFormField("items");
+            // 获取检测项id 集合
+            String[] items = list.split(",");
+            Integer[] ids = new Integer[items.length];
+            for (int j = 0; j < items.length; j++) {
+                ids[j] = Integer.parseInt(items[j]);
+            }
+            //上传文件到文件服务器、删除本地临时缓存的文件
+            String[] arrays = flag.split("\\\\");
+            String saveFileUrl = arrays[arrays.length - 1];
+            InputStream input = new FileInputStream(flag);
+            // 上传新excel附件
+            String excelUrl = MinIoUtil.upload("file-resources", saveFileUrl, input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            // 查询附件 存在则 删除附件
+            ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(ids[0]);
+            if (excelInsertVo != null) {
+                if (excelInsertVo.getProductExcelUrl() != null) {
+                    String[] urls = excelInsertVo.getProductExcelUrl().split("/");
+                    MinIoUtil.deleteFile("file-resources", urls[urls.length - 1]);
+                }
+                if (excelInsertVo.getReportEditUrl() != null) {
+                    String[] urls = excelInsertVo.getReportEditUrl().split("/");
+                    MinIoUtil.deleteFile("file-resources", urls[urls.length - 1]);
+                }
+            }
+            //相关表做更新或者插入操作
+            pageOfficeService.updateOriginalRecordUrl(excelUrl, ids);
+            return new ModelAndView("success");
+        } else {
+            return new ModelAndView("error");
+        }
     }
 
     /**
