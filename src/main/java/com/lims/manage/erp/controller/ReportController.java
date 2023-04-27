@@ -121,8 +121,6 @@ public class ReportController {
 //    private ReportRecordEntityMapper recordEntityMapper;
 
     Logger logger = LoggerFactory.getLogger(ReportController.class);
-    @Value("${posyspath}")
-    private String poSysPath;
     /**
      * 查询可制作报告任务单列表
      *
@@ -1047,7 +1045,7 @@ public class ReportController {
         Long entrustId = taskService.getEntrustIdByTaskId(reportEditReq.getTaskId());
         reportEditReq.setEntrustId(entrustId);
         EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
-        String localPath = reportService.handlerReportMessage(detail,reportEditReq,poSysPath);
+        String localPath = reportService.handlerReportMessage(detail,reportEditReq,qiYueSuoEntity.getAutographPath());
         //设置服务页面
         PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
         poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");

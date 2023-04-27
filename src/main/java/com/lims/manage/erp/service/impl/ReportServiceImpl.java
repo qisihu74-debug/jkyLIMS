@@ -3403,11 +3403,11 @@ public class ReportServiceImpl implements ReportService {
                 Workbook newWork = new Workbook();
                 newWork.getWorksheets().clear();
                 for (int i=0;i<count;i++){
-                    if (workbook.getWorksheets().get(i).getName().contains("报告")){
+                    if (workbook.getWorksheets().get(i).getName().contains("第")){
                         size = size + 1;
                         totalPage = totalPage + 1;
                         //合并sheet
-                        Worksheet worksheetS = newWork.getWorksheets().add("报告"+totalPage);
+                        Worksheet worksheetS = newWork.getWorksheets().add("第"+totalPage);
                         worksheetS.copy(workbook.getWorksheets().get(i));
                     }
                 }
