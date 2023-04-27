@@ -255,4 +255,7 @@ public interface ReportMapper {
      */
     @Select("SELECT user_id,mobile,name FROM sys_user WHERE name = #{name} LIMIT 1")
     SysUserEntity selectUserMobile(@Param("name") String name);
+
+    @Select("select inspector from test_report_record  where report_code=#{reportCode}")
+    String getInspectorByCode(@Param("reportCode") String reportCode);
 }

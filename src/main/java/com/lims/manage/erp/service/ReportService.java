@@ -24,7 +24,10 @@ import com.lims.manage.erp.vo.ReportSampleDetailVo;
 import io.minio.MinioClient;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -425,5 +428,7 @@ public interface ReportService {
 
     Boolean offlineReportMerge(String reportCode, MultipartFile file, String s, String s1, long parseLong, long parseLong1, String inspector);
 
-    String handlerReportMerge(String reportCode, String poSysPath);
+    InputStream handlerReportMerge(String reportCode, String path);
+
+    Boolean onlineReportMergeSave(String reportCode, String s, String s1, long parseLong, long parseLong1, String inspector);
 }
