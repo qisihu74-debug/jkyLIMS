@@ -33,4 +33,8 @@ public class TaskListParamVo {
      * 复核人
      */
     private String reviewer;
+    /**
+     * 签名URL
+     */
+    private String signatureUrl;
 }

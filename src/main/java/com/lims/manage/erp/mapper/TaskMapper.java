@@ -510,4 +510,7 @@ public interface TaskMapper extends BaseMapper {
      * 当前任务列表 (根据设备id 返回列表)
      */
     List<TaskListVo> taskList(@Param("search")String search,@Param("instrumentId")Long instrumentId );
+
+    List<TaskListParamVo> getUserSignatureUrls(@Param("list") List<Long> list);
+
 }

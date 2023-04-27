@@ -17,10 +17,7 @@ import com.lims.manage.erp.service.DynamicImgService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.SysUserRoleService;
 import com.lims.manage.erp.service.SysUserService;
-import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.SHA256Util;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -66,6 +63,8 @@ public class UserLoginController {
     private SysUserRoleService sysUserRoleService;
     @Autowired
     private DynamicImgService dynamicImgService;
+    @Autowired
+    RedisUtil redisUtil;
 
     /**
      * 登录
@@ -116,6 +115,8 @@ public class UserLoginController {
         List<String> roleList=roleIdList.stream().map(a -> String.valueOf(a.getRoleId())).collect(Collectors.toList());
         userData.setRoleList(roleList);
         map.put("userInfo", userData);
+        // 根据 token 存储 用户信息
+        redisUtil.setRedisTokenUser((String) map.get("token"),userData);
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userData.getUsername()+"登陆成功!", Const.LOGIN_LOG,true);
         return map;
     }

@@ -1,12 +1,14 @@
 package com.lims.manage.erp.util;
 
-import com.alibaba.fastjson.JSONObject;
+import com.lims.manage.erp.vo.ExcelInsertVo;
 import com.lims.manage.erp.vo.OriginalRecordDataVo;
 import com.lims.manage.erp.vo.TemplateSampleVo;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.*;
 import java.util.Map;
 
 /**
@@ -85,4 +87,95 @@ public class ExcelReplaceUtil {
             }
         }
     }
+
+    /**
+     * // 去除 e-iceblue中 sheet（Evaluation Warning）
+     *
+     * @param fileName  excel文件路径
+     * @param sheetName 待删除的 sheetName
+     * @throws IOException
+     */
+    public static void removeExcelSheetName(String fileName, String sheetName) throws IOException {
+
+        InputStream fileStream = new FileInputStream(fileName);
+        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
+        removeOtherSheets(sheetName, wb);
+//        wb.removeName(sheetName);
+        fileStream.close();
+        OutputStream f = new FileOutputStream("D:\\doc\\e-iceblue\\演示插入结果RemoveSheetName.xlsx");
+        wb.write(f);
+        f.close();
+    }
+
+    /**
+     * 颠倒循环次序
+     *
+     * @param sheetName
+     * @param book
+     */
+    public static void removeOtherSheets(String sheetName, XSSFWorkbook book) {
+        for (int i = book.getNumberOfSheets() - 1; i >= 0; i--) {
+            XSSFSheet tmpSheet = book.getSheetAt(i);
+            if (tmpSheet.getSheetName().equals(sheetName)) {
+                book.removeSheetAt(i);
+            }
+        }
+    }
+
+    /**
+     * 获取 excel 文本所在 行数及列数。
+     *
+     * @param excelInsertVo
+     * @param book
+     */
+    public static void getSheetRowAndColumn(ExcelInsertVo excelInsertVo, XSSFWorkbook book) {
+        XSSFSheet sheet = book.getSheet(excelInsertVo.getSheetName());
+        int lastRowNum = sheet.getLastRowNum(); //获取表格内容的最后一行的行数
+        //rowBegin代表要开始读取的行号，下面这个循环的作用是读取每一行内容
+        for (int x = 1; x <= lastRowNum; ++x) {
+            XSSFRow row = sheet.getRow(x);//获取每一行
+            int columnNum = row.getLastCellNum();//获取每一行的最后一列的列号，即总列数
+            for (int y = 0; y < columnNum; ++y) {
+                XSSFCell cell = row.getCell(y);//获取每个单元格
+                if (cell != null) {
+                    //设置单元格类型
+                    cell.setCellType(cell.CELL_TYPE_STRING);
+                    //获取单元格数据
+                    String cellValue = cell.getStringCellValue();
+                    if (!cellValue.equals("") && cellValue.equals(excelInsertVo.getRecordType())) {
+//                        System.out.println("x == " + (x + 1));
+//                        System.out.println("y == " + (y + 3));
+                        excelInsertVo.setLeftColumn(y + 3);
+                        excelInsertVo.setTopRow(x + 1);
+//                        System.out.println("cellValue == " + cellValue);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 清除指定单元格内容
+     *
+     * @param sheet
+     * @param row
+     * @param columln
+     */
+    private static void removeExcelCellValue(XSSFSheet sheet, int row, int columln) {
+        //锁定要修改的单元格：先找到行，再找到列
+        XSSFRow row1 = sheet.getRow(row);
+        row1.createCell(columln).setCellValue("");
+    }
+
+//    public static void main(String[] args) throws IOException {
+////        removeExcelSheetName("D:\\doc\\e-iceblue\\演示插入结果.xlsx", "Evaluation Warning");
+//        InputStream fileStream = new FileInputStream("D:\\doc\\e-iceblue\\演示插入结果.xlsx");
+//        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
+//        ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+//        excelInsertVo.setSheetName("水泥密度、比表面积试验检测记录表");
+//        excelInsertVo.setRecordType("检测：");
+//        getSheetRowAndColumn(excelInsertVo, wb);
+//        System.out.println(excelInsertVo);
+//
+//    }
 }
