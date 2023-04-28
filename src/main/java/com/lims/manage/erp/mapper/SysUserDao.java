@@ -101,4 +101,7 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
 
     @Select("select user_id from sys_user where name = #{name}")
     SysUserEntity getUserIdByName(@Param("name") String name);
+
+    @Select("select department from sys_user where user_id = #{userId}")
+    String getDeptByUserId(@Param("userId") Long userId);
 }
