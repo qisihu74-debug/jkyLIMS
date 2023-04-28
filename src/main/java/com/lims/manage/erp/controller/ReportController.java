@@ -1036,6 +1036,7 @@ public class ReportController {
      */
     @GetMapping("onlineEdit")
     public ModelAndView onlineEdit(@RequestParam("json") String json, Map<String, Object> map, HttpServletRequest request){
+        //json="{ \"reportComplete\": \"1\",   \"taskId\": \"4595967135304210\",   \"taskFlowId\": \"\",   \"reportType\": \"0\",   \"sampleId\": \"15288\" }";
         if (org.apache.commons.lang3.StringUtils.isEmpty(json)){
             return new ModelAndView("error");
         }
@@ -1103,6 +1104,8 @@ public class ReportController {
             return new ModelAndView("error");
         }
         ReportEditReq reportEditReq = JSON.parseObject(json,ReportEditReq.class);
+        Long entrustId = taskService.getEntrustIdByTaskId(reportEditReq.getTaskId());
+        reportEditReq.setEntrustId(entrustId);
         if (reportEditReq.getTaskId() == null || reportEditReq.getReportType() == null){
             return new ModelAndView("error");
         }
