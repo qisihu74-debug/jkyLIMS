@@ -107,9 +107,9 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 
     @Override
     public Boolean approval_data_two(ReportApprovalVo reportApprovalVo1) {
-        //       state 0是通过 1 是驳回
-//         报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
-        Integer state = 0;
+        //state 0是通过 1 是驳回
+        //报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
+        int state;
         // 动态修改数据表
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
         // 获取当前报告类型。

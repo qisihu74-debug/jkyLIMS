@@ -314,17 +314,24 @@ public class ReportApprovalController {
     @PostMapping("approvalSave")
     public Result approvalSave(@RequestBody ReportApprovalVo reportApprovalVo1) {
         if (reportApprovalVo1 == null) {
-            return ResultUtil.error(678, "缺少必填参数");
+            return ResultUtil.error(678, "缺少必填参数！");
         }
         if (reportApprovalVo1.getId() == null) {
-            return ResultUtil.error(678, "任务单主键不能为空");
+            return ResultUtil.error(678, "任务单主键不能为空！");
         }
-        if (reportApprovalVo1.getState() == null) {
-            return ResultUtil.error(678, "审批信息不能为空");
+        if (reportApprovalVo1.getStandardConclusion() == null || reportApprovalVo1.getReportRange() == null) {
+            return ResultUtil.error(678, "审批信息不能为空！");
         }
-        if (reportApprovalVo1.getState() != 1 && reportApprovalVo1.getState() != 0) {
-            return ResultUtil.error(678, "审批信息有误");
+        if(reportApprovalVo1.getStandardConclusion().equals(1) || reportApprovalVo1.getReportRange().equals(1)){
+            if(reportApprovalVo1.getReason() == null || "".equals(reportApprovalVo1.getReason())){
+                return ResultUtil.error(678, "驳回原因不能为空！");
+            }else{
+                reportApprovalVo1.setState(1);//驳回
+            }
+        }else{
+            reportApprovalVo1.setState(0);//通过
         }
+
         //1、 获取审批人信息
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {

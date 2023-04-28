@@ -14,7 +14,7 @@ import java.util.Date;
 @Data
 public class ReportApprovalVo {
     /**
-     * 任务单主键
+     * 报告表主键
      */
     private Long id;
     /**
@@ -66,6 +66,14 @@ public class ReportApprovalVo {
      * 报告单状态（0=未抢单 1=已抢单）
      */
     private Integer state;
+    /**
+     * 产品标准和检验结论是否正确 0,是；1，否
+     */
+    private Integer standardConclusion;
+    /**
+     * 报告的使用范围是否正确0,是；1，否
+     */
+    private Integer reportRange;
     /**
      * 驳回原因
      */
