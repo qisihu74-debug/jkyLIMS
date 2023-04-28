@@ -121,8 +121,6 @@ public class ReportController {
 //    private ReportRecordEntityMapper recordEntityMapper;
 
     Logger logger = LoggerFactory.getLogger(ReportController.class);
-    @Value("${posyspath}")
-    private String poSysPath;
     /**
      * 查询可制作报告任务单列表
      *
@@ -1038,6 +1036,7 @@ public class ReportController {
      */
     @GetMapping("onlineEdit")
     public ModelAndView onlineEdit(@RequestParam("json") String json, Map<String, Object> map, HttpServletRequest request){
+        //json="{ \"reportComplete\": \"1\",   \"taskId\": \"4595967135304210\",   \"taskFlowId\": \"\",   \"reportType\": \"0\",   \"sampleId\": \"15288\" }";
         if (org.apache.commons.lang3.StringUtils.isEmpty(json)){
             return new ModelAndView("error");
         }
@@ -1047,7 +1046,7 @@ public class ReportController {
         Long entrustId = taskService.getEntrustIdByTaskId(reportEditReq.getTaskId());
         reportEditReq.setEntrustId(entrustId);
         EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
-        String localPath = reportService.handlerReportMessage(detail,reportEditReq,poSysPath);
+        String localPath = reportService.handlerReportMessage(detail,reportEditReq,qiYueSuoEntity.getAutographPath());
         //设置服务页面
         PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
         poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");
@@ -1105,6 +1104,8 @@ public class ReportController {
             return new ModelAndView("error");
         }
         ReportEditReq reportEditReq = JSON.parseObject(json,ReportEditReq.class);
+        Long entrustId = taskService.getEntrustIdByTaskId(reportEditReq.getTaskId());
+        reportEditReq.setEntrustId(entrustId);
         if (reportEditReq.getTaskId() == null || reportEditReq.getReportType() == null){
             return new ModelAndView("error");
         }

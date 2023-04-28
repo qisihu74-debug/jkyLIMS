@@ -3403,11 +3403,11 @@ public class ReportServiceImpl implements ReportService {
                 Workbook newWork = new Workbook();
                 newWork.getWorksheets().clear();
                 for (int i=0;i<count;i++){
-                    if (workbook.getWorksheets().get(i).getName().contains("报告")){
+                    if (workbook.getWorksheets().get(i).getName().contains("第")){
                         size = size + 1;
                         totalPage = totalPage + 1;
                         //合并sheet
-                        Worksheet worksheetS = newWork.getWorksheets().add("报告"+totalPage);
+                        Worksheet worksheetS = newWork.getWorksheets().add("第"+totalPage);
                         worksheetS.copy(workbook.getWorksheets().get(i));
                     }
                 }
@@ -3511,7 +3511,7 @@ public class ReportServiceImpl implements ReportService {
             //样品信息
             //根据样品id获取样品详情
             SampleDetailVo sampleEntity = sampleEntityMapper.getSampleTagInfo(reportEditReq.getSampleId());
-            worksheet.getCells().get("B5").setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
+            worksheet.getCells().get("B6").setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
                     + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~", "~"))
                     + "；样品数量：" + (sampleEntity.getSampleQuantity() == null ? "——" : sampleEntity.getSampleQuantity())
                     + "；代表批量：" + (sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration())
@@ -3521,9 +3521,9 @@ public class ReportServiceImpl implements ReportService {
             String checkBasis = getCheckBasis(reportEditReq.getEntrustId(), sampleEntity.getId());
             String judgeBasis = getJudgeBasis(reportEditReq.getEntrustId(), sampleEntity.getId());
             //检测依据（只包含已完成的检测项）
-            worksheet.getCells().get("B6").setValue(checkBasis.equals("") ? "——" : checkBasis);
+            worksheet.getCells().get("B7").setValue(checkBasis.equals("") ? "——" : checkBasis);
             //判定依据
-            worksheet.getCells().get("B7").setValue(judgeBasis.equals("") ? "——" : judgeBasis);
+            worksheet.getCells().get("B8").setValue(judgeBasis.equals("") ? "——" : judgeBasis);
             //检测日期
             //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
             Date start = taskMapper.getStartTime(reportEditReq.getEntrustId());
@@ -3542,22 +3542,23 @@ public class ReportServiceImpl implements ReportService {
             }
             if (s != null && e != null) {
                 if (s.equals(e)) {
-                    worksheet.getCells().get("B8").setValue(s);
+                    worksheet.getCells().get("B9").setValue(s);
                 } else {
-                    worksheet.getCells().get("B8").setValue(s + "~" + e);
+                    worksheet.getCells().get("B9").setValue(s + "~" + e);
                 }
             }
             //主要仪器设备名称及编号
             String equipment = getEquipment(reportEditReq.getEntrustId(), reportEditReq.getSampleId());
-            worksheet.getCells().get("B9").setValue(equipment);
+            worksheet.getCells().get("B10").setValue(equipment);
             //委托编号
-            worksheet.getCells().get("B10").setValue(detail.getEntrustmentNo());
+            worksheet.getCells().get("B11").setValue(detail.getEntrustmentNo());
             //检测类别
-            worksheet.getCells().get("B11").setValue(detail.getCheckPurpose());
+            worksheet.getCells().get("B12").setValue(detail.getCheckPurpose());
             //批号
-            worksheet.getCells().get("B12").setValue(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
+            worksheet.getCells().get("B13").setValue(sampleEntity.getBatchNumber() == null ? "——" : sampleEntity.getBatchNumber());
             //生产厂家
-            worksheet.getCells().get("B12").setValue(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+            worksheet.getCells().get("B14").setValue(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+            workbook.calculateFormula(true);
             try {
                 workbook.save(localPath + fileName);
             } catch (Exception ex) {
