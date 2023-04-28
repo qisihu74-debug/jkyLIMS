@@ -79,10 +79,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URLDecoder;
@@ -3350,10 +3353,9 @@ public class ReportServiceImpl implements ReportService {
             reportMapper.updateVerAndIss(reportCode, inspector, verifyer, issuer, verifyerId, new Date(System.currentTimeMillis()), issuerId);
         }
         //设置签名信息,根据报告编号获取委托id
-        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
         String url1 = "";
         try {
-            url1 = insertPicToPdf(url, entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId(), inspector, type);
+            url1 = signInspector(reportCode,url,inspector);
             logger.info("设置签名信息：{}", url1);
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)) {
                 url = url1;
@@ -3375,8 +3377,116 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public String handlerReportMerge(String reportCode, String poSysPath) {
-        return null;
+    public InputStream handlerReportMerge(String reportCode, String path) {
+        InputStream inputStream = null;
+        //合并委托下所有样品报告
+        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
+        List<String> urls = entrustEntityMapper.getAllReportEditUrlByEntrustId(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+        //设置合并报告
+        Map<Integer, Integer> countMap = new LinkedHashMap();
+        Map<Integer, Workbook> map = new HashMap<>();
+        ReportRecordEntity reportRecordEntity = null;
+        Workbook topDoc = null;
+        //获取报告总页数
+        int totalPage = 0;
+        int index = 1;
+        for (String url:urls) {
+            int size = 0;
+            String[] strings = url.split("\\/");
+            String bluckName = strings[3];
+            String fileName = strings[4];
+            InputStream fileStream = MinIoUtil.getFileStream(bluckName, fileName);
+            try {
+                Workbook workbook = new Workbook(fileStream);
+                int count = workbook.getWorksheets().getCount();
+                //摘取报告、报告sheet放到新的excel文件中
+                Workbook newWork = new Workbook();
+                newWork.getWorksheets().clear();
+                for (int i=0;i<count;i++){
+                    if (workbook.getWorksheets().get(i).getName().contains("报告")){
+                        size = size + 1;
+                        totalPage = totalPage + 1;
+                        //合并sheet
+                        Worksheet worksheetS = newWork.getWorksheets().add("报告"+totalPage);
+                        worksheetS.copy(workbook.getWorksheets().get(i));
+                    }
+                }
+                map.put(index,workbook);
+                countMap.put(index, size);
+            } catch (Exception e) {
+                log.error("报告文件加载失败:{}",e);
+            }
+        }
+        //获取报告头部模板填充头部数据
+        InputStream fileStream = MinIoUtil.getFileStream("top-temlate", "top.xls");
+        try {
+            topDoc = new Workbook(fileStream);
+        } catch (Exception e) {
+            log.error("加载报告首页失败:{}",e);
+        }
+        EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+        EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+        if (entity.getEntrustId() != null) {
+            reportRecordEntity = selectByEntrustIdZj(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+        } else {
+            reportRecordEntity = selectByEntrustId(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+        }
+        logger.debug("本次报告总页数:{}", totalPage);
+        setReportTop1(topDoc, entrustAddVo, reportRecordEntity, totalPage, entrustHistoryDetail);
+        //合并成一个excel
+        Workbook document = workbookCopy(topDoc, map);
+        //处理页码
+        handlerPage(document, countMap);
+        //转为pdf
+        String excelPath = path+reportCode+".xlsx";
+        String pdfPath = path+reportCode+".xlsx";
+        try {
+            document.save(excelPath);
+        } catch (Exception e) {
+            log.error("合并报告后的文件临时缓存失败:{}",e);
+        }
+        File file = new File(excelPath);
+        MultipartFile multipartFile = AsposeUtil.fileToMultipart(file, reportCode);
+        try {
+            PDFHelper3.excel2pdf(multipartFile,pdfPath);
+        } catch (Exception e) {
+            log.error("报告在线合并excel转pdf异常:{}",e);
+        }
+        //删除临时文件
+        FileAndFolderUtil.delete(excelPath);
+        //上传文件、更新url
+        try {
+            inputStream = new FileInputStream(pdfPath);
+        } catch (FileNotFoundException e) {
+            log.error("读取本地pdf文件失败:{}",e);
+        }
+        String url = MinIoUtil.upload("report-download", reportCode + ".pdf", inputStream, "application/octet-stream");
+        String substring = url.substring(0, url.indexOf("?"));
+        recordEntityMapper.updateUrlByCode(reportCode,substring);
+        //删除临时文件
+        FileAndFolderUtil.delete(pdfPath);
+        return inputStream;
+    }
+
+    @Override
+    public Boolean onlineReportMergeSave(String reportCode, String verifyer, String issuer, long verifyerId, long issuerId, String inspector) {
+        //签字
+        String url = "";
+        ReportRecordEntity urlByCode = recordEntityMapper.getUrlByCode(reportCode);
+        try {
+            url = signInspector(reportCode,urlByCode.getReportUrl(),inspector);
+        } catch (Exception e) {
+            log.error("设置签名信息失败:{}",e);
+            return false;
+        }
+        //更新
+        String type = recordEntityMapper.getTypeByCode(reportCode);
+        if ("1".equals(type)) {
+            reportMapper.updateUrlZj(reportCode, inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+        } else {
+            reportMapper.updateUrl(reportCode, inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+        }
+        return true;
     }
 
     /**
@@ -3455,4 +3565,67 @@ public class ReportServiceImpl implements ReportService {
             }
             return localPath + fileName;
         }
+
+    /**
+     * 设置报告检测人员签字
+     * @param reportCode
+     * @return
+     */
+    public String signInspector(String reportCode, String pdfPath, String inspector) throws Exception{
+        HashSet<String> delList = new HashSet<>();
+        List<String> checkUrl = Lists.newArrayList();
+        String[] split = inspector.split(",");
+        for (String name : split) {
+            String signature = sysUserDao.getInspectorByName(name);
+            logger.info("实验人:{}", signature);
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(signature)) {
+                checkUrl.add(signature);
+            }
+        }
+        logger.info("checkUrl大小:{}", checkUrl.size());
+        if ( checkUrl.size() < 1) {
+            logger.info("缺少签名信息:{}",checkUrl.size());
+            return "";
+        }
+        String basePath = qiYueSuoEntity.getAutographPath();
+        logger.info("临时文件路径:{}", basePath);
+        //临时文件路径（使用后删除）
+        String startPath = "";
+        String endPath = "";
+        String suffix = ".pdf";
+        //现将服务器上的报告文件、图片签名文件缓存到本地
+        String signaturePath = "";
+        float x = 1;
+        float y = -10;
+        int index = 1;
+        if (pdfPath.contains("http")){
+            startPath = downLoad.downLoad(pdfPath,"pdf",reportCode).getContent();
+        }else {
+            startPath = pdfPath;
+        }
+        delList.add(startPath);
+        endPath = basePath + 1 + suffix;
+        delList.add(endPath);
+        for (String s : checkUrl) {
+            signaturePath = HttpDownloadUtil.download(s, basePath);
+            //图片插入
+            PdfDoc pdf = new PdfDoc(startPath, endPath);
+            pdf.addImage(basePath + signaturePath, "检测：", x, y, 30, 20);
+            index++;
+            startPath = endPath;
+            endPath = basePath + index + suffix;
+            x = x + 49;
+            delList.add(endPath);
+        }
+        File file = new File(endPath);
+        MultipartFile multipartFile = AsposeUtil.fileToMultipart(file,reportCode);
+        logger.info("上传带签名的报告");
+        String url = MinIoUtil.upload("report-download", multipartFile, reportCode + ".pdf");
+        logger.info("上传完成带签名的报告:{}", url);
+        //删除产生的临时文件
+        for (String del : delList) {
+            FileAndFolderUtil.delete(del);
+        }
+        return url.substring(0, url.indexOf("?"));
+    }
 }

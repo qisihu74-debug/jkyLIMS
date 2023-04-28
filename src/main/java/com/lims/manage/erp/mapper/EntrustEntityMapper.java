@@ -403,6 +403,9 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     List<Integer> getAllSampleIdentrustmentId(Long entrustmentId);
 
+    @Select("select report_edit_url from test_entrusted_sample_details_rel where entrustment_id=#{entrustmentId}")
+    List<String> getAllReportEditUrlByEntrustId(@Param("entrustmentId") Long entrustmentId);
+
     /**
      * 修改委托下样品委托单位
      * @return

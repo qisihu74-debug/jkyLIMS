@@ -383,4 +383,7 @@ public interface ReportRecordEntityMapper {
 
     @Select("select entrustment_id As entrustmentId,entrust_id As entrustId from test_report_record where report_code=#{reportCode}")
     ReportRecordEntity getEntrust(@Param("reportCode") String reportCode);
+
+    @Update("update test_report_record set report_url=#{substring} where report_code=#{reportCode}")
+    void updateUrlByCode(@Param("reportCode") String reportCode, @Param("substring") String substring);
 }
