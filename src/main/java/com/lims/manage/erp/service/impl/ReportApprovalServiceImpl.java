@@ -225,6 +225,11 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         return  data;
     }
 
+    @Override
+    public String getReportUrl(Long reportId) {
+        return reportApprovalMapper.getReportUrl(reportId);
+    }
+
 
 //    @Override
 //    public List<ReportApprovalVo> getVerify_list(String search, Integer state) {

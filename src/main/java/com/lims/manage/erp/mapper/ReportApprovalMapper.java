@@ -108,7 +108,11 @@ public interface ReportApprovalMapper {
      */
     TaskDetailInfoVo getTaskDetailInterimReport(Long id);
 
-
-
+    /**
+     * 查询报告url
+     * @param reportId
+     * @return
+     */
+    String getReportUrl(Long reportId);
 
 }

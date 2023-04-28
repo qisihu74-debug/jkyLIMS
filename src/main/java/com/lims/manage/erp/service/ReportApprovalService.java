@@ -59,6 +59,13 @@ public interface ReportApprovalService {
      */
     TaskDetailInfoVo getDetails(Long id);
 
+    /**
+     * 查询报告URL
+     * @param reportId
+     * @return
+     */
+    String getReportUrl(Long reportId);
+
 
     /**
      * 报告签发列表

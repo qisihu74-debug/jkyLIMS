@@ -289,7 +289,8 @@ public class ReportApprovalController {
         if (reportId == null) {
             log.info("导出失败：", "报告主键不能为空");
         }
-        String url = "http://121.89.242.0:9000/report-download/JC7-2023-YC-0471.pdf";
+//        String url = "http://121.89.242.0:9000/report-download/JC7-2023-YC-0471.pdf";
+        String url = reportApprovalService.getReportUrl(reportId);
         String[] split = url.split("/");
         String fileName = split[split.length-1];
         String bucket = split[split.length-2];
