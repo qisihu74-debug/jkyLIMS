@@ -82,6 +82,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/**/web/file_output_stream/getEntrustFileUrls", "anon");
         filterChainDefinitionMap.put("/app/accountUsage/*", "anon");
         filterChainDefinitionMap.put("/app/testInstrument/getDetails", "anon");
+        filterChainDefinitionMap.put("/news/list", "anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");

@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.sql.Date;
 import java.util.List;
 
 /**
@@ -73,8 +74,10 @@ public class NewsController {
             pageNum = 1;
             pageSize = 10;
         }
+        Date date = new Date(System.currentTimeMillis());
         LambdaQueryWrapper<NewsBean> lambdaQueryWrapper = new LambdaQueryWrapper();
         lambdaQueryWrapper.like(StringUtils.isNotEmpty(search),NewsBean::getContent,search);
+        lambdaQueryWrapper.le(NewsBean::getPublishDate,date);
         PageHelper.startPage(pageNum,pageSize);
         List<NewsBean> list = newsService.list(lambdaQueryWrapper);
         PageInfo<NewsBean> pageInfo = new PageInfo(list);
