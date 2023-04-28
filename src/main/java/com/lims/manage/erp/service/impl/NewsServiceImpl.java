@@ -30,6 +30,8 @@ public class NewsServiceImpl  extends ServiceImpl<NewsDao, NewsBean> implements 
     private SysUserDao userDao;
     @Autowired
     private DeptDao deptDao;
+    @Autowired
+    private NewsDao newsDao;
 
     @Override
     public Boolean saveNews(NewsBean newsBean, MultipartFile[] files) {
@@ -66,6 +68,14 @@ public class NewsServiceImpl  extends ServiceImpl<NewsDao, NewsBean> implements 
         newsBean.setPublishUser(ShiroUtils.getUserInfo().getName());
         newsBean.setPublishDept(substring);
         newsBean.setFileUrl(stringBuilder.toString());
+        //处理期数
+        Integer integer = newsDao.getMaxIndex();
+        if (integer == null){
+            integer = 1;
+        }else {
+            integer = integer + 1;
+        }
+        newsBean.setIndex(integer);
         int insert = this.baseMapper.insert(newsBean);
         if (insert >= 0){
             return true;

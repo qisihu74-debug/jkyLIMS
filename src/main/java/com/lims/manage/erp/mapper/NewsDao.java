@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.NewsBean;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,4 +17,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Mapper
 public interface NewsDao extends BaseMapper<NewsBean> {
+    @Select("select max(`index`) from sys_news")
+    Integer getMaxIndex();
 }

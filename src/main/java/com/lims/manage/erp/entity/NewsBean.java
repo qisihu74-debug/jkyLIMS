@@ -22,6 +22,17 @@ import java.util.List;
 public class NewsBean {
     @TableField
     private Long id;
+
+    /**
+     * 发布期数
+     */
+    private Integer index;
+
+    /**
+     * 类型0技术质量
+     */
+    private Integer type;
+
     /**
      * 标题
      */
@@ -31,11 +42,6 @@ public class NewsBean {
      * 内容描述
      */
     private String content;
-
-    /**
-     * 链接
-     */
-    private String newUrl;
 
     /**
      * 发布部门

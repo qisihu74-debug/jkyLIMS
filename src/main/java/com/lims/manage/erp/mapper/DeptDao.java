@@ -104,6 +104,6 @@ public interface DeptDao extends BaseMapper<DingDeptEntity> {
             "sys_dept")
     List<Long> getDeptLong();
 
-    @Select("select name from sys_dept where id=#{} ")
+    @Select("select name from sys_dept where id=#{id} ")
     String getNameById(@Param("id") Long id);
 }
