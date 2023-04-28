@@ -331,4 +331,13 @@
         WHERE
             t1.id = #{id}
     </select>
+
+    <select id="getReportUrl" resultType="java.lang.String">
+        SELECT
+            report_url
+        FROM
+            test_report_record
+        WHERE
+            id = #{reportId}
+    </select>
 </mapper>

@@ -29,7 +29,7 @@ import java.util.UUID;
 @Component
 public class DownloadUtils {
 
-    @Value("${posyspath}")
+    @Value("${autograph.path}")
     String fileDir;
 
     /**

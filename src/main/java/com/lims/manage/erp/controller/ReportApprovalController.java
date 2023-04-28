@@ -1,18 +1,30 @@
 package com.lims.manage.erp.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.ReportApprovalService;
 import com.lims.manage.erp.service.TaskService;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
+import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportApprovalVo;
+import io.minio.MinioClient;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +33,7 @@ import java.util.Map;
  * @Date: 2022/1/11 16:39
  * 报告审批
  */
+@Slf4j
 @RestController
 @RequestMapping("/report_approval/")
 public class ReportApprovalController {
@@ -31,6 +44,8 @@ public class ReportApprovalController {
     ReportApprovalMapper reportApprovalMapper;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private EntrustService entrustService;
 
     /**
      * 报告审批列表
@@ -265,6 +280,80 @@ public class ReportApprovalController {
     }
 
     /**
+     * 线上审批详情
+     * @param reportId
+     * @return
+     */
+    @GetMapping("/onlineReport")
+    public void onlineApprove(Long reportId, HttpServletResponse response) {
+        if (reportId == null) {
+            log.info("导出失败：", "报告主键不能为空");
+        }
+//        String url = "http://121.89.242.0:9000/report-download/JC7-2023-YC-0471.pdf";
+        String url = reportApprovalService.getReportUrl(reportId);
+        String[] split = url.split("/");
+        String fileName = split[split.length-1];
+        String bucket = split[split.length-2];
+        try {
+            InputStream inputStream = MinIoUtil.getFileStream(bucket, fileName);
+            ServletOutputStream outputStream = response.getOutputStream();
+            IOUtils.copy(inputStream, outputStream);// copy流数据,i为字节数
+            inputStream.close();
+            outputStream.close();
+        } catch (IOException e) {
+            log.info("导出失败：", e.getMessage());
+        }
+    }
+
+    /**
+     * 审批保存
+     * @param reportApprovalVo1
+     * @return
+     */
+    @PostMapping("approvalSave")
+    public Result approvalSave(@RequestBody ReportApprovalVo reportApprovalVo1) {
+        if (reportApprovalVo1 == null) {
+            return ResultUtil.error(678, "缺少必填参数！");
+        }
+        if (reportApprovalVo1.getId() == null) {
+            return ResultUtil.error(678, "任务单主键不能为空！");
+        }
+        if (reportApprovalVo1.getStandardConclusion() == null || reportApprovalVo1.getReportRange() == null) {
+            return ResultUtil.error(678, "审批信息不能为空！");
+        }
+        if(reportApprovalVo1.getStandardConclusion().equals(1) || reportApprovalVo1.getReportRange().equals(1)){
+            if(reportApprovalVo1.getReason() == null || "".equals(reportApprovalVo1.getReason())){
+                return ResultUtil.error(678, "驳回原因不能为空！");
+            }else{
+                reportApprovalVo1.setState(1);//驳回
+            }
+        }else{
+            reportApprovalVo1.setState(0);//通过
+        }
+
+        //1、 获取审批人信息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error(678, "token已经过期，请退出重新登录");
+        }
+        String name = reportApprovalMapper.getUserName(userInfo.getUserId());
+        if (name == null) {
+            return ResultUtil.error(678, "账号未配置使用人");
+        }
+        // 通过报告id 和 登录人id和姓名 比对
+        if(!reportApprovalService.efficacyApprovalData(reportApprovalVo1.getId(),userInfo.getUserId(),name,1)){
+            return ResultUtil.error(678, "审批失败！当前登录人不是指定人");
+        }
+        // 审核人姓名保存
+        reportApprovalVo1.setVerifyer(name);
+        Boolean flag = reportApprovalService.approval_data_two(reportApprovalVo1);
+        if (flag) {
+            return ResultUtil.success("成功");
+        }
+        return ResultUtil.error(678, "审批失败");
+    }
+
+    /**
      * 报告签发列表
      * @param search
      * @param pageNum
@@ -430,6 +519,60 @@ public class ReportApprovalController {
             return ResultUtil.success("成功");
         }
         return ResultUtil.error(678, "签发失败");
+    }
+
+    /**
+     * 线上签发保存
+     * @param reportApprovalVo1
+     * @return
+     */
+    @PostMapping("verifySave")
+    public Result verifySave(@RequestBody ReportApprovalVo reportApprovalVo1) {
+        if (reportApprovalVo1 == null) {
+            return ResultUtil.error(678, "缺少必填参数！");
+        }
+        if (reportApprovalVo1.getId() == null) {
+            return ResultUtil.error(678, "报告主键不能为空！");
+        }
+        if (null == reportApprovalVo1.getConclusionMatch() && null == reportApprovalVo1.getQualificationsRange()) {
+            return ResultUtil.error(678, "审批信息不能为空！");
+        }
+        String msg;
+        if(reportApprovalVo1.getConclusionMatch().equals(1) || reportApprovalVo1.getQualificationsRange().equals(1)){
+            if(null == reportApprovalVo1.getReason()){
+                return ResultUtil.error(678, "驳回原因不能为空！");
+            }else{
+                reportApprovalVo1.setState(1);
+                msg = "签发驳回";
+            }
+        }else{
+            reportApprovalVo1.setState(0);//通过
+            msg = "签发通过";
+        }
+        if (reportApprovalVo1.getState() == 0) {
+            if (reportApprovalVo1.getSealTypeArray() == null || reportApprovalVo1.getSealTypeArray().length==0 || reportApprovalVo1.getSealTypeArray()[0] == null) {
+                return ResultUtil.error(678, "印章不能为空!");
+            }
+        }
+        //1、 获取抢单人信息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error(678, "token已经过期，请退出重新登录");
+        }
+        String name = reportApprovalMapper.getUserName(userInfo.getUserId());
+        if (name == null) {
+            return ResultUtil.error(678, "账号未配置使用人");
+        }
+        // 通过报告id 和 登录人id和姓名 比对
+        if(!reportApprovalService.efficacyApprovalData(reportApprovalVo1.getId(),userInfo.getUserId(),name,2)){
+            return ResultUtil.error(678, "签发失败！当前登录人不是指定人");
+        }
+        reportApprovalVo1.setIssuer(name);
+        Boolean flag = reportApprovalService.verify_data_two(reportApprovalVo1);
+        if (flag) {
+            return ResultUtil.success(msg + "成功！", true);
+        }
+        return ResultUtil.error(678, "签发失败！");
     }
 
     /**
