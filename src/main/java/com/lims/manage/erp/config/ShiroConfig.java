@@ -75,6 +75,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/report/preReportUrl", "anon");
         filterChainDefinitionMap.put("/task/downloadEntrust_two", "anon");
         filterChainDefinitionMap.put("/entrust/previewEntrust", "anon");
+        filterChainDefinitionMap.put("/report_approval/onlineApprove","anon");
         filterChainDefinitionMap.put("/task/previewOriginalRecord", "anon");
         filterChainDefinitionMap.put("/testInstrument/exportInstrumentRecord", "anon");
         filterChainDefinitionMap.put("/testInstrument/batchExportInstrumentRecord", "anon");
