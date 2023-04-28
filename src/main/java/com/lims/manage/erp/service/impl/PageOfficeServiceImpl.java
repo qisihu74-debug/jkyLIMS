@@ -127,7 +127,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         String saveExcel = dir + file.getFileName();
         // 文件路径
         file.saveToFile(saveExcel);
-        System.out.println("文件返回值 == " + saveExcel);
+//        System.out.println("文件返回值 == " + saveExcel);
         // 查询用户id及签名信息
         // 检测人集合
         List<Long> testSetLong = new ArrayList<>();
@@ -147,7 +147,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         String[] recordImags = new String[recordSetLong.size()];
         // 调用方法处理 签名图片存放数组中。
         methodUrlImags(recordSetLong, recordImags);
-        System.out.println("暂停看输出");
+//        System.out.println("暂停看输出");
         List<ExcelInsertVo> excelInsertVoList = new ArrayList<>();
         List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
         if (!CollectionUtils.isEmpty(dataEntitys)) {
@@ -166,8 +166,9 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             }
         }
         // excel 插入图片
-        String newFilePath = dir + GenID.getID() + file.getFileName();
-        System.out.println(" newFilePath == " + newFilePath);
+        String[] names = file.getFileName().split("\\.");
+        String newFilePath = dir + GenID.getID() +"."+ names[1];
+//        System.out.println(" newFilePath == " + newFilePath);
         // 图片插入至excel中     SaveExcel 已经删除。
         ExcelImageUtils.ExcelInsertImage(saveExcel, excelInsertVoList, newFilePath);
         // 去除excel 中标记
@@ -182,8 +183,14 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // 删除附件
         FileAndFolderUtil.delete(newFilePath);
         // 删除图片信息
+        for (int i = 0; i < testImags.length - 1; i++) {
+            FileAndFolderUtil.delete(testImags[i]);
+        }
+        for (int i = 0; i < recordImags.length - 1; i++) {
+            FileAndFolderUtil.delete(recordImags[i]);
+        }
         // 返回 本地附件输出
-        System.out.println(saveExcel);
+//        System.out.println(saveExcel);
         return saveExcel;
     }
 

@@ -14,10 +14,7 @@ import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
-import com.lims.manage.erp.util.AsposeUtil;
-import com.lims.manage.erp.util.FileAndFolderUtil;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import com.spire.xls.Workbook;
 import com.spire.xls.Worksheet;
@@ -27,6 +24,7 @@ import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -874,6 +872,47 @@ public class TaskController {
             zipOutputStream.flush();
         }
 
+    }
+
+    /**
+     * 复核：中间及最终检测项(返回pdf)
+     *  list
+     *  checkReview
+     */
+    @RequestMapping(value = "/checkItemReview")
+//    public void checkItemReview(List<Integer> list,String checkReview){
+    public void previewDownLoad(@RequestBody ExcelInsertVo excelInsertVo , HttpServletResponse response) throws Exception {
+        String newFilePath = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
+        String path = qiYueSuoEntity.getAutographPath()+GenID.getID()+".pdf";
+        // excel 转 pdf
+        XSSFWorkbook wb = taskService.getOriginalRecordAttachment(excelInsertVo);
+        FileOutputStream out = new FileOutputStream(newFilePath);
+        wb.write(out);
+        out.flush();//刷新
+        out.close();//关闭
+        InputStream out000 = new FileInputStream(newFilePath);
+        //相应pdf
+        ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(out000,path);
+        InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+        ServletOutputStream outputStream = response.getOutputStream();
+        int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+        inputStream.close();
+        outputStream.close();
+        // 删除附件
+        FileAndFolderUtil.delete(newFilePath);
+        FileAndFolderUtil.delete(path);
+    }
+
+    /**
+     * 完成复核：中间检测项 及 最终复核
+     *  list
+     *  checkReview
+     */
+    @RequestMapping(value = "/finishCheckItemReview")
+    public void finishCheckItemReview(@RequestBody ExcelInsertVo excelInsertVo){
+       // 审核人id。
+        Long  userId = null;
+        // 判断复核数据类型。
     }
 
 

@@ -2,6 +2,9 @@ package com.lims.manage.erp.vo;
 
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @Author: DLC
  * @Date: 2023/4/25 11:27
@@ -37,5 +40,34 @@ public class ExcelInsertVo {
      * 产品URL附件
      */
     String productExcelUrl;
+    /**
+     * 检测项id集合
+     */
+    List<Integer> list = new ArrayList<>();
+    /**
+     * 类型（中间复核 或 最终复核）
+     */
+    String checkReview;
+    /**
+     * 仪器设备使用记录是否填写（是 或 否）
+     */
+    String instrumentStatus;
+    /**
+     * 原始记录是否填写完整/ 电子记录是否备份（是 或 否）
+     */
+    String originalRecordStatus;
+    /**
+     * 数据处理是否正确（是 或 否）
+     */
+    String data;
+    /**
+     * （通过 或  驳回）
+     */
+    String status;
+    /**
+     * 审批意见
+     */
+    String opinion;
+
 
 }

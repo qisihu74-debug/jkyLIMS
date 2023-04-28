@@ -20,32 +20,27 @@
 </head>
 <body>
 <form id="form1">
-    <div style="font-size: 14px;">
+    <div style="font-size: 14px;z-index:100">
         <label for="">
             检测人：
-            <select multiple name="cars1" id="testSet"  th:value="testSet">
-                <!--/*@thymesVar id="userInfoVos" type="11"*/-->
-
-                <!--/*@thymesVar id="userId" type="22"*/-->
-                <option th:each="e:${userInfoVos}" th:value="${e.departmentId}" th:text="${e.name}"></option>
-
+            <select name="cars1" id="testSet" th:value="testSet">
+<!--                <option th:each="e:${valueVoList}" th:value="${e.value}" th:text="${e.label}"></option>-->
+<!--                <option th:each="e:${userInfoVos}" th:value="${e.departmentId}" th:text="${e.name}"></option>-->
+                <option th:each="e:${teamVo}" th:value="${e.value}" th:text="${e.label}"></option>
             </select>
         </label>
         <label for="">
             记录人：
-            <select multiple name="cars2" id="recordSet" th:value="recordSet">
-                <!--/*@thymesVar id="userInfoVos" type="11"*/-->
-
-                <!--/*@thymesVar id="userId" type="22"*/-->
-                <option th:each="e:${userInfoVos}" th:value="${e.departmentId}" th:text="${e.name}"></option>
-
+            <select name="cars2" id="recordSet" th:value="recordSet">
+<!--                <option th:each="e:${userInfoVos}" th:value="${e.departmentId}" th:text="${e.name}"></option>-->
+                <option th:each="e:${teamVo}" th:value="${e.value}" th:text="${e.label}"></option>
             </select>
         </label>
         <input id="items" name="items" type="hidden" th:value="${items}" style="display: none"/>
 
         </select>
     </div>
-    <div style=" width:auto; height:700px;" th:utext="${pageoffice}"></div>
+    <div style="width:auto; height:700px;z-index:99" th:utext="${pageoffice}"></div>
 </form>
 </body>
 </html>

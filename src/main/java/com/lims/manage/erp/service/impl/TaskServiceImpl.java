@@ -9,33 +9,8 @@ import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TaskService;
-import com.lims.manage.erp.util.AsposeUtil;
-import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.ConvertUtil;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.LabelValueTeamVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.OriginalRecordDataVo;
-import com.lims.manage.erp.vo.OriginalRecordParamVo;
-import com.lims.manage.erp.vo.PagingToolVo;
-import com.lims.manage.erp.vo.PersonInfoVo;
-import com.lims.manage.erp.vo.ReceiveSampleListVo;
-import com.lims.manage.erp.vo.ReceiveSampleParamVo;
-import com.lims.manage.erp.vo.ReviewVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.SamplePrivateInfoVo;
-import com.lims.manage.erp.vo.TaskDetailInfoVo;
-import com.lims.manage.erp.vo.TaskListParamVo;
-import com.lims.manage.erp.vo.TaskListVo;
-import com.lims.manage.erp.vo.TaskStatsItemVo;
-import com.lims.manage.erp.vo.TaskStatsVo;
-import com.lims.manage.erp.vo.TeamVo;
-import com.lims.manage.erp.vo.TemplateSampleVo;
+import com.lims.manage.erp.util.*;
+import com.lims.manage.erp.vo.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
@@ -45,6 +20,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
@@ -102,6 +79,8 @@ public class TaskServiceImpl implements TaskService {
     private TestEntrustedTaskRelDao testEntrustedTaskRelDao;
     @Autowired
     private LogManagerService logManagerService;
+    @Autowired
+    private TestProductItemDao testProductItemDao;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -1634,7 +1613,6 @@ public class TaskServiceImpl implements TaskService {
     public Long getEntrustIdByTaskId(Long taskId) {
         return taskMapper.getEntrustIdByTaskId(taskId);
     }
-
     /**
      * 如果原始记录文件不为空 塞数据
      */
@@ -1783,4 +1761,54 @@ public class TaskServiceImpl implements TaskService {
         }
         return topId;
     }
+
+    /**
+     *  返回原始记录
+     * List 检测项主键
+     * CheckReview 类型（中间复核 或 最终复核）
+     * @return
+     */
+    @Override
+    public XSSFWorkbook getOriginalRecordAttachment(ExcelInsertVo excelInsertVo) throws IOException {
+        Integer[] ids =new Integer[excelInsertVo.getList().size()];
+        for(int i = 0; i<excelInsertVo.getList().size(); i++){
+            ids[i] = excelInsertVo.getList().get(i);
+        }
+        // 通过检测项主键 获取样品生成附件是否存在。
+        String productExcelUrl = testProductItemDao.getProductExcelUrl(excelInsertVo.getList().get(0));
+        InputStream fileStream = null;
+        // 获取公网 附件
+        try {
+            fileStream = FileAndFolderUtil.getInputStream(productExcelUrl);
+        } catch (Exception e) {
+            logger.info("样品附件 " + productExcelUrl + e);
+        }
+        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
+        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
+        // 获取 sheetName
+        Map<String,Object> map = new HashMap<>();
+        // 通过检测项id 获取 相应的 id关联信息。
+        for (int i = 0; i < dataEntitys.size(); i++) {
+            TaskIdEntity data = dataEntitys.get(i);
+            XSSFSheet sheet = wb.getSheet(data.getOriginalName());
+            if(sheet!=null){
+                map.put(data.getOriginalName(),i);
+            }
+        }
+        // sheetName 不包含 则清除
+        ExcelReplaceUtil.removeSheetName(map,wb);
+        return wb;
+    }
+
+    /**
+     *  完成复核：中间检测项 及 最终复核
+     * @param excelInsertVo
+     * @return
+     */
+    @Override
+    public Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo) {
+
+        return null;
+    }
+
 }
