@@ -317,7 +317,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     public Boolean verify_data_two(ReportApprovalVo reportApprovalVo1) {
         //      state  0是通过 1 是驳回
         // 报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
-        Integer state = 0;
+        Integer state;
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
         // 获取报告状态 是中间报告 还是 最终报告
         ReportApprovalVo reportApprovalVo2  = reportApprovalMapper.getReportApprovalDetail(reportApprovalVo1.getId());

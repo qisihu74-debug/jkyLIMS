@@ -284,7 +284,7 @@ public class ReportApprovalController {
      * @param reportId
      * @return
      */
-    @GetMapping("/onlineApprove")
+    @GetMapping("/onlineReport")
     public void onlineApprove(Long reportId, HttpServletResponse response) {
         if (reportId == null) {
             log.info("导出失败：", "报告主键不能为空");
@@ -303,7 +303,6 @@ public class ReportApprovalController {
         } catch (IOException e) {
             log.info("导出失败：", e.getMessage());
         }
-
     }
 
     /**
@@ -353,8 +352,6 @@ public class ReportApprovalController {
         }
         return ResultUtil.error(678, "审批失败");
     }
-
-
 
     /**
      * 报告签发列表
@@ -522,6 +519,60 @@ public class ReportApprovalController {
             return ResultUtil.success("成功");
         }
         return ResultUtil.error(678, "签发失败");
+    }
+
+    /**
+     * 线上签发保存
+     * @param reportApprovalVo1
+     * @return
+     */
+    @PostMapping("verifySave")
+    public Result verifySave(@RequestBody ReportApprovalVo reportApprovalVo1) {
+        if (reportApprovalVo1 == null) {
+            return ResultUtil.error(678, "缺少必填参数！");
+        }
+        if (reportApprovalVo1.getId() == null) {
+            return ResultUtil.error(678, "报告主键不能为空！");
+        }
+        if (null == reportApprovalVo1.getConclusionMatch() && null == reportApprovalVo1.getQualificationsRange()) {
+            return ResultUtil.error(678, "审批信息不能为空！");
+        }
+        String msg;
+        if(reportApprovalVo1.getConclusionMatch().equals(1) || reportApprovalVo1.getQualificationsRange().equals(1)){
+            if(null == reportApprovalVo1.getReason()){
+                return ResultUtil.error(678, "驳回原因不能为空！");
+            }else{
+                reportApprovalVo1.setState(1);
+                msg = "签发驳回";
+            }
+        }else{
+            reportApprovalVo1.setState(0);//通过
+            msg = "签发通过";
+        }
+        if (reportApprovalVo1.getState() == 0) {
+            if (reportApprovalVo1.getSealTypeArray() == null || reportApprovalVo1.getSealTypeArray().length==0 || reportApprovalVo1.getSealTypeArray()[0] == null) {
+                return ResultUtil.error(678, "印章不能为空!");
+            }
+        }
+        //1、 获取抢单人信息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error(678, "token已经过期，请退出重新登录");
+        }
+        String name = reportApprovalMapper.getUserName(userInfo.getUserId());
+        if (name == null) {
+            return ResultUtil.error(678, "账号未配置使用人");
+        }
+        // 通过报告id 和 登录人id和姓名 比对
+        if(!reportApprovalService.efficacyApprovalData(reportApprovalVo1.getId(),userInfo.getUserId(),name,2)){
+            return ResultUtil.error(678, "签发失败！当前登录人不是指定人");
+        }
+        reportApprovalVo1.setIssuer(name);
+        Boolean flag = reportApprovalService.verify_data_two(reportApprovalVo1);
+        if (flag) {
+            return ResultUtil.success(msg + "成功！", true);
+        }
+        return ResultUtil.error(678, "签发失败！");
     }
 
     /**

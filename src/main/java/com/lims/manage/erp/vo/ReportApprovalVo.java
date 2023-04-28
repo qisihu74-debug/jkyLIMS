@@ -75,6 +75,14 @@ public class ReportApprovalVo {
      */
     private Integer reportRange;
     /**
+     * 结论是否正确，是否与委托相符 0,是；1，否
+     */
+    private Integer conclusionMatch;
+    /**
+     * 检测产品/参数是否超出资质范围,是；1，否
+     */
+    private Integer qualificationsRange;
+    /**
      * 驳回原因
      */
     private String reason;
