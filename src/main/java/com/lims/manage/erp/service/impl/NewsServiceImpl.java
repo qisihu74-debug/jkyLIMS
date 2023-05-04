@@ -10,11 +10,12 @@ import com.lims.manage.erp.service.NewsService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import io.netty.handler.codec.http2.Http2Exception;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.sql.Date;
 
 /**
  * @author gjl
@@ -68,6 +69,9 @@ public class NewsServiceImpl  extends ServiceImpl<NewsDao, NewsBean> implements 
         newsBean.setPublishUser(ShiroUtils.getUserInfo().getName());
         newsBean.setPublishDept(substring);
         newsBean.setFileUrl(stringBuilder.toString());
+        if (newsBean.getPublishDate() == null){
+            newsBean.setPublishDate(new Date(System.currentTimeMillis()));
+        }
         //处理期数
         Integer integer = newsDao.getMaxIndex();
         if (integer == null){
@@ -75,8 +79,8 @@ public class NewsServiceImpl  extends ServiceImpl<NewsDao, NewsBean> implements 
         }else {
             integer = integer + 1;
         }
-        newsBean.setIndex(integer);
-        int insert = this.baseMapper.insert(newsBean);
+        newsBean.setNextNum(integer);
+        int insert = newsDao.insert(newsBean);
         if (insert >= 0){
             return true;
         }else {

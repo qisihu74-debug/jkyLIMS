@@ -17,6 +17,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Mapper
 public interface NewsDao extends BaseMapper<NewsBean> {
-    @Select("select max(`index`) from sys_news")
+    @Select("select max(`next_num`) from sys_news")
     Integer getMaxIndex();
 }

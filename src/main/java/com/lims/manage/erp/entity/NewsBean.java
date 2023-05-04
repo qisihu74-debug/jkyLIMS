@@ -26,7 +26,7 @@ public class NewsBean {
     /**
      * 发布期数
      */
-    private Integer index;
+    private Integer nextNum;
 
     /**
      * 类型0技术质量
