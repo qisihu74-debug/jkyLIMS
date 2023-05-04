@@ -681,7 +681,9 @@
                 LEFT JOIN test_product_item t2 ON t1.check_item_id = t2.check_item_id
                 LEFT JOIN test_sample t3 ON t1.sample_id = t3.id
     </select>
-
+    <select id="getDetailById" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        select * from test_report_record where id=#{id}
+    </select>
     <select id="getDetailByEntrustId" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         select * from test_report_record where entrustment_id=#{entrustId}
     </select>

@@ -49,6 +49,7 @@
             verifyer=#{verifyer},
             verifyer_time = #{verifyerTime},
             <if test="reason!=null and reason!=''">apply_reason=#{reason},</if>
+            <if test="reportUrl!=null and reportUrl!=''">report_url=#{reportUrl},</if>
         </trim>
         WHERE id =#{id}
     </update>
@@ -267,6 +268,7 @@
             issuer_time = #{issuerTime},
             <if test="reason!=null and reason!=''">issu_reason=#{reason},</if>
             <if test="sealType!=null and sealType!=''">seal_type=#{sealType},</if>
+            <if test="reportUrl!=null and reportUrl!=''">report_url=#{reportUrl},</if>
         </trim>
         WHERE id =#{id}
     </update>

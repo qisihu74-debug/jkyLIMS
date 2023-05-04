@@ -1,24 +1,29 @@
 package com.lims.manage.erp.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.ReportApprovalMapper;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.ReportApprovalService;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportApprovalVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,7 +38,7 @@ import java.util.Set;
  */
 @Service
 public class ReportApprovalServiceImpl implements ReportApprovalService {
-
+    Logger logger = LoggerFactory.getLogger(ReportApprovalServiceImpl.class);
     @Autowired
     ReportApprovalMapper reportApprovalMapper;
     @Autowired
@@ -42,6 +47,14 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     TaskMapper taskMapper;
     @Autowired
     private TeamMapper teamMapper;
+    @Autowired
+    private ReportRecordEntityMapper recordEntityMapper;
+    @Autowired
+    private ReportMapper reportMapper;
+    @Autowired
+    private SysUserDao sysUserDao;
+    @Autowired
+    private QiYueSuoEntity qiYueSuoEntity;
 
     @Override
     public PageInfo getApplyforList(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
@@ -127,6 +140,20 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             }
             reportApprovalVo.setState(state);
             reportApprovalVo.setId(reportApprovalVo1.getId());
+            //审批通过，审批人签字
+            ReportRecordEntity detailById = reportMapper.getDetailById(reportApprovalVo1.getId());
+            Long entrustId = detailById.getEntrustmentId();
+            if(entrustId == null){
+                entrustId = detailById.getEntrustId();
+            }
+            String url = null;
+            try {
+                url = insertPicToPdf(detailById.getReportUrl(), entrustId, detailById.getType(), "审核", 15);
+            } catch (Exception e) {
+                logger.error("报告编号【"+detailById.getReportCode() + "】审批签字失败！");
+                e.printStackTrace();
+            }
+            reportApprovalVo.setReportUrl(url);
             reportApprovalMapper.updateReportApprovalDetail(reportApprovalVo);
             return true;
         }
@@ -159,6 +186,20 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalVo.setVerifyer(reportApprovalVo1.getVerifyer());
             reportApprovalVo.setState(state);
             reportApprovalVo.setId(reportApprovalVo1.getId());
+            //审批通过，审批人签字
+            ReportRecordEntity detailById = reportMapper.getDetailById(reportApprovalVo1.getId());
+            Long entrustId = detailById.getEntrustmentId();
+            if(entrustId == null){
+                entrustId = detailById.getEntrustId();
+            }
+            String url = null;
+            try {
+                url = insertPicToPdf(detailById.getReportUrl(), entrustId, detailById.getType(), "审核", 15);
+            } catch (Exception e) {
+                logger.error("报告编号【"+detailById.getReportCode() + "】审批签字失败！");
+                e.printStackTrace();
+            }
+            reportApprovalVo.setReportUrl(url);
             reportApprovalMapper.updateReportApprovalDetail(reportApprovalVo);
             return true;
         }
@@ -272,11 +313,11 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 
     @Override
     public Boolean verify_data(ReportApprovalVo reportApprovalVo1) {
-        //        0是通过 1 是驳回
-        // 报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
+        //0:通过;1:是驳回
+        //报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
         Integer state = 0;
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
-        // 处理印章数组 解析成 字符串,
+        //处理印章数组 解析成 字符串,
         StringBuilder stringBuilder = new StringBuilder();
         for(int i=0;i<reportApprovalVo1.getSealTypeArray().length;i++){
             stringBuilder.append(reportApprovalVo1.getSealTypeArray()[i]);
@@ -313,6 +354,55 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         return false;
     }
 
+    public String insertPicToPdf(String pdfUrl, Long entrustId, String reportType,String key,int offsetX) throws Exception {
+        HashSet<String> delList = new HashSet<>();
+        //TODO (报告) 兼容中间报告
+        ReportRecordEntity detailByEntrustId = null;
+        Long aLong = recordEntityMapper.checkExist(entrustId, reportType);
+        if (aLong == null) {
+            detailByEntrustId = reportMapper.getDetailByEntrustIdZj(entrustId);//审核人、签发人
+        } else {
+            detailByEntrustId = reportMapper.getDetailByEntrustId(entrustId);//审核人、签发人
+        }
+        logger.info("查询签发复合信息:{}", JSON.toJSONString(detailByEntrustId));
+        Long userId = detailByEntrustId.getVerifyerId();
+        if("批准".equals(key)){
+            userId = detailByEntrustId.getIssuerId();
+        }
+        String nameUrl = sysUserDao.getSignatureById(userId);
+        logger.info(key+"人:{}", nameUrl);
+        String basePath = qiYueSuoEntity.getAutographPath();
+        logger.info("临时文件路径:{}", basePath);
+        //临时文件路径（使用后删除）
+        String startPath = "";
+        String endPath = "";
+        String suffix = ".pdf";
+        //现将服务器上的报告文件、图片签名文件缓存到本地
+        String localPdfPath = HttpDownloadUtil.download(pdfUrl, basePath);
+        String verUrlPath = HttpDownloadUtil.download(nameUrl, basePath);
+        delList.add(basePath + verUrlPath);
+        float x = 1;
+        float y = -10;
+        int index = 1;
+        startPath = basePath + localPdfPath;
+        delList.add(startPath);
+        endPath = basePath + 1 + suffix;
+        delList.add(endPath);
+        PdfDoc pdf2 = new PdfDoc(startPath, endPath);
+        pdf2.addImage(basePath + verUrlPath, key+"：", offsetX, -10, 30, 20);
+        //将最终本地的pdf报告上传到文件服务器
+        File file = new File(endPath);
+        MultipartFile multipartFile = AsposeUtil.fileToMultipart(file, detailByEntrustId.getReportCode());
+        logger.info("上传带签名的报告");
+        String url = MinIoUtil.upload("report-download", multipartFile, detailByEntrustId.getReportCode() + ".pdf");
+        logger.info("上传完成带签名的报告:{}", url);
+        //删除产生的临时文件
+        for (String del : delList) {
+            FileAndFolderUtil.delete(del);
+        }
+        return url;
+    }
+
     @Override
     public Boolean verify_data_two(ReportApprovalVo reportApprovalVo1) {
         //      state  0是通过 1 是驳回
@@ -342,6 +432,20 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalVo.setId(reportApprovalVo1.getId());
             reportApprovalVo.setReason(reportApprovalVo1.getReason());
             reportApprovalVo.setState(state);
+            //签发通过，签发人签字
+            ReportRecordEntity detailById = reportMapper.getDetailById(reportApprovalVo1.getId());
+            Long entrustId = detailById.getEntrustmentId();
+            if(entrustId == null){
+                entrustId = detailById.getEntrustId();
+            }
+            String url = null;
+            try {
+                url = insertPicToPdf(detailById.getReportUrl(), entrustId, detailById.getType(), "批准", 15);
+            } catch (Exception e) {
+                logger.error("报告编号【"+detailById.getReportCode() + "】签发签字失败！");
+                e.printStackTrace();
+            }
+            reportApprovalVo.setReportUrl(url);
             reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
             return true;
         }
@@ -388,6 +492,20 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalVo.setId(reportApprovalVo1.getId());
             reportApprovalVo.setReason(reportApprovalVo1.getReason());
             reportApprovalVo.setState(state);
+            //签发通过，签发人签字
+            ReportRecordEntity detailById = reportMapper.getDetailById(reportApprovalVo1.getId());
+            Long entrustId = detailById.getEntrustmentId();
+            if(entrustId == null){
+                entrustId = detailById.getEntrustId();
+            }
+            String url = null;
+            try {
+                url = insertPicToPdf(detailById.getReportUrl(), entrustId, detailById.getType(), "批准", 15);
+            } catch (Exception e) {
+                logger.error("报告编号【"+detailById.getReportCode() + "】签发签字失败！");
+                e.printStackTrace();
+            }
+            reportApprovalVo.setReportUrl(url);
             reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
             return true;
         }

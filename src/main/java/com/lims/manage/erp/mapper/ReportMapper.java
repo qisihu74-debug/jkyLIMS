@@ -160,6 +160,7 @@ public interface ReportMapper {
     @Select("select report_url from test_report_record where entrustment_id=#{entrustId}")
     String getUrlByEntrustId(@Param("entrustId") Long entrustId);
 
+    ReportRecordEntity getDetailById(@Param("id") Long id);
     ReportRecordEntity getDetailByEntrustId(@Param("entrustId") Long entrustId);
     ReportRecordEntity getDetailByEntrustIdZj(@Param("entrustId") Long entrustId);
     /**

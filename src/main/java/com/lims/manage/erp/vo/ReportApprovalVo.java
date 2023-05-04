@@ -124,4 +124,6 @@ public class ReportApprovalVo {
      */
     private Integer reportTypeStatus;
 
+    private String reportUrl;
+
 }
