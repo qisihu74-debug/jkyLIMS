@@ -1178,8 +1178,7 @@ public class ReportController {
      * @return
      */
     @RequestMapping("onlineReportMergeSave")
-    public Result onlineReportMergeSave(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
-                                        @RequestParam("issuer") String issuer){
+    public Result onlineReportMergeSave(String reportCode,String inspector,String verifyer, String issuer){
         if (StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数");
         }
