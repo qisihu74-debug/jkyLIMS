@@ -1178,14 +1178,13 @@ public class ReportController {
      * @return
      */
     @RequestMapping("onlineReportMergeSave")
-    public Result onlineReportMergeSave(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
-                                        @RequestParam("issuer") String issuer){
+    public Result onlineReportMergeSave(String reportCode,String inspector,String verifyer, String issuer){
         if (StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数");
         }
         logger.debug("发起审批检测人:{},审核人:{},签发人:{}",inspector,verifyer,issuer);
-        Boolean flag = reportService.onlineReportMergeSave(reportCode,verifyer.split("&")[0],issuer.split("&")[0]
-                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),inspector);
+        Boolean flag = reportService.onlineReportMergeSave(reportCode,verifyer.split(",")[0],issuer.split(",")[0]
+                ,Long.parseLong(verifyer.split(",")[1]),Long.parseLong(issuer.split(",")[1]),inspector);
         if (flag) {
             return ResultUtil.success("报告文件上传成功！");
         }else {

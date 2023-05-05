@@ -241,10 +241,4 @@ public interface TaskService {
      */
     XSSFWorkbook getOriginalRecordAttachment(ExcelInsertVo excelInsertVo) throws IOException;
 
-    /**
-     *  完成复核：中间检测项 及 最终复核
-     * @param excelInsertVo
-     * @return
-     */
-    Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo);
 }

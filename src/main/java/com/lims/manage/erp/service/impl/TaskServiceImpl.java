@@ -1800,15 +1800,4 @@ public class TaskServiceImpl implements TaskService {
         return wb;
     }
 
-    /**
-     *  完成复核：中间检测项 及 最终复核
-     * @param excelInsertVo
-     * @return
-     */
-    @Override
-    public Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo) {
-
-        return null;
-    }
-
 }

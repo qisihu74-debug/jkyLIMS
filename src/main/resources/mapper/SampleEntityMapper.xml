@@ -1240,4 +1240,20 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         </trim>
         ORDER BY t3.acceptance_date desc, t1.id
     </select>
+    <update id="updateItemReview" parameterType="com.lims.manage.erp.vo.ExcelInsertVo">
+        UPDATE test_entrusted_sample_checkitem_rel
+        SET
+        <if test="checkReview != null and checkReview != ''">
+            mid_state = 1,
+        </if>
+        <if test="state != null and state != ''">
+            state = #{state},
+        </if>
+        instrument_status = #{instrumentStatus},
+        original_record_status = #{originalRecordStatus},
+        original_data = #{data},
+        original_record_status = #{originalRecordStatus},
+        opinion = #{opinion}
+        WHERE id = #{itemId}
+    </update>
 </mapper>

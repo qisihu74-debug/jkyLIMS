@@ -12,6 +12,7 @@ import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
 import com.lims.manage.erp.util.*;
@@ -68,6 +69,8 @@ public class TaskController {
     private TaskMapper taskMapper;
     @Autowired
     private QiYueSuoEntity qiYueSuoEntity;
+    @Autowired
+    private PageOfficeService pageOfficeService;
 
     /**
      * 查询任务详情——废弃
@@ -909,10 +912,12 @@ public class TaskController {
      *  checkReview
      */
     @RequestMapping(value = "/finishCheckItemReview")
-    public void finishCheckItemReview(@RequestBody ExcelInsertVo excelInsertVo){
-       // 审核人id。
-        Long  userId = null;
+    public Result finishCheckItemReview(@RequestBody ExcelInsertVo excelInsertVo) throws Exception {
+        // 审核人id。
+        Long  userId = 1650006443416157L;
         // 判断复核数据类型。
+        pageOfficeService.finishCheckItemReview(excelInsertVo,userId);
+        return ResultUtil.success("复核成功");
     }
 
 

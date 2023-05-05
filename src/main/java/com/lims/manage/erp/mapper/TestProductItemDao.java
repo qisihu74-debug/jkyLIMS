@@ -125,5 +125,19 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
             "WHERE\n" +
             "\tt2.id = #{itemId}")
     ExcelInsertVo getExcelUrl(@Param("itemId") Integer itemId);
+
+    /**
+     * 更新报告excel附件
+     * @param entrustmentId
+     * @param sampleId
+     * @param url
+     * @return
+     */
+    @Update("UPDATE test_entrusted_sample_details_rel \n" +
+            "SET report_edit_url = #{url} \n" +
+            "WHERE\n" +
+            "\tsample_id = #{sampleId} \n" +
+            "\tAND entrustment_id = #{entrustmentId}")
+    int updateReportExcelUrl(@Param("entrustmentId") Long entrustmentId,@Param("sampleId") Integer sampleId,@Param("url") String url);
 }
 
