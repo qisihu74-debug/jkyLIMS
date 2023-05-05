@@ -1715,7 +1715,7 @@ public class ReportServiceImpl implements ReportService {
         //合并成一个excel
         Workbook document = workbookCopy(topDoc, map);
         //处理页码
-        handlerPage(document, countMap);
+        handlerPage(document, countMap,null);
         //上传合并完成的excel到服务器
         long name = GenID.getID();
         String path = qiYueSuoEntity.getAutographPath() + name + ".xlsx";
@@ -1749,7 +1749,7 @@ public class ReportServiceImpl implements ReportService {
      * @param document
      * @param countMap
      */
-    private void handlerPage(Workbook document, Map<Integer, Integer> countMap) {
+    private void handlerPage(Workbook document, Map<Integer, Integer> countMap,String reportCode) {
         //报告总页数
         int total = document.getWorksheets().getCount() - 2;
         //填充每个子报告每页的页码
@@ -1771,8 +1771,14 @@ public class ReportServiceImpl implements ReportService {
                             Object value = cell.getValue();
                             if (value != null) {
                                 String string = value.toString();
-                                if ("第 ${page} 页，共 ${total} 页".equals(string)) {
+                                if ("第   页,共   页".equals(string)) {
                                     cells.get(n, j).setValue("第" + count + "页，共" + total + "页");
+                                }
+                                //设置报告编号
+                                if ("报告编号：".equals(string)){
+                                    if (StringUtils.isNotEmpty(reportCode)){
+                                        setExcelValue(cells,n,j,reportCode);
+                                    }
                                 }
                             }
                         }
@@ -1782,7 +1788,26 @@ public class ReportServiceImpl implements ReportService {
                 index++;
             }
         }
+    }
 
+    public static void setExcelValue(Cells cells, int x, int y, String value){
+        String name = cells.get(x, y).getName();
+        String key = "";
+        ArrayList mergedCells = cells.getMergedCells();
+        int size = mergedCells.size();
+        Iterator iterator = mergedCells.iterator();
+        while (size > 0){
+            Object next = iterator.next();
+            String string = next.toString();
+            if (string.contains(name)){
+                Object next1 = iterator.next();
+                String string1 = next1.toString();
+                key = string1.substring(string1.indexOf("(") + 1, string1.indexOf(")"));
+                break;
+            }
+            size--;
+        }
+        cells.get(key.split(":")[0]).putValue(value);
     }
 
     @SneakyThrows
@@ -2167,7 +2192,7 @@ public class ReportServiceImpl implements ReportService {
         //合并成一个excel
         Workbook document = workbookCopy(topDoc, map);
         //处理页码
-        handlerPage(document, countMap);
+        handlerPage(document, countMap,null);
         //上传合并完成的doc到服务器
         long name = GenID.getID();
         String path = qiYueSuoEntity.getAutographPath() + name + ".xlsx";
@@ -3411,7 +3436,7 @@ public class ReportServiceImpl implements ReportService {
                         worksheetS.copy(workbook.getWorksheets().get(i));
                     }
                 }
-                map.put(index,workbook);
+                map.put(index,newWork);
                 countMap.put(index, size);
             } catch (Exception e) {
                 log.error("报告文件加载失败:{}",e);
@@ -3436,7 +3461,7 @@ public class ReportServiceImpl implements ReportService {
         //合并成一个excel
         Workbook document = workbookCopy(topDoc, map);
         //处理页码
-        handlerPage(document, countMap);
+        handlerPage(document, countMap,reportCode);
         //转为pdf
         String excelPath = path+reportCode+".xlsx";
         String pdfPath = path+reportCode+".xlsx";
@@ -3461,7 +3486,12 @@ public class ReportServiceImpl implements ReportService {
             log.error("读取本地pdf文件失败:{}",e);
         }
         String url = MinIoUtil.upload("report-download", reportCode + ".pdf", inputStream, "application/octet-stream");
-        String substring = url.substring(0, url.indexOf("?"));
+        String substring = "";
+        if (url.contains("?")){
+            substring = url.substring(0, url.indexOf("?"));
+        }else {
+            substring = url;
+        }
         recordEntityMapper.updateUrlByCode(reportCode,substring);
         //删除临时文件
         FileAndFolderUtil.delete(pdfPath);
