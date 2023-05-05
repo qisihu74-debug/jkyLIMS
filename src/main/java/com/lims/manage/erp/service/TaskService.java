@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.vo.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -231,4 +232,19 @@ public interface TaskService {
     List<LabelValueVo> getDeviceUser(Long userId);
 
     Long getEntrustIdByTaskId(Long taskId);
+
+    /**
+     * 返回原始记录
+     *  list 检测项主键
+     *  checkReview 类型（中间复核 或 最终复核）
+     * @return
+     */
+    XSSFWorkbook getOriginalRecordAttachment(ExcelInsertVo excelInsertVo) throws IOException;
+
+    /**
+     *  完成复核：中间检测项 及 最终复核
+     * @param excelInsertVo
+     * @return
+     */
+    Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo);
 }

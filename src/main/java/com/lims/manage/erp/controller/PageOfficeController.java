@@ -1,6 +1,6 @@
 package com.lims.manage.erp.controller;
 
-import com.aspose.slides.Collections.ArrayList;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductItemDao;
@@ -8,7 +8,7 @@ import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.ExcelInsertVo;
-import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.TeamVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
@@ -77,28 +77,29 @@ public class PageOfficeController {
         String[] items = list.split(",");
         Integer[] ids = new Integer[items.length];
         System.out.println("items == " + items);
-        for(int j =0; j< items.length; j++){
-            ids[j] =Integer.parseInt(items[j]);
+        for (int j = 0; j < items.length; j++) {
+            ids[j] = Integer.parseInt(items[j]);
         }
-//        JSONObject jsonObject = JSONObject.parseObject(list);
         // 编辑参数赋值。
-        map.put("items",list);
-
-
-
-//        String username = ShiroUtils.getUserInfo().getUsername();
-        //根据参数获取样品相关信息和检测项相关信息
-
-
-        //填充表头信息临时缓存到本地
-        String url = pageOfficeService.getProductExcelUrl(ids);
+        map.put("items", list);
         // 验证 token 是否存在
         String[] mapToken = parameterMap.get("token");
         String strVerify = redisUtil.getRedisToken(mapToken[0]);
         System.out.println("token == " + strVerify);
-
-
-
+        SysUserEntity user = new SysUserEntity();
+        if (strVerify != null) {
+            user = redisUtil.getRedisTokenUser(strVerify);
+        }
+        if (user != null) {
+            if (user.getUserId() != null) {
+                // 领取人
+                TeamVo returnList = taskService.getTeamUserNameTwo(user.getUserId());
+                map.put("teamVo", returnList.getTeamVo());
+            }
+        }
+        //根据参数获取样品相关信息和检测项相关信息
+        //填充表头信息临时缓存到本地
+        String url = pageOfficeService.getProductExcelUrl(ids);
         //设置服务页面
         PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
         poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");
@@ -145,16 +146,6 @@ public class PageOfficeController {
         //TODO 删除临时文件
 
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
-        List<LabelValueVo> valueVoList = new ArrayList();
-        LabelValueVo labelValueVo1 = new LabelValueVo();
-        labelValueVo1.setValue(1647502446459100L);
-        labelValueVo1.setLabel("guojialin");
-        LabelValueVo labelValueVo2 = new LabelValueVo();
-        labelValueVo2.setValue(1647502682230103L);
-        labelValueVo2.setLabel("xumingyue");
-        valueVoList.add(labelValueVo1);
-        valueVoList.add(labelValueVo2);
-        map.put("valueVoList", valueVoList);
         ModelAndView mv = new ModelAndView("POB");
         return mv;
     }
@@ -162,7 +153,6 @@ public class PageOfficeController {
     /**
      * 保存接口
      *
-     * @param bean
      * @param request
      * @param response
      */
@@ -172,6 +162,7 @@ public class PageOfficeController {
         FileSaver fs = new FileSaver(request, response);
         // 实现逻辑操作 -- 完成编辑
         String flag = pageOfficeService.saveOriginalRecord(request, fs);
+//        String flag = null;
         // 检测人
         String testSet = fs.getFormField("testSet");
         String input_select = fs.getFormField("input_select");
