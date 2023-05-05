@@ -58,7 +58,7 @@ public class DownloadUtils {
         if (null == fileName) {
             fileName = uuid+ "."+type;
         }else { // 文件后缀不一致时，以type为准(针对simText【将类txt文件转为txt】)
-            fileName = fileName.replace(fileName.substring(fileName.lastIndexOf(".") + 1), type);
+            fileName = fileName +"."+type;
         }
         String realPath = fileDir + fileName;
         File dirFile = new File(fileDir);

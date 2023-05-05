@@ -3391,11 +3391,12 @@ public class ReportServiceImpl implements ReportService {
         if (url.contains("?")) {
             url = url.substring(0, url.indexOf("?"));
         }
+        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
         //TODO (报告) 兼容中间报告
         if ("1".equals(type)) {
-            reportMapper.updateUrlZj(reportCode, inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrlZj(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         } else {
-            reportMapper.updateUrl(reportCode, inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrl(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         }
         logger.info("签名信息更新成功！:{}", reportCode + ":" + url);
         return true;
@@ -3500,6 +3501,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Boolean onlineReportMergeSave(String reportCode, String verifyer, String issuer, long verifyerId, long issuerId, String inspector) {
+        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
         //签字
         String url = "";
         ReportRecordEntity urlByCode = recordEntityMapper.getUrlByCode(reportCode);
@@ -3512,9 +3514,9 @@ public class ReportServiceImpl implements ReportService {
         //更新
         String type = recordEntityMapper.getTypeByCode(reportCode);
         if ("1".equals(type)) {
-            reportMapper.updateUrlZj(reportCode, inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrlZj(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         } else {
-            reportMapper.updateUrl(reportCode, inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrl(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         }
         return true;
     }
@@ -3628,7 +3630,7 @@ public class ReportServiceImpl implements ReportService {
         String signaturePath = "";
         float x = 1;
         float y = -10;
-        int index = 1;
+        int index = 0;
         if (pdfPath.contains("http")){
             startPath = downLoad.downLoad(pdfPath,"pdf",reportCode).getContent();
         }else {
@@ -3643,10 +3645,12 @@ public class ReportServiceImpl implements ReportService {
             PdfDoc pdf = new PdfDoc(startPath, endPath);
             pdf.addImage(basePath + signaturePath, "检测：", x, y, 30, 20);
             index++;
-            startPath = endPath;
-            endPath = basePath + index + suffix;
-            x = x + 49;
-            delList.add(endPath);
+            if (index < checkUrl.size()){
+                startPath = endPath;
+                endPath = basePath + index + suffix;
+                x = x + 49;
+                delList.add(endPath);
+            }
         }
         File file = new File(endPath);
         MultipartFile multipartFile = AsposeUtil.fileToMultipart(file,reportCode);
