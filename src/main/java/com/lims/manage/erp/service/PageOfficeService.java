@@ -1,6 +1,6 @@
 package com.lims.manage.erp.service;
 
-import com.lims.manage.erp.entity.ReqParamBean;
+import com.lims.manage.erp.vo.ExcelInsertVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +34,14 @@ public interface PageOfficeService {
      * @param ids
      * @return
      */
-    String updateOriginalRecordUrl(String excelUrl,Integer[] ids);
+    String updateOriginalRecordUrl(String excelUrl,Integer[] ids) throws Exception;
+
+    /**
+     *  完成复核：中间检测项 及 最终复核
+     * @param excelInsertVo
+     * @param userId
+     * @return
+     */
+    Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo,Long userId) throws Exception;
 
 }

@@ -68,6 +68,14 @@ public class ExcelInsertVo {
      * 审批意见
      */
     String opinion;
+    /**
+     * 检测项主键
+     */
+    Integer itemId;
+    /**
+     *  0：待检，1：检测中，2：待复核，3 ：通过，4：驳回
+     */
+    Integer state;
 
 
 }

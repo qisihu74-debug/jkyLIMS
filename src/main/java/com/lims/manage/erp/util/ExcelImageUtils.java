@@ -24,9 +24,10 @@ public class ExcelImageUtils {
      *
      * @param filePath D:\doc\43bc6f96-754a-4834-bc61-a88eac9846a0.xlsx
      * @param list
+     * @param flag true = 清除图片、 flase = 不清楚图片
      */
 //    public static void ExcelInsertImage(String filePath, String[] imags, String[] sheetNames) {
-    public static void ExcelInsertImage(String filePath, List<ExcelInsertVo> list, String newFilePath) throws IOException {
+    public static void ExcelInsertImage(String filePath, List<ExcelInsertVo> list, String newFilePath,Boolean flag) throws IOException {
         // 获取 wb 读取行号及列号
         InputStream fileStream = new FileInputStream(filePath);
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
@@ -41,7 +42,7 @@ public class ExcelImageUtils {
         for (String sheetName : setSheetName) {
             //获取Excel工作表
             Worksheet sheet = workbook.getWorksheets().get(sheetName);
-            if (sheet != null) {
+            if (sheet != null && flag == true) {
                 // 清除之前的 旧图片
                 PicturesCollection excelImag = sheet.getPictures();
                 IEnumerator it = excelImag.iterator();

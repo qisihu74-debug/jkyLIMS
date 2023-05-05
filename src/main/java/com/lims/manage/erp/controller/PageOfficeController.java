@@ -162,15 +162,9 @@ public class PageOfficeController {
         FileSaver fs = new FileSaver(request, response);
         // 实现逻辑操作 -- 完成编辑
         String flag = pageOfficeService.saveOriginalRecord(request, fs);
-//        String flag = null;
-        // 检测人
-        String testSet = fs.getFormField("testSet");
-        String input_select = fs.getFormField("input_select");
-        // 记录人
-        String recordSet = fs.getFormField("recordSet");
         // 保存本地Excel 包含签名信息
         if (!StringUtils.isEmpty(flag)) {
-            // 检测参数
+//            // 检测参数
             String list = fs.getFormField("items");
             // 获取检测项id 集合
             String[] items = list.split(",");
@@ -178,26 +172,27 @@ public class PageOfficeController {
             for (int j = 0; j < items.length; j++) {
                 ids[j] = Integer.parseInt(items[j]);
             }
-            //上传文件到文件服务器、删除本地临时缓存的文件
-            String[] arrays = flag.split("\\\\");
-            String saveFileUrl = arrays[arrays.length - 1];
-            InputStream input = new FileInputStream(flag);
-            // 上传新excel附件
-            String excelUrl = MinIoUtil.upload("file-resources", saveFileUrl, input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            // 查询附件 存在则 删除附件
-            ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(ids[0]);
-            if (excelInsertVo != null) {
-                if (excelInsertVo.getProductExcelUrl() != null) {
-                    String[] urls = excelInsertVo.getProductExcelUrl().split("/");
-                    MinIoUtil.deleteFile("file-resources", urls[urls.length - 1]);
-                }
-                if (excelInsertVo.getReportEditUrl() != null) {
-                    String[] urls = excelInsertVo.getReportEditUrl().split("/");
-                    MinIoUtil.deleteFile("file-resources", urls[urls.length - 1]);
-                }
-            }
-            //相关表做更新或者插入操作
-            pageOfficeService.updateOriginalRecordUrl(excelUrl, ids);
+            pageOfficeService.updateOriginalRecordUrl(flag, ids);
+//            //上传文件到文件服务器、删除本地临时缓存的文件
+//            String[] arrays = flag.split("\\\\");
+//            String saveFileUrl = arrays[arrays.length - 1];
+//            InputStream input = new FileInputStream(flag);
+//            // 上传新excel附件
+//            String excelUrl = MinIoUtil.upload("file-resources", saveFileUrl, input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+//            // 查询附件 存在则 删除附件
+//            ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(ids[0]);
+//            if (excelInsertVo != null) {
+//                if (excelInsertVo.getProductExcelUrl() != null) {
+//                    String[] urls = excelInsertVo.getProductExcelUrl().split("/");
+//                    MinIoUtil.deleteFile("file-resources", urls[urls.length - 1]);
+//                }
+//                if (excelInsertVo.getReportEditUrl() != null) {
+//                    String[] urls = excelInsertVo.getReportEditUrl().split("/");
+//                    MinIoUtil.deleteFile("file-resources", urls[urls.length - 1]);
+//                }
+//            }
+//            //相关表做更新或者插入操作
+//            pageOfficeService.updateOriginalRecordUrl(excelUrl, ids);
             return new ModelAndView("success");
         } else {
             return new ModelAndView("error");

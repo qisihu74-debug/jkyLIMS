@@ -344,4 +344,11 @@ public interface SampleEntityMapper {
             "WHERE\n" +
             "\tt1.role_name = \"技术负责人\";")
     List<LabelValueVo> getApprover();
+
+    /**
+     * 更新检测项 复核状态。
+     * @param excelInsertVo
+     * @return
+     */
+    int updateItemReview(ExcelInsertVo excelInsertVo);
 }
