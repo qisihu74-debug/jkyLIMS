@@ -7,6 +7,7 @@ import com.spire.xls.collections.PicturesCollection;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class ExcelImageUtils {
      *
      * @param filePath D:\doc\43bc6f96-754a-4834-bc61-a88eac9846a0.xlsx
      * @param list
-     * @param flag true = 清除图片、 flase = 不清楚图片
+     * @param flag true = 清除图片、 flase = 不清除图片
      */
 //    public static void ExcelInsertImage(String filePath, String[] imags, String[] sheetNames) {
     public static void ExcelInsertImage(String filePath, List<ExcelInsertVo> list, String newFilePath,Boolean flag) throws IOException {
@@ -52,6 +53,36 @@ public class ExcelImageUtils {
                     itNext += 1;
                 }
             }
+            // 处理复核信息
+//            if (sheet != null && flag == false) {
+//                // 保留检测签名与记录签名信息， 清除之前的 复核旧图片
+//                PicturesCollection excelImag = sheet.getPictures();
+//                int count = excelImag.getCount();
+//                System.out.println("count == " +count);
+//                IEnumerator it = excelImag.iterator();
+//                int itNext = 0;
+//                while (it.hasNext()) {
+////                    sheet.getPictures().get(itNext).remove();
+//                    sheet.getPrstGeomShapes().get("Shape4").remove();//通过形状名称获取并删除
+//                    itNext += 1;
+//                }
+////                int itNext = 0;
+////                if(count == 4){
+////                    itNext = 3;
+////                }
+////                if(count == 3){
+////                    itNext = 2;
+////                }
+////                if(count == 2){
+////                    itNext =2;
+////                }
+////                // count 最少2条、3条。进行保留,其余删除。
+////                while (count > itNext){
+////                while ()
+////                    sheet.getPictures().get(0).remove();
+////                    itNext += 1;
+////                }
+//            }
         }
         for (int i = 0; i < list.size(); i++) {
             ExcelInsertVo data = list.get(i);
@@ -71,44 +102,53 @@ public class ExcelImageUtils {
                         pic.setWidth(80);
                         pic.setHeight(30);
                         serialNumber += 1;
+//                        if(flag == false){
+//                            // 塞入日期
+//                            sheet.get(data.getTopRow()+serialNumber,data.getLeftColumn()+5).setValue("2023-5-6");
+//                        }
                     }
                 }
             }
         }
         // 删除附件
-        FileAndFolderUtil.delete(filePath);
+//        FileAndFolderUtil.delete(filePath);
         //保存文档
         workbook.saveToFile(newFilePath, ExcelVersion.Version2013);
     }
 
 //    public static void main(String[] args) throws IOException {
 //        List<ExcelInsertVo> list = new ArrayList<>();
-//        ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
-//        // 编辑类型
-//        excelInsertVo1.setRecordType("检测：");
-//        // 签名信息
+////        ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
+////        // 编辑类型
+////        excelInsertVo1.setRecordType("检测：");
+////        // 签名信息
 //        String[] imags = new String[2];
-//        imags[0] = "D:\\doc\\image\\1647502446459100.png";
-////        imags[1] = "D:\\doc\\image\\1647502446459100.png";
-//        excelInsertVo1.setImags(imags);
+////        imags[0] = "D:\\doc\\image\\1647502446459100.png";
+////        imags[1] = "D:\\doc\\image\\1647502682230103.png";
+////        excelInsertVo1.setImags(imags);
+////        // sheet名称
+////        excelInsertVo1.setSheetName("水泥密度、比表面积试验检测记录表");
+////        list.add(excelInsertVo1);
+////
+////        ExcelInsertVo excelInsertVo2 = new ExcelInsertVo();
+////        // 编辑类型
+////        excelInsertVo2.setRecordType("记录：");
+////        // 签名信息
+////        String[] imags2 = new String[1];
+////        imags2[0] = "D:\\doc\\image\\1647502446459100.png";
+////        excelInsertVo2.setImags(imags2);
 //        // sheet名称
-//        excelInsertVo1.setSheetName("水泥密度、比表面积试验检测记录表");
-//        list.add(excelInsertVo1);
-//
-//        ExcelInsertVo excelInsertVo2 = new ExcelInsertVo();
-//        // 编辑类型
-//        excelInsertVo2.setRecordType("记录：");
-//        // 签名信息
-//        String[] imags2 = new String[1];
-//        imags2[0] = "D:\\doc\\image\\1647502446459100.png";
-//        excelInsertVo2.setImags(imags2);
-//        // sheet名称
-//        excelInsertVo2.setSheetName("水泥密度、比表面积试验检测记录表");
-//        list.add(excelInsertVo2);
+////        excelInsertVo2.setSheetName("水泥密度、比表面积试验检测记录表");
+////        list.add(excelInsertVo2);
+//        ExcelInsertVo excelInsertVo3 = new ExcelInsertVo();
+//        excelInsertVo3.setSheetName("水泥密度、比表面积试验检测记录表");
+//        excelInsertVo3.setRecordType("复核：");
+//        excelInsertVo3.setImags(imags);
+//        list.add(excelInsertVo3);
 //        String filePath = "D:\\doc\\e-iceblue\\shuini.xlsx";
 //        String newFilePath = "D:\\doc\\e-iceblue\\new演示插入结果.xlsx";
 //        // 图片插入至excel中
-//        ExcelInsertImage(filePath, list, newFilePath);
+//        ExcelInsertImage(filePath, list, newFilePath,false);
 //        System.out.println("newFilePath  == " + newFilePath);
 //    }
 

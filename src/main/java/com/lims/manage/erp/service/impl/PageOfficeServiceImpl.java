@@ -41,7 +41,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
     private String dir;
 
     @Autowired
-    private TaskServiceImpl taskService = new TaskServiceImpl();
+    TaskServiceImpl taskService;
     @Autowired
     private TaskMapper taskMapper;
     @Autowired
@@ -60,7 +60,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                 // 优先拿 报告附件
                 productExcelUrl = excelInsertVo.getReportEditUrl();
             }
-            if (excelInsertVo.getProductExcelUrl() != null) {
+            if (excelInsertVo.getReportEditUrl() ==null && excelInsertVo.getProductExcelUrl() != null) {
                 // 其次拿 产品附件
                 productExcelUrl = excelInsertVo.getProductExcelUrl();
             }
@@ -90,7 +90,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             }
         }
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
+        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
         // 批量获取 检测项id（有可能对应多个模板） 再进行填充。
         // 通过检测项id 获取 相应的 id关联信息。
         for (int i = 0; i < dataEntitys.size(); i++) {
@@ -102,7 +102,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                 Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
                 result.put("result", originalData);
                 // 根据原始记录的 模板名 找到 对应的 sheet名称。
-                XSSFSheet sheet = wb.getSheet(data.getOriginalName());
+                XSSFSheet sheet = wb.getSheet(data.getCheckItemName());
                 if (sheet != null) {
                     // 替换原始记录模板数据
                     ExcelReplaceUtil.ExcelReplace(sheet, result);
@@ -139,12 +139,10 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         for (int j = 0; j < items.length; j++) {
             ids[j] = Integer.parseInt(items[j]);
         }
-
         // 生成的 完成后的file文件
         String saveExcel = dir + file.getFileName();
         // 文件路径
         file.saveToFile(saveExcel);
-//        System.out.println("文件返回值 == " + saveExcel);
         // 查询用户id及签名信息
         // 检测人集合
         List<Long> testSetLong = new ArrayList<>();
@@ -162,21 +160,25 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         recordSetLong.add(Long.valueOf(recordSet));
         // 记录人签名数组图片
         String[] recordImags = new String[recordSetLong.size()];
-        // 调用方法处理 签名图片存放数组中。
-        methodUrlImags(recordSetLong, recordImags);
-//        System.out.println("暂停看输出");
+        // 如果 检测人与记录人相同 签名数组复用即可。
+        if(testSet.equals(recordSet)){
+            recordImags[0] = testImags[0];
+        }else {
+            // 调用方法处理 签名图片存放数组中。
+            methodUrlImags(recordSetLong, recordImags);
+        }
         List<ExcelInsertVo> excelInsertVoList = new ArrayList<>();
-        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
+        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
         if (!CollectionUtils.isEmpty(dataEntitys)) {
             for (int i = 0; i < dataEntitys.size(); i++) {
                 TaskIdEntity taskIdEntity = dataEntitys.get(i);
                 ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
-                excelInsertVo1.setSheetName(taskIdEntity.getOriginalName());
+                excelInsertVo1.setSheetName(taskIdEntity.getCheckItemName());
                 excelInsertVo1.setRecordType("检测：");
                 excelInsertVo1.setImags(testImags);
                 excelInsertVoList.add(excelInsertVo1);
                 ExcelInsertVo excelInsertVo2 = new ExcelInsertVo();
-                excelInsertVo2.setSheetName(taskIdEntity.getOriginalName());
+                excelInsertVo2.setSheetName(taskIdEntity.getCheckItemName());
                 excelInsertVo2.setRecordType("记录：");
                 excelInsertVo2.setImags(recordImags);
                 excelInsertVoList.add(excelInsertVo2);
@@ -185,7 +187,6 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // excel 插入图片
         String[] names = file.getFileName().split("\\.");
         String newFilePath = dir + GenID.getID() +"."+ names[1];
-//        System.out.println(" newFilePath == " + newFilePath);
         // 图片插入至excel中     SaveExcel 已经删除。
         ExcelImageUtils.ExcelInsertImage(saveExcel, excelInsertVoList, newFilePath, true);
         // 去除excel 中标记
@@ -203,11 +204,12 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         for (int i = 0; i < testImags.length - 1; i++) {
             FileAndFolderUtil.delete(testImags[i]);
         }
-        for (int i = 0; i < recordImags.length - 1; i++) {
-            FileAndFolderUtil.delete(recordImags[i]);
+        // 检测人与记录不相同时
+        if(!testSet.equals(recordSet)){
+            for (int i = 0; i < recordImags.length - 1; i++) {
+                FileAndFolderUtil.delete(recordImags[i]);
+            }
         }
-        // 返回 本地附件输出
-//        System.out.println(saveExcel);
         return saveExcel;
     }
 
@@ -251,7 +253,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String updateOriginalRecordUrl(String excelUrl, Integer[] ids) throws Exception {
-        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
+        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
         // 获取公网 附件
         FileInputStream fileStream = new FileInputStream(excelUrl);
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
@@ -262,10 +264,6 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // 删除附件
         FileAndFolderUtil.delete(excelUrl);
         return "更新成功";
-//        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
-//        // 更新 样品Excel附件
-//        testProductItemDao.updateProductExcelUrl(dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId(), excelUrl);
-//        return "更新成功";
     }
 
 
@@ -279,6 +277,10 @@ public class PageOfficeServiceImpl implements PageOfficeService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo, Long userId) throws Exception {
+        if(excelInsertVo.getInstrumentStatus().equals("否") || excelInsertVo.getOriginalRecordStatus().equals("否") || excelInsertVo.getData().equals("否"))
+        {
+            excelInsertVo.setStatus("驳回");
+        }
         // 判断 通过、驳回
         // 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回
         Integer state = null;
@@ -313,18 +315,23 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         }
         // 通过检测项id 获取数据Excel
         Integer[] array = new Integer[excelInsertVo.getList().size()];
-        for (int i = 0; i < array.length - 1; i++) {
-            array[i] = excelInsertVo.getList().get(i);
+        if (array.length == 1) {
+            array[0] = excelInsertVo.getList().get(0);
+        } else {
+            for (int i = 0; i < array.length - 1; i++) {
+                array[i] = excelInsertVo.getList().get(i);
+            }
         }
         // 私有方法 处理 复核人签名信息。
         String saveExcel = methodReviewExcel(array, userId);
 //        System.out.println(" saveExcel ==  " + saveExcel);
         //上传文件到文件服务器、删除本地临时缓存的文件
-        String[] arrays = saveExcel.split("\\\\");
-        String saveFileUrl = arrays[arrays.length - 1];
+        String[] arrays = saveExcel.split("\\.");
+        String saveFileUrl = GenID.getID() + "." + arrays[arrays.length - 1];
+//        String saveFileUrl = arrays[arrays.length - 1];
         InputStream input = new FileInputStream(saveExcel);
         // 私有方法 更新 产品附件及报告附件内容。
-        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(array);
+        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
         methodUpdateItemUrl(saveFileUrl, input, array, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
         // 删除本地文件
         FileAndFolderUtil.delete(saveFileUrl);
@@ -347,12 +354,12 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // 调用方法处理 签名图片存放数组中。
         methodUrlImags(testSetLong, testImags);
         List<ExcelInsertVo> excelInsertVoList = new ArrayList<>();
-        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(array);
+        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
         if (!CollectionUtils.isEmpty(dataEntitys)) {
             for (int i = 0; i < dataEntitys.size(); i++) {
                 TaskIdEntity taskIdEntity = dataEntitys.get(i);
                 ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
-                excelInsertVo1.setSheetName(taskIdEntity.getOriginalName());
+                excelInsertVo1.setSheetName(taskIdEntity.getCheckItemName());
                 excelInsertVo1.setRecordType("复核：");
                 excelInsertVo1.setImags(testImags);
                 excelInsertVoList.add(excelInsertVo1);
