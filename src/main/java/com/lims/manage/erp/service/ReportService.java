@@ -428,7 +428,7 @@ public interface ReportService {
 
     Boolean offlineReportMerge(String reportCode, MultipartFile file, String s, String s1, long parseLong, long parseLong1, String inspector);
 
-    InputStream handlerReportMerge(String reportCode, String path);
+    String handlerReportMerge(String reportCode, String path);
 
     Boolean onlineReportMergeSave(String reportCode, String s, String s1, long parseLong, long parseLong1, String inspector);
 

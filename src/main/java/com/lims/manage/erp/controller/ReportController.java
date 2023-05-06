@@ -1055,19 +1055,8 @@ public class ReportController {
         poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");
         //禁止拷贝文档内容到外部
         poCtrl.setDisableCopyOnly(true);
-        //指定sheet可编辑状态
-//        poCtrl.setCustomToolbar(false);
-//        Workbook wb = new Workbook();
-//        Sheet sheet1 = wb.openSheet("第1页");
-//        sheet1.setReadOnly(false);
-//        //设置当工作表只读时，是否允许用户手动调整行列。
-//        sheet1.setAllowAdjustRC(true);
-//        Sheet sheet2 = wb.openSheet("第2页");
-//        sheet2.setReadOnly(false);
-//        //设置当工作表只读时，是否允许用户手动调整行列。
-//        sheet2.setAllowAdjustRC(true);
-//        //此行必须
-//        poCtrl.setWriter(wb);
+        poCtrl.setCustomToolbar(false);
+        com.zhuozhengsoft.pageoffice.excelwriter.Workbook wb = new com.zhuozhengsoft.pageoffice.excelwriter.Workbook();
         //解除excel隐藏sheet指定需要隐藏sheet
         try {
             Workbook workbook = new Workbook(localPath);
@@ -1076,6 +1065,10 @@ public class ReportController {
                 String name = workbook.getWorksheets().get(i).getName();
                 if ("第1页,第2页,第3页".contains(name)){
                     workbook.getWorksheets().get(i).setVisible(true);
+                    //设置当工作表只读时，是否允许用户手动调整行列。
+                    wb.openSheet(workbook.getWorksheets().get(i).getName()).setAllowAdjustRC(true);
+                    //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
+                    wb.openSheet(workbook.getWorksheets().get(i).getName()).setReadOnly(false);
                 }else {
                     workbook.getWorksheets().get(i).setVisible(false);
                 }
@@ -1084,6 +1077,7 @@ public class ReportController {
         } catch (Exception e) {
             logger.error("加载需要编辑的报告文件失败:{}",e);
         }
+        poCtrl.setWriter(wb);
         //添加自定义按钮
         poCtrl.addCustomToolButton("保存", "Save()", 1);
         poCtrl.addCustomToolButton("打印", "PrintFile()", 6);
@@ -1177,11 +1171,16 @@ public class ReportController {
             return ;
         }
         //根据报告编号合并委托下所用样品的报告模板包含首页、编辑报告页码和填充报告编号
-        InputStream fileInputStream = reportService.handlerReportMerge(reportCode,qiYueSuoEntity.getAutographPath());
+        String url = reportService.handlerReportMerge(reportCode,qiYueSuoEntity.getAutographPath());
+        String[] strings = url.split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        InputStream fileStream = MinIoUtil.getFileStream(bluckName, fileName);
         try {
             ServletOutputStream outputStream = response.getOutputStream();
-            IOUtils.copy(fileInputStream,outputStream);
-            fileInputStream.close();
+            IOUtils.copy(fileStream,outputStream);
+            outputStream.flush();
+            fileStream.close();
             outputStream.close();
         }catch (Exception e){
             logger.error("在线报告合成失败:{}",e);

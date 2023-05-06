@@ -3364,7 +3364,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public InputStream handlerReportMerge(String reportCode, String path) {
+    public String handlerReportMerge(String reportCode, String path) {
         InputStream inputStream = null;
         //合并委托下所有样品报告
         ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
@@ -3457,7 +3457,7 @@ public class ReportServiceImpl implements ReportService {
         recordEntityMapper.updateUrlByCode(reportCode,substring);
         //删除临时文件
         FileAndFolderUtil.delete(pdfPath);
-        return inputStream;
+        return url;
     }
 
     @Override
@@ -3472,6 +3472,7 @@ public class ReportServiceImpl implements ReportService {
             log.error("设置签名信息失败:{}",e);
             return false;
         }
+
         //更新
         String type = recordEntityMapper.getTypeByCode(reportCode);
         if ("1".equals(type)) {
