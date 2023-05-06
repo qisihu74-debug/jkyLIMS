@@ -14,6 +14,7 @@ public class ReportListVo {
     private String reportCode;
     private String sampleName;
     private List<LabelValueVo> sampleInfos;
+    private List<LabelValueVo> makeReportSampleInfos;
     private String countPrice;
     private String requestDate;
     private String reportUrl;

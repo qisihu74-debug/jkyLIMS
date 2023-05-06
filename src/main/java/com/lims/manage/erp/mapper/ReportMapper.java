@@ -49,11 +49,17 @@ public interface ReportMapper {
     List<String> getSampleNames(Long entrustId);
 
     /**
-     * 查询委托下样品信息
+     * 查询委托下所有样品信息
      * @param entrustId
      * @return
      */
     List<LabelValueVo> getSampleInfos(Long entrustId);
+    /**
+     * 查询委托下可制作报告样品信息
+     * @param entrustId
+     * @return
+     */
+    List<LabelValueVo> getMakeReportSampleInfos(Long entrustId);
 
     /**
      * 委托下的任务单号
