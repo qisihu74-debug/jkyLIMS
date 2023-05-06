@@ -41,7 +41,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
     private String dir;
 
     @Autowired
-    private TaskServiceImpl taskService = new TaskServiceImpl();
+    TaskServiceImpl taskService;
     @Autowired
     private TaskMapper taskMapper;
     @Autowired
