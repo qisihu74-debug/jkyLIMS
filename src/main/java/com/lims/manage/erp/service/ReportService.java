@@ -431,4 +431,6 @@ public interface ReportService {
     InputStream handlerReportMerge(String reportCode, String path);
 
     Boolean onlineReportMergeSave(String reportCode, String s, String s1, long parseLong, long parseLong1, String inspector);
+
+    PageInfo onlineMakeReport(Integer pageNum,Integer pageSize,String search);
 }

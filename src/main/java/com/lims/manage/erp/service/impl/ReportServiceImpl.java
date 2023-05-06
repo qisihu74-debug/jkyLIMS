@@ -11,30 +11,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.ConclusionEntity;
-import com.lims.manage.erp.entity.ParamEntity;
-import com.lims.manage.erp.entity.QiYueSuoEntity;
-import com.lims.manage.erp.entity.QiYueSuoReqBean;
-import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
-import com.lims.manage.erp.entity.QiYueSuoSealEntity;
-import com.lims.manage.erp.entity.QuotaEntity;
-import com.lims.manage.erp.entity.QuotaRes;
-import com.lims.manage.erp.entity.ReportEditReq;
-import com.lims.manage.erp.entity.ReportRecordDetailEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.ReportRecordMidEntity;
-import com.lims.manage.erp.entity.ReportResBean;
-import com.lims.manage.erp.entity.ReportTemplateEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.entity.SealEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TeamTreeStructureEntity;
-import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
-import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
-import com.lims.manage.erp.entity.TestTeam;
-import com.lims.manage.erp.entity.TreeEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
@@ -3662,5 +3639,18 @@ public class ReportServiceImpl implements ReportService {
             FileAndFolderUtil.delete(del);
         }
         return url.substring(0, url.indexOf("?"));
+    }
+
+    @Override
+    public PageInfo onlineMakeReport(Integer pageNum, Integer pageSize, String search) {
+        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        PageHelper.startPage(pageNum, pageSize);
+        List<ReportListVo> list = reportMapper.getReportListOnline(userTeamIds, search);
+        for (ReportListVo reportListVo : list) {
+            List<LabelValueVo> sampleInfos = reportMapper.getSampleInfos(reportListVo.getId());
+            reportListVo.setSampleInfos(sampleInfos);
+        }
+        PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
+        return pageInfo;
     }
 }
