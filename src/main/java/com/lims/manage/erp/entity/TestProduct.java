@@ -2,6 +2,7 @@ package com.lims.manage.erp.entity;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -45,6 +46,7 @@ public class TestProduct extends Model<TestProduct> {
     //外观描述
     private String outwardDescribe;
     //报告ID
+    @TableField(exist = false)
     private Long reportId;
 
     public String getProductPurpose() {
