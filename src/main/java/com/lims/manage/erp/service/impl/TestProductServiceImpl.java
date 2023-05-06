@@ -232,5 +232,10 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
         testProductItemVo.setSpecsList(SpecsList);
         return testProductItemVo;
     }
+
+    @Override
+    public TestProduct getProductInfo(Integer productId) {
+        return testProductDao.getProductInfo(productId);
+    }
 }
 

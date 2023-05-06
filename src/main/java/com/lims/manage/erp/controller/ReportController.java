@@ -1208,4 +1208,19 @@ public class ReportController {
             return ResultUtil.error("报告文件上传失败！");
         }
     }
+
+    /**
+     * 在线报告制作列表
+     * @param pageNum
+     * @param pageSize
+     * @param search
+     * @return
+     */
+    @GetMapping("/onlineReportList")
+    public Result onlineReportList(Integer pageNum,Integer pageSize,String search) {
+        if (pageNum == null || pageSize == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success("获取在线制作报告任务单列表成功！", reportService.onlineMakeReport(pageNum,pageSize,search));
+    }
 }

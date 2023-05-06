@@ -133,4 +133,15 @@
         from product_report_original_rel
         where product_id = #{productId,jdbcType=BIGINT}
     </delete>
+
+    <select id="getProductInfo" parameterType="java.lang.Integer" resultType="com.lims.manage.erp.entity.TestProduct">
+        SELECT
+            t1.*,
+            t2.report_original_id report_id
+        FROM
+            test_product t1
+                LEFT JOIN product_report_original_rel t2 ON t1.product_id = t2.product_id
+        where t1.del_flag = 0
+        and t1.product_id = #{productId}
+    </select>
 </mapper>

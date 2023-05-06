@@ -89,9 +89,11 @@ public class TestProductController extends ApiController {
      * @return 单条数据
      */
     @GetMapping("{id}")
-    public Result selectOne(@PathVariable Serializable id) {
-        if (id!=null&&id!=""){
-            TestProduct testMethod=this.testProductService.getOne(new QueryWrapper<TestProduct>().eq("product_id",id).eq("del_flag",0));
+//    public Result selectOne(@PathVariable Serializable id) {
+    public Result selectOne(@PathVariable Integer id) {
+        if (id!=null){
+//            TestProduct testMethod=this.testProductService.getOne(new QueryWrapper<TestProduct>().eq("product_id",id).eq("del_flag",0));
+            TestProduct testMethod = testProductService.getProductInfo(id);
             return ResultUtil.success(this.testProductService.getTestProductItemVo(testMethod));
         }else {
             return ResultUtil.error("参数为空");

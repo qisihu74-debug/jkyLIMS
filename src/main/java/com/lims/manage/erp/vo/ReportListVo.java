@@ -13,10 +13,12 @@ public class ReportListVo {
     private List<String> taskCodes;
     private String reportCode;
     private String sampleName;
+    private List<LabelValueVo> sampleInfos;
     private String countPrice;
     private String requestDate;
     private String reportUrl;
     private String entrustTestType;
+    private Integer taskState;
     /**
      * 报告生成时间
      */
@@ -45,6 +47,10 @@ public class ReportListVo {
      * state 状态
      */
     private Integer reportState;
+    /**
+     * 复核完的检测项数量
+     */
+    private Integer number;
 
     private String contractId;//合同id
     private String category;//印章分类，PHYSICS(物理章),ELECTRONIC(电子章)

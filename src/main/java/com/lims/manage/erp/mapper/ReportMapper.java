@@ -1,5 +1,6 @@
 package com.lims.manage.erp.mapper;
 
+import com.lims.manage.erp.entity.LabelInfo;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SealEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -30,6 +31,14 @@ public interface ReportMapper {
      */
     List<ReportListVo> getReportList2(@Param("deptIds") List<Long> deptIds,@Param("taskCode") String taskCode);
 
+    /**
+     * 在线报告制作列表
+     * @param deptIds
+     * @param taskCode
+     * @return
+     */
+    List<ReportListVo> getReportListOnline(@Param("deptIds") List<Long> deptIds,@Param("taskCode") String taskCode);
+
     List<ReportListVo> reportDownloadList(@Param("deptIds") List<Long> deptIds,@Param("reportCode") String reportCode);
 
     /**
@@ -38,6 +47,13 @@ public interface ReportMapper {
      * @return
      */
     List<String> getSampleNames(Long entrustId);
+
+    /**
+     * 查询委托下样品信息
+     * @param entrustId
+     * @return
+     */
+    List<LabelValueVo> getSampleInfos(Long entrustId);
 
     /**
      * 委托下的任务单号
@@ -160,6 +176,7 @@ public interface ReportMapper {
     @Select("select report_url from test_report_record where entrustment_id=#{entrustId}")
     String getUrlByEntrustId(@Param("entrustId") Long entrustId);
 
+    ReportRecordEntity getDetailById(@Param("id") Long id);
     ReportRecordEntity getDetailByEntrustId(@Param("entrustId") Long entrustId);
     ReportRecordEntity getDetailByEntrustIdZj(@Param("entrustId") Long entrustId);
     /**

@@ -92,4 +92,6 @@ public interface TestProductDao extends BaseMapper<TestProduct> {
      * @return
      */
     int deleteProductReportRel(@Param("productId") Long productId);
+
+    TestProduct getProductInfo(Integer productId);
 }
