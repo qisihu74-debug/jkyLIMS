@@ -366,6 +366,37 @@
         GROUP BY t2.id
         order by t2.code desc
     </select>
+    <select id="getReportListOnline" resultType="com.lims.manage.erp.vo.ReportListVo">
+        SELECT
+        t1.id,
+        t2.id task_id,
+        t2.state taskState,
+        t2.task_code,
+        t2.task_price AS countPrice,
+        DATE_FORMAT( t1.request_date, '%Y-%m-%d' ) request_date,
+        COUNT( t3.state ) number
+        FROM
+        test_entrusted_info t1
+        LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
+        LEFT JOIN test_entrusted_sample_checkitem_rel t3 ON t2.id = t3.task_id
+        WHERE
+            t2.task_code IS NOT NULL
+            AND t2.report_complete = 2
+            AND t3.state = 3
+        <if test="taskCode!=null and taskCode!=''">
+            and t2.task_code like CONCAT('%',#{taskCode},'%')
+        </if>
+        <if test="deptIds!=null">
+            and t2.dept_id in
+            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        GROUP BY
+        t2.task_code
+        HAVING
+        number > 0
+    </select>
 
 <!--    <select id="reportDownloadList" resultType="com.lims.manage.erp.vo.ReportListVo">-->
 <!--        SELECT DISTINCT t1.id,-->
@@ -429,6 +460,16 @@
         FROM
             test_entrusted_sample_details_rel t1
                 LEFT JOIN test_sample t2 ON t1.sample_id = t2.id
+        WHERE
+            t1.entrustment_id = #{entrustId}
+    </select>
+    <select id="getSampleInfos" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT
+            t2.id VALUE,
+	        t2.alias_name label
+        FROM
+            test_entrusted_sample_details_rel t1
+            LEFT JOIN test_sample t2 ON t1.sample_id = t2.id
         WHERE
             t1.entrustment_id = #{entrustId}
     </select>

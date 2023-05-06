@@ -11,6 +11,7 @@ import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.UnsupportedEncodingException;
@@ -65,8 +66,21 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteReportTemplate(List<Long> idList) {
         int i = reportOriginalEntityMapper.deleteByIds(idList);
+        for (int j = 0; j < idList.size(); j++) {
+            ReportOriginalEntity reportOriginalEntity = reportOriginalEntityMapper.selectByPrimaryKey(idList.get(j));
+            String oldUrl = reportOriginalEntity.getUrl();
+            String encodeFileName = oldUrl.substring(oldUrl.lastIndexOf("/") + 1);
+            String decode = null;
+            try {
+                decode = URLDecoder.decode(encodeFileName, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            MinIoUtil.deleteFile(BucketsConst.report_original, decode);
+        }
         return i > 0;
     }
 
