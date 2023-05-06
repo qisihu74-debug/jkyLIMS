@@ -1030,19 +1030,21 @@ public class ReportController {
 
     /**
      * 报告在线制作
-     * @param json
      * @param map
      * @param request
      * @return
      */
     @GetMapping("onlineEdit")
-    public ModelAndView onlineEdit(@RequestParam("json") String json, Map<String, Object> map, HttpServletRequest request){
+    public ModelAndView onlineEdit(Long taskId,Integer reportType,Integer sampleId,
+                                   Map<String, Object> map, HttpServletRequest request){
         //json="{ \"reportComplete\": \"1\",   \"taskId\": \"4595967135304210\",   \"taskFlowId\": \"\",   \"reportType\": \"0\",   \"sampleId\": \"15288\" }";
-        if (org.apache.commons.lang3.StringUtils.isEmpty(json)){
+        if (taskId==null || reportType==null || sampleId==null){
             return new ModelAndView("error");
         }
-        ReportEditReq reportEditReq = JSON.parseObject(json,ReportEditReq.class);
-        String username = ShiroUtils.getUserInfo().getUsername();
+        ReportEditReq reportEditReq = new ReportEditReq();
+        reportEditReq.setTaskId(taskId);
+        reportEditReq.setReportType(reportType);
+        reportEditReq.setSampleId(sampleId);
         //根据参数委托相关信息
         Long entrustId = taskService.getEntrustIdByTaskId(reportEditReq.getTaskId());
         reportEditReq.setEntrustId(entrustId);
@@ -1097,11 +1099,11 @@ public class ReportController {
         //设置处理文件保存的请求方法
         poCtrl.setSaveFilePage("saveOnlineReport");
         //加载文档
-        poCtrl.webOpen(localPath, OpenModeType.xlsSubmitForm, username);
+        poCtrl.webOpen(localPath, OpenModeType.xlsSubmitForm, "user");
         //删除临时文件
         FileAndFolderUtil.delete(localPath);
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
-        map.put("params",json);
+        map.put("params",JSON.toJSONString(reportEditReq));
         //设置模板引擎的html模板
         ModelAndView mv = new ModelAndView("excel");
         return mv;
