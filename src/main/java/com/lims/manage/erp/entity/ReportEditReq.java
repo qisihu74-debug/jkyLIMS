@@ -22,10 +22,6 @@ public class ReportEditReq {
      */
     private Integer reportType;
     /**
-     * 2暂存，1完成保存
-     */
-    private Integer reportComplete;
-    /**
      * 任务流转id
      */
     private Integer taskFlowId;
