@@ -1,9 +1,15 @@
 package com.lims.manage.erp.controller;
 
+import com.aspose.cells.SaveFormat;
+import com.aspose.cells.SaveOptions;
+import com.aspose.cells.Worksheet;
+import com.aspose.cells.WorksheetCollection;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductItemDao;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.*;
@@ -65,13 +71,14 @@ public class PageOfficeController {
 
     /**
      * 编辑接口
+     *
      * @param request
      * @return
      */
-    @RequestMapping(value ="Excel/editOriginalRecord")
+    @RequestMapping(value = "Excel/editOriginalRecord")
 //    @ResponseBody
 //    public String showExcel(@RequestParam("json") String json, HttpServletRequest request) throws IOException {
-    public ModelAndView showExcel(HttpServletRequest request,Map<String, Object> map) throws IOException {
+    public ModelAndView showExcel(HttpServletRequest request, Map<String, Object> map) throws Exception {
         Map<String, String[]> parameterMap = request.getParameterMap();
         String list = parameterMap.get("list")[0];
         String[] items = list.split(",");
@@ -110,16 +117,56 @@ public class PageOfficeController {
         Workbook wb = new Workbook();
         //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
         // 循环设置
-        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
-        for (int i = 0; i < dataEntitys.size(); i++) {
-            TaskIdEntity data = dataEntitys.get(i);
-            Sheet sheet1 = wb.openSheet(data.getOriginalName());
-            //设置当工作表只读时，是否允许用户手动调整行列。
-            sheet1.setAllowAdjustRC(true);
-            // 设置工作表是否只读。
-            //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
-            sheet1.setReadOnly(false);
+        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
+//        for (int i = 0; i < dataEntitys.size(); i++) {
+//            TaskIdEntity data = dataEntitys.get(i);
+//            Sheet sheet1 = wb.openSheet(data.getCheckItemName());
+//            //设置当工作表只读时，是否允许用户手动调整行列。
+//            sheet1.setAllowAdjustRC(true);
+//            // 设置工作表是否只读。
+//            //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
+//            sheet1.setReadOnly(false);
+//        }
+        InputStream fileStream = null;
+        try {
+            // 获取公网 附件
+            fileStream = FileAndFolderUtil.getInputStream(url);
+        } catch (Exception e) {
+            logger.info("读取产品excel异常 " + url + e);
         }
+//        FileInputStream fileInputStream = new FileInputStream("D:\\doc\\e-iceblue\\shuini.xlsx");
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
+        Iterator it = workbook.getWorksheets().iterator();
+        while (it.hasNext()) {
+            Worksheet sheet1 = (Worksheet) it.next();
+            // 全部设置为 可以看到
+            sheet1.setVisible(true);
+        }
+        // 再次迭代后 处理名称存在 设置为可见，其他不可见
+        Iterator it2 = workbook.getWorksheets().iterator();
+        while (it2.hasNext()) {
+            Worksheet sheet2 = (Worksheet) it2.next();
+            Boolean flag = false;
+            for (int i = 0; i < dataEntitys.size(); i++) {
+                TaskIdEntity data = dataEntitys.get(i);
+                if (data.getCheckItemName().equals(sheet2.getName())) {
+                    flag = true;
+                }
+            }
+            if (flag) {
+                // 设置为 可见
+                sheet2.setVisible(false);
+            } else {
+                // sheetName 不相等 设置为隐藏
+                sheet2.setVisible(false);
+            }
+        }
+//        workbook.getWorksheets().get(0).setVisible(false);
+//        workbook.getWorksheets().get(1).setVisible(false);
+        String excel = dir + "." + "xlsx";
+        System.out.println("excel == " + excel);
+//        workbook.save("D:\\doc\\e-iceblue\\shuini.xlsx", SaveFormat.XLSX);
+        workbook.save(excel, SaveFormat.XLSX);
         //此行必须
         poCtrl.setWriter(wb);
         //添加自定义按钮
@@ -141,8 +188,9 @@ public class PageOfficeController {
         String[] strArray = url.split("\\.");
         int suffixIndex = strArray.length - 1;
         String type = strArray[suffixIndex];
-        ReturnResponse<String> response = downloadUtils.downLoad(url, type, null);
-        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");
+//        ReturnResponse<String> response = downloadUtils.downLoad(url, type, null);
+        poCtrl.webOpen(excel, OpenModeType.xlsSubmitForm, "administrator");
+//        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");
         //TODO 删除临时文件
 
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
@@ -158,7 +206,8 @@ public class PageOfficeController {
      */
     @RequestMapping("Excel/saveOriginalRecord")
 //    public void save(@RequestBody SaveParamBean bean, HttpServletRequest request, HttpServletResponse response) {
-    public ModelAndView save(HttpServletRequest request, HttpServletResponse response) throws Exception {
+//    public ModelAndView save(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public Result save(HttpServletRequest request, HttpServletResponse response) throws Exception {
         FileSaver fs = new FileSaver(request, response);
         // 实现逻辑操作 -- 完成编辑
         String flag = pageOfficeService.saveOriginalRecord(request, fs);
@@ -193,9 +242,15 @@ public class PageOfficeController {
 //            }
 //            //相关表做更新或者插入操作
 //            pageOfficeService.updateOriginalRecordUrl(excelUrl, ids);
-            return new ModelAndView("success");
+            ModelAndView mv = new ModelAndView("success");
+//            return new ModelAndView("success");
+//            return mv;
+            return ResultUtil.success("编辑完成");
         } else {
-            return new ModelAndView("error");
+//            return new ModelAndView("error");
+            ModelAndView mv = new ModelAndView("error");
+//            return mv;
+            return ResultUtil.success("编辑完成");
         }
     }
 

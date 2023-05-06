@@ -1114,4 +1114,24 @@
         </foreach>
         and signature_url is not null
     </select>
+
+    <select id="selectItems" resultType="com.lims.manage.erp.entity.TaskIdEntity" >
+        SELECT
+        t1.id as idItem,
+        t1.check_item_id as checkItemId,
+        t1.task_id as taskId,
+        t1.sample_id as sampleId,
+        t1.state,
+        t1.entrust_id as entrustmentId,
+        t1.check_item_name as checkItemName
+        FROM
+        test_entrusted_sample_checkitem_rel as t1
+        WHERE 1=1
+        <if test="array!=null">
+            and t1.id IN
+            <foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+    </select>
 </mapper>

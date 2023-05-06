@@ -513,4 +513,9 @@ public interface TaskMapper extends BaseMapper {
 
     List<TaskListParamVo> getUserSignatureUrls(@Param("list") List<Long> list);
 
+    /**
+     * 获取有效数据 根据主键集合。
+     */
+    List<TaskIdEntity> selectItems(@Param(value = "array") Integer[] array);
+
 }

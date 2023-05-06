@@ -1784,15 +1784,15 @@ public class TaskServiceImpl implements TaskService {
             logger.info("样品附件 " + productExcelUrl + e);
         }
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
+        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
         // 获取 sheetName
         Map<String,Object> map = new HashMap<>();
         // 通过检测项id 获取 相应的 id关联信息。
         for (int i = 0; i < dataEntitys.size(); i++) {
             TaskIdEntity data = dataEntitys.get(i);
-            XSSFSheet sheet = wb.getSheet(data.getOriginalName());
+            XSSFSheet sheet = wb.getSheet(data.getCheckItemName());
             if(sheet!=null){
-                map.put(data.getOriginalName(),i);
+                map.put(data.getCheckItemName(),i);
             }
         }
         // sheetName 不包含 则清除

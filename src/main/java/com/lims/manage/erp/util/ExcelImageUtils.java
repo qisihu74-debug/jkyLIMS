@@ -53,17 +53,35 @@ public class ExcelImageUtils {
                     itNext += 1;
                 }
             }
-//            // 处理复核信息
+            // 处理复核信息
 //            if (sheet != null && flag == false) {
 //                // 保留检测签名与记录签名信息， 清除之前的 复核旧图片
 //                PicturesCollection excelImag = sheet.getPictures();
 //                int count = excelImag.getCount();
 //                System.out.println("count == " +count);
-//                int itNext = 2;
-//                while (count > itNext){
-//                    sheet.getPictures().get(itNext).remove();
+//                IEnumerator it = excelImag.iterator();
+//                int itNext = 0;
+//                while (it.hasNext()) {
+////                    sheet.getPictures().get(itNext).remove();
+//                    sheet.getPrstGeomShapes().get("Shape4").remove();//通过形状名称获取并删除
 //                    itNext += 1;
 //                }
+////                int itNext = 0;
+////                if(count == 4){
+////                    itNext = 3;
+////                }
+////                if(count == 3){
+////                    itNext = 2;
+////                }
+////                if(count == 2){
+////                    itNext =2;
+////                }
+////                // count 最少2条、3条。进行保留,其余删除。
+////                while (count > itNext){
+////                while ()
+////                    sheet.getPictures().get(0).remove();
+////                    itNext += 1;
+////                }
 //            }
         }
         for (int i = 0; i < list.size(); i++) {
@@ -84,12 +102,16 @@ public class ExcelImageUtils {
                         pic.setWidth(80);
                         pic.setHeight(30);
                         serialNumber += 1;
+//                        if(flag == false){
+//                            // 塞入日期
+//                            sheet.get(data.getTopRow()+serialNumber,data.getLeftColumn()+5).setValue("2023-5-6");
+//                        }
                     }
                 }
             }
         }
         // 删除附件
-        FileAndFolderUtil.delete(filePath);
+//        FileAndFolderUtil.delete(filePath);
         //保存文档
         workbook.saveToFile(newFilePath, ExcelVersion.Version2013);
     }
