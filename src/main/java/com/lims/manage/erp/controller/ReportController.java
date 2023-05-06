@@ -2,6 +2,8 @@ package com.lims.manage.erp.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
+import com.aspose.cells.SaveFormat;
+import com.aspose.cells.Workbook;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
@@ -47,7 +49,6 @@ import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
 import com.zhuozhengsoft.pageoffice.excelwriter.Sheet;
-import com.zhuozhengsoft.pageoffice.excelwriter.Workbook;
 import io.minio.MinioClient;
 import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;
@@ -1053,18 +1054,34 @@ public class ReportController {
         //禁止拷贝文档内容到外部
         poCtrl.setDisableCopyOnly(true);
         //指定sheet可编辑状态
-        poCtrl.setCustomToolbar(false);
-        Workbook wb = new Workbook();
-        Sheet sheet1 = wb.openSheet("第1页");
-        sheet1.setReadOnly(false);
-        //设置当工作表只读时，是否允许用户手动调整行列。
-        sheet1.setAllowAdjustRC(true);
-        Sheet sheet2 = wb.openSheet("第2页");
-        sheet2.setReadOnly(false);
-        //设置当工作表只读时，是否允许用户手动调整行列。
-        sheet2.setAllowAdjustRC(true);
-        //此行必须
-        poCtrl.setWriter(wb);
+//        poCtrl.setCustomToolbar(false);
+//        Workbook wb = new Workbook();
+//        Sheet sheet1 = wb.openSheet("第1页");
+//        sheet1.setReadOnly(false);
+//        //设置当工作表只读时，是否允许用户手动调整行列。
+//        sheet1.setAllowAdjustRC(true);
+//        Sheet sheet2 = wb.openSheet("第2页");
+//        sheet2.setReadOnly(false);
+//        //设置当工作表只读时，是否允许用户手动调整行列。
+//        sheet2.setAllowAdjustRC(true);
+//        //此行必须
+//        poCtrl.setWriter(wb);
+        //解除excel隐藏sheet指定需要隐藏sheet
+        try {
+            Workbook workbook = new Workbook(localPath);
+            int count = workbook.getWorksheets().getCount();
+            for (int i=0; i<count; i++){
+                String name = workbook.getWorksheets().get(i).getName();
+                if ("第1页,第2页,第3页".contains(name)){
+                    workbook.getWorksheets().get(i).setVisible(true);
+                }else {
+                    workbook.getWorksheets().get(i).setVisible(false);
+                }
+            }
+            workbook.save(localPath, SaveFormat.XLSX);
+        } catch (Exception e) {
+            logger.error("加载需要编辑的报告文件失败:{}",e);
+        }
         //添加自定义按钮
         poCtrl.addCustomToolButton("保存", "Save()", 1);
         poCtrl.addCustomToolButton("打印", "PrintFile()", 6);

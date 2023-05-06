@@ -3255,14 +3255,12 @@ public class ReportServiceImpl implements ReportService {
         String upload = MinIoUtil.upload(BucketsConst.buckets_sample_enclosure, fileName, fileStream, null);
         String[] split = upload.split("\\?");
         entrustEntityMapper.updateUrlByEntrustIdAndSampleId(reportEditReq.getEntrustId(), reportEditReq.getSampleId(), split[0]);
-        //1,报告已完成；2,报告未完成
-        Integer complete = reportEditReq.getReportComplete();
         //报告类型0最终，1中间报告
         Integer reportType = reportEditReq.getReportType();
         ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(reportEditReq.getEntrustId());
         if (reportRecordEntity1 != null) {
             //处理报告数据
-            if (complete == 2) {
+            if (reportType == 1) {
                 reportRecordEntity1.setState(2 + "");
             } else {
                 List<Integer> allReportComplete = taskMapper.getAllReportComplete(reportEditReq.getEntrustId(), reportEditReq.getTaskId());
@@ -3275,9 +3273,9 @@ public class ReportServiceImpl implements ReportService {
                         reportRecordEntity1.setReportCode(getMaxCode(reportEditReq.getEntrustId()));
                     }
                 }
+                //1,报告已完成；2,报告未完成
+                taskMapper.updateReportStatus(1, reportEditReq.getTaskId());
             }
-            //修改任务报告状态
-            taskMapper.updateReportStatus(complete, reportEditReq.getTaskId());
             int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
             if (update >= 0) {
                 flag = true;
@@ -3289,12 +3287,6 @@ public class ReportServiceImpl implements ReportService {
             ReportRecordEntity reportRecordEntity = new ReportRecordEntity();
             if (reportType == 0){
                 reportRecordEntity.setEntrustmentId(reportEditReq.getEntrustId());
-            }else {
-                reportRecordEntity.setEntrustId(reportEditReq.getEntrustId());
-            }
-            if (complete == 2) {//未完成
-                reportRecordEntity.setState(2 + "");
-            } else {//该任务单已完成，判断有没有其他任务单，和其他任务单状态
                 List<Integer> allReportComplete = taskMapper.getAllReportComplete(reportEditReq.getEntrustId(), reportEditReq.getTaskId());
                 if (allReportComplete.contains(2)) {
                     reportRecordEntity.setState(2 + "");
@@ -3303,26 +3295,18 @@ public class ReportServiceImpl implements ReportService {
                     reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
                     reportRecordEntity.setReportCode(getMaxCode(reportEditReq.getEntrustId()));
                 }
+                //修改任务报告状态
+                taskMapper.updateReportStatus(1, reportEditReq.getTaskId());
+            }else {
+                reportRecordEntity.setState(2 + "");
+                reportRecordEntity.setEntrustId(reportEditReq.getEntrustId());
             }
             reportRecordEntity.setId(recordId);
             //设置报告类型
             reportRecordEntity.setType(reportType.toString());
-            //修改任务报告状态
-            taskMapper.updateReportStatus(complete, reportEditReq.getTaskId());
             int insert = recordEntityMapper.insert(reportRecordEntity);
             if (insert >= 0) {
                 flag = true;
-            }
-            if (reportType == 1){
-                //修改任务流转中间报告的状态和recordId
-                TestEntrustedTaskRelEntity relEntity = new TestEntrustedTaskRelEntity();
-                relEntity.setId(reportEditReq.getTaskFlowId());
-                relEntity.setState(1);
-                relEntity.setRecordId(recordId);
-                int i = taskRelDao.updateMiddleReportState(relEntity);
-                if (i >= 0){
-                    flag = true;
-                }
             }
         }
         return flag;
