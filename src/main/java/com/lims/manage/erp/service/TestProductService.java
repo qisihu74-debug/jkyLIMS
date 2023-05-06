@@ -28,5 +28,6 @@ public interface TestProductService extends IService<TestProduct> {
     IPage<TestProductVo> getPageList(Page<TestProductVo> page, QueryWrapper<TestProduct> queryWrapper);
     TestProductSelVo getTestProductSelVo(TestProduct testProduct);
     TestProductItemVo getTestProductItemVo(TestProduct testProduct);
+    TestProduct getProductInfo(Integer productId);
 }
 
