@@ -136,34 +136,32 @@ public class PageOfficeController {
         }
 //        FileInputStream fileInputStream = new FileInputStream("D:\\doc\\e-iceblue\\shuini.xlsx");
         com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
-        Iterator it = workbook.getWorksheets().iterator();
-        while (it.hasNext()) {
-            Worksheet sheet1 = (Worksheet) it.next();
-            // 全部设置为 可以看到
-            sheet1.setVisible(true);
-        }
-        // 再次迭代后 处理名称存在 设置为可见，其他不可见
-        Iterator it2 = workbook.getWorksheets().iterator();
-        while (it2.hasNext()) {
-            Worksheet sheet2 = (Worksheet) it2.next();
+        int count = workbook.getWorksheets().getCount();
+        for (int i = 0; i < count; i++) {
             Boolean flag = false;
-            for (int i = 0; i < dataEntitys.size(); i++) {
-                TaskIdEntity data = dataEntitys.get(i);
-                if (data.getCheckItemName().equals(sheet2.getName())) {
+            String sheetName = "";
+            for (int j = 0; j < dataEntitys.size(); j++) {
+                TaskIdEntity data = dataEntitys.get(j);
+                if (data.getCheckItemName().equals(workbook.getWorksheets().get(i).getName())) {
                     flag = true;
+                    sheetName = data.getCheckItemName();
                 }
             }
             if (flag) {
                 // 设置为 可见
-                sheet2.setVisible(false);
+                workbook.getWorksheets().get(i).setVisible(true);
+                //设置当工作表只读时，是否允许用户手动调整行列。
+                wb.openSheet(sheetName).setAllowAdjustRC(true);
+                //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
+                wb.openSheet(sheetName).setReadOnly(false);
             } else {
                 // sheetName 不相等 设置为隐藏
-                sheet2.setVisible(false);
+                workbook.getWorksheets().get(i).setVisible(false);
             }
         }
 //        workbook.getWorksheets().get(0).setVisible(false);
 //        workbook.getWorksheets().get(1).setVisible(false);
-        String excel = dir + "." + "xlsx";
+        String excel = dir + GenID.getID() + "." + "xlsx";
         System.out.println("excel == " + excel);
 //        workbook.save("D:\\doc\\e-iceblue\\shuini.xlsx", SaveFormat.XLSX);
         workbook.save(excel, SaveFormat.XLSX);
