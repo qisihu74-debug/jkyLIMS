@@ -188,7 +188,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         String[] names = file.getFileName().split("\\.");
         String newFilePath = dir + GenID.getID() +"."+ names[1];
         // 图片插入至excel中     SaveExcel 已经删除。
-        ExcelImageUtils.ExcelInsertImage(saveExcel, excelInsertVoList, newFilePath, true);
+        ExcelImageUtils.ExcelInsertImage(saveExcel, excelInsertVoList, newFilePath, false);
         // 去除excel 中标记
         InputStream fileStream = new FileInputStream(newFilePath);
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
