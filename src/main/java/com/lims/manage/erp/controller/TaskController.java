@@ -884,9 +884,18 @@ public class TaskController {
      */
     @RequestMapping(value = "/checkItemReview")
 //    public void checkItemReview(List<Integer> list,String checkReview){
-    public void previewDownLoad(@RequestBody ExcelInsertVo excelInsertVo , HttpServletResponse response) throws Exception {
+//    public void previewDownLoad(@RequestBody ExcelInsertVo excelInsertVo , HttpServletResponse response) throws Exception {
+    public void previewDownLoad(String list , HttpServletResponse response) throws Exception {
         String newFilePath = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
         String path = qiYueSuoEntity.getAutographPath()+GenID.getID()+".pdf";
+        ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+        String[] items = list.split(",");
+        List<Integer> idList = new ArrayList<>();
+        for (int j = 0; j < items.length; j++) {
+            idList.add(Integer.parseInt(items[j]));
+        }
+        excelInsertVo.setList(idList);
+//        excelInsertVo.setCheckReview(checkReview);
         // excel 转 pdf
         XSSFWorkbook wb = taskService.getOriginalRecordAttachment(excelInsertVo);
         FileOutputStream out = new FileOutputStream(newFilePath);
@@ -914,9 +923,19 @@ public class TaskController {
     @RequestMapping(value = "/finishCheckItemReview")
     public Result finishCheckItemReview(@RequestBody ExcelInsertVo excelInsertVo) throws Exception {
         // 审核人id。
-        Long  userId = 1650006443416157L;
+//        Long  userId = 1650006443416157L;
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 通过检测项主键 获取test_task Id
+        Long taskId = taskMapper.getReturnTaskId(excelInsertVo.getList().get(0));
+        // 委托单144 则不能执行任务单
+        if(taskService.judgeTaskStatus(taskId)){
+            return ResultUtil.error(678, "操作失败！任务单已废弃！！！");
+        }
+        if (testDetectionService.reviewTheLogin(userInfo.getUserId(), taskId) == false) {
+            return ResultUtil.error("登录人没有被派发复核资格");
+        }
         // 判断复核数据类型。
-        pageOfficeService.finishCheckItemReview(excelInsertVo,userId);
+        pageOfficeService.finishCheckItemReview(excelInsertVo,userInfo.getUserId());
         return ResultUtil.success("复核成功");
     }
 
