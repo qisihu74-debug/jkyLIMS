@@ -20,6 +20,7 @@ import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
 import com.zhuozhengsoft.pageoffice.excelwriter.Sheet;
 import com.zhuozhengsoft.pageoffice.excelwriter.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +33,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLDecoder;
 import java.util.*;
 
@@ -159,12 +158,19 @@ public class PageOfficeController {
                 workbook.getWorksheets().get(i).setVisible(false);
             }
         }
-//        workbook.getWorksheets().get(0).setVisible(false);
-//        workbook.getWorksheets().get(1).setVisible(false);
         String excel = dir + GenID.getID() + "." + "xlsx";
         System.out.println("excel == " + excel);
 //        workbook.save("D:\\doc\\e-iceblue\\shuini.xlsx", SaveFormat.XLSX);
         workbook.save(excel, SaveFormat.XLSX);
+        // 去除excel 中标记
+        InputStream fileStream2 = new FileInputStream(excel);
+        XSSFWorkbook wb2 = new XSSFWorkbook(fileStream2);
+        // 调用方法 清除sheet名 = Evaluation Warning
+        ExcelReplaceUtil.removeOtherSheets("Evaluation Warning", wb2);
+        fileStream2.close();
+        OutputStream f = new FileOutputStream(excel);
+        wb2.write(f);
+        f.close();
         //此行必须
         poCtrl.setWriter(wb);
         //添加自定义按钮
@@ -190,7 +196,9 @@ public class PageOfficeController {
         poCtrl.webOpen(excel, OpenModeType.xlsSubmitForm, "administrator");
 //        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");
         //TODO 删除临时文件
-
+        // 删除附件
+        FileAndFolderUtil.delete(excel);
+        fileStream.close();
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
         ModelAndView mv = new ModelAndView("POB");
         return mv;

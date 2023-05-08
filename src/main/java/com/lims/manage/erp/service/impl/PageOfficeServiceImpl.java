@@ -115,6 +115,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         String[] array = productExcelUrl.split("/");
         if (excelInsertVo == null) {
             String excelUrl = MinIoUtil.upload("file-resources", GenID.getID() + array[array.length - 1], input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            input.close();
             // 更新 样品Excel附件
             testProductItemDao.updateProductExcelUrl(dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId(), excelUrl);
             return excelUrl;
@@ -239,6 +240,8 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                     outStream.write(buffer, 0, bytesRead);
                 }
                 Imags[i] = downloadDir;
+                initialStream.close();
+                outStream.close();
             }
         }
     }
@@ -263,6 +266,8 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         methodUpdateItemUrl(GenID.getID()+"."+arrays[arrays.length-1], input, ids, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
         // 删除附件
         FileAndFolderUtil.delete(excelUrl);
+        fileStream.close();
+        input.close();
         return "更新成功";
     }
 
@@ -438,7 +443,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
      * @param sampleId    样品id
      */
     @Transactional(rollbackFor = Exception.class)
-    public String methodUpdateItemUrl(String saveFileUrl, InputStream input, Integer[] array, Long entrustId, Integer sampleId) {
+    public String methodUpdateItemUrl(String saveFileUrl, InputStream input, Integer[] array, Long entrustId, Integer sampleId) throws IOException {
         // 查询附件 存在则 删除附件
         ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(array[0]);
         if (excelInsertVo != null) {
@@ -458,6 +463,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                 if (StringUtils.isEmpty(excelUrl) || "".equals(excelUrl)) {
                     // 报告附件没有上传 上传产品附件
                     productUrl = MinIoUtil.upload("file-resources", saveFileUrl, input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                    input.close();
                 } else {
                     InputStream fileStream = null;
                     // 根据上传完成的附件 使用并上传。
@@ -469,6 +475,8 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                         InputStream input000 = AsposeUtil.createExcelStream(wb);
                         // 报告附件没有上传
                         productUrl = MinIoUtil.upload("file-resources", saveFileUrl, input000, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                        fileStream.close();
+                        input000.close();
                     } catch (Exception e) {
                         logger.info("读取报告附件URL异常 " + excelUrl + e);
                     }
@@ -477,6 +485,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                 MinIoUtil.deleteFile("file-resources", urls[urls.length - 1]);
                 // 更新 报告Excel附件
                 testProductItemDao.updateProductExcelUrl(entrustId, sampleId, productUrl);
+                input.close();
                 return productUrl;
             }
         }
