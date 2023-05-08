@@ -3627,7 +3627,7 @@ public class ReportServiceImpl implements ReportService {
         for (ReportListVo reportListVo : list) {
             List<LabelValueVo> sampleInfos = reportMapper.getSampleInfos(reportListVo.getId());
             reportListVo.setSampleInfos(sampleInfos);
-            List<LabelValueVo> makeReportSampleInfos = reportMapper.getMakeReportSampleInfos(reportListVo.getId());
+            List<LabelValueVo> makeReportSampleInfos = reportMapper.getMakeReportSampleInfos(reportListVo.getId(),reportListVo.getTaskId());
             reportListVo.setMakeReportSampleInfos(makeReportSampleInfos);
         }
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
