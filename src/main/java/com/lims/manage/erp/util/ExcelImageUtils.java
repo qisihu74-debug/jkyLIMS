@@ -5,6 +5,7 @@ import com.spire.ms.System.Collections.IEnumerator;
 import com.spire.xls.*;
 import com.spire.xls.collections.PicturesCollection;
 import org.apache.poi.xssf.usermodel.*;
+import org.springframework.util.CollectionUtils;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -50,8 +51,12 @@ public class ExcelImageUtils {
                     List<Integer> indexs2 = getReviewCoord(data.getLeftColumn() - 1, data.getTopRow(), wb.getSheet(data.getSheetName()));
                     // indexs1 和 indexs2 存在两个 是因为 当前签名信息 最多两行
                     List<Integer> indexs = new ArrayList<>();
-                    indexs.addAll(indexs1);
-                    indexs.addAll(indexs2);
+                    if(!CollectionUtils.isEmpty(indexs1)){
+                        indexs.addAll(indexs1);
+                    }
+                    if(!CollectionUtils.isEmpty(indexs2)){
+                        indexs.addAll(indexs2);
+                    }
                     // 清除之前的 旧图片
                     PicturesCollection excelImag = sheet.getPictures();
                     IEnumerator it = excelImag.iterator();
@@ -82,6 +87,7 @@ public class ExcelImageUtils {
                 }
             }
         }
+        fileStream.close();
         // 删除附件
         FileAndFolderUtil.delete(filePath);
         //保存文档
@@ -98,7 +104,15 @@ public class ExcelImageUtils {
      */
     private static List<Integer> getReviewCoord(int colum, int row, XSSFSheet sheet) {
         // 在单元格上查找 chart 和 picture：
-        XSSFDrawing drawing = sheet.createDrawingPatriarch();
+        XSSFDrawing drawing = null;
+        try {
+            drawing = sheet.createDrawingPatriarch();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        if(drawing == null){
+            return null;
+        }
         List<XSSFShape> shapesList = drawing.getShapes();
         // 符合条件的标号
         List<Integer> integers = new ArrayList<>();
@@ -111,11 +125,11 @@ public class ExcelImageUtils {
                 //getRow1()：获取形状对象左上角所占用的行数。
                 //getCol2()：获取形状对象右下角所占用的列数。
                 //getRow2()：获取形状对象右下角所占用的行数。
-                System.out.println("获取形状对象左上角所占用的列数" + anchor11.getCol1());
-                System.out.println("获取形状对象左上角所占用的行数。" + anchor11.getRow1());
+//                System.out.println("获取形状对象左上角所占用的列数" + anchor11.getCol1());
+//                System.out.println("获取形状对象左上角所占用的行数。" + anchor11.getRow1());
                 // 判断该图片是否是要删除的目标图片，可根据 anchor 参数来判定
                 if (anchor11.getRow1() == row && anchor11.getCol1() == colum) {
-                    System.out.println("标号" + i);
+//                    System.out.println("标号" + i);
                     integers.add(i);
                 }
             }
@@ -125,36 +139,37 @@ public class ExcelImageUtils {
 
 //    public static void main(String[] args) throws IOException {
 //        List<ExcelInsertVo> list = new ArrayList<>();
-////        ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
-////        // 编辑类型
-////        excelInsertVo1.setRecordType("检测：");
-////        // 签名信息
+//        ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
+//////        // 编辑类型
+//        excelInsertVo1.setRecordType("检测：");
+////        excelInsertVo1.setSheetName("膨胀率");
+//////        // 签名信息
 //        String[] imags = new String[2];
 //        imags[0] = "D:\\doc\\image\\1647502446459100.png";
 ////        imags[1] = "D:\\doc\\image\\1647502682230103.png";
-////        excelInsertVo1.setImags(imags);
-////        // sheet名称
-////        excelInsertVo1.setSheetName("水泥密度、比表面积试验检测记录表");
-////        list.add(excelInsertVo1);
-////
+//        excelInsertVo1.setImags(imags);
+//////        // sheet名称
+//        excelInsertVo1.setSheetName("水泥密度、比表面积试验检测记录表");
+//        list.add(excelInsertVo1);
+//////
 ////        ExcelInsertVo excelInsertVo2 = new ExcelInsertVo();
-////        // 编辑类型
-////        excelInsertVo2.setRecordType("记录：");
-////        // 签名信息
-////        String[] imags2 = new String[1];
-////        imags2[0] = "D:\\doc\\image\\1647502446459100.png";
-////        excelInsertVo2.setImags(imags2);
-//        // sheet名称
-////        excelInsertVo2.setSheetName("水泥密度、比表面积试验检测记录表");
-////        list.add(excelInsertVo2);
-//        ExcelInsertVo excelInsertVo3 = new ExcelInsertVo();
-//        excelInsertVo3.setSheetName("膨胀率");
-//        excelInsertVo3.setRecordType("复核：");
-//        excelInsertVo3.setImags(imags);
-//        list.add(excelInsertVo3);
+//////        // 编辑类型
+//////        excelInsertVo2.setRecordType("记录：");
+//////        // 签名信息
+//////        String[] imags2 = new String[1];
+//////        imags2[0] = "D:\\doc\\image\\1647502446459100.png";
+//////        excelInsertVo2.setImags(imags2);
+////        // sheet名称
+//////        excelInsertVo2.setSheetName("水泥密度、比表面积试验检测记录表");
+//////        list.add(excelInsertVo2);
+////        ExcelInsertVo excelInsertVo3 = new ExcelInsertVo();
+////        excelInsertVo3.setSheetName("膨胀率");
+////        excelInsertVo3.setRecordType("复核：");
+////        excelInsertVo3.setImags(imags);
+////        list.add(excelInsertVo3);
 //        String filePath = "D:\\doc\\e-iceblue\\4602092399671262.xlsx";
 //        String newFilePath = "D:\\doc\\e-iceblue\\new演示插入结果.xlsx";
-////        // 图片插入至excel中
+//////        // 图片插入至excel中
 //        ExcelInsertImage(filePath, list, newFilePath, false);
 //        System.out.println("newFilePath  == " + newFilePath);
     // 获取 wb 读取行号及列号

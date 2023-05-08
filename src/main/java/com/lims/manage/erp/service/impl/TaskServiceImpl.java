@@ -1717,12 +1717,25 @@ public class TaskServiceImpl implements TaskService {
                 TaskList = testEntrustedTaskRelDao.getTaskList(sampleListVo.getTaskId());
                 if(!CollectionUtils.isEmpty(TaskList)){
                     StringBuilder stringBuilder = new StringBuilder();
+                    StringBuilder remark = new StringBuilder();
                     for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity:TaskList){
                         stringBuilder.append(DateUtil.formatDate(testEntrustedTaskRelEntity.getTaskFlowDate()));
                         stringBuilder.append("、");
+                        if(StringUtils.isEmpty(testEntrustedTaskRelEntity.getRemark())){
+                            remark.append("(");
+                            remark.append("——");
+                            remark.append(")");
+                            remark.append("、");
+                        }else {
+                            remark.append("(");
+                            remark.append(testEntrustedTaskRelEntity.getRemark());
+                            remark.append(")");
+                            remark.append("、");
+                        }
                     }
                     if(stringBuilder.length()>1){
-                        sampleListVo.setTaskFlowDate(stringBuilder.deleteCharAt(stringBuilder.length()-1).toString());
+                        sampleListVo.setTaskFlowDate(stringBuilder.toString()+
+                                remark.deleteCharAt(remark.length()-1).toString());
                     }
                     else{
                         sampleListVo.setTaskFlowDate("——");
