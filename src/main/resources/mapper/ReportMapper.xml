@@ -493,7 +493,9 @@
             and t3.state = 3
             AND t3.task_id = #{taskId}
         GROUP BY
-            t2.id
+            t2.id,
+            label,
+            text
         HAVING
             number > 0
     </select>
