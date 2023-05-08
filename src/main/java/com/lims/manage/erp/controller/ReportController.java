@@ -1104,6 +1104,25 @@ public class ReportController {
     }
 
     /**
+     * 报告在线编辑提交
+     * @param bean
+     * @return
+     */
+    @PostMapping("submitEditReport")
+    public Result submitEditReport(@RequestBody ReportEditReq bean){
+        if (bean.getTaskId() == null || bean.getReportType()==null || CollectionUtils.isEmpty(bean.getSampleIds())){
+            return ResultUtil.error("缺少参数");
+        }
+        Boolean flag = reportService.submitEditReport(bean);
+        if (flag){
+            return ResultUtil.success("提交成功");
+        }else {
+            return ResultUtil.error("提交失败");
+        }
+    }
+
+
+    /**
      * 报告制作保存
      * @param request
      * @param response

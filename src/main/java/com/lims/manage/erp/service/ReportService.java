@@ -433,4 +433,6 @@ public interface ReportService {
     Boolean onlineReportMergeSave(String reportCode, String s, String s1, long parseLong, long parseLong1, String inspector);
 
     PageInfo onlineMakeReport(Integer pageNum,Integer pageSize,String search);
+
+    Boolean submitEditReport(ReportEditReq bean);
 }

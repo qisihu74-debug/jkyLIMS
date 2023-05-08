@@ -11,7 +11,30 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.ParamEntity;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
+import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
+import com.lims.manage.erp.entity.QiYueSuoSealEntity;
+import com.lims.manage.erp.entity.QuotaEntity;
+import com.lims.manage.erp.entity.QuotaRes;
+import com.lims.manage.erp.entity.ReportEditReq;
+import com.lims.manage.erp.entity.ReportRecordDetailEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.ReportRecordMidEntity;
+import com.lims.manage.erp.entity.ReportResBean;
+import com.lims.manage.erp.entity.ReportTemplateEntity;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.SealEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TeamTreeStructureEntity;
+import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
+import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.entity.TreeEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
@@ -35,9 +58,36 @@ import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.mapper.TestTechnicistDao;
 import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.*;
-import com.zhuozhengsoft.pageoffice.OpenModeType;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.ConvertUtil;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.DownloadUtils;
+import com.lims.manage.erp.util.EntrustNoStrUtils;
+import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.HttpDownloadUtil;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.PDFHelper3;
+import com.lims.manage.erp.util.PdfDoc;
+import com.lims.manage.erp.util.ReturnResponse;
+import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.EntrustCategoryVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
+import com.lims.manage.erp.vo.ReportDetailListParamVo;
+import com.lims.manage.erp.vo.ReportDetailListVo;
+import com.lims.manage.erp.vo.ReportDetailVo;
+import com.lims.manage.erp.vo.ReportHistoryDetailVo;
+import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.ReportProductRelVo;
+import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.TaskCodeVo;
+import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -56,8 +106,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -3249,67 +3297,12 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean saveOnlineReport(FileInputStream fileStream, ReportEditReq reportEditReq) {
-        Boolean flag =false;
         String fileName = GenID.getID() + ".xlsx";
         //上传文件服务器、更新test_entrusted_sample_details_rel的edit_url
         String upload = MinIoUtil.upload(BucketsConst.buckets_sample_enclosure, fileName, fileStream, null);
         String[] split = upload.split("\\?");
         entrustEntityMapper.updateUrlByEntrustIdAndSampleId(reportEditReq.getEntrustId(), reportEditReq.getSampleId(), split[0]);
-        //报告类型0最终，1中间报告
-        Integer reportType = reportEditReq.getReportType();
-        ReportRecordEntity reportRecordEntity1 = recordEntityMapper.selectByEntrustId(reportEditReq.getEntrustId());
-        if (reportRecordEntity1 != null) {
-            //处理报告数据
-            if (reportType == 1) {
-                reportRecordEntity1.setState(2 + "");
-            } else {
-                List<Integer> allReportComplete = taskMapper.getAllReportComplete(reportEditReq.getEntrustId(), reportEditReq.getTaskId());
-                if (allReportComplete.contains(2)) {
-                    reportRecordEntity1.setState(2 + "");
-                } else {
-                    reportRecordEntity1.setState(1 + "");
-                    reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
-                    if (reportRecordEntity1.getReportCode() == null) {//当前任务单号为空时才会设置新的报告编号
-                        reportRecordEntity1.setReportCode(getMaxCode(reportEditReq.getEntrustId()));
-                    }
-                }
-                //1,报告已完成；2,报告未完成
-                taskMapper.updateReportStatus(1, reportEditReq.getTaskId());
-            }
-            int update = recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity1);
-            if (update >= 0) {
-                flag = true;
-            }
-        } else {
-            //保存报告检测项数据
-            long recordId = GenID.getID();
-            //保存报告数据
-            ReportRecordEntity reportRecordEntity = new ReportRecordEntity();
-            if (reportType == 0){
-                reportRecordEntity.setEntrustmentId(reportEditReq.getEntrustId());
-                List<Integer> allReportComplete = taskMapper.getAllReportComplete(reportEditReq.getEntrustId(), reportEditReq.getTaskId());
-                if (allReportComplete.contains(2)) {
-                    reportRecordEntity.setState(2 + "");
-                } else {
-                    reportRecordEntity.setState(1 + "");
-                    reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-                    reportRecordEntity.setReportCode(getMaxCode(reportEditReq.getEntrustId()));
-                }
-                //修改任务报告状态
-                taskMapper.updateReportStatus(1, reportEditReq.getTaskId());
-            }else {
-                reportRecordEntity.setState(2 + "");
-                reportRecordEntity.setEntrustId(reportEditReq.getEntrustId());
-            }
-            reportRecordEntity.setId(recordId);
-            //设置报告类型
-            reportRecordEntity.setType(reportType.toString());
-            int insert = recordEntityMapper.insert(reportRecordEntity);
-            if (insert >= 0) {
-                flag = true;
-            }
-        }
-        return flag;
+        return true;
     }
 
     @Override
@@ -3639,5 +3632,38 @@ public class ReportServiceImpl implements ReportService {
         }
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
+    }
+
+    @Override
+    public Boolean submitEditReport(ReportEditReq bean) {
+        //更新样品对应的报告编辑状态为完成、报告类型进行更新
+        Long entrustIdByTaskId = taskMapper.getEntrustIdByTaskId(bean.getTaskId());
+        List<Integer> sampleIds = bean.getSampleIds();
+        List<ReportEditReq> list = Lists.newArrayList();
+        for (Integer sampeId:sampleIds) {
+            ReportEditReq req = new ReportEditReq();
+            req.setSampleId(sampeId);
+            req.setReportType(bean.getReportType());
+            req.setEntrustId(entrustIdByTaskId);
+            list.add(req);
+        }
+        entrustEntityMapper.updateReportTypeAndStatus(list);
+        //报告类型0最终，1中间报告
+        Integer reportType = bean.getReportType();
+        if (reportType == 0){
+            //如果任务单下的所有样品状态为完成并且类型为最终、更新任务单完成状态
+            //最终报告、如果委托所有样品状态为完成并且报告类型为最终、报告记录新增数据
+            
+
+
+
+        }else {
+            //中间报告、如果报告类型是中间报告，报告记录新增数据
+
+
+
+
+        }
+        return true;
     }
 }

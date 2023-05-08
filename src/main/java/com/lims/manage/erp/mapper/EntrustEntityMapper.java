@@ -6,6 +6,7 @@ import com.lims.manage.erp.entity.EntrustHistoryEntity;
 import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
 import com.lims.manage.erp.entity.EntrustPamentEntity;
 import com.lims.manage.erp.entity.EntrustSampleEntity;
+import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SampleEntity;
@@ -14,8 +15,20 @@ import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.vo.*;
-import org.apache.ibatis.annotations.*;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
+import com.lims.manage.erp.vo.ClientOrderdetailVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.EntrustCategoryVo;
+import com.lims.manage.erp.vo.EntrustSampleInfoVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.TaskCodeVo;
+import com.lims.manage.erp.vo.TaskPriceVo;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -692,4 +705,6 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Update("update test_entrusted_sample_details_rel set report_edit_url=#{url} where entrustment_id=#{entrustId} and sample_id=#{sampleId}")
     void updateUrlByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") Integer sampleId, @Param("url") String url);
+
+    void updateReportTypeAndStatus(@Param("list") List<ReportEditReq> list);
 }

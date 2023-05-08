@@ -1268,5 +1268,15 @@
 
     </select>
 
+    <update id="updateReportTypeAndStatus" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update test_entrusted_sample_details_rel
+            <set>
+                completion_status = 1,
+                report_type = #{item.reportType}
+            </set>
+            where entrustment_id = #{item.entrustId}  and sample_id = #{item.sampleId}
+        </foreach>
+    </update>
 
 </mapper>

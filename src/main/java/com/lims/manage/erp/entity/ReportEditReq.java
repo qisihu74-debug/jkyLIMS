@@ -21,10 +21,6 @@ public class ReportEditReq {
      * 0最终报告，1中间报告
      */
     private Integer reportType;
-    /**
-     * 任务流转id
-     */
-    private Integer taskFlowId;
     private Integer sampleId;
     /**
      * 样品名称
@@ -46,4 +42,5 @@ public class ReportEditReq {
      * 样品检测项
      */
     private List<SampleItemEntity> sampleCheckItem;
+    private List<Integer> sampleIds;
 }
