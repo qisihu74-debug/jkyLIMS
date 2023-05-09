@@ -22,6 +22,7 @@ public class ReportEditReq {
      */
     private Integer reportType;
     private Integer sampleId;
+    private Integer completionStatus;
     /**
      * 样品名称
      */
