@@ -416,7 +416,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     List<Integer> getAllSampleIdentrustmentId(Long entrustmentId);
 
-    @Select("select report_edit_url from test_entrusted_sample_details_rel where entrustment_id=#{entrustmentId}")
+    @Select("select report_edit_url from test_entrusted_sample_details_rel where entrustment_id=#{entrustmentId} and completion_status=1")
     List<String> getAllReportEditUrlByEntrustId(@Param("entrustmentId") Long entrustmentId);
 
     /**
