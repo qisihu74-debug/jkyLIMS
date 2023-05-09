@@ -1223,4 +1223,18 @@ public class ReportController {
         }
         return ResultUtil.success("获取在线制作报告任务单列表成功！", reportService.onlineMakeReport(pageNum,pageSize,search));
     }
+
+    /**
+     * 查询任务单下可制作报告样品列表
+     * @param entrustId
+     * @param taskId
+     * @return
+     */
+    @GetMapping("/getMakeReportSampleInfos")
+    public Result getMakeReportSampleInfos(Long entrustId,Long taskId) {
+        if (entrustId == null || taskId == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        return ResultUtil.success("查询可制作报告样品列表成功！", reportService.makeReportSampleInfos(entrustId,taskId));
+    }
 }
