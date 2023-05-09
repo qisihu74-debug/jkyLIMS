@@ -3301,7 +3301,7 @@ public class ReportServiceImpl implements ReportService {
         //上传文件服务器、更新test_entrusted_sample_details_rel的edit_url
         String upload = MinIoUtil.upload(BucketsConst.buckets_sample_enclosure, fileName, fileStream, null);
         String[] split = upload.split("\\?");
-        entrustEntityMapper.updateUrlByEntrustIdAndSampleId(reportEditReq.getEntrustId(), reportEditReq.getSampleId(), split[0]);
+        entrustEntityMapper.updateUrlByEntrustIdAndSampleId(reportEditReq.getEntrustId(), reportEditReq.getSampleId(), split[0],reportEditReq.getReportType());
         return true;
     }
 
@@ -3644,7 +3644,6 @@ public class ReportServiceImpl implements ReportService {
         for (Integer sampeId:sampleIds) {
             ReportEditReq req = new ReportEditReq();
             req.setSampleId(sampeId);
-            req.setReportType(bean.getReportType());
             req.setEntrustId(entrustIdByTaskId);
             list.add(req);
         }
