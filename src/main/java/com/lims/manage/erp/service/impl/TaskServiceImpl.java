@@ -1810,6 +1810,7 @@ public class TaskServiceImpl implements TaskService {
         }
         // sheetName 不包含 则清除
         ExcelReplaceUtil.removeSheetName(map,wb);
+        fileStream.close();
         return wb;
     }
 

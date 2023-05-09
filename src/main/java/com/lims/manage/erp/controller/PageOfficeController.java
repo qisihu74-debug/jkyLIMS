@@ -1,9 +1,6 @@
 package com.lims.manage.erp.controller;
 
 import com.aspose.cells.SaveFormat;
-import com.aspose.cells.SaveOptions;
-import com.aspose.cells.Worksheet;
-import com.aspose.cells.WorksheetCollection;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
@@ -13,12 +10,10 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.ExcelInsertVo;
 import com.lims.manage.erp.vo.TeamVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
-import com.zhuozhengsoft.pageoffice.excelwriter.Sheet;
 import com.zhuozhengsoft.pageoffice.excelwriter.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -75,14 +70,12 @@ public class PageOfficeController {
      * @return
      */
     @RequestMapping(value = "Excel/editOriginalRecord")
-//    @ResponseBody
-//    public String showExcel(@RequestParam("json") String json, HttpServletRequest request) throws IOException {
     public ModelAndView showExcel(HttpServletRequest request, Map<String, Object> map) throws Exception {
         Map<String, String[]> parameterMap = request.getParameterMap();
         String list = parameterMap.get("list")[0];
         String[] items = list.split(",");
         Integer[] ids = new Integer[items.length];
-        System.out.println("items == " + items);
+//        System.out.println("items == " + items);
         for (int j = 0; j < items.length; j++) {
             ids[j] = Integer.parseInt(items[j]);
         }
@@ -91,7 +84,7 @@ public class PageOfficeController {
         // 验证 token 是否存在
         String[] mapToken = parameterMap.get("token");
         String strVerify = redisUtil.getRedisToken(mapToken[0]);
-        System.out.println("token == " + strVerify);
+//        System.out.println("token == " + strVerify);
         SysUserEntity user = new SysUserEntity();
         if (strVerify != null) {
             user = redisUtil.getRedisTokenUser(strVerify);
@@ -112,20 +105,11 @@ public class PageOfficeController {
         //禁止拷贝文档内容到外部
         poCtrl.setDisableCopyOnly(true);
         //设置委托样品下未勾选检测项对应的指定sheet不可编辑状态 TODO
-        poCtrl.setCustomToolbar(false);
+//        poCtrl.setCustomToolbar(false);
         Workbook wb = new Workbook();
         //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
         // 循环设置
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
-//        for (int i = 0; i < dataEntitys.size(); i++) {
-//            TaskIdEntity data = dataEntitys.get(i);
-//            Sheet sheet1 = wb.openSheet(data.getCheckItemName());
-//            //设置当工作表只读时，是否允许用户手动调整行列。
-//            sheet1.setAllowAdjustRC(true);
-//            // 设置工作表是否只读。
-//            //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
-//            sheet1.setReadOnly(false);
-//        }
         InputStream fileStream = null;
         try {
             // 获取公网 附件
@@ -133,7 +117,6 @@ public class PageOfficeController {
         } catch (Exception e) {
             logger.info("读取产品excel异常 " + url + e);
         }
-//        FileInputStream fileInputStream = new FileInputStream("D:\\doc\\e-iceblue\\shuini.xlsx");
         com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
         int count = workbook.getWorksheets().getCount();
         for (int i = 0; i < count; i++) {
@@ -159,8 +142,6 @@ public class PageOfficeController {
             }
         }
         String excel = dir + GenID.getID() + "." + "xlsx";
-        System.out.println("excel == " + excel);
-//        workbook.save("D:\\doc\\e-iceblue\\shuini.xlsx", SaveFormat.XLSX);
         workbook.save(excel, SaveFormat.XLSX);
         // 去除excel 中标记
         InputStream fileStream2 = new FileInputStream(excel);
@@ -211,9 +192,7 @@ public class PageOfficeController {
      * @param response
      */
     @RequestMapping("Excel/saveOriginalRecord")
-//    public void save(@RequestBody SaveParamBean bean, HttpServletRequest request, HttpServletResponse response) {
-//    public ModelAndView save(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    public Result save(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public ModelAndView save(HttpServletRequest request, HttpServletResponse response) throws Exception {
         FileSaver fs = new FileSaver(request, response);
         // 实现逻辑操作 -- 完成编辑
         String flag = pageOfficeService.saveOriginalRecord(request, fs);
@@ -228,35 +207,11 @@ public class PageOfficeController {
                 ids[j] = Integer.parseInt(items[j]);
             }
             pageOfficeService.updateOriginalRecordUrl(flag, ids);
-//            //上传文件到文件服务器、删除本地临时缓存的文件
-//            String[] arrays = flag.split("\\\\");
-//            String saveFileUrl = arrays[arrays.length - 1];
-//            InputStream input = new FileInputStream(flag);
-//            // 上传新excel附件
-//            String excelUrl = MinIoUtil.upload("file-resources", saveFileUrl, input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-//            // 查询附件 存在则 删除附件
-//            ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(ids[0]);
-//            if (excelInsertVo != null) {
-//                if (excelInsertVo.getProductExcelUrl() != null) {
-//                    String[] urls = excelInsertVo.getProductExcelUrl().split("/");
-//                    MinIoUtil.deleteFile("file-resources", urls[urls.length - 1]);
-//                }
-//                if (excelInsertVo.getReportEditUrl() != null) {
-//                    String[] urls = excelInsertVo.getReportEditUrl().split("/");
-//                    MinIoUtil.deleteFile("file-resources", urls[urls.length - 1]);
-//                }
-//            }
-//            //相关表做更新或者插入操作
-//            pageOfficeService.updateOriginalRecordUrl(excelUrl, ids);
             ModelAndView mv = new ModelAndView("success");
-//            return new ModelAndView("success");
-//            return mv;
-            return ResultUtil.success("编辑完成");
+            return new ModelAndView("success");
         } else {
-//            return new ModelAndView("error");
             ModelAndView mv = new ModelAndView("error");
-//            return mv;
-            return ResultUtil.success("编辑完成");
+            return mv;
         }
     }
 

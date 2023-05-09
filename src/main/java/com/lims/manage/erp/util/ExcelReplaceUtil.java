@@ -9,7 +9,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -101,7 +100,6 @@ public class ExcelReplaceUtil {
         InputStream fileStream = new FileInputStream(fileName);
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
         removeOtherSheets(sheetName, wb);
-//        wb.removeName(sheetName);
         fileStream.close();
         OutputStream f = new FileOutputStream("D:\\doc\\e-iceblue\\演示插入结果RemoveSheetName.xlsx");
         wb.write(f);
@@ -144,11 +142,10 @@ public class ExcelReplaceUtil {
                     //获取单元格数据
                     String cellValue = cell.getStringCellValue();
                     if (!cellValue.equals("") && cellValue.equals(excelInsertVo.getRecordType())) {
-//                        System.out.println("x == " + (x + 1));
-//                        System.out.println("y == " + (y + 3));
-                        excelInsertVo.setLeftColumn(y + 3);
-                        excelInsertVo.setTopRow(x + 1);
-//                        System.out.println("cellValue == " + cellValue);
+//                        System.out.println("x == " + (x ));
+//                        System.out.println("y == " + (y + 2));
+                        excelInsertVo.setLeftColumn(y + 2);
+                        excelInsertVo.setTopRow(x);
                     }
                 }
             }
@@ -182,129 +179,4 @@ public class ExcelReplaceUtil {
             }
         }
     }
-
-//    /**
-//     * 复制 sheet 到 新copyExcel 中。
-//     *
-//     * @param sheet
-//     * @param sheetName
-//     * @param copyExcel
-//     */
-//    public static void sheetCopyExcel(XSSFSheet sheet, String sheetName, XSSFWorkbook copyExcel) {
-//        XSSFSheet newSheet = copyExcel.createSheet(sheetName);
-////        int lastRowNum = sheet.getLastRowNum();
-//        int lastRowNum = sheet.getLastRowNum(); //获取表格内容的最后一行的行数
-//        //rowBegin代表要开始读取的行号，下面这个循环的作用是读取每一行内容
-//        for (int x = 1; x <= lastRowNum; ++x) {
-//            XSSFRow row = sheet.getRow(x);//获取每一行
-//            //创建行，i表示第i行
-//            XSSFRow newRow = newSheet.createRow(x);
-//            int columnNum = row.getLastCellNum();//获取每一行的最后一列的列号，即总列数
-//            for (int y = 0; y < columnNum; ++y) {
-//                XSSFCell cell = row.getCell(y);//获取每个单元格
-//                // 设置 单元格
-//                if (cell != null) {
-//                    //设置单元格类型
-//                    cell.setCellType(cell.CELL_TYPE_STRING);
-//                    //获取单元格数据
-//                    String cellValue = cell.getStringCellValue();
-//                    System.out.println("  cellValue == " + cellValue);
-//                    //创建单元格，0表示第一个单元格
-//                     newRow.createCell(y).setCellValue(cell.getStringCellValue());
-//                }
-//            }
-//        }
-//
-//    }
-//
-//    public static void main(String[] args) throws IOException {
-//        String filePath = "D:\\doc\\copy\\" + "shuini.xlsx";
-//        InputStream fileStream = new FileInputStream(filePath);
-//        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-//        // copyExcel 输出
-//        String newFilePath = "D:\\doc\\copy\\" + "模板.xlsx";
-////        InputStream newFileStream = new FileInputStream(newFilePath);
-////        XSSFWorkbook copyExcel = new XSSFWorkbook(newFileStream);
-////        String sheetName = "水泥密度、比表面积试验检测记录表";
-////        int sheetIds = wb.getNumberOfSheets();
-////        System.out.println("总的 sheet页 ==" + sheetIds);
-////        int arrays = wb.getNumberOfNames();
-////        System.out.println("arrays == " + arrays);
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("水泥密度、比表面积试验检测记录表", 1);
-////        int saveInt = wb.getNameIndex("细度");
-////        System.out.println(" saveInt == " +  saveInt);
-////        int[] deletes = new int[sheetIds];
-////        for (int i = sheetIds; i < 2; i--) {
-//////            deletes[i] = i;
-////            wb.removeSheetAt(i);
-////        }
-//        for (int i = wb.getNumberOfSheets() - 1; i >= 0; i--) {
-//            XSSFSheet tmpSheet = wb.getSheetAt(i);
-//            if (map.get(tmpSheet.getSheetName()) == null) {
-//                wb.removeSheetAt(i);
-//            }
-//        }
-////        deletes[saveInt] = 99;
-////        for (int i = 0; i < deletes.length - 1; i++) {
-////            if (deletes[i] != 99) {
-////                wb.removeSheetAt(deletes[i]);
-////            }
-////        }
-////        System.out.println("保留项 == " + saveInt);
-////        XSSFSheet sheet = wb.getSheet(sheetName);
-//////        if (sheet != null) {
-//////            sheetCopyExcel(sheet, sheetName, copyExcel);
-//////        }
-////        // 调用方法 清除sheet名 = Evaluation Warning
-////        ExcelReplaceUtil.removeOtherSheets("Evaluation Warning", wb);
-//        //通过输出流将workbook对象下载到磁盘
-//        FileOutputStream out = new FileOutputStream(newFilePath);
-//        wb.write(out);
-//        out.flush();//刷新
-//        out.close();//关闭
-//
-//
-//    }
-//    public static void main(String[] args) throws IOException {
-////        removeExcelSheetName("D:\\doc\\e-iceblue\\演示插入结果.xlsx", "Evaluation Warning");
-//        InputStream fileStream = new FileInputStream("D:\\doc\\e-iceblue\\演示插入结果.xlsx");
-//        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-//        ExcelInsertVo excelInsertVo = new ExcelInsertVo();
-//        excelInsertVo.setSheetName("水泥密度、比表面积试验检测记录表");
-//        excelInsertVo.setRecordType("检测：");
-//        getSheetRowAndColumn(excelInsertVo, wb);
-//        System.out.println(excelInsertVo);
-//
-//    }
-
-//    public static void main(String[] args) throws Exception {
-//        String filePath = "D:\\doc\\copy\\" + "4598803884862947shuini.xlsx";
-//        InputStream fileStream = new FileInputStream(filePath);
-//        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("水泥密度、比表面积试验检测记录表", 1);
-//        map.put("细度", 1);
-//        for (int i = wb.getNumberOfSheets() - 1; i >= 0; i--) {
-//            XSSFSheet tmpSheet = wb.getSheetAt(i);
-//            if (map.get(tmpSheet.getSheetName()) == null) {
-//                wb.removeSheetAt(i);
-//            }
-//        }
-//        String newFilePath = "D:\\doc\\copy\\" + "模板.xlsx";
-//        //        //通过输出流将workbook对象下载到磁盘
-//        FileOutputStream out = new FileOutputStream(newFilePath);
-//        wb.write(out);
-//        out.flush();//刷新
-//        out.close();//关闭
-//        //
-//        InputStream out000 = new FileInputStream(newFilePath);
-////        String path = qiYueSuoEntity.getAutographPath()+GenID.getID()+".pdf";
-//        String path = "D:\\doc\\copy\\" + "shuini"+".pdf";
-//        //相应pdf
-//        ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(out000,path);
-//        InputStream inputStream = FileAndFolderUtil.parseOut(b1);
-//
-//
-//    }
 }

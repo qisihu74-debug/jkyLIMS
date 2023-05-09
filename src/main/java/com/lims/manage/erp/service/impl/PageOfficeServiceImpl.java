@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -116,10 +117,12 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         if (excelInsertVo == null) {
             String excelUrl = MinIoUtil.upload("file-resources", GenID.getID() + array[array.length - 1], input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             input.close();
+            fileStream.close();
             // 更新 样品Excel附件
             testProductItemDao.updateProductExcelUrl(dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId(), excelUrl);
             return excelUrl;
         } else {
+            fileStream.close();
             // 私有方法 更新 产品附件及报告附件内容。
             return methodUpdateItemUrl(GenID.getID() + array[array.length - 1], input, ids, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
         }
@@ -172,33 +175,43 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
         if (!CollectionUtils.isEmpty(dataEntitys)) {
             for (int i = 0; i < dataEntitys.size(); i++) {
+                Map<String, Object> map = new HashMap<>();
                 TaskIdEntity taskIdEntity = dataEntitys.get(i);
                 ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
                 excelInsertVo1.setSheetName(taskIdEntity.getCheckItemName());
                 excelInsertVo1.setRecordType("检测：");
                 excelInsertVo1.setImags(testImags);
-                excelInsertVoList.add(excelInsertVo1);
+                // key 使用 sheet名加类型进行拼接
+                map.put(excelInsertVo1.getSheetName() + excelInsertVo1.getRecordType(), excelInsertVo1);
                 ExcelInsertVo excelInsertVo2 = new ExcelInsertVo();
                 excelInsertVo2.setSheetName(taskIdEntity.getCheckItemName());
                 excelInsertVo2.setRecordType("记录：");
                 excelInsertVo2.setImags(recordImags);
-                excelInsertVoList.add(excelInsertVo2);
+                // key 使用 sheet名加类型进行拼接
+                map.put(excelInsertVo2.getSheetName() + excelInsertVo2.getRecordType(), excelInsertVo2);
+                ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+                excelInsertVo.setSheetName(taskIdEntity.getCheckItemName());
+                excelInsertVo.setMap(map);
+                excelInsertVoList.add(excelInsertVo);
             }
         }
         // excel 插入图片
         String[] names = file.getFileName().split("\\.");
-        String newFilePath = dir + GenID.getID() +"."+ names[1];
-        // 图片插入至excel中     SaveExcel 已经删除。
-        ExcelImageUtils.ExcelInsertImage(saveExcel, excelInsertVoList, newFilePath, false);
+        String newFilePath = dir + GenID.getID() + "." + names[1];
+        // 清除图片
+        ExcelImageUtils.seachXY(saveExcel, excelInsertVoList, newFilePath);
+        // 插入图片
+        ExcelImageUtils.inserImage(newFilePath, excelInsertVoList, saveExcel);
         // 去除excel 中标记
-        InputStream fileStream = new FileInputStream(newFilePath);
+        // 创建一个文件输入流
+        FileInputStream fileStream = new FileInputStream(new File(saveExcel));
+        // 创建一个 XSSFWorkbook 对象，用于处理 .xlsx 格式的 Excel 文件
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-        // 调用方法 清除sheet名 = Evaluation Warning
         ExcelReplaceUtil.removeOtherSheets("Evaluation Warning", wb);
-        fileStream.close();
         OutputStream f = new FileOutputStream(saveExcel);
         wb.write(f);
         f.close();
+        fileStream.close();
         // 删除附件
         FileAndFolderUtil.delete(newFilePath);
         // 删除图片信息
@@ -229,7 +242,6 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                 // 获取的url签名信息 存放至本地附件
                 String[] image = taskListParamVo.getSignatureUrl().split("/");
                 String downloadDir = dir + GenID.getID() + image[image.length - 1];
-                System.out.println("recordImags + downloadDir == " + downloadDir);
                 // 远端URL 存放本地
                 InputStream initialStream = FileAndFolderUtil.getInputStream(taskListParamVo.getSignatureUrl());
                 File targetFile = new File(downloadDir);
@@ -340,6 +352,8 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         methodUpdateItemUrl(saveFileUrl, input, array, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
         // 删除本地文件
         FileAndFolderUtil.delete(saveFileUrl);
+        FileAndFolderUtil.delete(saveExcel);
+        input.close();
         return true;
     }
 
@@ -362,12 +376,18 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
         if (!CollectionUtils.isEmpty(dataEntitys)) {
             for (int i = 0; i < dataEntitys.size(); i++) {
+                Map<String, Object> map = new HashMap<>();
                 TaskIdEntity taskIdEntity = dataEntitys.get(i);
                 ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
                 excelInsertVo1.setSheetName(taskIdEntity.getCheckItemName());
                 excelInsertVo1.setRecordType("复核：");
                 excelInsertVo1.setImags(testImags);
-                excelInsertVoList.add(excelInsertVo1);
+                // key 使用 sheet名加类型进行拼接
+                map.put(excelInsertVo1.getSheetName() + excelInsertVo1.getRecordType(), excelInsertVo1);
+                ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+                excelInsertVo.setSheetName(taskIdEntity.getCheckItemName());
+                excelInsertVo.setMap(map);
+                excelInsertVoList.add(excelInsertVo);
             }
         }
         // 查询附件 存在则 删除附件
@@ -390,6 +410,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                     OutputStream f = new FileOutputStream(saveExcel);
                     wb.write(f);
                     f.close();
+                    fileStream.close();
                 } catch (Exception e) {
                     logger.info("读取报告URL附件异常 " + excelInsertVo2.getReportEditUrl() + e);
                 }
@@ -407,15 +428,20 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                     OutputStream f = new FileOutputStream(saveExcel);
                     wb.write(f);
                     f.close();
+                    fileStream.close();
                 } catch (Exception e) {
                     logger.info("读取产品URL附件异常 " + excelInsertVo2.getProductExcelUrl() + e);
                 }
             }
         }
         // 图片插入至excel中     SaveExcel 已经删除。
-        ExcelImageUtils.ExcelInsertImage(saveExcel, excelInsertVoList, newFilePath, false);
+//        ExcelImageUtils.ExcelInsertImage(saveExcel, excelInsertVoList, newFilePath, false);
+        // 清除图片
+        ExcelImageUtils.seachXY(saveExcel, excelInsertVoList, newFilePath);
+        // 插入图片
+        ExcelImageUtils.inserImage(newFilePath, excelInsertVoList, saveExcel);
         // 去除excel 中标记
-        InputStream fileStream2 = new FileInputStream(newFilePath);
+        InputStream fileStream2 = new FileInputStream(saveExcel);
         XSSFWorkbook wb = new XSSFWorkbook(fileStream2);
         // 调用方法 清除sheet名 = Evaluation Warning
         ExcelReplaceUtil.removeOtherSheets("Evaluation Warning", wb);
@@ -456,6 +482,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                 MinIoUtil.deleteFile("sample-enclosure", urls[urls.length - 1]);
                 // 更新报告excel附件
                 testProductItemDao.updateReportExcelUrl(entrustId, sampleId, excelUrl);
+                input.close();
             }
             if (excelInsertVo.getProductExcelUrl() != null) {
                 String productUrl = "";
