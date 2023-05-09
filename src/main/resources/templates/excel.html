@@ -7,6 +7,8 @@
     <script type="text/javascript">
         function Save() {
             document.getElementById("PageOfficeCtrl1").WebSave();
+            var data = document.getElementById(params);
+            window.external.CallParentFunc("resetSampleState("%data.value%");");
         }
 
         function SetFullScreen() {

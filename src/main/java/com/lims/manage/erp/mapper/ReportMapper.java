@@ -283,4 +283,7 @@ public interface ReportMapper {
 
     @Select("select inspector from test_report_record  where report_code=#{reportCode}")
     String getInspectorByCode(@Param("reportCode") String reportCode);
+
+    @Select("select id from test_report_record where entrustment_id=#{entrustId} or entrust_id=#{entrustId}")
+    Long getInfoByEntrustId(@Param("entrustId") Long entrustId);
 }

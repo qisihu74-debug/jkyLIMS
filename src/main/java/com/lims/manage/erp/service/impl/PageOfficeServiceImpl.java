@@ -302,7 +302,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回
         Integer state = null;
         // 原始记录 复核通过
-        if (excelInsertVo.getStatus().equals("通过")) {
+        if (excelInsertVo.getStatus().equals("是")) {
             // 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回
             state = 3;
         } else {

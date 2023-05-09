@@ -6,6 +6,7 @@ import com.lims.manage.erp.entity.EntrustHistoryEntity;
 import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
 import com.lims.manage.erp.entity.EntrustPamentEntity;
 import com.lims.manage.erp.entity.EntrustSampleEntity;
+import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SampleEntity;
@@ -14,8 +15,20 @@ import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.vo.*;
-import org.apache.ibatis.annotations.*;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
+import com.lims.manage.erp.vo.ClientOrderdetailVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.EntrustCategoryVo;
+import com.lims.manage.erp.vo.EntrustSampleInfoVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.TaskCodeVo;
+import com.lims.manage.erp.vo.TaskPriceVo;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -403,7 +416,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     List<Integer> getAllSampleIdentrustmentId(Long entrustmentId);
 
-    @Select("select report_edit_url from test_entrusted_sample_details_rel where entrustment_id=#{entrustmentId}")
+    @Select("select report_edit_url from test_entrusted_sample_details_rel where entrustment_id=#{entrustmentId} and completion_status=1")
     List<String> getAllReportEditUrlByEntrustId(@Param("entrustmentId") Long entrustmentId);
 
     /**
@@ -690,6 +703,24 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     List<EntrustSampleInfoVo> getEntrustSampleInfoIds(@Param("list") List<EntrustHistoryEntity> list);
 
-    @Update("update test_entrusted_sample_details_rel set report_edit_url=#{url} where entrustment_id=#{entrustId} and sample_id=#{sampleId}")
-    void updateUrlByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") Integer sampleId, @Param("url") String url);
+    @Update("update test_entrusted_sample_details_rel set report_edit_url=#{url},report_type=#{reportType} where entrustment_id=#{entrustId} and sample_id=#{sampleId}")
+    void updateUrlByEntrustIdAndSampleId(@Param("entrustId") Long entrustId, @Param("sampleId") Integer sampleId, @Param("url") String url,@Param("reportType") Integer reportType);
+
+    void updateReportTypeAndStatus(@Param("list") List<ReportEditReq> list);
+
+    @Select("SELECT\n" +
+            "\tsample_id AS sampleId,\n" +
+            "\treport_type AS reportType,\n" +
+            "\tcompletion_status AS completionStatus\n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_details_rel\n" +
+            "WHERE\n" +
+            "\tentrustment_id =#{entrustId}")
+    List<ReportEditReq> getStatusAndType(@Param("entrustId") Long entrustId);
+
+    @Select("select report_type as reportType,completion_status As completionStatus from test_entrusted_sample_details_rel where entrustment_id=#{entrustId} ")
+    List<ReportEditReq> getAllStatusAndTypeByEntrustId(@Param("entrustId") Long entrustId);
+
+    @Select("select DISTINCT sample_id from test_entrusted_sample_checkitem_rel where task_id=#{taskId}")
+    List<Integer> getSampelIdsByTaskId(@Param("taskId") Long taskId);
 }

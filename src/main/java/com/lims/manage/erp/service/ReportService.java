@@ -13,14 +13,7 @@ import com.lims.manage.erp.entity.SealEntity;
 import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.http.QiYueSuoResponse;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.ReportDetailListParamVo;
-import com.lims.manage.erp.vo.ReportDetailVo;
-import com.lims.manage.erp.vo.ReportHistoryDetailVo;
-import com.lims.manage.erp.vo.ReportListVo;
-import com.lims.manage.erp.vo.ReportPreserveVo;
-import com.lims.manage.erp.vo.ReportProductRelVo;
-import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -428,9 +421,13 @@ public interface ReportService {
 
     Boolean offlineReportMerge(String reportCode, MultipartFile file, String s, String s1, long parseLong, long parseLong1, String inspector);
 
-    InputStream handlerReportMerge(String reportCode, String path);
+    String handlerReportMerge(String reportCode, String path);
 
     Boolean onlineReportMergeSave(String reportCode, String s, String s1, long parseLong, long parseLong1, String inspector);
 
     PageInfo onlineMakeReport(Integer pageNum,Integer pageSize,String search);
+
+    Boolean submitEditReport(ReportEditReq bean);
+
+    List<LabelValueVo> makeReportSampleInfos(Long entrustId,Long taskId);
 }
