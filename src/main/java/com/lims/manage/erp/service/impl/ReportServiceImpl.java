@@ -3627,8 +3627,8 @@ public class ReportServiceImpl implements ReportService {
         for (ReportListVo reportListVo : list) {
             List<LabelValueVo> sampleInfos = reportMapper.getSampleInfos(reportListVo.getId());
             reportListVo.setSampleInfos(sampleInfos);
-            List<LabelValueVo> makeReportSampleInfos = reportMapper.getMakeReportSampleInfos(reportListVo.getId(),reportListVo.getTaskId());
-            reportListVo.setMakeReportSampleInfos(makeReportSampleInfos);
+//            List<LabelValueVo> makeReportSampleInfos = reportMapper.getMakeReportSampleInfos(reportListVo.getId(),reportListVo.getTaskId());
+//            reportListVo.setMakeReportSampleInfos(makeReportSampleInfos);
         }
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
@@ -3727,5 +3727,10 @@ public class ReportServiceImpl implements ReportService {
             recordEntityMapper.insert(reportRecordEntity);
         }
         return true;
+    }
+
+    @Override
+    public List<LabelValueVo> makeReportSampleInfos(Long entrustId, Long taskId) {
+        return reportMapper.getMakeReportSampleInfos(entrustId,taskId);
     }
 }
