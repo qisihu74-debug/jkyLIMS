@@ -1279,20 +1279,4 @@
         </foreach>
     </update>
 
-    <select id="getStatusAndType"  resultType="java.util.List">
-        select
-        report_type as reportType,
-        completion_status As completionStatus
-        FROM
-        test_entrusted_sample_details_rel
-        <where>
-            <if test="entrustId != null and entrustId != ''">and entrustment_id = #{entrustId}</if>
-            <if test="list != null">and sample_id in
-                <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
-                    #{item}
-                </foreach>
-            </if>
-        </where>
-    </select>
-
 </mapper>

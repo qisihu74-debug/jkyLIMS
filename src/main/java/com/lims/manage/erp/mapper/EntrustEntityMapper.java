@@ -708,11 +708,19 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     void updateReportTypeAndStatus(@Param("list") List<ReportEditReq> list);
 
-    List<ReportEditReq> getStatusAndType(@Param("entrustId") Long entrustId, @Param("list") List<Integer> list);
+    @Select("SELECT\n" +
+            "\tsample_id AS sampleId,\n" +
+            "\treport_type AS reportType,\n" +
+            "\tcompletion_status AS completionStatus\n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_details_rel\n" +
+            "WHERE\n" +
+            "\tentrustment_id =#{entrustId}")
+    List<ReportEditReq> getStatusAndType(@Param("entrustId") Long entrustId);
 
     @Select("select report_type as reportType,completion_status As completionStatus from test_entrusted_sample_details_rel where entrustment_id=#{entrustId} ")
     List<ReportEditReq> getAllStatusAndTypeByEntrustId(@Param("entrustId") Long entrustId);
 
-    @Select("select sample_id from test_entrusted_sample_checkitem_rel where task_id=#{taskId}")
+    @Select("select DISTINCT sample_id from test_entrusted_sample_checkitem_rel where task_id=#{taskId}")
     List<Integer> getSampelIdsByTaskId(@Param("taskId") Long taskId);
 }

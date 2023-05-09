@@ -3660,17 +3660,19 @@ public class ReportServiceImpl implements ReportService {
             for (Integer valueVo:makeReportSampleInfos) {
                 ids.add(valueVo);
             }
-            List<ReportEditReq> ll = entrustEntityMapper.getStatusAndType(entrustIdByTaskId,ids);
+            List<ReportEditReq> ll = entrustEntityMapper.getStatusAndType(entrustIdByTaskId);
             Boolean flag = true;
             for (ReportEditReq editReq:ll) {
-                if (editReq.getReportType()==1){
-                    flag = false;
-                    break;
-                }else {
-                    Integer completionStatus = editReq.getCompletionStatus();
-                    if (completionStatus == 0){
+                if (ids.contains(editReq.getSampleId())){
+                    if (editReq.getReportType()==1){
                         flag = false;
                         break;
+                    }else {
+                        Integer completionStatus = editReq.getCompletionStatus();
+                        if (completionStatus == 0){
+                            flag = false;
+                            break;
+                        }
                     }
                 }
             }
