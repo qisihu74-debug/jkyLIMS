@@ -445,6 +445,20 @@ public class ReportController {
     }
 
     /**
+     * 根据报告编号获取签署链接
+     * @param reportCode
+     * @return
+     */
+    @GetMapping("getSignUrl")
+    public Result getSignUrl(String reportCode){
+        if (StringUtils.isEmpty(reportCode)){
+            return ResultUtil.error("缺少参数");
+        }
+        ReportRecordEntity urlByCode = reportService.getUrlByCode(reportCode);
+        return ResultUtil.success(urlByCode.getSealUrl());
+    }
+
+    /**
      * 契约锁报告下载
      * @param contractId
      * @param name

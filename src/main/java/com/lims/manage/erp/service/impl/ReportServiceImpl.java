@@ -1391,6 +1391,7 @@ public class ReportServiceImpl implements ReportService {
         List<QiYueSuoSealEntity> newList = Lists.newArrayList();
         String[] split = sealType.split(",");
         List<QiYueSuoSealEntity> list = qiYueSuoResponse.getList();
+        logger.info("获取契约锁印章列表为:{}",JSON.toJSONString(list));
         for (QiYueSuoSealEntity qiYueSuoSealEntity : list) {
             for (String s : split) {
                 if (qiYueSuoSealEntity.getName().contains(s)) {
