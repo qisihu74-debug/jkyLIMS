@@ -3324,12 +3324,13 @@ public class ReportServiceImpl implements ReportService {
             logger.info("提交审批中上传文件失败:{}", e);
             return false;
         }
+        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
         //更新签名
         String type = recordEntityMapper.getTypeByCode(reportCode);
         if ("1".equals(type)) {
-            reportMapper.updateVerAndIssZj(reportCode, inspector, verifyer, issuer, verifyerId, new Date(System.currentTimeMillis()), issuerId);
+            reportMapper.updateVerAndIssZj(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, verifyer, issuer, verifyerId, new Date(System.currentTimeMillis()), issuerId);
         } else {
-            reportMapper.updateVerAndIss(reportCode, inspector, verifyer, issuer, verifyerId, new Date(System.currentTimeMillis()), issuerId);
+            reportMapper.updateVerAndIss(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, verifyer, issuer, verifyerId, new Date(System.currentTimeMillis()), issuerId);
         }
         //设置签名信息,根据报告编号获取委托id
         String url1 = "";
@@ -3345,7 +3346,6 @@ public class ReportServiceImpl implements ReportService {
         if (url.contains("?")) {
             url = url.substring(0, url.indexOf("?"));
         }
-        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
         //TODO (报告) 兼容中间报告
         if ("1".equals(type)) {
             reportMapper.updateUrlZj(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());

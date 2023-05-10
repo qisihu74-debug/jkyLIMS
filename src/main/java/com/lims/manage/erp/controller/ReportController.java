@@ -2,6 +2,7 @@ package com.lims.manage.erp.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.aspose.cells.SaveFormat;
 import com.aspose.cells.Workbook;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -1055,7 +1056,7 @@ public class ReportController {
         poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");
         //禁止拷贝文档内容到外部
         poCtrl.setDisableCopyOnly(true);
-        poCtrl.setCustomToolbar(false);
+        //poCtrl.setCustomToolbar(false);
         com.zhuozhengsoft.pageoffice.excelwriter.Workbook wb = new com.zhuozhengsoft.pageoffice.excelwriter.Workbook();
         //解除excel隐藏sheet指定需要隐藏sheet
         try {
@@ -1079,7 +1080,7 @@ public class ReportController {
         }
         poCtrl.setWriter(wb);
         //添加自定义按钮
-        poCtrl.addCustomToolButton("保存", "Save()", 1);
+        poCtrl.addCustomToolButton("保存", "Save", 1);
         poCtrl.addCustomToolButton("打印", "PrintFile()", 6);
         poCtrl.addCustomToolButton("全屏/还原", "IsFullScreen()", 4);
         poCtrl.addCustomToolButton("关闭", "CloseFile()", 21);
@@ -1098,6 +1099,16 @@ public class ReportController {
         FileAndFolderUtil.delete(localPath);
         map.put("pageoffice", poCtrl.getHtmlCode("PageOfficeCtrl1"));
         map.put("params",JSON.toJSONString(reportEditReq));
+        JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(reportEditReq));
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("entrustId"+"="+jsonObject.get("entrustId"));
+        stringBuilder.append(",");
+        stringBuilder.append("reportType"+"="+jsonObject.get("reportType"));
+        stringBuilder.append(",");
+        stringBuilder.append("sampleId"+"="+jsonObject.get("sampleId"));
+        stringBuilder.append(",");
+        stringBuilder.append("taskId"+"="+jsonObject.get("taskId"));
+        map.put("params1",stringBuilder.toString());
         //设置模板引擎的html模板
         ModelAndView mv = new ModelAndView("excel");
         return mv;
@@ -1117,7 +1128,7 @@ public class ReportController {
         if (flag){
             return ResultUtil.success("提交成功");
         }else {
-            return ResultUtil.error("提交失败");
+            return ResultUtil.error("提交失败，请检查该委托是否存在未完成的中间报告");
         }
     }
 
@@ -1170,8 +1181,8 @@ public class ReportController {
         if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer) || org.apache.commons.lang3.StringUtils.isEmpty(inspector)){
             return ResultUtil.error("缺少参数！");
         }
-        Boolean flag = reportService.offlineReportMerge(reportCode,file,verifyer.split("&")[0],issuer.split("&")[0]
-                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),inspector);
+        Boolean flag = reportService.offlineReportMerge(reportCode,file,verifyer.split(",")[0],issuer.split(",")[0]
+                ,Long.parseLong(verifyer.split(",")[1]),Long.parseLong(issuer.split(",")[1]),inspector);
         if (flag) {
             return ResultUtil.success("报告文件上传成功！");
         }else {
