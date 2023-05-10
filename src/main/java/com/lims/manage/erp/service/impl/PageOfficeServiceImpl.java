@@ -1,10 +1,14 @@
 package com.lims.manage.erp.service.impl;
 
 import com.google.common.collect.Maps;
+import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TestDetectionDao;
 import com.lims.manage.erp.mapper.TestProductItemDao;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.ExcelInsertVo;
@@ -24,10 +28,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.util.*;
 
 /**
  * @Author: DLC
@@ -49,6 +51,10 @@ public class PageOfficeServiceImpl implements PageOfficeService {
     private TestProductItemDao testProductItemDao;
     @Autowired
     private SampleEntityMapper sampleEntityMapper;
+    @Autowired
+    private TestDetectionDao testDetectionDao;
+    @Autowired
+    private LogManagerService logManagerService;
 
 
     @Override
@@ -113,9 +119,9 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // 把 XSSFWorkbook 转为 InputStream
         InputStream input = AsposeUtil.createExcelStream(wb);
         // 把 wb 数据 存放上传
-        String[] array = productExcelUrl.split("/");
+        String[] array = productExcelUrl.split("\\.");
         if (excelInsertVo == null) {
-            String excelUrl = MinIoUtil.upload("file-resources", GenID.getID() + array[array.length - 1], input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            String excelUrl = MinIoUtil.upload("file-resources", GenID.getID() + "." + array[array.length - 1], input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             input.close();
             fileStream.close();
             // 更新 样品Excel附件
@@ -124,7 +130,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         } else {
             fileStream.close();
             // 私有方法 更新 产品附件及报告附件内容。
-            return methodUpdateItemUrl(GenID.getID() + array[array.length - 1], input, ids, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
+            return methodUpdateItemUrl(GenID.getID() + "." + array[array.length - 1], input, ids, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
         }
     }
 
@@ -219,7 +225,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             FileAndFolderUtil.delete(testImags[i]);
         }
         // 检测人与记录不相同时
-        if(!testSet.equals(recordSet)){
+        if (testSet != recordSet) {
             for (int i = 0; i < recordImags.length - 1; i++) {
                 FileAndFolderUtil.delete(recordImags[i]);
             }
@@ -237,23 +243,28 @@ public class PageOfficeServiceImpl implements PageOfficeService {
     private void methodUrlImags(List<Long> userIds, String[] Imags) throws Exception {
         List<TaskListParamVo> list = taskMapper.getUserSignatureUrls(userIds);
         if (!CollectionUtils.isEmpty(list)) {
-            for (int i = 0; i < list.size(); i++) {
-                TaskListParamVo taskListParamVo = list.get(i);
-                // 获取的url签名信息 存放至本地附件
-                String[] image = taskListParamVo.getSignatureUrl().split("/");
-                String downloadDir = dir + GenID.getID() + image[image.length - 1];
-                // 远端URL 存放本地
-                InputStream initialStream = FileAndFolderUtil.getInputStream(taskListParamVo.getSignatureUrl());
-                File targetFile = new File(downloadDir);
-                OutputStream outStream = new FileOutputStream(targetFile);
-                byte[] buffer = new byte[8 * 1024];
-                int bytesRead;
-                while ((bytesRead = initialStream.read(buffer)) != -1) {
-                    outStream.write(buffer, 0, bytesRead);
+            // 两次循环 是希望根据 userIds 进行排序 设置数值
+            for (Long userId : userIds) {
+                for (int i = 0; i < list.size(); i++) {
+                    TaskListParamVo taskListParamVo = list.get(i);
+                    if (userId.equals(Long.valueOf(taskListParamVo.getInspector()))) {
+                        // 获取的url签名信息 存放至本地附件
+                        String[] image = taskListParamVo.getSignatureUrl().split("/");
+                        String downloadDir = dir + GenID.getID() + image[image.length - 1];
+                        // 远端URL 存放本地
+                        InputStream initialStream = FileAndFolderUtil.getInputStream(taskListParamVo.getSignatureUrl());
+                        File targetFile = new File(downloadDir);
+                        OutputStream outStream = new FileOutputStream(targetFile);
+                        byte[] buffer = new byte[8 * 1024];
+                        int bytesRead;
+                        while ((bytesRead = initialStream.read(buffer)) != -1) {
+                            outStream.write(buffer, 0, bytesRead);
+                        }
+                        Imags[i] = downloadDir;
+                        initialStream.close();
+                        outStream.close();
+                    }
                 }
-                Imags[i] = downloadDir;
-                initialStream.close();
-                outStream.close();
             }
         }
     }
@@ -335,7 +346,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         if (array.length == 1) {
             array[0] = excelInsertVo.getList().get(0);
         } else {
-            for (int i = 0; i < array.length - 1; i++) {
+            for (int i = 0; i < array.length ; i++) {
                 array[i] = excelInsertVo.getList().get(i);
             }
         }
@@ -517,5 +528,31 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             }
         }
         return null;
+    }
+
+    @Override
+    public String CompleteTheReview(ExcelInsertVo excelInsertVo) {
+        SampleItemInstrumentEntity sampleItemInstrumentEntity2 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(excelInsertVo.getList().get(0));
+        Long taskId = sampleItemInstrumentEntity2.getTaskId();
+        List<Integer> states = taskMapper.selectCheckItemState(taskId,sampleItemInstrumentEntity2.getDeptId());
+        for (Integer stateItem : states) {
+            if (stateItem != 3) {
+                return "当前任务单下检测项未全部复核成功";
+            }
+        }
+        // 修改test_task state 状态 为6：
+        TaskTestEntity taskTestEntity = new TaskTestEntity();
+        taskTestEntity.setId(taskId);
+        taskTestEntity.setState(6);
+        // 任务单 复核成功 记录复核时间。
+        taskTestEntity.setReviewTime(new Date(System.currentTimeMillis()));
+        //记录日志
+        StringBuilder stringBuilder2 = new StringBuilder();
+        stringBuilder2.append(" 任务单id"+taskId);
+        stringBuilder2.append("  任务单复核时间 :"+new Timestamp(taskTestEntity.getReviewTime().getTime()));
+        stringBuilder2.append(" 任务单状态: " + taskTestEntity.getState());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-任务单复核成功\n\t"+stringBuilder2.toString(), Const.TASK_TEST, true);
+        taskMapper.updateTestTask(taskTestEntity);
+        return "任务单复核成功";
     }
 }
