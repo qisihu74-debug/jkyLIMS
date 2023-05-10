@@ -1216,18 +1216,19 @@ public class ReportController {
         }
         //根据报告编号合并委托下所用样品的报告模板包含首页、编辑报告页码和填充报告编号
         String url = reportService.handlerReportMerge(reportCode,qiYueSuoEntity.getAutographPath());
+        MinioClient client = MinIoUtil.minioClient;
         String[] strings = url.split("\\/");
         String bluckName = strings[3];
         String fileName = strings[4];
-        InputStream fileStream = MinIoUtil.getFileStream(bluckName, fileName);
         try {
+            client.statObject(bluckName, fileName);
+            InputStream inputStream = client.getObject(bluckName, fileName);
             ServletOutputStream outputStream = response.getOutputStream();
-            IOUtils.copy(fileStream,outputStream);
-            outputStream.flush();
-            fileStream.close();
+            int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+            inputStream.close();
             outputStream.close();
         }catch (Exception e){
-            logger.error("在线报告合成失败:{}",e);
+            logger.error("预览合并后的报告异常:{}",e);
         }
     }
 
