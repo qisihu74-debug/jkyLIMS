@@ -395,12 +395,13 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         MultipartFile multipartFile = AsposeUtil.fileToMultipart(file, detailByEntrustId.getReportCode());
         logger.info("上传带签名的报告");
         String url = MinIoUtil.upload("report-download", multipartFile, detailByEntrustId.getReportCode() + ".pdf");
+        String[] fileUrls = url.split("\\?");
         logger.info("上传完成带签名的报告:{}", url);
         //删除产生的临时文件
         for (String del : delList) {
             FileAndFolderUtil.delete(del);
         }
-        return url;
+        return fileUrls[0];
     }
 
     @Override
