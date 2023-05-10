@@ -168,11 +168,11 @@ public class PageOfficeController {
         poCtrl.getRibbonBar().setTabVisible("TabView", false);//视图
         //设置处理文件保存的请求方法
         poCtrl.setSaveFilePage("saveOriginalRecord");
-        //加载文档
-        url = URLDecoder.decode(url, "utf-8");
-        String[] strArray = url.split("\\.");
-        int suffixIndex = strArray.length - 1;
-        String type = strArray[suffixIndex];
+//        //加载文档
+//        url = URLDecoder.decode(url, "utf-8");
+//        String[] strArray = url.split("\\.");
+//        int suffixIndex = strArray.length - 1;
+//        String type = strArray[suffixIndex];
 //        ReturnResponse<String> response = downloadUtils.downLoad(url, type, null);
         poCtrl.webOpen(excel, OpenModeType.xlsSubmitForm, "administrator");
 //        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");
@@ -192,10 +192,11 @@ public class PageOfficeController {
      * @param response
      */
     @RequestMapping("Excel/saveOriginalRecord")
-    public ModelAndView save(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void save(HttpServletRequest request, HttpServletResponse response) throws Exception {
         FileSaver fs = new FileSaver(request, response);
         // 实现逻辑操作 -- 完成编辑
         String flag = pageOfficeService.saveOriginalRecord(request, fs);
+        fs.close();
         // 保存本地Excel 包含签名信息
         if (!StringUtils.isEmpty(flag)) {
 //            // 检测参数
@@ -207,11 +208,6 @@ public class PageOfficeController {
                 ids[j] = Integer.parseInt(items[j]);
             }
             pageOfficeService.updateOriginalRecordUrl(flag, ids);
-            ModelAndView mv = new ModelAndView("success");
-            return new ModelAndView("success");
-        } else {
-            ModelAndView mv = new ModelAndView("error");
-            return mv;
         }
     }
 

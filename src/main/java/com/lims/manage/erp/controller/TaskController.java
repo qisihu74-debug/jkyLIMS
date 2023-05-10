@@ -936,9 +936,15 @@ public class TaskController {
         if (testDetectionService.reviewTheLogin(userInfo.getUserId(), taskId) == false) {
             return ResultUtil.error("登录人没有被派发复核资格");
         }
+        List<Long> ids = new ArrayList<>();
+        ids.add(userInfo.getUserId());
+        List<TaskListParamVo> list = taskMapper.getUserSignatureUrls(ids);
+        if(CollectionUtils.isEmpty(list)){
+            return ResultUtil.error("登录人没有被签名图片 请上传");
+        }
         // 判断复核数据类型。
         pageOfficeService.finishCheckItemReview(excelInsertVo,userInfo.getUserId());
-        return ResultUtil.success("复核成功");
+        return ResultUtil.success(pageOfficeService.CompleteTheReview(excelInsertVo));
     }
 
 

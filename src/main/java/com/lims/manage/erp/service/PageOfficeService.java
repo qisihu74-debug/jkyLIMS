@@ -44,4 +44,11 @@ public interface PageOfficeService {
      */
     Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo,Long userId) throws Exception;
 
+    /**
+     * 完成复核：根据检测项id 判断任务单
+     * @param excelInsertVo
+     * @return
+     */
+    String CompleteTheReview(ExcelInsertVo excelInsertVo);
+
 }
