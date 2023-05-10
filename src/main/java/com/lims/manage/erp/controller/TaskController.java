@@ -910,6 +910,8 @@ public class TaskController {
         int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
         inputStream.close();
         outputStream.close();
+        out000.close();
+        b1.close();
         // 删除附件
         FileAndFolderUtil.delete(newFilePath);
         FileAndFolderUtil.delete(path);

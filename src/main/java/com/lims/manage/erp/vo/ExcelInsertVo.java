@@ -2,8 +2,7 @@ package com.lims.manage.erp.vo;
 
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Author: DLC
@@ -76,6 +75,10 @@ public class ExcelInsertVo {
      *  0：待检，1：检测中，2：待复核，3 ：通过，4：驳回
      */
     Integer state;
+    /**
+     * 存放 原始记录中 签名信息
+     */
+    Map<String,Object> map  = new HashMap<>();
 
 
 }

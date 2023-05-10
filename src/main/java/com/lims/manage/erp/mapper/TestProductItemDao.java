@@ -101,14 +101,15 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
      * @param itemId
      * @return
      */
-    @Select("SELECT\n" +
-            "\tt3.product_excel_url \n" +
+    @Select("SELECT \n" +
+            "t5.url\n" +
             "FROM\n" +
             "\ttest_entrusted_sample_checkitem_rel AS t1\n" +
-            "\tLEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id \n" +
-            "\tLEFT JOIN test_product AS t3 ON t2.product_id = t3.product_id\n" +
-            "WHERE\n" +
-            "\tt1.id = #{itemId}")
+            "\tLEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id\n" +
+            "\tLEFT JOIN product_report_original_rel as t4 ON t4.product_id = t2.product_id\n" +
+            "\tLEFT JOIN test_report_original_template as t5 ON t4.report_original_id = t5.id\n" +
+            "WHERE"+
+            "\tt1.id = #{itemId} LIMIT 1")
     String getProductExcel(@Param("itemId") Integer itemId);
 
     /**
