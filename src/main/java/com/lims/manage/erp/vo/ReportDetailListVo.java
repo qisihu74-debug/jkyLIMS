@@ -6,6 +6,7 @@ import java.util.List;
 
 @Data
 public class ReportDetailListVo {
+    private Long reportId;
     /**
      * 委托单ID
      */
