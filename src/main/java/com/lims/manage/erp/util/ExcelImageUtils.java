@@ -111,7 +111,6 @@ public class ExcelImageUtils {
             for (String key : map.keySet()) {
                 // 根据key 遍历数据
                 ExcelInsertVo data = (ExcelInsertVo) map.get(key);
-//                System.out.println("遍历data 数据 == " + data);
                 // 获取需要操作的工作表
                 com.aspose.cells.Worksheet workSheet = workbook.getWorksheets().get(data.getSheetName());
                 if (workSheet != null) {

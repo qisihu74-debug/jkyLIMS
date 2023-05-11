@@ -119,27 +119,33 @@ public class PageOfficeController {
         }
         com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
         int count = workbook.getWorksheets().getCount();
-        for (int i = 0; i < count; i++) {
-            Boolean flag = false;
-            String sheetName = "";
-            for (int j = 0; j < dataEntitys.size(); j++) {
-                TaskIdEntity data = dataEntitys.get(j);
-                if (data.getCheckItemName().equals(workbook.getWorksheets().get(i).getName())) {
-                    flag = true;
-                    sheetName = data.getCheckItemName();
+        try {
+            for (int i = 0; i < count; i++) {
+                Boolean flag = false;
+                String sheetName = "";
+                for (int j = 0; j < dataEntitys.size(); j++) {
+                    TaskIdEntity data = dataEntitys.get(j);
+                    if (data.getCheckItemName().contains(workbook.getWorksheets().get(i).getName())) {
+                        flag = true;
+                        sheetName = workbook.getWorksheets().get(i).getName();
+                    }
+                }
+                if (flag) {
+                    // 设置为 可见
+                    workbook.getWorksheets().get(i).setVisible(true);
+                    //设置当工作表只读时，是否允许用户手动调整行列。
+                    wb.openSheet(sheetName).setAllowAdjustRC(true);
+                    //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
+                    wb.openSheet(sheetName).setReadOnly(false);
+                } else {
+                    // sheetName 不相等 设置为隐藏
+                    workbook.getWorksheets().get(i).setVisible(false);
                 }
             }
-            if (flag) {
-                // 设置为 可见
-                workbook.getWorksheets().get(i).setVisible(true);
-                //设置当工作表只读时，是否允许用户手动调整行列。
-                wb.openSheet(sheetName).setAllowAdjustRC(true);
-                //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
-                wb.openSheet(sheetName).setReadOnly(false);
-            } else {
-                // sheetName 不相等 设置为隐藏
-                workbook.getWorksheets().get(i).setVisible(false);
-            }
+        }catch (Exception e){
+            e.printStackTrace();
+            // 检测项无Sheet页
+            return new ModelAndView("error");
         }
         String excel = dir + GenID.getID() + "." + "xlsx";
         workbook.save(excel, SaveFormat.XLSX);

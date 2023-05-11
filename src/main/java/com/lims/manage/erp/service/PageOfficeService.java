@@ -18,7 +18,7 @@ public interface PageOfficeService {
      * @param ids
      * @return
      */
-    String getProductExcelUrl(Integer[] ids) throws IOException;
+    String getProductExcelUrl(Integer[] ids) throws Exception;
 
     /**
      * 完成编辑

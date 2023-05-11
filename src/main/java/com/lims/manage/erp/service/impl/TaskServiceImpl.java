@@ -1797,12 +1797,29 @@ public class TaskServiceImpl implements TaskService {
             logger.info("样品附件 " + productExcelUrl + e);
         }
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
+        Map<String, String> mapSheet = new HashMap<>();
+        // 循环遍历所有工作表
+        for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+            // 获取第i个工作表
+            XSSFSheet sheet = wb.getSheetAt(i);
+            if (sheet != null) {
+                // 获取工作表的名称
+                String sheetName = sheet.getSheetName();
+                mapSheet.put(sheetName, sheetName);
+            }
+        }
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
         // 获取 sheetName
         Map<String,Object> map = new HashMap<>();
         // 通过检测项id 获取 相应的 id关联信息。
         for (int i = 0; i < dataEntitys.size(); i++) {
             TaskIdEntity data = dataEntitys.get(i);
+            for (String key : mapSheet.keySet()) {
+                // 替换 sheet名
+                if (data.getCheckItemName().contains(key)) {
+                    data.setCheckItemName(key);
+                }
+            }
             XSSFSheet sheet = wb.getSheet(data.getCheckItemName());
             if(sheet!=null){
                 map.put(data.getCheckItemName(),i);
