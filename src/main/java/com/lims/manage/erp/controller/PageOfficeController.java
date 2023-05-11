@@ -206,7 +206,7 @@ public class PageOfficeController {
 //        ReturnResponse<String> response = downloadUtils.downLoad(url, type, null);
         logger.info("在线编辑原始记录本地缓存路径:{}",excel);
         if (excel.indexOf(":\\") < 0){
-            excel = "file://"+excel.substring(1);
+            excel = "file://"+excel;
         }
         logger.info("在线编辑原始记录本地缓存路径1:{}",excel);
         poCtrl.webOpen(excel, OpenModeType.xlsSubmitForm, "administrator");

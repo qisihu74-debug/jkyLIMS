@@ -382,7 +382,7 @@
         WHERE
             t2.task_code IS NOT NULL
             AND t2.report_complete = 2
-            AND t3.state = 3
+            AND (t3.state = 3 or t3.mid_state = 1)
         <if test="taskCode!=null and taskCode!=''">
             and t2.task_code like CONCAT('%',#{taskCode},'%')
         </if>
