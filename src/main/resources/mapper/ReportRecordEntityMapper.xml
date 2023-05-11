@@ -839,6 +839,7 @@
     </select>
 
     <resultMap id="reportDetailListResult" type="com.lims.manage.erp.vo.ReportDetailListVo">
+        <result property="reportId" column="report_id"></result>
         <result property="entrustId" column="entrustId"></result>
         <result property="entrustmentNo" column="entrustment_no"></result>
         <result property="reportCode" column="report_code"></result>
@@ -909,6 +910,7 @@
     <select id="reportList0808" resultMap="reportDetailListResult"
             parameterType="com.lims.manage.erp.vo.ReportDetailListParamVo">
         SELECT
+        t1.id report_id,
         t1.entrustment_id entrustId,
         t2.entrustment_no,
         IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
@@ -956,6 +958,7 @@
     <select id="reportListMid0808" resultMap="reportDetailListResult"
             parameterType="com.lims.manage.erp.vo.ReportDetailListParamVo">
         SELECT
+        t1.id report_id,
         t1.entrust_id entrustId,
         t2.entrustment_no,
         IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
@@ -1003,6 +1006,7 @@
     <select id="reportListTask0808" resultMap="reportDetailListResult"
             parameterType="com.lims.manage.erp.vo.ReportDetailListParamVo">
         SELECT
+        t1.id report_id,
         t2.entrustment_no,
         t1.report_code,
         t1.category,
@@ -1055,6 +1059,7 @@
     <select id="reportListTaskMid0808" resultMap="reportDetailListResult"
             parameterType="com.lims.manage.erp.vo.ReportDetailListParamVo">
         SELECT
+        t1.id report_id,
         t2.entrustment_no,
         IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
         t1.report_code,
