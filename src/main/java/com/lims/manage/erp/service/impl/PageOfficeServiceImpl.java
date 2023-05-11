@@ -552,6 +552,8 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         int count = workbook.getWorksheets().getCount();
         Map<String, String> mapSheet = new HashMap<>();
         for (int o = 0; o < count; o++) {
+            // 设置全部可读
+            workbook.getWorksheets().get(o).setVisible(true);
             String sheetName = workbook.getWorksheets().get(o).getName();
             mapSheet.put(sheetName, sheetName);
         }
@@ -718,6 +720,14 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         }
         fileStream.close();
         return countMap;
+    }
+
+    @Override
+    public String updateExcelVisible(String saveFileUrl,Integer[] array, InputStream inputStream) throws IOException {
+        // 私有方法 更新 产品附件及报告附件内容。
+        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
+        methodUpdateItemUrl(saveFileUrl, inputStream, array, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
+        return null;
     }
 
 
