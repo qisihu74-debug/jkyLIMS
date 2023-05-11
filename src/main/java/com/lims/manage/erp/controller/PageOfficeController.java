@@ -96,6 +96,7 @@ public class PageOfficeController {
                 map.put("teamVo", returnList.getTeamVo());
             }
         }
+        PDFHelper3.getLicense();
         //根据参数获取样品相关信息和检测项相关信息
         //填充表头信息临时缓存到本地
         String url = pageOfficeService.getProductExcelUrl(ids);
@@ -117,6 +118,7 @@ public class PageOfficeController {
         } catch (Exception e) {
             logger.info("读取产品excel异常 " + url + e);
         }
+        PDFHelper3.getLicense();
         com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
         int count = workbook.getWorksheets().getCount();
         try {
@@ -125,6 +127,8 @@ public class PageOfficeController {
                 String sheetName = "";
                 for (int j = 0; j < dataEntitys.size(); j++) {
                     TaskIdEntity data = dataEntitys.get(j);
+                    String name = workbook.getWorksheets().get(i).getName();
+                    System.out.println("name  == " + name );
                     if (data.getCheckItemName().contains(workbook.getWorksheets().get(i).getName())) {
                         flag = true;
                         sheetName = workbook.getWorksheets().get(i).getName();
@@ -201,6 +205,7 @@ public class PageOfficeController {
     public void save(HttpServletRequest request, HttpServletResponse response) throws Exception {
         FileSaver fs = new FileSaver(request, response);
         // 实现逻辑操作 -- 完成编辑
+        PDFHelper3.getLicense();
         String flag = pageOfficeService.saveOriginalRecord(request, fs);
         fs.close();
         // 保存本地Excel 包含签名信息
