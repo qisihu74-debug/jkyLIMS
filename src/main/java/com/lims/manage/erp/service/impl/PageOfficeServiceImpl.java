@@ -148,10 +148,6 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             TaskIdEntity data = dataEntitys.get(i);
             // 检测项 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回
             if (data != null && !data.getState().equals(3)) {
-                // 有序信息。
-                OriginalRecordDataVo originalData = taskService.getOriginalData(data.getTaskId(), data.getSampleId(), data.getCheckItemId(), data.getIdItem());
-                Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
-                result.put("result", originalData);
                 // 模糊匹配
                 // 循环遍历所有工作表
                 for (int j = 0; j < wb.getNumberOfSheets(); j++) {
@@ -161,6 +157,13 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                         // 获取工作表的名称
                         String sheetName = sheet.getSheetName();
                         if (data.getCheckItemName().contains(sheetName)) {
+                            Map<Integer, Integer> countMap = excelSheetDataVo.getCountMap();
+                            int number = countMap.get(j);
+                            // 有序信息。
+                            OriginalRecordDataVo originalData = taskService.getOriginalData(data.getTaskId(), data.getSampleId(), data.getCheckItemId(), data.getIdItem());
+                            Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
+                            originalData.setRecordNumber(originalData.getRecordNumber() + "-" + number);
+                            result.put("result", originalData);
                             // 替换原始记录模板数据
                             ExcelReplaceUtil.ExcelReplace(sheet, result);
                         }
@@ -240,6 +243,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
     public String updateOriginalRecordUrl(String excelUrl, Integer[] ids) throws Exception {
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
         // 获取公网 附件
+        PDFHelper3.getLicense();
         FileInputStream fileStream = new FileInputStream(excelUrl);
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
         // 把 XSSFWorkbook 转为 InputStream
@@ -310,6 +314,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             }
         }
         // 私有方法 处理 复核人签名信息。
+        PDFHelper3.getLicense();
         String saveExcel = methodReviewExcel(array, userId);
 //        System.out.println(" saveExcel ==  " + saveExcel);
         //上传文件到文件服务器、删除本地临时缓存的文件
@@ -526,6 +531,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // 检测人签名数组图片
         String[] testImags = new String[testSetLong.size()];
         // 调用方法处理 签名图片存放数组中。
+        PDFHelper3.getLicense();
         methodUrlImags(testSetLong, testImags);
         // 记录人集合
         List<Long> recordSetLong = new ArrayList<>();
