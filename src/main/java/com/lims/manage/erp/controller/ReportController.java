@@ -1110,7 +1110,7 @@ public class ReportController {
         logger.info("处理前路径:{}",localPath);
         //加载文档
         if (localPath.indexOf(":\\") < 0){
-            localPath = "file://"+localPath.substring(1);
+            localPath = "file://"+localPath;
         }
         logger.info("处理后路径:{}",localPath);
         poCtrl.webOpen(localPath, OpenModeType.xlsSubmitForm, "user");
