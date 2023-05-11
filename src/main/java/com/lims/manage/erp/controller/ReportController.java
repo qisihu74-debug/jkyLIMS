@@ -1107,7 +1107,12 @@ public class ReportController {
         poCtrl.getRibbonBar().setTabVisible("TabView", false);//视图
         //设置处理文件保存的请求方法
         poCtrl.setSaveFilePage("saveOnlineReport");
+        logger.info("处理前路径:{}",localPath);
         //加载文档
+        if (localPath.indexOf(":\\") < 0){
+            localPath = "file://"+localPath;
+        }
+        logger.info("处理后路径:{}",localPath);
         poCtrl.webOpen(localPath, OpenModeType.xlsSubmitForm, "user");
         //删除临时文件
         FileAndFolderUtil.delete(localPath);

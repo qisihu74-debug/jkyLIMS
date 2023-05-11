@@ -55,8 +55,6 @@ public class PageOfficeController {
     RedisUtil redisUtil;
     @Autowired
     private TaskService taskService;
-    @Autowired
-    private TestProductItemDao testProductItemDao;
 
     @Value("${autograph.path}")
     private String dir;
@@ -184,6 +182,11 @@ public class PageOfficeController {
 //        int suffixIndex = strArray.length - 1;
 //        String type = strArray[suffixIndex];
 //        ReturnResponse<String> response = downloadUtils.downLoad(url, type, null);
+        logger.info("在线编辑原始记录本地缓存路径:{}",excel);
+        if (excel.indexOf(":\\") < 0){
+            excel = "file://"+excel;
+        }
+        logger.info("在线编辑原始记录本地缓存路径1:{}",excel);
         poCtrl.webOpen(excel, OpenModeType.xlsSubmitForm, "administrator");
 //        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");
         //TODO 删除临时文件
