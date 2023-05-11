@@ -87,6 +87,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/pageOffice/Excel/saveOriginalRecord", "anon");
         filterChainDefinitionMap.put("/task/checkItemReview", "anon");
         filterChainDefinitionMap.put("/pageOffice/**", "anon");
+        filterChainDefinitionMap.put("/news/list", "anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");

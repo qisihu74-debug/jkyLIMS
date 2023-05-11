@@ -426,7 +426,7 @@
     </update>
 
     <select id="getUrlByCode" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
-        select report_url, seal_url
+        select report_url, seal_url, sign_url
         from test_report_record
         where report_code = #{reportCode}
     </select>

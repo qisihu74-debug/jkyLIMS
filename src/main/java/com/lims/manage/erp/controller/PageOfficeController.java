@@ -96,6 +96,7 @@ public class PageOfficeController {
                 map.put("teamVo", returnList.getTeamVo());
             }
         }
+        PDFHelper3.getLicense();
         //根据参数获取样品相关信息和检测项相关信息
         //填充表头信息临时缓存到本地
         String url = pageOfficeService.getProductExcelUrl(ids);
@@ -117,29 +118,38 @@ public class PageOfficeController {
         } catch (Exception e) {
             logger.info("读取产品excel异常 " + url + e);
         }
+        PDFHelper3.getLicense();
         com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
         int count = workbook.getWorksheets().getCount();
-        for (int i = 0; i < count; i++) {
-            Boolean flag = false;
-            String sheetName = "";
-            for (int j = 0; j < dataEntitys.size(); j++) {
-                TaskIdEntity data = dataEntitys.get(j);
-                if (data.getCheckItemName().equals(workbook.getWorksheets().get(i).getName())) {
-                    flag = true;
-                    sheetName = data.getCheckItemName();
+        try {
+            for (int i = 0; i < count; i++) {
+                Boolean flag = false;
+                String sheetName = "";
+                for (int j = 0; j < dataEntitys.size(); j++) {
+                    TaskIdEntity data = dataEntitys.get(j);
+                    String name = workbook.getWorksheets().get(i).getName();
+                    System.out.println("name  == " + name );
+                    if (data.getCheckItemName().contains(workbook.getWorksheets().get(i).getName())) {
+                        flag = true;
+                        sheetName = workbook.getWorksheets().get(i).getName();
+                    }
+                }
+                if (flag) {
+                    // 设置为 可见
+                    workbook.getWorksheets().get(i).setVisible(true);
+                    //设置当工作表只读时，是否允许用户手动调整行列。
+                    wb.openSheet(sheetName).setAllowAdjustRC(true);
+                    //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
+                    wb.openSheet(sheetName).setReadOnly(false);
+                } else {
+                    // sheetName 不相等 设置为隐藏
+                    workbook.getWorksheets().get(i).setVisible(false);
                 }
             }
-            if (flag) {
-                // 设置为 可见
-                workbook.getWorksheets().get(i).setVisible(true);
-                //设置当工作表只读时，是否允许用户手动调整行列。
-                wb.openSheet(sheetName).setAllowAdjustRC(true);
-                //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
-                wb.openSheet(sheetName).setReadOnly(false);
-            } else {
-                // sheetName 不相等 设置为隐藏
-                workbook.getWorksheets().get(i).setVisible(false);
-            }
+        }catch (Exception e){
+            e.printStackTrace();
+            // 检测项无Sheet页
+            return new ModelAndView("error");
         }
         String excel = dir + GenID.getID() + "." + "xlsx";
         workbook.save(excel, SaveFormat.XLSX);
@@ -168,11 +178,11 @@ public class PageOfficeController {
         poCtrl.getRibbonBar().setTabVisible("TabView", false);//视图
         //设置处理文件保存的请求方法
         poCtrl.setSaveFilePage("saveOriginalRecord");
-        //加载文档
-        url = URLDecoder.decode(url, "utf-8");
-        String[] strArray = url.split("\\.");
-        int suffixIndex = strArray.length - 1;
-        String type = strArray[suffixIndex];
+//        //加载文档
+//        url = URLDecoder.decode(url, "utf-8");
+//        String[] strArray = url.split("\\.");
+//        int suffixIndex = strArray.length - 1;
+//        String type = strArray[suffixIndex];
 //        ReturnResponse<String> response = downloadUtils.downLoad(url, type, null);
         poCtrl.webOpen(excel, OpenModeType.xlsSubmitForm, "administrator");
 //        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");
@@ -192,10 +202,12 @@ public class PageOfficeController {
      * @param response
      */
     @RequestMapping("Excel/saveOriginalRecord")
-    public ModelAndView save(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void save(HttpServletRequest request, HttpServletResponse response) throws Exception {
         FileSaver fs = new FileSaver(request, response);
         // 实现逻辑操作 -- 完成编辑
+        PDFHelper3.getLicense();
         String flag = pageOfficeService.saveOriginalRecord(request, fs);
+        fs.close();
         // 保存本地Excel 包含签名信息
         if (!StringUtils.isEmpty(flag)) {
 //            // 检测参数
@@ -207,11 +219,6 @@ public class PageOfficeController {
                 ids[j] = Integer.parseInt(items[j]);
             }
             pageOfficeService.updateOriginalRecordUrl(flag, ids);
-            ModelAndView mv = new ModelAndView("success");
-            return new ModelAndView("success");
-        } else {
-            ModelAndView mv = new ModelAndView("error");
-            return mv;
         }
     }
 

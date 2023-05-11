@@ -518,4 +518,9 @@ public interface TaskMapper extends BaseMapper {
      */
     List<TaskIdEntity> selectItems(@Param(value = "array") Integer[] array);
 
+    /**
+     * 根据任务单id 获取相应的 检测项
+     */
+    List<TaskIdEntity> selectItemPages(@Param(value = "taskId") Long taskId);
+
 }
