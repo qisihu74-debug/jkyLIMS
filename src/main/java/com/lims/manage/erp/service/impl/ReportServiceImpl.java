@@ -3394,6 +3394,7 @@ public class ReportServiceImpl implements ReportService {
                 }
                 map.put(index,newWork);
                 countMap.put(index, size);
+                index=index+1;
             } catch (Exception e) {
                 log.error("报告文件加载失败:{}",e);
             }
