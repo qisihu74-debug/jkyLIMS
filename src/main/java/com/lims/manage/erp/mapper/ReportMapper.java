@@ -40,6 +40,7 @@ public interface ReportMapper {
     List<ReportListVo> getReportListOnline(@Param("deptIds") List<Long> deptIds,@Param("taskCode") String taskCode);
 
     List<ReportListVo> reportDownloadList(@Param("deptIds") List<Long> deptIds,@Param("reportCode") String reportCode);
+    List<ReportListVo> reportDownloadList0512(@Param("deptIds") List<Long> deptIds,@Param("reportCode") String reportCode);
 
     /**
      * 查询委托下样品名字
