@@ -492,7 +492,7 @@
         FROM
         test_entrusted_info t1
         LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
-        LEFT JOIN test_report_record t6 ON t1.id = t6.entrustment_id
+        LEFT JOIN test_report_record t6 ON t1.id = t6.entrust_id
         WHERE
         t2.issue_report = '是'
         AND t6.state = 1

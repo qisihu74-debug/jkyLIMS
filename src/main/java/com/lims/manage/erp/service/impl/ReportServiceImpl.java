@@ -3421,7 +3421,7 @@ public class ReportServiceImpl implements ReportService {
         handlerPage(document, countMap,reportCode);
         //转为pdf
         String excelPath = path+reportCode+".xlsx";
-        String pdfPath = path+reportCode+".xlsx";
+        String pdfPath = path+reportCode+".pdf";
         try {
             document.save(excelPath);
         } catch (Exception e) {
