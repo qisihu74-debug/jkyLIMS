@@ -457,6 +457,58 @@
         </if>
         order by t6.report_code desc
     </select>
+    <select id="reportDownloadList0512" resultType="com.lims.manage.erp.vo.ReportListVo">
+        select * from (SELECT DISTINCT
+        t1.id,
+        t1.entrust_test_type,
+        t6.report_code,
+        t6.type AS reportType,
+        t1.actual_price count_price,
+        DATE_FORMAT( t1.request_date, '%Y-%m-%d' ) request_date
+        FROM
+        test_entrusted_info t1
+        LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
+        LEFT JOIN test_report_record t6 ON t1.id = t6.entrustment_id
+        WHERE
+        t2.issue_report = '是'
+        AND t6.state = 1
+        <if test="reportCode!=null and reportCode!=''">
+            and t6.report_code like CONCAT('%',#{reportCode},'%')
+        </if>
+        <if test="deptIds!=null">
+            and t2.dept_id in
+            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        union all
+        SELECT DISTINCT
+        t1.id,
+        t1.entrust_test_type,
+        t6.report_code,
+        t6.type AS reportType,
+        t1.actual_price count_price,
+        DATE_FORMAT( t1.request_date, '%Y-%m-%d' ) request_date
+        FROM
+        test_entrusted_info t1
+        LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
+        LEFT JOIN test_report_record t6 ON t1.id = t6.entrustment_id
+        WHERE
+        t2.issue_report = '是'
+        AND t6.state = 1
+        <if test="reportCode!=null and reportCode!=''">
+            and t6.report_code like CONCAT('%',#{reportCode},'%')
+        </if>
+        <if test="deptIds!=null">
+            and t2.dept_id in
+            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+
+
+        ) t1 order by t1.report_code
+    </select>
 
     <select id="getSampleNames" resultType="java.lang.String">
         SELECT
@@ -490,7 +542,7 @@
             LEFT JOIN test_entrusted_sample_checkitem_rel t3 ON t2.id = t3.sample_id
         WHERE
             t1.entrustment_id = #{entrustId}
-            and t3.state = 3
+            and (t3.state = 3 or t3.mid_state = 1)
             AND t3.task_id = #{taskId}
         GROUP BY
             t2.id,

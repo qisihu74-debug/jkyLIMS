@@ -251,7 +251,7 @@ public class ReportServiceImpl implements ReportService {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         PageHelper.clearPage();
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportListVo> list = reportMapper.reportDownloadList(userTeamIds, search);
+        List<ReportListVo> list = reportMapper.reportDownloadList0512(userTeamIds, search);
         for (ReportListVo reportListVo : list) {
             //设置样品信息
             List<String> sampleNames = reportMapper.getSampleNames(reportListVo.getId());
