@@ -5,6 +5,7 @@ import com.zhuozhengsoft.pageoffice.FileSaver;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @Author: DLC
@@ -51,4 +52,11 @@ public interface PageOfficeService {
      */
     String CompleteTheReview(ExcelInsertVo excelInsertVo);
 
+    /**
+     * 更新文件
+     * @param array
+     * @param inputStream
+     * @return
+     */
+    String updateExcelVisible(String saveFileUrl,Integer[] array, InputStream inputStream) throws IOException;
 }

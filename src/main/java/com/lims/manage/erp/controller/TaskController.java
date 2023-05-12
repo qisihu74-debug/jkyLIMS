@@ -905,9 +905,14 @@ public class TaskController {
         InputStream out000 = new FileInputStream(newFilePath);
         //相应pdf
         ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(out000,path);
-        if(b1 == null){
-            return;
-        }
+//        if(b1 == null){
+//            // 删除附件
+//            FileAndFolderUtil.delete(newFilePath);
+//            FileAndFolderUtil.delete(path);
+//            out000.close();
+//            b1.close();
+//            return;
+//        }
         InputStream inputStream = FileAndFolderUtil.parseOut(b1);
         ServletOutputStream outputStream = response.getOutputStream();
         int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数

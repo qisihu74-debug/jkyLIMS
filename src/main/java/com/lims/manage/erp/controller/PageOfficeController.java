@@ -125,27 +125,49 @@ public class PageOfficeController {
                 String sheetName = "";
                 for (int j = 0; j < dataEntitys.size(); j++) {
                     TaskIdEntity data = dataEntitys.get(j);
-                    String name = workbook.getWorksheets().get(i).getName();
-                    System.out.println("name  == " + name );
+//                    String name = workbook.getWorksheets().get(i).getName();
+//                    System.out.println("name  == " + name);
                     if (data.getCheckItemName().contains(workbook.getWorksheets().get(i).getName())) {
                         flag = true;
                         sheetName = workbook.getWorksheets().get(i).getName();
                     }
                 }
-                if (flag) {
+                if (flag == true) {
                     // 设置为 可见
                     workbook.getWorksheets().get(i).setVisible(true);
                     //设置当工作表只读时，是否允许用户手动调整行列。
                     wb.openSheet(sheetName).setAllowAdjustRC(true);
                     //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
                     wb.openSheet(sheetName).setReadOnly(false);
+//                    int visibility11 = workbook.getWorksheets().get(i).getVisibilityType();
+//                    System.out.println("设置可见后 == " + visibility11);
                 } else {
-                    // sheetName 不相等 设置为隐藏
-                    workbook.getWorksheets().get(i).setVisible(false);
+                    flag = false;
+                    // 获取工作表的隐藏状态，返回SheetVisibility类型
+                    int visibility = workbook.getWorksheets().get(i).getVisibilityType();
+//                    System.out.println("visibility == " + visibility);
+                    if (visibility != 1) {
+                        // sheetName 不相等 设置为隐藏
+                        workbook.getWorksheets().get(i).setVisible(false);
+//                        int visibility11 = workbook.getWorksheets().get(i).getVisibilityType();
+//                        System.out.println("visibility11 == " + visibility11);
+                    }
                 }
             }
-        }catch (Exception e){
+        }catch (Exception e) {
             e.printStackTrace();
+            // 设置所有状态 可见。
+            for (int o = 0; o < count; o++) {
+                // 设置全部可读
+                workbook.getWorksheets().get(o).setVisible(true);
+            }
+            String excel = dir + GenID.getID() + "." + "xlsx";
+            workbook.save(excel, SaveFormat.XLSX);
+            InputStream inputStream = new FileInputStream(excel);
+            // 更新 文件
+            pageOfficeService.updateExcelVisible(GenID.getID() + "." + "xlsx", ids, inputStream);
+            // 删除附件
+            FileAndFolderUtil.delete(excel);
             // 检测项无Sheet页
             return new ModelAndView("error");
         }
