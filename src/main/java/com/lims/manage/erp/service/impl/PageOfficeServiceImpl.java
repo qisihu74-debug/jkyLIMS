@@ -21,8 +21,6 @@ import com.lims.manage.erp.vo.OriginalRecordDataVo;
 import com.lims.manage.erp.vo.TaskListParamVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -36,6 +34,7 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -347,7 +346,14 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         String[] testImags = new String[testSetLong.size()];
         // 调用方法处理 签名图片存放数组中。
         methodUrlImags(testSetLong, testImags);
-
+//        // 日期数组图片
+//        String[] Imags = new String[1];
+//        String imagePath = dir + GenID.getID()+"."+"jpg";
+//        // 生成日期图片
+//        ImgUtils.inserNewImage(imagePath);
+//        // 更改图片背景颜色
+//        ImgUtils.changeImgColor(imagePath);
+//        Imags[0] = imagePath;
         // 查询附件 存在则 删除附件
         ExcelInsertVo excelInsertVo2 = testProductItemDao.getExcelUrl(array[0]);
         InputStream fileStream = null;
@@ -394,6 +400,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         }
         // 拿到文件后 saveExcel 获取 sheet名 返回
         Map<String, String> mapSheet = getSheetMap(saveExcel);
+        // 设置图片的list
         List<ExcelInsertVo> excelInsertVoList = new ArrayList<>();
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
         if (!CollectionUtils.isEmpty(dataEntitys)) {
@@ -418,8 +425,37 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                 excelInsertVoList.add(excelInsertVo);
             }
         }
+        // 设置文本的list
+        List<ExcelInsertVo> contextList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(dataEntitys)) {
+            Date currentTime = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy年MM月dd日");
+            String titleStr = formatter.format(currentTime);
+            for (int i = 0; i < dataEntitys.size(); i++) {
+                Map<String, Object> map = new HashMap<>();
+                TaskIdEntity taskIdEntity = dataEntitys.get(i);
+                for (String key : mapSheet.keySet()) {
+                    // 替换 sheet名
+                    if (taskIdEntity.getCheckItemName().contains(key)) {
+                        taskIdEntity.setCheckItemName(key);
+                    }
+                }
+                ExcelInsertVo excelInsertVo3 = new ExcelInsertVo();
+                excelInsertVo3.setSheetName(taskIdEntity.getCheckItemName());
+                excelInsertVo3.setRecordType("日期：");
+                excelInsertVo3.setData(titleStr);
+                // key 使用 sheet名加类型进行拼接
+                map.put(excelInsertVo3.getSheetName() + excelInsertVo3.getRecordType(), excelInsertVo3);
+                ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+                excelInsertVo.setSheetName(taskIdEntity.getCheckItemName());
+                excelInsertVo.setMap(map);
+                contextList.add(excelInsertVo);
+            }
+        }
+        // 塞入指定位置 文本内容
+        ExcelImageUtils.inserContext(saveExcel,contextList,newFilePath);
         // 清除图片
-        ExcelImageUtils.seachXY(saveExcel, excelInsertVoList, newFilePath);
+        ExcelImageUtils.seachXY(newFilePath, excelInsertVoList, saveExcel);
         // 插入图片
         ExcelImageUtils.inserImage(newFilePath, excelInsertVoList, saveExcel);
         // 去除excel 中标记
@@ -437,6 +473,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         for (int i = 0; i < testImags.length - 1; i++) {
             FileAndFolderUtil.delete(testImags[i]);
         }
+//        FileAndFolderUtil.delete(imagePath);
         // 返回塞入的复核人签名本地附件
         return saveExcel;
     }

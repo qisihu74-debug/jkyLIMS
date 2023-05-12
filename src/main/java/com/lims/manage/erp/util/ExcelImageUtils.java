@@ -1,17 +1,20 @@
 package com.lims.manage.erp.util;
 
-import com.aspose.cells.Cells;
-import com.aspose.cells.Picture;
-import com.aspose.cells.PictureCollection;
-import com.aspose.cells.PlacementType;
-import com.aspose.pdf.TabOrder;
+import com.aspose.cells.*;
 import com.lims.manage.erp.vo.ExcelInsertVo;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.util.CollectionUtils;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 /**
  * @Author: DLC
@@ -246,6 +249,161 @@ public class ExcelImageUtils {
 //        getReviewCoord2(9, 27, workSheet);
 //    }
 
+    /**
+     * Excel 插入文本并删除旧内容
+     *
+     * @param filePath    附件路径
+     * @param list        数据
+     * @param newFilePath 生成新文件路径
+     * @throws Exception
+     */
+    public static void inserContext(String filePath, List<ExcelInsertVo> list, String newFilePath) throws Exception {
+        // 获取 wb 读取行号及列号
+        InputStream fileStream = new FileInputStream(filePath);
+        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
+        // 打开要编辑的工作簿
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(filePath);
+        for (int i = 0; i < list.size(); i++) {
+            ExcelInsertVo excelInsertVo = list.get(i);
+            // 处理 data 中 map遍历值。
+            Map<String, Object> map = excelInsertVo.getMap();
+            for (String key : map.keySet()) {
+                // 根据key 遍历数据
+                ExcelInsertVo data = (ExcelInsertVo) map.get(key);
+                // 获取需要操作的工作表
+                com.aspose.cells.Worksheet workSheet = workbook.getWorksheets().get(data.getSheetName());
+                if (workSheet != null) {
+                    //设置图表插入的位置
+                    ExcelReplaceUtil.getSheetRowAndColumn(data, wb);
+                    Cells cells = workSheet.getCells();
+                    cells.get(data.getTopRow(), data.getLeftColumn()).setValue(data.getData());
+                }
+            }
+        }
+        // 保存修改后的工作簿
+        workbook.save(newFilePath);
+    }
+//        public static void main(String[] args) throws Exception {
+//            String filePath = "D:\\doc\\e-iceblue\\4603130104823154.xlsx";
+//            String newPath = "D:\\doc\\e-iceblue\\新插入文本文件.xlsx";
+//            List<ExcelInsertVo> excelInsertVoList = new ArrayList<>();
+//            Map<String, Object> map = new HashMap<>();
+//            // key 使用 sheet名加类型进行拼接
+//            ExcelInsertVo excelInsertVo3 = new ExcelInsertVo();
+//            excelInsertVo3.setSheetName("二氧化钛标准曲线");
+//            excelInsertVo3.setRecordType("日期：");
+//            excelInsertVo3.setData("2023年5月4日");
+//            // key 使用 sheet名加类型进行拼接
+//            map.put(excelInsertVo3.getSheetName() + excelInsertVo3.getRecordType(), excelInsertVo3);
+//            ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+//            excelInsertVo.setSheetName("二氧化钛标准曲线");
+//            excelInsertVo.setMap(map);
+//            excelInsertVoList.add(excelInsertVo);
+////            inserContext(filePath,excelInsertVoList,newPath);
+//            inserContext(newPath,excelInsertVoList,filePath);
+//    }
+
+    /**
+     * 生成日期图片
+     *
+     * @param imagePath
+     * @return
+     * @throws IOException
+     */
+    public static String inserNewImage(String imagePath) throws IOException {
+        Date currentTime = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy年MM月dd日");
+        String titleStr = formatter.format(currentTime);
+        int width = 560; // 图片宽
+        int height = 320;// 图片高
+        // 得到图片缓冲区
+        BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);// INT精确度达到一定,RGB三原色，高度70,宽度150
+
+        // 得到它的绘制环境(这张图片的笔)
+        Graphics2D g2 = (Graphics2D) bi.getGraphics();
+        java.awt.Color transparentRed = new java.awt.Color(255, 255, 255, 255);
+        g2.setColor(transparentRed); // 设置背景颜色
+        g2.fillRect(0, 0, width, height);// 填充整张图片(其实就是设置背景颜色)
+        g2.setColor(Color.black);// 设置字体颜色
+
+        // 设置标题的字体,字号,大小
+        java.awt.Font titleFont = new java.awt.Font("宋体", Font.BOLD, 70);
+        g2.setFont(titleFont);
+        String markNameStr = titleStr;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // 抗锯齿
+        // 计算文字长度,计算居中的X点坐标
+        FontMetrics fm = g2.getFontMetrics(titleFont);
+        int titleWidth = fm.stringWidth(markNameStr);
+        int titleWidthX = (width - titleWidth) / 2;// 感觉不居中,向左移动5个单位
+        g2.drawString(markNameStr, titleWidthX, 160);
+        g2.dispose(); // 释放对象
+//        String imagePath = dir + GenID.getID()+"."+"jpg";
+        ImageIO.write(bi, "PNG", new FileOutputStream(imagePath));// 保存图片 JPEG表示保存格式
+        return imagePath;
+    }
+
+    /**
+     * 将背景替换为透明
+     *
+     * @param path the img bytes
+     * @return
+     * @throws IOException the io exception
+     * @author Jack Que
+     * @created 2021 -07-08 10:25:10 Change img color.
+     */
+    public static void changeImgColor(String path) throws IOException {
+
+        File file = new File(path);
+        String fileName = file.getName();
+        BufferedImage bi = ImageIO.read(file);
+        Image image = (Image) bi;
+        //将原图片的二进制转化为ImageIcon
+        ImageIcon imageIcon = new ImageIcon(image);
+        int width = imageIcon.getIconWidth();
+        int height = imageIcon.getIconHeight();
+//
+        //图片缓冲流
+        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+        Graphics2D graphics2D = (Graphics2D) bufferedImage.getGraphics();
+        graphics2D.drawImage(imageIcon.getImage(), 0, 0, imageIcon.getImageObserver());
+
+        int alpha = 255;
+
+        //这个背景底色的选择，我这里选择的是比较偏的位置，可以修改位置。背景色选择不知道有没有别的更优的方式（比如先过滤一遍获取颜色次数最多的，但是因为感觉做起来会比较复杂没去实现），如果有可以评论。
+        int RGB = bufferedImage.getRGB(width - 1, height - 1);
+
+        for (int i = bufferedImage.getMinX(); i < width; i++) {
+            for (int j = bufferedImage.getMinY(); j < height; j++) {
+
+                int rgb = bufferedImage.getRGB(i, j);
+
+                int r = (rgb & 0xff0000) >> 16;
+                int g = (rgb & 0xff00) >> 8;
+                int b = (rgb & 0xff);
+                int R = (RGB & 0xff0000) >> 16;
+                int G = (RGB & 0xff00) >> 8;
+                int B = (RGB & 0xff);
+                //a为色差范围值，渐变色边缘处理，数值需要具体测试，50左右的效果比较可以
+                int a = 45;
+                if (Math.abs(R - r) < a && Math.abs(G - g) < a && Math.abs(B - b) < a) {
+                    alpha = 0;
+                } else {
+                    alpha = 255;
+                }
+                rgb = (alpha << 24) | (rgb & 0x00ffffff);
+                bufferedImage.setRGB(i, j, rgb);
+            }
+        }
+
+//        graphics2D.drawImage(bufferedImage, 0, 0, imageIcon.getImageObserver());
+
+        //新建字节输出流，用来存放替换完背景的图片
+//        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+//            String[] split = fileName.split("\\.");
+//            fileName = split[0]+"(已转换)."+split[1];
+        ImageIO.write(bufferedImage, "png", new File(path));
+    }
 
 }
 
