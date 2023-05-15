@@ -135,7 +135,7 @@ public class ExcelReplaceUtil {
             int columnNum = row.getLastCellNum();//获取每一行的最后一列的列号，即总列数
             for (int y = 0; y < columnNum; ++y) {
                 XSSFCell cell = row.getCell(y);//获取每个单元格
-                if (cell != null) {
+                if (cell != null && cell.getCellType() == 1) {
                     //设置单元格类型
                     cell.setCellType(cell.CELL_TYPE_STRING);
                     //获取单元格数据

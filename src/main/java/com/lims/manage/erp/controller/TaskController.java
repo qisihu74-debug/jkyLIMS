@@ -901,7 +901,6 @@ public class TaskController {
         FileOutputStream out = new FileOutputStream(newFilePath);
         wb.write(out);
         out.flush();//刷新
-        out.close();//关闭
         InputStream out000 = new FileInputStream(newFilePath);
         //相应pdf
         ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(out000,path);
@@ -920,6 +919,8 @@ public class TaskController {
         outputStream.close();
         out000.close();
         b1.close();
+
+        out.close();//关闭
         // 删除附件
         FileAndFolderUtil.delete(newFilePath);
         FileAndFolderUtil.delete(path);
