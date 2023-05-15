@@ -3734,4 +3734,16 @@ public class ReportServiceImpl implements ReportService {
     public List<LabelValueVo> makeReportSampleInfos(Long entrustId, Long taskId) {
         return reportMapper.getMakeReportSampleInfos(entrustId,taskId);
     }
+
+    @Override
+    public Date getReportCompleteTime(String reportCode) {
+        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
+        java.sql.Date date = recordEntityMapper.getMaxTime(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+        return date;
+    }
+
+    @Override
+    public void updateTime(String reportCode, Date reportCompleteTime) {
+        recordEntityMapper.updateTime(reportCode,reportCompleteTime);
+    }
 }
