@@ -107,6 +107,7 @@ public interface ReportMapper {
     List<ReportListVo> getReportList_history(ReportListVo reportListVo);
 
     List<ReportListVo> reportDownloadListHistory(ReportListVo reportListVo);
+    List<ReportListVo> reportDownloadListHistory0512(ReportListVo reportListVo);
 
     /**
      * 获取历史详情
