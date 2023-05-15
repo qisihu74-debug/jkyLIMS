@@ -31,5 +31,13 @@ public class TeamVo {
      * 团队信息 一层
      */
     List<LabelValueVo> ledSampleVo;
+    /**
+     * 检测人
+     */
+    List<LabelValueVo> inspectorVo;
+    /**
+     * 记录人
+     */
+    List<LabelValueVo> recorderVo;
 
 }

@@ -79,21 +79,6 @@ public class PageOfficeController {
         }
         // 编辑参数赋值。
         map.put("items", list);
-        // 验证 token 是否存在
-        String[] mapToken = parameterMap.get("token");
-        String strVerify = redisUtil.getRedisToken(mapToken[0]);
-//        System.out.println("token == " + strVerify);
-        SysUserEntity user = new SysUserEntity();
-        if (strVerify != null) {
-            user = redisUtil.getRedisTokenUser(strVerify);
-        }
-        if (user != null) {
-            if (user.getUserId() != null) {
-                // 领取人
-                TeamVo returnList = taskService.getTeamUserNameTwo(user.getUserId());
-                map.put("teamVo", returnList.getTeamVo());
-            }
-        }
         PDFHelper3.getLicense();
         //根据参数获取样品相关信息和检测项相关信息
         //填充表头信息临时缓存到本地
@@ -170,6 +155,25 @@ public class PageOfficeController {
             FileAndFolderUtil.delete(excel);
             // 检测项无Sheet页
             return new ModelAndView("error");
+        }
+        Long taskId = dataEntitys.get(0).getTaskId();
+        // 验证 token 是否存在
+        String[] mapToken = parameterMap.get("token");
+        String strVerify = redisUtil.getRedisToken(mapToken[0]);
+//        System.out.println("token == " + strVerify);
+        SysUserEntity user = new SysUserEntity();
+        if (strVerify != null) {
+            user = redisUtil.getRedisTokenUser(strVerify);
+        }
+        if (user != null) {
+            if (user.getUserId() != null) {
+                // 领取人
+                TeamVo returnList = taskService.getTeamUserNameTwo(user.getUserId());
+                // 返回检测人及记录人列表
+                TeamVo teamVo = pageOfficeService.getTaskInspectorAndRecorder(returnList.getTeamVo(),taskId);
+                map.put("teamVo", teamVo.getInspectorVo());
+                map.put("recorderVo",teamVo.getRecorderVo());
+            }
         }
         String excel = dir + GenID.getID() + "." + "xlsx";
         workbook.save(excel, SaveFormat.XLSX);
