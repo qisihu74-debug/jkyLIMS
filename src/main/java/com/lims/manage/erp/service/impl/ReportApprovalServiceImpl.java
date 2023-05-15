@@ -24,6 +24,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -381,15 +382,25 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         String localPdfPath = HttpDownloadUtil.download(pdfUrl, basePath);
         String verUrlPath = HttpDownloadUtil.download(nameUrl, basePath);
         delList.add(basePath + verUrlPath);
-        float x = 1;
-        float y = -10;
-        int index = 1;
         startPath = basePath + localPdfPath;
         delList.add(startPath);
         endPath = basePath + 1 + suffix;
         delList.add(endPath);
         PdfDoc pdf2 = new PdfDoc(startPath, endPath);
         pdf2.addImage(basePath + verUrlPath, key+"：", offsetX, -10, 30, 20);
+        if("批准".equals(key)){//签发时，同时签署报告时间
+            startPath = endPath;
+            endPath = basePath + 2 + suffix;
+            delList.add(endPath);
+            PdfDoc pdf3 = new PdfDoc(startPath, endPath);
+            Date reportCompleteTime = detailByEntrustId.getReportCompleteTime();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+            String reportCompleteTimeStr = simpleDateFormat.format(reportCompleteTime);
+            String dateUrl = basePath + reportCompleteTimeStr + ".png";
+            delList.add(dateUrl);
+            ImageUtil.createDateImage(dateUrl,reportCompleteTimeStr);
+            pdf3.addImage(dateUrl, "日期：", 5, -5, 80, 20);
+        }
         //将最终本地的pdf报告上传到文件服务器
         File file = new File(endPath);
         MultipartFile multipartFile = AsposeUtil.fileToMultipart(file, detailByEntrustId.getReportCode());
