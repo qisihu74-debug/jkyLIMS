@@ -3421,7 +3421,7 @@ public class ReportServiceImpl implements ReportService {
         handlerPage(document, countMap,reportCode);
         //转为pdf
         String excelPath = path+reportCode+".xlsx";
-        String pdfPath = path+reportCode+".xlsx";
+        String pdfPath = path+reportCode+".pdf";
         try {
             document.save(excelPath);
         } catch (Exception e) {
@@ -3487,6 +3487,24 @@ public class ReportServiceImpl implements ReportService {
          * @return
          */
         private String handlerReportHeader (EntrustAddVo detail, Workbook workbook, String localPath, String fileName, ReportEditReq reportEditReq){
+            //设置检测结论和附加声明
+            ConclusionEntity entity = getReportDesc(reportEditReq.getEntrustId(), reportEditReq.getSampleId());
+            int count = workbook.getWorksheets().getCount();
+            for (int i=0;i<count;i++) {
+                String name = workbook.getWorksheets().get(i).getName();
+                if ("第1页，第2页，第3页，第4页".contains(name)){
+                    Cell cell = workbook.getWorksheets().get(i).getCells().get("检测：");
+                    if (cell != null){
+                        String cellName = cell.getName();
+                        String key = cellName.substring(0, 1);
+                        String value = cellName.substring(1);
+                        //检测结论名称
+                        workbook.getWorksheets().get(i).getCells().get(key+(Integer.parseInt(value)-2)).setValue(entity.getConclusion());
+                        //附加生命名称
+                        workbook.getWorksheets().get(i).getCells().get(key+(Integer.parseInt(value)-1)).setValue(entity.getAdditional());
+                    }
+                }
+            }
             String info = recordEntityMapper.getInitInfo();
             Worksheet worksheet = workbook.getWorksheets().get("基础信息表");
             //检测单位名称
@@ -3733,5 +3751,50 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<LabelValueVo> makeReportSampleInfos(Long entrustId, Long taskId) {
         return reportMapper.getMakeReportSampleInfos(entrustId,taskId);
+    }
+
+    @Override
+    public Date getReportCompleteTime(String reportCode) {
+        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
+        java.sql.Date date = recordEntityMapper.getMaxTime(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+        return date;
+    }
+
+    @Override
+    public void updateTime(String reportCode, Date reportCompleteTime) {
+        recordEntityMapper.updateTime(reportCode,reportCompleteTime);
+    }
+
+    /**
+     * 检测结论：经检测，该水泥样品细度（比表面积）、凝结时间、安定性、3d抗折强度、3d抗压强度、氯离子含量、烧失量、
+     * 三氧化硫含量、氧化镁含量均符合GB 175-2007《通用硅酸盐水泥》中的技术要求。
+     * 附加声明：1.委托人：张军瑞；
+     * 2.见证单位：江苏东南工程咨询有限公司、北京中港路通工程管理有限公司、交科院检测技术（北京）有限公司银昆高速驻地10办中心试验室；
+     * 3.见证人：张平安、介艳玲、朱世林；
+     * 4.该水泥样品中的游离氧化钙含量、氧化钙含量、二氧化硅含量均不在综合甲级资质参数范围内；5.3d报告仅供参考，以28d报告为准。
+     * 5：本报告仅供参考，已最终报告为准。
+     * @param sampleId
+     * @return
+     */
+    public ConclusionEntity getReportDesc(Long entrustId,Integer sampleId) {
+        String desc= "";
+        EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(entrustId);
+        List<SampleEntity> samples = entrustHistoryDetail.getSamples();
+        ConclusionEntity conclusionEntity = new ConclusionEntity();
+        for (SampleEntity sampleEntity : samples) {
+            if (sampleEntity.getId().intValue() == sampleId.intValue()){
+                //处理模板下不同样品描述
+                String judgeBasis = getJudgeBasisRe(entrustId, sampleEntity.getId());
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("1.委托人：" + entrustHistoryDetail.getEntrustPeople() + "；");
+                stringBuilder.append("2." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessUint()) ? "见证单位：无" : "见证单位：" + entrustHistoryDetail.getWitnessUint()) + "；");
+                stringBuilder.append("3." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson()) ? "见证人：无" : "见证人：" + entrustHistoryDetail.getWitnessPerson()) + "；");
+                stringBuilder.append("4.委托方提供：" + (StringUtils.isEmpty(entrustHistoryDetail.getRemark()) ? "无" : entrustHistoryDetail.getRemark()) + " ；");
+                conclusionEntity.setAdditional(stringBuilder.toString());
+                String sampleDes = sampleEntity.getSampleName() + " " + "样品," + delItemDes(sampleEntity.getJudgmentBasisVos(), sampleEntity.getFileUrl(), entrustId);
+                conclusionEntity.setConclusion("经检测，该" + sampleDes + "均符合" + judgeBasis + "中的技术要求。");
+            }
+        }
+        return conclusionEntity;
     }
 }

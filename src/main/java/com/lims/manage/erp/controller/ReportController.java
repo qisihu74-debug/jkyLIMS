@@ -1192,8 +1192,9 @@ public class ReportController {
      */
     @PostMapping(value = "offlineReportMerge")
     public Result offlineReportMerge(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
-                               @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file) {
-        if (file == null || StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
+                               @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file
+            ,@RequestParam("reportCompleteTime") Date reportCompleteTime) {
+        if (reportCompleteTime == null || file == null || StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数");
         }
         logger.debug("发起审批检测人:{},审核人:{},签发人:{}",inspector,verifyer,issuer);
@@ -1203,6 +1204,8 @@ public class ReportController {
         Boolean flag = reportService.offlineReportMerge(reportCode,file,verifyer.split(",")[0],issuer.split(",")[0]
                 ,Long.parseLong(verifyer.split(",")[1]),Long.parseLong(issuer.split(",")[1]),inspector);
         if (flag) {
+            //更新报告上盖章的时间
+            reportService.updateTime(reportCode,reportCompleteTime);
             return ResultUtil.success("报告文件上传成功！");
         }else {
             return ResultUtil.error("报告文件上传失败！");
@@ -1246,7 +1249,7 @@ public class ReportController {
      * @return
      */
     @RequestMapping("onlineReportMergeSave")
-    public Result onlineReportMergeSave(String reportCode,String inspector,String verifyer, String issuer){
+    public Result onlineReportMergeSave(String reportCode,String inspector,String verifyer, String issuer,Date reportCompleteTime){
         if (StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数");
         }
@@ -1254,6 +1257,7 @@ public class ReportController {
         Boolean flag = reportService.onlineReportMergeSave(reportCode,verifyer.split(",")[0],issuer.split(",")[0]
                 ,Long.parseLong(verifyer.split(",")[1]),Long.parseLong(issuer.split(",")[1]),inspector);
         if (flag) {
+            reportService.updateTime(reportCode,reportCompleteTime);
             return ResultUtil.success("报告文件上传成功！");
         }else {
             return ResultUtil.error("报告文件上传失败！");
@@ -1287,5 +1291,19 @@ public class ReportController {
             return ResultUtil.error("缺少必要参数！");
         }
         return ResultUtil.success("查询可制作报告样品列表成功！", reportService.makeReportSampleInfos(entrustId,taskId));
+    }
+
+    /**
+     * 根据报告编号获取委托下最后一个检测项的完成时间
+     * @param reportCode
+     * @return
+     */
+    @GetMapping("getReportCompleteTime")
+    public Result getReportCompleteTime(String reportCode){
+        if (StringUtils.isEmpty(reportCode)){
+            return ResultUtil.error("缺少参数");
+        }
+        Date date = reportService.getReportCompleteTime(reportCode);
+        return ResultUtil.success(date);
     }
 }

@@ -21,6 +21,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -430,4 +431,8 @@ public interface ReportService {
     Boolean submitEditReport(ReportEditReq bean);
 
     List<LabelValueVo> makeReportSampleInfos(Long entrustId,Long taskId);
+
+    Date getReportCompleteTime(String reportCode);
+
+    void updateTime(String reportCode, Date reportCompleteTime);
 }
