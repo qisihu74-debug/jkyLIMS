@@ -15,10 +15,7 @@ import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.ExcelInsertVo;
-import com.lims.manage.erp.vo.ExcelSheetDataVo;
-import com.lims.manage.erp.vo.OriginalRecordDataVo;
-import com.lims.manage.erp.vo.TaskListParamVo;
+import com.lims.manage.erp.vo.*;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -760,11 +757,51 @@ public class PageOfficeServiceImpl implements PageOfficeService {
     }
 
     @Override
-    public String updateExcelVisible(String saveFileUrl,Integer[] array, InputStream inputStream) throws IOException {
+    public String updateExcelVisible(String saveFileUrl, Integer[] array, InputStream inputStream) throws IOException {
         // 私有方法 更新 产品附件及报告附件内容。
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
         methodUpdateItemUrl(saveFileUrl, inputStream, array, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
         return null;
+    }
+
+    @Override
+    public TeamVo getTaskInspectorAndRecorder(List<LabelValueVo> teamVo, Long taskId) {
+        TeamVo teamVo1 = new TeamVo();
+        // 查询任务单中检测人、记录人。
+        PersonInfoVo personInfo = taskMapper.getPersonInfo(taskId);
+        // 获取任务单中检测人
+        String[] inspectorArrays = personInfo.getInspector().split("\\,");
+        LinkedList<LabelValueVo> linkedList = new LinkedList<>();
+        linkedList.addAll(teamVo);
+        for (int i = 0; i < linkedList.size(); i++) {
+            LabelValueVo data = linkedList.get(i);
+            for (int j = 0; j <= inspectorArrays.length - 1; j++) {
+                String[] str1 = inspectorArrays[j].split("\\&");
+                Long value = Long.parseLong(str1[1]);
+                if (data.getValue().equals(value)) {
+                    linkedList.remove(i);
+                    linkedList.addFirst(data);
+                }
+            }
+        }
+        teamVo1.setInspectorVo(linkedList);
+        // 获取任务单中记录人
+        String[] recorderArrays = personInfo.getRecorder().split("\\,");
+        LinkedList<LabelValueVo> recorderList = new LinkedList<>();
+        recorderList.addAll(teamVo);
+        for (int i = 0; i < recorderList.size(); i++) {
+            LabelValueVo data = recorderList.get(i);
+            for (int j = 0; j <= recorderArrays.length - 1; j++) {
+                String[] str1 = recorderArrays[j].split("\\&");
+                Long value = Long.parseLong(str1[1]);
+                if (data.getValue().equals(value)) {
+                    recorderList.remove(i);
+                    recorderList.addFirst(data);
+                }
+            }
+        }
+        teamVo1.setRecorderVo(recorderList);
+        return teamVo1;
     }
 
 

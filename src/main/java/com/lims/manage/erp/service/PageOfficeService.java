@@ -1,11 +1,14 @@
 package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.vo.ExcelInsertVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.TeamVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * @Author: DLC
@@ -59,4 +62,12 @@ public interface PageOfficeService {
      * @return
      */
     String updateExcelVisible(String saveFileUrl,Integer[] array, InputStream inputStream) throws IOException;
+
+    /**
+     * 线上编辑原始记录模板时，根据任务单 选择检测人，记录人
+     * @param teamVo
+     * @param taskId
+     * @return
+     */
+    TeamVo getTaskInspectorAndRecorder(List<LabelValueVo> teamVo,Long taskId);
 }

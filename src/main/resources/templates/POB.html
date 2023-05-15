@@ -34,7 +34,7 @@
             记录人：
             <select name="cars2" id="recordSet" th:value="recordSet">
 <!--                <option th:each="e:${userInfoVos}" th:value="${e.departmentId}" th:text="${e.name}"></option>-->
-                <option th:each="e:${teamVo}" th:value="${e.value}" th:text="${e.label}"></option>
+                <option th:each="e:${recorderVo}" th:value="${e.value}" th:text="${e.label}"></option>
             </select>
         </label>
         <input id="items" name="items" type="hidden" th:value="${items}" style="display: none"/>
