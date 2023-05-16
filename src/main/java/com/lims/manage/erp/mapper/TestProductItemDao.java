@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.lims.manage.erp.entity.ItemSheetRelEntity;
 import com.lims.manage.erp.entity.TestProductItem;
 import com.lims.manage.erp.vo.ExcelInsertVo;
 import org.apache.ibatis.annotations.Param;
@@ -140,5 +141,33 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
             "\tsample_id = #{sampleId} \n" +
             "\tAND entrustment_id = #{entrustmentId}")
     int updateReportExcelUrl(@Param("entrustmentId") Long entrustmentId,@Param("sampleId") Integer sampleId,@Param("url") String url);
+
+    /**
+     * 查询产品报告模板的filename
+     * @param productId
+     * @return
+     */
+    String getProductFileName(Integer productId);
+
+    /**
+     * 检测项已经绑定的报告模板sheet下标
+     * @param checkItemId
+     * @return
+     */
+    List<Integer> getSheetIndex(Integer checkItemId);
+
+    /**
+     * 批量插入检测项和模板原始记录下标
+     * @param items
+     * @return
+     */
+    int addItemSheetRel(@Param("items") List<ItemSheetRelEntity> items);
+
+    /**
+     * 删除检测项与原始记录旧关系
+     * @param checkItemId
+     * @return
+     */
+    int deleteItemSheetRel(Integer checkItemId);
 }
 

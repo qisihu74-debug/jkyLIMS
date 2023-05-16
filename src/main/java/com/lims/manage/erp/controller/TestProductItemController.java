@@ -11,10 +11,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestProductItemService;
 import com.lims.manage.erp.service.TestReportTemplateService;
-import com.lims.manage.erp.vo.TestProductItemParamVo;
-import com.lims.manage.erp.vo.TestProductItemSelVo;
-import com.lims.manage.erp.vo.TestProductItemTreeVo;
-import com.lims.manage.erp.vo.TestProductItemVo;
+import com.lims.manage.erp.vo.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -83,12 +80,18 @@ public class TestProductItemController extends ApiController {
      * @return 单条数据
      */
     @GetMapping("{id}")
-    public Result selectOne(@PathVariable Serializable id) {
+    public Result selectOne(@PathVariable Serializable id) throws Exception {
         if (id!=null&&id!=""){
             TestProductItem testMethod=this.testProductItemService.getOne(new QueryWrapper<TestProductItem>().eq("check_item_id",id).eq("del_flag",0));
             String name = templateService.getNameById(testMethod.getReportModelId());
             testMethod.setReportModelName(name);
             TestProductItemParamVo testProductItemParamVo=this.testProductItemService.getItemParamVo(testMethod);
+//            //模板sheet
+//            List<LabelValueVo> productTemplateSheet = this.testProductItemService.getProductTemplateSheet(testMethod.getProductId());
+//            testProductItemParamVo.setTemplateSheet(productTemplateSheet);
+            //回显sheet
+            List<Integer> sheetIndex = this.testProductItemService.getSheetIndex(testMethod.getCheckItemId());
+            testProductItemParamVo.setSheetIndex(sheetIndex);
             return ResultUtil.success(testProductItemParamVo);
         }else {
             return ResultUtil.error("参数为空");
@@ -166,6 +169,21 @@ public class TestProductItemController extends ApiController {
             return this.testProductItemService.enableStatusTestProductItem(idList);
         }else {
             return ResultUtil.error("数据为空");
+        }
+    }
+
+    /**
+     * 查询产品报告模板的全部原始记录sheet
+     * @param productId
+     * @return
+     * @throws Exception
+     */
+    @GetMapping("/getAllSheets")
+    public Result enableStatus(Integer productId) throws Exception {
+        if (productId == null){
+            return ResultUtil.error("产品ID不能为空");
+        }else {
+            return ResultUtil.success(this.testProductItemService.getProductTemplateSheet(productId));
         }
     }
 }
