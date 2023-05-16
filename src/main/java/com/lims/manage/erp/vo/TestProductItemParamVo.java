@@ -16,4 +16,8 @@ public class TestProductItemParamVo {
     private List<Integer> typeIds;
     //产品检测项所属科室
     private List<Integer> itemIds;
+    //产品绑定的报告模板下的sheet
+    private List<LabelValueVo> templateSheet;
+    //检测项绑定的sheet下标
+    private List<Integer> sheetIndex;
 }

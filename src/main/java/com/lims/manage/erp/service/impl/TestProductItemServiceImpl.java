@@ -1,23 +1,32 @@
 package com.lims.manage.erp.service.impl;
 
+import com.aspose.cells.Workbook;
+import com.aspose.cells.Worksheet;
+import com.aspose.cells.WorksheetCollection;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.TestProductItemParamVo;
 import com.lims.manage.erp.vo.TestProductItemSelVo;
 import com.lims.manage.erp.vo.TestProductItemTreeVo;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -61,6 +70,8 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
     /*文件*/
     @Resource
     private SysOssService sysOssService;
+    @Resource
+    private TestProductItemDao testProductItemDao;
     @Override
     public Result addTestProductItem(TestProductItemParamVo testProductItemParamVo) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -70,40 +81,53 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         if(testProductItemParamVo.getTestProductItem().getCheckItemPid()==null){
             testProductItemParamVo.getTestProductItem().setCheckItemPid(0);
         }
-                if (testProductItemParamVo.getTestProductItem().getCheckItemName()==null){
-                    return ResultUtil.error("检测项目名称不能为空");
-                }
-                if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).eq("del_flag",0).eq("check_item_pid",testProductItemParamVo.getTestProductItem().getCheckItemPid()).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
+        if (testProductItemParamVo.getTestProductItem().getCheckItemName()==null){
+            return ResultUtil.error("检测项目名称不能为空");
+        }
+        if (this.getOne(new QueryWrapper<TestProductItem>().eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).eq("del_flag",0).eq("check_item_pid",testProductItemParamVo.getTestProductItem().getCheckItemPid()).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
                     return ResultUtil.error("同层检测项名称不能重复");
                 }
-                testProductItemParamVo.getTestProductItem().setStatus("0");
-                testProductItemParamVo.getTestProductItem().setDelFlag(0);
-                testProductItemParamVo.getTestProductItem().setCreateTime(new Date());
-                if (this.save(testProductItemParamVo.getTestProductItem())){
-                    //设置检查项检测依据
-                    if (testProductItemParamVo.getStandardIds()!=null&&testProductItemParamVo.getStandardIds().size()>0){
-                        for (Integer StandardId : testProductItemParamVo.getStandardIds()) {
-                            testProductItemStandardFileRelService.save(new TestProductItemStandardFileRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),StandardId));
-                        }
-                    }
-                    //设置检查项检测设备
-                    if (testProductItemParamVo.getTypeIds()!=null&&testProductItemParamVo.getTypeIds().size()>0){
-                        for (Integer TypeId : testProductItemParamVo.getTypeIds()) {
-                            testProductItemInstrumentTypeRelService.save(new TestProductItemInstrumentTypeRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),TypeId));
-                        }
-                    }
-                    //设置检测项所属科室
-                    if (testProductItemParamVo.getItemIds()!=null&&testProductItemParamVo.getItemIds().size()>0){
-                        for (Integer itemId : testProductItemParamVo.getItemIds()) {
-                            testCheckItemTeamRelService.save(new TestCheckItemTeamRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),itemId,testProductItemParamVo.getTestProductItem().getProductId()));
-                        }
-                    }
-                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品检测项"+testProductItemParamVo.getTestProductItem().getCheckItemId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
-                    return ResultUtil.success("添加成功");
-                }else {
-                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品检测项失败!", Const.DETECTION_MANAGEMENT_LOG,false);
-                    return ResultUtil.error("添加检查项失败，未知异常!");
+        testProductItemParamVo.getTestProductItem().setStatus("0");
+        testProductItemParamVo.getTestProductItem().setDelFlag(0);
+        testProductItemParamVo.getTestProductItem().setCreateTime(new Date());
+        if (this.save(testProductItemParamVo.getTestProductItem())){
+            //设置检查项检测依据
+            if (testProductItemParamVo.getStandardIds()!=null&&testProductItemParamVo.getStandardIds().size()>0){
+                for (Integer StandardId : testProductItemParamVo.getStandardIds()) {
+                    testProductItemStandardFileRelService.save(new TestProductItemStandardFileRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),StandardId));
                 }
+            }
+            //设置检查项检测设备
+            if (testProductItemParamVo.getTypeIds()!=null&&testProductItemParamVo.getTypeIds().size()>0){
+                for (Integer TypeId : testProductItemParamVo.getTypeIds()) {
+                    testProductItemInstrumentTypeRelService.save(new TestProductItemInstrumentTypeRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),TypeId));
+                }
+            }
+            //设置检测项所属科室
+            if (testProductItemParamVo.getItemIds()!=null&&testProductItemParamVo.getItemIds().size()>0){
+                for (Integer itemId : testProductItemParamVo.getItemIds()) {
+                    testCheckItemTeamRelService.save(new TestCheckItemTeamRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),itemId,testProductItemParamVo.getTestProductItem().getProductId()));
+                }
+            }
+            //设置检测项绑定的报告原始记录sheet
+            if(testProductItemParamVo.getSheetIndex() != null && testProductItemParamVo.getSheetIndex().size()>0){
+                for (int i = 0; i < testProductItemParamVo.getSheetIndex().size(); i++) {
+                    List<ItemSheetRelEntity> relList = Lists.newArrayList();
+                    Integer checkItemId = testProductItemParamVo.getTestProductItem().getCheckItemId();
+                    Integer sheetIndex = testProductItemParamVo.getSheetIndex().get(i);
+                    ItemSheetRelEntity relEntity = new ItemSheetRelEntity();
+                    relEntity.setCheckItemId(checkItemId);
+                    relEntity.setSheetIndex(sheetIndex);
+                    relList.add(relEntity);
+                    testProductItemDao.addItemSheetRel(relList);
+                }
+            }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品检测项"+testProductItemParamVo.getTestProductItem().getCheckItemId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
+            return ResultUtil.success("添加成功");
+        }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品检测项失败!", Const.DETECTION_MANAGEMENT_LOG,false);
+            return ResultUtil.error("添加检查项失败，未知异常!");
+        }
     }
 
     @Override
@@ -145,6 +169,21 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
             if (testProductItemParamVo.getItemIds()!=null&&testProductItemParamVo.getItemIds().size()>0){
                 for (Integer itemId : testProductItemParamVo.getItemIds()) {
                     testCheckItemTeamRelService.save(new TestCheckItemTeamRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),itemId,testProductItemParamVo.getTestProductItem().getProductId()));
+                }
+            }
+            //删除检测项绑定的报告原始记录sheet
+            testProductItemDao.deleteItemSheetRel(testProductItemParamVo.getTestProductItem().getCheckItemId());
+            //设置检测项绑定的报告原始记录sheet
+            if(testProductItemParamVo.getSheetIndex() != null && testProductItemParamVo.getSheetIndex().size()>0){
+                for (int i = 0; i < testProductItemParamVo.getSheetIndex().size(); i++) {
+                    List<ItemSheetRelEntity> relList = Lists.newArrayList();
+                    Integer checkItemId = testProductItemParamVo.getTestProductItem().getCheckItemId();
+                    Integer sheetIndex = testProductItemParamVo.getSheetIndex().get(i);
+                    ItemSheetRelEntity relEntity = new ItemSheetRelEntity();
+                    relEntity.setCheckItemId(checkItemId);
+                    relEntity.setSheetIndex(sheetIndex);
+                    relList.add(relEntity);
+                    testProductItemDao.addItemSheetRel(relList);
                 }
             }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改产品检测项"+testProductItemParamVo.getTestProductItem().getCheckItemId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
@@ -368,6 +407,32 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                 treeVos.add(treeVo);
             }
         return treeVos;
+    }
+
+    @Override
+    public List<LabelValueVo> getProductTemplateSheet(Integer productId) throws Exception {
+        List<LabelValueVo> result = Lists.newArrayList();
+        String fileName = testProductItemDao.getProductFileName(productId);
+        if(fileName == null){
+            return result;
+        }
+        InputStream fileStream = MinIoUtil.getFileStream("report-original-template", fileName);
+        XSSFWorkbook workbook = new XSSFWorkbook(fileStream);
+        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            String sheetName = workbook.getSheetAt(i).getSheetName();
+            if("基础信息表".equals(sheetName) || "技术指标".equals(sheetName) || "第1页".equals(sheetName) ||
+                    "第2页".equals(sheetName)){
+                continue;
+            }
+            LabelValueVo vo = new LabelValueVo(sheetName,Long.parseLong(i+""));
+            result.add(vo);
+        }
+        return result;
+    }
+
+    @Override
+    public List<Integer> getSheetIndex(Integer checkItemId) {
+        return testProductItemDao.getSheetIndex(checkItemId);
     }
 }
 

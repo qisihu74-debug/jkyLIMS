@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.TestMethod;
 import com.lims.manage.erp.entity.TestProductItem;
 import com.lims.manage.erp.result.Result;
-import com.lims.manage.erp.vo.TestProductItemParamVo;
-import com.lims.manage.erp.vo.TestProductItemSelVo;
-import com.lims.manage.erp.vo.TestProductItemTreeVo;
-import com.lims.manage.erp.vo.TestProductItemVo;
+import com.lims.manage.erp.vo.*;
 
 import java.util.List;
 
@@ -27,5 +24,14 @@ public interface TestProductItemService extends IService<TestProductItem> {
     TestProductItemParamVo getItemParamVo(TestProductItem testProductItem);
     List<TestProductItemSelVo> getTestProductSelVoList(TestProductItem testProductItem);
     List<TestProductItemTreeVo> getTreeList(TestProductItem testProductItem);
+
+    /**
+     * 查询产品标准模板的sheet
+     * @param productId
+     * @return
+     */
+    List<LabelValueVo> getProductTemplateSheet(Integer productId) throws Exception;
+
+    List<Integer> getSheetIndex(Integer checkItemId);
 }
 
