@@ -104,30 +104,27 @@ public class PageOfficeController {
         PDFHelper3.getLicense();
         com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
         int count = workbook.getWorksheets().getCount();
+        // 根据key 保证 sheet不重复使用。
+        Map<String, String> keyMap = new HashMap<>();
         try {
             for (int i = 0; i < count; i++) {
-                Boolean flag = false;
-                String sheetName = "";
+                String name = workbook.getWorksheets().get(i).getName();
                 for (int j = 0; j < dataEntitys.size(); j++) {
                     TaskIdEntity data = dataEntitys.get(j);
-//                    String name = workbook.getWorksheets().get(i).getName();
-//                    System.out.println("name  == " + name);
-                    if (data.getCheckItemName().contains(workbook.getWorksheets().get(i).getName())) {
-                        flag = true;
-                        sheetName = workbook.getWorksheets().get(i).getName();
+                    if (data.getCheckItemName().contains(name) && keyMap.get(name) == null) {
+                        keyMap.put(name, name);
                     }
                 }
-                if (flag == true) {
+                if (keyMap.get(name) != null){
                     // 设置为 可见
                     workbook.getWorksheets().get(i).setVisible(true);
                     //设置当工作表只读时，是否允许用户手动调整行列。
-                    wb.openSheet(sheetName).setAllowAdjustRC(true);
+                    wb.openSheet(name).setAllowAdjustRC(true);
                     //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
-                    wb.openSheet(sheetName).setReadOnly(false);
+                    wb.openSheet(name).setReadOnly(false);
 //                    int visibility11 = workbook.getWorksheets().get(i).getVisibilityType();
 //                    System.out.println("设置可见后 == " + visibility11);
-                } else {
-                    flag = false;
+                } else{
                     // 获取工作表的隐藏状态，返回SheetVisibility类型
                     int visibility = workbook.getWorksheets().get(i).getVisibilityType();
 //                    System.out.println("visibility == " + visibility);
@@ -177,15 +174,6 @@ public class PageOfficeController {
         }
         String excel = dir + GenID.getID() + "." + "xlsx";
         workbook.save(excel, SaveFormat.XLSX);
-        // 去除excel 中标记
-        InputStream fileStream2 = new FileInputStream(excel);
-        XSSFWorkbook wb2 = new XSSFWorkbook(fileStream2);
-        // 调用方法 清除sheet名 = Evaluation Warning
-        ExcelReplaceUtil.removeOtherSheets("Evaluation Warning", wb2);
-        fileStream2.close();
-        OutputStream f = new FileOutputStream(excel);
-        wb2.write(f);
-        f.close();
         //此行必须
         poCtrl.setWriter(wb);
         //添加自定义按钮

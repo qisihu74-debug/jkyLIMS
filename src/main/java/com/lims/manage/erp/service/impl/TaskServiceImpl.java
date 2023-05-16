@@ -1811,18 +1811,28 @@ public class TaskServiceImpl implements TaskService {
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
         // 获取 sheetName
         Map<String,Object> map = new HashMap<>();
+        // 根据key 保证 sheet不重复使用。
+        Map<String,String> keyMap = new HashMap<>();
         // 通过检测项id 获取 相应的 id关联信息。
         for (int i = 0; i < dataEntitys.size(); i++) {
             TaskIdEntity data = dataEntitys.get(i);
             for (String key : mapSheet.keySet()) {
                 // 替换 sheet名
-                if (data.getCheckItemName().contains(key)) {
+                if (data.getCheckItemName().contains(key) && keyMap.get(key) == null) {
                     data.setCheckItemName(key);
+                    keyMap.put(key, key);
                 }
             }
-            XSSFSheet sheet = wb.getSheet(data.getCheckItemName());
+            if (keyMap.get(data.getCheckItemName()) == null) {
+                keyMap.put(data.getCheckItemName(), data.getCheckItemName());
+            }
+        }
+        for(String key : keyMap.keySet()){
+            XSSFSheet sheet = wb.getSheet(key);
             if(sheet!=null){
-                map.put(data.getCheckItemName(),i);
+                // 设置全部可读
+                wb.getSheet(key).setVerticallyCenter(true);
+                map.put(key,0);
             }
         }
         // sheetName 不包含 则清除
