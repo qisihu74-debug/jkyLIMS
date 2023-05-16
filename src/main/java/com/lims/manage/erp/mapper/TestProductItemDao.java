@@ -140,5 +140,12 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
             "\tsample_id = #{sampleId} \n" +
             "\tAND entrustment_id = #{entrustmentId}")
     int updateReportExcelUrl(@Param("entrustmentId") Long entrustmentId,@Param("sampleId") Integer sampleId,@Param("url") String url);
+
+    /**
+     * 根据检测项主键 查询检测项的sheet下标
+     * @param array
+     * @return
+     */
+    List<ExcelInsertVo> selectItemSheetIndex(@Param(value = "array") Integer[] array);
 }
 

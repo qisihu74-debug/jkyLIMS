@@ -1,27 +1,27 @@
 package com.lims.manage.erp.controller;
 
 import com.aspose.cells.SaveFormat;
+import com.aspose.cells.Worksheet;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductItemDao;
-import com.lims.manage.erp.result.Result;
-import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.*;
+import com.lims.manage.erp.vo.ExcelInsertVo;
 import com.lims.manage.erp.vo.TeamVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
 import com.zhuozhengsoft.pageoffice.excelwriter.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -29,7 +29,6 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.URLDecoder;
 import java.util.*;
 
 /**
@@ -55,6 +54,8 @@ public class PageOfficeController {
     RedisUtil redisUtil;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private TestProductItemDao testProductItemDao;
 
     @Value("${autograph.path}")
     private String dir;
@@ -73,7 +74,6 @@ public class PageOfficeController {
         String list = parameterMap.get("list")[0];
         String[] items = list.split(",");
         Integer[] ids = new Integer[items.length];
-//        System.out.println("items == " + items);
         for (int j = 0; j < items.length; j++) {
             ids[j] = Integer.parseInt(items[j]);
         }
@@ -94,6 +94,8 @@ public class PageOfficeController {
         //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
         // 循环设置
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
+        // 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
         InputStream fileStream = null;
         try {
             // 获取公网 附件
@@ -111,8 +113,19 @@ public class PageOfficeController {
                 String name = workbook.getWorksheets().get(i).getName();
                 for (int j = 0; j < dataEntitys.size(); j++) {
                     TaskIdEntity data = dataEntitys.get(j);
-                    if (data.getCheckItemName().contains(name) && keyMap.get(name) == null) {
-                        keyMap.put(name, name);
+                    // 检测项 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回 && 检测项对应的sheet 不为空
+                    if (data != null && !data.getState().equals(3) && !CollectionUtils.isEmpty(sheetItems)) {
+                        for (ExcelInsertVo excelInsertVo1 : sheetItems) {
+                            // 获取sheetIndex工作表
+                            Worksheet sheet = workbook.getWorksheets().get(excelInsertVo1.getSheetIndex());
+                            // sheet != null && checkItemId 相等
+                            if (sheet != null && excelInsertVo1.getCheckItemId().equals(data.getCheckItemId())) {
+                                if (keyMap.get(sheet.getName()) == null) {
+                                    keyMap.put(sheet.getName(), sheet.getName());
+
+                                }
+                            }
+                        }
                     }
                 }
                 if (keyMap.get(name) != null){
@@ -122,17 +135,12 @@ public class PageOfficeController {
                     wb.openSheet(name).setAllowAdjustRC(true);
                     //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
                     wb.openSheet(name).setReadOnly(false);
-//                    int visibility11 = workbook.getWorksheets().get(i).getVisibilityType();
-//                    System.out.println("设置可见后 == " + visibility11);
                 } else{
                     // 获取工作表的隐藏状态，返回SheetVisibility类型
                     int visibility = workbook.getWorksheets().get(i).getVisibilityType();
-//                    System.out.println("visibility == " + visibility);
                     if (visibility != 1) {
                         // sheetName 不相等 设置为隐藏
                         workbook.getWorksheets().get(i).setVisible(false);
-//                        int visibility11 = workbook.getWorksheets().get(i).getVisibilityType();
-//                        System.out.println("visibility11 == " + visibility11);
                     }
                 }
             }
@@ -190,12 +198,6 @@ public class PageOfficeController {
         poCtrl.getRibbonBar().setTabVisible("TabView", false);//视图
         //设置处理文件保存的请求方法
         poCtrl.setSaveFilePage("saveOriginalRecord");
-//        //加载文档
-//        url = URLDecoder.decode(url, "utf-8");
-//        String[] strArray = url.split("\\.");
-//        int suffixIndex = strArray.length - 1;
-//        String type = strArray[suffixIndex];
-//        ReturnResponse<String> response = downloadUtils.downLoad(url, type, null);
         logger.info("在线编辑原始记录本地缓存路径:{}",excel);
         if (excel.indexOf(":\\") < 0){
             excel = "file://"+excel;
@@ -227,7 +229,7 @@ public class PageOfficeController {
         fs.close();
         // 保存本地Excel 包含签名信息
         if (!StringUtils.isEmpty(flag)) {
-//            // 检测参数
+            // 检测参数
             String list = fs.getFormField("items");
             // 获取检测项id 集合
             String[] items = list.split(",");

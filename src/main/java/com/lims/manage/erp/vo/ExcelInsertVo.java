@@ -79,6 +79,14 @@ public class ExcelInsertVo {
      * 存放 原始记录中 签名信息
      */
     Map<String,Object> map  = new HashMap<>();
+    /**
+     * check_item_id
+     */
+    Integer checkItemId;
+    /**
+     * sheet 下标
+     */
+    Integer sheetIndex;
 
 
 }

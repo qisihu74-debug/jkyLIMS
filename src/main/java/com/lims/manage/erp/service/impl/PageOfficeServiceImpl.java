@@ -17,7 +17,6 @@ import com.zhuozhengsoft.pageoffice.FileSaver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.bytedeco.opencv.presets.opencv_core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,24 +137,25 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         FileAndFolderUtil.delete(excelSheetDataVo.getSaveFile());
         // 根据key 保证 sheet不重复使用。
         Map<String, String> keyMap = new HashMap<>();
+        // 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
         // 批量获取 检测项id（有可能对应多个模板） 再进行填充。
         // 通过检测项id 获取 相应的 id关联信息。
         for (int i = 0; i < dataEntitys.size(); i++) {
             TaskIdEntity data = dataEntitys.get(i);
-            // 检测项 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回
-            if (data != null && !data.getState().equals(3)) {
-                // 模糊匹配
-                // 循环遍历所有工作表
-                for (int j = 0; j < wb.getNumberOfSheets(); j++) {
-                    // 获取第i个工作表
-                    XSSFSheet sheet = wb.getSheetAt(j);
-                    if (sheet != null) {
-                        // 获取工作表的名称
+            // 检测项 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回 && 检测项对应的sheet 不为空
+            if (data != null && !data.getState().equals(3) && !CollectionUtils.isEmpty(sheetItems)) {
+                for (ExcelInsertVo excelInsertVo1 : sheetItems) {
+                    // 获取sheetIndex工作表
+                    XSSFSheet sheet = wb.getSheetAt(excelInsertVo1.getSheetIndex());
+                    // sheet != null && checkItemId 相等
+                    if (sheet != null && excelInsertVo1.getCheckItemId().equals(data.getCheckItemId())) {
+                        //获取工作表的名称
                         String sheetName = sheet.getSheetName();
-                        if (data.getCheckItemName().contains(sheetName) && keyMap.get(sheetName) == null) {
+                        if (keyMap.get(sheetName) == null) {
                             keyMap.put(sheetName, sheetName);
                             Map<Integer, Integer> countMap = excelSheetDataVo.getCountMap();
-                            int number = countMap.get(j);
+                            int number = countMap.get(excelInsertVo1.getSheetIndex());
                             // 有序信息。
                             OriginalRecordDataVo originalData = taskService.getOriginalData(data.getTaskId(), data.getSampleId(), data.getCheckItemId(), data.getIdItem());
                             Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
@@ -391,105 +391,70 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             }
         }
         // 拿到文件后 saveExcel 获取 sheet名 返回
-        Map<String, String> mapSheet = getSheetMap(saveExcel);
+        Map<String, Integer> mapSheet = getSheetMap(saveExcel);
         // 设置图片的list
         List<ExcelInsertVo> excelInsertVoList = new ArrayList<>();
-        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
+        // 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(array);
         // 根据key 保证 sheet不重复使用。
         Map<String, String> keyMap = new HashMap<>();
-        if (!CollectionUtils.isEmpty(dataEntitys)) {
-            for (int i = 0; i < dataEntitys.size(); i++) {
-                TaskIdEntity taskIdEntity = dataEntitys.get(i);
+        // 通过检测项id 获取对应的 sheet下标
+        if (!CollectionUtils.isEmpty(sheetItems)) {
+            for (ExcelInsertVo excelInsertVo : sheetItems) {
+                Map<String, Object> map = new HashMap<>();
+                // 遍历对应的 sheet页
                 for (String key : mapSheet.keySet()) {
+                    Integer sheetIndex = mapSheet.get(key);
                     // 替换 sheet名
-                    if (taskIdEntity.getCheckItemName().contains(key) && keyMap.get(key) == null) {
+                    if (excelInsertVo.getSheetIndex().equals(sheetIndex) && keyMap.get(key) == null) {
                         keyMap.put(key, key);
-                        taskIdEntity.setCheckItemName(key);
+                        ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
+                        excelInsertVo1.setSheetName(key);
+                        excelInsertVo1.setRecordType("复核：");
+                        excelInsertVo1.setImags(testImags);
+                        // key 使用 sheet名加类型进行拼接
+                        map.put(excelInsertVo1.getSheetName() + excelInsertVo1.getRecordType(), excelInsertVo1);
+                        ExcelInsertVo data = new ExcelInsertVo();
+                        data.setSheetName(key);
+                        data.setMap(map);
+                        excelInsertVoList.add(data);
                     }
                 }
-//                // 如果有 多个 sheet 存放多个
-//                if (keyMap.get(taskIdEntity.getCheckItemName()) == null) {
-//                    keyMap.put(taskIdEntity.getCheckItemName(), taskIdEntity.getCheckItemName());
-//                }
-            }
-            for (String key : keyMap.keySet()) {
-                Map<String, Object> map = new HashMap<>();
-                ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
-                excelInsertVo1.setSheetName(key);
-                excelInsertVo1.setRecordType("复核：");
-                excelInsertVo1.setImags(testImags);
-                // key 使用 sheet名加类型进行拼接
-                map.put(excelInsertVo1.getSheetName() + excelInsertVo1.getRecordType(), excelInsertVo1);
-                ExcelInsertVo excelInsertVo = new ExcelInsertVo();
-                excelInsertVo.setSheetName(key);
-                excelInsertVo.setMap(map);
-                excelInsertVoList.add(excelInsertVo);
             }
         }
         // 设置文本的list
         List<ExcelInsertVo> contextList = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(dataEntitys)) {
-            Date currentTime = new Date();
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy年MM月dd日");
-            String titleStr = formatter.format(currentTime);
-//            for (int i = 0; i < dataEntitys.size(); i++) {
-//                Map<String, Object> map = new HashMap<>();
-//                TaskIdEntity taskIdEntity = dataEntitys.get(i);
-//                for (String key : mapSheet.keySet()) {
-//                    // 替换 sheet名
-//                    if (taskIdEntity.getCheckItemName().contains(key)) {
-//                        taskIdEntity.setCheckItemName(key);
-//                    }
-//                }
-//                ExcelInsertVo excelInsertVo3 = new ExcelInsertVo();
-//                excelInsertVo3.setSheetName(taskIdEntity.getCheckItemName());
-//                excelInsertVo3.setRecordType("日期：");
-//                excelInsertVo3.setData(titleStr);
-//                // key 使用 sheet名加类型进行拼接
-//                map.put(excelInsertVo3.getSheetName() + excelInsertVo3.getRecordType(), excelInsertVo3);
-//                ExcelInsertVo excelInsertVo = new ExcelInsertVo();
-//                excelInsertVo.setSheetName(taskIdEntity.getCheckItemName());
-//                excelInsertVo.setMap(map);
-//                contextList.add(excelInsertVo);
-//            }
-            Map<String, Object> map = new HashMap<>();
-            for (String key : keyMap.keySet()) {
-                ExcelInsertVo excelInsertVo3 = new ExcelInsertVo();
-                excelInsertVo3.setSheetName(key);
-                excelInsertVo3.setRecordType("日期：");
-                excelInsertVo3.setData(titleStr);
-                // key 使用 sheet名加类型进行拼接
-                map.put(excelInsertVo3.getSheetName() + excelInsertVo3.getRecordType(), excelInsertVo3);
-                ExcelInsertVo excelInsertVo = new ExcelInsertVo();
-                excelInsertVo.setSheetName(key);
-                excelInsertVo.setMap(map);
-                contextList.add(excelInsertVo);
-            }
+        Date currentTime = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy年MM月dd日");
+        String titleStr = formatter.format(currentTime);
+        Map<String, Object> map = new HashMap<>();
+        for (String key : keyMap.keySet()) {
+            ExcelInsertVo excelInsertVo3 = new ExcelInsertVo();
+            excelInsertVo3.setSheetName(key);
+            excelInsertVo3.setRecordType("日期：");
+            excelInsertVo3.setData(titleStr);
+            // key 使用 sheet名加类型进行拼接
+            map.put(excelInsertVo3.getSheetName() + excelInsertVo3.getRecordType(), excelInsertVo3);
+            ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+            excelInsertVo.setSheetName(key);
+            excelInsertVo.setMap(map);
+            contextList.add(excelInsertVo);
         }
         // 塞入指定位置 文本内容
-        ExcelImageUtils.inserContext(saveExcel,contextList,newFilePath);
+        ExcelImageUtils.inserContext(saveExcel, contextList, newFilePath);
         // 清除图片
         ExcelImageUtils.seachXY(newFilePath, excelInsertVoList, saveExcel);
         // 插入图片
-        ExcelImageUtils.inserImage(newFilePath, excelInsertVoList, saveExcel);
-        // 去除excel 中标记
-        InputStream fileStream2 = new FileInputStream(saveExcel);
-        XSSFWorkbook wb = new XSSFWorkbook(fileStream2);
-        // 调用方法 清除sheet名 = Evaluation Warning
-        ExcelReplaceUtil.removeOtherSheets("Evaluation Warning", wb);
-        fileStream2.close();
-        OutputStream f = new FileOutputStream(saveExcel);
-        wb.write(f);
-        f.close();
+        ExcelImageUtils.inserImage(saveExcel, excelInsertVoList, newFilePath);
         // 删除附件
-        FileAndFolderUtil.delete(newFilePath);
+        FileAndFolderUtil.delete(saveExcel);
         // 删除图片信息
         for (int i = 0; i < testImags.length - 1; i++) {
             FileAndFolderUtil.delete(testImags[i]);
         }
 //        FileAndFolderUtil.delete(imagePath);
         // 返回塞入的复核人签名本地附件
-        return saveExcel;
+        return newFilePath;
     }
 
     /**
@@ -597,53 +562,49 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             methodUrlImags(recordSetLong, recordImags);
         }
         List<ExcelInsertVo> excelInsertVoList = new ArrayList<>();
-        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
         // 处理模糊比较 sheetName
         com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(saveExcel);
         int count = workbook.getWorksheets().getCount();
-        Map<String, String> mapSheet = new HashMap<>();
+        Map<String, Integer> mapSheet = new HashMap<>();
         for (int o = 0; o < count; o++) {
             // 设置全部可读
             workbook.getWorksheets().get(o).setVisible(true);
             String sheetName = workbook.getWorksheets().get(o).getName();
-            mapSheet.put(sheetName, sheetName);
+            mapSheet.put(sheetName, o);
         }
         workbook.save(saveExcel, SaveFormat.XLSX);
         // 根据key 保证 sheet不重复使用。
-        Map<String,String> keyMap = new HashMap<>();
-        if (!CollectionUtils.isEmpty(dataEntitys)) {
-            for (int i = 0; i < dataEntitys.size(); i++) {
-                TaskIdEntity taskIdEntity = dataEntitys.get(i);
+        Map<String, String> keyMap = new HashMap<>();
+        // 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
+        // 通过检测项id 获取对应的 sheet下标
+        if (!CollectionUtils.isEmpty(sheetItems)) {
+            for (ExcelInsertVo excelInsertVo : sheetItems) {
+                Map<String, Object> map = new HashMap<>();
+                // 遍历对应的 sheet页
                 for (String key : mapSheet.keySet()) {
+                    Integer sheetIndex = mapSheet.get(key);
                     // 替换 sheet名
-                    if (taskIdEntity.getCheckItemName().contains(key) && keyMap.get(key)==null) {
-                        keyMap.put(key,key);
-                        taskIdEntity.setCheckItemName(key);
+                    if (excelInsertVo.getSheetIndex().equals(sheetIndex) && keyMap.get(key) == null) {
+                        keyMap.put(key, key);
+                        ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
+                        excelInsertVo1.setSheetName(key);
+                        excelInsertVo1.setRecordType("检测：");
+                        excelInsertVo1.setImags(testImags);
+                        // key 使用 sheet名加类型进行拼接
+                        map.put(excelInsertVo1.getSheetName() + excelInsertVo1.getRecordType(), excelInsertVo1);
+                        ExcelInsertVo excelInsertVo2 = new ExcelInsertVo();
+                        excelInsertVo2.setSheetName(key);
+                        excelInsertVo2.setRecordType("记录：");
+                        excelInsertVo2.setImags(recordImags);
+                        // key 使用 sheet名加类型进行拼接
+                        map.put(excelInsertVo2.getSheetName() + excelInsertVo2.getRecordType(), excelInsertVo2);
+                        ExcelInsertVo data = new ExcelInsertVo();
+                        data.setSheetName(key);
+                        data.setMap(map);
+                        excelInsertVoList.add(data);
                     }
                 }
-//                // 如果有 多个 sheet 存放多个
-//                if (keyMap.get(taskIdEntity.getCheckItemName()) == null) {
-//                    keyMap.put(taskIdEntity.getCheckItemName(), taskIdEntity.getCheckItemName());
-//                }
-            }
-            Map<String, Object> map = new HashMap<>();
-            for(String key : keyMap.keySet()){
-                ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
-                excelInsertVo1.setSheetName(key);
-                excelInsertVo1.setRecordType("检测：");
-                excelInsertVo1.setImags(testImags);
-                // key 使用 sheet名加类型进行拼接
-                map.put(excelInsertVo1.getSheetName() + excelInsertVo1.getRecordType(), excelInsertVo1);
-                ExcelInsertVo excelInsertVo2 = new ExcelInsertVo();
-                excelInsertVo2.setSheetName(key);
-                excelInsertVo2.setRecordType("记录：");
-                excelInsertVo2.setImags(recordImags);
-                // key 使用 sheet名加类型进行拼接
-                map.put(excelInsertVo2.getSheetName() + excelInsertVo2.getRecordType(), excelInsertVo2);
-                ExcelInsertVo excelInsertVo = new ExcelInsertVo();
-                excelInsertVo.setSheetName(key);
-                excelInsertVo.setMap(map);
-                excelInsertVoList.add(excelInsertVo);
             }
         }
         // excel 插入图片
@@ -653,16 +614,6 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         ExcelImageUtils.seachXY(saveExcel, excelInsertVoList, newFilePath);
         // 插入图片
         ExcelImageUtils.inserImage(newFilePath, excelInsertVoList, saveExcel);
-        // 去除excel 中标记
-        // 创建一个文件输入流
-        FileInputStream fileStream = new FileInputStream(new File(saveExcel));
-        // 创建一个 XSSFWorkbook 对象，用于处理 .xlsx 格式的 Excel 文件
-        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-        ExcelReplaceUtil.removeOtherSheets("Evaluation Warning", wb);
-        OutputStream f = new FileOutputStream(saveExcel);
-        wb.write(f);
-        f.close();
-        fileStream.close();
         // 删除附件
         FileAndFolderUtil.delete(newFilePath);
         // 删除图片信息
@@ -707,6 +658,18 @@ public class PageOfficeServiceImpl implements PageOfficeService {
     public Map<Integer, Integer> inserItemPage(XSSFWorkbook wb, Long taskId) {
         // 获取检测项的数据。
         List<TaskIdEntity> list = taskMapper.selectItemPages(taskId);
+        Integer[] array = new Integer[list.size()];
+        // list 获取
+        for (int i = 0; i < list.size(); i++) {
+            TaskIdEntity data = list.get(i);
+            array[i] = data.getIdItem();
+        }
+        // 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(array);
+        // 当前任务单下检测项没有对应sheet下标 返回空
+        if (CollectionUtils.isEmpty(sheetItems)) {
+            return null;
+        }
         // key = sheet标号 、value =序号
         Map<Integer, Integer> countMap = new HashMap<>();
         // 根据key 保证 sheet不重复使用。
@@ -720,9 +683,9 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             if (sheet != null) {
                 // 获取工作表的名称
                 String sheetName = sheet.getSheetName();
-                for (int j = 0; j < list.size(); j++) {
-                    TaskIdEntity data = list.get(j);
-                    if (data.getCheckItemName().contains(sheetName) && keyMap.get(sheetName) == null) {
+                for (int j = 0; j < sheetItems.size(); j++) {
+                    ExcelInsertVo data = sheetItems.get(j);
+                    if (data.getSheetIndex().equals(i) && keyMap.get(sheetName) == null) {
                         keyMap.put(sheetName, sheetName);
                         if (countMap.get(i) == null) {
                             countMap.put(i, number);
@@ -764,12 +727,13 @@ public class PageOfficeServiceImpl implements PageOfficeService {
 
     /**
      * 通过本地附件 获取 所有的 sheetName
-      * @param saveFile
+     *
+     * @param saveFile
      * @return
      * @throws IOException
      */
-    public Map<String,String> getSheetMap(String saveFile) throws IOException {
-        Map<String,String> countMap = new HashMap<>();
+    public Map<String, Integer> getSheetMap(String saveFile) throws IOException {
+        Map<String, Integer> countMap = new HashMap<>();
         InputStream fileStream = new FileInputStream(saveFile);
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
         // 循环遍历所有工作表
@@ -779,7 +743,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             if (sheet != null) {
                 // 获取工作表的名称
                 String sheetName = sheet.getSheetName();
-                countMap.put(sheetName,sheetName);
+                countMap.put(sheetName, i);
             }
         }
         fileStream.close();
