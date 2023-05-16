@@ -5,6 +5,7 @@ import com.lims.manage.erp.shiro.ShiroRealm;
 import com.lims.manage.erp.shiro.ShiroSessionIdGenerator;
 import com.lims.manage.erp.shiro.ShiroSessionManager;
 import com.lims.manage.erp.util.SHA256Util;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.session.mgt.SessionManager;
@@ -173,7 +174,9 @@ public class ShiroConfig {
         redisManager.setHost(host);
         redisManager.setPort(port);
         //redisManager.setTimeout(timeout);
-        redisManager.setPassword(password);
+        if (StringUtils.isNotEmpty(password)){
+            redisManager.setPassword(password);
+        }
         return redisManager;
     }
 
