@@ -147,4 +147,8 @@ public class ClientOrderdetailVo {
      * 委托单编号
      */
     private String entrustmentNostr;
+    /**
+     * 经营人员
+     */
+    private String operatingPersonnel;
 }

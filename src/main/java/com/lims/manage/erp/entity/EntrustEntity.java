@@ -287,6 +287,10 @@ public class EntrustEntity {
      * 委托单创建时间供排序使用
      */
     private Date createTime;
+    /**
+     * 经营人员
+     */
+    private String operatingPersonnel;
 
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,

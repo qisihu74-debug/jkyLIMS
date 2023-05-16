@@ -56,7 +56,8 @@
                system_price,
                actual_price,
                report_receiving_unit,
-               entrust_category
+               entrust_category,
+               operating_personnel
         from test_entrusted_info
         where id = #{id}
     </select>
@@ -541,7 +542,8 @@
                                         report_receiving_unit,
                                         entrust_category,
                                         entrust_category_type,
-                                        create_time)
+                                        create_time,
+                                        operating_personnel)
         values (#{id},
                 #{entrustmentNo},
                 #{entrustType},
@@ -596,7 +598,8 @@
                 #{reportReceivingUnit},
                 #{entrustCategory},
                 #{entrustCategoryType},
-                #{createTime})
+                #{createTime},
+                #{operatingPersonnel})
 
     </insert>
     <select id="GetDelegateInformation" resultType="String">
@@ -666,6 +669,7 @@
             <if test="auditState != null and auditState!=''">audit_state=#{auditState},</if>
             <if test="auditUser != null and auditUser!=''">audit_user=#{auditUser},</if>
             <if test="auditDate != null">audit_date=#{auditDate},</if>
+            <if test="operatingPersonnel != null and operatingPersonnel!=''">operating_personnel=#{operatingPersonnel},</if>
             address=#{address},
             addressee=#{addressee},
             mobile=#{mobile},
@@ -1031,7 +1035,8 @@
         project_part ,
         entrust_company ,
         entrust_company_id ,
-        actual_price as systemPrice
+        actual_price as systemPrice,
+        operating_personnel
         FROM
         test_entrusted_info
         WHERE
@@ -1056,6 +1061,9 @@
         </if>
         <if test="entrustPeople!=null">
             and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+        </if>
+        <if test="operatingPersonnel!=null and operatingPersonnel!=''">
+            and operating_personnel LIKE CONCAT('%',#{operatingPersonnel},'%')
         </if>
     </select>
 

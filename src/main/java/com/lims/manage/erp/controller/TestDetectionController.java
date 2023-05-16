@@ -127,7 +127,11 @@ public class TestDetectionController {
         if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),sampleItemInstrumentVo.getTaskId())==false){
             return ResultUtil.error("登录人没有被派发检测资格");
         }
-
+        // 比较检测项 start_time 与 end_time 时间
+        String msg = testDetectionService.compareItemTime(sampleItemInstrumentVo);
+        if(msg != null){
+            return ResultUtil.error(msg);
+        }
         Boolean flag = testDetectionService.postEndTest(sampleItemInstrumentVo);
         if(flag) {
             // 更新任务单状态 需要 对所有的 样品信息 下 检测项 进行判断 ==2的话 更新。

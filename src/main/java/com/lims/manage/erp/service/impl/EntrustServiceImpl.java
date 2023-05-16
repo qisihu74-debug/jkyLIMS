@@ -310,6 +310,8 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setCreateTime(new Date());
             // 委托单是否留样1.保留2.废弃 默认：否
             basisInfo.setIsSave("否");
+            // 新增经营人员
+            basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
             entityMapper.insertEntrustInfo(basisInfo);
             if(sampleStatus){
                 return "新建委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";
@@ -404,6 +406,8 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setAddressee(null);
             basisInfo.setReportReceivingUnit(null);
         }
+        // 新增经营人员
+        basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
         entityMapper.updateEntrustInfo(basisInfo);
         // 修改委托信息后： 触发联动效果。 同步更新任务单对应字段。
         methodModifyTheTask(basisInfo.getId());
@@ -2985,6 +2989,8 @@ public class EntrustServiceImpl implements EntrustService {
     public EntrustAddVo getAnotherListCopy(Long entrustmentId) {
         // 通过委托单id 获取copy 数据。
         EntrustAddVo entrustAddVo = getEntrustHistoryDetailTest(entrustmentId);
+        // 经营人员 = null
+        entrustAddVo.setOperatingPersonnel(null);
         // 清除上传的 附件
         entrustAddVo.setFileArrays(new ArrayList<>());
         // 处理印章数组。
@@ -3234,6 +3240,8 @@ public class EntrustServiceImpl implements EntrustService {
         basisInfo.setCreateTime(new Date());
         // 委托单是否留样1.保留2.废弃 默认：否
         basisInfo.setIsSave("否");
+        // 经营人员
+        basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
         entityMapper.insertEntrustInfo(basisInfo);
         if(sampleStatus){
             return "新建委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";
