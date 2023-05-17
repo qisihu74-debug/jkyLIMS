@@ -1198,7 +1198,8 @@ public class ReportController {
     @PostMapping(value = "offlineReportMerge")
     public Result offlineReportMerge(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file
-            ,@RequestParam("reportCompleteTime") String reportCompleteTime, @RequestParam("time") String time, @RequestParam("sampleName") String sampleName) {
+            ,@RequestParam("reportCompleteTime") String reportCompleteTime, @RequestParam("time") String requestDate
+            , @RequestParam("sampleName") String sampleName,@Param("taskId") Long taskId,@Param("taskCode") String taskCode) {
         if (reportCompleteTime == null || file == null || StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数");
         }
@@ -1209,19 +1210,22 @@ public class ReportController {
         Boolean flag = reportService.offlineReportMerge(reportCode,file,verifyer.split(",")[0],issuer.split(",")[0]
                 ,Long.parseLong(verifyer.split(",")[1]),Long.parseLong(issuer.split(",")[1]),inspector);
 
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.CHINA);
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date date = null;
         Date date1 = null;
         try {
+            if (reportCompleteTime.length()>10){
+                reportCompleteTime = reportCompleteTime.substring(0,10);
+            }
             date = format.parse(reportCompleteTime);
-            date1 = format.parse(time);
+            date1 = format.parse(requestDate);
         } catch (ParseException e) {
             logger.error("时间格式转换错误:{}",e);
         }
         if (flag) {
             //更新报告上盖章的时间
-            reportService.updateTime(reportCode,date,date1,sampleName);
+            reportService.updateTime(reportCode,date,date1,sampleName,taskId,taskCode);
             return ResultUtil.success("报告文件上传成功！");
         }else {
             return ResultUtil.error("报告文件上传失败！");
@@ -1266,27 +1270,31 @@ public class ReportController {
      */
     @RequestMapping("onlineReportMergeSave")
     public Result onlineReportMergeSave(String reportCode,String inspector,String verifyer, String issuer,
-                                        String reportCompleteTime, String time, String sampleName){
+                                        String reportCompleteTime, String requestDate, String sampleName
+            ,Long taskId, String taskCode){
         if (StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)
-                ||StringUtils.isEmpty(sampleName) ||StringUtils.isEmpty(time)){
+                ||StringUtils.isEmpty(sampleName) ||StringUtils.isEmpty(requestDate)){
             return ResultUtil.error("缺少参数");
         }
         logger.debug("发起审批检测人:{},审核人:{},签发人:{}",inspector,verifyer,issuer);
         Boolean flag = reportService.onlineReportMergeSave(reportCode,verifyer.split(",")[0],issuer.split(",")[0]
                 ,Long.parseLong(verifyer.split(",")[1]),Long.parseLong(issuer.split(",")[1]),inspector);
 
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.CHINA);
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date date = null;
         Date date1 = null;
         try {
+            if (reportCompleteTime.length()>10){
+                reportCompleteTime = reportCompleteTime.substring(0,10);
+            }
             date = format.parse(reportCompleteTime);
-            date1 = format.parse(time);
+            date1 = format.parse(requestDate);
         } catch (ParseException e) {
             logger.error("时间格式转换错误:{}",e);
         }
         if (flag) {
-            reportService.updateTime(reportCode,date,date1,sampleName);
+            reportService.updateTime(reportCode,date,date1,sampleName,taskId,taskCode);
             return ResultUtil.success("报告文件上传成功！");
         }else {
             return ResultUtil.error("报告文件上传失败！");
