@@ -683,6 +683,10 @@ public class TaskController {
                     return ResultUtil.error("登录人没有被派发复核资格");
                 }
             }
+            // 通过任务单id 查询 报告节点
+            if(taskService.getVerifyReportState(taskId)){
+                return ResultUtil.error( "操作失败，报告已经签发完成");
+            }
             return ResultUtil.success(taskService.passorno(itemId, state, opinion));
         }
     }

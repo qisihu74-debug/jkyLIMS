@@ -241,4 +241,11 @@ public interface TaskService {
      */
     XSSFWorkbook getOriginalRecordAttachment(ExcelInsertVo excelInsertVo) throws IOException;
 
+    /**
+     * 通过任务单id 验证 报告state =7 盖章，返回 true 否则 返回false
+     * @param taskId
+     * @return
+     */
+    Boolean getVerifyReportState(Long taskId);
+
 }
