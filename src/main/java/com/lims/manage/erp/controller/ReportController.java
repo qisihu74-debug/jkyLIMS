@@ -1225,7 +1225,8 @@ public class ReportController {
         }
         if (flag) {
             //更新报告上盖章的时间
-            reportService.updateTime(reportCode,date,date1,sampleName,taskId,taskCode);
+            Date date2 = new Date(System.currentTimeMillis());
+            reportService.updateTime(reportCode,date,date1,sampleName,taskId,taskCode,date2);
             return ResultUtil.success("报告文件上传成功！");
         }else {
             return ResultUtil.error("报告文件上传失败！");
@@ -1294,7 +1295,8 @@ public class ReportController {
             logger.error("时间格式转换错误:{}",e);
         }
         if (flag) {
-            reportService.updateTime(reportCode,date,date1,sampleName,taskId,taskCode);
+            Date date2 = new Date(System.currentTimeMillis());
+            reportService.updateTime(reportCode,date,date1,sampleName,taskId,taskCode,date2);
             return ResultUtil.success("报告文件上传成功！");
         }else {
             return ResultUtil.error("报告文件上传失败！");
