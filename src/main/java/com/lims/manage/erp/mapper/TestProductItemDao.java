@@ -169,5 +169,12 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
      * @return
      */
     int deleteItemSheetRel(Integer checkItemId);
+
+    /**
+     * 根据检测项主键 查询检测项的sheet下标
+     * @param array
+     * @return
+     */
+    List<ExcelInsertVo> selectItemSheetIndex(@Param(value = "array") Integer[] array);
 }
 

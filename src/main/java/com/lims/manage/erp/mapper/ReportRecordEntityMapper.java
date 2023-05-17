@@ -390,6 +390,7 @@ public interface ReportRecordEntityMapper {
     @Select("select max(end_time) from test_entrusted_sample_checkitem_rel where entrust_id=#{entrustId}")
     java.sql.Date getMaxTime(@Param("entrustId") Long entrustId);
 
-    @Update("update test_report_record set report_complete_time=#{reportCompleteTime} where report_code=#{reportCode}")
-    void updateTime(@Param("reportCode") String reportCode, @Param("reportCompleteTime") Date reportCompleteTime);
+    @Update("update test_report_record set report_complete_time=#{reportCompleteTime},required_completion_time=#{date},sample_name=#{sampleName} where report_code=#{reportCode}")
+    void updateTime(@Param("reportCode") String reportCode, @Param("reportCompleteTime") Date reportCompleteTime,
+                    @Param("date") Date date,@Param("sampleName") String sampleName);
 }

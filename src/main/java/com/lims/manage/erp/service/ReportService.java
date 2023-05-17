@@ -434,5 +434,5 @@ public interface ReportService {
 
     Date getReportCompleteTime(String reportCode);
 
-    void updateTime(String reportCode, Date reportCompleteTime);
+    void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName);
 }

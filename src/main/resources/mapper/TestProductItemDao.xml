@@ -111,5 +111,21 @@
     <delete id="deleteItemSheetRel">
         delete from test_item_sheet_rel where check_item_id=#{checkItemId}
     </delete>
+    <select id="selectItemSheetIndex" resultType="com.lims.manage.erp.vo.ExcelInsertVo">
+        SELECT
+            t2.check_item_id,
+            t2.sheet_index
+        FROM
+            test_entrusted_sample_checkitem_rel AS t1
+            LEFT JOIN test_item_sheet_rel AS t2 ON t1.check_item_id = t2.check_item_id
+        WHERE
+            id IN
+            <foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        and t2.check_item_id is not null
+        ORDER BY
+            t2.sheet_index
+    </select>
 </mapper>
 
