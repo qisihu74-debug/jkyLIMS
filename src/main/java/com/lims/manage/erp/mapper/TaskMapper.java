@@ -523,4 +523,14 @@ public interface TaskMapper extends BaseMapper {
      */
     List<TaskIdEntity> selectItemPages(@Param(value = "taskId") Long taskId);
 
+    @Select("\tSELECT\n" +
+            "\t\tt3.state \n" +
+            "\tFROM\n" +
+            "\t\ttest_task AS t1\n" +
+            "\t\tLEFT JOIN test_entrusted_info AS t2 ON t1.entrustment_id = t2.id\n" +
+            "\t\tLEFT JOIN test_report_record AS t3 ON t3.entrustment_id = t2.id \n" +
+            "\tWHERE\n" +
+            "\tt1.id = #{taskId} and t3.state is not null")
+    List<Integer> getVerifyReportState(@Param(value = "taskId") Long taskId);
+
 }

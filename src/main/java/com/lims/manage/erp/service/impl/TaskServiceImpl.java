@@ -1841,4 +1841,20 @@ public class TaskServiceImpl implements TaskService {
         return wb;
     }
 
+    @Override
+    public Boolean getVerifyReportState(Long taskId) {
+
+        List<Integer> list = taskMapper.getVerifyReportState(taskId);
+        if(CollectionUtils.isEmpty(list)){
+            return false;
+        }
+        Boolean status = true;
+        for(Integer state : list){
+            if(state<7){
+                status = false;
+            }
+        }
+        return status;
+    }
+
 }
