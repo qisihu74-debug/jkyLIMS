@@ -507,7 +507,7 @@
         </if>
 
 
-        ) t1 order by t1.report_code
+        ) t1 order by t1.report_code desc
     </select>
 
     <select id="getSampleNames" resultType="java.lang.String">
