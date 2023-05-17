@@ -461,6 +461,7 @@
         select * from (SELECT DISTINCT
         t1.id,
         t2.id taskId,
+        t2.task_code taskCode,
         t1.entrust_test_type,
         t6.report_code,
         t6.type AS reportType,
@@ -486,6 +487,7 @@
         SELECT DISTINCT
         t1.id,
         t2.id taskId,
+        t2.task_code taskCode,
         t1.entrust_test_type,
         t6.report_code,
         t6.type AS reportType,
