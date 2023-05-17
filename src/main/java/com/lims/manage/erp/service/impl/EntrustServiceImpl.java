@@ -3830,6 +3830,9 @@ public class EntrustServiceImpl implements EntrustService {
                 if(StringUtils.isEmpty(clientOrderdetailVo1.getProjectPart())){
                     clientOrderdetailVo1.setProjectPart("--");
                 }
+                if(StringUtils.isEmpty(clientOrderdetailVo1.getOperatingPersonnel())){
+                    clientOrderdetailVo1.setOperatingPersonnel("--");
+                }
                 HashSet<String> SampleNameSet = new HashSet<>();
                 HashSet<String> SpecsSet = new HashSet<>();
                 HashSet<String> BatchNumberSet = new HashSet<>();
@@ -4011,6 +4014,8 @@ public class EntrustServiceImpl implements EntrustService {
             row = letterCycle.getNextUpEn(row);
             cells.get(row+n).setValue(personVo.getEntrustPeople());
             row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getOperatingPersonnel());
+            row = letterCycle.getNextUpEn(row);
             cells.get(row+n).setValue(personVo.getProjectName());
             row = letterCycle.getNextUpEn(row);
             cells.get(row+n).setValue(personVo.getProjectPart());
@@ -4147,6 +4152,9 @@ public class EntrustServiceImpl implements EntrustService {
                 }
                 if(StringUtils.isEmpty(clientOrderdetailVo0.getProjectPart())){
                     clientOrderdetailVo0.setProjectPart("--");
+                }
+                if(StringUtils.isEmpty(clientOrderdetailVo0.getOperatingPersonnel())){
+                    clientOrderdetailVo0.setOperatingPersonnel("--");
                 }
                 entrustIds.add(clientOrderdetailVo0.getEntrustmentId());
             }

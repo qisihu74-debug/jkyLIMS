@@ -918,6 +918,7 @@
         <result property="entrustPeople" column="entrust_people"></result>
         <result property="acceptanceDate" column="acceptance_date"></result>
         <result property="entrustmentNostr" column="entrustmentNostr"></result>
+        <result property="operatingPersonnel" column="operating_personnel"></result>
         <collection property="samples" ofType="com.lims.manage.erp.entity.SampleEntity">
             <result property="id" column="sampleId"></result>
             <result property="sampleName" column="alias_name"></result>
@@ -952,6 +953,7 @@
         t1.entrust_company ,
         t1.entrust_company_id ,
         t1.actual_price system_price,
+        t1.operating_personnel,
         t3.id sampleId,
         t3.alias_name ,
         t3.specs,
@@ -993,6 +995,9 @@
         </if>
         <if test="entrustPeople!=null">
             and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+        </if>
+        <if test="operatingPersonnel!=null and operatingPersonnel!=''">
+            and t1.operating_personnel LIKE CONCAT('%',#{operatingPersonnel},'%')
         </if>
         ORDER BY t1.entrustment_no asc, t1.request_date asc
     </select>

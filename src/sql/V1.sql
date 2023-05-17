@@ -500,3 +500,6 @@ UPDATE `sys_function` SET `name` = '最终报告制作' WHERE `function_id` = 42
 ALTER TABLE `test_task`
     ADD COLUMN `create_time`  datetime DEFAULT NULL COMMENT '任务单创建时间' AFTER `present_information`;
 
+ALTER TABLE `test_entrusted_info`
+    ADD COLUMN `operating_personnel`  VARCHAR(50) NULL COMMENT '经营人员' AFTER `create_time`;
+
