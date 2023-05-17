@@ -3493,15 +3493,25 @@ public class ReportServiceImpl implements ReportService {
             for (int i=0;i<count;i++) {
                 String name = workbook.getWorksheets().get(i).getName();
                 if ("第1页，第2页，第3页，第4页".contains(name)){
-                    Cell cell = workbook.getWorksheets().get(i).getCells().get("检测：");
-                    if (cell != null){
-                        String cellName = cell.getName();
-                        String key = cellName.substring(0, 1);
-                        String value = cellName.substring(1);
-                        //检测结论名称
-                        workbook.getWorksheets().get(i).getCells().get(key+(Integer.parseInt(value)-2)).setValue(entity.getConclusion());
-                        //附加生命名称
-                        workbook.getWorksheets().get(i).getCells().get(key+(Integer.parseInt(value)-1)).setValue(entity.getAdditional());
+                    Cells cells = workbook.getWorksheets().get(i).getCells();
+                    int maxRow1 = cells.getMaxRow();
+                    int column1 = cells.getMaxColumn();
+                    for (int n = 0; n < maxRow1; n++) {
+                        for (int j = 0; j < column1; j++) {
+                            Cell cell = cells.get(n, j);
+                            if (cell != null) {
+                                Object value = cell.getValue();
+                                if (value != null) {
+                                    String string = value.toString();
+                                    if ("${检测结论}".equals(string)) {
+                                        cells.get(n, j).setValue("检测结论：" + entity.getConclusion());
+                                    }
+                                    if ("${附加声明}".equals(string)) {
+                                        cells.get(n, j).setValue("附加声明：" + entity.getAdditional());
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -3761,8 +3771,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void updateTime(String reportCode, Date reportCompleteTime) {
-        recordEntityMapper.updateTime(reportCode,reportCompleteTime);
+    public void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName) {
+        recordEntityMapper.updateTime(reportCode,reportCompleteTime,date,sampleName);
     }
 
     /**
