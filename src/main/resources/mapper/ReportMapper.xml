@@ -460,6 +460,7 @@
     <select id="reportDownloadList0512" resultType="com.lims.manage.erp.vo.ReportListVo">
         select * from (SELECT DISTINCT
         t1.id,
+        t2.id taskId,
         t1.entrust_test_type,
         t6.report_code,
         t6.type AS reportType,
@@ -484,6 +485,7 @@
         union all
         SELECT DISTINCT
         t1.id,
+        t2.id taskId,
         t1.entrust_test_type,
         t6.report_code,
         t6.type AS reportType,
