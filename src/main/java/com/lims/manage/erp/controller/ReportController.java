@@ -1198,7 +1198,8 @@ public class ReportController {
     @PostMapping(value = "offlineReportMerge")
     public Result offlineReportMerge(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file
-            ,@RequestParam("reportCompleteTime") String reportCompleteTime, @RequestParam("time") String requestDate, @RequestParam("sampleName") String sampleName) {
+            ,@RequestParam("reportCompleteTime") String reportCompleteTime, @RequestParam("time") String requestDate
+            , @RequestParam("sampleName") String sampleName,@Param("taskId") Long taskId,@Param("taskCode") String taskCode) {
         if (reportCompleteTime == null || file == null || StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数");
         }
@@ -1224,7 +1225,7 @@ public class ReportController {
         }
         if (flag) {
             //更新报告上盖章的时间
-            reportService.updateTime(reportCode,date,date1,sampleName);
+            reportService.updateTime(reportCode,date,date1,sampleName,taskId,taskCode);
             return ResultUtil.success("报告文件上传成功！");
         }else {
             return ResultUtil.error("报告文件上传失败！");
@@ -1269,7 +1270,8 @@ public class ReportController {
      */
     @RequestMapping("onlineReportMergeSave")
     public Result onlineReportMergeSave(String reportCode,String inspector,String verifyer, String issuer,
-                                        String reportCompleteTime, String requestDate, String sampleName){
+                                        String reportCompleteTime, String requestDate, String sampleName
+            ,Long taskId, String taskCode){
         if (StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)
                 ||StringUtils.isEmpty(sampleName) ||StringUtils.isEmpty(requestDate)){
             return ResultUtil.error("缺少参数");
@@ -1292,7 +1294,7 @@ public class ReportController {
             logger.error("时间格式转换错误:{}",e);
         }
         if (flag) {
-            reportService.updateTime(reportCode,date,date1,sampleName);
+            reportService.updateTime(reportCode,date,date1,sampleName,taskId,taskCode);
             return ResultUtil.success("报告文件上传成功！");
         }else {
             return ResultUtil.error("报告文件上传失败！");
