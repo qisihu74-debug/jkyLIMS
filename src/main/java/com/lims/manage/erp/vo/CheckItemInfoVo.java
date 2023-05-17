@@ -77,6 +77,8 @@ public class CheckItemInfoVo {
      */
     private String suffixType;
 
+    private String editData;
+
     public CheckItemInfoVo() {
     }
 

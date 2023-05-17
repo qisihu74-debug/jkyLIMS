@@ -5,10 +5,7 @@ import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TestDetectionDao;
-import com.lims.manage.erp.mapper.TestProductItemDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.util.*;
@@ -55,6 +52,8 @@ public class PageOfficeServiceImpl implements PageOfficeService {
     private TestDetectionDao testDetectionDao;
     @Autowired
     private LogManagerService logManagerService;
+    @Autowired
+    private EntrustEntityMapper entrustEntityMapper;
 
 
     /**
@@ -139,6 +138,17 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         Map<String, String> keyMap = new HashMap<>();
         // 查询检测项对应的 sheet下标
         List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
+        // 通过任务单 判断当前下单时间
+        //处理原始记录下载，单位名称问题
+        java.sql.Date date = entrustEntityMapper.getEntrustDateByTaskId(dataEntitys.get(0).getTaskId());
+        String dayString = DateUtil.getDayString(date.getTime());
+        // status = true;(检测单位名称：河南交科院检验检测认证有限公司)
+        // 否则 status = false; （检测单位名称：河南省公路工程试验检测中心有限公司）
+        Boolean status = false;
+        if (Integer.parseInt(dayString) >= 20230313){
+            // 检测单位名称：河南交科院检验检测认证有限公司
+            status = true;
+        }
         // 批量获取 检测项id（有可能对应多个模板） 再进行填充。
         // 通过检测项id 获取 相应的 id关联信息。
         for (int i = 0; i < dataEntitys.size(); i++) {
@@ -162,7 +172,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
                             originalData.setRecordNumber(originalData.getRecordNumber() + "-" + number);
                             result.put("result", originalData);
                             // 替换原始记录模板数据
-                            ExcelReplaceUtil.ExcelReplace(sheet, result);
+                            ExcelReplaceUtil.ExcelReplace(sheet, result,status);
                         }
                     }
                 }
@@ -796,6 +806,13 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         }
         teamVo1.setRecorderVo(recorderList);
         return teamVo1;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean editItemdData(Integer[] ids) {
+        testProductItemDao.updateBatchItemData(ids);
+        return true;
     }
 
 

@@ -70,4 +70,11 @@ public interface PageOfficeService {
      * @return
      */
     TeamVo getTaskInspectorAndRecorder(List<LabelValueVo> teamVo,Long taskId);
+
+    /**
+     * 编辑原始数据
+     * @param ids
+     * @return
+     */
+    Boolean editItemdData(Integer[] ids);
 }

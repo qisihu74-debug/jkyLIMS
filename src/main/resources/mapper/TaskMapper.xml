@@ -125,6 +125,7 @@
                 <result property="itemFileName" column="item_file_name"></result>
                 <result property="startTime" column="start_time"></result>
                 <result property="endTime" column="end_time"></result>
+                <result property="editData" column="edit_data"></result>
             </collection>
         </collection>
     </resultMap>
@@ -276,7 +277,8 @@
                t5.origin_url AS                                     originUrl,
                t5.opinion,
                t5.start_time,
-               t5.end_time
+               t5.end_time,
+               t5.edit_data
         FROM test_task t1
                  LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
                  LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id

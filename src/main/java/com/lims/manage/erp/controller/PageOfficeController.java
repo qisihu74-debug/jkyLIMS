@@ -238,6 +238,8 @@ public class PageOfficeController {
                 ids[j] = Integer.parseInt(items[j]);
             }
             pageOfficeService.updateOriginalRecordUrl(flag, ids);
+            // 更新编辑原始记录完成标记。
+            pageOfficeService.editItemdData(ids);
         }
     }
 

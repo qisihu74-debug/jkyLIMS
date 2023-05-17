@@ -176,5 +176,12 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
      * @return
      */
     List<ExcelInsertVo> selectItemSheetIndex(@Param(value = "array") Integer[] array);
+
+    /**
+     * 批量更新检测项数据 set edit_data = 1
+     * @param array
+     * @return
+     */
+    int updateBatchItemData(@Param(value = "array") Integer[] array);
 }
 

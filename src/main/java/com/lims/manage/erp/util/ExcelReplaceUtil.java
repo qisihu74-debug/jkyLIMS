@@ -22,8 +22,9 @@ public class ExcelReplaceUtil {
      *
      * @param sheet
      * @param map
+     * @param status true 进行修改
      */
-    public static void ExcelReplace(XSSFSheet sheet, Map<String, OriginalRecordDataVo> map) {
+    public static void ExcelReplace(XSSFSheet sheet, Map<String, OriginalRecordDataVo> map, Boolean status) {
         OriginalRecordDataVo originalRecordDataVo = map.get("result");
         int lastRowNum = sheet.getLastRowNum(); //获取表格内容的最后一行的行数
         //rowBegin代表要开始读取的行号，下面这个循环的作用是读取每一行内容
@@ -68,19 +69,35 @@ public class ExcelReplaceUtil {
                         // 主要仪器设备名称及编号
                         cell.setCellValue(originalRecordDataVo.getEquipment());
                     }
-                    if (!cellValue.equals("") && cellValue.contains("样品名称：")) {
+                    if (!cellValue.equals("") && cellValue.contains("${result.sampleDetails}")) {
                         TemplateSampleVo sample = originalRecordDataVo.getSample();
 
                         // 样品名称：${result.sample.sampleName}
                         // 样品编号：${result.sample.sampleNumber}样品数量：${result.sample.sampleQuantity}
                         //样品描述：${result.sample.sampleDesc}来样时间：${result.sample.sampleTime}
-                        String sampleName = cellValue.replace("${result.sample.sampleName}", sample.getSampleName());
-                        String sampleNumber = sampleName.replace("${result.sample.sampleNumber}", sample.getSampleNumber());
-                        String sampleQuantity = sampleNumber.replace("${result.sample.sampleQuantity}", sample.getSampleQuantity());
-                        String sampleDesc = sampleQuantity.replace("${result.sample.sampleDesc}", sample.getSampleDesc());
-                        String sampleTime = sampleDesc.replace("${result.sample.sampleTime}", sample.getSampleTime());
+                        String sampleName = "样品名称：" + sample.getSampleName();
+                        String sampleNumber = "样品编号" + sample.getSampleNumber();
+                        String sampleQuantity ="样品数量："+ sample.getSampleQuantity();
+                        String sampleDesc = "样品描述：" + sample.getSampleDesc();
+                        String sampleTime = "来样时间：" + sample.getSampleTime();
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append(sampleName);
+                        stringBuilder.append(sampleNumber);
+                        stringBuilder.append(sampleQuantity);
+                        stringBuilder.append(sampleDesc);
+                        stringBuilder.append(sampleTime);
+
                         // 赋值
-                        cell.setCellValue(sampleTime);
+                        cell.setCellValue(stringBuilder.toString());
+                    }
+                    //处理原始记录下载，单位名称问题
+                    if (!cellValue.equals("") && cellValue.equals("检测单位名称：${result.companyName}")) {
+                        if(status){
+                            cell.setCellValue("检测单位名称：河南交科院检验检测认证有限公司");
+                        }else {
+                            cell.setCellValue("检测单位名称：河南省公路工程试验检测中心有限公司");
+                        }
+
                     }
                 }
             }

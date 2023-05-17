@@ -7,6 +7,7 @@
     <script type="text/javascript">
         function Save() {
             document.getElementById("PageOfficeCtrl1").WebSave();
+            window.external.CallParentFunc("resetInit();");
             window.external.close();
         }
 
