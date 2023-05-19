@@ -3771,8 +3771,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode) {
-        recordEntityMapper.updateTime(reportCode,reportCompleteTime,date,sampleName,taskId,taskCode);
+    public void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode,Date combineTime) {
+        recordEntityMapper.updateTime(reportCode,reportCompleteTime,date,sampleName,taskId,taskCode,combineTime);
     }
 
     /**
