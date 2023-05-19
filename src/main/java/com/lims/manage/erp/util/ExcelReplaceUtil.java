@@ -63,7 +63,7 @@ public class ExcelReplaceUtil {
                     }
                     if (!cellValue.equals("") && cellValue.equals("${result.judgeBasis}")) {
                         // 判定依据
-                        cell.setCellValue(originalRecordDataVo.getTestBasis());
+                        cell.setCellValue(originalRecordDataVo.getJudgeBasis());
                     }
                     if (!cellValue.equals("") && cellValue.equals("${result.equipment}")) {
                         // 主要仪器设备名称及编号
