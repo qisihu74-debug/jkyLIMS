@@ -723,4 +723,7 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Select("select DISTINCT sample_id from test_entrusted_sample_checkitem_rel where task_id=#{taskId}")
     List<Integer> getSampelIdsByTaskId(@Param("taskId") Long taskId);
+
+    @Select("select check_item_name from test_entrusted_sample_checkitem_rel where entrust_id=#{entrustId} and sample_id=#{sampleId} and state=3")
+    List<String> getAllItems(@Param("entrustId") Long entrustId, @Param("sampleId") Integer sampleId);
 }

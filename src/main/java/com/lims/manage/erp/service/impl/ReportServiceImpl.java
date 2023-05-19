@@ -3801,10 +3801,30 @@ public class ReportServiceImpl implements ReportService {
                 stringBuilder.append("3." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson()) ? "见证人：无" : "见证人：" + entrustHistoryDetail.getWitnessPerson()) + "；");
                 stringBuilder.append("4.委托方提供：" + (StringUtils.isEmpty(entrustHistoryDetail.getRemark()) ? "无" : entrustHistoryDetail.getRemark()) + " ；");
                 conclusionEntity.setAdditional(stringBuilder.toString());
-                String sampleDes = sampleEntity.getSampleName() + " " + "样品," + delItemDes(sampleEntity.getJudgmentBasisVos(), sampleEntity.getFileUrl(), entrustId);
+                String sampleDes = sampleEntity.getSampleName() + " " + "样品," + HandlerItemDes(entrustId,sampleId);
                 conclusionEntity.setConclusion("经检测，该" + sampleDes + "均符合" + judgeBasis + "中的技术要求。");
             }
         }
         return conclusionEntity;
+    }
+
+    /**
+     * 检测项描述
+     * @param entrustId
+     * @param sampleId
+     * @return
+     */
+    private String HandlerItemDes(Long entrustId, Integer sampleId) {
+        StringBuilder stringBuilder = new StringBuilder();
+        List<String> list = entrustEntityMapper.getAllItems(entrustId,sampleId);
+        int index=0;
+        for (String des:list) {
+            stringBuilder.append(des);
+            index = index +1;
+            if (index<list.size()){
+                stringBuilder.append(",");
+            }
+        }
+        return stringBuilder.toString();
     }
 }
