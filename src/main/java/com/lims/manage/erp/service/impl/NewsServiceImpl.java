@@ -1,6 +1,9 @@
 package com.lims.manage.erp.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.NewsBean;
 import com.lims.manage.erp.mapper.DeptDao;
@@ -10,12 +13,20 @@ import com.lims.manage.erp.service.NewsService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.LinkedDataVo;
+import com.lims.manage.erp.vo.NewsBeanVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author gjl
@@ -81,10 +92,86 @@ public class NewsServiceImpl  extends ServiceImpl<NewsDao, NewsBean> implements 
         }
         newsBean.setNextNum(integer);
         int insert = newsDao.insert(newsBean);
-        if (insert >= 0){
+        if (insert >= 0) {
             return true;
-        }else {
+        } else {
             return false;
         }
+    }
+
+    /**
+     * 新增简报信息
+     *
+     * @param newsBeanVo
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean saveNews(NewsBeanVo newsBeanVo) {
+        // 主键
+        newsBeanVo.setId(GenID.getID());
+        // if 链接不为空
+        if (!CollectionUtils.isEmpty(newsBeanVo.getLinkedData())) {
+            for (LinkedDataVo linkedDataVo : newsBeanVo.getLinkedData()) {
+                linkedDataVo.setSysNewsId(newsBeanVo.getId());
+            }
+            // 进行批量新增 链接数据层
+            newsDao.addBatchLinkedData(newsBeanVo.getLinkedData());
+        }
+        // 新增简报信息
+        NewsBean newsBean = new NewsBean();
+        newsBean.setId(newsBeanVo.getId());
+        newsBean.setTitle(newsBeanVo.getTitle());
+        newsBean.setContent(newsBeanVo.getContent());
+        if (newsBeanVo.getPublishDate() != null) {
+            newsBean.setPublishDate(newsBeanVo.getPublishDate());
+        } else {
+            newsBean.setPublishDate(new Date(System.currentTimeMillis()));
+        }
+        int insert = newsDao.insert(newsBean);
+        if (insert >= 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public PageInfo<NewsBeanVo> getPageInfoList(String search, Integer pageNum, Integer pageSize) {
+        QueryWrapper<NewsBean> queryWrapper = new QueryWrapper<NewsBean>();
+        if (StringUtils.isNotEmpty(search)) {
+            queryWrapper.and(wq -> {
+                return wq.like("content", search)
+                        .or()
+                        .like("title", search);
+            });
+        }
+        queryWrapper.orderByDesc("id");
+        PageHelper.startPage(pageNum, pageSize);
+        List<NewsBean> list = newsDao.selectList(queryWrapper);
+        List<NewsBeanVo> beanVoList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(list)) {
+            for (NewsBean data : list) {
+                NewsBeanVo newsBeanVo = new NewsBeanVo();
+                newsBeanVo.setId(data.getId());
+                newsBeanVo.setContent(data.getContent());
+                newsBeanVo.setTitle(data.getTitle());
+                newsBeanVo.setPublishDate(data.getPublishDate());
+                // 根据 简报主键查询 链接列表
+                List<LinkedDataVo> linkedList = newsDao.selectLinkedList(data.getId());
+                if (!CollectionUtils.isEmpty(linkedList)) {
+                    int serialNumber = 1;
+                    for (LinkedDataVo linkedDataVo : linkedList) {
+                        linkedDataVo.setSerialNumber(serialNumber);
+                        serialNumber += 1;
+                    }
+                    newsBeanVo.setLinkedData(linkedList);
+                }
+                // 赋值
+                beanVoList.add(newsBeanVo);
+            }
+        }
+        PageInfo<NewsBeanVo> pageInfo = new PageInfo(beanVoList);
+        return pageInfo;
     }
 }
