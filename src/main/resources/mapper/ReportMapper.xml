@@ -399,6 +399,8 @@
     <select id="reportDownloadList" resultType="com.lims.manage.erp.vo.ReportListVo">
         SELECT DISTINCT
         t1.id,
+        t6.verifyer,
+        t6.issuer,
         t1.entrust_test_type,
         t6.report_code,
         t6.type As reportType,
@@ -497,6 +499,8 @@
     <select id="reportDownloadListHistory" resultType="com.lims.manage.erp.vo.ReportListVo">
         SELECT
         IFNULL( t1.entrustment_id, t1.entrust_id ) id,
+        t6.verifyer,
+        t6.issuer,
         t1.task_code as taskCode,
         t1.report_code as reportCode,
         t1.sample_name as sampleName,
