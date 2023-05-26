@@ -10,14 +10,11 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.NewsService;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.vo.NewsBeanVo;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -42,67 +39,68 @@ public class NewsController {
     @Autowired
     private NewsService newsService;
 
-    /**
-     * 新闻发布保存
-     * @param json
-     * @param files
-     * @return
-     */
-    @PostMapping("saveNews")
-    public Result saveNews(@RequestParam("json") String json, MultipartFile[] files){
-        if (StringUtils.isEmpty(json) || files == null){
-            return ResultUtil.error("缺少参数");
-        }
-        NewsBean newsBean = JSON.parseObject(json,NewsBean.class);
-        Boolean flag = newsService.saveNews(newsBean,files);
-        if (flag){
-            return ResultUtil.success("发布新闻成功");
-        }else {
-            return ResultUtil.error("发布消息失败");
-        }
-    }
-
-    /**
-     * 新闻消息列表
-     * @param search
-     * @return
-     */
-    @GetMapping("list")
-    public Result list(String search, Integer pageNum, Integer pageSize){
-        if (pageNum == null || pageSize == null
-        ){
-            pageNum = 1;
-            pageSize = 10;
-        }
-        Date date = new Date(System.currentTimeMillis());
-        LambdaQueryWrapper<NewsBean> lambdaQueryWrapper = new LambdaQueryWrapper();
-        lambdaQueryWrapper.like(StringUtils.isNotEmpty(search),NewsBean::getContent,search);
-        lambdaQueryWrapper.le(NewsBean::getPublishDate,date);
-        PageHelper.startPage(pageNum,pageSize);
-        List<NewsBean> list = newsService.list(lambdaQueryWrapper);
-        PageInfo<NewsBean> pageInfo = new PageInfo(list);
-        //附件列表返回
-        for (NewsBean bean:pageInfo.getList()) {
-            List<String> ll = Lists.newArrayList();
-            String fileUrl = bean.getFileUrl();
-            if (StringUtils.isNotEmpty(fileUrl)){
-                String[] split = fileUrl.split(",");
-                for (String url:split) {
-                    ll.add(url);
-                }
-            }
-        }
-        return ResultUtil.success(pageInfo);
-    }
+//    /**
+//     * 新闻发布保存
+//     * @param json
+//     * @param files
+//     * @return
+//     */
+//    @PostMapping("saveNews")
+//    public Result saveNews(@RequestParam("json") String json, MultipartFile[] files){
+//        if (StringUtils.isEmpty(json) || files == null){
+//            return ResultUtil.error("缺少参数");
+//        }
+//        NewsBean newsBean = JSON.parseObject(json,NewsBean.class);
+//        Boolean flag = newsService.saveNews(newsBean,files);
+//        if (flag){
+//            return ResultUtil.success("发布新闻成功");
+//        }else {
+//            return ResultUtil.error("发布消息失败");
+//        }
+//    }
+//
+//    /**
+//     * 新闻消息列表
+//     * @param search
+//     * @return
+//     */
+//    @GetMapping("list")
+//    public Result list(String search, Integer pageNum, Integer pageSize){
+//        if (pageNum == null || pageSize == null
+//        ){
+//            pageNum = 1;
+//            pageSize = 10;
+//        }
+//        Date date = new Date(System.currentTimeMillis());
+//        LambdaQueryWrapper<NewsBean> lambdaQueryWrapper = new LambdaQueryWrapper();
+//        lambdaQueryWrapper.like(StringUtils.isNotEmpty(search),NewsBean::getContent,search);
+//        lambdaQueryWrapper.le(NewsBean::getPublishDate,date);
+//        PageHelper.startPage(pageNum,pageSize);
+//        List<NewsBean> list = newsService.list(lambdaQueryWrapper);
+//        PageInfo<NewsBean> pageInfo = new PageInfo(list);
+//        //附件列表返回
+//        for (NewsBean bean:pageInfo.getList()) {
+//            List<String> ll = Lists.newArrayList();
+//            String fileUrl = bean.getFileUrl();
+//            if (StringUtils.isNotEmpty(fileUrl)){
+//                String[] split = fileUrl.split(",");
+//                for (String url:split) {
+//                    ll.add(url);
+//                }
+//            }
+//        }
+//        return ResultUtil.success(pageInfo);
+//    }
 
     /**
      * 删除
+     *
      * @param id
      * @return
      */
     @GetMapping("delete")
-    public Result detete(Long id){
-        if (id == null){
+    public Result detete(Long id) {
+        if (id == null) {
             return ResultUtil.error("缺少参数");
         }
         boolean b = newsService.removeById(id);
@@ -146,12 +144,50 @@ public class NewsController {
             fileName = URLEncoder.encode(fileName, "UTF-8");
             response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
             OutputStream outputStream = response.getOutputStream();
-            IOUtils.copy(fileStream,outputStream);
+            IOUtils.copy(fileStream, outputStream);
             fileStream.close();
             outputStream.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println("下载新闻附件异常");
         }
     }
 
+    /**
+     * 新闻发布保存
+     *
+     * @param newsBeanVo
+     * @return
+     */
+    @PostMapping("saveNews")
+    public Result saveNews(@RequestBody NewsBeanVo newsBeanVo) {
+        if (newsBeanVo == null) {
+            return ResultUtil.error("缺少参数");
+        }
+        if (newsBeanVo.getContent() == null || newsBeanVo.getTitle() == null) {
+            return ResultUtil.error("缺少参数");
+        }
+        Boolean flag = newsService.saveNews(newsBeanVo);
+        if (flag) {
+            return ResultUtil.success("发布新闻成功");
+        } else {
+            return ResultUtil.error("发布消息失败");
+        }
+    }
+
+    /**
+     * 新闻消息列表
+     *
+     * @param search
+     * @return
+     */
+    @GetMapping("list")
+    public Result list(String search, Integer pageNum, Integer pageSize) {
+        if (pageNum == null || pageSize == null
+        ) {
+            pageNum = 1;
+            pageSize = 10;
+        }
+        PageInfo<NewsBeanVo> list = newsService.getPageInfoList(search, pageNum, pageSize);
+        return ResultUtil.success(list);
+    }
 }

@@ -503,3 +503,20 @@ ALTER TABLE `test_task`
 ALTER TABLE `test_entrusted_info`
     ADD COLUMN `operating_personnel`  VARCHAR(50) NULL COMMENT '经营人员' AFTER `create_time`;
 
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for sys_linked_data
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_linked_data`;
+CREATE TABLE `sys_linked_data`  (
+  `id` int(0) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '名字',
+  `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '链接',
+  `sys_news_id` bigint(0) NOT NULL COMMENT 'sys_news中id',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
