@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lims.manage.erp.vo.BatchReceiveTaskVo;
 import lombok.Data;
@@ -134,6 +135,24 @@ public class TaskTestEntity {
      * 任务单价格
      */
     private Double taskPrice;
+    /**
+     * 创建时间
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern ="yyyy-MM-dd HH:mm:ss" , timezone ="GMT+8")
+    private Date creteTime;
+    /**
+     * 供删除委托单用
+     * 废弃时间
+     */
+    @TableField(exist = false)
+    private Date wasteTime;
+    /**
+     * 供删除委托单用
+     * 废弃人
+     */
+    @TableField(exist = false)
+    private String derelict;
 
     public TaskTestEntity() {
     }

@@ -4938,4 +4938,26 @@ public class EntrustServiceImpl implements EntrustService {
         pageInfo.setTotal(list.size());
         return pageInfo;
     }
+
+    @Override
+    public Boolean verifyTaskState(Long entrustId){
+        // 根据委托单查询任务单状态
+        List<TaskTestEntity> taskList = entityMapper.selectTaskTestEntityList(entrustId);
+        for(TaskTestEntity taskTestEntity : taskList){
+            if(taskTestEntity.getState() >=3){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean entrustRevocation(List<TaskTestEntity> list){
+        // 查询任务单信息
+        for(TaskTestEntity taskTestEntity : list){
+            // 查询任务单详情：
+            TaskTestEntity data = (TaskTestEntity) taskMapper.selectById(taskTestEntity.getId());
+        }
+        return false;
+    }
 }

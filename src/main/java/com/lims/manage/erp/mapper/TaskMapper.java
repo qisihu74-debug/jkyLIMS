@@ -510,4 +510,18 @@ public interface TaskMapper extends BaseMapper {
      * 当前任务列表 (根据设备id 返回列表)
      */
     List<TaskListVo> taskList(@Param("search")String search,@Param("instrumentId")Long instrumentId );
+
+    /**
+     * 查看任务单详情
+     * @param taskId
+     * @return
+     */
+    TaskTestEntity selectTaskEntity(@Param("taskId")Long taskId);
+
+    /**
+     * 新增 废弃任务单信息
+     * @param taskTestEntity
+     * @return
+     */
+//    int inserTasUsed(TaskTestEntity taskTestEntity);
 }
