@@ -163,7 +163,7 @@
         <result property="sampleReceivingTime" column="sample_receiving_time"></result>
         <result property="sampleStateDescription" column="sample_state_description"></result>
         <result property="orderTime" column="order_time"></result>
-        <result property="creteTime" column="create_time"></result>
+        <result property="createTime" column="create_time"></result>
         <collection property="sampleList" ofType="com.lims.manage.erp.vo.SamplePrivateInfoVo">
             <id property="id" column="sampleId"></id>
             <result property="sampleCode" column="sampeCode"></result>

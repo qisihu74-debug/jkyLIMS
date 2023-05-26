@@ -63,7 +63,7 @@ public class TaskListVo {
      */
     @DateTimeFormat(pattern="yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    private Date creteTime;
+    private Date createTime;
     /**
      * 设备使用记录 集合
      */
