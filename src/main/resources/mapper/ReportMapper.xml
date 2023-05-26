@@ -499,8 +499,8 @@
     <select id="reportDownloadListHistory" resultType="com.lims.manage.erp.vo.ReportListVo">
         SELECT
         IFNULL( t1.entrustment_id, t1.entrust_id ) id,
-        t6.verifyer,
-        t6.issuer,
+        t1.verifyer,
+        t1.issuer,
         t1.task_code as taskCode,
         t1.report_code as reportCode,
         t1.sample_name as sampleName,
