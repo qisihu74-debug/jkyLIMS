@@ -1110,9 +1110,6 @@
             or t4.alias_name like CONCAT('%',#{search},'%') )
         </if>
     </select>
-    <select id="selectTaskEntity" resultType="com.lims.manage.erp.entity.TaskTestEntity">
-        select  * from  test_task where id = #{taskId}
-    </select>
 
     <select id="getUserSignatureUrls" resultType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT
@@ -1160,4 +1157,61 @@
         test_entrusted_sample_checkitem_rel as t1
         WHERE task_id = #{taskId} ORDER BY check_item_id
     </select>
+
+    <select id="selectTaskEntity" resultType="com.lims.manage.erp.entity.TaskTestEntity">
+       SELECT
+            id,
+            CODE,
+            entrustment_id,
+            orderer,
+            order_time,
+            required_completion_time,
+            team_id,
+            receiver,
+            receive_time,
+            sampler,
+            sample_receiving_time,
+            inspector,
+            start_detection_time,
+            end_detection_time,
+            recorder,
+            reviewer,
+            verifyer,
+            verify_time,
+            signer,
+            sign_time,
+            state,
+            report_producer,
+            task_code,
+            reason,
+            report_url,
+            1 as issue_report,
+            dept_id,
+            report_complete,
+            sample_state_description,
+            review_time,
+            task_price,
+            present_information,
+            create_time
+        FROM
+            test_task
+            WHERE  id = #{taskId}
+    </select>
+    <insert id="inserTasUsed" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
+        insert into test_task_used (id,code,entrustment_id,orderer,order_time,required_completion_time,team_id,receiver,
+        receive_time,sampler,sample_receiving_time,inspector,start_detection_time,end_detection_time,recorder,reviewer,
+        verifyer,verify_time,signer,sign_time,state,report_producer,task_code,reason,report_url,issue_report,dept_id,
+        report_complete,sample_state_description,review_time,task_price,present_information,create_time,waste_time,derelict)
+        values(#{id},#{code},#{entrustmentId},#{orderer},#{orderTime},#{requiredCompletionTime},#{teamId},#{receiver},
+        #{receiveTime},#{sampler},#{sampleReceivingTime},#{inspector},#{startDetectionTime},#{endDetectionTime},#{recorder},#{reviewer},
+        #{verifyer},null,#{signer},null,#{state},#{reportProducer},#{taskCode},null,null,null,null,
+        #{reportComplete},#{sampleStateDescription},#{reviewTime},#{taskPrice},#{presentInformation},#{creteTime},#{wasteTime},#{derelict})
+    </insert>
+
+    <update id="batchUpdateItemState" parameterType="java.lang.Long">
+        update test_entrusted_sample_checkitem_rel set
+            dept_id  = null,
+            task_id = null
+        WHERE entrust_id = #{entrustmentId}
+    </update>
 </mapper>

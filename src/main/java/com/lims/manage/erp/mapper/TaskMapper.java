@@ -10,6 +10,7 @@ import com.lims.manage.erp.entity.TaskTestTeamEntity;
 import com.lims.manage.erp.entity.TeamTreeStructureEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.vo.*;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -511,20 +512,6 @@ public interface TaskMapper extends BaseMapper {
      */
     List<TaskListVo> taskList(@Param("search")String search,@Param("instrumentId")Long instrumentId );
 
-    /**
-     * 查看任务单详情
-     * @param taskId
-     * @return
-     */
-    TaskTestEntity selectTaskEntity(@Param("taskId")Long taskId);
-
-    /**
-     * 新增 废弃任务单信息
-     * @param taskTestEntity
-     * @return
-     */
-//    int inserTasUsed(TaskTestEntity taskTestEntity);
-
     List<TaskListParamVo> getUserSignatureUrls(@Param("list") List<Long> list);
 
     /**
@@ -546,5 +533,43 @@ public interface TaskMapper extends BaseMapper {
             "\tWHERE\n" +
             "\tt1.id = #{taskId} and t3.state is not null")
     List<Integer> getVerifyReportState(@Param(value = "taskId") Long taskId);
+
+    /**
+     * 查看任务单详情
+     * @param taskId
+     * @return
+     */
+    TaskTestEntity selectTaskEntity(@Param("taskId")Long taskId);
+
+    /**
+     * 新增 废弃任务单信息 test_task_used
+     * @param taskTestEntity
+     * @return
+     */
+    int inserTasUsed(TaskTestEntity taskTestEntity);
+
+    /**
+     * 删除任务流转信息 根据任务单id
+     * @param taskId
+     * @return
+     */
+    @Delete("DELETE FROM test_entrusted_task_rel  WHERE task_id in(#{taskId})")
+    int deleteTaskRel(@Param("taskId")Long taskId);
+
+    /**
+     * 根据委托单id 进行批量处理
+     * 进行检测项的针对 dept_id update 操作
+     * @param entrustmentId
+     * @return
+     */
+    int batchUpdateItemState(@Param("entrustmentId")Long entrustmentId);
+
+    /**
+     * 删除任务单
+     * @param taskId
+     * @return
+     */
+    @Delete("DELETE FROM test_task  WHERE id = #{taskId}")
+    int deleteTaskById(@Param("taskId")Long taskId);
 
 }

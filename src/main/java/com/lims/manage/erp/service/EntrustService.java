@@ -369,16 +369,17 @@ public interface EntrustService {
 
     /**
      * 验证委托单下 任务单状态
-     * @param entrustId
+     * @param taskList
      * @return
      */
-    Boolean verifyTaskState(Long entrustId);
+    Boolean verifyTaskState(List<TaskTestEntity> taskList);
 
     /**
      * 任务单撤回操作
      * @param list
+     * @param entrustId
      * @return
      */
-    Boolean entrustRevocation(List<TaskTestEntity> list);
+    Boolean entrustRevocation(List<TaskTestEntity> list,Long entrustId);
 
 }

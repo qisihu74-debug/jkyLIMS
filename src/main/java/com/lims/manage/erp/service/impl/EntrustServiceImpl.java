@@ -32,7 +32,6 @@ import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
-import io.swagger.models.auth.In;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -59,7 +58,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -4940,9 +4938,8 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public Boolean verifyTaskState(Long entrustId){
+    public Boolean verifyTaskState(List<TaskTestEntity> taskList){
         // 根据委托单查询任务单状态
-        List<TaskTestEntity> taskList = entityMapper.selectTaskTestEntityList(entrustId);
         for(TaskTestEntity taskTestEntity : taskList){
             if(taskTestEntity.getState() >=3){
                 return true;
@@ -4952,12 +4949,33 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public Boolean entrustRevocation(List<TaskTestEntity> list){
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean entrustRevocation(List<TaskTestEntity> list,Long entrustId){
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        String userName = userInfo.getUserId() + "&" + userInfo.getUsername();
         // 查询任务单信息
         for(TaskTestEntity taskTestEntity : list){
             // 查询任务单详情：
-            TaskTestEntity data = (TaskTestEntity) taskMapper.selectById(taskTestEntity.getId());
+            TaskTestEntity data = taskMapper.selectTaskEntity(taskTestEntity.getId());
+            // 删除时间
+            data.setWasteTime(new Date());
+            // 操作人
+            data.setDerelict(userName);
+            // 新增已删除任务单 插入表 test_task_used
+            taskMapper.inserTasUsed(data);
+            // 删除任务单
+            taskMapper.deleteTaskById(data.getId());
+            // 根据任务单id 删除流转信息
+            taskMapper.deleteTaskRel(data.getId());
         }
-        return false;
+        // 委托单 置为0
+        EntrustEntity basisInfo = new EntrustEntity();
+        basisInfo.setId(entrustId);
+        basisInfo.setState(0);
+        // 删除任务流转信息 根据任务单id
+        entityMapper.updateEntrustInfos(basisInfo);
+        // 根据委托单id 进行批量处理检测项状态
+        taskMapper.batchUpdateItemState(entrustId);
+        return true;
     }
 }

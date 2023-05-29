@@ -1035,13 +1035,13 @@ public class EntrustController {
             return ResultUtil.error("撤回失败：任务单不存在");
         }
         // 效验任务单 是否开始试验。
-        Boolean flag = entrustService.verifyTaskState(entrustId);
+        Boolean flag = entrustService.verifyTaskState(taskList);
         if(flag){
             return ResultUtil.error("撤回失败：任务单已开始试验");
         }
-        entrustService.entrustRevocation(taskList);
-
-        return null;
+        // 进行 撤回操作
+        entrustService.entrustRevocation(taskList,entrustId);
+        return ResultUtil.success("撤回成功");
     }
 
 }
