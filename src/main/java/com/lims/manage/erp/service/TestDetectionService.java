@@ -84,7 +84,6 @@ public interface TestDetectionService {
      * @return
      */
     DeviceUseTimeVo checkDeviceUseTime(DeviceUseTimeVo vo);
-
     /**
      * 比较检测项 开始时间 与 结束时间 是否合理
      * @param data

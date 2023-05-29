@@ -59,6 +59,12 @@ public class TaskListVo {
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date orderTime;
     /**
+     * 创建时间
+     */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date createTime;
+    /**
      * 设备使用记录 集合
      */
     private List<InstrumentRecordListVo> instrumentRecordListVos = new ArrayList<>();

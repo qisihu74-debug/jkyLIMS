@@ -56,7 +56,8 @@
                system_price,
                actual_price,
                report_receiving_unit,
-               entrust_category
+               entrust_category,
+               operating_personnel
         from test_entrusted_info
         where id = #{id}
     </select>
@@ -132,6 +133,7 @@
         <collection property="taskCodes" ofType="com.lims.manage.erp.vo.TaskCodeVo">
             <result property="taskCode" column="taskCode"></result>
             <result property="teamName" column="teamName"></result>
+            <result property="taskState" column="taskState"></result>
         </collection>
     </resultMap>
 
@@ -150,7 +152,8 @@
         t1.audit_state auditState,
         t1.sample_logistics_no sampleLogisticsNo,
         IFNULL( t2.task_code, "——" ) taskCode,
-        IFNULL(t3.name,"——") teamName
+        IFNULL(t3.name,"——") teamName,
+        t2.state taskState
         FROM
         test_entrusted_info t1
         left join test_task t2 ON t1.id = t2.entrustment_id
@@ -254,7 +257,8 @@
         t1.audit_state auditState,
         t1.sample_logistics_no sampleLogisticsNo,
         IFNULL( t2.task_code, "——" ) taskCode,
-        IFNULL(t3.name,"——") teamName
+        IFNULL(t3.name,"——") teamName,
+        t2.state taskState
         FROM
         test_entrusted_info t1
         left join test_task t2 ON t1.id = t2.entrustment_id
@@ -538,7 +542,8 @@
                                         report_receiving_unit,
                                         entrust_category,
                                         entrust_category_type,
-                                        create_time)
+                                        create_time,
+                                        operating_personnel)
         values (#{id},
                 #{entrustmentNo},
                 #{entrustType},
@@ -593,7 +598,8 @@
                 #{reportReceivingUnit},
                 #{entrustCategory},
                 #{entrustCategoryType},
-                #{createTime})
+                #{createTime},
+                #{operatingPersonnel})
 
     </insert>
     <select id="GetDelegateInformation" resultType="String">
@@ -663,6 +669,7 @@
             <if test="auditState != null and auditState!=''">audit_state=#{auditState},</if>
             <if test="auditUser != null and auditUser!=''">audit_user=#{auditUser},</if>
             <if test="auditDate != null">audit_date=#{auditDate},</if>
+            <if test="operatingPersonnel != null and operatingPersonnel!=''">operating_personnel=#{operatingPersonnel},</if>
             address=#{address},
             addressee=#{addressee},
             mobile=#{mobile},
@@ -889,7 +896,9 @@
         t2.code,
         t2.required_completion_time,
         t2.order_time,
-        t2.present_information
+        t2.present_information,
+        t2.dept_id as teamId,
+        t2.issue_report as receiver
         FROM
         test_entrusted_info as t1
         LEFT JOIN test_task as t2 ON t1.id = t2.entrustment_id
@@ -909,6 +918,7 @@
         <result property="entrustPeople" column="entrust_people"></result>
         <result property="acceptanceDate" column="acceptance_date"></result>
         <result property="entrustmentNostr" column="entrustmentNostr"></result>
+        <result property="operatingPersonnel" column="operating_personnel"></result>
         <collection property="samples" ofType="com.lims.manage.erp.entity.SampleEntity">
             <result property="id" column="sampleId"></result>
             <result property="sampleName" column="alias_name"></result>
@@ -943,6 +953,7 @@
         t1.entrust_company ,
         t1.entrust_company_id ,
         t1.actual_price system_price,
+        t1.operating_personnel,
         t3.id sampleId,
         t3.alias_name ,
         t3.specs,
@@ -985,6 +996,9 @@
         <if test="entrustPeople!=null">
             and t1.entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
         </if>
+        <if test="operatingPersonnel!=null and operatingPersonnel!=''">
+            and t1.operating_personnel LIKE CONCAT('%',#{operatingPersonnel},'%')
+        </if>
         ORDER BY t1.entrustment_no asc, t1.request_date asc
     </select>
 
@@ -1026,7 +1040,8 @@
         project_part ,
         entrust_company ,
         entrust_company_id ,
-        actual_price as systemPrice
+        actual_price as systemPrice,
+        operating_personnel
         FROM
         test_entrusted_info
         WHERE
@@ -1051,6 +1066,9 @@
         </if>
         <if test="entrustPeople!=null">
             and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+        </if>
+        <if test="operatingPersonnel!=null and operatingPersonnel!=''">
+            and operating_personnel LIKE CONCAT('%',#{operatingPersonnel},'%')
         </if>
     </select>
 

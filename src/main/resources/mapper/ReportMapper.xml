@@ -434,6 +434,8 @@
     <select id="reportDownloadList" resultType="com.lims.manage.erp.vo.ReportListVo">
         SELECT DISTINCT
         t1.id,
+        t6.verifyer,
+        t6.issuer,
         t1.entrust_test_type,
         t6.report_code,
         t6.type As reportType,
@@ -600,10 +602,13 @@
         FROM
         test_task t2
         LEFT JOIN test_report_record t1 ON t1.entrustment_id = t2.entrustment_id
+        LEFT JOIN test_entrusted_info t3 ON t3.id = t2.entrustment_id
         WHERE
         t2.report_complete = 1
+        AND t2.state != 144
+        AND t3.state != 144
         <if test="taskCode!=null and taskCode!=''">
-            and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
+            and t2.task_code LIKE CONCAT('%',#{taskCode},'%')
         </if>
         <if test="deptIds!=null">
             and t2.dept_id in
@@ -616,7 +621,9 @@
 
     <select id="reportDownloadListHistory" resultType="com.lims.manage.erp.vo.ReportListVo">
         SELECT
-        t1.entrustment_id id,
+        IFNULL( t1.entrustment_id, t1.entrust_id ) id,
+        t1.verifyer,
+        t1.issuer,
         t1.task_code as taskCode,
         t1.report_code as reportCode,
         t1.sample_name as sampleName,

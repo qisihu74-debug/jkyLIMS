@@ -2,6 +2,9 @@ package com.lims.manage.erp.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.NewsBean;
+import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.NewsBean;
+import com.lims.manage.erp.vo.NewsBeanVo;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -15,4 +18,20 @@ import org.springframework.web.multipart.MultipartFile;
 public interface NewsService extends IService<NewsBean> {
 
     Boolean saveNews(NewsBean newsBean, MultipartFile[] files);
+
+    /**
+     * 新增简报
+     * @param newsBeanVo
+     * @return
+     */
+    Boolean saveNews(NewsBeanVo newsBeanVo);
+
+    /**
+     *  查詢 新闻消息列表
+     * @param search
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    PageInfo<NewsBeanVo> getPageInfoList(String search, Integer pageNum, Integer pageSize);
 }

@@ -460,9 +460,30 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
+    public PageInfo teamStatistics0419(StatisticsParamVo paramVo) {
+        List<TeamOutputValueVo> result = Lists.newArrayList();
+        if(paramVo.getTeamId() == null){
+            //查询父级报告产值
+            List<TeamOutputValueVo> reportPrice = statisticsMapper.teamStatistics230419(paramVo.getBeginDate(), paramVo.getEndDate(), null);
+            result.addAll(reportPrice);
+        }else{
+            List<Long> nodeTeam = teamMapper.getNodeTeamId(Long.parseLong(paramVo.getTeamId()));
+            if(nodeTeam.size()>1){
+                List<TeamOutputValueVo> reportPrice = statisticsMapper.teamStatistics230419(paramVo.getBeginDate(), paramVo.getEndDate(), nodeTeam);
+                result.addAll(reportPrice);
+            }
+            List<TeamOutputValueVo> node = statisticsMapper.teamStatisticsNode0715(paramVo.getBeginDate(), paramVo.getEndDate(), nodeTeam);
+            result.addAll(node);
+        }
+        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        PageInfo<TeamOutputValueVo> resultPage = new PageInfo<>(result);
+        return resultPage;
+    }
+
+    @Override
     public PageInfo teamStatisticsNode(StatisticsParamVo paramVo) {
         PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
-        List<TeamOutputValueVo> list = statisticsMapper.teamStatisticsNode(paramVo);
+        List<TeamOutputValueVo> list = statisticsMapper.teamStatisticsNode0419(paramVo);
         PageInfo<TeamOutputValueVo> result = new PageInfo<>(list);
         return result;
     }

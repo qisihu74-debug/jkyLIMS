@@ -7,16 +7,7 @@ import com.aspose.words.SaveFormat;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustHistoryEntity;
-import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
-import com.lims.manage.erp.entity.QiYueSuoEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TaskEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -798,7 +789,7 @@ public class EntrustController {
         if (testEntrustedTaskRelVo.getPageNum() == null || testEntrustedTaskRelVo.getPageSize() == null) {
             return ResultUtil.error("缺少分页参数");
         }
-        return ResultUtil.success(entrustService.taskStatisticsList(testEntrustedTaskRelVo));
+        return ResultUtil.success(entrustService.taskStatisticsList2(testEntrustedTaskRelVo));
     }
 
     /**
@@ -1025,6 +1016,32 @@ public class EntrustController {
                 log.info("导出失败：{}", ex);
             }
         }
+    }
+
+    /**
+     * 委托单撤回
+     * @param entrustId
+     * @return
+     */
+    @GetMapping("entrustRevocation")
+    public Result entrustRevocation(Long entrustId) {
+        // 委托单id = null 返回失败
+        if(org.springframework.util.StringUtils.isEmpty(entrustId)){
+            return ResultUtil.error("委托单id不能为空");
+        }
+        // 根据委托单查询任务单状态
+        List<TaskTestEntity> taskList = entrustEntityMapper.selectTaskTestEntityList(entrustId);
+        if(CollectionUtils.isEmpty(taskList)){
+            return ResultUtil.error("撤回失败：任务单不存在");
+        }
+        // 效验任务单 是否开始试验。
+        Boolean flag = entrustService.verifyTaskState(entrustId);
+        if(flag){
+            return ResultUtil.error("撤回失败：任务单已开始试验");
+        }
+        entrustService.entrustRevocation(taskList);
+
+        return null;
     }
 
 }

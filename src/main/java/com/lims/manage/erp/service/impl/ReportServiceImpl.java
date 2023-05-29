@@ -702,6 +702,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private String getMaxCode(Long entrustId) {
+
+    public String max(Long id){
+        return getMaxCode(id);
+    }
+
+    private String getMaxCode(Long entrustId){
         //获取父级code
         Long deptId = taskMapper.getDeptByEntrustId(entrustId);
         String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
@@ -1771,7 +1777,6 @@ public class ReportServiceImpl implements ReportService {
 
     /**
      * 处理合并完整的excel每个报告的页码
-     *
      * @param document
      * @param countMap
      */
@@ -2288,7 +2293,7 @@ public class ReportServiceImpl implements ReportService {
     public List<ConclusionEntity> getResut(Long entrustId, Integer reportType) {
         List<ReportTemplateEntity> templateList;
         //TODO 需要从报告模板和产品关系表中查询产品ids
-        if (reportType == 1) {//中间报告查询
+        if(reportType == 1){//中间报告查询
             templateList = reportService.getMiddleReportTemplateList(entrustId);
         } else {//最终报告查询
             templateList = reportService.getReportTemplateList(entrustId);

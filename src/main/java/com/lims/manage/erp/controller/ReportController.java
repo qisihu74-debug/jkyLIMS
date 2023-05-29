@@ -287,6 +287,12 @@ public class ReportController {
         }
     }
 
+    @PostMapping("/test")
+    public Result test(Long id) {
+        String max = reportService.max(id);
+        return ResultUtil.success("保存成功！", max);
+    }
+
     /**
      * 待盖章和历史盖章列表查询
      * @param search

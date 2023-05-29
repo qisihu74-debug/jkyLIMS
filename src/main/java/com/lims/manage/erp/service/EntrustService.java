@@ -360,4 +360,25 @@ public interface EntrustService {
      */
     Boolean distributionTask320(TaskVo entity);
 
+    /**
+     * 当天任务统计
+     * @param testEntrustedTaskRelVo
+     * @return
+     */
+    PageInfo taskStatisticsList2(TestEntrustedTaskRelVo testEntrustedTaskRelVo);
+
+    /**
+     * 验证委托单下 任务单状态
+     * @param entrustId
+     * @return
+     */
+    Boolean verifyTaskState(Long entrustId);
+
+    /**
+     * 任务单撤回操作
+     * @param list
+     * @return
+     */
+    Boolean entrustRevocation(List<TaskTestEntity> list);
+
 }

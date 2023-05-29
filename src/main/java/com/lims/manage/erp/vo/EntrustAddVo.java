@@ -264,6 +264,7 @@ public class EntrustAddVo {
      * 报告进度
      */
     ReportProgressVo reportProgress;
+    List<ReportProgressVo> reportProgresses;
     /**
      * 委托单附件集合
      */
@@ -296,5 +297,9 @@ public class EntrustAddVo {
      * 是否包含任务单 true包含 false不包含
      */
     private Boolean isTaskList;
+    /**
+     * 经营人员
+     */
+    private String operatingPersonnel;
 
 }

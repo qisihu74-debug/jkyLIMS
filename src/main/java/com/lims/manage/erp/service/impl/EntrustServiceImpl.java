@@ -310,6 +310,8 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setCreateTime(new Date());
             // 委托单是否留样1.保留2.废弃 默认：否
             basisInfo.setIsSave("否");
+            // 新增经营人员
+            basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
             entityMapper.insertEntrustInfo(basisInfo);
             if(sampleStatus){
                 return "新建委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";
@@ -404,6 +406,8 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setAddressee(null);
             basisInfo.setReportReceivingUnit(null);
         }
+        // 新增经营人员
+        basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
         entityMapper.updateEntrustInfo(basisInfo);
         // 修改委托信息后： 触发联动效果。 同步更新任务单对应字段。
         methodModifyTheTask(basisInfo.getId());
@@ -1875,8 +1879,8 @@ public class EntrustServiceImpl implements EntrustService {
         List<TaskProgressVo> taskProgressList = dealTaskState(entrustmentId);
         entrustAddVo.setTaskProgressList(taskProgressList);
         //查询当前委托报告信息
-        ReportProgressVo reportProgressVo = dealReportState(entrustmentId);
-        entrustAddVo.setReportProgress(reportProgressVo);
+        List<ReportProgressVo> reportProgressVo = dealReportsState(entrustmentId);
+        entrustAddVo.setReportProgresses(reportProgressVo);
         return entrustAddVo;
     }
 
@@ -1994,7 +1998,7 @@ public class EntrustServiceImpl implements EntrustService {
             }else if(state == 8){
                 reportRecordEntity.setState("5");
             }
-            result = new ReportProgressVo(reportRecordEntity.getReportCode(),Integer.parseInt(reportRecordEntity.getState()));
+            result = new ReportProgressVo(reportRecordEntity.getReportCode(),Integer.parseInt(reportRecordEntity.getState()),reportRecordEntity.getType());
             List<ReportProgressStateVo> reportProgressStateList = Lists.newArrayList();
             for (int i = 0; i <=5 ; i++) {
                 if(i == 0){
@@ -2033,7 +2037,76 @@ public class EntrustServiceImpl implements EntrustService {
         }
         return result;
     }
-
+    private List<ReportProgressVo> dealReportsState(Long entrustmentId){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        List<ReportProgressVo> result = Lists.newArrayList();
+        //TODO 兼容中间报告
+//        ReportNodeVo reportRecordEntity = null;
+//        Long id = recordEntityMapper.checkExist(entrustmentId,"0");
+//        if (id == null){
+//            reportRecordEntity = recordEntityMapper.getReportNodeByZjEntrustId(entrustmentId);
+//        }else {
+//            reportRecordEntity = recordEntityMapper.getReportNodeByEntrustId(entrustmentId);
+//        }
+        List<ReportNodeVo> reportNodes = recordEntityMapper.getReportNodesByEntrustId(entrustmentId);
+        if(!CollectionUtils.isEmpty(reportNodes)){
+            for (int i = 0; i < reportNodes.size(); i++) {
+                ReportNodeVo reportRecordEntity = reportNodes.get(i);
+                Integer state = Integer.parseInt(reportRecordEntity.getState());
+                if(state == 0 || state == 2){
+                    reportRecordEntity.setState("0");
+                }else if(state == 3){//报告合成
+                    reportRecordEntity.setState("1");
+                }else if(state == 4){
+                    reportRecordEntity.setState("2");
+                }else if(state == 6){
+                    reportRecordEntity.setState("3");
+                }else if(state == 7){
+                    reportRecordEntity.setState("4");
+                }else if(state == 8){
+                    reportRecordEntity.setState("5");
+                }
+                ReportProgressVo progressVo = new ReportProgressVo(reportRecordEntity.getReportCode(),Integer.parseInt(reportRecordEntity.getState()),reportRecordEntity.getType());
+                List<ReportProgressStateVo> reportProgressStateList = Lists.newArrayList();
+                for (int j = 0; j <=5 ; j++) {
+                    if(j == 0){
+                        ReportProgressStateVo vo = new ReportProgressStateVo();
+                        vo.setTitle("报告制作中");
+                        vo.setTime(reportRecordEntity.getReportCompleteTime());
+                        reportProgressStateList.add(vo);
+                    }else if(j == 1){
+                        ReportProgressStateVo vo = new ReportProgressStateVo();
+                        vo.setTitle("报告合成");
+                        vo.setTime(reportRecordEntity.getCombineTime());
+                        reportProgressStateList.add(vo);
+                    }else if(j == 2){
+                        ReportProgressStateVo vo = new ReportProgressStateVo();
+                        vo.setTitle("审核完成");
+                        vo.setTime(reportRecordEntity.getVerifyerTime());
+                        reportProgressStateList.add(vo);
+                    }else if(j == 3){
+                        ReportProgressStateVo vo = new ReportProgressStateVo();
+                        vo.setTitle("签发完成");
+                        vo.setTime(reportRecordEntity.getIssuerTime());
+                        reportProgressStateList.add(vo);
+                    }else if(j == 4){
+                        ReportProgressStateVo vo = new ReportProgressStateVo();
+                        vo.setTitle("盖章完成");
+                        vo.setTime(reportRecordEntity.getSealTime());
+                        reportProgressStateList.add(vo);
+                    }else if(j == 5){
+                        ReportProgressStateVo vo = new ReportProgressStateVo();
+                        vo.setTitle("报告发出");
+                        vo.setTime(reportRecordEntity.getOperateTime());
+                        reportProgressStateList.add(vo);
+                    }
+                }
+                progressVo.setReportProgressStateList(reportProgressStateList);
+                result.add(progressVo);
+            }
+        }
+        return result;
+    }
 
 
     /**
@@ -2171,10 +2244,22 @@ public class EntrustServiceImpl implements EntrustService {
         PageHelper.clearPage();
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         // 通过委托单id 查询任务列表。委托单id不包含任务单 设置为 false。
-        if(CollectionUtils.isEmpty(entityMapper.selectTaskTestEntityList(entrustmentId))){
+        List<TaskTestEntity> taskList = entityMapper.selectTaskTestEntityList(entrustmentId);
+        if(CollectionUtils.isEmpty(taskList)){
             entrustAddVo.setIsTaskList(false);
         }else{
-            entrustAddVo.setIsTaskList(true);
+//            entrustAddVo.setIsTaskList(true);
+            // 获取任务单！=144 团队出具报告 进行赋值
+            for(TaskTestEntity taskTestEntity : taskList){
+                // 冒名顶替下 issue_report 转 receiver （类型转换）
+                if(taskTestEntity.getState() !=144 && taskTestEntity.getReceiver().equals("是")){
+                    entrustAddVo.setIsTaskList(true);
+                }
+            }
+            // 没有被赋值 进行
+            if(entrustAddVo.getIsTaskList() == null){
+                entrustAddVo.setIsTaskList(false);
+            }
         }
         List<LabelValueVo> allTestRoom = Lists.newArrayList();
 
@@ -2530,9 +2615,9 @@ public class EntrustServiceImpl implements EntrustService {
                 } else {
                     vo.setIssueReport("否");
                 }
-            }else {
-                vo.setIssueReport("是");
             }
+            // 任务单创建时间
+            vo.setCreateTime(new Date());
             vos.add(vo);
             //更新检测项分配的部门和任务单号
             List<CheckItemDeptVo> checkItemDeptVoList1 = Lists.newArrayList();
@@ -2552,6 +2637,7 @@ public class EntrustServiceImpl implements EntrustService {
             stringBuilder1.append("委托单id" + vo.getEntrustmentId());
             stringBuilder1.append("是否出具报告" + vo.getIssueReport());
             stringBuilder1.append("价格" + vo.getTaskPrice());
+            stringBuilder1.append("任务单创建时间" + vo.getCreateTime());
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.TASK_FLOW, true);
         }
         //任务单保存
@@ -2903,6 +2989,8 @@ public class EntrustServiceImpl implements EntrustService {
     public EntrustAddVo getAnotherListCopy(Long entrustmentId) {
         // 通过委托单id 获取copy 数据。
         EntrustAddVo entrustAddVo = getEntrustHistoryDetailTest(entrustmentId);
+        // 经营人员 = null
+        entrustAddVo.setOperatingPersonnel(null);
         // 清除上传的 附件
         entrustAddVo.setFileArrays(new ArrayList<>());
         // 处理印章数组。
@@ -3152,6 +3240,8 @@ public class EntrustServiceImpl implements EntrustService {
         basisInfo.setCreateTime(new Date());
         // 委托单是否留样1.保留2.废弃 默认：否
         basisInfo.setIsSave("否");
+        // 经营人员
+        basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
         entityMapper.insertEntrustInfo(basisInfo);
         if(sampleStatus){
             return "新建委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";
@@ -3740,6 +3830,9 @@ public class EntrustServiceImpl implements EntrustService {
                 if(StringUtils.isEmpty(clientOrderdetailVo1.getProjectPart())){
                     clientOrderdetailVo1.setProjectPart("--");
                 }
+                if(StringUtils.isEmpty(clientOrderdetailVo1.getOperatingPersonnel())){
+                    clientOrderdetailVo1.setOperatingPersonnel("--");
+                }
                 HashSet<String> SampleNameSet = new HashSet<>();
                 HashSet<String> SpecsSet = new HashSet<>();
                 HashSet<String> BatchNumberSet = new HashSet<>();
@@ -3921,6 +4014,8 @@ public class EntrustServiceImpl implements EntrustService {
             row = letterCycle.getNextUpEn(row);
             cells.get(row+n).setValue(personVo.getEntrustPeople());
             row = letterCycle.getNextUpEn(row);
+            cells.get(row+n).setValue(personVo.getOperatingPersonnel());
+            row = letterCycle.getNextUpEn(row);
             cells.get(row+n).setValue(personVo.getProjectName());
             row = letterCycle.getNextUpEn(row);
             cells.get(row+n).setValue(personVo.getProjectPart());
@@ -4057,6 +4152,9 @@ public class EntrustServiceImpl implements EntrustService {
                 }
                 if(StringUtils.isEmpty(clientOrderdetailVo0.getProjectPart())){
                     clientOrderdetailVo0.setProjectPart("--");
+                }
+                if(StringUtils.isEmpty(clientOrderdetailVo0.getOperatingPersonnel())){
+                    clientOrderdetailVo0.setOperatingPersonnel("--");
                 }
                 entrustIds.add(clientOrderdetailVo0.getEntrustmentId());
             }
@@ -4655,9 +4753,9 @@ public class EntrustServiceImpl implements EntrustService {
             taskTestEntity.setState(taskTestEntity.getState());
             // 比对部门id 是否出具最终报告标记
             if (!CollectionUtils.isEmpty(entity.getDeptIds())&&entity.getDeptIds().contains(taskProgressVo.getDeptId())) {
-                taskTestEntity.setIssueReport(0);
-            } else {
                 taskTestEntity.setIssueReport(1);
+            } else {
+                taskTestEntity.setIssueReport(0);
             }
             List<CheckItemDeptVo> checkItemDeptVoList1 = new ArrayList<>();
             // 遍历待发布检测项列表
@@ -4741,5 +4839,125 @@ public class EntrustServiceImpl implements EntrustService {
             return flag;
         }
         return true;
+    }
+
+    /**
+     * 当天任务统计
+     * @param testEntrustedTaskRelVo
+     * @return
+     */
+    @Override
+    public PageInfo taskStatisticsList2(TestEntrustedTaskRelVo testEntrustedTaskRelVo) {
+
+        List<TestEntrustedTaskRelVo> list = Lists.newArrayList();
+        //拆分委托编号
+        if(!StringUtils.isEmpty(testEntrustedTaskRelVo.getEntrustmentNostr())){
+            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(testEntrustedTaskRelVo.getEntrustmentNostr());
+            testEntrustedTaskRelVo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
+            testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo().toString());
+            if(!StringUtils.isEmpty(entrustCategoryVo.getEntrustmentNo())){
+                testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo().toString());
+            }
+        }
+        PageHelper.clearPage();
+        // 查询 中间报告数据
+         list = testEntrustedTaskRelDao.getTaskStatisticsMidList(testEntrustedTaskRelVo);
+        if(!CollectionUtils.isEmpty(list)){
+            // 中间报告 中 不包含 最终报告数据
+            List<TestEntrustedTaskRelVo> allList = testEntrustedTaskRelDao.getTaskStatisticsAllList(testEntrustedTaskRelVo);
+          if(!CollectionUtils.isEmpty(allList)){
+              for(TestEntrustedTaskRelVo tt1 : allList){
+                  for(TestEntrustedTaskRelVo tt2 : list){
+                      if(tt2.getId().equals(tt1.getId()) && tt1.getType().equals(tt2.getType())){
+                        // 对 中间数据源赋值。
+                          if(!StringUtils.isEmpty(tt1.getReportCode())){
+                              tt2.setReportCode(tt1.getReportCode());
+                          }
+                          if(!StringUtils.isEmpty(tt1.getReportFinishTime())){
+                              tt2.setReportFinishTime(tt1.getReportFinishTime());
+                          }
+                      }
+                  }
+              }
+          }
+            for(TestEntrustedTaskRelVo testEntrustedTaskRelVo1:list){
+                // 遍历输出数据
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getRemark()))
+                {
+                    testEntrustedTaskRelVo1.setRemark("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getAddressName())){
+                    testEntrustedTaskRelVo1.setAddressName("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskCode())){
+                    testEntrustedTaskRelVo1.setTaskCode("--");
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskSource())){
+                    testEntrustedTaskRelVo1.setTaskSource("--");
+                }
+                // if 中间报告!=空 && 最终报告 =null
+                if(!StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportCode()) && StringUtils.isEmpty(testEntrustedTaskRelVo1.getReportCode())){
+                    testEntrustedTaskRelVo1.setReportCode(testEntrustedTaskRelVo1.getMidReportCode());
+                }
+                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getReportCode())){
+                    testEntrustedTaskRelVo1.setReportCode("--");
+                }
+                // if 中间报告结束时间 ！= 空
+                if(!StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportFinishTime()))
+                {
+                    testEntrustedTaskRelVo1.setReportFinishTime(testEntrustedTaskRelVo1.getMidReportFinishTime());
+                }
+                else {
+                    testEntrustedTaskRelVo1.setReportFinishTime(null);
+                }
+
+            }
+        }
+        Integer pageNum = testEntrustedTaskRelVo.getPageNum();
+        Integer pageSize = testEntrustedTaskRelVo.getPageSize();
+        if(StringUtils.isEmpty(pageNum)||pageNum<=0){
+            pageNum = 1;
+        }
+        if(StringUtils.isEmpty(pageSize)||pageSize<=0){
+            pageSize = 10;
+        }
+        // 如果页码展示数量大于最大数 返回最大数值
+        if(pageSize>list.size()){
+            pageSize = list.size();
+        }
+        PageInfo pageInfo = new PageInfo();
+        //分页
+        List<TestEntrustedTaskRelVo> subList;
+        if (list.size() > 10 && list.size() / 10 >= pageNum) {
+            subList = list.subList((pageNum - 1) * pageSize, pageNum * pageSize);
+        } else {
+            subList = list.subList((pageNum - 1) * pageSize, list.size());
+        }
+        getMethodSampleName(subList);
+        pageInfo.setList(subList);
+        pageInfo.setTotal(list.size());
+        return pageInfo;
+    }
+
+    @Override
+    public Boolean verifyTaskState(Long entrustId){
+        // 根据委托单查询任务单状态
+        List<TaskTestEntity> taskList = entityMapper.selectTaskTestEntityList(entrustId);
+        for(TaskTestEntity taskTestEntity : taskList){
+            if(taskTestEntity.getState() >=3){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean entrustRevocation(List<TaskTestEntity> list){
+        // 查询任务单信息
+        for(TaskTestEntity taskTestEntity : list){
+            // 查询任务单详情：
+            TaskTestEntity data = (TaskTestEntity) taskMapper.selectById(taskTestEntity.getId());
+        }
+        return false;
     }
 }

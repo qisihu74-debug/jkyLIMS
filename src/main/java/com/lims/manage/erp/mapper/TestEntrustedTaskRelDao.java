@@ -93,4 +93,19 @@ public interface TestEntrustedTaskRelDao {
     @Delete("DELETE FROM test_entrusted_task_rel  WHERE task_id =#{taskId}")
     int deleteTaskId(@Param("taskId")Long taskId);
 
+
+    /**
+     * 当天任务统计 查询 中间报告
+     * @param testEntrustedTaskRelVo
+     * @return
+     */
+    List<TestEntrustedTaskRelVo> getTaskStatisticsMidList(TestEntrustedTaskRelVo testEntrustedTaskRelVo);
+
+    /**
+     * 当天任务统计 查询 最终报告
+     * @param testEntrustedTaskRelVo
+     * @return
+     */
+    List<TestEntrustedTaskRelVo> getTaskStatisticsAllList(TestEntrustedTaskRelVo testEntrustedTaskRelVo);
+
 }

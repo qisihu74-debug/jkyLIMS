@@ -59,4 +59,6 @@ public class ReportListVo {
      * 报告类型 0最终报告，1中间报告
      */
     private String reportType;
+    private String verifyer;
+    private String issuer;
 }
