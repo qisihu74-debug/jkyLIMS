@@ -10,19 +10,16 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.NewsService;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.vo.NewsBeanVo;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.lims.manage.erp.vo.NewsBeanVo;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -72,8 +69,8 @@ public class NewsController {
      * @param search
      * @return
      */
-    @GetMapping("list")
-    public Result list(String search, Integer pageNum, Integer pageSize){
+    @GetMapping("list1")
+    public Result list1(String search, Integer pageNum, Integer pageSize){
         if (pageNum == null || pageSize == null
         ){
             pageNum = 1;
@@ -162,8 +159,6 @@ public class NewsController {
      * @return
      */
     @GetMapping("delete")
-    public Result detete(Long id){
-        if (id == null){
     public Result detete(Long id) {
         if (id == null) {
             return ResultUtil.error("缺少参数");
@@ -210,10 +205,6 @@ public class NewsController {
             response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
             OutputStream outputStream = response.getOutputStream();
             IOUtils.copy(fileStream,outputStream);
-            fileStream.close();
-            outputStream.close();
-        }catch (Exception e){
-            IOUtils.copy(fileStream, outputStream);
             fileStream.close();
             outputStream.close();
         } catch (Exception e) {

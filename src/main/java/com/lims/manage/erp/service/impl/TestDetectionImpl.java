@@ -495,39 +495,5 @@ public class TestDetectionImpl implements TestDetectionService {
         }
         return null;
     }
-    @Override
-    public String compareItemTime(SampleItemInstrumentVo data) {
-        // 检测项结束时间
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        String stringDate = format.format(data.getEndTime());
-        if (stringDate.equals("1970-01-01")) {
-            data.setEndTime(new Date());
-        }
-        if (data.getEndTime() == null) {
-            data.setEndTime(new Date());
-        }
-        List<Integer> list = new ArrayList<>();
-        // 效验检测项 结束时间 与 开始时间 是否合理
-        for(SampleItemInstrumentEntity sampleItemInstrumentEntity : data.getItemInstrumentEntityList()){
-            list.add(sampleItemInstrumentEntity.getItemId());
-        }
-        // 查询检测项集合
-        List<SampleItemInstrumentEntity> itemList = testDetectionDao.getTestEntrustedSampleCheckitemRelDetailList(list);
-        for(SampleItemInstrumentEntity sampleItemInstrumentEntity : itemList){
-            if(sampleItemInstrumentEntity != null && sampleItemInstrumentEntity.getStartTime() != null){
-                // 检测项结束时间 （结束日期是否在开始日期之前。）
-                if(data.getEndTime().before(sampleItemInstrumentEntity.getStartTime())){
-                    String startTime =  format.format(sampleItemInstrumentEntity.getStartTime());
-                    String endTime =  format.format(data.getEndTime());
-                    // 结束日期 != 开始日期
-                    if(!startTime.equals(endTime)){
-                        return "检测项名:"+sampleItemInstrumentEntity.getCheckItemName()+" 开始时间:"+startTime
-                                +" 结束时间："+endTime+"有误，请重新选择";
-                    }
-                }
-            }
-        }
-        return null;
-    }
 
 }

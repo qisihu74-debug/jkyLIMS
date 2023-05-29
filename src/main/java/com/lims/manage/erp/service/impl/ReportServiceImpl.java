@@ -701,8 +701,7 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    private String getMaxCode(Long entrustId) {
-
+    @Override
     public String max(Long id){
         return getMaxCode(id);
     }
