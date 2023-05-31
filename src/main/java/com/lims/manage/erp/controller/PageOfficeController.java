@@ -80,6 +80,12 @@ public class PageOfficeController {
         // 编辑参数赋值。
         map.put("items", list);
         PDFHelper3.getLicense();
+        // 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
+        if(CollectionUtils.isEmpty(sheetItems)){
+            // 检测项无Sheet页
+            return new ModelAndView("error");
+        }
         //根据参数获取样品相关信息和检测项相关信息
         //填充表头信息临时缓存到本地
         String url = pageOfficeService.getProductExcelUrl(ids);
@@ -94,8 +100,6 @@ public class PageOfficeController {
         //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
         // 循环设置
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
-        // 查询检测项对应的 sheet下标
-        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
         InputStream fileStream = null;
         try {
             // 获取公网 附件
