@@ -74,6 +74,11 @@ public class TaskDetailInfoVo {
      */
     private String invalidReason;
 
+    /**
+     * 委托编号
+     */
+    private String entrustmentNostr;
+
 
     public TaskDetailInfoVo(Long taskId) {
         this.taskId = taskId;
