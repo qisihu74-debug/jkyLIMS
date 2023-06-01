@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.sql.Timestamp;
@@ -317,6 +318,13 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             for (int i = 0; i < array.length ; i++) {
                 array[i] = excelInsertVo.getList().get(i);
             }
+        }
+        // 复核时 无检测原始模板则直接返回
+        // 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(array);
+        if(CollectionUtils.isEmpty(sheetItems)){
+            // 检测项无Sheet页
+            return true;
         }
         // 私有方法 处理 复核人签名信息。
         PDFHelper3.getLicense();
