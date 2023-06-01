@@ -2,6 +2,7 @@ package com.lims.manage.erp.vo;
 
 import lombok.Data;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,4 +18,8 @@ public class ExcelSheetDataVo {
     Map<Integer, Integer> countMap = new HashMap<>();
     // 文件路径
     String SaveFile;
+
+    InputStream fileStream = null;
+
+    String productExcelUrl;
 }

@@ -1133,7 +1133,8 @@
         t1.sample_id as sampleId,
         t1.state,
         t1.entrust_id as entrustmentId,
-        t1.check_item_name as checkItemName
+        t1.check_item_name as checkItemName,
+        t1.edit_data
         FROM
         test_entrusted_sample_checkitem_rel as t1
         WHERE 1=1

@@ -290,7 +290,11 @@ public class PageOfficeServiceImpl implements PageOfficeService {
             // 中间复核通过 数据 = 1
             excelInsertVo.setCheckReview("1");
             // 检测项状态 = null
-            excelInsertVo.setState(null);
+            if(state == 4){
+                excelInsertVo.setState(state);
+            }else {
+                excelInsertVo.setState(null);
+            }
         } else {
             // 最终复核 数据 = null
             excelInsertVo.setCheckReview(null);

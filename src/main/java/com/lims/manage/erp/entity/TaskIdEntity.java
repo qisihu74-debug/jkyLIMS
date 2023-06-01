@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 /**
@@ -56,4 +57,9 @@ public class TaskIdEntity {
      * 委托单id
      */
     private Long entrustmentId;
+    /**
+     * 值1 = 表头数据填充
+     */
+    @TableField(exist = false)
+    private Integer editData;
 }

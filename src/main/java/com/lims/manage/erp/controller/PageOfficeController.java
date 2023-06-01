@@ -6,6 +6,7 @@ import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductItemDao;
+import com.lims.manage.erp.service.PageOfficeCopyService;
 import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.*;
@@ -56,6 +57,8 @@ public class PageOfficeController {
     private TaskService taskService;
     @Autowired
     private TestProductItemDao testProductItemDao;
+    @Autowired
+    PageOfficeCopyService pageOfficeCopyService;
 
     @Value("${autograph.path}")
     private String dir;
@@ -88,7 +91,7 @@ public class PageOfficeController {
         }
         //根据参数获取样品相关信息和检测项相关信息
         //填充表头信息临时缓存到本地
-        String url = pageOfficeService.getProductExcelUrl(ids);
+//        String url = pageOfficeService.getProductExcelUrl(ids);
         //设置服务页面
         PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
         poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");
@@ -100,6 +103,8 @@ public class PageOfficeController {
         //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
         // 循环设置
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
+        //填充表头信息临时缓存到本地
+        String url = pageOfficeCopyService.getProductExcelUrl(ids,sheetItems,dataEntitys);
         InputStream fileStream = null;
         try {
             // 获取公网 附件
@@ -110,6 +115,12 @@ public class PageOfficeController {
         PDFHelper3.getLicense();
         com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
         int count = workbook.getWorksheets().getCount();
+        // 读取 url 附件 设置为全部可读
+        // 设置所有状态 可见。
+        for (int o = 0; o < count; o++) {
+            // 设置全部可读
+            workbook.getWorksheets().get(o).setVisible(true);
+        }
         // 根据key 保证 sheet不重复使用。
         Map<String, String> keyMap = new HashMap<>();
         try {
