@@ -9,6 +9,7 @@ import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 import sun.misc.BASE64Encoder;
 
 import javax.servlet.ServletOutputStream;
@@ -71,6 +73,8 @@ public class TaskController {
     private QiYueSuoEntity qiYueSuoEntity;
     @Autowired
     private PageOfficeService pageOfficeService;
+    @Autowired
+    private TestProductItemDao testProductItemDao;
 
     /**
      * 查询任务详情——废弃
@@ -899,35 +903,37 @@ public class TaskController {
             idList.add(Integer.parseInt(items[j]));
         }
         excelInsertVo.setList(idList);
-//        excelInsertVo.setCheckReview(checkReview);
-        // excel 转 pdf
-        XSSFWorkbook wb = taskService.getOriginalRecordAttachment(excelInsertVo);
-        FileOutputStream out = new FileOutputStream(newFilePath);
-        wb.write(out);
-        out.flush();//刷新
-        InputStream out000 = new FileInputStream(newFilePath);
-        //相应pdf
-        ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(out000,path);
-//        if(b1 == null){
-//            // 删除附件
-//            FileAndFolderUtil.delete(newFilePath);
-//            FileAndFolderUtil.delete(path);
-//            out000.close();
-//            b1.close();
-//            return;
-//        }
-        InputStream inputStream = FileAndFolderUtil.parseOut(b1);
-        ServletOutputStream outputStream = response.getOutputStream();
-        int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
-        inputStream.close();
-        outputStream.close();
-        out000.close();
-        b1.close();
+        Integer[] ids =new Integer[excelInsertVo.getList().size()];
+        for(int i = 0; i<excelInsertVo.getList().size(); i++){
+            ids[i] = excelInsertVo.getList().get(i);
+        }
+        // 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
+        if(!CollectionUtils.isEmpty(sheetItems)){
+            // excel 转 pdf
+            XSSFWorkbook wb = taskService.getOriginalRecordAttachment(excelInsertVo);
+            FileOutputStream out = new FileOutputStream(newFilePath);
+            wb.write(out);
+            out.flush();//刷新
+            InputStream out000 = new FileInputStream(newFilePath);
+            //相应pdf
+            ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(out000,path);
+            InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+            ServletOutputStream outputStream = response.getOutputStream();
+            int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+            inputStream.close();
+            outputStream.close();
+            out000.close();
+            b1.close();
 
-        out.close();//关闭
-        // 删除附件
-        FileAndFolderUtil.delete(newFilePath);
-        FileAndFolderUtil.delete(path);
+            out.close();//关闭
+            // 删除附件
+            FileAndFolderUtil.delete(newFilePath);
+            FileAndFolderUtil.delete(path);
+        }else {
+            // 检测项无Sheet页
+
+        }
     }
 
     /**
