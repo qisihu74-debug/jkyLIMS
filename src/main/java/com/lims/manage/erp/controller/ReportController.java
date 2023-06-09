@@ -1089,7 +1089,7 @@ public class ReportController {
             int count = workbook.getWorksheets().getCount();
             for (int i=0; i<count; i++){
                 String name = workbook.getWorksheets().get(i).getName();
-                if ("第1页,第2页,第3页,基础信息表".contains(name)){
+                if ("报告第1页,报告第2页,报告第3页,指标选择".contains(name)){
                     workbook.getWorksheets().get(i).setVisible(true);
                     //设置当工作表只读时，是否允许用户手动调整行列。
                     wb.openSheet(workbook.getWorksheets().get(i).getName()).setAllowAdjustRC(true);
