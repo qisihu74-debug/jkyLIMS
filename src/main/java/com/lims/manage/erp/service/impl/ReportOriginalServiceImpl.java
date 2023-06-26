@@ -68,7 +68,6 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteReportTemplate(List<Long> idList) {
-        int i = reportOriginalEntityMapper.deleteByIds(idList);
         for (int j = 0; j < idList.size(); j++) {
             ReportOriginalEntity reportOriginalEntity = reportOriginalEntityMapper.selectByPrimaryKey(idList.get(j));
             String oldUrl = reportOriginalEntity.getUrl();
@@ -81,6 +80,7 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
             }
             MinIoUtil.deleteFile(BucketsConst.report_original, decode);
         }
+        int i = reportOriginalEntityMapper.deleteByIds(idList);
         return i > 0;
     }
 
