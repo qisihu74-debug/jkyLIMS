@@ -420,8 +420,8 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         XSSFWorkbook workbook = new XSSFWorkbook(fileStream);
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
             String sheetName = workbook.getSheetAt(i).getSheetName();
-            if("指标选择".equals(sheetName) || "技术指标".equals(sheetName) || "报告第1页".equals(sheetName) ||
-                    "报告第2页".equals(sheetName)){
+            if("指标选择".contains(sheetName) || "技术指标".contains(sheetName) || "报告第1页".contains(sheetName) ||
+                    "报告第2页".contains(sheetName)){
                 continue;
             }
             LabelValueVo vo = new LabelValueVo(sheetName,Long.parseLong(i+""));
