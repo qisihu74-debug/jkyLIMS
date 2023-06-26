@@ -2,7 +2,6 @@ package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.google.api.client.util.Lists;
-import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -16,16 +15,28 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
-import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.PDFHelper3;
+import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.BatchReceiveTaskVo;
+import com.lims.manage.erp.vo.ExcelInsertVo;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
+import com.lims.manage.erp.vo.OriginalRecordParamVo;
+import com.lims.manage.erp.vo.PersonInfoVo;
+import com.lims.manage.erp.vo.ReceiveSampleParamVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.TaskListParamVo;
+import com.lims.manage.erp.vo.TaskStatsVo;
+import com.lims.manage.erp.vo.TeamVo;
 import com.spire.xls.Workbook;
 import com.spire.xls.Worksheet;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +48,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
-import sun.misc.BASE64Encoder;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -54,9 +63,9 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipOutputStream;
 
 @Slf4j
@@ -782,8 +791,8 @@ public class TaskController {
             }else if ("png".equals(names[1]) || "jpg".equals(names[1]) || "jpeg".equals(names[1])){
                 byte[] data = new byte[in.available()];
                 in.read(data);
-                BASE64Encoder encoder = new BASE64Encoder();
-                String encode = encoder.encode(data);
+                Base64.Encoder encoder = Base64.getEncoder();
+                String encode = encoder.encodeToString(data);
                 return ResultUtil.success(encode);
             }else {
                 int i = IOUtils.copy(in, outputStream);   // copy流数据,i为字节数
