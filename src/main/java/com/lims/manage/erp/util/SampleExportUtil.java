@@ -149,7 +149,7 @@ public class SampleExportUtil {
             }
             // 样品接收人：
             if (sampleOutPutVo.getSampleTaker() != null) {
-                cells.get(row+n).setValue(sampleOutPutVo.getSampleTaker());
+                cells.get(row+n).setValue(sampleOutPutVo.getTaskPublisher());
                 row = letterCycle.getNextUpEn(row);
             }else {
                 row = letterCycle.getNextUpEn(row);

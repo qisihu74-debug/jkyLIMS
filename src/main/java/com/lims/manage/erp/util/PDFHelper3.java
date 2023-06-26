@@ -120,6 +120,10 @@ public class PDFHelper3 {
                     List<XWPFRun> runs = paragraph.getRuns();
                     runs.forEach(e-> e.setText("",0));
                 }
+                if("Evaluation Only. Created with Aspose.Cells for Java.Copyright 2003 - 2021 Aspose Pty Ltd.".equals(text)){
+                    List<XWPFRun> runs = paragraph.getRuns();
+                    runs.forEach(e-> e.setText("",0));
+                }
                 if(" Evaluation Warning : The document was created with Spire.PDF for Java.".equals(text)){
                     List<XWPFRun> runs = paragraph.getRuns();
                     runs.forEach(e-> e.setText("",0));
