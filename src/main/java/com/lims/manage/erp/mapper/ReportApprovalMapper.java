@@ -90,6 +90,7 @@ public interface ReportApprovalMapper {
      * @return
      */
     int updateentrustAndApprovalMonad(ReportApprovalVo reportApprovalVo);
+    int updateById(ReportApprovalVo reportApprovalVo);
     /**
      * 根据检测项 获取 检测项所属的 URL连接
      */

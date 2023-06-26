@@ -212,7 +212,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalVo.setState(state);
             reportApprovalVo.setId(reportApprovalVo1.getId());
             reportApprovalVo.setReason(reportApprovalVo1.getReason());
-            reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
+            reportApprovalMapper.updateById(reportApprovalVo);
             return true;
         }
         return false;

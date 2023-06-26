@@ -304,6 +304,22 @@
         </trim>
         WHERE entrustment_id =#{entrustmentId}
     </update>
+    <update id="updateById" parameterType="com.lims.manage.erp.vo.ReportApprovalVo">
+        UPDATE test_report_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="state!=null">state=#{state},</if>
+            verifyer=#{verifyer},
+            verifyer_time = #{verifyerTime},
+            verifyer_id = #{verifyerId},
+            issuer=#{issuer},
+            issuer_time = #{issuerTime},
+            issuer_id = #{issuerId},
+            <if test="issuReason!=null and issuReason!=''">issu_reason=#{issuReason},</if>
+            <if test="applyReason!=null and applyReason!=''">apply_reason=#{applyReason},</if>
+            <if test="sealType!=null and sealType!=''">seal_type=#{sealType},</if>
+        </trim>
+        WHERE id =#{id}
+    </update>
 
     <select id="getCheckItemInfoVoList" resultType="com.lims.manage.erp.vo.CheckItemInfoVo" parameterType="long">
         SELECT
