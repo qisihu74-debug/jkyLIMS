@@ -25,13 +25,14 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
     private ReportOriginalEntityMapper reportOriginalEntityMapper;
 
     @Override
-    public int addReportOriginal(ReportOriginalEntity entity, MultipartFile file) {
+    public int addReportOriginal(ReportOriginalEntity entity, MultipartFile file) throws UnsupportedEncodingException {
         String filename = file.getOriginalFilename();
         String upload = MinIoUtil.upload(BucketsConst.report_original, file, filename);
         String url = upload.substring(0, upload.indexOf("?"));
+        String decode = URLDecoder.decode(url, "UTF-8");
         entity.setId(GenID.getID());
         entity.setCreateDate(new Date());
-        entity.setUrl(url);
+        entity.setUrl(decode);
         return reportOriginalEntityMapper.insert(entity);
     }
 

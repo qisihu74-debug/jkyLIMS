@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -37,7 +38,7 @@ public class ReportOriginalController {
      * @return
      */
     @PostMapping("/addReportOriginal")
-    public Result addReportOriginal(@RequestParam("json") String json, MultipartFile file) {
+    public Result addReportOriginal(@RequestParam("json") String json, MultipartFile file) throws UnsupportedEncodingException {
         if (file == null) {
             return ResultUtil.error("报告模板不能为空！");
         }
