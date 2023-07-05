@@ -13,7 +13,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author: DLC
@@ -29,6 +31,9 @@ public class SampleExportUtil {
      * @throws Exception
      */
     public InputStream sampleRetentionExport(List<SampleOutPutVo> list) throws Exception {
+        //按时间顺序排序
+        list = list.stream()
+                .sorted(Comparator.comparing(SampleOutPutVo::getAcceptanceDate)).collect(Collectors.toList());
         InputStream fileStream = MinIoUtil.getFileStream("entrust-template", "样品入库登记表.xlsx");
         Workbook workbook = new Workbook(fileStream);
         Worksheet worksheet = workbook.getWorksheets().get(0);
@@ -115,6 +120,8 @@ public class SampleExportUtil {
      * @throws Exception
      */
     public InputStream sampleOutPutExport(List<SampleOutPutVo> list) throws Exception {
+        list = list.stream()
+                .sorted(Comparator.comparing(SampleOutPutVo::getAcceptanceDate)).collect(Collectors.toList());
         InputStream fileStream = MinIoUtil.getFileStream("entrust-template", "委托样品出入库登记表.xlsx");
         Workbook workbook = new Workbook(fileStream);
         Worksheet worksheet = workbook.getWorksheets().get(0);
