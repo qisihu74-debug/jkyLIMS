@@ -6,6 +6,7 @@ import com.aspose.cells.Worksheet;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.service.impl.ReportServiceImpl;
 import com.lims.manage.erp.vo.SampleOutPutVo;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
@@ -32,8 +33,10 @@ public class SampleExportUtil {
      */
     public InputStream sampleRetentionExport(List<SampleOutPutVo> list) throws Exception {
         //按时间顺序排序
-        list = list.stream()
-                .sorted(Comparator.comparing(SampleOutPutVo::getAcceptanceDate)).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(list)){
+            list = list.stream()
+                    .sorted(Comparator.comparing(SampleOutPutVo::getAcceptanceDate)).collect(Collectors.toList());
+        }
         InputStream fileStream = MinIoUtil.getFileStream("entrust-template", "样品入库登记表.xlsx");
         Workbook workbook = new Workbook(fileStream);
         Worksheet worksheet = workbook.getWorksheets().get(0);
@@ -120,8 +123,10 @@ public class SampleExportUtil {
      * @throws Exception
      */
     public InputStream sampleOutPutExport(List<SampleOutPutVo> list) throws Exception {
-        list = list.stream()
-                .sorted(Comparator.comparing(SampleOutPutVo::getAcceptanceDate)).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(list)){
+            list = list.stream()
+                    .sorted(Comparator.comparing(SampleOutPutVo::getAcceptanceDate)).collect(Collectors.toList());
+        }
         InputStream fileStream = MinIoUtil.getFileStream("entrust-template", "委托样品出入库登记表.xlsx");
         Workbook workbook = new Workbook(fileStream);
         Worksheet worksheet = workbook.getWorksheets().get(0);
