@@ -1185,6 +1185,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     <result property="sampleTaker" column="sampleTaker"></result>
     <result property="taskPublisher" column="taskPublisher"></result>
     <result property="approver" column="approver"></result>
+    <result property="sampleHolder" column="operator_name"></result>
         <collection property="sampleCirculationRecords" ofType="com.lims.manage.erp.entity.SampleCirculationRecord">
             <result property="sampleId" column="sampleId"></result>
             <result property="status" column="STATUS"></result>
@@ -1239,6 +1240,27 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             and t5.id is not null
         </trim>
         ORDER BY t3.acceptance_date desc, t1.id
+    </select>
+    <select id="sampleV_1" resultType="com.lims.manage.erp.vo.SampleOutPutVo" resultMap="SampleOutPutMap">
+        select * from sample_v_1
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="taskCode!=null">
+                and task_code LIKE CONCAT("%",#{taskCode},"%")
+            </if>
+            <if test="sampleCode!=null">
+                and sample_code LIKE CONCAT("%",#{sampleCode},"%")
+            </if>
+            <if test="sampleHolder!=null">
+                and operator_name LIKE CONCAT("%",#{sampleHolder},"%")
+                and STATUS = 3
+            </if>
+            <if test="startTime!=null and endTime!=null">
+                and acceptance_date BETWEEN #{startTime} and  #{endTime}
+            </if>
+            <if test="taskPublisher!=null">
+                and orderer LIKE CONCAT("%",#{taskPublisher},"%")
+            </if>
+        </trim>
     </select>
     <update id="updateItemReview" parameterType="com.lims.manage.erp.vo.ExcelInsertVo">
         UPDATE test_entrusted_sample_checkitem_rel

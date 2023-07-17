@@ -331,6 +331,12 @@ public interface SampleEntityMapper {
      */
     List<SampleOutPutVo> sampleOutPutList(SampleOutPutVo sampleOutPutVo);
     /**
+     * 查询样品 留样列表与出入库列表  : 加入视图
+     * @param sampleOutPutVo
+     * @return
+     */
+    List<SampleOutPutVo> sampleV_1(SampleOutPutVo sampleOutPutVo);
+    /**
      * 查询技术负责人
      * @return
      */

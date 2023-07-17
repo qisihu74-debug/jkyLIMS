@@ -823,7 +823,8 @@ public class SampleServiceImpl implements SampleService {
      */
     public List<SampleOutPutVo> getSampleOutPutVos(SampleOutPutVo sampleOutPutVo){
         // 查询数据集合
-        List<SampleOutPutVo> sampleList = sampleEntityMapper.sampleOutPutList(sampleOutPutVo);
+//        List<SampleOutPutVo> sampleList = sampleEntityMapper.sampleOutPutList(sampleOutPutVo);
+        List<SampleOutPutVo> sampleList = sampleEntityMapper.sampleV_1(sampleOutPutVo);
         if(!CollectionUtils.isEmpty(sampleList)){
             for(SampleOutPutVo item :sampleList){
                 if(!CollectionUtils.isEmpty(item.getSampleCirculationRecords())){
