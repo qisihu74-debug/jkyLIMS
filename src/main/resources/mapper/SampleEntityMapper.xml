@@ -1254,7 +1254,6 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             </if>
             <if test="sampleHolder!=null">
                 and operator_name LIKE CONCAT("%",#{sampleHolder},"%")
-                and STATUS = 3
             </if>
             <if test="startTime!=null and endTime!=null">
                 and acceptance_date BETWEEN #{startTime} and  #{endTime}
