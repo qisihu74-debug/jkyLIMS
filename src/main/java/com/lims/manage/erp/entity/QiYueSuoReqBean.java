@@ -65,4 +65,6 @@ public class QiYueSuoReqBean {
     private List<String> documents;
 
     private List<Signatories> signatories;
+
+    private List<QysParams> list;
 }
