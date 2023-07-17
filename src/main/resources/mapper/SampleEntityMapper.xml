@@ -1184,6 +1184,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     <result property="outboundDeliveryDate" column="outboundDeliveryDate"></result>
     <result property="sampleTaker" column="sampleTaker"></result>
     <result property="taskPublisher" column="taskPublisher"></result>
+    <result property="entrust_people" column="entrustPeople"></result>
     <result property="approver" column="approver"></result>
         <collection property="sampleCirculationRecords" ofType="com.lims.manage.erp.entity.SampleCirculationRecord">
             <result property="sampleId" column="sampleId"></result>
@@ -1207,6 +1208,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             t1.approver as approver,
             t3.acceptance_date,
             t3.request_date,
+            t3.entrust_people,
             t4.STATUS,
             t4.operator_id,
             t4.operator_name,

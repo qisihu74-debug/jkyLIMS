@@ -119,4 +119,6 @@ public class SampleOutPutVo {
      * 技术负责人
      */
     private String approver;
+
+    private String entrustPeople;
 }

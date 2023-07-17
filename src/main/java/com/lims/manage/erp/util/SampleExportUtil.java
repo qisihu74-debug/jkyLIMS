@@ -61,6 +61,9 @@ public class SampleExportUtil {
             // 样品名称
             cells.get(row+n).setValue(sampleOutPutVo.getSampleName());
             row = letterCycle.getNextUpEn(row);
+            // 委托人
+            cells.get(row+n).setValue(sampleOutPutVo.getEntrustPeople());
+            row = letterCycle.getNextUpEn(row);
             // 入库时间
             if (sampleOutPutVo.getAcceptanceDate() != null) {
                 String dateString = formatter.format(sampleOutPutVo.getAcceptanceDate());
