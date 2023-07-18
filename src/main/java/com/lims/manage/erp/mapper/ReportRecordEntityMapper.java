@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Mapper
 @Component
@@ -395,4 +396,19 @@ public interface ReportRecordEntityMapper {
     @Update("update test_report_record set report_complete_time=#{reportCompleteTime},required_completion_time=#{date},sample_name=#{sampleName},task_code=#{taskCode},task_id=#{taskId},combine_time=#{combineTime} where report_code=#{reportCode}")
     void updateTime(@Param("reportCode") String reportCode, @Param("reportCompleteTime") Date reportCompleteTime,
                     @Param("date") Date date,@Param("sampleName") String sampleName,@Param("taskId") Long taskId,@Param("taskCode") String taskCode,@Param("combineTime") Date combineTime);
+
+    @Update("update test_report_record set category = '电子章', qys_docment_id = #{documentId} where report_code=#{reportCode}")
+    void updateQysInfo(@Param("reportCode") String reportCode, @Param("documentId") Long documentId);
+
+    @Update("<script>" +
+            "UPDATE test_report_record SET contract_id=#{contractId} WHERE report_code IN" +
+            " <foreach item='item' collection='list' open='(' separator=',' close=')'>" +
+            "#{item}" +
+            "</foreach>" +
+            "</script>")
+    void updateContractIdByCodes(@Param("list") Set<String> list, @Param("contractId") Long contractId);
+
+    @Update("update test_report_record set sign_url=#{signUrl},qys_state=#{state},sealer=#{sealer},seal_time=#{sealTime} where contract_id=#{contractId}")
+    void updateUrlAndStateByContractId(@Param("contractId") Long contractId, @Param("signUrl") String signUrl, @Param("state") String state,
+                                       @Param("sealer") String sealer, @Param("sealTime") Date sealTime);
 }

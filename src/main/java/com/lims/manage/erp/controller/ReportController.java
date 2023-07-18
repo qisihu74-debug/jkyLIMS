@@ -368,21 +368,21 @@ public class ReportController {
      * @param entrustId
      * @return
      */
-    @GetMapping("sealApprove")
-    public Result seal(Long entrustId,String title,String fileType,String reportType) {
-        if (entrustId == null) {
-            return ResultUtil.error("缺少必要的参数！");
-        }
-        if (StringUtils.isEmpty(title) || StringUtils.isEmpty(fileType)){
-            return ResultUtil.error("缺少合同发起参数！");
-        }
-        Boolean flag = reportService.seal(entrustId,title,fileType,reportType);
-        if (flag) {
-            return ResultUtil.success("向契约锁发起盖章合同申请成功!");
-        } else {
-            return ResultUtil.error("向契约锁发起盖章合同申请失败！");
-        }
-    }
+//    @GetMapping("sealApprove")
+//    public Result seal(Long entrustId,String title,String fileType,String reportType) {
+//        if (entrustId == null) {
+//            return ResultUtil.error("缺少必要的参数！");
+//        }
+//        if (StringUtils.isEmpty(title) || StringUtils.isEmpty(fileType)){
+//            return ResultUtil.error("缺少合同发起参数！");
+//        }
+//        Boolean flag = reportService.seal(entrustId,title,fileType,reportType);
+//        if (flag) {
+//            return ResultUtil.success("向契约锁发起盖章合同申请成功!");
+//        } else {
+//            return ResultUtil.error("向契约锁发起盖章合同申请失败！");
+//        }
+//    }
 
     /**
      * 创建合同
@@ -394,7 +394,10 @@ public class ReportController {
         if (reqBean == null){
             return ResultUtil.error("缺少必要的参数");
         }
-        QiYueSuoResponse response = reportService.createbycategory(reqBean);
+        if (CollectionUtils.isEmpty(reqBean.getList())){
+            return ResultUtil.error("请选择需要签署的报告");
+        }
+        QiYueSuoResponse response = reportService.createbycategoryBatch(reqBean);
         if (response != null && response.getCode() == 0) {
             return ResultUtil.success("向契约锁发起报告制作申请成功!");
         } else {
@@ -407,18 +410,18 @@ public class ReportController {
      * @param reqBean
      * @return
      */
-    @PostMapping("signurl")
-    public Result signurl(@RequestBody QiYueSuoSeaLBean reqBean){
-        if (reqBean == null){
-            return ResultUtil.error("缺少必要的参数");
-        }
-        QiYueSuoResponse response = reportService.signurl(reqBean);
-        if (response != null && response.getCode() == 0) {
-            return ResultUtil.success("向契约锁发起报告签署url申请成功!");
-        } else {
-            return ResultUtil.error("向契约锁发起报告签署url申请失败："+response.getMessage());
-        }
-    }
+//    @PostMapping("signurl")
+//    public Result signurl(@RequestBody QiYueSuoSeaLBean reqBean){
+//        if (reqBean == null){
+//            return ResultUtil.error("缺少必要的参数");
+//        }
+//        QiYueSuoResponse response = reportService.signurl(reqBean);
+//        if (response != null && response.getCode() == 0) {
+//            return ResultUtil.success("向契约锁发起报告签署url申请成功!");
+//        } else {
+//            return ResultUtil.error("向契约锁发起报告签署url申请失败："+response.getMessage());
+//        }
+//    }
 
     /**
      * 契约锁部门列表获取

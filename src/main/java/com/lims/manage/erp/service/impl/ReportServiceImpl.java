@@ -97,6 +97,7 @@ import org.apache.poi.hwpf.usermodel.Range;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.docx4j.wml.P;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1305,6 +1306,82 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         return true;
+    }
+
+    @Override
+    public QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean) {
+        Map<String,Long> map = new HashMap<>();
+        for (String reportCode:reqBean.getList()) {
+            //step1 根据文件类型创建合同文档
+            String url = reportMapper.getUrlByReportCode(reportCode);
+            if (StringUtils.isNotEmpty(url)) {
+                File file = null;
+                try {
+                    String uri = "";
+                    if (url.contains("?")) {
+                        uri = url.substring(0, url.indexOf("?"));
+                    } else {
+                        uri = url;
+                    }
+                    file = FileAndFolderUtil.getFile(uri);
+                } catch (Exception e) {
+                    logger.error("将报告地址转为File文件失败:{}", e);
+                    continue;
+                }
+                if (file != null) {
+                    QiYueSuoResponse response = qiYueSuoHnadler.creatFile(file, reportCode, "pdf", null, null, null);
+                    if (response != null && response.getCode() == 0) {
+                        //根据报告编号存储文档id
+                        List<QiYueSuoDocment> result = response.getResult();
+                        map.put(reportCode,result.get(0).getDocumentId());
+                        //更新文档id和印章类型
+                        entityMapper.updateQysInfo(reportCode,result.get(0).getDocumentId());
+                    }else {
+                        return response;
+                    }
+                }
+            }
+        }
+        //Step2 创建合同
+        long id = GenID.getID();
+        Long contractId = null;
+        if (map !=null && map.size() > 0){
+            Set<String> set = map.keySet();
+            List<String> docs = new ArrayList<>();
+            for (String reportCode:set) {
+                docs.add(map.get(reportCode)+"");
+            }
+            reqBean.setDocuments(docs);
+            reqBean.setEntrustId(id);
+            QiYueSuoResponse response = qiYueSuoHnadler.createbycategory(reqBean);
+            if (response != null && response.getCode() == 0) {
+                //更新文档id和印章类型
+                if (response.getContractId() != null){
+                    contractId = response.getContractId();
+                    entityMapper.updateContractIdByCodes(set,contractId);
+                }
+            }else {
+                return response;
+            }
+        }
+        //step3 获取签署链接
+        String info = recordEntityMapper.getInitInfo();
+        QiYueSuoSeaLBean qiYueSuoSeaLBean = new QiYueSuoSeaLBean();
+        qiYueSuoSeaLBean.setContractId(contractId);
+        qiYueSuoSeaLBean.setEntrustId(id);
+        qiYueSuoSeaLBean.setContact("");
+        qiYueSuoSeaLBean.setExpireTime(72);
+        qiYueSuoSeaLBean.setReceiverName(ShiroUtils.getUserInfo().getName());
+        qiYueSuoSeaLBean.setTenantName(info);
+        qiYueSuoSeaLBean.setTenantType("COMPANY");
+        QiYueSuoResponse response = qiYueSuoHnadler.signurl(qiYueSuoSeaLBean);
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        String sysUserName = sysUserDao.getSysUserName(userId);
+        //更新签署链接、状态
+        if (response != null && response.getCode() == 0) {
+            entityMapper.updateUrlAndStateByContractId(contractId, response.getSignUrl(), "2", sysUserName + "&" + userId + "", new Date(System.currentTimeMillis()));
+        }
+        return response;
     }
 
     @Override

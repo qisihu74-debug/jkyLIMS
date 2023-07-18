@@ -288,4 +288,7 @@ public interface ReportMapper {
 
     @Select("select id from test_report_record where entrustment_id=#{entrustId} or entrust_id=#{entrustId}")
     Long getInfoByEntrustId(@Param("entrustId") Long entrustId);
+
+    @Select("select report_url from test_report_record  where report_code=#{reportCode}")
+    String getUrlByReportCode(@Param("reportCode") String reportCode);
 }
