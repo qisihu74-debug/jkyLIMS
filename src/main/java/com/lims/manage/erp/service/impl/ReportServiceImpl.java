@@ -1445,19 +1445,28 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void callback(Long contractId) {
-        Long entrustId = entityMapper.getEntrustIdByCid(contractId);
-        Long id = entityMapper.getIdByCid(contractId);
+        //支持批量
+        List<Long> entrustIds = entityMapper.getEntrustIdsByCid(contractId);
+        List<Long> zjEntrustIds = entityMapper.getzJEntrustIdsByCid(contractId);
+        List<Long> ids = entityMapper.getIdsByCid(contractId);
+
         //更新状态，更新
-        if (entrustId == null) {
-            Long idByCid = entityMapper.getEntrustByCid(contractId);
-            taskMapper.updateEntrustById(idByCid, 10);
-        } else {
-            taskMapper.updateEntrustById(entrustId, 10);
+        if (!CollectionUtils.isEmpty(entrustIds)){
+            for (Long entrustId:entrustIds) {
+                taskMapper.updateEntrustById(entrustId, 10);
+            }
+        }
+        if (!CollectionUtils.isEmpty(zjEntrustIds)){
+            for (Long idByCid:zjEntrustIds) {
+                taskMapper.updateEntrustById(idByCid, 10);
+            }
         }
         //更新报告状态
         entityMapper.updateFileState(contractId, "5");
         //移除中间报告
-        moveReportRecord(id);
+        for (Long id:ids) {
+            moveReportRecord(id);
+        }
         logger.debug("接收契约锁回调参数进行数据更新完成！");
     }
 
