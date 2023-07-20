@@ -28,7 +28,8 @@ public class QiYueSuoController {
      */
     @PostMapping("callback")
     public void callback(Long contractId){
-        log.debug("接收到契约锁回调请求=============");
+        log.debug("接收到契约锁回调请求，合同参数为:{}",contractId);
         service.callback(contractId);
+        log.debug("处理契约锁回调成功！");
     }
 }
