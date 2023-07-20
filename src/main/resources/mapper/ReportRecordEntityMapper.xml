@@ -386,18 +386,18 @@
             </foreach>
         </if>
         <if test="search != null and search != ''">
-            AND report_code like CONCAT('%',#{search},'%')
+            AND t1.report_code like CONCAT('%',#{search},'%')
         </if>
         <if test="state != null and state != ''">
-            AND qys_state = #{state}
+            AND t1.qys_state = #{state}
         </if>
         <if test="reportType != null and reportType != ''">
-            AND report_type = #{reportType}
+            AND t1.report_type = #{reportType}
         </if>
         <if test="reportTypeStatus != null">
             AND t1.type = #{reportTypeStatus}
         </if>
-        order by issuer_time desc
+        order by t1.issuer_time desc
     </select>
 
     <select id="getDetail" resultType="com.lims.manage.erp.entity.ReportRecordEntity">

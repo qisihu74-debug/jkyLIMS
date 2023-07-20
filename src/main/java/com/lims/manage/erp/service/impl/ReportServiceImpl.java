@@ -1462,7 +1462,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         //更新报告状态
-        entityMapper.updateFileState(contractId, "5");
+        entityMapper.updateFileState(contractId, "3");
         //移除中间报告
         for (Long id:ids) {
             moveReportRecord(id);
