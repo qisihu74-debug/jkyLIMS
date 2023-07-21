@@ -2,8 +2,15 @@ package com.lims.manage.erp.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.aspose.cells.BorderType;
 import com.aspose.cells.Cell;
+import com.aspose.cells.CellBorderType;
 import com.aspose.cells.Cells;
+import com.aspose.cells.Color;
+import com.aspose.cells.Font;
+import com.aspose.cells.SaveFormat;
+import com.aspose.cells.Style;
+import com.aspose.cells.TextAlignmentType;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -107,6 +114,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -114,6 +123,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -1385,6 +1395,124 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public OutputStream exportReportList(List<ReportDetailListVo> list, HttpServletResponse response) {
+        ServletOutputStream outputStream = null;
+        Workbook workbook = new Workbook();
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(list)){
+            Cells cells = worksheet.getCells();
+            //设置列头部信息
+            int n = 2;
+            setStyle(worksheet.getCells().get("A1"),true);
+            worksheet.getCells().get("A1").setValue("委托单号");
+            setStyle(worksheet.getCells().get("B1"),true);
+            worksheet.getCells().get("B1").setValue("任务单号");
+            setStyle(worksheet.getCells().get("C1"),true);
+            worksheet.getCells().get("C1").setValue("报告编号");
+            setStyle(worksheet.getCells().get("D1"),true);
+            worksheet.getCells().get("D1").setValue("样品名称");
+            setStyle(worksheet.getCells().get("E1"),true);
+            worksheet.getCells().get("E1").setValue("报告合成人员");
+            setStyle(worksheet.getCells().get("F1"),true);
+            worksheet.getCells().get("F1").setValue("用章类型");
+            setStyle(worksheet.getCells().get("G1"),true);
+            worksheet.getCells().get("G1").setValue("报告合成日期");
+            setStyle(worksheet.getCells().get("H1"),true);
+            worksheet.getCells().get("H1").setValue("报告领取人");
+            setStyle(worksheet.getCells().get("I1"),true);
+            worksheet.getCells().get("I1").setValue("报告领取时间");
+            setStyle(worksheet.getCells().get("J1"),true);
+            worksheet.getCells().get("J1").setValue("委托单位");
+            setStyle(worksheet.getCells().get("K1"),true);
+            worksheet.getCells().get("K1").setValue("邮寄人");
+            setStyle(worksheet.getCells().get("L1"),true);
+            worksheet.getCells().get("L1").setValue("邮寄编号");
+            for (ReportDetailListVo reportDetailListVo :list) {
+                String row = "A";
+                setStyle(cells.get(row + n),false);
+                cells.get(row + n).setValue(reportDetailListVo.getEntrustmentNo());
+                row = getNextUpEn(row);
+                setStyle(cells.get(row + n),false);
+                cells.get(row + n).setValue(reportDetailListVo.getTaskCodes());
+                row = getNextUpEn(row);
+                setStyle(cells.get(row + n),false);
+                cells.get(row + n).setValue(reportDetailListVo.getReportCode());
+
+                row = getNextUpEn(row);
+                setStyle(cells.get(row + n),false);
+                cells.get(row + n).setValue(reportDetailListVo.getSampleName());
+
+                row = getNextUpEn(row);
+                setStyle(cells.get(row + n),false);
+                cells.get(row + n).setValue(reportDetailListVo.getApplicant());
+
+                row = getNextUpEn(row);
+                setStyle(cells.get(row + n),false);
+                cells.get(row + n).setValue(reportDetailListVo.getCategory());
+
+                row = getNextUpEn(row);
+                setStyle(cells.get(row + n),false);
+                cells.get(row + n).setValue(reportDetailListVo.getReportCompleteTime());
+
+                row = getNextUpEn(row);
+                setStyle(cells.get(row + n),false);
+                cells.get(row + n).setValue(reportDetailListVo.getAddressee());
+
+                row = getNextUpEn(row);
+                setStyle(cells.get(row + n),false);
+                cells.get(row + n).setValue(reportDetailListVo.getReportTime());
+
+                row = getNextUpEn(row);
+                setStyle(cells.get(row + n),false);
+                cells.get(row + n).setValue(reportDetailListVo.getEntrustCompany());
+
+                row = getNextUpEn(row);
+                setStyle(cells.get(row + n),false);
+                cells.get(row + n).setValue(reportDetailListVo.getReportManager());
+
+                row = getNextUpEn(row);
+                setStyle(cells.get(row + n),false);
+                cells.get(row + n).setValue(reportDetailListVo.getPostCode());
+                n++;
+            }
+        }
+        try {
+            outputStream = response.getOutputStream();
+            workbook.save(outputStream, SaveFormat.XLSX);
+        }catch (Exception e){
+            log.debug("导出仪器使用费用记录异常:{}"+e);
+        }
+        return outputStream;
+    }
+
+    /**
+     * 设置单元格样式
+     * @param cell
+     */
+    public void setStyle(Cell cell,boolean bgc){
+        Style style = cell.getStyle(); // 获取单元格样式
+        // 设置字体样式
+        if (bgc){
+            Font font = style.getFont();
+            font.setBold(true);
+            font.setColor(Color.getGreen());
+        }
+        // 设置背景颜色
+        if (bgc){
+            style.setBackgroundColor(Color.getBurlyWood());
+        }
+        // 设置边框样式
+        style.setBorder(BorderType.TOP_BORDER, CellBorderType.MEDIUM,null);
+        style.setBorder(BorderType.BOTTOM_BORDER, CellBorderType.MEDIUM,null);
+        style.setBorder(BorderType.LEFT_BORDER, CellBorderType.MEDIUM,null);
+        style.setBorder(BorderType.RIGHT_BORDER, CellBorderType.MEDIUM,null);
+        // 设置对齐方式
+        style.setHorizontalAlignment(TextAlignmentType.CENTER);
+        style.setVerticalAlignment(TextAlignmentType.CENTER);
+        cell.setStyle(style); // 应用样式到单元格
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();
@@ -2622,7 +2750,9 @@ public class ReportServiceImpl implements ReportService {
                 paramVo.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));
             }
         }
-        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        if (paramVo.getPageNum() != null && paramVo.getPageSize() != null){
+            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        }
         List<ReportDetailListVo> reportDetailListVos;
         if (paramVo.getReportTypeStatus() == 0) {//最终报告查询
             if (paramVo.getTaskCode() == null) {//无任务单号多条
@@ -2652,6 +2782,9 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         PageInfo<ReportDetailListVo> pageInfo = new PageInfo<>(reportDetailListVos);
+        if (paramVo.getPageNum() == null && paramVo.getPageSize() == null){
+            pageInfo.setList(reportDetailListVos);
+        }
         return pageInfo;
     }
 
