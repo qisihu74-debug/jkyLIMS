@@ -61,4 +61,13 @@ public class ReportDetailListVo {
      * 委托编号——String
      */
     private String entrustmentNostr;
+    /**
+     * 邮寄人
+     */
+    private String reportManager;
+
+    /**
+     * 委托单位
+     */
+    private String entrustCompany;
 }

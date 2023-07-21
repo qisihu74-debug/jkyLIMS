@@ -44,6 +44,7 @@ import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
+import com.lims.manage.erp.vo.ReportDetailListVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import com.lims.manage.erp.vo.TeamVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
@@ -819,6 +820,30 @@ public class ReportController {
         logger.info("分页参数pageNum:{},pageSize:{}", paramVo.getPageNum(), paramVo.getPageSize());
         PageInfo pageInfo = reportService.reportList(paramVo);
         return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * 导出报告查询
+     * @param paramVo
+     * @return
+     */
+    @PostMapping("exportReportList")
+    public void exportReportList(@RequestBody ReportDetailListParamVo paramVo, HttpServletResponse response) {
+        paramVo.setPageNum(null);
+        paramVo.setPageSize(null);
+        List<ReportDetailListVo> list = reportService.reportList(paramVo).getList();
+        OutputStream outputStream = null;
+        try {
+            response.reset();
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("部门仪器使用费用统计列表"+".xlsx", "UTF-8") );
+            outputStream = reportService.exportReportList(list, response);
+            outputStream.flush();
+            outputStream.close();
+        }catch (Exception e){
+            log.error("部门仪器使用费用统计列表导出失败:{}",e);
+        }
     }
 
     /**

@@ -407,6 +407,9 @@ public class SampleServiceImpl implements SampleService {
             entity.setOutwardDescribe(StringUtils.isEmpty(sampleTagInfo.getOutwardDescribe())?"/":sampleTagInfo.getOutwardDescribe());
             //查询样品流转记录
             List<SampleCirculationRecord> list = sampleEntityMapper.getRecords(sampleId);
+            //TODO 流转操作人如果客户端没操作，流转详情表无法记录导致流转详情查看，无操作人，这种情况默认取留样人
+
+
             entity.setCirculationCecords(list);
             //根据当前用户设置手机端的扫描操作状态
             SysUserEntity userInfo = ShiroUtils.getUserInfo();

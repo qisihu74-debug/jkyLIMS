@@ -55,4 +55,13 @@ public class ReportDetailListParamVo {
      * 委托编号类别： null 常规原材试验、MN模拟试验、BD比对试验
      */
     private String entrustCategoryType;
+    /**
+     * 邮寄人
+     */
+    private String reportManager;
+
+    /**
+     * 委托单位
+     */
+    private String entrustCompany;
 }

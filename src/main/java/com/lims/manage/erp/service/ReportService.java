@@ -21,6 +21,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 
@@ -439,4 +440,12 @@ public interface ReportService {
     void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode,Date date2);
 
     QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean);
+
+    /**
+     * 报告查询列表导出
+     * @param list
+     * @param response
+     * @return
+     */
+    OutputStream exportReportList(List<ReportDetailListVo> list, HttpServletResponse response);
 }
