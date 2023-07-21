@@ -537,7 +537,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalVo.setReason(reportApprovalVo1.getReason());
             reportApprovalVo.setState(state);
             //  修改中间报告单至驳回状态
-            reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
+            reportApprovalMapper.updateentrustAndApprovalMonad2(reportApprovalVo);
             return true;
         }
         return false;
