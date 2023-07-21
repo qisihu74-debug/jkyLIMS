@@ -1581,12 +1581,16 @@ public class ReportServiceImpl implements ReportService {
         //更新状态，更新
         if (!CollectionUtils.isEmpty(entrustIds)){
             for (Long entrustId:entrustIds) {
-                taskMapper.updateEntrustById(entrustId, 10);
+                if (entrustId != null){
+                    taskMapper.updateEntrustById(entrustId, 10);
+                }
             }
         }
         if (!CollectionUtils.isEmpty(zjEntrustIds)){
             for (Long idByCid:zjEntrustIds) {
-                taskMapper.updateEntrustById(idByCid, 10);
+                if (idByCid != null){
+                    taskMapper.updateEntrustById(idByCid, 10);
+                }
             }
         }
         //更新报告状态
