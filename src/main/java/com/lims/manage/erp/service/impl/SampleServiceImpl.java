@@ -430,6 +430,7 @@ public class SampleServiceImpl implements SampleService {
                     sampleCirculationRecord.setTime(sampleTaker.getSampleReceivingTime());
                     sampleCirculationRecord.setStatus("1");
                     sampleCirculationRecord.setSampleId(list.get(0).getSampleId());
+                    list.add(sampleCirculationRecord);
                 }
             }
             //流转记录详情列表结果重新构造,操作内容 待检（流转确认人：） 状态，0待检，1在检，2已检，3留样，4处置
