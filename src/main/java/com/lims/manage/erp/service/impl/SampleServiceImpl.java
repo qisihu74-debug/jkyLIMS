@@ -408,8 +408,53 @@ public class SampleServiceImpl implements SampleService {
             //查询样品流转记录
             List<SampleCirculationRecord> list = sampleEntityMapper.getRecords(sampleId);
             //TODO 流转操作人如果客户端没操作，流转详情表无法记录导致流转详情查看，无操作人，这种情况默认取留样人
-
-
+            //流转详情待检、留样取委托发布人，在检取领样人
+            if (org.apache.commons.collections.CollectionUtils.isNotEmpty(list)){
+                boolean flag = true;
+                for (SampleCirculationRecord bean :list) {
+                    if ("0,3".contains(bean.getStatus())){
+                        String name = sampleEntityMapper.getTaskPublisher(bean.getSampleId());
+                        bean.setOperatorName(name);
+                    }
+                    if ("1".equals(bean.getStatus())){
+                        ReceiveSampleParamVo sampleTaker = sampleEntityMapper.getSampleTaker(bean.getSampleId());
+                        bean.setOperatorName(sampleTaker.getSampler());
+                        bean.setTime(sampleTaker.getSampleReceivingTime());
+                        flag = false;
+                    }
+                }
+                if (flag){
+                    ReceiveSampleParamVo sampleTaker = sampleEntityMapper.getSampleTaker(list.get(0).getSampleId());
+                    SampleCirculationRecord sampleCirculationRecord = new SampleCirculationRecord();
+                    sampleCirculationRecord.setOperatorName(sampleTaker.getSampler());
+                    sampleCirculationRecord.setTime(sampleTaker.getSampleReceivingTime());
+                    sampleCirculationRecord.setStatus("1");
+                    sampleCirculationRecord.setSampleId(list.get(0).getSampleId());
+                }
+            }
+            //流转记录详情列表结果重新构造,操作内容 待检（流转确认人：） 状态，0待检，1在检，2已检，3留样，4处置
+            for (SampleCirculationRecord record:list) {
+                switch (record.getStatus()){
+                    case "0":
+                        record.setContent("待检"+"（流转确认人："+record.getOperatorName()+"）" );
+                        break;
+                    case "1":
+                        record.setContent("在检"+"（流转确认人："+record.getOperatorName()+"）" );
+                        break;
+                    case "2":
+                        record.setContent("已检"+"（流转确认人："+record.getOperatorName()+"）" );
+                        break;
+                    case "3":
+                        record.setContent("留样"+"（流转确认人："+record.getOperatorName()+"）" );
+                        break;
+                    case "4":
+                        record.setContent("处置"+"（流转确认人："+record.getOperatorName()+"）" );
+                        break;
+                    default:
+                        log.info("未知的样品流转类型:{}",record.getStatus());
+                        break;
+                }
+            }
             entity.setCirculationCecords(list);
             //根据当前用户设置手机端的扫描操作状态
             SysUserEntity userInfo = ShiroUtils.getUserInfo();

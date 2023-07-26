@@ -789,6 +789,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         SELECT sample_code sampleCode,
                sample_name sampleName,
                alias_name aliasName,
+               sample_retention_period,
                specs,
                outward,
                inspector,
@@ -815,7 +816,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         FROM test_sample
         WHERE pid = #{sampleId}
     </select>
-    <select id="getSampleTagInfo" resultType="com.lims.manage.erp.vo.SampleDetailVo">
+    <!--<select id="getSampleTagInfo" resultType="com.lims.manage.erp.vo.SampleDetailVo">
         SELECT sample_code sampleCode,
                sample_name sampleName,
                alias_name aliasName,
@@ -828,7 +829,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
               received_date receivedDate
         FROM test_sample
         WHERE id = #{sampleId}
-    </select>
+    </select>-->
     <delete id="removeSamplesId">
         DELETE
         FROM test_entrusted_sample_details_rel
