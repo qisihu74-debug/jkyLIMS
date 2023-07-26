@@ -86,9 +86,9 @@ public interface SampleService {
     ZipOutputStream packagingWorkbookZip(Integer sampleId, HttpServletResponse response) throws IOException;
 
 
-    ServletOutputStream downloadNewSampleTab(Integer sampleId, SampleDetailVo sampleTagInfo, HttpServletResponse response);
+    ServletOutputStream downloadNewSampleTab(int type, Integer sampleId, SampleDetailVo sampleTagInfo, HttpServletResponse response);
 
-    TestSampleEntity sampleInfo(Integer sampleId);
+    TestSampleEntity sampleInfo(int type, Integer sampleId);
 
     Integer updateState(Integer sampleId, Integer state, Date time,Integer saveTime,Integer sampleRetentionPeriod,String sampleProcessMode,
                         String approver);

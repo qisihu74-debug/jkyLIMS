@@ -1280,4 +1280,22 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         opinion = #{opinion}
         WHERE id = #{itemId}
     </update>
+
+    <select id="getRecords" resultType="com.lims.manage.erp.entity.SampleCirculationRecord">
+SELECT
+	STATUS,
+	sample_id,
+	time,
+	operator_name
+FROM
+	test_sample_circulation_record
+WHERE
+	sample_id = #{sampleId}
+	<if test="type ==1 ">
+        AND (status = '0' or status= '1' or status = '2')
+    </if>
+        <if test="type ==2 ">
+            AND (status = '3' or status= '4')
+        </if>
+    </select>
 </mapper>

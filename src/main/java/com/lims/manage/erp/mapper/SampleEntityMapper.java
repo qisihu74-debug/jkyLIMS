@@ -239,15 +239,7 @@ public interface SampleEntityMapper {
      */
     List<TestTeam> getAllRoomInfoList();
 
-    @Select("SELECT\n" +
-            "\tSTATUS,sample_id,\n" +
-            "\ttime,\n" +
-            "\toperator_name\n" +
-            "FROM\n" +
-            "\ttest_sample_circulation_record\n" +
-            "WHERE\n" +
-            "\tsample_id = #{sampleId}")
-    List<SampleCirculationRecord> getRecords(@Param("sampleId") Integer sampleId);
+    List<SampleCirculationRecord> getRecords(@Param("sampleId") Integer sampleId,@Param("type") int type);
 
     @Select("SELECT DISTINCT\n" +
             "\tt2.sampler\n" +
