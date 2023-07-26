@@ -1,5 +1,6 @@
 package com.lims.manage.erp.mapper;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.TestTeam;
@@ -357,4 +358,18 @@ public interface SampleEntityMapper {
      * @return
      */
     int updateItemReview(ExcelInsertVo excelInsertVo);
+
+    /**
+     * 查询视图的分页展示
+     * @param sampleOutPutVo
+     * @return
+     */
+    List<SampleOutPutVo> selectPageVo(SampleOutPutVo sampleOutPutVo);
+
+    /**
+     * 查询条数
+     * @param sampleOutPutVo
+     * @return
+     */
+    Integer selectCount(SampleOutPutVo sampleOutPutVo);
 }

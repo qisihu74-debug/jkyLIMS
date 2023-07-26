@@ -1259,7 +1259,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                 and acceptance_date BETWEEN #{startTime} and  #{endTime}
             </if>
             <if test="taskPublisher!=null">
-                and orderer LIKE CONCAT("%",#{taskPublisher},"%")
+                and taskPublisher LIKE CONCAT("%",#{taskPublisher},"%")
             </if>
         </trim>
     </select>
@@ -1279,4 +1279,46 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         opinion = #{opinion}
         WHERE id = #{itemId}
     </update>
+
+    <select id="selectPageVo" resultType="com.lims.manage.erp.vo.SampleOutPutVo">
+        SELECT * FROM sample_v_2
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+        <if test="taskCode!=null">
+            and task_code LIKE CONCAT("%",#{taskCode},"%")
+        </if>
+        <if test="sampleCode!=null">
+            and sample_code LIKE CONCAT("%",#{sampleCode},"%")
+        </if>
+        <if test="sampleHolder!=null">
+            and sampleHolder LIKE CONCAT("%",#{sampleHolder},"%")
+        </if>
+        <if test="startTime!=null and endTime!=null">
+            and acceptance_date BETWEEN #{startTime} and  #{endTime}
+        </if>
+        <if test="taskPublisher!=null">
+            and taskPublisher LIKE CONCAT("%",#{taskPublisher},"%")
+        </if>
+    </trim>
+        limit #{pageNum},#{pageSize}
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(*) FROM sample_v_2
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="taskCode!=null">
+                and task_code LIKE CONCAT("%",#{taskCode},"%")
+            </if>
+            <if test="sampleCode!=null">
+                and sample_code LIKE CONCAT("%",#{sampleCode},"%")
+            </if>
+            <if test="sampleHolder!=null">
+                and sampleHolder LIKE CONCAT("%",#{sampleHolder},"%")
+            </if>
+            <if test="startTime!=null and endTime!=null">
+                and acceptance_date BETWEEN #{startTime} and  #{endTime}
+            </if>
+            <if test="taskPublisher!=null">
+                and taskPublisher LIKE CONCAT("%",#{taskPublisher},"%")
+            </if>
+        </trim>
+    </select>
 </mapper>

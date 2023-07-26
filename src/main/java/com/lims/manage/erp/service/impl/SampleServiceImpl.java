@@ -1,16 +1,15 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.aspose.cells.SaveFormat;
 import com.aspose.cells.Worksheet;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
-import com.lims.manage.erp.entity.QiYueSuoEntity;
-import com.lims.manage.erp.entity.SampleCirculationRecord;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.SysUserDao;
@@ -856,8 +855,13 @@ public class SampleServiceImpl implements SampleService {
 //    @SneakyThrows
     @Override
     public InputStream sampleRetentionExport(SampleOutPutVo sampleOutPutVo) throws Exception {
-        // 处理逻辑
-        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
+        Integer count = sampleEntityMapper.selectCount(sampleOutPutVo);
+        List<SampleOutPutVo> list = new ArrayList<>(count);
+        if(count > 0){
+            sampleOutPutVo.setPageNum(0);
+            sampleOutPutVo.setPageSize(count);
+            list = sampleEntityMapper.selectPageVo(sampleOutPutVo);
+        }
         SampleExportUtil sampleExportUtil =new SampleExportUtil();
         return sampleExportUtil.sampleRetentionExport(list);
     }
@@ -888,8 +892,13 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     public InputStream sampleOutPutExport(SampleOutPutVo sampleOutPutVo) throws Exception {
-        // 处理逻辑
-        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
+        Integer count = sampleEntityMapper.selectCount(sampleOutPutVo);
+        List<SampleOutPutVo> list = new ArrayList<>(count);
+        if(count > 0){
+            sampleOutPutVo.setPageNum(0);
+            sampleOutPutVo.setPageSize(count);
+            list = sampleEntityMapper.selectPageVo(sampleOutPutVo);
+        }
         SampleExportUtil sampleExportUtil =new SampleExportUtil();
         return sampleExportUtil.sampleOutPutExport(list);
     }
@@ -904,4 +913,65 @@ public class SampleServiceImpl implements SampleService {
         return true;
     }
 
+    /**
+     * 样品留样列表-分页
+     *
+     * @param sampleOutPutVo
+     * @return
+     */
+    @Override
+    public PageInfo sampleRetentionPageInfoList(SampleOutPutVo sampleOutPutVo) {
+        if (sampleOutPutVo.getPageNum() == 1) {
+            sampleOutPutVo.setPageNum(0);
+        } else {
+            Integer pageNum = (sampleOutPutVo.getPageNum() - 1) * sampleOutPutVo.getPageSize();
+            Integer pageSize = sampleOutPutVo.getPageSize();
+            if (pageNum == null || pageSize == null) {
+                pageNum = 0;
+                pageNum = 10;
+            }
+            sampleOutPutVo.setPageNum(pageNum);
+            sampleOutPutVo.setPageSize(pageSize);
+        }
+        Integer count = sampleEntityMapper.selectCount(sampleOutPutVo);
+        if (count == null || count ==0) {
+            PageInfo pageInfo = new PageInfo();
+            pageInfo.setPages(0);
+            pageInfo.setList(new ArrayList());
+            pageInfo.setTotal(0);
+            return pageInfo;
+        } else {
+            List<SampleOutPutVo> list = new ArrayList<>(count);
+            list = sampleEntityMapper.selectPageVo(sampleOutPutVo);
+            PageInfo pageInfo = new PageInfo();
+            if (list.size() == 0) {
+                // 通过分页数据 = null
+                sampleOutPutVo.setPageNum(0);
+                sampleOutPutVo.setPageSize(10);
+                list = sampleEntityMapper.selectPageVo(sampleOutPutVo);
+            }
+            if ((count % sampleOutPutVo.getPageSize()) > 0) {
+                pageInfo.setPages(count / sampleOutPutVo.getPageSize() + 1);
+            } else {
+                pageInfo.setPages(count / sampleOutPutVo.getPageSize());
+            }
+            if(CollectionUtil.isNotEmpty(list)){
+                for(SampleOutPutVo item : list){
+                    if(item.getStatus()!=null && !item.getStatus().equals("3")){
+                        // 增加领样信息
+                        item.setSampleHolder(null);
+                    }
+                    if(item.getStatus()!=null && !item.getStatus().equals("4")){
+                        // 增加处置人
+                        item.setHandler(null);
+                        // 增加处置时间
+                        item.setSellOffDate(null);
+                    }
+                }
+            }
+            pageInfo.setList(list);
+            pageInfo.setTotal(count);
+            return pageInfo;
+        }
+    }
 }
