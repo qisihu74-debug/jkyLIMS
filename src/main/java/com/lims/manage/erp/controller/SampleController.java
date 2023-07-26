@@ -535,12 +535,12 @@ public class SampleController {
      * @return
      */
     @RequestMapping("sampleInfo")
-    public Result sampleInfo(Integer sampleId){
+    public Result sampleInfo(Integer sampleId, Integer type){
         if (sampleId == null){
             return ResultUtil.error("缺少参数");
         }
         log.info("扫码请求参数:{}",sampleId);
-        TestSampleEntity entity = sampleService.sampleInfo(1,sampleId);
+        TestSampleEntity entity = sampleService.sampleInfo(type,sampleId);
         log.info("扫码响应结果:{}",JSON.toJSONString(entity));
         return ResultUtil.success(entity);
     }

@@ -404,6 +404,7 @@ public class SampleServiceImpl implements SampleService {
             entity.setSampleCode(sampleTagInfo.getSampleCode());
             entity.setSampleName(sampleTagInfo.getSampleName());
             entity.setSpecs(sampleTagInfo.getSpecs());
+            entity.setSampleRetentionPeriod(sampleTagInfo.getSampleRetentionPeriod());
             entity.setOutwardDescribe(StringUtils.isEmpty(sampleTagInfo.getOutwardDescribe())?"/":sampleTagInfo.getOutwardDescribe());
             //查询样品流转记录
             List<SampleCirculationRecord> list = sampleEntityMapper.getRecords(sampleId,type);
