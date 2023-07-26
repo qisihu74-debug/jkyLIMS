@@ -789,6 +789,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         SELECT sample_code sampleCode,
                sample_name sampleName,
                alias_name aliasName,
+               sample_retention_period,
                specs,
                outward,
                inspector,
@@ -815,7 +816,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         FROM test_sample
         WHERE pid = #{sampleId}
     </select>
-    <select id="getSampleTagInfo" resultType="com.lims.manage.erp.vo.SampleDetailVo">
+    <!--<select id="getSampleTagInfo" resultType="com.lims.manage.erp.vo.SampleDetailVo">
         SELECT sample_code sampleCode,
                sample_name sampleName,
                alias_name aliasName,
@@ -828,7 +829,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
               received_date receivedDate
         FROM test_sample
         WHERE id = #{sampleId}
-    </select>
+    </select>-->
     <delete id="removeSamplesId">
         DELETE
         FROM test_entrusted_sample_details_rel
@@ -1279,6 +1280,24 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         opinion = #{opinion}
         WHERE id = #{itemId}
     </update>
+
+    <select id="getRecords" resultType="com.lims.manage.erp.entity.SampleCirculationRecord">
+SELECT
+	STATUS,
+	sample_id,
+	time,
+	operator_name
+FROM
+	test_sample_circulation_record
+WHERE
+	sample_id = #{sampleId}
+	<if test="type ==1 ">
+        AND (status = '0' or status= '1' or status = '2')
+    </if>
+        <if test="type ==2 ">
+            AND (status = '3' or status= '4')
+        </if>
+    </select>
 
     <select id="selectPageVo" resultType="com.lims.manage.erp.vo.SampleOutPutVo">
         SELECT * FROM sample_v_2
