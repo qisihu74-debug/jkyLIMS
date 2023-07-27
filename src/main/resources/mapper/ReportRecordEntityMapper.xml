@@ -968,6 +968,8 @@
         t1.report_complete_time,
         t1.addressee,
         t1.report_time,
+        t1.report_manager,
+        t1.waybill,
         t1.type as reportTypeStatus
         FROM
         test_report_record t1
@@ -1024,6 +1026,8 @@
         t1.report_complete_time,
         t1.addressee,
         t1.report_time,
+        t1.report_manager,
+        t1.waybill,
         t1.type as reportTypeStatus
         FROM
         test_report_record_mid t1
@@ -1078,6 +1082,8 @@
         t1.report_complete_time,
         t1.addressee,
         t1.report_time,
+        t1.report_manager,
+        t1.waybill,
         t3.task_code taskCode,
         t4.NAME teamName,
         t1.type as reportTypeStatus
@@ -1140,6 +1146,8 @@
         t1.report_complete_time,
         t1.addressee,
         t1.report_time,
+        t1.report_manager,
+        t1.waybill,
         t3.task_code taskCode,
         t4.NAME teamName,
         t1.type as reportTypeStatus

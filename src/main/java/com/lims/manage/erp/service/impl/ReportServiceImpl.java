@@ -1406,34 +1406,22 @@ public class ReportServiceImpl implements ReportService {
             setStyle(worksheet.getCells().get("A1"),true);
             worksheet.getCells().get("A1").setValue("委托单号");
             setStyle(worksheet.getCells().get("B1"),true);
-            worksheet.getCells().get("B1").setValue("任务单号");
+            worksheet.getCells().get("B1").setValue("报告编号");
             setStyle(worksheet.getCells().get("C1"),true);
-            worksheet.getCells().get("C1").setValue("报告编号");
+            worksheet.getCells().get("C1").setValue("样品名称");
             setStyle(worksheet.getCells().get("D1"),true);
-            worksheet.getCells().get("D1").setValue("样品名称");
+            worksheet.getCells().get("D1").setValue("报告领取人");
             setStyle(worksheet.getCells().get("E1"),true);
-            worksheet.getCells().get("E1").setValue("报告合成人员");
+            worksheet.getCells().get("E1").setValue("报告领取时间");
             setStyle(worksheet.getCells().get("F1"),true);
-            worksheet.getCells().get("F1").setValue("用章类型");
+            worksheet.getCells().get("F1").setValue("邮寄人");
             setStyle(worksheet.getCells().get("G1"),true);
-            worksheet.getCells().get("G1").setValue("报告合成日期");
-            setStyle(worksheet.getCells().get("H1"),true);
-            worksheet.getCells().get("H1").setValue("报告领取人");
-            setStyle(worksheet.getCells().get("I1"),true);
-            worksheet.getCells().get("I1").setValue("报告领取时间");
-            setStyle(worksheet.getCells().get("J1"),true);
-            worksheet.getCells().get("J1").setValue("委托单位");
-            setStyle(worksheet.getCells().get("K1"),true);
-            worksheet.getCells().get("K1").setValue("邮寄人");
-            setStyle(worksheet.getCells().get("L1"),true);
-            worksheet.getCells().get("L1").setValue("邮寄编号");
+            worksheet.getCells().get("G1").setValue("邮寄编号");
             for (ReportDetailListVo reportDetailListVo :list) {
                 String row = "A";
                 setStyle(cells.get(row + n),false);
                 cells.get(row + n).setValue(reportDetailListVo.getEntrustmentNo());
-                row = getNextUpEn(row);
-                setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getTaskCodes());
+
                 row = getNextUpEn(row);
                 setStyle(cells.get(row + n),false);
                 cells.get(row + n).setValue(reportDetailListVo.getReportCode());
@@ -1444,27 +1432,11 @@ public class ReportServiceImpl implements ReportService {
 
                 row = getNextUpEn(row);
                 setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getApplicant());
-
-                row = getNextUpEn(row);
-                setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getCategory());
-
-                row = getNextUpEn(row);
-                setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getReportCompleteTime());
-
-                row = getNextUpEn(row);
-                setStyle(cells.get(row + n),false);
                 cells.get(row + n).setValue(reportDetailListVo.getAddressee());
 
                 row = getNextUpEn(row);
                 setStyle(cells.get(row + n),false);
                 cells.get(row + n).setValue(reportDetailListVo.getReportTime());
-
-                row = getNextUpEn(row);
-                setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getEntrustCompany());
 
                 row = getNextUpEn(row);
                 setStyle(cells.get(row + n),false);
