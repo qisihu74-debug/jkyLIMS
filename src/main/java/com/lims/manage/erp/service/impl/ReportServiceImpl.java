@@ -1320,8 +1320,10 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean) {
+        List<Long> longs = reqBean.getList();
+        List<String> stringList = reportMapper.getCodeByIds(longs);
         Map<String,Long> map = new HashMap<>();
-        for (String reportCode:reqBean.getList()) {
+        for (String reportCode:stringList) {
             //step1 根据文件类型创建合同文档
             String url = reportMapper.getUrlByReportCode(reportCode);
             if (StringUtils.isNotEmpty(url)) {

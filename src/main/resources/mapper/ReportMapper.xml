@@ -1078,4 +1078,11 @@
     <update id="updateReportSealMid" parameterType="com.lims.manage.erp.vo.ReportSealvVo">
         update  test_report_record_mid set seal_report_url = #{sealReportUrl} where id = #{id}
     </update>
+
+    <select id="getCodeByIds" resultType="java.util.List">
+        select report_code from test_report_record where id IN
+        <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

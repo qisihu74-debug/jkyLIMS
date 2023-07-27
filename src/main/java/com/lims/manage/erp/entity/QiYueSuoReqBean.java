@@ -66,5 +66,5 @@ public class QiYueSuoReqBean {
 
     private List<Signatories> signatories;
 
-    private List<String> list;
+    private List<Long> list;
 }
