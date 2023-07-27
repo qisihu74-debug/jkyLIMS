@@ -193,6 +193,14 @@
             <if test="entrustCategoryType!=null">
                 and t1.entrust_category_type = #{entrustCategoryType}
             </if>
+            <if test="aliasName!=null and aliasName!=''">
+              and  t1.id in (
+                SELECT t4.entrustment_id FROM
+                test_entrusted_sample_details_rel as t4
+                LEFT JOIN test_sample as t5 ON t5.id = t4.sample_id
+                WHERE t5.alias_name LIKE CONCAT('%',#{aliasName},'%')
+                )
+            </if>
         </trim>
         ORDER BY t1.acceptance_date desc,entrustment_no DESC
     </select>
@@ -297,6 +305,14 @@
             </if>
             <if test="entrustCategoryType!=null">
                 and t1.entrust_category_type = #{entrustCategoryType}
+            </if>
+            <if test="aliasName!=null and aliasName!=''">
+               and t1.id in (
+                SELECT t4.entrustment_id FROM
+                test_entrusted_sample_details_rel as t4
+                LEFT JOIN test_sample as t5 ON t5.id = t4.sample_id
+                WHERE t5.alias_name LIKE CONCAT('%',#{aliasName},'%')
+                )
             </if>
         </trim>
         ORDER BY t1.acceptance_date desc, t1.entrustment_no DESC
