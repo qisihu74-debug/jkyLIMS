@@ -989,8 +989,8 @@
             <if test="reportCode!=null and reportCode!=''">
                 and t1.report_code LIKE CONCAT('%',#{reportCode},'%')
             </if>
-            <if test="sampleName!=null and sampleName!=''">
-                and t1.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            <if test="aliasName!=null and aliasName!=''">
+                and t1.sample_name LIKE CONCAT('%',#{aliasName},'%')
             </if>
             <if test="applicant!=null and applicant!=''">
                 and t1.applicant LIKE CONCAT('%',#{applicant},'%')
@@ -1046,8 +1046,8 @@
             <if test="reportCode!=null and reportCode!=''">
                 and t1.report_code LIKE CONCAT('%',#{reportCode},'%')
             </if>
-            <if test="sampleName!=null and sampleName!=''">
-                and t1.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            <if test="aliasName!=null and aliasName!=''">
+                and t1.sample_name LIKE CONCAT('%',#{aliasName},'%')
             </if>
             <if test="applicant!=null and applicant!=''">
                 and t1.applicant LIKE CONCAT('%',#{applicant},'%')
@@ -1108,8 +1108,8 @@
             <if test="reportCode!=null and reportCode!=''">
                 and t1.report_code LIKE CONCAT('%',#{reportCode},'%')
             </if>
-            <if test="sampleName!=null and sampleName!=''">
-                and t1.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            <if test="aliasName!=null and aliasName!=''">
+                and t1.sample_name LIKE CONCAT('%',#{aliasName},'%')
             </if>
             <if test="applicant!=null and applicant!=''">
                 and t1.applicant LIKE CONCAT('%',#{applicant},'%')
@@ -1171,8 +1171,8 @@
             <if test="reportCode!=null and reportCode!=''">
                 and t1.report_code LIKE CONCAT('%',#{reportCode},'%')
             </if>
-            <if test="sampleName!=null and sampleName!=''">
-                and t1.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            <if test="aliasName!=null and aliasName!=''">
+                and t1.sample_name LIKE CONCAT('%',#{aliasName},'%')
             </if>
             <if test="applicant!=null and applicant!=''">
                 and t1.applicant LIKE CONCAT('%',#{applicant},'%')
