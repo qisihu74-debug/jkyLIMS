@@ -13,6 +13,7 @@ public class ReportListVo {
     private List<String> taskCodes;
     private String reportCode;
     private String sampleName;
+    private String aliasName;
     private List<LabelValueVo> sampleInfos;
     private List<LabelValueVo> makeReportSampleInfos;
     private String countPrice;

@@ -10,6 +10,7 @@ public class ReportSampleDetailVo {
     private Long productId;
     private String sampleCode;
     private String sampleName;
+    private String aliasName;
     private String specs;
     private String standard;
     private String outward;

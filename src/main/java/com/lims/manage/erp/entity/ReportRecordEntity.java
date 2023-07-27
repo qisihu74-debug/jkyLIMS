@@ -228,6 +228,7 @@ public class ReportRecordEntity {
         this.entrustmentId = vo.getEntrustmentId() == null ? null : vo.getEntrustmentId();
         this.reportCode = vo.getReportCode() == null ? null : vo.getReportCode();
         this.sampleName = vo.getSampleName() == null ? null : vo.getSampleName();
+        this.aliasName = vo.getAliasName() == null ? null : vo.getAliasName();
         this.price = vo.getPrice() == null ? null : vo.getPrice();
         this.requiredCompletionTime = vo.getRequiredCompletionTime() == null ? null : vo.getRequiredCompletionTime();
         this.taskCode = vo.getTaskCode() == null ? null : vo.getTaskCode();

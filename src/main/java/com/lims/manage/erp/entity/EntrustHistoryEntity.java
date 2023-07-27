@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lims.manage.erp.vo.EntrustSampleInfoVo;
 import com.lims.manage.erp.vo.TaskCodeVo;
@@ -110,4 +111,9 @@ public class EntrustHistoryEntity {
      * 编号类别
      */
     private String entrustCategoryType;
+    /**
+     * 样品别名
+     */
+    @TableField(exist = false)
+    private String aliasName;
 }
