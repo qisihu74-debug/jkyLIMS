@@ -67,6 +67,11 @@ public class ReportDetailListVo {
     private String reportManager;
 
     /**
+     * 邮寄单号
+     */
+    private String waybill;
+
+    /**
      * 委托单位
      */
     private String entrustCompany;

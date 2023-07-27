@@ -1444,7 +1444,7 @@ public class ReportServiceImpl implements ReportService {
 
                 row = getNextUpEn(row);
                 setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getPostCode());
+                cells.get(row + n).setValue(reportDetailListVo.getWaybill());
                 n++;
             }
         }
@@ -2733,11 +2733,29 @@ public class ReportServiceImpl implements ReportService {
         if (paramVo.getReportTypeStatus() == 0) {//最终报告查询
             if (paramVo.getTaskCode() == null) {//无任务单号多条
                 reportDetailListVos = entityMapper.reportList0808(paramVo);
-                //处理任务单号
-                if (!CollectionUtils.isEmpty(reportDetailListVos)) {
+                //批量处理设置任务单号
+                if (!CollectionUtils.isEmpty(reportDetailListVos)){
+                    List<Long> entrustIds = Lists.newArrayList();
+                    for (ReportDetailListVo bean:reportDetailListVos) {
+                        entrustIds.add(bean.getEntrustId());
+                    }
+                    List<TaskCodeVo> list = entrustEntityMapper.getTaskAndTeamByIds(entrustIds);
+                    Map<Long,List<TaskCodeVo>> map = new HashMap<>();
+                    for (TaskCodeVo taskCodeVo:list) {
+                        List<TaskCodeVo> voList = map.get(taskCodeVo.getEntrustmentId());
+                        if (CollectionUtils.isEmpty(voList)){
+                            List<TaskCodeVo> codeVoList = Lists.newArrayList();
+                            codeVoList.add(taskCodeVo);
+                            map.put(taskCodeVo.getEntrustmentId(),codeVoList);
+                        }else {
+                            List<TaskCodeVo> codeVoList = map.get(taskCodeVo.getEntrustmentId());
+                            codeVoList.add(taskCodeVo);
+                            map.put(taskCodeVo.getEntrustmentId(),codeVoList);
+                        }
+                    }
+                    //设置编号
                     for (ReportDetailListVo reportDetailListVo : reportDetailListVos) {
-                        List<TaskCodeVo> taskAndTeam = entrustEntityMapper.getTaskAndTeam(reportDetailListVo.getEntrustId());
-                        reportDetailListVo.setTaskCodes(taskAndTeam);
+                        reportDetailListVo.setTaskCodes(map.get(reportDetailListVo.getEntrustId()));
                     }
                 }
             } else {//有任务单号单条
@@ -2748,9 +2766,27 @@ public class ReportServiceImpl implements ReportService {
                 reportDetailListVos = entityMapper.reportListMid0808(paramVo);
                 //处理任务单号
                 if (!CollectionUtils.isEmpty(reportDetailListVos)) {
+                    //批量处理设置任务单号
+                    List<Long> entrustIds = Lists.newArrayList();
+                    for (ReportDetailListVo bean:reportDetailListVos) {
+                        entrustIds.add(bean.getEntrustId());
+                    }
+                    List<TaskCodeVo> list = entrustEntityMapper.getTaskAndTeamByIds(entrustIds);
+                    Map<Long,List<TaskCodeVo>> map = new HashMap<>();
+                    for (TaskCodeVo taskCodeVo:list) {
+                        List<TaskCodeVo> voList = map.get(taskCodeVo.getEntrustmentId());
+                        if (CollectionUtils.isEmpty(voList)){
+                            List<TaskCodeVo> codeVoList = Lists.newArrayList();
+                            codeVoList.add(taskCodeVo);
+                            map.put(taskCodeVo.getEntrustmentId(),codeVoList);
+                        }else {
+                            List<TaskCodeVo> codeVoList = map.get(taskCodeVo.getEntrustmentId());
+                            codeVoList.add(taskCodeVo);
+                            map.put(taskCodeVo.getEntrustmentId(),codeVoList);
+                        }
+                    }
                     for (ReportDetailListVo reportDetailListVo : reportDetailListVos) {
-                        List<TaskCodeVo> taskAndTeam = entrustEntityMapper.getTaskAndTeam(reportDetailListVo.getEntrustId());
-                        reportDetailListVo.setTaskCodes(taskAndTeam);
+                        reportDetailListVo.setTaskCodes(map.get(reportDetailListVo.getEntrustId()));
                     }
                 }
             } else {//有任务单号单条
