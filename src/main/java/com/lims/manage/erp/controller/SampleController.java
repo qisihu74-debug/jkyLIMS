@@ -664,7 +664,7 @@ public class SampleController {
             return ResultUtil.error("缺少必填参数！！！");
         }
         System.out.print("请求参数 == sampleOutPutVo ="+ sampleOutPutVo);
-        return ResultUtil.success(sampleService.sampleRetentionList(sampleOutPutVo));
+        return ResultUtil.success(sampleService.sampleRetentionPageInfoList(sampleOutPutVo));
     }
 
     /**
@@ -679,7 +679,8 @@ public class SampleController {
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "attachment; filename="
-                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+//                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+                + fileName + ".xls");
         InputStream inputStream = sampleService.sampleRetentionExport(sampleOutPutVo);
         ServletOutputStream outputStream = response.getOutputStream();
         BufferedInputStream bis = new BufferedInputStream(inputStream);
@@ -731,7 +732,7 @@ public class SampleController {
             return ResultUtil.error("缺少必填参数！！！");
         }
         System.out.print("请求参数 == sampleOutPutVo ="+ sampleOutPutVo);
-        return ResultUtil.success(sampleService.sampleOutPutList(sampleOutPutVo));
+        return ResultUtil.success(sampleService.sampleRetentionPageInfoList(sampleOutPutVo));
     }
 
     /**
@@ -746,7 +747,8 @@ public class SampleController {
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "attachment; filename="
-                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+//                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+                + fileName + ".xls");
         InputStream inputStream = sampleService.sampleOutPutExport(sampleOutPutVo);
         ServletOutputStream outputStream = response.getOutputStream();
         BufferedInputStream bis = new BufferedInputStream(inputStream);

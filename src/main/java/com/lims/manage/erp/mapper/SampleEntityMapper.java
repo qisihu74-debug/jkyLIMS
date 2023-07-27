@@ -1,5 +1,6 @@
 package com.lims.manage.erp.mapper;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.TestTeam;
@@ -362,4 +363,18 @@ public interface SampleEntityMapper {
             "LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.entrust_id = t3.entrustment_id\n" +
             "WHERE t3.sample_id=#{sampleId}")
     ReceiveSampleParamVo getSampleTaker(@Param("sampleId") int sampleId);
+
+    /**
+     * 查询视图的分页展示
+     * @param sampleOutPutVo
+     * @return
+     */
+    List<SampleOutPutVo> selectPageVo(SampleOutPutVo sampleOutPutVo);
+
+    /**
+     * 查询条数
+     * @param sampleOutPutVo
+     * @return
+     */
+    Integer selectCount(SampleOutPutVo sampleOutPutVo);
 }
