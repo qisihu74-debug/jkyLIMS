@@ -121,8 +121,4 @@ public class SampleOutPutVo {
     private String approver;
 
     private String entrustPeople;
-    /**
-     * 状态，1待检，2在检，3已检，4留样，5处置
-     */
-    private String status;
 }

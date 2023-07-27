@@ -377,4 +377,6 @@ public interface SampleEntityMapper {
      * @return
      */
     Integer selectCount(SampleOutPutVo sampleOutPutVo);
+
+    List<SampleCirculationRecord> selectSampleCirculationRecordList(@Param("list")List<SampleOutPutVo> list);
 }

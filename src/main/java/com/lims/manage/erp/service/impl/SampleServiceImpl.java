@@ -880,10 +880,6 @@ public class SampleServiceImpl implements SampleService {
             for(SampleOutPutVo item :sampleList){
                 if(!CollectionUtils.isEmpty(item.getSampleCirculationRecords())){
                     for(SampleCirculationRecord sampleCirculationRecord : item.getSampleCirculationRecords()){
-                        if(sampleCirculationRecord.getStatus()!=null && sampleCirculationRecord.getStatus().equals("3")){
-                            // 增加领样信息
-                            item.setSampleHolder(sampleCirculationRecord.getOperatorName());
-                        }
                         if(sampleCirculationRecord.getStatus()!=null && sampleCirculationRecord.getStatus().equals("4")){
                             // 增加处置人
                             item.setHandler(sampleCirculationRecord.getOperatorName());
@@ -904,13 +900,7 @@ public class SampleServiceImpl implements SampleService {
 //    @SneakyThrows
     @Override
     public InputStream sampleRetentionExport(SampleOutPutVo sampleOutPutVo) throws Exception {
-        Integer count = sampleEntityMapper.selectCount(sampleOutPutVo);
-        List<SampleOutPutVo> list = new ArrayList<>(count);
-        if(count > 0){
-            sampleOutPutVo.setPageNum(0);
-            sampleOutPutVo.setPageSize(count);
-            list = sampleEntityMapper.selectPageVo(sampleOutPutVo);
-        }
+        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
         SampleExportUtil sampleExportUtil =new SampleExportUtil();
         return sampleExportUtil.sampleRetentionExport(list);
     }
@@ -941,13 +931,7 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     public InputStream sampleOutPutExport(SampleOutPutVo sampleOutPutVo) throws Exception {
-        Integer count = sampleEntityMapper.selectCount(sampleOutPutVo);
-        List<SampleOutPutVo> list = new ArrayList<>(count);
-        if(count > 0){
-            sampleOutPutVo.setPageNum(0);
-            sampleOutPutVo.setPageSize(count);
-            list = sampleEntityMapper.selectPageVo(sampleOutPutVo);
-        }
+        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
         SampleExportUtil sampleExportUtil =new SampleExportUtil();
         return sampleExportUtil.sampleOutPutExport(list);
     }
@@ -1005,16 +989,20 @@ public class SampleServiceImpl implements SampleService {
                 pageInfo.setPages(count / sampleOutPutVo.getPageSize());
             }
             if(CollectionUtil.isNotEmpty(list)){
-                for(SampleOutPutVo item : list){
-                    if(item.getStatus()!=null && !item.getStatus().equals("3")){
-                        // 增加领样信息
-                        item.setSampleHolder(null);
-                    }
-                    if(item.getStatus()!=null && !item.getStatus().equals("4")){
-                        // 增加处置人
-                        item.setHandler(null);
-                        // 增加处置时间
-                        item.setSellOffDate(null);
+                // 获取样品流转记录信息单
+                List<SampleCirculationRecord> sampleOutPutVoList = sampleEntityMapper.selectSampleCirculationRecordList(list);
+                if(CollectionUtil.isNotEmpty(sampleOutPutVoList)){
+                    for(SampleOutPutVo item : list){
+                        for(SampleCirculationRecord sampleCirculationRecord : sampleOutPutVoList){
+                            if(item.getSampleId().equals(sampleCirculationRecord.getSampleId())){
+                                if(sampleCirculationRecord.getStatus()!=null && sampleCirculationRecord.getStatus().equals("4")){
+                                    // 增加处置人
+                                    item.setHandler(sampleCirculationRecord.getOperatorName());
+                                    // 增加处置时间
+                                    item.setSellOffDate(sampleCirculationRecord.getTime());
+                                }
+                            }
+                        }
                     }
                 }
             }
