@@ -837,12 +837,12 @@ public class ReportController {
             response.reset();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("部门仪器使用费用统计列表"+".xlsx", "UTF-8") );
+            response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("报告发放清单"+".xlsx", "UTF-8") );
             outputStream = reportService.exportReportList(list, response);
             outputStream.flush();
             outputStream.close();
         }catch (Exception e){
-            log.error("部门仪器使用费用统计列表导出失败:{}",e);
+            log.error("报告发放清单列表导出失败:{}",e);
         }
     }
 
