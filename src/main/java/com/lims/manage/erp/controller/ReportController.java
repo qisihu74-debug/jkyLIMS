@@ -398,7 +398,19 @@ public class ReportController {
         if (CollectionUtils.isEmpty(reqBean.getList())){
             return ResultUtil.error("请选择需要签署的报告");
         }
-        QiYueSuoResponse response = reportService.createbycategoryBatch(reqBean);
+        List<Long> longs = reqBean.getList();
+        List<String> stringList = reportService.getCodeByIds(longs);
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i=0;i<stringList.size();i++) {
+            stringBuilder.append(stringList.get(i));
+            if (i==stringList.size()-1){
+                continue;
+            }else {
+                stringBuilder.append(",");
+            }
+        }
+        reqBean.setSubject(stringBuilder.toString());
+        QiYueSuoResponse response = reportService.createbycategoryBatch(reqBean,stringList);
         if (response != null && response.getCode() == 0) {
             return ResultUtil.success("向契约锁发起报告制作申请成功!");
         } else {

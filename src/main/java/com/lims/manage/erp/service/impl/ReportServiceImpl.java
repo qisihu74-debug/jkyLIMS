@@ -1324,9 +1324,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean) {
-        List<Long> longs = reqBean.getList();
-        List<String> stringList = reportMapper.getCodeByIds(longs);
+    public QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean,List<String> stringList) {
         Map<String,Long> map = new HashMap<>();
         for (String reportCode:stringList) {
             //step1 根据文件类型创建合同文档
@@ -1464,6 +1462,11 @@ public class ReportServiceImpl implements ReportService {
         return outputStream;
     }
 
+    @Override
+    public List<String> getCodeByIds(List<Long> longs) {
+        return reportMapper.getCodeByIds(longs);
+    }
+
     /**
      * 设置单元格样式
      * @param cell
@@ -1591,14 +1594,14 @@ public class ReportServiceImpl implements ReportService {
         QiYueSuoResponse qiYueSuoResponse = qiYueSuoHnadler.sealList(category, companyName);
         //根据sealType过来qiYueSuoResponse
         List<QiYueSuoSealEntity> newList = Lists.newArrayList();
-        String[] split = sealType.split(",");
+        //String[] split = sealType.split(",");
         List<QiYueSuoSealEntity> list = qiYueSuoResponse.getList();
         logger.info("获取契约锁印章列表为:{}",JSON.toJSONString(list));
         for (QiYueSuoSealEntity qiYueSuoSealEntity : list) {
-            for (String s : split) {
-                if (qiYueSuoSealEntity.getName().contains(s)) {
-                    newList.add(qiYueSuoSealEntity);
-                }
+            if (qiYueSuoSealEntity.getName().contains("公路工程综合甲级专用章")
+                    || qiYueSuoSealEntity.getName().contains("实验室认可（CNAS）专用章")
+                    || qiYueSuoSealEntity.getName().contains("计量认证（CMA）专用章")) {
+                newList.add(qiYueSuoSealEntity);
             }
             //检验检测专用章（室内试验）、检验检测专用章（外业检测）作为通用章返回
             if (qiYueSuoSealEntity.getName().equals("检验检测专用章（室内试验）")
