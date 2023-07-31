@@ -412,6 +412,11 @@ public class ReportController {
         reqBean.setSubject(stringBuilder.toString());
         QiYueSuoResponse response = reportService.createbycategoryBatch(reqBean,stringList);
         if (response != null && response.getCode() == 0) {
+//            if (response.getContractId() != null){
+//                log.info("开始模拟处理回调业务");
+//                reportService.callback(response.getContractId());
+//                log.info("回调业务处理完成");
+//            }
             return ResultUtil.success("向契约锁发起报告制作申请成功!");
         } else {
             return ResultUtil.error("向契约锁发起报告制作申请失败："+response.getMessage());
@@ -847,14 +852,14 @@ public class ReportController {
         OutputStream outputStream = null;
         try {
             response.reset();
-            response.setContentType("application/x-msdownload");
+            response.setContentType("application/msword");
             response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("报告发放清单"+".xlsx", "UTF-8") );
+            response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("检验检测报告发放登记表"+".doc", "UTF-8") );
             outputStream = reportService.exportReportList(list, response);
             outputStream.flush();
             outputStream.close();
         }catch (Exception e){
-            log.error("报告发放清单列表导出失败:{}",e);
+            log.error("检验检测报告发放登记表导出失败:{}",e);
         }
     }
 

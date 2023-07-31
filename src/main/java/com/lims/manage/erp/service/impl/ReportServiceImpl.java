@@ -2,17 +2,13 @@ package com.lims.manage.erp.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.aspose.cells.BorderType;
 import com.aspose.cells.Cell;
-import com.aspose.cells.CellBorderType;
 import com.aspose.cells.Cells;
-import com.aspose.cells.Color;
-import com.aspose.cells.Font;
-import com.aspose.cells.SaveFormat;
-import com.aspose.cells.Style;
-import com.aspose.cells.TextAlignmentType;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
+import com.aspose.words.Document;
+import com.aspose.words.NodeType;
+import com.aspose.words.*;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -104,7 +100,6 @@ import org.apache.poi.hwpf.usermodel.Range;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
-import org.docx4j.wml.P;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1396,68 +1391,88 @@ public class ReportServiceImpl implements ReportService {
         if (response != null && response.getCode() == 0) {
             entityMapper.updateUrlAndStateByContractId(contractId, response.getSignUrl(), "2", sysUserName + "&" + userId + "", new Date(System.currentTimeMillis()));
         }
+        response.setContractId(contractId);
         return response;
     }
 
     @Override
     public OutputStream exportReportList(List<ReportDetailListVo> list, HttpServletResponse response) {
-        ServletOutputStream outputStream = null;
-        Workbook workbook = new Workbook();
-        Worksheet worksheet = workbook.getWorksheets().get(0);
+        OutputStream outputStream = null;
+        InputStream fileStream = MinIoUtil.getFileStream("sample-tag", "028检验检测报告发放登记表.doc");
+        Document doc = null;
+        try {
+            doc = new Document(fileStream);
+        }catch (Exception e){
+            logger.error("加载检测报告发放登记表失败:{}",e);
+        }
+        Table table = (Table) doc.getChild(NodeType.TABLE, 0, true);
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(list)){
-            Cells cells = worksheet.getCells();
-            //设置列头部信息
-            int n = 2;
-            setStyle(worksheet.getCells().get("A1"),true);
-            worksheet.getCells().get("A1").setValue("委托单号");
-            setStyle(worksheet.getCells().get("B1"),true);
-            worksheet.getCells().get("B1").setValue("报告编号");
-            setStyle(worksheet.getCells().get("C1"),true);
-            worksheet.getCells().get("C1").setValue("样品名称");
-            setStyle(worksheet.getCells().get("D1"),true);
-            worksheet.getCells().get("D1").setValue("报告领取人");
-            setStyle(worksheet.getCells().get("E1"),true);
-            worksheet.getCells().get("E1").setValue("报告领取时间");
-            setStyle(worksheet.getCells().get("F1"),true);
-            worksheet.getCells().get("F1").setValue("邮寄人");
-            setStyle(worksheet.getCells().get("G1"),true);
-            worksheet.getCells().get("G1").setValue("邮寄编号");
-            for (ReportDetailListVo reportDetailListVo :list) {
-                String row = "A";
-                setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getEntrustmentNo());
+            int i = table.getRows().getCount() - 1;
+            int addNum = list.size() - i;
+            if (addNum>0){
+                for (int j = 0; j < addNum; j++) {
+                    com.aspose.words.Row newRow = new Row(doc);
+                    for (int col = 0; col < table.getFirstRow().getCells().getCount(); col++) {
+                        com.aspose.words.Cell cell = new com.aspose.words.Cell(doc);
+                        try {
+                            cell.getCellFormat().setPreferredWidth(PreferredWidth.fromPercent(100.0 / table.getFirstRow().getCells().getCount()));
+                            cell.getCellFormat().setFitText(true);
+                            cell.appendChild(new Paragraph(doc));
+                            newRow.appendChild(cell);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                    try {
+                        table.appendChild(newRow);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            for (int n=0;n<list.size();n++) {
+                // 遍历表格的每个单元格，并填充数据
+                CellCollection cells = table.getRows().get(n + 1).getCells();
+                try {
+                    if (cells.get(0) != null && cells.get(0).getFirstParagraph() != null){
+                        cells.get(0).getFirstParagraph().appendChild(new Run(doc, list.get(n).getEntrustmentNo()));
+                    }
+                    if (cells.get(1) != null && cells.get(1).getFirstParagraph() != null){
+                        cells.get(1).getFirstParagraph().appendChild(new Run(doc, list.get(n).getReportCode()));
+                    }
+                    if (cells.get(2) != null && cells.get(2).getFirstParagraph() != null){
+                        cells.get(2).getFirstParagraph().appendChild(new Run(doc, list.get(n).getSampleName()));
+                    }
+                    if (cells.get(3) != null && cells.get(3).getFirstParagraph() != null){
+                        cells.get(3).getFirstParagraph().appendChild(new Run(doc, StringUtils.isEmpty(list.get(n).getReportCompleteTime())?"无":list.get(n).getReportCompleteTime()));
+                    }
+                    if (cells.get(4) != null && cells.get(4).getFirstParagraph() != null){
+                        cells.get(4).getFirstParagraph().appendChild(new Run(doc, StringUtils.isEmpty(list.get(n).getAddressee())?"无":list.get(n).getAddressee()));
+                    }
+                    if (cells.get(5) != null && cells.get(5).getFirstParagraph() != null){
+                        cells.get(5).getFirstParagraph().appendChild(new Run(doc, StringUtils.isEmpty(list.get(n).getReportTime())?"无":list.get(n).getReportTime()));
+                    }
+                    if (cells.get(6) != null && cells.get(6).getFirstParagraph() != null){
+                        cells.get(6).getFirstParagraph().appendChild(new Run(doc, StringUtils.isEmpty(list.get(n).getReportManager())?"无":list.get(n).getReportManager()));
+                    }
+                    if (cells.get(7) != null && cells.get(7).getFirstParagraph() != null){
+                        cells.get(7).getFirstParagraph().appendChild(new Run(doc, StringUtils.isEmpty(list.get(n).getWaybill())?"无":list.get(n).getWaybill()));
+                    }
+                    if (cells.get(8) != null && cells.get(8).getFirstParagraph() != null){
+                        cells.get(8).getFirstParagraph().appendChild(new Run(doc, ""));
+                    }
 
-                row = getNextUpEn(row);
-                setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getReportCode());
-
-                row = getNextUpEn(row);
-                setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getSampleName());
-
-                row = getNextUpEn(row);
-                setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getAddressee());
-
-                row = getNextUpEn(row);
-                setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getReportTime());
-
-                row = getNextUpEn(row);
-                setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getReportManager());
-
-                row = getNextUpEn(row);
-                setStyle(cells.get(row + n),false);
-                cells.get(row + n).setValue(reportDetailListVo.getWaybill());
-                n++;
+                }catch (Exception e){
+                    log.info("检验检测报告发放登记表填充数据异常:{}",e);
+                }
             }
         }
         try {
             outputStream = response.getOutputStream();
-            workbook.save(outputStream, SaveFormat.XLSX);
+            // 保存填充数据后的 DOC 文档
+            doc.save(outputStream,SaveFormat.DOCX);
         }catch (Exception e){
-            log.debug("导出仪器使用费用记录异常:{}"+e);
+            log.debug("导出检验检测报告发放登记表异常:{}"+e);
         }
         return outputStream;
     }
@@ -1465,33 +1480,6 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<String> getCodeByIds(List<Long> longs) {
         return reportMapper.getCodeByIds(longs);
-    }
-
-    /**
-     * 设置单元格样式
-     * @param cell
-     */
-    public void setStyle(Cell cell,boolean bgc){
-        Style style = cell.getStyle(); // 获取单元格样式
-        // 设置字体样式
-        if (bgc){
-            Font font = style.getFont();
-            font.setBold(true);
-            font.setColor(Color.getGreen());
-        }
-        // 设置背景颜色
-        if (bgc){
-            style.setBackgroundColor(Color.getBurlyWood());
-        }
-        // 设置边框样式
-        style.setBorder(BorderType.TOP_BORDER, CellBorderType.MEDIUM,null);
-        style.setBorder(BorderType.BOTTOM_BORDER, CellBorderType.MEDIUM,null);
-        style.setBorder(BorderType.LEFT_BORDER, CellBorderType.MEDIUM,null);
-        style.setBorder(BorderType.RIGHT_BORDER, CellBorderType.MEDIUM,null);
-        // 设置对齐方式
-        style.setHorizontalAlignment(TextAlignmentType.CENTER);
-        style.setVerticalAlignment(TextAlignmentType.CENTER);
-        cell.setStyle(style); // 应用样式到单元格
     }
 
     @Override
