@@ -23,6 +23,8 @@ public class ReportDetailListParamVo {
      * 样品名称
      */
     private String sampleName;
+
+    private String aliasName;
     /**
      * 报告合成人员
      */
@@ -59,6 +61,11 @@ public class ReportDetailListParamVo {
      * 邮寄人
      */
     private String reportManager;
+
+    /**
+     * 邮寄单号
+     */
+    private String waybill;
 
     /**
      * 委托单位

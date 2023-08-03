@@ -1,5 +1,6 @@
 package com.lims.manage.erp.mapper;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.TestTeam;
@@ -239,15 +240,7 @@ public interface SampleEntityMapper {
      */
     List<TestTeam> getAllRoomInfoList();
 
-    @Select("SELECT\n" +
-            "\tSTATUS,\n" +
-            "\ttime,\n" +
-            "\toperator_name\n" +
-            "FROM\n" +
-            "\ttest_sample_circulation_record\n" +
-            "WHERE\n" +
-            "\tsample_id = #{sampleId}")
-    List<SampleCirculationRecord> getRecords(@Param("sampleId") Integer sampleId);
+    List<SampleCirculationRecord> getRecords(@Param("sampleId") Integer sampleId,@Param("type") int type);
 
     @Select("SELECT DISTINCT\n" +
             "\tt2.sampler\n" +
@@ -357,4 +350,33 @@ public interface SampleEntityMapper {
      * @return
      */
     int updateItemReview(ExcelInsertVo excelInsertVo);
+
+    @Select("select DISTINCT taskPublisher from sample_v_1 where sampleId=#{sampleId}")
+    String getTaskPublisher(@Param("sampleId") int sampleId);
+
+    @Select("SELECT DISTINCT\n" +
+            "\tt1.sampler,\n" +
+            "\tt1.sample_receiving_time As sampleReceivingTime\n" +
+            "FROM\n" +
+            "\ttest_task t1\n" +
+            "LEFT JOIN test_entrusted_task_rel t2 ON t1.id = t2.task_id\n" +
+            "LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.entrust_id = t3.entrustment_id\n" +
+            "WHERE t3.sample_id=#{sampleId}")
+    ReceiveSampleParamVo getSampleTaker(@Param("sampleId") int sampleId);
+
+    /**
+     * 查询视图的分页展示
+     * @param sampleOutPutVo
+     * @return
+     */
+    List<SampleOutPutVo> selectPageVo(SampleOutPutVo sampleOutPutVo);
+
+    /**
+     * 查询条数
+     * @param sampleOutPutVo
+     * @return
+     */
+    Integer selectCount(SampleOutPutVo sampleOutPutVo);
+
+    List<SampleCirculationRecord> selectSampleCirculationRecordList(@Param("list")List<SampleOutPutVo> list);
 }

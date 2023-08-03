@@ -173,6 +173,7 @@ public class TestSampleEntity {
      */
     private String mixingWay;
 
+    private Integer sampleRetentionPeriod;
 
 
 

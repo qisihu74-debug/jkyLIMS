@@ -789,6 +789,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         SELECT sample_code sampleCode,
                sample_name sampleName,
                alias_name aliasName,
+               sample_retention_period,
                specs,
                outward,
                inspector,
@@ -815,7 +816,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         FROM test_sample
         WHERE pid = #{sampleId}
     </select>
-    <select id="getSampleTagInfo" resultType="com.lims.manage.erp.vo.SampleDetailVo">
+    <!--<select id="getSampleTagInfo" resultType="com.lims.manage.erp.vo.SampleDetailVo">
         SELECT sample_code sampleCode,
                sample_name sampleName,
                alias_name aliasName,
@@ -828,7 +829,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
               received_date receivedDate
         FROM test_sample
         WHERE id = #{sampleId}
-    </select>
+    </select>-->
     <delete id="removeSamplesId">
         DELETE
         FROM test_entrusted_sample_details_rel
@@ -1186,7 +1187,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     <result property="taskPublisher" column="taskPublisher"></result>
     <result property="entrustPeople" column="entrust_people"></result>
     <result property="approver" column="approver"></result>
-    <result property="sampleHolder" column="operator_name"></result>
+<!--    <result property="sampleHolder" column="operator_name"></result>-->
         <collection property="sampleCirculationRecords" ofType="com.lims.manage.erp.entity.SampleCirculationRecord">
             <result property="sampleId" column="sampleId"></result>
             <result property="status" column="STATUS"></result>
@@ -1199,7 +1200,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         SELECT
             t1.id as sampleId,
             t1.sample_code,
-            t1.sample_name,
+            t1.alias_name as sample_name,
             t1.sample_retention_period,
             t1.sample_process_mode,
             t1.sample_reserved_remrk,
@@ -1216,6 +1217,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             t4.time,
             t5.task_code,
             t5.orderer as taskPublisher
+--             ,t5.orderer as operator_name
         FROM
          (	SELECT aa.* FROM  test_sample as aa GROUP BY aa.sample_code ) as t1
             LEFT JOIN test_entrusted_sample_details_rel AS t2 ON t1.id = t2.sample_id
@@ -1230,8 +1232,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                 and t1.sample_code LIKE CONCAT("%",#{sampleCode},"%")
             </if>
             <if test="sampleHolder!=null">
-                and t4.operator_name LIKE CONCAT("%",#{sampleHolder},"%")
-                and t4.STATUS = 3
+                and t5.orderer  LIKE CONCAT("%",#{sampleHolder},"%")
             </if>
             <if test="startTime!=null and endTime!=null">
                 and t3.acceptance_date BETWEEN #{startTime} and  #{endTime}
@@ -1259,7 +1260,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                 and acceptance_date BETWEEN #{startTime} and  #{endTime}
             </if>
             <if test="taskPublisher!=null">
-                and orderer LIKE CONCAT("%",#{taskPublisher},"%")
+                and taskPublisher LIKE CONCAT("%",#{taskPublisher},"%")
             </if>
         </trim>
     </select>
@@ -1279,4 +1280,79 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         opinion = #{opinion}
         WHERE id = #{itemId}
     </update>
+
+    <select id="getRecords" resultType="com.lims.manage.erp.entity.SampleCirculationRecord">
+SELECT
+	STATUS,
+	sample_id,
+	time,
+	operator_name
+FROM
+	test_sample_circulation_record
+WHERE
+	sample_id = #{sampleId}
+	<if test="type ==1 ">
+        AND (status = '0' or status= '1' or status = '2')
+    </if>
+        <if test="type ==2 ">
+            AND (status = '3' or status= '4')
+        </if>
+    </select>
+
+    <select id="selectPageVo" resultType="com.lims.manage.erp.vo.SampleOutPutVo">
+        SELECT * FROM sample_v_2
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+        <if test="taskCode!=null">
+            and task_code LIKE CONCAT("%",#{taskCode},"%")
+        </if>
+        <if test="sampleCode!=null">
+            and sample_code LIKE CONCAT("%",#{sampleCode},"%")
+        </if>
+        <if test="sampleHolder!=null">
+            and sampleHolder LIKE CONCAT("%",#{sampleHolder},"%")
+        </if>
+        <if test="startTime!=null and endTime!=null">
+            and acceptance_date BETWEEN #{startTime} and  #{endTime}
+        </if>
+        <if test="taskPublisher!=null">
+            and taskPublisher LIKE CONCAT("%",#{taskPublisher},"%")
+        </if>
+    </trim>
+        limit #{pageNum},#{pageSize}
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(*) FROM sample_v_2
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="taskCode!=null">
+                and task_code LIKE CONCAT("%",#{taskCode},"%")
+            </if>
+            <if test="sampleCode!=null">
+                and sample_code LIKE CONCAT("%",#{sampleCode},"%")
+            </if>
+            <if test="sampleHolder!=null">
+                and sampleHolder LIKE CONCAT("%",#{sampleHolder},"%")
+            </if>
+            <if test="startTime!=null and endTime!=null">
+                and acceptance_date BETWEEN #{startTime} and  #{endTime}
+            </if>
+            <if test="taskPublisher!=null">
+                and taskPublisher LIKE CONCAT("%",#{taskPublisher},"%")
+            </if>
+        </trim>
+    </select>
+    <select id="selectSampleCirculationRecordList" resultType="com.lims.manage.erp.entity.SampleCirculationRecord">
+        SELECT
+            sample_id,
+            STATUS,
+            time,
+            operator_id,
+            operator_name
+        FROM
+            test_sample_circulation_record
+        WHERE
+        sample_id in
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item.sampleId}
+        </foreach>
+    </select>
 </mapper>

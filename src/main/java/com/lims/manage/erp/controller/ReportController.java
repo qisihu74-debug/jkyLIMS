@@ -398,8 +398,25 @@ public class ReportController {
         if (CollectionUtils.isEmpty(reqBean.getList())){
             return ResultUtil.error("请选择需要签署的报告");
         }
-        QiYueSuoResponse response = reportService.createbycategoryBatch(reqBean);
+        List<Long> longs = reqBean.getList();
+        List<String> stringList = reportService.getCodeByIds(longs);
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i=0;i<stringList.size();i++) {
+            stringBuilder.append(stringList.get(i));
+            if (i==stringList.size()-1){
+                continue;
+            }else {
+                stringBuilder.append(",");
+            }
+        }
+        reqBean.setSubject(stringBuilder.toString());
+        QiYueSuoResponse response = reportService.createbycategoryBatch(reqBean,stringList);
         if (response != null && response.getCode() == 0) {
+//            if (response.getContractId() != null){
+//                log.info("开始模拟处理回调业务");
+//                reportService.callback(response.getContractId());
+//                log.info("回调业务处理完成");
+//            }
             return ResultUtil.success("向契约锁发起报告制作申请成功!");
         } else {
             return ResultUtil.error("向契约锁发起报告制作申请失败："+response.getMessage());
@@ -835,14 +852,14 @@ public class ReportController {
         OutputStream outputStream = null;
         try {
             response.reset();
-            response.setContentType("application/x-msdownload");
+            response.setContentType("application/msword");
             response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("部门仪器使用费用统计列表"+".xlsx", "UTF-8") );
+            response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("检验检测报告发放登记表"+".doc", "UTF-8") );
             outputStream = reportService.exportReportList(list, response);
             outputStream.flush();
             outputStream.close();
         }catch (Exception e){
-            log.error("部门仪器使用费用统计列表导出失败:{}",e);
+            log.error("检验检测报告发放登记表导出失败:{}",e);
         }
     }
 

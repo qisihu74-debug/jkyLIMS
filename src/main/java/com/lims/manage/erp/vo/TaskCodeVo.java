@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class TaskCodeVo {
+    private Long entrustmentId;
     /**
      * 任务编号
      */

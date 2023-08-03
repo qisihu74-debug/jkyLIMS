@@ -70,7 +70,7 @@
                                         report_mailing_address, report_complete_time,
                                         task_id,type,entrust_id)
         values (#{id,jdbcType=BIGINT}, #{entrustmentId,jdbcType=BIGINT}, #{reportCode,jdbcType=VARCHAR},
-                #{sampleName,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{requiredCompletionTime,jdbcType=TIMESTAMP},
+                #{aliasName,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{requiredCompletionTime,jdbcType=TIMESTAMP},
                 #{taskCode,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR}, #{number,jdbcType=INTEGER},
                 #{reportType,jdbcType=VARCHAR}, #{verifyerTime,jdbcType=TIMESTAMP}, #{issuerTime,jdbcType=TIMESTAMP},
                 #{sealType,jdbcType=VARCHAR}, #{applyReason,jdbcType=VARCHAR}, #{issuReason,jdbcType=VARCHAR},
@@ -896,6 +896,8 @@
         <result property="reportTime" column="report_time"></result>
         <result property="reportTypeStatus" column="reportTypeStatus"></result>
         <result property="entrustmentNostr" column="entrustmentNostr"></result>
+        <result property="reportManager" column="report_manager"></result>
+        <result property="waybill" column="waybill"></result>
         <collection property="taskCodes" ofType="com.lims.manage.erp.vo.TaskCodeVo">
             <result property="taskCode" column="taskCode"></result>
             <result property="teamName" column="teamName"></result>
@@ -968,6 +970,7 @@
         t1.report_complete_time,
         t1.addressee,
         t1.report_time,
+        t1.waybill,
         t1.type as reportTypeStatus
         FROM
         test_report_record t1
@@ -986,8 +989,8 @@
             <if test="reportCode!=null and reportCode!=''">
                 and t1.report_code LIKE CONCAT('%',#{reportCode},'%')
             </if>
-            <if test="sampleName!=null and sampleName!=''">
-                and t1.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            <if test="aliasName!=null and aliasName!=''">
+                and t1.sample_name LIKE CONCAT('%',#{aliasName},'%')
             </if>
             <if test="applicant!=null and applicant!=''">
                 and t1.applicant LIKE CONCAT('%',#{applicant},'%')
@@ -1024,6 +1027,7 @@
         t1.report_complete_time,
         t1.addressee,
         t1.report_time,
+        t1.waybill,
         t1.type as reportTypeStatus
         FROM
         test_report_record_mid t1
@@ -1042,8 +1046,8 @@
             <if test="reportCode!=null and reportCode!=''">
                 and t1.report_code LIKE CONCAT('%',#{reportCode},'%')
             </if>
-            <if test="sampleName!=null and sampleName!=''">
-                and t1.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            <if test="aliasName!=null and aliasName!=''">
+                and t1.sample_name LIKE CONCAT('%',#{aliasName},'%')
             </if>
             <if test="applicant!=null and applicant!=''">
                 and t1.applicant LIKE CONCAT('%',#{applicant},'%')
@@ -1078,6 +1082,7 @@
         t1.report_complete_time,
         t1.addressee,
         t1.report_time,
+        t1.waybill,
         t3.task_code taskCode,
         t4.NAME teamName,
         t1.type as reportTypeStatus
@@ -1103,8 +1108,8 @@
             <if test="reportCode!=null and reportCode!=''">
                 and t1.report_code LIKE CONCAT('%',#{reportCode},'%')
             </if>
-            <if test="sampleName!=null and sampleName!=''">
-                and t1.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            <if test="aliasName!=null and aliasName!=''">
+                and t1.sample_name LIKE CONCAT('%',#{aliasName},'%')
             </if>
             <if test="applicant!=null and applicant!=''">
                 and t1.applicant LIKE CONCAT('%',#{applicant},'%')
@@ -1140,6 +1145,7 @@
         t1.report_complete_time,
         t1.addressee,
         t1.report_time,
+        t1.waybill,
         t3.task_code taskCode,
         t4.NAME teamName,
         t1.type as reportTypeStatus
@@ -1165,8 +1171,8 @@
             <if test="reportCode!=null and reportCode!=''">
                 and t1.report_code LIKE CONCAT('%',#{reportCode},'%')
             </if>
-            <if test="sampleName!=null and sampleName!=''">
-                and t1.sample_name LIKE CONCAT('%',#{sampleName},'%')
+            <if test="aliasName!=null and aliasName!=''">
+                and t1.sample_name LIKE CONCAT('%',#{aliasName},'%')
             </if>
             <if test="applicant!=null and applicant!=''">
                 and t1.applicant LIKE CONCAT('%',#{applicant},'%')

@@ -292,7 +292,7 @@ public class SampleController {
                 response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
                 response.setCharacterEncoding("UTF-8");
                 response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品标签.xlsx", "UTF-8") );
-                ServletOutputStream outputStream = sampleService.downloadNewSampleTab(sampleId,sampleTagInfo, response);
+                ServletOutputStream outputStream = sampleService.downloadNewSampleTab(1,sampleId,sampleTagInfo, response);
                 outputStream.flush();
                 outputStream.close();
             }else {
@@ -304,6 +304,45 @@ public class SampleController {
                 zipOutputStream.flush();
             }
         }
+    }
+
+    /**
+     * 下载留样标签
+     * @param sampleId
+     * @param response
+     * @throws IOException
+     */
+    @RequestMapping("/downloadRetentionTab")
+    public void downloadRetentionSampleTab(Integer sampleId, HttpServletResponse response) throws IOException {
+        if (sampleId == null){
+            return;
+        }
+        SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
+        if (sampleTagInfo != null){
+            response.reset();
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品留样标签.xlsx", "UTF-8") );
+            ServletOutputStream outputStream = sampleService.downloadNewSampleTab(2,sampleId,sampleTagInfo, response);
+            outputStream.flush();
+            outputStream.close();
+        }
+    }
+
+    /**
+     * 留样标签扫码
+     * @param sampleId
+     * @return
+     */
+    @RequestMapping("retentionInfo")
+    public Result retentionInfo(Integer sampleId){
+        if (sampleId == null){
+            return ResultUtil.error("缺少参数");
+        }
+        log.info("留样扫码请求参数:{}",sampleId);
+        TestSampleEntity entity = sampleService.sampleInfo(2,sampleId);
+        log.info("留样扫码响应结果:{}",JSON.toJSONString(entity));
+        return ResultUtil.success(entity);
     }
 
     /**
@@ -496,12 +535,12 @@ public class SampleController {
      * @return
      */
     @RequestMapping("sampleInfo")
-    public Result sampleInfo(Integer sampleId){
+    public Result sampleInfo(Integer sampleId, Integer type){
         if (sampleId == null){
             return ResultUtil.error("缺少参数");
         }
         log.info("扫码请求参数:{}",sampleId);
-        TestSampleEntity entity = sampleService.sampleInfo(sampleId);
+        TestSampleEntity entity = sampleService.sampleInfo(type,sampleId);
         log.info("扫码响应结果:{}",JSON.toJSONString(entity));
         return ResultUtil.success(entity);
     }
@@ -582,7 +621,7 @@ public class SampleController {
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("样品入库登记表.xlsx", "UTF-8") );
-        ServletOutputStream outputStream = sampleService.downloadNewSampleTab(sampleId,sampleTagInfo, response);
+        ServletOutputStream outputStream = sampleService.downloadNewSampleTab(0,sampleId,sampleTagInfo, response);
         outputStream.flush();
         outputStream.close();
     }
@@ -608,7 +647,7 @@ public class SampleController {
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("委托样品出入库登记表.xlsx", "UTF-8") );
-        ServletOutputStream outputStream = sampleService.downloadNewSampleTab(sampleId,sampleTagInfo, response);
+        ServletOutputStream outputStream = sampleService.downloadNewSampleTab(0,sampleId,sampleTagInfo, response);
         outputStream.flush();
         outputStream.close();
     }
@@ -625,7 +664,7 @@ public class SampleController {
             return ResultUtil.error("缺少必填参数！！！");
         }
         System.out.print("请求参数 == sampleOutPutVo ="+ sampleOutPutVo);
-        return ResultUtil.success(sampleService.sampleRetentionList(sampleOutPutVo));
+        return ResultUtil.success(sampleService.sampleRetentionPageInfoList(sampleOutPutVo));
     }
 
     /**
@@ -640,7 +679,8 @@ public class SampleController {
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "attachment; filename="
-                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+//                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+                + fileName + ".xls");
         InputStream inputStream = sampleService.sampleRetentionExport(sampleOutPutVo);
         ServletOutputStream outputStream = response.getOutputStream();
         BufferedInputStream bis = new BufferedInputStream(inputStream);
@@ -692,7 +732,7 @@ public class SampleController {
             return ResultUtil.error("缺少必填参数！！！");
         }
         System.out.print("请求参数 == sampleOutPutVo ="+ sampleOutPutVo);
-        return ResultUtil.success(sampleService.sampleOutPutList(sampleOutPutVo));
+        return ResultUtil.success(sampleService.sampleRetentionPageInfoList(sampleOutPutVo));
     }
 
     /**
@@ -707,7 +747,8 @@ public class SampleController {
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "attachment; filename="
-                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+//                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
+                + fileName + ".xls");
         InputStream inputStream = sampleService.sampleOutPutExport(sampleOutPutVo);
         ServletOutputStream outputStream = response.getOutputStream();
         BufferedInputStream bis = new BufferedInputStream(inputStream);

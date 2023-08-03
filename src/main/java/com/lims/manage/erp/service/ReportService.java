@@ -439,7 +439,7 @@ public interface ReportService {
 
     void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode,Date date2);
 
-    QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean);
+    QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean,List<String> stringList);
 
     /**
      * 报告查询列表导出
@@ -448,4 +448,6 @@ public interface ReportService {
      * @return
      */
     OutputStream exportReportList(List<ReportDetailListVo> list, HttpServletResponse response);
+
+    List<String> getCodeByIds(List<Long> longs);
 }

@@ -19,6 +19,7 @@
             <result property="productId" column="product_id"></result>
             <result property="sampleCode" column="sample_code"></result>
             <result property="sampleName" column="sample_name1"></result>
+            <result property="aliasName" column="alias_name"></result>
             <result property="specs" column="specs"></result>
             <!--            <result property="standard" column="batch_number"></result>-->
             <result property="outward" column="outward"></result>
@@ -105,6 +106,7 @@
             t3.sample_id,
             t4.sample_code,
             t4.sample_name sample_name1,
+            t4.alias_name alias_name,
             t4.specs,
             t4.outward,
             t4.product_id,
@@ -155,6 +157,7 @@
         t3.sample_id,
         t4.sample_code,
         t4.sample_name sample_name1,
+        t4.alias_name alias_name,
         t4.specs,
         t4.outward,
         t4.product_id,
@@ -1078,4 +1081,11 @@
     <update id="updateReportSealMid" parameterType="com.lims.manage.erp.vo.ReportSealvVo">
         update  test_report_record_mid set seal_report_url = #{sealReportUrl} where id = #{id}
     </update>
+
+    <select id="getCodeByIds" resultType="java.lang.String">
+        select report_code from test_report_record where id IN
+        <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

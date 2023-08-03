@@ -291,4 +291,6 @@ public interface ReportMapper {
 
     @Select("select report_url from test_report_record  where report_code=#{reportCode}")
     String getUrlByReportCode(@Param("reportCode") String reportCode);
+
+    List<String> getCodeByIds(@Param("list") List<Long> list);
 }

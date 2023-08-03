@@ -1,16 +1,15 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.aspose.cells.SaveFormat;
 import com.aspose.cells.Worksheet;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
-import com.lims.manage.erp.entity.QiYueSuoEntity;
-import com.lims.manage.erp.entity.SampleCirculationRecord;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.SysUserDao;
@@ -284,7 +283,7 @@ public class SampleServiceImpl implements SampleService {
     }
 
     @Override
-    public ServletOutputStream downloadNewSampleTab(Integer sampleId,SampleDetailVo sampleTagInfo, HttpServletResponse response) {
+    public ServletOutputStream downloadNewSampleTab(int type, Integer sampleId,SampleDetailVo sampleTagInfo, HttpServletResponse response) {
         ServletOutputStream outputStream = null;
         List<SampleDetailVo> sampleDetailVoList = new ArrayList<>();
         try {
@@ -353,7 +352,7 @@ public class SampleServiceImpl implements SampleService {
                     worksheet.getCells().get("B4").setValue(sampleDetailVo.getSpecs());
                     worksheet.getCells().get("B5").setValue(sampleDetailVo.getOutwardDescribe());
                     //设置二维码
-                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl()+sampleDetailVo.getId());
+                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl()+sampleDetailVo.getId()+"&type="+type);
                     InputStream stream = bufferedImageToInputStream(bufferedImage);
                     worksheet.getPictures().add(6,4,stream,26,26);
                     //合并sheet
@@ -373,7 +372,7 @@ public class SampleServiceImpl implements SampleService {
                     worksheet.getCells().get("B4").setValue(sampleDetailVoList.get(i).getSpecs());
                     worksheet.getCells().get("B5").setValue(sampleDetailVoList.get(i).getOutwardDescribe());
                     //设置二维码
-                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(sampleDetailVoList.get(i).getId() + "");
+                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(sampleDetailVoList.get(i).getId() + "&type="+type);
                     InputStream stream = bufferedImageToInputStream(bufferedImage);
                     worksheet.getPictures().add(5,3,stream,30,30);
                     //合并sheet
@@ -389,7 +388,7 @@ public class SampleServiceImpl implements SampleService {
     }
 
     @Override
-    public TestSampleEntity sampleInfo(Integer sampleId) {
+    public TestSampleEntity sampleInfo(int type,Integer sampleId) {
         SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
         if (sampleTagInfo != null){
             TestSampleEntity entity = new TestSampleEntity();
@@ -404,12 +403,61 @@ public class SampleServiceImpl implements SampleService {
             entity.setSampleCode(sampleTagInfo.getSampleCode());
             entity.setSampleName(sampleTagInfo.getSampleName());
             entity.setSpecs(sampleTagInfo.getSpecs());
+            entity.setSampleRetentionPeriod(sampleTagInfo.getSampleRetentionPeriod());
             entity.setOutwardDescribe(StringUtils.isEmpty(sampleTagInfo.getOutwardDescribe())?"/":sampleTagInfo.getOutwardDescribe());
             //查询样品流转记录
-            List<SampleCirculationRecord> list = sampleEntityMapper.getRecords(sampleId);
+            List<SampleCirculationRecord> list = sampleEntityMapper.getRecords(sampleId,type);
             //TODO 流转操作人如果客户端没操作，流转详情表无法记录导致流转详情查看，无操作人，这种情况默认取留样人
-
-
+            //流转详情待检、留样取委托发布人，在检取领样人
+            if (org.apache.commons.collections.CollectionUtils.isNotEmpty(list)){
+                //boolean flag = true;
+                for (SampleCirculationRecord bean :list) {
+                    if ("0,3".contains(bean.getStatus())){
+                        String name = sampleEntityMapper.getTaskPublisher(bean.getSampleId());
+                        bean.setOperatorName(name);
+                    }
+                    if ("1".equals(bean.getStatus())){
+                        ReceiveSampleParamVo sampleTaker = sampleEntityMapper.getSampleTaker(bean.getSampleId());
+                        if (sampleTaker != null){
+                            bean.setOperatorName(sampleTaker.getSampler());
+                            bean.setTime(sampleTaker.getSampleReceivingTime());
+                        }
+                        //flag = false;
+                    }
+                }
+//                if (flag){
+//                    ReceiveSampleParamVo sampleTaker = sampleEntityMapper.getSampleTaker(list.get(0).getSampleId());
+//                    SampleCirculationRecord sampleCirculationRecord = new SampleCirculationRecord();
+//                    sampleCirculationRecord.setOperatorName(sampleTaker.getSampler());
+//                    sampleCirculationRecord.setTime(sampleTaker.getSampleReceivingTime());
+//                    sampleCirculationRecord.setStatus("1");
+//                    sampleCirculationRecord.setSampleId(list.get(0).getSampleId());
+//                    list.add(sampleCirculationRecord);
+//                }
+            }
+            //流转记录详情列表结果重新构造,操作内容 待检（流转确认人：） 状态，0待检，1在检，2已检，3留样，4处置
+            for (SampleCirculationRecord record:list) {
+                switch (record.getStatus()){
+                    case "0":
+                        record.setContent("待检"+"（流转确认人："+record.getOperatorName()+"）" );
+                        break;
+                    case "1":
+                        record.setContent("在检"+"（流转确认人："+record.getOperatorName()+"）" );
+                        break;
+                    case "2":
+                        record.setContent("已检"+"（流转确认人："+record.getOperatorName()+"）" );
+                        break;
+                    case "3":
+                        record.setContent("留样"+"（流转确认人："+record.getOperatorName()+"）" );
+                        break;
+                    case "4":
+                        record.setContent("处置"+"（流转确认人："+record.getOperatorName()+"）" );
+                        break;
+                    default:
+                        log.info("未知的样品流转类型:{}",record.getStatus());
+                        break;
+                }
+            }
             entity.setCirculationCecords(list);
             //根据当前用户设置手机端的扫描操作状态
             SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -832,10 +880,6 @@ public class SampleServiceImpl implements SampleService {
             for(SampleOutPutVo item :sampleList){
                 if(!CollectionUtils.isEmpty(item.getSampleCirculationRecords())){
                     for(SampleCirculationRecord sampleCirculationRecord : item.getSampleCirculationRecords()){
-                        if(sampleCirculationRecord.getStatus()!=null && sampleCirculationRecord.getStatus().equals("3")){
-                            // 增加领样信息
-                            item.setSampleHolder(sampleCirculationRecord.getOperatorName());
-                        }
                         if(sampleCirculationRecord.getStatus()!=null && sampleCirculationRecord.getStatus().equals("4")){
                             // 增加处置人
                             item.setHandler(sampleCirculationRecord.getOperatorName());
@@ -856,7 +900,6 @@ public class SampleServiceImpl implements SampleService {
 //    @SneakyThrows
     @Override
     public InputStream sampleRetentionExport(SampleOutPutVo sampleOutPutVo) throws Exception {
-        // 处理逻辑
         List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
         SampleExportUtil sampleExportUtil =new SampleExportUtil();
         return sampleExportUtil.sampleRetentionExport(list);
@@ -888,7 +931,6 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     public InputStream sampleOutPutExport(SampleOutPutVo sampleOutPutVo) throws Exception {
-        // 处理逻辑
         List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
         SampleExportUtil sampleExportUtil =new SampleExportUtil();
         return sampleExportUtil.sampleOutPutExport(list);
@@ -904,4 +946,69 @@ public class SampleServiceImpl implements SampleService {
         return true;
     }
 
+    /**
+     * 样品留样列表-分页
+     *
+     * @param sampleOutPutVo
+     * @return
+     */
+    @Override
+    public PageInfo sampleRetentionPageInfoList(SampleOutPutVo sampleOutPutVo) {
+        if (sampleOutPutVo.getPageNum() == 1) {
+            sampleOutPutVo.setPageNum(0);
+        } else {
+            Integer pageNum = (sampleOutPutVo.getPageNum() - 1) * sampleOutPutVo.getPageSize();
+            Integer pageSize = sampleOutPutVo.getPageSize();
+            if (pageNum == null || pageSize == null) {
+                pageNum = 0;
+                pageNum = 10;
+            }
+            sampleOutPutVo.setPageNum(pageNum);
+            sampleOutPutVo.setPageSize(pageSize);
+        }
+        Integer count = sampleEntityMapper.selectCount(sampleOutPutVo);
+        if (count == null || count ==0) {
+            PageInfo pageInfo = new PageInfo();
+            pageInfo.setPages(0);
+            pageInfo.setList(new ArrayList());
+            pageInfo.setTotal(0);
+            return pageInfo;
+        } else {
+            List<SampleOutPutVo> list = new ArrayList<>(count);
+            list = sampleEntityMapper.selectPageVo(sampleOutPutVo);
+            PageInfo pageInfo = new PageInfo();
+            if (list.size() == 0) {
+                // 通过分页数据 = null
+                sampleOutPutVo.setPageNum(0);
+                sampleOutPutVo.setPageSize(10);
+                list = sampleEntityMapper.selectPageVo(sampleOutPutVo);
+            }
+            if ((count % sampleOutPutVo.getPageSize()) > 0) {
+                pageInfo.setPages(count / sampleOutPutVo.getPageSize() + 1);
+            } else {
+                pageInfo.setPages(count / sampleOutPutVo.getPageSize());
+            }
+            if(CollectionUtil.isNotEmpty(list)){
+                // 获取样品流转记录信息单
+                List<SampleCirculationRecord> sampleOutPutVoList = sampleEntityMapper.selectSampleCirculationRecordList(list);
+                if(CollectionUtil.isNotEmpty(sampleOutPutVoList)){
+                    for(SampleOutPutVo item : list){
+                        for(SampleCirculationRecord sampleCirculationRecord : sampleOutPutVoList){
+                            if(item.getSampleId().equals(sampleCirculationRecord.getSampleId())){
+                                if(sampleCirculationRecord.getStatus()!=null && sampleCirculationRecord.getStatus().equals("4")){
+                                    // 增加处置人
+                                    item.setHandler(sampleCirculationRecord.getOperatorName());
+                                    // 增加处置时间
+                                    item.setSellOffDate(sampleCirculationRecord.getTime());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            pageInfo.setList(list);
+            pageInfo.setTotal(count);
+            return pageInfo;
+        }
+    }
 }

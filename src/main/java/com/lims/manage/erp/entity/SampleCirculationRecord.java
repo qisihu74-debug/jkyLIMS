@@ -26,4 +26,8 @@ public class SampleCirculationRecord {
     private Date time;
     private Long operatorId;
     private String operatorName;
+    /**
+     * 操作内容 待检（流转确认人：）
+     */
+    private String content;
 }

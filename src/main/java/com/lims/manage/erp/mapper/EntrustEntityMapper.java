@@ -726,4 +726,6 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Select("select check_item_name from test_entrusted_sample_checkitem_rel where entrust_id=#{entrustId} and sample_id=#{sampleId} and state=3")
     List<String> getAllItems(@Param("entrustId") Long entrustId, @Param("sampleId") Integer sampleId);
+
+    List<TaskCodeVo> getTaskAndTeamByIds(@Param("list") List<Long> list);
 }

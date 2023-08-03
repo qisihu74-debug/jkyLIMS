@@ -538,21 +538,27 @@ public class TaskController {
         String str1 = "taskOrder11.docx";
         // 2023年3月13 零点后
         String str2 = "taskOrder20.docx";
+        // 2023年07月01 使用
+        String str3 = "taskOrder30.docx";
         // 获取任务单下单时间 进行比较
         TaskTestEntity taskDetails = taskMapper.getTaskOrderTime(taskId);
         if(taskDetails!=null && taskDetails.getOrderTime()!=null){
             Date date = null;
+            Date date2 = null;
             //实现将字符串转成⽇期类型
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
                 date = dateFormat.parse("2023-03-12 23:59:59");
+                date2 = dateFormat.parse("2023-06-30 23:59:59");
             } catch (ParseException e) {
                 e.printStackTrace();
             }
             // 截止至 2023-03-12 23:59:59 后 任务单附件为  String str2 = "taskOrder20.docx"
-             if(date.getTime() < taskDetails.getOrderTime().getTime()){
-                 fileName = str2;
-             }
+            if((date.getTime() < taskDetails.getOrderTime().getTime()) && (date2.getTime() > taskDetails.getOrderTime().getTime())){
+                fileName = str2;
+            }else if(date2.getTime() < taskDetails.getOrderTime().getTime()){
+                fileName = str3;
+            }
              else {
                  fileName = str1;
              }
