@@ -4978,4 +4978,244 @@ public class EntrustServiceImpl implements EntrustService {
         taskMapper.batchUpdateItemState(entrustId);
         return true;
     }
+
+    @Override
+    public XWPFDocument downloadEntrustNew(EntrustAddVo detail, InputStream object) {
+        XWPFDocument doc = null;
+        try {
+            doc = new XWPFDocument(object);
+            List<XWPFTable> tables = doc.getTables();
+            //设置样品信息
+            List<SampleEntity> sampleEntityList = Lists.newArrayList();
+            List<SampleEntity> samples = detail.getSamples();
+            List<TestSampleEntity> nodeSample = detail.getNodeSample();
+            if (nodeSample != null && nodeSample.size() > 0) {
+                for (TestSampleEntity node : nodeSample) {
+                    SampleEntity entity = new SampleEntity(node);
+                    sampleEntityList.add(entity);
+                }
+                samples.addAll(sampleEntityList);
+            }
+            for (int j = 0; j < tables.size(); j++) {
+                List<XWPFTableRow> rows;
+                //获取表格对应的行
+                rows = tables.get(j).getRows();
+                if (j == 0) {
+                    //设置模板数据
+                    rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
+                    rows.get(4).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getWitnessUint()) ? "——" : detail.getWitnessUint());//见证单位
+                    rows.get(5).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getProjectName()) ? "——" : detail.getProjectName());//工程名称
+                    rows.get(6).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getProjectPart()) ? "——" : detail.getProjectPart());//工程部位
+                    //新增的行数
+                    int sampleIndex = 8;
+                    int index = 1;
+                    int start = 14;
+                    if (samples.size() > 6) {
+                        AsposeUtil.addRows(tables.get(0), sampleIndex, samples.size() - 6);
+                        start = 14 + (samples.size() - 6);
+                    }
+                    for (int i = 0; i < samples.size(); i++) {
+                        rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getAliasName());//样品名称
+                        rows.get(sampleIndex).getTableCells().get(index + 1).setText(StringUtils.isEmpty(StringUtils.isEmpty(detail.getProjectPart()) ? "——" : detail.getProjectPart()) ? "——" : samples.get(i).getSpecs());//规格等级
+                        rows.get(sampleIndex).getTableCells().get(index + 2).setText(StringUtils.isEmpty(samples.get(i).getBatchNumber()) ? "——" : samples.get(i).getBatchNumber());//批号/编号
+                        rows.get(sampleIndex).getTableCells().get(index + 3).setText(StringUtils.isEmpty(samples.get(i).getSampleQuantity()) ? "——" : samples.get(i).getSampleQuantity());//样品数量
+                        rows.get(sampleIndex).getTableCells().get(index + 4).setText(StringUtils.isEmpty(samples.get(i).getGeneration()) ? "——" : samples.get(i).getGeneration());//代表批量
+                        rows.get(sampleIndex).getTableCells().get(index + 5).setText(StringUtils.isEmpty(samples.get(i).getManufacturer()) ? "——" : samples.get(i).getManufacturer());//样品产地/生产厂家
+                        rows.get(sampleIndex).getTableCells().get(index + 6).setText(StringUtils.isEmpty(samples.get(i).getSampleRemark()) ? "——" : samples.get(i).getSampleRemark());//样品备注
+                        sampleIndex = sampleIndex + 1;
+                    }
+                    //设置其它信息
+                    String ss = "";
+                    rows.get(start).getTableCells().get(2).setText(detail.getPresentInformation() == null ? "——" : detail.getPresentInformation());//提供资料
+                    start = start + 1;
+                    if (org.apache.commons.lang.StringUtils.isEmpty(detail.getSamplingMethod())) {
+                        rows.get(start).getTableCells().get(2).setText("——");//取样方式
+                    } else {
+                        String desc = "";
+                        if ("送样".equals(detail.getSamplingMethod())) {
+                            desc = "☑送样        □抽样        □现场检验      □其它";
+                        } else if ("抽样".equals(detail.getSamplingMethod())) {
+                            desc = "□送样        ☑抽样        □现场检验      □其它";
+                        } else if ("现场检验".equals(detail.getSamplingMethod())) {
+                            desc = "□送样        □抽样        ☑现场检验      □其它";
+                        } else {
+                            desc = "□送样        □抽样        □现场检验      ☑其它";
+                        }
+                        rows.get(start).getTableCells().get(2).setText(desc);//取样方式
+                    }
+                    start = start + 1;
+                    if (StringUtils.isEmpty(detail.getCheckPurpose())) {
+                        rows.get(start).getTableCells().get(4).setText("——");//检验目的
+                    } else {
+                        String desc = "";
+                        if ("委托检测".equals(detail.getCheckPurpose())) {
+                            desc = desc = "☑委托检验    □执法检验    □新产品鉴定    □见证取样检验      □其它";
+                        } else if ("执法检验".equals(detail.getCheckPurpose())) {
+                            desc = desc = "□委托检验    ☑执法检验    □新产品鉴定    □见证取样检验      □其它";
+                        } else if ("新产品鉴定".equals(detail.getCheckPurpose())) {
+                            desc = desc = "□委托检验    □执法检验    ☑新产品鉴定    □见证取样检验      □其它";
+                        } else if ("见证取样检测".equals(detail.getCheckPurpose())) {
+                            desc = desc = "□委托检验    □执法检验    □新产品鉴定    ☑见证取样检验      □其它";
+                        } else {
+                            desc = "□委托检验    □执法检验    □新产品鉴定    □见证取样检验      ☑其它";
+                        }
+                        rows.get(start).getTableCells().get(2).setText(desc);//检验目的
+                    }
+                    start = start + 1;
+                    //检测项目
+                    StringBuilder stringBuilder1 = new StringBuilder();
+                    if (!CollectionUtils.isEmpty(samples)) {
+                        for (SampleEntity entity : samples) {
+                            List<JudgmentBasisVo> sampleCheckItem = entity.getJudgmentBasisVos();
+                            if (!CollectionUtils.isEmpty(sampleCheckItem)) {
+                                for (JudgmentBasisVo itemEntity : sampleCheckItem) {
+                                    //价钱为null的不展示
+                                    if (itemEntity.getCheckPrice() != null) {
+                                        String name = itemEntity.getCheckItemName();
+                                        stringBuilder1.append(name);
+                                        stringBuilder1.append("，");
+                                    }
+                                }
+                            }
+                        }
+                        if (stringBuilder1.length() > 1) {
+                            String substring = stringBuilder1.toString().substring(0, stringBuilder1.length() - 1);
+                            rows.get(start).getTableCells().get(2).setText(substring);//检验项目
+                        }
+                        start = start + 1;
+                        //检测依据
+                        StringBuilder stringBuilder11 = new StringBuilder();
+                        if (!CollectionUtils.isEmpty(samples)) {
+                            for (SampleEntity entity : samples) {
+                                List<JudgmentBasisVo> sampleCheckItem = entity.getJudgmentBasisVos();
+                                if (!CollectionUtils.isEmpty(sampleCheckItem)) {
+                                    for (JudgmentBasisVo itemEntity : sampleCheckItem) {
+                                        //价钱为null的不展示
+                                        if (itemEntity.getCheckPrice() != null) {
+                                            if (!StringUtils.isEmpty(itemEntity.getStandardName())) {
+                                                stringBuilder11.append("（");
+                                                String s = itemEntity.getStandardName();
+                                                String aa = s.split("《")[0];
+                                                stringBuilder11.append(aa);
+                                                stringBuilder11.append("）");
+                                            }
+                                            stringBuilder11.append("，");
+                                        }
+                                    }
+                                }
+                            }
+                            if (stringBuilder11.length() > 1) {
+                                String substring = stringBuilder11.toString().substring(0, stringBuilder11.length() - 1);
+                                String[] split = substring.split("，");
+                                Set<String> set = new HashSet<>();
+                                for (String s : split) {
+                                    set.add(s);
+                                }
+                                String substring1 = set.toString().substring(1, set.toString().length() - 1);
+                                rows.get(start).getTableCells().get(2).setText(substring1);//检测依据
+                            }
+                            List<String> list = entityMapper.getSampleStandard(detail.getId());
+                            StringBuilder stringBuilder = new StringBuilder();
+                            if (!CollectionUtils.isEmpty(list)) {
+                                for (String s : list) {
+                                    stringBuilder.append(s);
+                                    stringBuilder.append("，");
+                                }
+                                String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
+                                rows.get(start).getTableCells().get(4).setText(substring == null ? "——" : substring);//产品标准 TODO 去重
+                            }
+                            start = start + 1;
+                        }
+                        //取报告方式
+                        rows.get(start).getTableCells().get(6).setText(detail.getReportReceivingUnit() == null ? "——" : detail.getReportReceivingUnit());//收报告单位
+                        rows.get(start).getTableCells().get(8).setText(detail.getAddressee() == null ? "——" : detail.getAddressee());//联系人
+                        start = start+1;
+                        rows.get(start).getTableCells().get(2).setText(detail.getReportCount().toString());//报告分数
+                        if (StringUtils.isEmpty(detail.getReportType())){
+                            rows.get(start).getTableCells().get(3).setText("——");//取报告方式
+                            rows.get(start).getTableCells().get(4).setText("——");//取报告方式
+                        }else {
+                            if ("自取".equals(detail.getReportType())){
+                                rows.get(start).getTableCells().get(3).setText("√");//取报告方式
+                            }
+                            if ("邮寄".equals(detail.getReportType())){
+                                rows.get(start).getTableCells().get(4).setText("√");//取报告方式
+                            }
+                        }
+                        rows.get(start).getTableCells().get(6).setText(detail.getAddress() == null ? "——" : detail.getAddress());//联系地址
+                        rows.get(start).getTableCells().get(8).setText(detail.getMobile() == null ? "——" : detail.getMobile());//联系方式
+                        start = start +1;
+                        //委托单立人签字、见证人、日期
+                        rows.get(start).getTableCells().get(1).setText(detail.getEntrustPeople() == null ? "——" : "委托代理人签字："+detail.getEntrustPeople());//委托人
+                        rows.get(start).getTableCells().get(2).setText(detail.getWitnessPerson() == null ? "——" : "见证人: "+detail.getWitnessPerson());//见证人
+                        Date acceptanceDate = detail.getAcceptanceDate();
+                        if (acceptanceDate == null){
+                            rows.get(start).getTableCells().get(3).setText("——");//委托日期
+                        }else {
+                            String s = DateUtil.formatDate(acceptanceDate);
+                            String[] split = s.split("-");
+                            rows.get(start).getTableCells().get(3).setText(split[0]+"年"+split[1]+"月"+split[2]+"日");//委托日期
+                        }
+                        start = start +1;
+                        StringBuilder stringBuilder2 = new StringBuilder();
+                        StringBuilder sampels = new StringBuilder();
+                        for (SampleEntity sampleEntity : samples) {
+                            sampels.append(sampleEntity.getSampleCode());
+                            stringBuilder2.append(sampleEntity.getAliasName());
+                            stringBuilder2.append("（");
+                            if (org.apache.commons.lang3.StringUtils.isNotEmpty(sampleEntity.getSpecs())) {
+                                stringBuilder2.append(sampleEntity.getSpecs());
+                            } else {
+                                stringBuilder2.append("——");
+                            }
+                            stringBuilder2.append("、");
+                            String s = sampleEntity.getOutwardDescribe();
+                            if (org.apache.commons.lang3.StringUtils.isNotEmpty(s)) {
+                                stringBuilder2.append(s);
+                            } else {
+                                stringBuilder2.append("——");
+                            }
+                            stringBuilder2.append("）；");
+                            sampels.append(",");
+                        }
+                        if (stringBuilder2.toString().length() >= 1) {
+                            rows.get(start).getTableCells().get(2).setText(stringBuilder2.toString().substring(0, stringBuilder2.length() - 1));//样品状态
+                        }
+                        if ("1".equals(detail.getIsSave())){
+                            rows.get(start).getTableCells().get(4).setText("是☑      "+
+                                    "否□");//样品保留
+                        }else {
+                            rows.get(start).getTableCells().get(4).setText("是□      " +
+                                    "否☑");//样品保留
+                        }
+                        //样品编号
+                        rows.get(start).getTableCells().get(6).setText(sampels.toString().substring(0, sampels.length() - 1));
+                        start = start + 1;
+                        rows.get(start).getTableCells().get(2).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getActualPrice()) ? "——" : detail.getActualPrice());//检验收费
+                        rows.get(start).getTableCells().get(4).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentRecordShow()) ? "——" : detail.getPaymentRecordShow());//本次交费
+                        start = start +1;
+                        String date = DateUtil.formatDate(detail.getRequestDate());
+                        String[] split = date.split("-");
+                        String s = split[0]+"年"+split[1]+"月"+split[2]+"日";
+                        rows.get(start).getTableCells().get(2).setText(s);//完成期限
+
+                        String formatDate = DateUtil.formatDate(detail.getAcceptanceDate());
+                        String[] strings = formatDate.split("-");
+                        String s1 = strings[0]+"年"+strings[1]+"月"+strings[2]+"日";
+                        if (StringUtils.isEmpty(detail.getBusinessAcceptor())){
+                            rows.get(start).getTableCells().get(3).setText("业务受理人签字：——         "+s1);//业务受理人
+                        }else {
+                            rows.get(start).getTableCells().get(3).setText("业务受理人签字："+detail.getBusinessAcceptor()+"    "+s1);//业务受理人
+                        }
+                        //备注
+                        start = start+2;
+                        rows.get(start).getTableCells().get(1).setText(StringUtils.isEmpty(detail.getRemark())?"——":detail.getRemark());//备注
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("设置委托单信息到模板异常:{}", e);
+        }
+        return doc;
+    }
 }

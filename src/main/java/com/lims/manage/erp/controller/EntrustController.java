@@ -469,12 +469,21 @@ public class EntrustController {
         if (Integer.parseInt(dayString)<20230313){
             fileName = "BD20210021-old.docx";
         }
+        //2023七月1号之后用新的委托模板
+        if (Integer.parseInt(dayString)>= 20230701){
+            fileName = "033检验委托单.docx";
+        }
+        XWPFDocument document = null;
         try {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(strings[0], fileName);
             //填充数据
             log.debug("====aaa:{}",JSON.toJSONString(detail));
-            XWPFDocument document = entrustService.downloadEntrust(detail, object);
+            if ("033检验委托单.docx".equals(fileName)){
+                document = entrustService.downloadEntrustNew(detail, object);
+            }else {
+                document = entrustService.downloadEntrust(detail, object);
+            }
             response.reset();
             response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
             response.setContentType("application/x-msdownload");
@@ -510,12 +519,21 @@ public class EntrustController {
         if (Integer.parseInt(dayString)<20230313){
             fileName = "BD20210021-old.docx";
         }
+        //2023七月1号之后用新的委托模板
+        if (Integer.parseInt(dayString)>= 20230701){
+            fileName = "033检验委托单.docx";
+        }
+        XWPFDocument document = null;
         try {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(strings[0], fileName);
             //填充数据
             log.debug("====aaa:{}",JSON.toJSONString(detail));
-            XWPFDocument document = entrustService.downloadEntrust(detail, object);
+            if ("033检验委托单.docx".equals(fileName)){
+                document = entrustService.downloadEntrustNew(detail, object);
+            }else {
+                document = entrustService.downloadEntrust(detail, object);
+            }
             //相应pdf
             ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(document);
             InputStream inputStream = FileAndFolderUtil.parseOut(b1);

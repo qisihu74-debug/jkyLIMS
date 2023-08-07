@@ -382,4 +382,5 @@ public interface EntrustService {
      */
     Boolean entrustRevocation(List<TaskTestEntity> list,Long entrustId);
 
+    XWPFDocument downloadEntrustNew(EntrustAddVo detail, InputStream object);
 }
