@@ -900,7 +900,10 @@ public class SampleServiceImpl implements SampleService {
 //    @SneakyThrows
     @Override
     public InputStream sampleRetentionExport(SampleOutPutVo sampleOutPutVo) throws Exception {
-        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
+        Integer count = sampleEntityMapper.selectCount3(sampleOutPutVo);
+        sampleOutPutVo.setPageNum(0);
+        sampleOutPutVo.setPageSize(count);
+        List<SampleOutPutVo> list = sampleEntityMapper.selectPageVo3(sampleOutPutVo);
         SampleExportUtil sampleExportUtil =new SampleExportUtil();
         return sampleExportUtil.sampleRetentionExport(list);
     }
@@ -931,7 +934,28 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     public InputStream sampleOutPutExport(SampleOutPutVo sampleOutPutVo) throws Exception {
-        List<SampleOutPutVo> list = getSampleOutPutVos(sampleOutPutVo);
+        Integer count = sampleEntityMapper.selectCount(sampleOutPutVo);
+        sampleOutPutVo.setPageNum(0);
+        sampleOutPutVo.setPageSize(count);
+        List<SampleOutPutVo> list = sampleEntityMapper.selectPageVo(sampleOutPutVo);
+        if(CollectionUtil.isNotEmpty(list)){
+            // 获取样品流转记录信息单
+            List<SampleCirculationRecord> sampleOutPutVoList = sampleEntityMapper.selectSampleCirculationRecordList(list);
+            if(CollectionUtil.isNotEmpty(sampleOutPutVoList)){
+                for(SampleOutPutVo item : list){
+                    for(SampleCirculationRecord sampleCirculationRecord : sampleOutPutVoList){
+                        if(item.getSampleId().equals(sampleCirculationRecord.getSampleId())){
+                            if(sampleCirculationRecord.getStatus()!=null && sampleCirculationRecord.getStatus().equals("4")){
+                                // 增加处置人
+                                item.setHandler(sampleCirculationRecord.getOperatorName());
+                                // 增加处置时间
+                                item.setSellOffDate(sampleCirculationRecord.getTime());
+                            }
+                        }
+                    }
+                }
+            }
+        }
         SampleExportUtil sampleExportUtil =new SampleExportUtil();
         return sampleExportUtil.sampleOutPutExport(list);
     }
@@ -947,7 +971,7 @@ public class SampleServiceImpl implements SampleService {
     }
 
     /**
-     * 样品留样列表-分页
+     * 样品出入库列表-分页
      *
      * @param sampleOutPutVo
      * @return
@@ -1005,6 +1029,53 @@ public class SampleServiceImpl implements SampleService {
                         }
                     }
                 }
+            }
+            pageInfo.setList(list);
+            pageInfo.setTotal(count);
+            return pageInfo;
+        }
+    }
+    /**
+     * 样品留样列表-分页
+     *
+     * @param sampleOutPutVo
+     * @return
+     */
+    @Override
+    public PageInfo sampleReservedSamplePageInfoList(SampleOutPutVo sampleOutPutVo) {
+        if (sampleOutPutVo.getPageNum() == 1) {
+            sampleOutPutVo.setPageNum(0);
+        } else {
+            Integer pageNum = (sampleOutPutVo.getPageNum() - 1) * sampleOutPutVo.getPageSize();
+            Integer pageSize = sampleOutPutVo.getPageSize();
+            if (pageNum == null || pageSize == null) {
+                pageNum = 0;
+                pageNum = 10;
+            }
+            sampleOutPutVo.setPageNum(pageNum);
+            sampleOutPutVo.setPageSize(pageSize);
+        }
+        Integer count = sampleEntityMapper.selectCount3(sampleOutPutVo);
+        if (count == null || count ==0) {
+            PageInfo pageInfo = new PageInfo();
+            pageInfo.setPages(0);
+            pageInfo.setList(new ArrayList());
+            pageInfo.setTotal(0);
+            return pageInfo;
+        } else {
+            List<SampleOutPutVo> list = new ArrayList<>(count);
+            list = sampleEntityMapper.selectPageVo3(sampleOutPutVo);
+            PageInfo pageInfo = new PageInfo();
+            if (list.size() == 0) {
+                // 通过分页数据 = null
+                sampleOutPutVo.setPageNum(0);
+                sampleOutPutVo.setPageSize(10);
+                list = sampleEntityMapper.selectPageVo3(sampleOutPutVo);
+            }
+            if ((count % sampleOutPutVo.getPageSize()) > 0) {
+                pageInfo.setPages(count / sampleOutPutVo.getPageSize() + 1);
+            } else {
+                pageInfo.setPages(count / sampleOutPutVo.getPageSize());
             }
             pageInfo.setList(list);
             pageInfo.setTotal(count);

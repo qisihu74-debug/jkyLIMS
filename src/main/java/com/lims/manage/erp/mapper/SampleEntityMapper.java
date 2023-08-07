@@ -379,4 +379,18 @@ public interface SampleEntityMapper {
     Integer selectCount(SampleOutPutVo sampleOutPutVo);
 
     List<SampleCirculationRecord> selectSampleCirculationRecordList(@Param("list")List<SampleOutPutVo> list);
+
+    /**
+     * 查询视图的分页展示-留样列表
+     * @param sampleOutPutVo
+     * @return
+     */
+    List<SampleOutPutVo> selectPageVo3(SampleOutPutVo sampleOutPutVo);
+
+    /**
+     * 查询条数-留样列表
+     * @param sampleOutPutVo
+     * @return
+     */
+    Integer selectCount3(SampleOutPutVo sampleOutPutVo);
 }
