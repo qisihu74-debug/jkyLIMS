@@ -571,7 +571,12 @@ public class TaskController {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
             TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId, null);
-            XWPFDocument doc = taskService.downloadEntrust(taskDetailInfo, object,status);
+            XWPFDocument doc = null;
+            if(status == true){
+               doc = taskService.downloadEntrustNew(taskDetailInfo, object);
+            }else {
+                doc = taskService.downloadEntrust(taskDetailInfo, object,false);
+            }
             //相应pdf
             ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
             InputStream inputStream = FileAndFolderUtil.parseOut(b1);

@@ -34,7 +34,12 @@ import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTc;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTcPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -5011,8 +5016,19 @@ public class EntrustServiceImpl implements EntrustService {
                     int index = 1;
                     int start = 14;
                     if (samples.size() > 6) {
-                        AsposeUtil.addRows(tables.get(0), sampleIndex, samples.size() - 6);
+                        AsposeUtil.addRowsIndex(tables.get(0), sampleIndex, samples.size() - 6,10);
                         start = 14 + (samples.size() - 6);
+                        for (int i = 1; i < rows.size()-samples.size() - 6; i++) {
+                            List<XWPFTableCell> cells = rows.get(i).getTableCells();
+                            for (int j1 = 0; j1 < cells.size(); j1++) {
+                                XWPFTableCell cell = cells.get(j1);
+                                // 设置水平居中,需要ooxml-schemas包支持
+                                CTTc cttc = cell.getCTTc();
+                                CTTcPr ctPr = cttc.addNewTcPr();
+                                ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
+                                cttc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
+                            }
+                        }
                     }
                     for (int i = 0; i < samples.size(); i++) {
                         rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getAliasName());//样品名称

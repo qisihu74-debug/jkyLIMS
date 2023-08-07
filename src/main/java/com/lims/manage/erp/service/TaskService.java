@@ -248,4 +248,9 @@ public interface TaskService {
      */
     Boolean getVerifyReportState(Long taskId);
 
+    /**
+     * 填充数据
+     */
+    XWPFDocument downloadEntrustNew(TaskDetailInfoVo taskDetailInfoVo, InputStream object) throws IOException;
+
 }

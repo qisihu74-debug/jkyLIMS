@@ -477,6 +477,68 @@ public class AsposeUtil {
         return in;
     }
 
+    /**
+     * des:表指定index添加行(表，要复制样式的行，添加行数)
+     * @param table
+     * @param source
+     * @param rows
+     * @param index
+     */
+    public static void addRowsIndex(XWPFTable table, int source, int rows,int index){
+        try{
+            //循环添加行和和单元格
+            for(int i=1;i<=rows;i++) {
+                //获取要复制样式的行
+                XWPFTableRow sourceRow = table.getRow(source);
+                //添加新行
+                XWPFTableRow targetRow = table.insertNewTableRow(index++);
+                //复制行的样式给新行
+                targetRow.getCtRow().setTrPr(sourceRow.getCtRow().getTrPr());
+                //获取要复制样式的行的单元格
+                List<XWPFTableCell> sourceCells = sourceRow.getTableCells();
+                //循环复制单元格
+                for (XWPFTableCell sourceCell : sourceCells) {
+                    //添加新列
+                    XWPFTableCell newCell = targetRow.addNewTableCell();
+                    //复制单元格的样式给新单元格
+                    newCell.getCTTc().setTcPr(sourceCell.getCTTc().getTcPr());
+                    //设置单元格居中
+                    CTTc ctTc = newCell.getCTTc();
+                    CTTcPr ctTcPr = ctTc.addNewTcPr();
+                    ctTcPr.addNewVAlign().setVal(STVerticalJc.CENTER);
+                    ctTc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
+                    //得到复制单元格的段落
+                    List<XWPFParagraph> sourceParagraphs = sourceCell.getParagraphs();
+                    if (org.springframework.util.StringUtils.isEmpty(sourceCell.getText())) {
+                        continue;
+                    }
+                    //拿到第一段
+                    XWPFParagraph sourceParagraph = sourceParagraphs.get(0);
+                    //得到新单元格的段落
+                    List<XWPFParagraph> targetParagraphs = newCell.getParagraphs();
+                    //判断新单元格是否为空
+                    if (org.springframework.util.StringUtils.isEmpty(newCell.getText())) {
+                        //添加新的段落
+                        XWPFParagraph ph = newCell.addParagraph();
+                        //复制段落样式给新段落
+                        ph.getCTP().setPPr(sourceParagraph.getCTP().getPPr());
+                        //得到文本对象
+                        XWPFRun run = ph.getRuns().isEmpty() ? ph.createRun() : ph.getRuns().get(0);
+                        //复制文本样式
+                        run.setFontFamily(sourceParagraph.getRuns().get(0).getFontFamily());
+                    } else {
+                        XWPFParagraph ph = targetParagraphs.get(0);
+                        ph.getCTP().setPPr(sourceParagraph.getCTP().getPPr());
+                        XWPFRun run = ph.getRuns().isEmpty() ? ph.createRun() : ph.getRuns().get(0);
+                        run.setFontFamily(sourceParagraph.getRuns().get(0).getFontFamily());
+                    }
+                }
+            }
+        }catch (Exception e){
+            logger.error("word表格新增行失败:{}",e);
+        }
+    }
+
     public static void main(String[] args) {
         getLicense();
     }
