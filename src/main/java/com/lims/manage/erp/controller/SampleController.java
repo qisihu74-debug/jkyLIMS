@@ -663,8 +663,7 @@ public class SampleController {
                 org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getPageSize())){
             return ResultUtil.error("缺少必填参数！！！");
         }
-        System.out.print("请求参数 == sampleOutPutVo ="+ sampleOutPutVo);
-        return ResultUtil.success(sampleService.sampleRetentionPageInfoList(sampleOutPutVo));
+        return ResultUtil.success(sampleService.sampleReservedSamplePageInfoList(sampleOutPutVo));
     }
 
     /**
@@ -675,12 +674,11 @@ public class SampleController {
     @PostMapping("/sampleRetentionExport")
     public void sampleRetentionExport(@RequestBody SampleOutPutVo sampleOutPutVo, HttpServletResponse response ) throws Exception {
         BufferedOutputStream bos = null;
-        String fileName = "样品出入库登记表";
-        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        String fileName = "样品留样";
+        String file = fileName+".xls";
+        file = URLEncoder.encode(file, "UTF-8");
         response.setContentType("application/vnd.ms-excel");
-        response.setHeader("Content-Disposition", "attachment; filename="
-//                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
-                + fileName + ".xls");
+        response.setHeader("Content-Disposition", "attachment;fileName=" + file);
         InputStream inputStream = sampleService.sampleRetentionExport(sampleOutPutVo);
         ServletOutputStream outputStream = response.getOutputStream();
         BufferedInputStream bis = new BufferedInputStream(inputStream);
@@ -744,11 +742,12 @@ public class SampleController {
     public void sampleOutPutExport(@RequestBody SampleOutPutVo sampleOutPutVo, HttpServletResponse response ) throws Exception {
         BufferedOutputStream bos = null;
         String fileName = "样品出入库登记表";
-        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+//        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
-        response.setHeader("Content-Disposition", "attachment; filename="
-//                + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
-                + fileName + ".xls");
+        String file = fileName+".xls";
+        file = URLEncoder.encode(file, "UTF-8");
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment;fileName=" + file);
         InputStream inputStream = sampleService.sampleOutPutExport(sampleOutPutVo);
         ServletOutputStream outputStream = response.getOutputStream();
         BufferedInputStream bis = new BufferedInputStream(inputStream);

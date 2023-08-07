@@ -138,9 +138,16 @@ public interface SampleService {
     Boolean sampleOutPutUpdate(SampleOutPutVo sampleOutPutVo);
 
     /**
-     * 样品留样列表-分页
+     * 样品出入库列表-分页
      * @param sampleOutPutVo
      * @return
      */
     PageInfo sampleRetentionPageInfoList(SampleOutPutVo sampleOutPutVo);
+
+    /**
+     * 样品留样列表-分页
+     * @param sampleOutPutVo
+     * @return
+     */
+    PageInfo sampleReservedSamplePageInfoList(SampleOutPutVo sampleOutPutVo);
 }
