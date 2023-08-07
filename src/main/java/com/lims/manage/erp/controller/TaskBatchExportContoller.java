@@ -77,7 +77,7 @@ public class TaskBatchExportContoller {
                 MinioClient client = MinIoUtil.minioClient;
                 InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
                 TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(testEntrustedTaskRelVo.getTaskId(),null);
-                XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
+                XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object,false);
                 response.reset();
                 response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
                 response.setContentType("application/x-msdownload");

@@ -508,7 +508,7 @@ public class TaskController {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
             TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId,null);
-            XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object);
+            XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object,false);
             response.reset();
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/x-msdownload");
@@ -539,9 +539,10 @@ public class TaskController {
         // 2023年3月13 零点后
         String str2 = "taskOrder20.docx";
         // 2023年07月01 使用
-        String str3 = "taskOrder30.docx";
+        String str3 = "taskOrder30升级版3.docx";
         // 获取任务单下单时间 进行比较
         TaskTestEntity taskDetails = taskMapper.getTaskOrderTime(taskId);
+        Boolean status = false;
         if(taskDetails!=null && taskDetails.getOrderTime()!=null){
             Date date = null;
             Date date2 = null;
@@ -558,6 +559,7 @@ public class TaskController {
                 fileName = str2;
             }else if(date2.getTime() < taskDetails.getOrderTime().getTime()){
                 fileName = str3;
+                status = true;
             }
              else {
                  fileName = str1;
@@ -569,17 +571,16 @@ public class TaskController {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
             TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId, null);
-            XWPFDocument doc = taskService.downloadEntrust(taskDetailInfo, object);
+            XWPFDocument doc = taskService.downloadEntrust(taskDetailInfo, object,status);
             //相应pdf
             ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
             InputStream inputStream = FileAndFolderUtil.parseOut(b1);
             //TODO 设置签名信息
             /** 设置文件下载名 （任务单号+检测项名）**/
             /** 不同文件的MimeType参考后续链接 **/
-            downloadFileName = taskDetailInfo.getTaskCode();
-//            response.setContentType("application/pdf");//下面三行是关键代码，处理乱码问题
-//            response.setCharacterEncoding("utf-8");
-//            response.setHeader("Content-Disposition", "attachment;filename=" + new String(downloadFileName.getBytes("utf-8"), "iso8859-1") + "." + "pdf");
+            String file = taskDetailInfo.getTaskCode()+".pdf";
+            file = URLEncoder.encode(file, "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + file);
             ServletOutputStream outputStream = response.getOutputStream();
             int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
             inputStream.close();
