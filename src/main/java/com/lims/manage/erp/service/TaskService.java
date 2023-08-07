@@ -141,7 +141,7 @@ public interface TaskService {
     /**
      * 填充数据
      */
-    XWPFDocument downloadEntrust(TaskDetailInfoVo taskDetailInfoVo, InputStream object);
+    XWPFDocument downloadEntrust(TaskDetailInfoVo taskDetailInfoVo, InputStream object,Boolean status);
 
     /**
      * 上传原始记录
