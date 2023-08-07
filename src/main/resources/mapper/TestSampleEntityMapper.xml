@@ -701,7 +701,7 @@
         sample_type,
         alias_name
         FROM
-        test_sample where company_id = #{companyId} and sample_type like '%配合比%' and pid is not null
+        test_sample where company_id = #{companyId}
         <if test="sampleCode!=null and sampleCode!=''">
             and sample_code LIKE CONCAT('%',#{sampleCode},'%')
         </if>
