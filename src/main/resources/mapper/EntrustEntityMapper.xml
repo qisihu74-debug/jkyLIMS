@@ -1423,6 +1423,8 @@
     <select id="getEntrustSampleInfoIds_by_view" resultType="com.lims.manage.erp.vo.EntrustSampleInfoVo">
         SELECT
         id As entrustId,
+        sample_id As sampleId,
+        sample_type As sampleType,
         alias_name As aliasName,
         specs As specs,
         outwardDescribe As outwardDescribe
