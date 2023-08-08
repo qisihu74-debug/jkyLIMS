@@ -33,11 +33,16 @@ import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBorder;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblBorders;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTc;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTcPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STBorder;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
 import org.slf4j.Logger;
@@ -56,6 +61,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -5002,33 +5008,31 @@ public class EntrustServiceImpl implements EntrustService {
                 samples.addAll(sampleEntityList);
             }
             for (int j = 0; j < tables.size(); j++) {
+                XWPFTable table = tables.get(j);
+                // 设置表格的字体
+                CTTblBorders borders = table.getCTTbl().getTblPr().addNewTblBorders();
+                CTBorder insideHBorder = borders.addNewInsideH();
+                insideHBorder.setVal(STBorder.SINGLE);
+                insideHBorder.setSz(new BigInteger("10")); // 设置字体大小为10
+                insideHBorder.setColor("auto");
+
                 List<XWPFTableRow> rows;
                 //获取表格对应的行
-                rows = tables.get(j).getRows();
+                rows = table.getRows();
                 if (j == 0) {
                     //设置模板数据
-                    rows.get(3).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
-                    rows.get(4).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getWitnessUint()) ? "——" : detail.getWitnessUint());//见证单位
-                    rows.get(5).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getProjectName()) ? "——" : detail.getProjectName());//工程名称
-                    rows.get(6).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getProjectPart()) ? "——" : detail.getProjectPart());//工程部位
+                    rows.get(3).getTableCells().get(2).setText("№." + detail.getEntrustmentNostr());//委托单号
+                    rows.get(4).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
+                    rows.get(5).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getWitnessUint()) ? "——" : detail.getWitnessUint());//见证单位
+                    rows.get(6).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getProjectName()) ? "——" : detail.getProjectName());//工程名称
+                    rows.get(7).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getProjectPart()) ? "——" : detail.getProjectPart());//工程部位
                     //新增的行数
-                    int sampleIndex = 8;
+                    int sampleIndex = 9;
                     int index = 1;
-                    int start = 14;
+                    int start = 15;
                     if (samples.size() > 6) {
                         AsposeUtil.addRowsIndex(tables.get(0), sampleIndex, samples.size() - 6,10);
-                        start = 14 + (samples.size() - 6);
-                        for (int i = 1; i < rows.size()-samples.size() - 6; i++) {
-                            List<XWPFTableCell> cells = rows.get(i).getTableCells();
-                            for (int j1 = 0; j1 < cells.size(); j1++) {
-                                XWPFTableCell cell = cells.get(j1);
-                                // 设置水平居中,需要ooxml-schemas包支持
-                                CTTc cttc = cell.getCTTc();
-                                CTTcPr ctPr = cttc.addNewTcPr();
-                                ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
-                                cttc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
-                            }
-                        }
+                        start = 15 + (samples.size() - 6);
                     }
                     for (int i = 0; i < samples.size(); i++) {
                         rows.get(sampleIndex).getTableCells().get(index).setText(samples.get(i).getAliasName());//样品名称
@@ -5049,13 +5053,13 @@ public class EntrustServiceImpl implements EntrustService {
                     } else {
                         String desc = "";
                         if ("送样".equals(detail.getSamplingMethod())) {
-                            desc = "☑送样        □抽样        □现场检验      □其它";
+                            desc = "☑送样        ☐抽样        ☐现场检验      ☐其它";
                         } else if ("抽样".equals(detail.getSamplingMethod())) {
-                            desc = "□送样        ☑抽样        □现场检验      □其它";
+                            desc = "☐送样        ☑抽样        ☐现场检验      ☐其它";
                         } else if ("现场检验".equals(detail.getSamplingMethod())) {
-                            desc = "□送样        □抽样        ☑现场检验      □其它";
+                            desc = "☐送样        ☐抽样        ☑现场检验      ☐其它";
                         } else {
-                            desc = "□送样        □抽样        □现场检验      ☑其它";
+                            desc = "☐送样        ☐抽样        ☐现场检验      ☑其它";
                         }
                         rows.get(start).getTableCells().get(2).setText(desc);//取样方式
                     }
@@ -5065,15 +5069,15 @@ public class EntrustServiceImpl implements EntrustService {
                     } else {
                         String desc = "";
                         if ("委托检测".equals(detail.getCheckPurpose())) {
-                            desc = desc = "☑委托检验    □执法检验    □新产品鉴定    □见证取样检验      □其它";
+                            desc = desc = "☑委托检验    ☐执法检验    ☐新产品鉴定    ☐见证取样检验      ☐其它";
                         } else if ("执法检验".equals(detail.getCheckPurpose())) {
-                            desc = desc = "□委托检验    ☑执法检验    □新产品鉴定    □见证取样检验      □其它";
+                            desc = desc = "☐委托检验    ☑执法检验    ☐新产品鉴定    ☐见证取样检验      ☐其它";
                         } else if ("新产品鉴定".equals(detail.getCheckPurpose())) {
-                            desc = desc = "□委托检验    □执法检验    ☑新产品鉴定    □见证取样检验      □其它";
+                            desc = desc = "☐委托检验    ☐执法检验    ☑新产品鉴定    ☐见证取样检验      ☐其它";
                         } else if ("见证取样检测".equals(detail.getCheckPurpose())) {
-                            desc = desc = "□委托检验    □执法检验    □新产品鉴定    ☑见证取样检验      □其它";
+                            desc = desc = "☐委托检验    ☐执法检验    ☐新产品鉴定    ☑见证取样检验      ☐其它";
                         } else {
-                            desc = "□委托检验    □执法检验    □新产品鉴定    □见证取样检验      ☑其它";
+                            desc = "☐委托检验    ☐执法检验    ☐新产品鉴定    ☐见证取样检验      ☑其它";
                         }
                         rows.get(start).getTableCells().get(2).setText(desc);//检验目的
                     }
@@ -5163,15 +5167,16 @@ public class EntrustServiceImpl implements EntrustService {
                         start = start +1;
                         //委托单立人签字、见证人、日期
                         rows.get(start).getTableCells().get(1).setText(detail.getEntrustPeople() == null ? "——" : "委托代理人签字："+detail.getEntrustPeople());//委托人
-                        rows.get(start).getTableCells().get(2).setText(detail.getWitnessPerson() == null ? "——" : "见证人: "+detail.getWitnessPerson());//见证人
+
                         Date acceptanceDate = detail.getAcceptanceDate();
                         if (acceptanceDate == null){
-                            rows.get(start).getTableCells().get(3).setText("——");//委托日期
+                            rows.get(start).getTableCells().get(2).setText(detail.getWitnessPerson() == null ? "——" : "见证人: "+detail.getWitnessPerson());//见证人
                         }else {
                             String s = DateUtil.formatDate(acceptanceDate);
                             String[] split = s.split("-");
-                            rows.get(start).getTableCells().get(3).setText(split[0]+"年"+split[1]+"月"+split[2]+"日");//委托日期
+                            rows.get(start).getTableCells().get(2).setText(detail.getWitnessPerson() == null ? "——" : "见证人: "+detail.getWitnessPerson()+"  "+split[0]+"年"+split[1]+"月"+split[2]+"日");//见证人
                         }
+
                         start = start +1;
                         StringBuilder stringBuilder2 = new StringBuilder();
                         StringBuilder sampels = new StringBuilder();
@@ -5199,9 +5204,9 @@ public class EntrustServiceImpl implements EntrustService {
                         }
                         if ("1".equals(detail.getIsSave())){
                             rows.get(start).getTableCells().get(4).setText("是☑      "+
-                                    "否□");//样品保留
+                                    "否☐");//样品保留
                         }else {
-                            rows.get(start).getTableCells().get(4).setText("是□      " +
+                            rows.get(start).getTableCells().get(4).setText("是☐      " +
                                     "否☑");//样品保留
                         }
                         //样品编号
@@ -5234,4 +5239,5 @@ public class EntrustServiceImpl implements EntrustService {
         }
         return doc;
     }
+
 }
