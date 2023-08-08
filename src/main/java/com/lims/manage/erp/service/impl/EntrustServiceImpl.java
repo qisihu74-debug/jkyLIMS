@@ -5021,7 +5021,7 @@ public class EntrustServiceImpl implements EntrustService {
                 rows = table.getRows();
                 if (j == 0) {
                     //设置模板数据
-                    rows.get(3).getTableCells().get(2).setText("№." + detail.getEntrustmentNostr());//委托单号
+                    rows.get(3).getTableCells().get(2).setText("No：" + detail.getEntrustmentNostr());//委托单号
                     rows.get(4).getTableCells().get(2).setText(detail.getEntrustCompany());//委托单位
                     rows.get(5).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getWitnessUint()) ? "——" : detail.getWitnessUint());//见证单位
                     rows.get(6).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getProjectName()) ? "——" : detail.getProjectName());//工程名称
@@ -5179,9 +5179,7 @@ public class EntrustServiceImpl implements EntrustService {
 
                         start = start +1;
                         StringBuilder stringBuilder2 = new StringBuilder();
-                        StringBuilder sampels = new StringBuilder();
                         for (SampleEntity sampleEntity : samples) {
-                            sampels.append(sampleEntity.getSampleCode());
                             stringBuilder2.append(sampleEntity.getAliasName());
                             stringBuilder2.append("（");
                             if (org.apache.commons.lang3.StringUtils.isNotEmpty(sampleEntity.getSpecs())) {
@@ -5197,7 +5195,6 @@ public class EntrustServiceImpl implements EntrustService {
                                 stringBuilder2.append("——");
                             }
                             stringBuilder2.append("）；");
-                            sampels.append(",");
                         }
                         if (stringBuilder2.toString().length() >= 1) {
                             rows.get(start).getTableCells().get(2).setText(stringBuilder2.toString().substring(0, stringBuilder2.length() - 1));//样品状态
@@ -5209,9 +5206,6 @@ public class EntrustServiceImpl implements EntrustService {
                             rows.get(start).getTableCells().get(4).setText("是☐      " +
                                     "否☑");//样品保留
                         }
-                        //样品编号
-                        rows.get(start).getTableCells().get(6).setText(sampels.toString().substring(0, sampels.length() - 1));
-                        start = start + 1;
                         rows.get(start).getTableCells().get(2).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getActualPrice()) ? "——" : detail.getActualPrice());//检验收费
                         rows.get(start).getTableCells().get(4).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentRecordShow()) ? "——" : detail.getPaymentRecordShow());//本次交费
                         start = start +1;
