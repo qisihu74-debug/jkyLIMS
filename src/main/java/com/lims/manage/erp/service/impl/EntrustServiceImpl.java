@@ -1720,25 +1720,17 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 获取状态
         List<EntrustHistoryEntity> dataList = new ArrayList<>();
+        PageHelper.startPage(entrustHistoryEntity.getPageNum(),entrustHistoryEntity.getPageSize());
         if (!StringUtils.isEmpty(entrustHistoryEntity.getState())&&entrustHistoryEntity.getState() == 1) {
-            PageHelper.clearPage();
-            dataList = entityMapper.selectEntrustHistoryTaskListRelease_of(entrustHistoryEntity);
+            dataList = entityMapper.selectEntrustHistoryTaskListRelease_of_by_view(entrustHistoryEntity);
         }else{
-            PageHelper.clearPage();
-            dataList = entityMapper.selectEntrustTaskHistoryList(entrustHistoryEntity);
+            dataList = entityMapper.selectEntrustTaskHistoryList_by_view(entrustHistoryEntity);
         }
-        PageInfo pageInfo = new PageInfo();
-        //分页
-        List<EntrustHistoryEntity> subList;
-        if (dataList.size() > 10 && dataList.size() / 10 >= entrustHistoryEntity.getPageNum()) {
-            subList = dataList.subList((entrustHistoryEntity.getPageNum() - 1) * entrustHistoryEntity.getPageSize(), entrustHistoryEntity.getPageNum() * entrustHistoryEntity.getPageSize());
-        } else {
-            subList = dataList.subList((entrustHistoryEntity.getPageNum() - 1) * entrustHistoryEntity.getPageSize(), dataList.size());
-        }
+        PageInfo<EntrustHistoryEntity> pageInfo = new PageInfo<>(dataList);
         //设置样品信息
-        if(!CollectionUtils.isEmpty(subList)){
-            List<EntrustSampleInfoVo> entrustSampleInfos = entityMapper.getEntrustSampleInfoIds(subList);
-            for (EntrustHistoryEntity entity : subList) {
+        if(!CollectionUtils.isEmpty(dataList)){
+            List<EntrustSampleInfoVo> entrustSampleInfos = entityMapper.getEntrustSampleInfoIds_by_view(pageInfo.getList());
+            for (EntrustHistoryEntity entity : pageInfo.getList()) {
                 List<EntrustSampleInfoVo> sampleInfoVos = new ArrayList<>();
                 for(EntrustSampleInfoVo entrustSampleInfoVo : entrustSampleInfos){
                     if(entrustSampleInfoVo.getEntrustId().equals(entity.getId())){
@@ -1749,8 +1741,8 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         //设置物流单号信息
-        if(!CollectionUtils.isEmpty(subList)){
-            for (EntrustHistoryEntity entity : subList) {
+        if(!CollectionUtils.isEmpty(pageInfo.getList())){
+            for (EntrustHistoryEntity entity : pageInfo.getList()) {
                 List<String> sampleLogisticsNoArr = Lists.newArrayList();
                 String sampleLogisticsNo = entity.getSampleLogisticsNo();
                 if(!StringUtils.isEmpty(sampleLogisticsNo)){
@@ -1762,8 +1754,6 @@ public class EntrustServiceImpl implements EntrustService {
                 entity.setSampleLogisticsNoArr(sampleLogisticsNoArr);
             }
         }
-        pageInfo.setList(subList);
-        pageInfo.setTotal(dataList.size());
         return pageInfo;
     }
 

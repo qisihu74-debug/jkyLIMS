@@ -205,6 +205,66 @@
         ORDER BY t1.acceptance_date desc,entrustment_no DESC
     </select>
 
+    <select id="selectEntrustTaskHistoryList_by_view" resultMap="selectEntrustTaskHistoryListMap"
+            parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
+        SELECT
+        id,
+        entrustment_no,
+        IFNULL( CONCAT( entrust_category_type, entrustment_no ), entrustment_no ) AS entrustmentNostr,
+        entrust_company,
+        entrust_people,
+        project_name,
+        business_acceptor,
+        acceptance_date,
+        state,
+        auditState,
+        sampleLogisticsNo,
+        IFNULL( taskCode, "——" ) taskCode,
+        IFNULL(teamName,"——") teamName,
+        taskState
+        FROM v_entrust_list
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="entrustmentNo!=null and entrustmentNo!=''">
+                and entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
+            </if>
+            <if test="entrustCompany!=null and entrustCompany!=''">
+                and entrust_company LIKE CONCAT('%',#{entrustCompany},'%')
+            </if>
+            <if test="entrustPeople!=null and entrustPeople!=''">
+                and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and project_name LIKE CONCAT('%',#{projectName},'%')
+            </if>
+            <if test="entrustPeople!=null and entrustPeople!=''">
+                and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+            </if>
+            <if test="businessAcceptor!=null and businessAcceptor!=''">
+                and business_acceptor LIKE CONCAT('%',#{businessAcceptor},'%')
+            </if>
+            <if test="startDate!=null">
+                and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>
+            </if>
+            <if test="endingDate!=null">
+                and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
+            </if>
+            <if test="state!=null">
+                and state = #{state}
+            </if>
+            <if test="taskCodeParam!=null and taskCodeParam!=''">
+                and taskCode LIKE CONCAT('%',#{taskCodeParam},'%')
+            </if>
+            <if test="entrustCategoryType!=null">
+                and entrust_category_type = #{entrustCategoryType}
+            </if>
+            <if test="aliasName!=null and aliasName!=''">
+                and alias_name LIKE CONCAT('%',#{aliasName},'%')
+                )
+            </if>
+        </trim>
+        ORDER BY acceptance_date desc, entrustment_no DESC
+    </select>
+
     <select id="selectEntrustHistoryListRelease_of" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity"
             parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
         SELECT
@@ -318,7 +378,65 @@
         ORDER BY t1.acceptance_date desc, t1.entrustment_no DESC
     </select>
 
-
+    <select id="selectEntrustHistoryTaskListRelease_of_by_view" resultMap="selectEntrustTaskHistoryListMap"
+            parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
+        SELECT
+        id,
+        entrustment_no,
+        IFNULL( CONCAT( entrust_category_type, entrustment_no ), entrustment_no ) AS entrustmentNostr,
+        entrust_company,
+        entrust_people,
+        project_name,
+        business_acceptor,
+        acceptance_date,
+        state,
+        auditState,
+        sampleLogisticsNo,
+        IFNULL( taskCode, "——" ) taskCode,
+        IFNULL(teamName,"——") teamName,
+        taskState
+        FROM v_entrust_list
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="entrustmentNo!=null and entrustmentNo!=''">
+                and entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
+            </if>
+            <if test="entrustCompany!=null and entrustCompany!=''">
+                and entrust_company LIKE CONCAT('%',#{entrustCompany},'%')
+            </if>
+            <if test="entrustPeople!=null and entrustPeople!=''">
+                and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and project_name LIKE CONCAT('%',#{projectName},'%')
+            </if>
+            <if test="entrustPeople!=null and entrustPeople!=''">
+                and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+            </if>
+            <if test="businessAcceptor!=null and businessAcceptor!=''">
+                and business_acceptor LIKE CONCAT('%',#{businessAcceptor},'%')
+            </if>
+            <if test="startDate!=null">
+                and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')  ]]>
+            </if>
+            <if test="endingDate!=null">
+                and <![CDATA[  DATE_FORMAT(acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
+            </if>
+            <if test="state!=null">
+                and state!=0 and state!=144 and state!=200
+            </if>
+            <if test="taskCodeParam!=null">
+                and taskCode LIKE CONCAT('%',#{taskCodeParam},'%')
+            </if>
+            <if test="entrustCategoryType!=null">
+                and entrust_category_type = #{entrustCategoryType}
+            </if>
+            <if test="aliasName!=null and aliasName!=''">
+                and alias_name LIKE CONCAT('%',#{aliasName},'%')
+                )
+            </if>
+        </trim>
+        ORDER BY acceptance_date desc, entrustment_no DESC
+    </select>
 
 <!--    <select id="selectEntrustReleasedList" resultType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity"-->
 <!--            parameterType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity">-->
@@ -1296,6 +1414,22 @@
                 LEFT JOIN test_sample AS t3 ON t3.id = t2.sample_id
         WHERE
             t1.id in
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+
+    </select>
+
+    <select id="getEntrustSampleInfoIds_by_view" resultType="com.lims.manage.erp.vo.EntrustSampleInfoVo">
+        SELECT
+        id As entrustId,
+        alias_name,
+        specs,
+        outwardDescribe
+        FROM
+        v_entrust_list
+        WHERE
+        id in
         <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
             #{item.id}
         </foreach>

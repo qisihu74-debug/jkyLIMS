@@ -728,4 +728,10 @@ public interface EntrustEntityMapper extends BaseMapper {
     List<String> getAllItems(@Param("entrustId") Long entrustId, @Param("sampleId") Integer sampleId);
 
     List<TaskCodeVo> getTaskAndTeamByIds(@Param("list") List<Long> list);
+
+    List<EntrustHistoryEntity> selectEntrustHistoryTaskListRelease_of_by_view(EntrustHistoryEntity entrustHistoryEntity);
+
+    List<EntrustHistoryEntity> selectEntrustTaskHistoryList_by_view(EntrustHistoryEntity entrustHistoryEntity);
+
+    List<EntrustSampleInfoVo> getEntrustSampleInfoIds_by_view(@Param("list") List<EntrustHistoryEntity> dataList);
 }
