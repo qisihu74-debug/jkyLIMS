@@ -5196,6 +5196,7 @@ public class EntrustServiceImpl implements EntrustService {
                             rows.get(start).getTableCells().get(4).setText("是☐      " +
                                     "否☑");//样品保留
                         }
+                        start = start +1;
                         rows.get(start).getTableCells().get(2).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getActualPrice()) ? "——" : detail.getActualPrice());//检验收费
                         rows.get(start).getTableCells().get(4).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentRecordShow()) ? "——" : detail.getPaymentRecordShow());//本次交费
                         start = start +1;
