@@ -1423,9 +1423,9 @@
     <select id="getEntrustSampleInfoIds_by_view" resultType="com.lims.manage.erp.vo.EntrustSampleInfoVo">
         SELECT
         id As entrustId,
-        alias_name,
-        specs,
-        outwardDescribe
+        alias_name As aliasName,
+        specs As specs,
+        outwardDescribe As outwardDescribe
         FROM
         v_entrust_list
         WHERE
