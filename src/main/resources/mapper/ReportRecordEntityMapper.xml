@@ -70,7 +70,7 @@
                                         report_mailing_address, report_complete_time,
                                         task_id,type,entrust_id)
         values (#{id,jdbcType=BIGINT}, #{entrustmentId,jdbcType=BIGINT}, #{reportCode,jdbcType=VARCHAR},
-                #{aliasName,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{requiredCompletionTime,jdbcType=TIMESTAMP},
+                #{sampleName,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{requiredCompletionTime,jdbcType=TIMESTAMP},
                 #{taskCode,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR}, #{number,jdbcType=INTEGER},
                 #{reportType,jdbcType=VARCHAR}, #{verifyerTime,jdbcType=TIMESTAMP}, #{issuerTime,jdbcType=TIMESTAMP},
                 #{sealType,jdbcType=VARCHAR}, #{applyReason,jdbcType=VARCHAR}, #{issuReason,jdbcType=VARCHAR},
