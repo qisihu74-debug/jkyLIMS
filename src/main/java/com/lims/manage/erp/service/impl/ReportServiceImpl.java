@@ -478,8 +478,6 @@ public class ReportServiceImpl implements ReportService {
             //处理每组样品下检测项
             StringBuilder sampleName = new StringBuilder();
             int i = 0;
-            //处理每组样品别名
-            StringBuilder aliasName = new StringBuilder();
             for (ReportSampleDetailVo reportSampleDetailVo : samples) {
                 List<ReportCheckItemDetailVo> result = Lists.newArrayList();
                 List<SampleItemEntity> temp = Lists.newArrayList();
@@ -549,15 +547,12 @@ public class ReportServiceImpl implements ReportService {
                 }
                 reportSampleDetailVo.setCheckItems(result);
                 sampleName.append(reportSampleDetailVo.getSampleName());
-                aliasName.append(reportSampleDetailVo.getAliasName());
                 if (i != samples.size() - 1) {
                     sampleName.append("/");
-                    aliasName.append("/");
                 }
                 i++;
             }
             reportDetail.setSampleName(sampleName.toString());
-            reportDetail.setAliasName(aliasName.toString());
             reportDetail.setSamples(samples);
         }
         return reportDetail;
