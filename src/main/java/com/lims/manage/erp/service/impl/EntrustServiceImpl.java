@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aspose.cells.Cells;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
@@ -69,6 +70,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -1719,25 +1721,37 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         // 获取状态
+        PageInfo<EntrustHistoryEntity> pageInfo = new PageInfo<>();
         List<EntrustHistoryEntity> dataList = new ArrayList<>();
-        PageHelper.startPage(entrustHistoryEntity.getPageNum(),entrustHistoryEntity.getPageSize());
+        PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
         if (!StringUtils.isEmpty(entrustHistoryEntity.getState())&&entrustHistoryEntity.getState() == 1) {
             dataList = entityMapper.selectEntrustHistoryTaskListRelease_of_by_view(entrustHistoryEntity);
         }else{
             dataList = entityMapper.selectEntrustTaskHistoryList_by_view(entrustHistoryEntity);
         }
-        PageInfo<EntrustHistoryEntity> pageInfo = new PageInfo<>(dataList);
+        pageInfo = new PageInfo<>(dataList);
+        if (pageInfo.getTotal() ==1){
+            PageHelper.clearPage();
+            PageHelper.startPage(0, 1);
+            if (!StringUtils.isEmpty(entrustHistoryEntity.getState())&&entrustHistoryEntity.getState() == 1) {
+                dataList = entityMapper.selectEntrustHistoryTaskListRelease_of_by_view(entrustHistoryEntity);
+            }else{
+                dataList = entityMapper.selectEntrustTaskHistoryList_by_view(entrustHistoryEntity);
+            }
+            pageInfo = new PageInfo<>(dataList);
+        }
         //设置样品信息
         if(!CollectionUtils.isEmpty(dataList)){
             List<EntrustSampleInfoVo> entrustSampleInfos = entityMapper.getEntrustSampleInfoIds_by_view(pageInfo.getList());
             for (EntrustHistoryEntity entity : pageInfo.getList()) {
-                List<EntrustSampleInfoVo> sampleInfoVos = new ArrayList<>();
+                HashSet<EntrustSampleInfoVo> sampleInfoVos = new HashSet<>();
                 for(EntrustSampleInfoVo entrustSampleInfoVo : entrustSampleInfos){
                     if(entrustSampleInfoVo.getEntrustId().equals(entity.getId())){
                         sampleInfoVos.add(entrustSampleInfoVo);
                     }
                 }
-                entity.setSampleInfoVos(sampleInfoVos);
+                List<EntrustSampleInfoVo> list = StreamSupport.stream(sampleInfoVos.spliterator(), false).collect(Collectors.toList());
+                entity.setSampleInfoVos(list);
             }
         }
         //设置物流单号信息
@@ -5103,11 +5117,9 @@ public class EntrustServiceImpl implements EntrustService {
                                         //价钱为null的不展示
                                         if (itemEntity.getCheckPrice() != null) {
                                             if (!StringUtils.isEmpty(itemEntity.getStandardName())) {
-                                                stringBuilder11.append("（");
                                                 String s = itemEntity.getStandardName();
                                                 String aa = s.split("《")[0];
                                                 stringBuilder11.append(aa);
-                                                stringBuilder11.append("）");
                                             }
                                             stringBuilder11.append("，");
                                         }

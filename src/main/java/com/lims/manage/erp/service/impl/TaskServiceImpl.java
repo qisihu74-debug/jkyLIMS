@@ -1958,19 +1958,19 @@ public class TaskServiceImpl implements TaskService {
                     AsposeUtil.addRowsIndex(tables.get(0), 3, samples.size() - 6,8);
                     start = 8 + (samples.size() - 6);
                     //遍历表格插入数据
-                    XWPFTable table1 = tables.get(j);
-                    List<XWPFTableRow> rows1 = table1.getRows();
-                    for (int i = 1; i < rows1.size(); i++) {
-                        List<XWPFTableCell> cells = rows1.get(i).getTableCells();
-                        for (int j1 = 0; j1 < cells.size(); j1++) {
-                            XWPFTableCell cell = cells.get(j1);
-                            // 设置水平居中,需要ooxml-schemas包支持
-                            CTTc cttc = cell.getCTTc();
-                            CTTcPr ctPr = cttc.addNewTcPr();
-                            ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
-                            cttc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
-                        }
-                    }
+//                    XWPFTable table1 = tables.get(j);
+//                    List<XWPFTableRow> rows1 = table1.getRows();
+//                    for (int i = 1; i < rows1.size(); i++) {
+//                        List<XWPFTableCell> cells = rows1.get(i).getTableCells();
+//                        for (int j1 = 0; j1 < cells.size(); j1++) {
+//                            XWPFTableCell cell = cells.get(j1);
+//                            // 设置水平居中,需要ooxml-schemas包支持
+//                            CTTc cttc = cell.getCTTc();
+//                            CTTcPr ctPr = cttc.addNewTcPr();
+//                            ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
+//                            cttc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
+//                        }
+//                    }
                 }
                 for (int i = 0; i < samples.size(); i++) {
                     SampleDetailVo sampleDetailVo = samples.get(i);
@@ -2053,27 +2053,27 @@ public class TaskServiceImpl implements TaskService {
                     rows.get(start+3).getTableCells().get(3).setText(String.valueOf("--"));
                 }
             }
-            // 数据：处理 2023年07月01日发布 第二页
+            // 数据：处理 2023年08月01日发布 第二页
             if (j == 1) {
                 // 检测项目处理 add增加表格。
                 // 判断表格 是否大于5
                 if(checkItemInfoVoMap.size()>5){
                     AsposeUtil.addRowsIndex(tables.get(j), 8, checkItemInfoVoMap.size() - 5,9);
 //                    //遍历表格插入数据
-                    XWPFTable table1 = tables.get(j);
-                    List<XWPFTableRow> rows1 = table1.getRows();
-                    for (int i = 1; i < rows1.size(); i++) {
-                        List<XWPFTableCell> cells = rows1.get(i).getTableCells();
-                        for (int j1 = 0; j1 < cells.size(); j1++) {
-                            XWPFTableCell cell = cells.get(j1);
-
-                            // 设置水平居中,需要ooxml-schemas包支持
-                            CTTc cttc = cell.getCTTc();
-                            CTTcPr ctPr = cttc.addNewTcPr();
-                            ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
-                            cttc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
-                        }
-                    }
+//                    XWPFTable table1 = tables.get(j);
+//                    List<XWPFTableRow> rows1 = table1.getRows();
+//                    for (int i = 1; i < rows1.size(); i++) {
+//                        List<XWPFTableCell> cells = rows1.get(i).getTableCells();
+//                        for (int j1 = 0; j1 < cells.size(); j1++) {
+//                            XWPFTableCell cell = cells.get(j1);
+//
+//                            // 设置水平居中,需要ooxml-schemas包支持
+//                            CTTc cttc = cell.getCTTc();
+//                            CTTcPr ctPr = cttc.addNewTcPr();
+//                            ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
+//                            cttc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
+//                        }
+//                    }
                 }
                 // 塞入数据
                 int serialNumber = 4;

@@ -470,7 +470,7 @@ public class EntrustController {
             fileName = "BD20210021-old.docx";
         }
         //2023七月1号之后用新的委托模板
-        if (Integer.parseInt(dayString)>= 20230701){
+        if (Integer.parseInt(dayString)>= 20230801){
             fileName = "033检验委托单.docx";
         }
         XWPFDocument document = null;
