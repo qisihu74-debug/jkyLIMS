@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aspose.cells.Cells;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
+import com.aspose.pdf.facades.IFormEditor;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -33,12 +34,14 @@ import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
+import org.apache.poi.xwpf.converter.core.Color;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.docx4j.vml.officedrawing.STColorMode;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBorder;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblBorders;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTc;
@@ -5014,11 +5017,25 @@ public class EntrustServiceImpl implements EntrustService {
             for (int j = 0; j < tables.size(); j++) {
                 XWPFTable table = tables.get(j);
                 // 设置表格的字体
-                CTTblBorders borders = table.getCTTbl().getTblPr().addNewTblBorders();
-                CTBorder insideHBorder = borders.addNewInsideH();
-                insideHBorder.setVal(STBorder.SINGLE);
-                insideHBorder.setSz(new BigInteger("10")); // 设置字体大小为10
-                insideHBorder.setColor("auto");
+//                CTTblBorders borders = table.getCTTbl().getTblPr().addNewTblBorders();
+//                CTBorder insideHBorder = borders.addNewInsideH();
+//                insideHBorder.setVal(STBorder.SINGLE);
+//                insideHBorder.setSz(new BigInteger("10")); // 设置字体大小为10
+//                insideHBorder.setColor("auto");
+                //设置字体
+//                List<XWPFTableRow> tableRows = table.getRows();
+//                for (int r =0;r<tableRows.size();r++) {
+//                    List<XWPFTableCell> tableCells = tableRows.get(r).getTableCells();
+//                    for (int k =0;k<tableCells.size();k++) {
+//                        List<XWPFParagraph> paragraphs = tableCells.get(k).getParagraphs();
+//                        for (int d=0;d<paragraphs.size();d++){
+//                            XWPFParagraph paragraph = paragraphs.get(d);
+//                            XWPFRun run = paragraph.createRun();
+//                            run.setFontFamily("宋体");
+//                            run.setFontSize(10);
+//                        }
+//                    }
+//                }
 
                 List<XWPFTableRow> rows;
                 //获取表格对应的行
