@@ -556,6 +556,7 @@ public class SampleController {
     @GetMapping("updateState")
     public Result updateState(Integer sampleId, Integer state, String time,Integer saveTime,
                               Integer sampleRetentionPeriod,String sampleProcessMode,String approver){
+        System.out.println("操作扫描样品id：=="+sampleId+"操作状态：=="+state+"操作人：=="+approver+"saveTime:=="+saveTime);
         System.out.println("留样天数: == "+sampleRetentionPeriod + " == 样品处置方式 == " + sampleProcessMode);
         System.out.println("扫码时间:{}"+time);
         log.info("扫码时间:{}",time);
