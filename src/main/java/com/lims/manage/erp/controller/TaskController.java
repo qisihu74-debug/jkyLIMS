@@ -550,7 +550,7 @@ public class TaskController {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
                 date = dateFormat.parse("2023-03-12 23:59:59");
-                date2 = dateFormat.parse("2023-07-30 23:59:59");
+                date2 = dateFormat.parse("2023-07-31 23:59:59");
             } catch (ParseException e) {
                 e.printStackTrace();
             }
