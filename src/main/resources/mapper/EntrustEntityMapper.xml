@@ -251,7 +251,6 @@
             </if>
             <if test="aliasName!=null and aliasName!=''">
                 and alias_name LIKE CONCAT('%',#{aliasName},'%')
-                )
             </if>
         </trim>
         ORDER BY acceptance_date desc, entrustment_no DESC
@@ -424,7 +423,6 @@
             </if>
             <if test="aliasName!=null and aliasName!=''">
                 and alias_name LIKE CONCAT('%',#{aliasName},'%')
-                )
             </if>
         </trim>
         ORDER BY acceptance_date desc, entrustment_no DESC
