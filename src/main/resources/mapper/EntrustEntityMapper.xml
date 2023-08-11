@@ -244,7 +244,7 @@
                 and state = #{state}
             </if>
             <if test="taskCodeParam!=null and taskCodeParam!=''">
-                and taskCode LIKE CONCAT('%',#{taskCodeParam},'%')
+                and id in (SELECT entrustment_id FROM test_task WHERE task_code  LIKE CONCAT('%',#{taskCodeParam},'%'))
             </if>
             <if test="entrustCategoryType!=null">
                 and entrust_category_type = #{entrustCategoryType}
@@ -416,7 +416,7 @@
                 and state!=0 and state!=144 and state!=200
             </if>
             <if test="taskCodeParam!=null">
-                and taskCode LIKE CONCAT('%',#{taskCodeParam},'%')
+                and id in (SELECT entrustment_id FROM test_task WHERE task_code  LIKE CONCAT('%',#{taskCodeParam},'%'))
             </if>
             <if test="entrustCategoryType!=null">
                 and entrust_category_type = #{entrustCategoryType}

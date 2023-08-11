@@ -43,6 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -783,17 +784,17 @@ public class TaskServiceImpl implements TaskService {
                     // 补充表格数据 样品名称
                     rows.get(i + 2).getTableCells().get(0).setText(sampleDetailVo.getAliasName());
                     // 规格/等级
-                    rows.get(i + 2).getTableCells().get(1).setText(sampleDetailVo.getSpecs());
+                    rows.get(i + 2).getTableCells().get(1).setText(StringUtils.isEmpty(sampleDetailVo.getSpecs()) ? "——" : sampleDetailVo.getSpecs());
                     // 批号/编号
-                    rows.get(i + 2).getTableCells().get(2).setText(sampleDetailVo.getBatchNumber());
+                    rows.get(i + 2).getTableCells().get(2).setText(StringUtils.isEmpty(sampleDetailVo.getBatchNumber()) ? "——" : sampleDetailVo.getBatchNumber());
                     // 样品数量
                     rows.get(i + 2).getTableCells().get(3).setText(sampleDetailVo.getSampleQuantity());
                     // 样品产地
-                    rows.get(i + 2).getTableCells().get(4).setText("--");
+                    rows.get(i + 2).getTableCells().get(4).setText("——");
                     //样品编号
                     rows.get(i + 2).getTableCells().get(5).setText(sampleDetailVo.getSampleCode());
                     // 备注
-                    rows.get(i + 2).getTableCells().get(6).setText(sampleDetailVo.getSampleRemark());
+                    rows.get(i + 2).getTableCells().get(6).setText(StringUtils.isEmpty(sampleDetailVo.getSampleRemark()) ? "——" : sampleDetailVo.getSampleRemark());
                     //6月22日 (多组样品有相同的检测项无法预览任务单；产品标准、检测项都要去重展示；没有价格的子检测项目不展示) 废弃
                     //9月2日  检测项名称一致和标准规范一致。进行去重。
                     if(!StringUtils.isEmpty(sampleDetailVo.getCheckItemInfoList())){
@@ -990,7 +991,18 @@ public class TaskServiceImpl implements TaskService {
         String recordNumber = "JL-"+entrustBaseInfo.getTaskCode();
         //获取样品信息
         TemplateSampleVo sampleVo = sampleEntityMapper.getOriginalSampleInfo(sampleId);
-
+        try {
+            // 样品来样时间  > 委托时间 ? 样品来样时间 ： 委托时间
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date date1 = sdf.parse(sampleVo.getSampleTime());
+            // 测试此日期是否在指定日期之后.时间不平等
+            if (!entrustBaseInfo.getAcceptanceDate().after(date1)&&!entrustBaseInfo.getAcceptanceDate().equals(date1)) {
+                // 签收时间 =委托单受理日期
+                sampleVo.setSampleTime(sdf.format(entrustBaseInfo.getAcceptanceDate()));
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         // 得到样品信息数据; 分割。
         sampleVo.setSampleName(!StringUtils.isEmpty(sampleVo.getSampleName())?sampleVo.getSampleName() + "；":"/；");
         sampleVo.setSampleNumber(!StringUtils.isEmpty(sampleVo.getSampleNumber())?sampleVo.getSampleNumber() + "；":"/；");
@@ -1044,6 +1056,18 @@ public class TaskServiceImpl implements TaskService {
                 sampleTime.append(sampleEntity.getOutwardDescribe()== null ? "——": sampleEntity.getOutwardDescribe());
                 sampleTime.append("；");
                 sampleTime.append("来样时间：");
+                try {
+                    // 样品来样时间  > 委托时间 ? 样品来样时间 ： 委托时间
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Date date1 = sdf.parse(sampleEntity.getReceivedDate());
+                    // 测试此日期是否在指定日期之后.时间不平等
+                    if (!entrustBaseInfo.getAcceptanceDate().after(date1)&&!entrustBaseInfo.getAcceptanceDate().equals(date1)) {
+                        // 签收时间 =委托单受理日期
+                        sampleEntity.setReceivedDate(sdf.format(entrustBaseInfo.getAcceptanceDate()));
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 sampleTime.append(sampleEntity.getReceivedDate());
             }
         }
@@ -1977,17 +2001,17 @@ public class TaskServiceImpl implements TaskService {
                     // 补充表格数据 样品名称
                     rows.get(i + 2).getTableCells().get(0).setText(sampleDetailVo.getAliasName());
                     // 规格/等级
-                    rows.get(i + 2).getTableCells().get(1).setText(sampleDetailVo.getSpecs());
+                    rows.get(i + 2).getTableCells().get(1).setText(StringUtils.isEmpty(sampleDetailVo.getSpecs()) ? "——" : sampleDetailVo.getSpecs());
                     // 批号/编号
-                    rows.get(i + 2).getTableCells().get(2).setText(sampleDetailVo.getBatchNumber());
+                    rows.get(i + 2).getTableCells().get(2).setText(StringUtils.isEmpty(sampleDetailVo.getBatchNumber()) ? "——" : sampleDetailVo.getBatchNumber());
                     // 样品数量
                     rows.get(i + 2).getTableCells().get(3).setText(sampleDetailVo.getSampleQuantity());
                     // 样品产地
-                    rows.get(i + 2).getTableCells().get(4).setText("--");
+                    rows.get(i + 2).getTableCells().get(4).setText("——");
                     //样品编号
                     rows.get(i + 2).getTableCells().get(5).setText(sampleDetailVo.getSampleCode());
                     // 备注
-                    rows.get(i + 2).getTableCells().get(6).setText(sampleDetailVo.getSampleRemark());
+                    rows.get(i + 2).getTableCells().get(6).setText(StringUtils.isEmpty(sampleDetailVo.getSampleRemark()) ? "——" : sampleDetailVo.getSampleRemark());
                     //6月22日 (多组样品有相同的检测项无法预览任务单；产品标准、检测项都要去重展示；没有价格的子检测项目不展示) 废弃
                     //9月2日  检测项名称一致和标准规范一致。进行去重。
                     if(!StringUtils.isEmpty(sampleDetailVo.getCheckItemInfoList())){

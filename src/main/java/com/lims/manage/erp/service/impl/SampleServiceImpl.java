@@ -905,25 +905,6 @@ public class SampleServiceImpl implements SampleService {
         sampleOutPutVo.setPageSize(count);
         List<SampleOutPutVo> list = sampleEntityMapper.selectPageVo3(sampleOutPutVo);
         SampleExportUtil sampleExportUtil =new SampleExportUtil();
-        // 根据数据列表 获取 留样数据中处理信息
-        if(CollectionUtil.isNotEmpty(list)){
-            List<SampleCirculationRecord> recordList = sampleEntityMapper.selectSampleCirculationRecordList(list);
-            if(CollectionUtil.isNotEmpty(recordList)){
-                // 获取样品数据中 样品id相等 status=4的数据
-                for(SampleOutPutVo data : list){
-                    for(SampleCirculationRecord sampleCirculationRecord : recordList){
-                        if(data.getSampleId().equals(sampleCirculationRecord.getSampleId())){
-                            if(sampleCirculationRecord.getStatus().equals("5")){
-                                // 处理人:handler
-                                data.setHandler(sampleCirculationRecord.getOperatorName());
-                                // 处理日期 sellOffDate
-                                data.setSellOffDate(sampleCirculationRecord.getTime());
-                            }
-                        }
-                    }
-                }
-            }
-        }
         return sampleExportUtil.sampleRetentionExport(list);
     }
 
@@ -1095,26 +1076,6 @@ public class SampleServiceImpl implements SampleService {
                 pageInfo.setPages(count / sampleOutPutVo.getPageSize() + 1);
             } else {
                 pageInfo.setPages(count / sampleOutPutVo.getPageSize());
-            }
-            // 根据数据列表 获取 留样数据中处理信息
-            if(CollectionUtil.isNotEmpty(list)){
-                List<SampleCirculationRecord> recordList = sampleEntityMapper.selectSampleCirculationRecordList(list);
-                if(CollectionUtil.isNotEmpty(recordList)){
-                    // 获取样品数据中 样品id相等 status=4的数据
-                    for(SampleOutPutVo data : list){
-                        for(SampleCirculationRecord sampleCirculationRecord : recordList){
-                            if(data.getSampleId().equals(sampleCirculationRecord.getSampleId())){
-                                if(sampleCirculationRecord.getStatus().equals("5")){
-                                    // 处理人:handler
-                                    data.setHandler(sampleCirculationRecord.getOperatorName());
-                                    // 处理日期 sellOffDate
-                                    data.setSellOffDate(sampleCirculationRecord.getTime());
-                                }
-                            }
-                        }
-                    }
-                }
-
             }
             pageInfo.setList(list);
             pageInfo.setTotal(count);
