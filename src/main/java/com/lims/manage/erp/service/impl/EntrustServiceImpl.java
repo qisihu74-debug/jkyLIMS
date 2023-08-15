@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aspose.cells.Cells;
 import com.aspose.cells.Workbook;
@@ -1742,6 +1743,29 @@ public class EntrustServiceImpl implements EntrustService {
                 dataList = entityMapper.selectEntrustTaskHistoryList_by_view(entrustHistoryEntity);
             }
             pageInfo = new PageInfo<>(dataList);
+        }
+        if(CollectionUtil.isNotEmpty(dataList)){
+            // 遍历
+            for(EntrustHistoryEntity entity :dataList){
+                if(CollectionUtil.isNotEmpty(entity.getTaskCodes())){
+                    List<TaskCodeVo> taskCodeVos = new ArrayList<>();
+                    // 根据逗号 截取
+                    String[] taskCodes = entity.getTaskCodes().get(0).getTaskCode().split("\\,");
+                    String[] teamNames = entity.getTaskCodes().get(0).getTeamName().split("\\,");
+                    Set<String> taskCodeSet = new HashSet<>();
+                    for(int i=0; i<taskCodes.length; i++){
+                        taskCodeSet.add(taskCodes[i]+","+teamNames[i]);
+                    }
+                    for(String str : taskCodeSet){
+                        TaskCodeVo taskCodeVo = new TaskCodeVo();
+                        String[] arrays = str.split("\\,");
+                        taskCodeVo.setTaskCode(arrays[0]);
+                        taskCodeVo.setTeamName(arrays[1]);
+                        taskCodeVos.add(taskCodeVo);
+                    }
+                    entity.setTaskCodes(taskCodeVos);
+                }
+            }
         }
         //设置样品信息
         if(!CollectionUtils.isEmpty(dataList)){

@@ -130,6 +130,7 @@
         <result property="state" column="state"></result>
         <result property="auditState" column="auditState"></result>
         <result property="entrustmentNostr" column="entrustmentNostr"></result>
+        <result property="aliasName" column="aliasName"></result>
         <collection property="taskCodes" ofType="com.lims.manage.erp.vo.TaskCodeVo">
             <result property="taskCode" column="taskCode"></result>
             <result property="teamName" column="teamName"></result>
@@ -199,8 +200,10 @@
 
     <select id="selectEntrustTaskHistoryList_by_view" resultMap="selectEntrustTaskHistoryListMap"
             parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
-        SELECT
+        SELECT * FROM (SELECT
         id,
+        GROUP_CONCAT( IFNULL( taskCode, "——" ) SEPARATOR ', ') As taskCode,
+        GROUP_CONCAT(IFNULL(teamName,"——") SEPARATOR ', ') As teamName,
         entrustment_no,
         IFNULL( CONCAT( entrust_category_type, entrustment_no ), entrustment_no ) AS entrustmentNostr,
         entrust_company,
@@ -211,8 +214,6 @@
         state,
         auditState,
         sampleLogisticsNo,
-        IFNULL( taskCode, "——" ) taskCode,
-        IFNULL(teamName,"——") teamName,
         taskState
         FROM v_entrust_list
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
@@ -250,10 +251,16 @@
                 and entrust_category_type = #{entrustCategoryType}
             </if>
             <if test="aliasName!=null and aliasName!=''">
-                and alias_name LIKE CONCAT('%',#{aliasName},'%')
+                and id in (
+                SELECT t4.entrustment_id FROM
+                test_entrusted_sample_details_rel as t4
+                LEFT JOIN test_sample as t5 ON t5.id = t4.sample_id
+                WHERE t5.alias_name LIKE CONCAT('%',#{aliasName},'%')
+                )
             </if>
         </trim>
-        ORDER BY acceptance_date desc, entrustment_no DESC
+        GROUP BY id) as t1
+        ORDER BY entrustment_no desc
     </select>
 
     <select id="selectEntrustHistoryListRelease_of" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity"
@@ -371,8 +378,11 @@
 
     <select id="selectEntrustHistoryTaskListRelease_of_by_view" resultMap="selectEntrustTaskHistoryListMap"
             parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
-        SELECT
+        SELECT * FROM
+        (SELECT
         id,
+        GROUP_CONCAT( IFNULL( taskCode, "——" ) SEPARATOR ', ') As taskCode,
+        GROUP_CONCAT(IFNULL(teamName,"——") SEPARATOR ', ') As teamName,
         entrustment_no,
         IFNULL( CONCAT( entrust_category_type, entrustment_no ), entrustment_no ) AS entrustmentNostr,
         entrust_company,
@@ -383,8 +393,6 @@
         state,
         auditState,
         sampleLogisticsNo,
-        IFNULL( taskCode, "——" ) taskCode,
-        IFNULL(teamName,"——") teamName,
         taskState
         FROM v_entrust_list
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
@@ -422,10 +430,16 @@
                 and entrust_category_type = #{entrustCategoryType}
             </if>
             <if test="aliasName!=null and aliasName!=''">
-                and alias_name LIKE CONCAT('%',#{aliasName},'%')
+                and id in (
+                SELECT t4.entrustment_id FROM
+                test_entrusted_sample_details_rel as t4
+                LEFT JOIN test_sample as t5 ON t5.id = t4.sample_id
+                WHERE t5.alias_name LIKE CONCAT('%',#{aliasName},'%')
+                )
             </if>
         </trim>
-        ORDER BY acceptance_date desc, entrustment_no DESC
+        GROUP BY id) as t1
+        ORDER BY entrustment_no desc
     </select>
 
 <!--    <select id="selectEntrustReleasedList" resultType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity"-->
