@@ -734,4 +734,13 @@ public interface EntrustEntityMapper extends BaseMapper {
     List<EntrustHistoryEntity> selectEntrustTaskHistoryList_by_view(EntrustHistoryEntity entrustHistoryEntity);
 
     List<EntrustSampleInfoVo> getEntrustSampleInfoIds_by_view(@Param("list") List<EntrustHistoryEntity> dataList);
+
+    @Select("SELECT\n" +
+            "\tt2.check_item_name\n" +
+            "FROM\n" +
+            "\ttest_report_template t1\n" +
+            "LEFT JOIN test_product_item t2 ON t1.id = t2.report_model_id\n" +
+            "WHERE\n" +
+            "\tt1.report_file_uri = #{reportFileUri}")
+    List<String> getBindItemByReortUrl(@Param("reportFileUri") String reportFileUri);
 }

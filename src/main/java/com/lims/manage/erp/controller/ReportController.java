@@ -1396,4 +1396,5 @@ public class ReportController {
         Date date = reportService.getReportCompleteTime(reportCode);
         return ResultUtil.success(date);
     }
+
 }
