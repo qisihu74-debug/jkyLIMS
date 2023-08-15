@@ -583,9 +583,9 @@ public class TaskController {
             //TODO 设置签名信息
             /** 设置文件下载名 （任务单号+检测项名）**/
             /** 不同文件的MimeType参考后续链接 **/
-//            String file = taskDetailInfo.getTaskCode()+".pdf";
-//            file = URLEncoder.encode(file, "UTF-8");
-//            response.setHeader("Content-Disposition", "attachment;fileName=" + file);
+            String file = taskDetailInfo.getTaskCode()+".pdf";
+            file = URLEncoder.encode(file, "UTF-8");
+            response.setHeader("Content-Disposition", "inline;fileName=" + file + ";fileName*=UTF-8''" + file);
             ServletOutputStream outputStream = response.getOutputStream();
             int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
             inputStream.close();

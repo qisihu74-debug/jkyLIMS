@@ -121,4 +121,9 @@ public class SampleOutPutVo {
     private String approver;
 
     private String entrustPeople;
+
+    /**
+     * 委托单号
+     */
+    private String entrustCode;
 }

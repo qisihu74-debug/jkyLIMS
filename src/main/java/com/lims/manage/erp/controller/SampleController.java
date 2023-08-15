@@ -676,7 +676,7 @@ public class SampleController {
     public void sampleRetentionExport(@RequestBody SampleOutPutVo sampleOutPutVo, HttpServletResponse response ) throws Exception {
         BufferedOutputStream bos = null;
         String fileName = "样品留样";
-        String file = fileName+".xls";
+        String file = fileName+".xlsx";
         file = URLEncoder.encode(file, "UTF-8");
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "attachment;fileName=" + file);
@@ -745,7 +745,7 @@ public class SampleController {
         String fileName = "样品出入库登记表";
 //        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
-        String file = fileName+".xls";
+        String file = fileName+".xlsx";
         file = URLEncoder.encode(file, "UTF-8");
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "attachment;fileName=" + file);
