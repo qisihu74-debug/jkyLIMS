@@ -202,8 +202,8 @@
             parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
         SELECT * FROM (SELECT
         id,
-        GROUP_CONCAT( IFNULL( taskCode, "——" ) SEPARATOR ', ') As taskCode,
-        GROUP_CONCAT(IFNULL(teamName,"——") SEPARATOR ', ') As teamName,
+        GROUP_CONCAT( IFNULL( taskCode, "——" ) SEPARATOR ',') As taskCode,
+        GROUP_CONCAT(IFNULL(teamName,"——") SEPARATOR ',') As teamName,
         entrustment_no,
         IFNULL( CONCAT( entrust_category_type, entrustment_no ), entrustment_no ) AS entrustmentNostr,
         entrust_company,
@@ -381,8 +381,8 @@
         SELECT * FROM
         (SELECT
         id,
-        GROUP_CONCAT( IFNULL( taskCode, "——" ) SEPARATOR ', ') As taskCode,
-        GROUP_CONCAT(IFNULL(teamName,"——") SEPARATOR ', ') As teamName,
+        GROUP_CONCAT( IFNULL( taskCode, "——" ) SEPARATOR ',') As taskCode,
+        GROUP_CONCAT(IFNULL(teamName,"——") SEPARATOR ',') As teamName,
         entrustment_no,
         IFNULL( CONCAT( entrust_category_type, entrustment_no ), entrustment_no ) AS entrustmentNostr,
         entrust_company,
