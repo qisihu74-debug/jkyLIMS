@@ -2777,14 +2777,14 @@ public class EntrustServiceImpl implements EntrustService {
                                             stringBuilder1.append(aa);
                                             stringBuilder1.append("）");
                                         }
-                                        stringBuilder1.append("，");
+                                        stringBuilder1.append("☐");
                                     }
                                 }
                             }
                         }
                         if(stringBuilder1.length()>1){
                             String substring = stringBuilder1.toString().substring(0, stringBuilder1.length() - 1);
-                            String[] split = substring.split("，");
+                            String[] split = substring.split("☐");
                             Set<String> set = new HashSet<>();
                             for (String s:split) {
                                 set.add(s);
@@ -5164,14 +5164,14 @@ public class EntrustServiceImpl implements EntrustService {
                                                 String aa = s.split("《")[0];
                                                 stringBuilder11.append(aa);
                                             }
-                                            stringBuilder11.append("，");
+                                            stringBuilder11.append("☐");
                                         }
                                     }
                                 }
                             }
                             if (stringBuilder11.length() > 1) {
                                 String substring = stringBuilder11.toString().substring(0, stringBuilder11.length() - 1);
-                                String[] split = substring.split("，");
+                                String[] split = substring.split("☐");
                                 Set<String> set = new HashSet<>();
                                 for (String s : split) {
                                     set.add(s);
