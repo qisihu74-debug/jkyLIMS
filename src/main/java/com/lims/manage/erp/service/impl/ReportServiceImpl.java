@@ -2498,32 +2498,36 @@ public class ReportServiceImpl implements ReportService {
         List<SampleEntity> sampleEntities = Lists.newArrayList();
         for (ReportTemplateEntity templateEntity : listT) {
             for (SampleEntity sampleEntity : samples) {
-                if (templateEntity.getProductId().equals(sampleEntity.getProductId() + "")) {
-                    SampleEntity sampleEntity1 = new SampleEntity();
-                    sampleEntity1.setId(sampleEntity.getId());
-                    sampleEntity1.setSampleName(sampleEntity.getSampleName());
-                    sampleEntity1.setFileUrl(templateEntity.getReportFileUri());
-                    List<JudgmentBasisVo> judgmentBasisVos = sampleEntity.getJudgmentBasisVos();
-                    sampleEntity1.setJudgmentBasisVos(judgmentBasisVos);
-                    sampleEntities.add(sampleEntity1);
+                if (org.apache.commons.lang3.StringUtils.isNotEmpty(templateEntity.getProductId())){
+                    if (templateEntity.getProductId().equals(sampleEntity.getProductId() + "")) {
+                        SampleEntity sampleEntity1 = new SampleEntity();
+                        sampleEntity1.setId(sampleEntity.getId());
+                        sampleEntity1.setSampleName(sampleEntity.getSampleName());
+                        sampleEntity1.setFileUrl(templateEntity.getReportFileUri());
+                        List<JudgmentBasisVo> judgmentBasisVos = sampleEntity.getJudgmentBasisVos();
+                        sampleEntity1.setJudgmentBasisVos(judgmentBasisVos);
+                        sampleEntities.add(sampleEntity1);
+                    }
                 }
             }
         }
-        for (SampleEntity sampleEntity : sampleEntities) {
-            //处理模板下不同样品描述
-            String judgeBasis = getJudgeBasisRe(entrustId, sampleEntity.getId());
-            ConclusionEntity conclusionEntity = new ConclusionEntity();
-            conclusionEntity.setSampleId(sampleEntity.getId());
-            conclusionEntity.setUrl(sampleEntity.getFileUrl());
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("1.委托人：" + entrustHistoryDetail.getEntrustPeople() + "；");
-            stringBuilder.append("2." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessUint()) ? "见证单位：无" : "见证单位：" + entrustHistoryDetail.getWitnessUint()) + "；");
-            stringBuilder.append("3." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson()) ? "见证人：无" : "见证人：" + entrustHistoryDetail.getWitnessPerson()) + "；");
-            stringBuilder.append("4.委托方提供：" + (StringUtils.isEmpty(entrustHistoryDetail.getRemark()) ? "无" : entrustHistoryDetail.getRemark()) + " ；");
-            conclusionEntity.setAdditional(stringBuilder.toString());
-            String sampleDes = sampleEntity.getSampleName() + " " + "样品," + delItemDes(sampleEntity.getJudgmentBasisVos(), sampleEntity.getFileUrl(), entrustId);
-            conclusionEntity.setConclusion("经检测，该" + sampleDes + "均符合" + judgeBasis + "中的技术要求。");
-            list.add(conclusionEntity);
+        if (sampleEntities.size()>=1){
+            for (SampleEntity sampleEntity : sampleEntities) {
+                //处理模板下不同样品描述
+                String judgeBasis = getJudgeBasisRe(entrustId, sampleEntity.getId());
+                ConclusionEntity conclusionEntity = new ConclusionEntity();
+                conclusionEntity.setSampleId(sampleEntity.getId());
+                conclusionEntity.setUrl(sampleEntity.getFileUrl());
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("1.委托人：" + entrustHistoryDetail.getEntrustPeople() + "；");
+                stringBuilder.append("2." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessUint()) ? "见证单位：无" : "见证单位：" + entrustHistoryDetail.getWitnessUint()) + "；");
+                stringBuilder.append("3." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson()) ? "见证人：无" : "见证人：" + entrustHistoryDetail.getWitnessPerson()) + "；");
+                stringBuilder.append("4.委托方提供：" + (StringUtils.isEmpty(entrustHistoryDetail.getRemark()) ? "无" : entrustHistoryDetail.getRemark()) + " ；");
+                conclusionEntity.setAdditional(stringBuilder.toString());
+                String sampleDes = sampleEntity.getSampleName() + " " + "样品," + delItemDes(sampleEntity.getJudgmentBasisVos(), sampleEntity.getFileUrl(), entrustId);
+                conclusionEntity.setConclusion("经检测，该" + sampleDes + "均符合" + judgeBasis + "中的技术要求。");
+                list.add(conclusionEntity);
+            }
         }
         return list;
     }
