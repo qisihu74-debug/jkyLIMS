@@ -991,18 +991,10 @@ public class TaskServiceImpl implements TaskService {
         String recordNumber = "JL-"+entrustBaseInfo.getTaskCode();
         //获取样品信息
         TemplateSampleVo sampleVo = sampleEntityMapper.getOriginalSampleInfo(sampleId);
-        try {
-            // 样品来样时间  > 委托时间 ? 样品来样时间 ： 委托时间
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date date1 = sdf.parse(sampleVo.getSampleTime());
-            // 测试此日期是否在指定日期之后.时间不平等
-            if (!entrustBaseInfo.getAcceptanceDate().after(date1)&&!entrustBaseInfo.getAcceptanceDate().equals(date1)) {
-                // 签收时间 =委托单受理日期
-                sampleVo.setSampleTime(sdf.format(entrustBaseInfo.getAcceptanceDate()));
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        // 样品来样时间  = 委托时间
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        // 签收时间 =委托单受理日期
+        sampleVo.setSampleTime(sdf.format(entrustBaseInfo.getAcceptanceDate()));
         // 得到样品信息数据; 分割。
         sampleVo.setSampleName(!StringUtils.isEmpty(sampleVo.getSampleName())?sampleVo.getSampleName() + "；":"/；");
         sampleVo.setSampleNumber(!StringUtils.isEmpty(sampleVo.getSampleNumber())?sampleVo.getSampleNumber() + "；":"/；");
@@ -1056,18 +1048,8 @@ public class TaskServiceImpl implements TaskService {
                 sampleTime.append(sampleEntity.getOutwardDescribe()== null ? "——": sampleEntity.getOutwardDescribe());
                 sampleTime.append("；");
                 sampleTime.append("来样时间：");
-                try {
-                    // 样品来样时间  > 委托时间 ? 样品来样时间 ： 委托时间
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    Date date1 = sdf.parse(sampleEntity.getReceivedDate());
-                    // 测试此日期是否在指定日期之后.时间不平等
-                    if (!entrustBaseInfo.getAcceptanceDate().after(date1)&&!entrustBaseInfo.getAcceptanceDate().equals(date1)) {
-                        // 签收时间 =委托单受理日期
-                        sampleEntity.setReceivedDate(sdf.format(entrustBaseInfo.getAcceptanceDate()));
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+                // 签收时间 = 委托单受理日期
+                sampleEntity.setReceivedDate(sdf.format(entrustBaseInfo.getAcceptanceDate()));
                 sampleTime.append(sampleEntity.getReceivedDate());
             }
         }
