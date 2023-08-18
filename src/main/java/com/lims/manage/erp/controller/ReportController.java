@@ -13,6 +13,7 @@ import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
+import com.lims.manage.erp.entity.QrCodeAuthRes;
 import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportResBean;
@@ -1397,4 +1398,17 @@ public class ReportController {
         return ResultUtil.success(date);
     }
 
+    /**
+     * 报告防伪二维码扫码
+     * @param reportCode
+     * @return
+     */
+    @GetMapping("qrCodeAuth")
+    public Result qrCodeAuth(String reportCode){
+        if (StringUtils.isEmpty(reportCode)){
+            return ResultUtil.error("无效二维码");
+        }
+        QrCodeAuthRes qrCodeAuthRes = reportService.qrCodeAuth(reportCode);
+        return ResultUtil.success(qrCodeAuthRes);
+    }
 }

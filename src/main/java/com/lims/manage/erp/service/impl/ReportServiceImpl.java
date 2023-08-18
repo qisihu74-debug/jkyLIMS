@@ -21,6 +21,7 @@ import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.QiYueSuoSealEntity;
+import com.lims.manage.erp.entity.QrCodeAuthRes;
 import com.lims.manage.erp.entity.QuotaEntity;
 import com.lims.manage.erp.entity.QuotaRes;
 import com.lims.manage.erp.entity.ReportEditReq;
@@ -101,6 +102,7 @@ import org.apache.poi.hwpf.usermodel.Range;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.odftoolkit.odfdom.dom.element.xforms.XformsModelElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1487,6 +1489,40 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public QrCodeAuthRes qrCodeAuth(String reportCode) {
+        QrCodeAuthRes qrCodeAuthRes = new QrCodeAuthRes();
+        String info = recordEntityMapper.getInitInfo();
+        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
+        Long entrustId = entity.getEntrustmentId() == null ? entity.getEntrustId() : entity.getEntrustmentId();
+        EntrustServiceImpl service = new EntrustServiceImpl();
+        EntrustAddVo detail = service.getEntrustHistoryDetail(entrustId);
+        qrCodeAuthRes.setEntrustCompany(detail.getEntrustCompany());
+        qrCodeAuthRes.setProjectName(detail.getProjectName());
+        qrCodeAuthRes.setEntrustPeople(detail.getEntrustPeople());
+        qrCodeAuthRes.setAcceptanceDate(detail.getAcceptanceDate());
+        List<SampleEntity> samples = detail.getSamples();
+        StringBuilder codes = new StringBuilder();
+        StringBuilder names = new StringBuilder();
+        StringBuilder specs = new StringBuilder();
+        for (int i =0;i<samples.size();i++){
+            codes.append(samples.get(i).getSampleCode());
+            names.append(samples.get(i).getSampleName());
+            specs.append(samples.get(i).getSpecs());
+            if (i < samples.size()-1){
+                codes.append(",");
+                names.append(",");
+                specs.append(",");
+            }
+        }
+        qrCodeAuthRes.setSampleCode(codes.toString());
+        qrCodeAuthRes.setSampleName(names.toString());
+        qrCodeAuthRes.setSpecs(specs.toString());
+        qrCodeAuthRes.setCheckOrganization(info);
+        qrCodeAuthRes.setReportCode(reportCode);
+        return qrCodeAuthRes;
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();
@@ -1750,6 +1786,9 @@ public class ReportServiceImpl implements ReportService {
                                         if ("${工程部位}".equals(string)) {
                                             cells.get(n, j).setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectPart()) ? "——" : entrustHistoryDetail.getProjectPart());
                                         }
+                                        Date acceptanceDate = entrustHistoryDetail.getAcceptanceDate();
+                                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                                        String dateString = format.format(acceptanceDate);
                                         if ("${样品信息}".equals(string)) {
                                             cells.get(n, j).setValue("样品名称：" + (sampleEntity.getAliasName() == null ? "——" : sampleEntity.getAliasName())
                                                     + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~", "~"))
@@ -1757,7 +1796,7 @@ public class ReportServiceImpl implements ReportService {
                                                     + "；代表批量：" + (sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration())
                                                     + "；规格等级：" + (sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs())
                                                     + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
-                                                    + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                                                    + "；收样时间：" + (dateString == null ? "——" : dateString));
                                         }
                                         if ("${检测依据}".equals(string)) {
                                             cells.get(n, j).setValue(checkBasis.equals("") ? "——" : checkBasis);
@@ -2150,6 +2189,9 @@ public class ReportServiceImpl implements ReportService {
                                         if ("${工程部位}".equals(string)) {
                                             cells.get(n, j).setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectPart()) ? "——" : entrustHistoryDetail.getProjectPart());
                                         }
+                                        Date acceptanceDate = entrustHistoryDetail.getAcceptanceDate();
+                                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                                        String dateString = format.format(acceptanceDate);
                                         if ("${样品信息}".equals(string)) {
                                             cells.get(n, j).setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
                                                     + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~", "~"))
@@ -2157,7 +2199,7 @@ public class ReportServiceImpl implements ReportService {
                                                     + "；代表批量：" + (sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration())
                                                     + "；规格等级：" + (sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs())
                                                     + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
-                                                    + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                                                    + "；收样时间：" + (dateString == null ? "——" : dateString));
                                         }
                                         if ("${检测依据}".equals(string)) {
                                             cells.get(n, j).setValue(checkBasis.equals("") ? "——" : checkBasis);
@@ -2556,7 +2598,7 @@ public class ReportServiceImpl implements ReportService {
                             String name = recordDetailEntityMapper.getIdByItemId(entity.getCheckItemId(), entrustId);
                             if (StringUtils.isNotEmpty(name)) {
                                 stringBuilder.append(name);
-                                stringBuilder.append("，");
+                                stringBuilder.append("、");
                             }
                         }
                     }
@@ -3797,6 +3839,9 @@ public class ReportServiceImpl implements ReportService {
                             }
                             //样品信息
                             //根据样品id获取样品详情
+                            Date acceptanceDate = detail.getAcceptanceDate();
+                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                            String dateString = format.format(acceptanceDate);
                             SampleDetailVo sampleEntity = sampleEntityMapper.getSampleTagInfo(reportEditReq.getSampleId());
                             if ("${result.sampleDetails}".equals(string)){
                                 cells.get(n, j).setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
@@ -3805,7 +3850,7 @@ public class ReportServiceImpl implements ReportService {
                                         + "；代表批量：" + (sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration())
                                         + "；规格等级：" + (sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs())
                                         + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
-                                        + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                                        + "；收样时间：" + (dateString == null ? "——" : dateString));
                             }
                             String checkBasis = getCheckBasis(reportEditReq.getEntrustId(), sampleEntity.getId());
                             String judgeBasis = getJudgeBasis(reportEditReq.getEntrustId(), sampleEntity.getId());

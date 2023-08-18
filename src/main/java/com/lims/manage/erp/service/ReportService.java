@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
+import com.lims.manage.erp.entity.QrCodeAuthRes;
 import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
@@ -456,4 +457,6 @@ public interface ReportService {
      * @param reportCode
      */
     void reportValidity(String reportCode);
+
+    QrCodeAuthRes qrCodeAuth(String reportCode);
 }
