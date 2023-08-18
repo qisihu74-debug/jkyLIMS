@@ -4106,13 +4106,15 @@ public class EntrustServiceImpl implements EntrustService {
         // true：样品签收时间改动
         Boolean status = false;
         try {
-            Date date1 = sdf.parse(sampleData.getReceivedDate());
-            // 测试此日期是否在指定日期之后.时间不平等
-            if (!AcceptanceDate.after(date1)&&!AcceptanceDate.equals(date1)) {
-                // 签收时间 =委托单受理日期
+//            // 测试此日期是否在指定日期之后.时间不平等
+//            if (!AcceptanceDate.after(date1)&&!AcceptanceDate.equals(date1)) {
+//                // 签收时间 =委托单受理日期
+//                sampleData.setReceivedDate(sdf.format(AcceptanceDate));
+//                status = true;
+//            }
+            //ps： 更改为 样品签收时间 =委托单受理日期
                 sampleData.setReceivedDate(sdf.format(AcceptanceDate));
                 status = true;
-            }
         }
         catch (Exception e){
             Debug.println("新增委托日志异常输出:\t",e+"  update样品状态时");
