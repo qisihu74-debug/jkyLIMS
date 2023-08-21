@@ -725,7 +725,8 @@
                t2.id,
                t2.project_name,
                t2.project_part,
-               t2.state
+               t2.state,
+               t2.acceptance_date
         FROM test_task t1
                  LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
         where t1.id = #{taskId}

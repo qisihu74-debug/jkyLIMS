@@ -43,6 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -783,17 +784,17 @@ public class TaskServiceImpl implements TaskService {
                     // 补充表格数据 样品名称
                     rows.get(i + 2).getTableCells().get(0).setText(sampleDetailVo.getAliasName());
                     // 规格/等级
-                    rows.get(i + 2).getTableCells().get(1).setText(sampleDetailVo.getSpecs());
+                    rows.get(i + 2).getTableCells().get(1).setText(StringUtils.isEmpty(sampleDetailVo.getSpecs()) ? "——" : sampleDetailVo.getSpecs());
                     // 批号/编号
-                    rows.get(i + 2).getTableCells().get(2).setText(sampleDetailVo.getBatchNumber());
+                    rows.get(i + 2).getTableCells().get(2).setText(StringUtils.isEmpty(sampleDetailVo.getBatchNumber()) ? "——" : sampleDetailVo.getBatchNumber());
                     // 样品数量
                     rows.get(i + 2).getTableCells().get(3).setText(sampleDetailVo.getSampleQuantity());
                     // 样品产地
-                    rows.get(i + 2).getTableCells().get(4).setText("--");
+                    rows.get(i + 2).getTableCells().get(4).setText("——");
                     //样品编号
                     rows.get(i + 2).getTableCells().get(5).setText(sampleDetailVo.getSampleCode());
                     // 备注
-                    rows.get(i + 2).getTableCells().get(6).setText(sampleDetailVo.getSampleRemark());
+                    rows.get(i + 2).getTableCells().get(6).setText(StringUtils.isEmpty(sampleDetailVo.getSampleRemark()) ? "——" : sampleDetailVo.getSampleRemark());
                     //6月22日 (多组样品有相同的检测项无法预览任务单；产品标准、检测项都要去重展示；没有价格的子检测项目不展示) 废弃
                     //9月2日  检测项名称一致和标准规范一致。进行去重。
                     if(!StringUtils.isEmpty(sampleDetailVo.getCheckItemInfoList())){
@@ -990,7 +991,10 @@ public class TaskServiceImpl implements TaskService {
         String recordNumber = "JL-"+entrustBaseInfo.getTaskCode();
         //获取样品信息
         TemplateSampleVo sampleVo = sampleEntityMapper.getOriginalSampleInfo(sampleId);
-
+        // 样品来样时间  = 委托时间
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        // 签收时间 =委托单受理日期
+        sampleVo.setSampleTime(sdf.format(entrustBaseInfo.getAcceptanceDate()));
         // 得到样品信息数据; 分割。
         sampleVo.setSampleName(!StringUtils.isEmpty(sampleVo.getSampleName())?sampleVo.getSampleName() + "；":"/；");
         sampleVo.setSampleNumber(!StringUtils.isEmpty(sampleVo.getSampleNumber())?sampleVo.getSampleNumber() + "；":"/；");
@@ -1044,6 +1048,8 @@ public class TaskServiceImpl implements TaskService {
                 sampleTime.append(sampleEntity.getOutwardDescribe()== null ? "——": sampleEntity.getOutwardDescribe());
                 sampleTime.append("；");
                 sampleTime.append("来样时间：");
+                // 签收时间 = 委托单受理日期
+                sampleEntity.setReceivedDate(sdf.format(entrustBaseInfo.getAcceptanceDate()));
                 sampleTime.append(sampleEntity.getReceivedDate());
             }
         }
@@ -1958,36 +1964,36 @@ public class TaskServiceImpl implements TaskService {
                     AsposeUtil.addRowsIndex(tables.get(0), 3, samples.size() - 6,8);
                     start = 8 + (samples.size() - 6);
                     //遍历表格插入数据
-                    XWPFTable table1 = tables.get(j);
-                    List<XWPFTableRow> rows1 = table1.getRows();
-                    for (int i = 1; i < rows1.size(); i++) {
-                        List<XWPFTableCell> cells = rows1.get(i).getTableCells();
-                        for (int j1 = 0; j1 < cells.size(); j1++) {
-                            XWPFTableCell cell = cells.get(j1);
-                            // 设置水平居中,需要ooxml-schemas包支持
-                            CTTc cttc = cell.getCTTc();
-                            CTTcPr ctPr = cttc.addNewTcPr();
-                            ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
-                            cttc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
-                        }
-                    }
+//                    XWPFTable table1 = tables.get(j);
+//                    List<XWPFTableRow> rows1 = table1.getRows();
+//                    for (int i = 1; i < rows1.size(); i++) {
+//                        List<XWPFTableCell> cells = rows1.get(i).getTableCells();
+//                        for (int j1 = 0; j1 < cells.size(); j1++) {
+//                            XWPFTableCell cell = cells.get(j1);
+//                            // 设置水平居中,需要ooxml-schemas包支持
+//                            CTTc cttc = cell.getCTTc();
+//                            CTTcPr ctPr = cttc.addNewTcPr();
+//                            ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
+//                            cttc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
+//                        }
+//                    }
                 }
                 for (int i = 0; i < samples.size(); i++) {
                     SampleDetailVo sampleDetailVo = samples.get(i);
                     // 补充表格数据 样品名称
                     rows.get(i + 2).getTableCells().get(0).setText(sampleDetailVo.getAliasName());
                     // 规格/等级
-                    rows.get(i + 2).getTableCells().get(1).setText(sampleDetailVo.getSpecs());
+                    rows.get(i + 2).getTableCells().get(1).setText(StringUtils.isEmpty(sampleDetailVo.getSpecs()) ? "——" : sampleDetailVo.getSpecs());
                     // 批号/编号
-                    rows.get(i + 2).getTableCells().get(2).setText(sampleDetailVo.getBatchNumber());
+                    rows.get(i + 2).getTableCells().get(2).setText(StringUtils.isEmpty(sampleDetailVo.getBatchNumber()) ? "——" : sampleDetailVo.getBatchNumber());
                     // 样品数量
                     rows.get(i + 2).getTableCells().get(3).setText(sampleDetailVo.getSampleQuantity());
                     // 样品产地
-                    rows.get(i + 2).getTableCells().get(4).setText("--");
+                    rows.get(i + 2).getTableCells().get(4).setText("——");
                     //样品编号
                     rows.get(i + 2).getTableCells().get(5).setText(sampleDetailVo.getSampleCode());
                     // 备注
-                    rows.get(i + 2).getTableCells().get(6).setText(sampleDetailVo.getSampleRemark());
+                    rows.get(i + 2).getTableCells().get(6).setText(StringUtils.isEmpty(sampleDetailVo.getSampleRemark()) ? "——" : sampleDetailVo.getSampleRemark());
                     //6月22日 (多组样品有相同的检测项无法预览任务单；产品标准、检测项都要去重展示；没有价格的子检测项目不展示) 废弃
                     //9月2日  检测项名称一致和标准规范一致。进行去重。
                     if(!StringUtils.isEmpty(sampleDetailVo.getCheckItemInfoList())){
@@ -2053,27 +2059,27 @@ public class TaskServiceImpl implements TaskService {
                     rows.get(start+3).getTableCells().get(3).setText(String.valueOf("--"));
                 }
             }
-            // 数据：处理 2023年07月01日发布 第二页
+            // 数据：处理 2023年08月01日发布 第二页
             if (j == 1) {
                 // 检测项目处理 add增加表格。
                 // 判断表格 是否大于5
                 if(checkItemInfoVoMap.size()>5){
                     AsposeUtil.addRowsIndex(tables.get(j), 8, checkItemInfoVoMap.size() - 5,9);
 //                    //遍历表格插入数据
-                    XWPFTable table1 = tables.get(j);
-                    List<XWPFTableRow> rows1 = table1.getRows();
-                    for (int i = 1; i < rows1.size(); i++) {
-                        List<XWPFTableCell> cells = rows1.get(i).getTableCells();
-                        for (int j1 = 0; j1 < cells.size(); j1++) {
-                            XWPFTableCell cell = cells.get(j1);
-
-                            // 设置水平居中,需要ooxml-schemas包支持
-                            CTTc cttc = cell.getCTTc();
-                            CTTcPr ctPr = cttc.addNewTcPr();
-                            ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
-                            cttc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
-                        }
-                    }
+//                    XWPFTable table1 = tables.get(j);
+//                    List<XWPFTableRow> rows1 = table1.getRows();
+//                    for (int i = 1; i < rows1.size(); i++) {
+//                        List<XWPFTableCell> cells = rows1.get(i).getTableCells();
+//                        for (int j1 = 0; j1 < cells.size(); j1++) {
+//                            XWPFTableCell cell = cells.get(j1);
+//
+//                            // 设置水平居中,需要ooxml-schemas包支持
+//                            CTTc cttc = cell.getCTTc();
+//                            CTTcPr ctPr = cttc.addNewTcPr();
+//                            ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
+//                            cttc.getPList().get(0).addNewPPr().addNewJc().setVal(STJc.CENTER);
+//                        }
+//                    }
                 }
                 // 塞入数据
                 int serialNumber = 4;

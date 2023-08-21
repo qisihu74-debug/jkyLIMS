@@ -34,6 +34,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -470,7 +475,7 @@ public class EntrustController {
             fileName = "BD20210021-old.docx";
         }
         //2023七月1号之后用新的委托模板
-        if (Integer.parseInt(dayString)>= 20230701){
+        if (Integer.parseInt(dayString)>= 20230801){
             fileName = "033检验委托单.docx";
         }
         XWPFDocument document = null;
@@ -520,7 +525,7 @@ public class EntrustController {
             fileName = "BD20210021-old.docx";
         }
         //2023七月1号之后用新的委托模板
-        if (Integer.parseInt(dayString)>= 20230701){
+        if (Integer.parseInt(dayString)>= 20230801){
             fileName = "033检验委托单.docx";
         }
         XWPFDocument document = null;
@@ -1062,4 +1067,39 @@ public class EntrustController {
         return ResultUtil.success("撤回成功");
     }
 
+    @GetMapping("test")
+    public void test(HttpServletResponse response) throws Exception{
+        FileInputStream fileInputStream = new FileInputStream("C:\\Users\\Administrator\\Music\\test.docx");
+        XWPFDocument doc = new XWPFDocument(fileInputStream);
+        List<XWPFTable> tables = doc.getTables();
+        XWPFTable table = tables.get(0);
+        //设置字体
+        List<XWPFTableRow> tableRows = table.getRows();
+        for (int r =0;r<tableRows.size();r++) {
+            List<XWPFTableCell> tableCells = tableRows.get(r).getTableCells();
+            for (int k =0;k<tableCells.size();k++) {
+                List<XWPFParagraph> paragraphs = tableCells.get(k).getParagraphs();
+                for (int d=0;d<paragraphs.size();d++){
+                    XWPFParagraph paragraph = paragraphs.get(d);
+                    XWPFRun run = paragraph.createRun();
+                    run.setFontFamily("宋体");
+                    run.setFontSize(10);
+                }
+            }
+        }
+        List<XWPFTableRow> rows = table.getRows();
+        rows.get(0).getTableCells().get(1).setText("No：" + 20230806);
+        rows.get(0).getTableCells().get(1).setText("GB123456-11");
+        rows.get(0).getTableCells().get(1).setText("样品");
+        rows.get(1).getTableCells().get(1).setText("张三");
+        rows.get(1).getTableCells().get(1).setText("李四");
+        response.reset();
+        response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+        response.setContentType("application/x-msdownload");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" +"test001.docx");
+        OutputStream outputStream = response.getOutputStream();
+        doc.write(outputStream);
+        outputStream.close();
+    }
 }

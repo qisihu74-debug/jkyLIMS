@@ -6,6 +6,7 @@ import com.aspose.cells.Cell;
 import com.aspose.cells.Cells;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
+import com.aspose.pdf.facades.IFormEditor;
 import com.aspose.words.Document;
 import com.aspose.words.NodeType;
 import com.aspose.words.*;
@@ -1478,6 +1479,14 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public void reportValidity(String reportCode) {
+        //根据报告链接生成防伪二维码、附到报告文件指定位置
+
+        //生成防伪需要展示的报告图片文件、上传到文件服务器
+
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();
@@ -1852,7 +1861,11 @@ public class ReportServiceImpl implements ReportService {
                                             }
                                         } else {
                                             if (StringUtils.isNotEmpty(specsContent)) {
-                                                cells.get(spec).setValue(StringUtils.isEmpty(item.getSpecsContent()) ? "——" : item.getSpecsContent());
+                                                try {
+                                                    cells.get(spec).setValue(StringUtils.isEmpty(item.getSpecsContent()) ? "——" : item.getSpecsContent());
+                                                }catch (Exception e){
+                                                    cells.get(spec.substring(1)).setValue(StringUtils.isEmpty(item.getSpecsContent()) ? "——" : item.getSpecsContent());
+                                                }
                                             }
                                         }
                                     }
@@ -2473,38 +2486,48 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<ConclusionEntity> getResut(Long entrustId, Integer reportType) {
-        List<ReportTemplateEntity> templateList;
-        //TODO 需要从报告模板和产品关系表中查询产品ids
-        if(reportType == 1){//中间报告查询
-            templateList = reportService.getMiddleReportTemplateList(entrustId);
-        } else {//最终报告查询
-            templateList = reportService.getReportTemplateList(entrustId);
+        List<ReportProductRelVo> templateList = reportService.getReportTemplateList0706(entrustId,null);
+        List<ReportTemplateEntity> listT = Lists.newArrayList();
+        for (ReportProductRelVo templateEntity : templateList){
+            List<ReportTemplateEntity> reportTemplates = templateEntity.getReportTemplates();
+            listT.addAll(reportTemplates);
         }
         List<ConclusionEntity> list = Lists.newArrayList();
         EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(entrustId);
         List<SampleEntity> samples = entrustHistoryDetail.getSamples();
-        for (ReportTemplateEntity templateEntity : templateList) {
+        List<SampleEntity> sampleEntities = Lists.newArrayList();
+        for (ReportTemplateEntity templateEntity : listT) {
             for (SampleEntity sampleEntity : samples) {
-                if (templateEntity.getProductIds().contains(sampleEntity.getProductId() + "")) {
-                    sampleEntity.setFileUrl(templateEntity.getReportFileUri());
+                if (org.apache.commons.lang3.StringUtils.isNotEmpty(templateEntity.getProductId())){
+                    if (templateEntity.getProductId().equals(sampleEntity.getProductId() + "")) {
+                        SampleEntity sampleEntity1 = new SampleEntity();
+                        sampleEntity1.setId(sampleEntity.getId());
+                        sampleEntity1.setSampleName(sampleEntity.getSampleName());
+                        sampleEntity1.setFileUrl(templateEntity.getReportFileUri());
+                        List<JudgmentBasisVo> judgmentBasisVos = sampleEntity.getJudgmentBasisVos();
+                        sampleEntity1.setJudgmentBasisVos(judgmentBasisVos);
+                        sampleEntities.add(sampleEntity1);
+                    }
                 }
             }
         }
-        for (SampleEntity sampleEntity : samples) {
-            //处理模板下不同样品描述
-            String judgeBasis = getJudgeBasisRe(entrustId, sampleEntity.getId());
-            ConclusionEntity conclusionEntity = new ConclusionEntity();
-            conclusionEntity.setSampleId(sampleEntity.getId());
-            conclusionEntity.setUrl(sampleEntity.getFileUrl());
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("1.委托人：" + entrustHistoryDetail.getEntrustPeople() + "；");
-            stringBuilder.append("2." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessUint()) ? "见证单位：无" : "见证单位：" + entrustHistoryDetail.getWitnessUint()) + "；");
-            stringBuilder.append("3." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson()) ? "见证人：无" : "见证人：" + entrustHistoryDetail.getWitnessPerson()) + "；");
-            stringBuilder.append("4.委托方提供：" + (StringUtils.isEmpty(entrustHistoryDetail.getRemark()) ? "无" : entrustHistoryDetail.getRemark()) + " ；");
-            conclusionEntity.setAdditional(stringBuilder.toString());
-            String sampleDes = sampleEntity.getSampleName() + " " + "样品," + delItemDes(sampleEntity.getJudgmentBasisVos(), sampleEntity.getFileUrl(), entrustId);
-            conclusionEntity.setConclusion("经检测，该" + sampleDes + "均符合" + judgeBasis + "中的技术要求。");
-            list.add(conclusionEntity);
+        if (sampleEntities.size()>=1){
+            for (SampleEntity sampleEntity : sampleEntities) {
+                //处理模板下不同样品描述
+                String judgeBasis = getJudgeBasisRe(entrustId, sampleEntity.getId());
+                ConclusionEntity conclusionEntity = new ConclusionEntity();
+                conclusionEntity.setSampleId(sampleEntity.getId());
+                conclusionEntity.setUrl(sampleEntity.getFileUrl());
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("1.委托人：" + entrustHistoryDetail.getEntrustPeople() + "；");
+                stringBuilder.append("2." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessUint()) ? "见证单位：无" : "见证单位：" + entrustHistoryDetail.getWitnessUint()) + "；");
+                stringBuilder.append("3." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson()) ? "见证人：无" : "见证人：" + entrustHistoryDetail.getWitnessPerson()) + "；");
+                stringBuilder.append("4.委托方提供：" + (StringUtils.isEmpty(entrustHistoryDetail.getRemark()) ? "无" : entrustHistoryDetail.getRemark()) + " ；");
+                conclusionEntity.setAdditional(stringBuilder.toString());
+                String sampleDes = sampleEntity.getSampleName() + " " + "样品," + delItemDes(sampleEntity.getJudgmentBasisVos(), sampleEntity.getFileUrl(), entrustId);
+                conclusionEntity.setConclusion("经检测，该" + sampleDes + "均符合" + judgeBasis + "中的技术要求。");
+                list.add(conclusionEntity);
+            }
         }
         return list;
     }

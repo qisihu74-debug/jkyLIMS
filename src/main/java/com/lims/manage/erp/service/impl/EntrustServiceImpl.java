@@ -1,10 +1,13 @@
 package com.lims.manage.erp.service.impl;
 
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aspose.cells.Cells;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
+import com.aspose.pdf.facades.IFormEditor;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
@@ -32,12 +35,14 @@ import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
+import org.apache.poi.xwpf.converter.core.Color;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.docx4j.vml.officedrawing.STColorMode;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBorder;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblBorders;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTc;
@@ -69,6 +74,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class EntrustServiceImpl implements EntrustService {
@@ -1719,25 +1725,60 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         // 获取状态
+        PageInfo<EntrustHistoryEntity> pageInfo = new PageInfo<>();
         List<EntrustHistoryEntity> dataList = new ArrayList<>();
-        PageHelper.startPage(entrustHistoryEntity.getPageNum(),entrustHistoryEntity.getPageSize());
+        PageHelper.startPage(entrustHistoryEntity.getPageNum(), entrustHistoryEntity.getPageSize());
         if (!StringUtils.isEmpty(entrustHistoryEntity.getState())&&entrustHistoryEntity.getState() == 1) {
             dataList = entityMapper.selectEntrustHistoryTaskListRelease_of_by_view(entrustHistoryEntity);
         }else{
             dataList = entityMapper.selectEntrustTaskHistoryList_by_view(entrustHistoryEntity);
         }
-        PageInfo<EntrustHistoryEntity> pageInfo = new PageInfo<>(dataList);
+        pageInfo = new PageInfo<>(dataList);
+        if (pageInfo.getTotal() ==1){
+            PageHelper.clearPage();
+            PageHelper.startPage(0, 1);
+            if (!StringUtils.isEmpty(entrustHistoryEntity.getState())&&entrustHistoryEntity.getState() == 1) {
+                dataList = entityMapper.selectEntrustHistoryTaskListRelease_of_by_view(entrustHistoryEntity);
+            }else{
+                dataList = entityMapper.selectEntrustTaskHistoryList_by_view(entrustHistoryEntity);
+            }
+            pageInfo = new PageInfo<>(dataList);
+        }
+        if(CollectionUtil.isNotEmpty(dataList)){
+            // 遍历
+            for(EntrustHistoryEntity entity :dataList){
+                if(CollectionUtil.isNotEmpty(entity.getTaskCodes())){
+                    List<TaskCodeVo> taskCodeVos = new ArrayList<>();
+                    // 根据逗号 截取
+                    String[] taskCodes = entity.getTaskCodes().get(0).getTaskCode().split("\\,");
+                    String[] teamNames = entity.getTaskCodes().get(0).getTeamName().split("\\,");
+                    Set<String> taskCodeSet = new HashSet<>();
+                    for(int i=0; i<taskCodes.length; i++){
+                        taskCodeSet.add(taskCodes[i]+","+teamNames[i]);
+                    }
+                    for(String str : taskCodeSet){
+                        TaskCodeVo taskCodeVo = new TaskCodeVo();
+                        String[] arrays = str.split("\\,");
+                        taskCodeVo.setTaskCode(arrays[0]);
+                        taskCodeVo.setTeamName(arrays[1]);
+                        taskCodeVos.add(taskCodeVo);
+                    }
+                    entity.setTaskCodes(taskCodeVos);
+                }
+            }
+        }
         //设置样品信息
         if(!CollectionUtils.isEmpty(dataList)){
             List<EntrustSampleInfoVo> entrustSampleInfos = entityMapper.getEntrustSampleInfoIds_by_view(pageInfo.getList());
             for (EntrustHistoryEntity entity : pageInfo.getList()) {
-                List<EntrustSampleInfoVo> sampleInfoVos = new ArrayList<>();
+                HashSet<EntrustSampleInfoVo> sampleInfoVos = new HashSet<>();
                 for(EntrustSampleInfoVo entrustSampleInfoVo : entrustSampleInfos){
                     if(entrustSampleInfoVo.getEntrustId().equals(entity.getId())){
                         sampleInfoVos.add(entrustSampleInfoVo);
                     }
                 }
-                entity.setSampleInfoVos(sampleInfoVos);
+                List<EntrustSampleInfoVo> list = StreamSupport.stream(sampleInfoVos.spliterator(), false).collect(Collectors.toList());
+                entity.setSampleInfoVos(list);
             }
         }
         //设置物流单号信息
@@ -2706,9 +2747,9 @@ public class EntrustServiceImpl implements EntrustService {
                 if (j == tables.size() - 1) {
                     //设置其它信息(第二个table)
                     String ss = "";
-                    rows.get(0).getTableCells().get(2).setText(detail.getPresentInformation() == null ? "——" : detail.getPresentInformation());//提供资料
-                    rows.get(1).getTableCells().get(2).setText(detail.getSamplingMethod() == null ? "——" : detail.getSamplingMethod());//取样方式
-                    rows.get(1).getTableCells().get(4).setText(detail.getCheckPurpose() == null ? "——" : detail.getCheckPurpose());//检验目的
+                    rows.get(0).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getPresentInformation()) ? "——" : detail.getPresentInformation());//提供资料
+                    rows.get(1).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getSamplingMethod()) ? "——" : detail.getSamplingMethod());//取样方式
+                    rows.get(1).getTableCells().get(4).setText(StringUtils.isEmpty(detail.getCheckPurpose()) ? "——" : detail.getCheckPurpose());//检验目的
                     List<String> list = entityMapper.getSampleStandard(detail.getId());
                     StringBuilder stringBuilder = new StringBuilder();
                     if (!CollectionUtils.isEmpty(list)) {
@@ -2717,7 +2758,7 @@ public class EntrustServiceImpl implements EntrustService {
                             stringBuilder.append("，");
                         }
                         String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
-                        rows.get(1).getTableCells().get(6).setText(substring == null ? "——" : substring);//产品标准 TODO 去重
+                        rows.get(1).getTableCells().get(6).setText(StringUtils.isEmpty(substring) ? "——" : substring);//产品标准 TODO 去重
                     }
                     StringBuilder stringBuilder1 = new StringBuilder();
                     if (!CollectionUtils.isEmpty(samples)) {
@@ -2736,32 +2777,32 @@ public class EntrustServiceImpl implements EntrustService {
                                             stringBuilder1.append(aa);
                                             stringBuilder1.append("）");
                                         }
-                                        stringBuilder1.append("，");
+                                        stringBuilder1.append("☐");
                                     }
                                 }
                             }
                         }
                         if(stringBuilder1.length()>1){
                             String substring = stringBuilder1.toString().substring(0, stringBuilder1.length() - 1);
-                            String[] split = substring.split("，");
+                            String[] split = substring.split("☐");
                             Set<String> set = new HashSet<>();
                             for (String s:split) {
                                 set.add(s);
                             }
                             String substring1 = set.toString().substring(1, set.toString().length() - 1);
-                            rows.get(2).getTableCells().get(2).setText(substring1 == null ? "——" : substring1);//检验项目及检测依据 TODO 去重
+                            rows.get(2).getTableCells().get(2).setText( StringUtils.isEmpty(substring1) ? "——" : substring1);//检验项目及检测依据 TODO 去重
                         }
                     }
                     //TODO +1
                     rows.get(3).getTableCells().get(2).setText(detail.getReportCount().toString());//报告分数
-                    rows.get(3).getTableCells().get(4).setText(detail.getReportType() == null ? "——" : detail.getReportType());//取报告方式
-                    rows.get(3).getTableCells().get(6).setText(detail.getReportReceivingUnit() == null ? "——" : detail.getReportReceivingUnit());//收报告单位
-                    rows.get(4).getTableCells().get(2).setText(detail.getAddress() == null ? "——" : detail.getAddress());//联系地址
-                    rows.get(4).getTableCells().get(4).setText(detail.getAddressee() == null ? "——" : detail.getAddressee());//联系人
-                    rows.get(4).getTableCells().get(6).setText(detail.getMobile() == null ? "——" : detail.getMobile());//联系方式
-                    rows.get(5).getTableCells().get(2).setText(detail.getEntrustPeople() == null ? "——" : detail.getEntrustPeople());//委托人
-                    rows.get(5).getTableCells().get(4).setText(detail.getEntrustPhone() == null ? "——" : detail.getEntrustPhone());//委托人电话
-                    rows.get(5).getTableCells().get(6).setText(detail.getWitnessPerson() == null ? "——" : detail.getWitnessPerson());//见证人
+                    rows.get(3).getTableCells().get(4).setText(StringUtils.isEmpty(detail.getReportType()) ? "——" : detail.getReportType());//取报告方式
+                    rows.get(3).getTableCells().get(6).setText(StringUtils.isEmpty(detail.getReportReceivingUnit()) ? "——" : detail.getReportReceivingUnit());//收报告单位
+                    rows.get(4).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getAddress()) ? "——" : detail.getAddress());//联系地址
+                    rows.get(4).getTableCells().get(4).setText(StringUtils.isEmpty(detail.getAddressee()) ? "——" : detail.getAddressee());//联系人
+                    rows.get(4).getTableCells().get(6).setText(StringUtils.isEmpty(detail.getMobile()) ? "——" : detail.getMobile());//联系方式
+                    rows.get(5).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getEntrustPeople()) ? "——" : detail.getEntrustPeople());//委托人
+                    rows.get(5).getTableCells().get(4).setText(StringUtils.isEmpty(detail.getEntrustPhone()) ? "——" : detail.getEntrustPhone());//委托人电话
+                    rows.get(5).getTableCells().get(6).setText(StringUtils.isEmpty(detail.getWitnessPerson()) ? "——" : detail.getWitnessPerson());//见证人
                     StringBuilder stringBuilder2 = new StringBuilder();
                     for (SampleEntity sampleEntity : samples) {
                         stringBuilder2.append(sampleEntity.getAliasName());
@@ -2785,11 +2826,11 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                     rows.get(6).getTableCells().get(4).setText(detail.getIsSave());//样品保留
                     rows.get(7).getTableCells().get(2).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getActualPrice()) ? "——" : detail.getActualPrice());//检验收费
-                    rows.get(7).getTableCells().get(4).setText(detail.getPaymentMethod() == null ? "——" : detail.getPaymentMethod());//支付方式
+                    rows.get(7).getTableCells().get(4).setText(StringUtils.isEmpty(detail.getPaymentMethod()) ? "——" : detail.getPaymentMethod());//支付方式
                     //TODO 本次缴费统计缴费记录表
                     rows.get(7).getTableCells().get(6).setText(org.apache.commons.lang3.StringUtils.isEmpty(detail.getPaymentRecordShow()) ? "——" : detail.getPaymentRecordShow());//本次交费
                     rows.get(8).getTableCells().get(2).setText(DateUtil.formatDate(detail.getRequestDate()));//完成期限
-                    rows.get(8).getTableCells().get(4).setText(detail.getBusinessAcceptor() == null ? "——" : detail.getBusinessAcceptor());//业务受理人
+                    rows.get(8).getTableCells().get(4).setText( StringUtils.isEmpty(detail.getBusinessAcceptor()) ? "——" : detail.getBusinessAcceptor());//业务受理人
                     rows.get(8).getTableCells().get(6).setText(DateUtil.formatDate(detail.getAcceptanceDate()));//受理日期
                     rows.get(10).getTableCells().get(1).removeParagraph(0);
                     rows.get(10).getTableCells().get(1).setText(StringUtils.isEmpty(detail.getRemark())?"——":detail.getRemark());//备注
@@ -4065,13 +4106,15 @@ public class EntrustServiceImpl implements EntrustService {
         // true：样品签收时间改动
         Boolean status = false;
         try {
-            Date date1 = sdf.parse(sampleData.getReceivedDate());
-            // 测试此日期是否在指定日期之后.时间不平等
-            if (!AcceptanceDate.after(date1)&&!AcceptanceDate.equals(date1)) {
-                // 签收时间 =委托单受理日期
+//            // 测试此日期是否在指定日期之后.时间不平等
+//            if (!AcceptanceDate.after(date1)&&!AcceptanceDate.equals(date1)) {
+//                // 签收时间 =委托单受理日期
+//                sampleData.setReceivedDate(sdf.format(AcceptanceDate));
+//                status = true;
+//            }
+            //ps： 更改为 样品签收时间 =委托单受理日期
                 sampleData.setReceivedDate(sdf.format(AcceptanceDate));
                 status = true;
-            }
         }
         catch (Exception e){
             Debug.println("新增委托日志异常输出:\t",e+"  update样品状态时");
@@ -5000,11 +5043,25 @@ public class EntrustServiceImpl implements EntrustService {
             for (int j = 0; j < tables.size(); j++) {
                 XWPFTable table = tables.get(j);
                 // 设置表格的字体
-                CTTblBorders borders = table.getCTTbl().getTblPr().addNewTblBorders();
-                CTBorder insideHBorder = borders.addNewInsideH();
-                insideHBorder.setVal(STBorder.SINGLE);
-                insideHBorder.setSz(new BigInteger("10")); // 设置字体大小为10
-                insideHBorder.setColor("auto");
+//                CTTblBorders borders = table.getCTTbl().getTblPr().addNewTblBorders();
+//                CTBorder insideHBorder = borders.addNewInsideH();
+//                insideHBorder.setVal(STBorder.SINGLE);
+//                insideHBorder.setSz(new BigInteger("10")); // 设置字体大小为10
+//                insideHBorder.setColor("auto");
+                //设置字体
+//                List<XWPFTableRow> tableRows = table.getRows();
+//                for (int r =0;r<tableRows.size();r++) {
+//                    List<XWPFTableCell> tableCells = tableRows.get(r).getTableCells();
+//                    for (int k =0;k<tableCells.size();k++) {
+//                        List<XWPFParagraph> paragraphs = tableCells.get(k).getParagraphs();
+//                        for (int d=0;d<paragraphs.size();d++){
+//                            XWPFParagraph paragraph = paragraphs.get(d);
+//                            XWPFRun run = paragraph.createRun();
+//                            run.setFontFamily("宋体");
+//                            run.setFontSize(10);
+//                        }
+//                    }
+//                }
 
                 List<XWPFTableRow> rows;
                 //获取表格对应的行
@@ -5036,7 +5093,7 @@ public class EntrustServiceImpl implements EntrustService {
                     }
                     //设置其它信息
                     String ss = "";
-                    rows.get(start).getTableCells().get(2).setText(detail.getPresentInformation() == null ? "——" : detail.getPresentInformation());//提供资料
+                    rows.get(start).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getPresentInformation()) ? "——" : detail.getPresentInformation());//提供资料
                     start = start + 1;
                     if (org.apache.commons.lang.StringUtils.isEmpty(detail.getSamplingMethod())) {
                         rows.get(start).getTableCells().get(2).setText("——");//取样方式
@@ -5091,6 +5148,8 @@ public class EntrustServiceImpl implements EntrustService {
                         if (stringBuilder1.length() > 1) {
                             String substring = stringBuilder1.toString().substring(0, stringBuilder1.length() - 1);
                             rows.get(start).getTableCells().get(2).setText(substring);//检验项目
+                        }else {
+                            rows.get(start).getTableCells().get(2).setText("");//检验项目
                         }
                         start = start + 1;
                         //检测依据
@@ -5103,20 +5162,18 @@ public class EntrustServiceImpl implements EntrustService {
                                         //价钱为null的不展示
                                         if (itemEntity.getCheckPrice() != null) {
                                             if (!StringUtils.isEmpty(itemEntity.getStandardName())) {
-                                                stringBuilder11.append("（");
                                                 String s = itemEntity.getStandardName();
                                                 String aa = s.split("《")[0];
                                                 stringBuilder11.append(aa);
-                                                stringBuilder11.append("）");
                                             }
-                                            stringBuilder11.append("，");
+                                            stringBuilder11.append("☐");
                                         }
                                     }
                                 }
                             }
                             if (stringBuilder11.length() > 1) {
                                 String substring = stringBuilder11.toString().substring(0, stringBuilder11.length() - 1);
-                                String[] split = substring.split("，");
+                                String[] split = substring.split("☐");
                                 Set<String> set = new HashSet<>();
                                 for (String s : split) {
                                     set.add(s);
@@ -5132,13 +5189,13 @@ public class EntrustServiceImpl implements EntrustService {
                                     stringBuilder.append("，");
                                 }
                                 String substring = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
-                                rows.get(start).getTableCells().get(4).setText(substring == null ? "——" : substring);//产品标准 TODO 去重
+                                rows.get(start).getTableCells().get(4).setText(StringUtils.isEmpty(substring) ? "——" : substring);//产品标准 TODO 去重
                             }
                             start = start + 1;
                         }
                         //取报告方式
-                        rows.get(start).getTableCells().get(6).setText(detail.getReportReceivingUnit() == null ? "——" : detail.getReportReceivingUnit());//收报告单位
-                        rows.get(start).getTableCells().get(8).setText(detail.getAddressee() == null ? "——" : detail.getAddressee());//联系人
+                        rows.get(start).getTableCells().get(6).setText(StringUtils.isEmpty(detail.getReportReceivingUnit()) ? "——" : detail.getReportReceivingUnit());//收报告单位
+                        rows.get(start).getTableCells().get(8).setText(StringUtils.isEmpty(detail.getAddressee()) ? "——" : detail.getAddressee());//联系人
                         start = start+1;
                         rows.get(start).getTableCells().get(2).setText(detail.getReportCount().toString());//报告分数
                         if (StringUtils.isEmpty(detail.getReportType())){
@@ -5152,19 +5209,19 @@ public class EntrustServiceImpl implements EntrustService {
                                 rows.get(start).getTableCells().get(4).setText("√");//取报告方式
                             }
                         }
-                        rows.get(start).getTableCells().get(6).setText(detail.getAddress() == null ? "——" : detail.getAddress());//联系地址
-                        rows.get(start).getTableCells().get(8).setText(detail.getMobile() == null ? "——" : detail.getMobile());//联系方式
+                        rows.get(start).getTableCells().get(6).setText(StringUtils.isEmpty(detail.getAddress()) ? "——" : detail.getAddress());//联系地址
+                        rows.get(start).getTableCells().get(8).setText(StringUtils.isEmpty(detail.getMobile()) ? "——" : detail.getMobile());//联系方式
                         start = start +1;
                         //委托单立人签字、见证人、日期
-                        rows.get(start).getTableCells().get(1).setText(detail.getEntrustPeople() == null ? "——" : "委托代理人签字："+detail.getEntrustPeople());//委托人
+                        rows.get(start).getTableCells().get(1).setText(StringUtils.isEmpty(detail.getEntrustPeople()) ? "——" : "委托代理人签字："+detail.getEntrustPeople());//委托人
 
                         Date acceptanceDate = detail.getAcceptanceDate();
                         if (acceptanceDate == null){
-                            rows.get(start).getTableCells().get(2).setText(detail.getWitnessPerson() == null ? "——" : "见证人: "+detail.getWitnessPerson());//见证人
+                            rows.get(start).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getWitnessPerson()) ? "——" : "见证人: "+detail.getWitnessPerson());//见证人
                         }else {
                             String s = DateUtil.formatDate(acceptanceDate);
                             String[] split = s.split("-");
-                            rows.get(start).getTableCells().get(2).setText(detail.getWitnessPerson() == null ? "——" : "见证人: "+detail.getWitnessPerson()+"  "+split[0]+"年"+split[1]+"月"+split[2]+"日");//见证人
+                            rows.get(start).getTableCells().get(2).setText(StringUtils.isEmpty(detail.getWitnessPerson()) ? "——" : "见证人: "+detail.getWitnessPerson()+"  "+split[0]+"年"+split[1]+"月"+split[2]+"日");//见证人
                         }
 
                         start = start +1;

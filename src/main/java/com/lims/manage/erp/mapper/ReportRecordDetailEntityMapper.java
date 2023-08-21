@@ -71,14 +71,23 @@ public interface ReportRecordDetailEntityMapper {
      */
     List<Long> getCheckItemIds(Long recordId,Long taskId,Integer sampleId);
 
-    @Select("SELECT distinct \n" +
-            "\trrd.check_item_name As name \n" +
+    @Select("SELECT DISTINCT\n" +
+            "\trrd.check_item_name AS NAME\n" +
             "FROM\n" +
             "\ttest_report_record rd\n" +
-            "\tLEFT JOIN test_report_record_detail rrd ON rd.id = rrd.record_id \n" +
-            "WHERE rrd.judge_result='合格'\n" +
-            "\tAND rd.entrustment_id = #{entrustId}\n" +
-            "\tAND rrd.check_item_id=#{checkItemId}")
+            "LEFT JOIN test_report_record_detail rrd ON rd.id = rrd.record_id\n" +
+            "WHERE\n" +
+            " rd.entrustment_id = #{entrustId}\n" +
+            "AND rrd.check_item_id = #{checkItemId}\n" +
+            "UNION ALL\n" +
+            "\tSELECT DISTINCT\n" +
+            "\t\trrd.check_item_name AS NAME\n" +
+            "\tFROM\n" +
+            "\t\ttest_report_record rd\n" +
+            "\tLEFT JOIN test_report_record_detail rrd ON rd.id = rrd.record_id\n" +
+            "\tWHERE\n" +
+            "\t rd.entrust_id = #{entrustId}\n" +
+            "\tAND rrd.check_item_id = #{checkItemId}")
     String getIdByItemId(@Param("checkItemId") Integer checkItemId,@Param("entrustId") Long entrustId);
 
     /**
