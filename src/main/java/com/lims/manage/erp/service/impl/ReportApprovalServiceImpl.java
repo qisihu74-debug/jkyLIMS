@@ -483,7 +483,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             }
             String path = "";
             try {
-                path = insertPicToPdf(url,reportApprovalVo1.getReportCode());
+                path = insertPicToPdf(url,detailById.getReportCode());
             }catch (Exception e){
                 path = url;
             }
@@ -549,7 +549,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             }
             String path = "";
             try {
-                path = insertPicToPdf(url,reportApprovalVo1.getReportCode());
+                path = insertPicToPdf(url,detailById.getReportCode());
             }catch (Exception e){
                 path = url;
             }
