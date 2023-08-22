@@ -384,4 +384,5 @@ public interface EntrustService {
 
     XWPFDocument downloadEntrustNew(EntrustAddVo detail, InputStream object);
 
+    QrCodeAuthRes qrCodeAuth(String reportCode);
 }

@@ -1481,48 +1481,6 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void reportValidity(String reportCode) {
-        //根据报告链接生成防伪二维码、附到报告文件指定位置
-
-        //生成防伪需要展示的报告图片文件、上传到文件服务器
-
-    }
-
-    @Override
-    public QrCodeAuthRes qrCodeAuth(String reportCode) {
-        QrCodeAuthRes qrCodeAuthRes = new QrCodeAuthRes();
-        String info = recordEntityMapper.getInitInfo();
-        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
-        Long entrustId = entity.getEntrustmentId() == null ? entity.getEntrustId() : entity.getEntrustmentId();
-        EntrustServiceImpl service = new EntrustServiceImpl();
-        EntrustAddVo detail = service.getEntrustHistoryDetail(entrustId);
-        qrCodeAuthRes.setEntrustCompany(detail.getEntrustCompany());
-        qrCodeAuthRes.setProjectName(detail.getProjectName());
-        qrCodeAuthRes.setEntrustPeople(detail.getEntrustPeople());
-        qrCodeAuthRes.setAcceptanceDate(detail.getAcceptanceDate());
-        List<SampleEntity> samples = detail.getSamples();
-        StringBuilder codes = new StringBuilder();
-        StringBuilder names = new StringBuilder();
-        StringBuilder specs = new StringBuilder();
-        for (int i =0;i<samples.size();i++){
-            codes.append(samples.get(i).getSampleCode());
-            names.append(samples.get(i).getSampleName());
-            specs.append(samples.get(i).getSpecs());
-            if (i < samples.size()-1){
-                codes.append(",");
-                names.append(",");
-                specs.append(",");
-            }
-        }
-        qrCodeAuthRes.setSampleCode(codes.toString());
-        qrCodeAuthRes.setSampleName(names.toString());
-        qrCodeAuthRes.setSpecs(specs.toString());
-        qrCodeAuthRes.setCheckOrganization(info);
-        qrCodeAuthRes.setReportCode(reportCode);
-        return qrCodeAuthRes;
-    }
-
-    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();

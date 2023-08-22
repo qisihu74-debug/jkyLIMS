@@ -1408,7 +1408,7 @@ public class ReportController {
         if (StringUtils.isEmpty(reportCode)){
             return ResultUtil.error("无效二维码");
         }
-        QrCodeAuthRes qrCodeAuthRes = reportService.qrCodeAuth(reportCode);
+        QrCodeAuthRes qrCodeAuthRes = entrustService.qrCodeAuth(reportCode);
         return ResultUtil.success(qrCodeAuthRes);
     }
 }

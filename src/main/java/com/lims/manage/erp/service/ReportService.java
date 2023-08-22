@@ -451,12 +451,4 @@ public interface ReportService {
     OutputStream exportReportList(List<ReportDetailListVo> list, HttpServletResponse response);
 
     List<String> getCodeByIds(List<Long> longs);
-
-    /**
-     * 报告仿真伪二维码生成
-     * @param reportCode
-     */
-    void reportValidity(String reportCode);
-
-    QrCodeAuthRes qrCodeAuth(String reportCode);
 }

@@ -5282,4 +5282,37 @@ public class EntrustServiceImpl implements EntrustService {
         return doc;
     }
 
+    @Override
+    public QrCodeAuthRes qrCodeAuth(String reportCode) {
+        QrCodeAuthRes qrCodeAuthRes = new QrCodeAuthRes();
+        String info = recordEntityMapper.getInitInfo();
+        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
+        Long entrustId = entity.getEntrustmentId() == null ? entity.getEntrustId() : entity.getEntrustmentId();
+        EntrustAddVo detail = this.getEntrustHistoryDetail(entrustId);
+        qrCodeAuthRes.setEntrustCompany(detail.getEntrustCompany());
+        qrCodeAuthRes.setProjectName(detail.getProjectName());
+        qrCodeAuthRes.setEntrustPeople(detail.getEntrustPeople());
+        qrCodeAuthRes.setAcceptanceDate(detail.getAcceptanceDate());
+        List<SampleEntity> samples = detail.getSamples();
+        StringBuilder codes = new StringBuilder();
+        StringBuilder names = new StringBuilder();
+        StringBuilder specs = new StringBuilder();
+        for (int i =0;i<samples.size();i++){
+            codes.append(samples.get(i).getSampleCode());
+            names.append(samples.get(i).getSampleName());
+            specs.append(samples.get(i).getSpecs());
+            if (i < samples.size()-1){
+                codes.append(",");
+                names.append(",");
+                specs.append(",");
+            }
+        }
+        qrCodeAuthRes.setSampleCode(codes.toString());
+        qrCodeAuthRes.setSampleName(names.toString());
+        qrCodeAuthRes.setSpecs(specs.toString());
+        qrCodeAuthRes.setCheckOrganization(info);
+        qrCodeAuthRes.setReportCode(reportCode);
+        return qrCodeAuthRes;
+    }
+
 }
