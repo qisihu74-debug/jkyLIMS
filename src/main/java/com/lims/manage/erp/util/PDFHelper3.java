@@ -357,6 +357,7 @@ public class PDFHelper3 {
             //wb.save(fileOS, SaveFormat.PDF);
             wb.save(fileOS, pdfSaveOptions);
             os.close();
+            fileOS.close();
             //设置pdf样式
             String s = setPdfStyle(basePath);
             //转化用时
@@ -364,8 +365,8 @@ public class PDFHelper3 {
             //处理流
             FileInputStream inputStream1 = new FileInputStream(s);
             bio = FileAndFolderUtil.parseIn(inputStream1);
+            inputStream1.close();
             System.out.println("excel 转 pdf 共耗时：" + ((now - old) / 1000.0) + "秒");
-            FileAndFolderUtil.delete(basePath);
             FileAndFolderUtil.delete(s);
         } catch (Exception e) {
             System.out.println("excel 转 pdf 失败...");
@@ -503,7 +504,7 @@ public class PDFHelper3 {
         }
         //保存PDF
         String[] split = basePath.split("\\.");
-        String s = split[0] + "doc" + ".pdf";
+        String s = split[0] + ".pdf";
         newDoc.saveToFile(s);
         //去水印
         PdfDoc.removePdfWatermark(s,s,null);
