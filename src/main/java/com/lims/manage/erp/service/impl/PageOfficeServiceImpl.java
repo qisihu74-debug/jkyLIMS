@@ -471,7 +471,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // 删除附件
         FileAndFolderUtil.delete(saveExcel);
         // 删除图片信息
-        for (int i = 0; i < testImags.length - 1; i++) {
+        for (int i = 0; i < testImags.length; i++) {
             FileAndFolderUtil.delete(testImags[i]);
         }
 //        FileAndFolderUtil.delete(imagePath);
@@ -639,12 +639,12 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // 删除附件
         FileAndFolderUtil.delete(newFilePath);
         // 删除图片信息
-        for (int i = 0; i < testImags.length - 1; i++) {
+        for (int i = 0; i < testImags.length; i++) {
             FileAndFolderUtil.delete(testImags[i]);
         }
         // 检测人与记录不相同时
         if (testImags.length > recordImags.length) {
-            for (int i = 0; i < recordImags.length - 1; i++) {
+            for (int i = 0; i < recordImags.length; i++) {
                 FileAndFolderUtil.delete(recordImags[i]);
             }
         }
