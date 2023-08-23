@@ -3743,6 +3743,7 @@ public class ReportServiceImpl implements ReportService {
             int count = workbook.getWorksheets().getCount();
             for (int i=0;i<count;i++) {
                 String name = workbook.getWorksheets().get(i).getName();
+                name = name.replaceAll(" ", "");
                 if ("报告第1页，报告第2页，报告第3页，报告第4页".contains(name)){
                     Cells cells = workbook.getWorksheets().get(i).getCells();
                     int maxRow1 = cells.getMaxRow();

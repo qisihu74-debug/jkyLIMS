@@ -419,7 +419,9 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         InputStream fileStream = MinIoUtil.getFileStream("report-original-template", fileName);
         XSSFWorkbook workbook = new XSSFWorkbook(fileStream);
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+
             String sheetName = workbook.getSheetAt(i).getSheetName();
+            sheetName = sheetName.replaceAll(" ", "");
             if("指标选择".contains(sheetName) || "技术指标".contains(sheetName) || "报告第1页".contains(sheetName) ||
                     "报告第2页".contains(sheetName)){
                 continue;
