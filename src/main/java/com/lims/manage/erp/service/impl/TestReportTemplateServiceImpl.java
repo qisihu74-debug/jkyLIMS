@@ -141,9 +141,12 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
         List<Integer> templateIdList = this.getTemplateIdList(id);
         if (templateIdList.size()>0){
             queryWrapper.in("id",templateIdList);
+            List<TestReportTemplate> testReportTemplates=this.list(queryWrapper);
+            return ResultUtil.success(testReportTemplates);
+        }else {
+            List<TestReportTemplate> list = new ArrayList<>();
+            return ResultUtil.success(list);
         }
-        List<TestReportTemplate> testReportTemplates=this.list(queryWrapper);
-        return ResultUtil.success(testReportTemplates);
     }
 
     @Override

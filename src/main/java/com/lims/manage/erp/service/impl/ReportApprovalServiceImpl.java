@@ -3,13 +3,30 @@ package com.lims.manage.erp.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.google.common.collect.Lists;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
-import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.ReportMapper;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
+import com.lims.manage.erp.mapper.SysUserDao;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
 import com.lims.manage.erp.service.ReportApprovalService;
-import com.lims.manage.erp.util.*;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.HttpDownloadUtil;
+import com.lims.manage.erp.util.ImageUtil;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.PdfDoc;
+import com.lims.manage.erp.util.QRCodeUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportApprovalVo;
@@ -23,7 +40,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -457,7 +481,13 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
                 logger.error("报告编号【"+detailById.getReportCode() + "】签发签字失败！");
                 e.printStackTrace();
             }
-            reportApprovalVo.setReportUrl(url);
+            String path = "";
+            try {
+                path = insertPicToPdf(url,detailById.getReportCode());
+            }catch (Exception e){
+                path = url;
+            }
+            reportApprovalVo.setReportUrl(path);
             reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
             return true;
         }
@@ -517,7 +547,13 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
                 logger.error("报告编号【"+detailById.getReportCode() + "】签发签字失败！");
                 e.printStackTrace();
             }
-            reportApprovalVo.setReportUrl(url);
+            String path = "";
+            try {
+                path = insertPicToPdf(url,detailById.getReportCode());
+            }catch (Exception e){
+                path = url;
+            }
+            reportApprovalVo.setReportUrl(path);
             reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
             return true;
         }
@@ -696,5 +732,56 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             taskDetailInfoVo.setSampleDetailList(sampleDetailVoList);
         }
         return taskDetailInfoVo;
+    }
+
+    /**
+     * 向pdf指定位置插入pic
+     * @param url
+     * @param reportCode
+     * @return
+     * @throws Exception
+     */
+    public String insertPicToPdf(String url, String reportCode) throws Exception{
+        String localPath = qiYueSuoEntity.getAutographPath()+"local.pdf";
+        URL url1 = new URL(url);
+        URLConnection connection = url1.openConnection();
+        InputStream inputStream = connection.getInputStream();
+
+        // 加载PDF文档
+        com.itextpdf.text.Document document = new com.itextpdf.text.Document(PageSize.A4);
+        PdfStamper stamper = new PdfStamper(new PdfReader(inputStream), new FileOutputStream(localPath));
+
+        // 创建 Image 对象
+        BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQrcode()+reportCode);
+        // 将图像写入字节数组
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "jpg", baos);
+        byte[] imageData = baos.toByteArray();
+
+        //除了第一页和第二页在报告左上角添加防伪标识码
+        for (int pageNumber = 1; pageNumber <= stamper.getReader().getNumberOfPages(); pageNumber++) {
+            if (pageNumber>2){
+                PdfContentByte content = stamper.getOverContent(pageNumber);
+                // 读取图片
+                Image image = Image.getInstance(imageData);
+                image.scaleToFit(50,50);
+                // 设置图片位置
+                image.setAbsolutePosition(15, PageSize.A4.getHeight() - 60);
+                // 将图片添加到页面
+                content.addImage(image);
+            }
+        }
+        // 保存修改后的 PDF 文档
+        inputStream.close();
+        stamper.close();
+        document.close();
+        //将本地文件上传到文件服务器，更新数据库记录的url
+        File file = new File(localPath);
+        MultipartFile multipartFile = AsposeUtil.fileToMultipart(file, reportCode);
+        String s = MinIoUtil.upload("report-download", multipartFile, reportCode + ".pdf");
+        String[] fileUrls = s.split("\\?");
+        //删除local.pdf
+        FileAndFolderUtil.delete(localPath);
+        return fileUrls[0];
     }
 }

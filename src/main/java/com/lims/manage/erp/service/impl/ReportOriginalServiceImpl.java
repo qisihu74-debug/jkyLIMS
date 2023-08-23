@@ -60,7 +60,13 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
             String filename = file.getOriginalFilename();
             String upload = MinIoUtil.upload(BucketsConst.report_original, file, filename);
             String url = upload.substring(0, upload.indexOf("?"));
-            entity.setUrl(url);
+            String urlDecode = null;
+            try {
+                urlDecode = URLDecoder.decode(url, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            entity.setUrl(urlDecode);
         }
         entity.setUpdateDate(new Date());
         return reportOriginalEntityMapper.updateByPrimaryKeySelective(entity);

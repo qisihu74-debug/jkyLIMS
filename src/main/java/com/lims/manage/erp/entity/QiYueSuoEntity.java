@@ -79,4 +79,7 @@ public class QiYueSuoEntity {
 
     @Value("${qrcode.url}")
     private String qRcodeUrl;
+
+    @Value("${qrcode}")
+    private String qrcode;
 }
