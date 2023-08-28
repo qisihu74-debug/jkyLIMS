@@ -26,6 +26,7 @@ import com.lims.manage.erp.util.ImageUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.PdfDoc;
 import com.lims.manage.erp.util.QRCodeUtil;
+import com.lims.manage.erp.util.QRCodeUtils;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
@@ -752,7 +753,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         PdfStamper stamper = new PdfStamper(new PdfReader(inputStream), new FileOutputStream(localPath));
 
         // 创建 Image 对象
-        BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQrcode()+reportCode);
+        BufferedImage bufferedImage = QRCodeUtils.encode(qiYueSuoEntity.getQrcode()+reportCode,qiYueSuoEntity.getLogoUrl(),false);
         // 将图像写入字节数组
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(bufferedImage, "jpg", baos);
