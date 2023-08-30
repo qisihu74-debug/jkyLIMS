@@ -471,10 +471,10 @@ public class SampleServiceImpl implements SampleService {
                         if (id.longValue() == 11){
                             integerList.add(1L);
                         }
-                        if (id.longValue() == 33){
+                        if (id.longValue() == 33 && type == 2){
                             integerList.add(3L);
                         }
-                        if (id.longValue() == 44){
+                        if (id.longValue() == 44 && type ==2){
                             integerList.add(4L);
                         }
                     }
