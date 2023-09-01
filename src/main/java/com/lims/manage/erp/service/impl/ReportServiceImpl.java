@@ -3781,9 +3781,14 @@ public class ReportServiceImpl implements ReportService {
                         if (value != null) {
                             String string = value.toString();
                             //检测单位名称
-                            if ("${result.companyName}".equals(string)) {
+                            if ("${result.companyName}".equals(string.trim()) || "检测单位名称：${result.companyName}".equals(string.trim())) {
                                 cells.get(n, j).setValue("检测单位名称：" + info);
                             }
+                            //报告编号
+//                            String reportCode = entrustEntityMapper.getReportCodeByEntrustId(reportEditReq.getEntrustId());
+//                            if ("${result.reportNumber}".equals(string.trim()) || "报告编号：${result.reportNumber}".equals(string.trim())) {
+//                                cells.get(n, j).setValue("报告编号：" + reportCode);
+//                            }
                             //委托单位
                             if ("${result.entrustUnit}".equals(string)){
                                 cells.get(n, j).setValue(org.apache.commons.lang.StringUtils.isEmpty(detail.getEntrustCompany()) ? "——" : detail.getEntrustCompany());
@@ -3823,7 +3828,7 @@ public class ReportServiceImpl implements ReportService {
                             }
                             //检测日期
                             //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
-                            if ("${result.testDate}".equals(string)){
+                            if (string.contains("${result.testDate}")){
                                 Date start = taskMapper.getStartTime(reportEditReq.getEntrustId());
                                 Date end = taskMapper.getEndTime(reportEditReq.getEntrustId());
                                 String e = "";
@@ -3866,6 +3871,14 @@ public class ReportServiceImpl implements ReportService {
                             //生产厂家
                             if ("${result.manufacturer}".equals(string)){
                                 cells.get(n, j).setValue(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+                            }
+                            //规格等级
+                            if ("${result.specificationGrade}".equals(string.trim())){
+                                cells.get(n, j).setValue(sampleEntity.getSpecs());
+                            }
+                            //代表数量
+                            if ("${result.quantity}".equals(string.trim())){
+                                cells.get(n, j).setValue(sampleEntity.getGeneration());
                             }
                         }
                     }

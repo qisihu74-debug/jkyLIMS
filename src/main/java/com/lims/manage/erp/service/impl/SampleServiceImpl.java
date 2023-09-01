@@ -401,7 +401,7 @@ public class SampleServiceImpl implements SampleService {
             }
             entity.setId(sampleId);
             entity.setSampleCode(sampleTagInfo.getSampleCode());
-            entity.setSampleName(sampleTagInfo.getSampleName());
+            entity.setSampleName(sampleTagInfo.getAliasName());
             entity.setSpecs(sampleTagInfo.getSpecs());
             entity.setSampleRetentionPeriod(sampleTagInfo.getSampleRetentionPeriod());
             entity.setOutwardDescribe(StringUtils.isEmpty(sampleTagInfo.getOutwardDescribe())?"/":sampleTagInfo.getOutwardDescribe());
