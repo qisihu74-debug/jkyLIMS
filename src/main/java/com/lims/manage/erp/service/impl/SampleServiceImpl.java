@@ -468,10 +468,10 @@ public class SampleServiceImpl implements SampleService {
                 List<Long> roles = sysUserRoleDao.getRoleIdsByUserId(userInfo.getUserId());
                 for (Long id:roles) {
                     if (id==11 || id==33 || id==44){
-                        if (id.longValue() == 11){
+                        if (id.longValue() == 11 && type == 1){
                             integerList.add(1L);
                         }
-                        if (id.longValue() == 33 && type == 2){
+                        if (id.longValue() == 33 && type == 1){
                             integerList.add(3L);
                         }
                         if (id.longValue() == 44 && type ==2){
