@@ -938,7 +938,7 @@ public class TaskController {
             out.flush();//刷新
             InputStream out000 = new FileInputStream(newFilePath);
             //相应pdf
-            ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(out000,path);
+            ByteArrayOutputStream b1 = PDFHelper3.excel2pdf(out000,path);
             InputStream inputStream = FileAndFolderUtil.parseOut(b1);
             ServletOutputStream outputStream = response.getOutputStream();
             int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
