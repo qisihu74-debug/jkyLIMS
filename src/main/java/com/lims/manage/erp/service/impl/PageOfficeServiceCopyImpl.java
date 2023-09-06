@@ -877,6 +877,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     @Override
     public String saveOriginalRecord2(Integer[] ids) throws Exception {
         ExcelInsertVo pathUrl = testProductItemDao.getExcelUrl(ids[0]);
+        // 签名 图片
+        List<String> signatureImages = new ArrayList<>();
         Integer itemId = ids[0];
         // 通过检测项主键 获取样品生成附件是否存在。
         ExcelSheetDataVo productInputStream = getProductInputStream(pathUrl, itemId);
@@ -911,15 +913,41 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                         ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
                         excelInsertVo1.setSheetName(key);
                         excelInsertVo1.setRecordType("检测：");
-//                        excelInsertVo1.setImags(testImags);
-                        excelInsertVo1.setImags(null);
+                        // 获取检测项中 检测人主键
+                        if (excelInsertVo.getTestSetUrl() != null) {
+                            List<Long> userIds = new ArrayList<>();
+                            String[] testArray = excelInsertVo.getTestSetUrl().split("\\,");
+                            for (int i = 0; i < testArray.length; i++) {
+                                userIds.add(Long.valueOf(testArray[i]));
+                            }
+                            String[] imags = new String[userIds.size()];
+                            methodUrlImags(userIds, imags);
+                            excelInsertVo1.setImags(imags);
+                            // 记录签名信息
+                            for (int j = 0; j < imags.length; j++) {
+                                signatureImages.add(imags[j]);
+                            }
+                        }
                         // key 使用 sheet名加类型进行拼接
                         map.put(excelInsertVo1.getSheetName() + excelInsertVo1.getRecordType(), excelInsertVo1);
                         ExcelInsertVo excelInsertVo2 = new ExcelInsertVo();
                         excelInsertVo2.setSheetName(key);
                         excelInsertVo2.setRecordType("记录：");
-//                        excelInsertVo2.setImags(recordImags);
-                        excelInsertVo2.setImags(null);
+                        // 获取检测项中 记录人主键
+                        if (excelInsertVo.getRecordSetUrl() != null) {
+                            List<Long> userIds = new ArrayList<>();
+                            String[] testArray = excelInsertVo.getRecordSetUrl().split("\\,");
+                            for (int i = 0; i < testArray.length; i++) {
+                                userIds.add(Long.valueOf(testArray[i]));
+                            }
+                            String[] recordImags = new String[userIds.size()];
+                            methodUrlImags(userIds, recordImags);
+                            excelInsertVo2.setImags(recordImags);
+                            // 记录签名信息
+                            for (int j = 0; j < recordImags.length; j++) {
+                                signatureImages.add(recordImags[j]);
+                            }
+                        }
                         // key 使用 sheet名加类型进行拼接
                         map.put(excelInsertVo2.getSheetName() + excelInsertVo2.getRecordType(), excelInsertVo2);
                         ExcelInsertVo data = new ExcelInsertVo();
@@ -938,6 +966,10 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         ExcelImageUtils.inserImage(newFilePath, excelInsertVoList, saveExcel);
         // 删除附件
         FileAndFolderUtil.delete(newFilePath);
+        // 消除图片信息
+        for (String iamgPath : signatureImages) {
+            FileAndFolderUtil.delete(iamgPath);
+        }
         return saveExcel;
     }
 }

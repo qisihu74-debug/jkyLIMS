@@ -87,6 +87,14 @@ public class ExcelInsertVo {
      * sheet 下标
      */
     Integer sheetIndex;
+    /**
+     * 检测人
+     */
+    String testSetUrl;
+    /**
+     * 记录人
+     */
+    String recordSetUrl;
 
 
 }

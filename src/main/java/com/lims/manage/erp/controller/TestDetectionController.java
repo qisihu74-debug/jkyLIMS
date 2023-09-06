@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.InstrumentEntity;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
@@ -8,6 +9,7 @@ import com.lims.manage.erp.entity.TestInstrumentEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.PageOfficeCopyService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -34,6 +36,8 @@ public class TestDetectionController {
     TestDetectionService testDetectionService;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private PageOfficeCopyService pageOfficeCopyService;
 
     @RequestMapping("/getTheInstrument")
     public Result getTheInstrument(Integer escRelId,Integer checkItemId) {
@@ -101,7 +105,7 @@ public class TestDetectionController {
      */
     @RequestMapping("/end_test")
 //    public Result PostEndTest1(SampleItemInstrumentVo sampleItemInstrumentVo) {
-    public Result PostEndTest1(@RequestBody EndTestParamVo paramVo) {
+    public Result PostEndTest1(@RequestBody EndTestParamVo paramVo) throws Exception {
         SampleItemInstrumentVo sampleItemInstrumentVo = new SampleItemInstrumentVo();
         sampleItemInstrumentVo.setResult(paramVo.getResult());
         sampleItemInstrumentVo.setEndTime(paramVo.getEndTime());
@@ -133,6 +137,16 @@ public class TestDetectionController {
             return ResultUtil.error(msg);
         }
         Boolean flag = testDetectionService.postEndTest(sampleItemInstrumentVo);
+        // 试验完成：检测项对应原始记录签名信息更新
+        if (CollectionUtil.isNotEmpty(sampleItemInstrumentVo.getItemInstrumentEntityList())) {
+            Integer[] ids = new Integer[sampleItemInstrumentVo.getItemInstrumentEntityList().size()];
+            for (int i = 0; i < sampleItemInstrumentVo.getItemInstrumentEntityList().size(); i++) {
+                SampleItemInstrumentEntity data = sampleItemInstrumentVo.getItemInstrumentEntityList().get(i);
+                ids[i] = data.getItemId();
+            }
+            String excelUrl = pageOfficeCopyService.saveOriginalRecord2(ids);
+            pageOfficeCopyService.updateOriginalRecordUrl(excelUrl, ids);
+        }
         if(flag) {
             // 更新任务单状态 需要 对所有的 样品信息 下 检测项 进行判断 ==2的话 更新。
             TaskDetailInfoVo dataGather = taskService.getTaskDetailInfoTwo(sampleItemInstrumentVo.getTaskId(),null);

@@ -226,73 +226,73 @@ public class PageOfficeController {
         return mv;
     }
 
-    /**
-     * 保存接口
-     *
-     * @param request
-     * @param response
-     */
-    @RequestMapping("Excel/saveOriginalRecord")
-    public void save(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        FileSaver fs = new FileSaver(request, response);
-        // 实现逻辑操作 -- 完成编辑
-        PDFHelper3.getLicense();
-        String flag = pageOfficeCopyService.saveOriginalRecord(request, fs);
-        fs.close();
-        // 保存本地Excel 包含签名信息
-        if (!StringUtils.isEmpty(flag)) {
-            // 检测参数
-            String list = fs.getFormField("items");
-            // 获取检测项id 集合
-            String[] items = list.split(",");
-            Integer[] ids = new Integer[items.length];
-            for (int j = 0; j < items.length; j++) {
-                ids[j] = Integer.parseInt(items[j]);
-            }
-            pageOfficeCopyService.updateOriginalRecordUrl(flag, ids);
-            // 更新编辑原始记录完成标记。
-            pageOfficeCopyService.editItemdData(ids,null,null);
-        }
-    }
-
 //    /**
-//     * 2023年9月5日更新：试验检测在线编辑：保留检测项对应签名信息，签名图片不做处理。
+//     * 保存接口
 //     *
 //     * @param request
 //     * @param response
 //     */
 //    @RequestMapping("Excel/saveOriginalRecord")
 //    public void save(HttpServletRequest request, HttpServletResponse response) throws Exception {
-//        FileSaver file = new FileSaver(request, response);
-//        // 读取 读取file中 试验签名，记录签名
-//        Map<String, String> map = pageOfficeCopyService.getName(file);
-//        // 检测人
-//        String testSet = map.get("testSet");
-//        // 记录人
-//        String recordSet = map.get("recordSet");
+//        FileSaver fs = new FileSaver(request, response);
 //        // 实现逻辑操作 -- 完成编辑
 //        PDFHelper3.getLicense();
-//        // 生成的 完成后的file文件
-//        String saveExcel = dir + file.getFileName();
-//        // 文件路径
-//        file.saveToFile(saveExcel);
-//        file.close();
+//        String flag = pageOfficeCopyService.saveOriginalRecord(request, fs);
+//        fs.close();
 //        // 保存本地Excel 包含签名信息
-//        if (!StringUtils.isEmpty(saveExcel)) {
+//        if (!StringUtils.isEmpty(flag)) {
 //            // 检测参数
-//            String list = file.getFormField("items");
+//            String list = fs.getFormField("items");
 //            // 获取检测项id 集合
 //            String[] items = list.split(",");
 //            Integer[] ids = new Integer[items.length];
 //            for (int j = 0; j < items.length; j++) {
 //                ids[j] = Integer.parseInt(items[j]);
 //            }
-//            pageOfficeCopyService.updateOriginalRecordUrl(saveExcel, ids);
+//            pageOfficeCopyService.updateOriginalRecordUrl(flag, ids);
 //            // 更新编辑原始记录完成标记。
-//            // 进行检测项与检测人和记录人的存储。
-//            pageOfficeCopyService.editItemdData(ids, testSet, recordSet);
+//            pageOfficeCopyService.editItemdData(ids,null,null);
 //        }
 //    }
+
+    /**
+     * 2023年9月5日更新：试验检测在线编辑：保留检测项对应签名信息，签名图片不做处理。
+     *
+     * @param request
+     * @param response
+     */
+    @RequestMapping("Excel/saveOriginalRecord")
+    public void save(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        FileSaver file = new FileSaver(request, response);
+        // 读取 读取file中 试验签名，记录签名
+        Map<String, String> map = pageOfficeCopyService.getName(file);
+        // 检测人
+        String testSet = map.get("testSet");
+        // 记录人
+        String recordSet = map.get("recordSet");
+        // 实现逻辑操作 -- 完成编辑
+        PDFHelper3.getLicense();
+        // 生成的 完成后的file文件
+        String saveExcel = dir + file.getFileName();
+        // 文件路径
+        file.saveToFile(saveExcel);
+        file.close();
+        // 保存本地Excel 包含签名信息
+        if (!StringUtils.isEmpty(saveExcel)) {
+            // 检测参数
+            String list = file.getFormField("items");
+            // 获取检测项id 集合
+            String[] items = list.split(",");
+            Integer[] ids = new Integer[items.length];
+            for (int j = 0; j < items.length; j++) {
+                ids[j] = Integer.parseInt(items[j]);
+            }
+            pageOfficeCopyService.updateOriginalRecordUrl(saveExcel, ids);
+            // 更新编辑原始记录完成标记。
+            // 进行检测项与检测人和记录人的存储。
+            pageOfficeCopyService.editItemdData(ids, testSet, recordSet);
+        }
+    }
 
     /**
      * 添加PageOffice的服务器端授权程序Servlet（必须）
