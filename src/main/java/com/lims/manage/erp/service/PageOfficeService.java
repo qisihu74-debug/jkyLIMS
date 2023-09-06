@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: DLC
@@ -76,5 +77,5 @@ public interface PageOfficeService {
      * @param ids
      * @return
      */
-    Boolean editItemdData(Integer[] ids);
+    Boolean editItemdData(Integer[] ids,String testSet ,String recordSet);
 }

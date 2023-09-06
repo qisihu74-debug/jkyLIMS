@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: DLC
@@ -74,8 +75,25 @@ public interface PageOfficeCopyService {
 
     /**
      * 编辑原始数据
+     *
      * @param ids
      * @return
      */
-    Boolean editItemdData(Integer[] ids);
+    Boolean editItemdData(Integer[] ids, String testSet, String recordSet);
+
+    /**
+     * 读取file中 签名信息
+     *
+     * @param file
+     * @return
+     */
+    Map<String, String> getName(FileSaver file);
+
+    /**
+     * 2023年9月6日 试验完成：更新检测项中 签名信息
+     *
+     * @param ids 检测项主键集合
+     * @return
+     */
+    String saveOriginalRecord2(Integer[] ids) throws Exception;
 }

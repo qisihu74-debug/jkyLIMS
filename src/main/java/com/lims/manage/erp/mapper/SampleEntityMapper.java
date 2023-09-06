@@ -394,6 +394,11 @@ public interface SampleEntityMapper {
      */
     Integer selectCount3(SampleOutPutVo sampleOutPutVo);
 
+    /**
+     * 通过委托单id 获取样品信息集合。
+     */
+    List<SampleEntity> selectAllState(@Param("list")List<Long> list);
+
     @Select("select id from test_sample where sample_code = #{code}")
     int getIdByCode(@Param("code") String code);
 
