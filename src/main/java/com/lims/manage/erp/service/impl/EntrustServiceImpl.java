@@ -177,14 +177,14 @@ public class EntrustServiceImpl implements EntrustService {
                     // 委托单创建 更新样品状态 state 待检0
                     sampleData.setState("0");
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
-                    // 增加样品样品流转状态
-                    SampleCirculationRecord sa = new SampleCirculationRecord();
-                    sa.setSampleId(sampleData.getId());
-                    sa.setStatus("0");
-                    sa.setOperatorId(userInfo.getUserId());
-                    sa.setOperatorName(vo.getBusinessAcceptor());
-                    sa.setTime(new Date());
-                    sampleEntityMapper.saveSampleCirculationRecord(sa);
+//                    // 增加样品样品流转状态
+//                    SampleCirculationRecord sa = new SampleCirculationRecord();
+//                    sa.setSampleId(sampleData.getId());
+//                    sa.setStatus("0");
+//                    sa.setOperatorId(userInfo.getUserId());
+//                    sa.setOperatorName(vo.getBusinessAcceptor());
+//                    sa.setTime(new Date());
+//                    sampleEntityMapper.saveSampleCirculationRecord(sa);
                     EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                     entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                     entrustSampleEntity.setSampleId(sampleEntity.getId());
@@ -2646,7 +2646,8 @@ public class EntrustServiceImpl implements EntrustService {
             vo.setOrderTime(entity.getOrderTime());
             vo.setState(0);
             vo.setReportComplete(2);
-            vo.setOrderer(ShiroUtils.getUserInfo().getName());
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            vo.setOrderer(userInfo.getName());
             vo.setPresentInformation(entity.getPresentInformation());
 //            if(deptId.equals(dept)){
             if(!CollectionUtils.isEmpty(entity.getDeptIds())){
@@ -2669,6 +2670,25 @@ public class EntrustServiceImpl implements EntrustService {
             }
             //更新检测项信息
             taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
+            // 2023年9月26日 发布时：样品状态 = 待检
+            // 通过委托单id 获取样品信息
+            List<Integer> sampleIds = entityMapper.getSampleId(entity.getEntrustmentId());
+            if (CollectionUtil.isNotEmpty(sampleIds)) {
+                for (Integer sampleId : sampleIds) {
+                    // 根据样品id 查询样品流转列表
+                    List<SampleCirculationRecord> circulationList = sampleEntityMapper.getRecords(sampleId, 30);
+                    if (CollectionUtils.isEmpty(circulationList)) {
+                        // 增加样品样品流转状态
+                        SampleCirculationRecord sa = new SampleCirculationRecord();
+                        sa.setSampleId(sampleId);
+                        sa.setStatus("0");
+                        sa.setOperatorId(userInfo.getUserId());
+                        sa.setOperatorName(userInfo.getName());
+                        sa.setTime(new Date());
+                        sampleEntityMapper.saveSampleCirculationRecord(sa);
+                    }
+                }
+            }
             // 记录发布任务单的日志
             StringBuffer stringBuilder1 = new StringBuffer();
             stringBuilder1.append("任务单发布日志");
@@ -3162,14 +3182,14 @@ public class EntrustServiceImpl implements EntrustService {
                 sampleEntity2.setState("0");
                 // update样品信息
                 sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity2);
-                // 增加样品样品流转状态
-                SampleCirculationRecord sa = new SampleCirculationRecord();
-                sa.setSampleId(sampleEntity2.getId());
-                sa.setStatus("0");
-                sa.setOperatorId(userInfo.getUserId());
-                sa.setOperatorName(vo.getBusinessAcceptor());
-                sa.setTime(new Date());
-                sampleEntityMapper.saveSampleCirculationRecord(sa);
+//                // 增加样品样品流转状态
+//                SampleCirculationRecord sa = new SampleCirculationRecord();
+//                sa.setSampleId(sampleEntity2.getId());
+//                sa.setStatus("0");
+//                sa.setOperatorId(userInfo.getUserId());
+//                sa.setOperatorName(vo.getBusinessAcceptor());
+//                sa.setTime(new Date());
+//                sampleEntityMapper.saveSampleCirculationRecord(sa);
                 EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                 entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                 entrustSampleEntity.setSampleId(sampleEntity.getId());

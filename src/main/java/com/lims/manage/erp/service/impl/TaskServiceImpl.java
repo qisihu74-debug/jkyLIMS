@@ -1058,6 +1058,9 @@ public class TaskServiceImpl implements TaskService {
                 sampleTime.append(sampleEntity.getOutwardDescribe()== null ? "——": sampleEntity.getOutwardDescribe());
                 sampleTime.append("；");
                 sampleTime.append("来样时间：");
+                sampleTime.append(sampleEntity.getSpecs()== null ? "——": sampleEntity.getSpecs());
+                sampleTime.append("；");
+                sampleTime.append("规格尺寸：");
                 // 签收时间 = 委托单受理日期
                 sampleEntity.setReceivedDate(sdf.format(entrustBaseInfo.getAcceptanceDate()));
                 sampleTime.append(sampleEntity.getReceivedDate());
@@ -1829,6 +1832,9 @@ public class TaskServiceImpl implements TaskService {
         } catch (Exception e) {
             logger.info("样品附件 " + productExcelUrl + e);
         }
+        if(fileStream == null){
+            return null;
+        }
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
         Map<String, String> mapSheet = new HashMap<>();
         // 循环遍历所有工作表
@@ -2110,6 +2116,8 @@ public class TaskServiceImpl implements TaskService {
     protected void updateSampleStateMethod(List<Long> taskIds) {
         // 根据任务单id 获取样品状态
         List<SampleEntity> sampleList = sampleEntityMapper.selectAllState(taskIds);
+        // 获取业务受理人id
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
         // 遍历 state < 1 : 更新状态 = 1
         for (SampleEntity sampleEntity : sampleList) {
             if (sampleEntity.getState() != null && (Integer.parseInt(sampleEntity.getState()) < 1)) {
@@ -2118,6 +2126,26 @@ public class TaskServiceImpl implements TaskService {
                 data.setId(sampleEntity.getId());
                 data.setState("1");
                 testSampleEntityMapper.updateById(data);
+            }
+            // 根据样品id 查询样品流转列表
+            List<SampleCirculationRecord> circulationList = sampleEntityMapper.getRecords(sampleEntity.getId(), 30);
+            if (CollectionUtil.isNotEmpty(circulationList)) {
+                Boolean flag = false;
+                for (SampleCirculationRecord sampleCirculationRecord : circulationList) {
+                    if (sampleCirculationRecord.getStatus().equals("1")) {
+                        flag = true;
+                    }
+                }
+                if (!flag) {
+                    // 增加样品样品流转状态
+                    SampleCirculationRecord sa = new SampleCirculationRecord();
+                    sa.setSampleId(sampleEntity.getId());
+                    sa.setStatus("1");
+                    sa.setOperatorId(userInfo.getUserId());
+                    sa.setOperatorName(userInfo.getName());
+                    sa.setTime(new Date());
+                    sampleEntityMapper.saveSampleCirculationRecord(sa);
+                }
             }
         }
     }
