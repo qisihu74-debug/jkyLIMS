@@ -1301,6 +1301,7 @@ WHERE
         <if test="type ==2 ">
             AND (status = '3' or status= '4')
         </if>
+        order by STATUS ASC 
     </select>
 
     <select id="selectPageVo" resultType="com.lims.manage.erp.vo.SampleOutPutVo">

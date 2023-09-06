@@ -790,12 +790,12 @@ public class SampleController {
     @RequestMapping("/downloadRetentionTab1")
     public void downloadRetentionSampleTab1(HttpServletResponse response) throws Exception {
         //读取excel
-        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\7月样品留样.xlsx");
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\样品留样8月.xlsx");
         Worksheet worksheet = workbook.getWorksheets().get(0);
         Cells cells = worksheet.getCells();
         //遍历excel，根据编号查询
         int num = 3;
-        while (num<=119){
+        while (num<=127){
             String index = "C"+num;
             String code = cells.get(index).getValue().toString();
             int sampleId = sampleService.getIdByCode(code);
@@ -826,7 +826,7 @@ public class SampleController {
         }
 
         //读取excel
-        com.aspose.cells.Workbook workbook1 = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\7月样品留样.xlsx");
+        com.aspose.cells.Workbook workbook1 = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\样品留样8月.xlsx");
         Worksheet worksheet1 = workbook1.getWorksheets().get(0);
         Cells cells1 = worksheet1.getCells();
         //遍历excel，根据编号查询
@@ -839,5 +839,20 @@ public class SampleController {
             sampleService.updateDayByCode(code,value);
             num1++;
         }
+    }
+
+    /**
+     * 导出委托台账
+     * @throws Exception
+     */
+    @RequestMapping("/exportWtTz")
+    public void exportWtTz() throws Exception {
+        //读取excel
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\委托台账.xls");
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        Cells cells = worksheet.getCells();
+        //遍历excel，根据编号查询
+        sampleService.exportWtTz(cells);
+        workbook.save("D:\\doc\\saveOriginalRecord\\委托台账.xlsx");
     }
 }

@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.aspose.cells.Cells;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
@@ -156,4 +157,6 @@ public interface SampleService {
     int getIdByCode(String code);
 
     void updateDayByCode(String code, String value);
+
+    void exportWtTz(Cells cells);
 }

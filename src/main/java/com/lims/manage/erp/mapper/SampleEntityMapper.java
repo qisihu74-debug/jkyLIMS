@@ -399,9 +399,72 @@ public interface SampleEntityMapper {
      */
     List<SampleEntity> selectAllState(@Param("list")List<Long> list);
 
-    @Select("select id from test_sample where sample_code = #{code}")
+    @Select("select id from test_sample where sample_code = #{code} limit 1")
     int getIdByCode(@Param("code") String code);
 
     @Update("update test_sample set sample_retention_period=#{parseInt} where sample_code = #{code}")
     void updateDayByCode(@Param("code") String code, @Param("parseInt") int parseInt);
+
+    @Select("\n" +
+            "SELECT DISTINCT GROUP_CONCAT( IFNULL( tb1.sample_code, \"——\" ) SEPARATOR ',') As sampleCode,\n" +
+            "GROUP_CONCAT( IFNULL( tb1.report_code, \"——\" ) SEPARATOR ',') As reportCode,\n" +
+            "GROUP_CONCAT( IFNULL( tb1.alias_name, \"——\" ) SEPARATOR ',') As aliasName,\n" +
+            " tb1.entrustment_no As entrustNo,\n" +
+            " tb1.acceptance_date As acceptanceDate,\n" +
+            " tb1.order_time As orderTime,\n" +
+            " tb1.task_code As taskCode,\n" +
+            "tb1.request_date AS requestDate\n" +
+            "FROM\n" +
+            "(SELECT DISTINCT\n" +
+            "\tt1.entrustment_no,\n" +
+            "\tt1.acceptance_date,\n" +
+            "\tt3.sample_code,\n" +
+            "\tt3.alias_name,\n" +
+            "\tt4.order_time,\n" +
+            "\tt4.task_code,\n" +
+            "\tt5.report_code,\n" +
+            "\tt1.request_date\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info t1\n" +
+            "LEFT JOIN test_entrusted_sample_details_rel t2 ON t1.id = t2.entrustment_id\n" +
+            "LEFT JOIN test_sample t3 ON t2.sample_id = t3.id\n" +
+            "LEFT JOIN test_task t4 ON t1.id = t4.entrustment_id\n" +
+            "LEFT JOIN test_report_record t5 ON t1.id=t5.entrustment_id\n" +
+            "WHERE t1.state!= 144 AND t1.state>=1 \n" +
+            "UNION ALL\n" +
+            "SELECT DISTINCT\n" +
+            "\tt1.entrustment_no,\n" +
+            "\tt1.acceptance_date,\n" +
+            "\tt3.sample_code,\n" +
+            "\tt3.alias_name,\n" +
+            "\tt4.order_time,\n" +
+            "\tt4.task_code,\n" +
+            "\tt5.report_code,\n" +
+            "\tt1.request_date\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info t1\n" +
+            "LEFT JOIN test_entrusted_sample_details_rel t2 ON t1.id = t2.entrustment_id\n" +
+            "LEFT JOIN test_sample t3 ON t2.sample_id = t3.id\n" +
+            "LEFT JOIN test_task t4 ON t1.id = t4.entrustment_id\n" +
+            "LEFT JOIN test_report_record t5 ON t1.id=t5.entrust_id\n" +
+            "WHERE t1.state!= 144 AND t1.state>=1 \n" +
+            "UNION ALL\n" +
+            "SELECT DISTINCT\n" +
+            "\tt1.entrustment_no,\n" +
+            "\tt1.acceptance_date,\n" +
+            "\tt3.sample_code,\n" +
+            "\tt3.alias_name,\n" +
+            "\tt4.order_time,\n" +
+            "  t4.task_code,\n" +
+            "\tt5.report_code,\n" +
+            "\tt1.request_date\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info t1\n" +
+            "LEFT JOIN test_entrusted_sample_details_rel t2 ON t1.id = t2.entrustment_id\n" +
+            "LEFT JOIN test_sample t3 ON t2.sample_id = t3.id\n" +
+            "LEFT JOIN test_task t4 ON t1.id = t4.entrustment_id\n" +
+            "LEFT JOIN test_report_record_mid t5 ON t1.id=t5.entrust_id\n" +
+            "WHERE t1.state!= 144 AND t1.state>=1 AND t5.report_code is not null) tb1\n" +
+            "GROUP BY tb1.task_code\n")
+    List<TzBean> exportWtTz();
 }

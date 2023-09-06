@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.aspose.cells.Cells;
 import com.aspose.cells.SaveFormat;
 import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -390,6 +391,7 @@ public class SampleServiceImpl implements SampleService {
     @Override
     public void downloadNewSampleTab1(int type, Integer sampleId,SampleDetailVo sampleTagInfo, HttpServletResponse response) {
         List<SampleDetailVo> sampleDetailVoList = new ArrayList<>();
+        log.info("样品留样标签的样品编号为:{}",sampleTagInfo.getSampleCode());
         try {
 
             List<String> codeList = Lists.newArrayList();
@@ -484,7 +486,7 @@ public class SampleServiceImpl implements SampleService {
                     worksheetS.copy(worksheet);
                 }
             }
-            newBook.save("D:\\doc\\saveOriginalRecord\\七月留样\\"+sampleTagInfo.getSampleCode()+".xlsx", SaveFormat.XLSX);
+            newBook.save("D:\\doc\\saveOriginalRecord\\八月留样\\"+sampleTagInfo.getSampleCode()+".xlsx", SaveFormat.XLSX);
         }catch (Exception e){
             log.error("下载样品标签异常:{}",e);
         }
@@ -1194,6 +1196,61 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     public void updateDayByCode(String code, String value) {
-        sampleEntityMapper.updateDayByCode(code,Integer.parseInt(value));
+        sampleEntityMapper.updateDayByCode(code,(int)Double.parseDouble(value));
+    }
+
+    @Override
+    public void exportWtTz(Cells cells) {
+        List<TzBean> list = sampleEntityMapper.exportWtTz();
+        for (TzBean bean :list){
+            String sampleCode = bean.getSampleCode();
+            if (StringUtils.isNotEmpty(sampleCode)){
+                HashSet<String> strings = handlerData(sampleCode);
+                bean.setSampleCode(strings.toString());
+            }
+            String aliasName = bean.getAliasName();
+            if (StringUtils.isNotEmpty(aliasName)){
+                HashSet<String> strings = handlerData(aliasName);
+                bean.setAliasName(strings.toString());
+            }
+            String reportCode = bean.getReportCode();
+            if (StringUtils.isNotEmpty(reportCode)){
+                HashSet<String> strings = handlerData(reportCode);
+                bean.setReportCode(strings.toString());
+            }
+        }
+        //填充数据
+        int start = 3;
+        for (int i = 0; i <list.size() ; i++) {
+            cells.get("A"+start).setValue(list.get(i).getTaskCode());
+            if (list.get(i).getOrderTime() != null){
+                cells.get("B"+start).setValue(DateUtil.formatDate(list.get(i).getOrderTime()));
+            }
+            cells.get("C"+start).setValue(list.get(i).getEntrustNo());
+            if (list.get(i).getAcceptanceDate() != null){
+                cells.get("D"+start).setValue(DateUtil.formatDate(list.get(i).getAcceptanceDate()));
+            }
+            cells.get("E"+start).setValue(list.get(i).getSampleCode());
+            cells.get("F"+start).setValue(list.get(i).getAliasName());
+            cells.get("G"+start).setValue(list.get(i).getReportCode());
+            if (list.get(i).getRequestDate() != null){
+                cells.get("H"+start).setValue(DateUtil.formatDate(list.get(i).getRequestDate()));
+            }
+            start++;
+        }
+
+    }
+
+    public HashSet<String> handlerData(String message){
+        HashSet<String> set = new HashSet();
+        String[] split = message.split(",");
+        for (String s :split){
+            if (StringUtils.isNotEmpty(s)){
+                if (!"——".equals(s)){
+                    set.add(s);
+                }
+            }
+        }
+        return set;
     }
 }
