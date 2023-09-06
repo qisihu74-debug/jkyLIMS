@@ -2317,7 +2317,7 @@ public class ReportServiceImpl implements ReportService {
                             cells.get(m + insertRow + 1, indexGg).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getSpecs()) ? "——" : testSampleEntities.get(m).getSpecs());
                             cells.get(m + insertRow + 1, indexCd).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getManufacturer()) ? "——" : testSampleEntities.get(m).getManufacturer());
                             cells.get(m + insertRow + 1, indexPh).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getBatchNumber()) ? "——" : testSampleEntities.get(m).getBatchNumber());
-                            cells.get(m + insertRow + 1, indexNum).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getGeneration()) ? "——" : testSampleEntities.get(m).getGeneration());
+                            cells.get(m + insertRow + 1, indexNum).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getSampleQuantity()) ? "——" : testSampleEntities.get(m).getSampleQuantity());
                             cells.get(m + insertRow + 1, indexZt).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getOutward()) ? "——" : testSampleEntities.get(m).getOutward());
                             cells.get(m + insertRow + 1, indexBh).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getSampleCode()) ? "——" : testSampleEntities.get(m).getSampleCode());
                         }
