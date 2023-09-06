@@ -822,25 +822,8 @@ public class PageOfficeServiceImpl implements PageOfficeService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean editItemdData(Integer[] ids) {
-        testProductItemDao.updateBatchItemData(ids);
+    public Boolean editItemdData(Integer[] ids, String testSet, String recordSet) {
+        testProductItemDao.updateBatchItemData(ids, testSet, recordSet);
         return true;
     }
-
-
-//    public static void main(String[] args) throws Exception {
-//        String fileName = "D:\\doc\\e-iceblue\\4602092399671262.xlsx";
-//        InputStream fileStream = new FileInputStream(fileName);
-//        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-//        Map<Integer, Integer> map = new PageOfficeServiceImpl().inserItemPage(wb);
-//        int total = map.size();
-//        // 把 XSSFWorkbook 转为 InputStream
-//        InputStream input000 = AsposeUtil.createExcelStream(wb);
-//        fileStream.close();
-//        com.aspose.cells.Workbook document = new Workbook(input000);
-//         handlerPage(document,map,total);
-//        String path = "D:\\doc\\e-iceblue\\"+ "name" + ".xlsx";
-//        document.save(path);
-//        input000.close();
-//    }
 }

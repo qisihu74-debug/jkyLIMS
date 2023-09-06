@@ -128,7 +128,7 @@
             t2.sheet_index
     </select>
     <update id="updateBatchItemData">
-        UPDATE test_entrusted_sample_checkitem_rel set edit_data = 1 WHERE id in
+        UPDATE test_entrusted_sample_checkitem_rel set edit_data = 1,test_set_url = #{testSet}, record_set_url = #{recordSet} WHERE id in
          <foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
             #{id}
         </foreach>

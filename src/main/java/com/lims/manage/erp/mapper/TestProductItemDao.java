@@ -182,6 +182,7 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
      * @param array
      * @return
      */
-    int updateBatchItemData(@Param(value = "array") Integer[] array);
+    int updateBatchItemData(@Param(value = "array") Integer[] array , @Param(value = "testSet") String testSet ,
+                            @Param(value = "recordSet") String recordSet);
 }
 

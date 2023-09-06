@@ -1396,4 +1396,24 @@ WHERE
             </if>
         </trim>
     </select>
+    <select id="selectAllState" resultType="com.lims.manage.erp.entity.SampleEntity">
+        SELECT
+        id,
+        state
+        FROM
+        test_sample
+        WHERE
+        id IN (
+        SELECT
+        t1.sample_id
+        FROM
+        test_entrusted_sample_details_rel AS t1
+        LEFT JOIN test_task AS t2 ON t1.entrustment_id = t2.entrustment_id
+        WHERE
+        t2.id IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        )
+    </select>
 </mapper>

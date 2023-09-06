@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -536,6 +537,11 @@ public class TaskServiceImpl implements TaskService {
         stringBuilder1.append(" 领样人:"+taskTestEntity.getSampler());
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "任务单领取\n\t"+stringBuilder1.toString(), Const.TASK_GET, true);
         taskMapper.updateTestTask(taskTestEntity);
+        // 获取任务单id集合 进行更新样品领样状态
+        List<Long> taskIds = new ArrayList<>();
+        taskIds.add(taskTestEntity.getId());
+        // 根据任务单id 更新样品状态 = 1
+        updateSampleStateMethod(taskIds);
         return true;
     }
 
@@ -577,16 +583,20 @@ public class TaskServiceImpl implements TaskService {
        if(i==0){
            logger.error("批量修改任务单信息失败！");
        }
-//        for (int j = 0; j < taskTestEntitys.size(); j++) {
-//            TaskTestEntity taskTestEntity = taskTestEntitys.get(i);
-        for(TaskTestEntity taskTestEntity :taskTestEntitys){
+        // 获取任务单id集合 进行更新样品领样状态
+        List<Long> taskIds = new ArrayList<>();
+       for(TaskTestEntity taskTestEntity :taskTestEntitys){
             // 根据任务单主键 获取委托单主键
             EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
+           taskIds.add(taskTestEntity.getId());
             if (entrustEntity != null) {
                 //更新任务单状态为已领样
                 taskMapper.updateEntrustById(taskTestEntity.getId(), 2);
             }
+           taskIds.add(taskTestEntity.getId());
         }
+       // 根据任务单id 更新样品状态 = 1
+        updateSampleStateMethod(taskIds);
         return true;
     }
 
@@ -2091,5 +2101,24 @@ public class TaskServiceImpl implements TaskService {
             }
         }
         return doc;
+    }
+
+    /**
+     * 根据任务单id 更新样品状态 = 1
+     * @param taskIds
+     */
+    protected void updateSampleStateMethod(List<Long> taskIds) {
+        // 根据任务单id 获取样品状态
+        List<SampleEntity> sampleList = sampleEntityMapper.selectAllState(taskIds);
+        // 遍历 state < 1 : 更新状态 = 1
+        for (SampleEntity sampleEntity : sampleList) {
+            if (sampleEntity.getState() != null && (Integer.parseInt(sampleEntity.getState()) < 1)) {
+                // 更新操作。
+                TestSampleEntity data = new TestSampleEntity();
+                data.setId(sampleEntity.getId());
+                data.setState("1");
+                testSampleEntityMapper.updateById(data);
+            }
+        }
     }
 }
