@@ -393,4 +393,10 @@ public interface SampleEntityMapper {
      * @return
      */
     Integer selectCount3(SampleOutPutVo sampleOutPutVo);
+
+    @Select("select id from test_sample where sample_code = #{code}")
+    int getIdByCode(@Param("code") String code);
+
+    @Update("update test_sample set sample_retention_period=#{parseInt} where sample_code = #{code}")
+    void updateDayByCode(@Param("code") String code, @Param("parseInt") int parseInt);
 }

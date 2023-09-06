@@ -638,6 +638,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
             <if test="approver != null">
                 approver = #{approver,jdbcType=VARCHAR},
             </if>
+            <if test="sampleRetentionArea != null">
+                sample_retention_area = #{sampleRetentionArea,jdbcType=VARCHAR},
+            </if>
         </set>
         where id = #{id,jdbcType=INTEGER}
     </update>
@@ -790,6 +793,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                sample_name sampleName,
                alias_name aliasName,
                sample_retention_period,
+               sample_retention_area,
                specs,
                outward,
                inspector,
