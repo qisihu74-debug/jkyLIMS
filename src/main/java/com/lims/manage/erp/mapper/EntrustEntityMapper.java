@@ -652,7 +652,7 @@ public interface EntrustEntityMapper extends BaseMapper {
             "LEFT JOIN test_task t4 ON t1.id=t4.entrustment_id\n" +
             "WHERE\n" +
             "\tt1.state != 144\n" +
-            "AND t1.state = 1\n" +
+            "AND t1.state >=1\n" +
             "AND 2023070000<t1.entrustment_no AND t1.entrustment_no<2023080000")
     List<EntrustAddVo> get7Infos1();
 
@@ -691,7 +691,7 @@ public interface EntrustEntityMapper extends BaseMapper {
             "LEFT JOIN test_task t4 ON t1.id=t4.entrustment_id\n" +
             "WHERE\n" +
             "\tt1.state != 144\n" +
-            "AND t1.state = 1\n" +
+            "AND t1.state >= 1\n" +
             "AND 2023080000<t1.entrustment_no AND t1.entrustment_no<2023090000")
     List<EntrustAddVo> get8Infos1();
 

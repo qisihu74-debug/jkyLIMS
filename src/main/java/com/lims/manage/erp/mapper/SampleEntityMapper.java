@@ -398,4 +398,10 @@ public interface SampleEntityMapper {
      * 通过委托单id 获取样品信息集合。
      */
     List<SampleEntity> selectAllState(@Param("list")List<Long> list);
+
+    @Select("select id from test_sample where sample_code = #{code}")
+    int getIdByCode(@Param("code") String code);
+
+    @Update("update test_sample set sample_retention_period=#{parseInt} where sample_code = #{code}")
+    void updateDayByCode(@Param("code") String code, @Param("parseInt") int parseInt);
 }

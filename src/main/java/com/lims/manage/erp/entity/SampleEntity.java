@@ -234,6 +234,10 @@ public class SampleEntity {
      * 负责人
      */
     private String approver;
+    /**
+     * 留样区域
+     */
+    private String sampleRetentionArea;
 
     public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo, String sampleName, String sampleCode, String pictureUrl, String insertFlag) {
         this.productId = addParamVo.getSampleName();
