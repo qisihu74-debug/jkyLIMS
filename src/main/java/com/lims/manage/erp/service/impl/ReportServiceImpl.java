@@ -3585,16 +3585,16 @@ public class ReportServiceImpl implements ReportService {
             reportMapper.updateVerAndIss(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, verifyer, issuer, verifyerId, new Date(System.currentTimeMillis()), issuerId);
         }
         //设置签名信息,根据报告编号获取委托id
-        String url1 = "";
-        try {
-            url1 = signInspector(reportCode,url,inspector);
-            logger.info("设置签名信息：{}", url1);
-            if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)) {
-                url = url1;
-            }
-        } catch (Exception e) {
-            logger.error("报告签名失败:{}", e);
-        }
+//        String url1 = "";
+//        try {
+//            url1 = signInspector(reportCode,url,inspector);
+//            logger.info("设置签名信息：{}", url1);
+//            if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)) {
+//                url = url1;
+//            }
+//        } catch (Exception e) {
+//            logger.error("报告签名失败:{}", e);
+//        }
         if (url.contains("?")) {
             url = url.substring(0, url.indexOf("?"));
         }
@@ -3710,21 +3710,21 @@ public class ReportServiceImpl implements ReportService {
     public Boolean onlineReportMergeSave(String reportCode, String verifyer, String issuer, long verifyerId, long issuerId, String inspector) {
         ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
         //签字
-        String url = "";
+//        String url = "";
+//        ReportRecordEntity urlByCode = recordEntityMapper.getUrlByCode(reportCode);
+//        try {
+//            url = signInspector(reportCode,urlByCode.getReportUrl(),inspector);
+//        } catch (Exception e) {
+//            log.error("设置签名信息失败:{}",e);
+//            return false;
+//        }
         ReportRecordEntity urlByCode = recordEntityMapper.getUrlByCode(reportCode);
-        try {
-            url = signInspector(reportCode,urlByCode.getReportUrl(),inspector);
-        } catch (Exception e) {
-            log.error("设置签名信息失败:{}",e);
-            return false;
-        }
-
         //更新
         String type = recordEntityMapper.getTypeByCode(reportCode);
         if ("1".equals(type)) {
-            reportMapper.updateUrlZj(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrlZj(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, urlByCode.getReportUrl(), verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         } else {
-            reportMapper.updateUrl(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrl(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, urlByCode.getReportUrl(), verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         }
         return true;
     }

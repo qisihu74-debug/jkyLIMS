@@ -94,7 +94,7 @@ public interface SampleService {
     TestSampleEntity sampleInfo(int type, Integer sampleId);
 
     Integer updateState(Integer sampleId, Integer state, Date time,Integer saveTime,Integer sampleRetentionPeriod,String sampleProcessMode,
-                        String approver,String sampleRetentionArea);
+                        String approver,String sampleRetentionArea,String disposalDate,String disposalPeople);
 
     /**
      * 样品留样列表

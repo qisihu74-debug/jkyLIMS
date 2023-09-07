@@ -85,4 +85,7 @@ public class QiYueSuoEntity {
 
     @Value("${logoUrl}")
     private String logoUrl;
+
+    @Value("${service.ip}")
+    private String ip;
 }

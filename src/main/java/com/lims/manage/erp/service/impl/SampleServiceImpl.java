@@ -353,7 +353,7 @@ public class SampleServiceImpl implements SampleService {
                     worksheet.getCells().get("B4").setValue(sampleDetailVo.getSpecs());
                     worksheet.getCells().get("B5").setValue(sampleDetailVo.getOutwardDescribe());
                     //设置二维码
-                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl()+sampleDetailVo.getId()+"&type="+type);
+                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl()+sampleDetailVo.getId()+"&type="+type+"&ip="+qiYueSuoEntity.getIp());
                     InputStream stream = bufferedImageToInputStream(bufferedImage);
                     worksheet.getPictures().add(6,4,stream,26,26);
                     //合并sheet
@@ -373,7 +373,7 @@ public class SampleServiceImpl implements SampleService {
                     worksheet.getCells().get("B4").setValue(sampleDetailVoList.get(i).getSpecs());
                     worksheet.getCells().get("B5").setValue(sampleDetailVoList.get(i).getOutwardDescribe());
                     //设置二维码
-                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(sampleDetailVoList.get(i).getId() + "&type="+type);
+                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl()+sampleDetailVoList.get(i).getId() + "&type="+type+"&ip="+qiYueSuoEntity.getIp());
                     InputStream stream = bufferedImageToInputStream(bufferedImage);
                     worksheet.getPictures().add(5,3,stream,30,30);
                     //合并sheet
@@ -478,7 +478,7 @@ public class SampleServiceImpl implements SampleService {
                     worksheet.getCells().get("B4").setValue(sampleDetailVoList.get(i).getSpecs());
                     worksheet.getCells().get("B5").setValue(sampleDetailVoList.get(i).getOutwardDescribe());
                     //设置二维码
-                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(sampleDetailVoList.get(i).getId() + "&type="+type);
+                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl()+sampleDetailVoList.get(i).getId() + "&type="+type);
                     InputStream stream = bufferedImageToInputStream(bufferedImage);
                     worksheet.getPictures().add(5,3,stream,30,30);
                     //合并sheet
@@ -486,7 +486,7 @@ public class SampleServiceImpl implements SampleService {
                     worksheetS.copy(worksheet);
                 }
             }
-            newBook.save("D:\\doc\\saveOriginalRecord\\八月留样\\"+sampleTagInfo.getSampleCode()+".xlsx", SaveFormat.XLSX);
+            newBook.save("D:\\doc\\saveOriginalRecord\\六月留样\\"+sampleTagInfo.getSampleCode()+".xlsx", SaveFormat.XLSX);
         }catch (Exception e){
             log.error("下载样品标签异常:{}",e);
         }
@@ -506,8 +506,9 @@ public class SampleServiceImpl implements SampleService {
             }
             entity.setId(sampleId);
             entity.setSampleCode(sampleTagInfo.getSampleCode());
-            entity.setSampleName(sampleTagInfo.getAliasName());
+            entity.setAliasName(sampleTagInfo.getAliasName());
             entity.setSpecs(sampleTagInfo.getSpecs());
+            entity.setSampleRetentionArea(sampleTagInfo.getSampleRetentionArea());
             entity.setSampleRetentionPeriod(sampleTagInfo.getSampleRetentionPeriod());
             entity.setOutwardDescribe(StringUtils.isEmpty(sampleTagInfo.getOutwardDescribe())?"/":sampleTagInfo.getOutwardDescribe());
             //查询样品流转记录
@@ -527,18 +528,8 @@ public class SampleServiceImpl implements SampleService {
                             bean.setOperatorName(sampleTaker.getSampler());
                             bean.setTime(sampleTaker.getSampleReceivingTime());
                         }
-                        //flag = false;
                     }
                 }
-//                if (flag){
-//                    ReceiveSampleParamVo sampleTaker = sampleEntityMapper.getSampleTaker(list.get(0).getSampleId());
-//                    SampleCirculationRecord sampleCirculationRecord = new SampleCirculationRecord();
-//                    sampleCirculationRecord.setOperatorName(sampleTaker.getSampler());
-//                    sampleCirculationRecord.setTime(sampleTaker.getSampleReceivingTime());
-//                    sampleCirculationRecord.setStatus("1");
-//                    sampleCirculationRecord.setSampleId(list.get(0).getSampleId());
-//                    list.add(sampleCirculationRecord);
-//                }
             }
             //流转记录详情列表结果重新构造,操作内容 待检（流转确认人：） 状态，0待检，1在检，2已检，3留样，4处置
             for (SampleCirculationRecord record:list) {
@@ -597,7 +588,7 @@ public class SampleServiceImpl implements SampleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Integer updateState(Integer sampleId,Integer state,Date time,Integer saveTime,Integer sampleRetentionPeriod,String sampleProcessMode,
-                               String approver,String sampleRetentionArea) {
+                               String approver,String sampleRetentionArea,String disposalDate,String disposalPeople) {
         //2领样，3留样，4处置
         List<Integer> ids = sampleEntityMapper.getExist(sampleId,state);
         if (ids != null && ids.size() >= 1){
@@ -613,8 +604,13 @@ public class SampleServiceImpl implements SampleService {
         SampleCirculationRecord record = new SampleCirculationRecord();
         //更新样品表状态
         if (state == 1){
+            List<Integer> list = sampleEntityMapper.getExist(sampleId,0);
+            if (org.apache.commons.collections.CollectionUtils.isEmpty(list)){
+                return 4;
+            }
             sampleEntityMapper.updateSampleState(sampleId,state);
         }
+        Date date11= null;
         if (state >= 3){
             Integer status = null;
             if (state == 3){
@@ -645,6 +641,20 @@ public class SampleServiceImpl implements SampleService {
                 }
             }
             if (state == 4){
+                //已检测、在判断已检时间和留样天数，当前时间
+                List<Integer> list = sampleEntityMapper.getExist(sampleId,2);
+                if (org.apache.commons.collections.CollectionUtils.isEmpty(list)){
+                    return 5;
+                }
+                Date date = sampleEntityMapper.getDate(sampleId,3);
+                int saveDay = sampleEntityMapper.getDaysById(sampleId);
+                //检测完成时间+留样天数》= 当前日期
+                String beforeDayString = DateUtil.getBeforeDayString(saveDay);//获取N天前的日期
+                //date>=beforeDayString
+                String dayString = DateUtil.getDayString(date.getTime());
+                if (Integer.parseInt(dayString)<Integer.parseInt(beforeDayString)){
+                    return 6;
+                }
                 status = 2;
                 // 样品处置方式（state=4处置）
                 if(!org.springframework.util.StringUtils.isEmpty(sampleProcessMode)){
@@ -657,11 +667,22 @@ public class SampleServiceImpl implements SampleService {
                 }
             }
             sampleEntityMapper.updateIsSave(sampleId,status,saveTime);
+            if (StringUtils.isEmpty(disposalDate)){
+                SimpleDateFormat simpleDateFormat =new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    date11 = simpleDateFormat.parse(disposalDate);
+                }catch (Exception e){
+                    log.error("时间转换异常:{}",e);
+                }
+            }
         }
         record.setSampleId(sampleId);
         record.setStatus(state+"");
         if (record.getTime() == null){
             record.setTime(time);
+        }
+        if (date11 != null){
+            record.setTime(date11);
         }
         if (record.getOperatorId() == null){
             record.setOperatorId(ShiroUtils.getUserInfo().getUserId());
