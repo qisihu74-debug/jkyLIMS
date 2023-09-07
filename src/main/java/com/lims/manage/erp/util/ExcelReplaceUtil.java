@@ -84,10 +84,10 @@ public class ExcelReplaceUtil {
                         StringBuilder stringBuilder = new StringBuilder();
                         stringBuilder.append(sampleName);
                         stringBuilder.append(sampleNumber);
+                        stringBuilder.append(specs);
                         stringBuilder.append(sampleQuantity);
                         stringBuilder.append(sampleDesc);
                         stringBuilder.append(sampleTime);
-                        stringBuilder.append(specs);
 
                         // 赋值
                         cell.setCellValue(stringBuilder.toString());

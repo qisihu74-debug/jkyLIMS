@@ -322,26 +322,30 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // 复核时 无检测原始模板则直接返回
         // 查询检测项对应的 sheet下标
         List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(array);
-        if(CollectionUtils.isEmpty(sheetItems)){
+        if (CollectionUtils.isEmpty(sheetItems)) {
             // 检测项无Sheet页
+            System.out.println("查询检测项对应的 sheet下标: " + array + "检测项无Sheet页");
             return true;
         }
-        // 私有方法 处理 复核人签名信息。
-        PDFHelper3.getLicense();
-        String saveExcel = methodReviewExcel(array, userId);
-//        System.out.println(" saveExcel ==  " + saveExcel);
-        //上传文件到文件服务器、删除本地临时缓存的文件
-        String[] arrays = saveExcel.split("\\.");
-        String saveFileUrl = GenID.getID() + "." + arrays[arrays.length - 1];
-//        String saveFileUrl = arrays[arrays.length - 1];
-        InputStream input = new FileInputStream(saveExcel);
-        // 私有方法 更新 产品附件及报告附件内容。
-        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
-        methodUpdateItemUrl(saveFileUrl, input, array, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
-        // 删除本地文件
-        FileAndFolderUtil.delete(saveFileUrl);
-        FileAndFolderUtil.delete(saveExcel);
-        input.close();
+        try {
+            // 私有方法 处理 复核人签名信息。
+            PDFHelper3.getLicense();
+            String saveExcel = methodReviewExcel(array, userId);
+            //上传文件到文件服务器、删除本地临时缓存的文件
+            String[] arrays = saveExcel.split("\\.");
+            String saveFileUrl = GenID.getID() + "." + arrays[arrays.length - 1];
+            InputStream input = new FileInputStream(saveExcel);
+            // 私有方法 更新 产品附件及报告附件内容。
+            List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
+            methodUpdateItemUrl(saveFileUrl, input, array, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
+            // 删除本地文件
+            FileAndFolderUtil.delete(saveFileUrl);
+            FileAndFolderUtil.delete(saveExcel);
+            input.close();
+        } catch (Exception e) {
+            System.out.println("处理复核人签名信息 异常抛出：");
+            e.printStackTrace();
+        }
         return true;
     }
 
