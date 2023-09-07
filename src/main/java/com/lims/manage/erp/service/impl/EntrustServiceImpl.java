@@ -4132,6 +4132,10 @@ public class EntrustServiceImpl implements EntrustService {
 //                sampleData.setReceivedDate(sdf.format(AcceptanceDate));
 //                status = true;
 //            }
+            // 判断时间一致直接返回
+            if(sampleData.getReceivedDate().equals(sdf.format(AcceptanceDate))){
+                return false;
+            }
             //ps： 更改为 样品签收时间 =委托单受理日期
                 sampleData.setReceivedDate(sdf.format(AcceptanceDate));
                 status = true;
