@@ -145,7 +145,9 @@ public class TestDetectionController {
                 ids[i] = data.getItemId();
             }
             String excelUrl = pageOfficeCopyService.saveOriginalRecord2(ids);
-            pageOfficeCopyService.updateOriginalRecordUrl(excelUrl, ids);
+            if (excelUrl != null) {
+                pageOfficeCopyService.updateOriginalRecordUrl(excelUrl, ids);
+            }
         }
         if(flag) {
             // 更新任务单状态 需要 对所有的 样品信息 下 检测项 进行判断 ==2的话 更新。

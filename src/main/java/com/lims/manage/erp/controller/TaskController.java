@@ -912,8 +912,6 @@ public class TaskController {
      *  checkReview
      */
     @RequestMapping(value = "/checkItemReview")
-//    public void checkItemReview(List<Integer> list,String checkReview){
-//    public void previewDownLoad(@RequestBody ExcelInsertVo excelInsertVo , HttpServletResponse response) throws Exception {
     public void previewDownLoad(String list , HttpServletResponse response) throws Exception {
         String newFilePath = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
         String path = qiYueSuoEntity.getAutographPath()+GenID.getID()+".pdf";

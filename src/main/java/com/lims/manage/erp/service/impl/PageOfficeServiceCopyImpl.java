@@ -877,12 +877,21 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     @Override
     public String saveOriginalRecord2(Integer[] ids) throws Exception {
         ExcelInsertVo pathUrl = testProductItemDao.getExcelUrl(ids[0]);
+        if (pathUrl == null) {
+            return null;
+        }
         // 签名 图片
         List<String> signatureImages = new ArrayList<>();
         Integer itemId = ids[0];
         // 通过检测项主键 获取样品生成附件是否存在。
         ExcelSheetDataVo productInputStream = getProductInputStream(pathUrl, itemId);
+        if (productInputStream == null) {
+            return null;
+        }
         File file = FileAndFolderUtil.getFile(productInputStream.getProductExcelUrl());
+        if (file == null) {
+            return null;
+        }
         String saveExcel = file.getPath();
         List<ExcelInsertVo> excelInsertVoList = new ArrayList<>();
         // 处理模糊比较 sheetName
@@ -900,6 +909,10 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         Map<String, String> keyMap = new HashMap<>();
         // 查询检测项对应的 sheet下标
         List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
+        if (CollectionUtils.isEmpty(sheetItems)) {
+            FileAndFolderUtil.delete(saveExcel);
+            return null;
+        }
         // 通过检测项id 获取对应的 sheet下标
         if (!CollectionUtils.isEmpty(sheetItems)) {
             for (ExcelInsertVo excelInsertVo : sheetItems) {
