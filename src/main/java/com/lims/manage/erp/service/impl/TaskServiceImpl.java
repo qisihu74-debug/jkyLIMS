@@ -540,8 +540,10 @@ public class TaskServiceImpl implements TaskService {
         // 获取任务单id集合 进行更新样品领样状态
         List<Long> taskIds = new ArrayList<>();
         taskIds.add(taskTestEntity.getId());
+        List<TaskTestEntity> taskTestEntities = new ArrayList<>();
+        taskTestEntities.add(taskTestEntity);
         // 根据任务单id 更新样品状态 = 1
-        updateSampleStateMethod(taskIds);
+        updateSampleStateMethod(taskIds,taskTestEntities);
         return true;
     }
 
@@ -596,7 +598,7 @@ public class TaskServiceImpl implements TaskService {
            taskIds.add(taskTestEntity.getId());
         }
        // 根据任务单id 更新样品状态 = 1
-        updateSampleStateMethod(taskIds);
+        updateSampleStateMethod(taskIds,taskTestEntitys);
         return true;
     }
 
@@ -715,7 +717,7 @@ public class TaskServiceImpl implements TaskService {
             }
             // 领样人
             if(taskListVo.getSampler()!=null){
-                testMap.put("sampler", taskListVo.getSampler());
+                testMap.put("sampler", taskListVo.getSampler().split("&")[0]);
             }else {
                 testMap.put("sampler", "--");
             }
@@ -1925,7 +1927,7 @@ public class TaskServiceImpl implements TaskService {
             }
             // 领样人
             if(taskListVo.getSampler()!=null){
-                testMap.put("sampler", taskListVo.getSampler());
+                testMap.put("sampler", taskListVo.getSampler().split("&")[0]);
             }else {
                 testMap.put("sampler", "--");
             }
@@ -2113,11 +2115,9 @@ public class TaskServiceImpl implements TaskService {
      * 根据任务单id 更新样品状态 = 1
      * @param taskIds
      */
-    protected void updateSampleStateMethod(List<Long> taskIds) {
+    protected void updateSampleStateMethod(List<Long> taskIds,List<TaskTestEntity> taskTestEntities) {
         // 根据任务单id 获取样品状态
         List<SampleEntity> sampleList = sampleEntityMapper.selectAllState(taskIds);
-        // 获取业务受理人id
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
         // 遍历 state < 1 : 更新状态 = 1
         for (SampleEntity sampleEntity : sampleList) {
             if (sampleEntity.getState() != null && (Integer.parseInt(sampleEntity.getState()) < 1)) {
@@ -2137,14 +2137,22 @@ public class TaskServiceImpl implements TaskService {
                     }
                 }
                 if (!flag) {
-                    // 增加样品样品流转状态
-                    SampleCirculationRecord sa = new SampleCirculationRecord();
-                    sa.setSampleId(sampleEntity.getId());
-                    sa.setStatus("1");
-                    sa.setOperatorId(userInfo.getUserId());
-                    sa.setOperatorName(userInfo.getName());
-                    sa.setTime(new Date());
-                    sampleEntityMapper.saveSampleCirculationRecord(sa);
+                    // 从任务单列表 获取 留样人、留样时间
+                    for(TaskTestEntity taskData : taskTestEntities){
+                        if(taskData.getId().equals(sampleEntity.getTaskId())){
+                            String[] lableArrays = taskData.getSampler().split("&");
+                            // 增加样品样品流转状态
+                            SampleCirculationRecord sa = new SampleCirculationRecord();
+                            sa.setSampleId(sampleEntity.getId());
+                            sa.setStatus("1");
+                            sa.setOperatorId(Long.parseLong(lableArrays[1]));
+                            sa.setOperatorName(lableArrays[0]);
+                            // 通过样品id 查询任务单列表 获取流转日期
+                            sa.setTime(taskData.getSampleReceivingTime());
+                            sampleEntityMapper.saveSampleCirculationRecord(sa);
+                        }
+                    }
+
                 }
             }
         }
