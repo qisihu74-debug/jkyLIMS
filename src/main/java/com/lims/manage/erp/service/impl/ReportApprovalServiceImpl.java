@@ -172,14 +172,14 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             if(entrustId == null){
                 entrustId = detailById.getEntrustId();
             }
-            String url = null;
-            try {
-                url = insertPicToPdf(detailById.getReportUrl(), entrustId, detailById.getType(), "审核", 15);
-            } catch (Exception e) {
-                logger.error("报告编号【"+detailById.getReportCode() + "】审批签字失败！");
-                e.printStackTrace();
-            }
-            reportApprovalVo.setReportUrl(url);
+//            String url = null;
+//            try {
+//                url = insertPicToPdf(detailById.getReportUrl(), entrustId, detailById.getType(), "审核", 15);
+//            } catch (Exception e) {
+//                logger.error("报告编号【"+detailById.getReportCode() + "】审批签字失败！");
+//                e.printStackTrace();
+//            }
+            reportApprovalVo.setReportUrl(detailById.getReportUrl());
             reportApprovalMapper.updateReportApprovalDetail(reportApprovalVo);
             return true;
         }
@@ -218,14 +218,14 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             if(entrustId == null){
                 entrustId = detailById.getEntrustId();
             }
-            String url = null;
-            try {
-                url = insertPicToPdf(detailById.getReportUrl(), entrustId, detailById.getType(), "审核", 15);
-            } catch (Exception e) {
-                logger.error("报告编号【"+detailById.getReportCode() + "】审批签字失败！");
-                e.printStackTrace();
-            }
-            reportApprovalVo.setReportUrl(url);
+//            String url = null;
+//            try {
+//                url = insertPicToPdf(detailById.getReportUrl(), entrustId, detailById.getType(), "审核", 15);
+//            } catch (Exception e) {
+//                logger.error("报告编号【"+detailById.getReportCode() + "】审批签字失败！");
+//                e.printStackTrace();
+//            }
+            reportApprovalVo.setReportUrl(detailById.getReportUrl());
             reportApprovalMapper.updateReportApprovalDetail(reportApprovalVo);
             return true;
         }
@@ -475,18 +475,18 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             if(entrustId == null){
                 entrustId = detailById.getEntrustId();
             }
-            String url = null;
-            try {
-                url = insertPicToPdf(detailById.getReportUrl(), entrustId, detailById.getType(), "批准", 15);
-            } catch (Exception e) {
-                logger.error("报告编号【"+detailById.getReportCode() + "】签发签字失败！");
-                e.printStackTrace();
-            }
+//            String url = null;
+//            try {
+//                url = insertPicToPdf(detailById.getReportUrl(), entrustId, detailById.getType(), "批准", 15);
+//            } catch (Exception e) {
+//                logger.error("报告编号【"+detailById.getReportCode() + "】签发签字失败！");
+//                e.printStackTrace();
+//            }
             String path = "";
             try {
-                path = insertPicToPdf(url,detailById.getReportCode());
+                path = insertPicToPdf(detailById.getReportUrl(),detailById.getReportCode());
             }catch (Exception e){
-                path = url;
+                path = detailById.getReportUrl();
             }
             reportApprovalVo.setReportUrl(path);
             reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
@@ -541,18 +541,18 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             if(entrustId == null){
                 entrustId = detailById.getEntrustId();
             }
-            String url = null;
-            try {
-                url = insertPicToPdf(detailById.getReportUrl(), entrustId, detailById.getType(), "批准", 15);
-            } catch (Exception e) {
-                logger.error("报告编号【"+detailById.getReportCode() + "】签发签字失败！");
-                e.printStackTrace();
-            }
+//            String url = null;
+//            try {
+//                url = insertPicToPdf(detailById.getReportUrl(), entrustId, detailById.getType(), "批准", 15);
+//            } catch (Exception e) {
+//                logger.error("报告编号【"+detailById.getReportCode() + "】签发签字失败！");
+//                e.printStackTrace();
+//            }
             String path = "";
             try {
-                path = insertPicToPdf(url,detailById.getReportCode());
+                path = insertPicToPdf(detailById.getReportUrl(),detailById.getReportCode());
             }catch (Exception e){
-                path = url;
+                path = detailById.getReportUrl();
             }
             reportApprovalVo.setReportUrl(path);
             reportApprovalMapper.updateVerifyMonad(reportApprovalVo);

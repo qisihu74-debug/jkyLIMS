@@ -467,4 +467,10 @@ public interface SampleEntityMapper {
             "WHERE t1.state!= 144 AND t1.state>=1 AND t5.report_code is not null) tb1\n" +
             "GROUP BY tb1.task_code\n")
     List<TzBean> exportWtTz();
+
+    @Select("SELECT time from test_sample_circulation_record WHERE sample_id =#{sampleId} AND status=#{state}")
+    Date getDate(@Param("sampleId") Integer sampleId, @Param("state") Integer state);
+
+    @Select("select sample_retention_period from test_sample where id=#{sampleId}")
+    int getDaysById(@Param("sampleId") Integer sampleId);
 }

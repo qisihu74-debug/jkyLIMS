@@ -175,6 +175,7 @@ public class TestSampleEntity {
 
     private Integer sampleRetentionPeriod;
 
+    private String sampleRetentionArea;
 
 
 
