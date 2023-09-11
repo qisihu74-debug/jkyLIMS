@@ -909,7 +909,6 @@
                         LEFT JOIN test_report_record t4 ON t2.id = t4.entrustment_id
                         LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.id = t5.task_id
                 <trim prefix="WHERE" prefixOverrides="AND |OR ">
-                    t4.seal_time IS NOT NULL
                     <if test="taskSource!=null and taskSource!=''">
                         and t3.NAME = #{taskSource}
                     </if>
@@ -917,10 +916,10 @@
                         and t3.pid = #{teamId}
                     </if>
                     <if test="beginDate!=null">
-                        and <![CDATA[  DATE_FORMAT(t4.seal_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
+                        and <![CDATA[  DATE_FORMAT(t4.issuer_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
                     </if>
                     <if test="endDate!=null">
-                        and <![CDATA[  DATE_FORMAT(t4.seal_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
+                        and <![CDATA[  DATE_FORMAT(t4.issuer_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
                     </if>
                 </trim>
                 GROUP BY
@@ -986,7 +985,6 @@
                         LEFT JOIN test_report_record t4 ON t2.id = t4.entrustment_id
                         LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.id = t5.task_id
                 <trim prefix="WHERE" prefixOverrides="AND |OR ">
-                    t4.seal_time IS NOT NULL
                     <if test="taskSource!=null and taskSource!=''">
                         and t3.NAME = #{taskSource}
                     </if>
@@ -994,10 +992,10 @@
                         and t3.pid = #{teamId}
                     </if>
                     <if test="beginDate!=null">
-                        and <![CDATA[  DATE_FORMAT(t4.seal_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
+                        and <![CDATA[  DATE_FORMAT(t4.issuer_time, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')  ]]>
                     </if>
                     <if test="endDate!=null">
-                        and <![CDATA[  DATE_FORMAT(t4.seal_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
+                        and <![CDATA[  DATE_FORMAT(t4.issuer_time, '%Y-%m-%d')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d')  ]]>
                     </if>
                 </trim>
                 GROUP BY
