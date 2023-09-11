@@ -80,9 +80,11 @@ public class ExcelReplaceUtil {
                         String sampleQuantity ="样品数量："+ sample.getSampleQuantity();
                         String sampleDesc = "样品描述：" + sample.getSampleDesc();
                         String sampleTime = "来样时间：" + sample.getSampleTime();
+                        String specs = "规格尺寸：" + sample.getSpecs();
                         StringBuilder stringBuilder = new StringBuilder();
                         stringBuilder.append(sampleName);
                         stringBuilder.append(sampleNumber);
+                        stringBuilder.append(specs);
                         stringBuilder.append(sampleQuantity);
                         stringBuilder.append(sampleDesc);
                         stringBuilder.append(sampleTime);

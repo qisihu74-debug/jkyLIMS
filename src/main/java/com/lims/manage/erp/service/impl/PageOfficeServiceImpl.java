@@ -322,26 +322,30 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // 复核时 无检测原始模板则直接返回
         // 查询检测项对应的 sheet下标
         List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(array);
-        if(CollectionUtils.isEmpty(sheetItems)){
+        if (CollectionUtils.isEmpty(sheetItems)) {
             // 检测项无Sheet页
+            System.out.println("查询检测项对应的 sheet下标: " + array + "检测项无Sheet页");
             return true;
         }
-        // 私有方法 处理 复核人签名信息。
-        PDFHelper3.getLicense();
-        String saveExcel = methodReviewExcel(array, userId);
-//        System.out.println(" saveExcel ==  " + saveExcel);
-        //上传文件到文件服务器、删除本地临时缓存的文件
-        String[] arrays = saveExcel.split("\\.");
-        String saveFileUrl = GenID.getID() + "." + arrays[arrays.length - 1];
-//        String saveFileUrl = arrays[arrays.length - 1];
-        InputStream input = new FileInputStream(saveExcel);
-        // 私有方法 更新 产品附件及报告附件内容。
-        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
-        methodUpdateItemUrl(saveFileUrl, input, array, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
-        // 删除本地文件
-        FileAndFolderUtil.delete(saveFileUrl);
-        FileAndFolderUtil.delete(saveExcel);
-        input.close();
+        try {
+            // 私有方法 处理 复核人签名信息。
+            PDFHelper3.getLicense();
+            String saveExcel = methodReviewExcel(array, userId);
+            //上传文件到文件服务器、删除本地临时缓存的文件
+            String[] arrays = saveExcel.split("\\.");
+            String saveFileUrl = GenID.getID() + "." + arrays[arrays.length - 1];
+            InputStream input = new FileInputStream(saveExcel);
+            // 私有方法 更新 产品附件及报告附件内容。
+            List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
+            methodUpdateItemUrl(saveFileUrl, input, array, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
+            // 删除本地文件
+            FileAndFolderUtil.delete(saveFileUrl);
+            FileAndFolderUtil.delete(saveExcel);
+            input.close();
+        } catch (Exception e) {
+            System.out.println("处理复核人签名信息 异常抛出：");
+            e.printStackTrace();
+        }
         return true;
     }
 
@@ -471,7 +475,7 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // 删除附件
         FileAndFolderUtil.delete(saveExcel);
         // 删除图片信息
-        for (int i = 0; i < testImags.length - 1; i++) {
+        for (int i = 0; i < testImags.length; i++) {
             FileAndFolderUtil.delete(testImags[i]);
         }
 //        FileAndFolderUtil.delete(imagePath);
@@ -639,12 +643,12 @@ public class PageOfficeServiceImpl implements PageOfficeService {
         // 删除附件
         FileAndFolderUtil.delete(newFilePath);
         // 删除图片信息
-        for (int i = 0; i < testImags.length - 1; i++) {
+        for (int i = 0; i < testImags.length; i++) {
             FileAndFolderUtil.delete(testImags[i]);
         }
         // 检测人与记录不相同时
         if (testImags.length > recordImags.length) {
-            for (int i = 0; i < recordImags.length - 1; i++) {
+            for (int i = 0; i < recordImags.length; i++) {
                 FileAndFolderUtil.delete(recordImags[i]);
             }
         }
@@ -822,25 +826,8 @@ public class PageOfficeServiceImpl implements PageOfficeService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean editItemdData(Integer[] ids) {
-        testProductItemDao.updateBatchItemData(ids);
+    public Boolean editItemdData(Integer[] ids, String testSet, String recordSet) {
+        testProductItemDao.updateBatchItemData(ids, testSet, recordSet);
         return true;
     }
-
-
-//    public static void main(String[] args) throws Exception {
-//        String fileName = "D:\\doc\\e-iceblue\\4602092399671262.xlsx";
-//        InputStream fileStream = new FileInputStream(fileName);
-//        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-//        Map<Integer, Integer> map = new PageOfficeServiceImpl().inserItemPage(wb);
-//        int total = map.size();
-//        // 把 XSSFWorkbook 转为 InputStream
-//        InputStream input000 = AsposeUtil.createExcelStream(wb);
-//        fileStream.close();
-//        com.aspose.cells.Workbook document = new Workbook(input000);
-//         handlerPage(document,map,total);
-//        String path = "D:\\doc\\e-iceblue\\"+ "name" + ".xlsx";
-//        document.save(path);
-//        input000.close();
-//    }
 }

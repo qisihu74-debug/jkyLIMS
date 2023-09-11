@@ -1,6 +1,9 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.aspose.cells.Cell;
+import com.aspose.cells.Cells;
+import com.aspose.cells.Worksheet;
 import com.google.api.client.util.IOUtils;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
@@ -555,9 +558,10 @@ public class SampleController {
      */
     @GetMapping("updateState")
     public Result updateState(Integer sampleId, Integer state, String time,Integer saveTime,
-                              Integer sampleRetentionPeriod,String sampleProcessMode,String approver){
+                              Integer sampleRetentionPeriod,String sampleProcessMode,String approver,
+                              String sampleRetentionArea,String disposalDate,String disposalPeople){
         System.out.println("操作扫描样品id：=="+sampleId+"操作状态：=="+state+"操作人：=="+approver+"saveTime:=="+saveTime);
-        System.out.println("留样天数: == "+sampleRetentionPeriod + " == 样品处置方式 == " + sampleProcessMode);
+        System.out.println("留样天数: == "+sampleRetentionPeriod + " == 样品处置方式 == " + sampleProcessMode+"留样区域"+sampleRetentionArea);
         System.out.println("扫码时间:{}"+time);
         log.info("扫码时间:{}",time);
         Date date= null;
@@ -574,12 +578,18 @@ public class SampleController {
         if (sampleId == null || state == null){
             return ResultUtil.error("缺少参数");
         }
-        Integer flag = sampleService.updateState(sampleId,state,date,saveTime,sampleRetentionPeriod,sampleProcessMode,approver);
+        Integer flag = sampleService.updateState(sampleId,state,date,saveTime,sampleRetentionPeriod,sampleProcessMode,approver,sampleRetentionArea,disposalDate,disposalPeople);
         if (flag == 0){
             return ResultUtil.success("操作成功");
         }else if (flag == 1){
             return ResultUtil.error("操作失败,可能其它账号已经操作");
-        } else{
+        }else if (flag == 4){
+            return ResultUtil.error("操作失败,样品未发布任务");
+        }else if(flag ==5){
+            return ResultUtil.error("处置失败，样品未试验完成");
+        }else if (flag == 6){
+            return ResultUtil.error("处置失败，样品仍在留样期间");
+        }else{
             return ResultUtil.error("操作失败,样品未绑定");
         }
     }
@@ -778,5 +788,82 @@ public class SampleController {
         }
         return  ResultUtil.success("更新样品出入库成功");
     }
+    /**
+     * 下载留样标签
+     * @param sampleId
+     * @param response
+     * @throws IOException
+     */
+    @RequestMapping("/downloadRetentionTab1")
+    public void downloadRetentionSampleTab1(HttpServletResponse response) throws Exception {
+        //读取excel
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\6月样品留样.xlsx");
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        Cells cells = worksheet.getCells();
+        //遍历excel，根据编号查询
+        int num = 3;
+        while (num<=166){
+            String index = "C"+num;
+            String key = "I"+num;
+            String string = cells.get(key).getValue().toString();
+            if ("90d".equals(string)){
+                String code = cells.get(index).getValue().toString();
+                int sampleId = sampleService.getIdByCode(code);
+                SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
+                if (sampleTagInfo != null) {
+                    sampleTagInfo.setSampleCode(code);
+                    sampleService.downloadNewSampleTab1(2, sampleId, sampleTagInfo, response);
+                }
+            }
+            num++;
+        }
+    }
 
+    @RequestMapping("/updateDayByCode")
+    public void updateDayByCode() throws Exception {
+        //读取excel
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\7月样品留样.xlsx");
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        Cells cells = worksheet.getCells();
+        //遍历excel，根据编号查询
+        int num = 3;
+        while (num<=119){
+            String index = "C"+num;
+            String key = "I"+num;
+            String code = cells.get(index).getValue().toString();
+            String value = cells.get(key).getValue().toString();
+            sampleService.updateDayByCode(code,value);
+            num++;
+        }
+
+        //读取excel
+        com.aspose.cells.Workbook workbook1 = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\样品留样8月.xlsx");
+        Worksheet worksheet1 = workbook1.getWorksheets().get(0);
+        Cells cells1 = worksheet1.getCells();
+        //遍历excel，根据编号查询
+        int num1 = 3;
+        while (num1<=127){
+            String index = "C"+num1;
+            String key = "I"+num1;
+            String code = cells1.get(index).getValue().toString();
+            String value = cells1.get(key).getValue().toString();
+            sampleService.updateDayByCode(code,value);
+            num1++;
+        }
+    }
+
+    /**
+     * 导出委托台账
+     * @throws Exception
+     */
+    @RequestMapping("/exportWtTz")
+    public void exportWtTz() throws Exception {
+        //读取excel
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\委托台账.xls");
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        Cells cells = worksheet.getCells();
+        //遍历excel，根据编号查询
+        sampleService.exportWtTz(cells);
+        workbook.save("D:\\doc\\saveOriginalRecord\\委托台账.xlsx");
+    }
 }

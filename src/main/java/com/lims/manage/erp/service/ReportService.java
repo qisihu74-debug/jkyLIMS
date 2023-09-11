@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
+import com.lims.manage.erp.entity.QrCodeAuthRes;
 import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
@@ -450,10 +451,4 @@ public interface ReportService {
     OutputStream exportReportList(List<ReportDetailListVo> list, HttpServletResponse response);
 
     List<String> getCodeByIds(List<Long> longs);
-
-    /**
-     * 报告仿真伪二维码生成
-     * @param reportCode
-     */
-    void reportValidity(String reportCode);
 }

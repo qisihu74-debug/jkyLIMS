@@ -652,6 +652,23 @@ public interface EntrustEntityMapper extends BaseMapper {
             "LEFT JOIN test_task t4 ON t1.id=t4.entrustment_id\n" +
             "WHERE\n" +
             "\tt1.state != 144\n" +
+            "AND t1.state >=1\n" +
+            "AND 2023070000<t1.entrustment_no AND t1.entrustment_no<2023080000")
+    List<EntrustAddVo> get7Infos1();
+
+    @Select("SELECT DISTINCT\n" +
+            "\tt1.id AS id,\n" +
+            "\tt1.entrustment_no AS entrustmentNo,\n" +
+            "\tt1.state AS state,\n" +
+            "t3.product_name\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info t1\n" +
+            "LEFT JOIN test_entrusted_sample_details_rel t2 ON t1.id=t2.entrustment_id\n" +
+            "LEFT JOIN test_sample t5 ON t2.sample_id=t5.id\n" +
+            "LEFT JOIN test_product t3 ON t5.product_id=t3.product_id\n" +
+            "LEFT JOIN test_task t4 ON t1.id=t4.entrustment_id\n" +
+            "WHERE\n" +
+            "\tt1.state != 144\n" +
             "AND t1.state = 1\n" +
             "AND t3.product_name='突起路标'\n" +
             "AND 2023030000<t1.entrustment_no AND t1.entrustment_no<2023040000\n" +
@@ -660,6 +677,23 @@ public interface EntrustEntityMapper extends BaseMapper {
             "239\n" +
             ")")
     List<EntrustAddVo> get8Infos();
+
+    @Select("SELECT DISTINCT\n" +
+            "\tt1.id AS id,\n" +
+            "\tt1.entrustment_no AS entrustmentNo,\n" +
+            "\tt1.state AS state,\n" +
+            "t3.product_name\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info t1\n" +
+            "LEFT JOIN test_entrusted_sample_details_rel t2 ON t1.id=t2.entrustment_id\n" +
+            "LEFT JOIN test_sample t5 ON t2.sample_id=t5.id\n" +
+            "LEFT JOIN test_product t3 ON t5.product_id=t3.product_id\n" +
+            "LEFT JOIN test_task t4 ON t1.id=t4.entrustment_id\n" +
+            "WHERE\n" +
+            "\tt1.state != 144\n" +
+            "AND t1.state >= 1\n" +
+            "AND 2023080000<t1.entrustment_no AND t1.entrustment_no<2023090000")
+    List<EntrustAddVo> get8Infos1();
 
     /**
      * 根据委托单id 获取任务单 列表

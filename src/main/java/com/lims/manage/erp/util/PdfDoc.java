@@ -175,6 +175,7 @@ public class PdfDoc implements Doc {
                 ContentStreamWriter tokenWriter = new ContentStreamWriter(out);
                 tokenWriter.writeTokens(tokens);
                 pdPage.setContents(updatedStream);
+                out.close();
             }
             //Output file name
             helloDocument.save(savePath);

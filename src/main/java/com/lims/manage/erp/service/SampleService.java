@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.aspose.cells.Cells;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
@@ -88,10 +89,12 @@ public interface SampleService {
 
     ServletOutputStream downloadNewSampleTab(int type, Integer sampleId, SampleDetailVo sampleTagInfo, HttpServletResponse response);
 
+    void downloadNewSampleTab1(int type, Integer sampleId, SampleDetailVo sampleTagInfo, HttpServletResponse response);
+
     TestSampleEntity sampleInfo(int type, Integer sampleId);
 
     Integer updateState(Integer sampleId, Integer state, Date time,Integer saveTime,Integer sampleRetentionPeriod,String sampleProcessMode,
-                        String approver);
+                        String approver,String sampleRetentionArea,String disposalDate,String disposalPeople);
 
     /**
      * 样品留样列表
@@ -150,4 +153,10 @@ public interface SampleService {
      * @return
      */
     PageInfo sampleReservedSamplePageInfoList(SampleOutPutVo sampleOutPutVo);
+
+    int getIdByCode(String code);
+
+    void updateDayByCode(String code, String value);
+
+    void exportWtTz(Cells cells);
 }

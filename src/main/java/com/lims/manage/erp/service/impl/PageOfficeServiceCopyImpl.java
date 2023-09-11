@@ -840,25 +840,149 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean editItemdData(Integer[] ids) {
-        testProductItemDao.updateBatchItemData(ids);
+    public Boolean editItemdData(Integer[] ids, String testSet, String recordSet) {
+        testProductItemDao.updateBatchItemData(ids, testSet, recordSet);
         return true;
     }
 
+    @Override
+    public Map<String, String> getName(FileSaver file) {
+        // 检测人集合 、记录人集合 带出签名信息。
+        // 检测人
+        String testSet = file.getFormField("testSet");
+        // 记录人
+        String recordSet = file.getFormField("recordSet");
+        // 检测人集合
+        List<Long> testSetLong = new ArrayList<>();
+        testSetLong.add(Long.valueOf(testSet));
+        // 检测人与记录人不相同时
+        if (!testSet.equals(recordSet)) {
+            testSetLong.add(Long.valueOf(recordSet));
+        }
+        Map<String, String> map = new HashMap<>();
+        StringBuffer stringBuffer = new StringBuffer();
+        for (Long testId : testSetLong) {
+            stringBuffer.append(testId);
+            stringBuffer.append(",");
+        }
+        if (stringBuffer != null) {
+            map.put("testSet", stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+        }
+        if (recordSet != null) {
+            map.put("recordSet", recordSet);
+        }
+        return map;
+    }
 
-//    public static void main(String[] args) throws Exception {
-//        String fileName = "D:\\doc\\e-iceblue\\4602092399671262.xlsx";
-//        InputStream fileStream = new FileInputStream(fileName);
-//        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-//        Map<Integer, Integer> map = new PageOfficeServiceImpl().inserItemPage(wb);
-//        int total = map.size();
-//        // 把 XSSFWorkbook 转为 InputStream
-//        InputStream input000 = AsposeUtil.createExcelStream(wb);
-//        fileStream.close();
-//        com.aspose.cells.Workbook document = new Workbook(input000);
-//         handlerPage(document,map,total);
-//        String path = "D:\\doc\\e-iceblue\\"+ "name" + ".xlsx";
-//        document.save(path);
-//        input000.close();
-//    }
+    @Override
+    public String saveOriginalRecord2(Integer[] ids) throws Exception {
+        ExcelInsertVo pathUrl = testProductItemDao.getExcelUrl(ids[0]);
+        if (pathUrl == null) {
+            return null;
+        }
+        // 签名 图片
+        List<String> signatureImages = new ArrayList<>();
+        Integer itemId = ids[0];
+        // 通过检测项主键 获取样品生成附件是否存在。
+        ExcelSheetDataVo productInputStream = getProductInputStream(pathUrl, itemId);
+        if (productInputStream == null) {
+            return null;
+        }
+        File file = FileAndFolderUtil.getFile(productInputStream.getProductExcelUrl());
+        if (file == null) {
+            return null;
+        }
+        String saveExcel = file.getPath();
+        List<ExcelInsertVo> excelInsertVoList = new ArrayList<>();
+        // 处理模糊比较 sheetName
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(saveExcel);
+        int count = workbook.getWorksheets().getCount();
+        Map<String, Integer> mapSheet = new HashMap<>();
+        for (int o = 0; o < count; o++) {
+            // 设置全部可读
+            workbook.getWorksheets().get(o).setVisible(true);
+            String sheetName = workbook.getWorksheets().get(o).getName();
+            mapSheet.put(sheetName, o);
+        }
+        workbook.save(saveExcel, SaveFormat.XLSX);
+        // 根据key 保证 sheet不重复使用。
+        Map<String, String> keyMap = new HashMap<>();
+        // 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
+        if (CollectionUtils.isEmpty(sheetItems)) {
+            FileAndFolderUtil.delete(saveExcel);
+            return null;
+        }
+        // 通过检测项id 获取对应的 sheet下标
+        if (!CollectionUtils.isEmpty(sheetItems)) {
+            for (ExcelInsertVo excelInsertVo : sheetItems) {
+                Map<String, Object> map = new HashMap<>();
+                // 遍历对应的 sheet页
+                for (String key : mapSheet.keySet()) {
+                    Integer sheetIndex = mapSheet.get(key);
+                    // 替换 sheet名
+                    if (excelInsertVo.getSheetIndex().equals(sheetIndex) && keyMap.get(key) == null) {
+                        keyMap.put(key, key);
+                        ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
+                        excelInsertVo1.setSheetName(key);
+                        excelInsertVo1.setRecordType("检测：");
+                        // 获取检测项中 检测人主键
+                        if (excelInsertVo.getTestSetUrl() != null) {
+                            List<Long> userIds = new ArrayList<>();
+                            String[] testArray = excelInsertVo.getTestSetUrl().split("\\,");
+                            for (int i = 0; i < testArray.length; i++) {
+                                userIds.add(Long.valueOf(testArray[i]));
+                            }
+                            String[] imags = new String[userIds.size()];
+                            methodUrlImags(userIds, imags);
+                            excelInsertVo1.setImags(imags);
+                            // 记录签名信息
+                            for (int j = 0; j < imags.length; j++) {
+                                signatureImages.add(imags[j]);
+                            }
+                        }
+                        // key 使用 sheet名加类型进行拼接
+                        map.put(excelInsertVo1.getSheetName() + excelInsertVo1.getRecordType(), excelInsertVo1);
+                        ExcelInsertVo excelInsertVo2 = new ExcelInsertVo();
+                        excelInsertVo2.setSheetName(key);
+                        excelInsertVo2.setRecordType("记录：");
+                        // 获取检测项中 记录人主键
+                        if (excelInsertVo.getRecordSetUrl() != null) {
+                            List<Long> userIds = new ArrayList<>();
+                            String[] testArray = excelInsertVo.getRecordSetUrl().split("\\,");
+                            for (int i = 0; i < testArray.length; i++) {
+                                userIds.add(Long.valueOf(testArray[i]));
+                            }
+                            String[] recordImags = new String[userIds.size()];
+                            methodUrlImags(userIds, recordImags);
+                            excelInsertVo2.setImags(recordImags);
+                            // 记录签名信息
+                            for (int j = 0; j < recordImags.length; j++) {
+                                signatureImages.add(recordImags[j]);
+                            }
+                        }
+                        // key 使用 sheet名加类型进行拼接
+                        map.put(excelInsertVo2.getSheetName() + excelInsertVo2.getRecordType(), excelInsertVo2);
+                        ExcelInsertVo data = new ExcelInsertVo();
+                        data.setSheetName(key);
+                        data.setMap(map);
+                        excelInsertVoList.add(data);
+                    }
+                }
+            }
+        }
+        String[] names = file.getName().split("\\.");
+        String newFilePath = dir + GenID.getID() + "." + names[1];
+        // 清除图片
+        ExcelImageUtils.seachXY(saveExcel, excelInsertVoList, newFilePath);
+        // 插入图片
+        ExcelImageUtils.inserImage(newFilePath, excelInsertVoList, saveExcel);
+        // 删除附件
+        FileAndFolderUtil.delete(newFilePath);
+        // 消除图片信息
+        for (String iamgPath : signatureImages) {
+            FileAndFolderUtil.delete(iamgPath);
+        }
+        return saveExcel;
+    }
 }

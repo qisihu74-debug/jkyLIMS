@@ -21,6 +21,7 @@ import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.QiYueSuoSealEntity;
+import com.lims.manage.erp.entity.QrCodeAuthRes;
 import com.lims.manage.erp.entity.QuotaEntity;
 import com.lims.manage.erp.entity.QuotaRes;
 import com.lims.manage.erp.entity.ReportEditReq;
@@ -101,6 +102,7 @@ import org.apache.poi.hwpf.usermodel.Range;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.odftoolkit.odfdom.dom.element.xforms.XformsModelElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1479,14 +1481,6 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void reportValidity(String reportCode) {
-        //根据报告链接生成防伪二维码、附到报告文件指定位置
-
-        //生成防伪需要展示的报告图片文件、上传到文件服务器
-
-    }
-
-    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();
@@ -1750,6 +1744,9 @@ public class ReportServiceImpl implements ReportService {
                                         if ("${工程部位}".equals(string)) {
                                             cells.get(n, j).setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectPart()) ? "——" : entrustHistoryDetail.getProjectPart());
                                         }
+                                        Date acceptanceDate = entrustHistoryDetail.getAcceptanceDate();
+                                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                                        String dateString = format.format(acceptanceDate);
                                         if ("${样品信息}".equals(string)) {
                                             cells.get(n, j).setValue("样品名称：" + (sampleEntity.getAliasName() == null ? "——" : sampleEntity.getAliasName())
                                                     + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~", "~"))
@@ -1757,7 +1754,7 @@ public class ReportServiceImpl implements ReportService {
                                                     + "；代表批量：" + (sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration())
                                                     + "；规格等级：" + (sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs())
                                                     + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
-                                                    + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                                                    + "；收样时间：" + (dateString == null ? "——" : dateString));
                                         }
                                         if ("${检测依据}".equals(string)) {
                                             cells.get(n, j).setValue(checkBasis.equals("") ? "——" : checkBasis);
@@ -2150,6 +2147,9 @@ public class ReportServiceImpl implements ReportService {
                                         if ("${工程部位}".equals(string)) {
                                             cells.get(n, j).setValue(org.apache.commons.lang.StringUtils.isEmpty(entrustHistoryDetail.getProjectPart()) ? "——" : entrustHistoryDetail.getProjectPart());
                                         }
+                                        Date acceptanceDate = entrustHistoryDetail.getAcceptanceDate();
+                                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                                        String dateString = format.format(acceptanceDate);
                                         if ("${样品信息}".equals(string)) {
                                             cells.get(n, j).setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
                                                     + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~", "~"))
@@ -2157,7 +2157,7 @@ public class ReportServiceImpl implements ReportService {
                                                     + "；代表批量：" + (sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration())
                                                     + "；规格等级：" + (sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs())
                                                     + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
-                                                    + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                                                    + "；收样时间：" + (dateString == null ? "——" : dateString));
                                         }
                                         if ("${检测依据}".equals(string)) {
                                             cells.get(n, j).setValue(checkBasis.equals("") ? "——" : checkBasis);
@@ -2317,7 +2317,7 @@ public class ReportServiceImpl implements ReportService {
                             cells.get(m + insertRow + 1, indexGg).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getSpecs()) ? "——" : testSampleEntities.get(m).getSpecs());
                             cells.get(m + insertRow + 1, indexCd).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getManufacturer()) ? "——" : testSampleEntities.get(m).getManufacturer());
                             cells.get(m + insertRow + 1, indexPh).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getBatchNumber()) ? "——" : testSampleEntities.get(m).getBatchNumber());
-                            cells.get(m + insertRow + 1, indexNum).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getGeneration()) ? "——" : testSampleEntities.get(m).getGeneration());
+                            cells.get(m + insertRow + 1, indexNum).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getSampleQuantity()) ? "——" : testSampleEntities.get(m).getSampleQuantity());
                             cells.get(m + insertRow + 1, indexZt).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getOutward()) ? "——" : testSampleEntities.get(m).getOutward());
                             cells.get(m + insertRow + 1, indexBh).setValue(StringUtils.isEmpty(testSampleEntities.get(m).getSampleCode()) ? "——" : testSampleEntities.get(m).getSampleCode());
                         }
@@ -2556,7 +2556,7 @@ public class ReportServiceImpl implements ReportService {
                             String name = recordDetailEntityMapper.getIdByItemId(entity.getCheckItemId(), entrustId);
                             if (StringUtils.isNotEmpty(name)) {
                                 stringBuilder.append(name);
-                                stringBuilder.append("，");
+                                stringBuilder.append("、");
                             }
                         }
                     }
@@ -3585,16 +3585,16 @@ public class ReportServiceImpl implements ReportService {
             reportMapper.updateVerAndIss(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, verifyer, issuer, verifyerId, new Date(System.currentTimeMillis()), issuerId);
         }
         //设置签名信息,根据报告编号获取委托id
-        String url1 = "";
-        try {
-            url1 = signInspector(reportCode,url,inspector);
-            logger.info("设置签名信息：{}", url1);
-            if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)) {
-                url = url1;
-            }
-        } catch (Exception e) {
-            logger.error("报告签名失败:{}", e);
-        }
+//        String url1 = "";
+//        try {
+//            url1 = signInspector(reportCode,url,inspector);
+//            logger.info("设置签名信息：{}", url1);
+//            if (org.apache.commons.lang3.StringUtils.isNotEmpty(url1)) {
+//                url = url1;
+//            }
+//        } catch (Exception e) {
+//            logger.error("报告签名失败:{}", e);
+//        }
         if (url.contains("?")) {
             url = url.substring(0, url.indexOf("?"));
         }
@@ -3710,21 +3710,21 @@ public class ReportServiceImpl implements ReportService {
     public Boolean onlineReportMergeSave(String reportCode, String verifyer, String issuer, long verifyerId, long issuerId, String inspector) {
         ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
         //签字
-        String url = "";
+//        String url = "";
+//        ReportRecordEntity urlByCode = recordEntityMapper.getUrlByCode(reportCode);
+//        try {
+//            url = signInspector(reportCode,urlByCode.getReportUrl(),inspector);
+//        } catch (Exception e) {
+//            log.error("设置签名信息失败:{}",e);
+//            return false;
+//        }
         ReportRecordEntity urlByCode = recordEntityMapper.getUrlByCode(reportCode);
-        try {
-            url = signInspector(reportCode,urlByCode.getReportUrl(),inspector);
-        } catch (Exception e) {
-            log.error("设置签名信息失败:{}",e);
-            return false;
-        }
-
         //更新
         String type = recordEntityMapper.getTypeByCode(reportCode);
         if ("1".equals(type)) {
-            reportMapper.updateUrlZj(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrlZj(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, urlByCode.getReportUrl(), verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         } else {
-            reportMapper.updateUrl(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrl(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, urlByCode.getReportUrl(), verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         }
         return true;
     }
@@ -3743,6 +3743,7 @@ public class ReportServiceImpl implements ReportService {
             int count = workbook.getWorksheets().getCount();
             for (int i=0;i<count;i++) {
                 String name = workbook.getWorksheets().get(i).getName();
+                name = name.replaceAll(" ", "");
                 if ("报告第1页，报告第2页，报告第3页，报告第4页".contains(name)){
                     Cells cells = workbook.getWorksheets().get(i).getCells();
                     int maxRow1 = cells.getMaxRow();
@@ -3780,9 +3781,14 @@ public class ReportServiceImpl implements ReportService {
                         if (value != null) {
                             String string = value.toString();
                             //检测单位名称
-                            if ("${result.companyName}".equals(string)) {
+                            if ("${result.companyName}".equals(string.trim()) || "检测单位名称：${result.companyName}".equals(string.trim())) {
                                 cells.get(n, j).setValue("检测单位名称：" + info);
                             }
+                            //报告编号
+//                            String reportCode = entrustEntityMapper.getReportCodeByEntrustId(reportEditReq.getEntrustId());
+//                            if ("${result.reportNumber}".equals(string.trim()) || "报告编号：${result.reportNumber}".equals(string.trim())) {
+//                                cells.get(n, j).setValue("报告编号：" + reportCode);
+//                            }
                             //委托单位
                             if ("${result.entrustUnit}".equals(string)){
                                 cells.get(n, j).setValue(org.apache.commons.lang.StringUtils.isEmpty(detail.getEntrustCompany()) ? "——" : detail.getEntrustCompany());
@@ -3797,6 +3803,9 @@ public class ReportServiceImpl implements ReportService {
                             }
                             //样品信息
                             //根据样品id获取样品详情
+                            Date acceptanceDate = detail.getAcceptanceDate();
+                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                            String dateString = format.format(acceptanceDate);
                             SampleDetailVo sampleEntity = sampleEntityMapper.getSampleTagInfo(reportEditReq.getSampleId());
                             if ("${result.sampleDetails}".equals(string)){
                                 cells.get(n, j).setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
@@ -3805,7 +3814,7 @@ public class ReportServiceImpl implements ReportService {
                                         + "；代表批量：" + (sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration())
                                         + "；规格等级：" + (sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs())
                                         + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())
-                                        + "；收样时间：" + (sampleEntity.getReceivedDate() == null ? "——" : sampleEntity.getReceivedDate()));
+                                        + "；收样时间：" + (dateString == null ? "——" : dateString));
                             }
                             String checkBasis = getCheckBasis(reportEditReq.getEntrustId(), sampleEntity.getId());
                             String judgeBasis = getJudgeBasis(reportEditReq.getEntrustId(), sampleEntity.getId());
@@ -3819,7 +3828,7 @@ public class ReportServiceImpl implements ReportService {
                             }
                             //检测日期
                             //根据委托单id，查询委托任务下实验开始的时间和实验结束的时间
-                            if ("${result.testDate}".equals(string)){
+                            if (string.contains("${result.testDate}")){
                                 Date start = taskMapper.getStartTime(reportEditReq.getEntrustId());
                                 Date end = taskMapper.getEndTime(reportEditReq.getEntrustId());
                                 String e = "";
@@ -3862,6 +3871,14 @@ public class ReportServiceImpl implements ReportService {
                             //生产厂家
                             if ("${result.manufacturer}".equals(string)){
                                 cells.get(n, j).setValue(sampleEntity.getManufacturer() == null ? "——" : sampleEntity.getManufacturer());
+                            }
+                            //规格等级
+                            if ("${result.specificationGrade}".equals(string.trim())){
+                                cells.get(n, j).setValue(sampleEntity.getSpecs());
+                            }
+                            //代表数量
+                            if ("${result.quantity}".equals(string.trim())){
+                                cells.get(n, j).setValue(sampleEntity.getGeneration());
                             }
                         }
                     }

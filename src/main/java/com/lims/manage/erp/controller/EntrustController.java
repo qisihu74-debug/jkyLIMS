@@ -1004,11 +1004,11 @@ public class EntrustController {
         //获取所有符合条件的委托单id（七所、八月份、土的委托单）
         //List<EntrustAddVo> list = entrustEntityMapper.getPublishEntrustIdBySearch();
         //七所八月份
-        List<EntrustAddVo> list7 = entrustEntityMapper.get7Infos();
+        List<EntrustAddVo> list7 = entrustEntityMapper.get7Infos1();
         //八所八月份
-        List<EntrustAddVo> list8 = entrustEntityMapper.get8Infos();
+        List<EntrustAddVo> list8 = entrustEntityMapper.get8Infos1();
         for (EntrustAddVo bean:list7) {
-            String path = "D:\\20230315export\\2023七所三月份土工布（织物类）\\"+bean.getEntrustmentNo()+".docx";
+            String path = "D:\\doc\\saveOriginalRecord\\七月\\"+bean.getEntrustmentNo()+".docx";
             try {
                 FileOutputStream outputStream = new FileOutputStream(path);
                 MinioClient client = MinIoUtil.minioClient;
@@ -1024,7 +1024,7 @@ public class EntrustController {
             }
         }
         for (EntrustAddVo bean:list8) {
-            String path = "D:\\20230315export\\2023八所三月份突起路标\\"+bean.getEntrustmentNo()+".docx";
+            String path = "D:\\doc\\saveOriginalRecord\\八月\\"+bean.getEntrustmentNo()+".docx";
             try {
                 FileOutputStream outputStream = new FileOutputStream(path);
                 MinioClient client = MinIoUtil.minioClient;

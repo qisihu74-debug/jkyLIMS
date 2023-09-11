@@ -13,6 +13,7 @@ import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
+import com.lims.manage.erp.entity.QrCodeAuthRes;
 import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportResBean;
@@ -1134,6 +1135,7 @@ public class ReportController {
             int count = workbook.getWorksheets().getCount();
             for (int i=0; i<count; i++){
                 String name = workbook.getWorksheets().get(i).getName();
+                name = name.replaceAll(" ", "");
                 if ("报告第1页,报告第2页,报告第3页,指标选择".contains(name)){
                     workbook.getWorksheets().get(i).setVisible(true);
                     //设置当工作表只读时，是否允许用户手动调整行列。
@@ -1397,4 +1399,17 @@ public class ReportController {
         return ResultUtil.success(date);
     }
 
+    /**
+     * 报告防伪二维码扫码
+     * @param reportCode
+     * @return
+     */
+    @GetMapping("qrCodeAuth")
+    public Result qrCodeAuth(String reportCode){
+        if (StringUtils.isEmpty(reportCode)){
+            return ResultUtil.error("无效二维码");
+        }
+        QrCodeAuthRes qrCodeAuthRes = entrustService.qrCodeAuth(reportCode);
+        return ResultUtil.success(qrCodeAuthRes);
+    }
 }

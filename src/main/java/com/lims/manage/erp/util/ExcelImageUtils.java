@@ -52,26 +52,26 @@ public class ExcelImageUtils {
                     int serialNumber = 0;
                     //设置图表插入的位置
                     ExcelReplaceUtil.getSheetRowAndColumn(data, wb);
-                    for (int j = 0; j < data.getImags().length; j++) {
-                        if (data.getImags()[j] != null) {
-                            // 塞入指定位置 图片
-                            // 加载并插入位于本地路径下的图像文件
-                            int row = data.getTopRow() + serialNumber; // 图片所在行索引（0-based）
-                            int column = data.getLeftColumn(); // 图片所在列索引（0-based）
-                            int widthInPixels = 80; // 图片宽度（以像素为单位）
-                            int heightInPixels = 30; // 图片高度（以像素为单位）
-                            String imagePath = data.getImags()[j];// 要插入的图像文件路径
-                            // 创建一个 PictureCollection 对象
-                            PictureCollection pics = worksheet.getPictures();
-                            // 加载并插入图像文件到指定单元格范围内
-                            int index = pics.add(row, column, imagePath);
-//                            System.out.println("index == " + index);
-                            Picture pic = pics.get(index);
-                            // 设置图像的大小和缩放模式
-                            pic.setWidth(widthInPixels);
-                            pic.setHeight(heightInPixels);
-                            //        pic.setSizeMode(PictureSizeMode.FIT);
-                            serialNumber += 1;
+                    if (data.getImags() != null) {
+                        for (int j = 0; j < data.getImags().length; j++) {
+                            if (data.getImags()[j] != null) {
+                                // 塞入指定位置 图片
+                                // 加载并插入位于本地路径下的图像文件
+                                int row = data.getTopRow() + serialNumber; // 图片所在行索引（0-based）
+                                int column = data.getLeftColumn(); // 图片所在列索引（0-based）
+                                int widthInPixels = 80; // 图片宽度（以像素为单位）
+                                int heightInPixels = 30; // 图片高度（以像素为单位）
+                                String imagePath = data.getImags()[j];// 要插入的图像文件路径
+                                // 创建一个 PictureCollection 对象
+                                PictureCollection pics = worksheet.getPictures();
+                                // 加载并插入图像文件到指定单元格范围内
+                                int index = pics.add(row, column, imagePath);
+                                Picture pic = pics.get(index);
+                                // 设置图像的大小和缩放模式
+                                pic.setWidth(widthInPixels);
+                                pic.setHeight(heightInPixels);
+                                serialNumber += 1;
+                            }
                         }
                     }
                 }

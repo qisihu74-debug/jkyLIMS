@@ -177,14 +177,14 @@ public class EntrustServiceImpl implements EntrustService {
                     // 委托单创建 更新样品状态 state 待检0
                     sampleData.setState("0");
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
-                    // 增加样品样品流转状态
-                    SampleCirculationRecord sa = new SampleCirculationRecord();
-                    sa.setSampleId(sampleData.getId());
-                    sa.setStatus("0");
-                    sa.setOperatorId(userInfo.getUserId());
-                    sa.setOperatorName(vo.getBusinessAcceptor());
-                    sa.setTime(new Date());
-                    sampleEntityMapper.saveSampleCirculationRecord(sa);
+//                    // 增加样品样品流转状态
+//                    SampleCirculationRecord sa = new SampleCirculationRecord();
+//                    sa.setSampleId(sampleData.getId());
+//                    sa.setStatus("0");
+//                    sa.setOperatorId(userInfo.getUserId());
+//                    sa.setOperatorName(vo.getBusinessAcceptor());
+//                    sa.setTime(new Date());
+//                    sampleEntityMapper.saveSampleCirculationRecord(sa);
                     EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                     entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                     entrustSampleEntity.setSampleId(sampleEntity.getId());
@@ -2646,7 +2646,8 @@ public class EntrustServiceImpl implements EntrustService {
             vo.setOrderTime(entity.getOrderTime());
             vo.setState(0);
             vo.setReportComplete(2);
-            vo.setOrderer(ShiroUtils.getUserInfo().getName());
+            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+            vo.setOrderer(userInfo.getName());
             vo.setPresentInformation(entity.getPresentInformation());
 //            if(deptId.equals(dept)){
             if(!CollectionUtils.isEmpty(entity.getDeptIds())){
@@ -2669,6 +2670,25 @@ public class EntrustServiceImpl implements EntrustService {
             }
             //更新检测项信息
             taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
+            // 2023年9月26日 发布时：样品状态 = 待检
+            // 通过委托单id 获取样品信息
+            List<Integer> sampleIds = entityMapper.getSampleId(entity.getEntrustmentId());
+            if (CollectionUtil.isNotEmpty(sampleIds)) {
+                for (Integer sampleId : sampleIds) {
+                    // 根据样品id 查询样品流转列表
+                    List<SampleCirculationRecord> circulationList = sampleEntityMapper.getRecords(sampleId, 30);
+                    if (CollectionUtils.isEmpty(circulationList)) {
+                        // 增加样品样品流转状态
+                        SampleCirculationRecord sa = new SampleCirculationRecord();
+                        sa.setSampleId(sampleId);
+                        sa.setStatus("0");
+                        sa.setOperatorId(userInfo.getUserId());
+                        sa.setOperatorName(userInfo.getName());
+                        sa.setTime(new Date());
+                        sampleEntityMapper.saveSampleCirculationRecord(sa);
+                    }
+                }
+            }
             // 记录发布任务单的日志
             StringBuffer stringBuilder1 = new StringBuffer();
             stringBuilder1.append("任务单发布日志");
@@ -3162,14 +3182,14 @@ public class EntrustServiceImpl implements EntrustService {
                 sampleEntity2.setState("0");
                 // update样品信息
                 sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity2);
-                // 增加样品样品流转状态
-                SampleCirculationRecord sa = new SampleCirculationRecord();
-                sa.setSampleId(sampleEntity2.getId());
-                sa.setStatus("0");
-                sa.setOperatorId(userInfo.getUserId());
-                sa.setOperatorName(vo.getBusinessAcceptor());
-                sa.setTime(new Date());
-                sampleEntityMapper.saveSampleCirculationRecord(sa);
+//                // 增加样品样品流转状态
+//                SampleCirculationRecord sa = new SampleCirculationRecord();
+//                sa.setSampleId(sampleEntity2.getId());
+//                sa.setStatus("0");
+//                sa.setOperatorId(userInfo.getUserId());
+//                sa.setOperatorName(vo.getBusinessAcceptor());
+//                sa.setTime(new Date());
+//                sampleEntityMapper.saveSampleCirculationRecord(sa);
                 EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                 entrustSampleEntity.setEntrustmentId(basisInfo.getId());
                 entrustSampleEntity.setSampleId(sampleEntity.getId());
@@ -4112,6 +4132,10 @@ public class EntrustServiceImpl implements EntrustService {
 //                sampleData.setReceivedDate(sdf.format(AcceptanceDate));
 //                status = true;
 //            }
+            // 判断时间一致直接返回
+            if(sampleData.getReceivedDate().equals(sdf.format(AcceptanceDate))){
+                return false;
+            }
             //ps： 更改为 样品签收时间 =委托单受理日期
                 sampleData.setReceivedDate(sdf.format(AcceptanceDate));
                 status = true;
@@ -5280,6 +5304,39 @@ public class EntrustServiceImpl implements EntrustService {
             logger.error("设置委托单信息到模板异常:{}", e);
         }
         return doc;
+    }
+
+    @Override
+    public QrCodeAuthRes qrCodeAuth(String reportCode) {
+        QrCodeAuthRes qrCodeAuthRes = new QrCodeAuthRes();
+        String info = recordEntityMapper.getInitInfo();
+        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
+        Long entrustId = entity.getEntrustmentId() == null ? entity.getEntrustId() : entity.getEntrustmentId();
+        EntrustAddVo detail = this.getEntrustHistoryDetail(entrustId);
+        qrCodeAuthRes.setEntrustCompany(detail.getEntrustCompany());
+        qrCodeAuthRes.setProjectName(detail.getProjectName());
+        qrCodeAuthRes.setEntrustPeople(detail.getEntrustPeople());
+        qrCodeAuthRes.setAcceptanceDate(detail.getAcceptanceDate());
+        List<SampleEntity> samples = detail.getSamples();
+        StringBuilder codes = new StringBuilder();
+        StringBuilder names = new StringBuilder();
+        StringBuilder specs = new StringBuilder();
+        for (int i =0;i<samples.size();i++){
+            codes.append(samples.get(i).getSampleCode());
+            names.append(samples.get(i).getSampleName());
+            specs.append(samples.get(i).getSpecs());
+            if (i < samples.size()-1){
+                codes.append(",");
+                names.append(",");
+                specs.append(",");
+            }
+        }
+        qrCodeAuthRes.setSampleCode(codes.toString());
+        qrCodeAuthRes.setSampleName(names.toString());
+        qrCodeAuthRes.setSpecs(specs.toString());
+        qrCodeAuthRes.setCheckOrganization(info);
+        qrCodeAuthRes.setReportCode(reportCode);
+        return qrCodeAuthRes;
     }
 
 }

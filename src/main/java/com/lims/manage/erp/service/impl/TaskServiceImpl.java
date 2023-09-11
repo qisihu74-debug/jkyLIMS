@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -536,6 +537,13 @@ public class TaskServiceImpl implements TaskService {
         stringBuilder1.append(" 领样人:"+taskTestEntity.getSampler());
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "任务单领取\n\t"+stringBuilder1.toString(), Const.TASK_GET, true);
         taskMapper.updateTestTask(taskTestEntity);
+        // 获取任务单id集合 进行更新样品领样状态
+        List<Long> taskIds = new ArrayList<>();
+        taskIds.add(taskTestEntity.getId());
+        List<TaskTestEntity> taskTestEntities = new ArrayList<>();
+        taskTestEntities.add(taskTestEntity);
+        // 根据任务单id 更新样品状态 = 1
+        updateSampleStateMethod(taskIds,taskTestEntities);
         return true;
     }
 
@@ -577,16 +585,20 @@ public class TaskServiceImpl implements TaskService {
        if(i==0){
            logger.error("批量修改任务单信息失败！");
        }
-//        for (int j = 0; j < taskTestEntitys.size(); j++) {
-//            TaskTestEntity taskTestEntity = taskTestEntitys.get(i);
-        for(TaskTestEntity taskTestEntity :taskTestEntitys){
+        // 获取任务单id集合 进行更新样品领样状态
+        List<Long> taskIds = new ArrayList<>();
+       for(TaskTestEntity taskTestEntity :taskTestEntitys){
             // 根据任务单主键 获取委托单主键
             EntrustEntity entrustEntity = taskMapper.getEntrustBaseInfo(taskTestEntity.getId());
+           taskIds.add(taskTestEntity.getId());
             if (entrustEntity != null) {
                 //更新任务单状态为已领样
                 taskMapper.updateEntrustById(taskTestEntity.getId(), 2);
             }
+           taskIds.add(taskTestEntity.getId());
         }
+       // 根据任务单id 更新样品状态 = 1
+        updateSampleStateMethod(taskIds,taskTestEntitys);
         return true;
     }
 
@@ -705,7 +717,7 @@ public class TaskServiceImpl implements TaskService {
             }
             // 领样人
             if(taskListVo.getSampler()!=null){
-                testMap.put("sampler", taskListVo.getSampler());
+                testMap.put("sampler", taskListVo.getSampler().split("&")[0]);
             }else {
                 testMap.put("sampler", "--");
             }
@@ -1048,6 +1060,9 @@ public class TaskServiceImpl implements TaskService {
                 sampleTime.append(sampleEntity.getOutwardDescribe()== null ? "——": sampleEntity.getOutwardDescribe());
                 sampleTime.append("；");
                 sampleTime.append("来样时间：");
+                sampleTime.append(sampleEntity.getSpecs()== null ? "——": sampleEntity.getSpecs());
+                sampleTime.append("；");
+                sampleTime.append("规格尺寸：");
                 // 签收时间 = 委托单受理日期
                 sampleEntity.setReceivedDate(sdf.format(entrustBaseInfo.getAcceptanceDate()));
                 sampleTime.append(sampleEntity.getReceivedDate());
@@ -1819,6 +1834,9 @@ public class TaskServiceImpl implements TaskService {
         } catch (Exception e) {
             logger.info("样品附件 " + productExcelUrl + e);
         }
+        if(fileStream == null){
+            return null;
+        }
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
         Map<String, String> mapSheet = new HashMap<>();
         // 循环遍历所有工作表
@@ -1909,7 +1927,7 @@ public class TaskServiceImpl implements TaskService {
             }
             // 领样人
             if(taskListVo.getSampler()!=null){
-                testMap.put("sampler", taskListVo.getSampler());
+                testMap.put("sampler", taskListVo.getSampler().split("&")[0]);
             }else {
                 testMap.put("sampler", "--");
             }
@@ -2091,5 +2109,52 @@ public class TaskServiceImpl implements TaskService {
             }
         }
         return doc;
+    }
+
+    /**
+     * 根据任务单id 更新样品状态 = 1
+     * @param taskIds
+     */
+    protected void updateSampleStateMethod(List<Long> taskIds,List<TaskTestEntity> taskTestEntities) {
+        // 根据任务单id 获取样品状态
+        List<SampleEntity> sampleList = sampleEntityMapper.selectAllState(taskIds);
+        // 遍历 state < 1 : 更新状态 = 1
+        for (SampleEntity sampleEntity : sampleList) {
+            if (sampleEntity.getState() != null && (Integer.parseInt(sampleEntity.getState()) < 1)) {
+                // 更新操作。
+                TestSampleEntity data = new TestSampleEntity();
+                data.setId(sampleEntity.getId());
+                data.setState("1");
+                testSampleEntityMapper.updateById(data);
+            }
+            // 根据样品id 查询样品流转列表
+            List<SampleCirculationRecord> circulationList = sampleEntityMapper.getRecords(sampleEntity.getId(), 30);
+            if (CollectionUtil.isNotEmpty(circulationList)) {
+                Boolean flag = false;
+                for (SampleCirculationRecord sampleCirculationRecord : circulationList) {
+                    if (sampleCirculationRecord.getStatus().equals("1")) {
+                        flag = true;
+                    }
+                }
+                if (!flag) {
+                    // 从任务单列表 获取 留样人、留样时间
+                    for(TaskTestEntity taskData : taskTestEntities){
+                        if(taskData.getId().equals(sampleEntity.getTaskId())){
+                            String[] lableArrays = taskData.getSampler().split("&");
+                            // 增加样品样品流转状态
+                            SampleCirculationRecord sa = new SampleCirculationRecord();
+                            sa.setSampleId(sampleEntity.getId());
+                            sa.setStatus("1");
+                            sa.setOperatorId(Long.parseLong(lableArrays[1]));
+                            sa.setOperatorName(lableArrays[0]);
+                            // 通过样品id 查询任务单列表 获取流转日期
+                            sa.setTime(taskData.getSampleReceivingTime());
+                            sampleEntityMapper.saveSampleCirculationRecord(sa);
+                        }
+                    }
+
+                }
+            }
+        }
     }
 }

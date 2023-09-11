@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.aspose.cells.Cells;
 import com.aspose.cells.SaveFormat;
 import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -352,6 +353,111 @@ public class SampleServiceImpl implements SampleService {
                     worksheet.getCells().get("B4").setValue(sampleDetailVo.getSpecs());
                     worksheet.getCells().get("B5").setValue(sampleDetailVo.getOutwardDescribe());
                     //设置二维码
+                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl()+sampleDetailVo.getId()+"&type="+type+"&ip="+qiYueSuoEntity.getIp());
+                    InputStream stream = bufferedImageToInputStream(bufferedImage);
+                    worksheet.getPictures().add(6,4,stream,26,26);
+                    //合并sheet
+                    Worksheet worksheetS = newBook.getWorksheets().add(list.get(i));
+                    worksheetS.copy(worksheet);
+                }
+            }
+            if (sampleDetailVoList.size()>1){
+                for (int i=0;i<sampleDetailVoList.size();i++) {
+                    //创建一个新的Excel文档
+                    InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-tag.xlsx");
+                    com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
+                    Worksheet worksheet = workbook.getWorksheets().get(0);
+                    //填充数据
+                    worksheet.getCells().get("B2").setValue(sampleDetailVoList.get(i).getSampleCode());
+                    worksheet.getCells().get("B3").setValue(sampleDetailVoList.get(i).getAliasName());
+                    worksheet.getCells().get("B4").setValue(sampleDetailVoList.get(i).getSpecs());
+                    worksheet.getCells().get("B5").setValue(sampleDetailVoList.get(i).getOutwardDescribe());
+                    //设置二维码
+                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl()+sampleDetailVoList.get(i).getId() + "&type="+type+"&ip="+qiYueSuoEntity.getIp());
+                    InputStream stream = bufferedImageToInputStream(bufferedImage);
+                    worksheet.getPictures().add(5,3,stream,30,30);
+                    //合并sheet
+                    Worksheet worksheetS = newBook.getWorksheets().add(sampleDetailVoList.get(i).getSampleCode());
+                    worksheetS.copy(worksheet);
+                }
+            }
+            newBook.save(outputStream, SaveFormat.XLSX);
+        }catch (Exception e){
+            log.error("下载样品标签异常:{}",e);
+        }
+        return outputStream;
+    }
+
+    @Override
+    public void downloadNewSampleTab1(int type, Integer sampleId,SampleDetailVo sampleTagInfo, HttpServletResponse response) {
+        List<SampleDetailVo> sampleDetailVoList = new ArrayList<>();
+        log.info("样品留样标签的样品编号为:{}",sampleTagInfo.getSampleCode());
+        try {
+
+            List<String> codeList = Lists.newArrayList();
+            if (sampleTagInfo.getSampleType().equals("原材")) {
+                if (sampleTagInfo != null) {
+                    //样品编号格式处理：YP-2022-9200-01~03 情况2：YP-2022-0096
+                    String[] sampleSplits = sampleTagInfo.getSampleCode().split("-");
+                    //获取样品标签编号集合
+                    String s = "";
+                    if (sampleSplits.length > 3) {
+                        String[] strings = sampleSplits[3].split("~");
+                        int startNum = Integer.parseInt(strings[0].substring(1));
+                        int endNum = Integer.parseInt(strings[1]);
+                        int index = startNum;
+                        for (int i = 0; i < endNum; i++) {
+                            s = sampleSplits[0] + "-" + sampleSplits[1] + "-" + sampleSplits[2] + "-" + index;
+                            codeList.add(s);
+                            index++;
+                        }
+                    } else {
+                        codeList.add(sampleTagInfo.getSampleCode());
+                    }
+                    // 处理样品描述信息 Outward、 outwardDescribe 组合输出
+                    StringBuilder stringBuilder = new StringBuilder();
+                    if (sampleTagInfo.getOutward() != null && sampleTagInfo.getOutward().length() > 0) {
+                        stringBuilder.append(sampleTagInfo.getOutward() + ",");
+                    }
+                    if (sampleTagInfo.getOutwardDescribe() != null && sampleTagInfo.getOutwardDescribe().length() > 0) {
+                        stringBuilder.append(sampleTagInfo.getOutwardDescribe() + ",");
+                    }
+                    if (stringBuilder.length() > 1) {
+                        sampleTagInfo.setOutward(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+                    } else {
+                        sampleTagInfo.setOutward("");
+                    }
+                }
+                sampleTagInfo.setCodeList(codeList);
+                sampleDetailVoList.add(sampleTagInfo);
+            }else {
+                //获取配合比集合。
+                sampleDetailVoList = sampleEntityMapper.getSampleTagInfoPidList(sampleTagInfo.getId());
+                if (org.apache.commons.collections4.CollectionUtils.isEmpty(sampleDetailVoList)){
+                    SampleDetailVo tagInfo = sampleEntityMapper.getSampleTagInfo(sampleTagInfo.getId());
+                    codeList.add(tagInfo.getSampleCode());
+                    tagInfo.setCodeList(codeList);
+                    sampleDetailVoList.add(tagInfo);
+                }
+            }
+            //填充数据,sampleDetailVoList size=1根据codeList取编号，大于1直接取数据的编号
+            PDFHelper3.getLicense();
+            com.aspose.cells.Workbook newBook = new com.aspose.cells.Workbook();
+            newBook.getWorksheets().clear();
+            if (sampleDetailVoList.size()==1){
+                SampleDetailVo sampleDetailVo = sampleDetailVoList.get(0);
+                List<String> list = sampleDetailVo.getCodeList();
+                for (int i=0;i<list.size();i++) {
+                    //创建一个新的Excel文档
+                    InputStream fileStream = MinIoUtil.getFileStream("test-sample-template", "sample-tag.xlsx");
+                    com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
+                    Worksheet worksheet = workbook.getWorksheets().get(0);
+                    //填充数据
+                    worksheet.getCells().get("B2").setValue(list.get(i));
+                    worksheet.getCells().get("B3").setValue(sampleDetailVo.getAliasName());
+                    worksheet.getCells().get("B4").setValue(sampleDetailVo.getSpecs());
+                    worksheet.getCells().get("B5").setValue(sampleDetailVo.getOutwardDescribe());
+                    //设置二维码
                     BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl()+sampleDetailVo.getId()+"&type="+type);
                     InputStream stream = bufferedImageToInputStream(bufferedImage);
                     worksheet.getPictures().add(6,4,stream,26,26);
@@ -372,7 +478,7 @@ public class SampleServiceImpl implements SampleService {
                     worksheet.getCells().get("B4").setValue(sampleDetailVoList.get(i).getSpecs());
                     worksheet.getCells().get("B5").setValue(sampleDetailVoList.get(i).getOutwardDescribe());
                     //设置二维码
-                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(sampleDetailVoList.get(i).getId() + "&type="+type);
+                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl()+sampleDetailVoList.get(i).getId() + "&type="+type);
                     InputStream stream = bufferedImageToInputStream(bufferedImage);
                     worksheet.getPictures().add(5,3,stream,30,30);
                     //合并sheet
@@ -380,11 +486,10 @@ public class SampleServiceImpl implements SampleService {
                     worksheetS.copy(worksheet);
                 }
             }
-            newBook.save(outputStream, SaveFormat.XLSX);
+            newBook.save("D:\\doc\\saveOriginalRecord\\六月留样\\"+sampleTagInfo.getSampleCode()+".xlsx", SaveFormat.XLSX);
         }catch (Exception e){
             log.error("下载样品标签异常:{}",e);
         }
-        return outputStream;
     }
 
     @Override
@@ -401,8 +506,9 @@ public class SampleServiceImpl implements SampleService {
             }
             entity.setId(sampleId);
             entity.setSampleCode(sampleTagInfo.getSampleCode());
-            entity.setSampleName(sampleTagInfo.getSampleName());
+            entity.setAliasName(sampleTagInfo.getAliasName());
             entity.setSpecs(sampleTagInfo.getSpecs());
+            entity.setSampleRetentionArea(sampleTagInfo.getSampleRetentionArea());
             entity.setSampleRetentionPeriod(sampleTagInfo.getSampleRetentionPeriod());
             entity.setOutwardDescribe(StringUtils.isEmpty(sampleTagInfo.getOutwardDescribe())?"/":sampleTagInfo.getOutwardDescribe());
             //查询样品流转记录
@@ -422,18 +528,8 @@ public class SampleServiceImpl implements SampleService {
                             bean.setOperatorName(sampleTaker.getSampler());
                             bean.setTime(sampleTaker.getSampleReceivingTime());
                         }
-                        //flag = false;
                     }
                 }
-//                if (flag){
-//                    ReceiveSampleParamVo sampleTaker = sampleEntityMapper.getSampleTaker(list.get(0).getSampleId());
-//                    SampleCirculationRecord sampleCirculationRecord = new SampleCirculationRecord();
-//                    sampleCirculationRecord.setOperatorName(sampleTaker.getSampler());
-//                    sampleCirculationRecord.setTime(sampleTaker.getSampleReceivingTime());
-//                    sampleCirculationRecord.setStatus("1");
-//                    sampleCirculationRecord.setSampleId(list.get(0).getSampleId());
-//                    list.add(sampleCirculationRecord);
-//                }
             }
             //流转记录详情列表结果重新构造,操作内容 待检（流转确认人：） 状态，0待检，1在检，2已检，3留样，4处置
             for (SampleCirculationRecord record:list) {
@@ -468,13 +564,13 @@ public class SampleServiceImpl implements SampleService {
                 List<Long> roles = sysUserRoleDao.getRoleIdsByUserId(userInfo.getUserId());
                 for (Long id:roles) {
                     if (id==11 || id==33 || id==44){
-                        if (id.longValue() == 11){
+                        if (id.longValue() == 11 && type == 1){
                             integerList.add(1L);
                         }
-                        if (id.longValue() == 33){
+                        if (id.longValue() == 33 && type == 1){
                             integerList.add(3L);
                         }
-                        if (id.longValue() == 44){
+                        if (id.longValue() == 44 && type ==2){
                             integerList.add(4L);
                         }
                     }
@@ -492,7 +588,7 @@ public class SampleServiceImpl implements SampleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Integer updateState(Integer sampleId,Integer state,Date time,Integer saveTime,Integer sampleRetentionPeriod,String sampleProcessMode,
-                               String approver) {
+                               String approver,String sampleRetentionArea,String disposalDate,String disposalPeople) {
         //2领样，3留样，4处置
         List<Integer> ids = sampleEntityMapper.getExist(sampleId,state);
         if (ids != null && ids.size() >= 1){
@@ -508,8 +604,13 @@ public class SampleServiceImpl implements SampleService {
         SampleCirculationRecord record = new SampleCirculationRecord();
         //更新样品表状态
         if (state == 1){
+            List<Integer> list = sampleEntityMapper.getExist(sampleId,0);
+            if (org.apache.commons.collections.CollectionUtils.isEmpty(list)){
+                return 4;
+            }
             sampleEntityMapper.updateSampleState(sampleId,state);
         }
+        Date date11= null;
         if (state >= 3){
             Integer status = null;
             if (state == 3){
@@ -534,11 +635,26 @@ public class SampleServiceImpl implements SampleService {
                     SampleEntity sampleEntity1 = new SampleEntity();
                     sampleEntity1.setId(sampleId);
                     sampleEntity1.setSampleRetentionPeriod(sampleRetentionPeriod);
+                    sampleEntity1.setSampleRetentionArea(sampleRetentionArea);
                     // 动态更新
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity1);
                 }
             }
             if (state == 4){
+                //已检测、在判断已检时间和留样天数，当前时间
+                List<Integer> list = sampleEntityMapper.getExist(sampleId,2);
+                if (org.apache.commons.collections.CollectionUtils.isEmpty(list)){
+                    return 5;
+                }
+                Date date = sampleEntityMapper.getDate(sampleId,3);
+                int saveDay = sampleEntityMapper.getDaysById(sampleId);
+                //检测完成时间+留样天数》= 当前日期
+                String beforeDayString = DateUtil.getBeforeDayString(saveDay);//获取N天前的日期
+                //date>=beforeDayString
+                String dayString = DateUtil.getDayString(date.getTime());
+                if (Integer.parseInt(dayString)<Integer.parseInt(beforeDayString)){
+                    return 6;
+                }
                 status = 2;
                 // 样品处置方式（state=4处置）
                 if(!org.springframework.util.StringUtils.isEmpty(sampleProcessMode)){
@@ -551,11 +667,22 @@ public class SampleServiceImpl implements SampleService {
                 }
             }
             sampleEntityMapper.updateIsSave(sampleId,status,saveTime);
+            if (StringUtils.isEmpty(disposalDate)){
+                SimpleDateFormat simpleDateFormat =new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    date11 = simpleDateFormat.parse(disposalDate);
+                }catch (Exception e){
+                    log.error("时间转换异常:{}",e);
+                }
+            }
         }
         record.setSampleId(sampleId);
         record.setStatus(state+"");
         if (record.getTime() == null){
             record.setTime(time);
+        }
+        if (date11 != null){
+            record.setTime(date11);
         }
         if (record.getOperatorId() == null){
             record.setOperatorId(ShiroUtils.getUserInfo().getUserId());
@@ -1081,5 +1208,70 @@ public class SampleServiceImpl implements SampleService {
             pageInfo.setTotal(count);
             return pageInfo;
         }
+    }
+
+    @Override
+    public int getIdByCode(String code) {
+        return sampleEntityMapper.getIdByCode(code);
+    }
+
+    @Override
+    public void updateDayByCode(String code, String value) {
+        sampleEntityMapper.updateDayByCode(code,(int)Double.parseDouble(value));
+    }
+
+    @Override
+    public void exportWtTz(Cells cells) {
+        List<TzBean> list = sampleEntityMapper.exportWtTz();
+        for (TzBean bean :list){
+            String sampleCode = bean.getSampleCode();
+            if (StringUtils.isNotEmpty(sampleCode)){
+                HashSet<String> strings = handlerData(sampleCode);
+                bean.setSampleCode(strings.toString());
+            }
+            String aliasName = bean.getAliasName();
+            if (StringUtils.isNotEmpty(aliasName)){
+                HashSet<String> strings = handlerData(aliasName);
+                bean.setAliasName(strings.toString());
+            }
+            String reportCode = bean.getReportCode();
+            if (StringUtils.isNotEmpty(reportCode)){
+                HashSet<String> strings = handlerData(reportCode);
+                bean.setReportCode(strings.toString());
+            }
+        }
+        //填充数据
+        int start = 3;
+        for (int i = 0; i <list.size() ; i++) {
+            cells.get("A"+start).setValue(list.get(i).getTaskCode());
+            if (list.get(i).getOrderTime() != null){
+                cells.get("B"+start).setValue(DateUtil.formatDate(list.get(i).getOrderTime()));
+            }
+            cells.get("C"+start).setValue(list.get(i).getEntrustNo());
+            if (list.get(i).getAcceptanceDate() != null){
+                cells.get("D"+start).setValue(DateUtil.formatDate(list.get(i).getAcceptanceDate()));
+            }
+            cells.get("E"+start).setValue(list.get(i).getSampleCode());
+            cells.get("F"+start).setValue(list.get(i).getAliasName());
+            cells.get("G"+start).setValue(list.get(i).getReportCode());
+            if (list.get(i).getRequestDate() != null){
+                cells.get("H"+start).setValue(DateUtil.formatDate(list.get(i).getRequestDate()));
+            }
+            start++;
+        }
+
+    }
+
+    public HashSet<String> handlerData(String message){
+        HashSet<String> set = new HashSet();
+        String[] split = message.split(",");
+        for (String s :split){
+            if (StringUtils.isNotEmpty(s)){
+                if (!"——".equals(s)){
+                    set.add(s);
+                }
+            }
+        }
+        return set;
     }
 }
