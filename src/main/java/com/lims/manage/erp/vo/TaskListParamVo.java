@@ -37,4 +37,18 @@ public class TaskListParamVo {
      * 签名URL
      */
     private String signatureUrl;
+    /**
+     * 记录人
+     */
+    private String recorder;
+    /**
+     * 报告制作人
+     */
+    private String reportProducer;
+    /**
+     * 领样人
+     */
+    private String sampler;
+
+
 }
