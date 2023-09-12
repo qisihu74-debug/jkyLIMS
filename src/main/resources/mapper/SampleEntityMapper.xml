@@ -1416,4 +1416,18 @@ WHERE
             #{item}
         </foreach>
     </select>
+    <select id="getGroupNodes" resultType="com.lims.manage.erp.entity.SampleEntity"
+            parameterType="com.lims.manage.erp.entity.SampleEntity">
+        SELECT
+        id, company_id, sample_name, sample_code, specs, batch_number, manufacturer, sample_origin,
+        outward, picture,
+        save_place, admin, sample_groups, quantity_per_group, inspector,
+        received_date, sample_requirement, generation, state, check_date, remark,product_id
+        FROM
+        test_sample
+        where sample_code in
+        <foreach collection="codes" item="code" index="index" open="(" close=")" separator=",">
+            #{code}
+        </foreach>
+    </select>
 </mapper>

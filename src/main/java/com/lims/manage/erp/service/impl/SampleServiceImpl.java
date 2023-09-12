@@ -62,6 +62,7 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     public Integer addSampleData(SampleAddParamVo addParamVo, MultipartFile[] file) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
         int result = 0;
         String insertFlag = System.currentTimeMillis() + "";
         //查询产品名称
@@ -136,7 +137,18 @@ public class SampleServiceImpl implements SampleService {
                 }
                 //保存样品信息
                 SampleEntity sampleEntity = new SampleEntity(addParamVo, details.get(i), productName, sampleCode, pictureUrl, insertFlag);
+                // 样品信息 state =5
+                sampleEntity.setState("5");
                 result = sampleEntityMapper.insert(sampleEntity);
+                // 样品新增时 新增流转SQL： 状态 = 5 收样。
+                // 增加样品样品流转状态
+                SampleCirculationRecord sa = new SampleCirculationRecord();
+                sa.setSampleId(sampleEntity.getId());
+                sa.setStatus("5");
+                sa.setOperatorId(userInfo.getUserId());
+                sa.setOperatorName(userInfo.getName());
+                sa.setTime(new Date());
+                sampleEntityMapper.saveSampleCirculationRecord(sa);
             }
         } else {
             StringBuilder code = new StringBuilder("YP-" + sdf.format(now) + "-");
@@ -144,7 +156,18 @@ public class SampleServiceImpl implements SampleService {
             String num = String.format("%0" + 5 + "d", newMax + 1);
             StringBuilder sampleCode = code.append(num);
             SampleEntity sampleEntity = new SampleEntity(addParamVo, null, productName, sampleCode.toString(), null, insertFlag);
+            // 样品信息 state =5
+            sampleEntity.setState("5");
             result = sampleEntityMapper.insert(sampleEntity);
+            // 样品新增时 新增流转SQL： 状态 = 5 收样。
+            // 增加样品样品流转状态
+            SampleCirculationRecord sa = new SampleCirculationRecord();
+            sa.setSampleId(sampleEntity.getId());
+            sa.setStatus("5");
+            sa.setOperatorId(userInfo.getUserId());
+            sa.setOperatorName(userInfo.getName());
+            sa.setTime(new Date());
+            sampleEntityMapper.saveSampleCirculationRecord(sa);
         }
         return result;
     }

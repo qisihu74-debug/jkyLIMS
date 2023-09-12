@@ -473,4 +473,11 @@ public interface SampleEntityMapper {
 
     @Select("select sample_retention_period from test_sample where id=#{sampleId}")
     int getDaysById(@Param("sampleId") Integer sampleId);
+
+    /**
+     * 查询样品信息
+     * @param codes
+     * @return
+     */
+    List<SampleEntity> getGroupNodes(@Param("codes") List<String> codes);
 }

@@ -1,16 +1,12 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.SampleFileTableEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.entity.TestSampleCollectionJSON;
-import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.SampleEntityMapper;
 import com.lims.manage.erp.mapper.SampleFileTableDao;
@@ -37,11 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,10 +71,13 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
     @Override
     public Integer batchInsertSample(List<SampleDetailAddVo> samples) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
         Date now = new Date();
         List<TestSampleEntity> entities = Lists.newArrayList();
         //获取数据库当前年份最大的样品编号
         int newMax = getNewSampleCode();
+        // 供流转记录进行使用
+        Set<String> sampleCodeSet = new HashSet<>();
         for (int i = 0; i < samples.size(); i++) {
             int code = newMax + i + 1;
             String codeStr = new DecimalFormat("00000").format(code);
@@ -106,14 +101,38 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
                 }
             }
             TestSampleEntity entity = new TestSampleEntity(samples.get(i), sampleCode,outwardStr.toString());
+            // 样品新增时： state = 5
+            entity.setState("5");
+            // 提供样品编号
+            sampleCodeSet.add(entity.getSampleCode());
             entities.add(entity);
         }
-        return testSampleEntityMapper.insertBatch(entities);
+//        return testSampleEntityMapper.insertBatch(entities);
+        Integer integer = testSampleEntityMapper.insertBatch(entities);
+        // 读取编号 获取样品id
+        if(CollectionUtil.isNotEmpty(sampleCodeSet)){
+            List<String> lists = new ArrayList<>(sampleCodeSet.stream().collect(Collectors.toList()));
+            List<SampleEntity> sampleDatas = sampleEntityMapper.getGroupNodes(lists);
+            for(SampleEntity sampleData : sampleDatas){
+                // 样品新增时 新增流转SQL： 状态 = 5 收样。
+                // 增加样品样品流转状态
+                SampleCirculationRecord sa = new SampleCirculationRecord();
+                sa.setSampleId(sampleData.getId());
+                sa.setStatus("5");
+                sa.setOperatorId(userInfo.getUserId());
+                sa.setOperatorName(userInfo.getName());
+                sa.setTime(new Date());
+                sampleEntityMapper.saveSampleCirculationRecord(sa);
+            }
+        }
+        return integer;
     }
 
     @Transactional
     @Override
     public Integer batchInsertMixSample(SamplesAddVo samples) {
+       SysUserEntity userInfo = ShiroUtils.getUserInfo();
+       Set<String> sampleCodeSet = new HashSet<>();
         Date now = new Date();
         List<TestSampleEntity> param = Lists.newArrayList();
         //处理配合比样品数据
@@ -123,6 +142,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         String codeStr = new DecimalFormat("00000").format(newMax);
         String sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
         TestSampleEntity mainSample = new TestSampleEntity(vo, sampleCode,null);
+        // 样品新增时： state = 5
+        mainSample.setState("5");
+        sampleCodeSet.add(mainSample.getSampleCode());
         param.add(mainSample);
         //处理子样品
         List<SampleDetailAddVo> samples1 = samples.getSamples();
@@ -155,6 +177,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
                     }
                 }
                 TestSampleEntity sample = new TestSampleEntity(sampleDetailAddVo, code,outwardStr.toString());
+                // 样品新增时： state = 5
+                sample.setState("5");
+                sampleCodeSet.add(sample.getSampleCode());
                 param.add(sample);
                 i++;
             }
@@ -171,10 +196,31 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
                 TestSampleEntity allById = testSampleEntityMapper.getAllById(sampleCode1);
                 allById.setId(null);
                 allById.setPid(newId);
+                // 样品新增时： state = 5
+                allById.setState("5");
+                sampleCodeSet.add(allById.getSampleCode());
                 param.add(allById);
             }
         }
-        return testSampleEntityMapper.insertBatchMixSamples(param);
+//        return testSampleEntityMapper.insertBatchMixSamples(param);
+        Integer integer = testSampleEntityMapper.insertBatchMixSamples(param);
+        // 读取编号 获取样品id
+        if(CollectionUtil.isNotEmpty(sampleCodeSet)){
+            List<String> lists = new ArrayList<>(sampleCodeSet.stream().collect(Collectors.toList()));
+            List<SampleEntity> sampleDatas = sampleEntityMapper.getGroupNodes(lists);
+            for(SampleEntity sampleData : sampleDatas){
+                // 样品新增时 新增流转SQL： 状态 = 5 收样。
+                // 增加样品样品流转状态
+                SampleCirculationRecord sa = new SampleCirculationRecord();
+                sa.setSampleId(sampleData.getId());
+                sa.setStatus("5");
+                sa.setOperatorId(userInfo.getUserId());
+                sa.setOperatorName(userInfo.getName());
+                sa.setTime(new Date());
+                sampleEntityMapper.saveSampleCirculationRecord(sa);
+            }
+        }
+        return integer;
     }
 
     @Override
@@ -451,6 +497,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<TestSampleEntity>  batchInsertSampleCopy(List<SampleDetailAddVo> samples) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 供流转记录进行使用
+        Set<String> sampleCodeSet = new HashSet<>();
         Date now = new Date();
         List<TestSampleEntity> entities = Lists.newArrayList();
         //获取数据库当前年份最大的样品编号
@@ -478,6 +527,10 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
                 }
             }
             TestSampleEntity entity = new TestSampleEntity(samples.get(i), sampleCode,outwardStr.toString());
+            // 样品新增时： state = 5
+            entity.setState("5");
+            // 提供样品编号
+            sampleCodeSet.add(entity.getSampleCode());
             entities.add(entity);
         }
         if(!CollectionUtils.isEmpty(entities)){
@@ -494,12 +547,31 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：新增原材样品\t"+stringBuilder1.toString(), Const.ENTRUST_FOUND, true);
         }
         testSampleEntityMapper.insertBatch(entities);
+        // 读取编号 获取样品id
+        if(CollectionUtil.isNotEmpty(sampleCodeSet)){
+            List<String> lists = new ArrayList<>(sampleCodeSet.stream().collect(Collectors.toList()));
+            List<SampleEntity> sampleDatas = sampleEntityMapper.getGroupNodes(lists);
+            for(SampleEntity sampleData : sampleDatas){
+                // 样品新增时 新增流转SQL： 状态 = 5 收样。
+                // 增加样品样品流转状态
+                SampleCirculationRecord sa = new SampleCirculationRecord();
+                sa.setSampleId(sampleData.getId());
+                sa.setStatus("5");
+                sa.setOperatorId(userInfo.getUserId());
+                sa.setOperatorName(userInfo.getName());
+                sa.setTime(new Date());
+                sampleEntityMapper.saveSampleCirculationRecord(sa);
+            }
+        }
         return entities;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TestSampleMixInfoEntity batchInsertMixSampleCopy(SamplesAddVo samples,long id) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 供流转记录进行使用
+        Set<String> sampleCodeSet = new HashSet<>();
         Date now = new Date();
         List<TestSampleEntity> param = Lists.newArrayList();
         //处理配合比样品数据
@@ -509,6 +581,10 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         String codeStr = new DecimalFormat("00000").format(newMax);
         String sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
         TestSampleEntity mainSample = new TestSampleEntity(vo, sampleCode,null);
+        // 样品新增时： state = 5
+        mainSample.setState("5");
+        // 提供样品编号
+        sampleCodeSet.add(mainSample.getSampleCode());
         param.add(mainSample);
         //处理子样品
         List<SampleDetailAddVo> samples1 = samples.getSamples();
@@ -540,6 +616,10 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
                 }
             }
             TestSampleEntity sample = new TestSampleEntity(sampleDetailAddVo, code,outwardStr.toString());
+            // 样品新增时： state = 5
+            sample.setState("5");
+            // 提供样品编号
+            sampleCodeSet.add(sample.getSampleCode());
             param.add(sample);
             i++;
         }
@@ -567,6 +647,22 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：新增配合比样品\t"+stringBuilder1.toString(), Const.ENTRUST_FOUND, true);
         }
         testSampleEntityMapper.insertBatchMixSamples(param);
+        // 读取编号 获取样品id
+        if(CollectionUtil.isNotEmpty(sampleCodeSet)){
+            List<String> lists = new ArrayList<>(sampleCodeSet.stream().collect(Collectors.toList()));
+            List<SampleEntity> sampleDatas = sampleEntityMapper.getGroupNodes(lists);
+            for(SampleEntity sampleData : sampleDatas){
+                // 样品新增时 新增流转SQL： 状态 = 5 收样。
+                // 增加样品样品流转状态
+                SampleCirculationRecord sa = new SampleCirculationRecord();
+                sa.setSampleId(sampleData.getId());
+                sa.setStatus("5");
+                sa.setOperatorId(userInfo.getUserId());
+                sa.setOperatorName(userInfo.getName());
+                sa.setTime(new Date());
+                sampleEntityMapper.saveSampleCirculationRecord(sa);
+            }
+        }
         return mixInfoEntity;
     }
     @Transactional(rollbackFor = Exception.class)
