@@ -11,6 +11,7 @@ import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
+import io.netty.util.internal.StringUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -490,6 +491,32 @@ public class TestDetectionImpl implements TestDetectionService {
                         return "检测项名:"+sampleItemInstrumentEntity.getCheckItemName()+" 开始时间:"+startTime
                                 +" 结束时间："+endTime+"有误，请重新选择";
                     }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String personnelComparison(SampleItemInstrumentVo data) {
+        List<Integer> list = new ArrayList<>();
+        // 效验检测项 结束时间 与 开始时间 是否合理
+        for(SampleItemInstrumentEntity sampleItemInstrumentEntity : data.getItemInstrumentEntityList()){
+            list.add(sampleItemInstrumentEntity.getItemId());
+        }
+        // 查询检测项集合
+        List<SampleItemInstrumentEntity> itemList = testDetectionDao.getTestEntrustedSampleCheckitemRelDetailList(list);
+        for(SampleItemInstrumentEntity sampleItemInstrumentEntity : itemList){
+            // 检测项已经编辑
+            if(!StringUtils.isEmpty(sampleItemInstrumentEntity.getEditData()))
+            {
+                // 判断检测人数据不存在
+                if(StringUtils.isEmpty(sampleItemInstrumentEntity.getTestSetUrl())){
+                    return "结束试验失败 检测项名:"+sampleItemInstrumentEntity.getCheckItemName()+" 编辑原始记录 检测人名称不存在";
+                }
+                // 判断记录人数据不存在
+                if(StringUtils.isEmpty(sampleItemInstrumentEntity.getRecordSetUrl())){
+                    return "结束试验失败 检测项名:"+sampleItemInstrumentEntity.getCheckItemName()+" 编辑原始记录 记录人名称不存在";
                 }
             }
         }

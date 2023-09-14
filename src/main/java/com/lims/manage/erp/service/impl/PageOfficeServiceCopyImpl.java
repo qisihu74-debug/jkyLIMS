@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.aspose.cells.*;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
@@ -331,11 +332,13 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         if (!CollectionUtils.isEmpty(excelInsertVo.getList())) {
             for (Integer itemd : excelInsertVo.getList()) {
                 excelInsertVo.setItemId(itemd);
-                // 更新检测项
+                // 更新审核人
+                excelInsertVo.setReviewedBySetUrl(userId.toString());
                 sampleEntityMapper.updateItemReview(excelInsertVo);
             }
         }
-        // 通过检测项id 获取数据Excel
+        // TODO： 9月13日复核 通过时：不进行业务签名图片
+/*        // 通过检测项id 获取数据Excel
         Integer[] array = new Integer[excelInsertVo.getList().size()];
         if (array.length == 1) {
             array[0] = excelInsertVo.getList().get(0);
@@ -359,7 +362,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         // 删除本地文件
         FileAndFolderUtil.delete(saveFileUrl);
         FileAndFolderUtil.delete(saveExcel);
-        input.close();
+        input.close();*/
         return true;
     }
 
@@ -854,21 +857,27 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         String recordSet = file.getFormField("recordSet");
         // 检测人集合
         List<Long> testSetLong = new ArrayList<>();
-        testSetLong.add(Long.valueOf(testSet));
+        if (!StringUtils.isEmpty(testSet)) {
+            testSetLong.add(Long.valueOf(testSet));
+        }
         // 检测人与记录人不相同时
-        if (!testSet.equals(recordSet)) {
-            testSetLong.add(Long.valueOf(recordSet));
+        if (!StringUtils.isEmpty(recordSet) && !StringUtils.isEmpty(testSet)) {
+            if (!testSet.equals(recordSet)) {
+                testSetLong.add(Long.valueOf(recordSet));
+            }
         }
         Map<String, String> map = new HashMap<>();
         StringBuffer stringBuffer = new StringBuffer();
-        for (Long testId : testSetLong) {
-            stringBuffer.append(testId);
-            stringBuffer.append(",");
+        if (CollectionUtil.isNotEmpty(testSetLong)) {
+            for (Long testId : testSetLong) {
+                stringBuffer.append(testId);
+                stringBuffer.append(",");
+            }
         }
-        if (stringBuffer != null) {
+        if (stringBuffer.length() > 1) {
             map.put("testSet", stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
         }
-        if (recordSet != null) {
+        if (!StringUtils.isEmpty(recordSet)) {
             map.put("recordSet", recordSet);
         }
         return map;

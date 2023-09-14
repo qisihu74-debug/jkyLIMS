@@ -58,7 +58,7 @@ import java.util.zip.ZipOutputStream;
 
 @Service
 @Slf4j
-public class TaskServiceImpl implements TaskService {
+public class TaskServiceImpl<labelValueVos> implements TaskService {
     Logger logger = LoggerFactory.getLogger(TaskServiceImpl.class);
     @Autowired
     private TaskMapper taskMapper;
@@ -82,6 +82,8 @@ public class TaskServiceImpl implements TaskService {
     private LogManagerService logManagerService;
     @Autowired
     private TestProductItemDao testProductItemDao;
+    @Autowired
+    private SysRoleDao sysRoleDao;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -1211,11 +1213,14 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String passorno(Integer itemId, Integer state, String opinion) {
+    public String passorno(Integer itemId, Integer state, String opinion, Long userId) {
         // 驳回=4，通过=3，撤回=1
         if (state != null) {
             if (state == 1) {
                 SampleItemInstrumentEntity sampleItemInstrumentEntity2 = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(itemId);
+                if(sampleItemInstrumentEntity2.getState() == 3){
+                    return "撤回失败！当前检测项 已经复核通过";
+                }
                 // 检测项 撤回时 考虑 （盖章的话） test_report_record state = '7'
                 // 通过委托单id 获取报告test_report_record state 状态
                 ReportRecordEntity reportRecordEntity = reportRecordEntityMapper.selectByEntrustId(sampleItemInstrumentEntity2.getEntrustId());
@@ -1259,7 +1264,7 @@ public class TaskServiceImpl implements TaskService {
             }
             if (state == 3) {
                 // 检测项复核通过
-                taskMapper.updateState(itemId, 3, opinion);
+                taskMapper.updateState(itemId, 3, opinion,userId);
                 //记录日志
                 StringBuilder stringBuilder1 = new StringBuilder();
                 stringBuilder1.append(" 检测项id"+itemId);
@@ -1303,7 +1308,7 @@ public class TaskServiceImpl implements TaskService {
         stringBuilder2.append(" 检测项状态: " + state);
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "试验检测-检测项状态驳回\n\t"+stringBuilder2.toString(), Const.TASK_TEST, true);
         // state = 4 检测项状态驳回
-        int status = taskMapper.updateState(itemId, state, opinion);
+        int status = taskMapper.updateState(itemId, state, opinion,null);
         if (status > 0) {
             return "成功";
         }
@@ -2120,7 +2125,8 @@ public class TaskServiceImpl implements TaskService {
         List<SampleEntity> sampleList = sampleEntityMapper.selectAllState(taskIds);
         // 遍历 state < 1 : 更新状态 = 1
         for (SampleEntity sampleEntity : sampleList) {
-            if (sampleEntity.getState() != null && (Integer.parseInt(sampleEntity.getState()) < 1)) {
+            if (sampleEntity.getState() != null &&
+                    (Integer.parseInt(sampleEntity.getState()) < 1 || Integer.parseInt(sampleEntity.getState()) == 5)) {
                 // 更新操作。
                 TestSampleEntity data = new TestSampleEntity();
                 data.setId(sampleEntity.getId());
@@ -2156,5 +2162,24 @@ public class TaskServiceImpl implements TaskService {
                 }
             }
         }
+    }
+
+
+    @Override
+    public String verifyUserInformation(Long userId) {
+        List<LabelValueVo> labelValueVos = sysRoleDao.selectSysyRoleName(66L);
+        if (CollectionUtil.isEmpty(labelValueVos)) {
+            return "用户授权人用户为空";
+        }
+        Boolean status = false;
+        for (LabelValueVo data : labelValueVos) {
+            if (data.getValue().equals(userId)) {
+                status = true;
+            }
+        }
+        if (!status) {
+            return "当前操作人 无用户授权人角色";
+        }
+        return null;
     }
 }

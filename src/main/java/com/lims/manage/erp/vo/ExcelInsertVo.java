@@ -95,6 +95,9 @@ public class ExcelInsertVo {
      * 记录人
      */
     String recordSetUrl;
-
+    /**
+     * 审核人
+     */
+    String reviewedBySetUrl;
 
 }

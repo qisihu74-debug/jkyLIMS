@@ -469,7 +469,7 @@
         LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
         LEFT JOIN test_team t5 ON t1.team_id = t5.id
         <trim prefix="WHERE" prefixOverrides="AND | OR ">
-            <if test="deptIds!=null">
+            <if test="deptIds!=null and inspector == null">
                 and t1.dept_id in
                 <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
                     #{id}
@@ -496,8 +496,7 @@
                 and ( t1.inspector LIKE CONCAT('%',#{inspector},'%') or t1.reviewer LIKE CONCAT('%',#{reviewer},'%')
                 OR t1.recorder like CONCAT( '%',#{recorder}, '%' )
                 OR t1.report_producer like CONCAT( '%',#{reportProducer}, '%' )
-                OR t1.sampler like CONCAT( '%',#{sampler}, '%' )
-                )
+                OR t1.sampler like CONCAT( '%',#{sampler}, '%' ))
             </if>
         </trim>
         ORDER BY
@@ -634,7 +633,8 @@
                end_detection_time,
                state,
                inspector,
-               reviewer
+               reviewer,
+               recorder
         FROM test_task
         WHERE id = #{taskId}
     </select>
@@ -807,6 +807,9 @@
     <update id="updateState">
         update test_entrusted_sample_checkitem_rel
         set state   = #{state,jdbcType=INTEGER},
+        <if test="reviewedBySetUrl != null and reviewedBySetUrl != ''">
+            reviewed_by_set_url = #{reviewedBySetUrl},
+        </if>
             opinion = #{opinion}
         where id = #{itemId,jdbcType=INTEGER}
     </update>

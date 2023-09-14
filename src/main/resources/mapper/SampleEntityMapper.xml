@@ -1277,6 +1277,9 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         <if test="state != null and state != ''">
             state = #{state},
         </if>
+        <if test="reviewedBySetUrl != null and reviewedBySetUrl != ''">
+            reviewed_by_set_url = #{reviewedBySetUrl},
+        </if>
         instrument_status = #{instrumentStatus},
         original_record_status = #{originalRecordStatus},
         original_data = #{data},

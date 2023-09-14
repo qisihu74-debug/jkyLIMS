@@ -90,4 +90,11 @@ public interface TestDetectionService {
      * @return 为null 正常 否则返回说明
      */
     String compareItemTime(SampleItemInstrumentVo data);
+
+    /**
+     * 比较检测项对应的 检测人与记录人
+     * @param data
+     * @return
+     */
+    String personnelComparison(SampleItemInstrumentVo data);
 }

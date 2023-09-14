@@ -104,7 +104,6 @@ public class TestDetectionController {
      * @return
      */
     @RequestMapping("/end_test")
-//    public Result PostEndTest1(SampleItemInstrumentVo sampleItemInstrumentVo) {
     public Result PostEndTest1(@RequestBody EndTestParamVo paramVo) throws Exception {
         SampleItemInstrumentVo sampleItemInstrumentVo = new SampleItemInstrumentVo();
         sampleItemInstrumentVo.setResult(paramVo.getResult());
@@ -136,19 +135,24 @@ public class TestDetectionController {
         if(msg != null){
             return ResultUtil.error(msg);
         }
+        // 通过检测项主键验证签名信息
+        String str = testDetectionService.personnelComparison(sampleItemInstrumentVo);
+        if(str != null){
+            return ResultUtil.error(str);
+        }
         Boolean flag = testDetectionService.postEndTest(sampleItemInstrumentVo);
         // 试验完成：检测项对应原始记录签名信息更新
-        if (CollectionUtil.isNotEmpty(sampleItemInstrumentVo.getItemInstrumentEntityList())) {
-            Integer[] ids = new Integer[sampleItemInstrumentVo.getItemInstrumentEntityList().size()];
-            for (int i = 0; i < sampleItemInstrumentVo.getItemInstrumentEntityList().size(); i++) {
-                SampleItemInstrumentEntity data = sampleItemInstrumentVo.getItemInstrumentEntityList().get(i);
-                ids[i] = data.getItemId();
-            }
-            String excelUrl = pageOfficeCopyService.saveOriginalRecord2(ids);
-            if (excelUrl != null) {
-                pageOfficeCopyService.updateOriginalRecordUrl(excelUrl, ids);
-            }
-        }
+//        if (CollectionUtil.isNotEmpty(sampleItemInstrumentVo.getItemInstrumentEntityList())) {
+//            Integer[] ids = new Integer[sampleItemInstrumentVo.getItemInstrumentEntityList().size()];
+//            for (int i = 0; i < sampleItemInstrumentVo.getItemInstrumentEntityList().size(); i++) {
+//                SampleItemInstrumentEntity data = sampleItemInstrumentVo.getItemInstrumentEntityList().get(i);
+//                ids[i] = data.getItemId();
+//            }
+//            String excelUrl = pageOfficeCopyService.saveOriginalRecord2(ids);
+//            if (excelUrl != null) {
+//                pageOfficeCopyService.updateOriginalRecordUrl(excelUrl, ids);
+//            }
+//        }
         if(flag) {
             // 更新任务单状态 需要 对所有的 样品信息 下 检测项 进行判断 ==2的话 更新。
             TaskDetailInfoVo dataGather = taskService.getTaskDetailInfoTwo(sampleItemInstrumentVo.getTaskId(),null);

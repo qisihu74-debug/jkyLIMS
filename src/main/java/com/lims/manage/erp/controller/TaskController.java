@@ -12,7 +12,7 @@ import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.PageOfficeService;
+import com.lims.manage.erp.service.PageOfficeCopyService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
 import com.lims.manage.erp.util.AsposeUtil;
@@ -81,7 +81,7 @@ public class TaskController {
     @Autowired
     private QiYueSuoEntity qiYueSuoEntity;
     @Autowired
-    private PageOfficeService pageOfficeService;
+    private PageOfficeCopyService pageOfficeCopyService;
     @Autowired
     private TestProductItemDao testProductItemDao;
 
@@ -192,6 +192,11 @@ public class TaskController {
         if (ShiroUtils.getUserInfo() != null) {
             // 抢单人
             Long strLong = ShiroUtils.getUserInfo().getUserId();
+            // 获取授权签字人的用户列表
+            String str = taskService.verifyUserInformation(strLong);
+            if(StringUtils.isNotEmpty(str)){
+                return ResultUtil.error(201, str);
+            }
             String str1 = String.valueOf(strLong);
             taskTestEntity.setReceiver(str1);
         } else {
@@ -226,6 +231,11 @@ public class TaskController {
         if (ShiroUtils.getUserInfo() != null) {
             // 抢单人
             Long strLong = ShiroUtils.getUserInfo().getUserId();
+            // 获取授权签字人的用户列表
+            String str = taskService.verifyUserInformation(strLong);
+            if(StringUtils.isNotEmpty(str)){
+                return ResultUtil.error(201, str);
+            }
             String str1 = String.valueOf(strLong);
             batchReceiveTaskVo.setReceiver(str1);
         } else {
@@ -718,7 +728,7 @@ public class TaskController {
             if(taskService.getVerifyReportState(taskId)){
                 return ResultUtil.error( "操作失败，报告已经签发完成");
             }
-            return ResultUtil.success(taskService.passorno(itemId, state, opinion));
+            return ResultUtil.success(taskService.passorno(itemId, state, opinion,userInfo.getUserId()));
         }
     }
 
@@ -735,6 +745,12 @@ public class TaskController {
 
     @RequestMapping("/updatePersonInfo")
     public Result updatePersonInfo(@RequestBody PersonInfoVo vo) {
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        // 获取授权签字人的用户列表
+        String str = taskService.verifyUserInformation(userId);
+        if(StringUtils.isNotEmpty(str)){
+            return ResultUtil.error(201, str);
+        }
         if (vo.getTaskId() == null || vo.getInspector() == null || vo.getRecorder() == null || vo.getReviewer() == null || vo.getReportProducer() == null||vo.getSampler()==null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         } else {
@@ -968,8 +984,6 @@ public class TaskController {
      */
     @RequestMapping(value = "/finishCheckItemReview")
     public Result finishCheckItemReview(@RequestBody ExcelInsertVo excelInsertVo) throws Exception {
-        // 审核人id。
-//        Long  userId = 1650006443416157L;
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         // 通过检测项主键 获取test_task Id
         Long taskId = taskMapper.getReturnTaskId(excelInsertVo.getList().get(0));
@@ -980,15 +994,16 @@ public class TaskController {
         if (testDetectionService.reviewTheLogin(userInfo.getUserId(), taskId) == false) {
             return ResultUtil.error("登录人没有被派发复核资格");
         }
-        List<Long> ids = new ArrayList<>();
+        // TODO: 9月13日复核通过：保留签名用户id，不做签名图片附件签署操作。
+/*        List<Long> ids = new ArrayList<>();
         ids.add(userInfo.getUserId());
         List<TaskListParamVo> list = taskMapper.getUserSignatureUrls(ids);
         if(CollectionUtils.isEmpty(list)){
             return ResultUtil.error("登录人没有被签名图片 请上传");
-        }
+        }*/
         // 判断复核数据类型。
-        pageOfficeService.finishCheckItemReview(excelInsertVo,userInfo.getUserId());
-        return ResultUtil.success(pageOfficeService.CompleteTheReview(excelInsertVo));
+        pageOfficeCopyService.finishCheckItemReview(excelInsertVo,userInfo.getUserId());
+        return ResultUtil.success(pageOfficeCopyService.CompleteTheReview(excelInsertVo));
     }
 
 
