@@ -1262,6 +1262,12 @@ public class SampleServiceImpl implements SampleService {
 
     }
 
+    @Override
+    public List<Node> retentionSampleAreaList() {
+        List<Node> list = sampleEntityMapper.retentionSampleAreaList();
+        return TreeBuilder.buildTree(list);
+    }
+
     public HashSet<String> handlerData(String message){
         HashSet<String> set = new HashSet();
         String[] split = message.split(",");

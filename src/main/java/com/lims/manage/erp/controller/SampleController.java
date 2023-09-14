@@ -19,6 +19,7 @@ import com.lims.manage.erp.service.TestSampleEntityService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.vo.Node;
 import com.lims.manage.erp.vo.SampleAddParamVo;
 import com.lims.manage.erp.vo.SampleDetailVo;
 import com.lims.manage.erp.vo.SampleOutPutVo;
@@ -865,5 +866,15 @@ public class SampleController {
         //遍历excel，根据编号查询
         sampleService.exportWtTz(cells);
         workbook.save("D:\\doc\\saveOriginalRecord\\委托台账.xlsx");
+    }
+
+    /**
+     * 留样区域列表
+     * @return
+     */
+    @RequestMapping("/retentionSampleAreaList")
+    public Result retentionSampleAreaList(){
+        List<Node> list = sampleService.retentionSampleAreaList();
+        return ResultUtil.success(list);
     }
 }

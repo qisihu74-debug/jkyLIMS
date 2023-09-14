@@ -375,6 +375,59 @@ public class PDFHelper3 {
         return bio;
     }
 
+    /**
+     * excel转pdf
+     * @param inputStream
+     * @param basePath
+     * @throws Exception
+     */
+    public static String excel2pdf3(InputStream inputStream, String basePath) throws Exception {
+        String s= "";
+        getLicense();
+        long old = System.currentTimeMillis();
+        try {
+            File fileDoc = new File(basePath);
+            FileOutputStream os = new FileOutputStream(fileDoc);
+            Workbook wb = new Workbook(inputStream);
+            WorksheetCollection worksheets = wb.getWorksheets();
+            int count = worksheets.getCount();
+            int[] autoDrawSheets=new int[count];
+            int[] showSheets=new int[count];
+            int index=0;
+            while (count != 0){
+                autoDrawSheets[index]=count-1;
+                showSheets[index]=count-1;
+                count--;
+                index++;
+            }
+            int[] reverse = reverse(autoDrawSheets);
+            int[] reverse1 = reverse(showSheets);
+
+            FileOutputStream fileOS = new FileOutputStream(basePath);
+            PdfSaveOptions pdfSaveOptions = new PdfSaveOptions();
+            pdfSaveOptions.setOnePagePerSheet(true);
+            pdfSaveOptions.setDefaultFont("宋体");
+            //设置合规性类型
+            //当excel中对应的sheet页宽度太大时，在PDF中会拆断并分页。此处等比缩放。
+            autoDraw(wb,reverse);
+            //隐藏workbook中不需要的sheet页。
+            //printSheetPage(wb,reverse1);
+            //wb.save(fileOS, SaveFormat.PDF);
+            wb.save(fileOS, pdfSaveOptions);
+            os.close();
+            fileOS.close();
+            //设置pdf样式
+            s = setPdfStyle(basePath);
+            //转化用时
+            long now = System.currentTimeMillis();
+            System.out.println("excel 转 pdf 共耗时：" + ((now - old) / 1000.0) + "秒");
+        } catch (Exception e) {
+            System.out.println("excel 转 pdf 失败...");
+            e.printStackTrace();
+        }
+        return s;
+    }
+
     public static ByteArrayOutputStream excel2pdf(InputStream inputStream, String basePath) throws Exception {
         ByteArrayOutputStream bio = null;
         getLicense();

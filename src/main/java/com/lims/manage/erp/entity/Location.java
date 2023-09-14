@@ -25,4 +25,5 @@ public class Location {
     private double offsetX;
     private double offsetY;
     private String actionName;
+    private String keyword;
 }

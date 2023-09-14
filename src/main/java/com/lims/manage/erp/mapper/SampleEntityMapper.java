@@ -473,4 +473,12 @@ public interface SampleEntityMapper {
 
     @Select("select sample_retention_period from test_sample where id=#{sampleId}")
     int getDaysById(@Param("sampleId") Integer sampleId);
+
+    @Select("SELECT\n" +
+            "\t*\n" +
+            "FROM\n" +
+            "\ttest_sample_area\n" +
+            "ORDER BY\n" +
+            "\tid")
+    List<Node> retentionSampleAreaList();
 }

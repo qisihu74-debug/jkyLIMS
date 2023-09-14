@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.AlertEntity;
+import com.lims.manage.erp.entity.ApproveInfo;
 import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
@@ -1411,5 +1412,19 @@ public class ReportController {
         }
         QrCodeAuthRes qrCodeAuthRes = entrustService.qrCodeAuth(reportCode);
         return ResultUtil.success(qrCodeAuthRes);
+    }
+
+    /**
+     * 报告合成审批弹框详情信息
+     * @param reportCode
+     * @return
+     */
+    @GetMapping("approveInfo")
+    public Result approveInfo(String reportCode){
+        if (StringUtils.isEmpty(reportCode)){
+            return ResultUtil.error("缺少参数");
+        }
+        ApproveInfo approveInfo = reportService.approveInfo(reportCode);
+        return ResultUtil.success(approveInfo);
     }
 }

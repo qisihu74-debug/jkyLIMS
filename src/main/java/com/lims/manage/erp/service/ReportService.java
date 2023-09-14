@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.ApproveInfo;
 import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
@@ -451,4 +452,6 @@ public interface ReportService {
     OutputStream exportReportList(List<ReportDetailListVo> list, HttpServletResponse response);
 
     List<String> getCodeByIds(List<Long> longs);
+
+    ApproveInfo approveInfo(String reportCode);
 }

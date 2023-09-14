@@ -159,4 +159,6 @@ public interface SampleService {
     void updateDayByCode(String code, String value);
 
     void exportWtTz(Cells cells);
+
+    List<Node> retentionSampleAreaList();
 }
