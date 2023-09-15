@@ -603,6 +603,9 @@
             <if test="requiredCompletionTime!=null">required_completion_time=#{requiredCompletionTime},</if>
             <if test="orderTime!=null">order_time=#{orderTime},</if>
             <if test="taskPrice!=null">task_price=#{taskPrice},</if>
+            <if test="probationer!=null and probationer!=''">probationer=#{probationer},</if>
+            <if test="interns!=null and interns!=''">interns=#{interns},</if>
+            <if test="auxiliaryPersonnel!=null and auxiliaryPersonnel!=''">auxiliary_personnel=#{auxiliaryPersonnel},</if>
         </trim>
         where id = #{id}
     </update>
@@ -621,6 +624,9 @@
                 <if test="item.state!=null">state=#{item.state},</if>
                 <if test="item.receiveTime!=null">receive_time=#{item.receiveTime},</if>
                 <if test="item.sampleStateDescription!=null and item.sampleStateDescription!='null'">sample_state_description=#{item.sampleStateDescription},</if>
+                <if test="item.probationer!=null and item.probationer!=''">probationer=#{item.probationer},</if>
+                <if test="item.interns!=null and item.interns!=''">interns=#{item.interns},</if>
+                <if test="item.auxiliaryPersonnel!=null and item.auxiliaryPersonnel!=''">auxiliary_personnel=#{item.auxiliaryPersonnel},</if>
             </trim>
             where id = #{item.id}
         </foreach>
@@ -833,6 +839,9 @@
             <if test="sampleReceivingTime!=null">sample_receiving_time=#{sampleReceivingTime},</if>
             <if test="sampleStateDescription!=null">sample_state_description=#{sampleStateDescription},</if>
             <if test="sampler!=null and sampler!=''">sampler=#{sampler},</if>
+            <if test="probationer!=null and probationer!=''">probationer=#{probationer},</if>
+            <if test="interns!=null and interns!=''">interns=#{interns},</if>
+            <if test="auxiliaryPersonnel!=null and auxiliaryPersonnel!=''">auxiliary_personnel=#{auxiliaryPersonnel},</if>
         </trim>
         where id = #{taskId,jdbcType=INTEGER}
     </update>

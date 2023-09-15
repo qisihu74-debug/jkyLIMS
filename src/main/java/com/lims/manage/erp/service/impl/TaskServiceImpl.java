@@ -537,6 +537,9 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         stringBuilder1.append(" 记录人:"+taskTestEntity.getRecorder());
         stringBuilder1.append(" 样品状态描述:"+taskTestEntity.getSampleStateDescription());
         stringBuilder1.append(" 领样人:"+taskTestEntity.getSampler());
+        stringBuilder1.append(" 见习生：实习的新手:"+taskTestEntity.getProbationer());
+        stringBuilder1.append(" 实习生:"+taskTestEntity.getInterns());
+        stringBuilder1.append(" 辅助人员:"+taskTestEntity.getAuxiliaryPersonnel());
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "任务单领取\n\t"+stringBuilder1.toString(), Const.TASK_GET, true);
         taskMapper.updateTestTask(taskTestEntity);
         // 获取任务单id集合 进行更新样品领样状态
@@ -580,6 +583,9 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                 stringBuilder1.append(" 记录人:"+taskTestEntity.getRecorder());
                 stringBuilder1.append(" 样品状态描述:"+taskTestEntity.getSampleStateDescription());
                 stringBuilder1.append(" 领样人:"+taskTestEntity.getSampler());
+                stringBuilder1.append(" 见习生：实习的新手:"+taskTestEntity.getProbationer());
+                stringBuilder1.append(" 实习生:"+taskTestEntity.getInterns());
+                stringBuilder1.append(" 辅助人员:"+taskTestEntity.getAuxiliaryPersonnel());
             }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "任务单领取\n\t"+stringBuilder1.toString(), Const.TASK_GET, true);
         }
@@ -672,6 +678,9 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         List<LabelValueVo> SignerVo = taskMapper.getRoleInformation(Const.signerLongUserId);
         teamVo.setSignerVo(SignerVo);
         // 获取科室下人员信息 （一个科室下）
+        // 查询用户列表
+        List<LabelValueTeamVo> userList = teamMapper.selectUserList();
+        teamVo.setUserVo(userList);
 
         return teamVo;
     }
@@ -1372,6 +1381,9 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         stringBuilder1.append(" 记录人:"+vo.getRecorder());
         stringBuilder1.append(" 样品状态描述:"+vo.getSampleStateDescription());
         stringBuilder1.append(" 领样人:"+vo.getSampler());
+        stringBuilder1.append(" 见习生：实习的新手:"+vo.getProbationer());
+        stringBuilder1.append(" 实习生:"+vo.getInterns());
+        stringBuilder1.append(" 辅助人员:"+vo.getAuxiliaryPersonnel());
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "任务单修改\n\t"+stringBuilder1.toString(), Const.TASK_GET, true);
         return taskMapper.updatePersonInfo(vo);
     }

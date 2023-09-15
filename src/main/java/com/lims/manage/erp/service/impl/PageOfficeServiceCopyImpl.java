@@ -3,9 +3,10 @@ package com.lims.manage.erp.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import com.aspose.cells.*;
 import com.google.common.collect.Maps;
-import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
-import com.lims.manage.erp.entity.TaskIdEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.http.QiYueSuoDocment;
+import com.lims.manage.erp.http.QiYueSuoResponse;
+import com.lims.manage.erp.job.QiYueSuoHnadler;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.PageOfficeCopyService;
@@ -56,6 +57,12 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     private LogManagerService logManagerService;
     @Autowired
     private EntrustEntityMapper entrustEntityMapper;
+    @Autowired
+    private QiYueSuoHnadler qiYueSuoHnadler;
+    @Autowired
+    private ReportRecordEntityMapper recordEntityMapper;
+    @Autowired
+    private SysUserDao sysUserDao;
 
 
     /**
@@ -160,6 +167,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         InputStream input = null;
         // 检测项表头为空
         if (headerData) {
+            // 记录检测项中 对应的记录编号
+            Map<Integer, String> recordNumberMap = new HashMap<>();
             // 塞入 原始记录 表头部分
             ExcelSheetDataVo excelSheetDataVo = getSaveFile(fileStream, dataEntitys.get(0).getTaskId());
             FileInputStream inputStream = new FileInputStream(new File(excelSheetDataVo.getSaveFile()));
@@ -200,6 +209,13 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                                 OriginalRecordDataVo originalData = taskService.getOriginalData(data.getTaskId(), data.getSampleId(), data.getCheckItemId(), data.getIdItem());
                                 Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
                                 originalData.setRecordNumber(originalData.getRecordNumber() + "-" + number);
+                                // 获取检测项中记录编号
+                                if (recordNumberMap.get(data.getIdItem()) == null) {
+                                    recordNumberMap.put(data.getIdItem(), originalData.getRecordNumber());
+                                } else {
+                                    String recordNumber = recordNumberMap.get(data.getIdItem());
+                                    recordNumberMap.put(data.getIdItem(), recordNumber + originalData.getRecordNumber());
+                                }
                                 result.put("result", originalData);
                                 // 替换原始记录模板数据
                                 ExcelReplaceUtil.ExcelReplace(sheet, result, status);
@@ -209,6 +225,12 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                 }
             }
             input = AsposeUtil.createExcelStream(wb);
+            // 更新 检测项记录编号
+            if (recordNumberMap != null) {
+                for (int keyData : recordNumberMap.keySet()) {
+                    testProductItemDao.updateItemData(keyData, recordNumberMap.get(keyData));
+                }
+            }
         }
         if (input != null) {
             // 把 wb 数据 存放上传
@@ -993,5 +1015,86 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             FileAndFolderUtil.delete(iamgPath);
         }
         return saveExcel;
+    }
+
+    @Override
+    public QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean, List<String> stringList) {
+        Map<String, Long> map = new HashMap<>();
+        Set<Long> setList = new HashSet<>();
+        for (String checkItemCode : stringList) {
+            //step1 根据文件类型创建合同文档
+            Long itemId = reqBean.getList().get(0);
+            setList.add(itemId);
+            String url = testProductItemDao.selectItemOriginUrlPdf(itemId);
+            if (com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotEmpty(url)) {
+                File file = null;
+                try {
+                    String uri = "";
+                    if (url.contains("?")) {
+                        uri = url.substring(0, url.indexOf("?"));
+                    } else {
+                        uri = url;
+                    }
+                    file = FileAndFolderUtil.getFile(uri);
+                } catch (Exception e) {
+                    logger.error("将报告地址转为File文件失败:{}", e);
+                    continue;
+                }
+                if (file != null) {
+                    QiYueSuoResponse response = qiYueSuoHnadler.creatFile(file, checkItemCode, "pdf", null, null, null);
+                    if (response != null && response.getCode() == 0) {
+                        //根据报告编号存储文档id
+                        List<QiYueSuoDocment> result = response.getResult();
+                        map.put(checkItemCode, result.get(0).getDocumentId());
+                        //更新文档id和印章类型
+                        testProductItemDao.updateQysInfo(itemId, result.get(0).getDocumentId());
+                    } else {
+                        return response;
+                    }
+                }
+            }
+        }
+        //Step2 创建合同
+        long id = GenID.getID();
+        Long contractId = null;
+        if (map != null && map.size() > 0) {
+            Set<String> set = map.keySet();
+            List<String> docs = new ArrayList<>();
+            for (String reportCode : set) {
+                docs.add(map.get(reportCode) + "");
+            }
+            reqBean.setDocuments(docs);
+            reqBean.setEntrustId(id);
+            QiYueSuoResponse response = qiYueSuoHnadler.createbycategory(reqBean);
+            if (response != null && response.getCode() == 0) {
+                //更新文档id和印章类型
+                if (response.getContractId() != null) {
+                    contractId = response.getContractId();
+                    testProductItemDao.updateContractIdByCodes(setList, contractId);
+                    System.out.println("set == " + set + "  contractId== " + contractId);
+                }
+            } else {
+                return response;
+            }
+        }
+        //step3 获取签署链接
+        String info = recordEntityMapper.getInitInfo();
+        QiYueSuoSeaLBean qiYueSuoSeaLBean = new QiYueSuoSeaLBean();
+        qiYueSuoSeaLBean.setContractId(contractId);
+        qiYueSuoSeaLBean.setEntrustId(id);
+        qiYueSuoSeaLBean.setContact("");
+        qiYueSuoSeaLBean.setExpireTime(72);
+        qiYueSuoSeaLBean.setReceiverName(ShiroUtils.getUserInfo().getName());
+        qiYueSuoSeaLBean.setTenantName(info);
+        qiYueSuoSeaLBean.setTenantType("COMPANY");
+        QiYueSuoResponse response = qiYueSuoHnadler.signurl(qiYueSuoSeaLBean);
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        String sysUserName = sysUserDao.getSysUserName(userId);
+        //更新签署链接、状态
+        if (response != null && response.getCode() == 0) {
+            testProductItemDao.updateUrlAndStateByContractId(contractId, response.getSignUrl(), "2", sysUserName + "&" + userId + "", new Date(System.currentTimeMillis()));
+        }
+        response.setContractId(contractId);
+        return response;
     }
 }

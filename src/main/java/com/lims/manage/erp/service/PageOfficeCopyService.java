@@ -1,6 +1,8 @@
 package com.lims.manage.erp.service;
 
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.TaskIdEntity;
+import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.vo.ExcelInsertVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.TeamVo;
@@ -96,4 +98,6 @@ public interface PageOfficeCopyService {
      * @return
      */
     String saveOriginalRecord2(Integer[] ids) throws Exception;
+
+    QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean, List<String> stringList);
 }

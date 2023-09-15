@@ -27,4 +27,18 @@ public class PersonInfoVo {
      * 样品描述信息
      */
     private String sampleStateDescription;
+    /**
+     * 见习生：实习的新手
+     */
+    private String probationer;
+
+    /**
+     * 实习生
+     */
+    private String interns;
+
+    /**
+     * 辅助人员
+     */
+    private String auxiliaryPersonnel;
 }

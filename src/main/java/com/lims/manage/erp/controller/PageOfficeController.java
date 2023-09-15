@@ -2,11 +2,15 @@ package com.lims.manage.erp.controller;
 
 import com.aspose.cells.SaveFormat;
 import com.aspose.cells.Worksheet;
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductItemDao;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.PageOfficeCopyService;
 //import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.service.TaskService;
@@ -351,4 +355,41 @@ public class PageOfficeController {
         srb.addUrlMappings("/sealsetup.exe");
         return srb;//
     }
+
+    /**
+     * 创建合同
+     * @param reqBean
+     * @return
+     */
+    @PostMapping("startInitiateContractLock")
+    public Result startInitiateContractLock(@RequestBody QiYueSuoReqBean reqBean) {
+        if (reqBean == null){
+            return ResultUtil.error("缺少必要的参数");
+        }
+        if (org.apache.commons.collections.CollectionUtils.isEmpty(reqBean.getList())){
+            return ResultUtil.error("请选择需要签署的报告");
+        }
+//        List<Long> longs = reqBean.getList();
+////        List<String> stringList = reportService.getCodeByIds(longs);
+        List<String> stringList = new ArrayList<>();
+        stringList.add("JL-F2309-013-1");
+//        StringBuilder stringBuilder = new StringBuilder();
+//        for (int i=0;i<stringList.size();i++) {
+//            stringBuilder.append(stringList.get(i));
+//            if (i==stringList.size()-1){
+//                continue;
+//            }else {
+//                stringBuilder.append(",");
+//            }
+//        }
+//        reqBean.setSubject(stringBuilder.toString());
+        reqBean.setSubject("JL-F2309-013-1");
+        QiYueSuoResponse response = pageOfficeCopyService.createbycategoryBatch(reqBean,stringList);
+        if (response != null && response.getCode() == 0) {
+            return ResultUtil.success("向契约锁发起报告制作申请成功!");
+        } else {
+            return ResultUtil.error("向契约锁发起报告制作申请失败："+response.getMessage());
+        }
+    }
+
 }

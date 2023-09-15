@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -184,5 +185,32 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
      */
     int updateBatchItemData(@Param(value = "array") Integer[] array , @Param(value = "testSet") String testSet ,
                             @Param(value = "recordSet") String recordSet);
+
+    /**
+     * 查询检测项 实验完成后 生成的pdf
+     * @param itemId
+     * @return
+     */
+    @Select("SELECT origin_url_pdf FROM test_entrusted_sample_checkitem_rel WHERE id  = #{itemId}")
+    String selectItemOriginUrlPdf(@Param("itemId") Long itemId);
+
+    @Update("update test_entrusted_sample_checkitem_rel set category = '电子章', qys_docment_id = #{documentId} WHERE id  = #{itemId}")
+    void updateQysInfo(@Param("itemId") Long itemId, @Param("documentId") Long documentId);
+
+    @Update("<script>" +
+            "UPDATE test_entrusted_sample_checkitem_rel SET contract_id=#{contractId} WHERE id IN" +
+            " <foreach item='item' collection='list' open='(' separator=',' close=')'>" +
+            "#{item}" +
+            "</foreach>" +
+            "</script>")
+    void updateContractIdByCodes(@Param("list") Set<Long> list, @Param("contractId") Long contractId);
+
+    @Update("update test_entrusted_sample_checkitem_rel set sign_url=#{signUrl},qys_state=#{state},sealer=#{sealer},seal_time=#{sealTime} where contract_id=#{contractId}")
+    void updateUrlAndStateByContractId(@Param("contractId") Long contractId, @Param("signUrl") String signUrl, @Param("state") String state,
+                                       @Param("sealer") String sealer, @Param("sealTime") Date sealTime);
+
+    @Update("update test_entrusted_sample_checkitem_rel set origin_url_pdf = #{originUrlPdf} WHERE id  = #{itemId}")
+    void updateItemData(@Param("itemId") Integer itemId, @Param("originUrlPdf") String originUrlPdf);
+
 }
 
