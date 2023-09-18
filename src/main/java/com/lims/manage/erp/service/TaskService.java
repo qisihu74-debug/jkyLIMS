@@ -177,7 +177,7 @@ public interface TaskService {
      * @param state
      * @return
      */
-    String passorno(Integer itemId, Integer state,String opinion);
+    String passorno(Integer itemId, Integer state,String opinion,Long userId);
 
     /**
      * 删除附件
@@ -252,5 +252,11 @@ public interface TaskService {
      * 填充数据
      */
     XWPFDocument downloadEntrustNew(TaskDetailInfoVo taskDetailInfoVo, InputStream object) throws IOException;
+
+    /**
+     * 验证用户信息
+     * @return
+     */
+    String verifyUserInformation(Long userId);
 
 }

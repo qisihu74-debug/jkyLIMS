@@ -2,15 +2,21 @@ package com.lims.manage.erp.controller;
 
 import com.aspose.cells.SaveFormat;
 import com.aspose.cells.Worksheet;
+import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductItemDao;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.PageOfficeCopyService;
 //import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.ExcelInsertVo;
+import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.TeamVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
@@ -59,7 +65,6 @@ public class PageOfficeController {
     private TestProductItemDao testProductItemDao;
     @Autowired
     PageOfficeCopyService pageOfficeCopyService;
-
     @Value("${autograph.path}")
     private String dir;
     @Value("${posyspath}")
@@ -85,9 +90,74 @@ public class PageOfficeController {
         PDFHelper3.getLicense();
         // 查询检测项对应的 sheet下标
         List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
-        if(CollectionUtils.isEmpty(sheetItems)){
+        if (CollectionUtils.isEmpty(sheetItems)) {
             // 检测项无Sheet页
             return new ModelAndView("error");
+        }
+        // 循环设置
+        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
+        Long taskId = dataEntitys.get(0).getTaskId();
+        // 验证 token 是否存在
+        String[] mapToken = parameterMap.get("token");
+        String strVerify = redisUtil.getRedisToken(mapToken[0]);
+        if (strVerify == null) {
+            System.out.println("strVerify: == null");
+        }
+        SysUserEntity user = new SysUserEntity();
+        if (strVerify != null) {
+            user = redisUtil.getRedisTokenUser(strVerify);
+        }
+        if (user != null) {
+            if (user.getUserId() != null) {
+                // 查询任务详情
+                TaskTestEntity taskEntity = taskMapper.getTaskOrders(taskId);
+                // 记录人
+                List<LabelValueVo> recorderVos = new ArrayList<>();
+                if (taskEntity.getRecorder().contains(user.getUserId().toString())) {
+                    String[] array1 = taskEntity.getRecorder().split(",");
+                    for (int i = 0; i < array1.length; i++) {
+                        String[] recorders = array1[i].split("&");
+                        LabelValueVo labelValueVo = new LabelValueVo();
+                        labelValueVo.setLabel(recorders[0]);
+                        labelValueVo.setValue(Long.parseLong(recorders[1]));
+                        recorderVos.add(labelValueVo);
+                    }
+                }
+                // 检测人
+                List<LabelValueVo> inspectorVos = new ArrayList<>();
+                if (taskEntity.getInspector().contains(user.getUserId().toString())) {
+                    String[] array1 = taskEntity.getInspector().split(",");
+                    for (int i = 0; i < array1.length; i++) {
+                        String[] inspectors = array1[i].split("&");
+                        LabelValueVo labelValueVo = new LabelValueVo();
+                        labelValueVo.setLabel(inspectors[0]);
+                        labelValueVo.setValue(Long.parseLong(inspectors[1]));
+                        inspectorVos.add(labelValueVo);
+                    }
+                }
+                if (CollectionUtils.isEmpty(recorderVos) && CollectionUtils.isEmpty(inspectorVos)) {
+                    Map<String, Object> msgMap = new HashMap<>();
+                    // {"code":201,"msg":"成功","data":"撤回成功，检测项回到初始状态"}
+                    msgMap.put("code", 201);
+                    msgMap.put("msg", "操作失败");
+                    msgMap.put("data", "当前登录人 不是检测人或记录人：无操作权限");
+                    ModelAndView mv = new ModelAndView();
+                    mv.addObject(msgMap);
+                    mv.setViewName("msg");
+                    return mv;
+                }
+                map.put("teamVo", inspectorVos);
+                map.put("recorderVo", recorderVos);
+            }
+        }
+        //填充表头信息临时缓存到本地
+        String url = pageOfficeCopyService.getProductExcelUrl(ids, sheetItems, dataEntitys);
+        InputStream fileStream = null;
+        try {
+            // 获取公网 附件
+            fileStream = FileAndFolderUtil.getInputStream(url);
+        } catch (Exception e) {
+            logger.info("读取产品excel异常 " + url + e);
         }
         //设置服务页面
         PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
@@ -98,17 +168,6 @@ public class PageOfficeController {
 //        poCtrl.setCustomToolbar(false);
         Workbook wb = new Workbook();
         //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
-        // 循环设置
-        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
-        //填充表头信息临时缓存到本地
-        String url = pageOfficeCopyService.getProductExcelUrl(ids,sheetItems,dataEntitys);
-        InputStream fileStream = null;
-        try {
-            // 获取公网 附件
-            fileStream = FileAndFolderUtil.getInputStream(url);
-        } catch (Exception e) {
-            logger.info("读取产品excel异常 " + url + e);
-        }
         PDFHelper3.getLicense();
         com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
         int count = workbook.getWorksheets().getCount();
@@ -173,25 +232,6 @@ public class PageOfficeController {
             // 检测项无Sheet页
             return new ModelAndView("error");
         }
-        Long taskId = dataEntitys.get(0).getTaskId();
-        // 验证 token 是否存在
-        String[] mapToken = parameterMap.get("token");
-        String strVerify = redisUtil.getRedisToken(mapToken[0]);
-//        System.out.println("token == " + strVerify);
-        SysUserEntity user = new SysUserEntity();
-        if (strVerify != null) {
-            user = redisUtil.getRedisTokenUser(strVerify);
-        }
-        if (user != null) {
-            if (user.getUserId() != null) {
-                // 领取人
-                TeamVo returnList = taskService.getTeamUserNameTwo(user.getUserId());
-                // 返回检测人及记录人列表
-                TeamVo teamVo = pageOfficeCopyService.getTaskInspectorAndRecorder(returnList.getTeamVo(), taskId);
-                map.put("teamVo", teamVo.getInspectorVo());
-                map.put("recorderVo",teamVo.getRecorderVo());
-            }
-        }
         String excel = dir + GenID.getID() + "." + "xlsx";
         workbook.save(excel, SaveFormat.XLSX);
         //此行必须
@@ -216,7 +256,6 @@ public class PageOfficeController {
         }
         logger.info("在线编辑原始记录本地缓存路径1:{}",excel);
         poCtrl.webOpen(excel, OpenModeType.xlsSubmitForm, "administrator");
-//        poCtrl.webOpen(response.getContent().replace("/", "\\"), OpenModeType.xlsSubmitForm, "administrator");
         //TODO 删除临时文件
         // 删除附件
         FileAndFolderUtil.delete(excel);
@@ -279,6 +318,13 @@ public class PageOfficeController {
         file.close();
         // 保存本地Excel 包含签名信息
         if (!StringUtils.isEmpty(saveExcel)) {
+            com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(saveExcel);
+            int count = workbook.getWorksheets().getCount();
+            for (int o = 0; o < count; o++) {
+                // 设置全部可读
+                workbook.getWorksheets().get(o).setVisible(true);
+            }
+            workbook.save(saveExcel, SaveFormat.XLSX);
             // 检测参数
             String list = file.getFormField("items");
             // 获取检测项id 集合
@@ -311,5 +357,55 @@ public class PageOfficeController {
         srb.addUrlMappings("/pobstyle.css");
         srb.addUrlMappings("/sealsetup.exe");
         return srb;//
+    }
+
+    /**
+     * 创建合同
+     * @param reqBean
+     * @return
+     */
+    @PostMapping("startInitiateContractLock")
+    public Result startInitiateContractLock(@RequestBody QiYueSuoReqBean reqBean) {
+        if (reqBean == null) {
+            return ResultUtil.error("缺少必要的参数");
+        }
+        if (org.apache.commons.collections.CollectionUtils.isEmpty(reqBean.getList())) {
+            return ResultUtil.error("请选择需要签署的检测项");
+        }
+        Long[] array = new Long[reqBean.getList().size()];
+        for (int i = 0; i < reqBean.getList().size(); i++) {
+            array[i] = reqBean.getList().get(i);
+        }
+        List<ExcelInsertVo> list = testProductItemDao.selectCheckList(array);
+        if (CollectionUtils.isEmpty(list)) {
+            return ResultUtil.error("创建合同失败：当前检测项 不存在");
+        }
+        List<String> stringList = new ArrayList<>();
+        // 效验每个检测项的信息
+        for (ExcelInsertVo excelInsertVo : list) {
+            if (excelInsertVo.getState() != 3) {
+                return ResultUtil.error("创建合同失败：当前检测项 " + excelInsertVo.getCheckItemName() + " 未通过复核 ");
+            }
+            if (StringUtils.isEmpty(excelInsertVo.getEditData())) {
+                return ResultUtil.error("创建合同失败：当前检测项 " + excelInsertVo.getCheckItemName() + " 未进行excel在线编辑 ");
+            }
+            stringList.add(excelInsertVo.getCheckItemCode());
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < stringList.size(); i++) {
+            stringBuilder.append(stringList.get(i));
+            if (i == stringList.size() - 1) {
+                continue;
+            } else {
+                stringBuilder.append(",");
+            }
+        }
+        reqBean.setSubject(stringBuilder.toString());
+        QiYueSuoResponse response = pageOfficeCopyService.createbycategoryBatch(reqBean, stringList);
+        if (response != null && response.getCode() == 0) {
+            return ResultUtil.success("向契约锁发起报告制作申请成功!");
+        } else {
+            return ResultUtil.error("向契约锁发起报告制作申请失败：" + response.getMessage());
+        }
     }
 }

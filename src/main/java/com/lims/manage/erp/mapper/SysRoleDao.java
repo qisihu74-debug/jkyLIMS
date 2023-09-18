@@ -27,10 +27,10 @@ public interface SysRoleDao extends BaseMapper<SysRoleEntity> {
     List<SysRoleEntity> selectSysRoleList(SysRoleEntity sysRoleEntity);
 
     /**
-     *  根据角色名 获取人员信息
+     *  根据角色id 获取人员信息
      * @return
      */
-    List<LabelValueVo> selectSysyRoleName(String roleName);
+    List<LabelValueVo> selectSysyRoleName(Long roleId);
 
 
 

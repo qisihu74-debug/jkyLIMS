@@ -279,7 +279,7 @@ public interface TaskMapper extends BaseMapper {
      * @param state
      * @return
      */
-    int updateState(Integer itemId, Integer state,String opinion);
+    int updateState(Integer itemId, Integer state,String opinion,Long reviewedBySetUrl);
 
     /**
      * 查询任务下检测人、记录人、复核人、报告制作人信息

@@ -39,5 +39,9 @@ public class TeamVo {
      * 记录人
      */
     List<LabelValueVo> recorderVo;
+    /**
+     * 用户信息
+     */
+    List<LabelValueTeamVo> userVo;
 
 }

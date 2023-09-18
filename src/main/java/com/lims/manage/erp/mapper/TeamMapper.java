@@ -5,6 +5,7 @@ import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TeamTreeStructureEntity;
 import com.lims.manage.erp.entity.TestCheckItemTeamRel;
 import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -260,4 +261,11 @@ public interface TeamMapper extends BaseMapper {
      */
     @Select("SELECT name FROM test_team WHERE id = #{deptId} LIMIT 1")
     String getTeamIdByName(@Param("deptId") Integer deptId);
+
+    /**
+     * 查询用户列表
+     * @return
+     */
+    @Select("SELECT user_id as value, name as label FROM sys_user")
+    List<LabelValueTeamVo> selectUserList();
 }

@@ -52,4 +52,18 @@ public class SampleItemInstrumentEntity extends SampleItemEntity{
      */
     private Integer deptId;
 
+    /**
+     * 检测人签名信息
+     */
+    private String testSetUrl;
+
+    /***
+     * 记录人信息
+     */
+    private String recordSetUrl;
+    /***
+     * 是否编辑
+     */
+    private String editData;
+
 }

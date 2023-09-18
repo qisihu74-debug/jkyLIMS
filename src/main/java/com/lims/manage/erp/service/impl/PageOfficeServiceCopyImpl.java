@@ -1,10 +1,12 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.aspose.cells.*;
 import com.google.common.collect.Maps;
-import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
-import com.lims.manage.erp.entity.TaskIdEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.http.QiYueSuoDocment;
+import com.lims.manage.erp.http.QiYueSuoResponse;
+import com.lims.manage.erp.job.QiYueSuoHnadler;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.PageOfficeCopyService;
@@ -55,6 +57,14 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     private LogManagerService logManagerService;
     @Autowired
     private EntrustEntityMapper entrustEntityMapper;
+    @Autowired
+    private QiYueSuoHnadler qiYueSuoHnadler;
+    @Autowired
+    private ReportRecordEntityMapper recordEntityMapper;
+    @Autowired
+    private SysUserDao sysUserDao;
+    @Autowired
+    private QiYueSuoEntity qiYueSuoEntity;
 
 
     /**
@@ -159,6 +169,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         InputStream input = null;
         // 检测项表头为空
         if (headerData) {
+            // 记录检测项中 对应的记录编号
+            Map<Integer, String> recordNumberMap = new HashMap<>();
             // 塞入 原始记录 表头部分
             ExcelSheetDataVo excelSheetDataVo = getSaveFile(fileStream, dataEntitys.get(0).getTaskId());
             FileInputStream inputStream = new FileInputStream(new File(excelSheetDataVo.getSaveFile()));
@@ -199,6 +211,13 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                                 OriginalRecordDataVo originalData = taskService.getOriginalData(data.getTaskId(), data.getSampleId(), data.getCheckItemId(), data.getIdItem());
                                 Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
                                 originalData.setRecordNumber(originalData.getRecordNumber() + "-" + number);
+                                // 获取检测项中记录编号
+                                if (recordNumberMap.get(data.getIdItem()) == null) {
+                                    recordNumberMap.put(data.getIdItem(), originalData.getRecordNumber());
+                                } else {
+                                    String recordNumber = recordNumberMap.get(data.getIdItem());
+                                    recordNumberMap.put(data.getIdItem(), recordNumber + originalData.getRecordNumber());
+                                }
                                 result.put("result", originalData);
                                 // 替换原始记录模板数据
                                 ExcelReplaceUtil.ExcelReplace(sheet, result, status);
@@ -208,6 +227,15 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                 }
             }
             input = AsposeUtil.createExcelStream(wb);
+            // 更新 检测项记录编号
+            if (recordNumberMap != null) {
+                for (int keyData : recordNumberMap.keySet()) {
+                    ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
+                    excelInsertVo1.setItemId(keyData);
+                    excelInsertVo1.setCheckItemCode(recordNumberMap.get(keyData));
+                    testProductItemDao.updateItemData(excelInsertVo1);
+                }
+            }
         }
         if (input != null) {
             // 把 wb 数据 存放上传
@@ -331,11 +359,13 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         if (!CollectionUtils.isEmpty(excelInsertVo.getList())) {
             for (Integer itemd : excelInsertVo.getList()) {
                 excelInsertVo.setItemId(itemd);
-                // 更新检测项
+                // 更新审核人
+                excelInsertVo.setReviewedBySetUrl(userId.toString());
                 sampleEntityMapper.updateItemReview(excelInsertVo);
             }
         }
-        // 通过检测项id 获取数据Excel
+        // TODO： 9月13日复核 通过时：不进行业务签名图片
+/*        // 通过检测项id 获取数据Excel
         Integer[] array = new Integer[excelInsertVo.getList().size()];
         if (array.length == 1) {
             array[0] = excelInsertVo.getList().get(0);
@@ -359,7 +389,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         // 删除本地文件
         FileAndFolderUtil.delete(saveFileUrl);
         FileAndFolderUtil.delete(saveExcel);
-        input.close();
+        input.close();*/
         return true;
     }
 
@@ -854,21 +884,27 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         String recordSet = file.getFormField("recordSet");
         // 检测人集合
         List<Long> testSetLong = new ArrayList<>();
-        testSetLong.add(Long.valueOf(testSet));
+        if (!StringUtils.isEmpty(testSet)) {
+            testSetLong.add(Long.valueOf(testSet));
+        }
         // 检测人与记录人不相同时
-        if (!testSet.equals(recordSet)) {
-            testSetLong.add(Long.valueOf(recordSet));
+        if (!StringUtils.isEmpty(recordSet) && !StringUtils.isEmpty(testSet)) {
+            if (!testSet.equals(recordSet)) {
+                testSetLong.add(Long.valueOf(recordSet));
+            }
         }
         Map<String, String> map = new HashMap<>();
         StringBuffer stringBuffer = new StringBuffer();
-        for (Long testId : testSetLong) {
-            stringBuffer.append(testId);
-            stringBuffer.append(",");
+        if (CollectionUtil.isNotEmpty(testSetLong)) {
+            for (Long testId : testSetLong) {
+                stringBuffer.append(testId);
+                stringBuffer.append(",");
+            }
         }
-        if (stringBuffer != null) {
+        if (stringBuffer.length() > 1) {
             map.put("testSet", stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
         }
-        if (recordSet != null) {
+        if (!StringUtils.isEmpty(recordSet)) {
             map.put("recordSet", recordSet);
         }
         return map;
@@ -984,5 +1020,216 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             FileAndFolderUtil.delete(iamgPath);
         }
         return saveExcel;
+    }
+
+    @Override
+    public QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean, List<String> stringList) {
+        Map<String, Long> map = new HashMap<>();
+        Set<Long> setList = new HashSet<>();
+        for (String checkItemCode : stringList) {
+            //step1 根据文件类型创建合同文档
+            Long itemId = reqBean.getList().get(0);
+            setList.add(itemId);
+            String url = testProductItemDao.selectItemOriginUrlPdf(itemId);
+            if (com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotEmpty(url)) {
+                File file = null;
+                try {
+                    String uri = "";
+                    if (url.contains("?")) {
+                        uri = url.substring(0, url.indexOf("?"));
+                    } else {
+                        uri = url;
+                    }
+                    file = FileAndFolderUtil.getFile(uri);
+                } catch (Exception e) {
+                    logger.error("将报告地址转为File文件失败:{}", e);
+                    continue;
+                }
+                if (file != null) {
+                    QiYueSuoResponse response = qiYueSuoHnadler.creatFile(file, checkItemCode, "pdf", null, null, null);
+                    if (response != null && response.getCode() == 0) {
+                        //根据报告编号存储文档id
+                        List<QiYueSuoDocment> result = response.getResult();
+                        map.put(checkItemCode, result.get(0).getDocumentId());
+                        //更新文档id和印章类型
+                        testProductItemDao.updateQysInfo(itemId, result.get(0).getDocumentId());
+                    } else {
+                        return response;
+                    }
+                }
+            }
+        }
+        //Step2 创建合同
+        long id = GenID.getID();
+        Long contractId = null;
+        if (map != null && map.size() > 0) {
+            Set<String> set = map.keySet();
+            List<String> docs = new ArrayList<>();
+            for (String reportCode : set) {
+                docs.add(map.get(reportCode) + "");
+            }
+            reqBean.setDocuments(docs);
+            reqBean.setEntrustId(id);
+            QiYueSuoResponse response = qiYueSuoHnadler.createbycategory(reqBean);
+            if (response != null && response.getCode() == 0) {
+                //更新文档id和印章类型
+                if (response.getContractId() != null) {
+                    contractId = response.getContractId();
+                    testProductItemDao.updateContractIdByCodes(setList, contractId);
+                    System.out.println("set == " + set + "  contractId== " + contractId);
+                }
+            } else {
+                return response;
+            }
+        }
+        //step3 获取签署链接
+        String info = recordEntityMapper.getInitInfo();
+        QiYueSuoSeaLBean qiYueSuoSeaLBean = new QiYueSuoSeaLBean();
+        qiYueSuoSeaLBean.setContractId(contractId);
+        qiYueSuoSeaLBean.setEntrustId(id);
+        qiYueSuoSeaLBean.setContact("");
+        qiYueSuoSeaLBean.setExpireTime(72);
+        qiYueSuoSeaLBean.setReceiverName(ShiroUtils.getUserInfo().getName());
+        qiYueSuoSeaLBean.setTenantName(info);
+        qiYueSuoSeaLBean.setTenantType("COMPANY");
+        QiYueSuoResponse response = qiYueSuoHnadler.signurl(qiYueSuoSeaLBean);
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        String sysUserName = sysUserDao.getSysUserName(userId);
+        //更新签署链接、状态
+        if (response != null && response.getCode() == 0) {
+            testProductItemDao.updateUrlAndStateByContractId(contractId, response.getSignUrl(), "2", sysUserName + "&" + userId + "", new Date(System.currentTimeMillis()));
+        }
+        response.setContractId(contractId);
+        return response;
+    }
+
+    @Override
+    public String updateItemOriginUrlPdf(SampleItemInstrumentVo sampleItemInstrumentVo) throws Exception {
+        // 试验完成：检测项对应原始记录签名信息更新
+        if (CollectionUtil.isNotEmpty(sampleItemInstrumentVo.getItemInstrumentEntityList())) {
+            Integer[] ids = new Integer[sampleItemInstrumentVo.getItemInstrumentEntityList().size()];
+            for (int i = 0; i < sampleItemInstrumentVo.getItemInstrumentEntityList().size(); i++) {
+                SampleItemInstrumentEntity data = sampleItemInstrumentVo.getItemInstrumentEntityList().get(i);
+                ids[i] = data.getItemId();
+                // 查询检测项详情：获取是否编辑(有无对应检测项)、附件pdf是否已经上传。
+                ExcelInsertVo excelInsertVo = testProductItemDao.selectCheckDetails(data.getItemId());
+                // sheet 已经编辑
+                if (org.apache.commons.lang3.StringUtils.isNotEmpty(excelInsertVo.getEditData())) {
+                    // 附件pdf 未上传
+                    if (StringUtils.isEmpty(excelInsertVo.getOriginUrlPdf())) {
+                        List<Integer> list = new ArrayList<>();
+                        list.add(data.getItemId());
+                        // 调用方法 实现 xlsx 转pdf 并上传桶文件 返回minIo链接
+                        String urlPdf = excelmethod(list, excelInsertVo.getCheckItemCode());
+                        // 更新xlsx 转pdf 进行上传。
+                        ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
+                        excelInsertVo1.setItemId(data.getItemId());
+                        excelInsertVo1.setOriginUrlPdf(urlPdf);
+                        testProductItemDao.updateItemData(excelInsertVo1);
+                        System.out.println("ItemId == " + data.getItemId() + " code  == " + excelInsertVo.getCheckItemCode());
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public String excelmethod(List<Integer> list, String checkItemCode) throws Exception {
+        String newFilePath = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
+        String path = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".pdf";
+        ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+        excelInsertVo.setList(list);
+        Integer[] ids = new Integer[excelInsertVo.getList().size()];
+        for (int i = 0; i < excelInsertVo.getList().size(); i++) {
+            ids[i] = excelInsertVo.getList().get(i);
+        }
+        // excel 转 pdf
+        XSSFWorkbook wb = getOriginalRecordAttachment(excelInsertVo);
+        FileOutputStream out = new FileOutputStream(newFilePath);
+        wb.write(out);
+        out.flush();//刷新
+        InputStream out000 = new FileInputStream(newFilePath);
+        //相应pdf
+        ByteArrayOutputStream b1 = PDFHelper3.excel2pdf(out000, path);
+        InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+        // 本地附件 上传 到远端仓库
+        String excelUrl = MinIoUtil.upload("sample-enclosure", checkItemCode + ".pdf", inputStream, "application/pdf");
+        inputStream.close();
+        out000.close();
+        b1.close();
+        out.close();//关闭
+        // 删除附件
+        FileAndFolderUtil.delete(newFilePath);
+        FileAndFolderUtil.delete(path);
+        // 文件上传
+        return excelUrl;
+    }
+
+    /**
+     *  返回原始记录
+     * List 检测项主键
+     * CheckReview 类型（中间复核 或 最终复核）
+     * @return
+     */
+    public  XSSFWorkbook getOriginalRecordAttachment(ExcelInsertVo excelInsertVo) throws IOException {
+        Integer[] ids =new Integer[excelInsertVo.getList().size()];
+        for(int i = 0; i<excelInsertVo.getList().size(); i++){
+            ids[i] = excelInsertVo.getList().get(i);
+        }
+        // 通过检测项主键 获取样品生成附件是否存在。
+        String productExcelUrl = testProductItemDao.getProductExcelUrl(excelInsertVo.getList().get(0));
+        InputStream fileStream = null;
+        // 获取公网 附件
+        try {
+            fileStream = FileAndFolderUtil.getInputStream(productExcelUrl);
+        } catch (Exception e) {
+            logger.info("样品附件 " + productExcelUrl + e);
+        }
+        if(fileStream == null){
+            return null;
+        }
+        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
+        Map<String, String> mapSheet = new HashMap<>();
+        // 循环遍历所有工作表
+        for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+            // 获取第i个工作表
+            XSSFSheet sheet = wb.getSheetAt(i);
+            if (sheet != null) {
+                // 获取工作表的名称
+                String sheetName = sheet.getSheetName();
+                mapSheet.put(sheetName, sheetName);
+            }
+        }
+        // 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
+        // 获取 sheetName
+        Map<String, Object> map = new HashMap<>();
+        // 根据key 保证 sheet不重复使用。
+        Map<String, String> keyMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(sheetItems)) {
+            for (ExcelInsertVo excelInsertVo1 : sheetItems) {
+                // 获取sheetIndex工作表
+                XSSFSheet sheet = wb.getSheetAt(excelInsertVo1.getSheetIndex());
+                if (sheet != null) {
+                    //获取工作表的名称
+                    String sheetName = sheet.getSheetName();
+                    if (keyMap.get(sheetName) == null) {
+                        keyMap.put(sheetName, sheetName);
+                    }
+                }
+            }
+        }
+        for (String key : keyMap.keySet()) {
+            XSSFSheet sheet = wb.getSheet(key);
+            if (sheet != null) {
+                // 设置全部可读
+                wb.getSheet(key).setVerticallyCenter(true);
+                map.put(key, 0);
+            }
+        }
+        // sheetName 不包含 则清除
+        ExcelReplaceUtil.removeSheetName(map,wb);
+        fileStream.close();
+        return wb;
     }
 }

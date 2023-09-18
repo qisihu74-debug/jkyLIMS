@@ -3423,17 +3423,6 @@ public class EntrustServiceImpl implements EntrustService {
                                     List<TestSampleEntity> addSamples = testSampleEntityService.batchInsertSampleCopy(samples);
                                     TestSampleEntity addSample = addSamples.get(0);
                                     sampleEntity.setId(addSample.getId());
-                                    // 再来一单时：样品新增时 新增流转SQL： 状态 = 5 收样。
-                                    // 增加样品样品流转状态
-                                    SampleCirculationRecord sa = new SampleCirculationRecord();
-                                    sa.setSampleId(sampleEntity.getId());
-                                    sa.setStatus("5");
-                                    sa.setOperatorId(userInfo.getUserId());
-                                    sa.setOperatorName(userInfo.getName());
-                                    sa.setTime(new Date());
-                                    sampleEntityMapper.saveSampleCirculationRecord(sa);
-                                    // 更新样品信息 state = 5 收样
-                                    sampleEntityMapper.updateSampleState(sampleEntity.getId(),5);
                                 }
                             }
                         }

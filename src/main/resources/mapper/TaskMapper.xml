@@ -165,6 +165,9 @@
         <result property="sampleStateDescription" column="sample_state_description"></result>
         <result property="orderTime" column="order_time"></result>
         <result property="createTime" column="create_time"></result>
+        <result property="probationer" column="probationer"></result>
+        <result property="interns" column="interns"></result>
+        <result property="auxiliaryPersonnel" column="auxiliary_personnel"></result>
         <collection property="sampleList" ofType="com.lims.manage.erp.vo.SamplePrivateInfoVo">
             <id property="id" column="sampleId"></id>
             <result property="sampleCode" column="sampeCode"></result>
@@ -461,7 +464,10 @@
         t1.sample_receiving_time,
         t1.sample_state_description,
         t1.task_price,
-        t1.create_time
+        t1.create_time,
+        t1.probationer,
+        t1.interns,
+        t1.auxiliary_personnel
         FROM
         test_task t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
@@ -469,7 +475,7 @@
         LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
         LEFT JOIN test_team t5 ON t1.team_id = t5.id
         <trim prefix="WHERE" prefixOverrides="AND | OR ">
-            <if test="deptIds!=null">
+            <if test="deptIds!=null and inspector == null">
                 and t1.dept_id in
                 <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
                     #{id}
@@ -496,8 +502,7 @@
                 and ( t1.inspector LIKE CONCAT('%',#{inspector},'%') or t1.reviewer LIKE CONCAT('%',#{reviewer},'%')
                 OR t1.recorder like CONCAT( '%',#{recorder}, '%' )
                 OR t1.report_producer like CONCAT( '%',#{reportProducer}, '%' )
-                OR t1.sampler like CONCAT( '%',#{sampler}, '%' )
-                )
+                OR t1.sampler like CONCAT( '%',#{sampler}, '%' ))
             </if>
         </trim>
         ORDER BY
@@ -533,7 +538,10 @@
         t1.sampler,
         t1.sample_receiving_time,
         t1.sample_state_description,
-        t1.create_time
+        t1.create_time,
+        t1.probationer,
+        t1.interns,
+        t1.auxiliary_personnel
         FROM
         test_task t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
@@ -604,6 +612,9 @@
             <if test="requiredCompletionTime!=null">required_completion_time=#{requiredCompletionTime},</if>
             <if test="orderTime!=null">order_time=#{orderTime},</if>
             <if test="taskPrice!=null">task_price=#{taskPrice},</if>
+            <if test="probationer!=null and probationer!=''">probationer=#{probationer},</if>
+            <if test="interns!=null and interns!=''">interns=#{interns},</if>
+            <if test="auxiliaryPersonnel!=null and auxiliaryPersonnel!=''">auxiliary_personnel=#{auxiliaryPersonnel},</if>
         </trim>
         where id = #{id}
     </update>
@@ -622,6 +633,9 @@
                 <if test="item.state!=null">state=#{item.state},</if>
                 <if test="item.receiveTime!=null">receive_time=#{item.receiveTime},</if>
                 <if test="item.sampleStateDescription!=null and item.sampleStateDescription!='null'">sample_state_description=#{item.sampleStateDescription},</if>
+                <if test="item.probationer!=null and item.probationer!=''">probationer=#{item.probationer},</if>
+                <if test="item.interns!=null and item.interns!=''">interns=#{item.interns},</if>
+                <if test="item.auxiliaryPersonnel!=null and item.auxiliaryPersonnel!=''">auxiliary_personnel=#{item.auxiliaryPersonnel},</if>
             </trim>
             where id = #{item.id}
         </foreach>
@@ -634,7 +648,8 @@
                end_detection_time,
                state,
                inspector,
-               reviewer
+               reviewer,
+               recorder
         FROM test_task
         WHERE id = #{taskId}
     </select>
@@ -807,6 +822,9 @@
     <update id="updateState">
         update test_entrusted_sample_checkitem_rel
         set state   = #{state,jdbcType=INTEGER},
+        <if test="reviewedBySetUrl != null and reviewedBySetUrl != ''">
+            reviewed_by_set_url = #{reviewedBySetUrl},
+        </if>
             opinion = #{opinion}
         where id = #{itemId,jdbcType=INTEGER}
     </update>
@@ -830,6 +848,9 @@
             <if test="sampleReceivingTime!=null">sample_receiving_time=#{sampleReceivingTime},</if>
             <if test="sampleStateDescription!=null">sample_state_description=#{sampleStateDescription},</if>
             <if test="sampler!=null and sampler!=''">sampler=#{sampler},</if>
+            <if test="probationer!=null and probationer!=''">probationer=#{probationer},</if>
+            <if test="interns!=null and interns!=''">interns=#{interns},</if>
+            <if test="auxiliaryPersonnel!=null and auxiliaryPersonnel!=''">auxiliary_personnel=#{auxiliaryPersonnel},</if>
         </trim>
         where id = #{taskId,jdbcType=INTEGER}
     </update>
