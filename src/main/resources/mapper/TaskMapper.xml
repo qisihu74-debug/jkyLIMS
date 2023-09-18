@@ -469,7 +469,7 @@
         LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
         LEFT JOIN test_team t5 ON t1.team_id = t5.id
         <trim prefix="WHERE" prefixOverrides="AND | OR ">
-            <if test="deptIds!=null and inspector==null">
+            <if test="deptIds!=null">
                 and t1.dept_id in
                 <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
                     #{id}
@@ -492,12 +492,11 @@
                     or t1.state=144
                 )
             </if>
-            <if test="inspector!=null and inspector!='' and deptIds!=null ">
+            <if test="inspector!=null and inspector!=''">
                 and ( t1.inspector LIKE CONCAT('%',#{inspector},'%') or t1.reviewer LIKE CONCAT('%',#{reviewer},'%')
-                            or t1.dept_id in
-                            <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
-                                #{id}
-                            </foreach>
+                OR t1.recorder like CONCAT( '%',#{recorder}, '%' )
+                OR t1.report_producer like CONCAT( '%',#{reportProducer}, '%' )
+                OR t1.sampler like CONCAT( '%',#{sampler}, '%' )
                 )
             </if>
         </trim>

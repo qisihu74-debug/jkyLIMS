@@ -238,6 +238,11 @@ public class SampleEntity {
      * 留样区域
      */
     private String sampleRetentionArea;
+    /**
+     * 任务单id
+     */
+    @TableField(exist = false)
+    private Long taskId;
 
     public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo, String sampleName, String sampleCode, String pictureUrl, String insertFlag) {
         this.productId = addParamVo.getSampleName();

@@ -703,7 +703,7 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         // 进行方法处理 样品状态操作
-        methodSampleIds(oldSampleIds,leadingEndIds,userInfo.getName(),userInfo.getUserId());
+//        methodSampleIds(oldSampleIds,leadingEndIds,userInfo.getName(),userInfo.getUserId());
         // 删除判定依据id
         entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
         // 删除缴费信息
@@ -2650,7 +2650,6 @@ public class EntrustServiceImpl implements EntrustService {
             SysUserEntity userInfo = ShiroUtils.getUserInfo();
             vo.setOrderer(userInfo.getName());
             vo.setPresentInformation(entity.getPresentInformation());
-//            if(deptId.equals(dept)){
             if(!CollectionUtils.isEmpty(entity.getDeptIds())){
                 if (entity.getDeptIds().contains(deptId)) {
                     vo.setIssueReport("是");
@@ -2687,9 +2686,26 @@ public class EntrustServiceImpl implements EntrustService {
                         sa.setOperatorName(userInfo.getName());
                         sa.setTime(new Date());
                         sampleEntityMapper.saveSampleCirculationRecord(sa);
+                    } else {
+                        Boolean flag = false;
+                        for (SampleCirculationRecord sampleCirculationRecord : circulationList) {
+                            if (sampleCirculationRecord.getStatus().equals("0")) {
+                                flag = true;
+                            }
+                        }
+                        if (!flag) {
+                            // 增加样品样品流转状态
+                            SampleCirculationRecord sa = new SampleCirculationRecord();
+                            sa.setSampleId(sampleId);
+                            sa.setStatus("0");
+                            sa.setOperatorId(userInfo.getUserId());
+                            sa.setOperatorName(userInfo.getName());
+                            sa.setTime(new Date());
+                            sampleEntityMapper.saveSampleCirculationRecord(sa);
+                        }
+                    }
                     }
                 }
-            }
             // 记录发布任务单的日志
             StringBuffer stringBuilder1 = new StringBuffer();
             stringBuilder1.append("任务单发布日志");
@@ -3180,7 +3196,7 @@ public class EntrustServiceImpl implements EntrustService {
                 // 使用方法 处理样品来样时间 与委托单受理日期
                 sampleStatus = methodAcceptanceDate(sampleEntity.getId(),vo.getAcceptanceDate(),sampleEntity2);
                 // 委托单创建 更新样品状态 state 待检0
-                sampleEntity2.setState("0");
+//                sampleEntity2.setState("0");
                 // update样品信息
                 sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity2);
 //                // 增加样品样品流转状态
@@ -3324,6 +3340,7 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void methodCopySamples(List<SampleEntity> sampleList,Long old,long id,Integer entrustCompanyId){
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
         // 获取样品集合 判断样品id 是否存在。 不存在 则 add样品。
             for (SampleEntity sampleEntity : sampleList) {
                 SampleEntity sampleDetailVo  = sampleEntityMapper.getSampleTagInfo(sampleEntity.getId());
@@ -3406,6 +3423,17 @@ public class EntrustServiceImpl implements EntrustService {
                                     List<TestSampleEntity> addSamples = testSampleEntityService.batchInsertSampleCopy(samples);
                                     TestSampleEntity addSample = addSamples.get(0);
                                     sampleEntity.setId(addSample.getId());
+                                    // 再来一单时：样品新增时 新增流转SQL： 状态 = 5 收样。
+                                    // 增加样品样品流转状态
+                                    SampleCirculationRecord sa = new SampleCirculationRecord();
+                                    sa.setSampleId(sampleEntity.getId());
+                                    sa.setStatus("5");
+                                    sa.setOperatorId(userInfo.getUserId());
+                                    sa.setOperatorName(userInfo.getName());
+                                    sa.setTime(new Date());
+                                    sampleEntityMapper.saveSampleCirculationRecord(sa);
+                                    // 更新样品信息 state = 5 收样
+                                    sampleEntityMapper.updateSampleState(sampleEntity.getId(),5);
                                 }
                             }
                         }
