@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
@@ -385,4 +386,6 @@ public interface EntrustService {
     XWPFDocument downloadEntrustNew(EntrustAddVo detail, InputStream object);
 
     QrCodeAuthRes qrCodeAuth(String reportCode);
+
+    JSONObject operatingPersonnel(Long entrustId);
 }

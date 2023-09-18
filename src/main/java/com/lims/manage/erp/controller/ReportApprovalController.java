@@ -291,6 +291,9 @@ public class ReportApprovalController {
         }
 //        String url = "http://121.89.242.0:9000/report-download/JC7-2023-YC-0471.pdf";
         String url = reportApprovalService.getReportUrl(reportId);
+        if (url.contains("?")) {
+            url = url.substring(0, url.indexOf("?"));
+        }
         String[] split = url.split("/");
         String fileName = split[split.length-1];
         String bucket = split[split.length-2];

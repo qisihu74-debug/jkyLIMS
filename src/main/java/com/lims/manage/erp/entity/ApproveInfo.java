@@ -2,6 +2,7 @@ package com.lims.manage.erp.entity;
 
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -61,13 +62,13 @@ public class ApproveInfo {
     /**
      * 报告检测人
      */
-    private Map<String,String> jcrMap;
+    private List<KeyValue> jcrMap;
     /**
      * 报告审核人
      */
-    private Map<String,String> shrMap;
+    private List<KeyValue> shrMap;
     /**
      * 报告签发人
      */
-    private Map<String,String> qfrMap;
+    private List<KeyValue> qfrMap;
 }

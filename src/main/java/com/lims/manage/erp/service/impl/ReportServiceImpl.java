@@ -17,6 +17,7 @@ import com.google.common.collect.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.ApproveInfo;
 import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.KeyValue;
 import com.lims.manage.erp.entity.ParamEntity;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
@@ -1485,22 +1486,34 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ApproveInfo approveInfo(String reportCode) {
         ApproveInfo approveInfo = recordEntityMapper.approveInfo(reportCode);
-        Map<String,String> jcMap = new HashMap<>();
+        List<KeyValue> jcMap = Lists.newArrayList();
         String inspector = approveInfo.getInspector();
         String recorder = approveInfo.getRecorder();
         if (org.apache.commons.lang.StringUtils.isNotEmpty(inspector)){
-            jcMap.put(inspector.split("&")[1],inspector.split("&")[0]);
+            KeyValue keyValue = new KeyValue();
+            keyValue.setKey(inspector.split("&")[1]);
+            keyValue.setValue(inspector.split("&")[0]);
+            jcMap.add(keyValue);
         }
         if (org.apache.commons.lang.StringUtils.isNotEmpty(recorder)){
-            jcMap.put(recorder.split("&")[1],recorder.split("&")[0]);
+            KeyValue keyValue = new KeyValue();
+            keyValue.setKey(recorder.split("&")[1]);
+            keyValue.setValue(recorder.split("&")[0]);
+            jcMap.add(keyValue);
         }
-        Map<String,String> shMap = new HashMap<>();
+        List<KeyValue> shMap = Lists.newArrayList();
         String receiver = approveInfo.getReviewer();
         if (org.apache.commons.lang.StringUtils.isNotEmpty(receiver)){
-            shMap.put(receiver.split("&")[1],receiver.split("&")[0]);
+            KeyValue keyValue = new KeyValue();
+            keyValue.setKey(receiver.split("&")[1]);
+            keyValue.setValue(receiver.split("&")[0]);
+            shMap.add(keyValue);
         }
-        Map<String,String> qfMap = new HashMap<>();
-        qfMap.put(approveInfo.getReceiver(),approveInfo.getReceiverName());
+        List<KeyValue> qfMap = Lists.newArrayList();
+        KeyValue keyValue = new KeyValue();
+        keyValue.setKey(approveInfo.getReceiver());
+        keyValue.setValue(approveInfo.getReceiverName());
+        qfMap.add(keyValue);
         approveInfo.setJcrMap(jcMap);
         approveInfo.setShrMap(shMap);
         approveInfo.setQfrMap(qfMap);

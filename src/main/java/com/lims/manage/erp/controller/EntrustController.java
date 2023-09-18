@@ -1,6 +1,7 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.aspose.words.Document;
 import com.aspose.words.ImportFormatMode;
 import com.aspose.words.SaveFormat;
@@ -1101,5 +1102,19 @@ public class EntrustController {
         OutputStream outputStream = response.getOutputStream();
         doc.write(outputStream);
         outputStream.close();
+    }
+
+    /**
+     * 获取委托经营人员信息
+     * @param entrustId
+     * @return
+     */
+    @GetMapping("operatingPersonnel")
+    public Result operatingPersonnel(Long entrustId){
+        if (entrustId == null){
+            return ResultUtil.error("缺少参数");
+        }
+        JSONObject jsonObject = entrustService.operatingPersonnel(entrustId);
+        return ResultUtil.success(jsonObject);
     }
 }

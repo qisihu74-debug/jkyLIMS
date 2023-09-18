@@ -549,6 +549,9 @@ public class SampleServiceImpl implements SampleService {
                     case "4":
                         record.setContent("处置"+"（流转确认人："+record.getOperatorName()+"）" );
                         break;
+                    case "5":
+                        record.setContent("收样"+"（流转确认人："+record.getOperatorName()+"）" );
+                        break;
                     default:
                         log.info("未知的样品流转类型:{}",record.getStatus());
                         break;
