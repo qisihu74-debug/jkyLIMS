@@ -461,5 +461,5 @@ public interface ReportRecordEntityMapper {
             "LEFT JOIN sys_user t4 ON t2.receiver=t4.user_id\n" +
             "WHERE\n" +
             "\tt3.report_code = #{reportCode}\n")
-    ApproveInfo approveInfo(@Param("reportCode") String reportCode);
+    List<ApproveInfo> approveInfo(@Param("reportCode") String reportCode);
 }

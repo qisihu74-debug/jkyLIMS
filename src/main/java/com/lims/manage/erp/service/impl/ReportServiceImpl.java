@@ -1485,35 +1485,46 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ApproveInfo approveInfo(String reportCode) {
-        ApproveInfo approveInfo = recordEntityMapper.approveInfo(reportCode);
+        List<ApproveInfo> approveInfoList = recordEntityMapper.approveInfo(reportCode);
         List<KeyValue> jcMap = Lists.newArrayList();
-        String inspector = approveInfo.getInspector();
-        String recorder = approveInfo.getRecorder();
-        if (org.apache.commons.lang.StringUtils.isNotEmpty(inspector)){
-            KeyValue keyValue = new KeyValue();
-            keyValue.setKey(inspector.split("&")[1]);
-            keyValue.setValue(inspector.split("&")[0]);
-            jcMap.add(keyValue);
-        }
-        if (org.apache.commons.lang.StringUtils.isNotEmpty(recorder)){
-            KeyValue keyValue = new KeyValue();
-            keyValue.setKey(recorder.split("&")[1]);
-            keyValue.setValue(recorder.split("&")[0]);
-            jcMap.add(keyValue);
-        }
         List<KeyValue> shMap = Lists.newArrayList();
-        String receiver = approveInfo.getReviewer();
-        if (org.apache.commons.lang.StringUtils.isNotEmpty(receiver)){
-            KeyValue keyValue = new KeyValue();
-            keyValue.setKey(receiver.split("&")[1]);
-            keyValue.setValue(receiver.split("&")[0]);
-            shMap.add(keyValue);
-        }
         List<KeyValue> qfMap = Lists.newArrayList();
-        KeyValue keyValue = new KeyValue();
-        keyValue.setKey(approveInfo.getReceiver());
-        keyValue.setValue(approveInfo.getReceiverName());
-        qfMap.add(keyValue);
+        for (ApproveInfo approveInfo :approveInfoList){
+            String inspector = approveInfo.getInspector();
+            String recorder = approveInfo.getRecorder();
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(inspector)){
+                KeyValue keyValue = new KeyValue();
+                keyValue.setKey(inspector.split("&")[1]);
+                keyValue.setValue(inspector.split("&")[0]);
+                jcMap.add(keyValue);
+            }
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(recorder)){
+                KeyValue keyValue = new KeyValue();
+                keyValue.setKey(recorder.split("&")[1]);
+                keyValue.setValue(recorder.split("&")[0]);
+                jcMap.add(keyValue);
+            }
+
+            String receiver = approveInfo.getReviewer();
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(receiver)){
+                KeyValue keyValue = new KeyValue();
+                keyValue.setKey(receiver.split("&")[1]);
+                keyValue.setValue(receiver.split("&")[0]);
+                shMap.add(keyValue);
+            }
+
+            KeyValue keyValue = new KeyValue();
+            keyValue.setKey(approveInfo.getReceiver());
+            keyValue.setValue(approveInfo.getReceiverName());
+            qfMap.add(keyValue);
+        }
+        ApproveInfo approveInfo = new ApproveInfo();
+        approveInfo.setEntrustmentNo(approveInfoList.get(0).getEntrustmentNo());
+        approveInfo.setEntrustCompany(approveInfoList.get(0).getEntrustCompany());
+        approveInfo.setWitnessUint(approveInfoList.get(0).getWitnessUint());
+        approveInfo.setProjectName(approveInfoList.get(0).getProjectName());
+        approveInfo.setProjectPart(approveInfoList.get(0).getProjectPart());
+        approveInfo.setReportCode(approveInfoList.get(0).getReportCode());
         approveInfo.setJcrMap(jcMap);
         approveInfo.setShrMap(shMap);
         approveInfo.setQfrMap(qfMap);
