@@ -68,4 +68,18 @@ public class TaskListVo {
      * 设备使用记录 集合
      */
     private List<InstrumentRecordListVo> instrumentRecordListVos = new ArrayList<>();
+    /**
+     * 见习生：实习的新手
+     */
+    private String probationer;
+
+    /**
+     * 实习生
+     */
+    private String interns;
+
+    /**
+     * 辅助人员
+     */
+    private String auxiliaryPersonnel;
 }

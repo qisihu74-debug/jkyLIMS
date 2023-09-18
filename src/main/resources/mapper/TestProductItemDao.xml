@@ -141,5 +141,46 @@
             #{id}
         </foreach>
     </update>
+
+
+    <update id="updateItemData"  parameterType="com.lims.manage.erp.vo.ExcelInsertVo">
+    UPDATE test_entrusted_sample_checkitem_rel
+    <trim prefix="SET" suffixOverrides=",">
+        <if test="checkItemCode!=null and checkItemCode!=''">check_item_code = #{checkItemCode},</if>
+        <if test="originUrlPdf!=null and originUrlPdf!=''">origin_url_pdf = #{originUrlPdf},</if>
+    </trim>
+    WHERE id = #{itemId}
+    </update>
+
+    <select id="selectCheckDetails" resultType="com.lims.manage.erp.vo.ExcelInsertVo">
+        SELECT
+            id AS itemId,
+            check_item_id as checkItemId,
+            edit_data AS editData,
+            origin_url_pdf AS originUrlPdf,
+            check_item_code
+        FROM
+            test_entrusted_sample_checkitem_rel
+        WHERE
+            id = #{itemId}
+    </select>
+
+    <select id="selectCheckList" resultType="com.lims.manage.erp.vo.ExcelInsertVo">
+        SELECT
+            id AS itemId,
+            check_item_id as checkItemId,
+            edit_data AS editData,
+            origin_url_pdf AS originUrlPdf,
+            check_item_code,
+            check_item_name,
+            state
+        FROM
+            test_entrusted_sample_checkitem_rel
+        WHERE
+            id IN
+            <foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+    </select>
 </mapper>
 

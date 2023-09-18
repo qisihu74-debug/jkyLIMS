@@ -1006,17 +1006,6 @@ public class TaskController {
         return ResultUtil.success(pageOfficeCopyService.CompleteTheReview(excelInsertVo));
     }
 
-    /**
-     * 完成复核：发起契约锁
-     *  list
-     *  checkReview
-     */
-    @RequestMapping(value = "/startInitiateContractLock")
-    public Result startInitiateContractLock(@RequestBody ExcelInsertVo excelInsertVo) throws Exception {
-
-        return null;
-    }
-
 
 
 }

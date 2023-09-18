@@ -5,6 +5,7 @@ import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.vo.ExcelInsertVo;
 import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.SampleItemInstrumentVo;
 import com.lims.manage.erp.vo.TeamVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 
@@ -100,4 +101,12 @@ public interface PageOfficeCopyService {
     String saveOriginalRecord2(Integer[] ids) throws Exception;
 
     QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean, List<String> stringList);
+
+    /**
+     * 试验完成 对检测项下 含有对应的 excel 转成pdf 进行更新origin_url_pdf。
+     *
+     * @param sampleItemInstrumentVo
+     * @return
+     */
+    String updateItemOriginUrlPdf(SampleItemInstrumentVo sampleItemInstrumentVo) throws Exception;
 }

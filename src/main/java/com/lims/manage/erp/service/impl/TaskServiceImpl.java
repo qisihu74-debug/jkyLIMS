@@ -1837,7 +1837,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
      * @return
      */
     @Override
-    public XSSFWorkbook getOriginalRecordAttachment(ExcelInsertVo excelInsertVo) throws IOException {
+    public  XSSFWorkbook getOriginalRecordAttachment(ExcelInsertVo excelInsertVo) throws IOException {
         Integer[] ids =new Integer[excelInsertVo.getList().size()];
         for(int i = 0; i<excelInsertVo.getList().size(); i++){
             ids[i] = excelInsertVo.getList().get(i);

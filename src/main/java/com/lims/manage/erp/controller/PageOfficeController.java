@@ -90,25 +90,19 @@ public class PageOfficeController {
         PDFHelper3.getLicense();
         // 查询检测项对应的 sheet下标
         List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
-        if(CollectionUtils.isEmpty(sheetItems)){
+        if (CollectionUtils.isEmpty(sheetItems)) {
             // 检测项无Sheet页
             return new ModelAndView("error");
         }
-        //设置服务页面
-        PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
-        poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");
-        //禁止拷贝文档内容到外部
-        poCtrl.setDisableCopyOnly(true);
-        //设置委托样品下未勾选检测项对应的指定sheet不可编辑状态 TODO
-//        poCtrl.setCustomToolbar(false);
-        Workbook wb = new Workbook();
-        //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
         // 循环设置
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
         Long taskId = dataEntitys.get(0).getTaskId();
         // 验证 token 是否存在
         String[] mapToken = parameterMap.get("token");
         String strVerify = redisUtil.getRedisToken(mapToken[0]);
+        if (strVerify == null) {
+            System.out.println("strVerify: == null");
+        }
         SysUserEntity user = new SysUserEntity();
         if (strVerify != null) {
             user = redisUtil.getRedisTokenUser(strVerify);
@@ -165,6 +159,15 @@ public class PageOfficeController {
         } catch (Exception e) {
             logger.info("读取产品excel异常 " + url + e);
         }
+        //设置服务页面
+        PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
+        poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");
+        //禁止拷贝文档内容到外部
+        poCtrl.setDisableCopyOnly(true);
+        //设置委托样品下未勾选检测项对应的指定sheet不可编辑状态 TODO
+//        poCtrl.setCustomToolbar(false);
+        Workbook wb = new Workbook();
+        //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
         PDFHelper3.getLicense();
         com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
         int count = workbook.getWorksheets().getCount();
@@ -363,33 +366,46 @@ public class PageOfficeController {
      */
     @PostMapping("startInitiateContractLock")
     public Result startInitiateContractLock(@RequestBody QiYueSuoReqBean reqBean) {
-        if (reqBean == null){
+        if (reqBean == null) {
             return ResultUtil.error("缺少必要的参数");
         }
-        if (org.apache.commons.collections.CollectionUtils.isEmpty(reqBean.getList())){
-            return ResultUtil.error("请选择需要签署的报告");
+        if (org.apache.commons.collections.CollectionUtils.isEmpty(reqBean.getList())) {
+            return ResultUtil.error("请选择需要签署的检测项");
         }
-//        List<Long> longs = reqBean.getList();
-////        List<String> stringList = reportService.getCodeByIds(longs);
+        Long[] array = new Long[reqBean.getList().size()];
+        for (int i = 0; i < reqBean.getList().size(); i++) {
+            array[i] = reqBean.getList().get(i);
+        }
+        List<ExcelInsertVo> list = testProductItemDao.selectCheckList(array);
+        if (CollectionUtils.isEmpty(list)) {
+            return ResultUtil.error("创建合同失败：当前检测项 不存在");
+        }
         List<String> stringList = new ArrayList<>();
-        stringList.add("JL-F2309-013-1");
-//        StringBuilder stringBuilder = new StringBuilder();
-//        for (int i=0;i<stringList.size();i++) {
-//            stringBuilder.append(stringList.get(i));
-//            if (i==stringList.size()-1){
-//                continue;
-//            }else {
-//                stringBuilder.append(",");
-//            }
-//        }
-//        reqBean.setSubject(stringBuilder.toString());
-        reqBean.setSubject("JL-F2309-013-1");
-        QiYueSuoResponse response = pageOfficeCopyService.createbycategoryBatch(reqBean,stringList);
+        // 效验每个检测项的信息
+        for (ExcelInsertVo excelInsertVo : list) {
+            if (excelInsertVo.getState() != 3) {
+                return ResultUtil.error("创建合同失败：当前检测项 " + excelInsertVo.getCheckItemName() + " 未通过复核 ");
+            }
+            if (StringUtils.isEmpty(excelInsertVo.getEditData())) {
+                return ResultUtil.error("创建合同失败：当前检测项 " + excelInsertVo.getCheckItemName() + " 未进行excel在线编辑 ");
+            }
+            stringList.add(excelInsertVo.getCheckItemCode());
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < stringList.size(); i++) {
+            stringBuilder.append(stringList.get(i));
+            if (i == stringList.size() - 1) {
+                continue;
+            } else {
+                stringBuilder.append(",");
+            }
+        }
+        reqBean.setSubject(stringBuilder.toString());
+        QiYueSuoResponse response = pageOfficeCopyService.createbycategoryBatch(reqBean, stringList);
         if (response != null && response.getCode() == 0) {
             return ResultUtil.success("向契约锁发起报告制作申请成功!");
         } else {
-            return ResultUtil.error("向契约锁发起报告制作申请失败："+response.getMessage());
+            return ResultUtil.error("向契约锁发起报告制作申请失败：" + response.getMessage());
         }
     }
-
 }

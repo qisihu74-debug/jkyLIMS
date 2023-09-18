@@ -165,6 +165,9 @@
         <result property="sampleStateDescription" column="sample_state_description"></result>
         <result property="orderTime" column="order_time"></result>
         <result property="createTime" column="create_time"></result>
+        <result property="probationer" column="probationer"></result>
+        <result property="interns" column="interns"></result>
+        <result property="auxiliaryPersonnel" column="auxiliary_personnel"></result>
         <collection property="sampleList" ofType="com.lims.manage.erp.vo.SamplePrivateInfoVo">
             <id property="id" column="sampleId"></id>
             <result property="sampleCode" column="sampeCode"></result>
@@ -461,7 +464,10 @@
         t1.sample_receiving_time,
         t1.sample_state_description,
         t1.task_price,
-        t1.create_time
+        t1.create_time,
+        t1.probationer,
+        t1.interns,
+        t1.auxiliary_personnel
         FROM
         test_task t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
@@ -532,7 +538,10 @@
         t1.sampler,
         t1.sample_receiving_time,
         t1.sample_state_description,
-        t1.create_time
+        t1.create_time,
+        t1.probationer,
+        t1.interns,
+        t1.auxiliary_personnel
         FROM
         test_task t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id

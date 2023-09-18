@@ -99,5 +99,21 @@ public class ExcelInsertVo {
      * 审核人
      */
     String reviewedBySetUrl;
+    /**
+     * 是否编辑数据
+     */
+    String editData;
+    /**
+     * 试验完成后生成pdf文件
+     */
+    String originUrlPdf;
+    /**
+     * 检测项编号
+     */
+    String checkItemCode;
+    /**
+     * 检测项名称
+     */
+    String checkItemName;
 
 }

@@ -209,8 +209,21 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
     void updateUrlAndStateByContractId(@Param("contractId") Long contractId, @Param("signUrl") String signUrl, @Param("state") String state,
                                        @Param("sealer") String sealer, @Param("sealTime") Date sealTime);
 
-    @Update("update test_entrusted_sample_checkitem_rel set origin_url_pdf = #{originUrlPdf} WHERE id  = #{itemId}")
-    void updateItemData(@Param("itemId") Integer itemId, @Param("originUrlPdf") String originUrlPdf);
+    int updateItemData(ExcelInsertVo excelInsertVo);
+
+    /**
+     * 查询检测项 详情数据
+     * @param itemId
+     * @return
+     */
+    ExcelInsertVo selectCheckDetails(@Param("itemId") Integer itemId);
+
+    /**
+     * 查询检测项 数组
+     * @param array
+     * @return
+     */
+    List<ExcelInsertVo> selectCheckList(@Param(value = "array") Long[] array);
 
 }
 

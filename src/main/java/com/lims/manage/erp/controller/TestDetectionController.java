@@ -141,20 +141,9 @@ public class TestDetectionController {
             return ResultUtil.error(str);
         }
         Boolean flag = testDetectionService.postEndTest(sampleItemInstrumentVo);
-        // 试验完成：检测项对应原始记录签名信息更新
-//        if (CollectionUtil.isNotEmpty(sampleItemInstrumentVo.getItemInstrumentEntityList())) {
-//            Integer[] ids = new Integer[sampleItemInstrumentVo.getItemInstrumentEntityList().size()];
-//            for (int i = 0; i < sampleItemInstrumentVo.getItemInstrumentEntityList().size(); i++) {
-//                SampleItemInstrumentEntity data = sampleItemInstrumentVo.getItemInstrumentEntityList().get(i);
-//                ids[i] = data.getItemId();
-//            }
-//            String excelUrl = pageOfficeCopyService.saveOriginalRecord2(ids);
-//            if (excelUrl != null) {
-//                pageOfficeCopyService.updateOriginalRecordUrl(excelUrl, ids);
-//            }
-//        }
         if(flag) {
             // 试验完成 对检测项下 含有对应的 excel 转成pdf 进行更新origin_url_pdf。
+            pageOfficeCopyService.updateItemOriginUrlPdf(sampleItemInstrumentVo);
             // 更新任务单状态 需要 对所有的 样品信息 下 检测项 进行判断 ==2的话 更新。
             TaskDetailInfoVo dataGather = taskService.getTaskDetailInfoTwo(sampleItemInstrumentVo.getTaskId(),null);
             Boolean DetailStatus = testDetectionService.JudgmentTaskDetail(dataGather, sampleItemInstrumentVo.getTaskId());

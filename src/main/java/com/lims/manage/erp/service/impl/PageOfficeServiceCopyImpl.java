@@ -63,6 +63,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     private ReportRecordEntityMapper recordEntityMapper;
     @Autowired
     private SysUserDao sysUserDao;
+    @Autowired
+    private QiYueSuoEntity qiYueSuoEntity;
 
 
     /**
@@ -228,7 +230,10 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             // 更新 检测项记录编号
             if (recordNumberMap != null) {
                 for (int keyData : recordNumberMap.keySet()) {
-                    testProductItemDao.updateItemData(keyData, recordNumberMap.get(keyData));
+                    ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
+                    excelInsertVo1.setItemId(keyData);
+                    excelInsertVo1.setCheckItemCode(recordNumberMap.get(keyData));
+                    testProductItemDao.updateItemData(excelInsertVo1);
                 }
             }
         }
@@ -1096,5 +1101,135 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         }
         response.setContractId(contractId);
         return response;
+    }
+
+    @Override
+    public String updateItemOriginUrlPdf(SampleItemInstrumentVo sampleItemInstrumentVo) throws Exception {
+        // 试验完成：检测项对应原始记录签名信息更新
+        if (CollectionUtil.isNotEmpty(sampleItemInstrumentVo.getItemInstrumentEntityList())) {
+            Integer[] ids = new Integer[sampleItemInstrumentVo.getItemInstrumentEntityList().size()];
+            for (int i = 0; i < sampleItemInstrumentVo.getItemInstrumentEntityList().size(); i++) {
+                SampleItemInstrumentEntity data = sampleItemInstrumentVo.getItemInstrumentEntityList().get(i);
+                ids[i] = data.getItemId();
+                // 查询检测项详情：获取是否编辑(有无对应检测项)、附件pdf是否已经上传。
+                ExcelInsertVo excelInsertVo = testProductItemDao.selectCheckDetails(data.getItemId());
+                // sheet 已经编辑
+                if (org.apache.commons.lang3.StringUtils.isNotEmpty(excelInsertVo.getEditData())) {
+                    // 附件pdf 未上传
+                    if (StringUtils.isEmpty(excelInsertVo.getOriginUrlPdf())) {
+                        List<Integer> list = new ArrayList<>();
+                        list.add(data.getItemId());
+                        // 调用方法 实现 xlsx 转pdf 并上传桶文件 返回minIo链接
+                        String urlPdf = excelmethod(list, excelInsertVo.getCheckItemCode());
+                        // 更新xlsx 转pdf 进行上传。
+                        ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
+                        excelInsertVo1.setItemId(data.getItemId());
+                        excelInsertVo1.setOriginUrlPdf(urlPdf);
+                        testProductItemDao.updateItemData(excelInsertVo1);
+                        System.out.println("ItemId == " + data.getItemId() + " code  == " + excelInsertVo.getCheckItemCode());
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public String excelmethod(List<Integer> list, String checkItemCode) throws Exception {
+        String newFilePath = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
+        String path = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".pdf";
+        ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+        excelInsertVo.setList(list);
+        Integer[] ids = new Integer[excelInsertVo.getList().size()];
+        for (int i = 0; i < excelInsertVo.getList().size(); i++) {
+            ids[i] = excelInsertVo.getList().get(i);
+        }
+        // excel 转 pdf
+        XSSFWorkbook wb = getOriginalRecordAttachment(excelInsertVo);
+        FileOutputStream out = new FileOutputStream(newFilePath);
+        wb.write(out);
+        out.flush();//刷新
+        InputStream out000 = new FileInputStream(newFilePath);
+        //相应pdf
+        ByteArrayOutputStream b1 = PDFHelper3.excel2pdf(out000, path);
+        InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+        // 本地附件 上传 到远端仓库
+        String excelUrl = MinIoUtil.upload("sample-enclosure", checkItemCode + ".pdf", inputStream, "application/pdf");
+        inputStream.close();
+        out000.close();
+        b1.close();
+        out.close();//关闭
+        // 删除附件
+        FileAndFolderUtil.delete(newFilePath);
+        FileAndFolderUtil.delete(path);
+        // 文件上传
+        return excelUrl;
+    }
+
+    /**
+     *  返回原始记录
+     * List 检测项主键
+     * CheckReview 类型（中间复核 或 最终复核）
+     * @return
+     */
+    public  XSSFWorkbook getOriginalRecordAttachment(ExcelInsertVo excelInsertVo) throws IOException {
+        Integer[] ids =new Integer[excelInsertVo.getList().size()];
+        for(int i = 0; i<excelInsertVo.getList().size(); i++){
+            ids[i] = excelInsertVo.getList().get(i);
+        }
+        // 通过检测项主键 获取样品生成附件是否存在。
+        String productExcelUrl = testProductItemDao.getProductExcelUrl(excelInsertVo.getList().get(0));
+        InputStream fileStream = null;
+        // 获取公网 附件
+        try {
+            fileStream = FileAndFolderUtil.getInputStream(productExcelUrl);
+        } catch (Exception e) {
+            logger.info("样品附件 " + productExcelUrl + e);
+        }
+        if(fileStream == null){
+            return null;
+        }
+        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
+        Map<String, String> mapSheet = new HashMap<>();
+        // 循环遍历所有工作表
+        for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+            // 获取第i个工作表
+            XSSFSheet sheet = wb.getSheetAt(i);
+            if (sheet != null) {
+                // 获取工作表的名称
+                String sheetName = sheet.getSheetName();
+                mapSheet.put(sheetName, sheetName);
+            }
+        }
+        // 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
+        // 获取 sheetName
+        Map<String, Object> map = new HashMap<>();
+        // 根据key 保证 sheet不重复使用。
+        Map<String, String> keyMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(sheetItems)) {
+            for (ExcelInsertVo excelInsertVo1 : sheetItems) {
+                // 获取sheetIndex工作表
+                XSSFSheet sheet = wb.getSheetAt(excelInsertVo1.getSheetIndex());
+                if (sheet != null) {
+                    //获取工作表的名称
+                    String sheetName = sheet.getSheetName();
+                    if (keyMap.get(sheetName) == null) {
+                        keyMap.put(sheetName, sheetName);
+                    }
+                }
+            }
+        }
+        for (String key : keyMap.keySet()) {
+            XSSFSheet sheet = wb.getSheet(key);
+            if (sheet != null) {
+                // 设置全部可读
+                wb.getSheet(key).setVerticallyCenter(true);
+                map.put(key, 0);
+            }
+        }
+        // sheetName 不包含 则清除
+        ExcelReplaceUtil.removeSheetName(map,wb);
+        fileStream.close();
+        return wb;
     }
 }
