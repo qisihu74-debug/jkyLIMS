@@ -480,4 +480,12 @@ public interface SampleEntityMapper {
      * @return
      */
     List<SampleEntity> getGroupNodes(@Param("codes") List<String> codes);
+
+    @Select("SELECT\n" +
+            "\t*\n" +
+            "FROM\n" +
+            "\ttest_sample_area\n" +
+            "ORDER BY\n" +
+            "\tid")
+    List<Node> retentionSampleAreaList();
 }

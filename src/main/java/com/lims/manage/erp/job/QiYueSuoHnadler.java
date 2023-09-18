@@ -2,7 +2,9 @@ package com.lims.manage.erp.job;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.Actions;
+import com.lims.manage.erp.entity.Location;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
@@ -69,23 +71,14 @@ public class QiYueSuoHnadler {
     /**
      * 契约锁创建文档信息
      * @param reqBean
+     * @desc
      * @return
      */
-    public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
-        //设置用印流程id
-        reqBean.setCategoryId(qiYueSuoEntity.getCategoryId());
-        //设置请求头
-        Map<String, String> headers = getHeaders();
-        //请求契约锁接口（请求方式由契约锁接口约定）
-        String url = qiYueSuoEntity.getUrl() + qiYueSuoEntity.getAddInterface();
-        //处理参数支持每个印章固定位置
-        List<Actions> actions = reqBean.getSignatories().get(0).getActions();
-        String sealIds = actions.get(0).getSealIds();
-        //公路工程综合甲级专用章 2934033400316387595
-        //实验室认可（CNAS）专用章 2937178885881422636
-        //计量认证（CMA）专用章 2937188764910183324
-        //检验检测专用章（室内试验） 2937191218674492340
-        //检验检测专用章（外业检测） 2937192180793304003
+    //公路工程综合甲级专用章 2934033400316387595
+    //实验室认可（CNAS）专用章 2937178885881422636
+    //计量认证（CMA）专用章 2937188764910183324
+    //检验检测专用章（室内试验） 2937191218674492340
+    //检验检测专用章（外业检测） 2937192180793304003
         /*{
             "tenantName": "河南省公路工程试验检测中心有限公司",
                 "subject": "ZX-2022-JC-0053",
@@ -163,6 +156,79 @@ public class QiYueSuoHnadler {
             }
     ]
         }*/
+    public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
+        //设置用印流程id
+        reqBean.setCategoryId(qiYueSuoEntity.getCategoryId());
+        //设置请求头
+        Map<String, String> headers = getHeaders();
+        //请求契约锁接口（请求方式由契约锁接口约定）
+        String url = qiYueSuoEntity.getUrl() + qiYueSuoEntity.getAddInterface();
+        //处理参数支持每个印章固定位置
+        List<Actions> actions = reqBean.getSignatories().get(0).getActions();
+        for (int i = 0; i < actions.size()-1; i++) {
+            //签署位置  检测： ，审核：，批准：
+            List<String> documents = reqBean.getDocuments();
+            if (i==0){
+                List<Location> locations = Lists.newArrayList();
+                for (String s:documents){
+                    Location location = new Location();
+                    location.setRectType("SEAL_PERSONAL");
+                    location.setPage(-1);
+                    location.setDocumentId(s);
+                    location.setActionName("检测人签字");
+                    location.setKeyword("检测：");
+                    location.setOffsetX(-0.05);
+                    location.setOffsetY(-0.01);
+                    locations.add(location);
+                }
+                actions.get(i).setLocations(locations);
+            }
+            if (i==1){
+                List<Location> locations = Lists.newArrayList();
+                for (String s:documents){
+                    Location location = new Location();
+                    location.setRectType("SEAL_PERSONAL");
+                    location.setPage(-1);
+                    location.setDocumentId(s);
+                    location.setActionName("检测记录人签字");
+                    location.setKeyword("检测：");
+                    location.setOffsetX(0.05);
+                    location.setOffsetY(-0.01);
+                    locations.add(location);
+                }
+                actions.get(i).setLocations(locations);
+            }
+            if (i==2){
+                List<Location> locations = Lists.newArrayList();
+                for (String s:documents){
+                    Location location = new Location();
+                    location.setRectType("SEAL_PERSONAL");
+                    location.setPage(-1);
+                    location.setDocumentId(s);
+                    location.setActionName("审核人签字");
+                    location.setKeyword("审核：");
+                    location.setOffsetX(-0.05);
+                    location.setOffsetY(-0.01);
+                    locations.add(location);
+                }
+                actions.get(i).setLocations(locations);
+            }
+            if (i==3){
+                List<Location> locations = Lists.newArrayList();
+                for (String s:documents){
+                    Location location = new Location();
+                    location.setRectType("SEAL_PERSONAL");
+                    location.setPage(-1);
+                    location.setDocumentId(s);
+                    location.setActionName("批准人签字");
+                    location.setKeyword("批准：");
+                    location.setOffsetX(-0.05);
+                    location.setOffsetY(-0.01);
+                    locations.add(location);
+                }
+                actions.get(i).setLocations(locations);
+            }
+        }
         log.debug("请求契约锁参数:{}",JSON.toJSONString(reqBean));
         Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, JSON.toJSONString(reqBean), headers);
         log.debug("契约锁创建文档响应信息:{}", JSON.toJSONString(stringPair));

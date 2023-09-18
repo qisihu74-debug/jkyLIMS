@@ -798,10 +798,13 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
                outward,
                inspector,
                received_date,
-               outward_describe,
                quantity_per_group quantityPerGroup,
                outward_describe outwardDescribe,
                sample_type sampleType,
+               generation,
+               sample_quantity,
+               batch_number,
+               manufacturer,
                id
         FROM test_sample
         WHERE id = #{sampleId}
@@ -1304,7 +1307,7 @@ WHERE
         <if test="type ==2 ">
             AND (status = '3' or status= '4')
         </if>
-        order by STATUS ASC 
+        order by STATUS ASC
     </select>
 
     <select id="selectPageVo" resultType="com.lims.manage.erp.vo.SampleOutPutVo">

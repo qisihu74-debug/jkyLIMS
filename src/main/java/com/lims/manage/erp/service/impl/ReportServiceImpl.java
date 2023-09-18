@@ -15,7 +15,9 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
+import com.lims.manage.erp.entity.ApproveInfo;
 import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.KeyValue;
 import com.lims.manage.erp.entity.ParamEntity;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
@@ -71,6 +73,7 @@ import com.lims.manage.erp.util.EntrustNoStrUtils;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.HttpDownloadUtil;
+import com.lims.manage.erp.util.ImageUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.PDFHelper3;
 import com.lims.manage.erp.util.PdfDoc;
@@ -1478,6 +1481,43 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<String> getCodeByIds(List<Long> longs) {
         return reportMapper.getCodeByIds(longs);
+    }
+
+    @Override
+    public ApproveInfo approveInfo(String reportCode) {
+        ApproveInfo approveInfo = recordEntityMapper.approveInfo(reportCode);
+        List<KeyValue> jcMap = Lists.newArrayList();
+        String inspector = approveInfo.getInspector();
+        String recorder = approveInfo.getRecorder();
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(inspector)){
+            KeyValue keyValue = new KeyValue();
+            keyValue.setKey(inspector.split("&")[1]);
+            keyValue.setValue(inspector.split("&")[0]);
+            jcMap.add(keyValue);
+        }
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(recorder)){
+            KeyValue keyValue = new KeyValue();
+            keyValue.setKey(recorder.split("&")[1]);
+            keyValue.setValue(recorder.split("&")[0]);
+            jcMap.add(keyValue);
+        }
+        List<KeyValue> shMap = Lists.newArrayList();
+        String receiver = approveInfo.getReviewer();
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(receiver)){
+            KeyValue keyValue = new KeyValue();
+            keyValue.setKey(receiver.split("&")[1]);
+            keyValue.setValue(receiver.split("&")[0]);
+            shMap.add(keyValue);
+        }
+        List<KeyValue> qfMap = Lists.newArrayList();
+        KeyValue keyValue = new KeyValue();
+        keyValue.setKey(approveInfo.getReceiver());
+        keyValue.setValue(approveInfo.getReceiverName());
+        qfMap.add(keyValue);
+        approveInfo.setJcrMap(jcMap);
+        approveInfo.setShrMap(shMap);
+        approveInfo.setQfrMap(qfMap);
+        return approveInfo;
     }
 
     @Override
@@ -3678,18 +3718,32 @@ public class ReportServiceImpl implements ReportService {
         } catch (Exception e) {
             log.error("合并报告后的文件临时缓存失败:{}",e);
         }
-        File file = new File(excelPath);
-        MultipartFile multipartFile = AsposeUtil.fileToMultipart(file, reportCode);
         try {
-            PDFHelper3.excel2pdf(multipartFile,pdfPath);
+            File file = new File(excelPath);
+            InputStream inputStream1 = new FileInputStream(file);
+            pdfPath = PDFHelper3.excel2pdf3(inputStream1,pdfPath);
         } catch (Exception e) {
             log.error("报告在线合并excel转pdf异常:{}",e);
         }
+        //pdf设置报告盖章日期
+        Date reportCompleteTime = reportRecordEntity.getReportCompleteTime();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+        String reportCompleteTimeStr = simpleDateFormat.format(reportCompleteTime);
+        String dateUrl = qiYueSuoEntity.getAutographPath() + reportCompleteTimeStr + ".png";
+        ImageUtil.createDateImage(dateUrl,reportCompleteTimeStr);
+        String qzPdfPath = path+"qzPdfPath.pdf";
+        PdfDoc pdf3 = new PdfDoc(pdfPath, qzPdfPath);
+        try {
+            pdf3.addImage(dateUrl, "日期：", 5, -5, 80, 20);
+        } catch (Exception e) {
+            log.error("设置报告盖章日期失败:{}",e);
+        }
         //删除临时文件
         FileAndFolderUtil.delete(excelPath);
+        FileAndFolderUtil.delete(dateUrl);
         //上传文件、更新url
         try {
-            inputStream = new FileInputStream(pdfPath);
+            inputStream = new FileInputStream(qzPdfPath);
         } catch (FileNotFoundException e) {
             log.error("读取本地pdf文件失败:{}",e);
         }
@@ -3703,6 +3757,7 @@ public class ReportServiceImpl implements ReportService {
         recordEntityMapper.updateUrlByCode(reportCode,substring);
         //删除临时文件
         FileAndFolderUtil.delete(pdfPath);
+        FileAndFolderUtil.delete(qzPdfPath);
         return url;
     }
 
@@ -3755,10 +3810,10 @@ public class ReportServiceImpl implements ReportService {
                                 Object value = cell.getValue();
                                 if (value != null) {
                                     String string = value.toString();
-                                    if ("${检测结论}".equals(string)) {
+                                    if ("${result.conclusion}".equals(string)) {
                                         cells.get(n, j).setValue("检测结论：" + entity.getConclusion());
                                     }
-                                    if ("${附加声明}".equals(string)) {
+                                    if ("${result.additional}".equals(string)) {
                                         cells.get(n, j).setValue("附加声明：" + entity.getAdditional());
                                     }
                                 }
@@ -3810,7 +3865,7 @@ public class ReportServiceImpl implements ReportService {
                             if ("${result.sampleDetails}".equals(string)){
                                 cells.get(n, j).setValue("样品名称：" + (sampleEntity.getSampleName() == null ? "——" : sampleEntity.getSampleName())
                                         + "；样品编号：" + (sampleEntity.getSampleCode() == null ? "——" : sampleEntity.getSampleCode().replace("~", "~"))
-                                        + "；样品数量：" + (sampleEntity.getSampleQuantity() == null ? "——" : sampleEntity.getSampleQuantity())
+                                        + "；样品数量：" + (sampleEntity.getQuantityPerGroup() == null ? "——" : sampleEntity.getQuantityPerGroup())
                                         + "；代表批量：" + (sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration())
                                         + "；规格等级：" + (sampleEntity.getSpecs() == null ? "——" : sampleEntity.getSpecs())
                                         + "；样品状态：" + (StringUtils.isEmpty(sampleEntity.getOutwardDescribe()) ? "——" : sampleEntity.getOutwardDescribe())

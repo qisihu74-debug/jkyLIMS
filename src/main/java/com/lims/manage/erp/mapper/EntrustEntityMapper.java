@@ -11,6 +11,7 @@ import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TestCompanyJsonEntity;
@@ -777,4 +778,15 @@ public interface EntrustEntityMapper extends BaseMapper {
             "WHERE\n" +
             "\tt1.report_file_uri = #{reportFileUri}")
     List<String> getBindItemByReortUrl(@Param("reportFileUri") String reportFileUri);
+
+    @Select("\n" +
+            "SELECT DISTINCT\n" +
+            "\tt1.operating_personnel As name,\n" +
+            "\tt2.mobile\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info t1\n" +
+            "LEFT JOIN sys_user t2 ON t1.operating_personnel = t2. NAME\n" +
+            "WHERE\n" +
+            "\tt1.id = #{entrustId} LIMIT 1")
+    SysUserEntity operatingPersonnel(@Param("entrustId") Long entrustId);
 }

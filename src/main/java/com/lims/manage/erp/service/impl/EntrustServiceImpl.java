@@ -3,6 +3,7 @@ package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.aspose.cells.Cells;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
@@ -5354,6 +5355,21 @@ public class EntrustServiceImpl implements EntrustService {
         qrCodeAuthRes.setCheckOrganization(info);
         qrCodeAuthRes.setReportCode(reportCode);
         return qrCodeAuthRes;
+    }
+
+    @Override
+    public JSONObject operatingPersonnel(Long entrustId) {
+        SysUserEntity sysUserEntity = entityMapper.operatingPersonnel(entrustId);
+        JSONObject object = new JSONObject();
+        if (sysUserEntity != null){
+            object.put("name",sysUserEntity.getName());
+            object.put("mobile",sysUserEntity.getMobile());
+            return object;
+        }else {
+            object.put("name",ShiroUtils.getUserInfo().getName());
+            object.put("mobile",ShiroUtils.getUserInfo().getMobile());
+            return object;
+        }
     }
 
 }
