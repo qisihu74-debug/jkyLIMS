@@ -26,4 +26,8 @@ public class Location {
     private double offsetY;
     private String actionName;
     private String keyword;
+    /**
+     * 第几个关键字,0:全部,-1:最后一个,其他:第keyIndex个,默认为1
+     */
+    private int keywordIndex;
 }
