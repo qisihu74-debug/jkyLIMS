@@ -1070,7 +1070,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             }
             reqBean.setDocuments(docs);
             reqBean.setEntrustId(id);
-            QiYueSuoResponse response = qiYueSuoHnadler.createbycategory(reqBean);
+            // 设置 具体签名信息：
+            QiYueSuoResponse response = qiYueSuoHnadler.createbyTestcategory(reqBean);
             if (response != null && response.getCode() == 0) {
                 //更新文档id和印章类型
                 if (response.getContractId() != null) {
@@ -1084,6 +1085,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         }
         //step3 获取签署链接
         String info = recordEntityMapper.getInitInfo();
+//        String info = null;
         QiYueSuoSeaLBean qiYueSuoSeaLBean = new QiYueSuoSeaLBean();
         qiYueSuoSeaLBean.setContractId(contractId);
         qiYueSuoSeaLBean.setEntrustId(id);
@@ -1093,9 +1095,10 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         qiYueSuoSeaLBean.setTenantName(info);
         qiYueSuoSeaLBean.setTenantType("COMPANY");
         QiYueSuoResponse response = qiYueSuoHnadler.signurl(qiYueSuoSeaLBean);
+//        QiYueSuoResponse response = null;
         Long userId = ShiroUtils.getUserInfo().getUserId();
         String sysUserName = sysUserDao.getSysUserName(userId);
-        //更新签署链接、状态
+//        //更新签署链接、状态
         if (response != null && response.getCode() == 0) {
             testProductItemDao.updateUrlAndStateByContractId(contractId, response.getSignUrl(), "2", sysUserName + "&" + userId + "", new Date(System.currentTimeMillis()));
         }
