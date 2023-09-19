@@ -34,7 +34,8 @@ public class DingMessageJob {
     private String appsecret;
 
     @Async("syncExecutor1")
-    @Scheduled(cron="0 0 6 1/1 * ?")
+    //@Scheduled(cron="0 0 6 1/1 * ?")
+    @Scheduled(cron="0 0/1 * * * ?")
     public void OAWorkNotice() throws Exception {
         AccessTokenSingleton instance = AccessTokenSingleton.getInstance();
         String token = instance.getToken(tokenUrl, "dingxg4nevxtzc90q9as", "ncCJeNny61UEH4LoTf-Pk54jDwj34fPWO0ZhmwEILSva0NbGd4WasCcp3aEDw_9Z");
@@ -63,7 +64,8 @@ public class DingMessageJob {
         body.setTitle("有新的检测任务待领取");
         body.setImage("@lADOADmaWMzazQKA");
 
-        oa.setMessageUrl(URLEncoder.encode("http://192.168.2.23:8082/jkyErp/index.html#/", StandardCharsets.UTF_8.toString()));
+        oa.setMessageUrl(URLEncoder.encode("https://wwww.baidu.com/", StandardCharsets.UTF_8.toString()));
+        oa.setPcMessageUrl(URLEncoder.encode("https://wwww.baidu.com/", StandardCharsets.UTF_8.toString()));
         oa.setBody(body);
         oa.setHead(head);
         msg.setOa(oa);
