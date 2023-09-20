@@ -531,7 +531,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         stringBuilder1.append(" 任务id"+taskTestEntity.getId());
         stringBuilder1.append(" 任务编号:"+taskTestEntity.getCode());
         stringBuilder1.append(" 检测人:"+taskTestEntity.getInspector());
-        stringBuilder1.append(" 记录人:"+taskTestEntity.getRecorder());
+        stringBuilder1.append(" 接收人:"+taskTestEntity.getReceiver());
         stringBuilder1.append(" 复核人:"+taskTestEntity.getReviewer());
         stringBuilder1.append(" 报告制作人:"+taskTestEntity.getReportProducer());
         stringBuilder1.append(" 记录人:"+taskTestEntity.getRecorder());
@@ -577,7 +577,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                 stringBuilder1.append(" 任务id"+taskTestEntity.getId());
                 stringBuilder1.append(" 任务编号:"+taskTestEntity.getCode());
                 stringBuilder1.append(" 检测人:"+taskTestEntity.getInspector());
-                stringBuilder1.append(" 记录人:"+taskTestEntity.getRecorder());
+                stringBuilder1.append(" 接单人:"+taskTestEntity.getReceiver());
                 stringBuilder1.append(" 复核人:"+taskTestEntity.getReviewer());
                 stringBuilder1.append(" 报告制作人:"+taskTestEntity.getReportProducer());
                 stringBuilder1.append(" 记录人:"+taskTestEntity.getRecorder());

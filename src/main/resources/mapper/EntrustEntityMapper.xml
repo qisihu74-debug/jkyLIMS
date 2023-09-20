@@ -1036,7 +1036,8 @@
         t2.order_time,
         t2.present_information,
         t2.dept_id as teamId,
-        t2.issue_report as receiver
+        IF
+	    ( t2.issue_report = NULL, NULL, IF ( t2.issue_report = "是", 1, 0 ) )  as issueReport
         FROM
         test_entrusted_info as t1
         LEFT JOIN test_task as t2 ON t1.id = t2.entrustment_id
