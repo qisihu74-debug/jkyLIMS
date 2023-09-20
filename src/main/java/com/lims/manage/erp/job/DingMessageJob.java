@@ -5,14 +5,11 @@ import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiMessageCorpconversationAsyncsendV2Request;
 import com.dingtalk.api.response.OapiMessageCorpconversationAsyncsendV2Response;
 import com.lims.manage.erp.util.AccessTokenSingleton;
-import com.taobao.api.ApiException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,8 +61,7 @@ public class DingMessageJob {
         body.setTitle("有新的检测任务待领取");
         body.setImage("@lADOADmaWMzazQKA");
 
-        oa.setMessageUrl(URLEncoder.encode("https://wwww.baidu.com/", StandardCharsets.UTF_8.toString()));
-        oa.setPcMessageUrl(URLEncoder.encode("https://wwww.baidu.com/", StandardCharsets.UTF_8.toString()));
+        oa.setPcMessageUrl("http://192.168.2.23:8082/jkyErp/index.html#/");
         oa.setBody(body);
         oa.setHead(head);
         msg.setOa(oa);

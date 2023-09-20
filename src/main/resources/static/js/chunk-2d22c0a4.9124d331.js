@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([["chunk-2d22c0a4"],{f213:function(n,e,c){"use strict";c.r(e);var t=c("7a23");var u=Object(t.r)({name:"Menu",setup:()=>({})}),r=c("6b0d");const a=c.n(r)()(u,[["render",function(n,e,c,u,r,a){return Object(t.J)(),Object(t.m)("div",null,"菜单管理")}]]);e.default=a}}]);
