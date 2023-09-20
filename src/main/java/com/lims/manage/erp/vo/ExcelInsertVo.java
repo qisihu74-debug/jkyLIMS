@@ -119,5 +119,9 @@ public class ExcelInsertVo {
      * 附件url
      */
     String signUrl;
+    /**
+     * contractId
+     */
+    String contractId;
 
 }

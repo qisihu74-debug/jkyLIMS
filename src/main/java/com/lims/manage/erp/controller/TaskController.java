@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
@@ -13,14 +14,10 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.PageOfficeCopyService;
+import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
-import com.lims.manage.erp.util.AsposeUtil;
-import com.lims.manage.erp.util.FileAndFolderUtil;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.PDFHelper3;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.BatchReceiveTaskVo;
 import com.lims.manage.erp.vo.ExcelInsertVo;
 import com.lims.manage.erp.vo.LabelValueTeamVo;
@@ -39,6 +36,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -84,6 +83,9 @@ public class TaskController {
     private PageOfficeCopyService pageOfficeCopyService;
     @Autowired
     private TestProductItemDao testProductItemDao;
+    Logger logger = LoggerFactory.getLogger(TaskController.class);
+    @Autowired
+    private ReportService reportService;
 
     /**
      * 查询任务详情——废弃
@@ -912,20 +914,47 @@ public class TaskController {
                                        HttpServletResponse response) throws IOException {
         Integer[] ids = new Integer[1];
         ids[0] = itemId;
-        // 效验 检测项url信息模板
-        // 通过检测项id 获取 相应的 id关联信息。
-        List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
-        // 判断 压缩数据=null 返回 null
-        if(!CollectionUtils.isEmpty(dataEntitys)){
-            response.reset();
-            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-            response.setContentType("application/zip");
-            response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode("原始记录.zip", "UTF-8") );
-            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys,response,taskId);
-            zipOutputStream.flush();
+        Long[] longids = new Long[1];
+        longids[0] = itemId.longValue();
+        // 处理检测项数据。
+        List<ExcelInsertVo> excelInsertlist = testProductItemDao.selectCheckList(longids);
+        if (CollectionUtil.isNotEmpty(excelInsertlist)) {
+            // 进行获取数据 进行查看 复核通过&&有印章 则展示数据
+            ExcelInsertVo data = excelInsertlist.get(0);
+            // 进行pdf 预览
+            if (StringUtils.isNotEmpty(data.getContractId())) {
+                byte[] bytes = reportService.downloadQysFile(null, Long.valueOf(data.getContractId()), data.getCheckItemName(), data.getCheckItemCode());
+                response.reset();
+                response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+                response.setContentType("application/zip");
+                response.setCharacterEncoding("UTF-8");
+                String fileName = data.getCheckItemCode() + "（" + data.getCheckItemName() + "）.zip";
+                try {
+                    response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(fileName, "UTF-8"));
+                    OutputStream outputStream = response.getOutputStream();
+                    outputStream.write(bytes);
+                    outputStream.close();
+                    outputStream.close();
+                } catch (Exception e) {
+                    logger.error("下载契约锁报告文档失败:{}", e);
+                }
+            } else {
+                // 下载原始记录模板
+                // 效验 检测项url信息模板
+                // 通过检测项id 获取 相应的 id关联信息。
+                List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
+                // 判断 压缩数据=null 返回 null
+                if (!CollectionUtils.isEmpty(dataEntitys)) {
+                    response.reset();
+                    response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+                    response.setContentType("application/zip");
+                    response.setCharacterEncoding("UTF-8");
+                    response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录.zip", "UTF-8"));
+                    ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys, response, taskId);
+                    zipOutputStream.flush();
+                }
+            }
         }
-
     }
 
     /**
@@ -945,9 +974,6 @@ public class TaskController {
         }
         excelInsertVo.setList(idList);
         Integer[] ids =new Integer[excelInsertVo.getList().size()];
-        for(int i = 0; i<excelInsertVo.getList().size(); i++){
-            ids[i] = excelInsertVo.getList().get(i);
-        }
         // 查询检测项对应的 sheet下标
         List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
         if(!CollectionUtils.isEmpty(sheetItems)){
@@ -966,7 +992,6 @@ public class TaskController {
             outputStream.close();
             out000.close();
             b1.close();
-
             out.close();//关闭
             // 删除附件
             FileAndFolderUtil.delete(newFilePath);

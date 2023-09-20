@@ -3,6 +3,7 @@ package com.lims.manage.erp.service;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.http.QiYueSuoResponse;
+import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.ExcelInsertVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.SampleItemInstrumentVo;
@@ -109,4 +110,12 @@ public interface PageOfficeCopyService {
      * @return
      */
     String updateItemOriginUrlPdf(SampleItemInstrumentVo sampleItemInstrumentVo) throws Exception;
+
+    /**
+     * 检测项发起：创建合同
+     *
+     * @param reqBean
+     * @return
+     */
+    public Result startInitiateContractLock(QiYueSuoReqBean reqBean,List<ExcelInsertVo> list);
 }

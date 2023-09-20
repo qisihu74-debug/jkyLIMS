@@ -363,21 +363,21 @@ public class QiYueSuoHnadler {
 //        String url = null;
         //处理参数支持每个印章固定位置
         List<Actions> actions = reqBean.getSignatories().get(0).getActions();
-        for (int i = 0; i < actions.size()-1; i++) {
+        for (int i = 0; i < actions.size(); i++) {
             //签署位置  检测： ，审核：，批准：
             List<String> documents = reqBean.getDocuments();
-            if (i==0){
+            if (i == 0) {
                 List<Location> locations = Lists.newArrayList();
-                for (String s:documents){
+                for (String s : documents) {
                     Location location = new Location();
                     location.setRectType("SEAL_PERSONAL");
                     location.setPage(-1);
                     location.setDocumentId(s);
                     location.setActionName("检测人签字");
                     location.setKeyword("检测：");
-//                    location.setOffsetX(-0.05);
                     location.setOffsetX(-0.01);
                     location.setOffsetY(-0.01);
+                    location.setKeywordIndex(-1);
                     locations.add(location);
                 }
                 actions.get(i).setLocations(locations);
@@ -391,9 +391,9 @@ public class QiYueSuoHnadler {
                     location.setDocumentId(s);
                     location.setActionName("记录人签字");
                     location.setKeyword("记录：");
-//                    location.setOffsetX(0.05);
                     location.setOffsetX(-0.01);
                     location.setOffsetY(-0.01);
+                    location.setKeywordIndex(-1);
                     locations.add(location);
                 }
                 actions.get(i).setLocations(locations);
@@ -407,28 +407,13 @@ public class QiYueSuoHnadler {
                     location.setDocumentId(s);
                     location.setActionName("复核人签字");
                     location.setKeyword("复核：");
-//                    location.setOffsetX(-0.05);
                     location.setOffsetX(-0.01);
                     location.setOffsetY(-0.01);
+                    location.setKeywordIndex(-1);
                     locations.add(location);
                 }
                 actions.get(i).setLocations(locations);
             }
-//            if (i==3){
-//                List<Location> locations = Lists.newArrayList();
-//                for (String s:documents){
-//                    Location location = new Location();
-//                    location.setRectType("SEAL_PERSONAL");
-//                    location.setPage(-1);
-//                    location.setDocumentId(s);
-//                    location.setActionName("批准人签字");
-//                    location.setKeyword("批准：");
-//                    location.setOffsetX(-0.05);
-//                    location.setOffsetY(-0.01);
-//                    locations.add(location);
-//                }
-//                actions.get(i).setLocations(locations);
-//            }
         }
         log.debug("请求契约锁参数:{}",JSON.toJSONString(reqBean));
         Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, JSON.toJSONString(reqBean), headers);
