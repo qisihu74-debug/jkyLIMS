@@ -502,7 +502,11 @@
                 and ( t1.inspector LIKE CONCAT('%',#{inspector},'%') or t1.reviewer LIKE CONCAT('%',#{reviewer},'%')
                 OR t1.recorder like CONCAT( '%',#{recorder}, '%' )
                 OR t1.report_producer like CONCAT( '%',#{reportProducer}, '%' )
-                OR t1.sampler like CONCAT( '%',#{sampler}, '%' ))
+                OR t1.sampler like CONCAT( '%',#{sampler}, '%' )
+                OR t1.probationer like CONCAT( '%',#{probationer}, '%' )
+                OR t1.interns like CONCAT( '%',#{interns}, '%' )
+                OR t1.auxiliary_personnel like CONCAT( '%',#{auxiliaryPersonnel}, '%' )
+                )
             </if>
         </trim>
         ORDER BY

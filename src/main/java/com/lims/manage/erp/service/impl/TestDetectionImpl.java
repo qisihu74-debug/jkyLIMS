@@ -512,11 +512,11 @@ public class TestDetectionImpl implements TestDetectionService {
             {
                 // 判断检测人数据不存在
                 if(StringUtils.isEmpty(sampleItemInstrumentEntity.getTestSetUrl())){
-                    return "结束试验失败 检测项名:"+sampleItemInstrumentEntity.getCheckItemName()+" 编辑原始记录 检测人名称不存在";
+                    return "结束试验失败 检测项名:"+sampleItemInstrumentEntity.getCheckItemName()+" 编辑原始记录 检测人尚未确认";
                 }
                 // 判断记录人数据不存在
                 if(StringUtils.isEmpty(sampleItemInstrumentEntity.getRecordSetUrl())){
-                    return "结束试验失败 检测项名:"+sampleItemInstrumentEntity.getCheckItemName()+" 编辑原始记录 记录人名称不存在";
+                    return "结束试验失败 检测项名:"+sampleItemInstrumentEntity.getCheckItemName()+" 编辑原始记录 记录人尚未确认";
                 }
             }
         }

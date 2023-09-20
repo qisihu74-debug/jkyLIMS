@@ -128,7 +128,7 @@ public class TestDetectionController {
             return ResultUtil.error(678, "结束试验失败！任务单已废弃！！！");
         }
         if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),sampleItemInstrumentVo.getTaskId())==false){
-            return ResultUtil.error("登录人没有被派发检测资格");
+            return ResultUtil.error("结束试验只能由检测人操作");
         }
         // 比较检测项 start_time 与 end_time 时间
         String msg = testDetectionService.compareItemTime(sampleItemInstrumentVo);
