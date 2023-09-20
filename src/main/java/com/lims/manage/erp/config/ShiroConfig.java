@@ -90,6 +90,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/pageOffice/Excel/editOriginalRecord", "anon");
         filterChainDefinitionMap.put("/pageOffice/Excel/saveOriginalRecord", "anon");
         filterChainDefinitionMap.put("/task/checkItemReview", "anon");
+        filterChainDefinitionMap.put("/task/reportCheckItemReview", "anon");
         filterChainDefinitionMap.put("/pageOffice/**", "anon");
         filterChainDefinitionMap.put("/news/list", "anon");
         filterChainDefinitionMap.put("/news/list", "anon");

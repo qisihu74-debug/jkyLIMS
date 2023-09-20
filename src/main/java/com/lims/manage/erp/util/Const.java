@@ -143,6 +143,10 @@ public class Const {
      */
     public static final String REPORT_ORIGINAL = "26";
     /**
+     * 角色id = 66L 签发人 = 授权签字人 基于数据库 sys_role 定义
+     */
+    public static final Long AuthorizedSignatory = 66L;
+    /**
      * 常规图片后缀名大全。
      */
    public static final  String[] nameSuffixS ={"tiff","pjp","jfif","bmp","webp","pjpeg","avif","tif","jpg","svgz","png","xbm","dib","jxl","jpeg","gif","svg","ico"};

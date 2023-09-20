@@ -47,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -1042,10 +1043,68 @@ public class TaskController {
             return ResultUtil.error("登录人没有被签名图片 请上传");
         }*/
         // 判断复核数据类型。
-        pageOfficeCopyService.finishCheckItemReview(excelInsertVo,userInfo.getUserId());
+        pageOfficeCopyService.finishCheckItemReview(excelInsertVo, userInfo.getUserId());
         return ResultUtil.success(pageOfficeCopyService.CompleteTheReview(excelInsertVo));
     }
 
+    /**
+     * 根据报告单主键 进行对应的检测项预览
+     * list
+     * checkReview
+     */
+    @RequestMapping(value = "/reportCheckItemReview")
+    public void reportCheckItemReview(String reportId, HttpServletResponse response) throws Exception {
+        // 根据报告主键 获取所属检测项主键列表
+        List<Integer> itemIds = testProductItemDao.selectGROUPBYItemId(Long.parseLong(reportId));
+        if (CollectionUtil.isNotEmpty(itemIds)) {
+            String newFilePath = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
+            String path = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".pdf";
+            ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+            Integer[] ids = new Integer[itemIds.size()];
+            for (int j = 0; j < itemIds.size(); j++) {
+                ids[j] = itemIds.get(j);
+            }
+            // 查询检测项对应的 sheet下标
+            List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
+            if (!CollectionUtils.isEmpty(sheetItems)) {
+                List<Integer> idList = new ArrayList<>();
+                for (int i = 0; i < sheetItems.size(); i++) {
+                    ExcelInsertVo excelInsertVo1 = sheetItems.get(i);
+                    if (StringUtils.isNotEmpty(excelInsertVo1.getTestSetUrl()) && StringUtils.isNotEmpty(excelInsertVo1.getRecordSetUrl())) {
+                        idList.add(excelInsertVo1.getItemId());
+                    }
+                }
+                excelInsertVo.setList(idList);
+                // 判断检测数据不为空
+                if (CollectionUtil.isNotEmpty(excelInsertVo.getList())) {
+                    // excel 转 pdf
+                    XSSFWorkbook wb = taskService.getOriginalRecordAttachment(excelInsertVo);
+                    FileOutputStream out = new FileOutputStream(newFilePath);
+                    wb.write(out);
+                    out.flush();//刷新
+                    InputStream out000 = new FileInputStream(newFilePath);
+                    //相应pdf
+                    ByteArrayOutputStream b1 = PDFHelper3.excel2pdf(out000, path);
+                    InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+                    ServletOutputStream outputStream = response.getOutputStream();
+                    int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+                    inputStream.close();
+                    outputStream.close();
+                    out000.close();
+                    b1.close();
+                    out.close();//关闭
+                    // 删除附件
+                    FileAndFolderUtil.delete(newFilePath);
+                    FileAndFolderUtil.delete(path);
+                }
+            } else {
+                // 检测项无Sheet页
+
+            }
+        }
+//        // 检测项无Sheet页
+//        new ModelAndView("error");
+    }
 
 
 }
