@@ -115,5 +115,13 @@ public class ExcelInsertVo {
      * 检测项名称
      */
     String checkItemName;
+    /**
+     * 附件url
+     */
+    String signUrl;
+    /**
+     * contractId
+     */
+    String contractId;
 
 }

@@ -2,15 +2,17 @@ package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.aspose.cells.*;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
 import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.PageOfficeCopyService;
-import com.lims.manage.erp.service.PageOfficeService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import com.zhuozhengsoft.pageoffice.FileSaver;
@@ -364,33 +366,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                 sampleEntityMapper.updateItemReview(excelInsertVo);
             }
         }
-        // TODO： 9月13日复核 通过时：不进行业务签名图片
-/*        // 通过检测项id 获取数据Excel
-        Integer[] array = new Integer[excelInsertVo.getList().size()];
-        if (array.length == 1) {
-            array[0] = excelInsertVo.getList().get(0);
-        } else {
-            for (int i = 0; i < array.length; i++) {
-                array[i] = excelInsertVo.getList().get(i);
-            }
-        }
-        // 私有方法 处理 复核人签名信息。
-        PDFHelper3.getLicense();
-        String saveExcel = methodReviewExcel(array, userId);
-//        System.out.println(" saveExcel ==  " + saveExcel);
-        //上传文件到文件服务器、删除本地临时缓存的文件
-        String[] arrays = saveExcel.split("\\.");
-        String saveFileUrl = GenID.getID() + "." + arrays[arrays.length - 1];
-//        String saveFileUrl = arrays[arrays.length - 1];
-        InputStream input = new FileInputStream(saveExcel);
-        // 私有方法 更新 产品附件及报告附件内容。
-        List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
-        methodUpdateItemUrl(saveFileUrl, input, array, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
-        // 删除本地文件
-        FileAndFolderUtil.delete(saveFileUrl);
-        FileAndFolderUtil.delete(saveExcel);
-        input.close();*/
-        return true;
+        // TODO： 9月19 复核通过后： 构造json数据 进行 合同发起
+        return jsonCheckItemMehtod(excelInsertVo.getList());
     }
 
     /**
@@ -1070,7 +1047,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             }
             reqBean.setDocuments(docs);
             reqBean.setEntrustId(id);
-            QiYueSuoResponse response = qiYueSuoHnadler.createbycategory(reqBean);
+            // 设置 具体签名信息：
+            QiYueSuoResponse response = qiYueSuoHnadler.createbyTestcategory(reqBean);
             if (response != null && response.getCode() == 0) {
                 //更新文档id和印章类型
                 if (response.getContractId() != null) {
@@ -1095,7 +1073,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         QiYueSuoResponse response = qiYueSuoHnadler.signurl(qiYueSuoSeaLBean);
         Long userId = ShiroUtils.getUserInfo().getUserId();
         String sysUserName = sysUserDao.getSysUserName(userId);
-        //更新签署链接、状态
+//        //更新签署链接、状态
         if (response != null && response.getCode() == 0) {
             testProductItemDao.updateUrlAndStateByContractId(contractId, response.getSignUrl(), "2", sysUserName + "&" + userId + "", new Date(System.currentTimeMillis()));
         }
@@ -1228,8 +1206,178 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             }
         }
         // sheetName 不包含 则清除
-        ExcelReplaceUtil.removeSheetName(map,wb);
+        ExcelReplaceUtil.removeSheetName(map, wb);
         fileStream.close();
         return wb;
+    }
+
+
+    @Override
+    public Result startInitiateContractLock(QiYueSuoReqBean reqBean, List<ExcelInsertVo> list) {
+        List<String> stringList = new ArrayList<>();
+        // 效验每个检测项的信息
+        for (ExcelInsertVo excelInsertVo : list) {
+            stringList.add(excelInsertVo.getCheckItemCode());
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < stringList.size(); i++) {
+            stringBuilder.append(stringList.get(i));
+            if (i == stringList.size() - 1) {
+                continue;
+            } else {
+                stringBuilder.append(",");
+            }
+        }
+        reqBean.setSubject(stringBuilder.toString());
+        QiYueSuoResponse response = createbycategoryBatch(reqBean, stringList);
+        if (response != null && response.getCode() == 0) {
+            return ResultUtil.success("向契约锁发起报告制作申请成功!");
+        } else {
+            return ResultUtil.error("向契约锁发起报告制作申请失败：" + response.getMessage());
+        }
+    }
+
+    /**
+     * TODO： 9月19 复核通过后：
+     * 通过检测项id 获取效验通过：
+     * 可以发起合同的检测人、记录人、复核人 有序排列
+     *
+     * @param itemList
+     * @return
+     */
+    public HashMap<String, Object> inspectionAndTesting(List<Integer> itemList) {
+        HashMap<String, Object> map = new HashMap<>();
+        Long[] array = new Long[itemList.size()];
+        for (int i = 0; i < itemList.size(); i++) {
+            array[i] = Long.valueOf(itemList.get(i));
+        }
+        List<ExcelInsertVo> list = testProductItemDao.selectCheckList(array);
+        List<String> stringList = new ArrayList<>();
+        List<Long> arrays = new ArrayList<>();
+        // 任务单下 对应的检测人、记录人、复核人
+        List<Long> userIds = new ArrayList<>();
+        // 获取去重后的 数据
+        List<ExcelInsertVo> items = new ArrayList<>();
+        // 效验每个检测项的信息
+        for (ExcelInsertVo excelInsertVo : list) {
+            Boolean status = true;
+            if (excelInsertVo.getState() != 3) {
+                // "创建合同失败：当前检测项 " + excelInsertVo.getCheckItemName() + " 未通过复核 "
+                status = false;
+            }
+            if (StringUtils.isEmpty(excelInsertVo.getEditData())) {
+                // "创建合同失败：当前检测项 " + excelInsertVo.getCheckItemName() + " 未进行excel在线编辑 "
+                status = false;
+            }
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(excelInsertVo.getSignUrl())) {
+                // "创建合同失败：当前检测项 " + excelInsertVo.getCheckItemName() + " 电子印章signUrl已存在 "
+                status = false;
+            }
+            // 条件成立
+            if (status) {
+                // 进行赋值
+                arrays.add(excelInsertVo.getItemId().longValue());
+                stringList.add(excelInsertVo.getCheckItemCode());
+                // 目前只需要记录一组即可
+                if (CollectionUtils.isEmpty(userIds)) {
+                    // 获取对应的检测项中 检测人、记录人、复核人
+                    String[] array1 = excelInsertVo.getTestSetUrl().split("\\,");
+                    userIds.add(Long.valueOf(array1[0]));
+                    userIds.add(Long.valueOf(excelInsertVo.getRecordSetUrl()));
+                    userIds.add(Long.valueOf(excelInsertVo.getReviewedBySetUrl()));
+                }
+                items.add(excelInsertVo);
+            }
+        }
+        if (CollectionUtils.isEmpty(items)) {
+            // items = null 说明复核通过后：复核发起契约锁的数据为空
+            return null;
+        }
+        map.put("arrays", arrays);
+        map.put("userIds", userIds);
+        map.put("list", items);
+        return map;
+    }
+
+    /**
+     * TODO： 9月19 复核通过后： 构造json数据 进行 合同发起
+     *
+     * @param itemList
+     * @return
+     */
+    public Boolean jsonCheckItemMehtod(List<Integer> itemList) {
+        // 复核通过后： 通过检测项id 获取效验通过可以发起合同的检测人、记录人、复核人 有序排列
+        HashMap<String, Object> map = inspectionAndTesting(itemList);
+        if (CollectionUtils.isEmpty(map.keySet())) {
+            return false;
+        }
+        // 获取 user信息
+        LambdaQueryWrapper<SysUserEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(SysUserEntity::getUserId, (List<Long>) map.get("userIds"));
+        List<SysUserEntity> userList = sysUserDao.selectList(queryWrapper);
+        // 处理数据格式
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        QiYueSuoReqBean reqBean = new QiYueSuoReqBean();
+        // 检测项主键集合
+        reqBean.setList((List<Long>) map.get("arrays"));
+        reqBean.setSend(true);
+        // 发起人名字
+        reqBean.setCreatorName(userInfo.getName());
+        // 发起人手机号
+        reqBean.setCreatorContact(userInfo.getMobile());
+        //step3 获取签署链接
+        String info = recordEntityMapper.getInitInfo();
+        // 公司信息
+        reqBean.setTenantName(info);
+        List<Signatories> signatories = new ArrayList<>();
+        Signatories data = new Signatories();
+        // NO暂定 = 1
+        data.setSerialNo(String.valueOf(1));
+        data.setTenantName(info);
+        data.setTenantType("COMPANY");
+        List<Actions> actions = new ArrayList<>();
+        List<ExcelInsertVo> list = (List<ExcelInsertVo>) map.get("list");
+        ExcelInsertVo insertVo = list.get(0);
+        // 检测人不为空
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(insertVo.getTestSetUrl())) {
+            String[] array1 = insertVo.getTestSetUrl().split("\\,");
+            String testPerson = array1[0];
+            methodLoop(testPerson, actions, userList, info, "1");
+        }
+        // 记录人不为空
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(insertVo.getRecordSetUrl())) {
+            methodLoop(insertVo.getRecordSetUrl(), actions, userList, info, "2");
+        }
+        // 复核人不为空
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty((insertVo.getReviewedBySetUrl()))){
+            methodLoop(insertVo.getReviewedBySetUrl(), actions, userList, info, "3");
+        }
+        data.setActions(actions);
+        signatories.add(data);
+        reqBean.setSignatories(signatories);
+        System.out.println("reqBean === " + reqBean);
+        // 数据正常后 ： 进行发起合同印章数据
+        Result msg = startInitiateContractLock(reqBean, list);
+        return true;
+    }
+
+    void methodLoop(String userId, List<Actions> actions, List<SysUserEntity> userList, String info, String serialNo) {
+        for (int i = 0; i < userList.size(); i++) {
+            Actions actions1 = new Actions();
+            SysUserEntity userData = userList.get(i);
+            if (userId.contains(userData.getUserId().toString())) {
+                actions1.setType("PERSONAL");
+                actions1.setName(info);
+                actions1.setSerialNo(serialNo);
+                actions1.setSealIds("[]");
+                List<ActionOperators> actionOperators = new ArrayList<>();
+                ActionOperators actiondata = new ActionOperators();
+                actiondata.setOperatorName(userData.getName());
+                actiondata.setOperatorContact(userData.getMobile());
+                actionOperators.add(actiondata);
+                actions1.setActionOperators(actionOperators);
+                actions.add(actions1);
+            }
+        }
     }
 }

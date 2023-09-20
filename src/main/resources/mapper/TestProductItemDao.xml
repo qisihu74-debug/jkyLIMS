@@ -173,7 +173,12 @@
             origin_url_pdf AS originUrlPdf,
             check_item_code,
             check_item_name,
-            state
+            state,
+            sign_url,
+            test_set_url AS testSetUrl,
+            record_set_url AS recordSetUrl,
+            reviewed_by_set_url AS reviewedBySetUrl,
+            contract_id
         FROM
             test_entrusted_sample_checkitem_rel
         WHERE

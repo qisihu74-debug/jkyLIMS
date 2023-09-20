@@ -389,6 +389,9 @@ public class PageOfficeController {
             if (StringUtils.isEmpty(excelInsertVo.getEditData())) {
                 return ResultUtil.error("创建合同失败：当前检测项 " + excelInsertVo.getCheckItemName() + " 未进行excel在线编辑 ");
             }
+            if(org.apache.commons.lang3.StringUtils.isNotEmpty(excelInsertVo.getSignUrl())){
+                return ResultUtil.error("创建合同失败：当前检测项 " + excelInsertVo.getCheckItemName() + " 电子印章signUrl已存在 ");
+            }
             stringList.add(excelInsertVo.getCheckItemCode());
         }
         StringBuilder stringBuilder = new StringBuilder();
