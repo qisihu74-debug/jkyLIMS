@@ -49,6 +49,20 @@ public class TaskListParamVo {
      * 领样人
      */
     private String sampler;
+    /**
+     * 见习生：实习的新手
+     */
+    private String probationer;
+
+    /**
+     * 实习生
+     */
+    private String interns;
+
+    /**
+     * 辅助人员
+     */
+    private String auxiliaryPersonnel;
 
 
 }

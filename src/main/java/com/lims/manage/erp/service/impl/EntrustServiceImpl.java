@@ -2292,8 +2292,8 @@ public class EntrustServiceImpl implements EntrustService {
 //            entrustAddVo.setIsTaskList(true);
             // 获取任务单！=144 团队出具报告 进行赋值
             for(TaskTestEntity taskTestEntity : taskList){
-                // 冒名顶替下 issue_report 转 receiver （类型转换）
-                if(taskTestEntity.getState() !=144 && taskTestEntity.getReceiver().equals("是")){
+                // issue_report: 是否出具报告：0、不出具；1、出具
+                if(taskTestEntity.getState() !=144 && taskTestEntity.getIssueReport().equals(1)){
                     entrustAddVo.setIsTaskList(true);
                 }
             }
@@ -2505,41 +2505,41 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean publishTask(TaskEntity entity) {
-        //根据委托单生成任务单
-        entity.setId(GenID.getID());
-        //设置任务编号由团队代码（单字符英文字母）+年月(4字符)+“-”+三位流水号（3字符），如A2108-015。
-        //团队编号这部分在团队表中，任务编号生成时不考虑，展示时拼接上即可
-        //获取当前最大样品编号
-        Integer code = null;
-        Integer entrustNum = taskMapper.selectMaxNo();
-        String currentTime = DateUtil.getTodayString().substring(2, 6);
-        if (entrustNum != null && entrustNum > 0) {
-            String substring = entrustNum.toString().substring(0, 4);
-            if (substring.equals(currentTime)) {
-                code = entrustNum + 1;
-            } else {
-                code = Integer.parseInt(currentTime + "001");
-            }
-        } else {
-            code = Integer.parseInt(currentTime + "001");
-        }
-        entity.setCode(code.toString());
-        if (!StringUtils.isEmpty(entity.getTeamId())) {
-            //设置接收人为团队副团长
-            List<SysUserEntity> userEntity = teamMapper.getUsersByTid(entity.getTeamId());
-            if (!CollectionUtils.isEmpty(userEntity)) {
-                for (SysUserEntity sysUserEntity : userEntity) {
-                    if (sysUserEntity.getPosition().equals(Const.SYS_MANAGER_LOG)) {
-                        entity.setReceiver(sysUserEntity.getUsername());
-                    }
-                }
-                entity.setReceiveTime(new java.sql.Date(System.currentTimeMillis()));
-            }
-        }
-        //任务单保存
-        taskMapper.save(entity);
-        //更新委托单状态
-        taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
+//        //根据委托单生成任务单
+//        entity.setId(GenID.getID());
+//        //设置任务编号由团队代码（单字符英文字母）+年月(4字符)+“-”+三位流水号（3字符），如A2108-015。
+//        //团队编号这部分在团队表中，任务编号生成时不考虑，展示时拼接上即可
+//        //获取当前最大样品编号
+//        Integer code = null;
+//        Integer entrustNum = taskMapper.selectMaxNo();
+//        String currentTime = DateUtil.getTodayString().substring(2, 6);
+//        if (entrustNum != null && entrustNum > 0) {
+//            String substring = entrustNum.toString().substring(0, 4);
+//            if (substring.equals(currentTime)) {
+//                code = entrustNum + 1;
+//            } else {
+//                code = Integer.parseInt(currentTime + "001");
+//            }
+//        } else {
+//            code = Integer.parseInt(currentTime + "001");
+//        }
+//        entity.setCode(code.toString());
+//        if (!StringUtils.isEmpty(entity.getTeamId())) {
+//            //设置接收人为团队副团长
+//            List<SysUserEntity> userEntity = teamMapper.getUsersByTid(entity.getTeamId());
+//            if (!CollectionUtils.isEmpty(userEntity)) {
+//                for (SysUserEntity sysUserEntity : userEntity) {
+//                    if (sysUserEntity.getPosition().equals(Const.SYS_MANAGER_LOG)) {
+//                        entity.setReceiver(sysUserEntity.getUsername());
+//                    }
+//                }
+//                entity.setReceiveTime(new java.sql.Date(System.currentTimeMillis()));
+//            }
+//        }
+//        //任务单保存
+//        taskMapper.save(entity);
+//        //更新委托单状态
+//        taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
         return true;
     }
 
@@ -3535,6 +3535,8 @@ public class EntrustServiceImpl implements EntrustService {
             // 获取委托单详情
             EntrustAddVo vo = entityMapper.selectByKeyId(id);
             for(TaskTestEntity taskTestEntity :taskList){
+                taskTestEntity.setIssueReport(null);
+                taskTestEntity.setReceiver(null);
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append("任务单编号 = "+taskTestEntity.getCode());
                 stringBuilder.append("原任务单完成时间 = ");

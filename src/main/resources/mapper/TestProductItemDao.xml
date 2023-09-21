@@ -113,6 +113,7 @@
     </delete>
     <select id="selectItemSheetIndex" resultType="com.lims.manage.erp.vo.ExcelInsertVo">
         SELECT
+            t1.id as itemId,
             t2.check_item_id,
             t2.sheet_index,
             t1.test_set_url,

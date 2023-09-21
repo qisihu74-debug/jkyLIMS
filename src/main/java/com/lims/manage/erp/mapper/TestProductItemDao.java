@@ -225,5 +225,20 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
      */
     List<ExcelInsertVo> selectCheckList(@Param(value = "array") Long[] array);
 
+    /**
+     * 根据报告主键 获取原始记录主键列表
+     *
+     */
+    @Select("SELECT\n" +
+            "\tt2.id \n" +
+            "FROM\n" +
+            "\ttest_report_record_detail AS t1\n" +
+            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.sample_id = t2.sample_id \n" +
+            "WHERE\n" +
+            "\trecord_id = #{recordId} \n" +
+            "GROUP BY\n" +
+            "\tt2.check_item_id")
+    List<Integer> selectGROUPBYItemId(@Param("recordId") Long recordId);
+
 }
 

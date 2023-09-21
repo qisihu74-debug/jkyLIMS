@@ -1308,6 +1308,9 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     public Boolean jsonCheckItemMehtod(List<Integer> itemList) {
         // 复核通过后： 通过检测项id 获取效验通过可以发起合同的检测人、记录人、复核人 有序排列
         HashMap<String, Object> map = inspectionAndTesting(itemList);
+        if(map == null){
+            return false;
+        }
         if (CollectionUtils.isEmpty(map.keySet())) {
             return false;
         }
