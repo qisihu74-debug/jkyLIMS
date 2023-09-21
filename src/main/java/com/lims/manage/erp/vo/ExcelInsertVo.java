@@ -123,5 +123,13 @@ public class ExcelInsertVo {
      * contractId
      */
     String contractId;
+    /**
+     * 序号
+     */
+    Integer number;
+    /**
+     * 起始页
+     */
+    Integer startPag;
 
 }

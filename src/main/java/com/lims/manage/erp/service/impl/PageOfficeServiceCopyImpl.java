@@ -70,12 +70,13 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
 
 
     /**
-     * 处理合并完整的excel每个报告的页码
+     * 处理合并完整的excel每个报告的页码------废弃
      *
      * @param document
      * @param countMap
+     * @param map      key= checkItemId， value对应的下标数据
      */
-    private static void handlerPage(Workbook document, Map<Integer, Integer> countMap, int total) {
+    private static void handlerPageDiscard(Workbook document, Map<Integer, Integer> countMap, int total, Map<Integer, Object> map) {
         //报告总页数
         //填充每个子报告每页的页码
         Set<Integer> keySet = countMap.keySet();
@@ -94,6 +95,44 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                             String string = value.toString();
                             if ("第   页，共   页".equals(string)) {
                                 cells.get(n, j).setValue("第" + count + "页，共" + total + "页");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 处理合并完整的excel每个报告的页码
+     *
+     * @param document
+     * @param countMap
+     * @param map      key= checkItemId， value对应的下标数据
+     */
+    private static void handlerPage(Workbook document, Map<Integer, Integer> countMap, Map<Integer, Object> map) {
+        Set<Integer> keySet = map.keySet();
+        for (Integer checkItemId : keySet) {
+            List<ExcelInsertVo> insertVos = (List<ExcelInsertVo>) map.get(checkItemId);
+            for (ExcelInsertVo data : insertVos) {
+                Worksheet worksheet = document.getWorksheets().get(data.getSheetIndex());
+                countMap.put(data.getSheetIndex(), data.getNumber());
+                Cells cells = worksheet.getCells();
+                int maxRow = cells.getMaxRow();
+                int column = cells.getMaxColumn();
+                for (int n = 0; n < maxRow; n++) {
+                    for (int j = 0; j < column; j++) {
+                        Cell cell = cells.get(n, j);
+                        if (cell != null) {
+                            Object value = cell.getValue();
+                            if (value != null) {
+                                String string = value.toString();
+                                if (string.contains("第   页，共   页")) {
+                                    cells.get(n, j).setValue("第" + data.getStartPag() + "页，共" + insertVos.size() + "页");
+                                }
+//                                if ("第   页，共   页".equals(string)) {
+//                                    cells.get(n, j).setValue("第" + data.getNumber() + "页，共" + insertVos.size() + "页");
+//                                }
                             }
                         }
                     }
@@ -150,7 +189,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     }
 
     @Override
-    public String getProductExcelUrl(Integer[] ids, List<ExcelInsertVo> sheetItems, List<TaskIdEntity> dataEntitys) throws Exception {
+    public String getProductExcelUrl(Integer[]
+                                             ids, List<ExcelInsertVo> sheetItems, List<TaskIdEntity> dataEntitys) throws Exception {
         String productExcelUrl = null;
         ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(ids[0]);
         Integer itemId = ids[0];
@@ -514,7 +554,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
      * @param sampleId    样品id
      */
     @Transactional(rollbackFor = Exception.class)
-    public String methodUpdateItemUrl(String saveFileUrl, InputStream input, Integer[] array, Long entrustId, Integer sampleId) throws IOException {
+    public String methodUpdateItemUrl(String saveFileUrl, InputStream input, Integer[] array, Long
+            entrustId, Integer sampleId) throws IOException {
         // 查询附件 存在则 删除附件
         ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(array[0]);
         if (excelInsertVo != null) {
@@ -702,7 +743,14 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         return "任务单复核成功";
     }
 
-    public Map<Integer, Integer> inserItemPage(XSSFWorkbook wb, Long taskId) {
+    /**
+     * 作废
+     *
+     * @param wb
+     * @param taskId
+     * @return
+     */
+    public Map<Integer, Integer> inserItemPageDiscard(XSSFWorkbook wb, Long taskId) {
         // 获取检测项的数据。
         List<TaskIdEntity> list = taskMapper.selectItemPages(taskId);
         Integer[] array = new Integer[list.size()];
@@ -745,6 +793,65 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         return countMap;
     }
 
+    /**
+     * 获取检测项中 对应的excel页码。
+     *
+     * @param taskId
+     * @return
+     */
+    public Map<Integer, Object> inserItemPage(Long taskId) {
+        // key= checkItemId， value对应的下标数据
+        HashMap<Integer, Object> map = new HashMap<>();
+        // 获取检测项的数据。
+        List<TaskIdEntity> list = taskMapper.selectItemPages(taskId);
+        Integer[] array = new Integer[list.size()];
+        // list 获取
+        for (int i = 0; i < list.size(); i++) {
+            TaskIdEntity data = list.get(i);
+            array[i] = data.getIdItem();
+        }
+        // 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(array);
+        // 当前任务单下检测项没有对应sheet下标 返回空
+        if (CollectionUtils.isEmpty(sheetItems)) {
+            return null;
+        }
+        // 序号
+        Integer number = 1;
+        for (int j = 0; j < sheetItems.size(); j++) {
+            number = j + 1;
+            Integer startPag = 1;
+            ExcelInsertVo data = sheetItems.get(j);
+            for (int y = 0; y < sheetItems.size(); y++) {
+                ExcelInsertVo dataY = sheetItems.get(y);
+                // 遍历数据：检测项相同：获取检测项对应的所有excel下标及序号。
+                if (data.getCheckItemId().equals(dataY.getCheckItemId())) {
+                    // 设置每组检测项中信息
+                    ExcelInsertVo insertVo = new ExcelInsertVo();
+                    // 检测项主键
+                    insertVo.setCheckItemId(data.getCheckItemId());
+                    // 序号
+                    insertVo.setNumber(number);
+                    // 起始页
+                    insertVo.setStartPag(startPag);
+                    // sheet下标
+                    insertVo.setSheetIndex(data.getSheetIndex());
+                    if (map.get(data.getCheckItemId()) == null) {
+                        List<ExcelInsertVo> insertVos = new ArrayList<>();
+                        insertVos.add(insertVo);
+                        map.put(data.getCheckItemId(), insertVos);
+                    } else {
+                        List<ExcelInsertVo> insertVosValues = (List<ExcelInsertVo>) map.get(data.getCheckItemId());
+                        insertVosValues.add(insertVo);
+                        map.put(data.getCheckItemId(), insertVosValues);
+                    }
+                    startPag++;
+                }
+            }
+        }
+        return map;
+    }
+
 //    public Map<Integer, Integer> getCountMap(InputStream fileStream,Long taskId) throws Exception {
 //        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
 //        Map<Integer, Integer> countMap = inserItemPage(wb, taskId);
@@ -756,13 +863,15 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     public ExcelSheetDataVo getSaveFile(InputStream fileStream, Long taskId) throws Exception {
         ExcelSheetDataVo excelSheetDataVo = new ExcelSheetDataVo();
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-        Map<Integer, Integer> countMap = inserItemPage(wb, taskId);
+        // key= checkItemId， value对应的下标数据
+        Map<Integer, Object> map = inserItemPage(taskId);
+        // key = sheet标号 、value = 序号
+        Map<Integer, Integer> countMap = new HashMap<>();
         fileStream.close();
         // 把 XSSFWorkbook 转为 InputStream
         InputStream input = AsposeUtil.createExcelStream(wb);
-        int total = countMap.size();
         Workbook document = new Workbook(input);
-        handlerPage(document, countMap, total);
+        handlerPage(document, countMap, map);
         String path = dir + GenID.getID() + ".xlsx";
         document.save(path);
         input.close();
@@ -798,7 +907,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     }
 
     @Override
-    public String updateExcelVisible(String saveFileUrl, Integer[] array, InputStream inputStream) throws IOException {
+    public String updateExcelVisible(String saveFileUrl, Integer[] array, InputStream inputStream) throws
+            IOException {
         // 私有方法 更新 产品附件及报告附件内容。
         List<TaskIdEntity> dataEntitys = taskMapper.selectItems(array);
         methodUpdateItemUrl(saveFileUrl, inputStream, array, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
@@ -1144,14 +1254,15 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     }
 
     /**
-     *  返回原始记录
+     * 返回原始记录
      * List 检测项主键
      * CheckReview 类型（中间复核 或 最终复核）
+     *
      * @return
      */
-    public  XSSFWorkbook getOriginalRecordAttachment(ExcelInsertVo excelInsertVo) throws IOException {
-        Integer[] ids =new Integer[excelInsertVo.getList().size()];
-        for(int i = 0; i<excelInsertVo.getList().size(); i++){
+    public XSSFWorkbook getOriginalRecordAttachment(ExcelInsertVo excelInsertVo) throws IOException {
+        Integer[] ids = new Integer[excelInsertVo.getList().size()];
+        for (int i = 0; i < excelInsertVo.getList().size(); i++) {
             ids[i] = excelInsertVo.getList().get(i);
         }
         // 通过检测项主键 获取样品生成附件是否存在。
@@ -1163,7 +1274,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         } catch (Exception e) {
             logger.info("样品附件 " + productExcelUrl + e);
         }
-        if(fileStream == null){
+        if (fileStream == null) {
             return null;
         }
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
@@ -1308,7 +1419,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     public Boolean jsonCheckItemMehtod(List<Integer> itemList) {
         // 复核通过后： 通过检测项id 获取效验通过可以发起合同的检测人、记录人、复核人 有序排列
         HashMap<String, Object> map = inspectionAndTesting(itemList);
-        if(map == null){
+        if (map == null) {
             return false;
         }
         if (CollectionUtils.isEmpty(map.keySet())) {
@@ -1352,7 +1463,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             methodLoop(insertVo.getRecordSetUrl(), actions, userList, info, "2");
         }
         // 复核人不为空
-        if (org.apache.commons.lang3.StringUtils.isNotEmpty((insertVo.getReviewedBySetUrl()))){
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty((insertVo.getReviewedBySetUrl()))) {
             methodLoop(insertVo.getReviewedBySetUrl(), actions, userList, info, "3");
         }
         data.setActions(actions);
@@ -1364,7 +1475,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         return true;
     }
 
-    void methodLoop(String userId, List<Actions> actions, List<SysUserEntity> userList, String info, String serialNo) {
+    void methodLoop(String userId, List<Actions> actions, List<SysUserEntity> userList, String info, String
+            serialNo) {
         for (int i = 0; i < userList.size(); i++) {
             Actions actions1 = new Actions();
             SysUserEntity userData = userList.get(i);
