@@ -229,15 +229,14 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
      * 根据报告主键 获取原始记录主键列表
      *
      */
-    @Select("SELECT\n" +
-            "\tt2.id \n" +
-            "FROM\n" +
-            "\ttest_report_record_detail AS t1\n" +
-            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.sample_id = t2.sample_id \n" +
-            "WHERE\n" +
-            "\trecord_id = #{recordId} \n" +
-            "GROUP BY\n" +
-            "\tt2.check_item_id")
+    @Select("SELECT t2.id FROM test_report_record as t1 \n" +
+            "LEFT JOIN test_entrusted_sample_checkitem_rel as t2 ON t1.entrustment_id = t2.entrust_id\n" +
+            "WHERE t1.id = #{recordId}\n" +
+            "UNION ALL\n" +
+            "SELECT t2.id FROM test_report_record_mid as t1 \n" +
+            "LEFT JOIN test_entrusted_sample_checkitem_rel as t2 ON t1.entrust_id = t2.entrust_id\n" +
+            "WHERE t1.id = #{recordId}\n" +
+            "GROUP BY t2.id")
     List<Integer> selectGROUPBYItemId(@Param("recordId") Long recordId);
 
 }
