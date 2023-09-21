@@ -1332,8 +1332,8 @@ public class ReportController {
             return ResultUtil.error("缺少参数");
         }
         logger.debug("发起审批检测人:{},审核人:{},签发人:{}",inspector,verifyer,issuer);
-        Boolean flag = reportService.onlineReportMergeSave(reportCode,verifyer.split(",")[0],issuer.split(",")[0]
-                ,Long.parseLong(verifyer.split(",")[1]),Long.parseLong(issuer.split(",")[1]),inspector);
+        Boolean flag = reportService.onlineReportMergeSave(reportCode,verifyer.split("&")[0],issuer.split("&")[0]
+                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),inspector);
 
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
