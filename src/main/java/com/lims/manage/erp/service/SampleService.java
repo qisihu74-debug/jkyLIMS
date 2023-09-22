@@ -161,4 +161,6 @@ public interface SampleService {
     void exportWtTz(Cells cells);
 
     List<Node> retentionSampleAreaList();
+
+    void exportItemInfo(HttpServletResponse response);
 }

@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.lims.manage.erp.entity.ItemExportBean;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.TestTeam;
@@ -488,4 +489,24 @@ public interface SampleEntityMapper {
             "ORDER BY\n" +
             "\tid")
     List<Node> retentionSampleAreaList();
+
+    @Select("SELECT  DISTINCT\n" +
+            "t3.check_item_id As checkItemId,\n" +
+            "\tt1.product_type_name As productTypeName,\n" +
+            "\tt2.product_name As productName,\n" +
+            "\tt3.check_item_name As checkItemName,\n" +
+            "\tt3.check_price As checkPrice\n" +
+            "FROM\n" +
+            "\ttest_product_type t1\n" +
+            "LEFT JOIN test_product t2 ON t1.product_type_id = t2.product_type_id\n" +
+            "LEFT JOIN test_product_item t3 ON t2.product_id = t3.product_id\n" +
+            "WHERE\n" +
+            "\tt1.del_flag = 0\n" +
+            "AND t2.del_flag = 0\n" +
+            "AND t3.del_flag = 0\n" +
+            "AND t1.is_valid = 1\n" +
+            "AND t2.is_valid = 1\n" +
+            "AND t3.check_price is not null\n" +
+            "order BY t1.product_type_name")
+    List<ItemExportBean> exportItemInfo();
 }
