@@ -510,6 +510,7 @@
             </if>
         </trim>
         ORDER BY
+        t1.create_time desc,
         t1.code desc
 
 
@@ -577,6 +578,7 @@
             </if>
         </trim>
         ORDER BY
+        t1.create_time desc,
         t1.code desc
 
     </select>
