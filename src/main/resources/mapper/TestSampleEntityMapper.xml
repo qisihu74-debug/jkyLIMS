@@ -635,7 +635,7 @@
         manufacturer,
         specs,
         state,
-        is_save,
+        IFNULL( is_save, "——" ) is_save,
         inspector,
         generation,
         received_date,
