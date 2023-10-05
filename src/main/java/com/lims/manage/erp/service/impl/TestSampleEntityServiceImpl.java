@@ -52,13 +52,14 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
     private LogManagerService logManagerService;
     Logger logger = LoggerFactory.getLogger(TestSampleEntityServiceImpl.class);
 
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+    private final SimpleDateFormat sdfYear = new SimpleDateFormat("yyyy");
+    private final SimpleDateFormat sdfMonth = new SimpleDateFormat("MM");
 
     private int getNewSampleCode() {
         Date now = new Date();
         //获取数据库当前年份最大的样品编号
         PageHelper.clearPage();
-        Integer maxNumber = sampleEntityMapper.getMaxNumber(sdf.format(now));
+        Integer maxNumber = sampleEntityMapper.getMaxNumber(sdfYear.format(now));
         logger.debug("样品编号:{}",maxNumber);
         Integer newMax;
         if (maxNumber == null) {
@@ -84,9 +85,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             String sampleCode;
             if (samples.get(i).getQuantityPerGroup() > 1) {
                 String numStr = new DecimalFormat("00").format(samples.get(i).getQuantityPerGroup());
-                sampleCode = "YP-" + sdf.format(now) + "-" + codeStr + "-01~" + numStr;
+                sampleCode = "YP-" + sdfYear.format(now) + "-" + codeStr + "-01~" + numStr;
             } else {
-                sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
+                sampleCode = "YP-" + sdfYear.format(now) + "-" + codeStr;
             }
             StringBuilder outwardStr = new StringBuilder();
             List<String> outward = samples.get(i).getOutward();
@@ -130,6 +131,73 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
 
     @Transactional
     @Override
+    public Integer batchPreReceivedSamples(List<SampleDetailAddVo> samples) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        Date now = new Date();
+        List<TestSampleEntity> entities = Lists.newArrayList();
+        //获取数据库当前年份最大的样品编号
+        Integer newMax = testSampleEntityMapper.getPreCode(sdfYear.format(now),sdfMonth.format(now));
+        if(newMax == null){
+            newMax = 0;
+        }
+        // 供流转记录进行使用
+        Set<String> sampleCodeSet = new HashSet<>();
+        for (int i = 0; i < samples.size(); i++) {
+            int code = newMax + i + 1;
+            String codeStr = new DecimalFormat("00000").format(code);
+            String sampleCode;
+            if (samples.get(i).getQuantityPerGroup() > 1) {
+                String numStr = new DecimalFormat("00").format(samples.get(i).getQuantityPerGroup());
+                sampleCode = "YSY-" + sdfYear.format(now)+sdfMonth.format(now) + "-" + codeStr + "-01~" + numStr;
+            } else {
+                sampleCode = "YSY-" + sdfYear.format(now)+sdfMonth.format(now) + "-" + codeStr;
+            }
+            StringBuilder outwardStr = new StringBuilder();
+            List<String> outward = samples.get(i).getOutward();
+            if(!CollectionUtils.isEmpty(outward)){
+                for (int j = 0; j < outward.size(); j++) {
+                    if(j != outward.size()-1){
+                        outwardStr.append(outward.get(j));
+                        outwardStr.append(",");
+                    }else{
+                        outwardStr.append(outward.get(j));
+                    }
+                }
+            }
+            TestSampleEntity entity = new TestSampleEntity(samples.get(i), sampleCode,outwardStr.toString());
+            // 样品新增时： state = 5
+            entity.setState("6");
+            // 提供样品编号
+            sampleCodeSet.add(entity.getSampleCode());
+            entities.add(entity);
+            newMax++;
+        }
+        //插入样品
+        Integer integer = testSampleEntityMapper.insertBatch(entities);
+        //更新样品最新预收样编号
+        PreSampleCode preSampleCode = new PreSampleCode(sdfYear.format(now),sdfMonth.format(now),newMax+"");
+        testSampleEntityMapper.insertLatestPreCode(preSampleCode);
+        // 读取编号 获取样品id
+        if(CollectionUtil.isNotEmpty(sampleCodeSet)){
+            List<String> lists = new ArrayList<>(sampleCodeSet.stream().collect(Collectors.toList()));
+            List<SampleEntity> sampleDatas = sampleEntityMapper.getGroupNodes(lists);
+            for(SampleEntity sampleData : sampleDatas){
+                // 样品新增时 新增流转SQL： 状态 = 6 预收样。
+                // 增加样品样品流转状态
+                SampleCirculationRecord sa = new SampleCirculationRecord();
+                sa.setSampleId(sampleData.getId());
+                sa.setStatus("6");
+                sa.setOperatorId(userInfo.getUserId());
+                sa.setOperatorName(userInfo.getName());
+                sa.setTime(new Date());
+                sampleEntityMapper.saveSampleCirculationRecord(sa);
+            }
+        }
+        return integer;
+    }
+
+    @Transactional
+    @Override
     public Integer batchInsertMixSample(SamplesAddVo samples) {
        SysUserEntity userInfo = ShiroUtils.getUserInfo();
        Set<String> sampleCodeSet = new HashSet<>();
@@ -140,7 +208,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         SampleDetailAddVo vo = new SampleDetailAddVo(samples, newId);
         int newMax = getNewSampleCode() + 1;
         String codeStr = new DecimalFormat("00000").format(newMax);
-        String sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
+        String sampleCode = "YP-" + sdfYear.format(now) + "-" + codeStr;
         TestSampleEntity mainSample = new TestSampleEntity(vo, sampleCode,null);
         // 样品新增时： state = 5
         mainSample.setState("5");
@@ -510,9 +578,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             String sampleCode;
             if (samples.get(i).getQuantityPerGroup() > 1) {
                 String numStr = new DecimalFormat("00").format(samples.get(i).getQuantityPerGroup());
-                sampleCode = "YP-" + sdf.format(now) + "-" + codeStr + "-01~" + numStr;
+                sampleCode = "YP-" + sdfYear.format(now) + "-" + codeStr + "-01~" + numStr;
             } else {
-                sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
+                sampleCode = "YP-" + sdfYear.format(now) + "-" + codeStr;
             }
             StringBuilder outwardStr = new StringBuilder();
             List<String> outward = samples.get(i).getOutward();
@@ -579,7 +647,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         SampleDetailAddVo vo = new SampleDetailAddVo(samples, newId);
         int newMax = getNewSampleCode() + 1;
         String codeStr = new DecimalFormat("00000").format(newMax);
-        String sampleCode = "YP-" + sdf.format(now) + "-" + codeStr;
+        String sampleCode = "YP-" + sdfYear.format(now) + "-" + codeStr;
         TestSampleEntity mainSample = new TestSampleEntity(vo, sampleCode,null);
         // 样品新增时： state = 5
         mainSample.setState("5");

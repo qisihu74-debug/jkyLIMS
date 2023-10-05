@@ -819,4 +819,19 @@
     <select id="getAllById" resultType="com.lims.manage.erp.entity.TestSampleEntity">
         SELECT * FROM test_sample where sample_code = #{sampleCode} limit 1
     </select>
+
+    <select id="getPreCode" resultType="java.lang.Integer">
+        SELECT
+            max(pre_sample_code)
+        FROM
+            test_sample_pre_code
+        WHERE
+            YEAR = #{year}
+          AND MONTH = #{month}
+    </select>
+
+    <insert id="insertLatestPreCode" parameterType="com.lims.manage.erp.entity.PreSampleCode">
+        insert into test_sample_pre_code (pre_sample_code, month, year)
+        values (#{preSampleCode}, #{month}, #{year})
+    </insert>
 </mapper>
