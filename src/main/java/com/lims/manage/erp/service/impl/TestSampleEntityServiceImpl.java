@@ -307,6 +307,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             newMax = 0;
         }
         newMax++;
+        //更新样品最新预收样编号
+        PreSampleCode preSampleCode = new PreSampleCode(sdfYear.format(now),sdfMonth.format(now),newMax+"");
+        testSampleEntityMapper.insertLatestPreCode(preSampleCode);
         String codeStr = new DecimalFormat("00000").format(newMax);
         String sampleCode = "YSY-" + sdfYear.format(now)+sdfMonth.format(now) + "-" + codeStr;
         TestSampleEntity mainSample = new TestSampleEntity(vo, sampleCode,null);
