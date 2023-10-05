@@ -291,6 +291,106 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         return integer;
     }
 
+    @Transactional
+    @Override
+    public Integer preAddMixSamples(SamplesAddVo samples) {
+       SysUserEntity userInfo = ShiroUtils.getUserInfo();
+       Set<String> sampleCodeSet = new HashSet<>();
+        Date now = new Date();
+        List<TestSampleEntity> param = Lists.newArrayList();
+        //处理配合比样品数据
+        Integer newId = testSampleEntityMapper.getMaxId() + 1;
+        SampleDetailAddVo vo = new SampleDetailAddVo(samples, newId);
+//        int newMax = getNewSampleCode() + 1;
+        Integer newMax = testSampleEntityMapper.getPreCode(sdfYear.format(now),sdfMonth.format(now));
+        if(newMax == null){
+            newMax = 0;
+        }
+        newMax++;
+        String codeStr = new DecimalFormat("00000").format(newMax);
+        String sampleCode = "YSY-" + sdfYear.format(now)+sdfMonth.format(now) + "-" + codeStr;
+        TestSampleEntity mainSample = new TestSampleEntity(vo, sampleCode,null);
+        // 样品新增时： state = 6//预收样
+        mainSample.setState("6");
+        sampleCodeSet.add(mainSample.getSampleCode());
+        param.add(mainSample);
+        //处理子样品
+        List<SampleDetailAddVo> samples1 = samples.getSamples();
+        if(!CollectionUtils.isEmpty(samples1)){
+            int i = 1;
+            for (SampleDetailAddVo sampleDetailAddVo : samples1) {
+                //设置样品编号
+                String format = new DecimalFormat("00").format(i);
+                String code = sampleCode + "_" + format;
+                //设置签收人
+                sampleDetailAddVo.setInspector(vo.getInspector());
+                //设置签收时间
+                sampleDetailAddVo.setReceivedDate(vo.getReceivedDate());
+                //设置检验类型
+                sampleDetailAddVo.setSampleType(vo.getSampleType());
+                //设置原材PID
+                sampleDetailAddVo.setPid(newId);
+                //设置委托单位
+                sampleDetailAddVo.setCompanyId(vo.getCompanyId());
+                StringBuilder outwardStr = new StringBuilder();
+                List<String> outward = sampleDetailAddVo.getOutward();
+                if(!CollectionUtils.isEmpty(outward)){
+                    for (int j = 0; j < outward.size(); j++) {
+                        if(j != outward.size()-1){
+                            outwardStr.append(outward.get(j));
+                            outwardStr.append(",");
+                        }else{
+                            outwardStr.append(outward.get(j));
+                        }
+                    }
+                }
+                TestSampleEntity sample = new TestSampleEntity(sampleDetailAddVo, code,outwardStr.toString());
+                // 样品新增时： state = 5
+                sample.setState("6");
+                sampleCodeSet.add(sample.getSampleCode());
+                param.add(sample);
+                i++;
+            }
+            TestSampleMixInfoEntity mixInfoEntity = new TestSampleMixInfoEntity(samples, newId);
+            //插入配合比参数信息
+            mixInfoEntityMapper.insert(mixInfoEntity);
+        }
+
+        //绑定原有原材
+        if(!CollectionUtils.isEmpty(samples.getSampleIds())){
+            List<String> sampleCodes = samples.getSampleIds();
+            for (int j = 0; j < sampleCodes.size(); j++) {
+                String sampleCode1 = sampleCodes.get(j);
+                TestSampleEntity allById = testSampleEntityMapper.getAllById(sampleCode1);
+                allById.setId(null);
+                allById.setPid(newId);
+                // 样品新增时： state = 5
+                allById.setState("5");
+                sampleCodeSet.add(allById.getSampleCode());
+                param.add(allById);
+            }
+        }
+//        return testSampleEntityMapper.insertBatchMixSamples(param);
+        Integer integer = testSampleEntityMapper.insertBatchMixSamples(param);
+        // 读取编号 获取样品id
+        if(CollectionUtil.isNotEmpty(sampleCodeSet)){
+            List<String> lists = new ArrayList<>(sampleCodeSet.stream().collect(Collectors.toList()));
+            List<SampleEntity> sampleDatas = sampleEntityMapper.getGroupNodes(lists);
+            for(SampleEntity sampleData : sampleDatas){
+                // 样品新增时 新增流转SQL： 状态 = 5 收样。
+                // 增加样品样品流转状态
+                SampleCirculationRecord sa = new SampleCirculationRecord();
+                sa.setSampleId(sampleData.getId());
+                sa.setStatus("5");
+                sa.setOperatorId(userInfo.getUserId());
+                sa.setOperatorName(userInfo.getName());
+                sa.setTime(new Date());
+                sampleEntityMapper.saveSampleCirculationRecord(sa);
+            }
+        }
+        return integer;
+    }
+
     @Override
     public PageInfo querySampleList(TestSampleEntity sampleEntity) {
         PageHelper.startPage(sampleEntity.getPageNum(), sampleEntity.getPageSize());

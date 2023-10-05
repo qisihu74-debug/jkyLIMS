@@ -553,6 +553,16 @@ public class SampleController {
             }
     }
 
+    @RequestMapping("/preAddMixSamples")
+    public Result preAddMixSamples(@RequestBody SamplesAddVo samples) {
+        Integer integer = testSampleEntityService.preAddMixSamples(samples);
+        if (integer > 0) {
+            return ResultUtil.success("预收样品成功！", integer);
+        } else {
+            return ResultUtil.error("预收样品失败，请联系管理员！");
+        }
+    }
+
     /**
      * 扫描查询样品流转详情
      * @return
