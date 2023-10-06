@@ -18,7 +18,7 @@ import java.util.Date;
 public class SampleCirculationRecord {
     private int sampleId;
     /**
-     * 状态，1待检，2在检，3已检，4留样，5处置
+     * 状态，1待检，2在检，3已检，4留样，5处置，6预收样
      */
     private String status;
     @DateTimeFormat(pattern = "yyyy-MM-dd")

@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.PreSampleCode;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import com.lims.manage.erp.vo.EntrustAddVo;
@@ -114,4 +115,19 @@ public interface TestSampleEntityMapper extends BaseMapper<TestSampleEntity> {
      * @return
      */
     TestSampleEntity getAllById(String sampleCode);
+
+    /**
+     * 查询当前年月下的预收样编号
+     * @param year
+     * @param month
+     * @return
+     */
+    Integer getPreCode(String year,String month);
+
+    /**
+     * 插入最新的预收样编号
+     * @param preSampleCode
+     * @return
+     */
+    int insertLatestPreCode(PreSampleCode preSampleCode);
 }
