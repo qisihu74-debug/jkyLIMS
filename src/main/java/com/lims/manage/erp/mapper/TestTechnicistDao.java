@@ -13,6 +13,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -47,7 +48,7 @@ int insertOrUpdateBatch(@Param("entities") List<TestTechnicist> entities);
 
     List<String> inspectorList(@Param("search") String search);
 
-    List<TechnicistCapacity> getTypeAndProductList(@Param("id") Integer id);
+    List<TechnicistCapacity> getTypeAndProductList(@Param("id") Serializable id);
 
     void insertBatchCapacity(@Param("list") List<TechnicistCapacity> capacityList);
 
