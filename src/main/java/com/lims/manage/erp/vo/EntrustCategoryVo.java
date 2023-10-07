@@ -25,4 +25,14 @@ public class EntrustCategoryVo {
      * 拼接后委托编号
      */
     private String entrustmentNoStr;
+
+    public EntrustCategoryVo() {
+    }
+
+    public EntrustCategoryVo(Integer entrustmentNo, String entrustCategoryType, String entrustCategory, String entrustmentNoStr) {
+        this.entrustmentNo = entrustmentNo;
+        this.entrustCategoryType = entrustCategoryType;
+        this.entrustCategory = entrustCategory;
+        this.entrustmentNoStr = entrustmentNoStr;
+    }
 }
