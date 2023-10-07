@@ -401,6 +401,25 @@ public class SampleController {
     }
 
     /**
+     * 预收样
+     * @param samples
+     * @return
+     */
+    @RequestMapping(value = "/preReceivedSamples", method = RequestMethod.POST)
+    public Result preReceivedSamples(@RequestBody SamplesAddVo samples) {
+        if (samples == null || CollectionUtils.isEmpty(samples.getSamples())) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        } else {
+            Integer integer = testSampleEntityService.batchPreReceivedSamples(samples.getSamples());
+            if (integer > 0) {
+                return ResultUtil.success("预收样品成功！", integer);
+            } else {
+                return ResultUtil.error("预收样品失败，请联系管理员！");
+            }
+        }
+    }
+
+    /**
      * 添加委托查询样品列表
      *
      * @param sampleEntity
@@ -532,6 +551,16 @@ public class SampleController {
             } else {
                 return ResultUtil.error("添加样品失败，请联系管理员！");
             }
+    }
+
+    @RequestMapping("/preAddMixSamples")
+    public Result preAddMixSamples(@RequestBody SamplesAddVo samples) {
+        Integer integer = testSampleEntityService.preAddMixSamples(samples);
+        if (integer > 0) {
+            return ResultUtil.success("预收样品成功！", integer);
+        } else {
+            return ResultUtil.error("预收样品失败，请联系管理员！");
+        }
     }
 
     /**

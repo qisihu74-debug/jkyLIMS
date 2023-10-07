@@ -19,12 +19,20 @@ public interface TestSampleEntityService extends IService<TestSampleEntity> {
      * @return
      */
     Integer batchInsertSample(List<SampleDetailAddVo> samples);
+
+    /**
+     * 预收样
+     * @param samples
+     * @return
+     */
+    Integer batchPreReceivedSamples(List<SampleDetailAddVo> samples);
     /**
      * 批量新增配合比样品
      * @param samples
      * @return
      */
     Integer batchInsertMixSample(SamplesAddVo samples);
+    Integer preAddMixSamples(SamplesAddVo samples);
 
     /**
      * 添加委托查询样品列表

@@ -512,11 +512,12 @@
         IFNULL( CONCAT( t1.entrust_category_type, t1.entrustment_no ), t1.entrustment_no ) AS entrustmentNostr,
         t1.entrust_company AS entrust_company,
         t1.entrust_people AS entrust_people,
-        t1.business_acceptor AS business_acceptor,
-        t1.acceptance_date AS acceptance_date
+        IFNULL(t1.business_acceptor,"——") AS business_acceptor,
+        t1.acceptance_date AS acceptance_date,
+        t1.state as state
         FROM
         test_entrusted_info AS t1
-        where audit_state =1
+        where audit_state =1 and t1.state in (0,201)
         <if test="entrustmentNo!=null and entrustmentNo!=''">
             and t1.entrustment_no LIKE CONCAT('%',#{entrustmentNo},'%')
         </if>
@@ -541,9 +542,6 @@
         <if test="endingDate!=null">
             and
             <![CDATA[  DATE_FORMAT(t1.acceptance_date, '%Y-%m-%d')<=  DATE_FORMAT(#{endingDate}, '%Y-%m-%d')  ]]>
-        </if>
-        <if test="state!=null">
-            and t1.state = #{state}
         </if>
         <if test="entrustCategoryType!=null">
             and t1.entrust_category_type = #{entrustCategoryType}
@@ -1467,4 +1465,19 @@
             #{item}
         </foreach>
     </select>
+
+    <select id="getPreEntrustCode" resultType="java.lang.Integer">
+        SELECT
+            max(pre_sample_code)
+        FROM
+            test_entrusted_pre_code
+        WHERE
+            YEAR = #{year}
+          AND MONTH = #{month}
+    </select>
+
+    <insert id="insertLatestPreEntrustCode" parameterType="com.lims.manage.erp.entity.PreEntrustCode">
+        insert into test_entrusted_pre_code (pre_entrust_code, month, year)
+        values (#{preEntrustCode}, #{month}, #{year})
+    </insert>
 </mapper>

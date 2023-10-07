@@ -114,7 +114,7 @@ public class EntrustEntity {
      */
     private Integer team;
     /**
-     * 状态
+     * 状态：0（未发布）；1（已发布）；144（已作废）；200（已完成）;201（预委托）；202（被驳回）；
      */
     private Integer state;
     /**
