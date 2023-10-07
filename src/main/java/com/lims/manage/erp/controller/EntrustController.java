@@ -1144,13 +1144,13 @@ public class EntrustController {
      * @return
      */
     @GetMapping("entrustReviewRejection")
-    public Result entrustReviewRejection(Long entrustId) {
+    public Result entrustReviewRejection(Long entrustId , String content) {
         // 委托单id = null 返回失败
         if(org.springframework.util.StringUtils.isEmpty(entrustId)){
             return ResultUtil.error("委托单id不能为空");
         }
         // 审核发布-驳回委托单
-        return entrustService.entrustReviewRejection(entrustId);
+        return entrustService.entrustReviewRejection(entrustId,content);
     }
     /**
      * 审核发布-审核通过
@@ -1163,8 +1163,8 @@ public class EntrustController {
         if(org.springframework.util.StringUtils.isEmpty(entrustId)){
             return ResultUtil.error("委托单id不能为空");
         }
-        // 审核发布-驳回委托单
-        return entrustService.entrustReviewRejection(entrustId);
+        // 审核发布-审核通过
+        return entrustService.entrustApproved(entrustId);
     }
 
 }

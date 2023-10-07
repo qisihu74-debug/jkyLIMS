@@ -404,7 +404,7 @@ public interface EntrustService {
      * @param entrustId
      * @return
      */
-    Result entrustReviewRejection(Long entrustId);
+    Result entrustReviewRejection(Long entrustId , String content);
     /**
      * 审核发布-审核通过
      * @param entrustId

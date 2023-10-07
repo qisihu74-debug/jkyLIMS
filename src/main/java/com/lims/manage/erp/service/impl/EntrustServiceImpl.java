@@ -2529,7 +2529,7 @@ public class EntrustServiceImpl implements EntrustService {
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
             // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
-            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144) {
+            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144 || entrustAddVo.getState() == 201) {
                 List<JudgmentBasisVo> list = Lists.newArrayList();
                          list = sampleEntityMapper.getCheckItemNoDistribution(sampleEntity.getId(), entrustmentId);
                 // 遍历检测项数据处理 价格为空的不展示（删除） 暂时废弃
@@ -5613,12 +5613,15 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public Result entrustReviewRejection(Long entrustId) {
+    public Result entrustReviewRejection(Long entrustId , String content) {
         // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
         EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
         // 状态：0（未发布）；1（已发布）；144（已作废）；200（已完成）;201（预委托）；202（被驳回）；
         if (entrustDetails == null) {
             return ResultUtil.error("驳回失败：委托单不存在");
+        }
+        if (entrustDetails.getState() == null) {
+            return ResultUtil.error("驳回失败：委托单状态异常");
         }
         if (entrustDetails.getState() == 202) {
             return ResultUtil.error("驳回失败：委托单已驳回");
@@ -5633,6 +5636,8 @@ public class EntrustServiceImpl implements EntrustService {
         EntrustEntity basisInfo = new EntrustEntity();
         basisInfo.setId(entrustId);
         basisInfo.setState(202);
+        // 驳回原因
+        basisInfo.setInvalidReason(content);
         entityMapper.updateEntrustInfos(basisInfo);
         return ResultUtil.success("驳回成功");
     }
@@ -5645,23 +5650,50 @@ public class EntrustServiceImpl implements EntrustService {
         if (entrustDetails == null) {
             return ResultUtil.error("审核失败：委托单不存在");
         }
+        if (entrustDetails.getState() == null) {
+            return ResultUtil.error("驳回失败：委托单状态异常");
+        }
         if (entrustDetails.getState() == 202) {
             return ResultUtil.error("审核失败：委托单已驳回");
         }
         if (entrustDetails.getState() == 1) {
             return ResultUtil.error("审核失败：委托单已发布成功");
         }
-        if (entrustDetails.getState() != 201 && entrustDetails.getState() != 0) {
-            return ResultUtil.error("审核失败：委托单不是预委托单");
-        }
         if (entrustDetails.getState() == 0) {
             return ResultUtil.error("审核失败：委托单已审核通过");
         }
-        // 效验后： 进行审核通过操作 更新委托单
+        if (entrustDetails.getState() != 201) {
+            return ResultUtil.error("审核失败：委托单不是预委托单");
+        }
+        // 效验后： 针对预委托单进行审核通过操作 更新委托单
         EntrustEntity basisInfo = new EntrustEntity();
         basisInfo.setId(entrustId);
         basisInfo.setState(0);
+        // 获取委托单号
+        //设置委托编号
+        SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
+        Date acceptanceTime = new Date();
+        String acceptanceDate = yyyyMMddHH_NOT_.format(acceptanceTime).substring(0,6);
+        Long time = acceptanceTime.getTime();
+        //获取并设置委托编号，相应的类别
+        EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(entrustDetails.getEntrustCategory(),acceptanceDate);
+        basisInfo.setEntrustmentNo(time.intValue());
+        basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
+        basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
+        // 通过委托编号 查询是否存在
+        PageHelper.clearPage();
+        if (entityMapper.getByDataEntrustMaxNo(basisInfo.getEntrustmentNo(),basisInfo.getEntrustCategoryType()) != null) {
+            return ResultUtil.error("审核失败：" + "新增委托失败!:\t委托编号已存在\t"+basisInfo.getEntrustmentNo());
+        }
+        // 获取受理日期
+        basisInfo.setAcceptanceDate(acceptanceTime);
+        // 获取受理人
+        // 获取业务受理人id
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        basisInfo.setBusinessAcceptor(userInfo.getName());
         entityMapper.updateEntrustInfos(basisInfo);
+        // 获取样品预览信息 进行更改编号数据。
+
         return ResultUtil.success("审批通过成功");
     }
 
