@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.CheckItemDetailVo;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.ClientOrderdetailVo;
@@ -388,4 +389,11 @@ public interface EntrustService {
     QrCodeAuthRes qrCodeAuth(String reportCode);
 
     JSONObject operatingPersonnel(Long entrustId);
+
+    /**
+     * 审核发布-驳回委托单
+     * @param entrustId
+     * @return
+     */
+    Result entrustReviewRejection(Long entrustId);
 }

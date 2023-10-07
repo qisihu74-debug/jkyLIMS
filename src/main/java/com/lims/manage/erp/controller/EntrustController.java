@@ -1117,4 +1117,20 @@ public class EntrustController {
         JSONObject jsonObject = entrustService.operatingPersonnel(entrustId);
         return ResultUtil.success(jsonObject);
     }
+
+    /**
+     * 审核发布-驳回委托单
+     * @param entrustId
+     * @return
+     */
+    @GetMapping("entrustReviewRejection")
+    public Result entrustReviewRejection(Long entrustId) {
+        // 委托单id = null 返回失败
+        if(org.springframework.util.StringUtils.isEmpty(entrustId)){
+            return ResultUtil.error("委托单id不能为空");
+        }
+        // 审核发布-驳回委托单
+        return entrustService.entrustReviewRejection(entrustId);
+    }
+
 }

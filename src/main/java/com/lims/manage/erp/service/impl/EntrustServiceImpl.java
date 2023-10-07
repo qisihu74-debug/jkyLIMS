@@ -31,6 +31,8 @@ import com.lims.manage.erp.mapper.TestEntrustedTaskRelDao;
 import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestSampleEntityService;
@@ -5372,6 +5374,28 @@ public class EntrustServiceImpl implements EntrustService {
             object.put("mobile",ShiroUtils.getUserInfo().getMobile());
             return object;
         }
+    }
+
+    @Override
+    public Result entrustReviewRejection(Long entrustId) {
+        // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
+        EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
+        // 状态：0（未发布）；1（已发布）；144（已作废）；200（已完成）;201（预委托）；202（被驳回）；
+        if(entrustDetails == null){
+            return ResultUtil.error("驳回失败：委托单不存在");
+        }
+        if(entrustDetails.getState()==202){
+            return ResultUtil.error("驳回失败：委托单已驳回");
+        }
+        if(entrustDetails.getState()==1){
+            return ResultUtil.error("驳回失败：委托单已发布成功");
+        }
+        if(entrustDetails.getState()!=201 || entrustDetails.getState()!=0){
+            return ResultUtil.error("驳回失败：委托单不是预委托单");
+        }
+        //
+
+        return null;
     }
 
 }
