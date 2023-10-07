@@ -2050,7 +2050,7 @@ public class EntrustServiceImpl implements EntrustService {
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         PageHelper.clearPage();
         //暂存配合比下的的样品信息
-        List<TestSampleEntity> nodeSample = Lists.newArrayList();
+//        List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         // 查询团队名称
@@ -2114,12 +2114,14 @@ public class EntrustServiceImpl implements EntrustService {
             // 补充样品下 依据集合
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
             //补充配合比下的的样品信息
+            List<TestSampleEntity> nodeSample = Lists.newArrayList();
             if (sampleEntity.getSampleType().contains("配合比")) {
                 nodeSample.addAll(testSampleEntityMapper.selectByPid(sampleEntity.getId()));
             }
+            sampleEntity.setNodeSample(nodeSample);
         }
         entrustAddVo.setSamples(sampleCollection);
-        entrustAddVo.setNodeSample(nodeSample);
+//        entrustAddVo.setNodeSample(nodeSample);
         //查询当前委托任务信息
         List<TaskProgressVo> taskProgressList = dealTaskState(entrustmentId);
         entrustAddVo.setTaskProgressList(taskProgressList);
@@ -2522,12 +2524,12 @@ public class EntrustServiceImpl implements EntrustService {
         List<SampleEntity> sampleCollection = Lists.newArrayList();
         sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
         //暂存配合比下的的样品信息
-        List<TestSampleEntity> nodeSample = Lists.newArrayList();
+//        List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 样品信息 进行补充 检测依据集合，检测项集合
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
             // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
-            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144) {
+            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144 || entrustAddVo.getState() == 201) {
                 List<JudgmentBasisVo> list = Lists.newArrayList();
                          list = sampleEntityMapper.getCheckItemNoDistribution(sampleEntity.getId(), entrustmentId);
                 // 遍历检测项数据处理 价格为空的不展示（删除） 暂时废弃
@@ -2601,13 +2603,15 @@ public class EntrustServiceImpl implements EntrustService {
                 sampleEntity.setJudgmentBasisVos(list);
             }
             //补充配合比样品的原材样品信息
+            List<TestSampleEntity> nodeSample = Lists.newArrayList();
             if (sampleEntity.getSampleType().contains("配合比")) {
                 nodeSample.addAll(testSampleEntityMapper.selectByPid(sampleEntity.getId()));
             }
+            sampleEntity.setNodeSample(nodeSample);
             // 补充样品下 依据集合
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
         }
-        entrustAddVo.setNodeSample(nodeSample);
+//        entrustAddVo.setNodeSample(nodeSample);
         entrustAddVo.setSamples(sampleCollection);
         LinkedHashSet<LabelValueVo> hashSet = new LinkedHashSet<>(allTestRoom);
         ArrayList<LabelValueVo> allTestRooms = new ArrayList<>(hashSet);
