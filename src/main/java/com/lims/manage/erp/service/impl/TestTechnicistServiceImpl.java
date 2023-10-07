@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -188,7 +189,7 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
     }
 
     @Override
-    public List<TestProductType> getCapacityMessage(Integer id) {
+    public List<TestProductType> getCapacityMessage(Serializable id) {
         List<TechnicistCapacity> technicistCapacities = testTechnicistDao.getTypeAndProductList(id);
         Map<String,List<String>> map = new HashMap<>();
         for (TechnicistCapacity bean :technicistCapacities){

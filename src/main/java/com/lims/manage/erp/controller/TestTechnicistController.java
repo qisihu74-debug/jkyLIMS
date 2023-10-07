@@ -109,7 +109,7 @@ public class TestTechnicistController extends ApiController {
     public Result selectOne(@PathVariable Serializable id) {
         if (id!=""&&id!=null){
             TestTechnicist byId = this.testTechnicistService.getById(id);
-            List<TestProductType> capacityMessage = testTechnicistService.getCapacityMessage((Integer) id);
+            List<TestProductType> capacityMessage = testTechnicistService.getCapacityMessage(id);
             byId.setList(capacityMessage);
             return ResultUtil.success(byId);
         }else {

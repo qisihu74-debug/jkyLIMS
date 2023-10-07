@@ -10,6 +10,7 @@ import com.lims.manage.erp.entity.TestTechnicist;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.TestTechnicistVo;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -27,7 +28,7 @@ public interface TestTechnicistService extends IService<TestTechnicist> {
 
     List<TechnicistCapacity> getTypeAndProductList(Integer id);
 
-    List<TestProductType> getCapacityMessage(Integer id);
+    List<TestProductType> getCapacityMessage(Serializable id);
 
     List<TestProductType> getProductTypeAndProduct();
 }
