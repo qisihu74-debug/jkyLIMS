@@ -1,21 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustHistoryEntity;
-import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
-import com.lims.manage.erp.entity.EntrustPamentEntity;
-import com.lims.manage.erp.entity.EntrustSampleEntity;
-import com.lims.manage.erp.entity.ReportEditReq;
-import com.lims.manage.erp.entity.ReportRecordDetailEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TaskEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.ClientOrderdetailVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
@@ -789,4 +775,19 @@ public interface EntrustEntityMapper extends BaseMapper {
             "WHERE\n" +
             "\tt1.id = #{entrustId} LIMIT 1")
     SysUserEntity operatingPersonnel(@Param("entrustId") Long entrustId);
+
+    /**
+     * 获取当前年月下的最大预委托号
+     * @param year
+     * @param month
+     * @return
+     */
+    Integer getPreEntrustCode(String year,String month);
+
+    /**
+     * 插入最新的预委托号
+     * @param preSampleCode
+     * @return
+     */
+    int insertLatestPreEntrustCode(PreSampleCode preSampleCode);
 }

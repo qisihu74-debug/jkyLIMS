@@ -107,6 +107,26 @@ public class EntrustController {
     }
 
     /**
+     * 预委托
+     * @param json
+     * @param file
+     * @return
+     */
+    @RequestMapping("/addPreEntrust")
+    public Result addPreEntrust(@RequestParam("json") String json, MultipartFile[] file) {
+        try {
+            EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
+            return ResultUtil.success(entrustService.addPreEntrust(entrust, file));
+        }
+        catch (Exception e){
+            // 日志输出。
+            Debug.println("新增委托日志异常输出\t",e+"");
+            return ResultUtil.error("新建委托失败,请联系管理员！！！");
+        }
+
+    }
+
+    /**
      * 修改委托测试丁 线上使用
      *
      * @param json

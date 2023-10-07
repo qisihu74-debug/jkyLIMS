@@ -28,6 +28,15 @@ public interface EntrustService {
     String addEntrustTest0620(EntrustAddVo vo, MultipartFile[] file) throws Exception;
 
     /**
+     * 新增预委托
+     * @param vo
+     * @param file
+     * @return
+     * @throws Exception
+     */
+    String addPreEntrust(EntrustAddVo vo, MultipartFile[] file) throws Exception;
+
+    /**
      * 修改委托测试 new
      */
     Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file) throws ParseException;
