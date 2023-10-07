@@ -1381,6 +1381,7 @@
             and entrust_category_type = "MN"
         </if>
         and DATE_FORMAT(acceptance_date, '%Y%m')=#{acceptanceDate}
+        and state != 201
     ORDER BY
         entrustment_no DESC
         LIMIT 1 FOR UPDATE;
@@ -1400,6 +1401,7 @@
         <if test="categoryType != null and categoryType=='MN' ">
             and entrust_category_type = "MN"
         </if>
+        and state != 201
         LIMIT 1
     </select>
 

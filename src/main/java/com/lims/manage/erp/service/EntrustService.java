@@ -405,4 +405,10 @@ public interface EntrustService {
      * @return
      */
     Result entrustReviewRejection(Long entrustId);
+    /**
+     * 审核发布-审核通过
+     * @param entrustId
+     * @return
+     */
+    Result entrustApproved(Long entrustId);
 }

@@ -5616,21 +5616,52 @@ public class EntrustServiceImpl implements EntrustService {
         // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
         EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
         // 状态：0（未发布）；1（已发布）；144（已作废）；200（已完成）;201（预委托）；202（被驳回）；
-        if(entrustDetails == null){
+        if (entrustDetails == null) {
             return ResultUtil.error("驳回失败：委托单不存在");
         }
-        if(entrustDetails.getState()==202){
+        if (entrustDetails.getState() == 202) {
             return ResultUtil.error("驳回失败：委托单已驳回");
         }
-        if(entrustDetails.getState()==1){
+        if (entrustDetails.getState() == 1) {
             return ResultUtil.error("驳回失败：委托单已发布成功");
         }
-        if(entrustDetails.getState()!=201 || entrustDetails.getState()!=0){
+        if (entrustDetails.getState() != 201 && entrustDetails.getState() != 0) {
             return ResultUtil.error("驳回失败：委托单不是预委托单");
         }
-        //
+        // 效验后： 进行驳回操作 更新委托单
+        EntrustEntity basisInfo = new EntrustEntity();
+        basisInfo.setId(entrustId);
+        basisInfo.setState(202);
+        entityMapper.updateEntrustInfos(basisInfo);
+        return ResultUtil.success("驳回成功");
+    }
 
-        return null;
+    @Override
+    public Result entrustApproved(Long entrustId) {
+        // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
+        EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
+        // 状态：0（未发布）；1（已发布）；144（已作废）；200（已完成）;201（预委托）；202（被驳回）；
+        if (entrustDetails == null) {
+            return ResultUtil.error("审核失败：委托单不存在");
+        }
+        if (entrustDetails.getState() == 202) {
+            return ResultUtil.error("审核失败：委托单已驳回");
+        }
+        if (entrustDetails.getState() == 1) {
+            return ResultUtil.error("审核失败：委托单已发布成功");
+        }
+        if (entrustDetails.getState() != 201 && entrustDetails.getState() != 0) {
+            return ResultUtil.error("审核失败：委托单不是预委托单");
+        }
+        if (entrustDetails.getState() == 0) {
+            return ResultUtil.error("审核失败：委托单已审核通过");
+        }
+        // 效验后： 进行审核通过操作 更新委托单
+        EntrustEntity basisInfo = new EntrustEntity();
+        basisInfo.setId(entrustId);
+        basisInfo.setState(0);
+        entityMapper.updateEntrustInfos(basisInfo);
+        return ResultUtil.success("审批通过成功");
     }
 
 }
