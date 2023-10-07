@@ -349,9 +349,10 @@ public class EntrustServiceImpl implements EntrustService {
             //设置委托编号
             SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
             String acceptanceDate = yyyyMMddHH_NOT_.format(basisInfo.getAcceptanceDate()).substring(0,6);
-            //获取并设置委托编号，相应的类别
+            Long time = basisInfo.getAcceptanceDate().getTime();
+        //获取并设置委托编号，相应的类别
             EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),acceptanceDate);
-            basisInfo.setEntrustmentNo(entrustCategoryVo.getEntrustmentNo());
+            basisInfo.setEntrustmentNo(time.intValue());
             basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
             basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
             // 通过委托编号 查询是否存在
