@@ -5643,7 +5643,7 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public Result entrustApproved(Long entrustId) {
+    public Result entrustApproved (Long entrustId){
         // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
         EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
         // 状态：0（未发布）；1（已发布）；144（已作废）；200（已完成）;201（预委托）；202（被驳回）；
@@ -5673,28 +5673,60 @@ public class EntrustServiceImpl implements EntrustService {
         //设置委托编号
         SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
         Date acceptanceTime = new Date();
-        String acceptanceDate = yyyyMMddHH_NOT_.format(acceptanceTime).substring(0,6);
-        Long time = acceptanceTime.getTime();
+        String acceptanceDate = yyyyMMddHH_NOT_.format(acceptanceTime).substring(0, 6);
         //获取并设置委托编号，相应的类别
-        EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(entrustDetails.getEntrustCategory(),acceptanceDate);
-        basisInfo.setEntrustmentNo(time.intValue());
+        EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(entrustDetails.getEntrustCategory(), acceptanceDate);
+        basisInfo.setEntrustmentNo(entrustCategoryVo.getEntrustmentNo());
         basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
         basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
         // 通过委托编号 查询是否存在
         PageHelper.clearPage();
-        if (entityMapper.getByDataEntrustMaxNo(basisInfo.getEntrustmentNo(),basisInfo.getEntrustCategoryType()) != null) {
-            return ResultUtil.error("审核失败：" + "新增委托失败!:\t委托编号已存在\t"+basisInfo.getEntrustmentNo());
+        if (entityMapper.getByDataEntrustMaxNo(basisInfo.getEntrustmentNo(), basisInfo.getEntrustCategoryType()) != null) {
+            return ResultUtil.error("审核失败：" + "新增委托失败!:\t委托编号已存在\t" + basisInfo.getEntrustmentNo());
         }
         // 获取受理日期
         basisInfo.setAcceptanceDate(acceptanceTime);
         // 获取受理人
-        // 获取业务受理人id
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         basisInfo.setBusinessAcceptor(userInfo.getName());
         entityMapper.updateEntrustInfos(basisInfo);
         // 获取样品预览信息 进行更改编号数据。
-
+        List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustId);
+        if (CollectionUtil.isNotEmpty(sampleCollection)) {
+            for (SampleEntity sampleData1 : sampleCollection) {
+                // 读取编号 是否为 预样品编号。
+                if (sampleData1.getSampleCode().contains("YSY")) {
+                    // 收样人
+                    sampleData1.setInspector(userInfo.getName());
+                    // 样品状态 预收样 = 收样
+                    sampleData1.setState("5");
+                    // 处理原材样品编号
+                    sampleData1.setSampleCode(methodSampleCode(sampleData1.getSampleCode(), sampleData1.getReceivedDate()));
+                    // update样品信息
+                    sampleEntityMapper.updateByPrimaryKeySelective(sampleData1);
+                    //补充配合比下的的样品信息
+                    if (!sampleData1.getSampleType().equals("原材")) {
+                        // 获取配合比信息：
+                        List<SampleDetailVo> sampleTagInfoPidList = Lists.newArrayList();
+                        sampleTagInfoPidList = sampleEntityMapper.getSampleTagInfoPidList(sampleData1.getId());
+                        if (!CollectionUtils.isEmpty(sampleTagInfoPidList)) {
+                            // 进行遍历塞配合比收样时间数值。
+                            for (SampleDetailVo sampleDetailVo1 : sampleTagInfoPidList) {
+                                SampleEntity sampleData2 = new SampleEntity();
+                                sampleData2.setId(sampleDetailVo1.getId());
+                                sampleData2.setReceivedDate(sampleData1.getReceivedDate());
+                                if (sampleData1.getSampleCode() != null) {
+                                    // 处理配合比则 更改样品编号
+                                    sampleData2.setSampleCode(methodMixProportionSampleCode(sampleData1.getSampleCode(), sampleDetailVo1.getSampleCode()));
+                                }
+                                // update样品信息
+                                sampleEntityMapper.updateByPrimaryKeySelective(sampleData2);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return ResultUtil.success("审批通过成功");
     }
-
 }
