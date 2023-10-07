@@ -1482,4 +1482,71 @@
         insert into test_entrusted_pre_code (pre_entrust_code, month, year)
         values (#{preEntrustCode}, #{month}, #{year})
     </insert>
+
+    <update id="updateEntrustInfoDetails" parameterType="com.lims.manage.erp.entity.EntrustEntity">
+        UPDATE test_entrusted_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="entrustType!=null and entrustType!=''">entrust_type=#{entrustType},</if>
+            <if test="businessAcceptor!=null and businessAcceptor!=''">business_acceptor=#{businessAcceptor},</if>
+            <if test="entrustCompany != null and entrustCompany!=''">entrust_company=#{entrustCompany},</if>
+            <if test="entrustCompanyId != null">entrust_company_id=#{entrustCompanyId},</if>
+            <if test="entrustPeople != null and entrustPeople!=''">entrust_people=#{entrustPeople},</if>
+            <if test="entrustPhone != null and entrustPhone!=''">entrust_phone=#{entrustPhone},</if>
+            <if test="witnessUint != null and witnessUint!=''">witness_uint=#{witnessUint},</if>
+            <if test="witnessPerson != null and witnessPerson!=''">witness_person=#{witnessPerson},</if>
+            <if test="witnessPhone != null and witnessPhone!=''">witness_phone=#{witnessPhone},</if>
+            <if test="projectName != null and projectName!=''">project_name=#{projectName},</if>
+            <if test="samplingMethod != null and samplingMethod!=''">sampling_method=#{samplingMethod},</if>
+            <if test="projectPart != null and projectPart!=''">project_part=#{projectPart},</if>
+            <if test="checkPurpose != null and checkPurpose!=''">check_purpose=#{checkPurpose},</if>
+            <if test="samplingMethod != null and samplingMethod!=''">sampling_method=#{samplingMethod},</if>
+            <if test="reportCount != null">report_count=#{reportCount},</if>
+            <if test="reportType != null and reportType!=''">report_type=#{reportType},</if>
+            <if test="requestDate != null">request_date=#{requestDate},</if>
+            <if test="paymentMethod != null and paymentMethod!=''">payment_method=#{paymentMethod},</if>
+            <if test="paymentCount != null and paymentCount!=''">count_price=#{paymentCount},</if>
+            <if test="presentInformation != null and presentInformation!=''">
+                present_information=#{presentInformation},
+            </if>
+            <if test="acceptanceDate != null">acceptance_date=#{acceptanceDate},</if>
+            <if test="team != null">team=#{team},</if>
+            <if test="state != null">state=#{state},</if>
+            <if test="remark != null and remark!=''">remark=#{remark},</if>
+            <if test="fileUrl != null and fileUrl!=''">file_url=#{fileUrl},</if>
+            <if test="sealType!=null and sealType!=''">seal_type=#{sealType}, </if>
+            <if test="isSave != null and isSave!=''">is_save=#{isSave},</if>
+            <if test="countPrice != null and countPrice!=''">count_price=#{countPrice},</if>
+            <if test="address != null and address!=''">address=#{address},</if>
+            <if test="addressee != null and addressee!=''">addressee=#{addressee},</if>
+            <if test="mobile != null and mobile!=''">mobile=#{mobile},</if>
+            <if test="mailbox != null and mailbox!=''">mailbox=#{mailbox},</if>
+            <if test="operateUser != null">operate_user=#{operateUser},</if>
+            <if test="operateDate != null">operate_date=#{operateDate},</if>
+            <if test="invalidReason != null and invalidReason!=''">invalid_reason=#{invalidReason},</if>
+            <if test="fileUrlStr != null and fileUrlStr!=''">file_url_str=#{fileUrlStr},</if>
+            <if test="entrustTestType != null and entrustTestType!=''">entrust_test_type=#{entrustTestType},</if>
+            <if test="designStrength != null and designStrength!=''">design_strength=#{designStrength},</if>
+            <if test="intensityOfConfiguration != null and intensityOfConfiguration!=''">
+                intensity_of_configuration=#{intensityOfConfiguration},
+            </if>
+            <if test="antifreezeLevel != null and antifreezeLevel!=''">antifreeze_level=#{antifreezeLevel},</if>
+            <if test="waterBinderRatio != null and waterBinderRatio!=''">water_binder_ratio=#{waterBinderRatio},</if>
+            <if test="unitWaterUse != null and unitWaterUse!='' ">unit_water_use=#{unitWaterUse},</if>
+            <if test="sandRatio != null and sandRatio!=''">sand_ratio=#{sandRatio},</if>
+            <if test="designSlump != null and designSlump!=''">design_slump=#{designSlump},</if>
+            <if test="mixingWay != null and mixingWay!=''">mixing_way=#{mixingWay},</if>
+            <if test="taskSource != null and taskSource!=''">task_source=#{taskSource},</if>
+            <if test="discount != null and discount!=''">discount=#{discount},</if>
+            <if test="actualPrice != null and actualPrice!=''">actual_price=#{actualPrice},</if>
+            <if test="systemPrice != null and systemPrice!=''">system_price=#{systemPrice},</if>
+            <if test="department != null">department=#{department},</if>
+            <if test="auditState != null and auditState!=''">audit_state=#{auditState},</if>
+            <if test="auditUser != null and auditUser!=''">audit_user=#{auditUser},</if>
+            <if test="auditDate != null">audit_date=#{auditDate},</if>
+            <if test="entrustmentNo!=null">
+                entrustment_no = #{entrustmentNo},
+            </if>
+        </trim>
+        where id = #{id}
+    </update>
 </mapper>

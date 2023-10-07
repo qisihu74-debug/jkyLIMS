@@ -408,7 +408,16 @@ public interface EntrustService {
     /**
      * 审核发布-审核通过
      * @param entrustId
+     * @param state：==1是 审核通过、==2是 审核通过与发布
      * @return
      */
-    Result entrustApproved(Long entrustId);
+    Result entrustApproved(Long entrustId ,Integer state);
+
+    /**
+     * 审核发布-审核通过与发布
+     * @param entrustId
+     * @param entity
+     * @return
+     */
+    Result entrustApproved1(Long entrustId ,TaskVo entity);
 }

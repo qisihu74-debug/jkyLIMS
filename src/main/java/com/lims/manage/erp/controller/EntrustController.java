@@ -406,62 +406,62 @@ public class EntrustController {
 //    }
 
 
-    @PostMapping("distributionTask")
-    public Result distributionTask(@RequestBody TaskVo entity) {
-        if (entity.getEntrustmentId() == null) {
-            return ResultUtil.error( "缺少必要参数");
-        }
-        //核查委托单位、委托人、委托人联系方式、样品信息、检测项信息是否完整
-        EntrustAddVo vo = entrustService.getEntrustHistoryDetail(entity.getEntrustmentId());
-        if(vo.getState() == 1){
-            return ResultUtil.error("任务已被发布，请重新确认信息！");
-        }
-        if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())) {
-            return ResultUtil.error( "请检查委托人信息是否完整！");
-        }
-        List<SampleEntity> samples = vo.getSamples();
-        if (CollectionUtils.isEmpty(samples)) {
-            return ResultUtil.error( "请检查委托单样品信息是否完整！");
-        }
-        if (!CollectionUtils.isEmpty(samples)) {
-            for (SampleEntity sampleEntity : samples) {
-                if (CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())) {
-                    return ResultUtil.error("请检查委托单样品下检测项信息是否完整！");
-                }
-            }
-        }
-        if (CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())) {
-             return ResultUtil.error( "检测项为空不能发布！！！");
-        }
-        if (!CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())) {
-            for (CheckItemDeptVo checkItemDeptVo : entity.getCheckItemDeptVoList()) {
-                if (checkItemDeptVo.getDeptId() == null) {
-                    return ResultUtil.error( "请确认所有检测项是否分配科室！");
-                }
-            }
-        }
-        // 效验： 任务发布时指向任务单A提示A任务单已完成，分配失败。
-        Boolean status = entrustService.verifyDistributionTask(entity);
-        if(!status){
-            return ResultUtil.error( "分配失败！！！任务单状态已完成试验。");
-        }
-        // 丁连春：任务单完成时间 以委托单下单时间为准
-        entity.setRequiredCompletionTime(vo.getRequestDate());
-        // 任务单下单日期等于委托单受理日期
-        entity.setOrderTime(vo.getAcceptanceDate());
-        // 任务单提供资料等于委托单提供资料
-        if(!org.springframework.util.StringUtils.isEmpty(vo.getPresentInformation())){
-            entity.setPresentInformation(vo.getPresentInformation());
-        }else {
-            entity.setPresentInformation("--");
-        }
-        Boolean flag = entrustService.distributionTask320(entity);
-        if (flag) {
-            return ResultUtil.success("委托分配成功！");
-        } else {
-            return ResultUtil.error( "委托分配失败！");
-        }
-    }
+//    @PostMapping("distributionTask")
+//    public Result distributionTask(@RequestBody TaskVo entity) {
+//        if (entity.getEntrustmentId() == null) {
+//            return ResultUtil.error( "缺少必要参数");
+//        }
+//        //核查委托单位、委托人、委托人联系方式、样品信息、检测项信息是否完整
+//        EntrustAddVo vo = entrustService.getEntrustHistoryDetail(entity.getEntrustmentId());
+//        if(vo.getState() == 1){
+//            return ResultUtil.error("任务已被发布，请重新确认信息！");
+//        }
+//        if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())) {
+//            return ResultUtil.error( "请检查委托人信息是否完整！");
+//        }
+//        List<SampleEntity> samples = vo.getSamples();
+//        if (CollectionUtils.isEmpty(samples)) {
+//            return ResultUtil.error( "请检查委托单样品信息是否完整！");
+//        }
+//        if (!CollectionUtils.isEmpty(samples)) {
+//            for (SampleEntity sampleEntity : samples) {
+//                if (CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())) {
+//                    return ResultUtil.error("请检查委托单样品下检测项信息是否完整！");
+//                }
+//            }
+//        }
+//        if (CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())) {
+//             return ResultUtil.error( "检测项为空不能发布！！！");
+//        }
+//        if (!CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())) {
+//            for (CheckItemDeptVo checkItemDeptVo : entity.getCheckItemDeptVoList()) {
+//                if (checkItemDeptVo.getDeptId() == null) {
+//                    return ResultUtil.error( "请确认所有检测项是否分配科室！");
+//                }
+//            }
+//        }
+//        // 效验： 任务发布时指向任务单A提示A任务单已完成，分配失败。
+//        Boolean status = entrustService.verifyDistributionTask(entity);
+//        if(!status){
+//            return ResultUtil.error( "分配失败！！！任务单状态已完成试验。");
+//        }
+//        // 丁连春：任务单完成时间 以委托单下单时间为准
+//        entity.setRequiredCompletionTime(vo.getRequestDate());
+//        // 任务单下单日期等于委托单受理日期
+//        entity.setOrderTime(vo.getAcceptanceDate());
+//        // 任务单提供资料等于委托单提供资料
+//        if(!org.springframework.util.StringUtils.isEmpty(vo.getPresentInformation())){
+//            entity.setPresentInformation(vo.getPresentInformation());
+//        }else {
+//            entity.setPresentInformation("--");
+//        }
+//        Boolean flag = entrustService.distributionTask320(entity);
+//        if (flag) {
+//            return ResultUtil.success("委托分配成功！");
+//        } else {
+//            return ResultUtil.error( "委托分配失败！");
+//        }
+//    }
 
     /**
      * 委托单任务待发布列表
@@ -1164,7 +1164,54 @@ public class EntrustController {
             return ResultUtil.error("委托单id不能为空");
         }
         // 审核发布-审核通过
-        return entrustService.entrustApproved(entrustId);
+        return entrustService.entrustApproved(entrustId ,1);
+    }
+
+    /**
+     * 审核并发布
+     * @param entity
+     * @return
+     */
+    @PostMapping("distributionTask")
+    public Result distributionTask(@RequestBody TaskVo entity) {
+        if (entity.getEntrustmentId() == null) {
+            return ResultUtil.error( "缺少必要参数");
+        }
+        //核查委托单位、委托人、委托人联系方式、样品信息、检测项信息是否完整
+        EntrustAddVo vo = entrustService.getEntrustHistoryDetail(entity.getEntrustmentId());
+        if(vo.getState() == 1){
+            return ResultUtil.error("任务已被发布，请重新确认信息！");
+        }
+        if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())) {
+            return ResultUtil.error( "请检查委托人信息是否完整！");
+        }
+//        List<SampleEntity> samples = vo.getSamples();
+//        if (CollectionUtils.isEmpty(samples)) {
+//            return ResultUtil.error( "请检查委托单样品信息是否完整！");
+//        }
+//        if (!CollectionUtils.isEmpty(samples)) {
+//            for (SampleEntity sampleEntity : samples) {
+//                if (CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())) {
+//                    return ResultUtil.error("请检查委托单样品下检测项信息是否完整！");
+//                }
+//            }
+//        }
+//        if (CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())) {
+//             return ResultUtil.error( "检测项为空不能发布！！！");
+//        }
+        // 丁连春：任务单完成时间 以委托单下单时间为准
+        entity.setRequiredCompletionTime(vo.getRequestDate());
+        // 任务单下单日期等于委托单受理日期
+        entity.setOrderTime(vo.getAcceptanceDate());
+        // 任务单提供资料等于委托单提供资料
+        if(!org.springframework.util.StringUtils.isEmpty(vo.getPresentInformation())){
+            entity.setPresentInformation(vo.getPresentInformation());
+        }else {
+            entity.setPresentInformation("--");
+        }
+
+        // 审核发布-审核通过
+        return entrustService.entrustApproved1(entity.getEntrustmentId() ,entity);
     }
 
 }

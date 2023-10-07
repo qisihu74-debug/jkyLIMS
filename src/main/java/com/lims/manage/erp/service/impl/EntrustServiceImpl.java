@@ -630,6 +630,12 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 新增经营人员
         basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
+        // 查询委托单详情 被驳回的 则更新为 正常即可
+        EntrustAddVo entrustDetails = entityMapper.selectByKeyId(basisInfo.getId());
+        if(entrustDetails.getState() == 202){
+
+        }
+
         entityMapper.updateEntrustInfo(basisInfo);
         // 修改委托信息后： 触发联动效果。 同步更新任务单对应字段。
         methodModifyTheTask(basisInfo.getId());
@@ -5641,9 +5647,14 @@ public class EntrustServiceImpl implements EntrustService {
         entityMapper.updateEntrustInfos(basisInfo);
         return ResultUtil.success("驳回成功");
     }
-
+    /**
+     * 审核发布-审核通过
+     * @param entrustId
+     * @param state：==1是 审核通过、==2是 审核通过与发布
+     * @return
+     */
     @Override
-    public Result entrustApproved (Long entrustId){
+    public Result entrustApproved (Long entrustId , Integer state){
         // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
         EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
         // 状态：0（未发布）；1（已发布）；144（已作废）；200（已完成）;201（预委托）；202（被驳回）；
@@ -5659,37 +5670,88 @@ public class EntrustServiceImpl implements EntrustService {
         if (entrustDetails.getState() == 1) {
             return ResultUtil.error("审核失败：委托单已发布成功");
         }
-        if (entrustDetails.getState() == 0) {
+        if (entrustDetails.getState() == 0 && state == 1) {
             return ResultUtil.error("审核失败：委托单已审核通过");
         }
-        if (entrustDetails.getState() != 201) {
+        if (entrustDetails.getState() != 201 && state == 1) {
             return ResultUtil.error("审核失败：委托单不是预委托单");
         }
+        if(state == 1){
+            // 针对·审核通过的
+            return entrustApprovedMethod(entrustDetails,entrustId);
+        }
+
+        return ResultUtil.success("审批通过成功");
+    }
+
+    /**
+     * 审核发布-审核通过与发布
+     * @param entrustId
+     * @param entity
+     * @return
+     */
+    @Override
+    public Result entrustApproved1(Long entrustId ,TaskVo entity){
+        // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
+        EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
+        // 针对·审核通过与发布的已经成功
+        Result msg = entrustApprovedMethod(entrustDetails, entrustId);
+        if(msg.getCode() == 200){
+            // 进行 发布数据 更新委托单 = 1
+            EntrustEntity basisInfo = new EntrustEntity();
+            basisInfo.setId(entrustId);
+            basisInfo.setState(1);
+            entityMapper.updateEntrustInfos(basisInfo);
+//            // 新建流转信息
+//            // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
+//            if(!CollectionUtils.isEmpty(entity.getTaskRelEntities())){
+//                // 补充发布人ID和姓名
+//                SysUserEntity userEntity = ShiroUtils.getUserInfo();
+//                List<TestEntrustedTaskRelEntity> TaskRelEntities = entity.getTaskRelEntities();
+//                for(TestEntrustedTaskRelEntity taskdata:TaskRelEntities){
+//                    taskdata.setUserId(userEntity.getUserId());
+//                    taskdata.setAddressName(userEntity.getName());
+//                    taskdata.setCreateDate(new Date());
+//                }
+//                methodDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
+//            }
+            // 新增流水号任务单信息
+
+            return msg;
+        }else {
+            return msg;
+        }
+    }
+
+    public Result entrustApprovedMethod(EntrustAddVo entrustDetails,long entrustId){
         // 效验后： 针对预委托单进行审核通过操作 更新委托单
         EntrustEntity basisInfo = new EntrustEntity();
         basisInfo.setId(entrustId);
         basisInfo.setState(0);
-        // 获取委托单号
-        //设置委托编号
-        SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
-        Date acceptanceTime = new Date();
-        String acceptanceDate = yyyyMMddHH_NOT_.format(acceptanceTime).substring(0, 6);
-        //获取并设置委托编号，相应的类别
-        EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(entrustDetails.getEntrustCategory(), acceptanceDate);
-        basisInfo.setEntrustmentNo(entrustCategoryVo.getEntrustmentNo());
-        basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
-        basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
-        // 通过委托编号 查询是否存在
-        PageHelper.clearPage();
-        if (entityMapper.getByDataEntrustMaxNo(basisInfo.getEntrustmentNo(), basisInfo.getEntrustCategoryType()) != null) {
-            return ResultUtil.error("审核失败：" + "新增委托失败!:\t委托编号已存在\t" + basisInfo.getEntrustmentNo());
-        }
-        // 获取受理日期
-        basisInfo.setAcceptanceDate(acceptanceTime);
         // 获取受理人
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        basisInfo.setBusinessAcceptor(userInfo.getName());
-        entityMapper.updateEntrustInfos(basisInfo);
+        // 获取委托单号
+        SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
+        Date acceptanceTime = new Date();
+        // 委托单 = 201 符合预委托单
+        if(entrustDetails.getState() == 201){
+            //设置委托编号
+            String acceptanceDate = yyyyMMddHH_NOT_.format(acceptanceTime).substring(0, 6);
+            //获取并设置委托编号，相应的类别
+            EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(entrustDetails.getEntrustCategory(), acceptanceDate);
+            basisInfo.setEntrustmentNo(entrustCategoryVo.getEntrustmentNo());
+            basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
+            basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
+            // 通过委托编号 查询是否存在
+            PageHelper.clearPage();
+            if (entityMapper.getByDataEntrustMaxNo(basisInfo.getEntrustmentNo(), basisInfo.getEntrustCategoryType()) != null) {
+                return ResultUtil.error("审核失败：" + "新增委托失败!:\t委托编号已存在\t" + basisInfo.getEntrustmentNo());
+            }
+            // 获取受理日期
+            basisInfo.setAcceptanceDate(acceptanceTime);
+            basisInfo.setBusinessAcceptor(userInfo.getName());
+        }
+        entityMapper.updateEntrustInfoDetails(basisInfo);
         // 获取样品预览信息 进行更改编号数据。
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustId);
         if (CollectionUtil.isNotEmpty(sampleCollection)) {

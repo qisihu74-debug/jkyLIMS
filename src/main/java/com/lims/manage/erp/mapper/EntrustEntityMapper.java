@@ -790,4 +790,12 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     int insertLatestPreEntrustCode(PreSampleCode preSampleCode);
+
+
+    /**
+     * 修改委托信息适用于 判断值非空
+     * @param basisInfo
+     * @return
+     */
+    int updateEntrustInfoDetails(EntrustEntity basisInfo);
 }
