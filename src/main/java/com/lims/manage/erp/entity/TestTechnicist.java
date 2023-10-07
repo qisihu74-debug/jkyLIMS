@@ -2,12 +2,14 @@ package com.lims.manage.erp.entity;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 技术人员(TestTechnicistVo)表实体类
@@ -45,7 +47,16 @@ public class TestTechnicist extends Model<TestTechnicist> {
     private Date updateTime;
     //备注
     private String remark;
+    @TableField(exist = false)
+    private List<TestProductType> list;
 
+    public List<TestProductType> getList() {
+        return list;
+    }
+
+    public void setList(List<TestProductType> list) {
+        this.list = list;
+    }
 
     public Integer getId() {
         return id;

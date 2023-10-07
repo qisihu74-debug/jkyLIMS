@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lims.manage.erp.entity.TestProductType;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 技术人员(TestTechnicistVo)表实体类
@@ -49,6 +51,15 @@ public class TestTechnicistVo extends Model<TestTechnicistVo> {
     private String userName;
     //团队名称
     private String teamName;
+    private List<TestProductType> productTypeList;
+
+    public List<TestProductType> getProductTypeList() {
+        return productTypeList;
+    }
+
+    public void setProductTypeList(List<TestProductType> productTypeList) {
+        this.productTypeList = productTypeList;
+    }
 
     public String getUserName() {
         return userName;

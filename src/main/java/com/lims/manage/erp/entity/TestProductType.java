@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 产品分类(TestProductType)表实体类
@@ -40,6 +41,17 @@ public class TestProductType extends Model<TestProductType> {
     private Date updateTime;
     //备注
     private String remark;
+
+    public List<TestProduct> getProductList() {
+        return productList;
+    }
+
+    public void setProductList(List<TestProduct> productList) {
+        this.productList = productList;
+    }
+
+    @TableField(exist = false)
+    private List<TestProduct> productList;
 
 
     public Integer getProductTypeId() {
