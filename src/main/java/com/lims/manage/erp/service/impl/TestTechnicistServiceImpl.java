@@ -4,7 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TechnicistCapacity;
+import com.lims.manage.erp.entity.TestProduct;
+import com.lims.manage.erp.entity.TestProductType;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.entity.TestTechnicist;
 import com.lims.manage.erp.mapper.TestTechnicistDao;
@@ -17,12 +21,17 @@ import com.lims.manage.erp.service.TestTechnicistService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.TestTechnicistVo;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 技术人员(TestTechnicistVo)表服务实现类
@@ -40,6 +49,7 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
     private SysOssService sysOssService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result addTestTechnicist(TestTechnicist TestTechnicist) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if(userInfo==null){
@@ -58,6 +68,23 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
         TestTechnicist.setDelFlag(0);
         TestTechnicist.setCreateTime(new Date());
         if (this.save(TestTechnicist)){
+            List<TechnicistCapacity>  capacityList = Lists.newArrayList();
+            //构建授权数据、保存入库
+            Integer id = TestTechnicist.getId();
+            List<TestProductType> list = TestTechnicist.getList();
+            for (TestProductType productType :list){
+                List<TestProduct> productList = productType.getProductList();
+                for (TestProduct product :productList){
+                    TechnicistCapacity capacity = new TechnicistCapacity();
+                    capacity.setTechnicistId(id);
+                    capacity.setProductTypeId(productType.getProductTypeId());
+                    capacity.setProductTypeName(productType.getProductTypeName());
+                    capacity.setProductId(product.getProductId());
+                    capacity.setProductName(product.getProductName());
+                    capacityList.add(capacity);
+                }
+            }
+            testTechnicistDao.insertBatchCapacity(capacityList);
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加技术人员"+TestTechnicist.getId()+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
             return ResultUtil.success("添加成功!");
         }else {
@@ -67,6 +94,7 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result updTestTechnicist(TestTechnicist TestTechnicist) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if(userInfo==null){
@@ -86,6 +114,24 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
         }
         TestTechnicist.setUpdateTime(new Date());
         if (this.updateById(TestTechnicist)){
+            //更新授权
+            List<TechnicistCapacity>  capacityList = Lists.newArrayList();
+            //构建授权数据、保存入库
+            List<TestProductType> list = TestTechnicist.getList();
+            for (TestProductType productType :list){
+                List<TestProduct> productList = productType.getProductList();
+                for (TestProduct product :productList){
+                    TechnicistCapacity capacity = new TechnicistCapacity();
+                    capacity.setTechnicistId(TestTechnicist.getId());
+                    capacity.setProductTypeId(productType.getProductTypeId());
+                    capacity.setProductTypeName(productType.getProductTypeName());
+                    capacity.setProductId(product.getProductId());
+                    capacity.setProductName(product.getProductName());
+                    capacityList.add(capacity);
+                }
+            }
+            testTechnicistDao.deleteCapatity(TestTechnicist.getId());
+            testTechnicistDao.insertBatchCapacity(capacityList);
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改技术人员"+TestTechnicist.getId()+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
             return ResultUtil.success("修改成功!");
         }else {
@@ -95,6 +141,7 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result delTestTechnicist(List<Long> idList) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if(userInfo==null){
@@ -114,6 +161,8 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
         }
         String idStr=idList.toString();
         if (this.updateBatchById(testLaboratoryList)){
+            //删除授权
+            testTechnicistDao.deleteBatchCapatity(idList);
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除技术人员"+idStr+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
             return ResultUtil.success("删除成功");
         }else {
@@ -130,6 +179,82 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
     @Override
     public List<SysUserEntity> getUserList() {
         return testTechnicistDao.getUserList();
+    }
+
+    @Override
+    public List<TechnicistCapacity> getTypeAndProductList(Integer id) {
+
+        return testTechnicistDao.getTypeAndProductList(id);
+    }
+
+    @Override
+    public List<TestProductType> getCapacityMessage(Integer id) {
+        List<TechnicistCapacity> technicistCapacities = testTechnicistDao.getTypeAndProductList(id);
+        Map<String,List<String>> map = new HashMap<>();
+        for (TechnicistCapacity bean :technicistCapacities){
+            List<String> stringList = map.get(bean.getProductTypeId()+"&"+bean.getProductTypeName());
+            if (CollectionUtils.isEmpty(stringList)){
+                List<String> list = Lists.newArrayList();
+                list.add(bean.getProductId()+"&"+bean.getProductName());
+                map.put(bean.getProductTypeId()+"&"+bean.getProductTypeName(),list);
+            }else {
+                stringList.add(bean.getProductId()+"&"+bean.getProductName());
+                map.put(bean.getProductTypeId()+"&"+bean.getProductTypeName(),stringList);
+            }
+        }
+        Set<String> set = map.keySet();
+        List<TestProductType> list = Lists.newArrayList();
+        for (String key :set){
+            TestProductType productType = new TestProductType();
+            productType.setProductTypeId(Integer.parseInt(key.split("&")[0]));
+            productType.setProductTypeName(key.split("&")[1]);
+            List<String> strings = map.get(key);
+            List<TestProduct> productList = Lists.newArrayList();
+            for (String p :strings){
+                TestProduct product = new TestProduct();
+                product.setProductId(Integer.parseInt(p.split("&")[0]));
+                product.setProductName(p.split("&")[1]);
+                productList.add(product);
+            }
+            productType.setProductList(productList);
+            list.add(productType);
+        }
+        return list;
+    }
+
+    @Override
+    public List<TestProductType> getProductTypeAndProduct() {
+        List<TechnicistCapacity> technicistCapacities = testTechnicistDao.getProductTypeAndProduct();
+        Map<String,List<String>> map = new HashMap<>();
+        for (TechnicistCapacity bean :technicistCapacities){
+            List<String> stringList = map.get(bean.getProductTypeId()+"&"+bean.getProductTypeName());
+            if (CollectionUtils.isEmpty(stringList)){
+                List<String> list = Lists.newArrayList();
+                list.add(bean.getProductId()+"&"+bean.getProductName());
+                map.put(bean.getProductTypeId()+"&"+bean.getProductTypeName(),list);
+            }else {
+                stringList.add(bean.getProductId()+"&"+bean.getProductName());
+                map.put(bean.getProductTypeId()+"&"+bean.getProductTypeName(),stringList);
+            }
+        }
+        Set<String> set = map.keySet();
+        List<TestProductType> list = Lists.newArrayList();
+        for (String key :set){
+            TestProductType productType = new TestProductType();
+            productType.setProductTypeId(Integer.parseInt(key.split("&")[0]));
+            productType.setProductTypeName(key.split("&")[1]);
+            List<String> strings = map.get(key);
+            List<TestProduct> productList = Lists.newArrayList();
+            for (String p :strings){
+                TestProduct product = new TestProduct();
+                product.setProductId(Integer.parseInt(p.split("&")[0]));
+                product.setProductName(p.split("&")[1]);
+                productList.add(product);
+            }
+            productType.setProductList(productList);
+            list.add(productType);
+        }
+        return list;
     }
 }
 

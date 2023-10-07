@@ -1,25 +1,34 @@
 package com.lims.manage.erp.controller;
 
 
-
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.ApiController;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.lims.manage.erp.entity.TestTeam;
+import com.google.api.client.util.Lists;
+import com.lims.manage.erp.entity.TechnicistCapacity;
+import com.lims.manage.erp.entity.TestProduct;
+import com.lims.manage.erp.entity.TestProductType;
 import com.lims.manage.erp.entity.TestTechnicist;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestTechnicistService;
-import com.lims.manage.erp.vo.TestTeamVo;
 import com.lims.manage.erp.vo.TestTechnicistVo;
-import org.springframework.web.bind.annotation.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 技术人员(TestTechnicistVo)表控制层
@@ -59,6 +68,29 @@ public class TestTechnicistController extends ApiController {
     }
 
     /**
+     * 查询授权人员参数详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/getTechnicistCapacity")
+    public Result getTechnicistCapacity(Integer id) {
+        if (id == null){
+            return ResultUtil.error("缺少参数");
+        }
+        return ResultUtil.success(testTechnicistService.getCapacityMessage(id));
+    }
+
+    /**
+     * 获取技术人员授权参数来源数据
+     * @return
+     */
+    @GetMapping("/getProductTypeAndProduct")
+    public Result getProductTypeAndProduct(){
+        List<TestProductType> list = testTechnicistService.getProductTypeAndProduct();
+        return ResultUtil.success(list);
+    }
+
+    /**
      * 查询用户列表
      * @return
      */
@@ -76,7 +108,10 @@ public class TestTechnicistController extends ApiController {
     @GetMapping("{id}")
     public Result selectOne(@PathVariable Serializable id) {
         if (id!=""&&id!=null){
-            return ResultUtil.success(this.testTechnicistService.getById(id));
+            TestTechnicist byId = this.testTechnicistService.getById(id);
+            List<TestProductType> capacityMessage = testTechnicistService.getCapacityMessage((Integer) id);
+            byId.setList(capacityMessage);
+            return ResultUtil.success(byId);
         }else {
             return ResultUtil.error("参数为空");
         }

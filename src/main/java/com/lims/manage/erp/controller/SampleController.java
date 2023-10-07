@@ -906,4 +906,12 @@ public class SampleController {
         List<Node> list = sampleService.retentionSampleAreaList();
         return ResultUtil.success(list);
     }
+
+    /**
+     * 导出参数信息
+     */
+    @GetMapping("exportItemInfo")
+    public void exportItemInfo(HttpServletResponse response){
+        sampleService.exportItemInfo(response);
+    }
 }

@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TechnicistCapacity;
+import com.lims.manage.erp.entity.TestProductType;
 import com.lims.manage.erp.entity.TestTechnicist;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.TestTechnicistVo;
@@ -22,5 +24,11 @@ public interface TestTechnicistService extends IService<TestTechnicist> {
     Result delTestTechnicist(List<Long> idList);
     IPage<TestTechnicistVo> getListPage(IPage<TestTechnicistVo> page, Wrapper<TestTechnicist> queryWrapper);
     List<SysUserEntity> getUserList();
+
+    List<TechnicistCapacity> getTypeAndProductList(Integer id);
+
+    List<TestProductType> getCapacityMessage(Integer id);
+
+    List<TestProductType> getProductTypeAndProduct();
 }
 

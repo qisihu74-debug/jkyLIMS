@@ -5,8 +5,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TechnicistCapacity;
+import com.lims.manage.erp.entity.TestProductType;
 import com.lims.manage.erp.entity.TestTechnicist;
 import com.lims.manage.erp.vo.TestTechnicistVo;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -43,5 +46,16 @@ int insertOrUpdateBatch(@Param("entities") List<TestTechnicist> entities);
     int getSealer(@Param("userId") Long userId);
 
     List<String> inspectorList(@Param("search") String search);
+
+    List<TechnicistCapacity> getTypeAndProductList(@Param("id") Integer id);
+
+    void insertBatchCapacity(@Param("list") List<TechnicistCapacity> capacityList);
+
+    @Delete("delete from test_technicist_capacity where technicist_id=#{id}")
+    void deleteCapatity(@Param("id") Integer id);
+
+    void deleteBatchCapatity(@Param("list") List<Long> idList);
+
+    List<TechnicistCapacity> getProductTypeAndProduct();
 }
 
