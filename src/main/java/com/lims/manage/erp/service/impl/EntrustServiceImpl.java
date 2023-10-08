@@ -8,6 +8,7 @@ import com.aspose.cells.Cells;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
 import com.aspose.pdf.facades.IFormEditor;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -620,9 +621,8 @@ public class EntrustServiceImpl implements EntrustService {
         // 查询委托单详情 被驳回的 则更新为 正常即可
         EntrustAddVo entrustDetails = entityMapper.selectByKeyId(basisInfo.getId());
         if(entrustDetails.getState() == 202){
-
+            basisInfo.setState(201);
         }
-
         entityMapper.updateEntrustInfo(basisInfo);
         // 修改委托信息后： 触发联动效果。 同步更新任务单对应字段。
         methodModifyTheTask(basisInfo.getId());
@@ -958,11 +958,9 @@ public class EntrustServiceImpl implements EntrustService {
                 entityMapper.BatchSaveSampleStandard(list1);
             }
         }
-//        if (totalMoney != 0) {
-            //得到总价钱，再保存委托基本信息
-//            basisInfo.setPaymentCount(totalMoney + "");2022年5月20日修改，不在后台计算检测项价格
-            //存放委托基本信息==》test_entrusted
-            basisInfo.setState(0);
+            if(vo.getState()!=201){
+                basisInfo.setState(0);
+            }
             entityMapper.updateEntrustInfos(basisInfo);
 //        }
         return true;
@@ -972,9 +970,17 @@ public class EntrustServiceImpl implements EntrustService {
     public String updateEntrustCheckItem(EntrustAddVo vo){
         // 样品编号变动 = true
         Boolean sampleStatus = false;
+        // 获取委托单受理日期
+        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(vo.getId());
+        // 委托单 = 202 驳回的话，设置为 预委托单
+        if(entrustAddVo.getState() == 202){
+            EntrustEntity basisInfo1 = new EntrustEntity();
+            basisInfo1.setId(vo.getId());
+            vo.setState(201);
+            basisInfo1.setState(201);
+            entityMapper.updateEntrustInfoDetails(basisInfo1);
+        }
         if(!CollectionUtils.isEmpty(vo.getSamples())){
-            // 获取委托单受理日期
-            EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(vo.getId());
             List<SampleEntity> samples = vo.getSamples();
             for(SampleEntity sampleEntity1:samples){
                 SampleEntity sampleData = new SampleEntity();
@@ -5626,7 +5632,7 @@ public class EntrustServiceImpl implements EntrustService {
         if (entrustDetails.getState() == 1) {
             return ResultUtil.error("驳回失败：委托单已发布成功");
         }
-        if (entrustDetails.getState() != 201 && entrustDetails.getState() != 0) {
+        if (entrustDetails.getState() != 201) {
             return ResultUtil.error("驳回失败：委托单不是预委托单");
         }
         // 效验后： 进行驳回操作 更新委托单
@@ -5645,6 +5651,7 @@ public class EntrustServiceImpl implements EntrustService {
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result entrustApproved (Long entrustId , Integer state){
         // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
         EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
@@ -5682,7 +5689,10 @@ public class EntrustServiceImpl implements EntrustService {
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result entrustApproved1(Long entrustId ,TaskVo entity){
+        // 获取受理人
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
         // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
         EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
         // 针对·审核通过与发布的已经成功
@@ -5704,12 +5714,37 @@ public class EntrustServiceImpl implements EntrustService {
                     taskdata.setAddressName(userEntity.getName());
                     taskdata.setCreateDate(new Date());
                 }
+                // 审核发布： 任务单流转 需要业务员提供信息
                 methodEntrustApprovedDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
             }
             // 新增流水号任务单信息
             TestTaskPool testTaskPool = new TestTaskPool();
-//            testTaskPool
-//            taskPoolMapper.insert();
+            // 设置任务单流水号
+            SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
+            Date acceptanceTime = new Date();
+            String acceptanceDate = yyyyMMddHH_NOT_.format(acceptanceTime).substring(0, 6);
+            testTaskPool.setSn("RW"+acceptanceDate);
+            // 查询流水号 "SELECT * FROM test_task_pool WHERE sn like "%202310%" ORDER by id desc  LIMIT 1 ;"
+            LambdaQueryWrapper<TestTaskPool> testTaskPoolLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            testTaskPoolLambdaQueryWrapper.like(TestTaskPool::getSn,testTaskPool.getSn());
+            testTaskPoolLambdaQueryWrapper.orderByDesc(TestTaskPool::getId);
+            testTaskPoolLambdaQueryWrapper.last("  LIMIT 1  ");
+            TestTaskPool testTaskPoolData = taskPoolMapper.selectOne(testTaskPoolLambdaQueryWrapper);
+            if(testTaskPoolData == null){
+                // 任务单=null  起始编号 2023110001
+                testTaskPool.setSn("RW"+acceptanceDate+"0001");
+            }else{
+                Integer taskCode = Integer.parseInt(testTaskPoolData.getSn().replace("RW", ""))+1;
+                testTaskPool.setSn("RW"+taskCode);
+            }
+            // 新增委托单id
+            testTaskPool.setEntrustmentId(entrustId);
+            // 发布时间
+            testTaskPool.setPublishDate(new Date());
+            // 发布人
+            testTaskPool.setPublisher(userInfo.getName());
+            // 新增流水任务单
+            taskPoolMapper.insert(testTaskPool);
             return msg;
         }else {
             return msg;
