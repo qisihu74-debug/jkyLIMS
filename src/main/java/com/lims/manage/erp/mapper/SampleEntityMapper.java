@@ -1,6 +1,5 @@
 package com.lims.manage.erp.mapper;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.lims.manage.erp.entity.ItemExportBean;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
