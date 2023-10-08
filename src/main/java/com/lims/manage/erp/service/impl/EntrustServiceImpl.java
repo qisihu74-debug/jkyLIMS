@@ -15,22 +15,7 @@ import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.EntrustFileTableDao;
-import com.lims.manage.erp.mapper.ProductItemEntityMapper;
-import com.lims.manage.erp.mapper.ReportApprovalMapper;
-import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.SysUserDao;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestCompanyDao;
-import com.lims.manage.erp.mapper.TestCustomerDao;
-import com.lims.manage.erp.mapper.TestEntrustedTaskRelDao;
-import com.lims.manage.erp.mapper.TestProductDao;
-import com.lims.manage.erp.mapper.TestSampleEntityMapper;
-import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
@@ -121,6 +106,8 @@ public class EntrustServiceImpl implements EntrustService {
     private QiYueSuoEntity qiYueSuoEntity;
     @Autowired
     private LogManagerService logManagerService;
+    @Autowired
+    private TestTaskPoolMapper taskPoolMapper;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -5706,21 +5693,23 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setId(entrustId);
             basisInfo.setState(1);
             entityMapper.updateEntrustInfos(basisInfo);
-//            // 新建流转信息
-//            // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
-//            if(!CollectionUtils.isEmpty(entity.getTaskRelEntities())){
-//                // 补充发布人ID和姓名
-//                SysUserEntity userEntity = ShiroUtils.getUserInfo();
-//                List<TestEntrustedTaskRelEntity> TaskRelEntities = entity.getTaskRelEntities();
-//                for(TestEntrustedTaskRelEntity taskdata:TaskRelEntities){
-//                    taskdata.setUserId(userEntity.getUserId());
-//                    taskdata.setAddressName(userEntity.getName());
-//                    taskdata.setCreateDate(new Date());
-//                }
-//                methodDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
-//            }
+            // 新建流转信息
+            // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
+            if(!CollectionUtils.isEmpty(entity.getTaskRelEntities())){
+                // 补充发布人ID和姓名
+                SysUserEntity userEntity = ShiroUtils.getUserInfo();
+                List<TestEntrustedTaskRelEntity> TaskRelEntities = entity.getTaskRelEntities();
+                for(TestEntrustedTaskRelEntity taskdata:TaskRelEntities){
+                    taskdata.setUserId(userEntity.getUserId());
+                    taskdata.setAddressName(userEntity.getName());
+                    taskdata.setCreateDate(new Date());
+                }
+                methodEntrustApprovedDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
+            }
             // 新增流水号任务单信息
-
+            TestTaskPool testTaskPool = new TestTaskPool();
+//            testTaskPool
+//            taskPoolMapper.insert();
             return msg;
         }else {
             return msg;
@@ -5794,5 +5783,48 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         return ResultUtil.success("审批通过成功");
+    }
+
+
+    /**
+     * 审核发布： 任务单流转 需要业务员提供信息
+     * @param id 委托单id
+     * @param taskRelEntities 任务单流转列表
+     */
+    void methodEntrustApprovedDistributionOfFlow(Long id, List<TestEntrustedTaskRelEntity> taskRelEntities){
+        // 补充信息。testEntrustedTaskRelEntityList 集合中 taskId 补充存入
+        for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity:taskRelEntities) {
+            testEntrustedTaskRelEntity.setEntrustId(id);
+            // 创建时间
+            testEntrustedTaskRelEntity.setCreateDate(new Date());
+            //设置中间报告的完成状态
+            if(testEntrustedTaskRelEntity.getType().equals(1)){
+                testEntrustedTaskRelEntity.setState(0);
+            }
+        }
+        /**
+         *  增加日志
+         */
+        if(!CollectionUtils.isEmpty(taskRelEntities)){
+            StringBuilder stringBuilder1 = new StringBuilder();
+            for (TestEntrustedTaskRelEntity testEntrustedTaskRelEntity : taskRelEntities){
+                stringBuilder1.append("新增任务流转：委托单id:"+testEntrustedTaskRelEntity.getEntrustId()+"流转日期：");
+                if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getTaskFlowDate())){
+                    stringBuilder1.append(new Timestamp(testEntrustedTaskRelEntity.getTaskFlowDate().getTime()));
+                }
+                stringBuilder1.append("备注："+testEntrustedTaskRelEntity.getRemark()+"报告类型：");
+                if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getType())){
+                    if(testEntrustedTaskRelEntity.getType().equals(1)){
+                        stringBuilder1.append("中间报告");
+                    }
+                    if(testEntrustedTaskRelEntity.getType().equals(0)){
+                        stringBuilder1.append("最终报告");
+                    }
+                }
+            }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.TASK_FLOW, true);
+        }
+        // 进行批量 add操作
+        testEntrustedTaskRelDao.addList(taskRelEntities);
     }
 }
