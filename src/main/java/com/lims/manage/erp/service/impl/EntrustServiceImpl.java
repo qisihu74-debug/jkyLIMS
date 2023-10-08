@@ -2524,7 +2524,7 @@ public class EntrustServiceImpl implements EntrustService {
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
             // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
-            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144 || entrustAddVo.getState() == 201) {
+            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144 || entrustAddVo.getState() == 201 || entrustAddVo.getState() == 202) {
                 List<JudgmentBasisVo> list = Lists.newArrayList();
                          list = sampleEntityMapper.getCheckItemNoDistribution(sampleEntity.getId(), entrustmentId);
                 // 遍历检测项数据处理 价格为空的不展示（删除） 暂时废弃
