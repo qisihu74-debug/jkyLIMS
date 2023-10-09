@@ -85,6 +85,18 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
     @Transactional(rollbackFor = Exception.class)
     public String startToTest(InstrumentVo instrumentVo) {
         if (instrumentVo != null && !CollectionUtils.isEmpty(instrumentVo.getCheckItemInfoList())) {
+            //校验设备使用状态
+            Long id = instrumentVo.getId();
+            InstrumentRecordEntity recordEntity1 = instrumentRecordEntityMapper.checkDeviceStatus(id);
+            if(recordEntity1 != null){
+                return "设备被用户【"+recordEntity1.getUser()+"】正在任务单【"+recordEntity1.getTaskCode()+"】中使用！";
+            }
+            //校验设备开始时间
+            Date startTime = instrumentVo.getStartTime();
+            InstrumentRecordEntity recordEntity2 = instrumentRecordEntityMapper.checkDeviceStartTime(id, startTime);
+            if(recordEntity2 != null){
+                return "设备与其他任务使用时间冲突，请重新选择！";
+            }
             // 存储 test_instrument_use_record 设备使用记录
             for (CheckItemInfoVo checkItemInfoVo : instrumentVo.getCheckItemInfoList()) {
                 InstrumentRecordEntity recordEntity = new InstrumentRecordEntity();
@@ -204,6 +216,15 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
         Integer state = null;
         if (type == 2) {
             state = 2;
+        }
+        //校验设备使用开始时间结束时间是否冲突
+        DeviceUseTimeVo vo = new DeviceUseTimeVo();
+        vo.setDeviceId(instrumentVo.getId());
+        vo.setEndTime(instrumentVo.getEndTime());
+        vo.setStartTime(instrumentVo.getStartTime());
+        List<InstrumentRecordEntity> instrumentRecordEntities = instrumentRecordEntityMapper.checkTime(vo);
+        if(!org.apache.commons.collections.CollectionUtils.isEmpty(instrumentRecordEntities)){
+            return "选择的结束时间与设备在其他任务中使用的时间冲突，请重新选择！";
         }
         // 遍历 设备使用记录id
         if (!CollectionUtils.isEmpty(instrumentVo.getInstrumentRecordListVos())) {

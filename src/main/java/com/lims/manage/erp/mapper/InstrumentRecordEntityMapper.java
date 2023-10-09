@@ -88,4 +88,18 @@ public interface InstrumentRecordEntityMapper {
      */
     List<InstrumentAppVo> getIds(@Param("list") List<InstrumentRecordListVo> list);
 
+    /**
+     * 校验设备使用状态
+     * @param instrumentId
+     * @return
+     */
+    InstrumentRecordEntity checkDeviceStatus(Long instrumentId);
+
+    /**
+     * 校验设备开始使用时间
+     * @param instrumentId
+     * @return
+     */
+    InstrumentRecordEntity checkDeviceStartTime(Long instrumentId,Date startTime);
+
 }

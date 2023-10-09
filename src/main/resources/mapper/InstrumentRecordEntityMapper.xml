@@ -14,11 +14,13 @@
         <result column="after_status" property="afterStatus" jdbcType="VARCHAR"/>
         <result column="user" property="user" jdbcType="VARCHAR"/>
         <result column="time" property="time" jdbcType="TIMESTAMP"/>
+        <result column="task_id" property="taskId" jdbcType="BIGINT"/>
+        <result column="task_code" property="taskCode" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List">
         id
         , instrument_id, esc_rel_id, type, start_time, end_time, temperature, humidity,
-    before_status, after_status, user, time
+    before_status, after_status, user, time,task_id,task_code
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -35,7 +37,7 @@
         insert into test_instrument_use_record (id, instrument_id, esc_rel_id,
                                                 type, start_time, end_time,
                                                 temperature, humidity, before_status,
-                                                after_status, user, time,task_id)
+                                                after_status, user, time,task_id,task_code)
         values (#{id,jdbcType=BIGINT}, #{instrumentId,jdbcType=BIGINT}, #{escRelId,jdbcType=BIGINT},
                 #{type,jdbcType=VARCHAR}, #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP},
                 #{temperature,jdbcType=VARCHAR}, #{humidity,jdbcType=VARCHAR}, #{beforeStatus,jdbcType=VARCHAR},
@@ -311,5 +313,57 @@
         <foreach collection="list" item="item" open="(" separator="," close=")">
             #{item.recordId}
         </foreach>
+    </select>
+
+    <select id="checkDeviceStatus" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+            t1.id,
+            t1.instrument_id,
+            t1.esc_rel_id,
+            t1.type,
+            t1.start_time,
+            t1.end_time,
+            t1.temperature,
+            t1.humidity,
+            t1.before_status,
+            t1.after_status,
+            t1.USER,
+            t1.time,
+            t1.task_id,
+            t2.task_code
+        FROM
+            test_instrument_use_record t1
+                LEFT JOIN test_task t2 ON t1.task_id = t2.id
+        WHERE
+            instrument_id = #{instrumentId}
+          AND end_time IS NULL
+            LIMIT 1
+    </select>
+
+    <select id="checkDeviceStartTime" resultMap="BaseResultMap">
+        SELECT id,
+               instrument_id,
+               esc_rel_id,
+               type,
+               start_time,
+               end_time,
+               temperature,
+               humidity,
+               before_status,
+               after_status,
+               USER,
+               time,
+               task_id,
+               task_code
+        FROM
+            test_instrument_use_record
+        WHERE
+            instrument_id = #{instrumentId}
+          AND start_time
+         &lt; STR_TO_DATE( #{startTime}
+            , '%Y-%m-%d %H:%i:%s' )
+          AND end_time
+         &gt; STR_TO_DATE( #{startTime}
+            , '%Y-%m-%d %H:%i:%s' )
     </select>
 </mapper>
