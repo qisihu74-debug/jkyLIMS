@@ -150,6 +150,7 @@
     <!--任务单和样品列表结果集-->
     <resultMap id="taskSampleResultMap" type="com.lims.manage.erp.vo.TaskListVo">
         <result property="taskId" column="taskId"></result>
+        <result property="startTime" column="startTime"></result>
         <result property="taskCode" column="taskCode"></result>
         <result property="orderer" column="orderer"></result>
         <result property="requiredCompletionTime" column="requiredCompletionTime"></result>
@@ -1115,6 +1116,7 @@
     <select id="taskList" resultMap="taskSampleResultMap">
         SELECT
         t2.id AS taskId,
+        t1.start_time as startTime,
         t2.order_time,
         t2.task_code AS taskCode,
         t4.id sampleId,
