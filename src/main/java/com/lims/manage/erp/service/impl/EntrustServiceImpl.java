@@ -5790,8 +5790,8 @@ public class EntrustServiceImpl implements EntrustService {
                     sampleData1.setInspector(userInfo.getName());
                     // 样品状态 预收样 = 收样
                     sampleData1.setState("5");
-                    // 处理原材样品编号
-                    sampleData1.setSampleCode(methodSampleCode(sampleData1.getSampleCode(), sampleData1.getReceivedDate()));
+                    // 处理原材样品编号 （ps:定义预样品编号需要强制更改样品编号）
+                    sampleData1.setSampleCode(methodSampleCode(sampleData1.getSampleCode()));
                     // update样品信息
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleData1);
                     //补充配合比下的的样品信息
@@ -5861,5 +5861,35 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 进行批量 add操作
         testEntrustedTaskRelDao.addList(taskRelEntities);
+    }
+
+    /**
+     * @param strSampleCode 样品预编号
+     * @return 处理后预样品编号 String类型
+     */
+    public String methodSampleCode(String strSampleCode) {
+        // 处理样品编号:来样时间与样品编号需要一致
+        StringBuffer sampleCode = new StringBuffer();
+        // 样品编号 比对 来样时间 年份不一致 则更改样品编号 为当前年份最大编号。
+        // 截取样品编号
+        String[] sampleCodes = strSampleCode.split("-");
+        sampleCodes[0]="YP";
+        // 根据年限 和类型 查询最大样品编号
+        String acceptanceDate = sampleCodes[1].substring(0, 4);
+        Integer maxSampleCode = sampleEntityMapper.getYPMaxNumber(acceptanceDate,"YP");
+        maxSampleCode += 1;
+        // 更改样品年限
+        sampleCodes[1] = String.valueOf(sampleCodes[1]);
+        // 更改样品编号
+        String suffix = new DecimalFormat("00000").format(maxSampleCode);
+        sampleCodes[2] = suffix;
+        for (int i = 0; i < sampleCodes.length; i++) {
+            sampleCode.append(sampleCodes[i]);
+            sampleCode.append("-");
+        }
+        if (sampleCode.deleteCharAt(sampleCode.length() - 1).toString().length() > 1) {
+            return sampleCode.toString();
+        }
+        return null;
     }
 }

@@ -508,4 +508,12 @@ public interface SampleEntityMapper {
             "AND t3.check_price is not null\n" +
             "order BY t1.product_type_name")
     List<ItemExportBean> exportItemInfo();
+
+    /**
+     * 查询当前年份最大样品编号
+     *
+     * @param year
+     * @return
+     */
+    Integer getYPMaxNumber(@Param("year")String year,@Param("sampleType")String sampleType);
 }

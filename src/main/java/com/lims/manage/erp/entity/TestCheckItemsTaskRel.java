@@ -57,39 +57,24 @@ public class TestCheckItemsTaskRel implements Serializable {
     private Long entrustId;
 
     /**
-     * 检测人
+     * name人名
      */
-    private String inspector;
+    private String userName;
 
     /**
-     * 记录人
+     * user_id
      */
-    private String recorder;
+    private String userId;
 
     /**
-     * 复核人
+     * 0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生
      */
-    private String reviewer;
+    private Integer userType;
 
     /**
-     * 报告制作人
+     * 任务单id
      */
-    private String reportProducer;
-
-    /**
-     * 辅助人员
-     */
-    private String auxiliaryPersonnel;
-
-    /**
-     * 见习生：实习的新手
-     */
-    private String probationer;
-
-    /**
-     * 实习生
-     */
-    private String interns;
+    private Long taskId;
 
 
 }
