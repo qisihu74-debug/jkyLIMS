@@ -8,6 +8,7 @@ import com.aspose.cells.Cells;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
 import com.aspose.pdf.facades.IFormEditor;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -15,22 +16,9 @@ import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.EntrustFileTableDao;
-import com.lims.manage.erp.mapper.ProductItemEntityMapper;
-import com.lims.manage.erp.mapper.ReportApprovalMapper;
-import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.SysUserDao;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestCompanyDao;
-import com.lims.manage.erp.mapper.TestCustomerDao;
-import com.lims.manage.erp.mapper.TestEntrustedTaskRelDao;
-import com.lims.manage.erp.mapper.TestProductDao;
-import com.lims.manage.erp.mapper.TestSampleEntityMapper;
-import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
+import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestSampleEntityService;
@@ -119,6 +107,8 @@ public class EntrustServiceImpl implements EntrustService {
     private QiYueSuoEntity qiYueSuoEntity;
     @Autowired
     private LogManagerService logManagerService;
+    @Autowired
+    private TestTaskPoolMapper taskPoolMapper;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -628,6 +618,11 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 新增经营人员
         basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
+        // 查询委托单详情 被驳回的 则更新为 正常即可
+        EntrustAddVo entrustDetails = entityMapper.selectByKeyId(basisInfo.getId());
+        if(entrustDetails.getState() == 202){
+            basisInfo.setState(201);
+        }
         entityMapper.updateEntrustInfo(basisInfo);
         // 修改委托信息后： 触发联动效果。 同步更新任务单对应字段。
         methodModifyTheTask(basisInfo.getId());
@@ -963,11 +958,9 @@ public class EntrustServiceImpl implements EntrustService {
                 entityMapper.BatchSaveSampleStandard(list1);
             }
         }
-//        if (totalMoney != 0) {
-            //得到总价钱，再保存委托基本信息
-//            basisInfo.setPaymentCount(totalMoney + "");2022年5月20日修改，不在后台计算检测项价格
-            //存放委托基本信息==》test_entrusted
-            basisInfo.setState(0);
+            if(vo.getState()!=201){
+                basisInfo.setState(0);
+            }
             entityMapper.updateEntrustInfos(basisInfo);
 //        }
         return true;
@@ -977,9 +970,17 @@ public class EntrustServiceImpl implements EntrustService {
     public String updateEntrustCheckItem(EntrustAddVo vo){
         // 样品编号变动 = true
         Boolean sampleStatus = false;
+        // 获取委托单受理日期
+        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(vo.getId());
+        // 委托单 = 202 驳回的话，设置为 预委托单
+        if(entrustAddVo.getState() == 202){
+            EntrustEntity basisInfo1 = new EntrustEntity();
+            basisInfo1.setId(vo.getId());
+            vo.setState(201);
+            basisInfo1.setState(201);
+            entityMapper.updateEntrustInfoDetails(basisInfo1);
+        }
         if(!CollectionUtils.isEmpty(vo.getSamples())){
-            // 获取委托单受理日期
-            EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(vo.getId());
             List<SampleEntity> samples = vo.getSamples();
             for(SampleEntity sampleEntity1:samples){
                 SampleEntity sampleData = new SampleEntity();
@@ -2050,7 +2051,7 @@ public class EntrustServiceImpl implements EntrustService {
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         PageHelper.clearPage();
         //暂存配合比下的的样品信息
-        List<TestSampleEntity> nodeSample = Lists.newArrayList();
+//        List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         // 查询团队名称
@@ -2114,12 +2115,14 @@ public class EntrustServiceImpl implements EntrustService {
             // 补充样品下 依据集合
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
             //补充配合比下的的样品信息
+            List<TestSampleEntity> nodeSample = Lists.newArrayList();
             if (sampleEntity.getSampleType().contains("配合比")) {
                 nodeSample.addAll(testSampleEntityMapper.selectByPid(sampleEntity.getId()));
             }
+            sampleEntity.setNodeSample(nodeSample);
         }
         entrustAddVo.setSamples(sampleCollection);
-        entrustAddVo.setNodeSample(nodeSample);
+//        entrustAddVo.setNodeSample(nodeSample);
         //查询当前委托任务信息
         List<TaskProgressVo> taskProgressList = dealTaskState(entrustmentId);
         entrustAddVo.setTaskProgressList(taskProgressList);
@@ -2522,12 +2525,12 @@ public class EntrustServiceImpl implements EntrustService {
         List<SampleEntity> sampleCollection = Lists.newArrayList();
         sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustmentId);
         //暂存配合比下的的样品信息
-        List<TestSampleEntity> nodeSample = Lists.newArrayList();
+//        List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 样品信息 进行补充 检测依据集合，检测项集合
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
             // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
-            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144) {
+            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144 || entrustAddVo.getState() == 201 || entrustAddVo.getState() == 202) {
                 List<JudgmentBasisVo> list = Lists.newArrayList();
                          list = sampleEntityMapper.getCheckItemNoDistribution(sampleEntity.getId(), entrustmentId);
                 // 遍历检测项数据处理 价格为空的不展示（删除） 暂时废弃
@@ -2601,13 +2604,15 @@ public class EntrustServiceImpl implements EntrustService {
                 sampleEntity.setJudgmentBasisVos(list);
             }
             //补充配合比样品的原材样品信息
+            List<TestSampleEntity> nodeSample = Lists.newArrayList();
             if (sampleEntity.getSampleType().contains("配合比")) {
                 nodeSample.addAll(testSampleEntityMapper.selectByPid(sampleEntity.getId()));
             }
+            sampleEntity.setNodeSample(nodeSample);
             // 补充样品下 依据集合
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
         }
-        entrustAddVo.setNodeSample(nodeSample);
+//        entrustAddVo.setNodeSample(nodeSample);
         entrustAddVo.setSamples(sampleCollection);
         LinkedHashSet<LabelValueVo> hashSet = new LinkedHashSet<>(allTestRoom);
         ArrayList<LabelValueVo> allTestRooms = new ArrayList<>(hashSet);
@@ -5610,4 +5615,281 @@ public class EntrustServiceImpl implements EntrustService {
         }
     }
 
+    @Override
+    public Result entrustReviewRejection(Long entrustId , String content) {
+        // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
+        EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
+        // 状态：0（未发布）；1（已发布）；144（已作废）；200（已完成）;201（预委托）；202（被驳回）；
+        if (entrustDetails == null) {
+            return ResultUtil.error("驳回失败：委托单不存在");
+        }
+        if (entrustDetails.getState() == null) {
+            return ResultUtil.error("驳回失败：委托单状态异常");
+        }
+        if (entrustDetails.getState() == 202) {
+            return ResultUtil.error("驳回失败：委托单已驳回");
+        }
+        if (entrustDetails.getState() == 1) {
+            return ResultUtil.error("驳回失败：委托单已发布成功");
+        }
+        if (entrustDetails.getState() != 201) {
+            return ResultUtil.error("驳回失败：委托单不是预委托单");
+        }
+        // 效验后： 进行驳回操作 更新委托单
+        EntrustEntity basisInfo = new EntrustEntity();
+        basisInfo.setId(entrustId);
+        basisInfo.setState(202);
+        // 驳回原因
+        basisInfo.setInvalidReason(content);
+        entityMapper.updateEntrustInfos(basisInfo);
+        return ResultUtil.success("驳回成功");
+    }
+    /**
+     * 审核发布-审核通过
+     * @param entrustId
+     * @param state：==1是 审核通过、==2是 审核通过与发布
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result entrustApproved (Long entrustId , Integer state){
+        // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
+        EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
+        // 状态：0（未发布）；1（已发布）；144（已作废）；200（已完成）;201（预委托）；202（被驳回）；
+        if (entrustDetails == null) {
+            return ResultUtil.error("审核失败：委托单不存在");
+        }
+        if (entrustDetails.getState() == null) {
+            return ResultUtil.error("驳回失败：委托单状态异常");
+        }
+        if (entrustDetails.getState() == 202) {
+            return ResultUtil.error("审核失败：委托单已驳回");
+        }
+        if (entrustDetails.getState() == 1) {
+            return ResultUtil.error("审核失败：委托单已发布成功");
+        }
+        if (entrustDetails.getState() == 0 && state == 1) {
+            return ResultUtil.error("审核失败：委托单已审核通过");
+        }
+        if (entrustDetails.getState() != 201 && state == 1) {
+            return ResultUtil.error("审核失败：委托单不是预委托单");
+        }
+        if(state == 1){
+            // 针对·审核通过的
+            return entrustApprovedMethod(entrustDetails,entrustId);
+        }
+
+        return ResultUtil.success("审批通过成功");
+    }
+
+    /**
+     * 审核发布-审核通过与发布
+     * @param entrustId
+     * @param entity
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result entrustApproved1(Long entrustId ,TaskVo entity){
+        // 获取受理人
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
+        EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
+        // 针对·审核通过与发布的已经成功
+        Result msg = entrustApprovedMethod(entrustDetails, entrustId);
+        if(msg.getCode() == 200){
+            // 进行 发布数据 更新委托单 = 1
+            EntrustEntity basisInfo = new EntrustEntity();
+            basisInfo.setId(entrustId);
+            basisInfo.setState(1);
+            entityMapper.updateEntrustInfos(basisInfo);
+            // 新建流转信息
+            // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
+            if(!CollectionUtils.isEmpty(entity.getTaskRelEntities())){
+                // 补充发布人ID和姓名
+                SysUserEntity userEntity = ShiroUtils.getUserInfo();
+                List<TestEntrustedTaskRelEntity> TaskRelEntities = entity.getTaskRelEntities();
+                for(TestEntrustedTaskRelEntity taskdata:TaskRelEntities){
+                    taskdata.setUserId(userEntity.getUserId());
+                    taskdata.setAddressName(userEntity.getName());
+                    taskdata.setCreateDate(new Date());
+                }
+                // 审核发布： 任务单流转 需要业务员提供信息
+                methodEntrustApprovedDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
+            }
+            // 新增流水号任务单信息
+            TestTaskPool testTaskPool = new TestTaskPool();
+            // 设置任务单流水号
+            SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
+            Date acceptanceTime = new Date();
+            String acceptanceDate = yyyyMMddHH_NOT_.format(acceptanceTime).substring(0, 6);
+            testTaskPool.setSn("RW"+acceptanceDate);
+            // 查询流水号 "SELECT * FROM test_task_pool WHERE sn like "%202310%" ORDER by id desc  LIMIT 1 ;"
+            LambdaQueryWrapper<TestTaskPool> testTaskPoolLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            testTaskPoolLambdaQueryWrapper.like(TestTaskPool::getSn,testTaskPool.getSn());
+            testTaskPoolLambdaQueryWrapper.orderByDesc(TestTaskPool::getId);
+            testTaskPoolLambdaQueryWrapper.last("  LIMIT 1  ");
+            TestTaskPool testTaskPoolData = taskPoolMapper.selectOne(testTaskPoolLambdaQueryWrapper);
+            if(testTaskPoolData == null){
+                // 任务单=null  起始编号 2023110001
+                testTaskPool.setSn("RW"+acceptanceDate+"0001");
+            }else{
+                Integer taskCode = Integer.parseInt(testTaskPoolData.getSn().replace("RW", ""))+1;
+                testTaskPool.setSn("RW"+taskCode);
+            }
+            // 新增委托单id
+            testTaskPool.setEntrustmentId(entrustId);
+            // 发布时间
+            testTaskPool.setPublishDate(new Date());
+            // 发布人
+            testTaskPool.setPublisher(userInfo.getName());
+            // 新增流水任务单
+            taskPoolMapper.insert(testTaskPool);
+            return msg;
+        }else {
+            return msg;
+        }
+    }
+
+    public Result entrustApprovedMethod(EntrustAddVo entrustDetails,long entrustId){
+        // 效验后： 针对预委托单进行审核通过操作 更新委托单
+        EntrustEntity basisInfo = new EntrustEntity();
+        basisInfo.setId(entrustId);
+        basisInfo.setState(0);
+        // 获取受理人
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 获取委托单号
+        SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
+        Date acceptanceTime = new Date();
+        // 委托单 = 201 符合预委托单
+        if(entrustDetails.getState() == 201){
+            //设置委托编号
+            String acceptanceDate = yyyyMMddHH_NOT_.format(acceptanceTime).substring(0, 6);
+            //获取并设置委托编号，相应的类别
+            EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(entrustDetails.getEntrustCategory(), acceptanceDate);
+            basisInfo.setEntrustmentNo(entrustCategoryVo.getEntrustmentNo());
+            basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
+            basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
+            // 通过委托编号 查询是否存在
+            PageHelper.clearPage();
+            if (entityMapper.getByDataEntrustMaxNo(basisInfo.getEntrustmentNo(), basisInfo.getEntrustCategoryType()) != null) {
+                return ResultUtil.error("审核失败：" + "新增委托失败!:\t委托编号已存在\t" + basisInfo.getEntrustmentNo());
+            }
+            // 获取受理日期
+            basisInfo.setAcceptanceDate(acceptanceTime);
+            basisInfo.setBusinessAcceptor(userInfo.getName());
+        }
+        entityMapper.updateEntrustInfoDetails(basisInfo);
+        // 获取样品预览信息 进行更改编号数据。
+        List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustId);
+        if (CollectionUtil.isNotEmpty(sampleCollection)) {
+            for (SampleEntity sampleData1 : sampleCollection) {
+                // 读取编号 是否为 预样品编号。
+                if (sampleData1.getSampleCode().contains("YSY")) {
+                    // 收样人
+                    sampleData1.setInspector(userInfo.getName());
+                    // 样品状态 预收样 = 收样
+                    sampleData1.setState("5");
+                    // 处理原材样品编号 （ps:定义预样品编号需要强制更改样品编号）
+                    sampleData1.setSampleCode(methodSampleCode(sampleData1.getSampleCode()));
+                    // update样品信息
+                    sampleEntityMapper.updateByPrimaryKeySelective(sampleData1);
+                    //补充配合比下的的样品信息
+                    if (!sampleData1.getSampleType().equals("原材")) {
+                        // 获取配合比信息：
+                        List<SampleDetailVo> sampleTagInfoPidList = Lists.newArrayList();
+                        sampleTagInfoPidList = sampleEntityMapper.getSampleTagInfoPidList(sampleData1.getId());
+                        if (!CollectionUtils.isEmpty(sampleTagInfoPidList)) {
+                            // 进行遍历塞配合比收样时间数值。
+                            for (SampleDetailVo sampleDetailVo1 : sampleTagInfoPidList) {
+                                SampleEntity sampleData2 = new SampleEntity();
+                                sampleData2.setId(sampleDetailVo1.getId());
+                                sampleData2.setReceivedDate(sampleData1.getReceivedDate());
+                                if (sampleData1.getSampleCode() != null) {
+                                    // 处理配合比则 更改样品编号
+                                    sampleData2.setSampleCode(methodMixProportionSampleCode(sampleData1.getSampleCode(), sampleDetailVo1.getSampleCode()));
+                                }
+                                // update样品信息
+                                sampleEntityMapper.updateByPrimaryKeySelective(sampleData2);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return ResultUtil.success("审批通过成功");
+    }
+
+
+    /**
+     * 审核发布： 任务单流转 需要业务员提供信息
+     * @param id 委托单id
+     * @param taskRelEntities 任务单流转列表
+     */
+    void methodEntrustApprovedDistributionOfFlow(Long id, List<TestEntrustedTaskRelEntity> taskRelEntities){
+        // 补充信息。testEntrustedTaskRelEntityList 集合中 taskId 补充存入
+        for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity:taskRelEntities) {
+            testEntrustedTaskRelEntity.setEntrustId(id);
+            // 创建时间
+            testEntrustedTaskRelEntity.setCreateDate(new Date());
+            //设置中间报告的完成状态
+            if(testEntrustedTaskRelEntity.getType().equals(1)){
+                testEntrustedTaskRelEntity.setState(0);
+            }
+        }
+        /**
+         *  增加日志
+         */
+        if(!CollectionUtils.isEmpty(taskRelEntities)){
+            StringBuilder stringBuilder1 = new StringBuilder();
+            for (TestEntrustedTaskRelEntity testEntrustedTaskRelEntity : taskRelEntities){
+                stringBuilder1.append("新增任务流转：委托单id:"+testEntrustedTaskRelEntity.getEntrustId()+"流转日期：");
+                if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getTaskFlowDate())){
+                    stringBuilder1.append(new Timestamp(testEntrustedTaskRelEntity.getTaskFlowDate().getTime()));
+                }
+                stringBuilder1.append("备注："+testEntrustedTaskRelEntity.getRemark()+"报告类型：");
+                if(!StringUtils.isEmpty(testEntrustedTaskRelEntity.getType())){
+                    if(testEntrustedTaskRelEntity.getType().equals(1)){
+                        stringBuilder1.append("中间报告");
+                    }
+                    if(testEntrustedTaskRelEntity.getType().equals(0)){
+                        stringBuilder1.append("最终报告");
+                    }
+                }
+            }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.TASK_FLOW, true);
+        }
+        // 进行批量 add操作
+        testEntrustedTaskRelDao.addList(taskRelEntities);
+    }
+
+    /**
+     * @param strSampleCode 样品预编号
+     * @return 处理后预样品编号 String类型
+     */
+    public String methodSampleCode(String strSampleCode) {
+        // 处理样品编号:来样时间与样品编号需要一致
+        StringBuffer sampleCode = new StringBuffer();
+        // 样品编号 比对 来样时间 年份不一致 则更改样品编号 为当前年份最大编号。
+        // 截取样品编号
+        String[] sampleCodes = strSampleCode.split("-");
+        sampleCodes[0]="YP";
+        // 根据年限 和类型 查询最大样品编号
+        String acceptanceDate = sampleCodes[1].substring(0, 4);
+        Integer maxSampleCode = sampleEntityMapper.getYPMaxNumber(acceptanceDate,"YP");
+        maxSampleCode += 1;
+        // 更改样品年限
+        sampleCodes[1] = String.valueOf(sampleCodes[1]);
+        // 更改样品编号
+        String suffix = new DecimalFormat("00000").format(maxSampleCode);
+        sampleCodes[2] = suffix;
+        for (int i = 0; i < sampleCodes.length; i++) {
+            sampleCode.append(sampleCodes[i]);
+            sampleCode.append("-");
+        }
+        if (sampleCode.deleteCharAt(sampleCode.length() - 1).toString().length() > 1) {
+            return sampleCode.toString();
+        }
+        return null;
+    }
 }

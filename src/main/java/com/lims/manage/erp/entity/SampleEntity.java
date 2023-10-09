@@ -244,6 +244,8 @@ public class SampleEntity {
     @TableField(exist = false)
     private Long taskId;
 
+    private List<TestSampleEntity> nodeSample;
+
     public SampleEntity(SampleAddParamVo addParamVo, SampleAddDetailVo detailVo, String sampleName, String sampleCode, String pictureUrl, String insertFlag) {
         this.productId = addParamVo.getSampleName();
         this.companyId = addParamVo.getCompanyId();

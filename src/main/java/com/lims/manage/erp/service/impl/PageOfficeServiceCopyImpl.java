@@ -33,6 +33,7 @@ import java.io.*;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @Author: DLC
@@ -126,13 +127,12 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                         if (cell != null) {
                             Object value = cell.getValue();
                             if (value != null) {
-                                String string = value.toString().replace(" ","");
-                                if (string.contains("第页，共页") || string.contains("第页,共页")) {
+                                String string = value.toString();
+                                String regex = "第.*\\s.*页，共.*\\s.*页";
+                                Pattern pattern = Pattern.compile(regex);
+                                if (pattern.matcher(string).matches()) {
                                     cells.get(n, j).setValue("第" + data.getStartPag() + "页，共" + insertVos.size() + "页");
                                 }
-//                                if ("第   页，共   页".equals(string)) {
-//                                    cells.get(n, j).setValue("第" + data.getNumber() + "页，共" + insertVos.size() + "页");
-//                                }
                             }
                         }
                     }
@@ -816,36 +816,40 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         if (CollectionUtils.isEmpty(sheetItems)) {
             return null;
         }
+        // 设置去重操作
+        Map<String, Integer> mapSet = new HashMap<>();
         // 序号
         Integer number = 1;
         for (int j = 0; j < sheetItems.size(); j++) {
             number = j + 1;
-            Integer startPag = 1;
             ExcelInsertVo data = sheetItems.get(j);
             for (int y = 0; y < sheetItems.size(); y++) {
                 ExcelInsertVo dataY = sheetItems.get(y);
                 // 遍历数据：检测项相同：获取检测项对应的所有excel下标及序号。
-                if (data.getCheckItemId().equals(dataY.getCheckItemId())) {
+                if (data.getCheckItemId().equals(dataY.getCheckItemId()) && mapSet.get(data.getCheckItemId() + "set" + data.getSheetIndex()) == null) {
                     // 设置每组检测项中信息
                     ExcelInsertVo insertVo = new ExcelInsertVo();
                     // 检测项主键
                     insertVo.setCheckItemId(data.getCheckItemId());
                     // 序号
                     insertVo.setNumber(number);
-                    // 起始页
-                    insertVo.setStartPag(startPag);
                     // sheet下标
                     insertVo.setSheetIndex(data.getSheetIndex());
+                    // 去重： checkItemId+sheetIndex 进行去重
+                    mapSet.put(insertVo.getCheckItemId() + "set" + insertVo.getSheetIndex(), 1);
                     if (map.get(data.getCheckItemId()) == null) {
                         List<ExcelInsertVo> insertVos = new ArrayList<>();
+                        // 起始页
+                        insertVo.setStartPag(1);
                         insertVos.add(insertVo);
                         map.put(data.getCheckItemId(), insertVos);
                     } else {
                         List<ExcelInsertVo> insertVosValues = (List<ExcelInsertVo>) map.get(data.getCheckItemId());
+                        // 起始页
+                        insertVo.setStartPag(insertVosValues.size() + 1);
                         insertVosValues.add(insertVo);
                         map.put(data.getCheckItemId(), insertVosValues);
                     }
-                    startPag++;
                 }
             }
         }
