@@ -217,6 +217,15 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
         if (type == 2) {
             state = 2;
         }
+        //校验设备使用开始时间结束时间是否冲突
+        DeviceUseTimeVo vo = new DeviceUseTimeVo();
+        vo.setDeviceId(instrumentVo.getId());
+        vo.setEndTime(instrumentVo.getEndTime());
+        vo.setStartTime(instrumentVo.getStartTime());
+        List<InstrumentRecordEntity> instrumentRecordEntities = instrumentRecordEntityMapper.checkTime(vo);
+        if(!org.apache.commons.collections.CollectionUtils.isEmpty(instrumentRecordEntities)){
+            return "选择的结束时间与设备在其他任务中使用的时间冲突，请重新选择！";
+        }
         // 遍历 设备使用记录id
         if (!CollectionUtils.isEmpty(instrumentVo.getInstrumentRecordListVos())) {
             for (InstrumentRecordListVo instrumentRecordListVo : instrumentVo.getInstrumentRecordListVos()) {
