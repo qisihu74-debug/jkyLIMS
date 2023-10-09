@@ -99,6 +99,13 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
             }
             // 存储 test_instrument_use_record 设备使用记录
             for (CheckItemInfoVo checkItemInfoVo : instrumentVo.getCheckItemInfoList()) {
+                //保存设备与检测项关系
+                TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
+                testChItemInstrumentMiddleEntity.setSidItem(checkItemInfoVo.getItemId());
+                testChItemInstrumentMiddleEntity.setStartTime(startTime);
+                testChItemInstrumentMiddleEntity.setIntrusmentId(instrumentVo.getId().intValue());
+                testDetectionDao.addItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
+                //保存设备使用记录
                 InstrumentRecordEntity recordEntity = new InstrumentRecordEntity();
                 // 记录id
                 recordEntity.setId(GenID.getID());
@@ -229,6 +236,12 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
         // 遍历 设备使用记录id
         if (!CollectionUtils.isEmpty(instrumentVo.getInstrumentRecordListVos())) {
             for (InstrumentRecordListVo instrumentRecordListVo : instrumentVo.getInstrumentRecordListVos()) {
+                //更新设备使用结束时间
+                TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
+                testChItemInstrumentMiddleEntity.setEndTime(instrumentVo.getEndTime());
+                testChItemInstrumentMiddleEntity.setSidItem(instrumentRecordListVo.getEscRelId().intValue());
+                testDetectionDao.updateItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
+
                 // 更新仪器使用记录
                 InstrumentRecordEntity instrumentRecordEntity = new InstrumentRecordEntity();
                 // 仪器使用记录id

@@ -180,6 +180,7 @@
         </collection>
         <collection property="instrumentRecordListVos" ofType="com.lims.manage.erp.vo.InstrumentRecordListVo">
             <id property="recordId" column="record_id"></id>
+            <id property="escRelId" column="escRelId"></id>
             <id property="checkItemName" column="check_item_name"></id>
         </collection>
     </resultMap>
@@ -1123,6 +1124,7 @@
         t4.sample_code sampeCode,
         t4.alias_name aliasName,
         t1.id as record_id,
+        t1.esc_rel_id as escRelId,
         t5.check_item_name
     FROM
         test_instrument_use_record AS t1

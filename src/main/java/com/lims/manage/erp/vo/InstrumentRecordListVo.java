@@ -9,6 +9,7 @@ import java.util.Date;
 @Data
 public class InstrumentRecordListVo {
     private Long recordId;
+    private Long escRelId;
     private String instrumentCode;
     private String instrumentName;
     private String instrumentModel;
