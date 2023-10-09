@@ -1,14 +1,16 @@
 package com.lims.manage.erp.controller;
 
 
+import com.alibaba.fastjson.JSON;
+import com.lims.manage.erp.entity.TestCheckItemsTaskRel;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestTaskPoolService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RestController;
+import java.lang.reflect.Type;
+import java.util.List;
 
 /**
  * <p>
@@ -19,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2023-10-08
  */
 @RestController
-@RequestMapping("/test-check-items-task-rel")
+@RequestMapping("/testCheckItemsTaskRel")
 public class TestCheckItemsTaskRelController {
 
     @Autowired
@@ -32,8 +34,20 @@ public class TestCheckItemsTaskRelController {
      * @return
      */
     @GetMapping("/taskHallDetailsDisplay")
-    public Result taskHallDetailsDisplay(Integer taskId,Long entrustId) {
-        return testTaskPoolService.taskHallDetailsDisplay(taskId,entrustId);
+    public Result taskHallDetailsDisplay(Integer taskId, Long entrustId) {
+        return testTaskPoolService.taskHallDetailsDisplay(taskId, entrustId);
+    }
+
+    /**
+     * 任务大厅 领取任务单
+     *
+     * @param json
+     * @return
+     */
+    @RequestMapping("/addTaskCollection")
+    public Result taskCollection(@RequestParam("json") String json) {
+        List<TestCheckItemsTaskRel> itemsTaskRels = JSON.parseObject(json, (Type) TestCheckItemsTaskRel.class);
+        return testTaskPoolService.addTaskCollection(itemsTaskRels);
     }
 
 }

@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -103,5 +105,45 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         // 样品信息
         jsonObject.put("samples", sampleList);
         return ResultUtil.success(jsonObject);
+    }
+
+    /**
+     * 任务大厅 领取任务单
+     *
+     * @param list
+     * @return
+     */
+    @Override
+    public Result addTaskCollection(List<TestCheckItemsTaskRel> list) {
+        // 检测人员信息
+        Map<String, Long> userMap = new HashMap<>();
+        // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
+        for (TestCheckItemsTaskRel testCheckItemsTaskRel1 : list) {
+            // 读取检测项数据 生成对应的任务单。
+            for (TestCheckItemsTaskRel testCheckItemsTaskRel2 : list) {
+                // 查询 检测人所代表的科室信息
+                if (testCheckItemsTaskRel1.getUserType().equals(0)) {
+                    // 检测人员 = key（检测项主键 + "&" + 检测人userId） , value(检测人userId)
+                    userMap.put(testCheckItemsTaskRel1.getItemId() + "&" + testCheckItemsTaskRel1.getUserId(), Long.valueOf(testCheckItemsTaskRel1.getUserId()));
+                }
+                //
+                if (userMap != null) {
+                    //
+                    for (String key : userMap.keySet()) {
+                        // 通过检测人 获取所属团队信息
+                        List<Long> userIds = new ArrayList<>();
+                        userIds.add(userMap.get(key));
+                    }
+                    // 根据人员id 查询所属科室
+
+                }
+                // 通过委托单id 及 任务单号 查看任务单是否存在，是否是试验状态。
+                // 检测项主键相等的情况下
+                if (testCheckItemsTaskRel1.getItemId().equals(testCheckItemsTaskRel2.getItemId())) {
+
+                }
+            }
+        }
+        return null;
     }
 }
