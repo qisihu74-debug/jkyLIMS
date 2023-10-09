@@ -38,4 +38,6 @@ public class InstrumentRecordEntity {
      * 任务单id
      */
     private Long taskId;
+
+    private String taskCode;
 }
