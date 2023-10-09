@@ -126,8 +126,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                         if (cell != null) {
                             Object value = cell.getValue();
                             if (value != null) {
-                                String string = value.toString();
-                                if (string.contains("第   页，共   页")) {
+                                String string = value.toString().replace(" ","");
+                                if (string.contains("第页，共页") || string.contains("第页,共页")) {
                                     cells.get(n, j).setValue("第" + data.getStartPag() + "页，共" + insertVos.size() + "页");
                                 }
 //                                if ("第   页，共   页".equals(string)) {

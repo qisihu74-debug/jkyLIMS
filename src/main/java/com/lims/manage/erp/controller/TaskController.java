@@ -1106,6 +1106,20 @@ public class TaskController {
 //        new ModelAndView("error");
     }
 
-
+    /**
+     *任务大厅列表
+     * @param sampleName
+     * @param publisher
+     * @param requireStartTime
+     * @param requireEndTime
+     * @param publishStartTime
+     * @param publishEndTime
+     * @return
+     */
+    @GetMapping("taskHall")
+    public Result taskHall(String sampleName,String publisher,String requireStartTime,String requireEndTime
+            ,String publishStartTime,String publishEndTime){
+        taskService.taskHall(sampleName,publisher,requireStartTime,requireEndTime,publishStartTime,publishEndTime,ShiroUtils.getUserInfo().getUserId());
+    }
 
 }
