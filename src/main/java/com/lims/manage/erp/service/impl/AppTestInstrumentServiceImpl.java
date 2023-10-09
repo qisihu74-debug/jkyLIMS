@@ -99,6 +99,13 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
             }
             // 存储 test_instrument_use_record 设备使用记录
             for (CheckItemInfoVo checkItemInfoVo : instrumentVo.getCheckItemInfoList()) {
+                //保存设备与检测项关系
+                TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
+                testChItemInstrumentMiddleEntity.setSidItem(checkItemInfoVo.getItemId());
+                testChItemInstrumentMiddleEntity.setStartTime(startTime);
+                testChItemInstrumentMiddleEntity.setIntrusmentId(instrumentVo.getId().intValue());
+                testDetectionDao.addItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
+                //保存设备使用记录
                 InstrumentRecordEntity recordEntity = new InstrumentRecordEntity();
                 // 记录id
                 recordEntity.setId(GenID.getID());
@@ -229,6 +236,12 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
         // 遍历 设备使用记录id
         if (!CollectionUtils.isEmpty(instrumentVo.getInstrumentRecordListVos())) {
             for (InstrumentRecordListVo instrumentRecordListVo : instrumentVo.getInstrumentRecordListVos()) {
+                //更新设备使用结束时间
+                TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity = new TestChItemInstrumentMiddleEntity();
+                testChItemInstrumentMiddleEntity.setEndTime(instrumentVo.getEndTime());
+                testChItemInstrumentMiddleEntity.setSidItem(instrumentRecordListVo.getEscRelId().intValue());
+                testDetectionDao.updateItemInstrumentMiddleRel(testChItemInstrumentMiddleEntity);
+
                 // 更新仪器使用记录
                 InstrumentRecordEntity instrumentRecordEntity = new InstrumentRecordEntity();
                 // 仪器使用记录id
@@ -247,21 +260,21 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
             // 仪器id
             Set<Long> instrumentIds = new HashSet<>();
             // 检测项id
-            Set<Long> itemIds = new HashSet<>();
-            // taskId
-            Set<Long> taskIds = new HashSet<>();
+//            Set<Long> itemIds = new HashSet<>();
+//            // taskId
+//            Set<Long> taskIds = new HashSet<>();
             // 通过记录id集合 获取所属 记录id、仪器id、检测项id、taskId
-            List<InstrumentAppVo> ids = instrumentRecordEntityMapper.getIds(instrumentVo.getInstrumentRecordListVos());
-            if (!CollectionUtils.isEmpty(ids)) {
-                for (InstrumentAppVo data : ids) {
-                    // 仪器id
-                    instrumentIds.add(data.getId());
-                    // 检测项id
-                    itemIds.add(data.getEscRelId());
-                    // taskId
-                    taskIds.add(data.getTaskId());
-                }
-            }
+//            List<InstrumentAppVo> ids = instrumentRecordEntityMapper.getIds(instrumentVo.getInstrumentRecordListVos());
+//            if (!CollectionUtils.isEmpty(ids)) {
+//                for (InstrumentAppVo data : ids) {
+//                    // 仪器id
+//                    instrumentIds.add(data.getId());
+//                    // 检测项id
+//                    itemIds.add(data.getEscRelId());
+//                    // taskId
+//                    taskIds.add(data.getTaskId());
+//                }
+//            }
             // 更新仪器状态
             for (Long id : instrumentIds) {
                 InstrumentAppVo instrumentAppVo = new InstrumentAppVo();
@@ -276,53 +289,53 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
                 logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "APP端更新仪器状态\n\t" + stringBuilder11.toString(), Const.TASK_TEST, true);
             }
             // 更新检测项结束时间
-            for (Long id : itemIds) {
-                SampleItemInstrumentEntity sampleItemInstrumentEntity = new SampleItemInstrumentEntity();
-                sampleItemInstrumentEntity.setItemId(id.intValue());
-                sampleItemInstrumentEntity.setEndTime(instrumentVo.getEndTime());
-                sampleItemInstrumentEntity.setState(state);
-                testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
-
-                //记录日志
-                StringBuilder stringBuilder13 = new StringBuilder();
-                stringBuilder13.append(" 检测项id：" + sampleItemInstrumentEntity.getId());
-                stringBuilder13.append(" 检测项状态：" + sampleItemInstrumentEntity.getState());
-                stringBuilder13.append(" 检测项结束时间：" + sampleItemInstrumentEntity.getEndTime());
-                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "APP端更新检测项\n\t" + stringBuilder13.toString(), Const.TASK_TEST, true);
-            }
+//            for (Long id : itemIds) {
+//                SampleItemInstrumentEntity sampleItemInstrumentEntity = new SampleItemInstrumentEntity();
+//                sampleItemInstrumentEntity.setItemId(id.intValue());
+//                sampleItemInstrumentEntity.setEndTime(instrumentVo.getEndTime());
+//                sampleItemInstrumentEntity.setState(state);
+//                testDetectionDao.updateSampleItemInstrumentEntity(sampleItemInstrumentEntity);
+//
+//                //记录日志
+//                StringBuilder stringBuilder13 = new StringBuilder();
+//                stringBuilder13.append(" 检测项id：" + sampleItemInstrumentEntity.getId());
+//                stringBuilder13.append(" 检测项状态：" + sampleItemInstrumentEntity.getState());
+//                stringBuilder13.append(" 检测项结束时间：" + sampleItemInstrumentEntity.getEndTime());
+//                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "APP端更新检测项\n\t" + stringBuilder13.toString(), Const.TASK_TEST, true);
+//            }
             // 通过任务单id 查询检测项
-            for (Long taskId : taskIds) {
-                Boolean status = true;
-                // 通过任务单id 获取所属检测项列表
-                List<CheckItemInfoVo> itemList = taskMapper.getEntrustItemVos(taskId);
-                if (!CollectionUtils.isEmpty(itemList)) {
-                    for (CheckItemInfoVo checkItemInfoVo : itemList) {
-                        // 检测项未 全部开检 则任务单无法结束试验
-                        if (checkItemInfoVo.getState() != null && checkItemInfoVo.getState() < 2) {
-                            status = false;
-                        }
-                    }
-                }
-                // if status = true 更新任务单为结束。
-                if (status) {
-                    // 更新任务单状态
-                    TaskTestEntity taskTestEntity = new TaskTestEntity();
-                    taskTestEntity.setId(taskId);
-                    // 任务单 == 4 试验完成
-                    taskTestEntity.setState(4);
-                    taskTestEntity.setEndDetectionTime(new Date(System.currentTimeMillis()));
-                    //记录日志
-                    StringBuilder stringBuilder1 = new StringBuilder();
-                    stringBuilder1.append(" 任务单id：" + taskTestEntity.getId());
-                    stringBuilder1.append(" 任务单状态：" + taskTestEntity.getState());
-                    stringBuilder1.append(" 任务结束时间：");
-                    if (!StringUtils.isEmpty(taskTestEntity.getEndDetectionTime())) {
-                        stringBuilder1.append(new Timestamp(taskTestEntity.getEndDetectionTime().getTime()));
-                    }
-                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "APP端试验检测-任务单结束试验\n\t" + stringBuilder1.toString(), Const.TASK_TEST, true);
-                    taskMapper.updateTestTask(taskTestEntity);
-                }
-            }
+//            for (Long taskId : taskIds) {
+//                Boolean status = true;
+//                // 通过任务单id 获取所属检测项列表
+//                List<CheckItemInfoVo> itemList = taskMapper.getEntrustItemVos(taskId);
+//                if (!CollectionUtils.isEmpty(itemList)) {
+//                    for (CheckItemInfoVo checkItemInfoVo : itemList) {
+//                        // 检测项未 全部开检 则任务单无法结束试验
+//                        if (checkItemInfoVo.getState() != null && checkItemInfoVo.getState() < 2) {
+//                            status = false;
+//                        }
+//                    }
+//                }
+//                // if status = true 更新任务单为结束。
+//                if (status) {
+//                    // 更新任务单状态
+//                    TaskTestEntity taskTestEntity = new TaskTestEntity();
+//                    taskTestEntity.setId(taskId);
+//                    // 任务单 == 4 试验完成
+//                    taskTestEntity.setState(4);
+//                    taskTestEntity.setEndDetectionTime(new Date(System.currentTimeMillis()));
+//                    //记录日志
+//                    StringBuilder stringBuilder1 = new StringBuilder();
+//                    stringBuilder1.append(" 任务单id：" + taskTestEntity.getId());
+//                    stringBuilder1.append(" 任务单状态：" + taskTestEntity.getState());
+//                    stringBuilder1.append(" 任务结束时间：");
+//                    if (!StringUtils.isEmpty(taskTestEntity.getEndDetectionTime())) {
+//                        stringBuilder1.append(new Timestamp(taskTestEntity.getEndDetectionTime().getTime()));
+//                    }
+//                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "APP端试验检测-任务单结束试验\n\t" + stringBuilder1.toString(), Const.TASK_TEST, true);
+//                    taskMapper.updateTestTask(taskTestEntity);
+//                }
+//            }
         }
         return "结束试验";
     }

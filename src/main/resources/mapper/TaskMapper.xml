@@ -150,6 +150,7 @@
     <!--任务单和样品列表结果集-->
     <resultMap id="taskSampleResultMap" type="com.lims.manage.erp.vo.TaskListVo">
         <result property="taskId" column="taskId"></result>
+        <result property="startTime" column="startTime"></result>
         <result property="taskCode" column="taskCode"></result>
         <result property="orderer" column="orderer"></result>
         <result property="requiredCompletionTime" column="requiredCompletionTime"></result>
@@ -179,6 +180,7 @@
         </collection>
         <collection property="instrumentRecordListVos" ofType="com.lims.manage.erp.vo.InstrumentRecordListVo">
             <id property="recordId" column="record_id"></id>
+            <id property="escRelId" column="escRelId"></id>
             <id property="checkItemName" column="check_item_name"></id>
         </collection>
     </resultMap>
@@ -1115,12 +1117,14 @@
     <select id="taskList" resultMap="taskSampleResultMap">
         SELECT
         t2.id AS taskId,
+        t1.start_time as startTime,
         t2.order_time,
         t2.task_code AS taskCode,
         t4.id sampleId,
         t4.sample_code sampeCode,
         t4.alias_name aliasName,
         t1.id as record_id,
+        t1.esc_rel_id as escRelId,
         t5.check_item_name
     FROM
         test_instrument_use_record AS t1
