@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.ReqTaskPool;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.TaskEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
@@ -9,6 +10,7 @@ import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
 import com.lims.manage.erp.entity.TeamTreeStructureEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
+import com.lims.manage.erp.entity.TestTaskPool;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
@@ -572,4 +574,7 @@ public interface TaskMapper extends BaseMapper {
     @Delete("DELETE FROM test_task  WHERE id = #{taskId}")
     int deleteTaskById(@Param("taskId")Long taskId);
 
+    List<TestTaskPool> taskHall(@Param("item") ReqTaskPool item);
+
+    List<TestTaskPool> myTaskList(@Param("item") ReqTaskPool bean);
 }

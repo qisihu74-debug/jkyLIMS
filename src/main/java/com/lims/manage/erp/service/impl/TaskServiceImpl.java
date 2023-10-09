@@ -6,12 +6,65 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.config.PoiConfig;
-import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustFileTableEntity;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.ReqTaskPool;
+import com.lims.manage.erp.entity.SampleCirculationRecord;
+import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
+import com.lims.manage.erp.entity.TaskIdEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TaskTestTeamEntity;
+import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
+import com.lims.manage.erp.entity.TestInstrumentEntity;
+import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.entity.TestTaskPool;
+import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.entity.TreeEntity;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
+import com.lims.manage.erp.mapper.EntrustFileTableDao;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
+import com.lims.manage.erp.mapper.SampleEntityMapper;
+import com.lims.manage.erp.mapper.SysRoleDao;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
+import com.lims.manage.erp.mapper.TestDetectionDao;
+import com.lims.manage.erp.mapper.TestEntrustedTaskRelDao;
+import com.lims.manage.erp.mapper.TestProductItemDao;
+import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TaskService;
-import com.lims.manage.erp.util.*;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.ConvertUtil;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.ExcelReplaceUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.CheckItemInfoVo;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.ExcelInsertVo;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.OriginalRecordDataVo;
+import com.lims.manage.erp.vo.OriginalRecordParamVo;
+import com.lims.manage.erp.vo.PagingToolVo;
+import com.lims.manage.erp.vo.PersonInfoVo;
+import com.lims.manage.erp.vo.ReceiveSampleListVo;
+import com.lims.manage.erp.vo.ReceiveSampleParamVo;
+import com.lims.manage.erp.vo.ReviewVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.SamplePrivateInfoVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.TaskListParamVo;
+import com.lims.manage.erp.vo.TaskListVo;
+import com.lims.manage.erp.vo.TaskStatsItemVo;
+import com.lims.manage.erp.vo.TaskStatsVo;
+import com.lims.manage.erp.vo.TeamVo;
+import com.lims.manage.erp.vo.TemplateSampleVo;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
@@ -44,7 +97,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
-import java.text.ParseException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,8 +105,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.zip.ZipOutputStream;
 
 @Service
@@ -2193,5 +2248,21 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             return "当前操作人 无用户授权人角色";
         }
         return null;
+    }
+
+    @Override
+    public PageInfo<TestTaskPool> taskHall(ReqTaskPool bean) {
+        PageHelper.startPage(bean.getPageNum(),bean.getPageSize());
+        List<TestTaskPool> list = taskMapper.taskHall(bean);
+        PageInfo<TestTaskPool> pageInfo = new PageInfo<>(list);
+        return pageInfo;
+    }
+
+    @Override
+    public PageInfo<TestTaskPool> myTaskList(ReqTaskPool bean) {
+        PageHelper.startPage(bean.getPageNum(),bean.getPageSize());
+        List<TestTaskPool> list = taskMapper.myTaskList(bean);
+        PageInfo<TestTaskPool> pageInfo = new PageInfo<>(list);
+        return pageInfo;
     }
 }

@@ -2,12 +2,15 @@ package com.lims.manage.erp.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
+import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
+import com.lims.manage.erp.entity.ReqTaskPool;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TestTaskPool;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.result.Result;
@@ -1108,18 +1111,26 @@ public class TaskController {
 
     /**
      *任务大厅列表
-     * @param sampleName
-     * @param publisher
-     * @param requireStartTime
-     * @param requireEndTime
-     * @param publishStartTime
-     * @param publishEndTime
+     * @param bean
      * @return
      */
-    @GetMapping("taskHall")
-    public Result taskHall(String sampleName,String publisher,String requireStartTime,String requireEndTime
-            ,String publishStartTime,String publishEndTime){
-        taskService.taskHall(sampleName,publisher,requireStartTime,requireEndTime,publishStartTime,publishEndTime,ShiroUtils.getUserInfo().getUserId());
+    @PostMapping("taskHall")
+    public Result taskHall(@RequestBody ReqTaskPool bean){
+        bean.setUserId(ShiroUtils.getUserInfo().getUserId());
+        PageInfo<TestTaskPool> pageInfo = taskService.taskHall(bean);
+        return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     *我的任务列表
+     * @param bean
+     * @return
+     */
+    @PostMapping("myTaskList")
+    public Result myTaskList(@RequestBody ReqTaskPool bean){
+        bean.setUserId(ShiroUtils.getUserInfo().getUserId());
+        PageInfo<TestTaskPool> pageInfo = taskService.myTaskList(bean);
+        return ResultUtil.success(pageInfo);
     }
 
 }
