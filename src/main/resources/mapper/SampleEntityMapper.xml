@@ -1436,4 +1436,11 @@ WHERE
             #{code}
         </foreach>
     </select>
+
+    <select id="getYPMaxNumber" resultType="java.lang.Integer" parameterType="string">
+        SELECT MAX(SUBSTR(sample_code, 9, 5) + 0) maxNum
+        FROM test_sample
+        WHERE sample_code LIKE CONCAT('%-', #{year}, '-%')
+        and sample_code LIKE CONCAT('%', #{sampleType} ,'%')
+    </select>
 </mapper>

@@ -1,8 +1,10 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author gjl
@@ -94,5 +96,10 @@ public class SampleItemEntity {
      * 任务ID
      */
     private Long taskId;
+    /**
+     * 检测项下 对应的操作人员。
+     */
+    @TableField(exist = false)
+    private List<TestCheckItemsTaskRel> itemsTaskRels;
 
 }

@@ -1185,20 +1185,6 @@ public class EntrustController {
         if (StringUtils.isEmpty(vo.getEntrustCompany()) || StringUtils.isEmpty(vo.getEntrustPeople())) {
             return ResultUtil.error( "请检查委托人信息是否完整！");
         }
-//        List<SampleEntity> samples = vo.getSamples();
-//        if (CollectionUtils.isEmpty(samples)) {
-//            return ResultUtil.error( "请检查委托单样品信息是否完整！");
-//        }
-//        if (!CollectionUtils.isEmpty(samples)) {
-//            for (SampleEntity sampleEntity : samples) {
-//                if (CollectionUtils.isEmpty(sampleEntity.getJudgmentBasisVos())) {
-//                    return ResultUtil.error("请检查委托单样品下检测项信息是否完整！");
-//                }
-//            }
-//        }
-//        if (CollectionUtils.isEmpty(entity.getCheckItemDeptVoList())) {
-//             return ResultUtil.error( "检测项为空不能发布！！！");
-//        }
         // 丁连春：任务单完成时间 以委托单下单时间为准
         entity.setRequiredCompletionTime(vo.getRequestDate());
         // 任务单下单日期等于委托单受理日期
