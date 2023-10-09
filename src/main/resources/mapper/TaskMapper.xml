@@ -1244,4 +1244,89 @@
             task_id = null
         WHERE entrust_id = #{entrustmentId}
     </update>
+
+    <select id="taskHall" resultType="com.lims.manage.erp.entity.TestTaskPool">
+SELECT
+	tb1.id,
+tb1.sn,
+tb1.sample,
+tb1.entrustment_id As entrustmentId,
+tb1.price,
+tb1.required_completion_time As requiredCompletionTime,
+tb1.task_flow_req As taskFlowReq,
+tb1.publisher,
+tb1.publish_date As publishDate
+
+FROM
+	test_task_pool tb1
+INNER JOIN (
+	SELECT
+		GROUP_CONCAT(
+			t1.product_name SEPARATOR ','
+		) AS productName,
+		t3.user_id AS userId
+	FROM
+		test_technicist_capacity t1
+	LEFT JOIN test_technicist t2 ON t1.technicist_id = t2.id
+	LEFT JOIN sys_user t3 ON t2.user_id = t3.user_id
+	WHERE
+		t3.user_id = #{item.userId}
+) tb2 ON tb2.productName LIKE CONCAT('%', tb1.sample, '%')
+WHERE
+	tb1.receive_id IS NULL
+<if test="item.sampleName != null and item.sampleName != ''">
+    AND tb1.sample LIKE CONCAT('%', #{item.sampleName}, '%')
+</if>
+<if test="item.publisher != null and item.publisher != ''">
+    AND tb1.publisher LIKE CONCAT('%', #{item.publisher}, '%')
+</if>
+<if test="item.requireStartTime != null and item.requireEndTime != null">
+    And tb1.required_completion_time &gt;=#{item.requireStartTime}
+     and tb1.required_completion_time &lt;= #{item.requireEndTime}
+</if>
+<if test="item.publishStartTime != null and item.publishEndTime != null">
+    And tb1.publish_date &gt;=#{item.publishStartTime}
+    and tb1.publish_date &lt;= #{item.publishEndTime}
+</if>
+    </select>
+
+    <select id="taskHall" resultType="com.lims.manage.erp.entity.TestTaskPool">
+        SELECT
+        tb1.id,
+        tb1.sn,
+        tb1.sample,
+        tb1.entrustment_id AS entrustmentId,
+        tb1.price,
+        tb1.required_completion_time AS requiredCompletionTime,
+        tb1.task_flow_req AS taskFlowReq,
+        tb1.publisher,
+        tb1.publish_date AS publishDate,
+        tb1.receive_name AS receiveName,
+        tb1.receive_date AS receiveDate,
+        GROUP_CONCAT(tb2.task_code SEPARATOR ',')
+        FROM
+        test_task_pool tb1
+        LEFT JOIN test_task tb2 ON tb1.id = tb2.pool_id
+        WHERE
+        tb1.receive_id #{item.userId}
+        <if test="item.sampleName != null and item.sampleName != ''">
+            AND tb1.sample LIKE CONCAT('%', #{item.sampleName}, '%')
+        </if>
+        <if test="item.publisher != null and item.publisher != ''">
+            AND tb1.publisher LIKE CONCAT('%', #{item.publisher}, '%')
+        </if>
+        <if test="item.requireStartTime != null and item.requireEndTime != null">
+            And tb1.required_completion_time &gt;=#{item.requireStartTime}
+            and tb1.required_completion_time &lt;= #{item.requireEndTime}
+        </if>
+        <if test="item.publishStartTime != null and item.publishEndTime != null">
+            And tb1.publish_date &gt;=#{item.publishStartTime}
+            and tb1.publish_date &lt;= #{item.publishEndTime}
+        </if>
+        <if test="item.receiveStartTime != null and item.receiveEndTime != null">
+            And tb1.receive_date &gt;=#{item.receiveStartTime}
+            and tb1.receive_date &lt;= #{item.receiveEndTime}
+        </if>
+        GROUP BY tb1.id
+    </select>
 </mapper>

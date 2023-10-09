@@ -1,8 +1,10 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.ReqTaskPool;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TestTaskPool;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -259,4 +261,7 @@ public interface TaskService {
      */
     String verifyUserInformation(Long userId);
 
+    PageInfo<TestTaskPool> taskHall(ReqTaskPool bean);
+
+    PageInfo<TestTaskPool> myTaskList(ReqTaskPool bean);
 }
