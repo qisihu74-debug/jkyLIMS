@@ -767,7 +767,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
                 Image image = Image.getInstance(imageData);
                 image.scaleToFit(50,50);
                 // 设置图片位置
-                image.setAbsolutePosition(80, PageSize.A4.getHeight() - 400);
+                image.setAbsolutePosition(280, PageSize.A4.getHeight() - 670);
                 // 将图片添加到页面
                 content.addImage(image);
             }
