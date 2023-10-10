@@ -25,7 +25,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("test_task_poolq")
+@TableName("test_task_pool")
 public class TestTaskPool implements Serializable {
 
 //    private static final long serialVersionUID=1L;

@@ -54,13 +54,20 @@
         order_time,
         task_price,
         present_information,
-        create_time
+        create_time,
+        inspector,
+        recorder,
+        reviewer,
+        report_producer,
+        probationer,
+        interns,
+        auxiliary_personnel
         )
         VALUES
         <foreach collection="vos" item="vo" separator=",">
             (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},
              #{vo.state}, #{vo.issueReport}, #{vo.orderer},#{vo.reportComplete},#{vo.orderTime},#{vo.taskPrice},#{vo.presentInformation},
-             #{vo.createTime})
+             #{vo.createTime},#{vo.inspector},#{vo.recorder},#{vo.reviewer},#{vo.reportProducer},#{vo.auxiliaryPersonnel},#{vo.probationer},#{vo.interns})
         </foreach>
     </insert>
 

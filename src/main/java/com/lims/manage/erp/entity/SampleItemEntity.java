@@ -3,6 +3,7 @@ package com.lims.manage.erp.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -151,5 +152,10 @@ public class SampleItemEntity {
      */
     @TableField(exist = false)
     private List<TestCheckItemsTaskRel> itemsTaskRels;
+    /**
+     * 样品id集合
+     */
+    @TableField(exist = false)
+    private List<Integer> sampleIds;
 
 }
