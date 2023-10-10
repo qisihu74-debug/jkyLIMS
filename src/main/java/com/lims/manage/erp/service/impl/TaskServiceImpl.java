@@ -2264,8 +2264,8 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         PageHelper.startPage(bean.getPageNum(),bean.getPageSize());
         List<TestTaskPool> list = taskMapper.myTaskList(bean);
         PageInfo<TestTaskPool> pageInfo = new PageInfo<>(list);
-        List<TaskRes> list1 = Lists.newArrayList();
         for (TestTaskPool taskPool :pageInfo.getList()){
+            List<TaskRes> list1 = Lists.newArrayList();
             String[] split = taskPool.getTaskCode().split(",");
             for (String s :split){
                 String[] strings = s.split("&");
