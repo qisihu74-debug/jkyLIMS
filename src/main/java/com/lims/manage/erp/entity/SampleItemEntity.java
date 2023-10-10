@@ -157,5 +157,15 @@ public class SampleItemEntity {
      */
     @TableField(exist = false)
     private List<Integer> sampleIds;
+    /**
+     * 样品名称
+     */
+    @TableField(exist = false)
+    private String sampleName;
+    /**
+     * sample_code
+     */
+    @TableField(exist = false)
+    private String sampleCode;
 
 }

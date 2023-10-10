@@ -276,15 +276,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     taskMapper.deleteTaskById(taskProgressVo.getTaskId());
                 }
             }
-            //调用方法： 补充检测项单信息并发布任务单
+            //调用方法： 补充检测项信息并发布任务单
             methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue());
-            // 调用方法： 对每组检测项的人员信息进行新增。
-            for (TestCheckItemsTaskRel testCheckItemsTaskRel : sampleItemEntity.getItemsTaskRels()) {
-                //
-                testCheckItemsTaskRel.setCheckItemName(sampleItemEntity.getCheckItemName());
-                testCheckItemsTaskRelMapper.insert(testCheckItemsTaskRel);
-            }
-
         }
         // 调用方法 进行 更新流水号任务单信息
         methodUpdateTaskPool(entrustId, testTaskPool);
@@ -333,8 +326,11 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         Date requiredCompletionTime = new Date();
         // 领样人
         entity.setSampler(sampler);
+        // 领样时间
+        entity.setSampleReceivingTime(new Date());
         // 补充检测项信息
         List<CheckItemDeptVo> checkItemDeptVoList = new ArrayList<>();
+        long taskId = GenID.getID();
         // 遍历每组检测项分配的itemId数量
         for (int i = 0; i < sampleItemEntity.getItemIds().size(); i++) {
             // itemList 是通过委托单id查看检测项详情列表
@@ -353,10 +349,34 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     checkItemDeptVoList.add(checkItemDeptVo);
                 }
             }
+            // 调用方法： 对每组检测项的人员信息进行新增。
+            for (SampleItemEntity sampleItemEntity1 : itemList) {
+                Integer itemId = sampleItemEntity.getItemIds().get(i);
+                if (sampleItemEntity1.getId().equals(itemId)) {
+                    for (TestCheckItemsTaskRel taskRel : sampleItemEntity.getItemsTaskRels()) {
+                        // 检测项主键
+                        taskRel.setItemId(itemId);
+                        // 检测项名称
+                        taskRel.setCheckItemName(sampleItemEntity1.getCheckItemName());
+                        // 样品名称
+                        taskRel.setSampleName(sampleItemEntity1.getSampleName());
+                        // 样品编号
+                        taskRel.setSampleCode(sampleItemEntity1.getSampleCode());
+                        // 样品id
+                        taskRel.setSampleId(sampleItemEntity1.getSampleId());
+                        // 委托单主键
+                        taskRel.setEntrustId(entrustId);
+                        // 任务单id
+                        taskRel.setTaskId(taskId);
+                        // 调用方法： 对每组检测项的人员信息进行新增。
+                        testCheckItemsTaskRelMapper.insert(taskRel);
+                    }
+                }
+            }
         }
         entity.setCheckItemDeptVoList(checkItemDeptVoList);
         // 发布任务
-        distributionTask412(entity, sampleItemEntity, poolId);
+        distributionTask412(entity, sampleItemEntity, poolId, taskId);
     }
 
     /**
@@ -367,6 +387,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      * @param inspectorRels
      */
     void methodForPersonnel(SampleItemEntity sampleItemEntity, List<LabelValueVo> inspectorArraysVos, List<TestCheckItemsTaskRel> inspectorRels) {
+        // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
         // 读取记录人数据
         if (StringUtils.isNotEmpty(sampleItemEntity.getRecorder())) {
             String[] userArrays = sampleItemEntity.getRecorder().split(",");
@@ -403,6 +424,42 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 inspectorArraysVos.add(labelValueVo);
             }
         }
+        // 辅助人员
+        if (StringUtils.isNotEmpty(sampleItemEntity.getAuxiliaryPersonnel())) {
+            String[] userArrays = sampleItemEntity.getAuxiliaryPersonnel().split(",");
+            for (int i = 0; i < userArrays.length; i++) {
+                String[] names = userArrays[i].split("&");
+                LabelValueVo labelValueVo = new LabelValueVo();
+                labelValueVo.setLabel(names[0]);
+                labelValueVo.setValue(Long.parseLong(names[1]));
+                labelValueVo.setText("4");
+                inspectorArraysVos.add(labelValueVo);
+            }
+        }
+        // 5、见习生：实习的新手
+        if (StringUtils.isNotEmpty(sampleItemEntity.getProbationer())) {
+            String[] userArrays = sampleItemEntity.getProbationer().split(",");
+            for (int i = 0; i < userArrays.length; i++) {
+                String[] names = userArrays[i].split("&");
+                LabelValueVo labelValueVo = new LabelValueVo();
+                labelValueVo.setLabel(names[0]);
+                labelValueVo.setValue(Long.parseLong(names[1]));
+                labelValueVo.setText("5");
+                inspectorArraysVos.add(labelValueVo);
+            }
+        }
+        // 6、实习生
+        if (StringUtils.isNotEmpty(sampleItemEntity.getInspector())) {
+            String[] userArrays = sampleItemEntity.getInspector().split(",");
+            for (int i = 0; i < userArrays.length; i++) {
+                String[] names = userArrays[i].split("&");
+                LabelValueVo labelValueVo = new LabelValueVo();
+                labelValueVo.setLabel(names[0]);
+                labelValueVo.setValue(Long.parseLong(names[1]));
+                labelValueVo.setText("6");
+                inspectorArraysVos.add(labelValueVo);
+            }
+        }
         // 循环读取 每组检测项
         for (LabelValueVo labelValueVo : inspectorArraysVos) {
             TestCheckItemsTaskRel data = new TestCheckItemsTaskRel();
@@ -414,7 +471,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Boolean distributionTask412(TaskVo entity, SampleItemEntity sampleItemEntity, Long poolId) {
+    public Boolean distributionTask412(TaskVo entity, SampleItemEntity sampleItemEntity, Long poolId, Long taskId) {
         List<Long> deptIds = Lists.newArrayList();
         List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
         for (CheckItemDeptVo vo : checkItemDeptVoList) {
@@ -435,8 +492,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 }
             }
             TaskVo vo = new TaskVo();
-            long id = GenID.getID();
-            vo.setId(id);
+            vo.setId(taskId);
             vo.setTaskPrice(taskPrice);
             //根据委托单号月份确定任务单ID
             String teamCode = taskMapper.getTeamCode(deptId);
@@ -491,7 +547,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             List<CheckItemDeptVo> checkItemDeptVoList1 = Lists.newArrayList();
             for (CheckItemDeptVo checkItemDeptVo : checkItemDeptVoList) {
                 if (deptId.equals(checkItemDeptVo.getDeptId())) {
-                    checkItemDeptVo.setTaskId(id);
+                    checkItemDeptVo.setTaskId(taskId);
                     checkItemDeptVoList1.add(checkItemDeptVo);
                 }
             }
