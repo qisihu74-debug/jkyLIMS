@@ -14,6 +14,7 @@ import com.lims.manage.erp.entity.SampleCirculationRecord;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.TaskIdEntity;
+import com.lims.manage.erp.entity.TaskRes;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TaskTestTeamEntity;
 import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
@@ -2263,6 +2264,18 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         PageHelper.startPage(bean.getPageNum(),bean.getPageSize());
         List<TestTaskPool> list = taskMapper.myTaskList(bean);
         PageInfo<TestTaskPool> pageInfo = new PageInfo<>(list);
+        List<TaskRes> list1 = Lists.newArrayList();
+        for (TestTaskPool taskPool :pageInfo.getList()){
+            String[] split = taskPool.getTaskCode().split(",");
+            for (String s :split){
+                String[] strings = s.split("&");
+                TaskRes taskRes = new TaskRes();
+                taskRes.setId(strings[1]);
+                taskRes.setTaskCode(strings[0]);
+                list1.add(taskRes);
+            }
+            taskPool.setList(list1);
+        }
         return pageInfo;
     }
 }

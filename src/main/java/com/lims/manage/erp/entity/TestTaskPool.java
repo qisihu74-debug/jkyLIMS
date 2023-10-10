@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -100,5 +101,5 @@ public class TestTaskPool implements Serializable {
     @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date receiveDate;
 
-
+    private List<TaskRes> list;
 }
