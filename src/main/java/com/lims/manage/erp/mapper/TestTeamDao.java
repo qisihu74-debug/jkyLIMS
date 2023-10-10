@@ -1,14 +1,16 @@
 package com.lims.manage.erp.mapper;
 
-import java.util.List;
-
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.vo.Node;
 import com.lims.manage.erp.vo.TestTeamVo;
 import org.apache.ibatis.annotations.Param;
-import com.lims.manage.erp.entity.TestTeam;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * 团队管理(TestTeamVo)表数据库访问层
@@ -36,6 +38,22 @@ int insertBatch(@Param("entities") List<TestTeam> entities);
 int insertOrUpdateBatch(@Param("entities") List<TestTeam> entities);
 
 IPage<TestTeamVo> getListPage(IPage<TestTeamVo> page, @Param(Constants.WRAPPER) Wrapper<TestTeam> queryWrapper);
+
+    /**
+     * 获取所有团队信息
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid,\n" +
+            "\tpid,\n" +
+            "NAME \n" +
+            "FROM\n" +
+            "\ttest_team \n" +
+            "WHERE\n" +
+            "\tdel_flag = 0 \n" +
+            "ORDER BY\n" +
+            "\tsort")
+    List<Node> getTree();
 
 }
 

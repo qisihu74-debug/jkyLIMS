@@ -11,6 +11,7 @@ import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportResBean;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
+import com.lims.manage.erp.entity.SealDefData;
 import com.lims.manage.erp.entity.SealEntity;
 import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import com.lims.manage.erp.entity.TestTeam;
@@ -427,7 +428,7 @@ public interface ReportService {
 
     Boolean offlineReportMerge(String reportCode, MultipartFile file, String s, String s1, long parseLong, long parseLong1, String inspector);
 
-    String handlerReportMerge(String reportCode, String path);
+    String handlerReportMerge(String reportCode, String path,String reportCompleteTime);
 
     Boolean onlineReportMergeSave(String reportCode, String s, String s1, long parseLong, long parseLong1, String inspector);
 
@@ -454,4 +455,6 @@ public interface ReportService {
     List<String> getCodeByIds(List<Long> longs);
 
     ApproveInfo approveInfo(String reportCode);
+
+    List<SealDefData> getNameAndMobile(String reportCode);
 }

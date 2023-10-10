@@ -69,8 +69,11 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
      * @param username
      * @return
      */
-    @Select("SELECT user_id,username,salt,password FROM sys_user WHERE username = #{username} LIMIT 1")
+    @Select("SELECT user_id,username,mobile,salt,password FROM sys_user WHERE username = #{username} LIMIT 1")
     SysUserEntity getUserInformation(String username);
+
+    @Select("SELECT mobile FROM sys_user WHERE name = #{name} LIMIT 1")
+    SysUserEntity getMobileByName(String name);
 
     /**
      * 判断 username 是否改变
