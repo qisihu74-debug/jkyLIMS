@@ -1292,7 +1292,7 @@ WHERE
 </if>
     </select>
 
-    <select id="taskHall" resultType="com.lims.manage.erp.entity.TestTaskPool">
+    <select id="myTaskList" resultType="com.lims.manage.erp.entity.TestTaskPool">
         SELECT
         tb1.id,
         tb1.sn,
