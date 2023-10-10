@@ -1302,7 +1302,7 @@ FROM
 WHERE
 	sample_id = #{sampleId}
 	<if test="type ==1 ">
-        AND (status = '0' or status= '1' or status = '2')
+        AND (status = '0' or status= '1' or status = '2' or status= '5')
     </if>
         <if test="type ==2 ">
             AND (status = '3' or status= '4')

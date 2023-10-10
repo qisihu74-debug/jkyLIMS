@@ -4100,35 +4100,46 @@ public class ReportServiceImpl implements ReportService {
             }
             if (flag){
                 //报告记录表限制只存在同一委托下的报告记录
-                Long id = reportMapper.getInfoByEntrustId(entrustIdByTaskId);
-                if (id != null){
-                    return false;
-                }
+                Long id = reportMapper.getInfoByEntrustId1(entrustIdByTaskId);
                 reportRecordEntity.setState(1 + "");
                 reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-                reportRecordEntity.setReportCode(getMaxCode(entrustIdByTaskId));
-                reportRecordEntity.setId(GenID.getID());
-                //设置报告类型
-                reportRecordEntity.setType("0");
-                reportRecordEntity.setEntrustmentId(entrustIdByTaskId);
-                //新增报告记录数据
-                recordEntityMapper.insert(reportRecordEntity);
+                if (id != null){
+                    //update
+                    reportRecordEntity.setId(id);
+                    recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity);
+                }else {
+                    //设置报告类型
+                    reportRecordEntity.setType("0");
+                    reportRecordEntity.setReportCode(getMaxCode(entrustIdByTaskId));
+                    reportRecordEntity.setId(GenID.getID());
+                    reportRecordEntity.setEntrustmentId(entrustIdByTaskId);
+                    //新增报告记录数据
+                    recordEntityMapper.insert(reportRecordEntity);
+                }
             }
         }else {
             //报告记录表限制只存在同一委托下的报告记录
-            Long id = reportMapper.getInfoByEntrustId(entrustIdByTaskId);
+            Long id = reportMapper.getInfoByEntrustId1(entrustIdByTaskId);
             if (id != null){
                 return false;
+            }else {
+                Long infoByEntrustId = reportMapper.getInfoByEntrustId(entrustIdByTaskId);
+                reportRecordEntity.setState(1 + "");
+                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+                if (infoByEntrustId != null){
+                    //update
+                    reportRecordEntity.setId(infoByEntrustId);
+                    recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity);
+                }else {
+                    //中间报告、如果报告类型是中间报告，报告记录新增数据
+                    reportRecordEntity.setEntrustId(entrustIdByTaskId);
+                    reportRecordEntity.setReportCode(getMaxCode(entrustIdByTaskId));
+                    reportRecordEntity.setId(GenID.getID());
+                    //设置报告类型
+                    reportRecordEntity.setType("1");
+                    recordEntityMapper.insert(reportRecordEntity);
+                }
             }
-            //中间报告、如果报告类型是中间报告，报告记录新增数据
-            reportRecordEntity.setEntrustId(entrustIdByTaskId);
-            reportRecordEntity.setState(1 + "");
-            reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-            reportRecordEntity.setReportCode(getMaxCode(entrustIdByTaskId));
-            reportRecordEntity.setId(GenID.getID());
-            //设置报告类型
-            reportRecordEntity.setType("1");
-            recordEntityMapper.insert(reportRecordEntity);
         }
         return true;
     }
