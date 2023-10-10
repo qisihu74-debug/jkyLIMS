@@ -122,6 +122,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         jsonObject.put("testTaskPool", detailedData);
         // 样品信息
         jsonObject.put("samples", sampleList);
+        // 领样人
+//        jsonObject.put("sampler", "");
         return ResultUtil.success(jsonObject);
     }
 
@@ -350,6 +352,10 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 }
             }
             // 调用方法： 对每组检测项的人员信息进行新增。
+            // 根据条件删除流转信息
+            LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
+            testCheckItemsTaskRelMapper.delete(queryWrapper);
             for (SampleItemEntity sampleItemEntity1 : itemList) {
                 Integer itemId = sampleItemEntity.getItemIds().get(i);
                 if (sampleItemEntity1.getId().equals(itemId)) {
