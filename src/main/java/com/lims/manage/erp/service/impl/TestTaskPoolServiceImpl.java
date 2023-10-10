@@ -71,6 +71,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         if (detailedData == null) {
             return ResultUtil.error("查看失败： 预任务单不存在");
         }
+        // 通过委托单id 查询任务列表
+        List<TaskProgressVo> taskProgressVos = taskMapper.getTaskStateByEntrustId(entrustId);
         // 2、 展示每组下样品列表
         List<SampleEntity> sampleList = sampleEntityMapper.selectSampleListGroup(entrustId);
         // 3、 查看检测项及所属类型：
@@ -123,7 +125,11 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         // 样品信息
         jsonObject.put("samples", sampleList);
         // 领样人
-//        jsonObject.put("sampler", "");
+        if (CollectionUtil.isNotEmpty(taskProgressVos)) {
+            jsonObject.put("sampler", taskProgressVos.get(0).getSampler());
+        } else {
+            jsonObject.put("sampler", null);
+        }
         return ResultUtil.success(jsonObject);
     }
 

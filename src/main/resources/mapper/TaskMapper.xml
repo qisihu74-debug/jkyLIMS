@@ -1001,7 +1001,8 @@
             end_detection_time,
             review_time,
             dept_id,
-            task_price
+            task_price,
+            sampler
         FROM
             test_task
         WHERE

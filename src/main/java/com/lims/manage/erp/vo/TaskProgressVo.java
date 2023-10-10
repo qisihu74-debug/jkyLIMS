@@ -62,4 +62,8 @@ public class TaskProgressVo {
      * 任务单价格
      */
     private Double taskPrice;
+    /**
+     * 领样人
+     */
+    private String sampler;
 }
