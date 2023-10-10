@@ -56,7 +56,7 @@ public class TestCheckItemsTaskRelController {
         if (CollectionUtil.isEmpty(list)) {
             return ResultUtil.error("数据不能为空");
         }
-        return testTaskPoolService.addTaskCollection(list);
+        return testTaskPoolService.addTaskCollection(list,sampleItemJsonVo.getSampler());
     }
 
 }
