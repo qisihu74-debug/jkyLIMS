@@ -456,5 +456,5 @@ public interface ReportService {
 
     ApproveInfo approveInfo(String reportCode);
 
-    List<SealDefData> getNameAndMobile(String reportCode);
+    List<SealDefData> getNameAndMobile(Long id);
 }

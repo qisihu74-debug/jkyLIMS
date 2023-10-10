@@ -1431,15 +1431,15 @@ public class ReportController {
 
     /**
      * 获取人员姓名和手机号
-     * @param reportCode
+     * @param id
      * @return
      */
     @GetMapping("getNameAndMobile")
-    public Result getNameAndMobile(String reportCode){
-        if (StringUtils.isEmpty(reportCode)){
+    public Result getNameAndMobile(Long id){
+        if (id == null){
             return ResultUtil.error("缺少参数");
         }
-        List<SealDefData> list = reportService.getNameAndMobile(reportCode);
+        List<SealDefData> list = reportService.getNameAndMobile(id);
         return ResultUtil.success(list);
     }
 }

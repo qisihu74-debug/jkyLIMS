@@ -1536,8 +1536,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<SealDefData> getNameAndMobile(String reportCode) {
-        List<ApproveInfo> approveInfoList = recordEntityMapper.approveInfo(reportCode);
+    public List<SealDefData> getNameAndMobile(Long id) {
+        List<ApproveInfo> approveInfoList = recordEntityMapper.approveInfoById(id);
         List<SealDefData> list = Lists.newArrayList();
         ApproveInfo approveInfo = approveInfoList.get(0);
         String inspector = approveInfo.getInspector();//检测人

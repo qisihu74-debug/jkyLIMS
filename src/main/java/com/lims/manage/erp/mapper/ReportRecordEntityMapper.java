@@ -462,4 +462,45 @@ public interface ReportRecordEntityMapper {
             "WHERE\n" +
             "\tt3.report_code = #{reportCode}\n")
     List<ApproveInfo> approveInfo(@Param("reportCode") String reportCode);
+
+    @Select("SELECT distinct\n" +
+            "\tt1.entrustment_no As entrustmentNo,\n" +
+            "\tt1.entrust_company As entrustCompany,\n" +
+            "\tt1.witness_uint As witnessUint,\n" +
+            "\tt1.project_name As projectName,\n" +
+            "\tt1.project_part As projectPart,\n" +
+            "\tt2.inspector,\n" +
+            "\tt2.recorder,\n" +
+            "\tt2.reviewer,\n" +
+            "\tt2.receiver,\n" +
+            "\tt4.name As receiverName,\n" +
+            "\tt3.report_code As reportCode\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info t1\n" +
+            "LEFT JOIN test_task t2 ON t1.id = t2.entrustment_id\n" +
+            "LEFT JOIN test_report_record t3 ON t2.entrustment_id = t3.entrust_id\n" +
+            "LEFT JOIN sys_user t4 ON t2.receiver=t4.user_id\n" +
+            "WHERE\n" +
+            "\tt3.id = #{id}\n" +
+            "UNION ALL\n" +
+            "SELECT distinct\n" +
+            "\tt1.entrustment_no,\n" +
+            "\tt1.entrust_company,\n" +
+            "\tt1.witness_uint,\n" +
+            "\tt1.project_name,\n" +
+            "\tt1.project_part,\n" +
+            "\tt2.inspector,\n" +
+            "\tt2.recorder,\n" +
+            "\tt2.reviewer,\n" +
+            "\tt2.receiver,\n" +
+            "\tt4.name,\n" +
+            "\tt3.report_code\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info t1\n" +
+            "LEFT JOIN test_task t2 ON t1.id = t2.entrustment_id\n" +
+            "LEFT JOIN test_report_record t3 ON t2.entrustment_id = t3.entrustment_id\n" +
+            "LEFT JOIN sys_user t4 ON t2.receiver=t4.user_id\n" +
+            "WHERE\n" +
+            "\tt3.id = #{id}\n")
+    List<ApproveInfo> approveInfoById(@Param("id") Long id);
 }
