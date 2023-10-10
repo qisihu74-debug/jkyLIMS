@@ -10,7 +10,8 @@
             check_item_name as checkItemName,
             check_item_id,
             times,
-	        unit_price
+	        unit_price,
+	        task_id
         FROM
             test_entrusted_sample_checkitem_rel
         WHERE

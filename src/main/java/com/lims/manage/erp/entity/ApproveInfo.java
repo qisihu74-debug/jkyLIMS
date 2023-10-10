@@ -71,4 +71,5 @@ public class ApproveInfo {
      * 报告签发人
      */
     private List<KeyValue> qfrMap;
+    private String mobile;
 }

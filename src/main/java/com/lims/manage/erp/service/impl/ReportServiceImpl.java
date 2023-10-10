@@ -34,7 +34,9 @@ import com.lims.manage.erp.entity.ReportResBean;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.SealDefData;
 import com.lims.manage.erp.entity.SealEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TeamTreeStructureEntity;
 import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
@@ -138,9 +140,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -1532,6 +1536,60 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public List<SealDefData> getNameAndMobile(String reportCode) {
+        List<ApproveInfo> approveInfoList = recordEntityMapper.approveInfo(reportCode);
+        List<SealDefData> list = Lists.newArrayList();
+        ApproveInfo approveInfo = approveInfoList.get(0);
+        String inspector = approveInfo.getInspector();//检测人
+        if (StringUtils.isNotEmpty(inspector)){
+            String s = inspector.split(",")[0];
+            SealDefData sealDefData = new SealDefData();
+            sealDefData.setType("检测人1");
+            sealDefData.setName(s.split("&")[0]);
+            SysUserEntity information = sysUserDao.getMobileByName(s.split("&")[0]);
+            if (information != null){
+                sealDefData.setMobile(information.getMobile());
+            }
+            list.add(sealDefData);
+        }
+        String recorder = approveInfo.getRecorder();//记录人
+        if (StringUtils.isNotEmpty(recorder)){
+            String s = recorder.split(",")[0];
+            SealDefData sealDefData = new SealDefData();
+            sealDefData.setType("检测人2");
+            sealDefData.setName(s.split("&")[0]);
+            SysUserEntity mobileByName = sysUserDao.getMobileByName(s.split("&")[0]);
+            if (mobileByName != null){
+                sealDefData.setMobile(mobileByName.getMobile());
+            }
+            list.add(sealDefData);
+        }
+        String receiver = approveInfo.getReviewer();//审核人
+        if (StringUtils.isNotEmpty(receiver)){
+            SealDefData sealDefData = new SealDefData();
+            sealDefData.setType("审核人");
+            sealDefData.setName(receiver.split("&")[0]);
+            SysUserEntity mobileByName = sysUserDao.getMobileByName(receiver.split("&")[0]);
+            if (mobileByName != null){
+                sealDefData.setMobile(mobileByName.getMobile());
+            }
+            list.add(sealDefData);
+        }
+        String receiverName = approveInfo.getReceiverName();//签发人
+        if (StringUtils.isNotEmpty(receiverName)){
+            SealDefData sealDefData = new SealDefData();
+            sealDefData.setType("签发人");
+            sealDefData.setName(receiverName.split("&")[0]);
+            SysUserEntity mobileByName = sysUserDao.getMobileByName(receiverName.split("&")[0]);
+            if (mobileByName != null){
+                sealDefData.setMobile(mobileByName.getMobile());
+            }
+            list.add(sealDefData);
+        }
+        return list;
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();
@@ -1761,14 +1819,14 @@ public class ReportServiceImpl implements ReportService {
                         String s = "";
                         String e = "";
                         if (start == null) {
-                            s = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                            s = DateUtil.formatDateYMD(new Date(System.currentTimeMillis()));
                         } else {
-                            s = DateUtil.formatDate(start);
+                            s = DateUtil.formatDateYMD(start);
                         }
                         if (end == null) {
-                            e = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                            e = DateUtil.formatDateYMD(new Date(System.currentTimeMillis()));
                         } else {
-                            e = DateUtil.formatDate(end);
+                            e = DateUtil.formatDateYMD(end);
                         }
                         //主要仪器
                         String equipment = getEquipment(id, sampleEntity.getId());
@@ -2155,14 +2213,14 @@ public class ReportServiceImpl implements ReportService {
                         String e = "";
                         String s = "";
                         if (start == null) {
-                            s = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                            s = DateUtil.formatDateYMD(new Date(System.currentTimeMillis()));
                         } else {
-                            s = DateUtil.formatDate(start);
+                            s = DateUtil.formatDateYMD(start);
                         }
                         if (end == null) {
-                            e = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                            e = DateUtil.formatDateYMD(new Date(System.currentTimeMillis()));
                         } else {
-                            e = DateUtil.formatDate(end);
+                            e = DateUtil.formatDateYMD(end);
                         }
                         //主要仪器
                         String equipment = getEquipment(id, sampleEntity.getId());
@@ -2575,7 +2633,7 @@ public class ReportServiceImpl implements ReportService {
                 stringBuilder.append("3." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson()) ? "见证人：无" : "见证人：" + entrustHistoryDetail.getWitnessPerson()) + "；");
                 stringBuilder.append("4.委托方提供：" + (StringUtils.isEmpty(entrustHistoryDetail.getRemark()) ? "无" : entrustHistoryDetail.getRemark()) + " ；");
                 conclusionEntity.setAdditional(stringBuilder.toString());
-                String sampleDes = sampleEntity.getSampleName() + " " + "样品," + delItemDes(sampleEntity.getJudgmentBasisVos(), sampleEntity.getFileUrl(), entrustId);
+                String sampleDes = sampleEntity.getSampleName() + "样品" + delItemDes(sampleEntity.getJudgmentBasisVos(), sampleEntity.getFileUrl(), entrustId);
                 conclusionEntity.setConclusion("经检测，该" + sampleDes + "均符合" + judgeBasis + "中的技术要求。");
                 list.add(conclusionEntity);
             }
@@ -3660,7 +3718,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public String handlerReportMerge(String reportCode, String path) {
+    public String handlerReportMerge(String reportCode, String path,String reportCompleteTime) {
         InputStream inputStream = null;
         //合并委托下所有样品报告
         ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
@@ -3737,9 +3795,21 @@ public class ReportServiceImpl implements ReportService {
             log.error("报告在线合并excel转pdf异常:{}",e);
         }
         //pdf设置报告盖章日期
-        Date reportCompleteTime = reportRecordEntity.getReportCompleteTime();
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date date = null;
+        if (StringUtils.isNotEmpty(reportCompleteTime)){
+            try {
+                date = format.parse(reportCompleteTime);
+            }catch (Exception e){
+                log.error("日期格式转换错误:{}",e);
+            }
+        }
+        if (date == null){
+            date = new Date();
+        }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
-        String reportCompleteTimeStr = simpleDateFormat.format(reportCompleteTime);
+        String reportCompleteTimeStr = simpleDateFormat.format(date);
         String dateUrl = qiYueSuoEntity.getAutographPath() + reportCompleteTimeStr + ".png";
         ImageUtil.createDateImage(dateUrl,reportCompleteTimeStr);
         String qzPdfPath = path+"qzPdfPath.pdf";
@@ -3900,14 +3970,14 @@ public class ReportServiceImpl implements ReportService {
                                 String e = "";
                                 String s = "";
                                 if (start == null) {
-                                    s = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                                    s = DateUtil.formatDateYMD(new Date(System.currentTimeMillis()));
                                 } else {
-                                    s = DateUtil.formatDate(start);
+                                    s = DateUtil.formatDateYMD(start);
                                 }
                                 if (end == null) {
-                                    e = DateUtil.formatDate(new Date(System.currentTimeMillis()));
+                                    e = DateUtil.formatDateYMD(new Date(System.currentTimeMillis()));
                                 } else {
-                                    e = DateUtil.formatDate(end);
+                                    e = DateUtil.formatDateYMD(end);
                                 }
                                 if (s != null && e != null) {
                                     if (s.equals(e)) {
@@ -4187,7 +4257,7 @@ public class ReportServiceImpl implements ReportService {
                 stringBuilder.append("3." + (StringUtils.isEmpty(entrustHistoryDetail.getWitnessPerson()) ? "见证人：无" : "见证人：" + entrustHistoryDetail.getWitnessPerson()) + "；");
                 stringBuilder.append("4.委托方提供：" + (StringUtils.isEmpty(entrustHistoryDetail.getRemark()) ? "无" : entrustHistoryDetail.getRemark()) + " ；");
                 conclusionEntity.setAdditional(stringBuilder.toString());
-                String sampleDes = sampleEntity.getSampleName() + " " + "样品," + HandlerItemDes(entrustId,sampleId);
+                String sampleDes = sampleEntity.getSampleName() + "样品" + HandlerItemDes(entrustId,sampleId);
                 conclusionEntity.setConclusion("经检测，该" + sampleDes + "均符合" + judgeBasis + "中的技术要求。");
             }
         }

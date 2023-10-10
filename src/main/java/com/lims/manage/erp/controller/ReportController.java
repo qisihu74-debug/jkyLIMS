@@ -19,6 +19,7 @@ import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportResBean;
 import com.lims.manage.erp.entity.ReqBean;
+import com.lims.manage.erp.entity.SealDefData;
 import com.lims.manage.erp.entity.SealEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
@@ -1206,7 +1207,7 @@ public class ReportController {
         if (flag){
             return ResultUtil.success("提交成功");
         }else {
-            return ResultUtil.error("最终报告已存在无法提交中间报告，或者该委托存在未完成的中间报告");
+            return ResultUtil.error("最终报告已存在无法提交中间报告");
         }
     }
 
@@ -1293,12 +1294,12 @@ public class ReportController {
      * @return
      */
     @GetMapping("/onlineReportMerge")
-    public void onlineReportMerge(String reportCode,HttpServletResponse response){
+    public void onlineReportMerge(String reportCode,String reportCompleteTime,HttpServletResponse response){
         if (StringUtils.isEmpty(reportCode)){
             return ;
         }
         //根据报告编号合并委托下所用样品的报告模板包含首页、编辑报告页码和填充报告编号
-        String url = reportService.handlerReportMerge(reportCode,qiYueSuoEntity.getAutographPath());
+        String url = reportService.handlerReportMerge(reportCode,qiYueSuoEntity.getAutographPath(),reportCompleteTime);
         MinioClient client = MinIoUtil.minioClient;
         String[] strings = url.split("\\/");
         String bluckName = strings[3];
@@ -1426,5 +1427,19 @@ public class ReportController {
         }
         ApproveInfo approveInfo = reportService.approveInfo(reportCode);
         return ResultUtil.success(approveInfo);
+    }
+
+    /**
+     * 获取人员姓名和手机号
+     * @param reportCode
+     * @return
+     */
+    @GetMapping("getNameAndMobile")
+    public Result getNameAndMobile(String reportCode){
+        if (StringUtils.isEmpty(reportCode)){
+            return ResultUtil.error("缺少参数");
+        }
+        List<SealDefData> list = reportService.getNameAndMobile(reportCode);
+        return ResultUtil.success(list);
     }
 }

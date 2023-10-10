@@ -761,13 +761,13 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 
         //除了第一页和第二页在报告左上角添加防伪标识码
         for (int pageNumber = 1; pageNumber <= stamper.getReader().getNumberOfPages(); pageNumber++) {
-            if (pageNumber>2){
+            if (pageNumber == 2){
                 PdfContentByte content = stamper.getOverContent(pageNumber);
                 // 读取图片
                 Image image = Image.getInstance(imageData);
                 image.scaleToFit(50,50);
                 // 设置图片位置
-                image.setAbsolutePosition(15, PageSize.A4.getHeight() - 60);
+                image.setAbsolutePosition(80, PageSize.A4.getHeight() - 400);
                 // 将图片添加到页面
                 content.addImage(image);
             }
