@@ -61,13 +61,17 @@
         report_producer,
         probationer,
         interns,
-        auxiliary_personnel
+        auxiliary_personnel,
+        sampler,
+        sample_receiving_time,
+        pool_id
         )
         VALUES
         <foreach collection="vos" item="vo" separator=",">
             (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},
              #{vo.state}, #{vo.issueReport}, #{vo.orderer},#{vo.reportComplete},#{vo.orderTime},#{vo.taskPrice},#{vo.presentInformation},
-             #{vo.createTime},#{vo.inspector},#{vo.recorder},#{vo.reviewer},#{vo.reportProducer},#{vo.auxiliaryPersonnel},#{vo.probationer},#{vo.interns})
+             #{vo.createTime},#{vo.inspector},#{vo.recorder},#{vo.reviewer},#{vo.reportProducer},#{vo.auxiliaryPersonnel},#{vo.probationer},#{vo.interns},
+             #{vo.sampler},#{vo.sampleReceivingTime},#{vo.poolId})
         </foreach>
     </insert>
 
@@ -1299,7 +1303,7 @@ WHERE
 </if>
     </select>
 
-    <select id="taskHall" resultType="com.lims.manage.erp.entity.TestTaskPool">
+    <select id="myTaskList" resultType="com.lims.manage.erp.entity.TestTaskPool">
         SELECT
         tb1.id,
         tb1.sn,
