@@ -1321,7 +1321,7 @@ WHERE
         test_task_pool tb1
         LEFT JOIN test_task tb2 ON tb1.id = tb2.pool_id
         WHERE
-        tb1.receive_id #{item.userId}
+        tb1.receive_id= #{item.userId}
         <if test="item.sampleName != null and item.sampleName != ''">
             AND tb1.sample LIKE CONCAT('%', #{item.sampleName}, '%')
         </if>
