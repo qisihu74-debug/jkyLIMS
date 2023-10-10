@@ -1,8 +1,10 @@
 package com.lims.manage.erp.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestTeam;
@@ -13,6 +15,8 @@ import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestTeamService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.TreeBuilder;
+import com.lims.manage.erp.vo.Node;
 import com.lims.manage.erp.vo.TestTeamVo;
 import org.springframework.stereotype.Service;
 
@@ -109,6 +113,22 @@ public class TestTeamServiceImpl extends ServiceImpl<TestTeamDao, TestTeam> impl
     @Override
     public IPage<TestTeamVo> getListPage(IPage<TestTeamVo> page, Wrapper<TestTeam> queryWrapper) {
         return testTeamDao.getListPage(page,queryWrapper);
+    }
+
+    @Override
+    public List<Node> getTree() {
+        //获取所有团队
+        List<Node> teamList=baseMapper.getTree();
+        return TreeBuilder.buildTree(teamList);
+    }
+
+    @Override
+    public List<TestTeam> getTreeByName(String name) {
+        LambdaQueryWrapper<TestTeam> wrapper=Wrappers.lambdaQuery();
+        wrapper.eq(TestTeam::getDelFlag,0);
+        wrapper.like(TestTeam::getName,name);
+        wrapper.select(TestTeam::getId,TestTeam::getName);
+        return baseMapper.selectList(wrapper);
     }
 }
 
