@@ -383,6 +383,7 @@ public class DateUtil {
 
 
     public static final String GENERAL_DATE_FORMAT="yyyy-MM-dd";
+    public static final String ZH_DATE_FORMAT="yyyy年MM月dd日";
 
     /**
      * @desc 格式化日期
@@ -391,6 +392,16 @@ public class DateUtil {
      */
     public static String formatDate(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat(GENERAL_DATE_FORMAT);
+        return sdf.format(date);
+    }
+
+    /**
+     * 2023年10月10日
+     * @param date
+     * @return
+     */
+    public static String formatDateYMD(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(ZH_DATE_FORMAT);
         return sdf.format(date);
     }
 

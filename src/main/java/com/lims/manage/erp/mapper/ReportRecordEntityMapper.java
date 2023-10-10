@@ -422,7 +422,7 @@ public interface ReportRecordEntityMapper {
     void updateUrlAndStateByContractId(@Param("contractId") Long contractId, @Param("signUrl") String signUrl, @Param("state") String state,
                                        @Param("sealer") String sealer, @Param("sealTime") Date sealTime);
 
-    @Select("SELECT\n" +
+    @Select("SELECT distinct\n" +
             "\tt1.entrustment_no As entrustmentNo,\n" +
             "\tt1.entrust_company As entrustCompany,\n" +
             "\tt1.witness_uint As witnessUint,\n" +
@@ -442,7 +442,7 @@ public interface ReportRecordEntityMapper {
             "WHERE\n" +
             "\tt3.report_code = #{reportCode}\n" +
             "UNION ALL\n" +
-            "SELECT\n" +
+            "SELECT distinct\n" +
             "\tt1.entrustment_no,\n" +
             "\tt1.entrust_company,\n" +
             "\tt1.witness_uint,\n" +
