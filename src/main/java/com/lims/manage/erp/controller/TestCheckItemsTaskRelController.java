@@ -2,17 +2,13 @@ package com.lims.manage.erp.controller;
 
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.alibaba.fastjson.JSON;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestTaskPoolService;
-import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.SampleItemJsonVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -56,7 +52,7 @@ public class TestCheckItemsTaskRelController {
         if (CollectionUtil.isEmpty(list)) {
             return ResultUtil.error("数据不能为空");
         }
-        return testTaskPoolService.addTaskCollection(list,sampleItemJsonVo.getSampler());
+        return testTaskPoolService.addTaskCollection(list);
     }
 
 }
