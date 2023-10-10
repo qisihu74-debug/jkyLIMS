@@ -1,5 +1,6 @@
 package com.lims.manage.erp.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -85,4 +86,45 @@ public class TaskVo {
      */
     @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date createTime;
+    /**
+     * 检测人
+     */
+    @TableField(exist = false)
+    private String inspector;
+
+    /**
+     * 记录人
+     */
+    @TableField(exist = false)
+    private String recorder;
+
+    /**
+     * 复核人
+     */
+    @TableField(exist = false)
+    private String reviewer;
+
+    /**
+     * 报告制作人
+     */
+    @TableField(exist = false)
+    private String reportProducer;
+
+    /**
+     * 辅助人员
+     */
+    @TableField(exist = false)
+    private String auxiliaryPersonnel;
+
+    /**
+     * 见习生：实习的新手
+     */
+    @TableField(exist = false)
+    private String probationer;
+
+    /**
+     * 实习生
+     */
+    @TableField(exist = false)
+    private String interns;
 }
