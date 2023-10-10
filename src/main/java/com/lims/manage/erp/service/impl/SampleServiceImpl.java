@@ -548,7 +548,11 @@ public class SampleServiceImpl implements SampleService {
                     if ("1".equals(bean.getStatus())){
                         ReceiveSampleParamVo sampleTaker = sampleEntityMapper.getSampleTaker(bean.getSampleId());
                         if (sampleTaker != null){
-                            bean.setOperatorName(sampleTaker.getSampler());
+                            if (sampleTaker.getSampler().contains("&")){
+                                bean.setOperatorName(sampleTaker.getSampler().split("&")[0]);
+                            }else {
+                                bean.setOperatorName(sampleTaker.getSampler());
+                            }
                             bean.setTime(sampleTaker.getSampleReceivingTime());
                         }
                     }

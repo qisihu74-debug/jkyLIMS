@@ -1206,7 +1206,7 @@ public class ReportController {
         if (flag){
             return ResultUtil.success("提交成功");
         }else {
-            return ResultUtil.error("提交失败，请检查该委托是否存在未完成的中间报告");
+            return ResultUtil.error("最终报告已存在无法提交中间报告，或者该委托存在未完成的中间报告");
         }
     }
 
