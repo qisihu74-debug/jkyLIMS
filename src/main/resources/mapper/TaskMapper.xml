@@ -1316,7 +1316,7 @@ WHERE
         tb1.publish_date AS publishDate,
         tb1.receive_name AS receiveName,
         tb1.receive_date AS receiveDate,
-        GROUP_CONCAT(tb2.task_code SEPARATOR ',')
+        tb1.task_code As taskCode
         FROM
         test_task_pool tb1
         LEFT JOIN test_task tb2 ON tb1.id = tb2.pool_id
