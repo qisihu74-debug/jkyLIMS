@@ -199,7 +199,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result addTaskCollection(List<SampleItemEntity> list) {
+    public Result addTaskCollection(List<SampleItemEntity> list, String sampler) {
         // 通过检测项主键 获取 委托单id
         Long entrustId = taskPoolMapper.selectEntrustmentId(list.get(0).getItemIds().get(0));
         if (entrustId == null) {
@@ -247,7 +247,13 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             methodForPersonnel(sampleItemEntity, inspectorArraysVos, inspectorRels);
             sampleItemEntity.setItemsTaskRels(inspectorRels);
         }
-
+        // 通过委托单 获取流水任务单详情
+        LambdaQueryWrapper<TestTaskPool> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestTaskPool::getEntrustmentId, entrustId);
+        TestTaskPool testTaskPool = taskPoolMapper.selectOne(queryWrapper);
+        if (testTaskPool == null) {
+            return ResultUtil.error("领取失败： 当前流水号任务单不存在");
+        }
         // 进行录入任务单信息
         for (SampleItemEntity sampleItemEntity : list) {
             // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
@@ -267,44 +273,90 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 }
                 // 删除任务单号
                 for (TaskProgressVo taskProgressVo : taskProgressVos) {
-                    taskMapper.deleteById(taskProgressVo.getTaskId());
+                    taskMapper.deleteTaskById(taskProgressVo.getTaskId());
                 }
             }
-            // 进行新建任务单信息、补充信息
-            TaskVo entity = new TaskVo();
-            // 委托单信息
-            entity.setEntrustmentId(entrustId);
-            // 设置折扣
-            entity.setDiscount(1.00);
-            // 下单时间=orderTime (委托单转任务单的时间)
-            Date orderTime = new Date();
-            // 要求完成时间
-            Date requiredCompletionTime = new Date();
-            // 补充检测项信息
-            List<CheckItemDeptVo> checkItemDeptVoList = new ArrayList<>();
-            // 遍历每组检测项分配的itemId数量
-            for (int i = 0; i < sampleItemEntity.getItemIds().size(); i++) {
-                // itemList 是通过委托单id查看检测项详情列表
-                for (SampleItemEntity sampleItemEntity1 : itemList) {
-                    Integer itemId = sampleItemEntity.getItemIds().get(i);
-                    if (sampleItemEntity1.getId().equals(itemId)) {
-                        CheckItemDeptVo checkItemDeptVo = new CheckItemDeptVo();
-                        // 检测项主键
-                        checkItemDeptVo.setId(itemId);
-                        // 样次
-                        checkItemDeptVo.setTimes(sampleItemEntity1.getTimes());
-                        // 单价
-                        checkItemDeptVo.setCheckPrice(sampleItemEntity1.getUnitPrice());
-                        // 部门
-                        checkItemDeptVo.setDeptId(sampleItemEntity.getTechnicistId());
-                        checkItemDeptVoList.add(checkItemDeptVo);
-                    }
-                }
+            //调用方法： 补充检测项单信息并发布任务单
+            methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue());
+            // 调用方法： 对每组检测项的人员信息进行新增。
+            for (TestCheckItemsTaskRel testCheckItemsTaskRel : sampleItemEntity.getItemsTaskRels()) {
+                //
+                testCheckItemsTaskRel.setCheckItemName(sampleItemEntity.getCheckItemName());
+                testCheckItemsTaskRelMapper.insert(testCheckItemsTaskRel);
             }
-            entity.setCheckItemDeptVoList(checkItemDeptVoList);
-            distributionTask412(entity, sampleItemEntity);
+
         }
+        // 调用方法 进行 更新流水号任务单信息
+        methodUpdateTaskPool(entrustId, testTaskPool);
         return ResultUtil.success("领取成功");
+    }
+
+    void methodUpdateTaskPool(Long entrustId, TestTaskPool testTaskPool) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 领取成功后： 补充流水号任务单信息
+        // 通过委托单id 查询任务列表
+        List<TaskProgressVo> taskProgress2Vos = taskMapper.getTaskStateByEntrustId(entrustId);
+        StringBuffer taskCodeBuffer = new StringBuffer();
+        //计算本单价格
+        double taskPrice = 0L;
+        for (TaskProgressVo taskProgressVo : taskProgress2Vos) {
+            // 获取任务单号
+            taskCodeBuffer.append(taskProgressVo.getTaskCode() + "&" + taskProgressVo.getTaskId() + ",");
+            // 获取价格
+            taskPrice += taskProgressVo.getTaskPrice();
+        }
+        // 任务单编号
+        testTaskPool.setTaskCode(taskCodeBuffer.deleteCharAt(taskCodeBuffer.length() - 1).toString());
+        // 本单费用
+        testTaskPool.setPrice(String.valueOf(taskPrice));
+        // 领取人id
+        testTaskPool.setReceiveId(userInfo.getUserId());
+        // 领取人（当前登陆人员）
+        testTaskPool.setReceiveName(userInfo.getName());
+        // 领取时间
+        testTaskPool.setReceiveDate(new Date());
+        LambdaQueryWrapper<TestTaskPool> queryWrapper1 = new LambdaQueryWrapper<>();
+        queryWrapper1.eq(TestTaskPool::getId, testTaskPool.getId());
+        taskPoolMapper.update(testTaskPool, queryWrapper1);
+    }
+
+    void methodPublishTaskList(Long entrustId, String sampler, SampleItemEntity sampleItemEntity, List<SampleItemEntity> itemList, Long poolId) {
+        // 进行新建任务单信息、补充信息
+        TaskVo entity = new TaskVo();
+        // 委托单信息
+        entity.setEntrustmentId(entrustId);
+        // 设置折扣
+        entity.setDiscount(1.00);
+        // 下单时间=orderTime (委托单转任务单的时间)
+        Date orderTime = new Date();
+        // 要求完成时间
+        Date requiredCompletionTime = new Date();
+        // 领样人
+        entity.setSampler(sampler);
+        // 补充检测项信息
+        List<CheckItemDeptVo> checkItemDeptVoList = new ArrayList<>();
+        // 遍历每组检测项分配的itemId数量
+        for (int i = 0; i < sampleItemEntity.getItemIds().size(); i++) {
+            // itemList 是通过委托单id查看检测项详情列表
+            for (SampleItemEntity sampleItemEntity1 : itemList) {
+                Integer itemId = sampleItemEntity.getItemIds().get(i);
+                if (sampleItemEntity1.getId().equals(itemId)) {
+                    CheckItemDeptVo checkItemDeptVo = new CheckItemDeptVo();
+                    // 检测项主键
+                    checkItemDeptVo.setId(itemId);
+                    // 样次
+                    checkItemDeptVo.setTimes(sampleItemEntity1.getTimes());
+                    // 单价
+                    checkItemDeptVo.setCheckPrice(sampleItemEntity1.getUnitPrice());
+                    // 部门
+                    checkItemDeptVo.setDeptId(sampleItemEntity.getTechnicistId());
+                    checkItemDeptVoList.add(checkItemDeptVo);
+                }
+            }
+        }
+        entity.setCheckItemDeptVoList(checkItemDeptVoList);
+        // 发布任务
+        distributionTask412(entity, sampleItemEntity, poolId);
     }
 
     /**
@@ -362,7 +414,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Boolean distributionTask412(TaskVo entity, SampleItemEntity sampleItemEntity) {
+    public Boolean distributionTask412(TaskVo entity, SampleItemEntity sampleItemEntity, Long poolId) {
         List<Long> deptIds = Lists.newArrayList();
         List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
         for (CheckItemDeptVo vo : checkItemDeptVoList) {
@@ -428,6 +480,12 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             vo.setProbationer(sampleItemEntity.getProbationer());
             // 实习生
             vo.setInterns(sampleItemEntity.getInterns());
+            // 领样人
+            vo.setSampler(entity.getSampler());
+            // 领样时间
+            vo.setSampleReceivingTime(new Date());
+            // 流水号任务单id
+            vo.setPoolId(poolId);
             vos.add(vo);
             //更新检测项分配的部门和任务单号
             List<CheckItemDeptVo> checkItemDeptVoList1 = Lists.newArrayList();

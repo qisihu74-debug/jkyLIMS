@@ -31,6 +31,6 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      * @param list
      * @return
      */
-    Result addTaskCollection(List<SampleItemEntity> list);
+    Result addTaskCollection(List<SampleItemEntity> list,String sampler);
 
 }

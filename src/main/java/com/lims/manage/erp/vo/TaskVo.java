@@ -127,4 +127,20 @@ public class TaskVo {
      */
     @TableField(exist = false)
     private String interns;
+
+    /**
+     * 领样人
+     */
+    @TableField(exist = false)
+    private String sampler;
+    /**
+     * 领样时间
+     */
+    @TableField(exist = false)
+    private Date sampleReceivingTime;
+    /**
+     * 流水号任务单id
+     */
+    @TableField(exist = false)
+    private Long poolId;
 }
