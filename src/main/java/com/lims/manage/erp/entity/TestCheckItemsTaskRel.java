@@ -21,9 +21,10 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class TestCheckItemsTaskRel implements Serializable {
 
-    private static final long serialVersionUID=1L;
+//    private static final long serialVersionUID=1L;
 
-    @TableId(value = "id", type = IdType.ID_WORKER)
+//    @TableId(value = "id", type = IdType.ID_WORKER)
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     /**

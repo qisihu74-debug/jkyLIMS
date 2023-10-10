@@ -5743,6 +5743,20 @@ public class EntrustServiceImpl implements EntrustService {
             testTaskPool.setPublishDate(new Date());
             // 发布人
             testTaskPool.setPublisher(userInfo.getName());
+            // 样品信息
+            // 2、 展示每组下样品列表
+            List<SampleEntity> sampleList = sampleEntityMapper.selectSampleListGroup(entrustId);
+            if(CollectionUtil.isNotEmpty(sampleList)){
+                StringBuffer sampleNameBuffer = new StringBuffer();
+                Set<String> setStr = new HashSet<>();
+                for(SampleEntity sampleEntity : sampleList){
+                    setStr.add(sampleEntity.getSampleName());
+                }
+                for(String setStrName : setStr){
+                    sampleNameBuffer.append(setStrName+",");
+                }
+                testTaskPool.setSample(sampleNameBuffer.deleteCharAt(sampleNameBuffer.length()-1).toString());
+            }
             // 新增流水任务单
             taskPoolMapper.insert(testTaskPool);
             return msg;
