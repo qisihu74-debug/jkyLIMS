@@ -207,7 +207,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result addTaskCollection(List<SampleItemEntity> list, String sampler) {
+    public Result addTaskCollection(List<SampleItemEntity> list) {
         // 通过检测项主键 获取 委托单id
         Long entrustId = taskPoolMapper.selectEntrustmentId(list.get(0).getItemIds().get(0));
         if (entrustId == null) {
@@ -285,6 +285,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 }
             }
             //调用方法： 补充检测项信息并发布任务单
+            String sampler = sampleItemEntity.getSampler();
             methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue());
         }
         // 调用方法 进行 更新流水号任务单信息

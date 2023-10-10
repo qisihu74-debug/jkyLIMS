@@ -167,5 +167,10 @@ public class SampleItemEntity {
      */
     @TableField(exist = false)
     private String sampleCode;
+    /**
+     * 领样人
+     */
+    @TableField(exist = false)
+    private String sampler;
 
 }
