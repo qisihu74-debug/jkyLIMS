@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.TestCheckItemsTaskRel;
 import com.lims.manage.erp.entity.TestTaskPool;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -19,10 +20,10 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
     /**
      * 任务大厅 展示详情数据
      *
-     * @param taskId
+     * @param poolId
      * @return
      */
-    Result taskHallDetailsDisplay(Integer taskId,Long entrustId);
+    Result taskHallDetailsDisplay(Long poolId,Long entrustId);
 
     /**
      * 任务大厅 领取任务单
@@ -30,6 +31,6 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      * @param list
      * @return
      */
-    Result addTaskCollection(List<TestCheckItemsTaskRel> list);
+    Result addTaskCollection(List<SampleItemEntity> list);
 
 }

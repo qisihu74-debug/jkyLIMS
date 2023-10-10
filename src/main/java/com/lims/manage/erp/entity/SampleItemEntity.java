@@ -97,6 +97,10 @@ public class SampleItemEntity {
      */
     private Long taskId;
     /**
+     * 团队信息
+     */
+    private Long technicistId;
+    /**
      * 检测人
      */
     @TableField(exist = false)
@@ -137,6 +141,11 @@ public class SampleItemEntity {
      */
     @TableField(exist = false)
     private String interns;
+    /**
+     * 检测项
+     */
+    @TableField(exist = false)
+    private List<Integer> itemIds;
     /**
      * 检测项下 对应的操作人员。
      */
