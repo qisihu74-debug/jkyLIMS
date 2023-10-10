@@ -97,6 +97,56 @@ public class SampleItemEntity {
      */
     private Long taskId;
     /**
+     * 团队信息
+     */
+    private Long technicistId;
+    /**
+     * 检测人
+     */
+    @TableField(exist = false)
+    private String inspector;
+
+    /**
+     * 记录人
+     */
+    @TableField(exist = false)
+    private String recorder;
+
+    /**
+     * 复核人
+     */
+    @TableField(exist = false)
+    private String reviewer;
+
+    /**
+     * 报告制作人
+     */
+    @TableField(exist = false)
+    private String reportProducer;
+
+    /**
+     * 辅助人员
+     */
+    @TableField(exist = false)
+    private String auxiliaryPersonnel;
+
+    /**
+     * 见习生：实习的新手
+     */
+    @TableField(exist = false)
+    private String probationer;
+
+    /**
+     * 实习生
+     */
+    @TableField(exist = false)
+    private String interns;
+    /**
+     * 检测项
+     */
+    @TableField(exist = false)
+    private List<Integer> itemIds;
+    /**
      * 检测项下 对应的操作人员。
      */
     @TableField(exist = false)

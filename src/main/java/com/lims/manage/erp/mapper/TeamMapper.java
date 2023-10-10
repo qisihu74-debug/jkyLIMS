@@ -268,4 +268,11 @@ public interface TeamMapper extends BaseMapper {
      */
     @Select("SELECT user_id as value, name as label FROM sys_user")
     List<LabelValueTeamVo> selectUserList();
+
+    /**
+     * 通过人员id 获取所属检测部门信息
+     * @param list
+     * @return
+     */
+    List<Long> getUsersByTechnicist(@Param("list") List<Long> list);
 }

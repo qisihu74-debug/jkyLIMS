@@ -107,4 +107,19 @@
         WHERE
             user_id = #{userId}
     </select>
+
+
+    <select id="getUsersByTechnicist" resultType="java.lang.Long">
+        SELECT
+        tr.team_id
+        FROM
+        test_team t
+        LEFT JOIN test_technicist tr ON t.id = tr.team_id
+        WHERE
+        tr.user_id IN
+        <foreach collection="list" item="user_id" index="index" open="(" close = ")" separator=",">
+            #{user_id}
+        </foreach>
+        AND tr.user_id IS NOT NULL
+    </select>
 </mapper>

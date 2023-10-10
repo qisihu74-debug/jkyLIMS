@@ -3814,7 +3814,7 @@ public class EntrustServiceImpl implements EntrustService {
      * @param id 委托单id
      * @param taskRelEntities 任务单流转列表
      */
-    void methodDistributionOfFlow(Long id, List<TestEntrustedTaskRelEntity> taskRelEntities){
+    public void methodDistributionOfFlow(Long id, List<TestEntrustedTaskRelEntity> taskRelEntities){
         // 通过委托单id 获取任务列表信息：
         List<TestEntrustedTaskRelEntity> testEntrustedTaskRelEntityList = testEntrustedTaskRelDao.getDeptByEntrustIdList(id);
         // 补充信息。testEntrustedTaskRelEntityList 集合中 taskId 补充存入
