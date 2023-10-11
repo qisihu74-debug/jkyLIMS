@@ -48,7 +48,8 @@ public interface AppTestInstrumentService {
      * @param type 类型 （结束试验的话 type = 1、点击提交复核 type =2）
      * @return
      */
-    String endToTest(InstrumentVo instrumentVo,Integer type);
+//    String endToTest(InstrumentVo instrumentVo,Integer type);
+    Result endToTest(InstrumentVo instrumentVo,Integer type);
 
     /**
      * 根据设备id 查询详情数据
