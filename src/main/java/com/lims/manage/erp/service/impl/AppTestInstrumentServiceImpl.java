@@ -250,6 +250,7 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
                 instrumentRecordEntity.setId(instrumentRecordListVo.getRecordId());
                 // 仪器使用记录结束时间
                 instrumentRecordEntity.setEndTime(instrumentVo.getEndTime());
+                instrumentRecordEntity.setAfterStatus(instrumentVo.getDeviceState());
                 instrumentRecordEntityMapper.updateByPrimaryKeySelective(instrumentRecordEntity);
 
                 //记录日志
