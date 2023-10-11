@@ -217,6 +217,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         List<TaskProgressVo> taskProgressVos = taskMapper.getTaskStateByEntrustId(entrustId);
         // 通过委托单id 查看检测项列表。
         List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+        // 检测人集合
+        List<Long> tsetUserIds = new ArrayList<>();
         // 1、效验检测人在不在检测科室 2、检测人不能在多个科室 3、补充每组检测项中人员信息
         for (SampleItemEntity sampleItemEntity : list) {
             // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
@@ -236,6 +238,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     labelValueVo.setText("0");
                     inspectorArraysVos.add(labelValueVo);
                     userIds.add(Long.parseLong(names[1]));
+                    tsetUserIds.add(Long.parseLong(names[1]));
                     nameStr.append(names[0] + " ");
                 }
                 // 读取检测人信息 是否在同一科室。
@@ -253,7 +256,32 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             }
             // 调用方法： 针对记录人、复核人、报告制作人信息 方法读取人员信息
             methodForPersonnel(sampleItemEntity, inspectorArraysVos, inspectorRels);
+            // 记录每组检测项 是否在一个科室。
+            if (CollectionUtil.isNotEmpty(inspectorRels)) {
+                //  0：检测人、1：记录人、2、复核人、3、报告制作人
+                for (TestCheckItemsTaskRel testCheckItemsTaskRel : inspectorRels) {
+                    if (testCheckItemsTaskRel.getUserType() == 1) {
+                        userIds.add(Long.valueOf(testCheckItemsTaskRel.getUserId()));
+                    }
+                    if (testCheckItemsTaskRel.getUserType() == 2) {
+                        userIds.add(Long.valueOf(testCheckItemsTaskRel.getUserId()));
+                    }
+                    if (testCheckItemsTaskRel.getUserType() == 3) {
+                        userIds.add(Long.valueOf(testCheckItemsTaskRel.getUserId()));
+                    }
+                }
+                // 读取0：检测人、1：记录人、2、复核人、3、报告制作人 是否在同一科室。
+                List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(userIds);
+                if (detectorsCollection.size() >= 2) {
+                    return ResultUtil.error("领取失败：" + nameStr + " 检测人、记录人、复核人、报告制作人 必须在同一个团队中");
+                }
+            }
             sampleItemEntity.setItemsTaskRels(inspectorRels);
+        }
+        //每组检测项中 选中的检测人 不能在同一科室。
+        List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(tsetUserIds);
+        if (detectorsCollection.size() != list.size()) {
+            return ResultUtil.error("领取失败：" + "请选择同一组人员，同一组人员必须要在同一个团队，不同组的人员，不能出现在同一个团队中");
         }
         // 通过委托单 获取流水任务单详情
         LambdaQueryWrapper<TestTaskPool> queryWrapper = new LambdaQueryWrapper<>();

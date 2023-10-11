@@ -291,19 +291,32 @@ public class TaskController {
         return ResultUtil.error(678, "领取失败！");
     }
 
+//    /**
+//     * 返回 团队姓名 前后端已废弃 （丁）
+//     *
+//     * @return
+//     */
+//    @RequestMapping("getTeamUserName")
+//    public Result getTeamUserName() {
+//        if (ShiroUtils.getUserInfo() != null) {
+//            // 抢单人
+//            List<LabelValueTeamVo> returnList = taskService.getTeamUserName(ShiroUtils.getUserInfo().getUserId());
+//            if (returnList != null && returnList.isEmpty()) {
+//                return ResultUtil.error(204, "数据为空！");
+//            }
+//            return ResultUtil.success(returnList);
+//        }
+//        return ResultUtil.error(502, "token过期！");
+//    }
     /**
-     * 返回 团队姓名 前后端已废弃 （丁）
+     * 返回 团队姓名 通过委托单id下样品名称是否匹配进行过滤
      *
      * @return
      */
-    @RequestMapping("getTeamUserName")
-    public Result getTeamUserName() {
+    @RequestMapping("getEntrustTeamUserName")
+    public Result getEntrustTeamUserName(Long entrustId) {
         if (ShiroUtils.getUserInfo() != null) {
-            // 抢单人
-            List<LabelValueTeamVo> returnList = taskService.getTeamUserName(ShiroUtils.getUserInfo().getUserId());
-            if (returnList != null && returnList.isEmpty()) {
-                return ResultUtil.error(204, "数据为空！");
-            }
+            TeamVo returnList = taskService.getEntrustTeamUserName(ShiroUtils.getUserInfo().getUserId(),entrustId);
             return ResultUtil.success(returnList);
         }
         return ResultUtil.error(502, "token过期！");

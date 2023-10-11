@@ -111,6 +111,7 @@
 
     <select id="getUsersByTechnicist" resultType="java.lang.Long">
         SELECT
+        DISTINCT
         tr.team_id
         FROM
         test_team t
