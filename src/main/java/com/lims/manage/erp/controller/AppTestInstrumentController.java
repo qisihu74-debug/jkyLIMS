@@ -130,7 +130,7 @@ public class AppTestInstrumentController {
         if (CollectionUtils.isEmpty(instrumentVo.getCheckItemInfoList())) {
             return ResultUtil.error("参数不能为空");
         }
-        return ResultUtil.success(appTestInstrumentService.startToTest(instrumentVo));
+        return appTestInstrumentService.startToTest(instrumentVo);
     }
 
     /**

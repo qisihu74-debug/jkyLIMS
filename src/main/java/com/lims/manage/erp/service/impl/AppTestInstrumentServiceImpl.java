@@ -2,6 +2,8 @@ package com.lims.manage.erp.service.impl;
 
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.AppTestInstrumentService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.util.Const;
@@ -83,19 +85,19 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String startToTest(InstrumentVo instrumentVo) {
+    public Result startToTest(InstrumentVo instrumentVo) {
         if (instrumentVo != null && !CollectionUtils.isEmpty(instrumentVo.getCheckItemInfoList())) {
             //校验设备使用状态
             Long id = instrumentVo.getId();
             InstrumentRecordEntity recordEntity1 = instrumentRecordEntityMapper.checkDeviceStatus(id);
             if(recordEntity1 != null){
-                return "设备被用户【"+recordEntity1.getUser()+"】正在任务单【"+recordEntity1.getTaskCode()+"】中使用！";
+                return ResultUtil.error("设备被用户【"+recordEntity1.getUser()+"】正在任务单【"+recordEntity1.getTaskCode()+"】中使用！");
             }
             //校验设备开始时间
             Date startTime = instrumentVo.getStartTime();
             InstrumentRecordEntity recordEntity2 = instrumentRecordEntityMapper.checkDeviceStartTime(id, startTime);
             if(recordEntity2 != null){
-                return "设备与其他任务使用时间冲突，请重新选择！";
+                return ResultUtil.error("设备与其他任务使用时间冲突，请重新选择！");
             }
             // 存储 test_instrument_use_record 设备使用记录
             for (CheckItemInfoVo checkItemInfoVo : instrumentVo.getCheckItemInfoList()) {
@@ -205,7 +207,7 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
                 }
             }
         }
-        return "开始实验成功";
+        return ResultUtil.success("开始实验成功",null);
     }
 
     /**
