@@ -1345,6 +1345,7 @@
     And t1.publish_date &gt;=#{item.publishStartTime}
     and t1.publish_date &lt;= #{item.publishEndTime}
 </if>
+        order by t1.id desc
     </select>
 
     <select id="myTaskList" resultType="com.lims.manage.erp.entity.TestTaskPool">
@@ -1385,5 +1386,6 @@
             and tb1.receive_date &lt;= #{item.receiveEndTime}
         </if>
         GROUP BY tb1.id
+        order by tb1.id desc
     </select>
 </mapper>

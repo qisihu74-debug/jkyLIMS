@@ -58,6 +58,8 @@ public class TestTaskPool implements Serializable {
     /**
      * 要求完成时间
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date requiredCompletionTime;
 
     /**

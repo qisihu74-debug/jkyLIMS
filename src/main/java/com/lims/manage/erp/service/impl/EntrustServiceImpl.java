@@ -339,7 +339,8 @@ public class EntrustServiceImpl implements EntrustService {
             //设置委托编号
             SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
             String acceptanceDate = yyyyMMddHH_NOT_.format(basisInfo.getAcceptanceDate()).substring(0,6);
-            Long time = basisInfo.getAcceptanceDate().getTime();
+//            Long time = basisInfo.getAcceptanceDate().getTime();
+            Long time = System.currentTimeMillis();
         //获取并设置委托编号，相应的类别
             EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),acceptanceDate);
             basisInfo.setEntrustmentNo(time.intValue());
@@ -376,7 +377,7 @@ public class EntrustServiceImpl implements EntrustService {
                     // 使用方法 处理样品来样时间 与委托单受理日期
                     sampleStatus = methodAcceptanceDate(sampleEntity.getId(),vo.getAcceptanceDate(),sampleData);
                     // 委托单创建 更新样品状态 state 待检0
-                    sampleData.setState("0");
+//                    sampleData.setState("0");
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleData);
                     EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
                     entrustSampleEntity.setEntrustmentId(basisInfo.getId());

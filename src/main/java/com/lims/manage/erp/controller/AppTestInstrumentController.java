@@ -147,7 +147,7 @@ public class AppTestInstrumentController {
         if (CollectionUtils.isEmpty(instrumentVo.getInstrumentRecordListVos())) {
             return ResultUtil.error("参数不能为空");
         }
-        return ResultUtil.success(appTestInstrumentService.endToTest(instrumentVo, 2));
+        return appTestInstrumentService.endToTest(instrumentVo, 2);
     }
 
     /**
