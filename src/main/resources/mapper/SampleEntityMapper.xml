@@ -1443,4 +1443,16 @@ WHERE
         WHERE sample_code LIKE CONCAT('%-', #{year}, '-%')
         and sample_code LIKE CONCAT('%', #{sampleType} ,'%')
     </select>
+    <select id="selectProductIdsTechnicist" resultType="java.lang.Long">
+        SELECT DISTINCT
+            t2.user_id
+        FROM
+            test_technicist_capacity t1
+            LEFT JOIN test_technicist t2 ON t1.technicist_id = t2.id
+        WHERE
+            t1.product_id IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
 </mapper>

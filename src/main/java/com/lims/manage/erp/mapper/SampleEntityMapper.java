@@ -516,4 +516,11 @@ public interface SampleEntityMapper {
      * @return
      */
     Integer getYPMaxNumber(@Param("year")String year,@Param("sampleType")String sampleType);
+
+    /**
+     * 通过产品id 获取对应的所属userIds
+     * @param list
+     * @return
+     */
+    List<Long> selectProductIdsTechnicist(@Param("list")List<Integer> list);
 }

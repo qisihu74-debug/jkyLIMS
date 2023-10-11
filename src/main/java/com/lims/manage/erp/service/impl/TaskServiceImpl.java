@@ -741,6 +741,68 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         return teamVo;
     }
 
+    /**
+     * 返回 团队姓名 通过委托单id下样品名称是否匹配进行过滤
+     * @param UserLong
+     * @param entrustId
+     * @return
+     */
+    @Override
+    public TeamVo getEntrustTeamUserName(Long UserLong,Long entrustId) {
+        TeamVo teamVo = new TeamVo();
+        // 获取当前用户所在科室id
+        Long department = teamMapper.getTeamIdByUid(UserLong);
+        // 获取顶级部门 为空则是当前部门
+        Long topDepartment = this.getTopDepartment(department);
+        if(StringUtils.isEmpty(topDepartment)){
+            topDepartment = department;
+        }
+        // 获取团队下所有子集团队下技术人员集合
+        List<TestTeam> testTeamList = teamMapper.getIdsByTeamId(topDepartment);
+        List<LabelValueVo> teamVos = new ArrayList<>();
+        // testTeamList =null
+        if(CollectionUtils.isEmpty(testTeamList)){
+            // 团队id集合 返回人员信息
+            Set<Long> deptIds = new HashSet<>();
+            deptIds.add(topDepartment);
+            List<LabelValueVo> teamVos0 = taskMapper.getMemberInformation(deptIds);
+            teamVo.setTeamVo(teamVos0);
+        } else {
+            for(TestTeam testTeam:testTeamList)
+            {
+                if(!StringUtils.isEmpty(testTeam)){
+                    LabelValueVo labelValueVo = new LabelValueVo();
+                    labelValueVo.setLabel(testTeam.getName());
+                    labelValueVo.setValue(testTeam.getUserId());
+                    teamVos.add(labelValueVo);
+                }
+            }
+            teamVo.setTeamVo(teamVos);
+        }
+        // 通过委托单获取样品信息
+        // 2、 展示每组下样品列表
+        List<SampleEntity> sampleList = sampleEntityMapper.selectSampleListGroup(entrustId);
+        if (CollectionUtil.isNotEmpty(sampleList)) {
+            List<Integer> productList = new ArrayList<>();
+            for (SampleEntity sampleEntity : sampleList) {
+                productList.add(sampleEntity.getProductId());
+            }
+            // 通过产品id 获取对应的所属userIds
+            List<Long> userList = sampleEntityMapper.selectProductIdsTechnicist(productList);
+            if(CollectionUtils.isEmpty(userList)){
+                teamVo.setTeamVo(new ArrayList<>());
+            }
+            // 参与比较
+            Map<Long,String> userMap = new HashMap<>();
+            if(CollectionUtil.isNotEmpty(teamVo.getTeamVo())){
+                //
+            }
+        }
+
+
+        return teamVo;
+    }
+
     @Override
     public Boolean getJudgmentTaskList(Long id) {
         if (taskMapper.getJudgmentTaskList(id) == 0) {

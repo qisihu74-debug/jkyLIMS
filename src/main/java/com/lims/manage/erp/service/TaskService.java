@@ -116,6 +116,11 @@ public interface TaskService {
     TeamVo getTeamUserNameTwo(Long UserLong);
 
     /**
+     * 返回 团队姓名 通过委托单id下样品名称是否匹配进行过滤
+     */
+    TeamVo getEntrustTeamUserName(Long UserLong,Long entrustId);
+
+    /**
      * 判断任务单 状态 state ==0 是空闲
      */
     Boolean getJudgmentTaskList(Long id);
