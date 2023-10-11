@@ -1328,8 +1328,9 @@
         FROM
         test_team
         WHERE
-        pid = #{item.team_id}
+        pid = #{item.teamId}
         )
+        or t4.team = #{item.teamId}
         OR t4.team IS NULL
         )
         AND t1.receive_id IS NULL
