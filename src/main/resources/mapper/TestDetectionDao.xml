@@ -166,4 +166,8 @@
 		id IN ( SELECT sample_id FROM test_entrusted_sample_details_rel WHERE entrustment_id = #{entrustId} )
     </update>
 
+    <select id="getSampleId" resultType="java.lang.Long">
+        select sample_id from test_entrusted_sample_checkitem_rel where id = #{itemId}
+    </select>
+
 </mapper>
