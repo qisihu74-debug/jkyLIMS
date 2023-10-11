@@ -1321,7 +1321,17 @@
         ) t2 ON t1.id = t2.id
         LEFT JOIN test_entrusted_info t4 ON t1.entrustment_id = t4.id
         WHERE
-        (t4.team = #{item.teamId} OR t4.team IS NULL)
+        (
+        t4.team IN (
+        SELECT
+        id
+        FROM
+        test_team
+        WHERE
+        pid = #{item.team_id}
+        )
+        OR t4.team IS NULL
+        )
         AND t1.receive_id IS NULL
         AND t1.sample IS NOT NULL
 <if test="item.sampleName != null and item.sampleName != ''">

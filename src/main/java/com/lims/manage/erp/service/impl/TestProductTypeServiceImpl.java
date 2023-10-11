@@ -37,7 +37,7 @@ public class TestProductTypeServiceImpl extends ServiceImpl<TestProductTypeDao, 
         if (type.getProductTypeName()==null){
             return ResultUtil.error("分类名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestProductType>().eq("product_type_name",type.getProductTypeName()))!=null){
+        if (this.getOne(new QueryWrapper<TestProductType>().eq("product_type_name",type.getProductTypeName()).eq("del_flag",0))!=null){
             return ResultUtil.error("分类名称重复");
         }
         type.setStatus("0");
