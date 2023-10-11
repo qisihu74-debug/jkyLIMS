@@ -219,7 +219,7 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String endToTest(InstrumentVo instrumentVo, Integer type) {
+    public Result endToTest(InstrumentVo instrumentVo, Integer type) {
         //结束试验的话 列1： 改变endTime 时间。
         //点击提交复核 列2： state = 2 待复核。
         Integer state = null;
@@ -233,7 +233,7 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
         vo.setStartTime(instrumentVo.getStartTime());
         List<InstrumentRecordEntity> instrumentRecordEntities = instrumentRecordEntityMapper.checkTime(vo);
         if(!org.apache.commons.collections.CollectionUtils.isEmpty(instrumentRecordEntities)){
-            return "选择的结束时间与设备在其他任务中使用的时间冲突，请重新选择！";
+            return ResultUtil.error("选择的结束时间与设备在其他任务中使用的时间冲突，请重新选择！");
         }
         // 遍历 设备使用记录id
         if (!CollectionUtils.isEmpty(instrumentVo.getInstrumentRecordListVos())) {
@@ -339,7 +339,7 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
 //                }
 //            }
         }
-        return "结束试验";
+        return ResultUtil.success("结束试验",null);
     }
 
     @Override
