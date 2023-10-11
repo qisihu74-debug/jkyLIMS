@@ -143,4 +143,20 @@ public class TaskVo {
      */
     @TableField(exist = false)
     private Long poolId;
+    /**
+     * 接单人(授权签字人，报告签发人)
+     */
+    @TableField(exist = false)
+    private String receiver;
+    /**
+     * 接单时间
+     */
+    @TableField(exist = false)
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private Date receiverTime;
+
+    /**
+     * 指定检测团队
+     */
+    private Long teamId;
 }

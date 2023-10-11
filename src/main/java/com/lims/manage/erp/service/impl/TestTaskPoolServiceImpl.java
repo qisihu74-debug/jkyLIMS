@@ -497,8 +497,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             }
         }
         // 6、实习生
-        if (StringUtils.isNotEmpty(sampleItemEntity.getInspector())) {
-            String[] userArrays = sampleItemEntity.getInspector().split(",");
+        if (StringUtils.isNotEmpty(sampleItemEntity.getInterns())) {
+            String[] userArrays = sampleItemEntity.getInterns().split(",");
             for (int i = 0; i < userArrays.length; i++) {
                 String[] names = userArrays[i].split("&");
                 LabelValueVo labelValueVo = new LabelValueVo();
@@ -563,8 +563,17 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             vo.setState(1);
             vo.setReportComplete(2);
             SysUserEntity userInfo = ShiroUtils.getUserInfo();
-            vo.setOrderer(userInfo.getName());
+            // 下单人 = 委托单受理人
+            vo.setOrderer(entrustAddVo.getBusinessAcceptor());
+            // 下单日期 = 受理日期
+            vo.setOrderTime(entrustAddVo.getAcceptanceDate());
             vo.setPresentInformation(entity.getPresentInformation());
+            // 接单人(授权签字人，报告签发人)
+            vo.setReceiver(userInfo.getUserId().toString());
+            // 接单时间
+            vo.setReceiverTime(new Date());;
+            // 团队
+            vo.setTeamId(deptId);
             // 设置出报告团队
             vo.setIssueReport("是");
             // 任务单创建时间

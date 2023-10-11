@@ -64,14 +64,17 @@
         auxiliary_personnel,
         sampler,
         sample_receiving_time,
-        pool_id
+        pool_id,
+        receiver,
+        receive_time,
+        team_id
         )
         VALUES
         <foreach collection="vos" item="vo" separator=",">
             (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},
              #{vo.state}, #{vo.issueReport}, #{vo.orderer},#{vo.reportComplete},#{vo.orderTime},#{vo.taskPrice},#{vo.presentInformation},
              #{vo.createTime},#{vo.inspector},#{vo.recorder},#{vo.reviewer},#{vo.reportProducer},#{vo.auxiliaryPersonnel},#{vo.probationer},#{vo.interns},
-             #{vo.sampler},#{vo.sampleReceivingTime},#{vo.poolId})
+             #{vo.sampler},#{vo.sampleReceivingTime},#{vo.poolId},#{vo.receiver},#{vo.receiverTime},#{vo.teamId})
         </foreach>
     </insert>
 
