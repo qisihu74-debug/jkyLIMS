@@ -202,6 +202,7 @@
             parameterType="com.lims.manage.erp.entity.EntrustHistoryEntity">
         SELECT * FROM (SELECT
         id,
+        create_time,
         GROUP_CONCAT( IFNULL( taskCode, "——" ) SEPARATOR ',') As taskCode,
         GROUP_CONCAT(IFNULL(teamName,"——") SEPARATOR ',') As teamName,
         entrustment_no,
@@ -260,7 +261,7 @@
             </if>
         </trim>
         GROUP BY id) as t1
-        ORDER BY entrustment_no desc
+        ORDER BY create_time desc
     </select>
 
     <select id="selectEntrustHistoryListRelease_of" resultType="com.lims.manage.erp.entity.EntrustHistoryEntity"
@@ -381,6 +382,7 @@
         SELECT * FROM
         (SELECT
         id,
+        create_time,
         GROUP_CONCAT( IFNULL( taskCode, "——" ) SEPARATOR ',') As taskCode,
         GROUP_CONCAT(IFNULL(teamName,"——") SEPARATOR ',') As teamName,
         entrustment_no,
@@ -439,7 +441,7 @@
             </if>
         </trim>
         GROUP BY id) as t1
-        ORDER BY entrustment_no desc
+        ORDER BY create_time desc
     </select>
 
 <!--    <select id="selectEntrustReleasedList" resultType="com.lims.manage.erp.entity.EntrustHistoryTaskEntity"-->
@@ -1440,7 +1442,7 @@
         <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
             #{item.id}
         </foreach>
-
+        order by create_time desc
     </select>
 
     <update id="updateReportTypeAndStatus" parameterType="java.util.List">

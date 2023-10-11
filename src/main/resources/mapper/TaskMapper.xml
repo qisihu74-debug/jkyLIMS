@@ -1262,6 +1262,7 @@
     <select id="taskHall" resultType="com.lims.manage.erp.entity.TestTaskPool">
         SELECT
         t1.id,
+        t1.sn,
         t1.sample,
         t1.entrustment_id AS entrustmentId,
         t1.price,
@@ -1269,12 +1270,14 @@
         t1.required_completion_time AS requiredCompletionTime,
         t1.task_flow_req AS taskFlowReq,
         t1.publisher,
-        t1.publish_date AS publishDate
+        t1.publish_date AS publishDate,
+        t4.team
         FROM
         test_task_pool t1
         LEFT JOIN (
         SELECT
         tpt.id,
+        tpt.sn,
         tpt.sample,
         tpt.entrustment_id AS entrustmentId,
         tpt.price,
@@ -1287,6 +1290,7 @@
         (
         SELECT
         id,
+        sn,
         entrustment_id,
         price,
         required_completion_time,
@@ -1312,8 +1316,10 @@
         t4.userId = #{item.userId}
         AND tpt.receive_id IS NULL
         ) t2 ON t1.id = t2.id
+        LEFT JOIN test_entrusted_info t4 ON t1.entrustment_id = t4.id
         WHERE
-        t1.receive_id IS NULL
+        (t4.team = #{item.teamId} OR t4.team IS NULL)
+        AND t1.receive_id IS NULL
         AND t1.sample IS NOT NULL
 <if test="item.sampleName != null and item.sampleName != ''">
     AND t1.sample LIKE CONCAT('%', #{item.sampleName}, '%')

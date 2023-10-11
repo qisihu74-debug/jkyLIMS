@@ -73,19 +73,25 @@ public class TestTechnicistServiceImpl extends ServiceImpl<TestTechnicistDao, Te
             //构建授权数据、保存入库
             Integer id = TestTechnicist.getId();
             List<TestProductType> list = TestTechnicist.getList();
-            for (TestProductType productType :list){
-                List<TestProduct> productList = productType.getProductList();
-                for (TestProduct product :productList){
-                    TechnicistCapacity capacity = new TechnicistCapacity();
-                    capacity.setTechnicistId(id);
-                    capacity.setProductTypeId(productType.getProductTypeId());
-                    capacity.setProductTypeName(productType.getProductTypeName());
-                    capacity.setProductId(product.getProductId());
-                    capacity.setProductName(product.getProductName());
-                    capacityList.add(capacity);
+            if (CollectionUtils.isNotEmpty(list)){
+                for (TestProductType productType :list){
+                    List<TestProduct> productList = productType.getProductList();
+                    if (CollectionUtils.isNotEmpty(productList)){
+                        for (TestProduct product :productList){
+                            TechnicistCapacity capacity = new TechnicistCapacity();
+                            capacity.setTechnicistId(id);
+                            capacity.setProductTypeId(productType.getProductTypeId());
+                            capacity.setProductTypeName(productType.getProductTypeName());
+                            capacity.setProductId(product.getProductId());
+                            capacity.setProductName(product.getProductName());
+                            capacityList.add(capacity);
+                        }
+                    }
                 }
             }
-            testTechnicistDao.insertBatchCapacity(capacityList);
+            if (CollectionUtils.isNotEmpty(capacityList)){
+                testTechnicistDao.insertBatchCapacity(capacityList);
+            }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加技术人员"+TestTechnicist.getId()+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
             return ResultUtil.success("添加成功!");
         }else {
