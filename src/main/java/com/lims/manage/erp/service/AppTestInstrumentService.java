@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.*;
 
 import java.util.List;
@@ -38,7 +39,8 @@ public interface AppTestInstrumentService {
      * @param instrumentVo
      * @return
      */
-    String startToTest(InstrumentVo instrumentVo);
+//    String startToTest(InstrumentVo instrumentVo);
+    Result startToTest(InstrumentVo instrumentVo);
 
     /**
      * 结束试验

@@ -41,7 +41,8 @@
         values (#{id,jdbcType=BIGINT}, #{instrumentId,jdbcType=BIGINT}, #{escRelId,jdbcType=BIGINT},
                 #{type,jdbcType=VARCHAR}, #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP},
                 #{temperature,jdbcType=VARCHAR}, #{humidity,jdbcType=VARCHAR}, #{beforeStatus,jdbcType=VARCHAR},
-                #{afterStatus,jdbcType=VARCHAR}, #{user,jdbcType=VARCHAR}, #{time,jdbcType=TIMESTAMP},#{taskId,jdbcType=BIGINT})
+                #{afterStatus,jdbcType=VARCHAR}, #{user,jdbcType=VARCHAR}, #{time,jdbcType=TIMESTAMP},#{taskId,jdbcType=BIGINT}
+                   , #{taskCode,jdbcType=VARCHAR})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.InstrumentRecordEntity">
         insert into test_instrument_use_record
