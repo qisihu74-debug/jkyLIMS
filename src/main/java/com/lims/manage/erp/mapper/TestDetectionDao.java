@@ -109,6 +109,5 @@ public interface TestDetectionDao {
     int batchSampleState(@Param("entrustId") Long entrustId);
 
 
-
-
+    Long getSampleId(Integer itemId);
 }

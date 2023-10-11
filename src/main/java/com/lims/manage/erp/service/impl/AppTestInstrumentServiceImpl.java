@@ -42,6 +42,8 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
     LogManagerService logManagerService;
     @Autowired
     TestInstrumentDao testInstrumentDao;
+    @Autowired
+    SampleEntityMapper sampleEntityMapper;
 
     @Override
     public List<TaskListVo> detectionTaskList(String search, Long userId) {
@@ -151,8 +153,11 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
             // 改变检测项状态 任务单状态记录开始、检测项进入开始状态。
             // 任务单集合
             Set<Long> taskIds = new HashSet<>();
+            Set<Long> sampleIds = new HashSet<>();
             for (CheckItemInfoVo checkItemInfoVo : instrumentVo.getCheckItemInfoList()) {
                 taskIds.add(checkItemInfoVo.getTaskId());
+                Long sampleId = testDetectionDao.getSampleId(checkItemInfoVo.getItemId());
+                sampleIds.add(sampleId);
             }
             // 遍历检测项 改变状态
             for (CheckItemInfoVo checkItemInfoVo : instrumentVo.getCheckItemInfoList()) {
@@ -204,6 +209,20 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
                             taskMapper.updateEntrustById(entrustEntity.getId(), 3);
                         }
                     }
+                }
+            }
+            //更新样品状态为在检2
+            if (!CollectionUtils.isEmpty(sampleIds)){
+                for (Long sampleId:sampleIds) {
+                    sampleEntityMapper.updateSampleState(sampleId.intValue(),2);
+                    SampleCirculationRecord sa = new SampleCirculationRecord();
+                    sa.setSampleId(sampleId.intValue());
+                    sa.setStatus("2");
+                    SysUserEntity userInfo = ShiroUtils.getUserInfo();
+                    sa.setOperatorId(userInfo.getUserId());
+                    sa.setOperatorName(userInfo.getName());
+                    sa.setTime(new Date());
+                    sampleEntityMapper.saveSampleCirculationRecord(sa);
                 }
             }
         }
