@@ -409,7 +409,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         List<SampleSimpleListVo> list = pageInfo.getList();
         List<SampleSimpleListVo> newDto = list.stream()
                 .collect(Collectors.collectingAndThen(Collectors.toCollection(()->
-                        new TreeSet<>(Comparator.comparing(SampleSimpleListVo::getSampleCode).reversed())),
+                        new TreeSet<>(Comparator.comparing(SampleSimpleListVo::getId).reversed())),
                         ArrayList::new));
         pageInfo.setList(newDto);
         return pageInfo;
@@ -434,7 +434,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         List<SampleSimpleListVo> list = pageInfo.getList();
         List<SampleSimpleListVo> newDto = list.stream()
                 .collect(Collectors.collectingAndThen(Collectors.toCollection(()->
-                        new TreeSet<>(Comparator.comparing(SampleSimpleListVo::getSampleCode).reversed())),
+                        new TreeSet<>(Comparator.comparing(SampleSimpleListVo::getId).reversed())),
                         ArrayList::new));
         pageInfo.setList(newDto);
         return pageInfo;
