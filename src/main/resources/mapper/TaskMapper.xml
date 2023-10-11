@@ -64,14 +64,17 @@
         auxiliary_personnel,
         sampler,
         sample_receiving_time,
-        pool_id
+        pool_id,
+        receiver,
+        receive_time,
+        team_id
         )
         VALUES
         <foreach collection="vos" item="vo" separator=",">
             (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},
              #{vo.state}, #{vo.issueReport}, #{vo.orderer},#{vo.reportComplete},#{vo.orderTime},#{vo.taskPrice},#{vo.presentInformation},
              #{vo.createTime},#{vo.inspector},#{vo.recorder},#{vo.reviewer},#{vo.reportProducer},#{vo.auxiliaryPersonnel},#{vo.probationer},#{vo.interns},
-             #{vo.sampler},#{vo.sampleReceivingTime},#{vo.poolId})
+             #{vo.sampler},#{vo.sampleReceivingTime},#{vo.poolId},#{vo.receiver},#{vo.receiverTime},#{vo.teamId})
         </foreach>
     </insert>
 
@@ -1318,7 +1321,18 @@
         ) t2 ON t1.id = t2.id
         LEFT JOIN test_entrusted_info t4 ON t1.entrustment_id = t4.id
         WHERE
-        (t4.team = #{item.teamId} OR t4.team IS NULL)
+        (
+        t4.team IN (
+        SELECT
+        id
+        FROM
+        test_team
+        WHERE
+        pid = #{item.teamId}
+        )
+        or t4.team = #{item.teamId}
+        OR t4.team IS NULL
+        )
         AND t1.receive_id IS NULL
         AND t1.sample IS NOT NULL
 <if test="item.sampleName != null and item.sampleName != ''">

@@ -58,5 +58,8 @@ int insertOrUpdateBatch(@Param("entities") List<TestTechnicist> entities);
     void deleteBatchCapatity(@Param("list") List<Long> idList);
 
     List<TechnicistCapacity> getProductTypeAndProduct();
+
+    @Select("select pid from test_team where id=#{id}")
+    Integer getPidById(@Param("id") Integer id);
 }
 
