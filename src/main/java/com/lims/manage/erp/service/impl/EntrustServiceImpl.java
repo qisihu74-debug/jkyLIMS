@@ -5698,11 +5698,17 @@ public class EntrustServiceImpl implements EntrustService {
         // 针对·审核通过与发布的已经成功
         Result msg = entrustApprovedMethod(entrustDetails, entrustId);
         if(msg.getCode() == 200){
+            // 通过委托单id 查看检测项列表。
+            List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
             // 进行 发布数据 更新委托单 = 1
             EntrustEntity basisInfo = new EntrustEntity();
             basisInfo.setId(entrustId);
             basisInfo.setState(1);
             entityMapper.updateEntrustInfos(basisInfo);
+            // 记录流转信息
+            StringBuffer taskFlowDateBuffer = new StringBuffer();
+            // 新增流转信息
+            List<TestEntrustedTaskRelEntity> addTaskRelEntities = new ArrayList<>();
             // 新建流转信息
             // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
             if(!CollectionUtils.isEmpty(entity.getTaskRelEntities())){
@@ -5713,9 +5719,15 @@ public class EntrustServiceImpl implements EntrustService {
                     taskdata.setUserId(userEntity.getUserId());
                     taskdata.setAddressName(userEntity.getName());
                     taskdata.setCreateDate(new Date());
+                    // 记录流转信息
+                    SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyy-MM-dd");
+                    String acceptanceDate = yyyyMMddHH_NOT_.format(taskdata.getTaskFlowDate()).substring(0, 10);
+                    String reportTypeStr = taskdata.getType()!=null&&taskdata.getType()==0?"最终报告":"中间报告";
+                    String remark = StringUtils.isEmpty(taskdata.getRemark())?"":"("+taskdata.getRemark()+")";
+                    taskFlowDateBuffer.append(acceptanceDate+reportTypeStr+remark+",");
+                    // 新增流转信息集合
+                    addTaskRelEntities.add(taskdata);
                 }
-                // 审核发布： 任务单流转 需要业务员提供信息
-                methodEntrustApprovedDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
             }
             // 新增流水号任务单信息
             TestTaskPool testTaskPool = new TestTaskPool();
@@ -5743,6 +5755,22 @@ public class EntrustServiceImpl implements EntrustService {
             testTaskPool.setPublishDate(new Date());
             // 发布人
             testTaskPool.setPublisher(userInfo.getName());
+            // 要求完成时间 = 委托要求完成时间
+            testTaskPool.setRequiredCompletionTime(entrustDetails.getRequestDate());
+            if(CollectionUtil.isNotEmpty(itemList)){
+                // 委托单的设置折扣率
+                entity.setDiscount(Double.parseDouble(entrustDetails.getDiscount()));
+                //计算本单价格
+                double taskPrice = 0L;
+                for (SampleItemEntity sampleItemEntity: itemList) {
+                        taskPrice = taskPrice + ((entity.getDiscount() == null ? 0 : entity.getDiscount()) *
+                                (sampleItemEntity.getUnitPrice() == null ? 0 : sampleItemEntity.getUnitPrice()) * sampleItemEntity.getTimes());
+                }
+                // 本单费用
+                testTaskPool.setPrice(String.valueOf(taskPrice));
+            }
+            // 任务流转要求
+            testTaskPool.setTaskFlowReq(taskFlowDateBuffer.deleteCharAt(taskFlowDateBuffer.length()-1).toString());
             // 样品信息
             // 2、 展示每组下样品列表
             List<SampleEntity> sampleList = sampleEntityMapper.selectSampleListGroup(entrustId);
@@ -5759,6 +5787,13 @@ public class EntrustServiceImpl implements EntrustService {
             }
             // 新增流水任务单
             taskPoolMapper.insert(testTaskPool);
+           if(CollectionUtil.isNotEmpty(addTaskRelEntities)){
+               for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity : addTaskRelEntities){
+                   testEntrustedTaskRelEntity.setTaskId(testTaskPool.getId().longValue());
+               }
+               // 审核发布： 任务单流转 需要业务员提供信息
+               methodEntrustApprovedDistributionOfFlow(entity.getEntrustmentId(),addTaskRelEntities);
+           }
             return msg;
         }else {
             return msg;
@@ -5893,7 +5928,7 @@ public class EntrustServiceImpl implements EntrustService {
         Integer maxSampleCode = sampleEntityMapper.getYPMaxNumber(acceptanceDate,"YP");
         maxSampleCode += 1;
         // 更改样品年限
-        sampleCodes[1] = String.valueOf(sampleCodes[1]);
+        sampleCodes[1] = acceptanceDate;
         // 更改样品编号
         String suffix = new DecimalFormat("00000").format(maxSampleCode);
         sampleCodes[2] = suffix;

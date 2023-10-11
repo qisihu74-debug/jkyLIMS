@@ -323,16 +323,23 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     }
 
     void methodPublishTaskList(Long entrustId, String sampler, SampleItemEntity sampleItemEntity, List<SampleItemEntity> itemList, Long poolId) {
+        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustId);
         // 进行新建任务单信息、补充信息
         TaskVo entity = new TaskVo();
         // 委托单信息
         entity.setEntrustmentId(entrustId);
         // 设置折扣
-        entity.setDiscount(1.00);
-        // 下单时间=orderTime (委托单转任务单的时间)
-        Date orderTime = new Date();
-        // 要求完成时间
-        Date requiredCompletionTime = new Date();
+        entity.setDiscount(Double.parseDouble(entrustAddVo.getDiscount()));
+        // 丁连春：任务单完成时间 以委托单下单时间为准
+        entity.setRequiredCompletionTime(entrustAddVo.getRequestDate());
+        // 任务单下单日期等于委托单受理日期
+        entity.setOrderTime(entrustAddVo.getAcceptanceDate());
+        // 任务单提供资料等于委托单提供资料
+        if(!org.springframework.util.StringUtils.isEmpty(entrustAddVo.getPresentInformation())){
+            entity.setPresentInformation(entrustAddVo.getPresentInformation());
+        }else {
+            entity.setPresentInformation("--");
+        }
         // 领样人
         entity.setSampler(sampler);
         // 领样时间
@@ -389,7 +396,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         }
         entity.setCheckItemDeptVoList(checkItemDeptVoList);
         // 发布任务
-        distributionTask412(entity, sampleItemEntity, poolId, taskId);
+        distributionTask412(entity, sampleItemEntity, poolId, taskId,entrustAddVo);
     }
 
     /**
@@ -484,7 +491,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Boolean distributionTask412(TaskVo entity, SampleItemEntity sampleItemEntity, Long poolId, Long taskId) {
+    public Boolean distributionTask412(TaskVo entity, SampleItemEntity sampleItemEntity, Long poolId, Long taskId,EntrustAddVo entrustAddVo) {
         List<Long> deptIds = Lists.newArrayList();
         List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
         for (CheckItemDeptVo vo : checkItemDeptVoList) {
@@ -492,7 +499,6 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 deptIds.add(vo.getDeptId());
             }
         }
-        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entity.getEntrustmentId());
         //创建任务对象
         List<TaskVo> vos = Lists.newArrayList();
         for (Long deptId : deptIds) {
@@ -526,7 +532,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             vo.setEntrustmentId(entity.getEntrustmentId());
             vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
             vo.setOrderTime(entity.getOrderTime());
-            vo.setState(0);
+            vo.setState(1);
             vo.setReportComplete(2);
             SysUserEntity userInfo = ShiroUtils.getUserInfo();
             vo.setOrderer(userInfo.getName());
@@ -571,6 +577,13 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             List<Integer> sampleIds = entityMapper.getSampleId(entity.getEntrustmentId());
             if (CollectionUtil.isNotEmpty(sampleIds)) {
                 for (Integer sampleId : sampleIds) {
+                    // 更新委托状态
+                    SampleEntity record = new SampleEntity();
+                    record.setId(sampleId);
+                    // 样品状态 预收样 = 收样
+                    record.setState("0");
+                    // update样品信息状态
+                    sampleEntityMapper.updateByPrimaryKeySelective(record);
                     // 根据样品id 查询样品流转列表
                     List<SampleCirculationRecord> circulationList = sampleEntityMapper.getRecords(sampleId, 30);
                     if (CollectionUtils.isEmpty(circulationList)) {
