@@ -13,6 +13,7 @@ import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TestTaskPool;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductItemDao;
+import com.lims.manage.erp.mapper.TestTechnicistDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -20,7 +21,12 @@ import com.lims.manage.erp.service.PageOfficeCopyService;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
-import com.lims.manage.erp.util.*;
+import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.FileAndFolderUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.PDFHelper3;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.BatchReceiveTaskVo;
 import com.lims.manage.erp.vo.ExcelInsertVo;
 import com.lims.manage.erp.vo.LabelValueTeamVo;
@@ -50,7 +56,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -90,6 +95,8 @@ public class TaskController {
     Logger logger = LoggerFactory.getLogger(TaskController.class);
     @Autowired
     private ReportService reportService;
+    @Autowired
+    private TestTechnicistDao testTechnicistDao;
 
     /**
      * 查询任务详情——废弃
@@ -1130,6 +1137,8 @@ public class TaskController {
     @PostMapping("taskHall")
     public Result taskHall(@RequestBody ReqTaskPool bean){
         bean.setUserId(ShiroUtils.getUserInfo().getUserId());
+        Integer teamId = testTechnicistDao.getSealer(bean.getUserId());
+        bean.setTeamId(teamId);
         PageInfo<TestTaskPool> pageInfo = taskService.taskHall(bean);
         return ResultUtil.success(pageInfo);
     }
