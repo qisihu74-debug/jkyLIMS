@@ -794,12 +794,24 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             }
             // 参与比较
             Map<Long,String> userMap = new HashMap<>();
-            if(CollectionUtil.isNotEmpty(teamVo.getTeamVo())){
-                //
+            if (CollectionUtil.isNotEmpty(teamVo.getTeamVo())) {
+                for (Long userId : userList) {
+                    for (LabelValueVo labelValueVo : teamVo.getTeamVo()) {
+                        if (labelValueVo.getValue().equals(userId)) {
+                            userMap.put(userId, "录入人员");
+                        }
+                    }
+                }
+                // 迭代数据
+                List<LabelValueVo> testUsers = new ArrayList<>();
+                for (LabelValueVo valueVo : teamVo.getTeamVo()) {
+                    if (userMap.get(valueVo.getValue()) != null) {
+                        testUsers.add(valueVo);
+                    }
+                }
+                teamVo.setTeamVo(testUsers);
             }
         }
-
-
         return teamVo;
     }
 
