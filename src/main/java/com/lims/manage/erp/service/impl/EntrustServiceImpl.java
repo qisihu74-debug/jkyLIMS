@@ -5771,7 +5771,9 @@ public class EntrustServiceImpl implements EntrustService {
                 testTaskPool.setPrice(String.valueOf(taskPrice));
             }
             // 任务流转要求
-            testTaskPool.setTaskFlowReq(taskFlowDateBuffer.deleteCharAt(taskFlowDateBuffer.length()-1).toString());
+            if(taskFlowDateBuffer.length()>=2){
+                testTaskPool.setTaskFlowReq(taskFlowDateBuffer.deleteCharAt(taskFlowDateBuffer.length()-1).toString());
+            }
             // 样品信息
             // 2、 展示每组下样品列表
             List<SampleEntity> sampleList = sampleEntityMapper.selectSampleListGroup(entrustId);
