@@ -11,6 +11,8 @@ import java.util.List;
 @Data
 public class TaskListVo {
     private Long taskId;//任务主键
+    // 委托单id
+    private Long entrustmentId;
     private String taskCode;//任务编号
     private String orderer;//下单人
     private String correlationTaskCode;//关联任务编号

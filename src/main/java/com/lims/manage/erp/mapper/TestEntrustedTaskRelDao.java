@@ -33,7 +33,7 @@ public interface TestEntrustedTaskRelDao {
      *  根据任务id 查询 流转单 列表
      * @return
      */
-    List<TestEntrustedTaskRelEntity> getTaskList(@Param("taskId") Long taskId);
+    List<TestEntrustedTaskRelEntity> getTaskList(@Param("taskId") Long taskId,@Param("entrustId") Long entrustId);
 
     /**
      * 单个修改信息

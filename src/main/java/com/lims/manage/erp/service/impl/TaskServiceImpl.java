@@ -1899,7 +1899,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                 sampleListVo.setCorrelationTaskCode(correlationTask.toString());
                 // 通过任务单id 补充 任务流转日期信息
                 List<TestEntrustedTaskRelEntity> TaskList = Lists.newArrayList();
-                TaskList = testEntrustedTaskRelDao.getTaskList(sampleListVo.getTaskId());
+                TaskList = testEntrustedTaskRelDao.getTaskList(sampleListVo.getTaskId(),sampleListVo.getEntrustmentId());
                 if(!CollectionUtils.isEmpty(TaskList)){
                     StringBuilder stringBuilder = new StringBuilder();
                     StringBuilder remark = new StringBuilder();
