@@ -4098,7 +4098,9 @@ public class ReportServiceImpl implements ReportService {
     public PageInfo onlineMakeReport(Integer pageNum, Integer pageSize, String search) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         PageHelper.startPage(pageNum, pageSize);
-        List<ReportListVo> list = reportMapper.getReportListOnline(userTeamIds, search);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        Long userId = userInfo.getUserId();
+        List<ReportListVo> list = reportMapper.getReportListOnline(userTeamIds, search,userId+"");
         for (ReportListVo reportListVo : list) {
             List<LabelValueVo> sampleInfos = reportMapper.getSampleInfos(reportListVo.getId());
             reportListVo.setSampleInfos(sampleInfos);
