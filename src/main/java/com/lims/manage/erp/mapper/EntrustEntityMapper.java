@@ -798,4 +798,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @return
      */
     int updateEntrustInfoDetails(EntrustEntity basisInfo);
+
+    @Update("update test_entrusted_info set state=10 where id=#{id}")
+    void updateStateById(@Param("id") Long id);
 }
