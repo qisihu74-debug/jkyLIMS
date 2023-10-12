@@ -164,6 +164,7 @@
     <!--任务单和样品列表结果集-->
     <resultMap id="taskSampleResultMap" type="com.lims.manage.erp.vo.TaskListVo">
         <result property="taskId" column="taskId"></result>
+        <result property="entrustmentId" column="entrustment_id"></result>
         <result property="startTime" column="startTime"></result>
         <result property="taskCode" column="taskCode"></result>
         <result property="orderer" column="orderer"></result>
@@ -456,6 +457,7 @@
             parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT DISTINCT
         t1.id taskId,
+        t1.entrustment_id,
         t1.task_code taskCode,
         t1.code,
         t1.orderer,
@@ -536,6 +538,7 @@
             parameterType="com.lims.manage.erp.vo.TaskListParamVo">
         SELECT DISTINCT
         t1.id taskId,
+        t1.entrustment_id,
         t1.task_code taskCode,
         t1.code,
         t1.orderer,

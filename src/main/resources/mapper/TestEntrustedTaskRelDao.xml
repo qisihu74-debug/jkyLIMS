@@ -57,6 +57,9 @@
     FROM
     test_entrusted_task_rel
     WHERE task_id = #{taskId}
+    <if test="entrustId != null">
+        or (entrust_id = #{entrustId} and department is null)
+    </if>
     </select>
     <update id="updateData" parameterType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
         update test_entrusted_task_rel

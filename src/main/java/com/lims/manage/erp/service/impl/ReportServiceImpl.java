@@ -844,6 +844,9 @@ public class ReportServiceImpl implements ReportService {
                 recordEntity.setEntrustmentId(recordEntity.getEntrustId());
             }
         }
+        list.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
+                        new TreeSet<>(Comparator.comparing(ReportRecordEntity:: getIssuerTime).reversed())),
+                ArrayList::new));
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
