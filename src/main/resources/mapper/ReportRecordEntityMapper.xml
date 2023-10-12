@@ -567,6 +567,9 @@
             <if test="reportCode != null">
                 report_code = #{reportCode,jdbcType=VARCHAR},
             </if>
+            <if test="number != null">
+                number = #{number},
+            </if>
             <if test="state != null">
                 state = #{state,jdbcType=VARCHAR},
             </if>
