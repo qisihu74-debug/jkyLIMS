@@ -5730,6 +5730,17 @@ public class EntrustServiceImpl implements EntrustService {
                     addTaskRelEntities.add(taskdata);
                 }
             }
+            //通过委托单id  查询流水号任务单 是否存在
+            LambdaQueryWrapper<TestTaskPool> entrustPoolWrapper = new LambdaQueryWrapper<>();
+            // 委托单id
+            entrustPoolWrapper.eq(TestTaskPool::getEntrustmentId,entrustId);
+            List<TestTaskPool> testTaskPoolList = taskPoolMapper.selectList(entrustPoolWrapper);
+            if(CollectionUtil.isNotEmpty(testTaskPoolList)){
+                // 更新操作即可
+                TestTaskPool taskPool = testTaskPoolList.get(0);
+                // 流转信息
+                taskPool.setTaskFlowReq(taskPool.getTaskFlowReq()+taskFlowDateBuffer.toString());
+            }
             // 新增流水号任务单信息
             TestTaskPool testTaskPool = new TestTaskPool();
             // 设置任务单流水号
