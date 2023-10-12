@@ -49,14 +49,14 @@ public class ExcelReplaceUtil {
                         // 工程部位/用途：
                         cell.setCellValue(originalRecordDataVo.getProjectLocation());
                     }
-                    if (!cellValue.equals("") && cellValue.equals("${result.testDate}")) {
-                        // 试验检测日期
-                        cell.setCellValue(originalRecordDataVo.getTestDate());
-                    }
-                    if (!cellValue.equals("") && cellValue.equals("${result.testCondition}")) {
-                        // 试验条件
-                        cell.setCellValue(originalRecordDataVo.getTestDate());
-                    }
+//                    if (!cellValue.equals("") && cellValue.equals("${result.testDate}")) {
+//                        // 试验检测日期
+//                        cell.setCellValue(originalRecordDataVo.getTestDate());
+//                    }
+//                    if (!cellValue.equals("") && cellValue.equals("${result.testCondition}")) {
+//                        // 试验条件
+//                        cell.setCellValue(originalRecordDataVo.getTestDate());
+//                    }
                     if (!cellValue.equals("") && cellValue.equals("${result.testBasis}")) {
                         // 检测依据
                         cell.setCellValue(originalRecordDataVo.getTestBasis());
@@ -65,10 +65,10 @@ public class ExcelReplaceUtil {
                         // 判定依据
                         cell.setCellValue(originalRecordDataVo.getJudgeBasis());
                     }
-                    if (!cellValue.equals("") && cellValue.equals("${result.equipment}")) {
-                        // 主要仪器设备名称及编号
-                        cell.setCellValue(originalRecordDataVo.getEquipment());
-                    }
+//                    if (!cellValue.equals("") && cellValue.equals("${result.equipment}")) {
+////                        // 主要仪器设备名称及编号
+////                        cell.setCellValue(originalRecordDataVo.getEquipment());
+////                    }
                     if (!cellValue.equals("") && cellValue.contains("${result.sampleDetails}")) {
                         TemplateSampleVo sample = originalRecordDataVo.getSample();
 
