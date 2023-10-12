@@ -1499,4 +1499,142 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             }
         }
     }
+
+    /**
+     * 进行每组检测项下对应的sheet下标 调整头部信息
+     *
+     * @param paramVo
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String updateItemOriginUr(EndTestParamVo paramVo) throws IOException {
+        // 1、获取检测项信息列表对应的 sheet下标。
+        // 查询检测项对应的 sheet下标
+        Integer[] ids = new Integer[paramVo.getItemInstrumentEntityList().size()];
+        for (int j = 0; j < paramVo.getItemInstrumentEntityList().size(); j++) {
+            ids[j] = paramVo.getItemInstrumentEntityList().get(j);
+        }
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
+        // 2、 获取每组检测项的 数据（试验检测日期、试验条件、主要仪器设备名称及编号）
+        Map<Integer, Map<String, String>> mapMap = methodHashMapItem(paramVo.getItemInstrumentEntityList());
+        // 3、读取产品附件
+        String productExcelUrl = null;
+        ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(ids[0]);
+        Integer itemId = ids[0];
+        // 通过检测项主键 获取样品生成附件是否存在。
+        InputStream inputStream = null;
+        // 调用函数 获取 数据内容
+        ExcelSheetDataVo productInputStream = getProductInputStream(excelInsertVo, itemId);
+        if (productInputStream == null) {
+            return null;
+        }
+        if (productInputStream.getProductExcelUrl() == null) {
+            return null;
+        }
+        inputStream = productInputStream.getFileStream();
+        productExcelUrl = productInputStream.getProductExcelUrl();
+        // 创建一个 XSSFWorkbook 对象，用于处理 .xlsx 格式的 Excel 文件
+        XSSFWorkbook wb = new XSSFWorkbook(inputStream);
+//        ----------------------------------上列 设置基础数据----------------------------
+        // 根据key 保证 sheet不重复使用。
+        Map<String, String> keyMap = new HashMap<>();
+        // 检测项 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回 && 检测项对应的sheet 不为空
+        for (ExcelInsertVo excelInsertVo1 : sheetItems) {
+            // 获取sheetIndex工作表
+            XSSFSheet sheet = wb.getSheetAt(excelInsertVo1.getSheetIndex());
+            if (sheet != null) {
+                //获取工作表的名称
+                String sheetName = sheet.getSheetName();
+                if (keyMap.get(sheetName) == null) {
+                    keyMap.put(sheetName, sheetName);
+                    // 设置数据
+                    OriginalRecordDataVo originalData = new OriginalRecordDataVo();
+                    Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
+                    // 录入信息
+                    Map<String, String> map = mapMap.get(excelInsertVo1.getItemId());
+                    // 试验检测日期
+                    originalData.setTestDate(map.get("testDate"));
+                    // 试验条件
+                    originalData.setTestCondition(map.get("testCondition"));
+                    // 主要仪器设备名称及编号
+                    originalData.setEquipment(map.get("equipment"));
+                    result.put("result", originalData);
+                    // 替换原始记录模板数据
+                    ExcelReplaceUtil.ExcelHeadReplace(sheet, result);
+                }
+            }
+        }
+        InputStream input = null;
+        input = AsposeUtil.createExcelStream(wb);
+        if (input != null) {
+            // 循环设置
+            List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
+            // 把 wb 数据 存放上传
+            String[] array = productExcelUrl.split("\\.");
+            if (excelInsertVo == null) {
+                String excelUrl = MinIoUtil.upload("file-resources", GenID.getID() + "." + array[array.length - 1], input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                input.close();
+//                fileStream.close();
+                // 更新 样品Excel附件
+                testProductItemDao.updateProductExcelUrl(dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId(), excelUrl);
+                return excelUrl;
+            } else {
+//                fileStream.close();
+                // 私有方法 更新 产品附件及报告附件内容。
+                return methodUpdateItemUrl(GenID.getID() + "." + array[array.length - 1], input, ids, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
+            }
+        }
+        return "操作成功";
+    }
+
+    public Map<Integer, Map<String, String>> methodHashMapItem(List<Integer> integerList) {
+        Map<Integer, Map<String, String>> mapMap = new HashMap<>();
+        // 获取检测项对应的信息
+        for (Integer id : integerList) {
+            Map<String, String> itemMap = new HashMap<>();
+            // 1、主要仪器设备名称及编号 、试验条件
+            List<TestInstrumentEntity> instrumentEntityList = taskMapper.getInstrumentEntityList(id);
+            // 仪器编号信息
+            StringBuilder stringBuilder = new StringBuilder();
+            // 试验条件
+            StringBuilder wendugBuilder = new StringBuilder();
+            if (instrumentEntityList != null && !instrumentEntityList.isEmpty()) {
+                for (int i = 0; i < instrumentEntityList.size(); i++) {
+                    stringBuilder.append(instrumentEntityList.get(i).getModel());
+                    stringBuilder.append(instrumentEntityList.get(i).getName());
+                    stringBuilder.append("（");
+                    stringBuilder.append(instrumentEntityList.get(i).getCode());
+                    stringBuilder.append("）");
+                    if (i != instrumentEntityList.size() - 1) {
+                        stringBuilder.append("、");
+                    }
+                    wendugBuilder.append("温度");
+                    if (StringUtils.isEmpty(instrumentEntityList.get(i).getTemperature())) {
+                        wendugBuilder.append("-");
+                    } else {
+                        wendugBuilder.append(instrumentEntityList.get(i).getTemperature());
+                    }
+                    wendugBuilder.append("湿度");
+                    if (StringUtils.isEmpty(instrumentEntityList.get(i).getHumidity())) {
+                        wendugBuilder.append("-");
+                    } else {
+                        wendugBuilder.append(instrumentEntityList.get(i).getHumidity() + " ");
+                    }
+                }
+            }
+            // 设备编号
+            itemMap.put("equipment", stringBuilder.toString());
+            // 试验条件
+            itemMap.put("testCondition", wendugBuilder.toString());
+            // 2、试验检测日期 -- 后期比较
+            SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyy-MM-dd");
+            SampleItemInstrumentEntity itemDetail = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(id);
+            String startTime = yyyyMMddHH_NOT_.format(itemDetail.getStartTime()).substring(0, 10);
+            String endTime = yyyyMMddHH_NOT_.format(itemDetail.getEndTime()).substring(0, 10);
+            itemMap.put("testDate", startTime + "-" + endTime);
+            mapMap.put(id, itemMap);
+        }
+        return mapMap;
+    }
 }

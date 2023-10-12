@@ -110,4 +110,11 @@ public interface TestDetectionDao {
 
 
     Long getSampleId(Integer itemId);
+
+    /**
+     * 依据检测项 选择设备仪器
+     * @param escRelId
+     * @return
+     */
+    List<TestInstrumentEntity> selectInstrumentList(Integer escRelId);
 }

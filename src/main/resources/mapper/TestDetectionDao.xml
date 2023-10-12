@@ -170,4 +170,17 @@
         select sample_id from test_entrusted_sample_checkitem_rel where id = #{itemId}
     </select>
 
+    <select id="selectInstrumentList" resultType="com.lims.manage.erp.entity.TestInstrumentEntity">
+        SELECT
+            temperature,
+            humidity,
+            start_time,
+            end_time,
+        USER
+        FROM
+            test_instrument_use_record
+        WHERE
+            esc_rel_id = #{escRelId}
+    </select>
+
 </mapper>
