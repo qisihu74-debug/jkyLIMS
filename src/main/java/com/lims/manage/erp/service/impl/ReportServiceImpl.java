@@ -1599,6 +1599,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public void sealRevoke(Long id) {
+        recordEntityMapper.sealRevoke(id);
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();

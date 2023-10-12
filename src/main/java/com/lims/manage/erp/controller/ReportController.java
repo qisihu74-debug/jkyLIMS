@@ -1442,4 +1442,18 @@ public class ReportController {
         List<SealDefData> list = reportService.getNameAndMobile(id);
         return ResultUtil.success(list);
     }
+
+    /**
+     * 电子章撤回从新盖章
+     * @param id
+     * @return
+     */
+    @GetMapping("sealRevoke")
+    public Result sealRevoke(Long id){
+        if (id == null){
+            return ResultUtil.error("缺少参数");
+        }
+        reportService.sealRevoke(id);
+        return ResultUtil.success("撤回成功");
+    }
 }
