@@ -3262,7 +3262,22 @@ public class ReportServiceImpl implements ReportService {
             list.add(entity);
             ids.add(id);
         }
+        //更新委托状态为10状态：0（未发布）；
+        //1（已发布）；
+        //3(试验开始)；
+        //4(试验完成)；
+        //8(报告审核)；
+        //9(报告签发)；
+        //10(报告盖章)；
+        //144（已作废）；
+        //200（已完成）；
+        //201（预委托）；
+        //202（被驳回）；
         //设置状态和用章类型
+        for (Long id :ids){
+            ReportRecordEntity byRecordId = recordEntityMapper.getByRecordId(id);
+            entrustEntityMapper.updateStateById(byRecordId.getEntrustmentId() != null?byRecordId.getEntrustmentId():byRecordId.getEntrustId());
+        }
         reportMapper.updateCategory(list);
         //如果是中间报告，移除中间报到到新表
         if (ids.size() >= 1) {

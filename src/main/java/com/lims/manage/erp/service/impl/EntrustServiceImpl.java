@@ -5885,6 +5885,25 @@ public class EntrustServiceImpl implements EntrustService {
                         }
                     }
                 }
+                // 根据样品id 查询样品流转列表
+                List<SampleCirculationRecord> circulationList = sampleEntityMapper.getRecords(sampleData1.getId(), 30);
+                Boolean flag = false;
+                for (SampleCirculationRecord sampleCirculationRecord : circulationList) {
+                    if (sampleCirculationRecord.getStatus().equals("0")) {
+                        flag = true;
+                    }
+                }
+                if (!flag) {
+                    // 增加样品样品流转状态
+                    SampleCirculationRecord sa = new SampleCirculationRecord();
+                    sa.setSampleId(sampleData1.getId());
+                    // 0:收样
+                    sa.setStatus("0");
+                    sa.setOperatorId(userInfo.getUserId());
+                    sa.setOperatorName(userInfo.getName());
+                    sa.setTime(new Date());
+                    sampleEntityMapper.saveSampleCirculationRecord(sa);
+                }
             }
         }
         return ResultUtil.success("审批通过成功");

@@ -1277,7 +1277,7 @@
         t4.team
         FROM
         test_task_pool t1
-        LEFT JOIN (
+        INNER JOIN (
         SELECT
         tpt.id,
         tpt.sn,
@@ -1305,7 +1305,7 @@
         FROM
         test_task_pool
         ) AS tpt
-        JOIN (
+        INNER JOIN (
         SELECT
         t1.technicist_id,
         t1.product_name,
