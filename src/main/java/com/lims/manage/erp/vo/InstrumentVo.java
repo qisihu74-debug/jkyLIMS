@@ -54,4 +54,6 @@ public class InstrumentVo {
      */
     private List<InstrumentRecordListVo> instrumentRecordListVos = new ArrayList<>();
 
+    private String taskCode;
+
 }
