@@ -8,6 +8,7 @@ import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
+import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
@@ -50,13 +51,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author: DLC
@@ -93,6 +89,9 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
                 bean.setEntrustmentId(bean.getEntrustId());
             }
         }
+        list.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
+                new TreeSet<>(Comparator.comparing(ReportApprovalVo:: getRequiredCompletionTime).reversed())),
+                ArrayList::new));
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
     }
@@ -513,7 +512,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             // 根据委托单id 进行全部修改
             reportApprovalMapper.updateentrustAndApprovalMonad(reportApprovalVo);
             // 驳回操作 test_task 下 report_complete =2
-//            taskMapper.updateTestTaskReportComplete(entrustAddVo.getId());
+            taskMapper.updateTestTaskReportComplete(entrustAddVo.getId());
             if(entrustAddVo.getState()!=null){
                 taskMapper.updateEntrustById(entrustAddVo.getId(),7);
             }
