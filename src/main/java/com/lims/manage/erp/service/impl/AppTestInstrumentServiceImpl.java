@@ -218,7 +218,7 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
                     sampleEntityMapper.updateSampleState(sampleId.intValue(),1);
                     SampleCirculationRecord sa = new SampleCirculationRecord();
                     sa.setSampleId(sampleId.intValue());
-                    sa.setStatus("2");
+                    sa.setStatus("1");
                     SysUserEntity userInfo = ShiroUtils.getUserInfo();
                     sa.setOperatorId(userInfo.getUserId());
                     sa.setOperatorName(userInfo.getName());

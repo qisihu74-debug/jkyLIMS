@@ -161,7 +161,7 @@
 
     <update id="batchSampleState" >
 	UPDATE test_sample
-	SET state = 2
+	SET state = 3
 	WHERE
 		id IN ( SELECT sample_id FROM test_entrusted_sample_details_rel WHERE entrustment_id = #{entrustId} )
     </update>

@@ -402,6 +402,7 @@
         t2.task_price
         HAVING
         number > 0
+        order by t2.create_time desc
     </select>
 
 <!--    <select id="reportDownloadList" resultType="com.lims.manage.erp.vo.ReportListVo">-->
