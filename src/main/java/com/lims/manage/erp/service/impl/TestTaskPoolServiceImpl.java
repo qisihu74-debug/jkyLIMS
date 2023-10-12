@@ -210,6 +210,11 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     public Result addTaskCollection(List<SampleItemEntity> list) {
         // 通过检测项主键 获取 委托单id
         Long entrustId = taskPoolMapper.selectEntrustmentId(list.get(0).getItemIds().get(0));
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        // 根据条件删除流转信息
+        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+        queryWrapper12.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
+        testCheckItemsTaskRelMapper.delete(queryWrapper12);
         if (entrustId == null) {
             return ResultUtil.error("数据异常、委托单不存在");
         }
@@ -393,11 +398,6 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     checkItemDeptVoList.add(checkItemDeptVo);
                 }
             }
-            // 调用方法： 对每组检测项的人员信息进行新增。
-            // 根据条件删除流转信息
-            LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
-            testCheckItemsTaskRelMapper.delete(queryWrapper);
             for (SampleItemEntity sampleItemEntity1 : itemList) {
                 Integer itemId = sampleItemEntity.getItemIds().get(i);
                 if (sampleItemEntity1.getId().equals(itemId)) {
