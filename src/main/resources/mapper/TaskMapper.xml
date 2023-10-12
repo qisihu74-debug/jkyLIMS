@@ -1126,7 +1126,7 @@
                  or t3.alias_name like CONCAT('%',#{search},'%') )
             </if>
         ORDER BY
-            t1.required_completion_time ASC
+            t1.create_time desc
     </select>
 
     <select id="taskList" resultMap="taskSampleResultMap">

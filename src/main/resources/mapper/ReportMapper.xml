@@ -382,6 +382,7 @@
         LEFT JOIN test_entrusted_sample_checkitem_rel t3 ON t2.id = t3.task_id
         WHERE
             t2.task_code IS NOT NULL
+            AND t2.report_producer like CONCAT('%',#{userId},'%')
             AND t2.report_complete = 2
             AND (t3.state = 3 or t3.mid_state = 1)
         <if test="taskCode!=null and taskCode!=''">

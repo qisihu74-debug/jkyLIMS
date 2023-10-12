@@ -133,6 +133,7 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
                 recordEntity.setUser(instrumentVo.getUser());
                 recordEntity.setTime(new Date());
                 recordEntity.setTaskId(checkItemInfoVo.getTaskId());
+                recordEntity.setTaskCode(instrumentVo.getTaskCode());
                 // 仪器使用记录
                 instrumentRecordEntityMapper.insert(recordEntity);
                 //记录日志
@@ -211,10 +212,10 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
                     }
                 }
             }
-            //更新样品状态为在检2
+            //更新样品状态为在检1
             if (!CollectionUtils.isEmpty(sampleIds)){
                 for (Long sampleId:sampleIds) {
-                    sampleEntityMapper.updateSampleState(sampleId.intValue(),2);
+                    sampleEntityMapper.updateSampleState(sampleId.intValue(),1);
                     SampleCirculationRecord sa = new SampleCirculationRecord();
                     sa.setSampleId(sampleId.intValue());
                     sa.setStatus("2");

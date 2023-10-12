@@ -37,7 +37,7 @@ public interface ReportMapper {
      * @param taskCode
      * @return
      */
-    List<ReportListVo> getReportListOnline(@Param("deptIds") List<Long> deptIds,@Param("taskCode") String taskCode);
+    List<ReportListVo> getReportListOnline(@Param("deptIds") List<Long> deptIds,@Param("taskCode") String taskCode,@Param("userId") String userId);
 
     List<ReportListVo> reportDownloadList(@Param("deptIds") List<Long> deptIds,@Param("reportCode") String reportCode);
     List<ReportListVo> reportDownloadList0512(@Param("deptIds") List<Long> deptIds,@Param("reportCode") String reportCode);
