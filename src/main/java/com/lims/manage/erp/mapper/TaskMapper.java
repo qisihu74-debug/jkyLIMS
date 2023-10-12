@@ -577,4 +577,18 @@ public interface TaskMapper extends BaseMapper {
     List<TestTaskPool> taskHall(@Param("item") ReqTaskPool item);
 
     List<TestTaskPool> myTaskList(@Param("item") ReqTaskPool bean);
+
+    /**
+     * 根据任务id获取委托单报告数量
+     * @param id
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tt2.report_count \n" +
+            "FROM\n" +
+            "\ttest_task AS t1\n" +
+            "\tLEFT JOIN test_entrusted_info AS t2 ON t1.entrustment_id = t2.id \n" +
+            "WHERE\n" +
+            "\tt1.id = #{id}")
+    Integer getReportCountByTaskId(@Param("id") Long id);
 }
