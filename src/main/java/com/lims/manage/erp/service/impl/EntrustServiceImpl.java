@@ -959,11 +959,12 @@ public class EntrustServiceImpl implements EntrustService {
                 entityMapper.BatchSaveSampleStandard(list1);
             }
         }
-            if(vo.getState()!=201){
-                basisInfo.setState(0);
-            }
-            entityMapper.updateEntrustInfos(basisInfo);
-//        }
+        // 获取委托状态
+        EntrustAddVo entrustData = entityMapper.selectByKeyId(basisInfo.getId());
+        if(entrustData.getState()!=null&&entrustData.getState()!=201){
+            basisInfo.setState(0);
+        }
+        entityMapper.updateEntrustInfos(basisInfo);
         return true;
     }
 
@@ -5730,6 +5731,33 @@ public class EntrustServiceImpl implements EntrustService {
                     addTaskRelEntities.add(taskdata);
                 }
             }
+            //计算本单价格
+            double taskPrice = 0L;
+            if(CollectionUtil.isNotEmpty(itemList)){
+                // 委托单的设置折扣率
+                entity.setDiscount(Double.parseDouble(entrustDetails.getDiscount()));
+                for (SampleItemEntity sampleItemEntity: itemList) {
+                    taskPrice = taskPrice + ((entity.getDiscount() == null ? 0 : entity.getDiscount()) *
+                            (sampleItemEntity.getUnitPrice() == null ? 0 : sampleItemEntity.getUnitPrice()) * sampleItemEntity.getTimes());
+                }
+            }
+            //通过委托单id  查询流水号任务单 是否存在
+            LambdaQueryWrapper<TestTaskPool> entrustPoolWrapper = new LambdaQueryWrapper<>();
+            // 委托单id
+            entrustPoolWrapper.eq(TestTaskPool::getEntrustmentId,entrustId);
+            List<TestTaskPool> testTaskPoolList = taskPoolMapper.selectList(entrustPoolWrapper);
+            if(CollectionUtil.isNotEmpty(testTaskPoolList)){
+                // 更新操作即可
+                TestTaskPool taskPool = testTaskPoolList.get(0);
+                // 任务流转要求
+                if(taskFlowDateBuffer.length()>=2){
+                    taskPool.setTaskFlowReq(taskPool.getTaskFlowReq()+","+taskFlowDateBuffer.deleteCharAt(taskFlowDateBuffer.length()-1).toString());
+                }
+                // 本单费用
+                taskPool.setPrice(String.valueOf(taskPrice));
+                taskPoolMapper.updateById(taskPool);
+                return ResultUtil.success("审批通过成功");
+            }
             // 新增流水号任务单信息
             TestTaskPool testTaskPool = new TestTaskPool();
             // 设置任务单流水号
@@ -5758,20 +5786,12 @@ public class EntrustServiceImpl implements EntrustService {
             testTaskPool.setPublisher(userInfo.getName());
             // 要求完成时间 = 委托要求完成时间
             testTaskPool.setRequiredCompletionTime(entrustDetails.getRequestDate());
-            if(CollectionUtil.isNotEmpty(itemList)){
-                // 委托单的设置折扣率
-                entity.setDiscount(Double.parseDouble(entrustDetails.getDiscount()));
-                //计算本单价格
-                double taskPrice = 0L;
-                for (SampleItemEntity sampleItemEntity: itemList) {
-                        taskPrice = taskPrice + ((entity.getDiscount() == null ? 0 : entity.getDiscount()) *
-                                (sampleItemEntity.getUnitPrice() == null ? 0 : sampleItemEntity.getUnitPrice()) * sampleItemEntity.getTimes());
-                }
-                // 本单费用
-                testTaskPool.setPrice(String.valueOf(taskPrice));
-            }
+            // 本单费用
+            testTaskPool.setPrice(String.valueOf(taskPrice));
             // 任务流转要求
-            testTaskPool.setTaskFlowReq(taskFlowDateBuffer.deleteCharAt(taskFlowDateBuffer.length()-1).toString());
+            if(taskFlowDateBuffer.length()>=2){
+                testTaskPool.setTaskFlowReq(taskFlowDateBuffer.deleteCharAt(taskFlowDateBuffer.length()-1).toString());
+            }
             // 样品信息
             // 2、 展示每组下样品列表
             List<SampleEntity> sampleList = sampleEntityMapper.selectSampleListGroup(entrustId);

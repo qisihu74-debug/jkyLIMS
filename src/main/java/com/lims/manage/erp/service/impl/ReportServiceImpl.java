@@ -1586,7 +1586,21 @@ public class ReportServiceImpl implements ReportService {
             }
             list.add(sealDefData);
         }
+        //获取印章
+        String seals = recordEntityMapper.getsealsById(id)+","+"2937191218674492340";
+        String replace = seals.replace("综合甲级", "2934033400316387595").
+                replace("CMA", "2937188764910183324").
+                replace("CNAS", "2937178885881422636");
+        SealDefData sealDefData = new SealDefData();
+        sealDefData.setType("印章");
+        sealDefData.setName(replace);
+        list.add(sealDefData);
         return list;
+    }
+
+    @Override
+    public void sealRevoke(Long id) {
+        recordEntityMapper.sealRevoke(id);
     }
 
     @Override
@@ -4116,6 +4130,8 @@ public class ReportServiceImpl implements ReportService {
     public Boolean submitEditReport(ReportEditReq bean) {
         //更新样品对应的报告编辑状态为完成、报告类型进行更新
         Long entrustIdByTaskId = taskMapper.getEntrustIdByTaskId(bean.getTaskId());
+        // 通过任务单id 获取委托单下报告数量
+        Integer reportCount = taskMapper.getReportCountByTaskId(bean.getTaskId());
         List<Integer> sampleIds = bean.getSampleIds();
         List<ReportEditReq> list = Lists.newArrayList();
         for (Integer sampeId:sampleIds) {
@@ -4178,6 +4194,7 @@ public class ReportServiceImpl implements ReportService {
                 if (id != null){
                     //update
                     reportRecordEntity.setId(id);
+                    reportRecordEntity.setNumber(reportCount);
                     recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity);
                 }else {
                     //设置报告类型
@@ -4185,6 +4202,8 @@ public class ReportServiceImpl implements ReportService {
                     reportRecordEntity.setReportCode(getMaxCode(entrustIdByTaskId));
                     reportRecordEntity.setId(GenID.getID());
                     reportRecordEntity.setEntrustmentId(entrustIdByTaskId);
+                    // 报告数量
+                    reportRecordEntity.setNumber(reportCount);
                     //新增报告记录数据
                     recordEntityMapper.insert(reportRecordEntity);
                 }
@@ -4201,6 +4220,8 @@ public class ReportServiceImpl implements ReportService {
                 if (infoByEntrustId != null){
                     //update
                     reportRecordEntity.setId(infoByEntrustId);
+                    // 报告数量
+                    reportRecordEntity.setNumber(reportCount);
                     recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity);
                 }else {
                     //中间报告、如果报告类型是中间报告，报告记录新增数据
@@ -4209,6 +4230,8 @@ public class ReportServiceImpl implements ReportService {
                     reportRecordEntity.setId(GenID.getID());
                     //设置报告类型
                     reportRecordEntity.setType("1");
+                    // 报告数量
+                    reportRecordEntity.setNumber(reportCount);
                     recordEntityMapper.insert(reportRecordEntity);
                 }
             }

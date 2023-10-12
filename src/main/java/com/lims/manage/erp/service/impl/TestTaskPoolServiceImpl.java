@@ -210,11 +210,6 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     public Result addTaskCollection(List<SampleItemEntity> list) {
         // 通过检测项主键 获取 委托单id
         Long entrustId = taskPoolMapper.selectEntrustmentId(list.get(0).getItemIds().get(0));
-        // 调用方法： 对每组检测项的人员信息进行新增。
-        // 根据条件删除流转信息
-        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
-        queryWrapper12.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
-        testCheckItemsTaskRelMapper.delete(queryWrapper12);
         if (entrustId == null) {
             return ResultUtil.error("数据异常、委托单不存在");
         }
@@ -224,6 +219,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
         // 检测人集合
         List<Long> tsetUserIds = new ArrayList<>();
+        // 参与效验的数据--------------------------------- ↓↓↓↓ ------------------------
         // 1、效验检测人在不在检测科室 2、检测人不能在多个科室 3、补充每组检测项中人员信息
         for (SampleItemEntity sampleItemEntity : list) {
             // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
@@ -295,29 +291,34 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         if (testTaskPool == null) {
             return ResultUtil.error("领取失败： 当前流水号任务单不存在");
         }
-        // 进行录入任务单信息
-        for (SampleItemEntity sampleItemEntity : list) {
-            // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
-            // 根据科室id 及 委托单主键 查询任务单是否存在？
-            //                         1、任务单存在 查看状态=试验开始 则返回错误信息 状态=未开始试验的话，最后删除任务单操作
-            //                         2、 任务单不存在的话，创建任务单即可。
-            // 1.1：任务单列表存在的话
-            if (CollectionUtil.isNotEmpty(taskProgressVos)) {
-                for (TaskProgressVo taskProgressVo : taskProgressVos) {
-                    if (taskProgressVo.getState() != 144) {
-                        // 任务单状态： 状态0未抢单，1.已抢单，2已领样,3实验中，4实验完成，5原始记录已上传，6.原始记录已符合，
-                        if (taskProgressVo.getState() >= 3) {
-                            // 1.2 查看状态=试验开始 则返回错误信息
-                            return ResultUtil.error("领取失败： 当前任务单 " + taskProgressVo.getTaskCode() + "已开始试验");
-                        }
-                    }
-                }
-                // 删除任务单号
-                for (TaskProgressVo taskProgressVo : taskProgressVos) {
-                    taskMapper.deleteTaskById(taskProgressVo.getTaskId());
+        for (TaskProgressVo taskProgressVo : taskProgressVos) {
+            if (taskProgressVo.getState() != 144) {
+                // 任务单状态： 状态0未抢单，1.已抢单，2已领样,3实验中，4实验完成，5原始记录已上传，6.原始记录已符合，
+                if (taskProgressVo.getState() >= 3) {
+                    // 1.2 查看状态=试验开始 则返回错误信息
+                    return ResultUtil.error("领取失败： 当前任务单 " + taskProgressVo.getTaskCode() + "已开始试验");
                 }
             }
-            //调用方法： 补充检测项信息并发布任务单
+        }
+        // 参与效验的数据--------------------------------- ↑↑↑↑ ------------------------
+        // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
+        // 根据科室id 及 委托单主键 查询任务单是否存在？
+        //                         1、任务单存在 查看状态=试验开始 则返回错误信息 状态=未开始试验的话，最后删除任务单操作
+        //                         2、 任务单不存在的话，创建任务单即可。
+        //调用方法： 补充检测项信息并发布任务单
+        // 1.1：任务单列表存在的话
+        if (CollectionUtil.isNotEmpty(taskProgressVos)) {
+            // 删除任务单号
+            for (TaskProgressVo taskProgressVo : taskProgressVos) {
+                taskMapper.deleteTaskById(taskProgressVo.getTaskId());
+            }
+        }
+        // 根据 委托单id 条件删除流转信息
+        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+        queryWrapper12.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
+        testCheckItemsTaskRelMapper.delete(queryWrapper12);
+        // 2、进行录入任务单信息
+        for (SampleItemEntity sampleItemEntity : list) {
             String sampler = sampleItemEntity.getSampler();
             methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue());
         }
