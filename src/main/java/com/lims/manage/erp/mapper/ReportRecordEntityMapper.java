@@ -507,6 +507,6 @@ public interface ReportRecordEntityMapper {
     @Select("select seal_type from test_report_record where id=#{id}")
     String getsealsById(@Param("id") Long id);
 
-    @Update("update test_report_record set qys_state='1',qys_docment_id=null,contract_id=null,sign_url=null where id=#{id}")
+    @Update("update test_report_record set qys_state='1',state='6',qys_docment_id=null,contract_id=null,sign_url=null where id=#{id}")
     void sealRevoke(@Param("id") Long id);
 }
