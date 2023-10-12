@@ -503,4 +503,7 @@ public interface ReportRecordEntityMapper {
             "WHERE\n" +
             "\tt3.id = #{id}\n")
     List<ApproveInfo> approveInfoById(@Param("id") Long id);
+
+    @Select("select seal_type from test_report_record where id=#{id}")
+    String getsealsById(@Param("id") Long id);
 }
