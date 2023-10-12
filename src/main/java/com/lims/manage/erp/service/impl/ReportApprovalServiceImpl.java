@@ -320,6 +320,9 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
                 bean.setEntrustmentId(bean.getEntrustId());
             }
         }
+        list.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
+                        new TreeSet<>(Comparator.comparing(ReportApprovalVo:: getRequiredCompletionTime).reversed())),
+                ArrayList::new));
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
     }
