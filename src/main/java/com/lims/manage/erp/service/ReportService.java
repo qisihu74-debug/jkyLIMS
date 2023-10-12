@@ -457,4 +457,6 @@ public interface ReportService {
     ApproveInfo approveInfo(String reportCode);
 
     List<SealDefData> getNameAndMobile(Long id);
+
+    void sealRevoke(Long id);
 }
