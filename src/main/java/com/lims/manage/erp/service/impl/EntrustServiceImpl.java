@@ -2199,7 +2199,7 @@ public class EntrustServiceImpl implements EntrustService {
                 taskProgressVo.setStateVoList(stateVoList);
                 // 根据任务单 id 查 流转单 列表
                 List<TestEntrustedTaskRelEntity> taskOrderFlowList = Lists.newArrayList();
-                taskOrderFlowList = testEntrustedTaskRelDao.getTaskList(taskProgressVo.getTaskId());
+                taskOrderFlowList = testEntrustedTaskRelDao.getTaskList(taskProgressVo.getTaskId(),null);
                 if(!CollectionUtils.isEmpty(taskOrderFlowList)){
                     for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity :taskOrderFlowList){
                         // 处理信息 部门id&部门名称 获取为 部门名称
