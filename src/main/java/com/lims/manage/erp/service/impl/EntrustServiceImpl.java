@@ -5889,7 +5889,7 @@ public class EntrustServiceImpl implements EntrustService {
                 List<SampleCirculationRecord> circulationList = sampleEntityMapper.getRecords(sampleData1.getId(), 30);
                 Boolean flag = false;
                 for (SampleCirculationRecord sampleCirculationRecord : circulationList) {
-                    if (sampleCirculationRecord.getStatus().equals("0")) {
+                    if (sampleCirculationRecord.getStatus().equals("5")) {
                         flag = true;
                     }
                 }
@@ -5897,8 +5897,8 @@ public class EntrustServiceImpl implements EntrustService {
                     // 增加样品样品流转状态
                     SampleCirculationRecord sa = new SampleCirculationRecord();
                     sa.setSampleId(sampleData1.getId());
-                    // 0:收样
-                    sa.setStatus("0");
+                    // 5收样
+                    sa.setStatus("5");
                     sa.setOperatorId(userInfo.getUserId());
                     sa.setOperatorName(userInfo.getName());
                     sa.setTime(new Date());
