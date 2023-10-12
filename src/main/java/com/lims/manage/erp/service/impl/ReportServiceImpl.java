@@ -1586,6 +1586,15 @@ public class ReportServiceImpl implements ReportService {
             }
             list.add(sealDefData);
         }
+        //获取印章
+        String seals = recordEntityMapper.getsealsById(id)+","+"2937191218674492340";
+        String replace = seals.replace("综合甲级", "2934033400316387595").
+                replace("CMA", "2937188764910183324").
+                replace("CNAS", "2937178885881422636");
+        SealDefData sealDefData = new SealDefData();
+        sealDefData.setType("印章");
+        sealDefData.setName(replace);
+        list.add(sealDefData);
         return list;
     }
 
