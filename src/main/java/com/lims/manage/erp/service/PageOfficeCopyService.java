@@ -4,13 +4,11 @@ import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.result.Result;
-import com.lims.manage.erp.vo.ExcelInsertVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.SampleItemInstrumentVo;
-import com.lims.manage.erp.vo.TeamVo;
+import com.lims.manage.erp.vo.*;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -118,4 +116,11 @@ public interface PageOfficeCopyService {
      * @return
      */
     public Result startInitiateContractLock(QiYueSuoReqBean reqBean,List<ExcelInsertVo> list);
+
+    /**
+     *  每组检测项统计信息 结束试验的话进行补充信息
+     * * @param paramVo
+     * @return
+     */
+    String updateItemOriginUr(EndTestParamVo paramVo) throws IOException;
 }

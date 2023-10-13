@@ -197,4 +197,41 @@ public class ExcelReplaceUtil {
             }
         }
     }
+
+    /**
+     * excel 原始记录模板标识符 按单元格进行替换
+     * 指定 试验检测日期、试验条件、主要仪器设备名称及编号
+     *
+     * @param sheet
+     * @param map
+     */
+    public static void ExcelHeadReplace(XSSFSheet sheet, Map<String, OriginalRecordDataVo> map) {
+        OriginalRecordDataVo originalRecordDataVo = map.get("result");
+        int lastRowNum = sheet.getLastRowNum(); //获取表格内容的最后一行的行数
+        //rowBegin代表要开始读取的行号，下面这个循环的作用是读取每一行内容
+        for (int x = 1; x <= lastRowNum; ++x) {
+            XSSFRow row = sheet.getRow(x);//获取每一行
+            int columnNum = row.getLastCellNum();//获取每一行的最后一列的列号，即总列数
+            for (int y = 0; y < columnNum; ++y) {
+                XSSFCell cell = row.getCell(y);//获取每个单元格
+                // 判断单元格类型并获取对应类型的值
+                if (cell != null && cell.getCellType() == 1) {
+                    //获取单元格数据
+                    String cellValue = cell.getStringCellValue();
+                    if (!cellValue.equals("") && cellValue.equals("${result.testDate}")) {
+                        // 试验检测日期
+                        cell.setCellValue(originalRecordDataVo.getTestDate());
+                    }
+                    if (!cellValue.equals("") && cellValue.equals("${result.testCondition}")) {
+                        // 试验条件
+                        cell.setCellValue(originalRecordDataVo.getTestDate());
+                    }
+                    if (!cellValue.equals("") && cellValue.equals("${result.equipment}")) {
+                        // 主要仪器设备名称及编号
+                        cell.setCellValue(originalRecordDataVo.getEquipment());
+                    }
+                }
+            }
+        }
+    }
 }

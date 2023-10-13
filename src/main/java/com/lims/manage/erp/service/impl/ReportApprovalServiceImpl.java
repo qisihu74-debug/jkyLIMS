@@ -199,7 +199,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             // 驳回操作 test_task 下 report_complete =2
             taskMapper.updateTestTaskReportComplete(entrustAddVo.getId());
             if(entrustAddVo.getState()!=null){
-                taskMapper.updateEntrustById(entrustAddVo.getId(),7);
+                taskMapper.updateEntrustById(entrustAddVo.getId(),4);
             }
             return true;
         }
@@ -517,7 +517,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             // 驳回操作 test_task 下 report_complete =2
             taskMapper.updateTestTaskReportComplete(entrustAddVo.getId());
             if(entrustAddVo.getState()!=null){
-                taskMapper.updateEntrustById(entrustAddVo.getId(),7);
+                taskMapper.updateEntrustById(entrustAddVo.getId(),4);
             }
             return true;
         }

@@ -53,4 +53,7 @@ public class OriginalRecordDataVo {
         this.judgeBasis = judgeBasis;
         this.equipment = equipment;
     }
+
+    public OriginalRecordDataVo() {
+    }
 }

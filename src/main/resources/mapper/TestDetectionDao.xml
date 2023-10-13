@@ -161,13 +161,26 @@
 
     <update id="batchSampleState" >
 	UPDATE test_sample
-	SET state = 3
+	SET state = 2
 	WHERE
 		id IN ( SELECT sample_id FROM test_entrusted_sample_details_rel WHERE entrustment_id = #{entrustId} )
     </update>
 
     <select id="getSampleId" resultType="java.lang.Long">
         select sample_id from test_entrusted_sample_checkitem_rel where id = #{itemId}
+    </select>
+
+    <select id="selectInstrumentList" resultType="com.lims.manage.erp.entity.TestInstrumentEntity">
+        SELECT
+            temperature,
+            humidity,
+            start_time,
+            end_time,
+        USER
+        FROM
+            test_instrument_use_record
+        WHERE
+            esc_rel_id = #{escRelId}
     </select>
 
 </mapper>
