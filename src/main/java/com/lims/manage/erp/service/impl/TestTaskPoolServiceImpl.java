@@ -51,6 +51,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     private LogManagerService logManagerService;
     @Autowired
     private EntrustServiceImpl entrustService;
+    @Autowired
+    private SysRoleDao sysRoleDao;
 
     /**
      * 任务大厅 展示详情数据
@@ -213,6 +215,23 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         if (entrustId == null) {
             return ResultUtil.error("数据异常、委托单不存在");
         }
+        // 登录人
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 查询当前登录人 是否为 授权角色
+        List<SysRoleEntity> roleList = sysRoleDao.selectSysRoleByUserId(userInfo.getUserId());
+        if (CollectionUtils.isEmpty(roleList)) {
+            return ResultUtil.error("领取失败：登录人无角色");
+        }
+        Boolean flag = false;
+        for (SysRoleEntity sysRoleEntity : roleList) {
+            if (sysRoleEntity.getRoleId() == 66) {
+                flag = true;
+            }
+        }
+        if (!flag) {
+            return ResultUtil.error("领取失败：登录人无授权签字人角色");
+        }
+
         // 通过委托单id 查询任务列表
         List<TaskProgressVo> taskProgressVos = taskMapper.getTaskStateByEntrustId(entrustId);
         // 通过委托单id 查看检测项列表。
@@ -323,12 +342,11 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue());
         }
         // 调用方法 进行 更新流水号任务单信息
-        methodUpdateTaskPool(entrustId, testTaskPool);
+        methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
         return ResultUtil.success("领取成功");
     }
 
-    void methodUpdateTaskPool(Long entrustId, TestTaskPool testTaskPool) {
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+    void methodUpdateTaskPool(Long entrustId, TestTaskPool testTaskPool, SysUserEntity userInfo) {
         // 领取成功后： 补充流水号任务单信息
         // 通过委托单id 查询任务列表
         List<TaskProgressVo> taskProgress2Vos = taskMapper.getTaskStateByEntrustId(entrustId);

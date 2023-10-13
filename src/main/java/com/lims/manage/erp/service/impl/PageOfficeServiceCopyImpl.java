@@ -1628,11 +1628,11 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             // 试验条件
             itemMap.put("testCondition", wendugBuilder.toString());
             // 2、试验检测日期 -- 后期比较
-            SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyy年MM月dd日");
             SampleItemInstrumentEntity itemDetail = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(id);
-            String startTime = yyyyMMddHH_NOT_.format(itemDetail.getStartTime()).substring(0, 10);
-            String endTime = yyyyMMddHH_NOT_.format(itemDetail.getEndTime()).substring(0, 10);
-            itemMap.put("testDate", startTime + "-" + endTime);
+            String startTime = yyyyMMddHH_NOT_.format(itemDetail.getStartTime()).substring(0, 11);
+            String endTime = yyyyMMddHH_NOT_.format(itemDetail.getEndTime()).substring(0, 11);
+            itemMap.put("testDate", startTime + "~" + endTime);
             mapMap.put(id, itemMap);
         }
         return mapMap;

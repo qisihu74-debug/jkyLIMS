@@ -224,7 +224,7 @@ public class ExcelReplaceUtil {
                     }
                     if (!cellValue.equals("") && cellValue.equals("${result.testCondition}")) {
                         // 试验条件
-                        cell.setCellValue(originalRecordDataVo.getTestDate());
+                        cell.setCellValue(originalRecordDataVo.getTestCondition());
                     }
                     if (!cellValue.equals("") && cellValue.equals("${result.equipment}")) {
                         // 主要仪器设备名称及编号
