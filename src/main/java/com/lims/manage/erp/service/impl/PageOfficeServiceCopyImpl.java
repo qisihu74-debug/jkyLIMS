@@ -1609,13 +1609,13 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                     if (i != instrumentEntityList.size() - 1) {
                         stringBuilder.append("、");
                     }
-                    wendugBuilder.append("温度");
+                    wendugBuilder.append("温度：");
                     if (StringUtils.isEmpty(instrumentEntityList.get(i).getTemperature())) {
                         wendugBuilder.append("-");
                     } else {
                         wendugBuilder.append(instrumentEntityList.get(i).getTemperature());
                     }
-                    wendugBuilder.append("湿度");
+                    wendugBuilder.append(" 湿度：");
                     if (StringUtils.isEmpty(instrumentEntityList.get(i).getHumidity())) {
                         wendugBuilder.append("-");
                     } else {
