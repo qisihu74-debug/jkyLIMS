@@ -1011,7 +1011,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         list.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
-                        new TreeSet<>(Comparator.comparing(ReportRecordEntity:: getId).reversed())),
+                        new TreeSet<>(Comparator.comparing(ReportRecordEntity:: getReportCompleteTime).reversed())),
                 ArrayList::new));
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
