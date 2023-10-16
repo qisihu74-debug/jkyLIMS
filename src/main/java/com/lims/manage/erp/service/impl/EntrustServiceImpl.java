@@ -5821,6 +5821,11 @@ public class EntrustServiceImpl implements EntrustService {
         }
     }
 
+    @Override
+    public List<String> getUrlListById(Long entrustId) {
+        return entityMapper.getUrlListById(entrustId);
+    }
+
     public Result entrustApprovedMethod(EntrustAddVo entrustDetails,long entrustId){
         // 效验后： 针对预委托单进行审核通过操作 更新委托单
         EntrustEntity basisInfo = new EntrustEntity();

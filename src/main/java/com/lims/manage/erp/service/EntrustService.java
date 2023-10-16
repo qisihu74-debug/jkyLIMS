@@ -420,4 +420,11 @@ public interface EntrustService {
      * @return
      */
     Result entrustApproved1(Long entrustId ,TaskVo entity);
+
+    /**
+     * 查询委托附件信息
+     * @param entrustId
+     * @return
+     */
+    List<String> getUrlListById(Long entrustId);
 }
