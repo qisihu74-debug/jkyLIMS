@@ -225,6 +225,15 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             // 通过任务单 判断当前下单时间
             //处理原始记录下载，单位名称问题
             java.sql.Date date = entrustEntityMapper.getEntrustDateByTaskId(dataEntitys.get(0).getTaskId());
+            // 通过检测项主键 获取委托单下所有的样品id数据
+            List<Integer> sampleIds = testProductItemDao.selectCountSampleIds(ids[0]);
+            // 样品id 序号
+            Map<Integer, Integer> sampleMapSerial = new HashMap<>();
+            for (int j = 0; j < sampleIds.size(); j++) {
+                Integer sampleId = sampleIds.get(j);
+                // 统计委托单下 所有的样品组数。
+                sampleMapSerial.put(sampleId, j + 1);
+            }
             String dayString = DateUtil.getDayString(date.getTime());
             // status = true;(检测单位名称：河南交科院检验检测认证有限公司)
             // 否则 status = false; （检测单位名称：河南省公路工程试验检测中心有限公司）
@@ -249,10 +258,12 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                             if (keyMap.get(sheetName) == null) {
                                 keyMap.put(sheetName, sheetName);
                                 Map<Integer, Integer> countMap = excelSheetDataVo.getCountMap();
-                                int number = countMap.get(excelInsertVo1.getSheetIndex());
+//                                int number = countMap.get(excelInsertVo1.getSheetIndex());
                                 // 有序信息。
                                 OriginalRecordDataVo originalData = taskService.getOriginalData(data.getTaskId(), data.getSampleId(), data.getCheckItemId(), data.getIdItem());
                                 Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
+                                // 设置组数
+                                int number = sampleMapSerial.get(excelInsertVo1.getSampleId());
                                 originalData.setRecordNumber(originalData.getRecordNumber() + "-" + number);
                                 // 获取检测项中记录编号
                                 if (recordNumberMap.get(data.getIdItem()) == null) {

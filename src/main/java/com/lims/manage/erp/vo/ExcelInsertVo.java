@@ -131,5 +131,9 @@ public class ExcelInsertVo {
      * 起始页
      */
     Integer startPag;
+    /**
+     * 样品id
+     */
+    Integer sampleId;
 
 }
