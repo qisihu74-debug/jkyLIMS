@@ -1200,4 +1200,18 @@ public class EntrustController {
         return entrustService.entrustApproved1(entity.getEntrustmentId() ,entity);
     }
 
+
+    /**
+     * 预览材质单
+     * @param entrustId
+     * @return
+     */
+    @GetMapping("previewMaterial")
+    public Result previewMaterial(Long entrustId){
+        if (entrustId == null){
+            return ResultUtil.error("缺少参数");
+        }
+        List<String> list = entrustService.getUrlListById(entrustId);
+        return ResultUtil.success(list);
+    }
 }

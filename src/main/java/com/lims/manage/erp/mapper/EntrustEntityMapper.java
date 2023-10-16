@@ -801,4 +801,7 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Update("update test_entrusted_info set state=10 where id=#{id}")
     void updateStateById(@Param("id") Long id);
+
+    @Select("select file_url from test_entrust_file_rel where entrust_id=#{entrustId}")
+    List<String> getUrlListById(@Param("entrustId") Long entrustId);
 }
