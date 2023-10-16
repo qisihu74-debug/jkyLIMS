@@ -253,5 +253,18 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
             "\t\t\t\tORDER BY t1.id asc;")
     List<Integer> selectCountSampleIds(@Param("itemId") Integer itemId);
 
+    /**
+     * 通过任务单id 获取检测项数据
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid \n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel \n" +
+            "WHERE\n" +
+            "\ttask_id = #{taskId}")
+    List<Integer> selectTaskIdItems(@Param("taskId") Long taskId);
+
 }
 

@@ -1703,4 +1703,10 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         }
         return mapMap;
     }
+
+    @Override
+    public List<Integer> selectTaskIds(Long taskId) {
+
+        return testProductItemDao.selectTaskIdItems(taskId);
+    }
 }
