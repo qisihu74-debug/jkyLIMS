@@ -3843,6 +3843,98 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
     }
+    @Transactional(rollbackFor = Exception.class)
+    public void methodCopySamples1016(List<SampleEntity> sampleList,Long old,long id,Integer entrustCompanyId){
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 获取样品集合 判断样品id 是否存在。 不存在 则 add样品。
+            for (SampleEntity sampleEntity : sampleList) {
+                SampleEntity sampleDetailVo  = sampleEntityMapper.getSampleTagInfo(sampleEntity.getId());
+                // 已经找到伪造字段
+                if(StringUtils.isEmpty(sampleDetailVo)){
+                    // 通过旧委托单id 获取样品集合 得到 配合比信息集合。
+                    List<SampleEntity> sampleSet  = sampleEntityMapper.selectSampleSet(old);
+                    // 配合比 处理。
+                    if(sampleEntity.getPid()!=null){
+                        // 整理 配合比信息
+                        SamplesAddVo samples = new SamplesAddVo();
+                        //获取 以pid的 配合比子集信息集合。
+                        List<SampleEntity> samplePidSub = sampleEntityMapper.selectByPid(sampleEntity.getPid());
+                        List<SampleDetailAddVo> subset= new ArrayList<>();
+                        if(!samplePidSub.isEmpty()){
+                            for(SampleEntity sampleEntity1:samplePidSub){
+                                SampleDetailAddVo sampleDetailAddVo = new SampleDetailAddVo(sampleEntity1);
+                                // 增加 样品数量 与来样时间
+                                sampleDetailAddVo.setSampleQuantity(sampleEntity1.getSampleQuantity());
+                                sampleDetailAddVo.setReceivedDate(new Date());
+                                subset.add(sampleDetailAddVo);
+                            }
+                        }
+                        if(!sampleSet.isEmpty()){
+                            for(SampleEntity sampleEntity2 :sampleSet){
+                                if(sampleEntity2.getId().equals(sampleEntity.getPid())){
+                                    // 前端 变更的字段
+                                    sampleEntity2.setSpecs(sampleEntity.getSpecs());
+                                    sampleEntity2.setBatchNumber(sampleEntity.getBatchNumber());
+                                    sampleEntity2.setGeneration(sampleEntity.getGeneration());
+                                   sampleEntity2.setCheckDate(sampleEntity.getCheckDate()!=null?sampleEntity.getCheckDate():new Date());
+                                    sampleEntity2.setCompanyId(entrustCompanyId);
+                                    SamplesAddVo samples1 = new SamplesAddVo(sampleEntity2);
+                                    samples = samples1;
+//                                    存储配合比子集。
+                                    samples.setSamples(subset);
+                                    // 获取配合比的样品字段
+                                    TestSampleMixInfoEntity data = mixInfoEntityMapper.selectBySampleId(sampleEntity.getPid());
+                                  if(data!=null){
+                                      samples.setDesignStrength(data.getDesignStrength());
+                                      samples.setIntensityConfiguration(data.getIntensityConfiguration());
+                                      samples.setAntifreezeLevel(data.getAntifreezeLevel());
+                                      samples.setWaterBinderRatio(data.getWaterBinderRatio());
+                                      samples.setUnitWaterUse(data.getUnitWaterUse());
+                                      samples.setSandRatio(data.getSandRatio());
+                                      samples.setDesignSlump(data.getDesignSlump());
+                                      samples.setMixingWay(data.getMixingWay());
+                                  }
+                                    samples.setCompanyId(entrustCompanyId);
+                                    // 针对 配合比 进行处理
+                                    TestSampleMixInfoEntity  addMixProportion  = testSampleEntityService.batchInsertMixSampleCopy(samples,id);
+                                       if(addMixProportion!=null){
+                                           sampleEntity.setId(addMixProportion.getSampleId());
+                                       }
+                                }
+                            }
+                        }
+                    }
+                    else{
+//                        原材处理
+                        if(!sampleSet.isEmpty()){
+                            for(int i=0;i<sampleSet.size();i++){
+                                SampleEntity oldSampleData = sampleSet.get(i);
+                                if(oldSampleData.getId().equals(sampleEntity.getOldSampleid())){
+                                    // 对此信息 重新 add。 并获取id 替换。
+                                    List<SampleDetailAddVo> samples = new ArrayList<>();
+                                    // 前端 变更的字段
+                                    oldSampleData.setSpecs(sampleEntity.getSpecs());
+                                    oldSampleData.setBatchNumber(sampleEntity.getBatchNumber());
+                                    oldSampleData.setGeneration(sampleEntity.getGeneration());
+                                    oldSampleData.setCheckDate(sampleEntity.getCheckDate()!=null?sampleEntity.getCheckDate():new Date());
+                                    oldSampleData.setCompanyId(entrustCompanyId);
+                                    // 其他信息不变更
+                                    SampleDetailAddVo sampleDetailAddVo = new SampleDetailAddVo(oldSampleData);
+                                    // 增加 样品数量 与来样时间
+                                    sampleDetailAddVo.setSampleQuantity(oldSampleData.getSampleQuantity());
+                                    sampleDetailAddVo.setReceivedDate(new Date());
+                                    samples.add(sampleDetailAddVo);
+                                    // 样品为原材的。
+                                    List<TestSampleEntity> addSamples = testSampleEntityService.batchInsertSampleCopy(samples);
+                                    TestSampleEntity addSample = addSamples.get(0);
+                                    sampleEntity.setId(addSample.getId());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+    }
 
     @Override
     public Boolean isPublish(Long entrustId) {
