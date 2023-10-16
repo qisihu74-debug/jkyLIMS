@@ -3,6 +3,7 @@ package com.lims.manage.erp.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import com.aspose.cells.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.github.pagehelper.util.StringUtil;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoDocment;
@@ -1599,27 +1600,64 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             StringBuilder stringBuilder = new StringBuilder();
             // 试验条件
             StringBuilder wendugBuilder = new StringBuilder();
+            // 仪器的开始检测时间
+            Date startTime = null;
+            // 仪器结束时间
+            Date endTime = null;
             if (instrumentEntityList != null && !instrumentEntityList.isEmpty()) {
+                //试验条件: 温度湿度 获取第一组信息
+                wendugBuilder.append("温度：");
+                if (StringUtils.isEmpty(instrumentEntityList.get(0).getTemperature())) {
+                    wendugBuilder.append("-");
+                } else {
+                    wendugBuilder.append(instrumentEntityList.get(0).getTemperature());
+                }
+                wendugBuilder.append(" 湿度：");
+                if (StringUtils.isEmpty(instrumentEntityList.get(0).getHumidity())) {
+                    wendugBuilder.append("-");
+                } else {
+                    wendugBuilder.append(instrumentEntityList.get(0).getHumidity() + " ");
+                }
                 for (int i = 0; i < instrumentEntityList.size(); i++) {
-                    stringBuilder.append(instrumentEntityList.get(i).getModel());
-                    stringBuilder.append(instrumentEntityList.get(i).getName());
-                    stringBuilder.append("（");
-                    stringBuilder.append(instrumentEntityList.get(i).getCode());
-                    stringBuilder.append("）");
-                    if (i != instrumentEntityList.size() - 1) {
-                        stringBuilder.append("、");
-                    }
-                    wendugBuilder.append("温度：");
-                    if (StringUtils.isEmpty(instrumentEntityList.get(i).getTemperature())) {
-                        wendugBuilder.append("-");
+//                    stringBuilder.append(instrumentEntityList.get(i).getModel());
+//                    stringBuilder.append(instrumentEntityList.get(i).getName());
+//                    stringBuilder.append("（");
+//                    stringBuilder.append(instrumentEntityList.get(i).getCode());
+//                    stringBuilder.append("）");
+//                    if (i != instrumentEntityList.size() - 1) {
+//                        stringBuilder.append("、");
+//                    }
+                    // 记录仪器的检测开始时间
+                    if (startTime == null) {
+                        // 当前检测项仪器开始时间不为空
+                        if (instrumentEntityList.get(i).getStartTime() != null) {
+                            startTime = instrumentEntityList.get(i).getStartTime();
+                        }
                     } else {
-                        wendugBuilder.append(instrumentEntityList.get(i).getTemperature());
+                        // 当前检测项仪器开始时间不为空
+                        if (instrumentEntityList.get(i).getStartTime() != null) {
+                            // 进行比较 检测项仪器的开始时间
+                            // boolean before(Date when)    测试此日期是否在指定日期之前。
+                            if (instrumentEntityList.get(i).getStartTime().before(startTime)) {
+                                startTime = instrumentEntityList.get(i).getStartTime();
+                            }
+                        }
                     }
-                    wendugBuilder.append(" 湿度：");
-                    if (StringUtils.isEmpty(instrumentEntityList.get(i).getHumidity())) {
-                        wendugBuilder.append("-");
+                    // 记录仪器的检测结束时间
+                    if (endTime == null) {
+                        // 当前检测项仪器结束时间不为空
+                        if (instrumentEntityList.get(i).getEndTime() != null) {
+                            endTime = instrumentEntityList.get(i).getEndTime();
+                        }
                     } else {
-                        wendugBuilder.append(instrumentEntityList.get(i).getHumidity() + " ");
+                        // 当前检测项仪器结束时间不为空
+                        if (instrumentEntityList.get(i).getEndTime() != null) {
+                            // 进行比较 检测项仪器的结束时间
+                            // boolean after(Date when)   测试此日期是否在指定日期之后。
+                            if (instrumentEntityList.get(i).getEndTime().after(endTime)) {
+                                endTime = instrumentEntityList.get(i).getEndTime();
+                            }
+                        }
                     }
                 }
             }
@@ -1629,10 +1667,27 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             itemMap.put("testCondition", wendugBuilder.toString());
             // 2、试验检测日期 -- 后期比较
             SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyy年MM月dd日");
-            SampleItemInstrumentEntity itemDetail = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(id);
-            String startTime = yyyyMMddHH_NOT_.format(itemDetail.getStartTime()).substring(0, 11);
-            String endTime = yyyyMMddHH_NOT_.format(itemDetail.getEndTime()).substring(0, 11);
-            itemMap.put("testDate", startTime + "~" + endTime);
+            String startTimestr = "";
+            String endTimestr = "";
+            if (startTime != null && endTime != null) {
+                startTimestr = yyyyMMddHH_NOT_.format(startTime).substring(0, 11);
+                endTimestr = yyyyMMddHH_NOT_.format(endTimestr).substring(0, 11);
+            } else {
+                SampleItemInstrumentEntity itemDetail = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(id);
+                // 获取试验开始时间 == null  则 设置为检测项的 开始时间与结束时间
+                startTimestr = yyyyMMddHH_NOT_.format(itemDetail.getStartTime()).substring(0, 11);
+                endTimestr = yyyyMMddHH_NOT_.format(itemDetail.getEndTime()).substring(0, 11);
+            }
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(startTimestr) && org.apache.commons.lang3.StringUtils.isNotEmpty(endTimestr)) {
+                // 仪器检测时间与结束时间一致的话  合并即可
+                if (startTimestr.equals(endTimestr)) {
+                    itemMap.put("testDate", endTimestr);
+                } else {
+                    itemMap.put("testDate", startTime + "~" + endTime);
+                }
+            } else {
+                itemMap.put("testDate", startTimestr);
+            }
             mapMap.put(id, itemMap);
         }
         return mapMap;
