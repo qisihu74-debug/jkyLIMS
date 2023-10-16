@@ -117,7 +117,8 @@
             t2.check_item_id,
             t2.sheet_index,
             t1.test_set_url,
-            t1.record_set_url
+            t1.record_set_url,
+            t1.sample_id
         FROM
             test_entrusted_sample_checkitem_rel AS t1
             LEFT JOIN test_item_sheet_rel AS t2 ON t1.check_item_id = t2.check_item_id
