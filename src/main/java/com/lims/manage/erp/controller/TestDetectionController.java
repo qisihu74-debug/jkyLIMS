@@ -142,15 +142,14 @@ public class TestDetectionController {
         }
         Boolean flag = testDetectionService.postEndTest(sampleItemInstrumentVo);
         if(flag) {
-            // 每组检测项统计信息 并进行试验
-            String itemMsg = pageOfficeCopyService.updateItemOriginUr(paramVo);
-            System.out.println("itemMsg" + itemMsg);
-            // 试验完成 对检测项下 含有对应的 excel 转成pdf 进行更新origin_url_pdf。
-            pageOfficeCopyService.updateItemOriginUrlPdf(sampleItemInstrumentVo);
             // 更新任务单状态 需要 对所有的 样品信息 下 检测项 进行判断 ==2的话 更新。
             TaskDetailInfoVo dataGather = taskService.getTaskDetailInfoTwo(sampleItemInstrumentVo.getTaskId(), null);
             Boolean DetailStatus = testDetectionService.JudgmentTaskDetail(dataGather, sampleItemInstrumentVo.getTaskId());
             if (DetailStatus == true) {
+                // 每组检测项统计信息 并进行试验
+                pageOfficeCopyService.updateItemOriginUr(paramVo);
+                // 试验完成 对检测项下 含有对应的 excel 转成pdf 进行更新origin_url_pdf。
+                pageOfficeCopyService.updateItemOriginUrlPdf(sampleItemInstrumentVo);
                 return ResultUtil.success("任务单完成！！！");
             }
             return ResultUtil.success("检测项未全部完成检测，任务单未结束", "整体任务单未结束");
