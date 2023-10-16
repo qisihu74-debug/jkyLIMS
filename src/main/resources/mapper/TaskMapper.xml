@@ -1123,7 +1123,7 @@
         WHERE
             t1.inspector LIKE CONCAT('%',#{userId},'%')
             AND t1.receive_time IS NOT NULL
-            and  <![CDATA[ t1.state < 6 ]]>
+            and  <![CDATA[ t1.state < 4 ]]>
             <if test="search!= null and search!= '' ">
                 AND (t1.task_code like CONCAT('%',#{search},'%') or t3.sample_code like CONCAT('%',#{search},'%')
                  or t3.alias_name like CONCAT('%',#{search},'%') )
