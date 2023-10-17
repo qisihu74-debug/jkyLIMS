@@ -678,16 +678,19 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         Date now = new Date();
         List<TestSampleEntity> entities = Lists.newArrayList();
         //获取数据库当前年份最大的样品编号
-        int newMax = getNewSampleCode();
+        Integer newMax = testSampleEntityMapper.getPreCode(sdfYear.format(now),sdfMonth.format(now));
+        if(newMax == null){
+            newMax = 0;
+        }
         for (int i = 0; i < samples.size(); i++) {
             int code = newMax + i + 1;
             String codeStr = new DecimalFormat("00000").format(code);
             String sampleCode;
             if (samples.get(i).getQuantityPerGroup() > 1) {
                 String numStr = new DecimalFormat("00").format(samples.get(i).getQuantityPerGroup());
-                sampleCode = "YP-" + sdfYear.format(now) + "-" + codeStr + "-01~" + numStr;
+                sampleCode = "YSY-" + sdfYear.format(now)+sdfMonth.format(now) + "-" + codeStr + "-01~" + numStr;
             } else {
-                sampleCode = "YP-" + sdfYear.format(now) + "-" + codeStr;
+                sampleCode = "YSY-" + sdfYear.format(now)+sdfMonth.format(now) + "-" + codeStr;
             }
             StringBuilder outwardStr = new StringBuilder();
             List<String> outward = samples.get(i).getOutward();
@@ -703,7 +706,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             }
             TestSampleEntity entity = new TestSampleEntity(samples.get(i), sampleCode,outwardStr.toString());
             // 样品新增时： state = 5
-            entity.setState("5");
+            entity.setState("6");
             // 提供样品编号
             sampleCodeSet.add(entity.getSampleCode());
             entities.add(entity);
@@ -722,6 +725,9 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：新增原材样品\t"+stringBuilder1.toString(), Const.ENTRUST_FOUND, true);
         }
         testSampleEntityMapper.insertBatch(entities);
+        //更新样品最新预收样编号
+        PreSampleCode preSampleCode = new PreSampleCode(sdfYear.format(now),sdfMonth.format(now),newMax+"");
+        testSampleEntityMapper.insertLatestPreCode(preSampleCode);
         // 读取编号 获取样品id
         if(CollectionUtil.isNotEmpty(sampleCodeSet)){
             List<String> lists = new ArrayList<>(sampleCodeSet.stream().collect(Collectors.toList()));
@@ -752,12 +758,18 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         //处理配合比样品数据
         Integer newId = testSampleEntityMapper.getMaxId() + 1;
         SampleDetailAddVo vo = new SampleDetailAddVo(samples, newId);
-        int newMax = getNewSampleCode() + 1;
+        Integer newMax = testSampleEntityMapper.getPreCode(sdfYear.format(now),sdfMonth.format(now));
+        if(newMax == null){
+            newMax = 0;
+        }
         String codeStr = new DecimalFormat("00000").format(newMax);
-        String sampleCode = "YP-" + sdfYear.format(now) + "-" + codeStr;
+        //更新样品最新预收样编号
+        PreSampleCode preSampleCode = new PreSampleCode(sdfYear.format(now),sdfMonth.format(now),newMax+"");
+        testSampleEntityMapper.insertLatestPreCode(preSampleCode);
+        String sampleCode = "YSY-" + sdfYear.format(now) + "-" + codeStr;
         TestSampleEntity mainSample = new TestSampleEntity(vo, sampleCode,null);
         // 样品新增时： state = 5
-        mainSample.setState("5");
+        mainSample.setState("6");
         // 提供样品编号
         sampleCodeSet.add(mainSample.getSampleCode());
         param.add(mainSample);

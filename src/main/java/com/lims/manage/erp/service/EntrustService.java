@@ -246,6 +246,15 @@ public interface EntrustService {
      */
     String addEntrustCopy(EntrustAddVo vo, MultipartFile[] file) throws Exception;
 
+    /**
+     * 保存再来一单
+     * @param vo
+     * @param file
+     * @return
+     * @throws Exception
+     */
+    String addEntrustCopy1016(EntrustAddVo vo, MultipartFile[] file) throws Exception;
+
     Long checkEntrustId(Long entrustId);
 
     /**

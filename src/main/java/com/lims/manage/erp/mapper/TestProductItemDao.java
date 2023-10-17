@@ -239,5 +239,32 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
             "GROUP BY t2.id")
     List<Integer> selectGROUPBYItemId(@Param("recordId") Long recordId);
 
+    /**
+     * 通过检测项 获取 委托单下 所有样品id数据
+     * @param itemId
+     * @return
+     */
+    @Select("\t\t\t\tSELECT \n" +
+            "\t\t\t\tt1.sample_id\n" +
+            "\t\t\t\tFROM \n" +
+            "\t\t\t\ttest_entrusted_sample_details_rel as t1 LEFT JOIN \n" +
+            "\t\t\t\ttest_entrusted_sample_checkitem_rel as t2 ON t1.entrustment_id = t2.entrust_id \n" +
+            "\t\t\t\tWHERE t2.id = #{itemId}\n" +
+            "\t\t\t\tORDER BY t1.id asc;")
+    List<Integer> selectCountSampleIds(@Param("itemId") Integer itemId);
+
+    /**
+     * 通过任务单id 获取检测项数据
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid \n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel \n" +
+            "WHERE\n" +
+            "\ttask_id = #{taskId}")
+    List<Integer> selectTaskIdItems(@Param("taskId") Long taskId);
+
 }
 

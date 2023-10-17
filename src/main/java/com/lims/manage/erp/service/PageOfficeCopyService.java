@@ -123,4 +123,11 @@ public interface PageOfficeCopyService {
      * @return
      */
     String updateItemOriginUr(EndTestParamVo paramVo) throws IOException;
+
+    /**
+     * 通过任务单id 获取检测项主键集合
+     * @param taskId
+     * @return
+     */
+    List<Integer> selectTaskIds(Long taskId);
 }

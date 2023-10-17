@@ -146,6 +146,9 @@ public class TestDetectionController {
             TaskDetailInfoVo dataGather = taskService.getTaskDetailInfoTwo(sampleItemInstrumentVo.getTaskId(), null);
             Boolean DetailStatus = testDetectionService.JudgmentTaskDetail(dataGather, sampleItemInstrumentVo.getTaskId());
             if (DetailStatus == true) {
+                // 任务单结束 通过任务单id 获取所有检测项数据数据
+                List<Integer> itemIds = pageOfficeCopyService.selectTaskIds(sampleItemInstrumentVo.getTaskId());
+                paramVo.setItemInstrumentEntityList(itemIds);
                 // 每组检测项统计信息 并进行试验
                 pageOfficeCopyService.updateItemOriginUr(paramVo);
                 // 试验完成 对检测项下 含有对应的 excel 转成pdf 进行更新origin_url_pdf。

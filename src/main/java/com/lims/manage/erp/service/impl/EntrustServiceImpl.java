@@ -3538,6 +3538,208 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public synchronized String addEntrustCopy1016(EntrustAddVo vo, MultipartFile[] file) throws Exception {
+        // 获取业务人员id
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 样品编号变动 = true
+        Boolean sampleStatus = false;
+        // 获取前台得到的 vo.getId()
+        long old = vo.getId();
+        //存放委托基本信息==》test_entrusted
+        EntrustEntity basisInfo = new EntrustEntity(vo);
+        long id = GenID.getID();
+        basisInfo.setId(id);
+        //获取并设置委托编号，相应的类别
+        SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
+        String acceptanceDate = yyyyMMddHH_NOT_.format(basisInfo.getAcceptanceDate()).substring(0,6);
+        //获取并设置委托编号，相应的类别
+        EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),acceptanceDate);
+        Long time = System.currentTimeMillis();
+        basisInfo.setEntrustmentNo(time.intValue());
+        basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
+        basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
+        /**
+         *  处理委托单位信息
+         */
+        TestCompanyVo companyClientVo = new TestCompanyVo();
+        companyClientVo.setType(1);
+        companyClientVo.setCompanyName(basisInfo.getEntrustCompany());
+        companyClientVo.setContacts(!StringUtils.isEmpty(basisInfo.getEntrustPeople()) ? basisInfo.getEntrustPeople() : null);
+        companyClientVo.setContactWay(!StringUtils.isEmpty(basisInfo.getEntrustPhone()) ? basisInfo.getEntrustPhone() : null);
+        /**
+         *  使用方法处理委托单位信息
+         */
+        Integer entrustCompanyId = methodUnit(companyClientVo);
+        basisInfo.setEntrustCompanyId(entrustCompanyId);
+        //处理见证单位信息
+        TestCompanyVo witnessCompanyClientVo = new TestCompanyVo();
+        witnessCompanyClientVo.setType(2);
+        witnessCompanyClientVo.setCompanyName(!StringUtils.isEmpty(basisInfo.getWitnessUint()) ? basisInfo.getWitnessUint() : null);
+        witnessCompanyClientVo.setContacts(!StringUtils.isEmpty(basisInfo.getWitnessPerson()) ? basisInfo.getWitnessPerson() : null);
+        witnessCompanyClientVo.setContactWay(!StringUtils.isEmpty(basisInfo.getWitnessPhone()) ? basisInfo.getWitnessPhone() : null);
+        // 处理见证单位信息
+        methodUnit(witnessCompanyClientVo);
+        // 处理copy后的样品集合
+        if(!vo.getSamples().isEmpty()){
+            methodCopySamples(vo.getSamples(),old,id,basisInfo.getEntrustCompanyId());
+        }
+        //通过样品ID 查询委托单信息和样品Id 绑定关系 （==null 正常，!=null false）
+        if (!CollectionUtils.isEmpty(vo.getSamples())) {
+            for (SampleEntity sampleEntity : vo.getSamples()) {
+                PageHelper.clearPage();
+                if (entityMapper.getEntrustIdBySampleId(sampleEntity.getId()) != null) {
+                    return "再来一单新增委托失败!:\t样品与委托单与建立关系\t"+sampleEntity.getId();
+                }
+            }
+        }
+        //附件存在上传附件到服务器
+        if (file.length != 0) {
+            for (MultipartFile multipartFile : file) {
+                uploading(basisInfo.getId(),multipartFile);
+            }
+        }
+        //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
+        Double totalMoney = 0D;
+        List<SampleEntity> samples = vo.getSamples();
+        List<EntrustSampleEntity> list = new ArrayList<>();
+        List<EntrustSampleEntity> list1 = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(samples)) {
+            for (SampleEntity sampleEntity : samples) {
+                SampleEntity sampleEntity2 = new SampleEntity();
+                sampleEntity2.setId(sampleEntity.getId());
+                sampleEntity2.setIsUse(1);
+                // 前端 变更的字段
+                sampleEntity2.setSpecs(sampleEntity.getSpecs());
+                sampleEntity2.setBatchNumber(sampleEntity.getBatchNumber());
+                sampleEntity2.setGeneration(sampleEntity.getGeneration());
+                sampleEntity2.setCheckDate(sampleEntity.getCheckDate()!=null?sampleEntity.getCheckDate():new Date());
+                sampleEntity2.setCompanyId(basisInfo.getEntrustCompanyId());
+                // 使用方法 处理样品来样时间 与委托单受理日期
+                sampleStatus = methodAcceptanceDate(sampleEntity.getId(),vo.getAcceptanceDate(),sampleEntity2);
+                // update样品信息
+                sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity2);
+                EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
+                entrustSampleEntity.setEntrustmentId(basisInfo.getId());
+                entrustSampleEntity.setSampleId(sampleEntity.getId());
+                list.add(entrustSampleEntity);
+                List<Integer> standardFileIds = sampleEntity.getStandardFileIds();
+                if (!CollectionUtils.isEmpty(standardFileIds)) {
+                    for (Integer integer : standardFileIds) {
+                        EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
+                        sampleEntity1.setSampleId(sampleEntity.getId());
+                        sampleEntity1.setStandardId(integer);
+                        sampleEntity1.setEntrustmentId(basisInfo.getId());
+                        list1.add(sampleEntity1);
+                    }
+                }
+                //样品下检测项
+                List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
+                if (!CollectionUtils.isEmpty(sampleCheckItem)) {
+                    List<SampleItemEntity> ItemList = new ArrayList<>();
+                    for (SampleItemEntity entity : sampleCheckItem) {
+                        // 正常存储检测项即可。
+                        //计算检测项总价钱
+                        if (entity.getUnitPrice() != null && entity.getUnitPrice() >= 0) {
+                            double money = entity.getTimes() * entity.getUnitPrice();
+                            totalMoney = totalMoney + money;
+                        }
+                        //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
+                        entity.setSampleId(sampleEntity.getId());
+                        entity.setEntrustId(basisInfo.getId());
+                        entity.setStandardId(entity.getStandardId());
+                        entity.setMethodId(entity.getMethodId());
+                        entity.setTimes(entity.getTimes());
+                        ItemList.add(entity);
+                    }
+                    if(!CollectionUtils.isEmpty(ItemList)){
+                        //记录日志
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append("委托编号为\t"+basisInfo.getEntrustmentNo());
+                        for(SampleItemEntity sampleItemEntity:sampleCheckItem){
+                            stringBuilder.append("\t检测项名称为\t"+sampleItemEntity.getCheckItemName()+"\t单价为\t"+sampleItemEntity.getUnitPrice()+"\t检测样次\t"+sampleItemEntity.getTimes()
+                                    +"\t检测项依据为\t"+sampleItemEntity.getStandardId());
+                        }
+                        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：委托-批量保存委托样品下检测项信息\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
+                        entityMapper.BatchSaveEntrustSampleItem(ItemList);
+                    }
+                }
+            }
+            if (!CollectionUtils.isEmpty(list)) {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("委托编号"+basisInfo.getEntrustmentNo());
+                for(EntrustSampleEntity entrustSampleEntity:list){
+                    stringBuilder.append("\t样品id\t"+entrustSampleEntity.getSampleId());
+                }
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：委托单与样品建立关系\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
+                entityMapper.BatchSaveEntrustSample(list);
+            }
+            if (!CollectionUtils.isEmpty(list1)) {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("委托编号"+basisInfo.getEntrustmentNo());
+                for(EntrustSampleEntity entrustSampleEntity:list1){
+                    stringBuilder.append("\t样品id\t"+entrustSampleEntity.getSampleId()+"\t样品委托依据\t"+entrustSampleEntity.getStandardId());
+                }
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：委托单样品，判定依据信息\t"+stringBuilder.toString(), Const.ENTRUST_FOUND, true);
+                entityMapper.BatchSaveSampleStandard(list1);
+            }
+        }
+        //更新委托单收费记录信息
+        if (!StringUtils.isEmpty(vo.getPaymentRecord())) {
+            EntrustPamentEntity pamentEntity = new EntrustPamentEntity();
+            pamentEntity.setEntrustmentId(basisInfo.getId());
+            pamentEntity.setTime(new Timestamp(new java.sql.Date(System.currentTimeMillis()).getTime()));
+            pamentEntity.setPrice(vo.getPaymentRecord());
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "新增再来一单：委托缴费记录新增\t"+"\t委托编号\t"+basisInfo.getEntrustmentNo()+"\t委托单收费记录\t"+pamentEntity.getPrice(), Const.ENTRUST_FOUND, true);
+            entityMapper.saveEntrustPayRecord(pamentEntity);
+        }
+        //得到总价钱，再保存委托基本信息
+        basisInfo.setState(201);
+        // 解析印章数组
+        if (vo.getSealTypes() != null && vo.getSealTypes().length > 0) {
+            StringBuilder sealTypes = new StringBuilder();
+            for (int i = 0; i < vo.getSealTypes().length; i++) {
+                sealTypes.append(vo.getSealTypes()[i]);
+                sealTypes.append(",");
+            }
+            basisInfo.setSealType(sealTypes.deleteCharAt(sealTypes.length() - 1).toString());
+        }
+        // 获取当前用户所在科室id
+        Long department = teamMapper.getTeamIdByUid(userInfo.getUserId());
+        // 委托单创建人所属部门
+        if(StringUtils.isEmpty(department)){
+            basisInfo.setDepartment(null);
+        }
+        else {
+            basisInfo.setDepartment(department);
+        }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), " 新增再来一单委托：信息成功\t委托编号为\t"+basisInfo.getEntrustmentNo()+"\t委托单位\t"+basisInfo.getEntrustCompany()
+                    +"\t委托人\t"+basisInfo.getEntrustPeople()+ "\t要求完成时间\t"+(new Timestamp(basisInfo.getRequestDate().getTime()))+"\t委托检测类别\t"+basisInfo.getEntrustTestType()+"\t检测目的\t"+basisInfo.getCheckPurpose()
+                    +"\t业务受理人\t"+basisInfo.getBusinessAcceptor()+"\t报告份数\t"+basisInfo.getReportCount()+"\t受理日期\t"+(new Timestamp(basisInfo.getAcceptanceDate().getTime()))
+                    +"\t任务来源\t"+basisInfo.getTaskSource()+"\t实收价格\t"+basisInfo.getActualPrice()+"\t应收价格\t"+basisInfo.getSystemPrice()+"\t折扣率\t"+basisInfo.getDiscount(), Const.ENTRUST_FOUND, true);
+        basisInfo.setAuditState("1");
+        // 判断取报告方式 非邮寄的话 清空状态
+        if(!StringUtils.isEmpty(basisInfo.getReportType()) && !basisInfo.getReportType().equals("邮寄")){
+            basisInfo.setAddress(null);
+            basisInfo.setMobile(null);
+            basisInfo.setAddressee(null);
+            basisInfo.setReportReceivingUnit(null);
+        }
+        basisInfo.setCreateTime(new Date());
+        // 委托单是否留样1.保留2.废弃 默认：否
+        basisInfo.setIsSave("否");
+        // 经营人员
+        basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
+        basisInfo.setAcceptanceDate(null);
+        basisInfo.setBusinessAcceptor(null);
+        entityMapper.insertEntrustInfo(basisInfo);
+        if(sampleStatus){
+            return "新建委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";
+        }
+        return "新建委托成功";
+    }
+
+    @Override
     public Long checkEntrustId(Long entrustId) {
         return entityMapper.checkEntrustId(entrustId);
     }
@@ -3551,6 +3753,98 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void methodCopySamples(List<SampleEntity> sampleList,Long old,long id,Integer entrustCompanyId){
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 获取样品集合 判断样品id 是否存在。 不存在 则 add样品。
+            for (SampleEntity sampleEntity : sampleList) {
+                SampleEntity sampleDetailVo  = sampleEntityMapper.getSampleTagInfo(sampleEntity.getId());
+                // 已经找到伪造字段
+                if(StringUtils.isEmpty(sampleDetailVo)){
+                    // 通过旧委托单id 获取样品集合 得到 配合比信息集合。
+                    List<SampleEntity> sampleSet  = sampleEntityMapper.selectSampleSet(old);
+                    // 配合比 处理。
+                    if(sampleEntity.getPid()!=null){
+                        // 整理 配合比信息
+                        SamplesAddVo samples = new SamplesAddVo();
+                        //获取 以pid的 配合比子集信息集合。
+                        List<SampleEntity> samplePidSub = sampleEntityMapper.selectByPid(sampleEntity.getPid());
+                        List<SampleDetailAddVo> subset= new ArrayList<>();
+                        if(!samplePidSub.isEmpty()){
+                            for(SampleEntity sampleEntity1:samplePidSub){
+                                SampleDetailAddVo sampleDetailAddVo = new SampleDetailAddVo(sampleEntity1);
+                                // 增加 样品数量 与来样时间
+                                sampleDetailAddVo.setSampleQuantity(sampleEntity1.getSampleQuantity());
+                                sampleDetailAddVo.setReceivedDate(new Date());
+                                subset.add(sampleDetailAddVo);
+                            }
+                        }
+                        if(!sampleSet.isEmpty()){
+                            for(SampleEntity sampleEntity2 :sampleSet){
+                                if(sampleEntity2.getId().equals(sampleEntity.getPid())){
+                                    // 前端 变更的字段
+                                    sampleEntity2.setSpecs(sampleEntity.getSpecs());
+                                    sampleEntity2.setBatchNumber(sampleEntity.getBatchNumber());
+                                    sampleEntity2.setGeneration(sampleEntity.getGeneration());
+                                   sampleEntity2.setCheckDate(sampleEntity.getCheckDate()!=null?sampleEntity.getCheckDate():new Date());
+                                    sampleEntity2.setCompanyId(entrustCompanyId);
+                                    SamplesAddVo samples1 = new SamplesAddVo(sampleEntity2);
+                                    samples = samples1;
+//                                    存储配合比子集。
+                                    samples.setSamples(subset);
+                                    // 获取配合比的样品字段
+                                    TestSampleMixInfoEntity data = mixInfoEntityMapper.selectBySampleId(sampleEntity.getPid());
+                                  if(data!=null){
+                                      samples.setDesignStrength(data.getDesignStrength());
+                                      samples.setIntensityConfiguration(data.getIntensityConfiguration());
+                                      samples.setAntifreezeLevel(data.getAntifreezeLevel());
+                                      samples.setWaterBinderRatio(data.getWaterBinderRatio());
+                                      samples.setUnitWaterUse(data.getUnitWaterUse());
+                                      samples.setSandRatio(data.getSandRatio());
+                                      samples.setDesignSlump(data.getDesignSlump());
+                                      samples.setMixingWay(data.getMixingWay());
+                                  }
+                                    samples.setCompanyId(entrustCompanyId);
+                                    // 针对 配合比 进行处理
+                                    TestSampleMixInfoEntity  addMixProportion  = testSampleEntityService.batchInsertMixSampleCopy(samples,id);
+                                       if(addMixProportion!=null){
+                                           sampleEntity.setId(addMixProportion.getSampleId());
+                                       }
+                                }
+                            }
+                        }
+                    }
+                    else{
+//                        原材处理
+                        if(!sampleSet.isEmpty()){
+                            for(int i=0;i<sampleSet.size();i++){
+                                SampleEntity oldSampleData = sampleSet.get(i);
+                                if(oldSampleData.getId().equals(sampleEntity.getOldSampleid())){
+                                    // 对此信息 重新 add。 并获取id 替换。
+                                    List<SampleDetailAddVo> samples = new ArrayList<>();
+                                    // 前端 变更的字段
+                                    oldSampleData.setSpecs(sampleEntity.getSpecs());
+                                    oldSampleData.setBatchNumber(sampleEntity.getBatchNumber());
+                                    oldSampleData.setGeneration(sampleEntity.getGeneration());
+                                    oldSampleData.setCheckDate(sampleEntity.getCheckDate()!=null?sampleEntity.getCheckDate():new Date());
+                                    oldSampleData.setCompanyId(entrustCompanyId);
+                                    // 其他信息不变更
+                                    SampleDetailAddVo sampleDetailAddVo = new SampleDetailAddVo(oldSampleData);
+                                    // 增加 样品数量 与来样时间
+                                    sampleDetailAddVo.setSampleQuantity(oldSampleData.getSampleQuantity());
+                                    sampleDetailAddVo.setReceivedDate(new Date());
+                                    samples.add(sampleDetailAddVo);
+                                    // 样品为原材的。
+                                    List<TestSampleEntity> addSamples = testSampleEntityService.batchInsertSampleCopy(samples);
+                                    TestSampleEntity addSample = addSamples.get(0);
+                                    sampleEntity.setId(addSample.getId());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+    }
+    @Transactional(rollbackFor = Exception.class)
+    public void methodCopySamples1016(List<SampleEntity> sampleList,Long old,long id,Integer entrustCompanyId){
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         // 获取样品集合 判断样品id 是否存在。 不存在 则 add样品。
             for (SampleEntity sampleEntity : sampleList) {
