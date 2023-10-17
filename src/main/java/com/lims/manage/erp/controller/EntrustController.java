@@ -18,6 +18,7 @@ import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.DingNotifyUtils;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -83,6 +84,8 @@ public class EntrustController {
     private ReportService reportService;
     @Autowired
     private QiYueSuoEntity qiYueSuoEntity;
+    @Autowired
+    private DingNotifyUtils dingNotifyUtils;
     /**
      * 新增委托 使用中丁
      *
@@ -1214,4 +1217,5 @@ public class EntrustController {
         List<String> list = entrustService.getUrlListById(entrustId);
         return ResultUtil.success(list);
     }
+
 }
