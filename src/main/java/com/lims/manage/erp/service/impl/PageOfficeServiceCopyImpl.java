@@ -3,7 +3,6 @@ package com.lims.manage.erp.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import com.aspose.cells.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.util.StringUtil;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.http.QiYueSuoDocment;
@@ -1527,9 +1526,10 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         for (int j = 0; j < paramVo.getItemInstrumentEntityList().size(); j++) {
             ids[j] = paramVo.getItemInstrumentEntityList().get(j);
         }
+        // 会获取任务单下 所有检测项
         List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
         // 2、 获取每组检测项的 数据（试验检测日期、试验条件、主要仪器设备名称及编号）
-        Map<Integer, Map<String, String>> mapMap = methodHashMapItem(paramVo.getItemInstrumentEntityList());
+        Map<Integer, Map<String, String>> mapMap = methodHashMapItem(paramVo.getItemInstrumentEntityList(), sheetItems);
         // 3、读取产品附件
         String productExcelUrl = null;
         ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(ids[0]);
@@ -1600,15 +1600,14 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         return "操作成功";
     }
 
-    public Map<Integer, Map<String, String>> methodHashMapItem(List<Integer> integerList) {
+    public Map<Integer, Map<String, String>> methodHashMapItem(List<Integer> integerList, List<ExcelInsertVo> sheetItems) {
         Map<Integer, Map<String, String>> mapMap = new HashMap<>();
-        // 获取检测项对应的信息
+        // 每个检测项主键对应的 仪器信息
+        Map<Integer, List<TestInstrumentEntity>> itemInstrumentList = new HashMap<>();
         for (Integer id : integerList) {
             Map<String, String> itemMap = new HashMap<>();
             // 1、主要仪器设备名称及编号 、试验条件
             List<TestInstrumentEntity> instrumentEntityList = taskMapper.getInstrumentEntityList(id);
-            // 仪器编号信息
-            StringBuilder stringBuilder = new StringBuilder();
             // 试验条件
             StringBuilder wendugBuilder = new StringBuilder();
             // 仪器的开始检测时间
@@ -1616,6 +1615,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             // 仪器结束时间
             Date endTime = null;
             if (instrumentEntityList != null && !instrumentEntityList.isEmpty()) {
+                // 记录：每个检测项主键对应的 仪器信息
+                itemInstrumentList.put(id, instrumentEntityList);
                 //试验条件: 温度湿度 获取第一组信息
                 wendugBuilder.append("温度：");
                 if (StringUtils.isEmpty(instrumentEntityList.get(0).getTemperature())) {
@@ -1630,14 +1631,6 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                     wendugBuilder.append(instrumentEntityList.get(0).getHumidity() + " ");
                 }
                 for (int i = 0; i < instrumentEntityList.size(); i++) {
-//                    stringBuilder.append(instrumentEntityList.get(i).getModel());
-//                    stringBuilder.append(instrumentEntityList.get(i).getName());
-//                    stringBuilder.append("（");
-//                    stringBuilder.append(instrumentEntityList.get(i).getCode());
-//                    stringBuilder.append("）");
-//                    if (i != instrumentEntityList.size() - 1) {
-//                        stringBuilder.append("、");
-//                    }
                     // 记录仪器的检测开始时间
                     if (startTime == null) {
                         // 当前检测项仪器开始时间不为空
@@ -1672,8 +1665,6 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                     }
                 }
             }
-            // 设备编号
-            itemMap.put("equipment", stringBuilder.toString());
             // 试验条件
             itemMap.put("testCondition", wendugBuilder.toString());
             // 2、试验检测日期 -- 后期比较
@@ -1682,7 +1673,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             String endTimestr = "";
             if (startTime != null && endTime != null) {
                 startTimestr = yyyyMMddHH_NOT_.format(startTime).substring(0, 11);
-                endTimestr = yyyyMMddHH_NOT_.format(endTimestr).substring(0, 11);
+                endTimestr = yyyyMMddHH_NOT_.format(endTime).substring(0, 11);
             } else {
                 SampleItemInstrumentEntity itemDetail = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(id);
                 // 获取试验开始时间 == null  则 设置为检测项的 开始时间与结束时间
@@ -1694,13 +1685,15 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                 if (startTimestr.equals(endTimestr)) {
                     itemMap.put("testDate", endTimestr);
                 } else {
-                    itemMap.put("testDate", startTime + "~" + endTime);
+                    itemMap.put("testDate", startTimestr + "~" + endTimestr);
                 }
             } else {
                 itemMap.put("testDate", startTimestr);
             }
             mapMap.put(id, itemMap);
         }
+        // 调用方法解决 ： 多个参数使用一个原始记录表格，仪器设备带出不全
+        methodItemSheet(itemInstrumentList, sheetItems, mapMap);
         return mapMap;
     }
 
@@ -1708,5 +1701,78 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     public List<Integer> selectTaskIds(Long taskId) {
 
         return testProductItemDao.selectTaskIdItems(taskId);
+    }
+
+    /**
+     * 解决 ： 多个参数使用一个原始记录表格，仪器设备带出不全
+     *
+     * @param itemInstrumentMap 每组检测项对应的仪器信息集合
+     * @param sheetItems        sheet下标集合
+     * @param mapMap            返回检测项与map生成数据
+     */
+    void methodItemSheet(Map<Integer, List<TestInstrumentEntity>> itemInstrumentMap, List<ExcelInsertVo> sheetItems, Map<Integer, Map<String, String>> mapMap) {
+        // 统计每个sheet页所对应的 设备编号信息
+        Map<Integer, Map<Integer, String>> sheetInstrumentMap = new HashMap<>();
+        // 遍历下标数据
+        for (ExcelInsertVo excelInsertVo : sheetItems) {
+            // 每组检测项主键 对应的仪器集合
+            if (CollectionUtil.isNotEmpty(itemInstrumentMap.get(excelInsertVo.getItemId()))) {
+                // 循环展示检测项中 仪器使用记录
+                List<TestInstrumentEntity> list = itemInstrumentMap.get(excelInsertVo.getItemId());
+                if (CollectionUtil.isNotEmpty(list)) {
+                    for (TestInstrumentEntity testInstrumentEntity : list) {
+                        // 转变为sheet页对应的 仪器信息
+                        if (sheetInstrumentMap.get(excelInsertVo.getSheetIndex()) == null) {
+                            // 仪器对应的数据
+                            Map<Integer, String> instrumentMap = new HashMap<>();
+                            // 仪器编号信息
+                            StringBuilder stringBuilder = new StringBuilder();
+                            stringBuilder.append(testInstrumentEntity.getModel());
+                            stringBuilder.append(testInstrumentEntity.getName());
+                            stringBuilder.append("（");
+                            stringBuilder.append(testInstrumentEntity.getCode());
+                            stringBuilder.append("）");
+                            instrumentMap.put(testInstrumentEntity.getId(), stringBuilder.toString());
+                            sheetInstrumentMap.put(excelInsertVo.getSheetIndex(), instrumentMap);
+                        }
+                        else{
+                            // 仪器对应的数据
+                            Map<Integer, String> sheetIndexMap = sheetInstrumentMap.get(excelInsertVo.getSheetIndex());
+                            // 仪器编号信息
+                            StringBuilder stringBuilder = new StringBuilder();
+                            stringBuilder.append(testInstrumentEntity.getModel());
+                            stringBuilder.append(testInstrumentEntity.getName());
+                            stringBuilder.append("（");
+                            stringBuilder.append(testInstrumentEntity.getCode());
+                            stringBuilder.append("）");
+                            sheetIndexMap.put(testInstrumentEntity.getId(), stringBuilder.toString());
+                            sheetInstrumentMap.put(excelInsertVo.getSheetIndex(), sheetIndexMap);
+                        }
+                    }
+                }
+            }
+        }
+        // mapMap：返回检测项与map生成数据
+        // 统计每个sheet页所对应的 设备编号信息  Map<Integer, Map<Integer, String>> sheetInstrumentMap = new HashMap<>();
+        // 遍历下标数据
+        for (ExcelInsertVo excelInsertVo : sheetItems) {
+            if (mapMap.get(excelInsertVo.getItemId()) != null) {
+                if (sheetInstrumentMap.get(excelInsertVo.getSheetIndex()) != null) {
+                    Map<Integer, String> sheetIndexMap = sheetInstrumentMap.get(excelInsertVo.getSheetIndex());
+                    // 仪器编号信息
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (Integer instrumentId : sheetIndexMap.keySet()) {
+                        String instrumentContext = sheetIndexMap.get(instrumentId);
+                        stringBuilder.append(instrumentContext);
+                        // 多个仪器展示信息
+                        stringBuilder.append("、");
+                    }
+                    Map<String, String> map = mapMap.get(excelInsertVo.getItemId());
+                    // 设备编号
+                    map.put("equipment", stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+                    mapMap.put(excelInsertVo.getItemId(), map);
+                }
+            }
+        }
     }
 }
