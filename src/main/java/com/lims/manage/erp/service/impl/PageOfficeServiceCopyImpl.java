@@ -266,10 +266,10 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                                 originalData.setRecordNumber(originalData.getRecordNumber() + "-" + number);
                                 // 获取检测项中记录编号
                                 if (recordNumberMap.get(data.getIdItem()) == null) {
-                                    recordNumberMap.put(data.getIdItem(), originalData.getRecordNumber());
+                                    recordNumberMap.put(data.getIdItem(), originalData.getRecordNumber() + "&" + GenID.getID());
                                 } else {
                                     String recordNumber = recordNumberMap.get(data.getIdItem());
-                                    recordNumberMap.put(data.getIdItem(), recordNumber + originalData.getRecordNumber());
+                                    recordNumberMap.put(data.getIdItem(), recordNumber + "," + originalData.getRecordNumber() + "&" + GenID.getID());
                                 }
                                 result.put("result", originalData);
                                 // 替换原始记录模板数据
@@ -1128,9 +1128,10 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     public QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean, List<String> stringList) {
         Map<String, Long> map = new HashMap<>();
         Set<Long> setList = new HashSet<>();
-        for (String checkItemCode : stringList) {
+        for (int i = 0; i < reqBean.getList().size(); i++) {
+            String checkItemCode = stringList.get(i);
             //step1 根据文件类型创建合同文档
-            Long itemId = reqBean.getList().get(0);
+            Long itemId = reqBean.getList().get(i);
             setList.add(itemId);
             String url = testProductItemDao.selectItemOriginUrlPdf(itemId);
             if (com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotEmpty(url)) {
@@ -1506,6 +1507,13 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                 actiondata.setOperatorContact(userData.getMobile());
                 actionOperators.add(actiondata);
                 actions1.setActionOperators(actionOperators);
+                // 设置签名页数
+                Location location = new Location();
+                // 签署页码，坐标指定位置时必须，0:全部页，-1:最后一页，其他:第page页
+                location.setPage(0);
+                List<Location> locations = new ArrayList<>();
+                locations.add(location);
+                actions1.setLocations(locations);
                 actions.add(actions1);
             }
         }

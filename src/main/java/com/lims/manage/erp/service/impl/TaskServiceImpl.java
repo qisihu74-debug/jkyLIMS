@@ -2352,4 +2352,19 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         }
         return pageInfo;
     }
+
+    @Override
+    public Boolean judgeTaskEndTest(Long id, ExcelInsertVo excelInsertVo) {
+        // 判断操作检测项 == 中间复核 不验证任务单直接返回即可
+        // 获取 类型（中间复核 或 最终复核）
+        if (excelInsertVo.getCheckReview().equals("中间复核")) {
+            return true;
+        }
+        // 任务单单自身 == 4 ：试验完成
+        Integer state = taskMapper.getJudgmentTaskList(id);
+        if(state!=null && state == 4){
+            return true;
+        }
+        return false;
+    }
 }

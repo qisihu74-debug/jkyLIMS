@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -152,6 +153,13 @@ public class TestDetectionController {
                 // 每组检测项统计信息 并进行试验
                 pageOfficeCopyService.updateItemOriginUr(paramVo);
                 // 试验完成 对检测项下 含有对应的 excel 转成pdf 进行更新origin_url_pdf。
+                List<SampleItemInstrumentEntity>  sampleItemInstrumentEntities = new ArrayList<>();
+                for(Integer itemId : itemIds){
+                    SampleItemInstrumentEntity data = new SampleItemInstrumentEntity();
+                    data.setItemId(itemId);
+                    sampleItemInstrumentEntities.add(data);
+                }
+                sampleItemInstrumentVo.setItemInstrumentEntityList(sampleItemInstrumentEntities);
                 pageOfficeCopyService.updateItemOriginUrlPdf(sampleItemInstrumentVo);
                 return ResultUtil.success("任务单完成！！！");
             }
