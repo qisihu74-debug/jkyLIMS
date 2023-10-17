@@ -371,13 +371,13 @@ public class QiYueSuoHnadler {
                 for (String s : documents) {
                     Location location = new Location();
                     location.setRectType("SEAL_PERSONAL");
-                    location.setPage(-1);
+                    location.setPage(0);
                     location.setDocumentId(s);
                     location.setActionName("检测人签字");
                     location.setKeyword("检测：");
                     location.setOffsetX(-0.01);
                     location.setOffsetY(-0.01);
-                    location.setKeywordIndex(-1);
+                    location.setKeywordIndex(0);
                     locations.add(location);
                 }
                 actions.get(i).setLocations(locations);
@@ -387,13 +387,13 @@ public class QiYueSuoHnadler {
                 for (String s:documents){
                     Location location = new Location();
                     location.setRectType("SEAL_PERSONAL");
-                    location.setPage(-1);
+                    location.setPage(0);
                     location.setDocumentId(s);
                     location.setActionName("记录人签字");
                     location.setKeyword("记录：");
                     location.setOffsetX(-0.01);
                     location.setOffsetY(-0.01);
-                    location.setKeywordIndex(-1);
+                    location.setKeywordIndex(0);
                     locations.add(location);
                 }
                 actions.get(i).setLocations(locations);
@@ -403,13 +403,13 @@ public class QiYueSuoHnadler {
                 for (String s:documents){
                     Location location = new Location();
                     location.setRectType("SEAL_PERSONAL");
-                    location.setPage(-1);
+                    location.setPage(0);
                     location.setDocumentId(s);
                     location.setActionName("复核人签字");
                     location.setKeyword("复核：");
                     location.setOffsetX(-0.01);
                     location.setOffsetY(-0.01);
-                    location.setKeywordIndex(-1);
+                    location.setKeywordIndex(0);
                     locations.add(location);
                 }
                 actions.get(i).setLocations(locations);
