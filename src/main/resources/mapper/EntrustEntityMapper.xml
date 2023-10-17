@@ -681,7 +681,8 @@
                                         entrust_category,
                                         entrust_category_type,
                                         create_time,
-                                        operating_personnel)
+                                        operating_personnel,
+                                        is_reserve)
         values (#{id},
                 #{entrustmentNo},
                 #{entrustType},
@@ -737,7 +738,8 @@
                 #{entrustCategory},
                 #{entrustCategoryType},
                 #{createTime},
-                #{operatingPersonnel})
+                #{operatingPersonnel},
+                #{isReserve})
 
     </insert>
     <select id="GetDelegateInformation" resultType="String">

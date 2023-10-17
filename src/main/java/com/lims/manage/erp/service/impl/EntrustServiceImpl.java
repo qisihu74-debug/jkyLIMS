@@ -523,6 +523,8 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
         basisInfo.setAcceptanceDate(null);
         basisInfo.setBusinessAcceptor(null);
+        // 是否留样
+        basisInfo.setIsReserve(vo.getIsReserve());
             entityMapper.insertEntrustInfo(basisInfo);
             if(sampleStatus){
                 return "新建预委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";
@@ -3732,6 +3734,8 @@ public class EntrustServiceImpl implements EntrustService {
         basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
         basisInfo.setAcceptanceDate(null);
         basisInfo.setBusinessAcceptor(null);
+        // 是否保留
+        basisInfo.setIsReserve(vo.getIsReserve());
         entityMapper.insertEntrustInfo(basisInfo);
         if(sampleStatus){
             return "新建委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";
