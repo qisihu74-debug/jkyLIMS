@@ -22,4 +22,9 @@ public class ExcelSheetDataVo {
     InputStream fileStream = null;
 
     String productExcelUrl;
+
+    /**
+     *  key = sheet标号 、value = ExcelInsertVo 中 topRow、leftColumn
+     */
+    Map<Integer, ExcelInsertVo> indexDataXYMap = new HashMap<>();
 }

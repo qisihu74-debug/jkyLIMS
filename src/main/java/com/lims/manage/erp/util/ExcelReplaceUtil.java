@@ -234,4 +234,37 @@ public class ExcelReplaceUtil {
             }
         }
     }
+
+    /**
+     * 获取 excel 文本所在 行数及列数。
+     *
+     * @param excelInsertVo
+     * @param book
+     */
+    public static void getSheetRowAndIndexColumn(ExcelInsertVo excelInsertVo, XSSFWorkbook book) {
+//        XSSFSheet sheet = book.getSheet(excelInsertVo.getSheetName());
+        XSSFSheet sheet = book.getSheetAt(excelInsertVo.getSheetIndex());
+        int lastRowNum = sheet.getLastRowNum(); //获取表格内容的最后一行的行数
+        //rowBegin代表要开始读取的行号，下面这个循环的作用是读取每一行内容
+        for (int x = 1; x <= lastRowNum; ++x) {
+            XSSFRow row = sheet.getRow(x);//获取每一行
+            int columnNum = row.getLastCellNum();//获取每一行的最后一列的列号，即总列数
+            for (int y = 0; y < columnNum; ++y) {
+                XSSFCell cell = row.getCell(y);//获取每个单元格
+                if (cell != null && cell.getCellType() == 1) {
+                    //设置单元格类型
+                    cell.setCellType(cell.CELL_TYPE_STRING);
+                    //获取单元格数据
+                    String cellValue = cell.getStringCellValue();
+                    System.out.println("cellValue == " + cellValue);
+                    if (!cellValue.equals("") && cellValue.equals(excelInsertVo.getRecordType())) {
+//                        System.out.println("x == " + (x ));
+//                        System.out.println("y == " + (y + 2));
+                        excelInsertVo.setLeftColumn(y + 2);
+                        excelInsertVo.setTopRow(x);
+                    }
+                }
+            }
+        }
+    }
 }
