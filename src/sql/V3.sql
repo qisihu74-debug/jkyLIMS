@@ -81,3 +81,9 @@ INSERT INTO `sys_function` (`function_id`, `function_pid`, `name`, `sort`, `is_v
 UPDATE `sys_function` SET `name`='检测任务' WHERE (`function_id`='40') LIMIT 1
 
 --产品大类清除、产品绑定新的产品大类、技术人员授权 --
+
+
+-- 委托单中 新增参数
+
+ALTER TABLE `test_entrusted_info`
+    ADD COLUMN `is_reserve`  VARCHAR(50) NULL COMMENT '是否保留';
