@@ -269,4 +269,9 @@ public interface TaskService {
     PageInfo<TestTaskPool> taskHall(ReqTaskPool bean);
 
     PageInfo<TestTaskPool> myTaskList(ReqTaskPool bean);
+
+    /**
+     * 根据任务单id 判断 任务单状态 == 实验完成
+     */
+    Boolean judgeTaskEndTest(Long id,ExcelInsertVo excelInsertVo);
 }
