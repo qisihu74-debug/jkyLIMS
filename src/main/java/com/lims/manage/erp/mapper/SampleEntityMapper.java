@@ -361,7 +361,7 @@ public interface SampleEntityMapper {
             "\ttest_task t1\n" +
             "LEFT JOIN test_entrusted_task_rel t2 ON t1.id = t2.task_id\n" +
             "LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.entrust_id = t3.entrustment_id\n" +
-            "WHERE t3.sample_id=#{sampleId}")
+            "WHERE t3.sample_id=#{sampleId} limit 1")
     ReceiveSampleParamVo getSampleTaker(@Param("sampleId") int sampleId);
 
     /**
