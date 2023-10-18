@@ -408,6 +408,11 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         return deviceList;
     }
 
+    @Override
+    public List<Integer> getAllIds() {
+        return deviceEntityMapper.getAllIds();
+    }
+
     private String upload(MultipartFile file) {
         String fileName = file.getOriginalFilename();
         String upload = MinIoUtil.upload("", file, fileName);
@@ -432,6 +437,29 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
             log.error("提示:",e);
         }
         return null;
+    }
+
+    @Override
+    public void printDeviceLables(Integer id, TestInstrument testInstrument, HttpServletResponse response) throws Exception {
+        PDFHelper3.getLicense();
+        //填冲数据
+        InputStream fileStream = MinIoUtil.getFileStream("sample-tag", "device-lable.xlsx");
+        InputStream imageStrem = MinIoUtil.getFileStream("sample-tag", "logo.png");
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        //填充数据
+        worksheet.getCells().get("I6").setValue(testInstrument.getName());//设备名称
+        worksheet.getCells().get("I11").setValue(testInstrument.getCode());//设备编号
+        worksheet.getCells().get("I14").setValue(testInstrument.getModel());//设备型号
+        worksheet.getCells().get("I17").setValue(testInstrument.getSerialNumber());//出厂编号
+        //设置二维码
+        BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(id+"");
+
+        InputStream stream = bufferedImageToInputStream(bufferedImage);
+        //设置二维码和logo
+        worksheet.getPictures().add(1,3,imageStrem,30,30);
+        worksheet.getPictures().add(11,19,stream,16,16);
+        workbook.save("D:\\Users\\Administrator\\Desktop\\device\\name_code_sn_id\\"+testInstrument.getName()+"_"+testInstrument.getCode()+"_"+testInstrument.getSerialNumber()+"_"+testInstrument.getId()+".xlsx", SaveFormat.XLSX);
     }
 }
 

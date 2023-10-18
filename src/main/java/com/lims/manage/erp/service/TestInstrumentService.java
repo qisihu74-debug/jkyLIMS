@@ -101,5 +101,9 @@ public interface TestInstrumentService extends IService<TestInstrument> {
      * @return
      */
     List<LabelValueVo> getDeviceList(String search);
+
+    List<Integer> getAllIds();
+
+    void printDeviceLables(Integer id, TestInstrument testInstrument, HttpServletResponse response) throws Exception;
 }
 

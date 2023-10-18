@@ -358,5 +358,26 @@ public class TestInstrumentController extends ApiController {
         }
 
     }
+
+    @GetMapping("printDeviceLables")
+    public void printDeviceLables( HttpServletResponse response){
+        List<Integer> list = testInstrumentService.getAllIds();
+        for (Integer id :list){
+            if (id != null){
+                //根据设备id获取设备详情
+                LambdaQueryWrapper<TestInstrument> queryWrapper = new LambdaQueryWrapper();
+                queryWrapper.eq(TestInstrument::getId,id);
+                TestInstrument testInstrument = testInstrumentService.getOne(queryWrapper);
+                if (testInstrument != null){
+                    try {
+                        Thread.sleep(100);
+                         testInstrumentService.printDeviceLables(id,testInstrument, response);
+                    }catch (Exception e){
+                        logger.error("打印设备标签异常:{}",e);
+                    }
+                }
+            }
+        }
+    }
 }
 

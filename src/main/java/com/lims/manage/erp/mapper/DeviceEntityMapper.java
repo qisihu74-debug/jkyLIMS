@@ -5,6 +5,7 @@ import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -59,4 +60,6 @@ public interface DeviceEntityMapper {
      */
     List<LabelValueVo> getDeviceList(@Param("search") String search);
 
+    @Select("SELECT id from test_instrument where del_flag=0")
+    List<Integer> getAllIds();
 }
