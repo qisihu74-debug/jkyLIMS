@@ -523,6 +523,8 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
         basisInfo.setAcceptanceDate(null);
         basisInfo.setBusinessAcceptor(null);
+        // 是否留样
+        basisInfo.setIsReserve(vo.getIsReserve());
             entityMapper.insertEntrustInfo(basisInfo);
             if(sampleStatus){
                 return "新建预委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";
@@ -624,6 +626,8 @@ public class EntrustServiceImpl implements EntrustService {
         if(entrustDetails.getState() == 202){
             basisInfo.setState(201);
         }
+        // 是否保留
+        basisInfo.setIsReserve(vo.getIsReserve());
         entityMapper.updateEntrustInfo(basisInfo);
         // 修改委托信息后： 触发联动效果。 同步更新任务单对应字段。
         methodModifyTheTask(basisInfo.getId());
@@ -3732,6 +3736,8 @@ public class EntrustServiceImpl implements EntrustService {
         basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
         basisInfo.setAcceptanceDate(null);
         basisInfo.setBusinessAcceptor(null);
+        // 是否保留
+        basisInfo.setIsReserve(vo.getIsReserve());
         entityMapper.insertEntrustInfo(basisInfo);
         if(sampleStatus){
             return "新建委托成功\n"+"委托与样品时间不一致，样品编号及签收时间发生变动";

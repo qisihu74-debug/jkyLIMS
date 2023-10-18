@@ -57,7 +57,8 @@
                actual_price,
                report_receiving_unit,
                entrust_category,
-               operating_personnel
+               operating_personnel,
+               is_reserve
         from test_entrusted_info
         where id = #{id}
     </select>
@@ -681,7 +682,8 @@
                                         entrust_category,
                                         entrust_category_type,
                                         create_time,
-                                        operating_personnel)
+                                        operating_personnel,
+                                        is_reserve)
         values (#{id},
                 #{entrustmentNo},
                 #{entrustType},
@@ -737,7 +739,8 @@
                 #{entrustCategory},
                 #{entrustCategoryType},
                 #{createTime},
-                #{operatingPersonnel})
+                #{operatingPersonnel},
+                #{isReserve})
 
     </insert>
     <select id="GetDelegateInformation" resultType="String">
@@ -808,6 +811,7 @@
             <if test="auditUser != null and auditUser!=''">audit_user=#{auditUser},</if>
             <if test="auditDate != null">audit_date=#{auditDate},</if>
             <if test="operatingPersonnel != null and operatingPersonnel!=''">operating_personnel=#{operatingPersonnel},</if>
+            <if test="isReserve != null">is_reserve=#{isReserve},</if>
             address=#{address},
             addressee=#{addressee},
             mobile=#{mobile},

@@ -301,5 +301,9 @@ public class EntrustAddVo {
      * 经营人员
      */
     private String operatingPersonnel;
+    /**
+     * 是否保留
+     */
+    private String isReserve;
 
 }

@@ -1184,7 +1184,8 @@
         t1.state,
         t1.entrust_id as entrustmentId,
         t1.check_item_name as checkItemName,
-        t1.edit_data
+        t1.edit_data,
+        t1.start_time
         FROM
         test_entrusted_sample_checkitem_rel as t1
         WHERE 1=1
