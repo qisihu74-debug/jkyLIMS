@@ -81,3 +81,28 @@ INSERT INTO `sys_function` (`function_id`, `function_pid`, `name`, `sort`, `is_v
 UPDATE `sys_function` SET `name`='检测任务' WHERE (`function_id`='40') LIMIT 1
 
 --产品大类清除、产品绑定新的产品大类、技术人员授权 --
+-- ----------------------------
+-- 人员工时占比信息
+-- ----------------------------
+DROP TABLE IF EXISTS `test_user_proportion`;
+CREATE TABLE `test_user_proportion`  (
+                                         `id` int(0) NOT NULL,
+                                         `user_type` int(0) NULL DEFAULT NULL COMMENT '0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生',
+                                         `user_proportion` double NULL DEFAULT NULL COMMENT '工时占比',
+                                         PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '人员工时占比信息' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of test_user_proportion
+-- ----------------------------
+INSERT INTO `test_user_proportion` VALUES (1, 0, 0.25);
+INSERT INTO `test_user_proportion` VALUES (2, 1, 0.25);
+INSERT INTO `test_user_proportion` VALUES (3, 2, 0.25);
+INSERT INTO `test_user_proportion` VALUES (4, 3, 0.25);
+-- 工时统计菜单添加
+INSERT INTO `sys_function` (`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES ('150', '60', '工时统计', '15', '0', '');
+
+-- 委托单中 新增参数
+
+ALTER TABLE `test_entrusted_info`
+    ADD COLUMN `is_reserve`  VARCHAR(50) NULL COMMENT '是否保留';

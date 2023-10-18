@@ -715,7 +715,11 @@ public class ReportServiceImpl implements ReportService {
                 return topDepartmentCode + "-" + year + "-" + entrustCategoryType + "-0001";
             } else {
                 int newCode = maxCode + 1;
-                return topDepartmentCode + "-" + year + "-" + entrustCategoryType + "-" + new DecimalFormat("0000").format(newCode);
+                if(newCode >= 10000){
+                    return topDepartmentCode + "-" + year + "-" + entrustCategoryType + "-" + new DecimalFormat("00000").format(newCode);
+                }else{
+                    return topDepartmentCode + "-" + year + "-" + entrustCategoryType + "-" + new DecimalFormat("0000").format(newCode);
+                }
             }
         } else {
             Integer maxCode = recordEntityMapper.getMaxCode(year, topDepartmentCode);
@@ -729,7 +733,11 @@ public class ReportServiceImpl implements ReportService {
                 return topDepartmentCode + "-" + year + "-YC-0001";
             } else {
                 int newCode = maxCode + 1;
-                return topDepartmentCode + "-" + year + "-YC-" + new DecimalFormat("0000").format(newCode);
+                if(newCode >= 10000){
+                    return topDepartmentCode + "-" + year + "-YC-" + new DecimalFormat("00000").format(newCode);
+                }else{
+                    return topDepartmentCode + "-" + year + "-YC-" + new DecimalFormat("0000").format(newCode);
+                }
             }
         }
     }

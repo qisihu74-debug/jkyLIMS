@@ -256,8 +256,14 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                             String sheetName = sheet.getSheetName();
                             if (keyMap.get(sheetName) == null) {
                                 keyMap.put(sheetName, sheetName);
-                                Map<Integer, Integer> countMap = excelSheetDataVo.getCountMap();
-//                                int number = countMap.get(excelInsertVo1.getSheetIndex());
+                                // key = sheet标号 、value = ExcelInsertVo 中 topRow、leftColumn
+                                Map<Integer, ExcelInsertVo> indexDataXYMap = excelSheetDataVo.getIndexDataXYMap();
+                                ExcelInsertVo insertVo = indexDataXYMap.get(excelInsertVo1.getSheetIndex());
+
+                                // 2、试验检测日期 -- 后期比较
+                                SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyy年MM月dd日");
+                                String startTimestr = yyyyMMddHH_NOT_.format(data.getStartTime()).substring(0, 11);
+                                sheet.getRow(insertVo.getTopRow()).getCell(insertVo.getLeftColumn()).setCellValue(startTimestr);
                                 // 有序信息。
                                 OriginalRecordDataVo originalData = taskService.getOriginalData(data.getTaskId(), data.getSampleId(), data.getCheckItemId(), data.getIdItem());
                                 Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
@@ -882,16 +888,29 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         Map<Integer, Object> map = inserItemPage(taskId);
         // key = sheet标号 、value = 序号
         Map<Integer, Integer> countMap = new HashMap<>();
+        // key = sheet标号 、value = ExcelInsertVo 中 topRow、leftColumn
+        Map<Integer, ExcelInsertVo> indexDataXYMap = new HashMap<>();
         fileStream.close();
         // 把 XSSFWorkbook 转为 InputStream
         InputStream input = AsposeUtil.createExcelStream(wb);
         Workbook document = new Workbook(input);
         handlerPage(document, countMap, map);
+        for (Integer index : countMap.keySet()) {
+            // 1、进行 根据标号 添加 日期内容 2、sheet 指定位置 填充文字 3、设置图表插入的位置
+            ExcelInsertVo data = new ExcelInsertVo();
+            data.setRecordType("日期：");
+            data.setSheetIndex(index);
+            ExcelReplaceUtil.getSheetRowAndIndexColumn(data, wb);
+            indexDataXYMap.put(index, data);
+            System.out.println("信息输出 == " + data);
+        }
         String path = dir + GenID.getID() + ".xlsx";
         document.save(path);
         input.close();
         excelSheetDataVo.setCountMap(countMap);
         excelSheetDataVo.setSaveFile(path);
+        // 每个sheet页中 日期的坐标系数。
+        excelSheetDataVo.setIndexDataXYMap(indexDataXYMap);
         // 创建一个文件输入流
         return excelSheetDataVo;
     }

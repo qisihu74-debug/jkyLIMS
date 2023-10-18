@@ -626,6 +626,8 @@ public class EntrustServiceImpl implements EntrustService {
         if(entrustDetails.getState() == 202){
             basisInfo.setState(201);
         }
+        // 是否保留
+        basisInfo.setIsReserve(vo.getIsReserve());
         entityMapper.updateEntrustInfo(basisInfo);
         // 修改委托信息后： 触发联动效果。 同步更新任务单对应字段。
         methodModifyTheTask(basisInfo.getId());
