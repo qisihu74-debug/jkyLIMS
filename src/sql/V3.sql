@@ -99,7 +99,8 @@ INSERT INTO `test_user_proportion` VALUES (1, 0, 0.25);
 INSERT INTO `test_user_proportion` VALUES (2, 1, 0.25);
 INSERT INTO `test_user_proportion` VALUES (3, 2, 0.25);
 INSERT INTO `test_user_proportion` VALUES (4, 3, 0.25);
-
+-- 工时统计菜单添加
+INSERT INTO `sys_function` (`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES ('150', '60', '工时统计', '15', '0', '');
 
 -- 委托单中 新增参数
 
