@@ -5103,11 +5103,16 @@ public class EntrustServiceImpl implements EntrustService {
         if(!sampleCodes[1].equals(times[0])){
             // 根据年限 查询最大样品编号
             Integer maxSampleCode = sampleEntityMapper.getMaxNumber(times[0]);
-            maxSampleCode+=1;
             // 更改样品年限
             sampleCodes[1] = String.valueOf(times[0]);
             // 更改样品编号
-            String suffix = new DecimalFormat("00000").format(maxSampleCode);
+            String suffix = "";
+            if(maxSampleCode == null){
+                suffix = new DecimalFormat("00000").format(1);
+            }else {
+                maxSampleCode += 1;
+                suffix = new DecimalFormat("00000").format(maxSampleCode);
+            }
             sampleCodes[2] = suffix;
             for(int i=0; i<sampleCodes.length; i++){
                 sampleCode.append(sampleCodes[i]);
@@ -6271,11 +6276,16 @@ public class EntrustServiceImpl implements EntrustService {
         // 根据年限 和类型 查询最大样品编号
         String acceptanceDate = sampleCodes[1].substring(0, 4);
         Integer maxSampleCode = sampleEntityMapper.getYPMaxNumber(acceptanceDate,"YP");
-        maxSampleCode += 1;
+        // 更改样品编号
+        String suffix = "";
+        if(maxSampleCode == null){
+            suffix = new DecimalFormat("00000").format(1);
+        }else {
+            maxSampleCode += 1;
+            suffix = new DecimalFormat("00000").format(maxSampleCode);
+        }
         // 更改样品年限
         sampleCodes[1] = acceptanceDate;
-        // 更改样品编号
-        String suffix = new DecimalFormat("00000").format(maxSampleCode);
         sampleCodes[2] = suffix;
         for (int i = 0; i < sampleCodes.length; i++) {
             sampleCode.append(sampleCodes[i]);

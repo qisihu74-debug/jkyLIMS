@@ -275,4 +275,11 @@ public interface TeamMapper extends BaseMapper {
      * @return
      */
     List<Long> getUsersByTechnicist(@Param("list") List<Long> list);
+
+    /**
+     * 通过顶级部门查看 下拉人员信息 - 拼接信息
+     * @param id
+     * @return
+     */
+    List<TestTeam> getByTeamId(@Param("id") Long id);
 }
