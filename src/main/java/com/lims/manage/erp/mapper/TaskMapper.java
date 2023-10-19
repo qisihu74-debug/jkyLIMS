@@ -591,4 +591,9 @@ public interface TaskMapper extends BaseMapper {
             "WHERE\n" +
             "\tt1.id = #{id}")
     Integer getReportCountByTaskId(@Param("id") Long id);
+
+    /**
+     *  根据团队id 查询人员信息列表-拼接信息
+     */
+    List<LabelValueVo> getMemberInformationConcat(@Param(value = "deptIds") Set<Long> deptIds);
 }

@@ -123,4 +123,42 @@
         </foreach>
         AND tr.user_id IS NOT NULL
     </select>
+
+    <select id="getByTeamId" resultType="com.lims.manage.erp.entity.TestTeam">
+        SELECT DISTINCT
+            uus.user_id AS userId,
+            CONCAT( uus.NAME, "-", tt.name ) AS NAME
+        FROM
+            test_technicist tte
+            LEFT JOIN sys_user uus ON tte.user_id = uus.user_id
+            LEFT JOIN test_team as tt ON tte.team_id = tt.id
+        WHERE
+            tte.team_id IN (
+        SELECT
+            tb1.id
+        FROM
+            (
+            WITH RECURSIVE td AS (
+        SELECT
+            *
+        FROM
+            test_team
+        WHERE
+            id = #{id} UNION ALL
+        SELECT
+            c.*
+        FROM
+            test_team c,
+            td
+        WHERE
+            c.pid = td.id
+            ) SELECT
+            *
+        FROM
+            td
+            ) tb1
+        WHERE
+            tb1.id != #{id}
+            )
+    </select>
 </mapper>

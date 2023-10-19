@@ -758,14 +758,14 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             topDepartment = department;
         }
         // 获取团队下所有子集团队下技术人员集合
-        List<TestTeam> testTeamList = teamMapper.getIdsByTeamId(topDepartment);
+        List<TestTeam> testTeamList = teamMapper.getByTeamId(topDepartment);
         List<LabelValueVo> teamVos = new ArrayList<>();
         // testTeamList =null
         if(CollectionUtils.isEmpty(testTeamList)){
             // 团队id集合 返回人员信息
             Set<Long> deptIds = new HashSet<>();
             deptIds.add(topDepartment);
-            List<LabelValueVo> teamVos0 = taskMapper.getMemberInformation(deptIds);
+            List<LabelValueVo> teamVos0 = taskMapper.getMemberInformationConcat(deptIds);
             teamVo.setTeamVo(teamVos0);
         } else {
             for(TestTeam testTeam:testTeamList)

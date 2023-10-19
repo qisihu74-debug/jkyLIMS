@@ -253,7 +253,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 for (int i = 0; i < inspectorArrays.length; i++) {
                     String[] names = inspectorArrays[i].split("&");
                     LabelValueVo labelValueVo = new LabelValueVo();
-                    labelValueVo.setLabel(names[0]);
+                    labelValueVo.setLabel(names[0].split("-")[0]);
                     labelValueVo.setValue(Long.parseLong(names[1]));
                     labelValueVo.setText("0");
                     inspectorArraysVos.add(labelValueVo);
@@ -461,7 +461,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             for (int i = 0; i < userArrays.length; i++) {
                 String[] names = userArrays[i].split("&");
                 LabelValueVo labelValueVo = new LabelValueVo();
-                labelValueVo.setLabel(names[0]);
+                labelValueVo.setLabel(names[0].split("-")[0]);
                 labelValueVo.setValue(Long.parseLong(names[1]));
                 labelValueVo.setText("1");
                 inspectorArraysVos.add(labelValueVo);
@@ -473,7 +473,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             for (int i = 0; i < userArrays.length; i++) {
                 String[] names = userArrays[i].split("&");
                 LabelValueVo labelValueVo = new LabelValueVo();
-                labelValueVo.setLabel(names[0]);
+                labelValueVo.setLabel(names[0].split("-")[0]);
                 labelValueVo.setValue(Long.parseLong(names[1]));
                 labelValueVo.setText("2");
                 inspectorArraysVos.add(labelValueVo);
@@ -485,7 +485,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             for (int i = 0; i < userArrays.length; i++) {
                 String[] names = userArrays[i].split("&");
                 LabelValueVo labelValueVo = new LabelValueVo();
-                labelValueVo.setLabel(names[0]);
+                labelValueVo.setLabel(names[0].split("-")[0]);
                 labelValueVo.setValue(Long.parseLong(names[1]));
                 labelValueVo.setText("3");
                 inspectorArraysVos.add(labelValueVo);
@@ -497,7 +497,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             for (int i = 0; i < userArrays.length; i++) {
                 String[] names = userArrays[i].split("&");
                 LabelValueVo labelValueVo = new LabelValueVo();
-                labelValueVo.setLabel(names[0]);
+                labelValueVo.setLabel(names[0].split("-")[0]);
                 labelValueVo.setValue(Long.parseLong(names[1]));
                 labelValueVo.setText("4");
                 inspectorArraysVos.add(labelValueVo);
@@ -509,7 +509,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             for (int i = 0; i < userArrays.length; i++) {
                 String[] names = userArrays[i].split("&");
                 LabelValueVo labelValueVo = new LabelValueVo();
-                labelValueVo.setLabel(names[0]);
+                labelValueVo.setLabel(names[0].split("-")[0]);
                 labelValueVo.setValue(Long.parseLong(names[1]));
                 labelValueVo.setText("5");
                 inspectorArraysVos.add(labelValueVo);
@@ -521,7 +521,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             for (int i = 0; i < userArrays.length; i++) {
                 String[] names = userArrays[i].split("&");
                 LabelValueVo labelValueVo = new LabelValueVo();
-                labelValueVo.setLabel(names[0]);
+                labelValueVo.setLabel(names[0].split("-")[0]);
                 labelValueVo.setValue(Long.parseLong(names[1]));
                 labelValueVo.setText("6");
                 inspectorArraysVos.add(labelValueVo);
