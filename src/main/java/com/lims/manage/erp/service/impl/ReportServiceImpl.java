@@ -4209,6 +4209,8 @@ public class ReportServiceImpl implements ReportService {
                     //新增报告记录数据
                     recordEntityMapper.insert(reportRecordEntity);
                 }
+            }else {
+                return false;
             }
         }else {
             //报告记录表限制只存在同一委托下的报告记录
