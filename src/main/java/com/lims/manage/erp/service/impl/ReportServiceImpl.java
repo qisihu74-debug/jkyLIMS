@@ -4130,87 +4130,44 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean submitEditReport(ReportEditReq bean) {
-        //更新样品对应的报告编辑状态为完成、报告类型进行更新
         Long entrustIdByTaskId = taskMapper.getEntrustIdByTaskId(bean.getTaskId());
         // 通过任务单id 获取委托单下报告数量
         Integer reportCount = taskMapper.getReportCountByTaskId(bean.getTaskId());
-        List<Integer> sampleIds = bean.getSampleIds();
-        List<ReportEditReq> list = Lists.newArrayList();
-        for (Integer sampeId:sampleIds) {
-            ReportEditReq req = new ReportEditReq();
-            req.setSampleId(sampeId);
-            req.setEntrustId(entrustIdByTaskId);
-            list.add(req);
-        }
-        entrustEntityMapper.updateReportTypeAndStatus(list);
         //报告类型0最终，1中间报告
         Integer reportType = bean.getReportType();
         ReportRecordEntity reportRecordEntity = new ReportRecordEntity();
         if (reportType == 0){
-            //最终报告、如果任务单下的所有样品状态为完成并且类型为最终、更新任务单完成状态
-            List<Integer> ids = Lists.newArrayList();
-            List<Integer> makeReportSampleInfos = entrustEntityMapper.getSampelIdsByTaskId(bean.getTaskId());
-            //对获取任务单下所有样品进行校验是否都已完成并且类型为最终报告
-            for (Integer valueVo:makeReportSampleInfos) {
-                ids.add(valueVo);
-            }
-            List<ReportEditReq> ll = entrustEntityMapper.getStatusAndType(entrustIdByTaskId);
-            Boolean flag = true;
-            for (ReportEditReq editReq:ll) {
-                if (ids.contains(editReq.getSampleId())){
-                    if (editReq.getReportType()==1){
-                        flag = false;
-                        break;
-                    }else {
-                        Integer completionStatus = editReq.getCompletionStatus();
-                        if (completionStatus == 0){
-                            flag = false;
-                            break;
-                        }
-                    }
+            //报告记录表限制只存在同一委托下的报告记录
+            Long id = reportMapper.getInfoByEntrustId1(entrustIdByTaskId);
+            if (id != null){
+                //update
+                reportRecordEntity.setId(id);
+                reportRecordEntity.setNumber(reportCount);
+                recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity);
+            }else {
+                //更新样品对应的报告编辑状态为完成、报告类型进行更新
+                List<Integer> sampleIds = bean.getSampleIds();
+                List<ReportEditReq> list = Lists.newArrayList();
+                for (Integer sampeId:sampleIds) {
+                    ReportEditReq req = new ReportEditReq();
+                    req.setSampleId(sampeId);
+                    req.setEntrustId(entrustIdByTaskId);
+                    list.add(req);
                 }
-            }
-            if (flag){
+                entrustEntityMapper.updateReportTypeAndStatus(list);
                 //更新任务单状态
                 taskMapper.updateReportStatus(1, bean.getTaskId());
-            }
-            //最终报告、如果委托所有样品状态为完成并且报告类型为最终、报告记录新增数据
-            List<ReportEditReq> all = entrustEntityMapper.getAllStatusAndTypeByEntrustId(entrustIdByTaskId);
-            for (ReportEditReq reportEditReq:all) {
-                if (reportEditReq.getReportType()==1){
-                    flag = false;
-                    break;
-                }else {
-                    Integer completionStatus = reportEditReq.getCompletionStatus();
-                    if (completionStatus == 0){
-                        flag = false;
-                        break;
-                    }
-                }
-            }
-            if (flag){
-                //报告记录表限制只存在同一委托下的报告记录
-                Long id = reportMapper.getInfoByEntrustId1(entrustIdByTaskId);
                 reportRecordEntity.setState(1 + "");
                 reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-                if (id != null){
-                    //update
-                    reportRecordEntity.setId(id);
-                    reportRecordEntity.setNumber(reportCount);
-                    recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity);
-                }else {
-                    //设置报告类型
-                    reportRecordEntity.setType("0");
-                    reportRecordEntity.setReportCode(getMaxCode(entrustIdByTaskId));
-                    reportRecordEntity.setId(GenID.getID());
-                    reportRecordEntity.setEntrustmentId(entrustIdByTaskId);
-                    // 报告数量
-                    reportRecordEntity.setNumber(reportCount);
-                    //新增报告记录数据
-                    recordEntityMapper.insert(reportRecordEntity);
-                }
-            }else {
-                return false;
+                //设置报告类型
+                reportRecordEntity.setType("0");
+                reportRecordEntity.setReportCode(getMaxCode(entrustIdByTaskId));
+                reportRecordEntity.setId(GenID.getID());
+                reportRecordEntity.setEntrustmentId(entrustIdByTaskId);
+                // 报告数量
+                reportRecordEntity.setNumber(reportCount);
+                //新增报告记录数据
+                recordEntityMapper.insert(reportRecordEntity);
             }
         }else {
             //报告记录表限制只存在同一委托下的报告记录
