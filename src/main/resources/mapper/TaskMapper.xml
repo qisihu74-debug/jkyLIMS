@@ -1400,8 +1400,9 @@
 
     <select id="getMemberInformationConcat" resultType="com.lims.manage.erp.vo.LabelValueVo" >
         SELECT
-        CONCAT( t3.NAME, "-", t1.NAME ) AS label,
-        t3.user_id AS VALUE
+        t3.NAME AS label,
+        t3.user_id AS VALUE,
+        t1.NAME as text
         FROM
         test_team as t1
         LEFT JOIN test_technicist as t2 ON t1.id = t2.team_id

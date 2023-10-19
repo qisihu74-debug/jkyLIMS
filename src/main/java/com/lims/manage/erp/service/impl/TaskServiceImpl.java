@@ -774,6 +774,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                     LabelValueVo labelValueVo = new LabelValueVo();
                     labelValueVo.setLabel(testTeam.getName());
                     labelValueVo.setValue(testTeam.getUserId());
+                    labelValueVo.setText(testTeam.getText());
                     teamVos.add(labelValueVo);
                 }
             }

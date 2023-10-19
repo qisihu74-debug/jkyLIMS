@@ -127,7 +127,8 @@
     <select id="getByTeamId" resultType="com.lims.manage.erp.entity.TestTeam">
         SELECT DISTINCT
             uus.user_id AS userId,
-            CONCAT( uus.NAME, "-", tt.name ) AS NAME
+            uus.NAME AS NAME,
+            tt.NAME as text
         FROM
             test_technicist tte
             LEFT JOIN sys_user uus ON tte.user_id = uus.user_id

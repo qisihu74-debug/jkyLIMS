@@ -51,6 +51,8 @@ public class TestTeam extends Model<TestTeam> {
     private Long userId;
     @TableField(exist = false)
     private String personName;
+    @TableField(exist = false)
+    private String text;
 
     public Integer getId() {
         return id;
