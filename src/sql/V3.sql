@@ -1,18 +1,16 @@
---预收样品编号表
+
 CREATE TABLE `test_sample_pre_code`  (
                                          `pre_sample_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '预收样样品编号',
                                          `month` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '月',
                                          `year` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '年'
-)
---设备使用记录增加任务单号字段
+);
+
 ALTER TABLE `test_instrument_use_record`
     ADD COLUMN `task_code`  VARCHAR(50) NULL COMMENT '任务单号';
 
 SET FOREIGN_KEY_CHECKS=0;
 
--- ----------------------------
--- Table structure for test_task_pool
--- ----------------------------
+
 DROP TABLE IF EXISTS `test_task_pool`;
 CREATE TABLE `test_task_pool` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '任务池任务id',
@@ -36,9 +34,7 @@ CREATE TABLE `test_task_pool` (
 
 SET FOREIGN_KEY_CHECKS=0;
 
--- ----------------------------
--- Table structure for test_technicist_capacity
--- ----------------------------
+
 DROP TABLE IF EXISTS `test_technicist_capacity`;
 CREATE TABLE `test_technicist_capacity` (
   `technicist_id` int NOT NULL COMMENT '技术人员id',
@@ -49,17 +45,15 @@ CREATE TABLE `test_technicist_capacity` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 ALTER TABLE `test_task`
-ADD COLUMN `pool_id`  int NULL AFTER `auxiliary_personnel`;
+ADD COLUMN `pool_id`  int NULL ;
 
 ALTER TABLE `test_entrusted_task_rel`
-MODIFY COLUMN `task_id`  bigint NULL COMMENT '任务单id' AFTER `address_name`;
+MODIFY COLUMN `task_id`  bigint NULL COMMENT '任务单id' ;
 
 
 SET FOREIGN_KEY_CHECKS=0;
 
--- ----------------------------
--- Table structure for test_check_items_task_rel
--- ----------------------------
+
 DROP TABLE IF EXISTS `test_check_items_task_rel`;
 CREATE TABLE `test_check_items_task_rel` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -80,10 +74,8 @@ INSERT INTO `sys_function` (`function_id`, `function_pid`, `name`, `sort`, `is_v
 
 UPDATE `sys_function` SET `name`='检测任务' WHERE (`function_id`='40') LIMIT 1
 
---产品大类清除、产品绑定新的产品大类、技术人员授权 --
--- ----------------------------
--- 人员工时占比信息
--- ----------------------------
+
+
 DROP TABLE IF EXISTS `test_user_proportion`;
 CREATE TABLE `test_user_proportion`  (
                                          `id` int(0) NOT NULL,
@@ -92,17 +84,39 @@ CREATE TABLE `test_user_proportion`  (
                                          PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '人员工时占比信息' ROW_FORMAT = Dynamic;
 
--- ----------------------------
--- Records of test_user_proportion
--- ----------------------------
+
 INSERT INTO `test_user_proportion` VALUES (1, 0, 0.25);
 INSERT INTO `test_user_proportion` VALUES (2, 1, 0.25);
 INSERT INTO `test_user_proportion` VALUES (3, 2, 0.25);
 INSERT INTO `test_user_proportion` VALUES (4, 3, 0.25);
--- 工时统计菜单添加
+
 INSERT INTO `sys_function` (`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES ('150', '60', '工时统计', '15', '0', '');
 
--- 委托单中 新增参数
+
 
 ALTER TABLE `test_entrusted_info`
     ADD COLUMN `is_reserve`  VARCHAR(50) NULL COMMENT '是否保留';
+
+INSERT INTO `sys_function` (`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES ('96', '39', '任务大厅', '0', '0', '待领取任务');
+
+UPDATE `sys_function` SET `name`='检测任务' WHERE (`function_id`='40') LIMIT 1;
+
+UPDATE sys_function SET name='审核发布' WHERE function_id = 37;
+
+INSERT INTO `sys_role`(`role_id`, `role_name`, `role_remark`, `create_time`) VALUES (66, '授权签字人', NULL, '2023-09-13 19:42:29');
+
+
+ALTER TABLE `test_entrusted_sample_checkitem_rel` ADD COLUMN `reviewed_by_set_url` VARCHAR ( 255 ) NULL COMMENT '审核人url' AFTER `record_set_url`;
+ALTER TABLE `test_entrusted_sample_checkitem_rel` ADD COLUMN `check_item_code` VARCHAR ( 255 ) NULL COMMENT '审核人url' AFTER `reviewed_by_set_url`;
+ALTER TABLE `test_entrusted_sample_checkitem_rel` ADD COLUMN `category` VARCHAR ( 255 ) NULL COMMENT '是否印章' AFTER `check_item_code`;
+ALTER TABLE `test_entrusted_sample_checkitem_rel` ADD COLUMN `qys_docment_id` VARCHAR ( 255 ) NULL COMMENT 'qys_docment_id' AFTER `category`;
+ALTER TABLE `test_entrusted_sample_checkitem_rel` ADD COLUMN `contract_id` VARCHAR ( 255 ) NULL COMMENT 'contract_id' AFTER `qys_docment_id`;
+ALTER TABLE `test_entrusted_sample_checkitem_rel` ADD COLUMN `sign_url` VARCHAR ( 255 ) NULL COMMENT 'sign_url' AFTER `contract_id`;
+ALTER TABLE `test_entrusted_sample_checkitem_rel` ADD COLUMN `qys_state` VARCHAR ( 255 ) NULL COMMENT 'qys_state' AFTER `sign_url`;
+ALTER TABLE `test_entrusted_sample_checkitem_rel` ADD COLUMN `sealer` VARCHAR ( 255 ) NULL COMMENT 'sealer' AFTER `qys_state`;
+ALTER TABLE `test_entrusted_sample_checkitem_rel` ADD COLUMN `seal_time` datetime NULL COMMENT 'seal_time' AFTER `sealer`;
+ALTER TABLE `test_entrusted_sample_checkitem_rel` ADD COLUMN `origin_url_pdf` VARCHAR ( 255 ) NULL COMMENT '试验完成后生成pdf文件' AFTER `seal_time`;
+-- 任务单增加参数
+ALTER TABLE `test_task` ADD COLUMN `probationer` VARCHAR ( 255 ) NULL COMMENT '见习生：实习的新手' AFTER `create_time`;
+ALTER TABLE `test_task` ADD COLUMN `interns` VARCHAR ( 255 ) NULL COMMENT '实习生' AFTER `probationer`;
+ALTER TABLE `test_task` ADD COLUMN `auxiliary_personnel` VARCHAR ( 255 ) NULL COMMENT '辅助人员' AFTER `interns`;

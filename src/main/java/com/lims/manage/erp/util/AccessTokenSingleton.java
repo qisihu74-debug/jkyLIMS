@@ -132,7 +132,7 @@ public class AccessTokenSingleton {
                 req.setHttpMethod("GET");
                 req.setDepartmentId(list_department.get(i).getId());
                 req.setOffset(0L);
-                req.setSize(10L);
+                req.setSize(50L);
                 OapiUserListbypageResponse rsp = client.execute(req, token);
                 if (rsp.getErrcode() == 0){
                     System.out.println(list_department.get(i).getName());
