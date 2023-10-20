@@ -63,7 +63,6 @@ public class DingDeptJob {
      */
     @Async("syncExecutor")
     @Scheduled(cron="30 10 1 * * ?")
-    @PostConstruct
     public void sync(){
         AccessTokenSingleton instance = AccessTokenSingleton.getInstance();
         String token = instance.getToken(tokenUrl, appKey, appsecret);

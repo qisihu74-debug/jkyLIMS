@@ -383,21 +383,21 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         PDFHelper3.getLicense();
         //填冲数据
         InputStream fileStream = MinIoUtil.getFileStream("sample-tag", "device-lable.xlsx");
-        InputStream imageStrem = MinIoUtil.getFileStream("sample-tag", "logo.png");
+        //InputStream imageStrem = MinIoUtil.getFileStream("sample-tag", "logo.png");
         com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
         Worksheet worksheet = workbook.getWorksheets().get(0);
         //填充数据
-        worksheet.getCells().get("I6").setValue(testInstrument.getName());//设备名称
-        worksheet.getCells().get("I11").setValue(testInstrument.getCode());//设备编号
-        worksheet.getCells().get("I14").setValue(testInstrument.getModel());//设备型号
-        worksheet.getCells().get("I17").setValue(testInstrument.getSerialNumber());//出厂编号
+        worksheet.getCells().get("B3").setValue(testInstrument.getName());//设备名称
+        worksheet.getCells().get("B5").setValue(testInstrument.getCode());//设备编号
+        worksheet.getCells().get("B7").setValue(testInstrument.getModel());//设备型号
+        worksheet.getCells().get("B9").setValue(testInstrument.getSerialNumber());//出厂编号
         //设置二维码
         BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(id+"");
 
         InputStream stream = bufferedImageToInputStream(bufferedImage);
         //设置二维码和logo
-        worksheet.getPictures().add(1,3,imageStrem,30,30);
-        worksheet.getPictures().add(11,19,stream,16,16);
+        //worksheet.getPictures().add(1,3,imageStrem,30,30);
+        worksheet.getPictures().add(5,8,stream,18,18);
         workbook.save(outputStream, SaveFormat.XLSX);
         return outputStream;
     }
