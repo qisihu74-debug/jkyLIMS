@@ -254,8 +254,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                         if (sheet != null && excelInsertVo1.getCheckItemId().equals(data.getCheckItemId())) {
                             //获取工作表的名称
                             String sheetName = sheet.getSheetName();
-                            if (keyMap.get(sheetName) == null) {
-                                keyMap.put(sheetName, sheetName);
+                            if (keyMap.get(sheetName + data.getCheckItemId()) == null) {
+                                keyMap.put(sheetName + +data.getCheckItemId(), sheetName);
                                 // key = sheet标号 、value = ExcelInsertVo 中 topRow、leftColumn
                                 Map<Integer, ExcelInsertVo> indexDataXYMap = excelSheetDataVo.getIndexDataXYMap();
                                 ExcelInsertVo insertVo = indexDataXYMap.get(excelInsertVo1.getSheetIndex());
@@ -424,7 +424,13 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             }
         }
         // TODO： 9月19 复核通过后： 构造json数据 进行 合同发起
-        return jsonCheckItemMehtod(excelInsertVo.getList());
+        try {
+            return jsonCheckItemMehtod(excelInsertVo.getList());
+        }catch (Exception e){
+            System.out.println("批量复核异常抛出：复核通过后： 构造json数据 进行 合同发起");
+        }
+        return true;
+
     }
 
     /**
