@@ -509,4 +509,7 @@ public interface ReportRecordEntityMapper {
 
     @Update("update test_report_record set qys_state='1',state='6',qys_docment_id=null,contract_id=null,sign_url=null where id=#{id}")
     void sealRevoke(@Param("id") Long id);
+
+    @Select("select operate_type from test_report_record where report_code=#{reportCode}")
+    Integer getOperateTypeByCode(@Param("reportCode") String reportCode);
 }

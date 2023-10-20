@@ -44,4 +44,8 @@ public class ReportEditReq {
      */
     private List<SampleItemEntity> sampleCheckItem;
     private List<Integer> sampleIds;
+    /**
+     * 操作类型0线上编辑的报告，1线下编辑的报告
+     */
+    private Integer operateType;
 }

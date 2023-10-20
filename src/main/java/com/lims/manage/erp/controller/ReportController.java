@@ -1211,7 +1211,6 @@ public class ReportController {
         }
     }
 
-
     /**
      * 报告制作保存
      * @param request
@@ -1294,9 +1293,14 @@ public class ReportController {
      * @return
      */
     @GetMapping("/onlineReportMerge")
-    public void onlineReportMerge(String reportCode,String reportCompleteTime,HttpServletResponse response){
+    public Result onlineReportMerge(String reportCode,String reportCompleteTime,HttpServletResponse response){
         if (StringUtils.isEmpty(reportCode)){
-            return ;
+            return ResultUtil.error("缺少参数");
+        }
+        //查询类型
+        Integer typeByCode = reportService.getOperateTypeByCode(reportCode);
+        if (typeByCode != null && typeByCode == 0){
+            return ResultUtil.error("线下制作的报告不支持发起线上审批，请操作线下审批");
         }
         //根据报告编号合并委托下所用样品的报告模板包含首页、编辑报告页码和填充报告编号
         String url = reportService.handlerReportMerge(reportCode,qiYueSuoEntity.getAutographPath(),reportCompleteTime);
@@ -1314,6 +1318,7 @@ public class ReportController {
         }catch (Exception e){
             logger.error("预览合并后的报告异常:{}",e);
         }
+        return ResultUtil.success("成功");
     }
 
     /**

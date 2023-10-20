@@ -459,4 +459,6 @@ public interface ReportService {
     List<SealDefData> getNameAndMobile(Long id);
 
     void sealRevoke(Long id);
+
+    Integer getOperateTypeByCode(String reportCode);
 }

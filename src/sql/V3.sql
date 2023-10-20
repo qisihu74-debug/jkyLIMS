@@ -126,3 +126,9 @@ delete from sys_function WHERE name in('中间报告制作','最终报告制作'
 UPDATE `sys_function` SET `name`='报告合成' WHERE (`function_id`='95') LIMIT 1;
 
 UPDATE `sys_function` SET `name`='在线报告制作' WHERE (`function_id`='43') LIMIT 1;
+
+ALTER TABLE `test_report_record`
+DROP COLUMN `operate_type`,
+ADD COLUMN `operate_type`  int NULL DEFAULT 0 COMMENT '操作类型0线上编辑的报告，1线下编辑的报告' AFTER `seal_report_url`;
+
+

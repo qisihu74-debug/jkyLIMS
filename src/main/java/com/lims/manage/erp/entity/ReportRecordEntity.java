@@ -289,4 +289,8 @@ public class ReportRecordEntity {
      * 印章分类，PHYSICS(物理章),ELECTRONIC(电子章)
      */
     private String category;
+    /**
+     * 操作类型0线上编辑的报告，1线下编辑的报告
+     */
+    private Integer operateType;
 }
