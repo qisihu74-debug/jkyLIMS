@@ -1226,15 +1226,15 @@ public class EntrustController {
 
     /**
      * 预览材质单
-     * @param entrustId
+     * @param entrustmentId
      * @return
      */
     @GetMapping("previewMaterial")
-    public Result previewMaterial(Long entrustId){
-        if (entrustId == null){
+    public Result previewMaterial(Long entrustmentId){
+        if (entrustmentId == null){
             return ResultUtil.error("缺少参数");
         }
-        List<String> list = entrustService.getUrlListById(entrustId);
+        List<String> list = entrustService.getUrlListById(entrustmentId);
         return ResultUtil.success(list);
     }
 
