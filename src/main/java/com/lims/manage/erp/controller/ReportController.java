@@ -1261,8 +1261,8 @@ public class ReportController {
         if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer) || org.apache.commons.lang3.StringUtils.isEmpty(inspector)){
             return ResultUtil.error("缺少参数！");
         }
-        Boolean flag = reportService.offlineReportMerge(reportCode,file,verifyer.split(",")[0],issuer.split(",")[0]
-                ,Long.parseLong(verifyer.split(",")[1]),Long.parseLong(issuer.split(",")[1]),inspector);
+        Boolean flag = reportService.offlineReportMerge(reportCode,file,verifyer.split(",")[0].split("&")[0],issuer.split(",")[0].split("&")[0]
+                ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),inspector);
 
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));

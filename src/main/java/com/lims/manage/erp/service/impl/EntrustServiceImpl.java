@@ -5135,6 +5135,7 @@ public class EntrustServiceImpl implements EntrustService {
     public String methodMixProportionSampleCode(String strCode,String selfNumber){
         String[] sampleCodes = strCode.split("-");
         String[] numbers = selfNumber.split("-");
+        numbers[0] = sampleCodes[0];
         numbers[1] = sampleCodes[1];
         // 获取配合比下后缀规则定位 "_"
         String[] numberSuffixs = numbers[2].split("_");
