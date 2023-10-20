@@ -4147,16 +4147,6 @@ public class ReportServiceImpl implements ReportService {
         }else {
             reportRecordEntity.setOperateType(1);
         }
-        //更新样品对应的报告编辑状态为完成、报告类型进行更新
-        List<Integer> sampleIds = bean.getSampleIds();
-        List<ReportEditReq> list = Lists.newArrayList();
-        for (Integer sampeId:sampleIds) {
-            ReportEditReq req = new ReportEditReq();
-            req.setSampleId(sampeId);
-            req.setEntrustId(entrustIdByTaskId);
-            list.add(req);
-        }
-        entrustEntityMapper.updateReportTypeAndStatus(list);
         if (reportType == 0){
             //报告记录表限制只存在同一委托下的报告记录
             Long id = reportMapper.getInfoByEntrustId1(entrustIdByTaskId);
@@ -4166,6 +4156,16 @@ public class ReportServiceImpl implements ReportService {
                 reportRecordEntity.setNumber(reportCount);
                 recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity);
             }else {
+                //更新样品对应的报告编辑状态为完成、报告类型进行更新
+                List<Integer> sampleIds = bean.getSampleIds();
+                List<ReportEditReq> list = Lists.newArrayList();
+                for (Integer sampeId:sampleIds) {
+                    ReportEditReq req = new ReportEditReq();
+                    req.setSampleId(sampeId);
+                    req.setEntrustId(entrustIdByTaskId);
+                    list.add(req);
+                }
+                entrustEntityMapper.updateReportTypeAndStatus(list);
                 //更新任务单状态
                 taskMapper.updateReportStatus(1, bean.getTaskId());
                 reportRecordEntity.setState(1 + "");
