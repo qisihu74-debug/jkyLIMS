@@ -427,7 +427,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         try {
             return jsonCheckItemMehtod(excelInsertVo.getList());
         }catch (Exception e){
-            System.out.println("批量复核异常抛出：复核通过后： 构造json数据 进行 合同发起");
+            System.out.println("批量复核异常抛出：复核通过后： 构造json数据 进行 合同发起" + e);
         }
         return true;
 
