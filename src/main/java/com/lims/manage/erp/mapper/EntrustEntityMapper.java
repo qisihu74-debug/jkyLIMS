@@ -776,6 +776,16 @@ public interface EntrustEntityMapper extends BaseMapper {
             "\tt1.id = #{entrustId} LIMIT 1")
     SysUserEntity operatingPersonnel(@Param("entrustId") Long entrustId);
 
+    @Select("\n" +
+            "SELECT DISTINCT\n" +
+            "\tt2.ding_user_id\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info t1\n" +
+            "LEFT JOIN sys_user t2 ON t1.operating_personnel = t2. NAME\n" +
+            "WHERE\n" +
+            "\tt1.id = #{entrustId} LIMIT 1")
+    String getOperatingPersonnel(@Param("entrustId") Long entrustId);
+
     /**
      * 获取当前年月下的最大预委托号
      * @param year

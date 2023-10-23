@@ -12,6 +12,7 @@ import com.dingtalk.api.response.OapiMessageCorpconversationGetsendprogressRespo
 import com.dingtalk.api.response.OapiMessageCorpconversationGetsendresultResponse;
 import com.dingtalk.api.response.OapiMessageCorpconversationRecallResponse;
 import com.taobao.api.ApiException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -60,17 +61,19 @@ public class DingNotifyUtils {
         head.setBgcolor("FFFF6A00");
         head.setText("lims检测系统任务池有新的任务注入");
         OapiMessageCorpconversationAsyncsendV2Request.Body body = new OapiMessageCorpconversationAsyncsendV2Request.Body();
-        List<OapiMessageCorpconversationAsyncsendV2Request.Form> list = new ArrayList<>();
-        OapiMessageCorpconversationAsyncsendV2Request.Form form1 = new OapiMessageCorpconversationAsyncsendV2Request.Form();
-        form1.setKey("任务发布人:");
-        form1.setValue(publisher);
+        if (StringUtils.isNotEmpty(publisher)){
+            List<OapiMessageCorpconversationAsyncsendV2Request.Form> list = new ArrayList<>();
+            OapiMessageCorpconversationAsyncsendV2Request.Form form1 = new OapiMessageCorpconversationAsyncsendV2Request.Form();
+            form1.setKey("任务发布人:");
+            form1.setValue(publisher);
 
-        list.add(form1);
-        body.setForm(list);
+            list.add(form1);
+            body.setForm(list);
+        }
         body.setTitle(title+System.currentTimeMillis());
         body.setImage("@resource/dingtalk/message_image");
 
-        oa.setPcMessageUrl("http://www.baidu.com");
+        //oa.setPcMessageUrl("http://www.baidu.com");
         oa.setBody(body);
         oa.setHead(head);
         msg.setOa(oa);

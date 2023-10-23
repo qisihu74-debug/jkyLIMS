@@ -70,6 +70,7 @@ import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.ConvertUtil;
 import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.DingNotifyUtils;
 import com.lims.manage.erp.util.DownloadUtils;
 import com.lims.manage.erp.util.EntrustNoStrUtils;
 import com.lims.manage.erp.util.FileAndFolderUtil;
@@ -174,6 +175,10 @@ public class ReportServiceImpl implements ReportService {
     private ReportRecordMidEntityMapper midReportMapper;
     @Autowired
     private DownloadUtils downLoad;
+    @Autowired
+    private EntrustEntityMapper entrustEntityMapper;
+    @Autowired
+    private DingNotifyUtils dingNotifyUtils;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -1679,6 +1684,29 @@ public class ReportServiceImpl implements ReportService {
         }
         //更新报告状态
         entityMapper.updateFileState(contractId, "3");
+        //盖章完成通知经营人员
+        //获取经营人员
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(entrustIds)){
+            for (Long entrustId:entrustIds) {
+                String dingId = entrustEntityMapper.getOperatingPersonnel(entrustId);
+                String reportCode = recordEntityMapper.getCodeByEntrustId(entrustId);
+                try {
+                    dingNotifyUtils.OAWorkNotice(dingId,reportCode+" 报告盖章已完成",null);
+                } catch (Exception e) {
+                    log.error("盖章完成发送消息给经营人员失败:{}",e);
+                }
+            }
+        }else {
+            for (Long idByCid:zjEntrustIds) {
+                String dingId = entrustEntityMapper.getOperatingPersonnel(idByCid);
+                String reportCode = recordEntityMapper.getMCodeByEntrustId(idByCid);
+                try {
+                    dingNotifyUtils.OAWorkNotice(dingId,reportCode+" 报告盖章已完成",null);
+                } catch (Exception e) {
+                    log.error("盖章完成发送消息给经营人员失败:{}",e);
+                }
+            }
+        }
         //移除中间报告
         for (Long id:ids) {
             moveReportRecord(id);
@@ -3291,6 +3319,13 @@ public class ReportServiceImpl implements ReportService {
         for (Long id :ids){
             ReportRecordEntity byRecordId = recordEntityMapper.getByRecordId(id);
             entrustEntityMapper.updateStateById(byRecordId.getEntrustmentId() != null?byRecordId.getEntrustmentId():byRecordId.getEntrustId());
+            //盖章完成通知经营人员
+            String dingId = entrustEntityMapper.getOperatingPersonnel(byRecordId.getEntrustmentId()==null?byRecordId.getEntrustId():byRecordId.getEntrustmentId());
+            try {
+                dingNotifyUtils.OAWorkNotice(dingId,byRecordId.getReportCode()+" 报告盖章已完成",null);
+            } catch (Exception e) {
+                log.error("盖章完成发送消息给经营人员失败:{}",e);
+            }
         }
         reportMapper.updateCategory(list);
         //如果是中间报告，移除中间报到到新表

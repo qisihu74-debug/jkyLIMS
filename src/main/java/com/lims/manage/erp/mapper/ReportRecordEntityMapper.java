@@ -512,4 +512,10 @@ public interface ReportRecordEntityMapper {
 
     @Select("select operate_type from test_report_record where report_code=#{reportCode}")
     Integer getOperateTypeByCode(@Param("reportCode") String reportCode);
+
+    @Select("select report_code from test_report_record where entrustment_id=#{entrustId}")
+    String getCodeByEntrustId(@Param("entrustId") Long entrustId);
+
+    @Select("select report_code from test_report_record where entrust_id=#{entrustId}")
+    String getMCodeByEntrustId(@Param("entrustId") Long entrustId);
 }
