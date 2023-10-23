@@ -4167,7 +4167,7 @@ public class ReportServiceImpl implements ReportService {
                 recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity);
             }else {
                 //更新任务单状态
-                taskMapper.updateReportStatus(1, bean.getTaskId());
+                taskMapper.updateReportStatusByEntrustId(1, entrustIdByTaskId);
                 reportRecordEntity.setState(1 + "");
                 reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
                 //设置报告类型
