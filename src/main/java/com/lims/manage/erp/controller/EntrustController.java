@@ -544,7 +544,7 @@ public class EntrustController {
         String[] strings = message.split("/");
         String fileName = strings[1];
         //20230314及之前的单子，单位名称用老的BD20210021-old.docx
-        String dayString = DateUtil.getDayString(detail.getAcceptanceDate().getTime());
+        String dayString = DateUtil.getDayString(detail.getAcceptanceDate()==null?System.currentTimeMillis():detail.getAcceptanceDate().getTime());
         if (Integer.parseInt(dayString)<20230313){
             fileName = "BD20210021-old.docx";
         }
