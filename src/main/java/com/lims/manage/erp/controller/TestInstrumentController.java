@@ -370,7 +370,7 @@ public class TestInstrumentController extends ApiController {
                 TestInstrument testInstrument = testInstrumentService.getOne(queryWrapper);
                 if (testInstrument != null){
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(20);
                          testInstrumentService.printDeviceLables(id,testInstrument, response);
                     }catch (Exception e){
                         logger.error("打印设备标签异常:{}",e);

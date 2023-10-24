@@ -4134,6 +4134,22 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public PageInfo onlineMakeReport1023(Integer pageNum, Integer pageSize, String search) {
+        PageHelper.startPage(pageNum, pageSize);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        Long userId = userInfo.getUserId();
+        List<ReportListVo> list = reportMapper.getReportListOnline1023(search,userId+"");
+        for (ReportListVo reportListVo : list) {
+            List<LabelValueVo> sampleInfos = reportMapper.getSampleInfos(reportListVo.getId());
+            reportListVo.setSampleInfos(sampleInfos);
+            List<String> taskCodes = reportMapper.getTaskCodes(reportListVo.getId());
+            reportListVo.setTaskCodes(taskCodes);
+        }
+        PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
+        return pageInfo;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean submitEditReport(ReportEditReq bean) {
         Long entrustIdByTaskId = taskMapper.getEntrustIdByTaskId(bean.getTaskId());
@@ -4167,7 +4183,7 @@ public class ReportServiceImpl implements ReportService {
                 recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity);
             }else {
                 //更新任务单状态
-                taskMapper.updateReportStatus(1, bean.getTaskId());
+                taskMapper.updateReportStatusByEntrustId(1, entrustIdByTaskId);
                 reportRecordEntity.setState(1 + "");
                 reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
                 //设置报告类型

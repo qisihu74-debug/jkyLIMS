@@ -887,6 +887,12 @@
         where id = #{taskId,jdbcType=INTEGER}
     </update>
 
+    <update id="updateReportStatusByEntrustId">
+        update test_task
+        set report_complete       = #{status,jdbcType=INTEGER}
+        where entrustment_id = #{entrustId,jdbcType=INTEGER}
+    </update>
+
     <select id="getAllReportComplete" resultType="java.lang.Integer">
         select report_complete from test_task where entrustment_id = #{entrustmentId} and id != #{taskId} and state != 144
     </select>

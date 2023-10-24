@@ -596,4 +596,6 @@ public interface TaskMapper extends BaseMapper {
      *  根据团队id 查询人员信息列表-拼接信息
      */
     List<LabelValueVo> getMemberInformationConcat(@Param(value = "deptIds") Set<Long> deptIds);
+
+    void updateReportStatusByEntrustId(@Param("status") Integer status,@Param("entrustId") Long entrustId);
 }

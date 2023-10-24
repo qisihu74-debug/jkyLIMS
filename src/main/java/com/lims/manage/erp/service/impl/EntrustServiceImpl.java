@@ -5839,7 +5839,7 @@ public class EntrustServiceImpl implements EntrustService {
                         if (stringBuilder2.toString().length() >= 1) {
                             rows.get(start).getTableCells().get(2).setText(stringBuilder2.toString().substring(0, stringBuilder2.length() - 1));//样品状态
                         }
-                        if ("1".equals(detail.getIsSave())){
+                        if ("是".equals(detail.getIsReserve())){
                             rows.get(start).getTableCells().get(4).setText("是☑      "+
                                     "否☐");//样品保留
                         }else {

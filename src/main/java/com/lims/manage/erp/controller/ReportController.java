@@ -1375,7 +1375,7 @@ public class ReportController {
         if (pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少分页参数！");
         }
-        return ResultUtil.success("获取在线制作报告任务单列表成功！", reportService.onlineMakeReport(pageNum,pageSize,search));
+        return ResultUtil.success("获取在线制作报告任务单列表成功！", reportService.onlineMakeReport1023(pageNum,pageSize,search));
     }
 
     /**
