@@ -106,6 +106,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         FROM test_entrusted_sample_details_rel AS t1
                  LEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id
         WHERE t1.entrustment_id = #{entrustmentId}
+        order by t2.id asc
     </select>
 
     <select id="selectSampleListObtain" resultType="com.lims.manage.erp.entity.SampleEntity">

@@ -404,6 +404,33 @@
         number > 0
         order by t2.create_time desc
     </select>
+    <select id="getReportListOnline1023" resultType="com.lims.manage.erp.vo.ReportListVo">
+        SELECT
+        t1.id,
+        t2.task_price AS countPrice,
+        DATE_FORMAT( t1.request_date, '%Y-%m-%d' ) request_date,
+        COUNT( t3.state ) number
+        FROM
+        test_entrusted_info t1
+        LEFT JOIN test_report_record t4 ON t1.id = t4.entrustment_id
+        LEFT JOIN test_task t2 ON t2.entrustment_id = t1.id
+        LEFT JOIN test_entrusted_sample_checkitem_rel t3 ON t2.id = t3.task_id
+        WHERE
+            t2.task_code IS NOT NULL
+            AND t2.report_producer like CONCAT('%',#{userId},'%')
+            AND t2.report_complete = 2
+            AND (t3.state = 3 or t3.mid_state = 1)
+            AND t4.state >= 7
+        <if test="taskCode!=null and taskCode!=''">
+            and t2.task_code like CONCAT('%',#{taskCode},'%')
+        </if>
+        GROUP BY
+        t1.id,
+        t2.task_price
+        HAVING
+        number > 0
+        order by t2.create_time desc
+    </select>
 
 <!--    <select id="reportDownloadList" resultType="com.lims.manage.erp.vo.ReportListVo">-->
 <!--        SELECT DISTINCT t1.id,-->

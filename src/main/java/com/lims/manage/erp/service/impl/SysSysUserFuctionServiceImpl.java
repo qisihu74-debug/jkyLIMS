@@ -135,8 +135,42 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
 
     @Override
     public List<Long> getRoleMenu(Long roleId) {
-
-        return sysRoleFuncMenuDao.getFunctionIdByRoleIdS(roleId);
+        // 获取角色列表
+        List<Long> funtionIds = sysRoleFuncMenuDao.getFunctionIdByRoleIdS(roleId);
+        // 角色查询菜单 == null 直接返回
+        if (CollectionUtils.isEmpty(funtionIds)) {
+            return funtionIds;
+        }
+        // 查询全部菜单信息
+        List<TreeFunction> list = fuctionDao.getList();
+        // key = （ 获取全部菜单中 指向pid） ，value = (指向个数)
+        Map<Long, Integer> map = new HashMap<>();
+        for (TreeFunction function : list) {
+            for (TreeFunction function1 : list) {
+                if (function1.getFunctionPid().equals(function.getFunctionId())) {
+                    // pid = id
+                    if (map.get(function1.getFunctionPid()) != null) {
+                        Integer pid = map.get(function1.getFunctionPid()) + 1;
+                        map.put(function1.getFunctionPid(), pid);
+                    } else {
+                        map.put(function1.getFunctionPid(), 1);
+                    }
+                }
+            }
+        }
+        // 循环 map数据
+        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(map.keySet())) {
+            for (Long key : map.keySet()) {
+                Iterator<Long> it = funtionIds.iterator();
+                while (it.hasNext()) {
+                    Long functionId = it.next();
+                    if (map.get(key).equals(functionId)) {
+                        it.remove();
+                    }
+                }
+            }
+        }
+        return funtionIds;
     }
 
     @Override
