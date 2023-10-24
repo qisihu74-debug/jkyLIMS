@@ -5982,6 +5982,9 @@ public class EntrustServiceImpl implements EntrustService {
         if (entrustDetails.getState() != 201 && state == 1) {
             return ResultUtil.error("审核失败：委托单不是预委托单");
         }
+        if(entrustDetails.getAuditState().equals("0")){
+            return ResultUtil.error("审核失败：委托单未受理");
+        }
         if(state == 1){
             // 针对·审核通过的
             return entrustApprovedMethod(entrustDetails,entrustId);
@@ -6003,6 +6006,9 @@ public class EntrustServiceImpl implements EntrustService {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
         EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
+        if(entrustDetails.getAuditState().equals("0")){
+            return ResultUtil.error("审核失败：委托单未受理");
+        }
         // 针对·审核通过与发布的已经成功
         Result msg = entrustApprovedMethod(entrustDetails, entrustId);
         if(msg.getCode() == 200){

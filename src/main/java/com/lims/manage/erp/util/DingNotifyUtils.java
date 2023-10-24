@@ -29,7 +29,7 @@ import java.util.List;
 @Component
 public class DingNotifyUtils {
     @Value("${dingtalk.token_url}")
-    private String tokenUrl;
+    private String tokenUrl = "https://oapi.dingtalk.com/gettoken";
     private static final String appKey="dingxg4nevxtzc90q9as";
     private static final String appsecret="ncCJeNny61UEH4LoTf-Pk54jDwj34fPWO0ZhmwEILSva0NbGd4WasCcp3aEDw_9Z";
     private static final String url = "https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2";
