@@ -1299,7 +1299,7 @@ public class ReportController {
         }
         //查询类型
         Integer typeByCode = reportService.getOperateTypeByCode(reportCode);
-        if (typeByCode != null && typeByCode == 0){
+        if (typeByCode != null && typeByCode == 1){
             return ResultUtil.error("线下制作的报告不支持发起线上审批，请操作线下审批");
         }
         //根据报告编号合并委托下所用样品的报告模板包含首页、编辑报告页码和填充报告编号
