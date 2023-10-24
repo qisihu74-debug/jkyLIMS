@@ -814,4 +814,7 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Select("select file_url from test_entrust_file_rel where entrust_id=#{entrustId}")
     List<String> getUrlListById(@Param("entrustId") Long entrustId);
+
+    @Select("select report_count from test_entrusted_info where id=#{id}")
+    Integer getReportNumById(@Param("id") Long id);
 }

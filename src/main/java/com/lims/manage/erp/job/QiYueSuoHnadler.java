@@ -2,7 +2,10 @@ package com.lims.manage.erp.job;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
+import com.lims.manage.erp.entity.ActionOperators;
 import com.lims.manage.erp.entity.Actions;
 import com.lims.manage.erp.entity.Location;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
@@ -10,6 +13,7 @@ import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.http.HttpClientUtil;
 import com.lims.manage.erp.http.QiYueSuoResponse;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -156,6 +161,7 @@ public class QiYueSuoHnadler {
             }
     ]
         }*/
+    @SneakyThrows
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置用印流程id
         reqBean.setCategoryId(qiYueSuoEntity.getCategoryId());
@@ -165,9 +171,12 @@ public class QiYueSuoHnadler {
         String url = qiYueSuoEntity.getUrl() + qiYueSuoEntity.getAddInterface();
         //处理参数支持每个印章固定位置
         List<Actions> actions = reqBean.getSignatories().get(0).getActions();
-        for (int i = 0; i < actions.size()-1; i++) {
+        //剔除最后一个action盖章动作，改为根据印章列表不同印章固定盖章位置
+        Actions lastAction = actions.get(actions.size() - 1);
+        actions.remove(actions.size()-1);
+        List<String> documents = reqBean.getDocuments();
+        for (int i = 0; i < actions.size(); i++) {
             //签署位置  检测： ，审核：，批准：
-            List<String> documents = reqBean.getDocuments();
             if (i==0){
                 List<Location> locations = Lists.newArrayList();
                 for (String s:documents){
@@ -228,6 +237,84 @@ public class QiYueSuoHnadler {
                 }
                 actions.get(i).setLocations(locations);
             }
+        }
+        //设置不同印章的位置
+        ObjectMapper objectMapper = new ObjectMapper();
+        long[] numbers = objectMapper.readValue(lastAction.getSealIds(), new TypeReference<long[]>() {});
+        List<ActionOperators> actionOperators = lastAction.getActionOperators();
+        String operatorName = actionOperators.get(0).getOperatorName();
+        String operatorContact = actionOperators.get(0).getOperatorContact();
+        for (Long sealId :numbers){
+            List<ActionOperators> list = Lists.newArrayList();
+            ActionOperators operators = new ActionOperators();
+            operators.setOperatorName(operatorName);
+            operators.setOperatorContact(operatorContact);
+            list.add(operators);
+            Actions newActions = new Actions();
+            newActions.setActionOperators(list);
+            newActions.setName(lastAction.getName());
+            newActions.setType(lastAction.getType());
+            newActions.setSerialNo("5");
+            newActions.setSealId(sealId);
+            //如果印章是CMA盖章位置在第一页左上角，如果印章是CNAS印章位置在第一页上面中间位置，
+            //如果印章是综合甲级印章位置在第一页的右上角，如果是室内印章盖章位置在第一页的下面中间位置
+            // 和报告每页含有关键字（日期：）的位置和每一页右边中间位置需要盖骑缝章
+            //公路工程综合甲级专用章 2934033400316387595
+            //实验室认可（CNAS）专用章 2937178885881422636
+            //计量认证（CMA）专用章 2937188764910183324
+            //检验检测专用章（室内试验） 2937191218674492340
+            for (String s:documents){
+                List<Location> locations = Lists.newArrayList();
+                if ("2937188764910183324".equals(sealId.toString())){
+                    Location location = new Location();
+                    location.setRectType("SEAL_CORPORATE");
+                    location.setPage(1);
+                    location.setDocumentId(s);
+                    location.setOffsetX(0.2);
+                    location.setOffsetY(0.9);
+                    locations.add(location);
+                }else if ("2937178885881422636".equals(sealId.toString())){
+                    Location location = new Location();
+                    location.setRectType("SEAL_CORPORATE");
+                    location.setPage(1);
+                    location.setDocumentId(s);
+                    location.setOffsetX(0.5);
+                    location.setOffsetY(0.9);
+                    locations.add(location);
+                }else if ("2934033400316387595".equals(sealId.toString())){
+                    Location location = new Location();
+                    location.setRectType("SEAL_CORPORATE");
+                    location.setPage(1);
+                    location.setDocumentId(s);
+                    location.setOffsetX(0.8);
+                    location.setOffsetY(0.9);
+                    locations.add(location);
+                }else if ("2937191218674492340".equals(sealId.toString())){
+                    Location location = new Location();
+                    location.setRectType("SEAL_CORPORATE");
+                    location.setPage(1);
+                    location.setDocumentId(s);
+                    location.setOffsetX(0.5);
+                    location.setOffsetY(0.1);
+                    locations.add(location);
+                    Location keyLocation = new Location();
+                    keyLocation.setRectType("SEAL_CORPORATE");
+                    keyLocation.setDocumentId(s);
+                    keyLocation.setKeyword("日期：");
+                    keyLocation.setKeywordIndex(0);
+                    locations.add(keyLocation);
+                    Location qf = new Location();
+                    qf.setRectType("ACROSS_PAGE");
+                    qf.setDocumentId(s);
+                    qf.setOffsetY(0.5);
+                    locations.add(qf);
+                }else {
+                    log.debug("未定义的印章类型:{}",sealId);
+                    continue;
+                }
+                newActions.setLocations(locations);
+            }
+            actions.add(newActions);
         }
         log.debug("请求契约锁参数:{}",JSON.toJSONString(reqBean));
         Pair<Integer, String> stringPair = HttpClientUtil.postJson(url, JSON.toJSONString(reqBean), headers);

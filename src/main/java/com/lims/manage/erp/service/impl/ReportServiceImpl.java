@@ -6,10 +6,15 @@ import com.aspose.cells.Cell;
 import com.aspose.cells.Cells;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
-import com.aspose.pdf.facades.IFormEditor;
+import com.aspose.words.CellCollection;
 import com.aspose.words.Document;
 import com.aspose.words.NodeType;
-import com.aspose.words.*;
+import com.aspose.words.Paragraph;
+import com.aspose.words.PreferredWidth;
+import com.aspose.words.Row;
+import com.aspose.words.Run;
+import com.aspose.words.SaveFormat;
+import com.aspose.words.Table;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -23,7 +28,6 @@ import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.QiYueSuoSealEntity;
-import com.lims.manage.erp.entity.QrCodeAuthRes;
 import com.lims.manage.erp.entity.QuotaEntity;
 import com.lims.manage.erp.entity.QuotaRes;
 import com.lims.manage.erp.entity.ReportEditReq;
@@ -82,7 +86,23 @@ import com.lims.manage.erp.util.PDFHelper3;
 import com.lims.manage.erp.util.PdfDoc;
 import com.lims.manage.erp.util.ReturnResponse;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.EntrustAddVo;
+import com.lims.manage.erp.vo.EntrustCategoryVo;
+import com.lims.manage.erp.vo.HistoryEntrustDataVo;
+import com.lims.manage.erp.vo.JudgmentBasisVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
+import com.lims.manage.erp.vo.ReportDetailListParamVo;
+import com.lims.manage.erp.vo.ReportDetailListVo;
+import com.lims.manage.erp.vo.ReportDetailVo;
+import com.lims.manage.erp.vo.ReportHistoryDetailVo;
+import com.lims.manage.erp.vo.ReportListVo;
+import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.ReportProductRelVo;
+import com.lims.manage.erp.vo.ReportSampleDetailVo;
+import com.lims.manage.erp.vo.SampleDetailVo;
+import com.lims.manage.erp.vo.TaskCodeVo;
+import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +112,6 @@ import org.apache.poi.hwpf.usermodel.Range;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
-import org.odftoolkit.odfdom.dom.element.xforms.XformsModelElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +121,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -117,8 +135,21 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -175,8 +206,6 @@ public class ReportServiceImpl implements ReportService {
     private ReportRecordMidEntityMapper midReportMapper;
     @Autowired
     private DownloadUtils downLoad;
-    @Autowired
-    private EntrustEntityMapper entrustEntityMapper;
     @Autowired
     private DingNotifyUtils dingNotifyUtils;
 
@@ -4171,9 +4200,9 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean submitEditReport(ReportEditReq bean) {
-        Long entrustIdByTaskId = taskMapper.getEntrustIdByTaskId(bean.getTaskId());
+        Long entrustIdByTaskId = bean.getEntrustId();
         // 通过任务单id 获取委托单下报告数量
-        Integer reportCount = taskMapper.getReportCountByTaskId(bean.getTaskId());
+        Integer reportCount = entrustEntityMapper.getReportNumById(entrustIdByTaskId);
         //报告类型0最终，1中间报告
         Integer reportType = bean.getReportType();
         ReportRecordEntity reportRecordEntity = new ReportRecordEntity();

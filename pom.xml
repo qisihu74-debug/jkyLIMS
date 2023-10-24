@@ -362,6 +362,18 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.60</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.13.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.13.3</version>
+            <type>java-interface</type>
+            <scope>compile</scope>
+        </dependency>
         <!--文件服务器依赖fastdfs -->
         <dependency>
             <groupId>com.itextpdf</groupId>
