@@ -11,10 +11,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestTaskPoolService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +50,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     private EntrustServiceImpl entrustService;
     @Autowired
     private SysRoleDao sysRoleDao;
+    @Autowired
+    private SysUserDao sysUserDao;
 
     /**
      * 任务大厅 展示详情数据
@@ -684,6 +683,12 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         }
         //任务单保存
         taskMapper.batchSave(vos);
+        try {
+            // 任务单保存
+            receivePushInformationmethod(vos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         //更新委托单状态
         taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
 //        // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
@@ -699,5 +704,95 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
 //            entrustService.methodDistributionOfFlow(entity.getEntrustmentId(), TaskRelEntities);
 //        }
         return true;
+    }
+
+    /**
+     * 任务单领取 通知相关人员
+     *
+     * @param vos
+     */
+    public void receivePushInformationmethod(List<TaskVo> vos) throws Exception {
+        for (TaskVo taskVo : vos) {
+            // 检测人
+            methodForEachNotice(taskVo, taskVo.getInspector(), 1);
+            // 记录人
+            methodForEachNotice(taskVo, taskVo.getRecorder(), 2);
+            // 复核人
+            methodForEachNotice(taskVo, taskVo.getReviewer(), 3);
+            // 制作人
+            methodForEachNotice(taskVo, taskVo.getReportProducer(), 4);
+            // 辅助人员
+            if(StringUtils.isNotEmpty(taskVo.getAuxiliaryPersonnel())){
+                methodForEachNotice(taskVo, taskVo.getAuxiliaryPersonnel(), 5);
+            }
+            // 见习生：实习的新手
+            if(StringUtils.isNotEmpty(taskVo.getProbationer())){
+                methodForEachNotice(taskVo, taskVo.getProbationer(), 6);
+            }
+            // 实习生
+            if(StringUtils.isNotEmpty(taskVo.getInterns())){
+                methodForEachNotice(taskVo, taskVo.getInterns(), 7);
+            }
+
+        }
+    }
+
+    /**
+     * 调用方法循环 通知信息
+     *
+     * @param taskVo
+     * @param personnel
+     * @param type
+     */
+    void methodForEachNotice(TaskVo taskVo, String personnel, Integer type) throws Exception {
+        // 进行钉钉发布消息操作
+        DingNotifyUtils dingNotifyUtils = new DingNotifyUtils();
+        String PersonnelType = "";
+        switch (type) {
+            case 1:
+                PersonnelType = "检测人";
+                break;
+            case 2:
+                PersonnelType = "记录人";
+                break;
+            case 3:
+                PersonnelType = "复核人";
+                break;
+            case 4:
+                PersonnelType = "制作人";
+                break;
+            case 5:
+                PersonnelType = "辅助人员";
+                break;
+            case 6:
+                PersonnelType = "见习生";
+                break;
+            case 7:
+                PersonnelType = "实习生";
+                break;
+            default:
+                break;
+        }
+        // 任务单号
+        String taskCode = taskVo.getTaskCode();
+        // 发布人 : 取任务单下单人
+        String publisher = taskVo.getOrderer();
+        // 检测人
+        String[] inspectorArray = personnel.split(",");
+        // 查询钉钉id
+        String dingId = "";
+        for (int i = 0; i < inspectorArray.length; i++) {
+            String inspectorStr = inspectorArray[i];
+            String[] inspectors = inspectorStr.split("&");
+            // 获取 任务单下检测人信息 userId
+            LambdaQueryWrapper<SysUserEntity> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(SysUserEntity::getUserId, inspectors[1]);
+            SysUserEntity userDetails = sysUserDao.selectOne(queryWrapper);
+            dingId = userDetails.getDingUserId();
+            StringBuffer titleBuffer = new StringBuffer();
+            titleBuffer.append("任务大厅中指派您：" + userDetails.getName() + "为" + PersonnelType);
+            titleBuffer.append("任务单号为： " + taskCode + " 请及时操作");
+            dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), publisher);
+        }
     }
 }

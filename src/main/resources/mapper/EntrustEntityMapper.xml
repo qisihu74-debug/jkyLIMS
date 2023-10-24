@@ -58,7 +58,8 @@
                report_receiving_unit,
                entrust_category,
                operating_personnel,
-               is_reserve
+               is_reserve,
+               audit_state
         from test_entrusted_info
         where id = #{id}
     </select>
