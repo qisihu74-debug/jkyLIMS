@@ -518,4 +518,6 @@ public interface ReportRecordEntityMapper {
 
     @Select("select report_code from test_report_record where entrust_id=#{entrustId}")
     String getMCodeByEntrustId(@Param("entrustId") Long entrustId);
+
+    List<String> getSealTypeByIds(@Param("ids") List<Long> ids);
 }

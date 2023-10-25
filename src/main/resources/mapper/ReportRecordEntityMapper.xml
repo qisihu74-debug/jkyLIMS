@@ -1348,4 +1348,14 @@
         order by operate_time desc
     </select>
 
+    <select id="getSendListCount" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+        seal_type
+        FROM
+        test_report_record
+        WHERE id IN
+        <foreach collection="ids" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

@@ -398,6 +398,15 @@ public class ReportController {
         if (reqBean == null){
             return ResultUtil.error("缺少必要的参数");
         }
+        //校验所选批次印章是否一致
+        List<Long> list = reqBean.getList();
+        List<String> strings  = reportService.getSealTypeByIds(list);
+        //判断strings里的每个对象是否一致
+        boolean allElementsEqual = strings.stream()
+                .allMatch(s -> s.equals(strings.get(0)));
+        if (!allElementsEqual){
+            return ResultUtil.error("同批次用章类型应保持一致");
+        }
         if (CollectionUtils.isEmpty(reqBean.getList())){
             return ResultUtil.error("请选择需要签署的报告");
         }

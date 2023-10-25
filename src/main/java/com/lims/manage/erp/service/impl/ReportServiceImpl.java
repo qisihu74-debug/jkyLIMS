@@ -1631,6 +1631,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public List<String> getSealTypeByIds(List<Long> list) {
+        return recordEntityMapper.getSealTypeByIds(list);
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();
