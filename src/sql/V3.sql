@@ -1,6 +1,6 @@
 
 CREATE TABLE `test_sample_pre_code`  (
-                                         `pre_sample_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '预收样样品编号',
+                                         `pre_sample_code` int(0) NULL DEFAULT NULL COMMENT '预收样样品编号',
                                          `month` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '月',
                                          `year` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '年'
 );
