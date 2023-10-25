@@ -259,12 +259,13 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
      * @return
      */
     @Select("SELECT\n" +
-            "\tid \n" +
+            "\tid as itemId, \n" +
+            "\tsample_id as sampleId \n" +
             "FROM\n" +
             "\ttest_entrusted_sample_checkitem_rel \n" +
             "WHERE\n" +
-            "\ttask_id = #{taskId}")
-    List<Integer> selectTaskIdItems(@Param("taskId") Long taskId);
+            "\ttask_id = #{taskId} and edit_data = 1 ")
+    List<ExcelInsertVo> selectTaskIdItems(@Param("taskId") Long taskId);
 
 }
 

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: DLC
@@ -147,21 +148,29 @@ public class TestDetectionController {
             TaskDetailInfoVo dataGather = taskService.getTaskDetailInfoTwo(sampleItemInstrumentVo.getTaskId(), null);
             Boolean DetailStatus = testDetectionService.JudgmentTaskDetail(dataGather, sampleItemInstrumentVo.getTaskId());
             if (DetailStatus == true) {
-                // 任务单结束 通过任务单id 获取所有检测项数据数据
-                List<Integer> itemIds = pageOfficeCopyService.selectTaskIds(sampleItemInstrumentVo.getTaskId());
-                paramVo.setItemInstrumentEntityList(itemIds);
-                // 每组检测项统计信息 并进行试验
-                pageOfficeCopyService.updateItemOriginUr(paramVo);
-                // 试验完成 对检测项下 含有对应的 excel 转成pdf 进行更新origin_url_pdf。
-                List<SampleItemInstrumentEntity>  sampleItemInstrumentEntities = new ArrayList<>();
-                for(Integer itemId : itemIds){
-                    SampleItemInstrumentEntity data = new SampleItemInstrumentEntity();
-                    data.setItemId(itemId);
-                    sampleItemInstrumentEntities.add(data);
+                try {
+                    // 任务单结束 通过任务单id 获取所有检测项数据数据
+                    Map<Integer, List<Integer>> map = pageOfficeCopyService.selectTaskIds(sampleItemInstrumentVo.getTaskId());
+                    for (Integer key : map.keySet()) {
+                        List<Integer> itemIds = map.get(key);
+                        paramVo.setItemInstrumentEntityList(itemIds);
+                        // 每组检测项统计信息 并进行试验
+                        pageOfficeCopyService.updateItemOriginUr(paramVo);
+                        // 试验完成 对检测项下 含有对应的 excel 转成pdf 进行更新origin_url_pdf。
+                        List<SampleItemInstrumentEntity> sampleItemInstrumentEntities = new ArrayList<>();
+                        for (Integer itemId : itemIds) {
+                            SampleItemInstrumentEntity data = new SampleItemInstrumentEntity();
+                            data.setItemId(itemId);
+                            sampleItemInstrumentEntities.add(data);
+                        }
+                        sampleItemInstrumentVo.setItemInstrumentEntityList(sampleItemInstrumentEntities);
+                        pageOfficeCopyService.updateItemOriginUrlPdf(sampleItemInstrumentVo);
+                        return ResultUtil.success("任务单完成！！！");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return ResultUtil.success("任务单完成 编辑原始记录异常抛出 ： " + e);
                 }
-                sampleItemInstrumentVo.setItemInstrumentEntityList(sampleItemInstrumentEntities);
-                pageOfficeCopyService.updateItemOriginUrlPdf(sampleItemInstrumentVo);
-                return ResultUtil.success("任务单完成！！！");
             }
             return ResultUtil.success("检测项未全部完成检测，任务单未结束", "整体任务单未结束");
         }

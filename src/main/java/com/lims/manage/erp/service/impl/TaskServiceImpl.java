@@ -2363,7 +2363,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         }
         // 任务单单自身 == 4 ：试验完成
         Integer state = taskMapper.getJudgmentTaskList(id);
-        if(state!=null && state == 4){
+        if(state!=null && state >= 4){
             return true;
         }
         return false;

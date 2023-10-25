@@ -1063,7 +1063,7 @@ public class TaskController {
             return ResultUtil.error(678, "操作失败！任务单未完成试验");
         }
         // 判断复核数据类型。
-        pageOfficeCopyService.finishCheckItemReview(excelInsertVo, userInfo.getUserId());
+        pageOfficeCopyService.finishCheckItemReview(excelInsertVo, userInfo.getUserId(),taskId);
         return ResultUtil.success(pageOfficeCopyService.CompleteTheReview(excelInsertVo));
     }
 

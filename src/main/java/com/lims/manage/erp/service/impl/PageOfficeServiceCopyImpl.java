@@ -382,11 +382,12 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
      *
      * @param excelInsertVo
      * @param userId
+     * @param taskId
      * @return
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo, Long userId) throws Exception {
+    public Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo, Long userId, Long taskId) throws Exception {
         if (excelInsertVo.getInstrumentStatus().equals("否") || excelInsertVo.getOriginalRecordStatus().equals("否") || excelInsertVo.getData().equals("否")) {
             excelInsertVo.setStatus("驳回");
         }
@@ -425,12 +426,60 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         }
         // TODO： 9月19 复核通过后： 构造json数据 进行 合同发起
         try {
-            return jsonCheckItemMehtod(excelInsertVo.getList());
-        }catch (Exception e){
+            // 通过检测项主键集合与任务单id： 查询已编辑并且是带有sheet的去重itemId
+            List<Integer> ids = methodDisinctItemList(taskId, excelInsertVo.getList());
+            if (CollectionUtil.isNotEmpty(ids)) {
+                return jsonCheckItemMehtod(excelInsertVo.getList());
+            } else {
+                return true;
+            }
+        } catch (Exception e) {
             System.out.println("批量复核异常抛出：复核通过后： 构造json数据 进行 合同发起" + e);
         }
         return true;
 
+    }
+
+    /**
+     * 通过检测项主键集合与任务单id： 查询已编辑并且是带有sheet的去重itemId
+     *
+     * @param taskId 任务单id
+     * @param list   检测项
+     * @return
+     */
+    private List<Integer> methodDisinctItemList(Long taskId, List<Integer> list) {
+        // 通过任务单 带出检测项Id
+        Map<Integer, List<Integer>> map = selectTaskIds(taskId);
+        // 通过检测项 查询 sheet数据
+        // 查询检测项对应的 sheet下标
+        Integer[] array = new Integer[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i);
+        }
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(array);
+        if (CollectionUtils.isEmpty(sheetItems)) {
+            return null;
+        }
+        Set<Integer> set = new HashSet<>();
+        // 进行比较
+        for (ExcelInsertVo excelInsertVo : sheetItems) {
+            List<Integer> itemIds = map.get(excelInsertVo.getSampleId());
+            if (CollectionUtil.isNotEmpty(itemIds)) {
+                for (Integer id : itemIds) {
+                    if (excelInsertVo.getItemId().equals(id)) {
+                        set.add(id);
+                    }
+                }
+            }
+        }
+        if (CollectionUtil.isNotEmpty(set)) {
+            List<Integer> ids = new ArrayList<>();
+            for (Integer id : set) {
+                ids.add(id);
+            }
+            return ids;
+        }
+        return null;
     }
 
     /**
@@ -1731,9 +1780,23 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     }
 
     @Override
-    public List<Integer> selectTaskIds(Long taskId) {
-
-        return testProductItemDao.selectTaskIdItems(taskId);
+    public Map<Integer, List<Integer>> selectTaskIds(Long taskId) {
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        List<ExcelInsertVo> list = testProductItemDao.selectTaskIdItems(taskId);
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (ExcelInsertVo data : list) {
+                if (map.get(data.getSampleId()) == null) {
+                    List<Integer> items = new ArrayList<>();
+                    items.add(data.getItemId());
+                    map.put(data.getSampleId(), items);
+                } else {
+                    List<Integer> items = map.get(data.getSampleId());
+                    items.add(data.getItemId());
+                    map.put(data.getSampleId(), items);
+                }
+            }
+        }
+        return map;
     }
 
     /**

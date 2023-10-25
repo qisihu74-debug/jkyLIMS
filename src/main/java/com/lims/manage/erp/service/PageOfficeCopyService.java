@@ -50,7 +50,7 @@ public interface PageOfficeCopyService {
      * @param userId
      * @return
      */
-    Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo, Long userId) throws Exception;
+    Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo, Long userId ,Long taskId) throws Exception;
 
     /**
      * 完成复核：根据检测项id 判断任务单
@@ -127,7 +127,7 @@ public interface PageOfficeCopyService {
     /**
      * 通过任务单id 获取检测项主键集合
      * @param taskId
-     * @return
+     * @return key = sampleId,value=itemId
      */
-    List<Integer> selectTaskIds(Long taskId);
+    Map<Integer, List<Integer>> selectTaskIds(Long taskId);
 }
