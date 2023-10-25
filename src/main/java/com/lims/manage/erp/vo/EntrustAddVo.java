@@ -305,5 +305,9 @@ public class EntrustAddVo {
      * 是否保留
      */
     private String isReserve;
+    /**
+     * 审理状态：0未审核，1已审核
+     */
+    private String auditState;
 
 }
