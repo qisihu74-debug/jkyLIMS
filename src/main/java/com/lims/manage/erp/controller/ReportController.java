@@ -1225,8 +1225,6 @@ public class ReportController {
             return new ModelAndView("error");
         }
         ReportEditReq reportEditReq = JSON.parseObject(json,ReportEditReq.class);
-        Long entrustId = taskService.getEntrustIdByTaskId(reportEditReq.getTaskId());
-        reportEditReq.setEntrustId(entrustId);
         if (reportEditReq.getTaskId() == null || reportEditReq.getReportType() == null){
             return new ModelAndView("error");
         }
