@@ -438,6 +438,7 @@ public interface ReportService {
     Boolean submitEditReport(ReportEditReq bean);
 
     List<LabelValueVo> makeReportSampleInfos(Long entrustId,Long taskId);
+    List<LabelValueVo> makeReportSampleInfos(Long entrustId);
 
     Date getReportCompleteTime(String reportCode);
 
