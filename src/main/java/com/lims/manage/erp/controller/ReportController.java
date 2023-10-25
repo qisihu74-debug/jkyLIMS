@@ -97,6 +97,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -401,10 +402,18 @@ public class ReportController {
         //校验所选批次印章是否一致
         List<Long> list = reqBean.getList();
         List<String> strings  = reportService.getSealTypeByIds(list);
+        String[] split1 = strings.get(0).split(",");
         //判断strings里的每个对象是否一致
-        boolean allElementsEqual = strings.stream()
-                .allMatch(s -> s.equals(strings.get(0)));
-        if (!allElementsEqual){
+        boolean flag = true;
+        for (String s :strings){
+            String[] split = s.split(",");
+            boolean isEqual = Arrays.equals(split, split1);
+            if (!isEqual){
+                flag = false;
+                break;
+            }
+        }
+        if (!flag){
             return ResultUtil.error("同批次用章类型应保持一致");
         }
         if (CollectionUtils.isEmpty(reqBean.getList())){
