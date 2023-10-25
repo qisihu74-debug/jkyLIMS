@@ -203,6 +203,8 @@ public class TestDetectionImpl implements TestDetectionService {
                 recordEntity.setBeforeStatus("正常");
                 recordEntity.setAfterStatus("正常");
                 recordEntity.setType("试验使用");
+                recordEntity.setStartTime(new Date());//PC端默认
+                recordEntity.setEndTime(new Date());//PC端默认
                 recordEntity.setTime(new Date());
 //                System.out.println("测试："+recordEntity.toString());
                 //使用记录
