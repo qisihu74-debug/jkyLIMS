@@ -1104,6 +1104,7 @@ public class ReportController {
 
     /**
      * 报告在线制作
+     * taskId 接收的参数值是委托单id
      * @param map
      * @param request
      * @return
@@ -1120,9 +1121,8 @@ public class ReportController {
         reportEditReq.setReportType(reportType);
         reportEditReq.setSampleId(sampleId);
         //根据参数委托相关信息
-        Long entrustId = taskService.getEntrustIdByTaskId(reportEditReq.getTaskId());
-        reportEditReq.setEntrustId(entrustId);
-        EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
+        reportEditReq.setEntrustId(taskId);
+        EntrustAddVo detail = entrustService.getEntrustHistoryDetail(taskId);
         String localPath = reportService.handlerReportMessage(detail,reportEditReq,qiYueSuoEntity.getAutographPath());
         //设置服务页面
         PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
