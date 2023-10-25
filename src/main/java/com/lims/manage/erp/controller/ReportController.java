@@ -1200,7 +1200,7 @@ public class ReportController {
      */
     @PostMapping("submitEditReport")
     public Result submitEditReport(@RequestBody ReportEditReq bean){
-        if (bean.getTaskId() == null || bean.getReportType()==null || CollectionUtils.isEmpty(bean.getSampleIds())){
+        if (bean.getEntrustId() == null || bean.getReportType()==null || CollectionUtils.isEmpty(bean.getSampleIds())){
             return ResultUtil.error("缺少参数");
         }
         Boolean flag = reportService.submitEditReport(bean);
