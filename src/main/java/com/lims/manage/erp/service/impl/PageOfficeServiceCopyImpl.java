@@ -1731,9 +1731,23 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     }
 
     @Override
-    public List<Integer> selectTaskIds(Long taskId) {
-
-        return testProductItemDao.selectTaskIdItems(taskId);
+    public Map<Integer, List<Integer>> selectTaskIds(Long taskId) {
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        List<ExcelInsertVo> list = testProductItemDao.selectTaskIdItems(taskId);
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (ExcelInsertVo data : list) {
+                if (map.get(data.getSampleId()) == null) {
+                    List<Integer> items = new ArrayList<>();
+                    items.add(data.getItemId());
+                    map.put(data.getSampleId(), items);
+                } else {
+                    List<Integer> items = map.get(data.getSampleId());
+                    items.add(data.getItemId());
+                    map.put(data.getSampleId(), items);
+                }
+            }
+        }
+        return map;
     }
 
     /**

@@ -518,7 +518,7 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setAuditState("1");
             basisInfo.setCreateTime(new Date());
             // 委托单是否留样1.保留2.废弃 默认：否
-            basisInfo.setIsSave("否");
+//            basisInfo.setIsSave("否");
             // 新增经营人员
             basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
         basisInfo.setAcceptanceDate(null);
@@ -3731,7 +3731,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
         basisInfo.setCreateTime(new Date());
         // 委托单是否留样1.保留2.废弃 默认：否
-        basisInfo.setIsSave("否");
+//        basisInfo.setIsSave("否");
         // 经营人员
         basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
         basisInfo.setAcceptanceDate(null);
