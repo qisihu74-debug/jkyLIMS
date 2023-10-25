@@ -452,7 +452,11 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         Map<Integer, List<Integer>> map = selectTaskIds(taskId);
         // 通过检测项 查询 sheet数据
         // 查询检测项对应的 sheet下标
-        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex((Integer[]) list.toArray());
+        Integer[] array = new Integer[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i);
+        }
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(array);
         if (CollectionUtils.isEmpty(sheetItems)) {
             return null;
         }
