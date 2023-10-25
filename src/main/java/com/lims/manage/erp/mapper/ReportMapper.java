@@ -64,6 +64,7 @@ public interface ReportMapper {
      * @return
      */
     List<LabelValueVo> getMakeReportSampleInfos(Long entrustId,Long taskId);
+    List<LabelValueVo> getMakeReportSampleInfos1025(Long entrustId);
 
     /**
      * 委托下的任务单号

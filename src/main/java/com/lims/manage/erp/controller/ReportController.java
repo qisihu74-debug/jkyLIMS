@@ -1385,11 +1385,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("/getMakeReportSampleInfos")
-    public Result getMakeReportSampleInfos(Long entrustId,Long taskId) {
-        if (entrustId == null || taskId == null) {
+    public Result getMakeReportSampleInfos(Long entrustId) {
+        if (entrustId == null) {
             return ResultUtil.error("缺少必要参数！");
         }
-        return ResultUtil.success("查询可制作报告样品列表成功！", reportService.makeReportSampleInfos(entrustId,taskId));
+        return ResultUtil.success("查询可制作报告样品列表成功！", reportService.makeReportSampleInfos(entrustId));
     }
 
     /**
