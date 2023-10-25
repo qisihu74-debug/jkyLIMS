@@ -143,7 +143,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         // 供流转记录进行使用
         Set<String> sampleCodeSet = new HashSet<>();
         for (int i = 0; i < samples.size(); i++) {
-            newMax = newMax ++;
+            newMax ++;
             String codeStr = new DecimalFormat("00000").format(newMax);
             String sampleCode;
             if (samples.get(i).getQuantityPerGroup() > 1) {
@@ -170,7 +170,6 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             // 提供样品编号
             sampleCodeSet.add(entity.getSampleCode());
             entities.add(entity);
-            newMax++;
         }
         //插入样品
         Integer integer = testSampleEntityMapper.insertBatch(entities);
@@ -683,7 +682,7 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             newMax = 0;
         }
         for (int i = 0; i < samples.size(); i++) {
-            newMax = newMax ++;
+            newMax ++;
             String codeStr = new DecimalFormat("00000").format(newMax);
             String sampleCode;
             if (samples.get(i).getQuantityPerGroup() > 1) {
