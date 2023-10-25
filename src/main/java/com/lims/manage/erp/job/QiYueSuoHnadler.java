@@ -263,8 +263,8 @@ public class QiYueSuoHnadler {
             //实验室认可（CNAS）专用章 2937178885881422636
             //计量认证（CMA）专用章 2937188764910183324
             //检验检测专用章（室内试验） 2937191218674492340
+            List<Location> locations = Lists.newArrayList();
             for (String s:documents){
-                List<Location> locations = Lists.newArrayList();
                 if ("2937188764910183324".equals(sealId.toString())){
                     Location location = new Location();
                     location.setRectType("SEAL_CORPORATE");
