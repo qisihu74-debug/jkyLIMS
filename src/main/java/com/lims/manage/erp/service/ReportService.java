@@ -463,4 +463,6 @@ public interface ReportService {
     void sealRevoke(Long id);
 
     Integer getOperateTypeByCode(String reportCode);
+
+    List<String> getSealTypeByIds(List<Long> list);
 }

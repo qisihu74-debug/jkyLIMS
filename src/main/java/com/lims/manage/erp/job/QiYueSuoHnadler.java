@@ -271,7 +271,7 @@ public class QiYueSuoHnadler {
                     location.setPage(1);
                     location.setDocumentId(s);
                     location.setOffsetX(0.2);
-                    location.setOffsetY(0.9);
+                    location.setOffsetY(0.85);
                     locations.add(location);
                 }else if ("2937178885881422636".equals(sealId.toString())){
                     Location location = new Location();
@@ -295,7 +295,7 @@ public class QiYueSuoHnadler {
                     location.setPage(1);
                     location.setDocumentId(s);
                     location.setOffsetX(0.5);
-                    location.setOffsetY(0.1);
+                    location.setOffsetY(0.12);
                     locations.add(location);
                     Location keyLocation = new Location();
                     keyLocation.setRectType("SEAL_CORPORATE");
