@@ -50,7 +50,7 @@ public interface PageOfficeCopyService {
      * @param userId
      * @return
      */
-    Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo, Long userId) throws Exception;
+    Boolean finishCheckItemReview(ExcelInsertVo excelInsertVo, Long userId ,Long taskId) throws Exception;
 
     /**
      * 完成复核：根据检测项id 判断任务单
