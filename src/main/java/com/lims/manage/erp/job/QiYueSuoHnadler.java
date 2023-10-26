@@ -270,7 +270,7 @@ public class QiYueSuoHnadler {
                     location.setRectType("SEAL_CORPORATE");
                     location.setPage(1);
                     location.setDocumentId(s);
-                    location.setOffsetX(0.2);
+                    location.setOffsetX(0.1);
                     location.setOffsetY(0.85);
                     locations.add(location);
                 }else if ("2937178885881422636".equals(sealId.toString())){
@@ -278,8 +278,8 @@ public class QiYueSuoHnadler {
                     location.setRectType("SEAL_CORPORATE");
                     location.setPage(1);
                     location.setDocumentId(s);
-                    location.setOffsetX(0.5);
-                    location.setOffsetY(0.9);
+                    location.setOffsetX(0.4);
+                    location.setOffsetY(0.85);
                     locations.add(location);
                 }else if ("2934033400316387595".equals(sealId.toString())){
                     Location location = new Location();
@@ -287,20 +287,22 @@ public class QiYueSuoHnadler {
                     location.setPage(1);
                     location.setDocumentId(s);
                     location.setOffsetX(0.8);
-                    location.setOffsetY(0.9);
+                    location.setOffsetY(0.88);
                     locations.add(location);
                 }else if ("2937191218674492340".equals(sealId.toString())){
                     Location location = new Location();
                     location.setRectType("SEAL_CORPORATE");
                     location.setPage(1);
                     location.setDocumentId(s);
-                    location.setOffsetX(0.5);
+                    location.setOffsetX(0.35);
                     location.setOffsetY(0.12);
                     locations.add(location);
                     Location keyLocation = new Location();
                     keyLocation.setRectType("SEAL_CORPORATE");
                     keyLocation.setDocumentId(s);
                     keyLocation.setKeyword("日期：");
+                    keyLocation.setOffsetX(-0.1);
+                    keyLocation.setOffsetY(0.02);
                     keyLocation.setKeywordIndex(0);
                     locations.add(keyLocation);
                     Location qf = new Location();

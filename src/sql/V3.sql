@@ -119,7 +119,7 @@ ALTER TABLE `test_entrusted_sample_checkitem_rel` ADD COLUMN `origin_url_pdf` VA
 -- 任务单增加参数
 ALTER TABLE `test_task` ADD COLUMN `probationer` VARCHAR ( 255 ) NULL COMMENT '见习生：实习的新手' AFTER `create_time`;
 ALTER TABLE `test_task` ADD COLUMN `interns` VARCHAR ( 255 ) NULL COMMENT '实习生' AFTER `probationer`;
-ALTER TABLE `test_task` ADD COLUMN `auxiliary_personnel` VARCHAR ( 255 ) NULL COMMENT '辅助人员' AFTER `interns`;
+ALTER TABLE `test_task` ADD COLUMN `auxilihome_afficheary_personnel` VARCHAR ( 255 ) NULL COMMENT '辅助人员' AFTER `interns`;
 
 delete from sys_function WHERE name in('中间报告制作','最终报告制作','报告合成(旧)');
 

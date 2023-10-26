@@ -436,11 +436,6 @@ public class ReportController {
         reqBean.setSubject(stringBuilder.toString());
         QiYueSuoResponse response = reportService.createbycategoryBatch(reqBean,stringList);
         if (response != null && response.getCode() == 0) {
-//            if (response.getContractId() != null){
-//                log.info("开始模拟处理回调业务");
-//                reportService.callback(response.getContractId());
-//                log.info("回调业务处理完成");
-//            }
             return ResultUtil.success("向契约锁发起报告制作申请成功!");
         } else {
             return ResultUtil.error("向契约锁发起报告制作申请失败："+response.getMessage());
