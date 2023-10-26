@@ -229,14 +229,32 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
      * 根据报告主键 获取原始记录主键列表
      *
      */
-    @Select("SELECT t2.id FROM test_report_record as t1 \n" +
-            "LEFT JOIN test_entrusted_sample_checkitem_rel as t2 ON t1.entrustment_id = t2.entrust_id\n" +
-            "WHERE t1.id = #{recordId}\n" +
-            "UNION ALL\n" +
-            "SELECT t2.id FROM test_report_record_mid as t1 \n" +
-            "LEFT JOIN test_entrusted_sample_checkitem_rel as t2 ON t1.entrust_id = t2.entrust_id\n" +
-            "WHERE t1.id = #{recordId}\n" +
-            "GROUP BY t2.id")
+    @Select("SELECT\n" +
+            "\tt2.id \n" +
+            "FROM\n" +
+            "\ttest_report_record AS t1\n" +
+            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.entrustment_id = t2.entrust_id \n" +
+            "WHERE\n" +
+            "\tt1.id = #{recordId} \n" +
+            "\tAND t2.id  IS NOT NULL UNION ALL\n" +
+            "SELECT\n" +
+            "\tt2.id \n" +
+            "FROM\n" +
+            "\ttest_report_record_mid AS t1\n" +
+            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.entrust_id = t2.entrust_id \n" +
+            "WHERE\n" +
+            "\tt1.id = #{recordId} \n" +
+            "\tAND t2.id  IS NOT NULL \n" +
+            "GROUP BY\n" +
+            "\tt2.id UNION ALL\n" +
+            "SELECT\n" +
+            "\tt2.id \n" +
+            "FROM\n" +
+            "\ttest_report_record AS t1\n" +
+            "\tLEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.entrust_id = t2.entrust_id \n" +
+            "WHERE\n" +
+            "\tt1.id = #{recordId} \n" +
+            "\tAND t2.id  IS NOT NULL")
     List<Integer> selectGROUPBYItemId(@Param("recordId") Long recordId);
 
     /**
