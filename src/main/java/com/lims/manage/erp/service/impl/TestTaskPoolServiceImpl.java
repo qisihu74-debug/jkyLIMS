@@ -130,6 +130,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     }
                 }
                 sampleEntity.setSampleCheckItem(sampleItemEntities);
+                // 样品外观描述 不为null
+                sampleEntity.setOutwardDescribe(sampleEntity.getOutwardDescribe() == null ? "-" : sampleEntity.getOutwardDescribe());
             }
         }
         JSONObject jsonObject = new JSONObject();
@@ -349,7 +351,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         testCheckItemsTaskRelMapper.delete(queryWrapper12);
         // 2、进行录入任务单信息
         for (SampleItemEntity sampleItemEntity : list) {
-            String sampler = sampleItemEntity.getSampler();
+            String sampler = sampleItemEntity.getSampler().split("-")[0];
             methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue());
         }
         // 调用方法 进行 更新流水号任务单信息
