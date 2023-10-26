@@ -68,7 +68,7 @@
         receiver,
         receive_time,
         team_id,
-        outward_describe
+        sample_state_description
         )
         VALUES
         <foreach collection="vos" item="vo" separator=",">
