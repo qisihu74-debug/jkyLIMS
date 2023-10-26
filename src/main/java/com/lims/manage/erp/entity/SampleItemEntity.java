@@ -172,5 +172,10 @@ public class SampleItemEntity {
      */
     @TableField(exist = false)
     private String sampler;
+    /**
+     * 样品状态描述
+     */
+    @TableField(exist = false)
+    private String sampleStateDescription;
 
 }

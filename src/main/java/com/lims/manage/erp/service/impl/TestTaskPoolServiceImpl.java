@@ -105,6 +105,18 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                         // 调用方法 遍历：
                         methodForEachTaskHallDetails(sampleItemEntity, itemsTaskRels1);
                     }
+                    // 每组检测项中 补充样品描述说明
+                    if (CollectionUtil.isNotEmpty(taskProgressVos)) {
+                        if (sampleItemEntity.getTaskId() != null) {
+                            for (TaskProgressVo taskProgressVo : taskProgressVos) {
+                                if (sampleItemEntity.getTaskId().equals(taskProgressVo.getTaskId())) {
+                                    sampleItemEntity.setSampleStateDescription(
+                                            StringUtils.isEmpty(taskProgressVo.getSampleStateDescription()) ?
+                                                    "-" : taskProgressVo.getSampleStateDescription());
+                                }
+                            }
+                        }
+                    }
                 }
             }
             for (SampleEntity sampleEntity : sampleList) {
@@ -614,6 +626,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             vo.setSampler(entity.getSampler());
             // 领样时间
             vo.setSampleReceivingTime(new Date());
+            // 样品状态描述
+            vo.setOutwardDescribe(sampleItemEntity.getSampleStateDescription());
             // 流水号任务单id
             vo.setPoolId(poolId);
             vos.add(vo);

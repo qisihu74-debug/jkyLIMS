@@ -159,4 +159,10 @@ public class TaskVo {
      * 指定检测团队
      */
     private Long teamId;
+
+    /**
+     * 样品状态描述
+     */
+    @TableField(exist = false)
+    private String outwardDescribe;
 }

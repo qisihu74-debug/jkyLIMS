@@ -66,4 +66,8 @@ public class TaskProgressVo {
      * 领样人
      */
     private String sampler;
+    /**
+     * 样品状态描述
+     */
+    private String sampleStateDescription;
 }

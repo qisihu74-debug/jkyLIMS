@@ -67,14 +67,15 @@
         pool_id,
         receiver,
         receive_time,
-        team_id
+        team_id,
+        outward_describe
         )
         VALUES
         <foreach collection="vos" item="vo" separator=",">
             (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},
              #{vo.state}, #{vo.issueReport}, #{vo.orderer},#{vo.reportComplete},#{vo.orderTime},#{vo.taskPrice},#{vo.presentInformation},
              #{vo.createTime},#{vo.inspector},#{vo.recorder},#{vo.reviewer},#{vo.reportProducer},#{vo.auxiliaryPersonnel},#{vo.probationer},#{vo.interns},
-             #{vo.sampler},#{vo.sampleReceivingTime},#{vo.poolId},#{vo.receiver},#{vo.receiverTime},#{vo.teamId})
+             #{vo.sampler},#{vo.sampleReceivingTime},#{vo.poolId},#{vo.receiver},#{vo.receiverTime},#{vo.teamId},#{vo.outwardDescribe})
         </foreach>
     </insert>
 
@@ -1015,7 +1016,8 @@
             review_time,
             dept_id,
             task_price,
-            sampler
+            sampler,
+            sample_state_description
         FROM
             test_task
         WHERE
