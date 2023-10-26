@@ -18,6 +18,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Configuration
 public class MinioConfig {
+
+    @Value("${minio.url}")
+    private String url;
     @Value("${minio.ip}")
     private String endpoint;
     @Value("${minio.port}")
@@ -30,7 +33,8 @@ public class MinioConfig {
 
     public MinioClient getMinioClient() throws InvalidEndpointException,
             InvalidPortException {
-        MinioClient minioClient = new MinioClient(endpoint, port, accessKey, ecretKey);
+        //MinioClient minioClient = new MinioClient(endpoint, port, accessKey, ecretKey);
+        MinioClient minioClient = new MinioClient(url, accessKey, ecretKey);
         hashMap.put("minioClient",minioClient);
         return minioClient;
     }
