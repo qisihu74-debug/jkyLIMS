@@ -98,6 +98,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -403,10 +404,12 @@ public class ReportController {
         List<Long> list = reqBean.getList();
         List<String> strings  = reportService.getSealTypeByIds(list);
         String[] split1 = strings.get(0).split(",");
+        Arrays.sort(split1, Comparator.comparing(String::hashCode));
         //判断strings里的每个对象是否一致
         boolean flag = true;
         for (String s :strings){
             String[] split = s.split(",");
+            Arrays.sort(split, Comparator.comparing(String::hashCode));
             boolean isEqual = Arrays.equals(split, split1);
             if (!isEqual){
                 flag = false;
