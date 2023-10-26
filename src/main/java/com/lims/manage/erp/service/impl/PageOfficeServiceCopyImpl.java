@@ -1266,7 +1266,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         qiYueSuoSeaLBean.setContractId(contractId);
         qiYueSuoSeaLBean.setEntrustId(id);
         qiYueSuoSeaLBean.setContact("");
-        qiYueSuoSeaLBean.setExpireTime(72);
+        qiYueSuoSeaLBean.setExpireTime(259200);
         qiYueSuoSeaLBean.setReceiverName(ShiroUtils.getUserInfo().getName());
         qiYueSuoSeaLBean.setTenantName(info);
         qiYueSuoSeaLBean.setTenantType("COMPANY");

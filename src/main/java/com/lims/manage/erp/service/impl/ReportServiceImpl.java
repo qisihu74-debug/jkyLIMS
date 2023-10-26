@@ -1345,6 +1345,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean,List<String> stringList) {
         Map<String,Long> map = new HashMap<>();
         for (String reportCode:stringList) {
@@ -1718,29 +1719,6 @@ public class ReportServiceImpl implements ReportService {
         }
         //更新报告状态
         entityMapper.updateFileState(contractId, "3");
-        //盖章完成通知经营人员
-        //获取经营人员
-        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(entrustIds)){
-            for (Long entrustId:entrustIds) {
-                String dingId = entrustEntityMapper.getOperatingPersonnel(entrustId);
-                String reportCode = recordEntityMapper.getCodeByEntrustId(entrustId);
-                try {
-                    dingNotifyUtils.OAWorkNotice(dingId,reportCode+" 报告盖章已完成",null);
-                } catch (Exception e) {
-                    log.error("盖章完成发送消息给经营人员失败:{}",e);
-                }
-            }
-        }else {
-            for (Long idByCid:zjEntrustIds) {
-                String dingId = entrustEntityMapper.getOperatingPersonnel(idByCid);
-                String reportCode = recordEntityMapper.getMCodeByEntrustId(idByCid);
-                try {
-                    dingNotifyUtils.OAWorkNotice(dingId,reportCode+" 报告盖章已完成",null);
-                } catch (Exception e) {
-                    log.error("盖章完成发送消息给经营人员失败:{}",e);
-                }
-            }
-        }
         //移除中间报告
         for (Long id:ids) {
             moveReportRecord(id);
