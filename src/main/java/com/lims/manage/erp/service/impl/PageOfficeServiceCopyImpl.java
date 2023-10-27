@@ -1453,7 +1453,6 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                         excelInsertVo1.setItemId(data.getItemId());
                         excelInsertVo1.setOriginUrlPdf(urlPdf);
                         testProductItemDao.updateItemData(excelInsertVo1);
-                        System.out.println("ItemId == " + data.getItemId() + " code  == " + excelInsertVo.getCheckItemCode());
                     }
                 }
             }
@@ -1748,6 +1747,95 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
      * @param paramVo
      * @return
      */
+//    @Override
+//    @Transactional(rollbackFor = Exception.class)
+//    public String updateItemOriginUr(EndTestParamVo paramVo) throws IOException {
+//        // 1、获取检测项信息列表对应的 sheet下标。
+//        // 查询检测项对应的 sheet下标
+//        Integer[] ids = new Integer[paramVo.getItemInstrumentEntityList().size()];
+//        for (int j = 0; j < paramVo.getItemInstrumentEntityList().size(); j++) {
+//            ids[j] = paramVo.getItemInstrumentEntityList().get(j);
+//        }
+//        // 会获取任务单下 所有检测项
+//        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
+//        // 2、 获取每组检测项的 数据（试验检测日期、试验条件、主要仪器设备名称及编号）
+//        Map<Integer, Map<String, String>> mapMap = methodHashMapItem(paramVo.getItemInstrumentEntityList(), sheetItems);
+//        // 3、读取产品附件
+//        String productExcelUrl = null;
+//        ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(ids[0]);
+//        Integer itemId = ids[0];
+//        // 通过检测项主键 获取样品生成附件是否存在。
+//        InputStream inputStream = null;
+//        // 调用函数 获取 数据内容
+//        ExcelSheetDataVo productInputStream = getProductInputStream(excelInsertVo, itemId);
+//        if (productInputStream == null) {
+//            return null;
+//        }
+//        if (productInputStream.getProductExcelUrl() == null) {
+//            return null;
+//        }
+//        inputStream = productInputStream.getFileStream();
+//        productExcelUrl = productInputStream.getProductExcelUrl();
+//        // 创建一个 XSSFWorkbook 对象，用于处理 .xlsx 格式的 Excel 文件
+//        XSSFWorkbook wb = new XSSFWorkbook(inputStream);
+////        ----------------------------------上列 设置基础数据----------------------------
+//        // 根据key 保证 sheet不重复使用。
+//        Map<String, String> keyMap = new HashMap<>();
+//        // 检测项 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回 && 检测项对应的sheet 不为空
+//        for (ExcelInsertVo excelInsertVo1 : sheetItems) {
+//            // 获取sheetIndex工作表
+//            XSSFSheet sheet = wb.getSheetAt(excelInsertVo1.getSheetIndex());
+//            if (sheet != null) {
+//                //获取工作表的名称
+//                String sheetName = sheet.getSheetName();
+//                if (keyMap.get(sheetName) == null) {
+//                    keyMap.put(sheetName, sheetName);
+//                    // 设置数据
+//                    OriginalRecordDataVo originalData = new OriginalRecordDataVo();
+//                    Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
+//                    // 录入信息
+//                    Map<String, String> map = mapMap.get(excelInsertVo1.getItemId());
+//                    // 试验检测日期
+//                    originalData.setTestDate(map.get("testDate"));
+//                    // 试验条件
+//                    originalData.setTestCondition(map.get("testCondition"));
+//                    // 主要仪器设备名称及编号
+//                    originalData.setEquipment(map.get("equipment"));
+//                    result.put("result", originalData);
+//                    // 替换原始记录模板数据
+//                    ExcelReplaceUtil.ExcelHeadReplace(sheet, result);
+//                }
+//            }
+//        }
+//        InputStream input = null;
+//        input = AsposeUtil.createExcelStream(wb);
+//        if (input != null) {
+//            // 循环设置
+//            List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
+//            // 把 wb 数据 存放上传
+//            String[] array = productExcelUrl.split("\\.");
+//            if (excelInsertVo == null) {
+//                String excelUrl = MinIoUtil.upload("file-resources", GenID.getID() + "." + array[array.length - 1], input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+//                input.close();
+////                fileStream.close();
+//                // 更新 样品Excel附件
+//                testProductItemDao.updateProductExcelUrl(dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId(), excelUrl);
+//                return excelUrl;
+//            } else {
+////                fileStream.close();
+//                // 私有方法 更新 产品附件及报告附件内容。
+//                return methodUpdateItemUrl(GenID.getID() + "." + array[array.length - 1], input, ids, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
+//            }
+//        }
+//        return "操作成功";
+//    }
+
+    /**
+     * 进行每组检测项下对应的sheet下标 调整头部信息
+     *
+     * @param paramVo
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String updateItemOriginUr(EndTestParamVo paramVo) throws IOException {
@@ -1759,8 +1847,9 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         }
         // 会获取任务单下 所有检测项
         List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
-        // 2、 获取每组检测项的 数据（试验检测日期、试验条件、主要仪器设备名称及编号）
-        Map<Integer, Map<String, String>> mapMap = methodHashMapItem(paramVo.getItemInstrumentEntityList(), sheetItems);
+        if (CollectionUtils.isEmpty(sheetItems)) {
+            return null;
+        }
         // 3、读取产品附件
         String productExcelUrl = null;
         ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(ids[0]);
@@ -1780,33 +1869,14 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         // 创建一个 XSSFWorkbook 对象，用于处理 .xlsx 格式的 Excel 文件
         XSSFWorkbook wb = new XSSFWorkbook(inputStream);
 //        ----------------------------------上列 设置基础数据----------------------------
-        // 根据key 保证 sheet不重复使用。
-        Map<String, String> keyMap = new HashMap<>();
-        // 检测项 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回 && 检测项对应的sheet 不为空
-        for (ExcelInsertVo excelInsertVo1 : sheetItems) {
-            // 获取sheetIndex工作表
-            XSSFSheet sheet = wb.getSheetAt(excelInsertVo1.getSheetIndex());
-            if (sheet != null) {
-                //获取工作表的名称
-                String sheetName = sheet.getSheetName();
-                if (keyMap.get(sheetName) == null) {
-                    keyMap.put(sheetName, sheetName);
-                    // 设置数据
-                    OriginalRecordDataVo originalData = new OriginalRecordDataVo();
-                    Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
-                    // 录入信息
-                    Map<String, String> map = mapMap.get(excelInsertVo1.getItemId());
-                    // 试验检测日期
-                    originalData.setTestDate(map.get("testDate"));
-                    // 试验条件
-                    originalData.setTestCondition(map.get("testCondition"));
-                    // 主要仪器设备名称及编号
-                    originalData.setEquipment(map.get("equipment"));
-                    result.put("result", originalData);
-                    // 替换原始记录模板数据
-                    ExcelReplaceUtil.ExcelHeadReplace(sheet, result);
-                }
-            }
+        try {
+            // 动态插入 头部信息:1、批量获取 检测项id（有可能对应多个模板） 再进行填充。2、通过检测项id 获取 相应的 id关联信息。
+            // 循环设置
+            List<TaskIdEntity> dataEntitys = taskMapper.selectItems(ids);
+            methodInsertHeadTemplate(dataEntitys, sheetItems, wb, null, null, null, false);
+        } catch (Exception e) {
+            System.out.println("编辑原始记录异常抛出");
+            e.printStackTrace();
         }
         InputStream input = null;
         input = AsposeUtil.createExcelStream(wb);
@@ -1818,12 +1888,10 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             if (excelInsertVo == null) {
                 String excelUrl = MinIoUtil.upload("file-resources", GenID.getID() + "." + array[array.length - 1], input, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
                 input.close();
-//                fileStream.close();
                 // 更新 样品Excel附件
                 testProductItemDao.updateProductExcelUrl(dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId(), excelUrl);
                 return excelUrl;
             } else {
-//                fileStream.close();
                 // 私有方法 更新 产品附件及报告附件内容。
                 return methodUpdateItemUrl(GenID.getID() + "." + array[array.length - 1], input, ids, dataEntitys.get(0).getEntrustmentId(), dataEntitys.get(0).getSampleId());
             }

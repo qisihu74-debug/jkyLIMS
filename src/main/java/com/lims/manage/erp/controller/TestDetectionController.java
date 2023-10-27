@@ -1,11 +1,11 @@
 package com.lims.manage.erp.controller;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.InstrumentEntity;
 import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrumentEntity;
+import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author: DLC
@@ -40,10 +39,12 @@ public class TestDetectionController {
     private TaskService taskService;
     @Autowired
     private PageOfficeCopyService pageOfficeCopyService;
+    @Autowired
+    private TestProductItemDao testProductItemDao;
 
     @RequestMapping("/getTheInstrument")
-    public Result getTheInstrument(Integer escRelId,Integer checkItemId) {
-        List<TestInstrumentEntity> dataCollect = testDetectionService.getTheInstrument(escRelId,checkItemId);
+    public Result getTheInstrument(Integer escRelId, Integer checkItemId) {
+        List<TestInstrumentEntity> dataCollect = testDetectionService.getTheInstrument(escRelId, checkItemId);
         if (dataCollect.isEmpty()) {
             return ResultUtil.error(204, "数据为空！");
         }
@@ -134,45 +135,37 @@ public class TestDetectionController {
         }
         // 比较检测项 start_time 与 end_time 时间
         String msg = testDetectionService.compareItemTime(sampleItemInstrumentVo);
-        if(msg != null){
+        if (msg != null) {
             return ResultUtil.error(msg);
         }
         // 通过检测项主键验证签名信息
         String str = testDetectionService.personnelComparison(sampleItemInstrumentVo);
-        if(str != null){
+        if (str != null) {
             return ResultUtil.error(str);
         }
         Boolean flag = testDetectionService.postEndTest(sampleItemInstrumentVo);
-        if(flag) {
+        try {
+            // 每组检测项统计信息 并进行试验
+            pageOfficeCopyService.updateItemOriginUr(paramVo);
+            // 试验完成 对检测项下 含有对应的 excel 转成pdf 进行更新origin_url_pdf。
+            List<SampleItemInstrumentEntity> sampleItemInstrumentEntities = new ArrayList<>();
+            for (Integer itemId : paramVo.getItemInstrumentEntityList()) {
+                SampleItemInstrumentEntity data = new SampleItemInstrumentEntity();
+                data.setItemId(itemId);
+                sampleItemInstrumentEntities.add(data);
+            }
+            sampleItemInstrumentVo.setItemInstrumentEntityList(sampleItemInstrumentEntities);
+            pageOfficeCopyService.updateItemOriginUrlPdf(sampleItemInstrumentVo);
+        } catch (Exception e) {
+            System.out.println("编辑原始记录异常抛出");
+            e.printStackTrace();
+        }
+        if (flag) {
             // 更新任务单状态 需要 对所有的 样品信息 下 检测项 进行判断 ==2的话 更新。
             TaskDetailInfoVo dataGather = taskService.getTaskDetailInfoTwo(sampleItemInstrumentVo.getTaskId(), null);
             Boolean DetailStatus = testDetectionService.JudgmentTaskDetail(dataGather, sampleItemInstrumentVo.getTaskId());
             if (DetailStatus == true) {
-                try {
-                    // 任务单结束 通过任务单id 获取所有检测项数据数据
-//                    Map<Integer, List<Integer>> map = pageOfficeCopyService.selectTaskIds(sampleItemInstrumentVo.getTaskId());
-//                    for (Integer key : map.keySet()) {
-//                        List<Integer> itemIds = map.get(key);
-//                        paramVo.setItemInstrumentEntityList(itemIds);
-//                        // 每组检测项统计信息 并进行试验
-//                        pageOfficeCopyService.updateItemOriginUr(paramVo);
-//                        // 试验完成 对检测项下 含有对应的 excel 转成pdf 进行更新origin_url_pdf。
-//                        List<SampleItemInstrumentEntity> sampleItemInstrumentEntities = new ArrayList<>();
-//                        for (Integer itemId : itemIds) {
-//                            SampleItemInstrumentEntity data = new SampleItemInstrumentEntity();
-//                            data.setItemId(itemId);
-//                            sampleItemInstrumentEntities.add(data);
-//                        }
-//                        sampleItemInstrumentVo.setItemInstrumentEntityList(sampleItemInstrumentEntities);
-//                        pageOfficeCopyService.updateItemOriginUrlPdf(sampleItemInstrumentVo);
-//                        return ResultUtil.success("任务单完成！！！");
-//                    }
-                        pageOfficeCopyService.updateItemOriginUrlPdf(sampleItemInstrumentVo);
-                        return ResultUtil.success("任务单完成！！！");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return ResultUtil.success("任务单完成 编辑原始记录异常抛出 ： " + e);
-                }
+                return ResultUtil.success("任务单完成！！！");
             }
             return ResultUtil.success("检测项未全部完成检测，任务单未结束", "整体任务单未结束");
         }

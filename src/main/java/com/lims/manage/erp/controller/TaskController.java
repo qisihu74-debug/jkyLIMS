@@ -1059,9 +1059,9 @@ public class TaskController {
             return ResultUtil.error("登录人没有被派发复核资格");
         }
         // TODO: 2023年10月17日：发起复核前 判断任务单是否实验完成。效验数据为最终复核通过的
-        if(!taskService.judgeTaskEndTest(taskId,excelInsertVo)){
-            return ResultUtil.error(678, "操作失败！任务单未完成试验");
-        }
+//        if(!taskService.judgeTaskEndTest(taskId,excelInsertVo)){
+//            return ResultUtil.error(678, "操作失败！任务单未完成试验");
+//        }
         // 判断复核数据类型。
         pageOfficeCopyService.finishCheckItemReview(excelInsertVo, userInfo.getUserId(),taskId);
         return ResultUtil.success(pageOfficeCopyService.CompleteTheReview(excelInsertVo));
