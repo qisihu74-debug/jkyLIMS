@@ -133,4 +133,24 @@ ADD COLUMN `operate_type`  int NULL DEFAULT 0 COMMENT '操作类型0线上编辑
 
 UPDATE `sys_function` SET `name`='报告制作' WHERE (`function_id`='43') LIMIT 1;
 
+--增加 sheet对应的记录信息表
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for test_item_sheet_rel_head_context
+-- ----------------------------
+DROP TABLE IF EXISTS `test_item_sheet_rel_head_context`;
+CREATE TABLE `test_item_sheet_rel_head_context`  (
+  `id` int(0) NOT NULL AUTO_INCREMENT,
+  `sample_id` int(0) DEFAULT NULL COMMENT '样品ID',
+  `sheet_index` int(0) NOT NULL COMMENT '报告模板sheet下标',
+  `test_date_text` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '检测日期-Text',
+  `test_condition_text` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '试验条件 - Text',
+  `equipment_text` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '主要仪器 - Text',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
 
