@@ -1456,4 +1456,22 @@ WHERE
             #{item}
         </foreach>
     </select>
+
+    <insert id="addTestItemSheetRelHeadContext" parameterType="com.lims.manage.erp.entity.TaskIdEntity">
+        insert into test_item_sheet_rel_head_context (id,sample_id, sheet_index, test_date_text,
+                                 test_condition_text, equipment_text)
+
+        values (id,#{sampleId,jdbcType=INTEGER}, #{sheetIndex,jdbcType=INTEGER}, #{testDateText},
+                #{testConditionText},#{equipmentText})
+    </insert>
+
+    <update id="updateTestItemSheetRelHeadContext" parameterType="com.lims.manage.erp.entity.TaskIdEntity">
+    UPDATE test_item_sheet_rel_head_context
+    SET test_date_text = #{testDateText},
+    test_condition_text = #{testConditionText},
+    equipment_text = #{equipmentText}
+    WHERE
+        sample_id = #{sampleId,jdbcType=INTEGER}
+        AND sheet_index = #{sheetIndex,jdbcType=INTEGER}
+    </update>
 </mapper>

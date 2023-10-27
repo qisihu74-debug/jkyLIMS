@@ -26,9 +26,17 @@ public class OriginalRecordDataVo {
      */
     private String testDate;
     /**
+     * 检测日期-Text
+     */
+    private String testDateText;
+    /**
      * 试验条件
      */
     private String testCondition;
+    /**
+     * 试验条件 - Text
+     */
+    private String testConditionText;
     /**
      * 检测依据
      */
@@ -41,6 +49,10 @@ public class OriginalRecordDataVo {
      * 主要仪器
      */
     private String equipment;
+    /**
+     * 主要仪器 - Text
+     */
+    private String equipmentText;
 
     public OriginalRecordDataVo(String recordNumber, EntrustEntity entrustBaseInfo, TemplateSampleVo sampleVo, String checkBasis, String judgeBasis) {
         this.recordNumber = recordNumber;

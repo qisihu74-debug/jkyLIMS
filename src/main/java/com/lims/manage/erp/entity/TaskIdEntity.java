@@ -69,4 +69,27 @@ public class TaskIdEntity {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date startTime;
+
+    /**
+     * 检测日期-Text
+     */
+    @TableField(exist = false)
+    private String testDateText;
+    /**
+     * 试验条件 - Text
+     */
+    @TableField(exist = false)
+    private String testConditionText;
+    /**
+     * 主要仪器 - Text
+     */
+    @TableField(exist = false)
+    private String equipmentText;
+
+    /**
+     * 检测项 sheet下标
+     */
+    @TableField(exist = false)
+    private Integer sheetIndex;
+
 }

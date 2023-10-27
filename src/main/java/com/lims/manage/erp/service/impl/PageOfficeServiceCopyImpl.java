@@ -17,6 +17,7 @@ import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -187,113 +188,61 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         excelSheetDataVo.setProductExcelUrl(productExcelUrl);
         return excelSheetDataVo;
     }
-
     @Override
     public String getProductExcelUrl(Integer[]
                                              ids, List<ExcelInsertVo> sheetItems, List<TaskIdEntity> dataEntitys) throws Exception {
         String productExcelUrl = null;
         ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(ids[0]);
         Integer itemId = ids[0];
-        // 通过检测项主键 获取样品生成附件是否存在。
-        Boolean headerData = false;
         InputStream fileStream = null;
         // 调用函数 获取 数据内容
         ExcelSheetDataVo productInputStream = getProductInputStream(excelInsertVo, itemId);
         fileStream = productInputStream.getFileStream();
         productExcelUrl = productInputStream.getProductExcelUrl();
-        for (int i = 0; i < dataEntitys.size(); i++) {
-            TaskIdEntity data = dataEntitys.get(i);
-            if (data != null && data.getEditData() == null) {
-                // 表头数据 为null
-                headerData = true;
-            }
-        }
         InputStream input = null;
-        // 检测项表头为空
-        if (headerData) {
-            // 记录检测项中 对应的记录编号
-            Map<Integer, String> recordNumberMap = new HashMap<>();
-            // 塞入 原始记录 表头部分
-            ExcelSheetDataVo excelSheetDataVo = getSaveFile(fileStream, dataEntitys.get(0).getTaskId());
-            FileInputStream inputStream = new FileInputStream(new File(excelSheetDataVo.getSaveFile()));
-            // 创建一个 XSSFWorkbook 对象，用于处理 .xlsx 格式的 Excel 文件
-            XSSFWorkbook wb = new XSSFWorkbook(inputStream);
-            FileAndFolderUtil.delete(excelSheetDataVo.getSaveFile());
-            // 根据key 保证 sheet不重复使用。
-            Map<String, String> keyMap = new HashMap<>();
-            // 通过任务单 判断当前下单时间
-            //处理原始记录下载，单位名称问题
-            java.sql.Date date = entrustEntityMapper.getEntrustDateByTaskId(dataEntitys.get(0).getTaskId());
-            // 通过检测项主键 获取委托单下所有的样品id数据
-            List<Integer> sampleIds = testProductItemDao.selectCountSampleIds(ids[0]);
-            // 样品id 序号
-            Map<Integer, Integer> sampleMapSerial = new HashMap<>();
-            for (int j = 0; j < sampleIds.size(); j++) {
-                Integer sampleId = sampleIds.get(j);
-                // 统计委托单下 所有的样品组数。
-                sampleMapSerial.put(sampleId, j + 1);
-            }
-            String dayString = DateUtil.getDayString(date.getTime());
-            // status = true;(检测单位名称：河南交科院检验检测认证有限公司)
-            // 否则 status = false; （检测单位名称：河南省公路工程试验检测中心有限公司）
-            Boolean status = false;
-            if (Integer.parseInt(dayString) >= 20230313) {
-                // 检测单位名称：河南交科院检验检测认证有限公司
-                status = true;
-            }
-            // 批量获取 检测项id（有可能对应多个模板） 再进行填充。
-            // 通过检测项id 获取 相应的 id关联信息。
-            for (int i = 0; i < dataEntitys.size(); i++) {
-                TaskIdEntity data = dataEntitys.get(i);
-                // 检测项 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回 && 检测项对应的sheet 不为空
-                if (data != null && !data.getState().equals(3) && !CollectionUtils.isEmpty(sheetItems) && data.getEditData() == null) {
-                    for (ExcelInsertVo excelInsertVo1 : sheetItems) {
-                        // 获取sheetIndex工作表
-                        XSSFSheet sheet = wb.getSheetAt(excelInsertVo1.getSheetIndex());
-                        // sheet != null && checkItemId 相等
-                        if (sheet != null && excelInsertVo1.getCheckItemId().equals(data.getCheckItemId())) {
-                            //获取工作表的名称
-                            String sheetName = sheet.getSheetName();
-                            if (keyMap.get(sheetName + data.getCheckItemId()) == null) {
-                                keyMap.put(sheetName + +data.getCheckItemId(), sheetName);
-                                // key = sheet标号 、value = ExcelInsertVo 中 topRow、leftColumn
-                                Map<Integer, ExcelInsertVo> indexDataXYMap = excelSheetDataVo.getIndexDataXYMap();
-                                ExcelInsertVo insertVo = indexDataXYMap.get(excelInsertVo1.getSheetIndex());
-
-                                // 2、试验检测日期 -- 后期比较
-                                SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyy年MM月dd日");
-                                String startTimestr = yyyyMMddHH_NOT_.format(data.getStartTime()).substring(0, 11);
-                                sheet.getRow(insertVo.getTopRow()).getCell(insertVo.getLeftColumn()).setCellValue(startTimestr);
-                                // 有序信息。
-                                OriginalRecordDataVo originalData = taskService.getOriginalData(data.getTaskId(), data.getSampleId(), data.getCheckItemId(), data.getIdItem());
-                                Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
-                                // 设置组数
-                                int number = sampleMapSerial.get(excelInsertVo1.getSampleId());
-                                originalData.setRecordNumber(originalData.getRecordNumber() + "-" + number);
-                                // 获取检测项中记录编号
-                                if (recordNumberMap.get(data.getIdItem()) == null) {
-                                    recordNumberMap.put(data.getIdItem(), originalData.getRecordNumber() + "&" + GenID.getID());
-                                } else {
-                                    String recordNumber = recordNumberMap.get(data.getIdItem());
-                                    recordNumberMap.put(data.getIdItem(), recordNumber + "," + originalData.getRecordNumber() + "&" + GenID.getID());
-                                }
-                                result.put("result", originalData);
-                                // 替换原始记录模板数据
-                                ExcelReplaceUtil.ExcelReplace(sheet, result, status);
-                            }
-                        }
-                    }
-                }
-            }
-            input = AsposeUtil.createExcelStream(wb);
-            // 更新 检测项记录编号
-            if (recordNumberMap != null) {
-                for (int keyData : recordNumberMap.keySet()) {
-                    ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
-                    excelInsertVo1.setItemId(keyData);
-                    excelInsertVo1.setCheckItemCode(recordNumberMap.get(keyData));
-                    testProductItemDao.updateItemData(excelInsertVo1);
-                }
+        // 记录检测项中 对应的记录编号
+        Map<Integer, String> recordNumberMap = new HashMap<>();
+        // 塞入 原始记录 表头部分
+        ExcelSheetDataVo excelSheetDataVo = getSaveFile(fileStream, dataEntitys.get(0).getTaskId());
+        FileInputStream inputStream = new FileInputStream(new File(excelSheetDataVo.getSaveFile()));
+        // 创建一个 XSSFWorkbook 对象，用于处理 .xlsx 格式的 Excel 文件
+        XSSFWorkbook wb = new XSSFWorkbook(inputStream);
+        FileAndFolderUtil.delete(excelSheetDataVo.getSaveFile());
+        // 通过任务单 判断当前下单时间
+        //处理原始记录下载，单位名称问题
+        java.sql.Date date = entrustEntityMapper.getEntrustDateByTaskId(dataEntitys.get(0).getTaskId());
+        // 通过检测项主键 获取委托单下所有的样品id数据
+        List<Integer> sampleIds = testProductItemDao.selectCountSampleIds(ids[0]);
+        // 样品id 序号
+        Map<Integer, Integer> sampleMapSerial = new HashMap<>();
+        for (int j = 0; j < sampleIds.size(); j++) {
+            Integer sampleId = sampleIds.get(j);
+            // 统计委托单下 所有的样品组数。
+            sampleMapSerial.put(sampleId, j + 1);
+        }
+        String dayString = DateUtil.getDayString(date.getTime());
+        // status = true;(检测单位名称：河南交科院检验检测认证有限公司)
+        // 否则 status = false; （检测单位名称：河南省公路工程试验检测中心有限公司）
+        Boolean status = false;
+        if (Integer.parseInt(dayString) >= 20230313) {
+            // 检测单位名称：河南交科院检验检测认证有限公司
+            status = true;
+        }
+        try {
+            // 动态插入 头部信息:1、批量获取 检测项id（有可能对应多个模板） 再进行填充。2、通过检测项id 获取 相应的 id关联信息。
+            methodInsertHeadTemplate(dataEntitys, sheetItems, wb, excelSheetDataVo, recordNumberMap, sampleMapSerial, status);
+        } catch (Exception e) {
+            System.out.println("编辑原始记录异常抛出");
+            e.printStackTrace();
+        }
+        input = AsposeUtil.createExcelStream(wb);
+        // 更新 检测项记录编号
+        if (recordNumberMap != null) {
+            for (int keyData : recordNumberMap.keySet()) {
+                ExcelInsertVo excelInsertVo1 = new ExcelInsertVo();
+                excelInsertVo1.setItemId(keyData);
+                excelInsertVo1.setCheckItemCode(recordNumberMap.get(keyData));
+                testProductItemDao.updateItemData(excelInsertVo1);
             }
         }
         if (input != null) {
@@ -315,6 +264,207 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         return productExcelUrl;
     }
 
+    private void methodInsertHeadTemplate(List<TaskIdEntity> dataEntitys, List<ExcelInsertVo> sheetItems, XSSFWorkbook wb,
+                                          ExcelSheetDataVo excelSheetDataVo, Map<Integer, String> recordNumberMap, Map<Integer, Integer> sampleMapSerial, Boolean status) {
+        // 根据key 保证 sheet不重复使用。
+        Map<String, String> keyMap = new HashMap<>();
+        List<Integer> items = new ArrayList<>();
+        for (int i = 0; i < dataEntitys.size(); i++) {
+            TaskIdEntity data = dataEntitys.get(i);
+            items.add(data.getIdItem());
+        }
+        // 1、 获取每组检测项的 数据（试验检测日期、试验条件、主要仪器设备名称及编号）
+        Map<Integer, Map<String, String>> mapMap = methodHashMapItem(items, sheetItems);
+        for (int i = 0; i < dataEntitys.size(); i++) {
+            TaskIdEntity data = dataEntitys.get(i);
+            // 检测项 0：待检，1：检测中，2：待复核，3 ：通过，4：驳回 && 检测项对应的sheet 不为空
+            if (data != null && !data.getState().equals(3) && !CollectionUtils.isEmpty(sheetItems)) {
+                for (ExcelInsertVo excelInsertVo1 : sheetItems) {
+                    // 获取sheetIndex工作表
+                    XSSFSheet sheet = wb.getSheetAt(excelInsertVo1.getSheetIndex());
+                    // sheet != null && checkItemId 相等
+                    if (sheet != null && excelInsertVo1.getCheckItemId().equals(data.getCheckItemId())) {
+                        //获取工作表的名称
+                        String sheetName = sheet.getSheetName();
+                        if (keyMap.get(sheetName + data.getCheckItemId()) == null) {
+                            keyMap.put(sheetName + data.getCheckItemId(), sheetName);
+                            if (data.getEditData() == null) {
+                                // 首次填充 设置 sheet页左下角 日期
+                                try {
+                                    methodSheetTime(sheet, excelSheetDataVo, excelInsertVo1.getSheetIndex(), data.getStartTime());
+                                } catch (Exception e) {
+                                    System.out.println("编辑原始记录异常抛出");
+                                    e.printStackTrace();
+                                }
+                                try {
+                                    // 首次填充 设置原始记录 头部信息
+                                    methodSheetHead(data, sampleMapSerial, excelInsertVo1.getSampleId(), recordNumberMap, sheet, excelInsertVo1.getSheetIndex(), status, mapMap);
+                                } catch (Exception e) {
+                                    System.out.println("编辑原始记录异常抛出");
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                try {
+                                    // 原始记录已经编辑过 查询：试验时间、试验条件、仪器设备编号。
+                                    methodDynamicModificationSheetHead(mapMap, excelInsertVo1.getItemId(), sheet, excelInsertVo1.getSampleId(), excelInsertVo1.getSheetIndex());
+                                } catch (Exception e) {
+                                    System.out.println("编辑原始记录异常抛出");
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 设置sheet页的左下角日期
+     */
+    private void methodSheetTime(XSSFSheet sheet, ExcelSheetDataVo excelSheetDataVo, Integer sheetIndex, Date startTime) {
+//         key = sheet标号 、value = ExcelInsertVo 中 topRow、leftColumn
+        Map<Integer, ExcelInsertVo> indexDataXYMap = excelSheetDataVo.getIndexDataXYMap();
+        ExcelInsertVo insertVo = indexDataXYMap.get(sheetIndex);
+        // 2、试验检测日期 -- 后期比较
+        SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyy年MM月dd日");
+        String startTimestr = yyyyMMddHH_NOT_.format(startTime).substring(0, 11);
+        sheet.getRow(insertVo.getTopRow()).getCell(insertVo.getLeftColumn()).setCellValue(startTimestr);
+    }
+
+    /**
+     * 设置sheet页的头部信息
+     */
+    private void methodSheetHead(TaskIdEntity data, Map<Integer, Integer> sampleMapSerial, Integer sampleId, Map<Integer, String> recordNumberMap,
+                                 XSSFSheet sheet, Integer sheetIndex, Boolean status, Map<Integer, Map<String, String>> mapMap) {
+        // 根据样品id 与sheet页 获取当前对应的标识符数据
+        TaskIdEntity sheetRelHeadContextData = sampleEntityMapper.selectTestItemSheetRelHeadContextData(sampleId, sheetIndex);
+        // 有序信息。
+        OriginalRecordDataVo originalData = taskService.getOriginalData(data.getTaskId(), data.getSampleId(), data.getCheckItemId(), data.getIdItem());
+        Map<String, String> mapStr = mapMap.get(data.getIdItem());
+        if (sheetRelHeadContextData != null) {
+            // 获取仪器记录信息
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(sheetRelHeadContextData.getEquipmentText())) {
+                // 记录模板的标记信息
+                originalData.setEquipmentText(sheetRelHeadContextData.getEquipmentText());
+                StringBuffer equipmentBuffer = new StringBuffer();
+                if (org.apache.commons.lang3.StringUtils.isNotEmpty(mapStr.get("equipment"))) {
+                    equipmentBuffer.append(mapStr.get("equipment"));
+                    equipmentBuffer.append("、");
+                }
+                equipmentBuffer.append(sheetRelHeadContextData.getEquipmentText());
+                String[] array1 = equipmentBuffer.toString().split("、");
+                Set<String> strings = new HashSet<>();
+                for (int i = 0; i < array1.length; i++) {
+                    strings.add(array1[i]);
+                }
+                StringBuffer stringBuffer = new StringBuffer();
+                for (String str : strings) {
+                    stringBuffer.append(str);
+                    stringBuffer.append("、");
+                }
+                originalData.setEquipment(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+            }
+        }
+        Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
+        // 设置组数
+        int number = sampleMapSerial.get(sampleId);
+        originalData.setRecordNumber(originalData.getRecordNumber() + "-" + number);
+        // 获取检测项中记录编号
+        if (recordNumberMap.get(data.getIdItem()) == null) {
+            recordNumberMap.put(data.getIdItem(), originalData.getRecordNumber() + "&" + GenID.getID());
+        } else {
+            String recordNumber = recordNumberMap.get(data.getIdItem());
+            recordNumberMap.put(data.getIdItem(), recordNumber + "," + originalData.getRecordNumber() + "&" + GenID.getID());
+        }
+        originalData.setTestCondition(mapStr.get("testCondition"));
+        originalData.setTestDate(mapStr.get("testDate"));
+        result.put("result", originalData);
+        // 替换原始记录模板数据
+        ExcelReplaceUtil.ExcelReplace(sheet, result, status);
+        if (sheetRelHeadContextData == null) {
+            // 存储检测项标识符数据：
+            TaskIdEntity sheetData = new TaskIdEntity();
+            sheetData.setSampleId(sampleId);
+            sheetData.setSheetIndex(sheetIndex);
+            sheetData.setTestDateText(originalData.getTestDate() == null ? null : originalData.getTestDate());
+            sheetData.setTestConditionText(originalData.getTestCondition() == null ? null : originalData.getTestCondition());
+            sheetData.setEquipmentText(originalData.getEquipment() == null ? null : originalData.getEquipment());
+            sampleEntityMapper.addTestItemSheetRelHeadContext(sheetData);
+        } else {
+            // 更新操作
+            TaskIdEntity sheetData = new TaskIdEntity();
+            sheetData.setSampleId(sampleId);
+            sheetData.setSheetIndex(sheetIndex);
+            sheetData.setTestDateText(originalData.getTestDate() == null ? null : originalData.getTestDate());
+            sheetData.setTestConditionText(originalData.getTestCondition() == null ? null : originalData.getTestCondition());
+            sheetData.setEquipmentText(originalData.getEquipment() == null ? null : originalData.getEquipment());
+            sampleEntityMapper.updateTestItemSheetRelHeadContext(sheetData);
+        }
+    }
+
+    /**
+     * 使用方法 动态 调整 sheet参数
+     */
+    private void methodDynamicModificationSheetHead(Map<Integer, Map<String, String>> mapMap, Integer itemId, XSSFSheet sheet, Integer sampleId, Integer sheetIndex) {
+//        TaskIdEntity data = null;
+        // 进行originalData补充 检测项信息。
+        OriginalRecordDataVo originalData = new OriginalRecordDataVo();
+        // 根据样品id 与sheet页 获取当前对应的标识符数据
+        TaskIdEntity sheetRelHeadContextData = sampleEntityMapper.selectTestItemSheetRelHeadContextData(sampleId, sheetIndex);
+        // 标识符数据
+        Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
+        // 录入信息
+        Map<String, String> map = mapMap.get(itemId);
+        // 试验检测日期
+        originalData.setTestDate(org.apache.commons.lang.StringUtils.isNotEmpty(map.get("testDate")) ? map.get("testDate") : sheetRelHeadContextData.getTestDateText());
+        // 试验条件
+        originalData.setTestCondition(org.apache.commons.lang.StringUtils.isNotEmpty(map.get("testCondition")) ? map.get("testCondition") : sheetRelHeadContextData.getTestConditionText());
+        // 为检测项对应的 sheet数据
+        // 检测日期
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(sheetRelHeadContextData.getTestDateText())) {
+            // 1、说明标识符已经被替换 使用新的内容文本
+            originalData.setTestDateText(sheetRelHeadContextData.getTestDateText());
+        }
+        // 试验条件 - Text
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(sheetRelHeadContextData.getTestConditionText())) {
+            // 1、说明标识符已经被替换 使用新的内容文本
+            originalData.setTestConditionText(sheetRelHeadContextData.getTestConditionText());
+        }
+        // 获取仪器记录信息
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(sheetRelHeadContextData.getEquipmentText())) {
+            // 记录模板的标记信息
+            originalData.setEquipmentText(sheetRelHeadContextData.getEquipmentText());
+            StringBuffer equipmentBuffer = new StringBuffer();
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(map.get("equipment"))) {
+                equipmentBuffer.append(map.get("equipment"));
+                equipmentBuffer.append("、");
+            }
+            equipmentBuffer.append(sheetRelHeadContextData.getEquipmentText());
+            String[] array1 = equipmentBuffer.toString().split("、");
+            Set<String> strings = new HashSet<>();
+            for (int i = 0; i < array1.length; i++) {
+                strings.add(array1[i]);
+            }
+            StringBuffer stringBuffer = new StringBuffer();
+            for (String str : strings) {
+                stringBuffer.append(str);
+                stringBuffer.append("、");
+            }
+            originalData.setEquipment(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+        } else {
+            // 主要仪器设备名称及编号
+            originalData.setEquipment(org.apache.commons.lang.StringUtils.isNotEmpty(map.get("equipment")) ? map.get("equipment") : sheetRelHeadContextData.getEquipmentText());
+        }
+        result.put("result", originalData);
+        // 替换原始记录模板数据
+        ExcelReplaceUtil.ExcelReplace(sheet, result, false);
+        // 进行 更新操作
+        sheetRelHeadContextData.setTestConditionText(originalData.getTestCondition());
+        sheetRelHeadContextData.setEquipmentText(originalData.getEquipment());
+        sheetRelHeadContextData.setTestDateText(originalData.getTestDate());
+        sampleEntityMapper.updateTestItemSheetRelHeadContext(sheetRelHeadContextData);
+    }
 
     /**
      * 私有方法 调用 签名图片存放数组中。
@@ -957,7 +1107,6 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             data.setSheetIndex(index);
             ExcelReplaceUtil.getSheetRowAndIndexColumn(data, wb);
             indexDataXYMap.put(index, data);
-            System.out.println("信息输出 == " + data);
         }
         String path = dir + GenID.getID() + ".xlsx";
         document.save(path);
@@ -1759,8 +1908,12 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             } else {
                 SampleItemInstrumentEntity itemDetail = testDetectionDao.getTestEntrustedSampleCheckitemRelDetail(id);
                 // 获取试验开始时间 == null  则 设置为检测项的 开始时间与结束时间
-                startTimestr = yyyyMMddHH_NOT_.format(itemDetail.getStartTime()).substring(0, 11);
-                endTimestr = yyyyMMddHH_NOT_.format(itemDetail.getEndTime()).substring(0, 11);
+                if (itemDetail.getStartTime() != null) {
+                    startTimestr = yyyyMMddHH_NOT_.format(itemDetail.getStartTime()).substring(0, 11);
+                }
+                if (itemDetail.getEndTime() != null) {
+                    endTimestr = yyyyMMddHH_NOT_.format(itemDetail.getEndTime()).substring(0, 11);
+                }
             }
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(startTimestr) && org.apache.commons.lang3.StringUtils.isNotEmpty(endTimestr)) {
                 // 仪器检测时间与结束时间一致的话  合并即可

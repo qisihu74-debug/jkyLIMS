@@ -3,6 +3,7 @@ package com.lims.manage.erp.util;
 import com.lims.manage.erp.vo.ExcelInsertVo;
 import com.lims.manage.erp.vo.OriginalRecordDataVo;
 import com.lims.manage.erp.vo.TemplateSampleVo;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -49,14 +50,28 @@ public class ExcelReplaceUtil {
                         // 工程部位/用途：
                         cell.setCellValue(originalRecordDataVo.getProjectLocation());
                     }
-//                    if (!cellValue.equals("") && cellValue.equals("${result.testDate}")) {
-//                        // 试验检测日期
-//                        cell.setCellValue(originalRecordDataVo.getTestDate());
-//                    }
-//                    if (!cellValue.equals("") && cellValue.equals("${result.testCondition}")) {
-//                        // 试验条件
-//                        cell.setCellValue(originalRecordDataVo.getTestDate());
-//                    }
+                    if (!cellValue.equals("") && cellValue.equals("${result.testDate}")) {
+                        // 试验检测日期
+                        if (StringUtils.isNotEmpty(originalRecordDataVo.getTestDate())) {
+                            cell.setCellValue(originalRecordDataVo.getTestDate());
+                        }
+                    }
+                    // 根据实验检测日期 text文本 当做标识符操作
+                    if (!cellValue.equals("") && StringUtils.isNotEmpty(originalRecordDataVo.getTestDateText()) && cellValue.equals(originalRecordDataVo.getTestDateText())) {
+                        // 试验检测日期 text文本
+                        cell.setCellValue(originalRecordDataVo.getTestDate());
+                    }
+                    if (!cellValue.equals("") && cellValue.equals("${result.testCondition}")) {
+                        // 试验条件
+                        if (StringUtils.isNotEmpty(originalRecordDataVo.getTestCondition())) {
+                            cell.setCellValue(originalRecordDataVo.getTestCondition());
+                        }
+                    }
+                    // 试验条件 text 文本 当做标识符操作
+                    if (!cellValue.equals("") && StringUtils.isNotEmpty(originalRecordDataVo.getTestConditionText()) && cellValue.equals(originalRecordDataVo.getTestConditionText())) {
+                        // 试验条件
+                        cell.setCellValue(originalRecordDataVo.getTestCondition());
+                    }
                     if (!cellValue.equals("") && cellValue.equals("${result.testBasis}")) {
                         // 检测依据
                         cell.setCellValue(originalRecordDataVo.getTestBasis());
@@ -65,10 +80,17 @@ public class ExcelReplaceUtil {
                         // 判定依据
                         cell.setCellValue(originalRecordDataVo.getJudgeBasis());
                     }
-//                    if (!cellValue.equals("") && cellValue.equals("${result.equipment}")) {
-////                        // 主要仪器设备名称及编号
-////                        cell.setCellValue(originalRecordDataVo.getEquipment());
-////                    }
+                    if (!cellValue.equals("") && cellValue.equals("${result.equipment}")) {
+                        // 主要仪器设备名称及编号
+                        if (StringUtils.isNotEmpty(originalRecordDataVo.getEquipment())) {
+                            cell.setCellValue(originalRecordDataVo.getEquipment());
+                        }
+                    }
+                    // 主要仪器设备名称及编号 当做标识符操作
+                    if (!cellValue.equals("") && StringUtils.isNotEmpty(originalRecordDataVo.getEquipmentText()) && cellValue.equals(originalRecordDataVo.getEquipmentText())) {
+                        // 主要仪器设备名称及编号
+                        cell.setCellValue(originalRecordDataVo.getEquipment());
+                    }
                     if (!cellValue.equals("") && cellValue.contains("${result.sampleDetails}")) {
                         TemplateSampleVo sample = originalRecordDataVo.getSample();
 
@@ -77,7 +99,7 @@ public class ExcelReplaceUtil {
                         //样品描述：${result.sample.sampleDesc}来样时间：${result.sample.sampleTime}
                         String sampleName = "样品名称：" + sample.getSampleName();
                         String sampleNumber = "样品编号" + sample.getSampleNumber();
-                        String sampleQuantity ="样品数量："+ sample.getSampleQuantity();
+                        String sampleQuantity = "样品数量：" + sample.getSampleQuantity();
                         String sampleDesc = "样品描述：" + sample.getSampleDesc();
                         String sampleTime = "来样时间：" + sample.getSampleTime();
                         String specs = "规格尺寸：" + sample.getSpecs();
@@ -256,7 +278,6 @@ public class ExcelReplaceUtil {
                     cell.setCellType(cell.CELL_TYPE_STRING);
                     //获取单元格数据
                     String cellValue = cell.getStringCellValue();
-                    System.out.println("cellValue == " + cellValue);
                     if (!cellValue.equals("") && cellValue.equals(excelInsertVo.getRecordType())) {
 //                        System.out.println("x == " + (x ));
 //                        System.out.println("y == " + (y + 2));

@@ -1,16 +1,8 @@
 package com.lims.manage.erp.mapper;
 
-import com.lims.manage.erp.entity.ItemExportBean;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleItemEntity;
-import com.lims.manage.erp.entity.TestTeam;
-import com.lims.manage.erp.entity.SampleCirculationRecord;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.vo.*;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
-import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -523,4 +515,51 @@ public interface SampleEntityMapper {
      * @return
      */
     List<Long> selectProductIdsTechnicist(@Param("list")List<Integer> list);
+
+    /**
+     * 存储 样品下 sheet 数据
+     * @param taskIdEntity
+     * @return
+     */
+    int addTestItemSheetRelHeadContext(TaskIdEntity taskIdEntity);
+
+    /**
+     * 查询 样品对应的 sheet数据集合
+     * @param sampleId
+     * @param sheetIndex
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tsample_id,\n" +
+            "\tsheet_index,\n" +
+            "\ttest_date_text,\n" +
+            "\ttest_condition_text,\n" +
+            "\tequipment_text \n" +
+            "FROM\n" +
+            "\ttest_item_sheet_rel_head_context \n" +
+            "WHERE\n" +
+            "\tsample_id = #{sampleId} \n" +
+            "\tAND sheet_index = #{sheetIndex}")
+    TaskIdEntity selectTestItemSheetRelHeadContextData(@Param("sampleId")Integer sampleId,@Param("sheetIndex")Integer sheetIndex);
+
+    /**
+     * 删除数据
+     * @param sampleId
+     * @param sheetIndex
+     * @return
+     */
+    @Delete("DELETE \n" +
+            "FROM\n" +
+            "\ttest_item_sheet_rel_head_context \n" +
+            "WHERE\n" +
+            "\tsample_id = #{sampleId} \n" +
+            "\tAND sheet_index = #{sheetIndex}")
+    int deleteTestItemSheetRelHeadContextList(@Param("sampleId")Integer sampleId,@Param("sheetIndex")Integer sheetIndex);
+
+    /**
+     * 进行更新操作
+     * @param taskIdEntity
+     * @return
+     */
+    int updateTestItemSheetRelHeadContext(TaskIdEntity taskIdEntity);
 }

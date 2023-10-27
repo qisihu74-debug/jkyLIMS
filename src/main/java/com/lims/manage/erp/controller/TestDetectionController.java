@@ -150,23 +150,25 @@ public class TestDetectionController {
             if (DetailStatus == true) {
                 try {
                     // 任务单结束 通过任务单id 获取所有检测项数据数据
-                    Map<Integer, List<Integer>> map = pageOfficeCopyService.selectTaskIds(sampleItemInstrumentVo.getTaskId());
-                    for (Integer key : map.keySet()) {
-                        List<Integer> itemIds = map.get(key);
-                        paramVo.setItemInstrumentEntityList(itemIds);
-                        // 每组检测项统计信息 并进行试验
-                        pageOfficeCopyService.updateItemOriginUr(paramVo);
-                        // 试验完成 对检测项下 含有对应的 excel 转成pdf 进行更新origin_url_pdf。
-                        List<SampleItemInstrumentEntity> sampleItemInstrumentEntities = new ArrayList<>();
-                        for (Integer itemId : itemIds) {
-                            SampleItemInstrumentEntity data = new SampleItemInstrumentEntity();
-                            data.setItemId(itemId);
-                            sampleItemInstrumentEntities.add(data);
-                        }
-                        sampleItemInstrumentVo.setItemInstrumentEntityList(sampleItemInstrumentEntities);
+//                    Map<Integer, List<Integer>> map = pageOfficeCopyService.selectTaskIds(sampleItemInstrumentVo.getTaskId());
+//                    for (Integer key : map.keySet()) {
+//                        List<Integer> itemIds = map.get(key);
+//                        paramVo.setItemInstrumentEntityList(itemIds);
+//                        // 每组检测项统计信息 并进行试验
+//                        pageOfficeCopyService.updateItemOriginUr(paramVo);
+//                        // 试验完成 对检测项下 含有对应的 excel 转成pdf 进行更新origin_url_pdf。
+//                        List<SampleItemInstrumentEntity> sampleItemInstrumentEntities = new ArrayList<>();
+//                        for (Integer itemId : itemIds) {
+//                            SampleItemInstrumentEntity data = new SampleItemInstrumentEntity();
+//                            data.setItemId(itemId);
+//                            sampleItemInstrumentEntities.add(data);
+//                        }
+//                        sampleItemInstrumentVo.setItemInstrumentEntityList(sampleItemInstrumentEntities);
+//                        pageOfficeCopyService.updateItemOriginUrlPdf(sampleItemInstrumentVo);
+//                        return ResultUtil.success("任务单完成！！！");
+//                    }
                         pageOfficeCopyService.updateItemOriginUrlPdf(sampleItemInstrumentVo);
                         return ResultUtil.success("任务单完成！！！");
-                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     return ResultUtil.success("任务单完成 编辑原始记录异常抛出 ： " + e);
