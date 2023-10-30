@@ -229,7 +229,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             return true;
         }
         if (reportApprovalVo1.getState() == 1 &&  reportApprovalVo2.getReportTypeStatus()==1 ) {
-            state = 1;
+            state = 0;
             reportApprovalVo.setVerifyerTime(null);
             reportApprovalVo.setVerifyer(null);
             reportApprovalVo.setVerifyerId(null);

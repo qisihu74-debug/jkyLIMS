@@ -4221,6 +4221,10 @@ public class ReportServiceImpl implements ReportService {
         }
         entrustEntityMapper.updateReportTypeAndStatus(list);
         if (reportType == 0){
+            Integer midReportExit = entrustEntityMapper.midReportExit(entrustIdByTaskId);
+            if(midReportExit > 0){
+                return false;
+            }
             //报告记录表限制只存在同一委托下的报告记录
             Long id = reportMapper.getInfoByEntrustId1(entrustIdByTaskId);
             if (id != null){
@@ -4257,6 +4261,7 @@ public class ReportServiceImpl implements ReportService {
                     reportRecordEntity.setId(infoByEntrustId);
                     // 报告数量
                     reportRecordEntity.setNumber(reportCount);
+                    reportRecordEntity.setState("1");
                     recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity);
                 }else {
                     //中间报告、如果报告类型是中间报告，报告记录新增数据
