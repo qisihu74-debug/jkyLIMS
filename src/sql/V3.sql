@@ -72,7 +72,7 @@ CREATE TABLE `test_check_items_task_rel` (
 
 INSERT INTO `sys_function` (`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES ('96', '39', '任务大厅', '0', '0', '待领取任务')
 
-UPDATE `sys_function` SET `name`='检测任务' WHERE (`function_id`='40') LIMIT 1
+UPDATE `sys_function` SET `name`='检测任务' WHERE (`function_id`='40') LIMIT 1;
 
 
 
@@ -119,7 +119,7 @@ ALTER TABLE `test_entrusted_sample_checkitem_rel` ADD COLUMN `origin_url_pdf` VA
 -- 任务单增加参数
 ALTER TABLE `test_task` ADD COLUMN `probationer` VARCHAR ( 255 ) NULL COMMENT '见习生：实习的新手' AFTER `create_time`;
 ALTER TABLE `test_task` ADD COLUMN `interns` VARCHAR ( 255 ) NULL COMMENT '实习生' AFTER `probationer`;
-ALTER TABLE `test_task` ADD COLUMN `auxilihome_afficheary_personnel` VARCHAR ( 255 ) NULL COMMENT '辅助人员' AFTER `interns`;
+ALTER TABLE `test_task` ADD COLUMN `auxiliary_personnel` VARCHAR ( 255 ) NULL COMMENT '辅助人员' AFTER `interns`;
 
 delete from sys_function WHERE name in('中间报告制作','最终报告制作','报告合成(旧)');
 
@@ -128,12 +128,10 @@ UPDATE `sys_function` SET `name`='报告合成' WHERE (`function_id`='95') LIMIT
 UPDATE `sys_function` SET `name`='在线报告制作' WHERE (`function_id`='43') LIMIT 1;
 
 ALTER TABLE `test_report_record`
-DROP COLUMN `operate_type`,
 ADD COLUMN `operate_type`  int NULL DEFAULT 0 COMMENT '操作类型0线上编辑的报告，1线下编辑的报告' AFTER `seal_report_url`;
 
 UPDATE `sys_function` SET `name`='报告制作' WHERE (`function_id`='43') LIMIT 1;
 
---增加 sheet对应的记录信息表
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -153,4 +151,10 @@ CREATE TABLE `test_item_sheet_rel_head_context`  (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+DROP TABLE IF EXISTS `test_sample_area`;
+CREATE TABLE `test_sample_area` (
+  `id` int NOT NULL COMMENT 'id',
+  `pid` int DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL COMMENT '名称'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
