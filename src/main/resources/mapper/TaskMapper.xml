@@ -1419,6 +1419,12 @@
         <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
             #{id}
         </foreach>
+        <if test="userIds != null ">
+            or t3.user_id in
+         <foreach collection="userIds" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        </if>
         and t3.name is not NULL
         and t2.del_flag = 0
     </select>

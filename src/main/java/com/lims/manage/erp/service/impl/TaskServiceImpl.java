@@ -6,23 +6,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.config.PoiConfig;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustFileTableEntity;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.ReqTaskPool;
-import com.lims.manage.erp.entity.SampleCirculationRecord;
-import com.lims.manage.erp.entity.SampleEntity;
-import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
-import com.lims.manage.erp.entity.TaskIdEntity;
-import com.lims.manage.erp.entity.TaskRes;
-import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TaskTestTeamEntity;
-import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
-import com.lims.manage.erp.entity.TestInstrumentEntity;
-import com.lims.manage.erp.entity.TestSampleEntity;
-import com.lims.manage.erp.entity.TestTaskPool;
-import com.lims.manage.erp.entity.TestTeam;
-import com.lims.manage.erp.entity.TreeEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.EntrustFileTableDao;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
@@ -34,6 +18,7 @@ import com.lims.manage.erp.mapper.TestDetectionDao;
 import com.lims.manage.erp.mapper.TestEntrustedTaskRelDao;
 import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.AsposeUtil;
@@ -754,23 +739,49 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         Long department = teamMapper.getTeamIdByUid(UserLong);
         // 获取顶级部门 为空则是当前部门
         Long topDepartment = this.getTopDepartment(department);
-        if(StringUtils.isEmpty(topDepartment)){
+        if (StringUtils.isEmpty(topDepartment)) {
             topDepartment = department;
         }
         // 获取团队下所有子集团队下技术人员集合
         List<TestTeam> testTeamList = teamMapper.getByTeamId(topDepartment);
         List<LabelValueVo> teamVos = new ArrayList<>();
+        // 查询当前登录人 是否为 授权角色
+        Boolean flag = false;
+        List<SysRoleEntity> roleList = sysRoleDao.selectSysRoleByUserId(UserLong);
+        // 用户集合 = 根据角色 == 88 带出用户信息
+        Set<Long> userIds = new HashSet<>();
+        if (CollectionUtil.isNotEmpty(roleList)) {
+            for (SysRoleEntity sysRoleEntity : roleList) {
+                if (sysRoleEntity.getRoleId() == 88) {
+                    flag = true;
+                }
+            }
+            // 根据 角色Id 带出 用户信息列表
+            if (flag) {
+                // TODO:10月30日 暂定写死 = 88L
+                List<LabelValueVo> userList = sysRoleDao.selectSysyRoleName(88L);
+                if (CollectionUtil.isNotEmpty(userList)) {
+                    for (LabelValueVo labelValueVo : userList) {
+                        userIds.add(labelValueVo.getValue());
+                    }
+                }
+            }
+        }
         // testTeamList =null
-        if(CollectionUtils.isEmpty(testTeamList)){
+        if (CollectionUtils.isEmpty(testTeamList)) {
             // 团队id集合 返回人员信息
             Set<Long> deptIds = new HashSet<>();
             deptIds.add(topDepartment);
-            List<LabelValueVo> teamVos0 = taskMapper.getMemberInformationConcat(deptIds);
-            teamVo.setTeamVo(teamVos0);
+            if (CollectionUtil.isNotEmpty(userIds)) {
+                List<LabelValueVo> teamVos0 = taskMapper.getMemberInformationConcat(deptIds, userIds);
+                teamVo.setTeamVo(teamVos0);
+            } else {
+                List<LabelValueVo> teamVos0 = taskMapper.getMemberInformationConcat(deptIds, null);
+                teamVo.setTeamVo(teamVos0);
+            }
         } else {
-            for(TestTeam testTeam:testTeamList)
-            {
-                if(!StringUtils.isEmpty(testTeam)){
+            for (TestTeam testTeam : testTeamList) {
+                if (!StringUtils.isEmpty(testTeam)) {
                     LabelValueVo labelValueVo = new LabelValueVo();
                     labelValueVo.setLabel(testTeam.getName());
                     labelValueVo.setValue(testTeam.getUserId());
