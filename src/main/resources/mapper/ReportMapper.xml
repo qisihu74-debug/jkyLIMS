@@ -421,7 +421,7 @@
             AND t2.report_producer like CONCAT('%',#{userId},'%')
             AND t2.report_complete = 2
             AND (t3.state = 3 or t3.mid_state = 1)
-            AND (t4.state >= 7 or t4.state is null)
+            AND (t4.state &lt;= 2 or t4.state is null)
         <if test="taskCode!=null and taskCode!=''">
             and t2.task_code like CONCAT('%',#{taskCode},'%')
         </if>

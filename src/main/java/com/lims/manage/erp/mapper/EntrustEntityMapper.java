@@ -817,4 +817,7 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Select("select report_count from test_entrusted_info where id=#{id}")
     Integer getReportNumById(@Param("id") Long id);
+
+    @Select("select COUNT(*) from test_report_record where entrust_id = #{id}")
+    Integer midReportExit(@Param("id") Long id);
 }
