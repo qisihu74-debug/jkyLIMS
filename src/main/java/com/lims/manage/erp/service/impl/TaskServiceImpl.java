@@ -756,17 +756,19 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                     flag = true;
                 }
             }
-            // 根据 角色Id 带出 用户信息列表
-            if (flag) {
-                // TODO:10月30日 暂定写死 = 88L
-                List<LabelValueVo> userList = sysRoleDao.selectSysyRoleName(88L);
-                if (CollectionUtil.isNotEmpty(userList)) {
-                    for (LabelValueVo labelValueVo : userList) {
-                        userIds.add(labelValueVo.getValue());
-                    }
+        }
+        // 根据 角色Id 带出 用户信息列表
+        if (flag) {
+            // TODO:10月30日 暂定写死 = 88L
+            List<LabelValueVo> userList = sysRoleDao.selectSysyRoleName(88L);
+            if (CollectionUtil.isNotEmpty(userList)) {
+                for (LabelValueVo labelValueVo : userList) {
+                    userIds.add(labelValueVo.getValue());
                 }
             }
         }
+        // 去重利器
+        HashMap<Long,LabelValueVo> map = new HashMap<>();
         // testTeamList =null
         if (CollectionUtils.isEmpty(testTeamList)) {
             // 团队id集合 返回人员信息
@@ -780,14 +782,26 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                 teamVo.setTeamVo(teamVos0);
             }
         } else {
+            if(CollectionUtil.isNotEmpty(userIds)){
+                List<LabelValueVo> teamVos1 = taskMapper.getMemberInformationConcat1(userIds);
+                if(CollectionUtil.isNotEmpty(teamVos1)){
+                    for (LabelValueVo labelValueVo : teamVos1) {
+                        map.put(labelValueVo.getValue(),labelValueVo);
+                    }
+                }
+            }
             for (TestTeam testTeam : testTeamList) {
                 if (!StringUtils.isEmpty(testTeam)) {
                     LabelValueVo labelValueVo = new LabelValueVo();
                     labelValueVo.setLabel(testTeam.getName());
                     labelValueVo.setValue(testTeam.getUserId());
                     labelValueVo.setText(testTeam.getText());
-                    teamVos.add(labelValueVo);
+                    map.put(labelValueVo.getValue(),labelValueVo);
                 }
+            }
+            for(Long key : map.keySet()){
+                LabelValueVo labelValueVo = map.get(key);
+                teamVos.add(labelValueVo);
             }
             teamVo.setTeamVo(teamVos);
         }

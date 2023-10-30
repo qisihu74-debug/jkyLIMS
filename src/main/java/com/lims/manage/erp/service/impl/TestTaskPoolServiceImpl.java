@@ -292,7 +292,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                         // 每组检测项根据报告制作人指定科室。
                         sampleItemEntity.setTechnicistId(detectorsCollection.get(0));
                         // TODO: 10月30日 制作人所在部门 先固定  查询当前用户的 科室信息
-                        if (detectorsCollection.get(0) == 265) {
+                        if (detectorsCollection.get(0) == 265 || detectorsCollection.get(0) ==264 ) {
                             claimFlag = false;
                         }
                     }
