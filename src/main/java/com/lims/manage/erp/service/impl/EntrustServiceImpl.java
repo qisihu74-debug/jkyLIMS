@@ -2960,7 +2960,7 @@ public class EntrustServiceImpl implements EntrustService {
             //设置样品信息
             List<SampleEntity> sampleEntityList = Lists.newArrayList();
             List<SampleEntity> samples = detail.getSamples();
-            List<TestSampleEntity> nodeSample = detail.getNodeSample();
+            List<TestSampleEntity> nodeSample = samples.get(0).getNodeSample();
             if (nodeSample != null && nodeSample.size() > 0) {
                 for (TestSampleEntity node : nodeSample) {
                     SampleEntity entity = new SampleEntity(node);
@@ -5625,7 +5625,7 @@ public class EntrustServiceImpl implements EntrustService {
             //设置样品信息
             List<SampleEntity> sampleEntityList = Lists.newArrayList();
             List<SampleEntity> samples = detail.getSamples();
-            List<TestSampleEntity> nodeSample = detail.getNodeSample();
+            List<TestSampleEntity> nodeSample = samples.get(0).getNodeSample();
             if (nodeSample != null && nodeSample.size() > 0) {
                 for (TestSampleEntity node : nodeSample) {
                     SampleEntity entity = new SampleEntity(node);

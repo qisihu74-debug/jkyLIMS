@@ -158,3 +158,6 @@ CREATE TABLE `test_sample_area` (
   `name` varchar(255) DEFAULT NULL COMMENT '名称'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+INSERT INTO `sys_role`(`role_id`, `role_name`, `role_remark`, `create_time`) VALUES (88, '交通工程下领取员角色', NULL, '2023-10-30 15:06:55');
+
