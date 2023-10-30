@@ -963,6 +963,7 @@ public class SampleServiceImpl implements SampleService {
 
     }
 
+    @Override
     public List<HashMap<String, SampleDetailVo>> getSampleTagInfoList(Integer sampleId) {
         List<HashMap<String, SampleDetailVo>> results = Lists.newArrayList();
         SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
