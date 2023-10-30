@@ -638,8 +638,8 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
             }
             newSampleCode.append(prefix+num);
         }else{//修改预收样样品编号
-            String prefix = sampleCode.substring(0,10);
-            String code = sampleCode.substring(10);
+            String prefix = sampleCode.substring(0,11);
+            String code = sampleCode.substring(11);
             int i = code.indexOf("-");
             String num;
             if(i > 0){
