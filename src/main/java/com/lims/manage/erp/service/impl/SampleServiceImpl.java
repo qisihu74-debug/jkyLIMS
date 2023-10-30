@@ -624,12 +624,6 @@ public class SampleServiceImpl implements SampleService {
         if (ids != null && ids.size() >= 1){
             return 1;
         }
-        if (state == 3){
-            List<Integer> exist = sampleEntityMapper.getExist(sampleId, 0);
-            if (CollectionUtils.isEmpty(exist)){
-                return 2;
-            }
-        }
         //插入流转记录
         SampleCirculationRecord record = new SampleCirculationRecord();
         //更新样品表状态
