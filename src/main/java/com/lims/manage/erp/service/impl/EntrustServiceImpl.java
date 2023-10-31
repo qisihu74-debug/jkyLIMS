@@ -5587,7 +5587,9 @@ public class EntrustServiceImpl implements EntrustService {
             // 删除任务单
             taskMapper.deleteTaskById(data.getId());
             // 根据任务单id 删除流转信息
-            taskMapper.deleteTaskRel(data.getId());
+            taskMapper.deleteTaskRel(data.getEntrustmentId());
+            // 删除任务流水号 根据entrustId
+            taskMapper.deleteTaskRelPool(data.getEntrustmentId());
         }
         // 委托单 置为0
         EntrustEntity basisInfo = new EntrustEntity();
