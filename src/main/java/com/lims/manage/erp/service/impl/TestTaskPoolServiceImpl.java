@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -426,8 +427,6 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         }
         // 领样人
         entity.setSampler(sampler);
-        // 领样时间
-        entity.setSampleReceivingTime(new Date());
         // 补充检测项信息
         List<CheckItemDeptVo> checkItemDeptVoList = new ArrayList<>();
         long taskId = GenID.getID();
@@ -646,7 +645,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             // 领样人
             vo.setSampler(entity.getSampler());
             // 领样时间
-            vo.setSampleReceivingTime(new Date());
+            vo.setSampleReceivingTime(vo.getOrderTime());
             // 样品状态描述
             vo.setOutwardDescribe(sampleItemEntity.getSampleStateDescription());
             // 流水号任务单id

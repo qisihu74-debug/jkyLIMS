@@ -111,6 +111,8 @@ public class EntrustServiceImpl implements EntrustService {
     private TestTaskPoolMapper taskPoolMapper;
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
+    @Autowired
+    private  TestCheckItemsTaskRelMapper testCheckItemsTaskRelMapper;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -2195,6 +2197,7 @@ public class EntrustServiceImpl implements EntrustService {
                             testEntrustedTaskRelEntity.setDeptName(deptIds[1]);
                         }
                     }
+                    taskProgressVo.setTaskOrderFlowList(taskOrderFlowList);
                 }else{
                     taskProgressVo.setTaskOrderFlowList(new ArrayList<>());
                 }
@@ -5588,13 +5591,17 @@ public class EntrustServiceImpl implements EntrustService {
             taskMapper.deleteTaskById(data.getId());
             // 根据任务单id 删除流转信息
             taskMapper.deleteTaskRel(data.getEntrustmentId());
-            // 删除任务流水号 根据entrustId
-            taskMapper.deleteTaskRelPool(data.getEntrustmentId());
         }
         // 委托单 置为0
         EntrustEntity basisInfo = new EntrustEntity();
         basisInfo.setId(entrustId);
         basisInfo.setState(0);
+        // 删除任务流水号 根据entrustId
+        taskMapper.deleteTaskRelPool(entrustId);
+        // 根据 委托单id 条件删除流转信息
+        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+        queryWrapper12.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
+        testCheckItemsTaskRelMapper.delete(queryWrapper12);
         // 删除任务流转信息 根据任务单id
         entityMapper.updateEntrustInfos(basisInfo);
         // 根据委托单id 进行批量处理检测项状态
