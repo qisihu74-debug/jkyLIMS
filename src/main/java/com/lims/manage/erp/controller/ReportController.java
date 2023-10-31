@@ -606,6 +606,10 @@ public class ReportController {
         if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
             return ;
         }
+        //获取检测结论
+        if (CollectionUtils.isEmpty(reqBean.getList())){
+            reqBean.setList(reportService.getResut(reqBean.getId(),Integer.parseInt(reqBean.getReportType())));
+        }
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;
         ReportResBean resBean = null;
