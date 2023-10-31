@@ -109,6 +109,8 @@ public class EntrustServiceImpl implements EntrustService {
     private LogManagerService logManagerService;
     @Autowired
     private TestTaskPoolMapper taskPoolMapper;
+    @Autowired
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -343,8 +345,7 @@ public class EntrustServiceImpl implements EntrustService {
             Long time = System.currentTimeMillis();
         //获取并设置委托编号，相应的类别
             EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),acceptanceDate);
-            Long num = GenID.getID();
-            basisInfo.setEntrustmentNo(num.intValue());
+            basisInfo.setEntrustmentNo(snowflakeIdGenerator.nextId());
             basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
             basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
             // 通过委托编号 查询是否存在
@@ -3542,8 +3543,7 @@ public class EntrustServiceImpl implements EntrustService {
         String acceptanceDate = yyyyMMddHH_NOT_.format(basisInfo.getAcceptanceDate()).substring(0,6);
         //获取并设置委托编号，相应的类别
         EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),acceptanceDate);
-        Long num = GenID.getID();
-        basisInfo.setEntrustmentNo(num.intValue());
+        basisInfo.setEntrustmentNo(snowflakeIdGenerator.nextId());
         basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
         basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
         /**
