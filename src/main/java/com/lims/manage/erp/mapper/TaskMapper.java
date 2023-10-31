@@ -551,12 +551,20 @@ public interface TaskMapper extends BaseMapper {
     int inserTasUsed(TaskTestEntity taskTestEntity);
 
     /**
-     * 删除任务流转信息 根据任务单id
-     * @param taskId
+     * 删除任务流转信息 根据entrustId
+     * @param entrustId
      * @return
      */
-    @Delete("DELETE FROM test_entrusted_task_rel  WHERE task_id in(#{taskId})")
-    int deleteTaskRel(@Param("taskId")Long taskId);
+    @Delete("DELETE FROM test_entrusted_task_rel  WHERE entrust_id in(#{entrustId})")
+    int deleteTaskRel(@Param("entrustId")Long entrustId);
+
+    /**
+     * 删除任务流水号 根据entrustId
+     * @param entrustId
+     * @return
+     */
+    @Delete("DELETE FROM test_task_pool  WHERE entrustment_id in(#{entrustId})")
+    int deleteTaskRelPool(@Param("entrustId")Long entrustId);
 
     /**
      * 根据委托单id 进行批量处理
