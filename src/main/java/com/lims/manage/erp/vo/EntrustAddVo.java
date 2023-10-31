@@ -3,6 +3,7 @@ package com.lims.manage.erp.vo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lims.manage.erp.entity.EntrustFileTableEntity;
 import com.lims.manage.erp.entity.SampleEntity;
+import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -309,5 +310,9 @@ public class EntrustAddVo {
      * 审理状态：0未审核，1已审核
      */
     private String auditState;
+    /**
+     * 流转信息数据
+     */
+    private List<TestEntrustedTaskRelEntity> taskList;
 
 }

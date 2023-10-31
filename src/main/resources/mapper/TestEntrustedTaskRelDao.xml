@@ -61,6 +61,22 @@
         or (entrust_id = #{entrustId} and department is null)
     </if>
     </select>
+    <select id="getEntrustTaskList" resultType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
+        SELECT
+        id,
+        department,
+        task_flow_date,
+        type,
+        remark,
+        user_id,
+        address_name,
+        task_id,
+        record_id
+        FROM
+        test_entrusted_task_rel
+        WHERE
+             entrust_id = #{entrustId} and department is null
+    </select>
     <update id="updateData" parameterType="com.lims.manage.erp.entity.TestEntrustedTaskRelEntity">
         update test_entrusted_task_rel
         <set>

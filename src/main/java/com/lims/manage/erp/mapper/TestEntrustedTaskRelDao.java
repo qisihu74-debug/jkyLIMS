@@ -36,6 +36,12 @@ public interface TestEntrustedTaskRelDao {
     List<TestEntrustedTaskRelEntity> getTaskList(@Param("taskId") Long taskId,@Param("entrustId") Long entrustId);
 
     /**
+     *  根据委托单Id 查询 流转单 列表
+     * @return
+     */
+    List<TestEntrustedTaskRelEntity> getEntrustTaskList(@Param("entrustId") Long entrustId);
+
+    /**
      * 单个修改信息
      */
     int updateData(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity);

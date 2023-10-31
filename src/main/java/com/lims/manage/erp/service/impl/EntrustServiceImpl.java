@@ -2112,6 +2112,10 @@ public class EntrustServiceImpl implements EntrustService {
         //查询当前委托报告信息
         List<ReportProgressVo> reportProgressVo = dealReportsState(entrustmentId);
         entrustAddVo.setReportProgresses(reportProgressVo);
+        // TODO: 10月31日 流转信息数据
+        List<TestEntrustedTaskRelEntity> taskList = com.google.common.collect.Lists.newArrayList();
+        taskList = testEntrustedTaskRelDao.getEntrustTaskList(entrustmentId);
+        entrustAddVo.setTaskList(taskList);
         return entrustAddVo;
     }
 
