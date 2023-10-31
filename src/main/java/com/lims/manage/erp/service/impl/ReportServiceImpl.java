@@ -1643,6 +1643,16 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public Long getIdByFId(Long id) {
+        return recordEntityMapper.getIdByFId(id);
+    }
+
+    @Override
+    public Long getIdByMId(Long id) {
+        return recordEntityMapper.getIdByMId(id);
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();
@@ -1841,7 +1851,8 @@ public class ReportServiceImpl implements ReportService {
                     sampleEntity = entity;
                 }
             }
-            String[] strings = conclusionEntity.getUrl().split("\\/");
+            String[] split = conclusionEntity.getUrl().split("\\?");
+            String[] strings = split[0].split("\\/");
             String bluckName = strings[3];
             String fileName = strings[4];
             Workbook doc = null;
@@ -1852,7 +1863,7 @@ public class ReportServiceImpl implements ReportService {
             logger.debug("报告页数:{}", totalPageNew);
             //写入数据
             List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
-            if (org.apache.commons.collections.CollectionUtils.isNotEmpty(checkItemList)) {
+            if (checkItemList != null) {
                 int size = doc.getWorksheets().getCount();
                 countMap.put(index, size);
                 //获取表格信息
