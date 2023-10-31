@@ -377,6 +377,9 @@ public class ReportServiceImpl implements ReportService {
         List<ReportListVo> list = reportMapper.reportDownloadListHistory(reportListVo);
         //设置任务单号
         for (ReportListVo reportListVo1 : list) {
+            if (reportListVo1.getOperateType() == null){
+                reportListVo1.setOperateType(1);
+            }
             List<String> taskCodes = reportMapper.getTaskCodes(reportListVo1.getId());
             reportListVo1.setTaskCodes(taskCodes);
         }

@@ -61,4 +61,8 @@ public class ReportListVo {
     private String reportType;
     private String verifyer;
     private String issuer;
+    /**
+     * 操作类型0线上编辑的报告，1线下编辑的报告
+     */
+    private Integer operateType;
 }

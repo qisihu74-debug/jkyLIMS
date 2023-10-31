@@ -682,7 +682,8 @@
         t1.price as countPrice,
         DATE_FORMAT(t1.required_completion_time,'%Y-%m-%d') as requestDate,
         DATE_FORMAT(t1.report_complete_time,'%Y-%m-%d') as reportCompleteTime,
-        t1.report_url as reportUrl
+        t1.report_url as reportUrl,
+        t1.operate_type As operateType
         FROM
         test_report_record t1 left join test_task t2 on t1.task_id = t2.id
         WHERE t1.state &gt;= 3
