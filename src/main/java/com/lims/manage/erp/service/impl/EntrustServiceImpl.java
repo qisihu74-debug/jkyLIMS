@@ -343,7 +343,8 @@ public class EntrustServiceImpl implements EntrustService {
             Long time = System.currentTimeMillis();
         //获取并设置委托编号，相应的类别
             EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),acceptanceDate);
-            basisInfo.setEntrustmentNo(time.intValue());
+            Long num = GenID.getID();
+            basisInfo.setEntrustmentNo(num.intValue());
             basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
             basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
             // 通过委托编号 查询是否存在
@@ -3541,8 +3542,8 @@ public class EntrustServiceImpl implements EntrustService {
         String acceptanceDate = yyyyMMddHH_NOT_.format(basisInfo.getAcceptanceDate()).substring(0,6);
         //获取并设置委托编号，相应的类别
         EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),acceptanceDate);
-        Long time = System.currentTimeMillis();
-        basisInfo.setEntrustmentNo(time.intValue());
+        Long num = GenID.getID();
+        basisInfo.setEntrustmentNo(num.intValue());
         basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
         basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
         /**
