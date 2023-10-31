@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author gjl
@@ -22,7 +23,7 @@ public class GenID {
     private static final int max12bit = 4095;
     private static final long max41bit= 1099511627775L;
     private static String machineId = "" ; // 机器ID
-
+    private static AtomicInteger counter = new AtomicInteger(0);
     public synchronized static long getID() {
         long time = System.currentTimeMillis() - EPOCH  + max41bit;
         // 二进制的 毫秒级时间戳
@@ -68,6 +69,15 @@ public class GenID {
             System.out.println(GenID.getID());
             i++;
         }
+
+    }
+
+    /**
+     * int id生成器
+     * @return
+     */
+    public static int generateId() {
+        return counter.incrementAndGet();
 
     }
 }
