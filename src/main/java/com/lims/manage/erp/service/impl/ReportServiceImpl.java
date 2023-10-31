@@ -276,6 +276,9 @@ public class ReportServiceImpl implements ReportService {
         PageHelper.startPage(pageNum, pageSize);
         List<ReportListVo> list = reportMapper.reportDownloadList0512(userTeamIds, search);
         for (ReportListVo reportListVo : list) {
+            if (reportListVo.getOperateType() == null){
+                reportListVo.setOperateType(1);
+            }
             //设置样品信息
             List<String> sampleNames = reportMapper.getSampleNames(reportListVo.getId());
             StringBuilder sampleName = new StringBuilder();

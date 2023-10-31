@@ -2056,8 +2056,6 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public EntrustAddVo getEntrustHistoryDetail(Long entrustmentId) {
         PageHelper.clearPage();
-        //暂存配合比下的的样品信息
-//        List<TestSampleEntity> nodeSample = Lists.newArrayList();
         // 通过委托ID 委托单信息 → test_entrusted_info
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustmentId);
         // 查询团队名称
@@ -2097,26 +2095,6 @@ public class EntrustServiceImpl implements EntrustService {
         // 样品信息 进行补充 检测依据集合，检测项集合
         for (SampleEntity sampleEntity : sampleCollection) {
             // 样品下 检测项、检测依据 补充。
-            // 根据 委托单状态 进行选择项查询 0&&144 查询默认部门信息 state =1 查询所属指定部门信息
-//            if (entrustAddVo.getState() == 0 || entrustAddVo.getState() == 144) {
-//                List<JudgmentBasisVo> list = sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId);
-//                if (list != null && !list.isEmpty()) {
-//                    // 根据检测项id 查询 默认匹配部门信息
-////                    for (JudgmentBasisVo data : list) {
-//////                        List<String> strings = sampleEntityMapper.getTeamNameStrings(data.getCheckItemId());
-//////                        data.setTestingRoom(strings.toString());
-////                        data.setTestingRoom("——");
-////                    }
-//                    sampleEntity.setJudgmentBasisVos(list);
-////                    //根据检测项ID查询可做该检测项的科室labelvalue集合
-////                    for (JudgmentBasisVo data : list) {
-////                        List<LabelValueVo> testingRoomList = sampleEntityMapper.getTestingRoomList(data.getCheckItemId());
-////                        data.setTestingRoomList(testingRoomList);
-////                    }
-////                    sampleEntity.setJudgmentBasisVos(list);
-//                }
-//            } else {
-//            }
             sampleEntity.setJudgmentBasisVos(sampleEntityMapper.selectTestStandardList(sampleEntity.getId(), entrustmentId));
             // 补充样品下 依据集合
             sampleEntity.setStandardFileIds(sampleEntityMapper.getSampleBasisSet(sampleEntity.getId(), entrustAddVo.getId()));
@@ -2128,13 +2106,16 @@ public class EntrustServiceImpl implements EntrustService {
             sampleEntity.setNodeSample(nodeSample);
         }
         entrustAddVo.setSamples(sampleCollection);
-//        entrustAddVo.setNodeSample(nodeSample);
         //查询当前委托任务信息
         List<TaskProgressVo> taskProgressList = dealTaskState(entrustmentId);
         entrustAddVo.setTaskProgressList(taskProgressList);
         //查询当前委托报告信息
         List<ReportProgressVo> reportProgressVo = dealReportsState(entrustmentId);
         entrustAddVo.setReportProgresses(reportProgressVo);
+        // TODO: 10月31日 流转信息数据
+        List<TestEntrustedTaskRelEntity> taskList = com.google.common.collect.Lists.newArrayList();
+        taskList = testEntrustedTaskRelDao.getEntrustTaskList(entrustmentId);
+        entrustAddVo.setTaskList(taskList);
         return entrustAddVo;
     }
 
@@ -2212,8 +2193,9 @@ public class EntrustServiceImpl implements EntrustService {
                             testEntrustedTaskRelEntity.setDeptName(deptIds[1]);
                         }
                     }
+                }else{
+                    taskProgressVo.setTaskOrderFlowList(new ArrayList<>());
                 }
-                taskProgressVo.setTaskOrderFlowList(taskOrderFlowList);
             }
         }
         return taskProgressList;
@@ -4265,8 +4247,9 @@ public class EntrustServiceImpl implements EntrustService {
         testEntrustedTaskRelEntity.setCreateDate(new Date());
         // 通过部门id 获取name值。
         PageHelper.clearPage();
-        String deptName = teamMapper.getTeamIdByName(testEntrustedTaskRelEntity.getDeptId());
-        testEntrustedTaskRelEntity.setDepartment(testEntrustedTaskRelEntity.getDeptId()+"&"+deptName);
+        // TODO: 修改流转信息
+//        String deptName = teamMapper.getTeamIdByName(testEntrustedTaskRelEntity.getDeptId());
+//        testEntrustedTaskRelEntity.setDepartment(testEntrustedTaskRelEntity.getDeptId()+"&"+deptName);
         //设置中间报告任务流转状态（0，未完成；1，已完成）
         if(testEntrustedTaskRelEntity.getType() == 1){
             testEntrustedTaskRelEntity.setState(0);
@@ -4290,7 +4273,7 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         stringBuilder1.append("任务单id："+testEntrustedTaskRelEntity.getTaskId());
-        stringBuilder1.append("部门信息："+testEntrustedTaskRelEntity.getDepartment());
+//        stringBuilder1.append("部门信息："+testEntrustedTaskRelEntity.getDepartment());
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.TASK_FLOW, true);
         testEntrustedTaskRelDao.addData(testEntrustedTaskRelEntity);
         return true;

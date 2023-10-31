@@ -500,6 +500,7 @@
         t6.report_code,
         t6.type AS reportType,
         t1.actual_price count_price,
+        t6.operate_type As operateType,
         DATE_FORMAT( t1.request_date, '%Y-%m-%d' ) request_date
         FROM
         test_entrusted_info t1
@@ -526,6 +527,7 @@
         t6.report_code,
         t6.type AS reportType,
         t1.actual_price count_price,
+        t6.operate_type AS operateType,
         DATE_FORMAT( t1.request_date, '%Y-%m-%d' ) request_date
         FROM
         test_entrusted_info t1
