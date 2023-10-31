@@ -809,7 +809,7 @@ public class EntrustController {
      */
     @PostMapping("/addTestEntrustedTaskRelEntity")
     public Result addTestEntrustedTaskRelEntity(@RequestBody TestEntrustedTaskRelEntity testEntrustedTaskRelEntity){
-        if(testEntrustedTaskRelEntity.getTaskId()==null ||testEntrustedTaskRelEntity.getEntrustId()==null){
+        if(testEntrustedTaskRelEntity.getEntrustId()==null){
             return ResultUtil.error("缺少必填参数！");
         }
         // 操作人id 与name 存入

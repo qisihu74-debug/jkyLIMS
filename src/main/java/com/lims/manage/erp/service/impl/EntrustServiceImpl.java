@@ -4247,8 +4247,9 @@ public class EntrustServiceImpl implements EntrustService {
         testEntrustedTaskRelEntity.setCreateDate(new Date());
         // 通过部门id 获取name值。
         PageHelper.clearPage();
-        String deptName = teamMapper.getTeamIdByName(testEntrustedTaskRelEntity.getDeptId());
-        testEntrustedTaskRelEntity.setDepartment(testEntrustedTaskRelEntity.getDeptId()+"&"+deptName);
+        // TODO: 修改流转信息
+//        String deptName = teamMapper.getTeamIdByName(testEntrustedTaskRelEntity.getDeptId());
+//        testEntrustedTaskRelEntity.setDepartment(testEntrustedTaskRelEntity.getDeptId()+"&"+deptName);
         //设置中间报告任务流转状态（0，未完成；1，已完成）
         if(testEntrustedTaskRelEntity.getType() == 1){
             testEntrustedTaskRelEntity.setState(0);
@@ -4272,7 +4273,7 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         stringBuilder1.append("任务单id："+testEntrustedTaskRelEntity.getTaskId());
-        stringBuilder1.append("部门信息："+testEntrustedTaskRelEntity.getDepartment());
+//        stringBuilder1.append("部门信息："+testEntrustedTaskRelEntity.getDepartment());
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.TASK_FLOW, true);
         testEntrustedTaskRelDao.addData(testEntrustedTaskRelEntity);
         return true;
