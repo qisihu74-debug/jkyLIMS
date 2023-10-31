@@ -483,7 +483,7 @@ public class SampleController {
         if(sampleEntity.getSampleType().contains("配合比")){
             i = testSampleEntityService.updateSampleBatch(sampleEntity);
         }else{
-            i = testSampleEntityService.updateSample(sampleEntity);
+            i = testSampleEntityService.updateSample1030(sampleEntity);
         }
         if (i > 0) {
             return ResultUtil.success("样品信息修改成功！");

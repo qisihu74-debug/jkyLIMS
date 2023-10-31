@@ -612,6 +612,52 @@ public class TestSampleEntityServiceImpl extends ServiceImpl<TestSampleEntityMap
         return testSampleEntityMapper.updateByPrimaryKeyNotAll(sampleEntity);
     }
 
+    @Override
+    public int updateSample1030(TestSampleEntity sampleEntity) {
+        // 根据样品ID 判断 样品与委托单是否绑定 、绑定 产品id是否变动，变动 则清除委托单下检测项信息。
+        methodUpdateSample(sampleEntity.getId(),sampleEntity.getProductId());
+        String outward = sampleEntity.getOutward();
+        if(outward != null){
+            String replace = outward.replace("[", "");
+            String replace1 = replace.replace("]", "");
+            String replace2 = replace1.replace("\"", "");
+            sampleEntity.setOutward(replace2);
+        }
+        //修改样品数量时，处理样品编号
+        StringBuilder newSampleCode = new StringBuilder();
+        String sampleCode = sampleEntity.getSampleCode();
+        if(sampleCode.contains("YP")){//修改正式样品编号
+            String prefix = sampleCode.substring(0,8);
+            String code = sampleCode.substring(8);
+            int i = code.indexOf("-");
+            String num;
+            if(i > 0){
+                num = code.substring(0, i);
+            }else{
+                num = code;
+            }
+            newSampleCode.append(prefix+num);
+        }else{//修改预收样样品编号
+            String prefix = sampleCode.substring(0,11);
+            String code = sampleCode.substring(11);
+            int i = code.indexOf("-");
+            String num;
+            if(i > 0){
+                num = code.substring(0, i);
+            }else{
+                num = code;
+            }
+            newSampleCode.append(prefix+num);
+        }
+        if(sampleEntity.getQuantityPerGroup() > 1){
+            newSampleCode.append("-01~");
+            String numStr = new DecimalFormat("00").format(sampleEntity.getQuantityPerGroup());
+            newSampleCode.append(numStr);
+        }
+        sampleEntity.setSampleCode(newSampleCode.toString());
+        return testSampleEntityMapper.updateByPrimaryKeyNotAll(sampleEntity);
+    }
+
     @Transactional
     @Override
     public int updateSampleBatch(TestSampleEntity sampleEntity) {
