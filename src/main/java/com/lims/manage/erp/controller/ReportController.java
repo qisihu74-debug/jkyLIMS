@@ -646,7 +646,7 @@ public class ReportController {
         response.setCharacterEncoding("UTF-8");
         try {
             fileName = URLEncoder.encode(fileName, "UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName+".xlsx");
             OutputStream outputStream = response.getOutputStream();
             IOUtils.copy(fileStream,outputStream);
             fileStream.close();
