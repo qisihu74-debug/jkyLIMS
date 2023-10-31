@@ -161,3 +161,10 @@ CREATE TABLE `test_sample_area` (
 
 INSERT INTO `sys_role`(`role_id`, `role_name`, `role_remark`, `create_time`) VALUES (88, '交通工程下领取员角色', NULL, '2023-10-30 15:06:55');
 
+ALTER TABLE `test_instrument`
+ADD COLUMN `is_show`  int NULL DEFAULT 0 COMMENT '0生成仪器使用记录，1不需要生成（不展示）' AFTER `device_state`;
+
+ALTER TABLE `test_instrument`
+ADD COLUMN `parallel`  int NULL DEFAULT 0 COMMENT '并线数量（不能并行的仪器默认为0，并行的仪器给出数量）' AFTER `is_show`;
+
+
