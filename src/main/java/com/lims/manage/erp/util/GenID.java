@@ -2,9 +2,11 @@ package com.lims.manage.erp.util;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
 import java.util.UUID;
@@ -19,11 +21,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Copyright © 河南交科院
  */
 public class GenID {
+    @Autowired
+    private SnowflakeIdGenerator snowflakeIdGenerator;
     private static final long EPOCH = 1659323575416L; //开始时间,固定一个小于当前时间的毫秒数
     private static final int max12bit = 4095;
     private static final long max41bit= 1099511627775L;
     private static String machineId = "" ; // 机器ID
     private static AtomicInteger counter = new AtomicInteger(0);
+    private static final int ID_LENGTH = 13;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
     public synchronized static long getID() {
         long time = System.currentTimeMillis() - EPOCH  + max41bit;
         // 二进制的 毫秒级时间戳
@@ -61,23 +68,5 @@ public class GenID {
         String randomNumeric = RandomStringUtils.randomNumeric(3);
         String orderNum = localDate + randomNumeric;
         return orderNum;
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        for (int i=0;i<10000;i++) {
-            Thread.sleep(1000);
-            System.out.println(GenID.getID());
-            i++;
-        }
-
-    }
-
-    /**
-     * int id生成器
-     * @return
-     */
-    public static int generateId() {
-        return counter.incrementAndGet();
-
     }
 }
