@@ -6397,6 +6397,8 @@ public class EntrustServiceImpl implements EntrustService {
         Date acceptanceTime = new Date();
         // 委托单 = 201 符合预委托单
         if(entrustDetails.getState() == 201){
+            StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append("委托单号 state = 201 " + entrustDetails.getEntrustmentNo());
             //设置委托编号
             String acceptanceDate = yyyyMMddHH_NOT_.format(acceptanceTime).substring(0, 6);
             //获取并设置委托编号，相应的类别
@@ -6412,6 +6414,8 @@ public class EntrustServiceImpl implements EntrustService {
             // 获取受理日期
             basisInfo.setAcceptanceDate(acceptanceTime);
             basisInfo.setBusinessAcceptor(userInfo.getName());
+            stringBuffer.append("委托单号 state = 0 " + acceptanceDate);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "审核发布：审批通过时\t"+stringBuffer.toString(), Const.ENTRUST_FOUND, true);
         }
         entityMapper.updateEntrustInfoDetails(basisInfo);
         // 获取样品预览信息 进行更改编号数据。
@@ -6420,12 +6424,15 @@ public class EntrustServiceImpl implements EntrustService {
             for (SampleEntity sampleData1 : sampleCollection) {
                 // 读取编号 是否为 预样品编号。
                 if (sampleData1.getSampleCode().contains("YSY")) {
+                    StringBuffer stringBuffer = new StringBuffer();
+                    stringBuffer.append("处理原材样品编号前  = YSY " + sampleData1.getSampleCode());
                     // 收样人
                     sampleData1.setInspector(userInfo.getName());
                     // 样品状态 预收样 = 收样
                     sampleData1.setState("5");
                     // 处理原材样品编号 （ps:定义预样品编号需要强制更改样品编号）
                     sampleData1.setSampleCode(methodSampleCode(sampleData1.getSampleCode()));
+                    stringBuffer.append("处理原材样品编号后  " + sampleData1.getSampleCode());
                     // update样品信息
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleData1);
                     //补充配合比下的的样品信息
@@ -6441,13 +6448,16 @@ public class EntrustServiceImpl implements EntrustService {
                                 sampleData2.setReceivedDate(sampleData1.getReceivedDate());
                                 if (sampleData1.getSampleCode() != null) {
                                     // 处理配合比则 更改样品编号
+                                    stringBuffer.append("处理配合比样品编号前  " + sampleDetailVo1.getSampleCode());
                                     sampleData2.setSampleCode(methodMixProportionSampleCode(sampleData1.getSampleCode(), sampleDetailVo1.getSampleCode()));
+                                    stringBuffer.append("处理配合比样品编号后  " + sampleData2.getSampleCode());
                                 }
                                 // update样品信息
                                 sampleEntityMapper.updateByPrimaryKeySelective(sampleData2);
                             }
                         }
                     }
+                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "审核发布：审批通过时\t"+stringBuffer.toString(), Const.ENTRUST_FOUND, true);
                 }
                 // 根据样品id 查询样品流转列表
                 List<SampleCirculationRecord> circulationList = sampleEntityMapper.getRecords(sampleData1.getId(), 30);
