@@ -3,8 +3,10 @@ package com.lims.manage.erp.controller;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.aspose.cells.Cells;
 import com.aspose.cells.SaveFormat;
 import com.aspose.cells.Workbook;
+import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
@@ -26,6 +28,7 @@ import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -86,6 +89,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -131,6 +135,8 @@ public class ReportController {
     private DownloadUtils downLoad;
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private SysUserDao sysUserDao;
 //    @Autowired
 //    private ReportRecordEntityMapper recordEntityMapper;
 
@@ -1494,5 +1500,76 @@ public class ReportController {
         }
         reportService.sealRevoke(id);
         return ResultUtil.success("撤回成功");
+    }
+
+    /**
+     * 更新异常数据
+     */
+    @GetMapping("updateDate")
+    public void updateDate(){
+        String directoryPath = "C:\\Users\\Administrator\\3D Objects\\每天提交产值\\每天提交产值";
+        try {
+            listFiles(directoryPath);
+        } catch (Exception e) {
+            log.error("更新发生异常:{}",e);
+        }
+
+    }
+
+    public void listFiles(String directoryPath) throws Exception{
+                File directory = new File(directoryPath);
+        if (directory.exists() && directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isFile()) {
+                        InputStream inputStream = new FileInputStream(file);
+                        //读取文件，根据报告编号更新审核、签发信息及报告状态
+                        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(inputStream);
+                        Worksheet worksheet = workbook.getWorksheets().get(0);
+                        Cells cells = worksheet.getCells();
+                        int num = 4;
+                        while (num<=100000){
+                            Object value = cells.get("B" + num).getValue();
+                            if (value != null){
+                                String reportCode = value.toString();
+                                if (StringUtils.isNotEmpty(reportCode)){
+                                    //跟新数据库
+                                    List<String> list = reportService.getAllUpdateCode();
+                                    if (list.contains(reportCode)){
+                                        String shr = cells.get("E"+num).getValue().toString();//审核人
+                                        SysUserEntity shrId = sysUserDao.getUserIdByName(shr);//审核人id
+                                        String qhr = cells.get("F"+num).getValue().toString();//签发人
+                                        SysUserEntity qhrId = sysUserDao.getUserIdByName(qhr);//审核人id
+                                        String shDate = cells.get("G"+num).getValue().toString();
+                                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                                        Date shTime = null;
+                                        Date qfTime = null;
+                                        try {
+                                            shTime = dateFormat.parse(shDate);
+                                            qfTime = dateFormat.parse(shDate);
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
+                                        reportService.updateShAndQfByReportCode(reportCode,shr,shrId.getUserId(),qhr,qhrId.getUserId(),shTime,qfTime);
+                                        System.out.println("报告编号："+reportCode+" 的数据被更新审核人："+shr+" 签发人："+qhr);
+                                    }
+                                    num++;
+                                }else {
+                                    break;
+                                }
+                            }else {
+                                break;
+                            }
+                        }
+                    } else if (file.isDirectory()) {
+                        System.out.println("子目录： " + file.getName());
+                        listFiles(file.getAbsolutePath());
+                    }
+                }
+            }
+        } else {
+            System.out.println("目录不存在或不是一个目录");
+        }
     }
 }
