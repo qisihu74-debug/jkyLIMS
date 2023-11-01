@@ -282,4 +282,13 @@ public interface TeamMapper extends BaseMapper {
      * @return
      */
     List<TestTeam> getByTeamId(@Param("id") Long id);
+
+    /**
+     * 通过委托单id 及 部门id 保证委托单下任务单号 唯一。
+     * @param deptId
+     * @param entrustId
+     * @return
+     */
+    @Select("SELECT task_code FROM test_task WHERE entrustment_id = #{entrustId} and dept_id = #{deptId} LIMIT 1")
+    String selectTaskCode(@Param("deptId") Long deptId,@Param("entrustId") Long entrustId);
 }

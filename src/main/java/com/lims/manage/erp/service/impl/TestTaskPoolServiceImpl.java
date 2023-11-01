@@ -85,7 +85,6 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         LambdaQueryWrapper<TestCheckItemsTaskRel> taskRelLambdaQueryWrapper = new LambdaQueryWrapper<>();
         taskRelLambdaQueryWrapper.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
         List<TestCheckItemsTaskRel> itemsTaskRels = testCheckItemsTaskRelMapper.selectList(taskRelLambdaQueryWrapper);
-        System.out.println("任务大厅----展示详情数据");
         // 进行数据的 集成展示。
         if (CollectionUtil.isNotEmpty(sampleList)) {
             // 遍历检测项与对应指派人员的信息
@@ -253,6 +252,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
         // 检测人集合
         List<Long> tsetUserIds = new ArrayList<>();
+        // 报告制作人集合
+        List<Long> reportProducerIds = new ArrayList<>();
         // 参与效验的数据--------------------------------- ↓↓↓↓ ------------------------
         // 1、效验检测人在不在检测科室 2、检测人不能在多个科室 3、补充每组检测项中人员信息
         for (SampleItemEntity sampleItemEntity : list) {
@@ -282,25 +283,32 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                         userIds.add(Long.valueOf(testCheckItemsTaskRel.getUserId()));
                         // 根据报告制作人 来 确认科室信息
                         producerList.add(Long.valueOf(testCheckItemsTaskRel.getUserId()));
-                        // 读取报告制作人 是否在同一科室。
-                        List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(producerList);
-                        if (CollectionUtils.isEmpty(detectorsCollection)) {
-                            return ResultUtil.error("领取失败：" + nameStr + " 报告制作人不在科室");
-                        }
-                        if (detectorsCollection.size() >= 2) {
-                            return ResultUtil.error("领取失败：" + nameStr + " 报告制作人所在科室不同");
-                        }
-                        // 每组检测项根据报告制作人指定科室。
-                        sampleItemEntity.setTechnicistId(detectorsCollection.get(0));
-                        // TODO: 10月30日 制作人所在部门 先固定  查询当前用户的 科室信息
-                        if (detectorsCollection.get(0) == 265 || detectorsCollection.get(0) ==264 ) {
-                            claimFlag = false;
-                        }
+                        reportProducerIds.add(Long.valueOf(testCheckItemsTaskRel.getUserId()));
                     }
                 }
+                // 读取报告制作人 是否在同一科室。
+                List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(producerList);
+                if (CollectionUtils.isEmpty(detectorsCollection)) {
+                    return ResultUtil.error("领取失败：" + nameStr + " 报告制作人不在科室");
+                }
+                if (detectorsCollection.size() >= 2) {
+                    return ResultUtil.error("领取失败：" + nameStr + " 报告制作人所在科室不同");
+                }
+                // 每组检测项根据报告制作人指定科室。
+                sampleItemEntity.setTechnicistId(detectorsCollection.get(0));
+//                // 通过委托单id 和 科室信息 查询当前科室存在的话，则展示领取失败
+//                String taskCode = teamMapper.selectTaskCode(sampleItemEntity.getTechnicistId(), entrustId);
+//                if (StringUtils.isNotEmpty(taskCode)) {
+//                    // 抛出异常。
+//                    return ResultUtil.error("领取失败：" + "当前任务单已存在");
+//                }
+                // TODO: 10月30日 制作人所在部门 先固定  查询当前用户的 科室信息
+                if (detectorsCollection.get(0) == 265 || detectorsCollection.get(0) == 264) {
+                    claimFlag = false;
+                }
                 // 读取0：检测人、1：记录人、2、复核人、3、报告制作人 是否在同一科室。
-                List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(userIds);
-                if (detectorsCollection.size() >= 2 && claimFlag == true) {
+                List<Long> detectorsCollection2 = teamMapper.getUsersByTechnicist(userIds);
+                if (detectorsCollection2.size() >= 2 && claimFlag == true) {
                     return ResultUtil.error("领取失败：" + nameStr + " 检测人、记录人、复核人、报告制作人 必须在同一个团队中");
                 }
             }
@@ -309,14 +317,14 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 String[] inspectorArrays = sampleItemEntity.getInspector().split(",");
                 for (int i = 0; i < inspectorArrays.length; i++) {
                     String[] names = inspectorArrays[i].split("&");
-                    LabelValueVo labelValueVo = new LabelValueVo();
-                    labelValueVo.setLabel(names[0]);
-                    labelValueVo.setValue(Long.parseLong(names[1]));
-                    labelValueVo.setText("0");
-                    inspectorArraysVos.add(labelValueVo);
                     userIds.add(Long.parseLong(names[1]));
                     tsetUserIds.add(Long.parseLong(names[1]));
                     nameStr.append(names[0] + " ");
+                    TestCheckItemsTaskRel data = new TestCheckItemsTaskRel();
+                    data.setUserName(names[0]);
+                    data.setUserId(names[1]);
+                    data.setUserType(0);
+                    inspectorRels.add(data);
                 }
                 // 读取检测人信息 是否在同一科室。
                 List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(userIds);
@@ -330,6 +338,11 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 return ResultUtil.error("领取失败：检测人信息不能为空");
             }
             sampleItemEntity.setItemsTaskRels(inspectorRels);
+        }
+        // 进行效验：每组检测项中 报告制作人 应该不同，相同 会生成两组同样的任务单号
+        List<Long> detectorsCollection0 = teamMapper.getUsersByTechnicist(reportProducerIds);
+        if (detectorsCollection0.size() != list.size()) {
+            return ResultUtil.error("领取失败：" + "报告制作人中： 请选择同一组人员，同一组人员必须要在同一个团队，不同组的人员，不能出现在同一个团队中");
         }
         //每组检测项中 选中的检测人 不能在同一科室。
         List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(tsetUserIds);
