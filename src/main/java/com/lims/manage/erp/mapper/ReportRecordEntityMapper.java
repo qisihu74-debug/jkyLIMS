@@ -526,4 +526,21 @@ public interface ReportRecordEntityMapper {
 
     @Select("select id from test_report_record where entrust_id=#{id}")
     Long getIdByMId(@Param("id") Long id);
+
+    @Select("\n" +
+            "SELECT\n" +
+            "\t\t\treport_code\n" +
+            "\n" +
+            "\t\tFROM\n" +
+            "\t\t\ttest_report_record\n" +
+            "\t\tWHERE\n" +
+            "\t\t\treport_code IS NOT NULL\n" +
+            "\t\tAND (state = 1 OR state =2)\n" +
+            "\t\tAND report_type IS NOT NULL\n" +
+            "ORDER BY  report_code")
+    List<String> getAllUpdateCode();
+
+    @Update("update test_report_record set verifyer_time=#{shTime},issuer_time=#{qfTime},verifyer=#{shr},verifyer_id=#{shrId},issuer=#{qhr},issuer_id=#{qhrId},state='8'")
+    void updateShAndQfByReportCode(@Param("reportCode") String reportCode, @Param("shr") String shr, @Param("shrId") Long shrId,
+                                   @Param("qhr") String qhr, @Param("qhrId") Long qhrId, @Param("shTime") Date shTime, @Param("qfTime") Date qfTime);
 }

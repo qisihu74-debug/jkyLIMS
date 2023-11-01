@@ -13,6 +13,7 @@ import com.lims.manage.erp.entity.ReportResBean;
 import com.lims.manage.erp.entity.ReportTemplateEntity;
 import com.lims.manage.erp.entity.SealDefData;
 import com.lims.manage.erp.entity.SealEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.http.QiYueSuoResponse;
@@ -469,4 +470,8 @@ public interface ReportService {
     Long getIdByFId(Long id);
 
     Long getIdByMId(Long id);
+
+    List<String> getAllUpdateCode();
+
+    void updateShAndQfByReportCode(String reportCode, String shr, Long shrId, String qhr, Long qhrId, Date shTime, Date qfTime);
 }
