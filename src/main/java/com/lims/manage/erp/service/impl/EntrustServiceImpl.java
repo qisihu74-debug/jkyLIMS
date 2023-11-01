@@ -109,6 +109,10 @@ public class EntrustServiceImpl implements EntrustService {
     private LogManagerService logManagerService;
     @Autowired
     private TestTaskPoolMapper taskPoolMapper;
+    @Autowired
+    private SnowflakeIdGenerator snowflakeIdGenerator;
+    @Autowired
+    private  TestCheckItemsTaskRelMapper testCheckItemsTaskRelMapper;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -343,8 +347,7 @@ public class EntrustServiceImpl implements EntrustService {
             Long time = System.currentTimeMillis();
         //获取并设置委托编号，相应的类别
             EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),acceptanceDate);
-            Long num = GenID.getID();
-            basisInfo.setEntrustmentNo(num.intValue());
+            basisInfo.setEntrustmentNo(snowflakeIdGenerator.nextId());
             basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
             basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
             // 通过委托编号 查询是否存在
@@ -2194,6 +2197,7 @@ public class EntrustServiceImpl implements EntrustService {
                             testEntrustedTaskRelEntity.setDeptName(deptIds[1]);
                         }
                     }
+                    taskProgressVo.setTaskOrderFlowList(taskOrderFlowList);
                 }else{
                     taskProgressVo.setTaskOrderFlowList(new ArrayList<>());
                 }
@@ -3542,8 +3546,7 @@ public class EntrustServiceImpl implements EntrustService {
         String acceptanceDate = yyyyMMddHH_NOT_.format(basisInfo.getAcceptanceDate()).substring(0,6);
         //获取并设置委托编号，相应的类别
         EntrustCategoryVo entrustCategoryVo = returnEntrustCategoryVo(vo.getEntrustCategory(),acceptanceDate);
-        Long num = GenID.getID();
-        basisInfo.setEntrustmentNo(num.intValue());
+        basisInfo.setEntrustmentNo(snowflakeIdGenerator.nextId());
         basisInfo.setEntrustCategory(entrustCategoryVo.getEntrustCategory());
         basisInfo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
         /**
@@ -5575,24 +5578,33 @@ public class EntrustServiceImpl implements EntrustService {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         String userName = userInfo.getUserId() + "&" + userInfo.getUsername();
         // 查询任务单信息
-        for(TaskTestEntity taskTestEntity : list){
-            // 查询任务单详情：
-            TaskTestEntity data = taskMapper.selectTaskEntity(taskTestEntity.getId());
-            // 删除时间
-            data.setWasteTime(new Date());
-            // 操作人
-            data.setDerelict(userName);
-            // 新增已删除任务单 插入表 test_task_used
-            taskMapper.inserTasUsed(data);
-            // 删除任务单
-            taskMapper.deleteTaskById(data.getId());
-            // 根据任务单id 删除流转信息
-            taskMapper.deleteTaskRel(data.getId());
+        // 委托单下 任务单不为空的话
+        if(CollectionUtil.isNotEmpty(list)){
+            for(TaskTestEntity taskTestEntity : list){
+                // 查询任务单详情：
+                TaskTestEntity data = taskMapper.selectTaskEntity(taskTestEntity.getId());
+                // 删除时间
+                data.setWasteTime(new Date());
+                // 操作人
+                data.setDerelict(userName);
+                // 新增已删除任务单 插入表 test_task_used
+                taskMapper.inserTasUsed(data);
+                // 删除任务单
+                taskMapper.deleteTaskById(data.getId());
+                // 根据任务单id 删除流转信息
+                taskMapper.deleteTaskRel(data.getEntrustmentId());
+            }
         }
         // 委托单 置为0
         EntrustEntity basisInfo = new EntrustEntity();
         basisInfo.setId(entrustId);
         basisInfo.setState(0);
+        // 删除任务流水号 根据entrustId
+        taskMapper.deleteTaskRelPool(entrustId);
+        // 根据 委托单id 条件删除流转信息
+        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+        queryWrapper12.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
+        testCheckItemsTaskRelMapper.delete(queryWrapper12);
         // 删除任务流转信息 根据任务单id
         entityMapper.updateEntrustInfos(basisInfo);
         // 根据委托单id 进行批量处理检测项状态

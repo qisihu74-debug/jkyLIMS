@@ -49,6 +49,7 @@ import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
 import com.lims.manage.erp.vo.ReportDetailListVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
+import com.lims.manage.erp.vo.ReportProductRelVo;
 import com.lims.manage.erp.vo.TeamVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
@@ -603,12 +604,27 @@ public class ReportController {
      */
     @PostMapping("submitDownLoad")
     public void submitDownLoad(@RequestBody ReqBean reqBean,HttpServletResponse response) {
-        if (reqBean.getId() == null || CollectionUtil.isEmpty(reqBean.getList())){
-            return ;
-        }
         //获取检测结论
         if (CollectionUtils.isEmpty(reqBean.getList())){
             reqBean.setList(reportService.getResut(reqBean.getId(),Integer.parseInt(reqBean.getReportType())));
+        }
+        //获取报告模板，委托id，报告id
+        Long reportId = null;
+        if (Integer.parseInt(reqBean.getReportType()) == 0){
+            reportId = reportService.getIdByFId(reqBean.getId());
+        }else {
+            reportId = reportService.getIdByMId(reqBean.getId());
+        }
+        List<ReportProductRelVo> list0706 = reportService.getReportTemplateList0706(reqBean.getId(), reportId);
+        for (ConclusionEntity conclusionEntity:reqBean.getList()){
+            for (ReportProductRelVo bean :list0706){
+                if (org.apache.commons.lang.StringUtils.isEmpty(conclusionEntity.getUrl())){
+                    if (conclusionEntity.getSampleId() == bean.getSampleId()){
+                        conclusionEntity.setUrl(bean.getReportTemplates().get(0).getReportFileUri());
+                    }
+                }
+            }
+
         }
         //从文件服务器拉取文件
         MinioClient client = MinIoUtil.minioClient;

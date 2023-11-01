@@ -465,4 +465,8 @@ public interface ReportService {
     Integer getOperateTypeByCode(String reportCode);
 
     List<String> getSealTypeByIds(List<Long> list);
+
+    Long getIdByFId(Long id);
+
+    Long getIdByMId(Long id);
 }
