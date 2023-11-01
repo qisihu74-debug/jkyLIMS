@@ -1653,6 +1653,16 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public List<String> getAllUpdateCode() {
+        return recordEntityMapper.getAllUpdateCode();
+    }
+
+    @Override
+    public void updateShAndQfByReportCode(String reportCode, String shr, Long shrId, String qhr, Long qhrId, Date shTime, Date qfTime) {
+        recordEntityMapper.updateShAndQfByReportCode(reportCode,shr,shrId,qhr,qhrId,shTime,qfTime);
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();
