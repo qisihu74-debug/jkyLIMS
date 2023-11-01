@@ -292,12 +292,12 @@
         UPDATE test_report_record
         <trim prefix="SET" suffixOverrides=",">
             <if test="state!=null">state=#{state},</if>
-            verifyer=#{verifyer},
-            verifyer_time = #{verifyerTime},
-            verifyer_id = #{verifyerId},
-            issuer=#{issuer},
-            issuer_time = #{issuerTime},
-            issuer_id = #{issuerId},
+            <if test="verifyer!=null">verifyer=#{verifyer},</if>
+            <if test="verifyerTime!=null">verifyer_time = #{verifyerTime},</if>
+            <if test="verifyerId!=null">verifyer_id = #{verifyerId},</if>
+            <if test="issuer!=null">issuer=#{issuer},</if>
+            <if test="issuerTime!=null">issuer_time = #{issuerTime},</if>
+            <if test="issuerId!=null">issuer_id = #{issuerId},</if>
             <if test="issuReason!=null and issuReason!=''">issu_reason=#{issuReason},</if>
             <if test="applyReason!=null and applyReason!=''">apply_reason=#{applyReason},</if>
             <if test="sealType!=null and sealType!=''">seal_type=#{sealType},</if>
