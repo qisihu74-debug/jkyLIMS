@@ -1,5 +1,7 @@
 package com.lims.manage.erp.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SampleEntity;
@@ -65,6 +67,7 @@ public class ClientOrderdetailVo {
     /**
      * 样品名称
      */
+    @TableField(exist=false)
     private String sampleName;
     /**
      * 规格等级
@@ -77,47 +80,57 @@ public class ClientOrderdetailVo {
     /**
      * 检测项名称
      */
+    @TableField(exist=false)
     private String checkItemName;
     /**
      * 检测项Id
      */
+    @TableField(exist=false)
     private Integer checkItemId;
     /**
      * 任务编号
      */
+    @TableField(exist=false)
     private String taskCode;
     /**
      * 报告编号
      */
+    @TableField(exist=false)
     private String reportCode;
     /**
      * 报告发放日期
      */
+    @TableField(exist=false)
     private String reportTime;
 
     /**
      * 样品信息
      */
+    @TableField(exist=false)
     private List<SampleEntity> samples;
 
     /**
      * 任务信息
      */
+    @TableField(exist=false)
     private List<TaskEntity> taskEntities;
 
     /**
      * 报告单信息
      */
+    @TableField(exist=false)
     private List<ReportRecordEntity> reportRecordEntities;
 
     /**
      * 当前页码
      */
+    @TableField(exist=false)
     private Integer pageNum;
 
     /**
      * 当前展示页数量
      */
+    @TableField(exist=false)
     private Integer pageSize;
 
     /**
@@ -137,11 +150,13 @@ public class ClientOrderdetailVo {
     /**
      * 委托单位id 数组
      */
+    @TableField(exist=false)
     private Integer[] companyIds;
 
     /**
      * 委托单位id 数组
      */
+    @TableField(exist=false)
     private String[] companyStrs;
     /**
      * 委托单编号

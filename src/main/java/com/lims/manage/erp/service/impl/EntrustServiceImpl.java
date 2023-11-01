@@ -525,8 +525,9 @@ public class EntrustServiceImpl implements EntrustService {
 //            basisInfo.setIsSave("否");
             // 新增经营人员
             basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
-        basisInfo.setAcceptanceDate(null);
-        basisInfo.setBusinessAcceptor(null);
+            // TODO: 11月1日 预委托单 微调 受理人与受理时间 不为空
+//        basisInfo.setAcceptanceDate(null);
+//        basisInfo.setBusinessAcceptor(null);
         // 是否留样
         basisInfo.setIsReserve(vo.getIsReserve());
             entityMapper.insertEntrustInfo(basisInfo);
@@ -3720,8 +3721,9 @@ public class EntrustServiceImpl implements EntrustService {
 //        basisInfo.setIsSave("否");
         // 经营人员
         basisInfo.setOperatingPersonnel(vo.getOperatingPersonnel());
-        basisInfo.setAcceptanceDate(null);
-        basisInfo.setBusinessAcceptor(null);
+        // TODO: 同预委托单创建信息一致
+//        basisInfo.setAcceptanceDate(null);
+//        basisInfo.setBusinessAcceptor(null);
         // 是否保留
         basisInfo.setIsReserve(vo.getIsReserve());
         entityMapper.insertEntrustInfo(basisInfo);
