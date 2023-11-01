@@ -5578,19 +5578,22 @@ public class EntrustServiceImpl implements EntrustService {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         String userName = userInfo.getUserId() + "&" + userInfo.getUsername();
         // 查询任务单信息
-        for(TaskTestEntity taskTestEntity : list){
-            // 查询任务单详情：
-            TaskTestEntity data = taskMapper.selectTaskEntity(taskTestEntity.getId());
-            // 删除时间
-            data.setWasteTime(new Date());
-            // 操作人
-            data.setDerelict(userName);
-            // 新增已删除任务单 插入表 test_task_used
-            taskMapper.inserTasUsed(data);
-            // 删除任务单
-            taskMapper.deleteTaskById(data.getId());
-            // 根据任务单id 删除流转信息
-            taskMapper.deleteTaskRel(data.getEntrustmentId());
+        // 委托单下 任务单不为空的话
+        if(CollectionUtil.isNotEmpty(list)){
+            for(TaskTestEntity taskTestEntity : list){
+                // 查询任务单详情：
+                TaskTestEntity data = taskMapper.selectTaskEntity(taskTestEntity.getId());
+                // 删除时间
+                data.setWasteTime(new Date());
+                // 操作人
+                data.setDerelict(userName);
+                // 新增已删除任务单 插入表 test_task_used
+                taskMapper.inserTasUsed(data);
+                // 删除任务单
+                taskMapper.deleteTaskById(data.getId());
+                // 根据任务单id 删除流转信息
+                taskMapper.deleteTaskRel(data.getEntrustmentId());
+            }
         }
         // 委托单 置为0
         EntrustEntity basisInfo = new EntrustEntity();
