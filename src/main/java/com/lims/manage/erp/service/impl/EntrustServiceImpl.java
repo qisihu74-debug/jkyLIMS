@@ -4953,7 +4953,6 @@ public class EntrustServiceImpl implements EntrustService {
     public PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo) {
         List<ClientOrderdetailVo> subList = Lists.newArrayList();
         PageHelper.clearPage();
-        clientOrderdetailVo.setCompanyIds(null);
         if(clientOrderdetailVo.getCompanyStrs()!=null&&clientOrderdetailVo.getCompanyStrs().length==0){
             clientOrderdetailVo.setCompanyStrs(null);
         }
@@ -5110,6 +5109,10 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public Result getClientListSumPrice(ClientOrderdetailVo clientOrderdetailVo) {
+        if(clientOrderdetailVo.getCompanyStrs()!=null&&clientOrderdetailVo.getCompanyStrs().length==0){
+            clientOrderdetailVo.setCompanyStrs(null);
+        }
+        PageHelper.clearPage();
        String sumPrice = entityMapper.getClientListSumPrice(clientOrderdetailVo);
         return ResultUtil.success(sumPrice);
     }

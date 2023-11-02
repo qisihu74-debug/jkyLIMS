@@ -1286,7 +1286,7 @@
         <if test="acceptanceoverDate!=null">
             and date_format(acceptance_date,'%Y-%m-%d')&lt;= #{acceptanceoverDate,jdbcType=DATE}
         </if>
-        <if test="entrustPeople!=null">
+        <if test="entrustPeople!=null and entrustPeople!=''">
             and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
         </if>
         <if test="operatingPersonnel!=null and operatingPersonnel!=''">
