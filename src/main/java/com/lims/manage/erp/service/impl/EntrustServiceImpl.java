@@ -5109,6 +5109,12 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
+    public Result getClientListSumPrice(ClientOrderdetailVo clientOrderdetailVo) {
+       String sumPrice = entityMapper.getClientListSumPrice(clientOrderdetailVo);
+        return ResultUtil.success(sumPrice);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean acceptEntrust(Long id) {
         SysUserEntity user = ShiroUtils.getUserInfo();

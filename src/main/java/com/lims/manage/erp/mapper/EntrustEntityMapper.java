@@ -500,11 +500,18 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     /**
      * 委托单查询-分页
-     * @param page
      * @param clientOrderdetailVo
      * @return
      */
     List<ClientOrderdetailVo> selectEntrustPageVo(ClientOrderdetailVo clientOrderdetailVo);
+
+    /**
+     * 委托单查询-统计价格
+     * @param clientOrderdetailVo
+     * @return
+     */
+    String getClientListSumPrice(ClientOrderdetailVo clientOrderdetailVo);
+
     // 获取样品信息
     List<SampleEntity> getSampleList(@Param("entrustIds") List<Long> entrustIds);
     // 获取任务单列表
