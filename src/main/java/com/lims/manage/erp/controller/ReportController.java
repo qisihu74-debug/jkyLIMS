@@ -37,6 +37,7 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.DownloadUtils;
 import com.lims.manage.erp.util.FileAndFolderUtil;
@@ -1520,6 +1521,7 @@ public class ReportController {
                 File directory = new File(directoryPath);
         if (directory.exists() && directory.isDirectory()) {
             File[] files = directory.listFiles();
+            List<String> list = reportService.getAllUpdateCode();
             if (files != null) {
                 for (File file : files) {
                     if (file.isFile()) {
@@ -1535,7 +1537,6 @@ public class ReportController {
                                 String reportCode = value.toString();
                                 if (StringUtils.isNotEmpty(reportCode)){
                                     //跟新数据库
-                                    List<String> list = reportService.getAllUpdateCode();
                                     if (list.contains(reportCode)){
                                         String shr = cells.get("E"+num).getValue().toString();//审核人
                                         SysUserEntity shrId = sysUserDao.getUserIdByName(shr);//审核人id
