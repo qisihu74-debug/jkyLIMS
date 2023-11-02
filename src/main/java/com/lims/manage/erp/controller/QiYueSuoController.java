@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import com.lims.manage.erp.http.HttpClientUtil;
 import com.lims.manage.erp.service.ReportService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,12 @@ public class QiYueSuoController {
     @PostMapping("callback")
     public void callback(Long contractId){
         log.debug("接收到契约锁回调请求，合同参数为:{}",contractId);
+        //向外业系统转发回执信息
+        try {
+            HttpClientUtil.get("http://39.98.85.26/jky/wy/qiyuesuo/callback?contractId="+contractId);
+        }catch (Exception e){
+            log.error("向外业系统转发回执信息失败:{}",e);
+        }
         service.callback(contractId);
         log.debug("处理契约锁回调成功！");
     }
