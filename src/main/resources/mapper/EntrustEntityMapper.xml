@@ -1216,6 +1216,50 @@
         </if>
     </select>
 
+    <select id="selectEntrustPageVo" resultType="com.lims.manage.erp.vo.ClientOrderdetailVo">
+        SELECT
+        id as entrustmentId,
+        entrustment_no,
+        IFNULL( CONCAT( entrust_category_type, entrustment_no ), entrustment_no ) AS entrustmentNostr,
+        acceptance_date,
+        request_date,
+        entrust_people ,
+        project_name ,
+        project_part ,
+        entrust_company ,
+        entrust_company_id ,
+        actual_price as systemPrice,
+        operating_personnel
+        FROM
+        test_entrusted_info
+        WHERE
+        1=1
+        <if test="companyStrs!=null">
+            and entrust_company in
+            <foreach collection="companyStrs" item="name" index="index" open="(" close=")" separator=",">
+                #{name}
+            </foreach>
+        </if>
+        <if test="projectName!=null and projectName!=''">
+            and project_name LIKE CONCAT('%',#{projectName},'%')
+        </if>
+        <if test="projectPart!=null and projectPart!=''">
+            and project_part LIKE CONCAT('%',#{projectPart},'%')
+        </if>
+        <if test="acceptancebeganDate!=null">
+            and date_format(acceptance_date,'%Y-%m-%d')&gt;= #{acceptancebeganDate,jdbcType=DATE}
+        </if>
+        <if test="acceptanceoverDate!=null">
+            and date_format(acceptance_date,'%Y-%m-%d')&lt;= #{acceptanceoverDate,jdbcType=DATE}
+        </if>
+        <if test="entrustPeople!=null">
+            and entrust_people LIKE CONCAT('%',#{entrustPeople},'%')
+        </if>
+        <if test="operatingPersonnel!=null and operatingPersonnel!=''">
+            and operating_personnel LIKE CONCAT('%',#{operatingPersonnel},'%')
+        </if>
+    </select>
+
     <select id="getSampleList" resultType="com.lims.manage.erp.entity.SampleEntity">
     SELECT
         t1.id sampleId,
