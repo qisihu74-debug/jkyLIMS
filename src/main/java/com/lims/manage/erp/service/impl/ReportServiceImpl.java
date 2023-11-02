@@ -1726,6 +1726,9 @@ public class ReportServiceImpl implements ReportService {
         //支持批量
         List<Long> entrustIds = entityMapper.getEntrustIdsByCid(contractId);
         List<Long> zjEntrustIds = entityMapper.getzJEntrustIdsByCid(contractId);
+        if (org.apache.commons.collections.CollectionUtils.isEmpty(entrustIds) && org.apache.commons.collections.CollectionUtils.isEmpty(zjEntrustIds)){
+            return;
+        }
         List<Long> ids = entityMapper.getIdsByCid(contractId);
 
         //更新状态，更新
