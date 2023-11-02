@@ -870,6 +870,14 @@ public class EntrustController {
         }
         return ResultUtil.success(entrustService.getClientList(clientOrderdetailVo));
     }
+    /**
+     * 客户委托查询-统计价格
+     */
+    @GetMapping("/getClientListSumPrice")
+    public Result getClientListSumPrice(ClientOrderdetailVo clientOrderdetailVo){
+
+        return entrustService.getClientListSumPrice(clientOrderdetailVo);
+    }
 
     /**
      * 客户委托查询 导出
