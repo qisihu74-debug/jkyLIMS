@@ -731,6 +731,7 @@
         WHERE
             t1.role_id = #{roleId}
             AND t3.NAME IS NOT NULL
+            GROUP BY t3.user_id
     </select>
 
     <select id="selectTeamList" resultType="com.lims.manage.erp.vo.LabelValueTeamVo">
