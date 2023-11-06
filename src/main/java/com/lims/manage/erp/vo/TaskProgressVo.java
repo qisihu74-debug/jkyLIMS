@@ -1,5 +1,6 @@
 package com.lims.manage.erp.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
 import lombok.Data;
 
@@ -70,4 +71,9 @@ public class TaskProgressVo {
      * 样品状态描述
      */
     private String sampleStateDescription;
+    /**
+     * 任务号
+     */
+    @TableField(exist=false)
+    private String code;
 }

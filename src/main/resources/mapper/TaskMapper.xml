@@ -1017,7 +1017,8 @@
             dept_id,
             task_price,
             sampler,
-            sample_state_description
+            sample_state_description,
+            code
         FROM
             test_task
         WHERE
