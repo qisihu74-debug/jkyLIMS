@@ -97,7 +97,7 @@ END;
 
 
 CREATE TRIGGER sync_data_delete_to_delete
-AFTER DELETE ON t_ems_instrument_view
+AFTER DELETE ON t_ems_instrument
 FOR EACH ROW
 BEGIN
     DELETE FROM DATA_TB.test_instrument WHERE id=OLD.id;
