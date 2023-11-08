@@ -6,6 +6,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -84,5 +85,19 @@ public class TaskStatisticsVo {
      */
     @TableField(exist = false)
     private Integer pageSize;
+
+    /**
+     * 团队id
+     */
+    private Long teamId;
+    /**
+     * 团队名称
+     */
+    private String teamName;
+    /**
+     * 部门id集合
+     */
+    @TableField(exist = false)
+    private List<Long> longList;
 
 }

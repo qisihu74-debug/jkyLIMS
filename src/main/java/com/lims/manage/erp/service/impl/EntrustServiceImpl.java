@@ -6407,7 +6407,7 @@ public class EntrustServiceImpl implements EntrustService {
             // 获取受理日期
             basisInfo.setAcceptanceDate(acceptanceTime);
             basisInfo.setBusinessAcceptor(userInfo.getName());
-            stringBuffer.append("委托单号 state = 0 " + acceptanceDate);
+            stringBuffer.append("委托单号 state = 0 " + entrustCategoryVo.getEntrustmentNo());
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "审核发布：审批通过时\t"+stringBuffer.toString(), Const.ENTRUST_FOUND, true);
         }
         entityMapper.updateEntrustInfoDetails(basisInfo);

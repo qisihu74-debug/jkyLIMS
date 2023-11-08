@@ -71,5 +71,13 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      */
     Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list);
 
+    /**
+     * 工时统计-按照人员统计
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    Result getPersonnelStatistics(TaskStatisticsVo taskStatisticsVo);
+
 
 }

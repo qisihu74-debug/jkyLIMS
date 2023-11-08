@@ -131,4 +131,15 @@ public class StatisticAnalysisInterface {
         return testCheckItemsTaskRelService.postAdjustingQuotas(taskOrderWorkingHoursVo.getList());
     }
 
+    /**
+     * 工时统计-按照人员统计
+     *
+     * @return
+     */
+    @GetMapping(value = "getPersonnelStatistics")
+    public Result<?> getPersonnelStatistics(TaskStatisticsVo taskStatisticsVo) {
+
+        return testCheckItemsTaskRelService.getPersonnelStatistics(taskStatisticsVo);
+    }
+
 }

@@ -30,6 +30,7 @@ import org.apache.poi.util.StringUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.xlsx4j.sml.Col;
 
 import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
@@ -267,5 +268,104 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
         }
         return ResultUtil.success("数据新增成功");
+    }
+
+    private static TestTeam getTopDepartment(Map<Integer, TestTeam> departmentMap, int departmentId) {
+
+        TestTeam department = departmentMap.get(departmentId);
+
+        if (department == null) {
+            return null;
+        }
+        if (department.getPid() == 0) { // 如果顶级部门的父ID为0，则返回该部门本身。在本例中，顶级部门是指ID为0的部门。
+            return department;
+        } else { // 否则，递归查找顶级部门。
+            return getTopDepartment(departmentMap, department.getPid());
+        }
+    }
+
+    /**
+     * 调用方法查询全部部门信息
+     *
+     * @return 返回 Map: key =部门 value = 顶级部门的信息
+     */
+    public Map<Integer, TestTeam> methodDepartmentTopMap() {
+        // 查询 每个团队的顶级部门。
+        List<TestTeam> teamAll = testTeamDao.selectList(null);
+        // key=团队 value = 顶级部门
+        Map<Integer, TestTeam> departmentTopMap = new HashMap<>();
+        // 部门map集合
+        Map<Integer, TestTeam> departmentMap = new HashMap<>();
+        if (CollectionUtil.isNotEmpty(teamAll)) {
+            for (TestTeam testTeam : teamAll) {
+                departmentMap.put(testTeam.getId(), testTeam);
+            }
+            for (TestTeam testTeam2 : teamAll) {
+                // 使用递归方法。
+                TestTeam topDepartment = getTopDepartment(departmentMap, testTeam2.getId());
+                if (topDepartment != null) {
+                    departmentTopMap.put(testTeam2.getId(), topDepartment);
+                }
+            }
+        }
+        return departmentTopMap;
+    }
+
+    /**
+     * 根据顶级部门名称 获取 所属下级部门id集合
+     *
+     * @param deptList         key = 顶级组织名，  所在组织 都是顶级部门：根据顶级部门 带出所属部门id 集合。
+     * @param departmentTopMap key=团队id value = 顶级部门 ： 调用方法获取
+     */
+    public void methodDepartmentNameAcquisitionSet(Map<String, List<Long>> deptList, Map<Integer, TestTeam> departmentTopMap) {
+        if (CollectionUtil.isNotEmpty(departmentTopMap.keySet())) {
+            for (Integer teamId : departmentTopMap.keySet()) {
+                TestTeam testTeam = departmentTopMap.get(teamId);
+                if (deptList.get(testTeam.getName()) != null) {
+                    List<Long> teamList = deptList.get(testTeam.getName());
+                    teamList.add(teamId.longValue());
+                } else {
+                    List<Long> teamList = new ArrayList<>();
+                    teamList.add(teamId.longValue());
+                    deptList.put(testTeam.getName(), teamList);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Result getPersonnelStatistics(TaskStatisticsVo taskStatisticsVo) {
+        if (taskStatisticsVo.getPageNum() == null || taskStatisticsVo.getPageSize() == null) {
+            return ResultUtil.error("分页参数不能为空");
+        }
+        //  key=团队id value = 顶级部门 ： 调用方法获取
+        Map<Integer, TestTeam> departmentTopMap = methodDepartmentTopMap();
+        // key = 顶级组织名，  所在组织 都是顶级部门：根据顶级部门 带出所属部门id 集合。
+        Map<String, List<Long>> deptList = new HashMap<>();
+        // 调用方法： 根据顶级部门名称 获取 所属下级部门id集合
+        methodDepartmentNameAcquisitionSet(deptList, departmentTopMap);
+        if (!StringUtils.isEmpty(taskStatisticsVo.getTeamName())) {
+            List<Long> longList = deptList.get(taskStatisticsVo.getTeamName());
+            taskStatisticsVo.setLongList(longList);
+        }
+        // 展示 人员信息及部门信息
+        // 进行 查询分页。
+        PageHelper.clearPage();
+        PageHelper.startPage(taskStatisticsVo.getPageNum(), taskStatisticsVo.getPageSize());
+        List<TaskStatisticsVo> list = testTeamDao.getEmployeesAndDepartments(taskStatisticsVo);
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (TaskStatisticsVo statisticsVo : list) {
+                // 部门id 对应的顶级部门信息
+                if (statisticsVo.getTeamId() != null) {
+                    TestTeam team = departmentTopMap.get(statisticsVo.getTeamId().intValue());
+                    if (team != null && team.getName() != null) {
+                        statisticsVo.setTeamId(team.getId().longValue());
+                        statisticsVo.setTeamName(team.getName());
+                    }
+                }
+            }
+        }
+        PageInfo<TaskStatisticsVo> result = new PageInfo<>(list);
+        return ResultUtil.success(result);
     }
 }

@@ -54,5 +54,38 @@
         </foreach>
         on duplicate key update
          name = values(name) , pid = values(pid) , code = values(code) , team_lead = values(team_lead) , team_lead1 = values(team_lead1) , lead_tel = values(lead_tel) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , remark = values(remark)     </insert>
+    <select id="getEmployeesAndDepartments" resultType="com.lims.manage.erp.vo.TaskStatisticsVo">
+        SELECT
+        a.user_id AS receiverUserId,
+        a.NAME AS receiver,
+        b.team_id,
+        b.team_name
+        FROM
+        sys_user AS a
+        LEFT JOIN (
+        SELECT DISTINCT
+        t1.user_id,
+        t2.id AS team_id,
+        t2.NAME AS team_name,
+        t2.pid
+        FROM
+        test_technicist AS t1
+        LEFT JOIN test_team AS t2 ON t1.team_id = t2.id
+        WHERE
+        t2.id IS NOT NULL
+        ) AS b ON a.user_id = b.user_id
+        <where>
+            1=1
+            <if test="receiver!=null and receiver!= '' ">
+                and a.NAME like CONCAT("%",#{receiver},"%")
+            </if>
+            <if test="longList!= null">
+                and b.team_id in
+                <foreach collection="longList" item="id" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
 </mapper>
 
