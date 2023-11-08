@@ -28,6 +28,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.util.StringUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
@@ -36,10 +37,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>
@@ -238,9 +236,36 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 countList.add(data);
             }
             map.put("list", countList);
+            // 通过任务单id 获取任务单下对应的检测项总工时
+            Integer workingHours = baseMapper.getWorkingHours(taskId);
             // 任务单 工时
-            map.put("sumCount", 10);
+            map.put("sumCount", workingHours);
+        } else {
+            map.put("list", list);
+            // 通过任务单id 获取任务单下对应的检测项总工时
+            Integer workingHours = baseMapper.getWorkingHours(taskId);
+            map.put("sumCount", workingHours);
         }
         return ResultUtil.success(map);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list) {
+        // 允许调整一次。
+        LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, list.get(0).getTaskId());
+        List<TestTaskOrderWorkingHours> dataList = testTaskOrderWorkingHoursMapper.selectList(queryWrapper);
+        if (CollectionUtil.isNotEmpty(dataList)) {
+            return ResultUtil.error("当前任务单号 调整分配（仅可调整一次）");
+        }
+        // 获取当前用户登录的信息
+        SysUserEntity user = ShiroUtils.getUserInfo();
+        for (TestTaskOrderWorkingHours taskOrderWorkingHours : list) {
+            taskOrderWorkingHours.setAddOperator(user.getName() + "&" + user.getUserId());
+            taskOrderWorkingHours.setCreateTime(new Date());
+            testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        }
+        return ResultUtil.success("数据新增成功");
     }
 }

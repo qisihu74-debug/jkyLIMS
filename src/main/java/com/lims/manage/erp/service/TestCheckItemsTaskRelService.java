@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.TestCheckItemsTaskRel;
+import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.TaskStatisticsVo;
 import com.lims.manage.erp.vo.WorkHourStatisticVo;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,6 +62,14 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      * @return
      */
     Result getMyHoursStatisticsDetails(Long taskId);
+
+    /**
+     * 工时统计-我的工时-调整分配
+     *
+     * @param list
+     * @return
+     */
+    Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list);
 
 
 }

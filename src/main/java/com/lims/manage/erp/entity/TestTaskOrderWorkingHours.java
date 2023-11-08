@@ -1,28 +1,53 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Date;
 
+@Data
 public class TestTaskOrderWorkingHours implements Serializable {
+
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
-
+    /**
+     * 任务单id
+     */
     private Long taskId;
-
+    /**
+     * 总工时
+     */
     private Integer totalWorkingHours;
-
+    /**
+     * 检测类型
+     */
     private String detectionType;
-
+    /**
+     * userId
+     */
     private Long userId;
-
+    /**
+     * userName
+     */
     private String userName;
-
+    /**
+     * 使用工时
+     */
     private Integer workingHours;
-
+    /**
+     * 比例
+     */
     private String proportion;
 
     private Date createTime;
 
     private Date updateTime;
+    /**
+     * 新增操作人
+     */
+    private String addOperator;
 
     private static final long serialVersionUID = 1L;
 
@@ -119,15 +144,15 @@ public class TestTaskOrderWorkingHours implements Serializable {
         }
         TestTaskOrderWorkingHours other = (TestTaskOrderWorkingHours) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getTaskId() == null ? other.getTaskId() == null : this.getTaskId().equals(other.getTaskId()))
-            && (this.getTotalWorkingHours() == null ? other.getTotalWorkingHours() == null : this.getTotalWorkingHours().equals(other.getTotalWorkingHours()))
-            && (this.getDetectionType() == null ? other.getDetectionType() == null : this.getDetectionType().equals(other.getDetectionType()))
-            && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
-            && (this.getUserName() == null ? other.getUserName() == null : this.getUserName().equals(other.getUserName()))
-            && (this.getWorkingHours() == null ? other.getWorkingHours() == null : this.getWorkingHours().equals(other.getWorkingHours()))
-            && (this.getProportion() == null ? other.getProportion() == null : this.getProportion().equals(other.getProportion()))
-            && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
-            && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()));
+                && (this.getTaskId() == null ? other.getTaskId() == null : this.getTaskId().equals(other.getTaskId()))
+                && (this.getTotalWorkingHours() == null ? other.getTotalWorkingHours() == null : this.getTotalWorkingHours().equals(other.getTotalWorkingHours()))
+                && (this.getDetectionType() == null ? other.getDetectionType() == null : this.getDetectionType().equals(other.getDetectionType()))
+                && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
+                && (this.getUserName() == null ? other.getUserName() == null : this.getUserName().equals(other.getUserName()))
+                && (this.getWorkingHours() == null ? other.getWorkingHours() == null : this.getWorkingHours().equals(other.getWorkingHours()))
+                && (this.getProportion() == null ? other.getProportion() == null : this.getProportion().equals(other.getProportion()))
+                && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
+                && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()));
     }
 
     @Override
