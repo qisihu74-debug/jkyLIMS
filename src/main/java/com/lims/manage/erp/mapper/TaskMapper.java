@@ -611,4 +611,18 @@ public interface TaskMapper extends BaseMapper {
      *  根据团队id 查询人员信息列表-拼接信息
      */
     List<LabelValueVo> getMemberInformationConcat1(@Param(value = "userIds") Set<Long> userIds);
+
+    /**
+     * 根据任务单id 获取样品名称
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT DISTINCT\n" +
+            "\tt2.sample_name \n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel AS t1\n" +
+            "\tLEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id \n" +
+            "WHERE\n" +
+            "\tt1.task_id = #{taskId}")
+    List<String> getTaskSamples(@Param("taskId")Long taskId);
 }

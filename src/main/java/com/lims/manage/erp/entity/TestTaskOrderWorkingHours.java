@@ -44,7 +44,7 @@ public class TestTaskOrderWorkingHours implements Serializable {
     /**
      * 使用工时
      */
-    private Integer workingHours;
+    private String workingHours;
     /**
      * 比例
      */
@@ -117,11 +117,11 @@ public class TestTaskOrderWorkingHours implements Serializable {
         this.userName = userName == null ? null : userName.trim();
     }
 
-    public Integer getWorkingHours() {
+    public String getWorkingHours() {
         return workingHours;
     }
 
-    public void setWorkingHours(Integer workingHours) {
+    public void setWorkingHours(String workingHours) {
         this.workingHours = workingHours;
     }
 

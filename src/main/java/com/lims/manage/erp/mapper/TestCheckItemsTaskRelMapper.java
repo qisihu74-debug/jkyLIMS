@@ -56,7 +56,7 @@ public interface TestCheckItemsTaskRelMapper extends BaseMapper<TestCheckItemsTa
             "\tLEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id \n" +
             "WHERE\n" +
             "\tt1.task_id = #{taskId}")
-    Integer getWorkingHours(@Param("taskId") Long taskId);
+    String getWorkingHours(@Param("taskId") Long taskId);
 
     /**
      * 查询 - 工时统计-我的工时-总计工时

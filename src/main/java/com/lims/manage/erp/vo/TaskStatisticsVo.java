@@ -56,7 +56,7 @@ public class TaskStatisticsVo {
      * 工时
      */
     @TableField(exist = false)
-    private Integer workingHours;
+    private String workingHours;
     /**
      * 样品名称
      */

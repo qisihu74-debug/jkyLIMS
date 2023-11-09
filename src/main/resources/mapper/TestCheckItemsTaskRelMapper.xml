@@ -50,7 +50,7 @@
         t1.id as taskId,
         t1.order_time,
         t1.required_completion_time,
-        task_code,
+        t1.task_code,
         t2.NAME AS receiver,
         "任务大厅" AS source,
         t3.id as state
