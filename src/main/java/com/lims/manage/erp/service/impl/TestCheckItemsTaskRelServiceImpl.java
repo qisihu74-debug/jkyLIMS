@@ -509,6 +509,49 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     }
 
     @Override
+    public InputStream getPersonnelStatisticsExport(TaskStatisticsVo taskStatisticsVo) throws IOException {
+        taskStatisticsVo.setPageNum(1);
+        taskStatisticsVo.setPageSize(100000);
+        Result result = getPersonnelStatistics(taskStatisticsVo);
+        PageInfo<TaskStatisticsVo> pageInfo = (PageInfo<TaskStatisticsVo>) result.getData();
+        List<TaskStatisticsVo> list = pageInfo.getList();
+// 我的工时统计-导出
+        //创建HSSFWorkbook对象(excel的文档对象)
+        HSSFWorkbook wb = new HSSFWorkbook();
+        //建立新的sheet对象（excel的表单）
+        HSSFSheet sheet = wb.createSheet("sheet0");
+        //在sheet里创建第一行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
+        HSSFRow row1 = sheet.createRow(0);
+        //创建单元格并设置单元格内容
+        row1.createCell(0).setCellValue("名称");
+        row1.createCell(1).setCellValue("已接任务");
+        row1.createCell(2).setCellValue("完成任务");
+        row1.createCell(3).setCellValue("已完成合计（工时）");
+        row1.createCell(4).setCellValue("所在组织");
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (int i = 0; i < list.size(); i++) {
+                TaskStatisticsVo statisticsVo = list.get(i);
+                //在sheet里创建第二行
+                HSSFRow row3 = sheet.createRow(i + 1);
+                row3.createCell(0).setCellValue(statisticsVo.getReceiver());
+                // 已接任务
+                row3.createCell(1).setCellValue(statisticsVo.getReceivedTaskVolume() != null ? statisticsVo.getReceivedTaskVolume().toString() : "-");
+                // 完成任务
+                row3.createCell(2).setCellValue(statisticsVo.getCompletedTaskVolume() != null ? statisticsVo.getCompletedTaskVolume().toString() : "-");
+                // 工时
+                row3.createCell(3).setCellValue(statisticsVo.getWorkingHours() != null ? statisticsVo.getWorkingHours().toString() : "-");
+                // 所在组织
+                row3.createCell(4).setCellValue(statisticsVo.getTeamName() != null ? statisticsVo.getTeamName() : "-");
+            }
+        }
+        //输出Excel文件 字节输出流
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        wb.write(os);
+        os.close();
+        return new ByteArrayInputStream(os.toByteArray());
+    }
+
+    @Override
     public Result getTotalPersonnelHours() {
         QueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new QueryWrapper<>();
         queryWrapper.select("sum(working_hours) as working_hours");
@@ -561,6 +604,79 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             methodWorkingHours(totalWorkforAllTasks, list);
         }
         PageInfo<TaskStatisticsVo> result = new PageInfo<>(list);
+        return ResultUtil.success(result);
+    }
+
+    @Override
+    public InputStream getAuthorizedSignatureListExport(TaskStatisticsVo taskStatisticsVo) throws IOException {
+        taskStatisticsVo.setPageNum(1);
+        taskStatisticsVo.setPageSize(100000);
+        Result result = getAuthorizedSignatureList(taskStatisticsVo);
+        PageInfo<TaskStatisticsVo> pageInfo = (PageInfo<TaskStatisticsVo>) result.getData();
+        List<TaskStatisticsVo> list = pageInfo.getList();
+// 我的工时统计-导出
+        //创建HSSFWorkbook对象(excel的文档对象)
+        HSSFWorkbook wb = new HSSFWorkbook();
+        //建立新的sheet对象（excel的表单）
+        HSSFSheet sheet = wb.createSheet("sheet0");
+        //在sheet里创建第一行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
+        HSSFRow row1 = sheet.createRow(0);
+        //创建单元格并设置单元格内容
+        row1.createCell(0).setCellValue("名称");
+        row1.createCell(1).setCellValue("已接任务");
+        row1.createCell(2).setCellValue("完成任务");
+        row1.createCell(3).setCellValue("已完成合计（工时）");
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (int i = 0; i < list.size(); i++) {
+                TaskStatisticsVo statisticsVo = list.get(i);
+                //在sheet里创建第二行
+                HSSFRow row3 = sheet.createRow(i + 1);
+                row3.createCell(0).setCellValue(statisticsVo.getReceiver());
+                // 已接任务
+                row3.createCell(1).setCellValue(statisticsVo.getReceivedTaskVolume() != null ? statisticsVo.getReceivedTaskVolume().toString() : "-");
+                // 完成任务
+                row3.createCell(2).setCellValue(statisticsVo.getCompletedTaskVolume() != null ? statisticsVo.getCompletedTaskVolume().toString() : "-");
+                // 工时
+                row3.createCell(3).setCellValue(statisticsVo.getWorkingHours() != null ? statisticsVo.getWorkingHours().toString() : "-");
+            }
+        }
+        //输出Excel文件 字节输出流
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        wb.write(os);
+        os.close();
+        return new ByteArrayInputStream(os.toByteArray());
+    }
+
+    @Override
+    public Result getAuthorizedSignatureListDetails(TaskStatisticsVo taskStatisticsVo) {
+        if (taskStatisticsVo.getPageNum() == null || taskStatisticsVo.getPageSize() == null) {
+            return ResultUtil.error("分页参数不能为空");
+        }
+        if (taskStatisticsVo.getReceiverUserId() == null) {
+            return ResultUtil.error("参数不能为空");
+        }
+        // 进行 查询分页。
+        PageHelper.clearPage();
+        PageHelper.startPage(taskStatisticsVo.getPageNum(), taskStatisticsVo.getPageSize());
+        List<TestTaskOrderWorkingHours> list = testTaskOrderWorkingHoursMapper.selectTaskOrderList(taskStatisticsVo);
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (TestTaskOrderWorkingHours data : list) {
+                LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, data.getTaskId());
+                List<TestTaskOrderWorkingHours> testTaskOrderWorkingHoursList = testTaskOrderWorkingHoursMapper.selectList(queryWrapper);
+                // 输出任务单下 人员比例信息
+                StringBuffer stringBuffer = new StringBuffer();
+                if (CollectionUtil.isNotEmpty(testTaskOrderWorkingHoursList)) {
+                    for (TestTaskOrderWorkingHours taskOrderWorkingHours : testTaskOrderWorkingHoursList) {
+                        stringBuffer.append(taskOrderWorkingHours.getUserName());
+                        String msg = taskOrderWorkingHours.getProportion() != null ? taskOrderWorkingHours.getProportion() + "%" : "--";
+                        stringBuffer.append(msg + " ");
+                    }
+                }
+                data.setProportion(stringBuffer.toString());
+            }
+        }
+        PageInfo<TestTaskOrderWorkingHours> result = new PageInfo<>(list);
         return ResultUtil.success(result);
     }
 }

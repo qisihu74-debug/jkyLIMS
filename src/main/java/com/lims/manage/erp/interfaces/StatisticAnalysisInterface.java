@@ -148,8 +148,24 @@ public class StatisticAnalysisInterface {
      * @return
      */
     @GetMapping(value = "getPersonnelStatisticsExport")
-    public void getPersonnelStatisticsExport(TaskStatisticsVo taskStatisticsVo) {
-
+    public void getPersonnelStatisticsExport(TaskStatisticsVo taskStatisticsVo, HttpServletResponse response) throws IOException {
+        BufferedOutputStream bos = null;
+        String fileName = "工时统计-按照人员统计_导出" + DateUtil.formatDate(new Date());
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(fileName + ".xlsx", "UTF-8"));
+        InputStream inputStream = testCheckItemsTaskRelService.getPersonnelStatisticsExport(taskStatisticsVo);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
     }
 
     /**
@@ -192,9 +208,37 @@ public class StatisticAnalysisInterface {
      * @return
      */
     @GetMapping(value = "getAuthorizedSignatureListExport")
-    public void getAuthorizedSignatureListExport(TaskStatisticsVo taskStatisticsVo) {
+    public void getAuthorizedSignatureListExport(TaskStatisticsVo taskStatisticsVo, HttpServletResponse response) throws IOException {
 
-//        return testCheckItemsTaskRelService.getAuthorizedSignatureList(taskStatisticsVo);
+        BufferedOutputStream bos = null;
+        String fileName = "工时统计-按照授权签字人获取-导出" + DateUtil.formatDate(new Date());
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(fileName + ".xlsx", "UTF-8"));
+        InputStream inputStream = testCheckItemsTaskRelService.getAuthorizedSignatureListExport(taskStatisticsVo);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+    }
+
+
+    /**
+     * 工时统计-按照授权签字人获取_详情
+     *
+     * @return
+     */
+    @GetMapping(value = "getAuthorizedSignatureListDetails")
+    public Result<?> getAuthorizedSignatureListDetails(TaskStatisticsVo taskStatisticsVo) {
+
+        return testCheckItemsTaskRelService.getAuthorizedSignatureListDetails(taskStatisticsVo);
     }
 
 

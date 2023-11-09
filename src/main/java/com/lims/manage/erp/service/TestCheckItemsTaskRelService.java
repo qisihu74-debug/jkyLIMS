@@ -80,6 +80,14 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
     Result getPersonnelStatistics(TaskStatisticsVo taskStatisticsVo);
 
     /**
+     * 工时统计-按照人员统计-导出
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    InputStream getPersonnelStatisticsExport(TaskStatisticsVo taskStatisticsVo) throws IOException;
+
+    /**
      * 工时统计-按照人员统计_人员总工时
      *
      * @return
@@ -103,6 +111,22 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      * @return
      */
     Result getAuthorizedSignatureList(TaskStatisticsVo taskStatisticsVo);
+
+    /**
+     * 工时统计-按照授权签字人获取
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    InputStream getAuthorizedSignatureListExport(TaskStatisticsVo taskStatisticsVo) throws IOException;
+
+    /**
+     * 工时统计-按照授权签字人获取_详情
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    Result getAuthorizedSignatureListDetails(TaskStatisticsVo taskStatisticsVo);
 
 
 }

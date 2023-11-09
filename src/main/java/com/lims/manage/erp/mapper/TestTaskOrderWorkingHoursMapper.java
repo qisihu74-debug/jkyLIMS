@@ -35,4 +35,11 @@ public interface TestTaskOrderWorkingHoursMapper  extends BaseMapper<TestTaskOrd
      * @return
      */
     List<TestTaskOrderWorkingHours> selectTaskOrderTotalWorkingHours(TaskStatisticsVo taskStatisticsVo);
+
+    /**
+     * 根据授权签字人 查询信息
+     * @param taskStatisticsVo
+     * @return
+     */
+    List<TestTaskOrderWorkingHours> selectTaskOrderList(TaskStatisticsVo taskStatisticsVo);
 }
