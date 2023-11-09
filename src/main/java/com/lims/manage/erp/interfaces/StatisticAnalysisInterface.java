@@ -142,4 +142,60 @@ public class StatisticAnalysisInterface {
         return testCheckItemsTaskRelService.getPersonnelStatistics(taskStatisticsVo);
     }
 
+    /**
+     * 工时统计-按照人员统计_导出
+     *
+     * @return
+     */
+    @GetMapping(value = "getPersonnelStatisticsExport")
+    public void getPersonnelStatisticsExport(TaskStatisticsVo taskStatisticsVo) {
+
+    }
+
+    /**
+     * 工时统计-按照人员统计_人员总工时
+     *
+     * @return
+     */
+    @GetMapping(value = "getTotalPersonnelHours")
+    public Result<?> getTotalPersonnelHours() {
+
+        return testCheckItemsTaskRelService.getTotalPersonnelHours();
+    }
+
+    /**
+     * 工时统计-按照人员统计-详情
+     *
+     * @return
+     */
+    @GetMapping(value = "getPersonnelStatisticsDetails")
+    public Result<?> getPersonnelStatisticsDetails(TaskStatisticsVo taskStatisticsVo) {
+
+        return testCheckItemsTaskRelService.getPersonnelStatisticsDetails(taskStatisticsVo);
+    }
+
+
+    /**
+     * 工时统计-按照授权签字人获取
+     *
+     * @return
+     */
+    @GetMapping(value = "getAuthorizedSignatureList")
+    public Result<?> getAuthorizedSignatureList(TaskStatisticsVo taskStatisticsVo) {
+
+        return testCheckItemsTaskRelService.getAuthorizedSignatureList(taskStatisticsVo);
+    }
+
+    /**
+     * 工时统计-按照授权签字人获取-导出
+     *
+     * @return
+     */
+    @GetMapping(value = "getAuthorizedSignatureListExport")
+    public void getAuthorizedSignatureListExport(TaskStatisticsVo taskStatisticsVo) {
+
+//        return testCheckItemsTaskRelService.getAuthorizedSignatureList(taskStatisticsVo);
+    }
+
+
 }

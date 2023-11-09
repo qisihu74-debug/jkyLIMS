@@ -2,6 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -107,6 +108,13 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         // 分页后： 进行统计每组检测项 工时
         if (CollectionUtil.isNotEmpty(list)) {
             for (TaskStatisticsVo taskStatisticsVo1 : list) {
+                if (taskStatisticsVo1.getState() == null) {
+                    taskStatisticsVo1.setStatus(true);
+                    taskStatisticsVo1.setState(null);
+                } else {
+                    taskStatisticsVo1.setStatus(false);
+                    taskStatisticsVo1.setState(null);
+                }
                 // 通过任务单id 获取任务单下对应的检测项总工时
                 Integer workingHours = baseMapper.getWorkingHours(taskStatisticsVo1.getTaskId());
                 // 补充工时
@@ -201,6 +209,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 data.setUserName(inspectorStr[0]);
                 data.setUserId(Long.parseLong(inspectorStr[1]));
                 data.setDetectionType("检测人员：");
+                data.setTaskId(taskId);
                 countList.add(data);
             }
             // 记录人员
@@ -212,6 +221,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 data.setUserName(inspectorStr[0]);
                 data.setUserId(Long.parseLong(inspectorStr[1]));
                 data.setDetectionType("记录人员：");
+                data.setTaskId(taskId);
                 countList.add(data);
             }
             // 复核人
@@ -223,6 +233,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 data.setUserName(inspectorStr[0]);
                 data.setUserId(Long.parseLong(inspectorStr[1]));
                 data.setDetectionType("复核人：");
+                data.setTaskId(taskId);
                 countList.add(data);
             }
             // 报告制作人
@@ -234,6 +245,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 data.setUserName(inspectorStr[0]);
                 data.setUserId(Long.parseLong(inspectorStr[1]));
                 data.setDetectionType("报告制作人：");
+                data.setTaskId(taskId);
                 countList.add(data);
             }
             map.put("list", countList);
@@ -333,6 +345,64 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
     }
 
+    /**
+     * 全部任务单 工时统计
+     *
+     * @param totalWorkforAllTasks 根据人员 查询 全部任务总工时列表
+     * @param list                 人员数据集合不为空
+     */
+    public void methodWorkingHours(List<TestTaskOrderWorkingHours> totalWorkforAllTasks, List<TaskStatisticsVo> list) {
+        if (CollectionUtil.isNotEmpty(totalWorkforAllTasks)) {
+            // key = 人员id、 value = 工时信息
+            Map<Long, TaskStatisticsVo> map = new HashMap<>();
+            // 调用方法 : 循环遍历每组工时信息 进行汇总
+            for (TestTaskOrderWorkingHours taskOrderWorkingHours : totalWorkforAllTasks) {
+                if (map.get(taskOrderWorkingHours.getUserId()) == null) {
+                    TaskStatisticsVo data = new TaskStatisticsVo();
+                    // 人员id
+                    data.setReceiverUserId(taskOrderWorkingHours.getUserId());
+                    // 个人工时
+                    data.setWorkingHours(taskOrderWorkingHours.getWorkingHours());
+                    // 已接任务单量
+                    data.setReceivedTaskVolume(1);
+                    // 完成单量 任务单 state >=3 算是完成
+                    if (taskOrderWorkingHours.getState() >= 3) {
+                        data.setCompletedTaskVolume(1);
+                    } else {
+                        data.setCompletedTaskVolume(0);
+                    }
+                    map.put(taskOrderWorkingHours.getUserId(), data);
+                } else {
+                    TaskStatisticsVo data = map.get(taskOrderWorkingHours.getUserId());
+                    // 人员id
+                    data.setReceiverUserId(taskOrderWorkingHours.getUserId());
+                    // 个人工时 = 旧工时 + 新工时
+                    data.setWorkingHours(data.getWorkingHours() + taskOrderWorkingHours.getWorkingHours());
+                    // 已接任务单量 = 任务单量 + 1
+                    data.setReceivedTaskVolume(data.getReceivedTaskVolume() + 1);
+                    // 完成单量 任务单 state >=3 算是完成 = 任务量 + 1
+                    if (taskOrderWorkingHours.getState() >= 3) {
+                        data.setCompletedTaskVolume(data.getCompletedTaskVolume() + 1);
+                    } else {
+                        data.setCompletedTaskVolume(data.getCompletedTaskVolume() + 0);
+                    }
+                    map.put(taskOrderWorkingHours.getUserId(), data);
+                }
+            }
+            for (TaskStatisticsVo statisticsVo : list) {
+                TaskStatisticsVo data = map.get(statisticsVo.getReceiverUserId());
+                if (data != null) {
+                    // 个人工时
+                    statisticsVo.setWorkingHours(data.getWorkingHours());
+                    // 已接任务单量
+                    statisticsVo.setReceivedTaskVolume(data.getReceivedTaskVolume());
+                    // 完成单量 任务单 state >=3 算是完成
+                    statisticsVo.setCompletedTaskVolume(data.getCompletedTaskVolume());
+                }
+            }
+        }
+    }
+
     @Override
     public Result getPersonnelStatistics(TaskStatisticsVo taskStatisticsVo) {
         if (taskStatisticsVo.getPageNum() == null || taskStatisticsVo.getPageSize() == null) {
@@ -353,6 +423,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         PageHelper.clearPage();
         PageHelper.startPage(taskStatisticsVo.getPageNum(), taskStatisticsVo.getPageSize());
         List<TaskStatisticsVo> list = testTeamDao.getEmployeesAndDepartments(taskStatisticsVo);
+        // 用户id集合
+        List<Long> userIds = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(list)) {
             for (TaskStatisticsVo statisticsVo : list) {
                 // 部门id 对应的顶级部门信息
@@ -363,7 +435,70 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                         statisticsVo.setTeamName(team.getName());
                     }
                 }
+                userIds.add(statisticsVo.getReceiverUserId());
             }
+            // TODO: 11月9日 暂时替换 userIds = deptIds
+            taskStatisticsVo.setLongList(userIds);
+            // 根据人员 查询 全部任务总工时列表
+            List<TestTaskOrderWorkingHours> totalWorkforAllTasks = testTaskOrderWorkingHoursMapper.selectTaskOrderWorkingHours(taskStatisticsVo);
+            // 调用方法：全部任务单 工时统计
+            methodWorkingHours(totalWorkforAllTasks, list);
+        }
+        PageInfo<TaskStatisticsVo> result = new PageInfo<>(list);
+        return ResultUtil.success(result);
+    }
+
+    @Override
+    public Result getTotalPersonnelHours() {
+        QueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("sum(working_hours) as working_hours");
+        TestTaskOrderWorkingHours totalData = testTaskOrderWorkingHoursMapper.selectOne(queryWrapper);
+        if (totalData != null) {
+            return ResultUtil.success(totalData.getWorkingHours());
+        }
+        return null;
+    }
+
+    @Override
+    public Result getPersonnelStatisticsDetails(TaskStatisticsVo taskStatisticsVo) {
+        if (taskStatisticsVo.getPageNum() == null || taskStatisticsVo.getPageSize() == null) {
+            return ResultUtil.error("分页参数不能为空");
+        }
+        if (taskStatisticsVo.getReceiverUserId() == null) {
+            return ResultUtil.error("参数不能为空");
+        }
+        // 进行 查询分页。
+        PageHelper.clearPage();
+        PageHelper.startPage(taskStatisticsVo.getPageNum(), taskStatisticsVo.getPageSize());
+        LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestTaskOrderWorkingHours::getUserId, taskStatisticsVo.getReceiverUserId());
+        List<TestTaskOrderWorkingHours> list = testTaskOrderWorkingHoursMapper.selectList(queryWrapper);
+        PageInfo<TestTaskOrderWorkingHours> result = new PageInfo<>(list);
+        return ResultUtil.success(result);
+    }
+
+    @Override
+    public Result getAuthorizedSignatureList(TaskStatisticsVo taskStatisticsVo) {
+        if (taskStatisticsVo.getPageNum() == null || taskStatisticsVo.getPageSize() == null) {
+            return ResultUtil.error("分页参数不能为空");
+        }
+        // 根据授权签字（role_id = 66）
+        // 进行 查询分页。
+        PageHelper.clearPage();
+        PageHelper.startPage(taskStatisticsVo.getPageNum(), taskStatisticsVo.getPageSize());
+        List<TaskStatisticsVo> list = testTeamDao.getRoleUserInformation(taskStatisticsVo);
+        // 用户id集合
+        List<Long> userIds = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (TaskStatisticsVo statisticsVo : list) {
+                userIds.add(statisticsVo.getReceiverUserId());
+            }
+            // TODO: 11月9日 暂时替换 userIds = deptIds
+            taskStatisticsVo.setLongList(userIds);
+            // 根据授权人员 查询 任务单工时列表-总工时
+            List<TestTaskOrderWorkingHours> totalWorkforAllTasks = testTaskOrderWorkingHoursMapper.selectTaskOrderTotalWorkingHours(taskStatisticsVo);
+            // 调用方法：全部任务单 工时统计
+            methodWorkingHours(totalWorkforAllTasks, list);
         }
         PageInfo<TaskStatisticsVo> result = new PageInfo<>(list);
         return ResultUtil.success(result);

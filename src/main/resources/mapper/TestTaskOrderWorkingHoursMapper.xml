@@ -150,4 +150,65 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="selectTaskOrderWorkingHours" resultType="com.lims.manage.erp.entity.TestTaskOrderWorkingHours">
+    SELECT
+    t1.id,
+    t1.task_id,
+    t1.total_working_hours,
+    t1.detection_type,
+    t1.user_id,
+    t1.user_name,
+    t1.working_hours,
+    t1.proportion,
+    t1.create_time,
+    t1.update_time,
+    t2.state
+    FROM
+    test_task_order_working_hours AS t1
+    LEFT JOIN test_task AS t2 ON t1.task_id = t2.id
+    <where>
+      1=1
+      <if test="longList!=null">
+        and t1.user_id IN
+        <foreach collection="longList" item="id" open="(" close=")" separator=",">
+          #{id}
+        </foreach>
+      </if>
+      <if test="startDate!=null">
+        AND t2.order_time >= #{startDate}
+      </if>
+      <if test="stopDate!=null">
+        AND #{stopDate} >= t2.required_completion_time
+      </if>
+    </where>
+  </select>
+
+  <select id="selectTaskOrderTotalWorkingHours" resultType="com.lims.manage.erp.entity.TestTaskOrderWorkingHours">
+    SELECT
+    t1.task_id,
+    t1.total_working_hours AS working_hours,
+    t2.receiver AS user_id,
+    t2.state
+    FROM
+    test_task_order_working_hours AS t1
+    LEFT JOIN test_task AS t2 ON t1.task_id = t2.id
+    <where>
+      1=1
+      <if test="longList!=null">
+        AND t2.receiver IN
+        <foreach collection="longList" item="id" open="(" close=")" separator=",">
+          #{id}
+        </foreach>
+      </if>
+      <if test="startDate!=null">
+        AND t2.order_time >= #{startDate}
+      </if>
+      <if test="stopDate!=null">
+        AND #{stopDate} >= t2.required_completion_time
+      </if>
+    </where>
+    GROUP BY
+    t1.task_id
+  </select>
 </mapper>

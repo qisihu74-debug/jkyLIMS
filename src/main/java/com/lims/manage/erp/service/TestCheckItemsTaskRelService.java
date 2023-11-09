@@ -79,5 +79,30 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      */
     Result getPersonnelStatistics(TaskStatisticsVo taskStatisticsVo);
 
+    /**
+     * 工时统计-按照人员统计_人员总工时
+     *
+     * @return
+     */
+    Result getTotalPersonnelHours();
+
+
+    /**
+     * 工时统计-按照人员统计-详情
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    Result getPersonnelStatisticsDetails(TaskStatisticsVo taskStatisticsVo);
+
+
+    /**
+     * 工时统计-按照授权签字人获取
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    Result getAuthorizedSignatureList(TaskStatisticsVo taskStatisticsVo);
+
 
 }

@@ -99,5 +99,25 @@ public class TaskStatisticsVo {
      */
     @TableField(exist = false)
     private List<Long> longList;
+    /**
+     * state
+     */
+    @TableField(exist = false)
+    private Integer state;
+    /**
+     * status = true , status = false
+     */
+    @TableField(exist = false)
+    private Boolean status;
+    /**
+     * 已经接任务量
+     */
+    @TableField(exist = false)
+    private Integer receivedTaskVolume;
+    /**
+     * 完成工作量
+     */
+    @TableField(exist = false)
+    private Integer completedTaskVolume;
 
 }

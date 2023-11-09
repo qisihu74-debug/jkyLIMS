@@ -1,6 +1,7 @@
 package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
@@ -17,9 +18,17 @@ public class TestTaskOrderWorkingHours implements Serializable {
      */
     private Long taskId;
     /**
+     * 任务单号
+     */
+    private String taskCode;
+    /**
+     * 样品名称
+     */
+    private String sampleName;
+    /**
      * 总工时
      */
-    private Integer totalWorkingHours;
+    private String totalWorkingHours;
     /**
      * 检测类型
      */
@@ -48,6 +57,15 @@ public class TestTaskOrderWorkingHours implements Serializable {
      * 新增操作人
      */
     private String addOperator;
+    /**
+     * 任务单状态：
+     */
+    @TableField(exist = false)
+    private Integer state;
+    /**
+     * 来源
+     */
+    private String source;
 
     private static final long serialVersionUID = 1L;
 
@@ -67,11 +85,11 @@ public class TestTaskOrderWorkingHours implements Serializable {
         this.taskId = taskId;
     }
 
-    public Integer getTotalWorkingHours() {
+    public String getTotalWorkingHours() {
         return totalWorkingHours;
     }
 
-    public void setTotalWorkingHours(Integer totalWorkingHours) {
+    public void setTotalWorkingHours(String totalWorkingHours) {
         this.totalWorkingHours = totalWorkingHours;
     }
 

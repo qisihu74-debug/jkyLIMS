@@ -87,5 +87,19 @@
             </if>
         </where>
     </select>
+
+    <select id="getRoleUserInformation" resultType="com.lims.manage.erp.vo.TaskStatisticsVo">
+        SELECT
+            t1.user_id receiverUserId,
+            t1.NAME receiver
+        FROM
+            sys_user AS t1
+            LEFT JOIN sys_user_role AS t2 ON t1.user_id = t2.user_id
+        WHERE
+            t2.role_id = 66
+        <if test="receiver!=null and receiver!= '' ">
+            and t1.NAME like CONCAT("%",#{receiver},"%")
+        </if>
+    </select>
 </mapper>
 

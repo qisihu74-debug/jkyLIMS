@@ -63,5 +63,13 @@ IPage<TestTeamVo> getListPage(IPage<TestTeamVo> page, @Param(Constants.WRAPPER) 
      */
     List<TaskStatisticsVo> getEmployeesAndDepartments(TaskStatisticsVo taskStatisticsVo);
 
+
+    /**
+     * 展示 根据授权签字（role_id = 66） 带出用户信息
+     *
+     * @return
+     */
+    List<TaskStatisticsVo> getRoleUserInformation(TaskStatisticsVo taskStatisticsVo);
+
 }
 
