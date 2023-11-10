@@ -3914,7 +3914,7 @@ public class ReportServiceImpl implements ReportService {
         String qzPdfPath = path+"qzPdfPath.pdf";
         PdfDoc pdf3 = new PdfDoc(pdfPath, qzPdfPath);
         try {
-            pdf3.addImage(dateUrl, "日期：", 5, -5, 80, 20);
+            pdf3.addImage(dateUrl, "日期：", 5, -7, 90, 25);
         } catch (Exception e) {
             log.error("设置报告盖章日期失败:{}",e);
         }
