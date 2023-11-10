@@ -6,6 +6,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -55,7 +56,7 @@ public class TaskStatisticsVo {
      * 工时
      */
     @TableField(exist = false)
-    private Integer workingHours;
+    private String workingHours;
     /**
      * 样品名称
      */
@@ -84,5 +85,39 @@ public class TaskStatisticsVo {
      */
     @TableField(exist = false)
     private Integer pageSize;
+
+    /**
+     * 团队id
+     */
+    private Long teamId;
+    /**
+     * 团队名称
+     */
+    private String teamName;
+    /**
+     * 部门id集合
+     */
+    @TableField(exist = false)
+    private List<Long> longList;
+    /**
+     * state
+     */
+    @TableField(exist = false)
+    private Integer state;
+    /**
+     * status = true , status = false
+     */
+    @TableField(exist = false)
+    private Boolean status;
+    /**
+     * 已经接任务量
+     */
+    @TableField(exist = false)
+    private Integer receivedTaskVolume;
+    /**
+     * 完成工作量
+     */
+    @TableField(exist = false)
+    private Integer completedTaskVolume;
 
 }

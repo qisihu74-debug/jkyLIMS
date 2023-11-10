@@ -108,4 +108,18 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
 
     @Select("select department from sys_user where user_id = #{userId}")
     String getDeptByUserId(@Param("userId") Long userId);
+
+    /**
+     * 根据角色id 查询用户id集合
+     *
+     * @param roleId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tuser_id \n" +
+            "FROM\n" +
+            "\tsys_user_role \n" +
+            "WHERE\n" +
+            "\trole_id = #{roleId}")
+    List<Long> selectUserIds(@Param("roleId") Long roleId);
 }

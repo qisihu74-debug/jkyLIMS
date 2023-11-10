@@ -1,8 +1,11 @@
 package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -17,9 +20,17 @@ public class TestTaskOrderWorkingHours implements Serializable {
      */
     private Long taskId;
     /**
+     * 任务单号
+     */
+    private String taskCode;
+    /**
+     * 样品名称
+     */
+    private String sampleName;
+    /**
      * 总工时
      */
-    private Integer totalWorkingHours;
+    private String totalWorkingHours;
     /**
      * 检测类型
      */
@@ -35,19 +46,30 @@ public class TestTaskOrderWorkingHours implements Serializable {
     /**
      * 使用工时
      */
-    private Integer workingHours;
+    private String workingHours;
     /**
      * 比例
      */
     private String proportion;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date createTime;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date updateTime;
     /**
      * 新增操作人
      */
     private String addOperator;
+    /**
+     * 任务单状态：
+     */
+    @TableField(exist = false)
+    private Integer state;
+    /**
+     * 来源
+     */
+    private String source;
 
     private static final long serialVersionUID = 1L;
 
@@ -67,11 +89,11 @@ public class TestTaskOrderWorkingHours implements Serializable {
         this.taskId = taskId;
     }
 
-    public Integer getTotalWorkingHours() {
+    public String getTotalWorkingHours() {
         return totalWorkingHours;
     }
 
-    public void setTotalWorkingHours(Integer totalWorkingHours) {
+    public void setTotalWorkingHours(String totalWorkingHours) {
         this.totalWorkingHours = totalWorkingHours;
     }
 
@@ -99,11 +121,11 @@ public class TestTaskOrderWorkingHours implements Serializable {
         this.userName = userName == null ? null : userName.trim();
     }
 
-    public Integer getWorkingHours() {
+    public String getWorkingHours() {
         return workingHours;
     }
 
-    public void setWorkingHours(Integer workingHours) {
+    public void setWorkingHours(String workingHours) {
         this.workingHours = workingHours;
     }
 

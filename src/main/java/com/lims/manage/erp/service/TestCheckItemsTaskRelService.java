@@ -45,7 +45,7 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      *
      * @return
      */
-    Result getMyHoursStatisticsSum();
+    Result getMyHoursStatisticsSum(TaskStatisticsVo taskStatisticsVo);
 
     /**
      * 查询我的工时-统计-导出
@@ -70,6 +70,70 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      * @return
      */
     Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list);
+
+    /**
+     * 工时统计-按照人员统计
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    Result getPersonnelStatistics(TaskStatisticsVo taskStatisticsVo);
+
+    /**
+     * 工时统计-按照人员统计-导出
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    InputStream getPersonnelStatisticsExport(TaskStatisticsVo taskStatisticsVo) throws IOException;
+
+    /**
+     * 工时统计-按照人员统计_人员总工时
+     *
+     * @return
+     */
+    Result getTotalPersonnelHours(TaskStatisticsVo taskStatisticsVo);
+
+
+    /**
+     * 工时统计-按照人员统计-详情
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    Result getPersonnelStatisticsDetails(TaskStatisticsVo taskStatisticsVo);
+
+
+    /**
+     * 工时统计-按照授权签字人获取
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    Result getAuthorizedSignatureList(TaskStatisticsVo taskStatisticsVo);
+
+    /**
+     * 工时统计-按照授权签字人获取
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    InputStream getAuthorizedSignatureListExport(TaskStatisticsVo taskStatisticsVo) throws IOException;
+
+    /**
+     * 工时统计-按照授权签字人获取_详情
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    Result getAuthorizedSignatureListDetails(TaskStatisticsVo taskStatisticsVo);
+
+    /**
+     * 工时统计-按照授权签字-统计总工时
+     *
+     * @return
+     */
+    Result getAuthorizedSignatureHours(TaskStatisticsVo taskStatisticsVo);
 
 
 }
