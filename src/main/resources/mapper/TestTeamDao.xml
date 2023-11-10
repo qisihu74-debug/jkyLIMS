@@ -57,11 +57,11 @@
     <select id="getEmployeesAndDepartments" resultType="com.lims.manage.erp.vo.TaskStatisticsVo">
         SELECT
         a.user_id AS receiverUserId,
-        a.NAME AS receiver,
+        a.user_name AS receiver,
         b.team_id,
         b.team_name
         FROM
-        sys_user AS a
+        ( SELECT user_id, user_name FROM test_task_order_working_hours GROUP BY user_id ) AS a
         LEFT JOIN (
         SELECT DISTINCT
         t1.user_id,
@@ -77,7 +77,7 @@
         <where>
             1=1
             <if test="receiver!=null and receiver!= '' ">
-                and a.NAME like CONCAT("%",#{receiver},"%")
+                and a.user_name like CONCAT("%",#{receiver},"%")
             </if>
             <if test="longList!= null">
                 and b.team_id in
