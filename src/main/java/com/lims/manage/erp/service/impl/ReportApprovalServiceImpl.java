@@ -767,7 +767,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
                 PdfContentByte content = stamper.getOverContent(pageNumber);
                 // 读取图片
                 Image image = Image.getInstance(imageData);
-                image.scaleToFit(50,50);
+                image.scaleToFit(55,55);
                 // 设置图片位置
                 image.setAbsolutePosition(280, PageSize.A4.getHeight() - 670);
                 // 将图片添加到页面

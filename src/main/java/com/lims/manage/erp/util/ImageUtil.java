@@ -13,14 +13,14 @@ import java.util.Date;
 public class ImageUtil {
 
     public static void main(String[] args) {
-        createDateImage(",","");
+        createDateImage("D:\\Users\\Administrator\\Desktop\\device\\电子章\\电子章\\png\\123.png","2023年11月10日");
     }
 
     public static void createDateImage(String url,String reportCompleteDate) {
         int width = 120;
         int height = 30;
         File file = new File(url);
-        Font font = new Font("Serif", Font.BOLD, 10);
+        Font font = new Font("宋体", Font.PLAIN, 12);
         // 创建一个画布
         BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         // 获取画布的画笔

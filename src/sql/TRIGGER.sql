@@ -1,6 +1,6 @@
 CREATE TRIGGER sync_data_to_add AFTER INSERT ON t_ems_instrument FOR EACH ROW
 BEGIN
-INSERT INTO DATA_TB.test_instrument (
+INSERT INTO ERP_69.test_instrument (
 id,
 code,
 name,
@@ -16,7 +16,6 @@ device_admin,
 use_dept,
 calibration_param,
 store_place,
-calibration_period,
 expire_date,
 calibration_number,
 purchase_date,
@@ -46,7 +45,6 @@ NEW.user_id,
 NEW.use_dept,
 NEW.calibration_param,
 NEW.store_place,
-NEW.calibration_period,
 NEW.expire_date,
 NEW.calibration_number,
 NEW.purchase_date,
@@ -64,7 +62,7 @@ END ;
 
 CREATE TRIGGER sync_data_update_to_update AFTER UPDATE ON t_ems_instrument FOR EACH ROW
 BEGIN
-	UPDATE DATA_TB.test_instrument
+	UPDATE ERP_69.test_instrument
 SET `code` = NEW.equipment_code,
  `name` = NEW.equipment_name,
  model = NEW.equipment_model,
@@ -79,7 +77,6 @@ SET `code` = NEW.equipment_code,
  use_dept = NEW.use_dept,
  calibration_param = NEW.calibration_param,
  store_place = NEW.store_place,
- calibration_period = NEW.calibration_period,
  expire_date = NEW.expire_date,
  calibration_number = NEW.calibration_number,
  purchase_date = NEW.purchase_date,
@@ -100,7 +97,7 @@ CREATE TRIGGER sync_data_delete_to_delete
 AFTER DELETE ON t_ems_instrument
 FOR EACH ROW
 BEGIN
-    DELETE FROM DATA_TB.test_instrument WHERE id=OLD.id;
+    DELETE FROM ERP_69.test_instrument WHERE id=OLD.id;
 END;
 
 
