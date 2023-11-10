@@ -49,7 +49,7 @@
         SELECT
         t1.id as taskId,
         t1.order_time,
-        t1.required_completion_time,
+        t1.end_detection_time as required_completion_time,
         t1.task_code,
         t2.NAME AS receiver,
         "任务大厅" AS source,
@@ -60,6 +60,7 @@
         LEFT JOIN test_task_order_working_hours AS t3 ON t1.id = t3.task_id
         <where>
             1=1
+            and t1.state >= 4 and t1.end_detection_time is not null
             <if test="receiverUserId!=null">
                 and t1.receiver = #{receiverUserId}
             </if>
@@ -70,9 +71,11 @@
                 AND #{stopDate} >= t1.required_completion_time
             </if>
         </where>
+        GROUP BY t1.id
+        ORDER BY t1.end_detection_time desc
     </select>
 
-    <select id="getMyHoursStatisticsSum" resultType="java.lang.Integer">
+    <select id="getMyHoursStatisticsSum" resultType="java.lang.String">
         SELECT
         sum( t2.times * t3.report_model_id )
         FROM
@@ -81,8 +84,18 @@
         LEFT JOIN test_product_item AS t3 ON t2.check_item_id = t3.check_item_id
         <where>
             1=1
+            and t1.state >= 4 and t1.end_detection_time is not null
             <if test="receiverUserId!=null">
                 and t1.receiver = #{receiverUserId}
+            </if>
+            <if test="receiverUserId!=null">
+                and t1.receiver = #{receiverUserId}
+            </if>
+            <if test="startDate!=null">
+                AND t1.order_time >= #{startDate}
+            </if>
+            <if test="stopDate!=null">
+                AND #{stopDate} >= t1.required_completion_time
             </if>
         </where>
     </select>

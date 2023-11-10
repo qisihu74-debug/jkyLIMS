@@ -37,6 +37,14 @@ public interface TestTaskOrderWorkingHoursMapper  extends BaseMapper<TestTaskOrd
     List<TestTaskOrderWorkingHours> selectTaskOrderTotalWorkingHours(TaskStatisticsVo taskStatisticsVo);
 
     /**
+     * 根据授权人员 查询 任务单工时列表-总工时
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    String selectAuthorizedSignatureHours(TaskStatisticsVo taskStatisticsVo);
+
+    /**
      * 根据授权签字人 查询信息
      * @param taskStatisticsVo
      * @return

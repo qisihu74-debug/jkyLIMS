@@ -125,16 +125,20 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     }
 
     @Override
-    public Result getMyHoursStatisticsSum() {
-        TaskStatisticsVo taskStatisticsVo = new TaskStatisticsVo();
+    public Result getMyHoursStatisticsSum(TaskStatisticsVo taskStatisticsVo) {
         // 获取当前用户登录的信息
         SysUserEntity user = ShiroUtils.getUserInfo();
         // 当前登录人 = 授权签字人
         taskStatisticsVo.setReceiverUserId(user.getUserId());
         // 进行工时 总计
         PageHelper.clearPage();
-        Integer countSum = baseMapper.getMyHoursStatisticsSum(taskStatisticsVo);
-        return ResultUtil.success(countSum);
+        taskStatisticsVo.setPageSize(null);
+        taskStatisticsVo.setPageNum(null);
+        String countSum = baseMapper.getMyHoursStatisticsSum(taskStatisticsVo);
+        // 返回数据
+        Map<String, Object> map = new HashMap<>();
+        map.put("sumCount", String.format("%.2f", Double.parseDouble(countSum)));
+        return ResultUtil.success(map);
     }
 
     /**
@@ -197,6 +201,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         if (CollectionUtils.isEmpty(list)) {
             // 根据任务单 查询任务下对应操作信息
             TaskTestEntity taskDetails = taskMapper.selectTaskEntity(taskId);
+            //TODO:11月10 查询基础表信息 - 检测类型包含工时
+            List<TestInitDataEntity> basisList = taskMapper.selectEntrustBasis(30);
             List<TestTaskOrderWorkingHours> countList = new ArrayList<>();
             // 使用 map 进行 数据统计 key = userId , value = 参数
             Map<Long, TestTaskOrderWorkingHours> mapData = new HashMap<>();
@@ -204,22 +210,22 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             // 检测人员
             if (StringUtils.isNotEmpty(taskDetails.getInspector())) {
                 //  调用方法 去处理 签名信息进行截取
-                methodSubstr(1, taskDetails.getInspector(), mapData, taskId);
+                methodSubstr(0, taskDetails.getInspector(), mapData, taskId, basisList);
             }
             // 记录人员
             if (StringUtils.isNotEmpty(taskDetails.getRecorder())) {
                 //  调用方法 去处理 签名信息进行截取
-                methodSubstr(2, taskDetails.getRecorder(), mapData, taskId);
+                methodSubstr(1, taskDetails.getRecorder(), mapData, taskId, basisList);
             }
             // 复核人
             if (StringUtils.isNotEmpty(taskDetails.getReviewer())) {
                 //  调用方法 去处理 签名信息进行截取
-                methodSubstr(3, taskDetails.getReviewer(), mapData, taskId);
+                methodSubstr(2, taskDetails.getReviewer(), mapData, taskId, basisList);
             }
             // 报告制作人
             if (StringUtils.isNotEmpty(taskDetails.getReportProducer())) {
                 //  调用方法 去处理 签名信息进行截取
-                methodSubstr(4, taskDetails.getReportProducer(), mapData, taskId);
+                methodSubstr(3, taskDetails.getReportProducer(), mapData, taskId, basisList);
             }
             // 进行循环迭代 mapData 数据
             if (CollectionUtil.isNotEmpty(mapData.keySet())) {
@@ -250,23 +256,28 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
      * @param mapData              使用 map 进行 数据统计 key = userId , value = 参数
      * @param taskId               任务单id
      */
-    public void methodSubstr(Integer type, String signatureInformation, Map<Long, TestTaskOrderWorkingHours> mapData, Long taskId) {
+    public void methodSubstr(Integer type, String signatureInformation, Map<Long, TestTaskOrderWorkingHours> mapData, Long taskId, List<TestInitDataEntity> basisList) {
         String typeStr = "";
         switch (type) {
             case 0:
-                typeStr = "检测人员： ";
+                typeStr = "检测人员";
                 break;
             case 1:
-                typeStr = "记录人员： ";
+                typeStr = "记录人员";
                 break;
             case 2:
-                typeStr = "复核人： ";
+                typeStr = "复核人";
                 break;
             case 3:
-                typeStr = "报告制作人： ";
+                typeStr = "报告制作人";
                 break;
             default:
                 break;
+        }
+        // key = 类型 value = 比例值
+        Map<String, Integer> map = new HashMap<>();
+        for (TestInitDataEntity dataEntity : basisList) {
+            map.put(dataEntity.getName(), Integer.parseInt(dataEntity.getRemark()));
         }
         // 检测人员
         String[] inspectorarrays = signatureInformation.split(",");
@@ -277,6 +288,13 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 TestTaskOrderWorkingHours data = new TestTaskOrderWorkingHours();
                 data.setUserName(inspectorStr[0]);
                 data.setUserId(Long.parseLong(inspectorStr[1]));
+                // 设置比例
+                if (map.get(typeStr) != null) {
+                    Integer value = map.get(typeStr);
+                    data.setProportion(value.toString());
+                } else {
+                    data.setProportion("0");
+                }
                 data.setDetectionType(typeStr);
                 data.setTaskId(taskId);
                 mapData.put(data.getUserId(), data);
@@ -284,7 +302,17 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 TestTaskOrderWorkingHours data = mapData.get(Long.parseLong(inspectorStr[1]));
                 data.setUserName(inspectorStr[0]);
                 data.setUserId(Long.parseLong(inspectorStr[1]));
-                data.setDetectionType(data.getDetectionType() + typeStr);
+                // 设置比例
+                if (map.get(typeStr) != null) {
+                    Integer value1 = map.get(typeStr);
+                    Integer value2 = Integer.parseInt(data.getProportion());
+                    data.setProportion(String.valueOf(value1 + value2));
+                } else {
+                    Integer value1 = Integer.parseInt(data.getProportion());
+                    Integer value2 = 0;
+                    data.setProportion(String.valueOf(value1 + value2));
+                }
+                data.setDetectionType(data.getDetectionType() + "、" + typeStr);
                 data.setTaskId(taskId);
                 mapData.put(data.getUserId(), data);
             }
@@ -294,6 +322,24 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list) {
+        // 当前登录需要为授权签字人： TODO: 11月10日 roleId = 66L 为授权签字人
+        Long roleId = 66L;
+        List<Long> userIds = sysUserDao.selectUserIds(roleId);
+        // 获取当前用户登录的信息
+        SysUserEntity user = ShiroUtils.getUserInfo();
+        if (CollectionUtil.isEmpty(userIds)) {
+            // 抛出 授权签字人角色信息 为空
+            return ResultUtil.error("授权签字人角色信息为空");
+        }
+        Boolean falg = false;
+        for (Long userId : userIds) {
+            if (userId.equals(user.getUserId())) {
+                falg = true;
+            }
+        }
+        if (!falg) {
+            return ResultUtil.error("分配失败，当前操作人无授权签字人角色");
+        }
         // 允许调整一次。
         LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, list.get(0).getTaskId());
@@ -314,8 +360,6 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 nameBuffer.append(sampleName + " ");
             }
         }
-        // 获取当前用户登录的信息
-        SysUserEntity user = ShiroUtils.getUserInfo();
         for (TestTaskOrderWorkingHours taskOrderWorkingHours : list) {
             taskOrderWorkingHours.setAddOperator(user.getName() + "&" + user.getUserId());
             taskOrderWorkingHours.setCreateTime(new Date());
@@ -332,9 +376,9 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 taskOrderWorkingHours.setWorkingHours("0");
             } else {
                 // 求比例工时
-                double one22 = (100d - Double.parseDouble(taskOrderWorkingHours.getProportion())) / 100d;
+                double one22 = Double.parseDouble(taskOrderWorkingHours.getProportion()) / 100d;
                 double zhi = Double.parseDouble(taskOrderWorkingHours.getTotalWorkingHours()) * one22;
-                String context = String.valueOf(zhi);
+                String context = String.format("%.2f", zhi);
                 taskOrderWorkingHours.setWorkingHours(context);
             }
             testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
@@ -422,7 +466,9 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                     // 人员id
                     data.setReceiverUserId(taskOrderWorkingHours.getUserId());
                     // 个人工时
-                    data.setWorkingHours(taskOrderWorkingHours.getWorkingHours());
+                    double zhi = Double.parseDouble(taskOrderWorkingHours.getWorkingHours());
+                    String context = String.format("%.2f", zhi);
+                    data.setWorkingHours(context);
                     // 已接任务单量
                     data.setReceivedTaskVolume(1);
                     // 完成单量 任务单 state >=3 算是完成
@@ -437,7 +483,11 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                     // 人员id
                     data.setReceiverUserId(taskOrderWorkingHours.getUserId());
                     // 个人工时 = 旧工时 + 新工时
-                    data.setWorkingHours(data.getWorkingHours() + taskOrderWorkingHours.getWorkingHours());
+                    double zhi1 = Double.parseDouble(data.getWorkingHours());
+                    double zhi2 = Double.parseDouble(taskOrderWorkingHours.getWorkingHours());
+                    double sum = zhi1 + zhi2;
+                    String context = String.format("%.2f", sum);
+                    data.setWorkingHours(context);
                     // 已接任务单量 = 任务单量 + 1
                     data.setReceivedTaskVolume(data.getReceivedTaskVolume() + 1);
                     // 完成单量 任务单 state >=3 算是完成 = 任务量 + 1
@@ -552,13 +602,17 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     }
 
     @Override
-    public Result getTotalPersonnelHours() {
-        QueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("sum(working_hours) as working_hours");
-        TestTaskOrderWorkingHours totalData = testTaskOrderWorkingHoursMapper.selectOne(queryWrapper);
-        if (totalData != null) {
-            return ResultUtil.success(totalData.getWorkingHours());
-        }
+    public Result getTotalPersonnelHours(TaskStatisticsVo taskStatisticsVo) {
+        // 进行工时 总计
+        PageHelper.clearPage();
+        taskStatisticsVo.setPageSize(null);
+        taskStatisticsVo.setPageNum(null);
+        String totalData = testTaskOrderWorkingHoursMapper.selectAuthorizedSignatureHours(taskStatisticsVo);
+//        if (totalData != null) {
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("sumCount", String.format("%.2f", Double.parseDouble(totalData.getWorkingHours())));
+//            return ResultUtil.success(map);
+//        }
         return null;
     }
 
@@ -678,5 +732,35 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
         PageInfo<TestTaskOrderWorkingHours> result = new PageInfo<>(list);
         return ResultUtil.success(result);
+    }
+
+    @Override
+    public Result getAuthorizedSignatureHours(TaskStatisticsVo taskStatisticsVo) {
+        // 进行工时 总计
+        PageHelper.clearPage();
+        taskStatisticsVo.setPageSize(null);
+        taskStatisticsVo.setPageNum(null);
+        List<TaskStatisticsVo> list = testTeamDao.getRoleUserInformation(taskStatisticsVo);
+        // 用户id集合
+        List<Long> userIds = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (TaskStatisticsVo statisticsVo : list) {
+                userIds.add(statisticsVo.getReceiverUserId());
+            }
+            // TODO: 11月9日 暂时替换 userIds = deptIds
+            taskStatisticsVo.setLongList(userIds);
+        }
+        PageHelper.clearPage();
+        taskStatisticsVo.setPageSize(null);
+        taskStatisticsVo.setPageNum(null);
+        String totalData = testTaskOrderWorkingHoursMapper.selectAuthorizedSignatureHours(taskStatisticsVo);
+        if (totalData != null) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("sumCount", String.format("%.2f", Double.parseDouble(totalData)));
+            return ResultUtil.success(map);
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("sumCount", "0.00");
+        return ResultUtil.success(map);
     }
 }

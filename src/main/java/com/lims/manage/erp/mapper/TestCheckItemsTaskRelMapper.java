@@ -64,5 +64,5 @@ public interface TestCheckItemsTaskRelMapper extends BaseMapper<TestCheckItemsTa
      * @param taskStatisticsVo
      * @return
      */
-    Integer getMyHoursStatisticsSum(TaskStatisticsVo taskStatisticsVo);
+    String getMyHoursStatisticsSum(TaskStatisticsVo taskStatisticsVo);
 }

@@ -45,7 +45,7 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      *
      * @return
      */
-    Result getMyHoursStatisticsSum();
+    Result getMyHoursStatisticsSum(TaskStatisticsVo taskStatisticsVo);
 
     /**
      * 查询我的工时-统计-导出
@@ -92,7 +92,7 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      *
      * @return
      */
-    Result getTotalPersonnelHours();
+    Result getTotalPersonnelHours(TaskStatisticsVo taskStatisticsVo);
 
 
     /**
@@ -127,6 +127,13 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      * @return
      */
     Result getAuthorizedSignatureListDetails(TaskStatisticsVo taskStatisticsVo);
+
+    /**
+     * 工时统计-按照授权签字-统计总工时
+     *
+     * @return
+     */
+    Result getAuthorizedSignatureHours(TaskStatisticsVo taskStatisticsVo);
 
 
 }

@@ -69,9 +69,9 @@ public class StatisticAnalysisInterface {
      * @return
      */
     @GetMapping(value = "getMyHoursStatisticsSum")
-    public Result<?> getMyHoursStatisticsSum() {
+    public Result<?> getMyHoursStatisticsSum(TaskStatisticsVo taskStatisticsVo) {
 
-        return testCheckItemsTaskRelService.getMyHoursStatisticsSum();
+        return testCheckItemsTaskRelService.getMyHoursStatisticsSum(taskStatisticsVo);
     }
 
     /**
@@ -174,9 +174,9 @@ public class StatisticAnalysisInterface {
      * @return
      */
     @GetMapping(value = "getTotalPersonnelHours")
-    public Result<?> getTotalPersonnelHours() {
+    public Result<?> getTotalPersonnelHours(TaskStatisticsVo taskStatisticsVo) {
 
-        return testCheckItemsTaskRelService.getTotalPersonnelHours();
+        return testCheckItemsTaskRelService.getTotalPersonnelHours(taskStatisticsVo);
     }
 
     /**
@@ -239,6 +239,17 @@ public class StatisticAnalysisInterface {
     public Result<?> getAuthorizedSignatureListDetails(TaskStatisticsVo taskStatisticsVo) {
 
         return testCheckItemsTaskRelService.getAuthorizedSignatureListDetails(taskStatisticsVo);
+    }
+
+    /**
+     * 工时统计-按照授权签字-统计总工时
+     *
+     * @return
+     */
+    @GetMapping(value = "getAuthorizedSignatureHours")
+    public Result<?> getAuthorizedSignatureHours(TaskStatisticsVo taskStatisticsVo) {
+
+        return testCheckItemsTaskRelService.getAuthorizedSignatureHours(taskStatisticsVo);
     }
 
 

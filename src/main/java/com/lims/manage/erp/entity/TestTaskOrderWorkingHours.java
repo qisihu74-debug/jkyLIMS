@@ -3,7 +3,9 @@ package com.lims.manage.erp.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -49,9 +51,11 @@ public class TestTaskOrderWorkingHours implements Serializable {
      * 比例
      */
     private String proportion;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date createTime;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date updateTime;
     /**
      * 新增操作人

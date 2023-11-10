@@ -1450,4 +1450,15 @@
         and t3.name is not NULL
         and t2.del_flag = 0
     </select>
+
+    <select id="selectEntrustBasis" resultType="com.lims.manage.erp.entity.TestInitDataEntity" parameterType="integer">
+        SELECT
+            id,
+            NAME,
+            type,
+            remark
+        FROM
+            test_init_data
+            where type = #{TypeId}
+    </select>
 </mapper>

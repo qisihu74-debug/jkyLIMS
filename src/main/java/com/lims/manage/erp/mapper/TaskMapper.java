@@ -1,16 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.ReqTaskPool;
-import com.lims.manage.erp.entity.SampleItemInstrumentEntity;
-import com.lims.manage.erp.entity.TaskEntity;
-import com.lims.manage.erp.entity.TaskIdEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TaskTestTeamEntity;
-import com.lims.manage.erp.entity.TeamTreeStructureEntity;
-import com.lims.manage.erp.entity.TestInstrumentEntity;
-import com.lims.manage.erp.entity.TestTaskPool;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
@@ -625,4 +616,10 @@ public interface TaskMapper extends BaseMapper {
             "WHERE\n" +
             "\tt1.task_id = #{taskId}")
     List<String> getTaskSamples(@Param("taskId")Long taskId);
+
+    /**
+     *  基础信息处理。
+     * @return
+     */
+    List<TestInitDataEntity> selectEntrustBasis(Integer TypeId);
 }
