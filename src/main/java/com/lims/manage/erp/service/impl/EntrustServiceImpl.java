@@ -6246,6 +6246,21 @@ public class EntrustServiceImpl implements EntrustService {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
         EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
+        if (entrustDetails.getState() == null) {
+            return ResultUtil.error("驳回失败：委托单状态异常");
+        }
+        if (entrustDetails.getState() == 202) {
+            return ResultUtil.error("审核失败：委托单已驳回");
+        }
+        if (entrustDetails.getState() == 1) {
+            return ResultUtil.error("审核失败：委托单已发布成功");
+        }
+        if (entrustDetails.getState() == 0 && entrustDetails.getState() == 1) {
+            return ResultUtil.error("审核失败：委托单已审核通过");
+        }
+        if (entrustDetails.getState() != 201 && entrustDetails.getState() == 1) {
+            return ResultUtil.error("审核失败：委托单不是预委托单");
+        }
         if(entrustDetails.getAuditState().equals("0")){
             return ResultUtil.error("审核失败：委托单未受理");
         }
@@ -6260,6 +6275,9 @@ public class EntrustServiceImpl implements EntrustService {
             basisInfo.setState(1);
             basisInfo.setBusinessAcceptor(userInfo.getName());
             entityMapper.updateEntrustInfos(basisInfo);
+            StringBuffer stringBuffer1 = new StringBuffer();
+            stringBuffer1.append("委托单id"+entrustId+"受理人"+basisInfo.getBusinessAcceptor());
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "审核发布：" + stringBuffer1.toString(), Const.ENTRUST_FOUND, true);
             // 记录流转信息
             StringBuffer taskFlowDateBuffer = new StringBuffer();
             // 新增流转信息
@@ -6389,10 +6407,10 @@ public class EntrustServiceImpl implements EntrustService {
         // 获取委托单号
         SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
         Date acceptanceTime = new Date();
+        StringBuffer stringBuffer1 = new StringBuffer();
+        stringBuffer1.append("委托id"+entrustId+"委托state="+entrustDetails.getState() +"委托单号"+ entrustDetails.getEntrustmentNo());
         // 委托单 = 201 符合预委托单
-        if(entrustDetails.getState() == 201){
-            StringBuffer stringBuffer = new StringBuffer();
-            stringBuffer.append("委托单号 state = 201 " + entrustDetails.getEntrustmentNo());
+        if (entrustDetails.getState() == 201) {
             //设置委托编号
             String acceptanceDate = yyyyMMddHH_NOT_.format(acceptanceTime).substring(0, 6);
             //获取并设置委托编号，相应的类别
@@ -6407,11 +6425,11 @@ public class EntrustServiceImpl implements EntrustService {
             }
             // 获取受理日期
             basisInfo.setAcceptanceDate(acceptanceTime);
-            basisInfo.setBusinessAcceptor(userInfo.getName());
-            stringBuffer.append("委托单号 state = 0 " + entrustCategoryVo.getEntrustmentNo());
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "审核发布：审批通过时\t"+stringBuffer.toString(), Const.ENTRUST_FOUND, true);
         }
+        basisInfo.setBusinessAcceptor(userInfo.getName());
         entityMapper.updateEntrustInfoDetails(basisInfo);
+        stringBuffer1.append("委托受理人"+basisInfo.getBusinessAcceptor()+"委托单号" + basisInfo.getEntrustmentNo());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "审核发布：审批通过时:" + stringBuffer1.toString(), Const.ENTRUST_FOUND, true);
         // 获取样品预览信息 进行更改编号数据。
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustId);
         if (CollectionUtil.isNotEmpty(sampleCollection)) {
