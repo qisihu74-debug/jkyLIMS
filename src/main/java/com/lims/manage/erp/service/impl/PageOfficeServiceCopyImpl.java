@@ -70,41 +70,6 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     @Autowired
     private QiYueSuoEntity qiYueSuoEntity;
 
-
-    /**
-     * 处理合并完整的excel每个报告的页码------废弃
-     *
-     * @param document
-     * @param countMap
-     * @param map      key= checkItemId， value对应的下标数据
-     */
-    private static void handlerPageDiscard(Workbook document, Map<Integer, Integer> countMap, int total, Map<Integer, Object> map) {
-        //报告总页数
-        //填充每个子报告每页的页码
-        Set<Integer> keySet = countMap.keySet();
-        for (Integer page : keySet) {
-            int count = countMap.get(page);
-            Worksheet worksheet = document.getWorksheets().get(page);
-            Cells cells = worksheet.getCells();
-            int maxRow = cells.getMaxRow();
-            int column = cells.getMaxColumn();
-            for (int n = 0; n < maxRow; n++) {
-                for (int j = 0; j < column; j++) {
-                    Cell cell = cells.get(n, j);
-                    if (cell != null) {
-                        Object value = cell.getValue();
-                        if (value != null) {
-                            String string = value.toString();
-                            if ("第   页，共   页".equals(string)) {
-                                cells.get(n, j).setValue("第" + count + "页，共" + total + "页");
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     /**
      * 处理合并完整的excel每个报告的页码
      *
