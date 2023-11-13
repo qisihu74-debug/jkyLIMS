@@ -1422,7 +1422,6 @@ public class ReportController {
     /**
      * 查询任务单下可制作报告样品列表
      * @param entrustId
-     * @param taskId
      * @return
      */
     @GetMapping("/getMakeReportSampleInfos")
@@ -1532,7 +1531,7 @@ public class ReportController {
 
     }
 
-    public void listFiles(String directoryPath,List<String> list) throws Exception{
+    public void listFiles(String directoryPath,List<String> list1) throws Exception{
                 File directory = new File(directoryPath);
         if (directory.exists() && directory.isDirectory()) {
             File[] files = directory.listFiles();
