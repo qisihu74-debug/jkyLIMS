@@ -6258,6 +6258,7 @@ public class EntrustServiceImpl implements EntrustService {
             EntrustEntity basisInfo = new EntrustEntity();
             basisInfo.setId(entrustId);
             basisInfo.setState(1);
+            basisInfo.setBusinessAcceptor(userInfo.getName());
             entityMapper.updateEntrustInfos(basisInfo);
             // 记录流转信息
             StringBuffer taskFlowDateBuffer = new StringBuffer();
