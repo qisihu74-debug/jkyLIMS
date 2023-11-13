@@ -37,6 +37,7 @@ import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.DownloadUtils;
 import com.lims.manage.erp.util.FileAndFolderUtil;
@@ -1535,6 +1536,7 @@ public class ReportController {
                 File directory = new File(directoryPath);
         if (directory.exists() && directory.isDirectory()) {
             File[] files = directory.listFiles();
+            List<String> list = reportService.getAllUpdateCode();
             if (files != null) {
                 for (File file : files) {
                     logger.info("文件名称:{}",file.getName());

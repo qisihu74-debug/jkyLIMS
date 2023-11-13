@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.ClientOrderdetailVo;
@@ -496,6 +497,21 @@ public interface EntrustEntityMapper extends BaseMapper {
     List<TaskCodeVo> getTaskAndTeam(Long entrustId);
 //    测试信息： 获取委托列表
     List<ClientOrderdetailVo> getEntrustList(ClientOrderdetailVo clientOrderdetailVo);
+
+    /**
+     * 委托单查询-分页
+     * @param clientOrderdetailVo
+     * @return
+     */
+    List<ClientOrderdetailVo> selectEntrustPageVo(ClientOrderdetailVo clientOrderdetailVo);
+
+    /**
+     * 委托单查询-统计价格
+     * @param clientOrderdetailVo
+     * @return
+     */
+    String getClientListSumPrice(ClientOrderdetailVo clientOrderdetailVo);
+
     // 获取样品信息
     List<SampleEntity> getSampleList(@Param("entrustIds") List<Long> entrustIds);
     // 获取任务单列表

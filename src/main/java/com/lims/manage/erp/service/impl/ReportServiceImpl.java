@@ -1413,7 +1413,7 @@ public class ReportServiceImpl implements ReportService {
         qiYueSuoSeaLBean.setContractId(contractId);
         qiYueSuoSeaLBean.setEntrustId(id);
         qiYueSuoSeaLBean.setContact("");
-        qiYueSuoSeaLBean.setExpireTime(72);
+        qiYueSuoSeaLBean.setExpireTime(259200);
         qiYueSuoSeaLBean.setReceiverName(ShiroUtils.getUserInfo().getName());
         qiYueSuoSeaLBean.setTenantName(info);
         qiYueSuoSeaLBean.setTenantType("COMPANY");
@@ -1726,6 +1726,9 @@ public class ReportServiceImpl implements ReportService {
         //支持批量
         List<Long> entrustIds = entityMapper.getEntrustIdsByCid(contractId);
         List<Long> zjEntrustIds = entityMapper.getzJEntrustIdsByCid(contractId);
+        if (org.apache.commons.collections.CollectionUtils.isEmpty(entrustIds) && org.apache.commons.collections.CollectionUtils.isEmpty(zjEntrustIds)){
+            return;
+        }
         List<Long> ids = entityMapper.getIdsByCid(contractId);
 
         //更新状态，更新
@@ -3911,7 +3914,7 @@ public class ReportServiceImpl implements ReportService {
         String qzPdfPath = path+"qzPdfPath.pdf";
         PdfDoc pdf3 = new PdfDoc(pdfPath, qzPdfPath);
         try {
-            pdf3.addImage(dateUrl, "日期：", 5, -5, 80, 20);
+            pdf3.addImage(dateUrl, "日期：", 5, -7, 90, 25);
         } catch (Exception e) {
             log.error("设置报告盖章日期失败:{}",e);
         }

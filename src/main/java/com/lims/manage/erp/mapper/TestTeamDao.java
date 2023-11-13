@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.vo.Node;
+import com.lims.manage.erp.vo.TaskStatisticsVo;
 import com.lims.manage.erp.vo.TestTeamVo;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -54,6 +55,21 @@ IPage<TestTeamVo> getListPage(IPage<TestTeamVo> page, @Param(Constants.WRAPPER) 
             "ORDER BY\n" +
             "\tsort")
     List<Node> getTree();
+
+    /**
+     * 展示 人员信息及部门信息
+     *
+     * @return
+     */
+    List<TaskStatisticsVo> getEmployeesAndDepartments(TaskStatisticsVo taskStatisticsVo);
+
+
+    /**
+     * 展示 根据授权签字（role_id = 66） 带出用户信息
+     *
+     * @return
+     */
+    List<TaskStatisticsVo> getRoleUserInformation(TaskStatisticsVo taskStatisticsVo);
 
 }
 

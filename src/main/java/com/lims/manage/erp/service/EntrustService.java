@@ -335,6 +335,13 @@ public interface EntrustService {
      */
     PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo);
 
+    /**
+     * 客户委托查询-统计价格
+     * @param clientOrderdetailVo
+     * @return
+     */
+    Result getClientListSumPrice(ClientOrderdetailVo clientOrderdetailVo);
+
     boolean acceptEntrust(Long id);
 
     /**

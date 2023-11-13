@@ -4951,32 +4951,14 @@ public class EntrustServiceImpl implements EntrustService {
     }
     @Override
     public PageInfo getClientList(ClientOrderdetailVo clientOrderdetailVo) {
-        List<ClientOrderdetailVo> list = Lists.newArrayList();
+        List<ClientOrderdetailVo> subList = Lists.newArrayList();
         PageHelper.clearPage();
-        clientOrderdetailVo.setCompanyIds(null);
         if(clientOrderdetailVo.getCompanyStrs()!=null&&clientOrderdetailVo.getCompanyStrs().length==0){
             clientOrderdetailVo.setCompanyStrs(null);
         }
-        list = entityMapper.getEntrustList(clientOrderdetailVo);
-        // 处理分页数据：
-        Integer pageNum = clientOrderdetailVo.getPageNum();
-        Integer pageSize = clientOrderdetailVo.getPageSize();
-        if(StringUtils.isEmpty(pageNum)||pageNum<=0){
-            pageNum = 1;
-        }
-        if(StringUtils.isEmpty(pageSize)||pageSize<=0){
-            pageSize = 10;
-        }
-        PageInfo pageInfo = new PageInfo();
-        //分页
-        List<ClientOrderdetailVo> subList;
-        if (list.size() > 10 && list.size() / 10 >= pageNum) {
-            subList = list.subList((pageNum - 1) * pageSize, pageNum * pageSize);
-        } else {
-            subList = list.subList((pageNum - 1) * pageSize, list.size());
-        }
-        pageInfo.setList(subList);
-        pageInfo.setTotal(list.size());
+//        list = entityMapper.getEntrustList(clientOrderdetailVo);
+        PageHelper.startPage(clientOrderdetailVo.getPageNum(),clientOrderdetailVo.getPageSize());
+        subList = entityMapper.selectEntrustPageVo(clientOrderdetailVo);
         // 处理List信息：
         if(!CollectionUtils.isEmpty(subList)){
             // 根据委托单主键条件进行搜索
@@ -5121,7 +5103,18 @@ public class EntrustServiceImpl implements EntrustService {
                 }
             }
         }
-        return pageInfo;
+        PageInfo<ClientOrderdetailVo> result = new PageInfo<>(subList);
+        return result;
+    }
+
+    @Override
+    public Result getClientListSumPrice(ClientOrderdetailVo clientOrderdetailVo) {
+        if(clientOrderdetailVo.getCompanyStrs()!=null&&clientOrderdetailVo.getCompanyStrs().length==0){
+            clientOrderdetailVo.setCompanyStrs(null);
+        }
+        PageHelper.clearPage();
+       String sumPrice = entityMapper.getClientListSumPrice(clientOrderdetailVo);
+        return ResultUtil.success(sumPrice);
     }
 
     @Override
@@ -6384,7 +6377,7 @@ public class EntrustServiceImpl implements EntrustService {
     public List<String> getUrlListById(Long entrustId) {
         return entityMapper.getUrlListById(entrustId);
     }
-
+//    @Transactional(rollbackFor = Exception.class)
     public Result entrustApprovedMethod(EntrustAddVo entrustDetails,long entrustId){
         // 效验后： 针对预委托单进行审核通过操作 更新委托单
         EntrustEntity basisInfo = new EntrustEntity();
@@ -6397,6 +6390,8 @@ public class EntrustServiceImpl implements EntrustService {
         Date acceptanceTime = new Date();
         // 委托单 = 201 符合预委托单
         if(entrustDetails.getState() == 201){
+            StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append("委托单号 state = 201 " + entrustDetails.getEntrustmentNo());
             //设置委托编号
             String acceptanceDate = yyyyMMddHH_NOT_.format(acceptanceTime).substring(0, 6);
             //获取并设置委托编号，相应的类别
@@ -6412,6 +6407,8 @@ public class EntrustServiceImpl implements EntrustService {
             // 获取受理日期
             basisInfo.setAcceptanceDate(acceptanceTime);
             basisInfo.setBusinessAcceptor(userInfo.getName());
+            stringBuffer.append("委托单号 state = 0 " + entrustCategoryVo.getEntrustmentNo());
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "审核发布：审批通过时\t"+stringBuffer.toString(), Const.ENTRUST_FOUND, true);
         }
         entityMapper.updateEntrustInfoDetails(basisInfo);
         // 获取样品预览信息 进行更改编号数据。
@@ -6420,12 +6417,15 @@ public class EntrustServiceImpl implements EntrustService {
             for (SampleEntity sampleData1 : sampleCollection) {
                 // 读取编号 是否为 预样品编号。
                 if (sampleData1.getSampleCode().contains("YSY")) {
+                    StringBuffer stringBuffer = new StringBuffer();
+                    stringBuffer.append("处理原材样品编号前  = YSY " + sampleData1.getSampleCode());
                     // 收样人
                     sampleData1.setInspector(userInfo.getName());
                     // 样品状态 预收样 = 收样
                     sampleData1.setState("5");
                     // 处理原材样品编号 （ps:定义预样品编号需要强制更改样品编号）
                     sampleData1.setSampleCode(methodSampleCode(sampleData1.getSampleCode()));
+                    stringBuffer.append("处理原材样品编号后  " + sampleData1.getSampleCode());
                     // update样品信息
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleData1);
                     //补充配合比下的的样品信息
@@ -6439,15 +6439,18 @@ public class EntrustServiceImpl implements EntrustService {
                                 SampleEntity sampleData2 = new SampleEntity();
                                 sampleData2.setId(sampleDetailVo1.getId());
                                 sampleData2.setReceivedDate(sampleData1.getReceivedDate());
-                                if (sampleData1.getSampleCode() != null) {
+                                if (sampleData1.getSampleCode() != null && sampleDetailVo1.getSampleCode().contains("YSY")) {
                                     // 处理配合比则 更改样品编号
+                                    stringBuffer.append("处理配合比样品编号前  " + sampleDetailVo1.getSampleCode());
                                     sampleData2.setSampleCode(methodMixProportionSampleCode(sampleData1.getSampleCode(), sampleDetailVo1.getSampleCode()));
+                                    stringBuffer.append("处理配合比样品编号后  " + sampleData2.getSampleCode());
+                                    // update样品信息 更改样品编号
+                                    sampleEntityMapper.updateByPrimaryKeySelective(sampleData2);
                                 }
-                                // update样品信息
-                                sampleEntityMapper.updateByPrimaryKeySelective(sampleData2);
                             }
                         }
                     }
+                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "审核发布：审批通过时\t"+stringBuffer.toString(), Const.ENTRUST_FOUND, true);
                 }
                 // 根据样品id 查询样品流转列表
                 List<SampleCirculationRecord> circulationList = sampleEntityMapper.getRecords(sampleData1.getId(), 30);

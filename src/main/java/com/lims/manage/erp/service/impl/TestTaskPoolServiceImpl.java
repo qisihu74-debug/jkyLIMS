@@ -85,7 +85,6 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         LambdaQueryWrapper<TestCheckItemsTaskRel> taskRelLambdaQueryWrapper = new LambdaQueryWrapper<>();
         taskRelLambdaQueryWrapper.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
         List<TestCheckItemsTaskRel> itemsTaskRels = testCheckItemsTaskRelMapper.selectList(taskRelLambdaQueryWrapper);
-        System.out.println("任务大厅----展示详情数据");
         // 进行数据的 集成展示。
         if (CollectionUtil.isNotEmpty(sampleList)) {
             // 遍历检测项与对应指派人员的信息
@@ -245,14 +244,66 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         if (!flag) {
             return ResultUtil.error("领取失败：登录人无授权签字人角色");
         }
-        // 根据报告制作人： 查询 所在科室 是 交通工程 = false；
-        Boolean claimFlag = true;
-        // 通过委托单id 查询任务列表
+        // 通过委托单id 查询旧任务列表
         List<TaskProgressVo> taskProgressVos = taskMapper.getTaskStateByEntrustId(entrustId);
         // 通过委托单id 查看检测项列表。
         List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+        // 通过委托单 获取流水任务单详情
+        LambdaQueryWrapper<TestTaskPool> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestTaskPool::getEntrustmentId, entrustId);
+        TestTaskPool testTaskPool = taskPoolMapper.selectOne(queryWrapper);
+        if (testTaskPool == null) {
+            return ResultUtil.error("领取失败： 当前流水号任务单不存在");
+        }
+        // 任务领取-循环验证 数据 msg = null 正常执行、！= null 抛出。
+        Result msg = loopValidation(list, taskProgressVos);
+        if (msg != null) {
+            return msg;
+        }
+        // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
+        // 根据科室id 及 委托单主键 查询任务单是否存在？
+        //                         1、任务单存在 查看状态=试验开始 则返回错误信息 状态=未开始试验的话，最后删除任务单操作
+        //                         2、 任务单不存在的话，创建任务单即可。
+        //调用方法： 补充检测项信息并发布任务单
+        // key = deptId value = 旧单号
+        Map<Long, TaskProgressVo> taskCodeMap = new HashMap<>();
+        // 1.1：任务单列表存在的话
+        if (CollectionUtil.isNotEmpty(taskProgressVos)) {
+            // 删除任务单号
+            for (TaskProgressVo taskProgressVo : taskProgressVos) {
+                // 根据部门id 保留旧任务单号
+                taskCodeMap.put(taskProgressVo.getDeptId().longValue(), taskProgressVo);
+                taskMapper.deleteTaskById(taskProgressVo.getTaskId());
+            }
+        }
+        // 根据 委托单id 条件删除流转信息
+        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+        queryWrapper12.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
+        testCheckItemsTaskRelMapper.delete(queryWrapper12);
+        // 2、进行录入任务单信息
+        for (SampleItemEntity sampleItemEntity : list) {
+            String sampler = sampleItemEntity.getSampler().split("-")[0];
+            methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue(), taskCodeMap);
+        }
+        // 调用方法 进行 更新流水号任务单信息
+        methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
+        return ResultUtil.success("领取成功");
+    }
+
+    /**
+     * 任务领取-循环验证 数据
+     *
+     * @param list            任务单领取数据值
+     * @param taskProgressVos 通过委托单id 查询旧任务列表
+     * @return = null 正常执行，否则抛出异常值。
+     */
+    public Result loopValidation(List<SampleItemEntity> list, List<TaskProgressVo> taskProgressVos) {
         // 检测人集合
         List<Long> tsetUserIds = new ArrayList<>();
+        // 报告制作人集合
+        List<Long> reportProducerIds = new ArrayList<>();
+        // 根据报告制作人： 查询 所在科室 是 交通工程 = false；
+        Boolean claimFlag = true;
         // 参与效验的数据--------------------------------- ↓↓↓↓ ------------------------
         // 1、效验检测人在不在检测科室 2、检测人不能在多个科室 3、补充每组检测项中人员信息
         for (SampleItemEntity sampleItemEntity : list) {
@@ -282,25 +333,26 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                         userIds.add(Long.valueOf(testCheckItemsTaskRel.getUserId()));
                         // 根据报告制作人 来 确认科室信息
                         producerList.add(Long.valueOf(testCheckItemsTaskRel.getUserId()));
-                        // 读取报告制作人 是否在同一科室。
-                        List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(producerList);
-                        if (CollectionUtils.isEmpty(detectorsCollection)) {
-                            return ResultUtil.error("领取失败：" + nameStr + " 报告制作人不在科室");
-                        }
-                        if (detectorsCollection.size() >= 2) {
-                            return ResultUtil.error("领取失败：" + nameStr + " 报告制作人所在科室不同");
-                        }
-                        // 每组检测项根据报告制作人指定科室。
-                        sampleItemEntity.setTechnicistId(detectorsCollection.get(0));
-                        // TODO: 10月30日 制作人所在部门 先固定  查询当前用户的 科室信息
-                        if (detectorsCollection.get(0) == 265 || detectorsCollection.get(0) ==264 ) {
-                            claimFlag = false;
-                        }
+                        reportProducerIds.add(Long.valueOf(testCheckItemsTaskRel.getUserId()));
                     }
                 }
+                // 读取报告制作人 是否在同一科室。
+                List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(producerList);
+                if (CollectionUtils.isEmpty(detectorsCollection)) {
+                    return ResultUtil.error("领取失败：" + nameStr + " 报告制作人不在科室");
+                }
+                if (detectorsCollection.size() >= 2) {
+                    return ResultUtil.error("领取失败：" + nameStr + " 报告制作人所在科室不同");
+                }
+                // 每组检测项根据报告制作人指定科室。
+                sampleItemEntity.setTechnicistId(detectorsCollection.get(0));
+                // TODO: 10月30日 制作人所在部门 先固定  查询当前用户的 科室信息
+                if (detectorsCollection.get(0) == 265 || detectorsCollection.get(0) == 264) {
+                    claimFlag = false;
+                }
                 // 读取0：检测人、1：记录人、2、复核人、3、报告制作人 是否在同一科室。
-                List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(userIds);
-                if (detectorsCollection.size() >= 2 && claimFlag == true) {
+                List<Long> detectorsCollection2 = teamMapper.getUsersByTechnicist(userIds);
+                if (detectorsCollection2.size() >= 2 && claimFlag == true) {
                     return ResultUtil.error("领取失败：" + nameStr + " 检测人、记录人、复核人、报告制作人 必须在同一个团队中");
                 }
             }
@@ -309,14 +361,14 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 String[] inspectorArrays = sampleItemEntity.getInspector().split(",");
                 for (int i = 0; i < inspectorArrays.length; i++) {
                     String[] names = inspectorArrays[i].split("&");
-                    LabelValueVo labelValueVo = new LabelValueVo();
-                    labelValueVo.setLabel(names[0]);
-                    labelValueVo.setValue(Long.parseLong(names[1]));
-                    labelValueVo.setText("0");
-                    inspectorArraysVos.add(labelValueVo);
                     userIds.add(Long.parseLong(names[1]));
                     tsetUserIds.add(Long.parseLong(names[1]));
                     nameStr.append(names[0] + " ");
+                    TestCheckItemsTaskRel data = new TestCheckItemsTaskRel();
+                    data.setUserName(names[0]);
+                    data.setUserId(names[1]);
+                    data.setUserType(0);
+                    inspectorRels.add(data);
                 }
                 // 读取检测人信息 是否在同一科室。
                 List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(userIds);
@@ -331,17 +383,15 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             }
             sampleItemEntity.setItemsTaskRels(inspectorRels);
         }
+        // 进行效验：每组检测项中 报告制作人 应该不同，相同 会生成两组同样的任务单号
+        List<Long> detectorsCollection0 = teamMapper.getUsersByTechnicist(reportProducerIds);
+        if (detectorsCollection0.size() != list.size()) {
+            return ResultUtil.error("领取失败：" + "报告制作人中： 请选择同一组人员，同一组人员必须要在同一个团队，不同组的人员，不能出现在同一个团队中");
+        }
         //每组检测项中 选中的检测人 不能在同一科室。
         List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(tsetUserIds);
         if (detectorsCollection.size() != list.size() && claimFlag == true) {
             return ResultUtil.error("领取失败：" + "请选择同一组人员，同一组人员必须要在同一个团队，不同组的人员，不能出现在同一个团队中");
-        }
-        // 通过委托单 获取流水任务单详情
-        LambdaQueryWrapper<TestTaskPool> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TestTaskPool::getEntrustmentId, entrustId);
-        TestTaskPool testTaskPool = taskPoolMapper.selectOne(queryWrapper);
-        if (testTaskPool == null) {
-            return ResultUtil.error("领取失败： 当前流水号任务单不存在");
         }
         for (TaskProgressVo taskProgressVo : taskProgressVos) {
             if (taskProgressVo.getState() != 144) {
@@ -353,30 +403,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             }
         }
         // 参与效验的数据--------------------------------- ↑↑↑↑ ------------------------
-        // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
-        // 根据科室id 及 委托单主键 查询任务单是否存在？
-        //                         1、任务单存在 查看状态=试验开始 则返回错误信息 状态=未开始试验的话，最后删除任务单操作
-        //                         2、 任务单不存在的话，创建任务单即可。
-        //调用方法： 补充检测项信息并发布任务单
-        // 1.1：任务单列表存在的话
-        if (CollectionUtil.isNotEmpty(taskProgressVos)) {
-            // 删除任务单号
-            for (TaskProgressVo taskProgressVo : taskProgressVos) {
-                taskMapper.deleteTaskById(taskProgressVo.getTaskId());
-            }
-        }
-        // 根据 委托单id 条件删除流转信息
-        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
-        queryWrapper12.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
-        testCheckItemsTaskRelMapper.delete(queryWrapper12);
-        // 2、进行录入任务单信息
-        for (SampleItemEntity sampleItemEntity : list) {
-            String sampler = sampleItemEntity.getSampler().split("-")[0];
-            methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue());
-        }
-        // 调用方法 进行 更新流水号任务单信息
-        methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
-        return ResultUtil.success("领取成功");
+        return null;
     }
 
     void methodUpdateTaskPool(Long entrustId, TestTaskPool testTaskPool, SysUserEntity userInfo) {
@@ -407,7 +434,17 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskPoolMapper.update(testTaskPool, queryWrapper1);
     }
 
-    void methodPublishTaskList(Long entrustId, String sampler, SampleItemEntity sampleItemEntity, List<SampleItemEntity> itemList, Long poolId) {
+    /**
+     * 整理每组检测项数据
+     *
+     * @param entrustId
+     * @param sampler
+     * @param sampleItemEntity
+     * @param itemList
+     * @param poolId
+     * @param taskCodeMap      key = deptId value = 旧单号
+     */
+    void methodPublishTaskList(Long entrustId, String sampler, SampleItemEntity sampleItemEntity, List<SampleItemEntity> itemList, Long poolId, Map<Long, TaskProgressVo> taskCodeMap) {
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustId);
         // 进行新建任务单信息、补充信息
         TaskVo entity = new TaskVo();
@@ -474,7 +511,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         }
         entity.setCheckItemDeptVoList(checkItemDeptVoList);
         // 发布任务
-        distributionTask412(entity, sampleItemEntity, poolId, taskId,entrustAddVo);
+        distributionTask412(entity, sampleItemEntity, poolId, taskId, entrustAddVo, taskCodeMap);
     }
 
     /**
@@ -569,7 +606,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Boolean distributionTask412(TaskVo entity, SampleItemEntity sampleItemEntity, Long poolId, Long taskId,EntrustAddVo entrustAddVo) {
+    public Boolean distributionTask412(TaskVo entity, SampleItemEntity sampleItemEntity, Long poolId, Long taskId, EntrustAddVo entrustAddVo, Map<Long, TaskProgressVo> taskCodeMap) {
         List<Long> deptIds = Lists.newArrayList();
         List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
         for (CheckItemDeptVo vo : checkItemDeptVoList) {
@@ -592,21 +629,27 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             vo.setId(taskId);
             vo.setTaskPrice(taskPrice);
             //根据委托单号月份确定任务单ID
-            String teamCode = taskMapper.getTeamCode(deptId);
-            String entrustmentNo = entrustAddVo.getEntrustmentNo() + "";
-            String format = entrustmentNo.substring(2, 6);
-            Integer integer = taskMapper.selectMaxNoByCode(teamCode + format);
-            Integer code = null;
-            if (integer == null) {
-                String currentTime = DateUtil.getTodayString().substring(2, 6);
-                code = Integer.parseInt(format + "001");
+            if (taskCodeMap.get(deptId) != null) {
+                TaskProgressVo oldTaskCode = taskCodeMap.get(deptId);
+                vo.setCode(oldTaskCode.getCode());
+                vo.setTaskCode(oldTaskCode.getTaskCode());
             } else {
-                code = integer + 1;
+                String teamCode = taskMapper.getTeamCode(deptId);
+                String entrustmentNo = entrustAddVo.getEntrustmentNo() + "";
+                String format = entrustmentNo.substring(2, 6);
+                Integer integer = taskMapper.selectMaxNoByCode(teamCode + format);
+                Integer code = null;
+                if (integer == null) {
+                    String currentTime = DateUtil.getTodayString().substring(2, 6);
+                    code = Integer.parseInt(format + "001");
+                } else {
+                    code = integer + 1;
+                }
+                String codeStr = code + "";
+                vo.setCode(codeStr);
+                vo.setTaskCode(teamCode + codeStr.substring(0, 4) + "-" + codeStr.substring(4, 7));
             }
-            String codeStr = code + "";
             vo.setDeptId(deptId);
-            vo.setCode(codeStr);
-            vo.setTaskCode(teamCode + codeStr.substring(0, 4) + "-" + codeStr.substring(4, 7));
             vo.setEntrustmentId(entity.getEntrustmentId());
             vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
             vo.setOrderTime(entity.getOrderTime());
@@ -706,7 +749,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             }
             // 记录发布任务单的日志
             StringBuffer stringBuilder1 = new StringBuffer();
-            stringBuilder1.append("任务单发布日志");
+            stringBuilder1.append("任务大厅领取日志");
             stringBuilder1.append("任务单id" + vo.getId());
             stringBuilder1.append("任务单号" + vo.getTaskCode());
             stringBuilder1.append("委托单id" + vo.getEntrustmentId());
@@ -718,30 +761,20 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         //任务单保存
         taskMapper.batchSave(vos);
         try {
-            // 任务单保存
-            receivePushInformationmethod(vos);
+            if (taskCodeMap.get(vos.get(0).getDeptId().longValue()) == null) {
+                // 任务单领取 使用钉钉 通知相关人员
+                receivePushInformationmethod(vos);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         //更新委托单状态
         taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
-//        // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
-//        if (!CollectionUtils.isEmpty(entity.getTaskRelEntities())) {
-//            // 补充发布人ID和姓名
-//            SysUserEntity userEntity = ShiroUtils.getUserInfo();
-//            List<TestEntrustedTaskRelEntity> TaskRelEntities = entity.getTaskRelEntities();
-//            for (TestEntrustedTaskRelEntity taskdata : TaskRelEntities) {
-//                taskdata.setUserId(userEntity.getUserId());
-//                taskdata.setAddressName(userEntity.getName());
-//                taskdata.setCreateDate(new Date());
-//            }
-//            entrustService.methodDistributionOfFlow(entity.getEntrustmentId(), TaskRelEntities);
-//        }
         return true;
     }
 
     /**
-     * 任务单领取 通知相关人员
+     * 任务单领取 使用钉钉 通知相关人员
      *
      * @param vos
      */

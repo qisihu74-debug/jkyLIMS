@@ -663,22 +663,6 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
     @Override
     public TeamVo getTeamUserNameTwo(Long UserLong) {
         TeamVo teamVo = new TeamVo();
-/*        // 返回团队id集合 根据人员id
-        List<TeamTreeStructureEntity> dataDepts = taskMapper.getTeamDeptVo(UserLong);
-        List<TeamTreeStructureEntity> dataDepts = new ArrayList<>();
-        if (dataDepts != null && !dataDepts.isEmpty()) {
-            Set<Long> deptIds = new HashSet<>();
-            for (TeamTreeStructureEntity data : dataDepts) {
-                deptIds.add(data.getId());
-                if (data.getSId() != null) {
-                    deptIds.add(data.getSId());
-                }
-            }
-            // 团队id集合 返回人员信息
-            List<LabelValueVo> teamVos = taskMapper.getMemberInformation(deptIds);
-            teamVo.setTeamVo(teamVos);
-        }*/
-
         /*// 返回团队所有人员信息。*/
         // 获取当前用户所在科室id
         Long department = teamMapper.getTeamIdByUid(UserLong);

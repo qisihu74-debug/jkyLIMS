@@ -731,6 +731,7 @@
         WHERE
             t1.role_id = #{roleId}
             AND t3.NAME IS NOT NULL
+            GROUP BY t3.user_id
     </select>
 
     <select id="selectTeamList" resultType="com.lims.manage.erp.vo.LabelValueTeamVo">
@@ -1017,7 +1018,8 @@
             dept_id,
             task_price,
             sampler,
-            sample_state_description
+            sample_state_description,
+            code
         FROM
             test_task
         WHERE
@@ -1447,5 +1449,16 @@
         </if>
         and t3.name is not NULL
         and t2.del_flag = 0
+    </select>
+
+    <select id="selectEntrustBasis" resultType="com.lims.manage.erp.entity.TestInitDataEntity" parameterType="integer">
+        SELECT
+            id,
+            NAME,
+            type,
+            remark
+        FROM
+            test_init_data
+            where type = #{TypeId}
     </select>
 </mapper>
