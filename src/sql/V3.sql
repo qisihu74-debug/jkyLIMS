@@ -168,3 +168,46 @@ ALTER TABLE `test_instrument`
 ADD COLUMN `parallel`  int NULL DEFAULT 0 COMMENT '并线数量（不能并行的仪器默认为0，并行的仪器给出数量）' AFTER `is_show`;
 
 
+
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for test_task_order_working_hours
+-- ----------------------------
+DROP TABLE IF EXISTS `test_task_order_working_hours`;
+CREATE TABLE `test_task_order_working_hours`  (
+  `id` int(0) NOT NULL AUTO_INCREMENT,
+  `task_id` bigint(0) DEFAULT NULL COMMENT '任务单id',
+  `task_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '任务单号',
+  `sample_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '样品名称',
+  `total_working_hours` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '总工时',
+  `detection_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '检测类型',
+  `user_id` bigint(0) DEFAULT NULL COMMENT '用户id',
+  `user_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '用户名称',
+  `working_hours` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '使用工时',
+  `proportion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '比例',
+  `create_time` datetime(0) DEFAULT NULL COMMENT '创建时间',
+  `update_time` datetime(0) DEFAULT NULL COMMENT '更新时间',
+  `add_operator` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '新增操作人',
+  `source` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '来源',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 28 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+
+INSERT INTO `test_init_data`(`id`, `type`, `name`, `remark`) VALUES (49, 30, '检测人员', '30');
+INSERT INTO `test_init_data`(`id`, `type`, `name`, `remark`) VALUES (50, 30, '记录人员', '20');
+INSERT INTO `test_init_data`(`id`, `type`, `name`, `remark`) VALUES (51, 30, '复核人', '30');
+INSERT INTO `test_init_data`(`id`, `type`, `name`, `remark`) VALUES (52, 30, '报告制作人', '20');
+
+
+INSERT INTO `sys_function`(`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES (200, 60, '工时统计', 0, 0, NULL);
+INSERT INTO `sys_function`(`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES (201, 200, '我的工时', 3, 0, NULL);
+INSERT INTO `sys_function`(`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES (202, 200, '按人员统计', 1, 0, NULL);
+INSERT INTO `sys_function`(`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES (203, 200, '按授权签字人统计', 2, 0, NULL);
+
+

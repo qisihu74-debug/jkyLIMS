@@ -135,9 +135,14 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         taskStatisticsVo.setPageSize(null);
         taskStatisticsVo.setPageNum(null);
         String countSum = baseMapper.getMyHoursStatisticsSum(taskStatisticsVo);
-        // 返回数据
+        if (countSum != null) {
+            // 返回数据
+            Map<String, Object> map = new HashMap<>();
+            map.put("sumCount", String.format("%.2f", Double.parseDouble(countSum)));
+            return ResultUtil.success(map);
+        }
         Map<String, Object> map = new HashMap<>();
-        map.put("sumCount", String.format("%.2f", Double.parseDouble(countSum)));
+        map.put("sumCount", "0.00");
         return ResultUtil.success(map);
     }
 
@@ -149,13 +154,11 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
      */
     @Override
     public InputStream getMyHoursStatisticsExport(TaskStatisticsVo taskStatisticsVo) throws IOException {
-        // 获取当前用户登录的信息
-        SysUserEntity user = ShiroUtils.getUserInfo();
-        // 当前登录人 = 授权签字人
-        taskStatisticsVo.setReceiverUserId(user.getUserId());
-        // 进行 查询分页。
-        PageHelper.clearPage();
-        List<TaskStatisticsVo> list = baseMapper.getMyHoursStatistics(taskStatisticsVo);
+        taskStatisticsVo.setPageNum(1);
+        taskStatisticsVo.setPageSize(100000);
+        Result result = getMyHoursStatistics(taskStatisticsVo);
+        PageInfo<TaskStatisticsVo> pageInfo = (PageInfo<TaskStatisticsVo>) result.getData();
+        List<TaskStatisticsVo> list = pageInfo.getList();
         // 我的工时统计-导出
         //创建HSSFWorkbook对象(excel的文档对象)
         HSSFWorkbook wb = new HSSFWorkbook();
@@ -470,12 +473,12 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                     String context = String.format("%.2f", zhi);
                     data.setWorkingHours(context);
                     // 已接任务单量
-                    data.setReceivedTaskVolume(1);
+                    data.setReceivedTaskVolume(String.valueOf(1));
                     // 完成单量 任务单 state >=3 算是完成
                     if (taskOrderWorkingHours.getState() >= 3) {
-                        data.setCompletedTaskVolume(1);
+                        data.setCompletedTaskVolume(String.valueOf(1));
                     } else {
-                        data.setCompletedTaskVolume(0);
+                        data.setCompletedTaskVolume(String.valueOf(0));
                     }
                     map.put(taskOrderWorkingHours.getUserId(), data);
                 } else {
@@ -489,12 +492,12 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                     String context = String.format("%.2f", sum);
                     data.setWorkingHours(context);
                     // 已接任务单量 = 任务单量 + 1
-                    data.setReceivedTaskVolume(data.getReceivedTaskVolume() + 1);
+                    data.setReceivedTaskVolume(String.valueOf(Integer.parseInt(data.getReceivedTaskVolume()) + 1));
                     // 完成单量 任务单 state >=3 算是完成 = 任务量 + 1
                     if (taskOrderWorkingHours.getState() >= 3) {
-                        data.setCompletedTaskVolume(data.getCompletedTaskVolume() + 1);
+                        data.setCompletedTaskVolume(String.valueOf(Integer.parseInt(data.getCompletedTaskVolume()) + 1));
                     } else {
-                        data.setCompletedTaskVolume(data.getCompletedTaskVolume() + 0);
+                        data.setCompletedTaskVolume(String.valueOf(Integer.parseInt(data.getCompletedTaskVolume()) + 0));
                     }
                     map.put(taskOrderWorkingHours.getUserId(), data);
                 }
@@ -607,13 +610,47 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         PageHelper.clearPage();
         taskStatisticsVo.setPageSize(null);
         taskStatisticsVo.setPageNum(null);
-        String totalData = testTaskOrderWorkingHoursMapper.selectAuthorizedSignatureHours(taskStatisticsVo);
-//        if (totalData != null) {
-//            Map<String, Object> map = new HashMap<>();
-//            map.put("sumCount", String.format("%.2f", Double.parseDouble(totalData.getWorkingHours())));
-//            return ResultUtil.success(map);
-//        }
-        return null;
+        //  key=团队id value = 顶级部门 ： 调用方法获取
+        Map<Integer, TestTeam> departmentTopMap = methodDepartmentTopMap();
+        // key = 顶级组织名，  所在组织 都是顶级部门：根据顶级部门 带出所属部门id 集合。
+        Map<String, List<Long>> deptList = new HashMap<>();
+        // 调用方法： 根据顶级部门名称 获取 所属下级部门id集合
+        methodDepartmentNameAcquisitionSet(deptList, departmentTopMap);
+        if (!StringUtils.isEmpty(taskStatisticsVo.getTeamName())) {
+            List<Long> longList = deptList.get(taskStatisticsVo.getTeamName());
+            taskStatisticsVo.setLongList(longList);
+        }
+        // 展示 人员信息及部门信息
+        // 进行 查询分页。
+        PageHelper.clearPage();
+        List<TaskStatisticsVo> list = testTeamDao.getEmployeesAndDepartments(taskStatisticsVo);
+        // 用户id集合
+        List<Long> userIds = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (TaskStatisticsVo statisticsVo : list) {
+                // 部门id 对应的顶级部门信息
+                if (statisticsVo.getTeamId() != null) {
+                    TestTeam team = departmentTopMap.get(statisticsVo.getTeamId().intValue());
+                    if (team != null && team.getName() != null) {
+                        statisticsVo.setTeamId(team.getId().longValue());
+                        statisticsVo.setTeamName(team.getName());
+                    }
+                }
+                userIds.add(statisticsVo.getReceiverUserId());
+            }
+            // TODO: 11月9日 暂时替换 userIds = deptIds
+            taskStatisticsVo.setLongList(userIds);
+            // 根据人员 查询 全部任务总工时列表
+            String totalData = testTaskOrderWorkingHoursMapper.selectTaskOrderCountWorkingHours(taskStatisticsVo);
+            if (totalData != null) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("sumCount", String.format("%.2f", Double.parseDouble(totalData)));
+                return ResultUtil.success(map);
+            }
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("sumCount", "0.00");
+        return ResultUtil.success(map);
     }
 
     @Override
@@ -656,6 +693,17 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             List<TestTaskOrderWorkingHours> totalWorkforAllTasks = testTaskOrderWorkingHoursMapper.selectTaskOrderTotalWorkingHours(taskStatisticsVo);
             // 调用方法：全部任务单 工时统计
             methodWorkingHours(totalWorkforAllTasks, list);
+        }
+        for (TaskStatisticsVo taskStatisticsVo1 : list) {
+            if (taskStatisticsVo1.getWorkingHours() == null) {
+                taskStatisticsVo1.setWorkingHours("-");
+            }
+            if (taskStatisticsVo1.getReceivedTaskVolume() == null) {
+                taskStatisticsVo1.setReceivedTaskVolume("-");
+            }
+            if (taskStatisticsVo1.getCompletedTaskVolume() == null) {
+                taskStatisticsVo1.setCompletedTaskVolume("-");
+            }
         }
         PageInfo<TaskStatisticsVo> result = new PageInfo<>(list);
         return ResultUtil.success(result);

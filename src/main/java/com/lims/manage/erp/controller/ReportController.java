@@ -1422,7 +1422,6 @@ public class ReportController {
     /**
      * 查询任务单下可制作报告样品列表
      * @param entrustId
-     * @param taskId
      * @return
      */
     @GetMapping("/getMakeReportSampleInfos")
@@ -1507,23 +1506,39 @@ public class ReportController {
      * 更新异常数据
      */
     @GetMapping("updateDate")
-    public void updateDate(){
-        String directoryPath = "C:\\Users\\Administrator\\3D Objects\\每天提交产值\\每天提交产值";
+    public void updateDate(String path){
+        List<String> list = reportService.getAllUpdateCode();
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2022年七所八所产值\\检测七所\\1";//50
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2022年七所八所产值\\检测七所\\2";//41
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2022年七所八所产值\\检测八所\\1";//5
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2022年七所八所产值\\检测八所\\2";//30
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2022年七所八所产值\\检测八所\\3";//19
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2023年产值统计\\检测7所\\1";//16
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2023年产值统计\\检测7所\\2";//59
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2023年产值统计\\检测7所\\3";//7
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2023年产值统计\\检测8所\\1";//16
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2023年产值统计\\检测8所\\2";//12
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2023年产值统计\\检测8所\\3";//35
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2023年产值统计\\检测8所\\4";//17
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2023年产值统计\\检测8所\\5";//1
+//        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2023年产值统计\\交通工程研究所\\1";//19
+        String directoryPath = "D:\\Users\\Administrator\\Desktop\\产值跟踪\\数据\\每天提交产值\\2023年产值统计\\交通工程研究所\\2";//14
         try {
-            listFiles(directoryPath);
+            listFiles(directoryPath,list);
         } catch (Exception e) {
             log.error("更新发生异常:{}",e);
         }
 
     }
 
-    public void listFiles(String directoryPath) throws Exception{
+    public void listFiles(String directoryPath,List<String> list1) throws Exception{
                 File directory = new File(directoryPath);
         if (directory.exists() && directory.isDirectory()) {
             File[] files = directory.listFiles();
             List<String> list = reportService.getAllUpdateCode();
             if (files != null) {
                 for (File file : files) {
+                    logger.info("文件名称:{}",file.getName());
                     if (file.isFile()) {
                         InputStream inputStream = new FileInputStream(file);
                         //读取文件，根据报告编号更新审核、签发信息及报告状态
@@ -1534,10 +1549,14 @@ public class ReportController {
                         while (num<=100000){
                             Object value = cells.get("B" + num).getValue();
                             if (value != null){
-                                String reportCode = value.toString();
+                                String reportCode = value.toString().trim();
                                 if (StringUtils.isNotEmpty(reportCode)){
                                     //跟新数据库
                                     if (list.contains(reportCode)){
+                                        if(cells.get("E"+num).getValue() == null){
+                                            logger.error("审核人为空报告编号："+reportCode);
+                                            break;
+                                        }
                                         String shr = cells.get("E"+num).getValue().toString();//审核人
                                         SysUserEntity shrId = sysUserDao.getUserIdByName(shr);//审核人id
                                         String qhr = cells.get("F"+num).getValue().toString();//签发人
@@ -1563,10 +1582,12 @@ public class ReportController {
                                 break;
                             }
                         }
+                        inputStream.close();
                     } else if (file.isDirectory()) {
                         System.out.println("子目录： " + file.getName());
-                        listFiles(file.getAbsolutePath());
+                        listFiles(file.getAbsolutePath(),list);
                     }
+
                 }
             }
         } else {

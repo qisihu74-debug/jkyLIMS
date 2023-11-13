@@ -540,7 +540,7 @@ public interface ReportRecordEntityMapper {
             "ORDER BY  report_code")
     List<String> getAllUpdateCode();
 
-    @Update("update test_report_record set verifyer_time=#{shTime},issuer_time=#{qfTime},verifyer=#{shr},verifyer_id=#{shrId},issuer=#{qhr},issuer_id=#{qhrId},state='8'")
+    @Update("update test_report_record set verifyer_time=#{shTime},issuer_time=#{qfTime},verifyer=#{shr},verifyer_id=#{shrId},issuer=#{qhr},issuer_id=#{qhrId},state='8' where report_code = #{reportCode}")
     void updateShAndQfByReportCode(@Param("reportCode") String reportCode, @Param("shr") String shr, @Param("shrId") Long shrId,
                                    @Param("qhr") String qhr, @Param("qhrId") Long qhrId, @Param("shTime") Date shTime, @Param("qfTime") Date qfTime);
 }

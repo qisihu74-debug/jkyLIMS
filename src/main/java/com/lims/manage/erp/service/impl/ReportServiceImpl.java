@@ -4259,8 +4259,11 @@ public class ReportServiceImpl implements ReportService {
             Long id = reportMapper.getInfoByEntrustId1(entrustIdByTaskId);
             if (id != null){
                 //update
+                //更新任务单状态
+                taskMapper.updateReportStatusByEntrustId(1, entrustIdByTaskId);
                 reportRecordEntity.setId(id);
                 reportRecordEntity.setNumber(reportCount);
+                reportRecordEntity.setState("1");
                 recordEntityMapper.updateByEntrustIdSelective(reportRecordEntity);
             }else {
                 //更新任务单状态

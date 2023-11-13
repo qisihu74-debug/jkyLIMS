@@ -3,7 +3,6 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
 import com.lims.manage.erp.vo.TaskStatisticsVo;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -27,6 +26,14 @@ public interface TestTaskOrderWorkingHoursMapper  extends BaseMapper<TestTaskOrd
      * @return
      */
     List<TestTaskOrderWorkingHours> selectTaskOrderWorkingHours(TaskStatisticsVo taskStatisticsVo);
+
+    /**
+     * 根据人员 查询 统计总供时
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    String selectTaskOrderCountWorkingHours(TaskStatisticsVo taskStatisticsVo);
 
     /**
      * 根据授权人员 查询 任务单工时列表-总工时

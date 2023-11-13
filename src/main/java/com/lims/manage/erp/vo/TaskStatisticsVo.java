@@ -113,11 +113,11 @@ public class TaskStatisticsVo {
      * 已经接任务量
      */
     @TableField(exist = false)
-    private Integer receivedTaskVolume;
+    private String receivedTaskVolume;
     /**
      * 完成工作量
      */
     @TableField(exist = false)
-    private Integer completedTaskVolume;
+    private String completedTaskVolume;
 
 }
