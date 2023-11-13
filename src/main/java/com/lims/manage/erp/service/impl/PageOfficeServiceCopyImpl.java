@@ -1850,6 +1850,15 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         if (CollectionUtils.isEmpty(sheetItems)) {
             return null;
         }
+        Boolean status = false;
+        for (ExcelInsertVo insertVo : sheetItems) {
+            if (insertVo.getEditData() != null) {
+                status = true;
+            }
+        }
+        if (!status) {
+            return null;
+        }
         // 3、读取产品附件
         String productExcelUrl = null;
         ExcelInsertVo excelInsertVo = testProductItemDao.getExcelUrl(ids[0]);
