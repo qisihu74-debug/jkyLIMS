@@ -2180,7 +2180,7 @@ public class ReportServiceImpl implements ReportService {
                             Object value = cell.getValue();
                             if (value != null) {
                                 String string = value.toString().replace(" ","");
-                                if ("第页，共页".contains(string) || "第${page}页，共${total}页".contains(string) || "第页,共页".contains(string)) {
+                                if ("第页，共页".equals(string) || "第${page}页，共${total}页".equals(string) || "第页,共页".equals(string)) {
                                     cells.get(n, j).setValue("第" + count + "页，共" + total + "页");
                                 }
                                 //设置报告编号
