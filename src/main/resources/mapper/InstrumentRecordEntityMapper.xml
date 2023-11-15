@@ -16,11 +16,12 @@
         <result column="time" property="time" jdbcType="TIMESTAMP"/>
         <result column="task_id" property="taskId" jdbcType="BIGINT"/>
         <result column="task_code" property="taskCode" jdbcType="VARCHAR"/>
+        <result column="parallel" property="parallel" jdbcType="INTEGER"/>
     </resultMap>
     <sql id="Base_Column_List">
         id
         , instrument_id, esc_rel_id, type, start_time, end_time, temperature, humidity,
-    before_status, after_status, user, time,task_id,task_code
+    before_status, after_status, user, time,task_id,task_code,parallel
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -37,12 +38,12 @@
         insert into test_instrument_use_record (id, instrument_id, esc_rel_id,
                                                 type, start_time, end_time,
                                                 temperature, humidity, before_status,
-                                                after_status, user, time,task_id,task_code)
+                                                after_status, user, time,task_id,task_code,parallel)
         values (#{id,jdbcType=BIGINT}, #{instrumentId,jdbcType=BIGINT}, #{escRelId,jdbcType=BIGINT},
                 #{type,jdbcType=VARCHAR}, #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP},
                 #{temperature,jdbcType=VARCHAR}, #{humidity,jdbcType=VARCHAR}, #{beforeStatus,jdbcType=VARCHAR},
                 #{afterStatus,jdbcType=VARCHAR}, #{user,jdbcType=VARCHAR}, #{time,jdbcType=TIMESTAMP},#{taskId,jdbcType=BIGINT}
-                   , #{taskCode,jdbcType=VARCHAR})
+                   , #{taskCode,jdbcType=VARCHAR},#{parallel,jdbcType=INTEGER})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.InstrumentRecordEntity">
         insert into test_instrument_use_record
@@ -367,4 +368,146 @@
          &gt; STR_TO_DATE( #{startTime}
             , '%Y-%m-%d %H:%i:%s' )
     </select>
+
+    <select id="checkDeviceUseInfo" resultType="com.lims.manage.erp.entity.InstrumentUseGroup">
+        select * from test_instrument_group where instrument_id = #{instrumentId} limit 1
+    </select>
+
+    <select id="getGroupInfo" resultType="com.lims.manage.erp.entity.InstrumentUseGroup">
+        select * from test_instrument_group where instrument_id = #{instrumentId}
+    </select>
+
+    <select id="taskStatus" resultType="java.lang.Integer">
+        select count(*) from test_instrument_group where state = 1 and instrument_id = #{instrumentId}
+    </select>
+
+    <select id="useSize" resultType="java.lang.Integer">
+        select sum(parallel) from test_instrument_group where instrument_id = #{instrumentId}
+    </select>
+
+    <insert id="insertGroup" parameterType="com.lims.manage.erp.entity.InstrumentUseGroup">
+        insert into test_instrument_group (instrument_id, user, task_id,
+                                                task_code, state, parallel,esc_rel_ids)
+        values (#{instrumentId},#{user},#{taskId},#{taskCode},#{state},#{parallel},#{escRelIds})
+    </insert>
+
+    <insert id="batchInsertGroup" parameterType="com.lims.manage.erp.entity.InstrumentUseGroup">
+        insert into test_instrument_group (instrument_id, user, task_id,
+                                                task_code, state, parallel,esc_rel_ids)
+        values
+        <foreach collection="records" item="item" open="" separator="," close="">
+               (#{item.instrumentId},#{item.user},#{item.taskId},#{item.taskCode},
+                #{item.state},#{item.parallel},#{item.escRelIds})
+        </foreach>
+    </insert>
+
+    <delete id="deleteGroup" parameterType="com.lims.manage.erp.entity.InstrumentUseGroup">
+        delete
+        from test_instrument_group
+        where instrument_id = #{instrumentId,jdbcType=BIGINT} and task_id = #{taskId,jdbcType=BIGINT}
+    </delete>
+
+    <delete id="deleteGroupByInstrumentId" parameterType="java.lang.Long">
+        delete
+        from test_instrument_group
+        where instrument_id = #{instrumentId,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="batchInsert" parameterType="com.lims.manage.erp.entity.InstrumentRecordEntity">
+        insert into test_instrument_use_record (id, instrument_id, esc_rel_id,
+                                                type, start_time, end_time,
+                                                temperature, humidity, before_status,
+                                                after_status, user, time,task_id,task_code,parallel)
+        values
+        <foreach collection="records" item="item" open="" separator="," close="">
+               (#{item.id,jdbcType=BIGINT}, #{item.instrumentId,jdbcType=BIGINT}, #{item.escRelId,jdbcType=BIGINT},
+                #{item.type,jdbcType=VARCHAR}, #{item.startTime,jdbcType=TIMESTAMP}, #{item.endTime,jdbcType=TIMESTAMP},
+                #{item.temperature,jdbcType=VARCHAR}, #{item.humidity,jdbcType=VARCHAR}, #{item.beforeStatus,jdbcType=VARCHAR},
+                #{item.afterStatus,jdbcType=VARCHAR}, #{item.user,jdbcType=VARCHAR}, #{item.time,jdbcType=TIMESTAMP},
+                #{item.taskId,jdbcType=BIGINT}, #{item.taskCode,jdbcType=VARCHAR},#{item.parallel,jdbcType=INTEGER})
+        </foreach>
+    </insert>
+
+    <update id="updateGroupState" parameterType="java.lang.Long">
+        update test_instrument_group
+        set state = 1
+        where instrument_id = #{instrumentId}
+    </update>
+
+    <update id="updateRecordEndTime">
+        UPDATE test_instrument_use_record
+        set end_time = #{endTime},
+            after_status = #{deviceState}
+        WHERE instrument_id = #{intrusmentId}
+        and end_time is null
+        and esc_rel_id in
+        <foreach collection="escRelIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="getInstrumentUseTime" resultType="com.lims.manage.erp.vo.InstrumentRecordVo">
+        SELECT
+            t1.instrument_id,
+            t1.start_time,
+            t1.end_time,
+            sum( t1.parallel ) parallel,
+            #{parallel}-sum( parallel ) sampleSize
+        FROM
+            (
+                SELECT
+                    instrument_id,
+                    start_time,
+                    end_time,
+                    task_id,
+                    ROUND( AVG( parallel ) ) parallel
+                FROM
+                    test_instrument_use_record
+                WHERE
+                    instrument_id = #{id}
+                and <![CDATA[ DATE_FORMAT(start_time, '%Y-%m-%d %H:%i:%S') >=  DATE_FORMAT(#{startTime}, '%Y-%m-%d %H:%i:%S') ]]>
+                and <![CDATA[ DATE_FORMAT(end_time, '%Y-%m-%d %H:%i:%S') <=  DATE_FORMAT(#{endTime}, '%Y-%m-%d %H:%i:%S') ]]>
+	            GROUP BY
+                    start_time,
+                    end_time,
+                    task_id
+            ) t1
+        GROUP BY
+            t1.start_time,
+            t1.end_time
+        ORDER BY
+            t1.start_time
+    </select>
+
+    <select id="getRecordInfo" resultType="com.lims.manage.erp.entity.InstrumentRecordEntity">
+        SELECT
+            *
+        FROM
+            test_instrument_use_record
+        WHERE
+            instrument_id = #{id}
+          AND start_time = #{startTime}
+          AND end_time = #{endTime} limit 1
+    </select>
+
+    <select id="getGroupInfoDetail" resultType="com.lims.manage.erp.entity.InstrumentUseGroup">
+        SELECT
+            *
+        FROM
+            test_instrument_group
+        WHERE
+            instrument_id = #{instrumentId}
+          AND task_id = #{taskId}
+    </select>
+
+    <update id="batchUpdateGroup" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            UPDATE test_instrument_group
+            <trim prefix="SET" suffixOverrides=",">
+                <if test="item.escRelIds!=null">esc_rel_ids=#{item.escRelIds},</if>
+            </trim>
+            where instrument_id = #{item.instrumentId}
+            and task_id = #{item.taskId}
+        </foreach>
+    </update>
 </mapper>

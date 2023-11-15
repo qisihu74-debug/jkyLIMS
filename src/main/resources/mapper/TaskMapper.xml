@@ -1461,4 +1461,24 @@
             test_init_data
             where type = #{TypeId}
     </select>
+
+    <update id="batchUpdateTestTaskState" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            UPDATE test_task
+            <trim prefix="SET" suffixOverrides=",">
+                <if test="item.state!=null">state=#{item.state},</if>
+                <if test="item.startDetectionTime!=null">start_detection_time=#{item.startDetectionTime},</if>
+            </trim>
+            where id = #{item.id}
+        </foreach>
+    </update>
+
+    <update id="batchUpdateEntrustById">
+        update test_entrusted_info
+        set state=#{state}
+        where id in
+        <foreach collection='entrustIds' item='id' open='(' separator=',' close=')'>
+            #{id}
+        </foreach>
+    </update>
 </mapper>

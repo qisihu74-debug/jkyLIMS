@@ -18,6 +18,7 @@ public interface SampleEntityMapper {
     int insertSelective(SampleEntity record);
 
     SampleEntity selectByPrimaryKey(Integer id);
+    SampleEntity selectState(Integer id);
 
     List<SampleEntity> selectSampleListGroup(Long entrustmentId);
 
@@ -562,4 +563,19 @@ public interface SampleEntityMapper {
      * @return
      */
     int updateTestItemSheetRelHeadContext(TaskIdEntity taskIdEntity);
+
+    /**
+     * 批量更新样品状态
+     * @param sampleIds
+     * @param state
+     * @return
+     */
+    int batchUpdateSampleState(@Param("sampleIds") List<Long> sampleIds, @Param("state") Integer state);
+
+    /**
+     * 批量新增样品流转记录
+     * @param sampleCirculationRecord
+     * @return
+     */
+    int batchSaveSampleCirculationRecord(@Param("records")List<SampleCirculationRecord> sampleCirculationRecord);
 }

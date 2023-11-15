@@ -7,7 +7,7 @@
             <arg column="company_id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
             <arg column="sample_name" jdbcType="CHAR" javaType="java.lang.String"/>
             <arg column="sample_code" jdbcType="VARCHAR" javaType="java.lang.String"/>
-            <arg column="specs" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="specs" jdbcType="VARCHAR" javaType="java.lang.String"/>
             <arg column="batch_number" jdbcType="VARCHAR" javaType="java.lang.String"/>
             <arg column="manufacturer" jdbcType="VARCHAR" javaType="java.lang.String"/>
             <arg column="sample_origin" jdbcType="VARCHAR" javaType="java.lang.String"/>
@@ -36,6 +36,13 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
         select
         <include refid="Base_Column_List"/>
+        from test_sample
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectState" resultType="com.lims.manage.erp.entity.SampleEntity"
+            parameterType="java.lang.Integer">
+        select
+            state
         from test_sample
         where id = #{id,jdbcType=INTEGER}
     </select>
@@ -1474,4 +1481,20 @@ WHERE
         sample_id = #{sampleId,jdbcType=INTEGER}
         AND sheet_index = #{sheetIndex,jdbcType=INTEGER}
     </update>
+
+    <update id="batchUpdateSampleState">
+        update test_sample set state=#{state}
+        where id in
+        <foreach collection='sampleIds' item='id' open='(' separator=',' close=')'>
+            #{id}
+        </foreach>
+    </update>
+
+    <insert id="batchSaveSampleCirculationRecord">
+        INSERT into test_sample_circulation_record (sample_id,status,time,operator_id,operator_name)
+        VALUES
+        <foreach collection="records" item="item" open="" separator="," close="">
+            (#{item.sampleId},#{item.status},#{item.time},#{item.operatorId},#{item.operatorName})
+        </foreach>
+    </insert>
 </mapper>
