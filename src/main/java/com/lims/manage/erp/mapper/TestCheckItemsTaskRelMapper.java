@@ -50,7 +50,7 @@ public interface TestCheckItemsTaskRelMapper extends BaseMapper<TestCheckItemsTa
      * @return
      */
     @Select("SELECT\n" +
-            "\tsum( t1.times * t2.report_model_id ) \n" +
+            "\tsum( t1.times * t2.working_hours ) \n" +
             "FROM\n" +
             "\ttest_entrusted_sample_checkitem_rel AS t1\n" +
             "\tLEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id \n" +

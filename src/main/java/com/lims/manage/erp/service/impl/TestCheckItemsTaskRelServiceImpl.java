@@ -230,6 +230,18 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 //  调用方法 去处理 签名信息进行截取
                 methodSubstr(3, taskDetails.getReportProducer(), mapData, taskId, basisList);
             }
+            // 接单人
+            if (StringUtils.isNotEmpty(taskDetails.getReceiver())) {
+                //  调用方法 去处理 签名信息进行截取
+                // 查找userId与name
+                String name = sysUserDao.getSysUserName(Long.valueOf(taskDetails.getReceiver()));
+                methodSubstr(4, name + "&" + taskDetails.getReceiver(), mapData, taskId, basisList);
+            }
+            // 辅助人员
+            if (StringUtils.isNotEmpty(taskDetails.getAuxiliaryPersonnel())) {
+                //  调用方法 去处理 签名信息进行截取
+                methodSubstr(5, taskDetails.getAuxiliaryPersonnel(), mapData, taskId, basisList);
+            }
             // 进行循环迭代 mapData 数据
             if (CollectionUtil.isNotEmpty(mapData.keySet())) {
                 for (Long key : mapData.keySet()) {
@@ -260,23 +272,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
      * @param taskId               任务单id
      */
     public void methodSubstr(Integer type, String signatureInformation, Map<Long, TestTaskOrderWorkingHours> mapData, Long taskId, List<TestInitDataEntity> basisList) {
-        String typeStr = "";
-        switch (type) {
-            case 0:
-                typeStr = "检测人员";
-                break;
-            case 1:
-                typeStr = "记录人员";
-                break;
-            case 2:
-                typeStr = "复核人";
-                break;
-            case 3:
-                typeStr = "报告制作人";
-                break;
-            default:
-                break;
-        }
+        String typeStr = basisList.get(type).getName();
         // key = 类型 value = 比例值
         Map<String, Integer> map = new HashMap<>();
         for (TestInitDataEntity dataEntity : basisList) {

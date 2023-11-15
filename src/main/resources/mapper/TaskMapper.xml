@@ -1254,7 +1254,8 @@
             review_time,
             task_price,
             present_information,
-            create_time
+            create_time,
+            auxiliary_personnel
         FROM
             test_task
             WHERE  id = #{taskId}
@@ -1460,5 +1461,6 @@
         FROM
             test_init_data
             where type = #{TypeId}
+            ORDER BY id asc
     </select>
 </mapper>

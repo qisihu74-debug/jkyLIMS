@@ -978,7 +978,8 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     @Override
-    public String updateEntrustCheckItem(EntrustAddVo vo){
+    @Transactional(rollbackFor = Exception.class)
+    public synchronized String updateEntrustCheckItem(EntrustAddVo vo){
         // 样品编号变动 = true
         Boolean sampleStatus = false;
         // 获取委托单受理日期
@@ -6200,7 +6201,7 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result entrustApproved (Long entrustId , Integer state){
+    public synchronized Result entrustApproved (Long entrustId , Integer state){
         // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
         EntrustAddVo entrustDetails = entityMapper.selectByKeyId(entrustId);
         // 状态：0（未发布）；1（已发布）；144（已作废）；200（已完成）;201（预委托）；202（被驳回）；
@@ -6241,7 +6242,7 @@ public class EntrustServiceImpl implements EntrustService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result entrustApproved1(Long entrustId ,TaskVo entity){
+    public synchronized Result entrustApproved1(Long entrustId ,TaskVo entity){
         // 获取受理人
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         // 查询委托详情 - 获取 state状态 ： 点驳回 201（预委托） 状态效验。
@@ -6489,6 +6490,18 @@ public class EntrustServiceImpl implements EntrustService {
                     sa.setOperatorName(userInfo.getName());
                     sa.setTime(new Date());
                     sampleEntityMapper.saveSampleCirculationRecord(sa);
+                }
+                if(flag){
+                    // 更新收样人信息
+                    // 增加样品样品流转状态
+                    SampleCirculationRecord sa = new SampleCirculationRecord();
+                    sa.setSampleId(sampleData1.getId());
+                    // 5收样
+                    sa.setStatus("5");
+                    sa.setOperatorId(userInfo.getUserId());
+                    sa.setOperatorName(userInfo.getName());
+                    sa.setTime(new Date());
+                    sampleEntityMapper.updateSampleCirculationRecord(sa);
                 }
             }
         }

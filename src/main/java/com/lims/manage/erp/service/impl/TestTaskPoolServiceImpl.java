@@ -222,7 +222,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result addTaskCollection(List<SampleItemEntity> list) {
+    public synchronized Result addTaskCollection(List<SampleItemEntity> list) {
         // 通过检测项主键 获取 委托单id
         Long entrustId = taskPoolMapper.selectEntrustmentId(list.get(0).getItemIds().get(0));
         if (entrustId == null) {

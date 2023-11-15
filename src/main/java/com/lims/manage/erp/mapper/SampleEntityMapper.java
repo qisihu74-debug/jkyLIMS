@@ -265,6 +265,14 @@ public interface SampleEntityMapper {
      */
     int saveSampleCirculationRecord(SampleCirculationRecord sampleCirculationRecord);
 
+    /**
+     * 更新样品流转记录
+     *
+     * @param sampleCirculationRecord
+     * @return
+     */
+    int updateSampleCirculationRecord(SampleCirculationRecord sampleCirculationRecord);
+
     @Select("SELECT\n" +
             "\tt1.is_save\n" +
             "FROM\n" +
