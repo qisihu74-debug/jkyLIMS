@@ -210,6 +210,12 @@ INSERT INTO `sys_function`(`function_id`, `function_pid`, `name`, `sort`, `is_va
 INSERT INTO `sys_function`(`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES (202, 200, '按人员统计', 1, 0, NULL);
 INSERT INTO `sys_function`(`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES (203, 200, '按授权签字人统计', 2, 0, NULL);
 
+-- 工时统计
+INSERT INTO `test_init_data`(`id`, `type`, `name`, `remark`) VALUES (53, 30, '签发人', '20');
+INSERT INTO `test_init_data`(`id`, `type`, `name`, `remark`) VALUES (54, 30, '辅助人员', '0');
+
+ALTER TABLE `test_product_item` ADD COLUMN `working_hours` VARCHAR ( 255 ) NULL COMMENT '检测项工时' AFTER `report_model_name`;
+
 --设备队伍表
 CREATE TABLE `test_instrument_group`  (
                                           `instrument_id` bigint(0) NULL DEFAULT NULL COMMENT '设备ID',
