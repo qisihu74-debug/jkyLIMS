@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -52,6 +53,13 @@ public interface TestDetectionDao {
      * 更新仪器 结束时间
      */
     int updateItemInstrumentMiddleRel(TestChItemInstrumentMiddleEntity testChItemInstrumentMiddleEntity);
+
+    /**
+     * 批量更新检测项仪器中间表的结束时间
+     * @param escRelIds
+     * @return
+     */
+    int updateItemInstrumentMiddleRelEnd(@Param("escRelIds") List<Long> escRelIds, @Param("intrusmentId") Long intrusmentId,@Param("endTime") Date endTime);
 
     /**
      * 根据必要条件查询 任务单信息
@@ -117,4 +125,20 @@ public interface TestDetectionDao {
      * @return
      */
     List<TestInstrumentEntity> selectInstrumentList(Integer escRelId);
+
+    /******************************设备并行************************************/
+    /**
+     * 批量新增设备与检测项关系
+     * @param records
+     * @return
+     */
+    int batchAddItemInstrumentMiddleRel(@Param("records") List<TestChItemInstrumentMiddleEntity> records);
+
+    /**
+     * 批量更新委托单检测项状态
+     * @param records
+     * @return
+     */
+    int batchUpdateSampleItemInstrumentEntity(@Param("records") List<SampleItemInstrumentEntity> records);
+
 }

@@ -15,4 +15,9 @@ public class InstrumentRecordVo {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date endTime;
+    private Integer parallel;
+    /**
+     * 组队样品数量
+     */
+    private Integer sampleSize;
 }

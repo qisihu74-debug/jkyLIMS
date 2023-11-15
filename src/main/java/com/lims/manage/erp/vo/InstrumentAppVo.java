@@ -1,6 +1,7 @@
 package com.lims.manage.erp.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lims.manage.erp.entity.InstrumentUseGroup;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -80,4 +81,16 @@ public class InstrumentAppVo {
      * 任务单id
      */
     private Long taskId;
+    /**
+     * 0生成仪器使用记录，1不需要生成（不展示）
+     */
+    private Integer isShow;
+    /**
+     * 并线数量（不能并行的仪器默认为0，并行的仪器给出数量）
+     */
+    private Integer parallel;
+    /**
+     * 设备组队信息
+     */
+    private List<InstrumentUseGroup> groupInfo;
 }

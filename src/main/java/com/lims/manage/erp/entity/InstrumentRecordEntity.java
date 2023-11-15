@@ -40,4 +40,6 @@ public class InstrumentRecordEntity {
     private Long taskId;
 
     private String taskCode;
+
+    private Integer parallel;
 }

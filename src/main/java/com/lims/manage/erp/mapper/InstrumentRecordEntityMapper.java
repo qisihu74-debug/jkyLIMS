@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.InstrumentRecordEntity;
+import com.lims.manage.erp.entity.InstrumentUseGroup;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -102,4 +103,112 @@ public interface InstrumentRecordEntityMapper {
      */
     InstrumentRecordEntity checkDeviceStartTime(Long instrumentId,Date startTime);
 
+    /**
+     * 查询设备的使用情况
+     * @param instrumentId
+     * @return
+     */
+    InstrumentUseGroup checkDeviceUseInfo(Long instrumentId);
+
+    /**
+     * 当前设备的组队信息
+     * @param instrumentId
+     * @return
+     */
+    List<InstrumentUseGroup> getGroupInfo(Long instrumentId);
+
+    /**
+     * 设备是否已经开始使用
+     * @param instrumentId
+     * @return
+     */
+    int taskStatus(Long instrumentId);
+
+    /**
+     * 设备当前占用并行数
+     * @param instrumentId
+     * @return
+     */
+    Integer useSize(Long instrumentId);
+
+    /**
+     * 新增组队信息
+     * @param group
+     * @return
+     */
+    int insertGroup(InstrumentUseGroup group);
+
+    /**
+     * 批量新增组队信息
+     * @param records
+     * @return
+     */
+    int batchInsertGroup(@Param("records") List<InstrumentUseGroup> records);
+
+    /**
+     * 退出组队
+     * @param group
+     * @return
+     */
+    int deleteGroup(InstrumentUseGroup group);
+
+    /**
+     * 删除队伍
+     * @param instrumentId
+     * @return
+     */
+    int deleteGroupByInstrumentId(Long instrumentId);
+
+    /**
+     * 批量新增设备使用记录
+     * @param records
+     * @return
+     */
+    int batchInsert(@Param("records")List<InstrumentRecordEntity> records);
+
+    /**
+     * 更新队伍试验状态
+     * @param instrumentId
+     * @return
+     */
+    int updateGroupState(Long instrumentId);
+
+    /**
+     * 更新使用记录完成时间，设备状态
+     * @param escRelIds
+     * @param intrusmentId
+     * @param endTime
+     * @param deviceState
+     * @return
+     */
+    int updateRecordEndTime(@Param("escRelIds") List<Long> escRelIds,@Param("intrusmentId") Long intrusmentId,
+                            @Param("endTime") Date endTime,@Param("deviceState") String deviceState);
+
+    /**
+     * 查询指定时间内使用的时间信息
+     * @param instrumentVo
+     * @return
+     */
+    List<InstrumentRecordVo> getInstrumentUseTime(InstrumentVo instrumentVo);
+
+    /**
+     * 查询插单的记录信息
+     * @param instrumentVo
+     * @return
+     */
+    InstrumentRecordEntity getRecordInfo(InstrumentVo instrumentVo);
+
+    /**
+     * 查询队伍信息
+     * @param group
+     * @return
+     */
+    InstrumentUseGroup getGroupInfoDetail(InstrumentUseGroup group);
+
+    /**
+     * 批量更新组队
+     * @param list
+     * @return
+     */
+    int batchUpdateGroup(@Param("list") List<InstrumentUseGroup> list);
 }

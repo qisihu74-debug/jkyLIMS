@@ -210,4 +210,18 @@ INSERT INTO `sys_function`(`function_id`, `function_pid`, `name`, `sort`, `is_va
 INSERT INTO `sys_function`(`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES (202, 200, '按人员统计', 1, 0, NULL);
 INSERT INTO `sys_function`(`function_id`, `function_pid`, `name`, `sort`, `is_valid`, `kanban_name`) VALUES (203, 200, '按授权签字人统计', 2, 0, NULL);
 
+--设备队伍表
+CREATE TABLE `test_instrument_group`  (
+                                          `instrument_id` bigint(0) NULL DEFAULT NULL COMMENT '设备ID',
+                                          `user` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '使用人',
+                                          `task_id` bigint(0) NULL DEFAULT NULL COMMENT '任务ID',
+                                          `task_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '任务单号',
+                                          `state` int(0) NULL DEFAULT 0 COMMENT '队伍状态（0，等待试验；1，开始试验）',
+                                          `parallel` int(0) NULL DEFAULT NULL COMMENT '并行任务占用数量',
+                                          `esc_rel_ids` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '检测的检测项数据ID'
+)
+
+--设备使用记录增加 任务占用数量 字段
+ALTER TABLE `test_instrument_use_record`
+    ADD COLUMN `parallel`  int NULL DEFAULT 0 COMMENT '任务占用数量' AFTER `task_code`;
 

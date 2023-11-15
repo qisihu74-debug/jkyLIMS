@@ -131,6 +131,17 @@
     <update id="updateItemInstrumentMiddleRel" parameterType="com.lims.manage.erp.entity.TestChItemInstrumentMiddleEntity">
         UPDATE test_product_item_instrument_middle_rel set end_time = #{endTime} WHERE id_item = #{sidItem}
     </update>
+
+    <update id="updateItemInstrumentMiddleRelEnd">
+        UPDATE test_product_item_instrument_middle_rel
+            set end_time = #{endTime}
+        WHERE intrusment_id = #{intrusmentId}
+          and end_time is null
+          and id_item in
+        <foreach collection="escRelIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
     <select id="getInstrumentCollection" resultType="com.lims.manage.erp.entity.TestChItemInstrumentMiddleEntity">
             SELECT
                 id,
@@ -183,4 +194,22 @@
             esc_rel_id = #{escRelId}
     </select>
 
+    <insert id="batchAddItemInstrumentMiddleRel" parameterType="com.lims.manage.erp.entity.TestChItemInstrumentMiddleEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT into test_product_item_instrument_middle_rel (id_item,intrusment_id,start_time,end_time)
+        VALUES
+        <foreach collection="records" item="item" open="" separator="," close="">
+            (#{item.sidItem},#{item.intrusmentId},#{item.startTime},#{item.endTime})
+        </foreach>
+    </insert>
+
+    <update id="batchUpdateSampleItemInstrumentEntity" parameterType="com.lims.manage.erp.entity.SampleItemInstrumentEntity">
+        <foreach collection="records" item="item" index="index" open="" close="" separator=";">
+            UPDATE test_entrusted_sample_checkitem_rel
+                set
+                    state=#{item.state},
+                    start_time=#{item.startTime}
+            WHERE id = #{item.itemId}
+        </foreach>
+    </update>
 </mapper>

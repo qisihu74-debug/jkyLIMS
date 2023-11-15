@@ -109,7 +109,9 @@
             calibration_param,
             appraisal_date,
             expire_date,
-            device_state
+            device_state,
+            is_show,
+            parallel
         FROM
             test_instrument
         WHERE

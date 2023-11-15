@@ -136,17 +136,18 @@
 
     <select id="getReportTemplateList0706" resultType="com.lims.manage.erp.entity.ReportTemplateEntity">
         SELECT DISTINCT
-            t3.id,
-            t3.report_code,
-            t3.product_id,
-            t3.report_name,
-            t3.report_file_uri
-        FROM
-            test_entrusted_sample_checkitem_rel t1
-                LEFT JOIN test_product_item t2 ON t1.check_item_id = t2.check_item_id
-                LEFT JOIN test_report_template t3 ON t2.report_model_id = t3.id
-        WHERE
-            report_file_uri IS NOT NULL
+	t3.id,
+	t3.report_code,
+	t4.product_id,
+	t3.report_name,
+	t3.report_file_uri
+FROM
+	test_entrusted_sample_checkitem_rel t1
+	LEFT JOIN test_product_item t2 ON t1.check_item_id = t2.check_item_id
+	LEFT JOIN test_report_template t3 ON t2.report_model_id = t3.id
+LEFT JOIN test_report_template_product_ref t4 ON t2.product_id = t4.product_id
+WHERE
+	t3.report_file_uri IS NOT NULL
           AND t1.entrust_id = #{entrustId}
           AND t1.sample_id = #{sampleId}
     </select>

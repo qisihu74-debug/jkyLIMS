@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import com.lims.manage.erp.entity.InstrumentUseGroup;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -7,10 +8,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.AppTestInstrumentService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.lims.manage.erp.vo.InstrumentVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import com.lims.manage.erp.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -122,7 +120,7 @@ public class AppTestInstrumentController {
      * @param instrumentVo
      * @return
      */
-    @RequestMapping("startToTest")
+    @RequestMapping("startToTestOld")
     public Result startToTest(@RequestBody InstrumentVo instrumentVo) {
         if (instrumentVo == null) {
             return ResultUtil.error("参数不能为空");
@@ -134,12 +132,56 @@ public class AppTestInstrumentController {
     }
 
     /**
+     * 新APP开始试验
+     * @param instrumentVo
+     * @return
+     */
+    @RequestMapping("startToTest")
+    public Result startToTestNew(@RequestBody InstrumentParamVo instrumentVo) {
+//        if (instrumentVo == null || instrumentVo.getInstrumentVoList().get(0).getRecordType() == null) {
+//            return ResultUtil.error("参数不能为空");
+//        }
+        if(instrumentVo.getInsertType() != null){//插单
+            return appTestInstrumentService.startToTestNewInsert(instrumentVo);
+        }else{//正常记录
+            if(instrumentVo.getIsShow() != null && instrumentVo.getIsShow().equals(0)){//生成记录
+                return appTestInstrumentService.startToTestNew(instrumentVo);
+            }else{//不生成记录
+                return appTestInstrumentService.startToTestNewNo(instrumentVo);
+            }
+        }
+    }
+
+    /**
+     * 创建队伍
+     * @param instrumentVo
+     * @return
+     */
+    @RequestMapping("createGroup")
+    public Result createGroup(@RequestBody InstrumentParamVo instrumentVo) {
+        if (instrumentVo == null) {
+            return ResultUtil.error("参数不能为空");
+        }
+        return appTestInstrumentService.createGroup(instrumentVo);
+    }
+
+    /**
+     * 退出队伍
+     * @param group
+     * @return
+     */
+    @RequestMapping("deleteGroup")
+    public Result deleteGroup(@RequestBody InstrumentUseGroup group) {
+        return appTestInstrumentService.deleteGroup(group);
+    }
+
+    /**
      * 结束试验
      *
      * @param instrumentVo
      * @return
      */
-    @RequestMapping("endToTest")
+    @RequestMapping("endToTestOld")
     public Result endToTest(@RequestBody InstrumentVo instrumentVo) {
         if (instrumentVo == null) {
             return ResultUtil.error("参数不能为空");
@@ -148,6 +190,19 @@ public class AppTestInstrumentController {
             return ResultUtil.error("参数不能为空");
         }
         return appTestInstrumentService.endToTest(instrumentVo, 2);
+    }
+
+    /**
+     * 新版APP结束试验
+     * @param instrumentVo
+     * @return
+     */
+    @RequestMapping("endToTest")
+    public Result endToTestNew(@RequestBody InstrumentVo instrumentVo) {
+        if (instrumentVo == null) {
+            return ResultUtil.error("参数不能为空");
+        }
+        return appTestInstrumentService.endToTestNew(instrumentVo);
     }
 
     /**
@@ -179,6 +234,28 @@ public class AppTestInstrumentController {
             return ResultUtil.error("参数为空");
         }
         return ResultUtil.success(appTestInstrumentService.InstrumentDetails(instrumentId));
+    }
+
+    @RequestMapping("getDetailsNew")
+    public Result getDetailsNew(Long instrumentId) {
+        if (instrumentId == null || instrumentId.equals("")) {
+            return ResultUtil.error("参数为空");
+        }
+        return ResultUtil.success(appTestInstrumentService.getDetailsNew(instrumentId));
+    }
+
+    /**
+     * 查询指定时间段内可用时间
+     * @param instrumentVo
+     * @return
+     */
+    @RequestMapping("getInstrumentUseTime")
+    public Result getInstrumentUseTime(@RequestBody InstrumentVo instrumentVo) {
+        if (instrumentVo == null || instrumentVo.getStartTime() == null
+                || instrumentVo.getEndTime() == null || instrumentVo.getId() == null) {
+            return ResultUtil.error("参数为空！");
+        }
+        return ResultUtil.success(appTestInstrumentService.getInstrumentUseTime(instrumentVo));
     }
 
     /**
