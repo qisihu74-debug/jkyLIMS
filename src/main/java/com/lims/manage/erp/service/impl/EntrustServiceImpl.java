@@ -6369,14 +6369,28 @@ public class EntrustServiceImpl implements EntrustService {
             List<SampleEntity> sampleList = sampleEntityMapper.selectSampleListGroup(entrustId);
             if(CollectionUtil.isNotEmpty(sampleList)){
                 StringBuffer sampleNameBuffer = new StringBuffer();
+                StringBuffer aliasNameBuffer = new StringBuffer();
+                StringBuffer productIdBuffer = new StringBuffer();
                 Set<String> setStr = new HashSet<>();
+                Set<String> setAlias = new HashSet<>();
+                Set<String> setProductId = new HashSet<>();
                 for(SampleEntity sampleEntity : sampleList){
                     setStr.add(sampleEntity.getSampleName());
+                    setAlias.add(sampleEntity.getAliasName());
+                    setProductId.add(sampleEntity.getProductId().toString());
                 }
                 for(String setStrName : setStr){
                     sampleNameBuffer.append(setStrName+",");
                 }
+                for(String setStrName : setAlias){
+                    aliasNameBuffer.append(setStrName+",");
+                }
+                for(String setStrName : setProductId){
+                    productIdBuffer.append(setStrName+",");
+                }
                 testTaskPool.setSample(sampleNameBuffer.deleteCharAt(sampleNameBuffer.length()-1).toString());
+                testTaskPool.setProductId(productIdBuffer.deleteCharAt(productIdBuffer.length()-1).toString());
+                testTaskPool.setAliasName(aliasNameBuffer.deleteCharAt(aliasNameBuffer.length()-1).toString());
             }
             // 新增流水任务单
             taskPoolMapper.insert(testTaskPool);

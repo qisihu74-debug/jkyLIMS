@@ -46,6 +46,16 @@ public class TestTaskPool implements Serializable {
     private String sample;
 
     /**
+     * 产品id 多个使用逗号间隔
+     */
+    private String productId;
+
+    /**
+     * 样品别名
+     */
+    private String aliasName;
+
+    /**
      * 对应委托单
      */
     private Long entrustmentId;
