@@ -231,3 +231,10 @@ CREATE TABLE `test_instrument_group`  (
 ALTER TABLE `test_instrument_use_record`
     ADD COLUMN `parallel`  int NULL DEFAULT 0 COMMENT '任务占用数量' AFTER `task_code`;
 
+
+
+    -- 流水号任务单新增字段
+ALTER TABLE `test_task_pool` ADD COLUMN `product_id` VARCHAR ( 255 ) NULL COMMENT '产品id 多个使用逗号间隔' AFTER `sample`;
+
+ALTER TABLE `test_task_pool` ADD COLUMN `alias_name` VARCHAR ( 255 ) NULL COMMENT '产品别名' AFTER `product_id`;
+

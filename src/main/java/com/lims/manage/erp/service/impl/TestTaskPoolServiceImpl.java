@@ -606,7 +606,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Boolean distributionTask412(TaskVo entity, SampleItemEntity sampleItemEntity, Long poolId, Long taskId, EntrustAddVo entrustAddVo, Map<Long, TaskProgressVo> taskCodeMap) {
+    public synchronized Boolean distributionTask412(TaskVo entity, SampleItemEntity sampleItemEntity, Long poolId, Long taskId, EntrustAddVo entrustAddVo, Map<Long, TaskProgressVo> taskCodeMap) {
         List<Long> deptIds = Lists.newArrayList();
         List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
         for (CheckItemDeptVo vo : checkItemDeptVoList) {
