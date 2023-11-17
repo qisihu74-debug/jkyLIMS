@@ -222,7 +222,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result addTaskCollection(List<SampleItemEntity> list) {
+    public synchronized Result addTaskCollection(List<SampleItemEntity> list) {
         // 通过检测项主键 获取 委托单id
         Long entrustId = taskPoolMapper.selectEntrustmentId(list.get(0).getItemIds().get(0));
         if (entrustId == null) {
@@ -606,7 +606,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Boolean distributionTask412(TaskVo entity, SampleItemEntity sampleItemEntity, Long poolId, Long taskId, EntrustAddVo entrustAddVo, Map<Long, TaskProgressVo> taskCodeMap) {
+    public synchronized Boolean distributionTask412(TaskVo entity, SampleItemEntity sampleItemEntity, Long poolId, Long taskId, EntrustAddVo entrustAddVo, Map<Long, TaskProgressVo> taskCodeMap) {
         List<Long> deptIds = Lists.newArrayList();
         List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
         for (CheckItemDeptVo vo : checkItemDeptVoList) {

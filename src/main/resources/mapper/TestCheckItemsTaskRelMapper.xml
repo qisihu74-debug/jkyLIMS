@@ -77,7 +77,7 @@
 
     <select id="getMyHoursStatisticsSum" resultType="java.lang.String">
         SELECT
-        sum( t2.times * t3.report_model_id )
+        sum( t2.times * t3.working_hours )
         FROM
         test_task AS t1
         LEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.id = t2.task_id

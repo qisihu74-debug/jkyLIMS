@@ -1164,6 +1164,16 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         VALUES(#{sampleId},#{status},#{time},#{operatorId},#{operatorName})
     </insert>
 
+    <update id="updateSampleCirculationRecord">
+        UPDATE test_sample_circulation_record
+        SET time = #{time},
+        operator_id = #{operatorId},
+        operator_name = #{operatorName}
+        WHERE
+            sample_id = #{sampleId}
+            AND STATUS = #{status}
+    </update>
+
     <select id="sampleStausDisint" resultType="integer">
         SELECT
         sample_id

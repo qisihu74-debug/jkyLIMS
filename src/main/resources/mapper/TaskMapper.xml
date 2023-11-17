@@ -1254,7 +1254,8 @@
             review_time,
             task_price,
             present_information,
-            create_time
+            create_time,
+            auxiliary_personnel
         FROM
             test_task
             WHERE  id = #{taskId}
@@ -1281,7 +1282,7 @@
         SELECT
         t1.id,
         t1.sn,
-        t1.sample,
+        t1.alias_name,
         t1.entrustment_id AS entrustmentId,
         t1.price,
         t1.receive_id,
@@ -1371,7 +1372,7 @@
         SELECT
         tb1.id,
         tb1.sn,
-        tb1.sample,
+        tb1.alias_name,
         tb1.entrustment_id AS entrustmentId,
         tb1.price,
         tb1.required_completion_time AS requiredCompletionTime,
@@ -1460,6 +1461,7 @@
         FROM
             test_init_data
             where type = #{TypeId}
+            ORDER BY id asc
     </select>
 
     <update id="batchUpdateTestTaskState" parameterType="java.util.List">
