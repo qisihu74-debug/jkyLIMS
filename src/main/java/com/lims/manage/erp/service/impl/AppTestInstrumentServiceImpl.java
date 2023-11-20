@@ -551,7 +551,8 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
                 //构造设备仪器使用记录
                 InstrumentRecordEntity recordEntity = new InstrumentRecordEntity();
                 recordEntity.setId(GenID.getID());// 记录id
-                recordEntity.setInstrumentId(recordInfo.getInstrumentId());// 仪器id
+//                recordEntity.setInstrumentId(recordInfo.getInstrumentId());// 仪器id
+                recordEntity.setInstrumentId(instrumentVo.getId());// 仪器id
                 recordEntity.setEscRelId(escRelIds.get(k));// 检测项主键
                 recordEntity.setType("试验使用");// 类型：试验使用
                 if(instrumentParamVo.getInsertType().equals(0)){
@@ -570,7 +571,7 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
                     recordEntity.setAfterStatus(instrumentVo.getDeviceState());// 使用前状态
                 }
                 recordEntity.setUser(group.getUser());// 操作人
-                recordEntity.setTime(recordInfo.getTime());
+                recordEntity.setTime(startTime);
                 recordEntity.setTaskId(group.getTaskId());
                 recordEntity.setTaskCode(group.getTaskCode());
                 recordEntity.setParallel(group.getParallel());
