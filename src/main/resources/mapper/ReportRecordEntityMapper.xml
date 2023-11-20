@@ -373,7 +373,10 @@
         t1.contract_id,
         t1.sign_url,
         t1.type,
-        t1.type reportTypeStatus
+        t1.type reportTypeStatus,
+        t1.verifyer,
+        t1.issuer,
+        t1.inspector
         FROM
         test_report_record t1
         LEFT JOIN test_product t2 ON t1.sample_name = t2.product_name

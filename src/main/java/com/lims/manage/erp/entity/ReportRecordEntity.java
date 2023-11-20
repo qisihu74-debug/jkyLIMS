@@ -41,6 +41,10 @@ public class ReportRecordEntity {
      */
     private String reportCode;
     /**
+     * 备注描述报告参与的检测到签发人员
+     */
+    private String note;
+    /**
      * 样品名称
      */
     private String sampleName;

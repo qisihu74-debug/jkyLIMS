@@ -13,6 +13,8 @@ import lombok.Data;
 @Data
 public class SealDefData {
     private String name;
+    private String sealName;
     private String mobile;
+    private String sealMobile;
     private String type;
 }

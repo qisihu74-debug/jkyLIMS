@@ -469,10 +469,9 @@ public interface ReportRecordEntityMapper {
             "\tt1.witness_uint As witnessUint,\n" +
             "\tt1.project_name As projectName,\n" +
             "\tt1.project_part As projectPart,\n" +
-            "\tt2.inspector,\n" +
-            "\tt2.recorder,\n" +
-            "\tt2.reviewer,\n" +
-            "\tt2.receiver,\n" +
+            "\tt3.inspector,\n" +
+            "\tt3.verifyer,\n" +
+            "\tt3.issuer,\n" +
             "\tt4.name As receiverName,\n" +
             "\tt3.report_code As reportCode\n" +
             "FROM\n" +
@@ -489,10 +488,9 @@ public interface ReportRecordEntityMapper {
             "\tt1.witness_uint,\n" +
             "\tt1.project_name,\n" +
             "\tt1.project_part,\n" +
-            "\tt2.inspector,\n" +
-            "\tt2.recorder,\n" +
-            "\tt2.reviewer,\n" +
-            "\tt2.receiver,\n" +
+            "\tt3.inspector,\n" +
+            "\tt3.verifyer,\n" +
+            "\tt3.issuer,\n" +
             "\tt4.name,\n" +
             "\tt3.report_code\n" +
             "FROM\n" +
@@ -543,4 +541,14 @@ public interface ReportRecordEntityMapper {
     @Update("update test_report_record set verifyer_time=#{shTime},issuer_time=#{qfTime},verifyer=#{shr},verifyer_id=#{shrId},issuer=#{qhr},issuer_id=#{qhrId},state='8' where report_code = #{reportCode}")
     void updateShAndQfByReportCode(@Param("reportCode") String reportCode, @Param("shr") String shr, @Param("shrId") Long shrId,
                                    @Param("qhr") String qhr, @Param("qhrId") Long qhrId, @Param("shTime") Date shTime, @Param("qfTime") Date qfTime);
+
+    @Select("SELECT DISTINCT\n" +
+            "\tt3.url \n" +
+            "FROM\n" +
+            "\ttest_sample t1\n" +
+            "\tLEFT JOIN product_report_original_rel t2 ON t1.product_id = t2.product_id\n" +
+            "\tLEFT JOIN test_report_original_template t3 ON t2.report_original_id = t3.id \n" +
+            "WHERE\n" +
+            "\tt1.id= #{sampleId}")
+    String getUrlBySampleId(@Param("sampleId") Integer sampleId);
 }

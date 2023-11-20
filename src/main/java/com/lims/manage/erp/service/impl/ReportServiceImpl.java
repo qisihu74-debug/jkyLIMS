@@ -896,6 +896,16 @@ public class ReportServiceImpl implements ReportService {
                         new TreeSet<>(Comparator.comparing(ReportRecordEntity:: getIssuerTime).reversed())),
                 ArrayList::new));
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
+        for (int i = 0; i <pageInfo.getList().size() ; i++) {
+            try {
+                String desc = "检测人,记录人："+pageInfo.getList().get(i).getInspector()+
+                        " 审核人："+pageInfo.getList().get(i).getVerifyer()+
+                        " 签发人："+ pageInfo.getList().get(i).getIssuer();
+                pageInfo.getList().get(i).setNote(desc);
+            }catch (Exception e){
+                log.error("电子印章列表展示相关人员信息备注失败：{},报告编号:{}",e,pageInfo.getList().get(i).getReportCode());
+            }
+        }
         return pageInfo;
     }
 
@@ -1565,56 +1575,72 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<SealDefData> getNameAndMobile(Long id) {
+        String inspector = "";
+        String recorder = "";
+        String receiver = "";
+        String receiverName = "";
         List<ApproveInfo> approveInfoList = recordEntityMapper.approveInfoById(id);
+        if (!CollectionUtils.isEmpty(approveInfoList)){
+            ApproveInfo approveInfo = approveInfoList.get(0);
+            if (approveInfo != null){
+                String[] split = null;
+                if (approveInfo.getInspector() != null){
+                    split = approveInfo.getInspector().split(",");
+                }
+                inspector = split[0];//检测人
+                if (split.length>1){
+                    recorder = split[1];//记录人
+                }
+                receiver = approveInfo.getVerifyer();//审核人
+                receiverName = approveInfo.getIssuer();//签发人
+            }
+        }
         List<SealDefData> list = Lists.newArrayList();
-        ApproveInfo approveInfo = approveInfoList.get(0);
-        String inspector = approveInfo.getInspector();//检测人
         if (StringUtils.isNotEmpty(inspector)){
-            String s = inspector.split(",")[0];
             SealDefData sealDefData = new SealDefData();
             sealDefData.setType("检测人1");
-            sealDefData.setName(s.split("&")[0]);
-            SysUserEntity information = sysUserDao.getMobileByName(s.split("&")[0]);
+            sealDefData.setName(inspector);
+            SysUserEntity information = sysUserDao.getMobileByName(inspector);
             if (information != null){
                 sealDefData.setMobile(information.getMobile());
             }
             list.add(sealDefData);
         }
-        String recorder = approveInfo.getRecorder();//记录人
+
         if (StringUtils.isNotEmpty(recorder)){
-            String s = recorder.split(",")[0];
             SealDefData sealDefData = new SealDefData();
             sealDefData.setType("检测人2");
-            sealDefData.setName(s.split("&")[0]);
-            SysUserEntity mobileByName = sysUserDao.getMobileByName(s.split("&")[0]);
+            sealDefData.setName(recorder);
+            SysUserEntity mobileByName = sysUserDao.getMobileByName(recorder);
             if (mobileByName != null){
                 sealDefData.setMobile(mobileByName.getMobile());
             }
             list.add(sealDefData);
         }
-        String receiver = approveInfo.getReviewer();//审核人
+
         if (StringUtils.isNotEmpty(receiver)){
             SealDefData sealDefData = new SealDefData();
             sealDefData.setType("审核人");
-            sealDefData.setName(receiver.split("&")[0]);
-            SysUserEntity mobileByName = sysUserDao.getMobileByName(receiver.split("&")[0]);
+            sealDefData.setName(receiver);
+            SysUserEntity mobileByName = sysUserDao.getMobileByName(receiver);
             if (mobileByName != null){
                 sealDefData.setMobile(mobileByName.getMobile());
             }
             list.add(sealDefData);
         }
-        String receiverName = approveInfo.getReceiverName();//签发人
+
         if (StringUtils.isNotEmpty(receiverName)){
             SealDefData sealDefData = new SealDefData();
             sealDefData.setType("签发人");
-            sealDefData.setName(receiverName.split("&")[0]);
-            SysUserEntity mobileByName = sysUserDao.getMobileByName(receiverName.split("&")[0]);
+            sealDefData.setName(receiverName);
+            SysUserEntity mobileByName = sysUserDao.getMobileByName(receiverName);
             if (mobileByName != null){
                 sealDefData.setMobile(mobileByName.getMobile());
             }
             list.add(sealDefData);
         }
         //获取印章
+        SysUserEntity rolName = sysUserDao.getNameByRolName();
         String seals = recordEntityMapper.getsealsById(id)+","+"2937191218674492340";
         String replace = seals.replace("综合甲级", "2934033400316387595").
                 replace("CMA", "2937188764910183324").
@@ -1622,7 +1648,10 @@ public class ReportServiceImpl implements ReportService {
         SealDefData sealDefData = new SealDefData();
         sealDefData.setType("印章");
         sealDefData.setName(replace);
+        sealDefData.setSealName(rolName.getName());
+        sealDefData.setSealMobile(rolName.getMobile());
         list.add(sealDefData);
+
         return list;
     }
 
@@ -3723,6 +3752,10 @@ public class ReportServiceImpl implements ReportService {
         //填充数据
         //根据委托样品信息获取需要填充的模板文件
         ReportEditReq editReq = entityMapper.getUrlByEntrustIdAndSampleId(reportEditReq.getEntrustId(), reportEditReq.getSampleId());
+        if (StringUtils.isEmpty(editReq.getReportEditUrl())){
+            String url = entityMapper.getUrlBySampleId(reportEditReq.getSampleId());
+            editReq.setReportEditUrl(url);
+        }
         //判断是否是暂存的文件，如果是直接返回，如果不是继续进行
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(editReq.getReportEditUrl())) {
             ReturnResponse<String> response = null;

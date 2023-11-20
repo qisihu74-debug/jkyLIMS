@@ -1317,7 +1317,8 @@
         publisher,
         publish_date,
         receive_id,
-        SUBSTRING_INDEX(sample, ',', 1) AS sample
+        SUBSTRING_INDEX(sample, ',', 1) AS sample,
+        SUBSTRING_INDEX(product_id, ',', 1) AS productId
         FROM
         test_task_pool
         ) AS tpt
@@ -1325,12 +1326,13 @@
         SELECT
         t1.technicist_id,
         t1.product_name,
+        t1.product_id,
         t3.user_id AS userId
         FROM
         test_technicist_capacity t1
         LEFT JOIN test_technicist t2 ON t1.technicist_id = t2.id
         LEFT JOIN sys_user t3 ON t2.user_id = t3.user_id
-        ) t4 ON tpt.sample = t4.product_name
+        ) t4 ON (tpt.sample = t4.product_name OR tpt.productId = t4.product_id)
         WHERE
         t4.userId = #{item.userId}
         AND tpt.receive_id IS NULL

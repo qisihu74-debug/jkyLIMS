@@ -540,6 +540,13 @@ public class AsposeUtil {
     }
 
     public static void main(String[] args) {
-        getLicense();
+        try {
+            File file = new File("D:\\Users\\Administrator\\Desktop\\device\\电子章\\电子章\\png\\JC7-2023-YC-10420   侯智敏钢绞线.xlsx");
+            InputStream inputStream = new FileInputStream(file);
+            PDFHelper3.excel2pdf2(inputStream,"D:\\Users\\Administrator\\Desktop\\device\\电子章\\电子章\\png\\JC7-2023-YC-10420.pdf");
+        }catch (Exception e){
+            System.out.println("excel转pdf异常:"+e.getMessage());
+        }
+
     }
 }

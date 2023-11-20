@@ -15,6 +15,8 @@ import java.util.Map;
  */
 @Data
 public class ApproveInfo {
+    private String verifyer;
+    private String issuer;
     /**
      * 委托单编号
      */
