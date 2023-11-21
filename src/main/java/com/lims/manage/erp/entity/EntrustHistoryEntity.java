@@ -116,4 +116,9 @@ public class EntrustHistoryEntity {
      */
     @TableField(exist = false)
     private String aliasName;
+    /**
+     * 样品编号
+     */
+    @TableField(exist = false)
+    private String sampleCode;
 }

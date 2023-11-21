@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -41,4 +42,14 @@ public class ReqTaskPool {
     @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date receiveEndTime;
     private Integer teamId;
+    /**
+     * 委托单号
+     */
+    @TableField(exist = false)
+    private String entrustmentNo;
+    /**
+     * 任务单号
+     */
+    @TableField(exist = false)
+    private String taskCode;
 }

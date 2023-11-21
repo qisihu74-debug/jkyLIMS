@@ -1290,7 +1290,8 @@
         t1.task_flow_req AS taskFlowReq,
         t1.publisher,
         t1.publish_date AS publishDate,
-        t4.team
+        t4.team,
+        t4.entrustment_no
         FROM
         test_task_pool t1
         INNER JOIN (
@@ -1367,6 +1368,9 @@
     And t1.publish_date &gt;=#{item.publishStartTime}
     and t1.publish_date &lt;= #{item.publishEndTime}
 </if>
+<if test="item.entrustmentNo != null and item.entrustmentNo != ''">
+    AND t4.entrustment_no LIKE CONCAT('%', #{item.entrustmentNo}, '%')
+</if>
         order by t1.id desc
     </select>
 
@@ -1406,6 +1410,9 @@
         <if test="item.receiveStartTime != null and item.receiveEndTime != null">
             And tb1.receive_date &gt;=#{item.receiveStartTime}
             and tb1.receive_date &lt;= #{item.receiveEndTime}
+        </if>
+        <if test="item.taskCode != null and item.taskCode != ''">
+            AND tb1.task_code LIKE CONCAT('%', #{item.taskCode}, '%')
         </if>
         GROUP BY tb1.id
         order by tb1.id desc

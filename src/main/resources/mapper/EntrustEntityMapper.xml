@@ -261,6 +261,14 @@
                 WHERE t5.alias_name LIKE CONCAT('%',#{aliasName},'%')
                 )
             </if>
+            <if test="sampleCode!=null and sampleCode!=''">
+                and id in (
+                SELECT t4.entrustment_id FROM
+                test_entrusted_sample_details_rel as t4
+                LEFT JOIN test_sample as t5 ON t5.id = t4.sample_id
+                WHERE t5.sample_code LIKE CONCAT('%',#{sampleCode},'%')
+                )
+            </if>
         </trim>
         GROUP BY id) as t1
         ORDER BY create_time desc
@@ -439,6 +447,14 @@
                 test_entrusted_sample_details_rel as t4
                 LEFT JOIN test_sample as t5 ON t5.id = t4.sample_id
                 WHERE t5.alias_name LIKE CONCAT('%',#{aliasName},'%')
+                )
+            </if>
+            <if test="sampleCode!=null and sampleCode!=''">
+                and id in (
+                SELECT t4.entrustment_id FROM
+                test_entrusted_sample_details_rel as t4
+                LEFT JOIN test_sample as t5 ON t5.id = t4.sample_id
+                WHERE t5.sample_code LIKE CONCAT('%',#{sampleCode},'%')
                 )
             </if>
         </trim>
