@@ -77,6 +77,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         List<TaskProgressVo> taskProgressVos = taskMapper.getTaskStateByEntrustId(entrustId);
         // 2、 展示每组下样品列表
         List<SampleEntity> sampleList = sampleEntityMapper.selectSampleListGroup(entrustId);
+        // 新增样品信息下检测项
+        List<SampleEntity> addNewSamples = new ArrayList<>();
         // 3、 查看检测项及所属类型：
         //      （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
         // 3.1：通过委托单id 查看检测项列表。
@@ -121,17 +123,35 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             }
             for (SampleEntity sampleEntity : sampleList) {
                 List<SampleItemEntity> sampleItemEntities = new ArrayList<>();
+                // 新增检测项中 taskId = null的。
+                List<SampleItemEntity> addNewSampleItemEntities = new ArrayList<>();
                 // 遍历检测项数据 存放至 样品中
                 if (CollectionUtil.isNotEmpty(itemList)) {
                     for (SampleItemEntity sampleItemEntity : itemList) {
                         if (sampleItemEntity.getSampleId().equals(sampleEntity.getId())) {
                             sampleItemEntities.add(sampleItemEntity);
+                            if (CollectionUtil.isNotEmpty(taskProgressVos) && sampleItemEntity.getTaskId() == null) {
+                                addNewSampleItemEntities.add(sampleItemEntity);
+                            }
                         }
                     }
                 }
                 sampleEntity.setSampleCheckItem(sampleItemEntities);
                 // 样品外观描述 不为null
                 sampleEntity.setOutwardDescribe(sampleEntity.getOutwardDescribe() == null ? "-" : sampleEntity.getOutwardDescribe());
+                SampleEntity sampleData = new SampleEntity();
+                sampleData.setId(sampleEntity.getId());
+                sampleData.setSampleCode(sampleEntity.getSampleCode());
+                sampleData.setSampleName(sampleEntity.getSampleName());
+                sampleData.setAliasName(sampleEntity.getAliasName());
+                sampleData.setSpecs(sampleEntity.getSpecs());
+                sampleData.setBatchNumber(sampleEntity.getBatchNumber());
+                sampleData.setManufacturer(sampleEntity.getManufacturer());
+                sampleData.setSampleOrigin(sampleEntity.getSampleOrigin());
+                sampleData.setOutward(sampleEntity.getOutward());
+                sampleData.setOutwardDescribe(sampleEntity.getOutwardDescribe());
+                sampleData.setSampleCheckItem(addNewSampleItemEntities);
+                addNewSamples.add(sampleData);
             }
         }
         JSONObject jsonObject = new JSONObject();
@@ -139,6 +159,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         jsonObject.put("testTaskPool", detailedData);
         // 样品信息
         jsonObject.put("samples", sampleList);
+        // 新增样品信息下检测项
+        jsonObject.put("addNewSamples", addNewSamples);
         // 领样人
         if (CollectionUtil.isNotEmpty(taskProgressVos)) {
             jsonObject.put("sampler", taskProgressVos.get(0).getSampler());
