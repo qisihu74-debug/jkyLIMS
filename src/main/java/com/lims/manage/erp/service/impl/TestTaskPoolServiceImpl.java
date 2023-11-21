@@ -638,6 +638,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         }
         //创建任务对象
         List<TaskVo> vos = Lists.newArrayList();
+        // 读取检测项中样品id
+        List<Integer> itemIds = new ArrayList<>();
         for (Long deptId : deptIds) {
             //计算本单价格
             double taskPrice = 0L;
@@ -646,6 +648,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     taskPrice = taskPrice + ((entity.getDiscount() == null ? 0 : entity.getDiscount()) *
                             (vo.getCheckPrice() == null ? 0 : vo.getCheckPrice()) * vo.getTimes());
                 }
+                itemIds.add(vo.getId());
             }
             TaskVo vo = new TaskVo();
             vo.setId(taskId);
@@ -713,6 +716,19 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             vo.setSampleReceivingTime(vo.getOrderTime());
             // 样品状态描述
             vo.setOutwardDescribe(sampleItemEntity.getSampleStateDescription());
+            if (StringUtils.isEmpty(vo.getOutwardDescribe())) {
+                List<SampleEntity> outwardDescribeList = sampleEntityMapper.getSampleOutwardDescribeList(itemIds);
+                if (CollectionUtil.isNotEmpty(outwardDescribeList)) {
+                    StringBuffer stringBuffer = new StringBuffer();
+                    for (SampleEntity sampleEntityData : outwardDescribeList) {
+                        stringBuffer.append(sampleEntityData.getOutwardDescribe());
+                        stringBuffer.append("、");
+                    }
+                    if (StringUtils.isNotEmpty(stringBuffer.toString())) {
+                        vo.setOutwardDescribe(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+                    }
+                }
+            }
             // 流水号任务单id
             vo.setPoolId(poolId);
             vos.add(vo);

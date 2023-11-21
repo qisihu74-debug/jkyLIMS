@@ -52,4 +52,9 @@ public class ReqTaskPool {
      */
     @TableField(exist = false)
     private String taskCode;
+    /**
+     * searchType
+     */
+    @TableField(exist = false)
+    private String searchType;
 }

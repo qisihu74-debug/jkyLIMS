@@ -586,4 +586,11 @@ public interface SampleEntityMapper {
      * @return
      */
     int batchSaveSampleCirculationRecord(@Param("records")List<SampleCirculationRecord> sampleCirculationRecord);
+
+    /**
+     * 检测项主键集合 获取样品数据
+     * @param itemIds
+     * @return
+     */
+    List<SampleEntity> getSampleOutwardDescribeList(@Param("itemIds") List<Integer> itemIds);
 }
