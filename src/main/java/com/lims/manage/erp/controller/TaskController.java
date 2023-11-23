@@ -455,122 +455,70 @@ public class TaskController {
         }
     }
 
-//    /**
-//     * 下载原始记录
-//     *
-//     * @param taskId
-//     * @param sampleId
-//     * @param checkItemId
-//     * @param itemId
-//     * @param response
-//     */
-//    @RequestMapping(value = "/downloadOriginalRecord")
-////    @CrossOrigin()
-//    public void downloadOriginalRecord(Long taskId,
-//                                       Integer sampleId,
-//                                       Integer checkItemId,
-//                                       Integer itemId,
-//                                       HttpServletResponse response) {
-//        OriginalRecordDataVo originalData = taskService.getOriginalData(taskId, sampleId, checkItemId,itemId);
-//        Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
-//        result.put("result", originalData);
-//        //从文件服务器获取文件流
-//        String originalTemplate = taskService.getOriginalTemplateUrl(checkItemId);
-//        if(originalTemplate==null){
-//            log.error(checkItemId+"\t无原始记录模板为null");
-//        }
-//        String[] split = originalTemplate.split("/");
-//        String[] split1 = split[4].split("\\?");
-//        XLSTransformer transformer = new XLSTransformer();
-////        InputStream fileStream = MinIoUtil.getFileStream("original-record-template", originalTemplate);
-//        InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
-//        org.apache.poi.ss.usermodel.Workbook workbook = null;
-//        try {
-//            workbook = transformer.transformXLS(fileStream, result);
-//            response.reset();
-//            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-//            response.setContentType("application/x-msdownload");
-//            response.setCharacterEncoding("UTF-8");
-//            String fileName2 = URLEncoder.encode(split1[0], "UTF-8");
-//            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName2);
-//            OutputStream outputStream = response.getOutputStream();
-//            workbook.write(outputStream);
-//            outputStream.close();
-//        } catch (IOException | InvalidFormatException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     /**
-     * 预览原始记录
+     * ToDO:11月23日 下载docx 任务单信息 数组taskIds下载
      *
-     * @param taskId
-     * @param sampleId
-     * @param checkItemId
-     * @param itemId
-     * @param response
-     */
-    /*@RequestMapping(value = "/previewOriginalRecord")
-//    @CrossOrigin()
-    public void previewOriginalRecord(Long taskId,
-                                       Integer sampleId,
-                                       Integer checkItemId,
-                                       Integer itemId,
-                                       HttpServletResponse response) {
-        OriginalRecordDataVo originalData = taskService.getOriginalData(taskId, sampleId, checkItemId,itemId);
-        Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
-        result.put("result", originalData);
-        //从文件服务器获取文件流
-        String originalTemplate = taskService.getOriginalTemplateUrl(checkItemId);
-        if(originalTemplate==null){
-            log.error(checkItemId+"\t无原始记录模板为null");
-        }
-        String[] split = originalTemplate.split("/");
-        String[] split1 = split[4].split("\\?");
-        XLSTransformer transformer = new XLSTransformer();
-//        InputStream fileStream = MinIoUtil.getFileStream("original-record-template", originalTemplate);
-        InputStream fileStream = MinIoUtil.getFileStream("file-resources", split1[0]);
-        Workbook workbook = null;
-        try {
-            workbook = transformer.transformXLS(fileStream, result);
-            int numberOfSheets = workbook.getNumberOfSheets();
-            for (int i=1;i<numberOfSheets;i++) {
-                workbook.removeSheetAt(1);
-            }
-            ExcelConvertPdf.excelConvertPdf(workbook,response.getOutputStream(),response);
-        } catch (Exception e) {
-            log.error("原始记录转换pdf预览失败:{}",e);
-        }
-    }*/
-
-    /**
-     * 下载任务通知单 废弃 页面已经不使用
-     * 下载doc 任务单信息
-     * @param taskId
-     * @param response
+     * @param taskIds
      */
     @RequestMapping("downloadEntrust")
-    public void downloadEntrust(Long taskId, HttpServletResponse response) {
-        String fileName = "taskOrder11.docx";
-        try {
-            MinioClient client = MinIoUtil.minioClient;
-            InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
-            TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId,null);
-            XWPFDocument document = taskService.downloadEntrust(taskDetailInfo, object,false);
-            response.reset();
-            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-            response.setContentType("application/x-msdownload");
-            response.setCharacterEncoding("UTF-8");
-            fileName = URLEncoder.encode(fileName, "UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
-            OutputStream outputStream = response.getOutputStream();
-            document.write(outputStream);
-            //document.close();
-            outputStream.close();
-        } catch (Exception ex) {
-            log.info("导出失败：", ex.getMessage());
+    public void downloadEntrust(Long[] taskIds)  {
+        String fileName = "";
+        // 3月13日前
+        String str1 = "taskOrder11.docx";
+        // 2023年3月13 零点后
+        String str2 = "taskOrder20.docx";
+        // 2023年07月01 使用
+        String str3 = "taskOrder30升级版3.docx";
+        for (int i = 0; i < taskIds.length; i++) {
+            Long taskId = taskIds[i];
+            // 获取任务单下单时间 进行比较
+            TaskTestEntity taskDetails = taskMapper.getTaskOrderTime(taskId);
+            Boolean status = false;
+            if (taskDetails != null && taskDetails.getOrderTime() != null) {
+                Date date = null;
+                Date date2 = null;
+                //实现将字符串转成⽇期类型
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                try {
+                    date = dateFormat.parse("2023-03-12 23:59:59");
+                    date2 = dateFormat.parse("2023-07-31 23:59:59");
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                // 截止至 2023-03-12 23:59:59 后 任务单附件为  String str2 = "taskOrder20.docx"
+                if ((date.getTime() < taskDetails.getOrderTime().getTime()) && (date2.getTime() > taskDetails.getOrderTime().getTime())) {
+                    fileName = str2;
+                } else if (date2.getTime() < taskDetails.getOrderTime().getTime()) {
+                    fileName = str3;
+                    status = true;
+                } else {
+                    fileName = str1;
+                }
+            }
+            try {
+                MinioClient client = MinIoUtil.minioClient;
+                InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
+                TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId, null);
+                XWPFDocument document = null;
+                if (status == true) {
+                    document = taskService.downloadEntrustNew(taskDetailInfo, object);
+                } else {
+                    document = taskService.downloadEntrust(taskDetailInfo, object, false);
+                }
+                String file = taskDetailInfo.getTaskCode() + ".docx";
+                file = URLEncoder.encode(file, "UTF-8");
+                File fileOut2 = new File("D:\\AAno\\" + file);
+                OutputStream fileOut = new FileOutputStream(fileOut2.getPath());
+                // 将源文件数组中的当前文件读入 FileInputStream 流中
+                document.write(fileOut);
+                fileOut.close();
+            } catch (Exception ex) {
+                log.info("导出失败：", ex.getMessage());
+            }
         }
     }
+
+
 
     /**downloadOriginalRecord
      * 下载任务通知单——二次开发 丁 线上使用中
