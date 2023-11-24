@@ -824,6 +824,10 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 return true;
             }
         }
+        String workingHoursId = baseMapper.getTaskIdWorkingHours(taskId);
+        if (workingHoursId != null) {
+            return true;
+        }
         //TODO:11月10 查询基础表信息 - 检测类型包含工时
         List<TestInitDataEntity> basisList = taskMapper.selectEntrustBasis(30);
         List<TestTaskOrderWorkingHours> countList = new ArrayList<>();

@@ -643,5 +643,7 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     int updateTaskWorkingHoursId(@Param("taskId")Long taskId);
+    @Select("\tSELECT id FROM test_task WHERE state >=4 and create_time >= \"2023-11-10 00:00:00\" ORDER BY create_time desc  LIMIT 1000\n")
+    List<Long> selectTaskIds();
 
 }

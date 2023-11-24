@@ -50,7 +50,7 @@ public interface TestCheckItemsTaskRelMapper extends BaseMapper<TestCheckItemsTa
      * @return
      */
     @Select("SELECT\n" +
-            "\tsum( t1.times * t2.working_hours ) \n" +
+            "\tIFNULL( sum( t1.times * t2.working_hours ), 0 )  \n" +
             "FROM\n" +
             "\ttest_entrusted_sample_checkitem_rel AS t1\n" +
             "\tLEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id \n" +
@@ -65,4 +65,12 @@ public interface TestCheckItemsTaskRelMapper extends BaseMapper<TestCheckItemsTa
      * @return
      */
     String getMyHoursStatisticsSum(TaskStatisticsVo taskStatisticsVo);
+
+    /**
+     * 任务单id 获取 工时
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT DISTINCT task_id FROM test_task_order_working_hours WHERE task_id = #{taskId}")
+    String getTaskIdWorkingHours(@Param("taskId") Long taskId);
 }

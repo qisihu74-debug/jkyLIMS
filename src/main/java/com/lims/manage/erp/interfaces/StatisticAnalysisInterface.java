@@ -2,6 +2,7 @@ package com.lims.manage.erp.interfaces;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
+import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestCheckItemsTaskRelService;
@@ -17,6 +18,7 @@ import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,8 @@ public class StatisticAnalysisInterface {
 
     @Resource
     private TestCheckItemsTaskRelService testCheckItemsTaskRelService;
+    @Resource
+    private TaskMapper taskMapper;
 
     /**
      * 统计分析-根据条件获取工时统计信息
@@ -252,13 +256,16 @@ public class StatisticAnalysisInterface {
         return testCheckItemsTaskRelService.getAuthorizedSignatureHours(taskStatisticsVo);
     }
 
-    @RequestMapping("batchAllottedTime")
-    public void BatchAllottedTime(Long[] taskIds) {
-        for (int i = 0; i < taskIds.length; i++) {
-            // 任务单成后 ： 把工时信息补充完成
-            testCheckItemsTaskRelService.endTaskAllottedTime(taskIds[i]);
-        }
-    }
+//    @RequestMapping("batchAllottedTime")
+//    public void BatchAllottedTime() {
+//        List<Long> taskIds = taskMapper.selectTaskIds();
+//        System.out.println("taskIds + size" + taskIds.size());
+//        for (Long taskId : taskIds) {
+//            testCheckItemsTaskRelService.endTaskAllottedTime(taskId);
+//            System.out.println("taskId = = " + taskId);
+//
+//        }
+//    }
 
 
 }
