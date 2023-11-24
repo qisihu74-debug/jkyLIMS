@@ -238,3 +238,6 @@ ALTER TABLE `test_task_pool` ADD COLUMN `product_id` VARCHAR ( 255 ) NULL COMMEN
 
 ALTER TABLE `test_task_pool` ADD COLUMN `alias_name` VARCHAR ( 255 ) NULL COMMENT '产品别名' AFTER `product_id`;
 
+
+ALTER TABLE `test_task` ADD COLUMN `working_hours_id` int NULL COMMENT '工时id存在则已添加 不存在则为空' AFTER `pool_id`;
+

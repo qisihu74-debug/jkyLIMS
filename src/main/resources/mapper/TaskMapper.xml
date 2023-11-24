@@ -1255,7 +1255,8 @@
             task_price,
             present_information,
             create_time,
-            auxiliary_personnel
+            auxiliary_personnel,
+            working_hours_id as workingHoursId
         FROM
             test_task
             WHERE  id = #{taskId}
@@ -1491,5 +1492,9 @@
         <foreach collection='entrustIds' item='id' open='(' separator=',' close=')'>
             #{id}
         </foreach>
+    </update>
+
+    <update id="updateTaskWorkingHoursId">
+	UPDATE test_task set working_hours_id = 1 WHERE id = #{taskId}
     </update>
 </mapper>

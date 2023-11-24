@@ -11,6 +11,7 @@ import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.PageOfficeCopyService;
 import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.service.TestCheckItemsTaskRelService;
 import com.lims.manage.erp.service.TestDetectionService;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.SampleItemInstrumentVo;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +43,8 @@ public class TestDetectionController {
     private PageOfficeCopyService pageOfficeCopyService;
     @Autowired
     private TestProductItemDao testProductItemDao;
+    @Resource
+    private TestCheckItemsTaskRelService testCheckItemsTaskRelService;
 
     @RequestMapping("/getTheInstrument")
     public Result getTheInstrument(Integer escRelId, Integer checkItemId) {
@@ -165,6 +169,8 @@ public class TestDetectionController {
             TaskDetailInfoVo dataGather = taskService.getTaskDetailInfoTwo(sampleItemInstrumentVo.getTaskId(), null);
             Boolean DetailStatus = testDetectionService.JudgmentTaskDetail(dataGather, sampleItemInstrumentVo.getTaskId());
             if (DetailStatus == true) {
+                // 任务单成后 ： 把工时信息补充完成
+                testCheckItemsTaskRelService.endTaskAllottedTime(sampleItemInstrumentVo.getTaskId());
                 return ResultUtil.success("任务单完成！！！");
             }
             return ResultUtil.success("检测项未全部完成检测，任务单未结束", "整体任务单未结束");

@@ -169,6 +169,13 @@ public class TaskTestEntity {
      */
     private String auxiliaryPersonnel;
 
+    /**
+     * 工时id存在则已添加 不存在则为空
+     *
+     */
+    @TableField(exist = false)
+    private Integer workingHoursId;
+
     public TaskTestEntity() {
     }
 

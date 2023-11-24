@@ -53,7 +53,7 @@
         t1.task_code,
         t2.NAME AS receiver,
         "任务大厅" AS source,
-        t3.id as state
+        t1.working_hours_id as state
         FROM
         test_task AS t1
         LEFT JOIN sys_user AS t2 ON t1.receiver = t2.user_id

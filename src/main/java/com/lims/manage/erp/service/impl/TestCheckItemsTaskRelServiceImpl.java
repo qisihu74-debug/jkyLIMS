@@ -340,13 +340,17 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             return ResultUtil.error("分配失败，当前操作人无授权签字人角色");
         }
         // 允许调整一次。
-        LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, list.get(0).getTaskId());
-        List<TestTaskOrderWorkingHours> dataList = testTaskOrderWorkingHoursMapper.selectList(queryWrapper);
-        if (CollectionUtil.isNotEmpty(dataList)) {
+        TaskTestEntity taskDetails = taskMapper.selectTaskEntity(list.get(0).getTaskId());
+        if (taskDetails == null) {
+            return ResultUtil.error("分配失败，任务单不存在");
+        }
+        if (taskDetails.getWorkingHoursId() != null) {
             return ResultUtil.error("当前任务单号 调整分配（仅可调整一次）");
         }
-        TaskTestEntity taskDetails = taskMapper.selectTaskEntity(list.get(0).getTaskId());
+        // 删除旧数据
+        LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, list.get(0).getTaskId());
+        testTaskOrderWorkingHoursMapper.delete(queryWrapper);
         // 任务单号
         String taskCode = taskDetails.getTaskCode();
         // 接单人 =  来源
@@ -382,6 +386,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             }
             testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
         }
+        // 数据新增后： 更新任务单数据 workingHoursId = 1
+        taskMapper.updateTaskWorkingHoursId(taskDetails.getId());
         return ResultUtil.success("数据新增成功");
     }
 
@@ -806,5 +812,105 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         Map<String, Object> map = new HashMap<>();
         map.put("sumCount", "0.00");
         return ResultUtil.success(map);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean endTaskAllottedTime(Long taskId) {
+        // 根据任务单 查询任务下对应操作信息
+        TaskTestEntity taskDetails = taskMapper.selectTaskEntity(taskId);
+        if (taskDetails != null) {
+            if (taskDetails.getWorkingHoursId() != null) {
+                return true;
+            }
+        }
+        //TODO:11月10 查询基础表信息 - 检测类型包含工时
+        List<TestInitDataEntity> basisList = taskMapper.selectEntrustBasis(30);
+        List<TestTaskOrderWorkingHours> countList = new ArrayList<>();
+        // 使用 map 进行 数据统计 key = userId , value = 参数
+        Map<Long, TestTaskOrderWorkingHours> mapData = new HashMap<>();
+        // 直接返回任务单数据即可。
+        // 检测人员
+        if (StringUtils.isNotEmpty(taskDetails.getInspector())) {
+            //  调用方法 去处理 签名信息进行截取
+            methodSubstr(0, taskDetails.getInspector(), mapData, taskId, basisList);
+        }
+        // 记录人员
+        if (StringUtils.isNotEmpty(taskDetails.getRecorder())) {
+            //  调用方法 去处理 签名信息进行截取
+            methodSubstr(1, taskDetails.getRecorder(), mapData, taskId, basisList);
+        }
+        // 复核人
+        if (StringUtils.isNotEmpty(taskDetails.getReviewer())) {
+            //  调用方法 去处理 签名信息进行截取
+            methodSubstr(2, taskDetails.getReviewer(), mapData, taskId, basisList);
+        }
+        // 报告制作人
+        if (StringUtils.isNotEmpty(taskDetails.getReportProducer())) {
+            //  调用方法 去处理 签名信息进行截取
+            methodSubstr(3, taskDetails.getReportProducer(), mapData, taskId, basisList);
+        }
+        // 接单人
+        String name = "";
+        if (StringUtils.isNotEmpty(taskDetails.getReceiver())) {
+            //  调用方法 去处理 签名信息进行截取
+            // 查找userId与name
+            name = sysUserDao.getSysUserName(Long.valueOf(taskDetails.getReceiver()));
+            methodSubstr(4, name + "&" + taskDetails.getReceiver(), mapData, taskId, basisList);
+        }
+        // 辅助人员
+        if (StringUtils.isNotEmpty(taskDetails.getAuxiliaryPersonnel())) {
+            //  调用方法 去处理 签名信息进行截取
+            methodSubstr(5, taskDetails.getAuxiliaryPersonnel(), mapData, taskId, basisList);
+        }
+        // 进行循环迭代 mapData 数据
+        if (CollectionUtil.isNotEmpty(mapData.keySet())) {
+            for (Long key : mapData.keySet()) {
+                TestTaskOrderWorkingHours data = mapData.get(key);
+                countList.add(data);
+            }
+        }
+        // 任务单号
+        String taskCode = taskDetails.getTaskCode();
+        // 接单人 =  来源
+        if (StringUtils.isEmpty(name)) {
+            name = sysUserDao.getSysUserName(Long.valueOf(taskDetails.getReceiver()));
+        }
+        // 通过任务单 获取样品信息
+        List<String> sampleNames = taskMapper.getTaskSamples(taskDetails.getId());
+        StringBuffer nameBuffer = new StringBuffer();
+        if (CollectionUtil.isNotEmpty(sampleNames)) {
+            for (String sampleName : sampleNames) {
+                nameBuffer.append(sampleName + " ");
+            }
+        }
+        // 通过任务单id 获取任务单下对应的检测项总工时
+        String workingHours = baseMapper.getWorkingHours(taskId);
+        for (TestTaskOrderWorkingHours taskOrderWorkingHours : countList) {
+            // 总工时
+            taskOrderWorkingHours.setTotalWorkingHours(workingHours);
+            taskOrderWorkingHours.setAddOperator(name + "&" + taskDetails.getReceiver());
+            taskOrderWorkingHours.setCreateTime(new Date());
+            // 样品名称 = 任务单下 样品名称
+            taskOrderWorkingHours.setSampleName(nameBuffer.toString());
+            // 来源 = 任务单的下单人
+            taskOrderWorkingHours.setSource(name);
+            // 任务单号
+            taskOrderWorkingHours.setTaskCode(taskCode);
+            // 使用工时
+            int proportion = Integer.parseInt(taskOrderWorkingHours.getProportion());
+            if (proportion == 0) {
+                // 工时 = 0
+                taskOrderWorkingHours.setWorkingHours("0");
+            } else {
+                // 求比例工时
+                double one22 = Double.parseDouble(taskOrderWorkingHours.getProportion()) / 100d;
+                double zhi = Double.parseDouble(taskOrderWorkingHours.getTotalWorkingHours()) * one22;
+                String context = String.format("%.2f", zhi);
+                taskOrderWorkingHours.setWorkingHours(context);
+            }
+            testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        }
+        return true;
     }
 }

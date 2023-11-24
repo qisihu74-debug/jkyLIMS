@@ -252,5 +252,13 @@ public class StatisticAnalysisInterface {
         return testCheckItemsTaskRelService.getAuthorizedSignatureHours(taskStatisticsVo);
     }
 
+    @RequestMapping("batchAllottedTime")
+    public void BatchAllottedTime(Long[] taskIds) {
+        for (int i = 0; i < taskIds.length; i++) {
+            // 任务单成后 ： 把工时信息补充完成
+            testCheckItemsTaskRelService.endTaskAllottedTime(taskIds[i]);
+        }
+    }
+
 
 }

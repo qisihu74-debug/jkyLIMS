@@ -609,7 +609,7 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     @Select("SELECT DISTINCT\n" +
-            "\tt2.sample_name \n" +
+            "\tt2.alias_name \n" +
             "FROM\n" +
             "\ttest_entrusted_sample_checkitem_rel AS t1\n" +
             "\tLEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id \n" +
@@ -636,5 +636,12 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     int batchUpdateEntrustById(@Param("entrustIds")List<Long> entrustIds,@Param("state")Integer state);
+
+    /**
+     *  更新 test_task working_hours_id = 1
+     * @param taskId
+     * @return
+     */
+    int updateTaskWorkingHoursId(@Param("taskId")Long taskId);
 
 }
