@@ -2168,10 +2168,13 @@ public class ReportServiceImpl implements ReportService {
             stringBuilder.append("&&");
         }
         String name1 = "";
+        String name2 = "";
         if (StringUtils.isNotEmpty(stringBuilder.toString())) {
             name1 = stringBuilder.toString().substring(0, stringBuilder.length() - 2);
+            String[] split = name1.split("\\?");
+            name2 = split[0];
         }
-        updateReportUrl(reportRecordEntity.getId(), url, name1);
+        updateReportUrl(reportRecordEntity.getId(), url, name2);
         //存放提示信息
         resBean.setUrl(url);
         FileAndFolderUtil.delete(path);
@@ -2652,10 +2655,13 @@ public class ReportServiceImpl implements ReportService {
         resBean.setUrl(url);
         FileAndFolderUtil.delete(path);
         String name1 = "";
+        String name2 = "";
         if (StringUtils.isNotEmpty(stringBuilder.toString())) {
             name1 = stringBuilder.toString().substring(0, stringBuilder.length() - 2);
+            String[] split = name1.split("\\?");
+            name2 = split[0];
         }
-        updateReportUrl(reportRecordEntity.getId(), url, name1);
+        updateReportUrl(reportRecordEntity.getId(), url, name2);
         return resBean;
     }
 
