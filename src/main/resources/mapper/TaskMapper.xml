@@ -491,7 +491,7 @@
         FROM
         test_task t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
-        LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
+        LEFT JOIN ( SELECT DISTINCT sample_id, task_id FROM test_entrusted_sample_checkitem_rel ) AS t3 ON t1.id = t3.task_id
         LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
         LEFT JOIN test_team t5 ON t1.team_id = t5.id
         <trim prefix="WHERE" prefixOverrides="AND | OR ">
@@ -571,7 +571,7 @@
         FROM
         test_task t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
-        LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
+        LEFT JOIN ( SELECT DISTINCT sample_id, task_id FROM test_entrusted_sample_checkitem_rel ) AS t3 ON t1.id = t3.task_id
         LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
         LEFT JOIN test_team t5 ON t1.team_id = t5.id
         <trim prefix="WHERE" prefixOverrides="AND | OR ">
@@ -1290,7 +1290,8 @@
         t1.task_flow_req AS taskFlowReq,
         t1.publisher,
         t1.publish_date AS publishDate,
-        t4.team
+        t4.team,
+        t4.entrustment_no
         FROM
         test_task_pool t1
         INNER JOIN (
@@ -1367,6 +1368,9 @@
     And t1.publish_date &gt;=#{item.publishStartTime}
     and t1.publish_date &lt;= #{item.publishEndTime}
 </if>
+<if test="item.entrustmentNo != null and item.entrustmentNo != ''">
+    AND t4.entrustment_no LIKE CONCAT('%', #{item.entrustmentNo}, '%')
+</if>
         order by t1.id desc
     </select>
 
@@ -1406,6 +1410,9 @@
         <if test="item.receiveStartTime != null and item.receiveEndTime != null">
             And tb1.receive_date &gt;=#{item.receiveStartTime}
             and tb1.receive_date &lt;= #{item.receiveEndTime}
+        </if>
+        <if test="item.taskCode != null and item.taskCode != ''">
+            AND tb1.task_code LIKE CONCAT('%', #{item.taskCode}, '%')
         </if>
         GROUP BY tb1.id
         order by tb1.id desc

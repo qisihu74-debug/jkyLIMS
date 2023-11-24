@@ -112,4 +112,9 @@ public class TestTaskPool implements Serializable {
     private Date receiveDate;
     @TableField(exist = false)
     private List<TaskRes> list;
+    /**
+     * 委托单号
+     */
+    @TableField(exist = false)
+    private String entrustmentNo;
 }

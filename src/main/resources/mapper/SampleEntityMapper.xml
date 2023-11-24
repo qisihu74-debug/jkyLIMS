@@ -1507,4 +1507,22 @@ WHERE
             (#{item.sampleId},#{item.status},#{item.time},#{item.operatorId},#{item.operatorName})
         </foreach>
     </insert>
+
+
+    <select id="getSampleOutwardDescribeList" resultType="com.lims.manage.erp.entity.SampleEntity">
+        SELECT
+        t1.id,
+        t1.outward_describe AS outwardDescribe
+        FROM
+        test_sample AS t1
+        LEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.id = t2.sample_id
+        WHERE
+        t2.id IN
+        <foreach collection="itemIds" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        AND t1.outward_describe IS NOT NULL
+        GROUP BY
+        t1.id
+    </select>
 </mapper>
