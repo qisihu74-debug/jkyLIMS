@@ -899,7 +899,7 @@
         select * from test_report_record where entrustment_id=#{entrustId}
     </select>
     <select id="getDetailByEntrustIdZj" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
-        select * from test_report_record where entrust_id=#{entrustId}
+        select * from test_report_record_mid where entrust_id=#{entrustId}
     </select>
 
     <update id="updateCategory" parameterType="com.lims.manage.erp.entity.SealEntity">

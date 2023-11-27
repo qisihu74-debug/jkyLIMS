@@ -874,8 +874,15 @@ public class ReportServiceImpl implements ReportService {
         }
         //根据用户id判断用户角色是否是盖章人，盖章人查看所有数据，其它人员查看自己本团队数据
         String byId = sysUserDao.checkRoleById(userId);
-        if (ids.size() <= 0 || org.apache.commons.lang.StringUtils.isNotEmpty(byId)) {
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(byId)){
+            if ("1".equals(state)){
+                state = "2";
+            }
             ids = null;
+        }else {
+            if (ids.size() <= 0){
+                ids = null;
+            }
         }
         PageHelper.startPage(pageNum, pageSize);
         //TODO 兼容中间报告
