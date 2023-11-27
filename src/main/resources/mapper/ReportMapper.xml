@@ -962,7 +962,7 @@
     <select id="historyListZj" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         SELECT distinct
         t1.id,
-        t1.entrustment_id,
+        t1.entrust_id As entrustmentId,
         t1.report_code,
         t1.sample_name,
         t1.required_completion_time,
