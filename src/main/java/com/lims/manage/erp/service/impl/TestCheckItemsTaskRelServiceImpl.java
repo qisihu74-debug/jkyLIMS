@@ -206,6 +206,23 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             TaskTestEntity taskDetails = taskMapper.selectTaskEntity(taskId);
             //TODO:11月10 查询基础表信息 - 检测类型包含工时
             List<TestInitDataEntity> basisList = taskMapper.selectEntrustBasis(30);
+            // 辅助人包括报告制作和辅助人员
+            if (StringUtils.isNotEmpty(taskDetails.getReportProducer()) && StringUtils.isNotEmpty(taskDetails.getAuxiliaryPersonnel())) {
+                // 任务单中 包含报告制作人与辅助人员 不为空 则平摊比例
+                TestInitDataEntity reportProducerData = basisList.get(3);
+                int zhi1 = Integer.parseInt(reportProducerData.getRemark()) / 2;
+                reportProducerData.setRemark(String.valueOf(zhi1));
+                basisList.set(3, reportProducerData);
+                TestInitDataEntity auxiliaryPersonnel = basisList.get(5);
+                int zhi2 = Integer.parseInt(auxiliaryPersonnel.getRemark()) / 2;
+                auxiliaryPersonnel.setRemark(String.valueOf(zhi2));
+                basisList.set(5, auxiliaryPersonnel);
+            } else {
+                // 辅助人员 工时 = 0
+                TestInitDataEntity auxiliaryPersonnel = basisList.get(5);
+                auxiliaryPersonnel.setRemark("0");
+                basisList.set(5, auxiliaryPersonnel);
+            }
             List<TestTaskOrderWorkingHours> countList = new ArrayList<>();
             // 使用 map 进行 数据统计 key = userId , value = 参数
             Map<Long, TestTaskOrderWorkingHours> mapData = new HashMap<>();
@@ -830,6 +847,23 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
         //TODO:11月10 查询基础表信息 - 检测类型包含工时
         List<TestInitDataEntity> basisList = taskMapper.selectEntrustBasis(30);
+        // 辅助人包括报告制作和辅助人员
+        if (StringUtils.isNotEmpty(taskDetails.getReportProducer()) && StringUtils.isNotEmpty(taskDetails.getAuxiliaryPersonnel())) {
+            // 任务单中 包含报告制作人与辅助人员 不为空 则平摊比例
+            TestInitDataEntity reportProducerData = basisList.get(3);
+            int zhi1 = Integer.parseInt(reportProducerData.getRemark()) / 2;
+            reportProducerData.setRemark(String.valueOf(zhi1));
+            basisList.set(3, reportProducerData);
+            TestInitDataEntity auxiliaryPersonnel = basisList.get(5);
+            int zhi2 = Integer.parseInt(auxiliaryPersonnel.getRemark()) / 2;
+            auxiliaryPersonnel.setRemark(String.valueOf(zhi2));
+            basisList.set(5, auxiliaryPersonnel);
+        } else {
+            // 辅助人员 工时 = 0
+            TestInitDataEntity auxiliaryPersonnel = basisList.get(5);
+            auxiliaryPersonnel.setRemark("0");
+            basisList.set(5, auxiliaryPersonnel);
+        }
         List<TestTaskOrderWorkingHours> countList = new ArrayList<>();
         // 使用 map 进行 数据统计 key = userId , value = 参数
         Map<Long, TestTaskOrderWorkingHours> mapData = new HashMap<>();
