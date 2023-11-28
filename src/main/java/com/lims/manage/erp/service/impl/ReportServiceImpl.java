@@ -872,8 +872,17 @@ public class ReportServiceImpl implements ReportService {
                 ids.add(Integer.valueOf(entity.getId() + ""));
             }
         }
-        if (ids.size() <= 0) {
+        //根据用户id判断用户角色是否是盖章人，盖章人查看所有数据，其它人员查看自己本团队数据
+        String byId = sysUserDao.checkRoleById(userId);
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(byId)){
+            if ("1".equals(state)){
+                state = "2";
+            }
             ids = null;
+        }else {
+            if (ids.size() <= 0){
+                ids = null;
+            }
         }
         PageHelper.startPage(pageNum, pageSize);
         //TODO 兼容中间报告
@@ -3399,7 +3408,19 @@ public class ReportServiceImpl implements ReportService {
             //盖章完成通知经营人员
             String dingId = entrustEntityMapper.getOperatingPersonnel(byRecordId.getEntrustmentId()==null?byRecordId.getEntrustId():byRecordId.getEntrustmentId());
             try {
-                dingNotifyUtils.OAWorkNotice(dingId,byRecordId.getReportCode()+" 报告盖章已完成",null);
+                String category = byRecordId.getCategory();
+                String desc = "";
+                if ("物理章".equals(category)){
+                    desc = " 物理报告盖章申请已提交";
+                }else {
+                    desc = " 电子报告盖章申请已提交";
+                }
+                dingNotifyUtils.OAWorkNotice(dingId,byRecordId.getReportCode()+desc,null);
+                //给盖章人员通知消息
+                List<String> dIds = sysUserDao.getDingIdByRoleName();
+                for (String did: dIds){
+                    dingNotifyUtils.OAWorkNotice(did,byRecordId.getReportCode()+" 报告盖章已提交",null);
+                }
             } catch (Exception e) {
                 log.error("盖章完成发送消息给经营人员失败:{}",e);
             }
@@ -3457,7 +3478,8 @@ public class ReportServiceImpl implements ReportService {
                 ids.add(Integer.valueOf(entity.getId() + ""));
             }
         }
-        if (ids.size() <= 0) {
+        String byId = sysUserDao.checkRoleById(userId);
+        if (ids.size() <= 0 || StringUtils.isNotEmpty(byId)) {
             ids = null;
         }
         List<ReportRecordEntity> list;
