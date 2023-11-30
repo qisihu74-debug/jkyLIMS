@@ -131,7 +131,7 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
             "\tLEFT JOIN sys_user_role t2 ON t1.role_id = t2.role_id\n" +
             "\tLEFT JOIN sys_user t3 ON t2.user_id = t3.user_id \n" +
             "WHERE\n" +
-            "\tt1.role_name = '盖章人'")
+            "\tt1.role_name = '盖章人' LIMIT 1")
     SysUserEntity getNameByRolName();
 
     @Select("SELECT\n" +
