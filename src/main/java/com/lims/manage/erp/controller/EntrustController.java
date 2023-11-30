@@ -1105,6 +1105,14 @@ public class EntrustController {
         if(org.springframework.util.StringUtils.isEmpty(entrustId)){
             return ResultUtil.error("委托单id不能为空");
         }
+        // 获取委托状态
+        EntrustAddVo entrustData = entrustEntityMapper.selectByKeyId(entrustId);
+        if (entrustData == null) {
+            return ResultUtil.error("撤回失败：委托单不存在");
+        }
+        if (entrustData.getState() != null && entrustData.getState() == 201) {
+            return ResultUtil.error("撤回失败：预委托单不能撤回");
+        }
         // 根据委托单查询任务单状态
         List<TaskTestEntity> taskList = entrustEntityMapper.selectTaskTestEntityList(entrustId);
         // 委托单下 任务单不为空的话

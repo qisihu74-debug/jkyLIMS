@@ -553,6 +553,54 @@ public class ReportController {
     }
 
     /**
+     * 报告查询-契约锁-合同下载
+     * @param entrustId
+     * @param reportId
+     * @return
+     */
+    @GetMapping("reportQueryDownloadQysFile")
+    public Result reportQueryDownloadQysFile(Long entrustId, Long reportId,HttpServletResponse response){
+        if (entrustId==null || reportId== null){
+            return ResultUtil.error("缺少必要参数");
+        }
+        Long contractId = null;
+        ReportRecordEntity bean = reportService.getDetailByEntrustId(entrustId);
+        // 通过 reportId 比对后 获取 contractId
+        if (bean != null) {
+            if (bean.getId().equals(reportId) && bean.getContractId() != null) {
+                contractId = Long.parseLong(bean.getContractId());
+            }
+        }
+        //TODO 兼容中间报告
+        if (contractId == null) {
+            bean = reportService.getDetailByEntrustIdZj(entrustId);
+            if(bean == null){
+                if (bean.getId().equals(reportId) && bean.getContractId() != null) {
+                    contractId = Long.parseLong(bean.getContractId());
+                }
+            }
+        }
+        // 获取当前用户名称、联系方式
+        SysUserEntity user = ShiroUtils.getUserInfo();
+        byte[] bytes = reportService.downloadQysFile(entrustId, contractId, user.getName(), user.getMobile());
+        response.reset();
+        response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+        response.setContentType("application/zip");
+        response.setCharacterEncoding("UTF-8");
+        String fileName = bean.getReportCode()+"（"+bean.getSampleName()+"）.zip";
+        try {
+            response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(fileName, "UTF-8"));
+            OutputStream outputStream = response.getOutputStream();
+            outputStream.write(bytes);
+            outputStream.close();
+            outputStream.close();
+        }catch (Exception e){
+            logger.error("下载契约锁报告文档失败:{}",e);
+        }
+        return null;
+    }
+
+    /**
      * 预览报告模板
      *
      * @param reportCode

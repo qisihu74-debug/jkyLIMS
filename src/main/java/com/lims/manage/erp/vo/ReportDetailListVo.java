@@ -75,4 +75,8 @@ public class ReportDetailListVo {
      * 委托单位
      */
     private String entrustCompany;
+    /**
+     * 契约锁报告状态1合同待发起,2合同待签署，3报告合同待下载
+     */
+    private String qysState;
 }
