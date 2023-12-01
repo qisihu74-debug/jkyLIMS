@@ -1,11 +1,14 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.TestProductDao;
+import com.lims.manage.erp.mapper.TestReportTemplateProductRefDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
@@ -15,6 +18,7 @@ import com.lims.manage.erp.vo.TestProductItemVo;
 import com.lims.manage.erp.vo.TestProductSelVo;
 import com.lims.manage.erp.vo.TestProductVo;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -50,17 +54,22 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
     /*日志*/
     @Resource
     private LogManagerService logManagerService;
+    /*报告模板xls与产品关联*/
+    @Resource
+    private TestReportTemplateProductRefDao testReportTemplateProductRefDao;
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result addTestProduct(TestProductItemVo testProductItemVo) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
         //判断产品基本信息参数
-        if (testProductItemVo.getTestProduct().getProductName()==null){
+        if (testProductItemVo.getTestProduct().getProductName() == null) {
             return ResultUtil.error("产品名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestProduct>().eq("del_flag",0).eq("product_name",testProductItemVo.getTestProduct().getProductName()))!=null){
+        if (this.getOne(new QueryWrapper<TestProduct>().eq("del_flag", 0).eq("product_name", testProductItemVo.getTestProduct().getProductName())) != null) {
             return ResultUtil.error("产品名称重复");
         }
         //设置基础信息
@@ -75,20 +84,31 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
                 }
             }
             //设置产品等级
-            if (testProductItemVo.getSpecsList().size()>0){
+            if (testProductItemVo.getSpecsList().size() > 0) {
                 for (String Specs : testProductItemVo.getSpecsList()) {
-                    if (Specs!=null&&Specs!=""){
-                        testProductSpecsService.save(new TestProductSpecs(testProductItemVo.getTestProduct().getProductId(),Specs));
+                    if (Specs != null && Specs != "") {
+                        testProductSpecsService.save(new TestProductSpecs(testProductItemVo.getTestProduct().getProductId(), Specs));
                     }
+                }
+            }
+            //存储报告模板xls与产品关联
+            if (CollectionUtil.isNotEmpty(testProductItemVo.getTemplateIds())) {
+                LambdaQueryWrapper<TestReportTemplateProductRef> productRefLambdaQueryWrapper = new LambdaQueryWrapper<>();
+                productRefLambdaQueryWrapper.eq(TestReportTemplateProductRef::getProductId, testProductItemVo.getTestProduct().getProductId());
+                testReportTemplateProductRefDao.delete(productRefLambdaQueryWrapper);
+                for (Integer templateId : testProductItemVo.getTemplateIds()) {
+                    TestReportTemplateProductRef templateProductRef = new TestReportTemplateProductRef();
+                    templateProductRef.setProductId(testProductItemVo.getTestProduct().getProductId());
+                    templateProductRef.setTemplateId(templateId);
+                    testReportTemplateProductRefDao.insert(templateProductRef);
                 }
             }
             //保存产品与报告关系
             Integer productId = testProductItemVo.getTestProduct().getProductId();
             Long reportId = testProductItemVo.getTestProduct().getReportId();
-            ProductReportRelEntity productReportRelEntity = new ProductReportRelEntity(productId.longValue(),reportId);
+            ProductReportRelEntity productReportRelEntity = new ProductReportRelEntity(productId.longValue(), reportId);
             testProductDao.insertProductReportRel(productReportRelEntity);
-
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品"+testProductItemVo.getTestProduct().getProductId()+"成功!", Const.PRODUCT_MANAGEMENT_LOG,true);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "添加产品" + testProductItemVo.getTestProduct().getProductId() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
             return ResultUtil.success("添加成功!");
         }else {
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品失败!", Const.PRODUCT_MANAGEMENT_LOG,false);
@@ -97,6 +117,7 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result updTestProduct(TestProductItemVo testProductItemVo) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if(userInfo==null){
@@ -122,13 +143,26 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
                 }
             }
             //删除原产品等级
-            testProductSpecsService.remove(new QueryWrapper<TestProductSpecs>().eq("product_id",testProductItemVo.getTestProduct().getProductId()));
+            testProductSpecsService.remove(new QueryWrapper<TestProductSpecs>().eq("product_id", testProductItemVo.getTestProduct().getProductId()));
             //设置产品等级
-            if (testProductItemVo.getSpecsList().size()>0){
+            if (testProductItemVo.getSpecsList().size() > 0) {
                 for (String Specs : testProductItemVo.getSpecsList()) {
-                    if (Specs!=null&&Specs!=""){
-                        testProductSpecsService.save(new TestProductSpecs(testProductItemVo.getTestProduct().getProductId(),Specs));
+                    if (Specs != null && Specs != "") {
+                        testProductSpecsService.save(new TestProductSpecs(testProductItemVo.getTestProduct().getProductId(), Specs));
                     }
+                }
+            }
+            // 删除 报告模板xls与产品关联
+            LambdaQueryWrapper<TestReportTemplateProductRef> productRefLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            productRefLambdaQueryWrapper.eq(TestReportTemplateProductRef::getProductId, testProductItemVo.getTestProduct().getProductId());
+            testReportTemplateProductRefDao.delete(productRefLambdaQueryWrapper);
+            //存储报告模板xls与产品关联
+            if (CollectionUtil.isNotEmpty(testProductItemVo.getTemplateIds())) {
+                for (Integer templateId : testProductItemVo.getTemplateIds()) {
+                    TestReportTemplateProductRef templateProductRef = new TestReportTemplateProductRef();
+                    templateProductRef.setProductId(testProductItemVo.getTestProduct().getProductId());
+                    templateProductRef.setTemplateId(templateId);
+                    testReportTemplateProductRefDao.insert(templateProductRef);
                 }
             }
             //删除原报告与报告关系
@@ -136,72 +170,93 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
             testProductDao.deleteProductReportRel(productId.longValue());
             //保存新产品与报告关系
             Long reportId = testProductItemVo.getTestProduct().getReportId();
-            ProductReportRelEntity productReportRelEntity = new ProductReportRelEntity(productId.longValue(),reportId);
-            testProductDao.insertProductReportRel(productReportRelEntity);
-
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改产品"+testProductItemVo.getTestProduct().getProductId()+"成功!", Const.PRODUCT_MANAGEMENT_LOG,true);
+            if (reportId != null) {
+                ProductReportRelEntity productReportRelEntity = new ProductReportRelEntity(productId.longValue(), reportId);
+                testProductDao.insertProductReportRel(productReportRelEntity);
+            }
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "修改产品" + testProductItemVo.getTestProduct().getProductId() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
             return ResultUtil.success("修改成功!");
-        }else {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改产品"+testProductItemVo.getTestProduct().getProductId()+"失败!", Const.PRODUCT_MANAGEMENT_LOG,false);
+        } else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "修改产品" + testProductItemVo.getTestProduct().getProductId() + "失败!", Const.PRODUCT_MANAGEMENT_LOG, false);
             return ResultUtil.error("保存产品信息失败，未知异常!");
         }
     }
 
+    /**
+     * 删除产品-及绑定关系
+     *
+     * @param idList
+     * @return
+     */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result delTestProduct(List<Long> idList) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        List<TestProduct> testMethods=new ArrayList<>();
-        for (Long aLong : idList) {
-            TestProduct testMethod=new TestProduct();
-            testMethod.setUpdateTime(new Date());
-            testMethod.setDelFlag(1);
-            testMethod.setProductId(aLong.intValue());
-            testMethods.add(testMethod);
-        }
-        String idStr=idList.toString();
-        if (this.updateBatchById(testMethods)){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除产品"+idStr+"成功!", Const.PRODUCT_MANAGEMENT_LOG,true);
-            return ResultUtil.success("删除成功");
-        }else {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除产品"+idStr+"失败!", Const.PRODUCT_MANAGEMENT_LOG,false);
-            return ResultUtil.error("删除失败");
-        }
+//        for (Long aLong : idList) {
+//            LambdaQueryWrapper<TestProduct> productLambdaQueryWrapper = new LambdaQueryWrapper<>();
+//            productLambdaQueryWrapper.eq(TestProduct::getProductId, aLong);
+//            this.remove(productLambdaQueryWrapper);
+//            //删除原有依据
+//            testProductStandardFileRelService.remove(new QueryWrapper<TestProductStandardFileRel>().eq("product_id", aLong));
+//            //删除原产品等级
+//            testProductSpecsService.remove(new QueryWrapper<TestProductSpecs>().eq("product_id", aLong));
+//            // 删除 报告模板xls与产品关联
+//            LambdaQueryWrapper<TestReportTemplateProductRef> productRefLambdaQueryWrapper = new LambdaQueryWrapper<>();
+//            productRefLambdaQueryWrapper.eq(TestReportTemplateProductRef::getProductId, aLong);
+//            testReportTemplateProductRefDao.delete(productRefLambdaQueryWrapper);
+//            //删除原报告与报告关系
+//            testProductDao.deleteProductReportRel(aLong);
+//        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品" + idList.toArray() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
+        return ResultUtil.success("删除成功");
     }
 
     @Override
     public IPage<TestProductVo> getPageList(Page<TestProductVo> page, QueryWrapper<TestProduct> queryWrapper) {
-        return testProductDao.getPageList(page,queryWrapper);
+        IPage<TestProductVo> list = testProductDao.getPageList(page, queryWrapper);
+        if (CollectionUtil.isNotEmpty(list.getRecords())) {
+            // 起始条数
+            Long initialNumber = (page.getCurrent() * page.getSize()) - page.getSize();
+            // 序号
+            Integer serialNumber = 1 + initialNumber.intValue();
+            for (TestProductVo productVo : list.getRecords()) {
+                // 进行设置数据序号
+                productVo.setSerialNumber(+serialNumber);
+                serialNumber += 1;
+            }
+        }
+        return list;
     }
 
     @Override
     public TestProductSelVo getTestProductSelVo(TestProduct testProduct) {
         //初始化对象
-        TestProductSelVo testProductSelVo=new TestProductSelVo();
+        TestProductSelVo testProductSelVo = new TestProductSelVo();
         //设置产品基本信息
         testProductSelVo.setTestProduct(testProduct);
         //获取并设置产品类型
-        if(testProduct.getProductTypeId()!=null){
+        if (testProduct.getProductTypeId() != null) {
             testProductSelVo.setProductTypeName(testProductTypeService.getById(testProduct.getProductTypeId()).getProductTypeName());
         }
         //获取并设置产品判断依据
-        List<TestProductStandardFileRel> testProductStandardFileRels=testProductStandardFileRelService.list(new QueryWrapper<TestProductStandardFileRel>().eq("product_id",testProduct.getProductId()));
-        List<String> StandarString=new ArrayList<>();
+        List<TestProductStandardFileRel> testProductStandardFileRels = testProductStandardFileRelService.list(new QueryWrapper<TestProductStandardFileRel>().eq("product_id", testProduct.getProductId()));
+        List<String> StandarString = new ArrayList<>();
         for (TestProductStandardFileRel testProductStandardFileRel : testProductStandardFileRels) {
             StandarString.add(testStandardFileService.getById(testProductStandardFileRel.getStandardFileId()).getName());
         }
         testProductSelVo.setStandardList(StandarString);
         //获取并设置产品等级
-        List<TestProductSpecs> testProductSpecs=testProductSpecsService.list(new QueryWrapper<TestProductSpecs>().eq("product_id",testProduct.getProductId()));
-        List<String> SpecsList=new ArrayList<>();
+        List<TestProductSpecs> testProductSpecs = testProductSpecsService.list(new QueryWrapper<TestProductSpecs>().eq("product_id", testProduct.getProductId()));
+        List<String> SpecsList = new ArrayList<>();
         for (TestProductSpecs testProductSpec : testProductSpecs) {
             SpecsList.add(testProductSpec.getSpecs());
         }
         testProductSelVo.setSpecsList(SpecsList);
         //设置产品检测项
-        TestProductItem testProductItem=new TestProductItem();
+        TestProductItem testProductItem = new TestProductItem();
         testProductItem.setProductId(testProduct.getProductId());
         testProductSelVo.setTestProductItemSelVoList(testProductItemService.getTestProductSelVoList(testProductItem));
         return testProductSelVo;
@@ -210,26 +265,35 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
     @Override
     public TestProductItemVo getTestProductItemVo(TestProduct testProduct) {
         //初始化对象
-        TestProductItemVo testProductItemVo=new TestProductItemVo();
+        TestProductItemVo testProductItemVo = new TestProductItemVo();
         //设置产品基本信息
         testProductItemVo.setTestProduct(testProduct);
         //获取并设置产品判断依据
-        List<TestProductStandardFileRel> testProductStandardFileRels=testProductStandardFileRelService.list(new QueryWrapper<TestProductStandardFileRel>().eq("product_id",testProduct.getProductId()));
-        List<Integer> StandarInteger=new ArrayList<>();
+        List<TestProductStandardFileRel> testProductStandardFileRels = testProductStandardFileRelService.list(new QueryWrapper<TestProductStandardFileRel>().eq("product_id", testProduct.getProductId()));
+        List<Integer> StandarInteger = new ArrayList<>();
         for (TestProductStandardFileRel testProductStandardFileRel : testProductStandardFileRels) {
             TestStandardFile byId = testStandardFileService.getById(testProductStandardFileRel.getStandardFileId());
-            if (byId != null){
+            if (byId != null) {
                 StandarInteger.add(byId.getId());
             }
         }
         testProductItemVo.setStandardRelIds(StandarInteger);
         //获取并设置产品等级
-        List<TestProductSpecs> testProductSpecs=testProductSpecsService.list(new QueryWrapper<TestProductSpecs>().eq("product_id",testProduct.getProductId()));
-        List<String> SpecsList=new ArrayList<>();
+        List<TestProductSpecs> testProductSpecs = testProductSpecsService.list(new QueryWrapper<TestProductSpecs>().eq("product_id", testProduct.getProductId()));
+        List<String> SpecsList = new ArrayList<>();
         for (TestProductSpecs testProductSpec : testProductSpecs) {
             SpecsList.add(testProductSpec.getSpecs());
         }
         testProductItemVo.setSpecsList(SpecsList);
+        // 报告模板xls与产品关联
+        List<Integer> templateIds = new ArrayList<>();
+        LambdaQueryWrapper<TestReportTemplateProductRef> productRefLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        productRefLambdaQueryWrapper.eq(TestReportTemplateProductRef::getProductId, testProduct.getProductId());
+        List<TestReportTemplateProductRef> templateProductRefs = testReportTemplateProductRefDao.selectList(productRefLambdaQueryWrapper);
+        for (TestReportTemplateProductRef templateProductRef : templateProductRefs) {
+            templateIds.add(templateProductRef.getTemplateId());
+        }
+        testProductItemVo.setTemplateIds(templateIds);
         return testProductItemVo;
     }
 

@@ -23,11 +23,28 @@ import java.util.List;
  */
 public interface TestProductService extends IService<TestProduct> {
     Result addTestProduct(TestProductItemVo testProductItemVo);
+
     Result updTestProduct(TestProductItemVo testProductItemVo);
+
+    /**
+     * 删除产品-及绑定关系
+     * @param idList
+     * @return
+     */
     Result delTestProduct(List<Long> idList);
+
     IPage<TestProductVo> getPageList(Page<TestProductVo> page, QueryWrapper<TestProduct> queryWrapper);
+
     TestProductSelVo getTestProductSelVo(TestProduct testProduct);
+
+    /**
+     * 查询详情
+     *
+     * @param testProduct
+     * @return
+     */
     TestProductItemVo getTestProductItemVo(TestProduct testProduct);
+
     TestProduct getProductInfo(Integer productId);
 }
 

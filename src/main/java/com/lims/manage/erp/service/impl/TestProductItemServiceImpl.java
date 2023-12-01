@@ -21,6 +21,7 @@ import com.lims.manage.erp.vo.TestProductItemTreeVo;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.InputStream;
@@ -195,14 +196,14 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
     }
 
     @Override
-    public Result delTestProductItem(List<Long> idList) {
+    public Result delTestProductItemOlderVersion(List<Long> idList) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        TestProductItem testProductItem=getById(idList.get(0));
+        TestProductItem testProductItem = getById(idList.get(0));
         testProductItem.setDelFlag(1);
-        if (testProductItem.getIcon()!=null){
+        if (testProductItem.getIcon() != null) {
             sysOssService.delAnnounce(testProductItem.getIcon());
         }
         if (this.updateById(testProductItem)) {
@@ -213,23 +214,55 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                 logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品检测项" + idList.get(0) + "失败!", Const.DETECTION_MANAGEMENT_LOG, false);
                 return ResultUtil.error("删除失败");
             }
-        }else {
+        } else {
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品检测项" + idList.get(0) + "失败!", Const.DETECTION_MANAGEMENT_LOG, false);
             return ResultUtil.error("删除失败");
         }
     }
 
+    /**
+     * TODO：23年11月30日 进行检测项删除操作的重构
+     * 1、异常操作时，进行事务回滚。
+     * 2、直接删除、并且需要把绑定关系解除后进行删除。
+     * 3、日志的记录信息
+     *
+     * @param idList
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result delTestProductItem(List<Long> idList) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token 已过期！");
+        }
+        for (Long checkItemId : idList) {
+            //删除原有检测依据
+            testProductItemStandardFileRelService.remove(new QueryWrapper<TestProductItemStandardFileRel>().eq("check_item_id", checkItemId));
+            //删除原有检测设备
+            testProductItemInstrumentTypeRelService.remove(new QueryWrapper<TestProductItemInstrumentTypeRel>().eq("check_item_id", checkItemId));
+            //删除检测项绑定的报告原始记录sheet
+            testProductItemDao.deleteItemSheetRel(checkItemId.intValue());
+            // 删除 检测项所属团队
+            testCheckItemTeamRelService.remove(new QueryWrapper<TestCheckItemTeamRel>().eq("check_item_id",checkItemId));
+            // 删除检测项信息
+            this.removeById(checkItemId);
+        }
+        return ResultUtil.error("删除成功");
+
+    }
+
     @Override
     public Result disableStatusTestProductItem(List<Long> idList) {
-        TestProductItem testProductItem=getById(idList.get(0));
+        TestProductItem testProductItem = getById(idList.get(0));
         testProductItem.setStatus("1");
-        if (this.updateById(testProductItem)){
-            if (this.disableStatus(idList.get(0))){
+        if (this.updateById(testProductItem)) {
+            if (this.disableStatus(idList.get(0))) {
                 return ResultUtil.success("禁用成功");
-            }else {
+            } else {
                 return ResultUtil.error("禁用失败");
             }
-        }else {
+        } else {
             return ResultUtil.error("禁用失败");
         }
     }
