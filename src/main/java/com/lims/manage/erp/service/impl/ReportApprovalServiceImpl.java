@@ -765,20 +765,36 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         //设置水印
         for (int i = 1; i <= stamper.getReader().getNumberOfPages(); i++) {
             // 获取当前页的内容
-            PdfContentByte content = stamper.getUnderContent(i);
-            // 设置水印内容
-            String watermarkText = "河南交科院";
-            // 设置字体和大小
-            BaseFont baseFont = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.EMBEDDED);
-            float fontSize = 100;
-            float xPosition = 340;
-            float yPosition = 380;
-            // 添加水印
-            content.beginText();
-            content.setFontAndSize(baseFont, fontSize);
-            content.setGrayFill(0.8f);
-            content.showTextAligned(Element.ALIGN_CENTER, watermarkText, xPosition, yPosition, 45);
-            content.endText();
+            //每一页设置四行水印
+            for (int j=0;j<4;j++){
+                float xPosition = 0;
+                float yPosition = 0;
+                PdfContentByte content = stamper.getUnderContent(i);
+                // 设置水印内容
+                String watermarkText = "河 南 交 科 院";
+                // 设置字体和大小
+                BaseFont baseFont = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.EMBEDDED);
+                float fontSize = 38;
+                if (j==0){
+                    xPosition = 400;
+                    yPosition = 200;
+                }else if (j==1){
+                    xPosition = 100;
+                    yPosition = 300;
+                }else if (j==2){
+                    xPosition = 400;
+                    yPosition = 600;
+                }else {
+                    xPosition = 100;
+                    yPosition = 600;
+                }
+                // 添加水印
+                content.beginText();
+                content.setFontAndSize(baseFont, fontSize);
+                content.setGrayFill(0.85f);
+                content.showTextAligned(Element.ALIGN_CENTER, watermarkText, xPosition, yPosition, 45);
+                content.endText();
+            }
         }
         logger.info("报告添加水印成功");
         //除了第一页和第二页在报告左上角添加防伪标识码
