@@ -32,7 +32,7 @@ public class QiYueSuoController {
         log.debug("接收到契约锁回调请求，合同参数为:{}",contractId);
         //向外业系统转发回执信息
         try {
-            HttpClientUtil.get("http://lims.design/jky/wy/qiyuesuo/callback?contractId="+contractId);
+            HttpClientUtil.get("https://lims.design/jky/wy/qiyuesuo/callback?contractId="+contractId);
         }catch (Exception e){
             log.error("向外业系统转发回执信息失败:{}",e);
         }

@@ -3,8 +3,10 @@ package com.lims.manage.erp.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.itextpdf.text.Element;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
+import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
@@ -760,7 +762,25 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(bufferedImage, "jpg", baos);
         byte[] imageData = baos.toByteArray();
-
+        //设置水印
+        for (int i = 1; i <= stamper.getReader().getNumberOfPages(); i++) {
+            // 获取当前页的内容
+            PdfContentByte content = stamper.getUnderContent(i);
+            // 设置水印内容
+            String watermarkText = "河南交科院";
+            // 设置字体和大小
+            BaseFont baseFont = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.EMBEDDED);
+            float fontSize = 100;
+            float xPosition = 340;
+            float yPosition = 380;
+            // 添加水印
+            content.beginText();
+            content.setFontAndSize(baseFont, fontSize);
+            content.setGrayFill(0.8f);
+            content.showTextAligned(Element.ALIGN_CENTER, watermarkText, xPosition, yPosition, 45);
+            content.endText();
+        }
+        logger.info("报告添加水印成功");
         //除了第一页和第二页在报告左上角添加防伪标识码
         for (int pageNumber = 1; pageNumber <= stamper.getReader().getNumberOfPages(); pageNumber++) {
             if (pageNumber == 2){
