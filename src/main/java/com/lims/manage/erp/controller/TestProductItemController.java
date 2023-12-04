@@ -57,7 +57,13 @@ public class TestProductItemController extends ApiController {
      */
     @GetMapping("/list")
     public Result selectAll(TestProductItem testProductItem) {
-        List<TestProductItemTreeVo> treeVos=this.testProductItemService.getTreeList(testProductItem);
+        if (testProductItem == null) {
+            return ResultUtil.error("缺少必填参数");
+        }
+        if (testProductItem.getProductId() == null) {
+            return ResultUtil.error("产品id不能为空");
+        }
+        List<TestProductItemTreeVo> treeVos = this.testProductItemService.getTreeList(testProductItem);
         return ResultUtil.success(treeVos);
     }
 
@@ -69,7 +75,16 @@ public class TestProductItemController extends ApiController {
      */
     @GetMapping("/getSel")
     public Result selectOneSel(TestProductItem testProductItem) {
-        List<TestProductItemSelVo> treeVos=this.testProductItemService.getTestProductSelVoList(testProductItem);
+        if (testProductItem == null) {
+            return ResultUtil.error("缺少必填参数");
+        }
+        if (testProductItem.getProductId() == null) {
+            return ResultUtil.error("产品id不能为空");
+        }
+        if (testProductItem.getCheckItemId() == null) {
+            return ResultUtil.error("检测项id不能为空");
+        }
+        List<TestProductItemSelVo> treeVos = this.testProductItemService.getTestProductSelVoList(testProductItem);
         return ResultUtil.success(treeVos);
     }
 

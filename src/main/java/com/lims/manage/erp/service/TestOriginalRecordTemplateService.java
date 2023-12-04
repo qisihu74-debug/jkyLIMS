@@ -23,5 +23,12 @@ public interface TestOriginalRecordTemplateService extends IService<TestOriginal
     Result delTtestOriginalRecordTemplate(List<Long> idList);
     IPage<TorttpiVo> getPageList(Page<TorttpiVo> page, QueryWrapper<TestOriginalRecordTemplate> queryWrapper);
 
+    /**
+     * 查询线下原始记录信息
+     * @return
+     */
+    Result getAllList();
+
+
 }
 

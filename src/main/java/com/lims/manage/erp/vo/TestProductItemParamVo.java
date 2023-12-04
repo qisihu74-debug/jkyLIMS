@@ -1,6 +1,7 @@
 package com.lims.manage.erp.vo;
 
 import com.lims.manage.erp.entity.TestProductItem;
+import com.lims.manage.erp.entity.TestProductItemMethodRel;
 import lombok.Data;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public class TestProductItemParamVo {
     //产品检测项基本信息
     private TestProductItem testProductItem;
     //产品检测项的检测方法
-    private List<Integer> methodIds;
+    private List<TestProductItemMethodRel> methodIds;
     //产品检测项的检测依据
     private List<Integer> standardIds;
     //产品检测项的设备
@@ -20,4 +21,6 @@ public class TestProductItemParamVo {
     private List<LabelValueVo> templateSheet;
     //检测项绑定的sheet下标
     private List<Integer> sheetIndex;
+    //线下原始记录模板集合
+    private List<Integer> templateSet;
 }
