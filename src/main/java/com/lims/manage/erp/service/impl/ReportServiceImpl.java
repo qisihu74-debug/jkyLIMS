@@ -1701,6 +1701,32 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean revoke(String reportCode) {
+        ReportRecordEntity entity = recordEntityMapper.getUrlByCode(reportCode);
+        Integer operateType = entity.getOperateType();
+        if (operateType.intValue()==1){
+            //线下报告撤回，更新报告状态3到1
+            recordEntityMapper.updateStateByCode(reportCode,"1");
+        }else {
+            ReportRecordEntity entrust = recordEntityMapper.getEntrust(reportCode);
+            //线上报告撤回，更新任务单report_complete状态为2
+            taskMapper.updateTestTaskReportComplete(entrust.getEntrustmentId()==null?entrust.getEntrustId():entrust.getEntrustmentId());
+            //更新test_entrusted_sample_checkitem_rel表tstate = 3
+            taskMapper.updateStateByEntrustId(entrust.getEntrustmentId()==null?entrust.getEntrustId():entrust.getEntrustmentId());
+            //更新test_report_record state=2
+            recordEntityMapper.updateStateByCode(reportCode,"2");
+        }
+        //删除文件服务器文件
+        String[] split = entity.getReportUrl().split("\\?");
+        String[] strings = split[0].split("/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        MinIoUtil.deleteFile(bluckName,fileName);
+        return true;
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();

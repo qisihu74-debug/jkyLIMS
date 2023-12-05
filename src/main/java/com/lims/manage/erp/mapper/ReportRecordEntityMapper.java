@@ -551,4 +551,7 @@ public interface ReportRecordEntityMapper {
             "WHERE\n" +
             "\tt1.id= #{sampleId}")
     String getUrlBySampleId(@Param("sampleId") Integer sampleId);
+
+    @Update("update test_report_record set state=#{state} where report_code = #{reportCode}")
+    void updateStateByCode(@Param("reportCode") String reportCode,@Param("state") String state);
 }

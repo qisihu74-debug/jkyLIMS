@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -646,4 +647,6 @@ public interface TaskMapper extends BaseMapper {
     @Select("\tSELECT id FROM test_task WHERE state >=4 and create_time >= \"2023-11-10 00:00:00\" ORDER BY create_time desc  LIMIT 1000\n")
     List<Long> selectTaskIds();
 
+    @Update("update test_entrusted_sample_checkitem_rel set state=3 where entrust_id=#{entrustId}")
+    void updateStateByEntrustId(@Param("entrustId") Long entrustId);
 }
