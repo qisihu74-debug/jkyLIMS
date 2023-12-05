@@ -474,4 +474,6 @@ public interface ReportService {
     List<String> getAllUpdateCode();
 
     void updateShAndQfByReportCode(String reportCode, String shr, Long shrId, String qhr, Long qhrId, Date shTime, Date qfTime);
+
+    Boolean revoke(String reportCode);
 }
