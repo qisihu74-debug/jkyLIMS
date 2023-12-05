@@ -97,16 +97,19 @@ public class TestProductItemController extends ApiController {
     @GetMapping("{id}")
     public Result selectOne(@PathVariable Serializable id) throws Exception {
         if (id!=null&&id!=""){
-            TestProductItem testMethod=this.testProductItemService.getOne(new QueryWrapper<TestProductItem>().eq("check_item_id",id).eq("del_flag",0));
+            TestProductItem testMethod = this.testProductItemService.getOne(new QueryWrapper<TestProductItem>().eq("check_item_id", id).eq("del_flag", 0));
             String name = templateService.getNameById(testMethod.getReportModelId());
             testMethod.setReportModelName(name);
-            TestProductItemParamVo testProductItemParamVo=this.testProductItemService.getItemParamVo(testMethod);
-//            //模板sheet
-//            List<LabelValueVo> productTemplateSheet = this.testProductItemService.getProductTemplateSheet(testMethod.getProductId());
-//            testProductItemParamVo.setTemplateSheet(productTemplateSheet);
+            TestProductItemParamVo testProductItemParamVo = this.testProductItemService.getItemParamVo(testMethod);
             //回显sheet
             List<Integer> sheetIndex = this.testProductItemService.getSheetIndex(testMethod.getCheckItemId());
             testProductItemParamVo.setSheetIndex(sheetIndex);
+            // 补充检测项绑定报告数据
+            if (testMethod.getReportModelId() != null) {
+                List<Integer> ids = new ArrayList<>();
+                ids.add(testMethod.getReportModelId());
+                testProductItemParamVo.setTemplateSet(ids);
+            }
             return ResultUtil.success(testProductItemParamVo);
         }else {
             return ResultUtil.error("参数为空");

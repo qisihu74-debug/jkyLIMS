@@ -21,6 +21,8 @@ public class TestProductItemParamVo {
     private List<LabelValueVo> templateSheet;
     //检测项绑定的sheet下标
     private List<Integer> sheetIndex;
-    //线下原始记录模板集合
+    //线上检测项与报告模板id
     private List<Integer> templateSet;
+    //配合使用 线上对应的 检测项与原始记录对应
+    private List<Integer> reportModelId;
 }

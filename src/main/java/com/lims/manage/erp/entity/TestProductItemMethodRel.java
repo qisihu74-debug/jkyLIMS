@@ -2,11 +2,13 @@ package com.lims.manage.erp.entity;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 检测项的检测方法(TestProductItemMethodRel)表实体类
@@ -31,8 +33,11 @@ public class TestProductItemMethodRel extends Model<TestProductItemMethodRel> {
     private Integer chargePricingState;
     //方法类型
     private String methodType;
+    // 关联规范/章节 Id集合
+    private String standardSet;
     // 关联规范/章节 Id
-    private Integer standardId;
+    @TableField(exist = false)
+    private List<Integer> standardIds;
     // 关联规范/章节 name
     private String standardName;
 

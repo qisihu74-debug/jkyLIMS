@@ -97,6 +97,9 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         }
         testProductItemParamVo.getTestProductItem().setDelFlag(0);
         testProductItemParamVo.getTestProductItem().setCreateTime(new Date());
+        if (CollectionUtil.isNotEmpty(testProductItemParamVo.getTemplateSet())) {
+            testProductItemParamVo.getTestProductItem().setReportModelId(testProductItemParamVo.getTemplateSet().get(0));
+        }
         if (this.save(testProductItemParamVo.getTestProductItem())) {
             //设置检查项检测依据
             if (testProductItemParamVo.getStandardIds() != null && testProductItemParamVo.getStandardIds().size() > 0) {
@@ -133,12 +136,33 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
             if (CollectionUtil.isNotEmpty(testProductItemParamVo.getMethodIds())) {
                 for (TestProductItemMethodRel testProductItemMethodRel : testProductItemParamVo.getMethodIds()) {
                     testProductItemMethodRel.setCheckItemId(testProductItemParamVo.getTestProductItem().getCheckItemId());
+                    if (CollectionUtil.isNotEmpty(testProductItemMethodRel.getStandardIds())) {
+                        StringBuffer stringBuffer = new StringBuffer();
+                        for (Integer standardId : testProductItemMethodRel.getStandardIds()) {
+                            stringBuffer.append(standardId);
+                            stringBuffer.append(",");
+                        }
+                        // 存储收费定价的依据信息id
+                        testProductItemMethodRel.setStandardSet(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+                        LambdaQueryWrapper<TestStandardFile> queryWrapper = new LambdaQueryWrapper<>();
+                        queryWrapper.in(TestStandardFile::getId, testProductItemMethodRel.getStandardIds());
+                        List<TestStandardFile> standardList = testStandardFileService.list(queryWrapper);
+                        if (CollectionUtil.isNotEmpty(standardList)) {
+                            StringBuffer standardFileBuffer = new StringBuffer();
+                            for (TestStandardFile standardFile : standardList) {
+                                standardFileBuffer.append(standardFile.getCode() + "《" + standardFile.getName() + "》");
+                                standardFileBuffer.append(",");
+                            }
+                            // 存储收费定价的依据信息 code+standName
+                            testProductItemMethodRel.setStandardName(standardFileBuffer.deleteCharAt(standardFileBuffer.length() - 1).toString());
+                        }
+                    }
                     testProductItemMethodRelService.save(testProductItemMethodRel);
                 }
             }
             // 设置检测项对应线下原始记录
-            if (CollectionUtil.isNotEmpty(testProductItemParamVo.getTemplateSet())) {
-                for (Integer templateId : testProductItemParamVo.getTemplateSet()) {
+            if (CollectionUtil.isNotEmpty(testProductItemParamVo.getReportModelId())) {
+                for (Integer templateId : testProductItemParamVo.getReportModelId()) {
                     LambdaQueryWrapper<TestOriginalRecordTemplate> lambdaQueryWrapper = new LambdaQueryWrapper<>();
                     lambdaQueryWrapper.eq(TestOriginalRecordTemplate::getId, templateId);
                     TestOriginalRecordTemplate template = new TestOriginalRecordTemplate();
@@ -159,30 +183,35 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
     @Transactional(rollbackFor = Exception.class)
     public Result updTestProductItem(TestProductItemParamVo testProductItemParamVo) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        if (testProductItemParamVo.getTestProductItem().getCheckItemId()==null){
+        if (testProductItemParamVo.getTestProductItem().getCheckItemId() == null) {
             return ResultUtil.error("缺少修改对象");
         }
-        if (testProductItemParamVo.getTestProductItem().getCheckItemName()==null){
+        if (testProductItemParamVo.getTestProductItem().getCheckItemName() == null) {
             return ResultUtil.error("检测项目名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestProductItem>().eq("check_item_pid",testProductItemParamVo.getTestProductItem().getCheckItemPid()).eq("product_id",testProductItemParamVo.getTestProductItem().getProductId()).ne("check_item_id",testProductItemParamVo.getTestProductItem().getCheckItemId()).eq("del_flag",0).eq("check_item_name",testProductItemParamVo.getTestProductItem().getCheckItemName()))!=null){
+        if (this.getOne(new QueryWrapper<TestProductItem>().eq("check_item_pid", testProductItemParamVo.getTestProductItem().getCheckItemPid()).eq("product_id", testProductItemParamVo.getTestProductItem().getProductId()).ne("check_item_id", testProductItemParamVo.getTestProductItem().getCheckItemId()).eq("del_flag", 0).eq("check_item_name", testProductItemParamVo.getTestProductItem().getCheckItemName())) != null) {
             return ResultUtil.error("同层检测项名称不能重复");
         }
         testProductItemParamVo.getTestProductItem().setUpdateTime(new Date());
-        if (this.updateById(testProductItemParamVo.getTestProductItem())){
+        if (CollectionUtil.isNotEmpty(testProductItemParamVo.getTemplateSet())) {
+            testProductItemParamVo.getTestProductItem().setReportModelId(testProductItemParamVo.getTemplateSet().get(0));
+        } else {
+            testProductItemParamVo.getTestProductItem().setReportModelId(null);
+        }
+        if (this.updateById(testProductItemParamVo.getTestProductItem())) {
             //删除原有检测依据
-            testProductItemStandardFileRelService.remove(new QueryWrapper<TestProductItemStandardFileRel>().eq("check_item_id",testProductItemParamVo.getTestProductItem().getCheckItemId()));
+            testProductItemStandardFileRelService.remove(new QueryWrapper<TestProductItemStandardFileRel>().eq("check_item_id", testProductItemParamVo.getTestProductItem().getCheckItemId()));
             //设置检查项检测依据
-            if (testProductItemParamVo.getStandardIds()!=null&&testProductItemParamVo.getStandardIds().size()>0){
+            if (testProductItemParamVo.getStandardIds() != null && testProductItemParamVo.getStandardIds().size() > 0) {
                 for (Integer StandardId : testProductItemParamVo.getStandardIds()) {
-                    testProductItemStandardFileRelService.save(new TestProductItemStandardFileRel(testProductItemParamVo.getTestProductItem().getCheckItemId(),StandardId));
+                    testProductItemStandardFileRelService.save(new TestProductItemStandardFileRel(testProductItemParamVo.getTestProductItem().getCheckItemId(), StandardId));
                 }
             }
             //删除原有检测设备
-            testProductItemInstrumentTypeRelService.remove(new QueryWrapper<TestProductItemInstrumentTypeRel>().eq("check_item_id",testProductItemParamVo.getTestProductItem().getCheckItemId()));
+            testProductItemInstrumentTypeRelService.remove(new QueryWrapper<TestProductItemInstrumentTypeRel>().eq("check_item_id", testProductItemParamVo.getTestProductItem().getCheckItemId()));
             //设置检查项检测设备
             if (testProductItemParamVo.getTypeIds()!=null&&testProductItemParamVo.getTypeIds().size()>0){
                 for (Integer TypeId : testProductItemParamVo.getTypeIds()) {
@@ -231,8 +260,8 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
             template0.setUpdateTime(new Date());
             testOriginalRecordTemplateDao.update(template0, queryWrapper0);
             // 设置检测项对应线下原始记录
-            if (CollectionUtil.isNotEmpty(testProductItemParamVo.getTemplateSet())) {
-                for (Integer templateId : testProductItemParamVo.getTemplateSet()) {
+            if (CollectionUtil.isNotEmpty(testProductItemParamVo.getReportModelId())) {
+                for (Integer templateId : testProductItemParamVo.getReportModelId()) {
                     LambdaQueryWrapper<TestOriginalRecordTemplate> queryWrapper = new LambdaQueryWrapper<>();
                     queryWrapper.eq(TestOriginalRecordTemplate::getId, templateId);
                     TestOriginalRecordTemplate template = new TestOriginalRecordTemplate();
@@ -410,7 +439,42 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         for (TestCheckItemTeamRel testCheckItemTeamRel : testCheckItemTeamRels) {
             ItemRel.add(testCheckItemTeamRel.getTeamId());
         }
-//        testProductItemParamVo.setMethodIds(MethodRel);
+        //设置检查项方法
+        List<TestProductItemMethodRel> productItemMethodRels = testProductItemMethodRelService.list(new QueryWrapper<TestProductItemMethodRel>().eq("check_item_id", testProductItem.getCheckItemId()));
+        List<TestProductItemMethodRel> ItemMethodRelList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(productItemMethodRels)) {
+            for (TestProductItemMethodRel testProductItemMethodRel : productItemMethodRels) {
+                List<Integer> standardIds = new ArrayList<>();
+                String[] standardIdArray = testProductItemMethodRel.getStandardSet().split("\\,");
+                for (int i = 0; i < standardIdArray.length; i++) {
+                    standardIds.add(Integer.valueOf(standardIdArray[i]));
+                }
+                testProductItemMethodRel.setStandardIds(standardIds);
+                ItemMethodRelList.add(testProductItemMethodRel);
+            }
+        }
+        testProductItemParamVo.setMethodIds(ItemMethodRelList);
+        // 查看线下原始记录信息
+        LambdaQueryWrapper<TestOriginalRecordTemplate> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(TestOriginalRecordTemplate::getCheckItemId, testProductItem.getCheckItemId());
+        List<TestOriginalRecordTemplate> templateSet = testOriginalRecordTemplateDao.selectList(lambdaQueryWrapper);
+        // 补充信息
+        List<LabelValueVo> templateSheet = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(templateSet)) {
+            List<Integer> templateIntegerSet = new ArrayList<>();
+            for (TestOriginalRecordTemplate template : templateSet) {
+                LabelValueVo labelValueVo = new LabelValueVo();
+                labelValueVo.setValue(template.getId().longValue());
+                labelValueVo.setLabel(template.getCode() + "《" + template.getName() + "》");
+                templateSheet.add(labelValueVo);
+                templateIntegerSet.add(template.getId());
+            }
+            testProductItemParamVo.setReportModelId(templateIntegerSet);
+            testProductItemParamVo.setTemplateSheet(templateSheet);
+        } else {
+            testProductItemParamVo.setReportModelId(new ArrayList<>());
+            testProductItemParamVo.setTemplateSheet(new ArrayList<>());
+        }
         testProductItemParamVo.setStandardIds(StandardFileRel);
         testProductItemParamVo.setTypeIds(TypeRel);
         testProductItemParamVo.setItemIds(ItemRel);
