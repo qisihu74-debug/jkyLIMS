@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,6 +17,7 @@ import java.util.Date;
  * @author makejava
  * @since 2022-03-02 15:00:10
  */
+@Data
 @SuppressWarnings("serial")
 public class TestProduct extends Model<TestProduct> {
     //产品id
@@ -49,7 +51,7 @@ public class TestProduct extends Model<TestProduct> {
     @TableField(exist = false)
     private Long reportId;
     //序号
-    private Integer serialNumber;
+    private String serialNumber;
 
     public String getProductPurpose() {
         return productPurpose;
