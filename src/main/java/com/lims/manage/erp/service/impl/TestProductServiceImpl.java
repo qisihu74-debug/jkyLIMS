@@ -217,17 +217,17 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
     @Override
     public IPage<TestProductVo> getPageList(Page<TestProductVo> page, QueryWrapper<TestProduct> queryWrapper) {
         IPage<TestProductVo> list = testProductDao.getPageList(page, queryWrapper);
-        if (CollectionUtil.isNotEmpty(list.getRecords())) {
-            // 起始条数
-            Long initialNumber = (page.getCurrent() * page.getSize()) - page.getSize();
-            // 序号
-            Integer serialNumber = 1 + initialNumber.intValue();
-            for (TestProductVo productVo : list.getRecords()) {
-                // 进行设置数据序号
-                productVo.setSerialNumber(+serialNumber);
-                serialNumber += 1;
-            }
-        }
+//        if (CollectionUtil.isNotEmpty(list.getRecords())) {
+//            // 起始条数
+//            Long initialNumber = (page.getCurrent() * page.getSize()) - page.getSize();
+//            // 序号
+//            Integer serialNumber = 1 + initialNumber.intValue();
+//            for (TestProductVo productVo : list.getRecords()) {
+//                // 进行设置数据序号
+//                productVo.setSerialNumber(+serialNumber);
+//                serialNumber += 1;
+//            }
+//        }
         return list;
     }
 

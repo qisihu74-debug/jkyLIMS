@@ -21,6 +21,7 @@ import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.TestProductItemParamVo;
 import com.lims.manage.erp.vo.TestProductItemSelVo;
 import com.lims.manage.erp.vo.TestProductItemTreeVo;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -445,9 +446,11 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         if (CollectionUtil.isNotEmpty(productItemMethodRels)) {
             for (TestProductItemMethodRel testProductItemMethodRel : productItemMethodRels) {
                 List<Integer> standardIds = new ArrayList<>();
-                String[] standardIdArray = testProductItemMethodRel.getStandardSet().split("\\,");
-                for (int i = 0; i < standardIdArray.length; i++) {
-                    standardIds.add(Integer.valueOf(standardIdArray[i]));
+                if (StringUtils.isNotEmpty(testProductItemMethodRel.getStandardSet())) {
+                    String[] standardIdArray = testProductItemMethodRel.getStandardSet().split("\\,");
+                    for (int i = 0; i < standardIdArray.length; i++) {
+                        standardIds.add(Integer.valueOf(standardIdArray[i]));
+                    }
                 }
                 testProductItemMethodRel.setStandardIds(standardIds);
                 ItemMethodRelList.add(testProductItemMethodRel);

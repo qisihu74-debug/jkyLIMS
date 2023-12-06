@@ -48,6 +48,8 @@ public class TestProduct extends Model<TestProduct> {
     //报告ID
     @TableField(exist = false)
     private Long reportId;
+    //序号
+    private Integer serialNumber;
 
     public String getProductPurpose() {
         return productPurpose;

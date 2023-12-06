@@ -71,6 +71,7 @@
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
         <result property="productTypeName" column="productTypeName" jdbcType="VARCHAR"/>
+        <result property="serialNumber" column="serial_number" jdbcType="INTEGER"/>
     </resultMap>
 
     <select id="getPageList" resultMap="TestProductVoMap">
