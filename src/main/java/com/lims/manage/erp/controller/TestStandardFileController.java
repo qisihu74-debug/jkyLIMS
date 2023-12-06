@@ -3,7 +3,6 @@ package com.lims.manage.erp.controller;
 
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.api.R;
@@ -12,10 +11,17 @@ import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestStandardFileService;
+import com.lims.manage.erp.util.MinIoUtil;
+import io.minio.MinioClient;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
 
@@ -125,6 +131,36 @@ public class TestStandardFileController extends ApiController {
             return ResultUtil.error("数据为空");
         }
     }
+
+    /**
+     * 规范预览
+     * @param fileUrl
+     * @return
+     */
+    @PostMapping("/previewFile")
+    public void previewFile(String fileUrl, HttpServletResponse response) {
+        if (StringUtils.isNotEmpty(fileUrl)){
+            MinioClient client = MinIoUtil.minioClient;
+            //预览word转pdf
+            String[] split = fileUrl.split("\\?");
+            String[] strings = split[0].split("\\/");
+            String bluckName = strings[3];
+            String fileName = strings[4];
+            try {
+                client.statObject(bluckName, fileName);
+                InputStream inputStream = client.getObject(bluckName, fileName);
+                ServletOutputStream outputStream = response.getOutputStream();
+                int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+                inputStream.close();
+                outputStream.close();
+            }catch (Exception e){
+                logger.error("预览标准规范异常:{}",e);
+            }
+        }else {
+            return ;
+        }
+    }
+
     /**##############################依据重做##################################**/
     /**
      * 新增依据

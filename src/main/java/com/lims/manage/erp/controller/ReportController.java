@@ -192,6 +192,23 @@ public class ReportController {
         return ResultUtil.success("获取出具报告历史列表成功！", reportService.reportDownloadListHistory(search,pageNum,pageSize));
     }
 
+    /**
+     * 报告合并历史查询记录撤回
+     * @param reportCode
+     * @return
+     */
+    @GetMapping("/revoke")
+    public Result revoke(String reportCode){
+        if (StringUtils.isEmpty(reportCode)){
+            return ResultUtil.error("缺少参数");
+        }
+        Boolean flag = reportService.revoke(reportCode);
+        if (flag){
+            return ResultUtil.success("撤回成功");
+        }else {
+            return ResultUtil.error("撤回失败");
+        }
+    }
 
     /**
      * 提交审批
