@@ -211,9 +211,9 @@ public class TestStandardFileController extends ApiController {
      * @return
      */
     @GetMapping("/getRecords")
-    public Result getRecords(Integer pid) {
-        if (pid != null) {
-            return testStandardFileService.getRecords(pid);
+    public Result getRecords(Integer pid,Integer pageNum,Integer pageSize) {
+        if (pid != null&&pageNum != null && pageSize!=null) {
+            return ResultUtil.success("查询变更记录成功！",testStandardFileService.getRecords(pid,pageNum,pageSize));
         } else {
             return ResultUtil.error("参数为空");
         }
