@@ -237,5 +237,10 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
         return ResultUtil.success("查询检测方法成功！",standardMethodEntityMapper.getByStandardId(id));
     }
 
+    @Override
+    public Result deleteMethod(Integer id) {
+        return ResultUtil.success("删除成功！",standardMethodEntityMapper.deleteByPrimaryKey(id));
+    }
+
 }
 

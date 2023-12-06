@@ -60,5 +60,12 @@ public interface TestStandardFileService extends IService<TestStandardFile> {
      */
     Result getMethodList(Integer id);
 
+    /**
+     * 删除检测方法
+     * @param id
+     * @return
+     */
+    Result deleteMethod(Integer id);
+
 }
 
