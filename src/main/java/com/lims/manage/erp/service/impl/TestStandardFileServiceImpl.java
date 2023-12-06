@@ -2,6 +2,8 @@ package com.lims.manage.erp.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.StandardFileEntityMapper;
 import com.lims.manage.erp.mapper.StandardMethodEntityMapper;
@@ -228,8 +230,10 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
     }
 
     @Override
-    public Result getRecords(Integer pid) {
-        return ResultUtil.success("查询变更记录成功！",standardFileEntityMapper.getRecords(pid));
+    public PageInfo getRecords(Integer pid,Integer pageNum,Integer pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<StandardFileEntity> records = standardFileEntityMapper.getRecords(pid);
+        return new PageInfo<>(records);
     }
 
     @Override

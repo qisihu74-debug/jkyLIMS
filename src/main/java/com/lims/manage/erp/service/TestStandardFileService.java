@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.Patent;
 import com.lims.manage.erp.entity.StandardFileEntity;
 import com.lims.manage.erp.entity.StandardMethodEntity;
@@ -51,7 +52,7 @@ public interface TestStandardFileService extends IService<TestStandardFile> {
      * @param pid
      * @return
      */
-    Result getRecords(Integer pid);
+    PageInfo getRecords(Integer pid,Integer pageNum,Integer pageSize);
 
     /**
      * 查询依据下方法列表
