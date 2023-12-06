@@ -97,8 +97,8 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         }
         testProductItemParamVo.getTestProductItem().setDelFlag(0);
         testProductItemParamVo.getTestProductItem().setCreateTime(new Date());
-        if (CollectionUtil.isNotEmpty(testProductItemParamVo.getTemplateSet())) {
-            testProductItemParamVo.getTestProductItem().setReportModelId(testProductItemParamVo.getTemplateSet().get(0));
+        if (testProductItemParamVo.getTemplateSet() != null) {
+            testProductItemParamVo.getTestProductItem().setReportModelId(testProductItemParamVo.getTemplateSet());
         }
         if (this.save(testProductItemParamVo.getTestProductItem())) {
             //设置检查项检测依据
@@ -194,8 +194,8 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
             return ResultUtil.error("同层检测项名称不能重复");
         }
         testProductItemParamVo.getTestProductItem().setUpdateTime(new Date());
-        if (CollectionUtil.isNotEmpty(testProductItemParamVo.getTemplateSet())) {
-            testProductItemParamVo.getTestProductItem().setReportModelId(testProductItemParamVo.getTemplateSet().get(0));
+        if (testProductItemParamVo.getTemplateSet() != null) {
+            testProductItemParamVo.getTestProductItem().setReportModelId(testProductItemParamVo.getTemplateSet());
         } else {
             testProductItemParamVo.getTestProductItem().setReportModelId(null);
         }

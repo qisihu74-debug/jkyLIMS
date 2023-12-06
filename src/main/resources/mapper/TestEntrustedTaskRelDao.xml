@@ -336,7 +336,8 @@
         t2.acceptance_date,
         t5.type AS mid_report_type,
         t5.report_code AS mid_report_code,
-        t5.seal_time AS mid_reportFinishTime
+        t5.seal_time AS mid_reportFinishTime,
+        t5.state as reportState
         FROM
         test_entrusted_task_rel AS t1
         LEFT JOIN test_entrusted_info AS t2 ON t1.entrust_id = t2.id
@@ -378,7 +379,8 @@
         t3.end_detection_time testEndTime,
         t4.report_code,
         t4.seal_time reportFinishTime,
-        t2.acceptance_date
+        t2.acceptance_date,
+        t4.state as reportState
         FROM
         test_entrusted_task_rel AS t1
         LEFT JOIN test_entrusted_info AS t2 ON t1.entrust_id = t2.id

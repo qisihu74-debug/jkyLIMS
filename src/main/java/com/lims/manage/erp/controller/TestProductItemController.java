@@ -106,9 +106,7 @@ public class TestProductItemController extends ApiController {
             testProductItemParamVo.setSheetIndex(sheetIndex);
             // 补充检测项绑定报告数据
             if (testMethod.getReportModelId() != null) {
-                List<Integer> ids = new ArrayList<>();
-                ids.add(testMethod.getReportModelId());
-                testProductItemParamVo.setTemplateSet(ids);
+                testProductItemParamVo.setTemplateSet(testMethod.getReportModelId());
             }
             return ResultUtil.success(testProductItemParamVo);
         }else {
