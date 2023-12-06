@@ -14,10 +14,12 @@ public interface ReportOriginalEntityMapper {
     int deleteByPrimaryKey(Long id);
 
     int insert(ReportOriginalEntity record);
+    int insertRecord(ReportOriginalEntity record);
 
     int insertSelective(ReportOriginalEntity record);
 
     ReportOriginalEntity selectByPrimaryKey(Long id);
+    ReportOriginalEntity getDetail(Long id);
 
     int updateByPrimaryKeySelective(ReportOriginalEntity record);
 
@@ -43,4 +45,11 @@ public interface ReportOriginalEntityMapper {
      * @return
      */
     List<LabelValueVo> getReportSelectList(@Param("param") String param);
+
+    /**
+     * 查询变更记录列表
+     * @param pid
+     * @return
+     */
+    List<ReportOriginalEntity> getReportRecordList(Long pid);
 }

@@ -30,7 +30,31 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
         String upload = MinIoUtil.upload(BucketsConst.report_original, file, filename);
         String url = upload.substring(0, upload.indexOf("?"));
         String decode = URLDecoder.decode(url, "UTF-8");
-        entity.setId(GenID.getID());
+        long id = GenID.getID();
+        entity.setId(id);
+        entity.setPid(id);
+        entity.setCreateDate(new Date());
+        entity.setUrl(decode);
+        return reportOriginalEntityMapper.insert(entity);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int changeReportOriginal(ReportOriginalEntity entity, MultipartFile file) throws UnsupportedEncodingException {
+        Long oldId = entity.getId();
+        ReportOriginalEntity reportOriginalEntity = reportOriginalEntityMapper.getDetail(oldId);
+        reportOriginalEntity.setStatus("作废");
+        reportOriginalEntity.setExpirationDate(new Date());
+        reportOriginalEntityMapper.insertRecord(reportOriginalEntity);
+        reportOriginalEntityMapper.deleteByPrimaryKey(oldId);
+        Long pid = entity.getPid();
+        String filename = file.getOriginalFilename();
+        String upload = MinIoUtil.upload(BucketsConst.report_original, file, filename);
+        String url = upload.substring(0, upload.indexOf("?"));
+        String decode = URLDecoder.decode(url, "UTF-8");
+        long id = GenID.getID();
+        entity.setId(id);
+        entity.setPid(pid);
         entity.setCreateDate(new Date());
         entity.setUrl(decode);
         return reportOriginalEntityMapper.insert(entity);
@@ -94,5 +118,12 @@ public class ReportOriginalServiceImpl implements ReportOriginalService {
     @Override
     public List<LabelValueVo> getReportSelectList(String param) {
         return reportOriginalEntityMapper.getReportSelectList(param);
+    }
+
+    @Override
+    public PageInfo getReportRecordList(Long pid, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<ReportOriginalEntity> reportRecordList = reportOriginalEntityMapper.getReportRecordList(pid);
+        return new PageInfo<>(reportRecordList);
     }
 }

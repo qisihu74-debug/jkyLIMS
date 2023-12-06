@@ -10,15 +10,25 @@
             <arg column="remark" jdbcType="VARCHAR" javaType="java.lang.String"/>
             <arg column="create_date" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
             <arg column="update_date" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="implementation_date" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="status" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="expiration_date" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="pid" jdbcType="BIGINT" javaType="java.lang.Long"/>
         </constructor>
     </resultMap>
     <sql id="Base_Column_List">
         id
-        , code, name, url, remark, create_date, update_date
+        , code, name, url, remark, create_date, update_date,implementation_date,status,expiration_date,pid
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
         <include refid="Base_Column_List"/>
+        from test_report_original_template
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <select id="getDetail" resultType="com.lims.manage.erp.entity.ReportOriginalEntity" parameterType="java.lang.Long">
+        select
+        *
         from test_report_original_template
         where id = #{id,jdbcType=BIGINT}
     </select>
@@ -30,10 +40,20 @@
     <insert id="insert" parameterType="com.lims.manage.erp.entity.ReportOriginalEntity">
         insert into test_report_original_template (id, code, name,
                                                    url, remark, create_date,
-                                                   update_date)
+                                                   update_date,implementation_date,status,expiration_date,pid)
         values (#{id,jdbcType=BIGINT}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
                 #{url,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP},
-                #{updateDate,jdbcType=TIMESTAMP})
+                #{updateDate,jdbcType=TIMESTAMP},#{implementationDate,jdbcType=TIMESTAMP}, #{status,jdbcType=VARCHAR},
+                #{expirationDate,jdbcType=TIMESTAMP},#{pid,jdbcType=BIGINT})
+    </insert>
+    <insert id="insertRecord" parameterType="com.lims.manage.erp.entity.ReportOriginalEntity">
+        insert into test_report_original_template_record (id, code, name,
+                                                   url, remark, create_date,
+                                                   update_date,implementation_date,status,expiration_date,pid)
+        values (#{id,jdbcType=BIGINT}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+                #{url,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP},
+                #{updateDate,jdbcType=TIMESTAMP},#{implementationDate,jdbcType=TIMESTAMP}, #{status,jdbcType=VARCHAR},
+                #{expirationDate,jdbcType=TIMESTAMP},#{pid,jdbcType=BIGINT})
     </insert>
     <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportOriginalEntity">
         insert into test_report_original_template
@@ -105,6 +125,15 @@
             <if test="updateDate != null">
                 update_date = #{updateDate,jdbcType=TIMESTAMP},
             </if>
+            <if test="implementationDate != null">
+                implementation_date = #{implementationDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="expirationDate != null">
+                expiration_date = #{expirationDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=VARCHAR},
+            </if>
         </set>
         where id = #{id,jdbcType=BIGINT}
     </update>
@@ -115,7 +144,11 @@
             url         = #{url,jdbcType=VARCHAR},
             remark      = #{remark,jdbcType=VARCHAR},
             create_date = #{createDate,jdbcType=TIMESTAMP},
-            update_date = #{updateDate,jdbcType=TIMESTAMP}
+            update_date = #{updateDate,jdbcType=TIMESTAMP},
+            implementation_date = #{implementationDate,jdbcType=TIMESTAMP},
+            expiration_date = #{expirationDate,jdbcType=TIMESTAMP},
+            status      = #{status,jdbcType=VARCHAR},
+            pid         = #{pid,jdbcType=BIGINT}
         where id = #{id,jdbcType=BIGINT}
     </update>
 
@@ -153,6 +186,14 @@
                 AND label LIKE concat(concat('%',#{param}),'%')
             </if>
         </where>
+    </select>
+
+    <select id="getReportRecordList" resultType="com.lims.manage.erp.entity.ReportOriginalEntity"
+            parameterType="java.lang.Long">
+        select
+            *
+        from test_report_original_template_record
+        where pid = #{pid,jdbcType=BIGINT}
     </select>
 
 </mapper>
