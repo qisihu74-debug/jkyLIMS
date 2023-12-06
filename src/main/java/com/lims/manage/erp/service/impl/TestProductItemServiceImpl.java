@@ -1,14 +1,12 @@
 package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.aspose.cells.Workbook;
-import com.aspose.cells.Worksheet;
-import com.aspose.cells.WorksheetCollection;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.ItemOriginalRecordTemplateMapper;
 import com.lims.manage.erp.mapper.TestOriginalRecordTemplateDao;
 import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.result.Result;
@@ -31,7 +29,6 @@ import javax.annotation.Resource;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -79,6 +76,8 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
     private TestProductItemDao testProductItemDao;
     @Resource
     private TestOriginalRecordTemplateDao testOriginalRecordTemplateDao;
+    @Resource
+    private ItemOriginalRecordTemplateMapper itemOriginalRecordTemplateMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -164,12 +163,10 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
             // 设置检测项对应线下原始记录
             if (CollectionUtil.isNotEmpty(testProductItemParamVo.getReportModelId())) {
                 for (Integer templateId : testProductItemParamVo.getReportModelId()) {
-                    LambdaQueryWrapper<TestOriginalRecordTemplate> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-                    lambdaQueryWrapper.eq(TestOriginalRecordTemplate::getId, templateId);
-                    TestOriginalRecordTemplate template = new TestOriginalRecordTemplate();
-                    template.setCheckItemId(testProductItemParamVo.getTestProductItem().getCheckItemId());
-                    testOriginalRecordTemplateDao.update(template, lambdaQueryWrapper);
-
+                    TestItemOriginalRecordTemplateRel record = new TestItemOriginalRecordTemplateRel();
+                    record.setOriginalRecordTemplateId(templateId);
+                    record.setCheckItemId(testProductItemParamVo.getTestProductItem().getCheckItemId());
+                    itemOriginalRecordTemplateMapper.insert(record);
                 }
             }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "添加产品检测项" + testProductItemParamVo.getTestProductItem().getCheckItemId() + "成功!", Const.DETECTION_MANAGEMENT_LOG, true);
@@ -254,21 +251,16 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                 }
             }
             // 清除检测项对应的线下原始记录
-            LambdaQueryWrapper<TestOriginalRecordTemplate> queryWrapper0 = new LambdaQueryWrapper<>();
-            queryWrapper0.eq(TestOriginalRecordTemplate::getCheckItemId, testProductItemParamVo.getTestProductItem().getCheckItemId());
-            TestOriginalRecordTemplate template0 = new TestOriginalRecordTemplate();
-            template0.setCheckItemId(null);
-            template0.setUpdateTime(new Date());
-            testOriginalRecordTemplateDao.update(template0, queryWrapper0);
+            LambdaQueryWrapper<TestItemOriginalRecordTemplateRel> recordWrapper = new LambdaQueryWrapper<>();
+            recordWrapper.eq(TestItemOriginalRecordTemplateRel::getCheckItemId, testProductItemParamVo.getTestProductItem().getCheckItemId());
+            itemOriginalRecordTemplateMapper.delete(recordWrapper);
             // 设置检测项对应线下原始记录
             if (CollectionUtil.isNotEmpty(testProductItemParamVo.getReportModelId())) {
                 for (Integer templateId : testProductItemParamVo.getReportModelId()) {
-                    LambdaQueryWrapper<TestOriginalRecordTemplate> queryWrapper = new LambdaQueryWrapper<>();
-                    queryWrapper.eq(TestOriginalRecordTemplate::getId, templateId);
-                    TestOriginalRecordTemplate template = new TestOriginalRecordTemplate();
-                    template.setCheckItemId(testProductItemParamVo.getTestProductItem().getCheckItemId());
-                    testOriginalRecordTemplateDao.update(template, queryWrapper);
-
+                    TestItemOriginalRecordTemplateRel record = new TestItemOriginalRecordTemplateRel();
+                    record.setOriginalRecordTemplateId(templateId);
+                    record.setCheckItemId(testProductItemParamVo.getTestProductItem().getCheckItemId());
+                    itemOriginalRecordTemplateMapper.insert(record);
                 }
             }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "修改产品检测项" + testProductItemParamVo.getTestProductItem().getCheckItemId() + "成功!", Const.DETECTION_MANAGEMENT_LOG, true);
@@ -334,12 +326,9 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
             lambdaQueryWrapper.eq(TestProductItemMethodRel::getCheckItemId, checkItemId);
             testProductItemMethodRelService.remove(lambdaQueryWrapper);
             // 清除检测项对应的线下原始记录
-            LambdaQueryWrapper<TestOriginalRecordTemplate> queryWrapper0 = new LambdaQueryWrapper<>();
-            queryWrapper0.eq(TestOriginalRecordTemplate::getCheckItemId, checkItemId);
-            TestOriginalRecordTemplate template0 = new TestOriginalRecordTemplate();
-            template0.setCheckItemId(null);
-            template0.setUpdateTime(new Date());
-            testOriginalRecordTemplateDao.update(template0, queryWrapper0);
+            LambdaQueryWrapper<TestItemOriginalRecordTemplateRel> recordWrapper = new LambdaQueryWrapper<>();
+            recordWrapper.eq(TestItemOriginalRecordTemplateRel::getCheckItemId, checkItemId);
+            itemOriginalRecordTemplateMapper.delete(recordWrapper);
             // 删除检测项信息
             this.removeById(checkItemId);
         }
@@ -458,9 +447,7 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         }
         testProductItemParamVo.setMethodIds(ItemMethodRelList);
         // 查看线下原始记录信息
-        LambdaQueryWrapper<TestOriginalRecordTemplate> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(TestOriginalRecordTemplate::getCheckItemId, testProductItem.getCheckItemId());
-        List<TestOriginalRecordTemplate> templateSet = testOriginalRecordTemplateDao.selectList(lambdaQueryWrapper);
+        List<TestOriginalRecordTemplate> templateSet = itemOriginalRecordTemplateMapper.selectOriginalRecordList(testProductItem.getCheckItemId());
         // 补充信息
         List<LabelValueVo> templateSheet = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(templateSet)) {
@@ -535,9 +522,7 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
             }
             testProductItemSelVo.setItemStandardList(StandarString);
             // 查看线下原始记录信息
-            LambdaQueryWrapper<TestOriginalRecordTemplate> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(TestOriginalRecordTemplate::getCheckItemId, testProductItem.getCheckItemId());
-            List<TestOriginalRecordTemplate> templateSet = testOriginalRecordTemplateDao.selectList(lambdaQueryWrapper);
+            List<TestOriginalRecordTemplate> templateSet = itemOriginalRecordTemplateMapper.selectOriginalRecordList(testProductItem.getCheckItemId());
             if (CollectionUtil.isNotEmpty(templateSet)) {
                 for (TestOriginalRecordTemplate template : templateSet) {
                     template.setFileUrl(null);

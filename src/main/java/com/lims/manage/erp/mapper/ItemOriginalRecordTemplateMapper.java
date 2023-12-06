@@ -1,17 +1,31 @@
 package com.lims.manage.erp.mapper;
 
-import com.lims.manage.erp.entity.ItemOriginalRecordTemplateRel;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.lims.manage.erp.entity.TestItemOriginalRecordTemplateRel;
+import com.lims.manage.erp.entity.TestOriginalRecordTemplate;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
-public interface ItemOriginalRecordTemplateMapper {
+import java.util.List;
+
+@Mapper
+public interface ItemOriginalRecordTemplateMapper extends BaseMapper<TestItemOriginalRecordTemplateRel> {
     int deleteByPrimaryKey(Integer id);
 
-    int insert(ItemOriginalRecordTemplateRel record);
+    int insert(TestItemOriginalRecordTemplateRel record);
 
-    int insertSelective(ItemOriginalRecordTemplateRel record);
+    int insertSelective(TestItemOriginalRecordTemplateRel record);
 
-    ItemOriginalRecordTemplateRel selectByPrimaryKey(Integer id);
+    TestItemOriginalRecordTemplateRel selectByPrimaryKey(Integer id);
 
-    int updateByPrimaryKeySelective(ItemOriginalRecordTemplateRel record);
+    int updateByPrimaryKeySelective(TestItemOriginalRecordTemplateRel record);
 
-    int updateByPrimaryKey(ItemOriginalRecordTemplateRel record);
+    int updateByPrimaryKey(TestItemOriginalRecordTemplateRel record);
+
+    /**
+     * 通过检测项id 获取原始记录信息
+     * @param checkItemId
+     * @return
+     */
+    List<TestOriginalRecordTemplate> selectOriginalRecordList(@Param("checkItemId") Integer checkItemId);
 }

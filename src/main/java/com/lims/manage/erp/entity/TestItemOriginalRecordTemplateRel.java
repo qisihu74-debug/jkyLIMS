@@ -1,10 +1,13 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 import java.io.Serializable;
 @Data
-public class ItemOriginalRecordTemplateRel implements Serializable {
+public class TestItemOriginalRecordTemplateRel implements Serializable {
+    @TableId(type = IdType.AUTO)
     private Integer id;
 
     private Integer checkItemId;
@@ -48,7 +51,7 @@ public class ItemOriginalRecordTemplateRel implements Serializable {
         if (getClass() != that.getClass()) {
             return false;
         }
-        ItemOriginalRecordTemplateRel other = (ItemOriginalRecordTemplateRel) that;
+        TestItemOriginalRecordTemplateRel other = (TestItemOriginalRecordTemplateRel) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
             && (this.getCheckItemId() == null ? other.getCheckItemId() == null : this.getCheckItemId().equals(other.getCheckItemId()))
             && (this.getOriginalRecordTemplateId() == null ? other.getOriginalRecordTemplateId() == null : this.getOriginalRecordTemplateId().equals(other.getOriginalRecordTemplateId()));
