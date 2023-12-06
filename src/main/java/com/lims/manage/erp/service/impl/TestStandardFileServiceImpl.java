@@ -138,7 +138,7 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
         }
         standardFileEntity.setType("3");
         standardFileEntity.setStatus("0");
-        standardFileEntity.setDelFlag(1);
+        standardFileEntity.setDelFlag(0);
         standardFileEntity.setCreateTime(new Date());
         int maxId = standardFileEntityMapper.getMaxId();
         standardFileEntity.setId(maxId);
@@ -203,7 +203,7 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
         }
         standardFileEntity.setType("3");
         standardFileEntity.setStatus("0");
-        standardFileEntity.setDelFlag(1);
+        standardFileEntity.setDelFlag(0);
         standardFileEntity.setCreateTime(new Date());
         int maxId = standardFileEntityMapper.getMaxId();
         standardFileEntity.setId(maxId);
