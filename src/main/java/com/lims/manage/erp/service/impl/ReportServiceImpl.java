@@ -1718,11 +1718,13 @@ public class ReportServiceImpl implements ReportService {
             recordEntityMapper.updateStateByCode(reportCode,"2");
         }
         //删除文件服务器文件
-        String[] split = entity.getReportUrl().split("\\?");
-        String[] strings = split[0].split("/");
-        String bluckName = strings[3];
-        String fileName = strings[4];
-        MinIoUtil.deleteFile(bluckName,fileName);
+        if (StringUtils.isNotEmpty(entity.getReportUrl())){
+            String[] split = entity.getReportUrl().split("\\?");
+            String[] strings = split[0].split("/");
+            String bluckName = strings[3];
+            String fileName = strings[4];
+            MinIoUtil.deleteFile(bluckName,fileName);
+        }
         return true;
     }
 
