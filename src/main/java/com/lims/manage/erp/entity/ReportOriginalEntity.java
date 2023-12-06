@@ -9,12 +9,14 @@ import java.util.Date;
 @Data
 public class ReportOriginalEntity {
     private Long id;
+    private Long pid;
 
     private String code;
 
     private String name;
 
     private String url;
+    private String status;
 
     private String remark;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -23,6 +25,13 @@ public class ReportOriginalEntity {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date updateDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date implementationDate;//实施日期
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date expirationDate;//过期日期
 
     private Integer pageNum;
     private Integer pageSize;
