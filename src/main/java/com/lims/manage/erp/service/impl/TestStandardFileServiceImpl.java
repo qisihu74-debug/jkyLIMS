@@ -215,6 +215,7 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
         if(!CollectionUtils.isEmpty(methods)){
             for (int i = 0; i < methods.size(); i++) {
                 methods.get(i).setStandardId(maxId);
+                methods.get(i).setMethodId(null);
             }
             standardMethodEntityMapper.batchInsert(methods);
         }
