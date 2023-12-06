@@ -24,6 +24,7 @@ public class TestStandardFile extends Model<TestStandardFile> {
     //主键id
     @TableId(type = IdType.AUTO)
     private Integer id;
+    private Integer pid;
     //文件类型1.检测依据，2判定依据，3既是检测又是判定，4其它
     private String type;
     //文件编号
