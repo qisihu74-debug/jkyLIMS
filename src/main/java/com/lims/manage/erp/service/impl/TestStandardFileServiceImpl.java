@@ -2,18 +2,25 @@ package com.lims.manage.erp.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.lims.manage.erp.entity.Patent;
-import com.lims.manage.erp.entity.SysUserEntity;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.StandardFileEntityMapper;
+import com.lims.manage.erp.mapper.StandardMethodEntityMapper;
 import com.lims.manage.erp.mapper.TestStandardFileDao;
-import com.lims.manage.erp.entity.TestStandardFile;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestStandardFileService;
 import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -32,7 +39,11 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
     private LogManagerService logManagerService;
     @Resource
     private SysOssService sysOssService;
-//添加
+    @Autowired
+    private StandardFileEntityMapper standardFileEntityMapper;
+    @Autowired
+    private StandardMethodEntityMapper standardMethodEntityMapper;
+    //添加
     @Override
     public Result addTestStandardFile(TestStandardFile testStandardFile) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -52,8 +63,7 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
             return ResultUtil.error("添加失败，未知异常!");
         }
     }
-
-//    修改
+    //修改
     @Override
     public Result updTestStandardFile(TestStandardFile testStandardFile) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -75,7 +85,7 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
         }
 
     }
-//删除
+    //删除
     @Override
     public Result delTestStandardFile(List<Long> idList) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
@@ -105,5 +115,137 @@ public class TestStandardFileServiceImpl extends ServiceImpl<TestStandardFileDao
         }
 
     }
+
+    /**############################**/
+
+    @Override
+    public Result addStandardFile(StandardFileEntity standardFileEntity, MultipartFile standardFile) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
+        if (standardFileEntity.getName()==null){
+            return ResultUtil.error("文件名称不能为空");
+        }
+        //上传文件
+        if(standardFile != null){
+            String file = standardFileEntity.getCode() + standardFileEntity.getName();
+            String filename = standardFile.getOriginalFilename();
+            String extension = filename.substring(filename.lastIndexOf("."));
+            String upload = MinIoUtil.upload("standard-file", standardFile, file + extension);
+            String[] url = upload.split("\\?");
+            standardFileEntity.setFileUrl(url[0]);
+        }
+        standardFileEntity.setType("3");
+        standardFileEntity.setStatus("0");
+        standardFileEntity.setDelFlag(0);
+        standardFileEntity.setCreateTime(new Date());
+        int maxId = standardFileEntityMapper.getMaxId();
+        standardFileEntity.setId(maxId);
+        standardFileEntity.setPid(maxId);
+        int insert = standardFileEntityMapper.insert(standardFileEntity);
+        if (insert > 0){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
+                    +"添加检测标准"+standardFileEntity.getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
+            return ResultUtil.success("添加成功!");
+        }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
+                    +"添加检测标准失败!", Const.DETECTION_MANAGEMENT_LOG,false);
+            return ResultUtil.error("添加失败，未知异常!");
+        }
+    }
+
+    @Override
+    public Result addStandardMethod(StandardMethodEntity standardMethodEntity) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
+        standardMethodEntity.setCreateTime(new Date());
+        int insert = standardMethodEntityMapper.insert(standardMethodEntity);
+        if (insert > 0){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
+                    +"添加检测方法"+standardMethodEntity.getChapterName()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
+            return ResultUtil.success("添加成功!");
+        }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
+                    +"添加检测方法失败!", Const.DETECTION_MANAGEMENT_LOG,false);
+            return ResultUtil.error("添加失败，未知异常!");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result updateStandard(StandardFileEntity standardFileEntity, MultipartFile standardFile) {
+        //作废旧依据
+        Integer pid = standardFileEntity.getPid();
+        Integer oldId = standardFileEntity.getId();
+        StandardFileEntity old = standardFileEntityMapper.getDetail(oldId);
+        old.setStandardStatus("作废");
+        old.setExpirationDate(new Date());
+        standardFileEntityMapper.insertRecord(old);
+        //保存新依据
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
+        if (standardFileEntity.getName()==null){
+            return ResultUtil.error("文件名称不能为空");
+        }
+        //上传文件
+        if(standardFile != null){
+            String file = standardFileEntity.getCode() + standardFileEntity.getName();
+            String filename = standardFile.getOriginalFilename();
+            String extension = filename.substring(filename.lastIndexOf("."));
+            String upload = MinIoUtil.upload("standard-file", standardFile, file + extension);
+            String[] url = upload.split("\\?");
+            standardFileEntity.setFileUrl(url[0]);
+        }
+        standardFileEntity.setType("3");
+        standardFileEntity.setStatus("0");
+        standardFileEntity.setDelFlag(0);
+        standardFileEntity.setCreateTime(new Date());
+        int maxId = standardFileEntityMapper.getMaxId();
+        standardFileEntity.setId(maxId);
+        standardFileEntity.setPid(pid);
+        int insert = standardFileEntityMapper.insert(standardFileEntity);
+        standardFileEntityMapper.deleteByPrimaryKey(oldId);
+        //继承旧方法
+        List<StandardMethodEntity> methods = standardMethodEntityMapper.getByStandardId(oldId);
+        if(!CollectionUtils.isEmpty(methods)){
+            for (int i = 0; i < methods.size(); i++) {
+                methods.get(i).setStandardId(maxId);
+                methods.get(i).setMethodId(null);
+            }
+            standardMethodEntityMapper.batchInsert(methods);
+        }
+        if (insert > 0){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
+                    +"添加检测标准"+standardFileEntity.getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
+            return ResultUtil.success("添加成功!");
+        }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
+                    +"添加检测标准失败!", Const.DETECTION_MANAGEMENT_LOG,false);
+            return ResultUtil.error("添加失败，未知异常!");
+        }
+    }
+
+    @Override
+    public PageInfo getRecords(Integer pid,Integer pageNum,Integer pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<StandardFileEntity> records = standardFileEntityMapper.getRecords(pid);
+        return new PageInfo<>(records);
+    }
+
+    @Override
+    public Result getMethodList(Integer id) {
+        return ResultUtil.success("查询检测方法成功！",standardMethodEntityMapper.getByStandardId(id));
+    }
+
+    @Override
+    public Result deleteMethod(Integer id) {
+        return ResultUtil.success("删除成功！",standardMethodEntityMapper.deleteByPrimaryKey(id));
+    }
+
 }
 

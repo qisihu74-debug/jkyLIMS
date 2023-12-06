@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lims.manage.erp.mapper.StandardFileEntityMapper">
+    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.StandardFileEntity">
+        <constructor>
+            <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="type" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="code" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="name" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="standard_type" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="expiration_date" jdbcType="DATE" javaType="java.util.Date"/>
+            <arg column="status" jdbcType="CHAR" javaType="java.lang.String"/>
+            <arg column="del_flag" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="remark" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="standard_status" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="release_date" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="implementation_date" jdbcType="VARCHAR" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+    <resultMap id="ResultMapWithBLOBs" type="com.lims.manage.erp.entity.StandardFileEntity">
+        <constructor>
+            <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="type" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="code" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="name" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="standard_type" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="expiration_date" jdbcType="DATE" javaType="java.util.Date"/>
+            <arg column="status" jdbcType="CHAR" javaType="java.lang.String"/>
+            <arg column="del_flag" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="remark" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="standard_status" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="release_date" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="implementation_date" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="pid" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="file_url" jdbcType="LONGVARCHAR" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , type, code, name, standard_type, expiration_date, status, del_flag, create_time,
+    update_time, remark, standard_status, release_date, implementation_date,pid
+    </sql>
+    <sql id="Blob_Column_List">
+        file_url
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from test_standard_file
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="getDetail" resultType="com.lims.manage.erp.entity.StandardFileEntity" parameterType="java.lang.Integer">
+        select
+            *
+        from test_standard_file
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete
+        from test_standard_file
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.lims.manage.erp.entity.StandardFileEntity">
+        insert into test_standard_file (id, type, code,
+                                        name, standard_type, expiration_date,
+                                        status, del_flag, create_time,
+                                        update_time, remark, standard_status,
+                                        release_date, implementation_date, file_url,pid)
+        values (#{id,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR},
+                #{name,jdbcType=VARCHAR}, #{standardType,jdbcType=VARCHAR}, #{expirationDate,jdbcType=DATE},
+                #{status,jdbcType=CHAR}, #{delFlag,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP},
+                #{updateTime,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR}, #{standardStatus,jdbcType=VARCHAR},
+                #{releaseDate,jdbcType=VARCHAR}, #{implementationDate,jdbcType=VARCHAR},
+                #{fileUrl,jdbcType=LONGVARCHAR},#{pid,jdbcType=INTEGER})
+    </insert>
+    <insert id="insertRecord" parameterType="com.lims.manage.erp.entity.StandardFileEntity">
+        insert into test_standard_file_record (id, type, code,
+                                        name, standard_type, expiration_date,
+                                        status, del_flag, create_time,
+                                        update_time, remark, standard_status,
+                                        release_date, implementation_date, file_url,pid)
+        values (#{id,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR},
+                #{name,jdbcType=VARCHAR}, #{standardType,jdbcType=VARCHAR}, #{expirationDate,jdbcType=DATE},
+                #{status,jdbcType=CHAR}, #{delFlag,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP},
+                #{updateTime,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR}, #{standardStatus,jdbcType=VARCHAR},
+                #{releaseDate,jdbcType=VARCHAR}, #{implementationDate,jdbcType=VARCHAR},
+                #{fileUrl,jdbcType=LONGVARCHAR},#{pid,jdbcType=INTEGER})
+    </insert>
+    <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.StandardFileEntity">
+        insert into test_standard_file
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="code != null">
+                code,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="standardType != null">
+                standard_type,
+            </if>
+            <if test="expirationDate != null">
+                expiration_date,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="delFlag != null">
+                del_flag,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="standardStatus != null">
+                standard_status,
+            </if>
+            <if test="releaseDate != null">
+                release_date,
+            </if>
+            <if test="implementationDate != null">
+                implementation_date,
+            </if>
+            <if test="fileUrl != null">
+                file_url,
+            </if>
+            <if test="pid != null">
+                pid,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="standardType != null">
+                #{standardType,jdbcType=VARCHAR},
+            </if>
+            <if test="expirationDate != null">
+                #{expirationDate,jdbcType=DATE},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=CHAR},
+            </if>
+            <if test="delFlag != null">
+                #{delFlag,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="standardStatus != null">
+                #{standardStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="releaseDate != null">
+                #{releaseDate,jdbcType=VARCHAR},
+            </if>
+            <if test="implementationDate != null">
+                #{implementationDate,jdbcType=VARCHAR},
+            </if>
+            <if test="fileUrl != null">
+                #{fileUrl,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="pid != null">
+                #{pid,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.StandardFileEntity">
+        update test_standard_file
+        <set>
+            <if test="type != null">
+                type = #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                code = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="standardType != null">
+                standard_type = #{standardType,jdbcType=VARCHAR},
+            </if>
+            <if test="expirationDate != null">
+                expiration_date = #{expirationDate,jdbcType=DATE},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=CHAR},
+            </if>
+            <if test="delFlag != null">
+                del_flag = #{delFlag,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="standardStatus != null">
+                standard_status = #{standardStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="releaseDate != null">
+                release_date = #{releaseDate,jdbcType=VARCHAR},
+            </if>
+            <if test="implementationDate != null">
+                implementation_date = #{implementationDate,jdbcType=VARCHAR},
+            </if>
+            <if test="fileUrl != null">
+                file_url = #{fileUrl,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.lims.manage.erp.entity.StandardFileEntity">
+        update test_standard_file
+        set type                = #{type,jdbcType=VARCHAR},
+            code                = #{code,jdbcType=VARCHAR},
+            name                = #{name,jdbcType=VARCHAR},
+            standard_type       = #{standardType,jdbcType=VARCHAR},
+            expiration_date     = #{expirationDate,jdbcType=DATE},
+            status              = #{status,jdbcType=CHAR},
+            del_flag            = #{delFlag,jdbcType=INTEGER},
+            create_time         = #{createTime,jdbcType=TIMESTAMP},
+            update_time         = #{updateTime,jdbcType=TIMESTAMP},
+            remark              = #{remark,jdbcType=VARCHAR},
+            standard_status     = #{standardStatus,jdbcType=VARCHAR},
+            release_date        = #{releaseDate,jdbcType=VARCHAR},
+            implementation_date = #{implementationDate,jdbcType=VARCHAR},
+            file_url            = #{fileUrl,jdbcType=LONGVARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.StandardFileEntity">
+        update test_standard_file
+        set type                = #{type,jdbcType=VARCHAR},
+            code                = #{code,jdbcType=VARCHAR},
+            name                = #{name,jdbcType=VARCHAR},
+            standard_type       = #{standardType,jdbcType=VARCHAR},
+            expiration_date     = #{expirationDate,jdbcType=DATE},
+            status              = #{status,jdbcType=CHAR},
+            del_flag            = #{delFlag,jdbcType=INTEGER},
+            create_time         = #{createTime,jdbcType=TIMESTAMP},
+            update_time         = #{updateTime,jdbcType=TIMESTAMP},
+            remark              = #{remark,jdbcType=VARCHAR},
+            standard_status     = #{standardStatus,jdbcType=VARCHAR},
+            release_date        = #{releaseDate,jdbcType=VARCHAR},
+            implementation_date = #{implementationDate,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <select id="getMaxId" resultType="java.lang.Integer">
+        select IFNULL(MAX(id),0)+1 from test_standard_file
+    </select>
+
+    <select id="getRecords" resultType="com.lims.manage.erp.entity.StandardFileEntity" parameterType="java.lang.Integer">
+        select
+        *
+        from test_standard_file
+        where pid = #{pid,jdbcType=INTEGER}
+    </select>
+</mapper>

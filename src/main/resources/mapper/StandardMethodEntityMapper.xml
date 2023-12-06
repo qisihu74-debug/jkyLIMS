@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lims.manage.erp.mapper.StandardMethodEntityMapper">
+    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.StandardMethodEntity">
+        <constructor>
+            <idArg column="method_id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="standard_id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="chapter_num" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="chapter_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+        </constructor>
+    </resultMap>
+    <sql id="Base_Column_List">
+        method_id,standard_id
+        , chapter_num, chapter_name, create_time
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from test_standard_method
+        where method_id = #{methodId,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete
+        from test_standard_method
+        where method_id = #{methodId,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.lims.manage.erp.entity.StandardMethodEntity">
+        insert into test_standard_method (method_id,standard_id, chapter_num, chapter_name,
+                                          create_time)
+        values (#{methodId,jdbcType=INTEGER},#{standardId,jdbcType=INTEGER}, #{chapterNum,jdbcType=VARCHAR}, #{chapterName,jdbcType=VARCHAR},
+                #{createTime,jdbcType=TIMESTAMP})
+    </insert>
+    <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.StandardMethodEntity">
+        insert into test_standard_method
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="methodId != null">
+                method_id,
+            </if>
+            <if test="standardId != null">
+                standard_id,
+            </if>
+            <if test="chapterNum != null">
+                chapter_num,
+            </if>
+            <if test="chapterName != null">
+                chapter_name,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="methodId != null">
+                #{methodId,jdbcType=INTEGER},
+            </if>
+            <if test="standardId != null">
+                #{standardId,jdbcType=INTEGER},
+            </if>
+            <if test="chapterNum != null">
+                #{chapterNum,jdbcType=VARCHAR},
+            </if>
+            <if test="chapterName != null">
+                #{chapterName,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.StandardMethodEntity">
+        update test_standard_method
+        <set>
+            <if test="standardId != null">
+                standard_id = #{standardId,jdbcType=INTEGER},
+            </if>
+            <if test="chapterNum != null">
+                chapter_num = #{chapterNum,jdbcType=VARCHAR},
+            </if>
+            <if test="chapterName != null">
+                chapter_name = #{chapterName,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where method_id = #{methodId,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.StandardMethodEntity">
+        update test_standard_method
+        set standard_id  = #{standardId,jdbcType=INTEGER},
+            chapter_num  = #{chapterNum,jdbcType=VARCHAR},
+            chapter_name = #{chapterName,jdbcType=VARCHAR},
+            create_time  = #{createTime,jdbcType=TIMESTAMP}
+        where method_id = #{methodId,jdbcType=INTEGER}
+    </update>
+
+    <select id="getByStandardId" resultType="com.lims.manage.erp.entity.StandardMethodEntity" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from test_standard_method
+        where standard_id = #{standardId,jdbcType=INTEGER}
+    </select>
+
+    <insert id="batchInsert" parameterType="com.lims.manage.erp.entity.StandardMethodEntity">
+        insert into test_standard_method (method_id,standard_id, chapter_num, chapter_name,
+                                          create_time)
+        values
+        <foreach collection="records" item="item" open="" separator="," close="">
+               (#{item.methodId,jdbcType=INTEGER},#{item.standardId,jdbcType=INTEGER}, #{item.chapterNum,jdbcType=VARCHAR}, #{item.chapterName,jdbcType=VARCHAR},
+                #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+</mapper>
