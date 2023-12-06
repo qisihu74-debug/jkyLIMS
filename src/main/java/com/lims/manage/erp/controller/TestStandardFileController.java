@@ -3,17 +3,17 @@ package com.lims.manage.erp.controller;
 
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.lims.manage.erp.entity.Patent;
-import com.lims.manage.erp.entity.TestProductType;
-import com.lims.manage.erp.entity.TestStandardFile;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestStandardFileService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
@@ -125,5 +125,70 @@ public class TestStandardFileController extends ApiController {
             return ResultUtil.error("数据为空");
         }
     }
+    /**##############################依据重做##################################**/
+    /**
+     * 新增依据
+     * @param standardFile
+     * @param standardJson
+     * @return
+     */
+    @PostMapping("/addStandard")
+    public Result addStandard(@RequestParam("standardFile") MultipartFile standardFile,
+                                  @RequestParam("standardJson") String standardJson) {
+        StandardFileEntity standardFileEntity = JSON.parseObject(standardJson, StandardFileEntity.class);
+        return this.testStandardFileService.addStandardFile(standardFileEntity,standardFile);
+    }
+
+    /**
+     * 新增检测方法
+     * @param standardMethodEntity
+     * @return
+     */
+    @PostMapping("/addStandardMethod")
+    public Result addStandardMethod(@RequestBody StandardMethodEntity standardMethodEntity) {
+        return this.testStandardFileService.addStandardMethod(standardMethodEntity);
+    }
+
+    /**
+     * 变更依据
+     * @param standardFile
+     * @param standardJson
+     * @return
+     */
+    @PostMapping("/updateStandard")
+    public Result updateStandard(@RequestParam("standardFile") MultipartFile standardFile,
+                              @RequestParam("standardJson") String standardJson) {
+        StandardFileEntity standardFileEntity = JSON.parseObject(standardJson, StandardFileEntity.class);
+        return this.testStandardFileService.updateStandard(standardFileEntity,standardFile);
+    }
+
+    /**
+     * 查询变更记录
+     * @param pid
+     * @return
+     */
+    @GetMapping("/getRecords")
+    public Result getRecords(Integer pid) {
+        if (pid!=null){
+            return testStandardFileService.getRecords(pid);
+        }else {
+            return ResultUtil.error("参数为空");
+        }
+    }
+
+    /**
+     * 查询检测方法
+     * @param id
+     * @return
+     */
+    @GetMapping("/getMethodList")
+    public Result getMethodList(Integer id) {
+        if (id!=null){
+            return testStandardFileService.getMethodList(id);
+        }else {
+            return ResultUtil.error("参数为空");
+        }
+    }
+
 }
 
