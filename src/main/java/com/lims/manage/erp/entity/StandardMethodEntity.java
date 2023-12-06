@@ -6,6 +6,8 @@ import java.util.Date;
 
 @Data
 public class StandardMethodEntity {
+    private Integer methodId;
+
     private Integer standardId;
 
     private String chapterNum;

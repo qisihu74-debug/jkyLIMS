@@ -234,5 +234,19 @@ public class TestStandardFileController extends ApiController {
         }
     }
 
+    /**
+     * 删除检测方法
+     * @param id
+     * @return
+     */
+    @GetMapping("/deleteMethod")
+    public Result deleteMethod(Integer id) {
+        if (id != null) {
+            return testStandardFileService.deleteMethod(id);
+        } else {
+            return ResultUtil.error("参数为空");
+        }
+    }
+
 }
 
