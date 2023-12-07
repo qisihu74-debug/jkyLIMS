@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -20,6 +21,7 @@ import com.lims.manage.erp.vo.TestProductSelVo;
 import com.lims.manage.erp.vo.TestProductVo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -107,8 +109,10 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
             //保存产品与报告关系
             Integer productId = testProductItemVo.getTestProduct().getProductId();
             Long reportId = testProductItemVo.getTestProduct().getReportId();
-            ProductReportRelEntity productReportRelEntity = new ProductReportRelEntity(productId.longValue(), reportId);
-            testProductDao.insertProductReportRel(productReportRelEntity);
+            if (reportId != null) {
+                ProductReportRelEntity productReportRelEntity = new ProductReportRelEntity(productId.longValue(), reportId);
+                testProductDao.insertProductReportRel(productReportRelEntity);
+            }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "添加产品" + testProductItemVo.getTestProduct().getProductId() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
             return ResultUtil.success("添加成功!");
         }else {
@@ -125,22 +129,28 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
             return ResultUtil.error("token 已过期！");
         }
         //判断产品基本信息参数
-        if (testProductItemVo.getTestProduct().getProductName()==null){
+        if (testProductItemVo.getTestProduct().getProductName() == null) {
             return ResultUtil.error("产品名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestProduct>().eq("del_flag",0).ne("product_id",testProductItemVo.getTestProduct().getProductId()).eq("product_name",testProductItemVo.getTestProduct().getProductName()))!=null){
+        if (this.getOne(new QueryWrapper<TestProduct>().eq("del_flag", 0).ne("product_id", testProductItemVo.getTestProduct().getProductId()).eq("product_name", testProductItemVo.getTestProduct().getProductName())) != null) {
             return ResultUtil.error("产品名称重复");
         }
         //设置基础信息
         testProductItemVo.getTestProduct().setUpdateTime(new Date());
+        if (StringUtils.isEmpty(testProductItemVo.getTestProduct().getSerialNumber())) {
+            testProductItemVo.getTestProduct().setSerialNumber(null);
+        }
+        UpdateWrapper<TestProduct> lambdaUpdateWrapper = new UpdateWrapper<>();
+        lambdaUpdateWrapper.lambda().eq(TestProduct::getProductId, testProductItemVo.getTestProduct().getProductId()).
+                set(TestProduct::getSerialNumber, testProductItemVo.getTestProduct().getSerialNumber());
         //修改产品信息
-        if (this.updateById(testProductItemVo.getTestProduct())){
+        if (this.update(testProductItemVo.getTestProduct(), lambdaUpdateWrapper)) {
             //删除原有依据
-            testProductStandardFileRelService.remove(new QueryWrapper<TestProductStandardFileRel>().eq("product_id",testProductItemVo.getTestProduct().getProductId()));
+            testProductStandardFileRelService.remove(new QueryWrapper<TestProductStandardFileRel>().eq("product_id", testProductItemVo.getTestProduct().getProductId()));
             //设置产品判定依据
-            if (testProductItemVo.getStandardRelIds().size()>0){
+            if (testProductItemVo.getStandardRelIds().size() > 0) {
                 for (Integer standardRelId : testProductItemVo.getStandardRelIds()) {
-                    testProductStandardFileRelService.save(new TestProductStandardFileRel(testProductItemVo.getTestProduct().getProductId(),standardRelId));
+                    testProductStandardFileRelService.save(new TestProductStandardFileRel(testProductItemVo.getTestProduct().getProductId(), standardRelId));
                 }
             }
             //删除原产品等级
