@@ -241,3 +241,58 @@ ALTER TABLE `test_task_pool` ADD COLUMN `alias_name` VARCHAR ( 255 ) NULL COMMEN
 
 ALTER TABLE `test_task` ADD COLUMN `working_hours_id` int NULL COMMENT '工时id存在则已添加 不存在则为空' AFTER `pool_id`;
 
+--依据变更功能
+UPDATE test_standard_file_record SET pid = id;
+
+ALTER TABLE `test_standard_file` ADD COLUMN `pid` int NULL COMMENT '依据关联ID' AFTER `implementation_date`;
+
+CREATE TABLE `test_standard_file_record`  (
+                                              `id` int(0) NOT NULL COMMENT '主键id',
+                                              `type` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '文件类型1.检测依据，2判定依据，3既是检测又是判定，4其它',
+                                              `code` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '文件编号',
+                                              `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '文件名称',
+                                              `file_url` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '文件地址',
+                                              `standard_type` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '标准类型，地标、国标、行标、企标、铁标、协会标准',
+                                              `expiration_date` date NULL DEFAULT NULL COMMENT '失效日期',
+                                              `status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '0' COMMENT ' 0,启用，1,冻结',
+                                              `del_flag` int(0) NOT NULL DEFAULT 0 COMMENT '0默认未删除,1删除',
+                                              `create_time` timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '注册时间',
+                                              `update_time` timestamp(0) NULL DEFAULT NULL COMMENT '更新时间',
+                                              `remark` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
+                                              `standard_status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '标准规范状态。\r\n数据来源：https://openstd.samr.gov.cn/bzgk/gb/gbMainQuery\r\n',
+                                              `release_date` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '发布日期',
+                                              `implementation_date` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '实施日期/作废日期',
+                                              `pid` int(0) NULL DEFAULT NULL COMMENT '系列ID',
+                                              INDEX `id_index`(`id`) USING BTREE
+)
+
+CREATE TABLE `test_standard_method`  (
+                                         `method_id` int(0) NOT NULL AUTO_INCREMENT COMMENT '方法ID',
+                                         `standard_id` int(0) NOT NULL COMMENT '依据ID',
+                                         `chapter_num` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '章节号',
+                                         `chapter_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '章节名称',
+                                         `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+                                         PRIMARY KEY (`method_id`) USING BTREE
+)
+
+--报告变更
+UPDATE test_report_original_template SET pid = id;
+ALTER TABLE `test_report_original_template` ADD COLUMN `implementation_date` datetime NULL COMMENT '实施日期' AFTER `update_date`;
+ALTER TABLE `test_report_original_template` ADD COLUMN `expiration_date` datetime NULL COMMENT '过期日期' AFTER `implementation_date`;
+ALTER TABLE `test_report_original_template` ADD COLUMN `status` VARCHAR ( 255 ) NULL COMMENT '当前状态' AFTER `implementation_date`;
+ALTER TABLE `test_report_original_template` ADD COLUMN `pid` int NULL COMMENT '报告变更关系ID' AFTER `status`;
+
+CREATE TABLE `test_report_original_template_record`  (
+                                                         `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+                                                         `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '受控编号',
+                                                         `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '模板名称',
+                                                         `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '模板链接',
+                                                         `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
+                                                         `create_date` datetime(0) NULL DEFAULT NULL COMMENT '创建日期',
+                                                         `update_date` datetime(0) NULL DEFAULT NULL COMMENT '修改日期',
+                                                         `implementation_date` datetime(0) NULL DEFAULT NULL COMMENT '实施日期',
+                                                         `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '当前状态',
+                                                         `expiration_date` datetime(0) NULL DEFAULT NULL COMMENT '过期日期',
+                                                         `pid` bigint(0) NULL DEFAULT NULL COMMENT '系列ID',
+                                                         PRIMARY KEY (`id`) USING BTREE
+)
