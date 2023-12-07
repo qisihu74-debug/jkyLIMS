@@ -45,6 +45,8 @@ public class TestProductVo extends Model<TestProductVo> {
     private String productPurpose;
     //外观描述
     private String outwardDescribe;
+    //序号
+    private Integer serialNumber;
     /**
      * 获取主键值
      *

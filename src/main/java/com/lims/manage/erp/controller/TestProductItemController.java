@@ -57,7 +57,13 @@ public class TestProductItemController extends ApiController {
      */
     @GetMapping("/list")
     public Result selectAll(TestProductItem testProductItem) {
-        List<TestProductItemTreeVo> treeVos=this.testProductItemService.getTreeList(testProductItem);
+        if (testProductItem == null) {
+            return ResultUtil.error("缺少必填参数");
+        }
+        if (testProductItem.getProductId() == null) {
+            return ResultUtil.error("产品id不能为空");
+        }
+        List<TestProductItemTreeVo> treeVos = this.testProductItemService.getTreeList(testProductItem);
         return ResultUtil.success(treeVos);
     }
 
@@ -69,7 +75,16 @@ public class TestProductItemController extends ApiController {
      */
     @GetMapping("/getSel")
     public Result selectOneSel(TestProductItem testProductItem) {
-        List<TestProductItemSelVo> treeVos=this.testProductItemService.getTestProductSelVoList(testProductItem);
+        if (testProductItem == null) {
+            return ResultUtil.error("缺少必填参数");
+        }
+        if (testProductItem.getProductId() == null) {
+            return ResultUtil.error("产品id不能为空");
+        }
+        if (testProductItem.getCheckItemId() == null) {
+            return ResultUtil.error("检测项id不能为空");
+        }
+        List<TestProductItemSelVo> treeVos = this.testProductItemService.getTestProductSelVoList(testProductItem);
         return ResultUtil.success(treeVos);
     }
 
@@ -82,16 +97,17 @@ public class TestProductItemController extends ApiController {
     @GetMapping("{id}")
     public Result selectOne(@PathVariable Serializable id) throws Exception {
         if (id!=null&&id!=""){
-            TestProductItem testMethod=this.testProductItemService.getOne(new QueryWrapper<TestProductItem>().eq("check_item_id",id).eq("del_flag",0));
+            TestProductItem testMethod = this.testProductItemService.getOne(new QueryWrapper<TestProductItem>().eq("check_item_id", id).eq("del_flag", 0));
             String name = templateService.getNameById(testMethod.getReportModelId());
             testMethod.setReportModelName(name);
-            TestProductItemParamVo testProductItemParamVo=this.testProductItemService.getItemParamVo(testMethod);
-//            //模板sheet
-//            List<LabelValueVo> productTemplateSheet = this.testProductItemService.getProductTemplateSheet(testMethod.getProductId());
-//            testProductItemParamVo.setTemplateSheet(productTemplateSheet);
+            TestProductItemParamVo testProductItemParamVo = this.testProductItemService.getItemParamVo(testMethod);
             //回显sheet
             List<Integer> sheetIndex = this.testProductItemService.getSheetIndex(testMethod.getCheckItemId());
             testProductItemParamVo.setSheetIndex(sheetIndex);
+            // 补充检测项绑定报告数据
+            if (testMethod.getReportModelId() != null) {
+                testProductItemParamVo.setTemplateSet(testMethod.getReportModelId());
+            }
             return ResultUtil.success(testProductItemParamVo);
         }else {
             return ResultUtil.error("参数为空");
@@ -180,11 +196,19 @@ public class TestProductItemController extends ApiController {
      */
     @GetMapping("/getAllSheets")
     public Result enableStatus(Integer productId) throws Exception {
-        if (productId == null){
+        if (productId == null) {
             return ResultUtil.error("产品ID不能为空");
-        }else {
+        } else {
             return ResultUtil.success(this.testProductItemService.getProductTemplateSheet(productId));
         }
+    }
+
+    /**
+     * @return
+     */
+    @GetMapping("get_Basics")
+    public Result ReturnBasicsData() {
+        return ResultUtil.success(this.testProductItemService.returnEntrustData());
     }
 }
 

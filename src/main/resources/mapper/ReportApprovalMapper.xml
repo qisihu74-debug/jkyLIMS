@@ -249,7 +249,7 @@
         FROM
         test_report_record
         WHERE  issuer_time is not NULL
-        and state = 6 and issuer_id in
+        and state >= 6 and issuer_id in
         <foreach collection="list" item="issuer_id" index="index" open="(" close = ")" separator=",">
             #{issuer_id}
         </foreach>

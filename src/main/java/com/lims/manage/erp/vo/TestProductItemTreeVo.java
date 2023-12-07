@@ -59,5 +59,7 @@ public class TestProductItemTreeVo {
     private Date updateTime;
     //物流费用
     private String logisticsCosts;
+    //应用印章
+    private String methodSignet;
     List<TestProductItemTreeVo> children;
 }

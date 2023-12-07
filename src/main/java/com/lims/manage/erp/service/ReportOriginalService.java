@@ -16,6 +16,7 @@ public interface ReportOriginalService {
      * @return
      */
     int addReportOriginal(ReportOriginalEntity entity, MultipartFile file) throws UnsupportedEncodingException;
+    int changeReportOriginal(ReportOriginalEntity entity, MultipartFile file) throws UnsupportedEncodingException;
 
     /**
      * 报告查询列表
@@ -49,4 +50,13 @@ public interface ReportOriginalService {
      * @return
      */
     List<LabelValueVo> getReportSelectList(String param);
+
+    /**
+     * 查询变更记录列表
+     * @param pid
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    PageInfo getReportRecordList(Long pid,Integer pageNum,Integer pageSize);
 }

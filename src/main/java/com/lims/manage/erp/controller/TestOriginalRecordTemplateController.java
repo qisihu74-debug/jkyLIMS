@@ -3,6 +3,7 @@ package com.lims.manage.erp.controller;
 
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.ApiController;
@@ -116,14 +117,24 @@ public class TestOriginalRecordTemplateController extends ApiController {
      */
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {
-        if (idList.size()!=0){
+        if (idList.size() != 0) {
             return this.testOriginalRecordTemplateService.delTtestOriginalRecordTemplate(idList);
-        }else {
+        } else {
             return ResultUtil.error("数据为空");
         }
     }
 
 
+    /**
+     * 查询原始记录数据
+     *
+     * @return 所有数据
+     */
+    @GetMapping("/getAllList")
+    public Result getAllList() {
+
+        return this.testOriginalRecordTemplateService.getAllList();
+    }
 
 
 }

@@ -17,9 +17,13 @@ import java.util.List;
  */
 public interface TestReportTemplateService extends IService<TestReportTemplate> {
     Result addReportTemplate(TestReportTemplateVo testReportTemplate);
+
     Result updReportTemplate(TestReportTemplateVo testReportTemplate);
+
     Result delReportTemplate(List<Long> idList);
+
     Result getList(Serializable id);
+
     Result getUpdOne(Serializable id);
 
     String getNameById(Integer reportModelId);

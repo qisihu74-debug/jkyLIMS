@@ -29,7 +29,7 @@
 	    t2.name text
         FROM
             ( SELECT * FROM test_product_standard_file_rel WHERE product_id = #{productId} ) t1
-            LEFT JOIN test_standard_file t2
+            LEFT JOIN (select * from test_standard_file union all select * from  test_standard_file_record) t2
         ON t1.standard_file_id = t2.id
         WHERE
             t2.type IN ( 2
@@ -71,6 +71,7 @@
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
         <result property="productTypeName" column="productTypeName" jdbcType="VARCHAR"/>
+        <result property="serialNumber" column="serial_number" jdbcType="INTEGER"/>
     </resultMap>
 
     <select id="getPageList" resultMap="TestProductVoMap">
@@ -108,7 +109,7 @@
 	        CONCAT(t2.code,'《',t2.name,'》') label
         FROM
             test_product_item_standard_file_rel t1
-            LEFT JOIN test_standard_file t2 ON t1.standard_file_id = t2.id
+            LEFT JOIN (select * from test_standard_file union all select * from  test_standard_file_record) t2 ON t1.standard_file_id = t2.id
         WHERE
             t2.type IN ( 1, 3 )
             and t1.check_item_id = #{checkItemId}
@@ -143,5 +144,18 @@
                 LEFT JOIN product_report_original_rel t2 ON t1.product_id = t2.product_id
         where t1.del_flag = 0
         and t1.product_id = #{productId}
+    </select>
+
+    <select id="selectSampleNumberCount" resultType="java.lang.Integer">
+        SELECT
+	        count( product_id )
+        FROM
+            test_sample
+        WHERE
+            product_id IN
+        <foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        LIMIT 1
     </select>
 </mapper>

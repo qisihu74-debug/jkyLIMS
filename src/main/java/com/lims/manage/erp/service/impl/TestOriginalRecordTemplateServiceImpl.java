@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -122,7 +123,18 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
 
     @Override
     public IPage<TorttpiVo> getPageList(Page<TorttpiVo> page, QueryWrapper<TestOriginalRecordTemplate> queryWrapper) {
-        return testOriginalRecordTemplateDao.getPageList(page,queryWrapper);
+        return testOriginalRecordTemplateDao.getPageList(page, queryWrapper);
+    }
+
+    @Override
+    public Result getAllList() {
+        LambdaQueryWrapper<TestOriginalRecordTemplate> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(TestOriginalRecordTemplate::getDelFlag, 0);
+        List<TestOriginalRecordTemplate> list = testOriginalRecordTemplateDao.selectList(lambdaQueryWrapper);
+        for (TestOriginalRecordTemplate data : list) {
+            data.setFileUrl(null);
+        }
+        return ResultUtil.success(list);
     }
 
 }

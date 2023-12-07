@@ -133,5 +133,9 @@ public class TestEntrustedTaskRelVo {
     @DateTimeFormat(pattern="yyyy-MM-dd")
     @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
     private Date midReportFinishTime;
+    /**
+     * 报告流转状态
+     */
+    private Integer reportState;
 
 }

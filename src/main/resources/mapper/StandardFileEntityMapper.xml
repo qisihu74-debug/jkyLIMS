@@ -287,7 +287,7 @@
     <select id="getRecords" resultType="com.lims.manage.erp.entity.StandardFileEntity" parameterType="java.lang.Integer">
         select
         *
-        from test_standard_file
+        from test_standard_file_record
         where pid = #{pid,jdbcType=INTEGER}
     </select>
 </mapper>
