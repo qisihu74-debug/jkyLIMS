@@ -242,6 +242,8 @@ ALTER TABLE `test_task_pool` ADD COLUMN `alias_name` VARCHAR ( 255 ) NULL COMMEN
 ALTER TABLE `test_task` ADD COLUMN `working_hours_id` int NULL COMMENT '工时id存在则已添加 不存在则为空' AFTER `pool_id`;
 
 --依据变更功能
+UPDATE test_standard_file_record SET pid = id;
+
 ALTER TABLE `test_standard_file` ADD COLUMN `pid` int NULL COMMENT '依据关联ID' AFTER `implementation_date`;
 
 CREATE TABLE `test_standard_file_record`  (
@@ -274,6 +276,7 @@ CREATE TABLE `test_standard_method`  (
 )
 
 --报告变更
+UPDATE test_report_original_template SET pid = id;
 ALTER TABLE `test_report_original_template` ADD COLUMN `implementation_date` datetime NULL COMMENT '实施日期' AFTER `update_date`;
 ALTER TABLE `test_report_original_template` ADD COLUMN `expiration_date` datetime NULL COMMENT '过期日期' AFTER `implementation_date`;
 ALTER TABLE `test_report_original_template` ADD COLUMN `status` VARCHAR ( 255 ) NULL COMMENT '当前状态' AFTER `implementation_date`;
