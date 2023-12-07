@@ -196,11 +196,19 @@ public class TestProductItemController extends ApiController {
      */
     @GetMapping("/getAllSheets")
     public Result enableStatus(Integer productId) throws Exception {
-        if (productId == null){
+        if (productId == null) {
             return ResultUtil.error("产品ID不能为空");
-        }else {
+        } else {
             return ResultUtil.success(this.testProductItemService.getProductTemplateSheet(productId));
         }
+    }
+
+    /**
+     * @return
+     */
+    @GetMapping("get_Basics")
+    public Result ReturnBasicsData() {
+        return ResultUtil.success(this.testProductItemService.returnEntrustData());
     }
 }
 

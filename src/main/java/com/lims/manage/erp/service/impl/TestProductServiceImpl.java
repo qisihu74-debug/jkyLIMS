@@ -201,7 +201,14 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
         if (count > 0) {
             return ResultUtil.error("删除失败，产品基础信息与业务信息参与绑定");
         }
-//        for (Long aLong : idList) {
+        for (Long aLong : idList) {
+            LambdaUpdateWrapper<TestProduct> testProductWrapper = new LambdaUpdateWrapper<>();
+            testProductWrapper.eq(TestProduct::getProductId, aLong);
+            testProductWrapper.set(TestProduct::getDelFlag, 1);
+            testProductDao.update(null, testProductWrapper);
+        }
+        // TODO： 2023年12月7日 产品数据执行软删除。
+/*//        for (Long aLong : idList) {
 //            LambdaQueryWrapper<TestProduct> productLambdaQueryWrapper = new LambdaQueryWrapper<>();
 //            productLambdaQueryWrapper.eq(TestProduct::getProductId, aLong);
 //            this.remove(productLambdaQueryWrapper);
@@ -215,8 +222,8 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
 //            testReportTemplateProductRefDao.delete(productRefLambdaQueryWrapper);
 //            //删除原报告与报告关系
 //            testProductDao.deleteProductReportRel(aLong);
-//        }
-//        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品" + idList.toArray() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
+//        }*/
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品" + idList.toArray() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
         return ResultUtil.success("删除成功");
     }
 
