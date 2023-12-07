@@ -17,6 +17,7 @@ import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.TestReportTemplateVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
@@ -105,21 +106,22 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result delReportTemplate(List<Long> idList) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        List<TestReportTemplate> testReportTemplates=new ArrayList<>();
+        List<TestReportTemplate> testReportTemplates = new ArrayList<>();
         for (Long aLong : idList) {
-            TestReportTemplate testReportTemplate=new TestReportTemplate();
+            TestReportTemplate testReportTemplate = new TestReportTemplate();
             testReportTemplate.setUpdateTime(new Date());
             testReportTemplate.setDelFlag(1);
             testReportTemplate.setId(aLong.intValue());
-            String url=this.getById(aLong).getReportFileUri();
-            if (url!=null){
+            String url = this.getById(aLong).getReportFileUri();
+            if (url != null) {
                 sysOssService.delAnnounce(url);
-                log.info("管理员:"+ShiroUtils.getUserInfo().getUsername()+"删除文件："+url);
+                log.info("管理员:" + ShiroUtils.getUserInfo().getUsername() + "删除文件：" + url);
             }
             testReportTemplates.add(testReportTemplate);
         }

@@ -5736,12 +5736,15 @@ public class EntrustServiceImpl implements EntrustService {
               for(TestEntrustedTaskRelVo tt1 : allList){
                   for(TestEntrustedTaskRelVo tt2 : list){
                       if(tt2.getId().equals(tt1.getId()) && tt1.getType().equals(tt2.getType())){
-                        // 对 中间数据源赋值。
-                          if(!StringUtils.isEmpty(tt1.getReportCode())){
+                          // 对 中间数据源赋值。
+                          if (!StringUtils.isEmpty(tt1.getReportCode())) {
                               tt2.setReportCode(tt1.getReportCode());
                           }
-                          if(!StringUtils.isEmpty(tt1.getReportFinishTime())){
+                          if (!StringUtils.isEmpty(tt1.getReportFinishTime())) {
                               tt2.setReportFinishTime(tt1.getReportFinishTime());
+                          }
+                          if (tt1.getReportState() != null) {
+                              tt2.setReportState(tt1.getReportState());
                           }
                       }
                   }

@@ -992,7 +992,14 @@
             t2.name as originalName
         FROM
             test_entrusted_sample_checkitem_rel as t1
-            LEFT JOIN test_original_record_template as t2 ON t1.check_item_id = t2.check_item_id
+            LEFT JOIN (
+        SELECT
+        t1.*,
+        t2.check_item_id AS check_item_id_rel
+        FROM
+        test_original_record_template AS t1
+        LEFT JOIN test_item_original_record_template_rel AS t2 ON t1.id = t2.original_record_template_id
+        )  as t2 ON t1.check_item_id = t2.check_item_id_rel
             LEFT JOIN test_task as t3 ON t3.id = t1.task_id
         WHERE 1=1
             <if test="array!=null">

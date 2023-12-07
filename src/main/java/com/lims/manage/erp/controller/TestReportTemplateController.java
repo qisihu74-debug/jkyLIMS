@@ -2,7 +2,9 @@ package com.lims.manage.erp.controller;
 
 
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.ApiController;
@@ -47,21 +49,38 @@ public class TestReportTemplateController extends ApiController {
      */
     @GetMapping("/list")
     public Result selectAll(Page<TestReportTemplate> page, TestReportTemplate testReportTemplate) {
-        QueryWrapper<TestReportTemplate> queryWrapper=new QueryWrapper<>();
-        queryWrapper.eq("del_flag",0);
-        if (testReportTemplate.getReportName()!=null){
-            queryWrapper.like("report_name",testReportTemplate.getReportName());
+        QueryWrapper<TestReportTemplate> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("del_flag", 0);
+        if (testReportTemplate.getReportName() != null) {
+            queryWrapper.like("report_name", testReportTemplate.getReportName());
         }
         queryWrapper.orderByDesc("create_time");
         IPage<TestReportTemplate> iPage = this.testReportTemplateService.page(page, queryWrapper);
-        for (TestReportTemplate bean:iPage.getRecords()) {
-            if (StringUtils.isNotEmpty(bean.getReportFileUri())){
-                bean.setReportFileUri(bean.getReportFileUri().substring(0,bean.getReportFileUri().indexOf("?")));
+        for (TestReportTemplate bean : iPage.getRecords()) {
+            if (StringUtils.isNotEmpty(bean.getReportFileUri())) {
+                bean.setReportFileUri(bean.getReportFileUri().substring(0, bean.getReportFileUri().indexOf("?")));
                 String substring = bean.getReportFileUri().substring(bean.getReportFileUri().lastIndexOf(".") + 1);
                 bean.setRemark(substring);
             }
         }
         return ResultUtil.success(iPage);
+    }
+
+    /**
+     * 查询所有数据
+     *
+     * @return 所有数据
+     */
+    @GetMapping("/getAllList")
+    public Result getAllList() {
+        LambdaQueryWrapper<TestReportTemplate> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(TestReportTemplate::getDelFlag, 0);
+        lambdaQueryWrapper.orderByDesc(TestReportTemplate::getCreateTime);
+        List<TestReportTemplate> list = this.testReportTemplateService.list(lambdaQueryWrapper);
+        if (CollectionUtil.isNotEmpty(list)) {
+            list.stream().forEach(testReportTemplate -> testReportTemplate.setReportFileUri(null));
+        }
+        return ResultUtil.success(list);
     }
 
     /**

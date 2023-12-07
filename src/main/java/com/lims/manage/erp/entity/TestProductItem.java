@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,6 +17,7 @@ import java.util.List;
  * @author makejava
  * @since 2022-03-02 15:14:51
  */
+@Data
 @SuppressWarnings("serial")
 public class TestProductItem extends Model<TestProductItem> {
     //检验项目ID
@@ -73,6 +75,8 @@ public class TestProductItem extends Model<TestProductItem> {
     private String sampleStandard;
     //报告模板别名
     private String reportModelName;
+    // 工时
+    private String workingHours;
 
     public Integer getCheckItemId() {
         return checkItemId;

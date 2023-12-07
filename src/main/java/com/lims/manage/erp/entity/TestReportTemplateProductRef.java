@@ -4,6 +4,8 @@ package com.lims.manage.erp.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
@@ -13,6 +15,7 @@ import java.io.Serializable;
  * @since 2022-04-13 09:49:09
  */
 @SuppressWarnings("serial")
+@Data
 public class TestReportTemplateProductRef extends Model<TestReportTemplateProductRef> {
     //报告模板id
     @TableId(type = IdType.AUTO)

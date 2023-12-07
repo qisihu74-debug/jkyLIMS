@@ -22,5 +22,7 @@ public class TestProductItemVo extends Model<TestProductItemVo> {
     private List<Integer> standardRelIds;
     //产品规格等级
     private List<String> specsList;
+    //报告模板xls与产品关联
+    private List<Integer> templateIds;
 }
 

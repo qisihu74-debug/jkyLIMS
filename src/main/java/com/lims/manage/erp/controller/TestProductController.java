@@ -40,43 +40,46 @@ public class TestProductController extends ApiController {
 
     @GetMapping("/getList")
     public Result getAll(TestProduct testProduct) {
-        QueryWrapper<TestProduct> queryWrapper=new QueryWrapper<>(testProduct);
+        QueryWrapper<TestProduct> queryWrapper = new QueryWrapper<>(testProduct);
         queryWrapper.orderByDesc("create_time");
-        queryWrapper.eq("del_flag",0);
+        queryWrapper.eq("del_flag", 0);
         return ResultUtil.success(this.testProductService.list(queryWrapper));
     }
-    /**
-     * 通过主键查询单条数据
-     *
-     * @param id 主键
-     * @return 单条数据
-     */
-    @GetMapping("/selProduct/{id}")
-    public Result selectProductVo(@PathVariable Serializable id) {
-        if (id!=null&&id!=""){
-            TestProduct testProduct=this.testProductService.getOne(new QueryWrapper<TestProduct>().eq("product_id",id));
-            return ResultUtil.success(this.testProductService.getTestProductSelVo(testProduct));
-        }else {
-            return ResultUtil.error("参数为空");
-        }
-    }
+//    /**
+//     * 通过主键查询单条数据
+//     *
+//     * @param id 主键
+//     * @return 单条数据
+//     */
+//    @GetMapping("/selProduct/{id}")
+//    public Result selectProductVo(@PathVariable Serializable id) {
+//        if (id!=null&&id!=""){
+//            TestProduct testProduct=this.testProductService.getOne(new QueryWrapper<TestProduct>().eq("product_id",id));
+//            return ResultUtil.success(this.testProductService.getTestProductSelVo(testProduct));
+//        }else {
+//            return ResultUtil.error("参数为空");
+//        }
+//    }
 
     /**
      * 分页查询所有数据
      *
-     * @param page 分页对象
+     * @param page        分页对象
      * @param testProduct 查询实体
      * @return 所有数据
      */
     @GetMapping("/list")
     public Result selectAll(Page<TestProductVo> page, TestProduct testProduct) {
-        QueryWrapper<TestProduct> queryWrapper=new QueryWrapper<>();
-        queryWrapper.eq("p.del_flag",0);
-        if (testProduct.getProductName()!=null){
-            queryWrapper.like("p.product_name",testProduct.getProductName());
+        QueryWrapper<TestProduct> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("p.del_flag", 0);
+        if (testProduct.getProductName() != null) {
+            queryWrapper.like("p.product_name", testProduct.getProductName());
         }
-        if (testProduct.getProductTypeId()!=null){
-            queryWrapper.eq("p.product_type_id",testProduct.getProductTypeId());
+        if (testProduct.getProductTypeId() != null) {
+            queryWrapper.eq("p.product_type_id", testProduct.getProductTypeId());
+        }
+        if (testProduct.getStatus() != null) {
+            queryWrapper.eq("p.status", testProduct.getStatus());
         }
         queryWrapper.orderByDesc("p.create_time");
         return ResultUtil.success(this.testProductService.getPageList(page, queryWrapper));
