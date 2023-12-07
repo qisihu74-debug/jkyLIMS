@@ -204,6 +204,7 @@ public class ReportController {
         }
         Boolean flag = reportService.revoke(reportCode);
         if (flag){
+            log.info("用户："+ShiroUtils.getUserInfo().getName()+" 在："+DateUtil.getDayString(System.currentTimeMillis())+" 撤回了报告，编号为："+reportCode);
             return ResultUtil.success("撤回成功");
         }else {
             return ResultUtil.error("撤回失败");

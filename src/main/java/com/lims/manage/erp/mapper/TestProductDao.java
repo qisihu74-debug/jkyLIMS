@@ -88,10 +88,19 @@ public interface TestProductDao extends BaseMapper<TestProduct> {
 
     /**
      * 删除原产品与报告模板关系
+     *
      * @param productId
      * @return
      */
     int deleteProductReportRel(@Param("productId") Long productId);
 
     TestProduct getProductInfo(Integer productId);
+
+    /**
+     * 统计产品id 在 test_sample 存在的条数
+     *
+     * @param productIds
+     * @return
+     */
+    Integer selectSampleNumberCount(@Param("productIds") List<Long> productIds);
 }

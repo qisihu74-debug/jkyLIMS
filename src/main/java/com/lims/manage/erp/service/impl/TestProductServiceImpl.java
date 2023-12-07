@@ -3,6 +3,8 @@ package com.lims.manage.erp.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -19,6 +21,7 @@ import com.lims.manage.erp.vo.TestProductSelVo;
 import com.lims.manage.erp.vo.TestProductVo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -106,8 +109,10 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
             //保存产品与报告关系
             Integer productId = testProductItemVo.getTestProduct().getProductId();
             Long reportId = testProductItemVo.getTestProduct().getReportId();
-            ProductReportRelEntity productReportRelEntity = new ProductReportRelEntity(productId.longValue(), reportId);
-            testProductDao.insertProductReportRel(productReportRelEntity);
+            if (reportId != null) {
+                ProductReportRelEntity productReportRelEntity = new ProductReportRelEntity(productId.longValue(), reportId);
+                testProductDao.insertProductReportRel(productReportRelEntity);
+            }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "添加产品" + testProductItemVo.getTestProduct().getProductId() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
             return ResultUtil.success("添加成功!");
         }else {
@@ -124,22 +129,28 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
             return ResultUtil.error("token 已过期！");
         }
         //判断产品基本信息参数
-        if (testProductItemVo.getTestProduct().getProductName()==null){
+        if (testProductItemVo.getTestProduct().getProductName() == null) {
             return ResultUtil.error("产品名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestProduct>().eq("del_flag",0).ne("product_id",testProductItemVo.getTestProduct().getProductId()).eq("product_name",testProductItemVo.getTestProduct().getProductName()))!=null){
+        if (this.getOne(new QueryWrapper<TestProduct>().eq("del_flag", 0).ne("product_id", testProductItemVo.getTestProduct().getProductId()).eq("product_name", testProductItemVo.getTestProduct().getProductName())) != null) {
             return ResultUtil.error("产品名称重复");
         }
         //设置基础信息
         testProductItemVo.getTestProduct().setUpdateTime(new Date());
+        if (StringUtils.isEmpty(testProductItemVo.getTestProduct().getSerialNumber())) {
+            testProductItemVo.getTestProduct().setSerialNumber(null);
+        }
+        UpdateWrapper<TestProduct> lambdaUpdateWrapper = new UpdateWrapper<>();
+        lambdaUpdateWrapper.lambda().eq(TestProduct::getProductId, testProductItemVo.getTestProduct().getProductId()).
+                set(TestProduct::getSerialNumber, testProductItemVo.getTestProduct().getSerialNumber());
         //修改产品信息
-        if (this.updateById(testProductItemVo.getTestProduct())){
+        if (this.update(testProductItemVo.getTestProduct(), lambdaUpdateWrapper)) {
             //删除原有依据
-            testProductStandardFileRelService.remove(new QueryWrapper<TestProductStandardFileRel>().eq("product_id",testProductItemVo.getTestProduct().getProductId()));
+            testProductStandardFileRelService.remove(new QueryWrapper<TestProductStandardFileRel>().eq("product_id", testProductItemVo.getTestProduct().getProductId()));
             //设置产品判定依据
-            if (testProductItemVo.getStandardRelIds().size()>0){
+            if (testProductItemVo.getStandardRelIds().size() > 0) {
                 for (Integer standardRelId : testProductItemVo.getStandardRelIds()) {
-                    testProductStandardFileRelService.save(new TestProductStandardFileRel(testProductItemVo.getTestProduct().getProductId(),standardRelId));
+                    testProductStandardFileRelService.save(new TestProductStandardFileRel(testProductItemVo.getTestProduct().getProductId(), standardRelId));
                 }
             }
             //删除原产品等级
@@ -195,7 +206,19 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-//        for (Long aLong : idList) {
+        // 通过 产品id 查询业务中数据，存在业务数据 删除失败。
+        Integer count = testProductDao.selectSampleNumberCount(idList);
+        if (count > 0) {
+            return ResultUtil.error("删除失败，产品基础信息与业务信息参与绑定");
+        }
+        for (Long aLong : idList) {
+            LambdaUpdateWrapper<TestProduct> testProductWrapper = new LambdaUpdateWrapper<>();
+            testProductWrapper.eq(TestProduct::getProductId, aLong);
+            testProductWrapper.set(TestProduct::getDelFlag, 1);
+            testProductDao.update(null, testProductWrapper);
+        }
+        // TODO： 2023年12月7日 产品数据执行软删除。
+/*//        for (Long aLong : idList) {
 //            LambdaQueryWrapper<TestProduct> productLambdaQueryWrapper = new LambdaQueryWrapper<>();
 //            productLambdaQueryWrapper.eq(TestProduct::getProductId, aLong);
 //            this.remove(productLambdaQueryWrapper);
@@ -209,7 +232,7 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
 //            testReportTemplateProductRefDao.delete(productRefLambdaQueryWrapper);
 //            //删除原报告与报告关系
 //            testProductDao.deleteProductReportRel(aLong);
-//        }
+//        }*/
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品" + idList.toArray() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
         return ResultUtil.success("删除成功");
     }
@@ -300,6 +323,25 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
     @Override
     public TestProduct getProductInfo(Integer productId) {
         return testProductDao.getProductInfo(productId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result updateProductStatus(TestProductItemVo testProductItemVo) {
+        if (testProductItemVo.getTestProduct() == null) {
+            return ResultUtil.success("产品信息为空");
+        }
+        if (testProductItemVo.getTestProduct().getProductId() == null) {
+            return ResultUtil.success("产品id为空");
+        }
+        if (testProductItemVo.getTestProduct().getStatus() == null) {
+            return ResultUtil.success("产品状态为空");
+        }
+        LambdaUpdateWrapper<TestProduct> lambdaQueryWrapper = new LambdaUpdateWrapper<>();
+        lambdaQueryWrapper.eq(TestProduct::getProductId, testProductItemVo.getTestProduct().getProductId());
+        lambdaQueryWrapper.set(TestProduct::getStatus, testProductItemVo.getTestProduct().getStatus());
+        this.update(lambdaQueryWrapper);
+        return ResultUtil.success("更新状态成功");
     }
 }
 

@@ -4,11 +4,10 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.ItemOriginalRecordTemplateMapper;
-import com.lims.manage.erp.mapper.TestOriginalRecordTemplateDao;
-import com.lims.manage.erp.mapper.TestProductItemDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
@@ -22,14 +21,13 @@ import com.lims.manage.erp.vo.TestProductItemTreeVo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 产品检测项(TestProductItem)表服务实现类
@@ -78,6 +76,8 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
     private TestOriginalRecordTemplateDao testOriginalRecordTemplateDao;
     @Resource
     private ItemOriginalRecordTemplateMapper itemOriginalRecordTemplateMapper;
+    @Autowired
+    private TestCompanyDao testCompanyDao;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -311,6 +311,11 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
+        }
+        // 查询检测项信息 与 检测项信息表 绑定关系
+        Integer count = testProductItemDao.selectCheckitemNumberCount(idList);
+        if (count > 0) {
+            return ResultUtil.error("删除失败，检测项基础信息与业务信息参与绑定");
         }
         for (Long checkItemId : idList) {
             //删除原有检测依据
@@ -602,7 +607,7 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
                     "报告第2页".contains(sheetName)){
                 continue;
             }
-            LabelValueVo vo = new LabelValueVo(sheetName,Long.parseLong(i+""));
+            LabelValueVo vo = new LabelValueVo(sheetName, Long.parseLong(i + ""));
             result.add(vo);
         }
         return result;
@@ -611,6 +616,30 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
     @Override
     public List<Integer> getSheetIndex(Integer checkItemId) {
         return testProductItemDao.getSheetIndex(checkItemId);
+    }
+
+    @Override
+    public Map<String, List<LabelValueVo>> returnEntrustData() {
+
+        Map<String, List<LabelValueVo>> map = new HashMap<>();
+        PageHelper.clearPage();
+        List<TestInitDataEntity> ReturnBasisData = testCompanyDao.selectEntrustBasis();
+        // 6：检测项签章类型：
+        List<LabelValueVo> arrySeal = new ArrayList<>();
+        for (TestInitDataEntity testInitDataEntity : ReturnBasisData) {
+            LabelValueVo labelValueVo = new LabelValueVo();
+            labelValueVo.setLabel(testInitDataEntity.getName());
+            labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
+            switch (testInitDataEntity.getType()) {
+                case 16:
+                    arrySeal.add(labelValueVo);
+                    break;
+                default:
+                    break;
+            }
+        }
+        map.put("arrySeal", arrySeal);
+        return map;
     }
 }
 

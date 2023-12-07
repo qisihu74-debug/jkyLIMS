@@ -8,6 +8,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 产品检测项(TestProductItem)表服务接口
@@ -57,5 +58,11 @@ public interface TestProductItemService extends IService<TestProductItem> {
     List<LabelValueVo> getProductTemplateSheet(Integer productId) throws Exception;
 
     List<Integer> getSheetIndex(Integer checkItemId);
+
+    /**
+     * 返回基础信息
+     * @return
+     */
+    Map<String, List<LabelValueVo>> returnEntrustData();
 }
 
