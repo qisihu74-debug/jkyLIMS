@@ -3,6 +3,7 @@ package com.lims.manage.erp.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -195,6 +196,11 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
+        // 通过 产品id 查询业务中数据，存在业务数据 删除失败。
+        Integer count = testProductDao.selectSampleNumberCount(idList);
+        if (count > 0) {
+            return ResultUtil.error("删除失败，产品基础信息与业务信息参与绑定");
+        }
 //        for (Long aLong : idList) {
 //            LambdaQueryWrapper<TestProduct> productLambdaQueryWrapper = new LambdaQueryWrapper<>();
 //            productLambdaQueryWrapper.eq(TestProduct::getProductId, aLong);
@@ -210,7 +216,7 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
 //            //删除原报告与报告关系
 //            testProductDao.deleteProductReportRel(aLong);
 //        }
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品" + idList.toArray() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
+//        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品" + idList.toArray() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
         return ResultUtil.success("删除成功");
     }
 
@@ -300,6 +306,25 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
     @Override
     public TestProduct getProductInfo(Integer productId) {
         return testProductDao.getProductInfo(productId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result updateProductStatus(TestProductItemVo testProductItemVo) {
+        if (testProductItemVo.getTestProduct() == null) {
+            return ResultUtil.success("产品信息为空");
+        }
+        if (testProductItemVo.getTestProduct().getProductId() == null) {
+            return ResultUtil.success("产品id为空");
+        }
+        if (testProductItemVo.getTestProduct().getStatus() == null) {
+            return ResultUtil.success("产品状态为空");
+        }
+        LambdaUpdateWrapper<TestProduct> lambdaQueryWrapper = new LambdaUpdateWrapper<>();
+        lambdaQueryWrapper.eq(TestProduct::getProductId, testProductItemVo.getTestProduct().getProductId());
+        lambdaQueryWrapper.set(TestProduct::getStatus, testProductItemVo.getTestProduct().getStatus());
+        this.update(lambdaQueryWrapper);
+        return ResultUtil.success("更新状态成功");
     }
 }
 

@@ -190,5 +190,18 @@
                 #{id}
             </foreach>
     </select>
+
+    <select id="selectCheckitemNumberCount" resultType="java.lang.Integer">
+        SELECT
+        count( check_item_id )
+        FROM
+        test_entrusted_sample_checkitem_rel
+        WHERE
+        check_item_id IN
+        <foreach collection="checkItemIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        LIMIT 1
+    </select>
 </mapper>
 

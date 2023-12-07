@@ -285,5 +285,14 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
             "\ttask_id = #{taskId} and edit_data = 1 ")
     List<ExcelInsertVo> selectTaskIdItems(@Param("taskId") Long taskId);
 
+
+    /**
+     * 统计 check_item_id 在 test_entrusted_sample_checkitem_rel 存在的条数
+     *
+     * @param checkItemIds
+     * @return
+     */
+    Integer selectCheckitemNumberCount(@Param("checkItemIds") List<Long> checkItemIds);
+
 }
 

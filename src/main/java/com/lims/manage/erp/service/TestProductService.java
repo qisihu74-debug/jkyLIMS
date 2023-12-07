@@ -46,5 +46,7 @@ public interface TestProductService extends IService<TestProduct> {
     TestProductItemVo getTestProductItemVo(TestProduct testProduct);
 
     TestProduct getProductInfo(Integer productId);
+
+    Result updateProductStatus(TestProductItemVo testProductItemVo);
 }
 

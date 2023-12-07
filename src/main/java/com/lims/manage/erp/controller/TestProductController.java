@@ -137,11 +137,25 @@ public class TestProductController extends ApiController {
      */
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {
-        if (idList.size()!=0){
+        if (idList.size() != 0) {
             return this.testProductService.delTestProduct(idList);
-        }else {
+        } else {
             return ResultUtil.error("数据为空");
         }
+    }
+
+
+    /**
+     * 更新产品状态
+     *
+     * @return 更新产品状态
+     */
+    @PostMapping("/updateProductStatus")
+    public Result updateProductStatus(@RequestBody TestProductItemVo testProductItemVo) {
+        if (StrUtil.isEmptyIfStr(testProductItemVo)) {
+            return ResultUtil.error("数据为空");
+        }
+        return this.testProductService.updateProductStatus(testProductItemVo);
     }
 }
 

@@ -8,6 +8,7 @@ import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.ItemOriginalRecordTemplateMapper;
 import com.lims.manage.erp.mapper.TestOriginalRecordTemplateDao;
+import com.lims.manage.erp.mapper.TestProductDao;
 import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
@@ -312,26 +313,31 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        for (Long checkItemId : idList) {
-            //删除原有检测依据
-            testProductItemStandardFileRelService.remove(new QueryWrapper<TestProductItemStandardFileRel>().eq("check_item_id", checkItemId));
-            //删除原有检测设备
-            testProductItemInstrumentTypeRelService.remove(new QueryWrapper<TestProductItemInstrumentTypeRel>().eq("check_item_id", checkItemId));
-            //删除检测项绑定的报告原始记录sheet
-            testProductItemDao.deleteItemSheetRel(checkItemId.intValue());
-            // 删除 检测项所属团队
-//            testCheckItemTeamRelService.remove(new QueryWrapper<TestCheckItemTeamRel>().eq("check_item_id",checkItemId));
-            // 清除收费定价
-            LambdaQueryWrapper<TestProductItemMethodRel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(TestProductItemMethodRel::getCheckItemId, checkItemId);
-            testProductItemMethodRelService.remove(lambdaQueryWrapper);
-            // 清除检测项对应的线下原始记录
-            LambdaQueryWrapper<TestItemOriginalRecordTemplateRel> recordWrapper = new LambdaQueryWrapper<>();
-            recordWrapper.eq(TestItemOriginalRecordTemplateRel::getCheckItemId, checkItemId);
-            itemOriginalRecordTemplateMapper.delete(recordWrapper);
-            // 删除检测项信息
-            this.removeById(checkItemId);
+        // 查询检测项信息 与 检测项信息表 绑定关系
+        Integer count = testProductItemDao.selectCheckitemNumberCount(idList);
+        if (count > 0) {
+            return ResultUtil.error("删除失败，检测项基础信息与业务信息参与绑定");
         }
+//        for (Long checkItemId : idList) {
+//            //删除原有检测依据
+//            testProductItemStandardFileRelService.remove(new QueryWrapper<TestProductItemStandardFileRel>().eq("check_item_id", checkItemId));
+//            //删除原有检测设备
+//            testProductItemInstrumentTypeRelService.remove(new QueryWrapper<TestProductItemInstrumentTypeRel>().eq("check_item_id", checkItemId));
+//            //删除检测项绑定的报告原始记录sheet
+//            testProductItemDao.deleteItemSheetRel(checkItemId.intValue());
+//            // 删除 检测项所属团队
+////            testCheckItemTeamRelService.remove(new QueryWrapper<TestCheckItemTeamRel>().eq("check_item_id",checkItemId));
+//            // 清除收费定价
+//            LambdaQueryWrapper<TestProductItemMethodRel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+//            lambdaQueryWrapper.eq(TestProductItemMethodRel::getCheckItemId, checkItemId);
+//            testProductItemMethodRelService.remove(lambdaQueryWrapper);
+//            // 清除检测项对应的线下原始记录
+//            LambdaQueryWrapper<TestItemOriginalRecordTemplateRel> recordWrapper = new LambdaQueryWrapper<>();
+//            recordWrapper.eq(TestItemOriginalRecordTemplateRel::getCheckItemId, checkItemId);
+//            itemOriginalRecordTemplateMapper.delete(recordWrapper);
+//            // 删除检测项信息
+//            this.removeById(checkItemId);
+//        }
         return ResultUtil.error("删除成功");
 
     }
