@@ -70,7 +70,7 @@ public interface EntrustEntityMapper extends BaseMapper {
             "t2.code as judgmentBasis\n" +
             "FROM\n" +
             "test_entrusted_sample_standard_rel as t1 \n" +
-            "LEFT JOIN test_standard_file as t2 ON t1.standard_id = t2.id\n" +
+            "LEFT JOIN (select * from test_standard_file union all select * from  test_standard_file_record) as t2 ON t1.standard_id = t2.id\n" +
             "WHERE t1.entrustment_id = #{entrustmentId} and t2.code is not null\n")
     List<String> getSampleStandard(Long entrustmentId);
 
