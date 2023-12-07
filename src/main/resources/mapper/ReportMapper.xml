@@ -547,7 +547,7 @@
         </if>
 
 
-        ) t1 order by t1.report_code desc
+        ) t1 order by t1.combine_time desc
     </select>
 
     <select id="getSampleNames" resultType="java.lang.String">
