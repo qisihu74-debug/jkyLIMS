@@ -5,7 +5,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TestReportTemplate;
 import com.lims.manage.erp.mapper.TestOriginalRecordTemplateDao;
 import com.lims.manage.erp.entity.TestOriginalRecordTemplate;
 
@@ -51,6 +54,9 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
         /*if (this.getOne(new QueryWrapper<TestOriginalRecordTemplate>().eq("name",testOriginalRecordTemplate.getName()))!=null){
             return ResultUtil.error("原始模板名称重复");
         }*/
+        Integer maxId = testOriginalRecordTemplateDao.getMaxId();
+        testOriginalRecordTemplate.setId(maxId);
+        testOriginalRecordTemplate.setPid(maxId);
         testOriginalRecordTemplate.setStatus("0");
         testOriginalRecordTemplate.setDelFlag(0);
         testOriginalRecordTemplate.setCreateTime(new Date());
@@ -135,6 +141,43 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
             data.setFileUrl(null);
         }
         return ResultUtil.success(list);
+    }
+
+    @Override
+    public Result changeTestOriginalRecordTemplate(TestOriginalRecordTemplate testOriginalRecordTemplate) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
+        if (testOriginalRecordTemplate.getName()==null){
+            return ResultUtil.error("原始模板名称不能为空");
+        }
+        Integer oldId = testOriginalRecordTemplate.getId();
+        Integer pid = testOriginalRecordTemplate.getPid();
+        TestOriginalRecordTemplate detail = testOriginalRecordTemplateDao.getDetail(oldId);
+        detail.setUpdateTime(new Date());
+        testOriginalRecordTemplateDao.insertRecord(detail);
+        testOriginalRecordTemplateDao.deleteById(oldId);
+        //保存新原始记录
+        testOriginalRecordTemplate.setStatus("0");
+        testOriginalRecordTemplate.setDelFlag(0);
+        testOriginalRecordTemplate.setPid(pid);
+        testOriginalRecordTemplate.setCreateTime(new Date());
+        if (this.save(testOriginalRecordTemplate)){
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加原始记录模板"+testOriginalRecordTemplate.getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
+            return ResultUtil.success("添加成功!");
+        }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加原始记录模板"+testOriginalRecordTemplate.getId()+"失败!", Const.DETECTION_MANAGEMENT_LOG,false);
+            return ResultUtil.error("添加失败，未知异常!");
+        }
+
+    }
+
+    @Override
+    public PageInfo getRecords(Integer pid, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<TestOriginalRecordTemplate> recordList = testOriginalRecordTemplateDao.getRecordList(pid);
+        return new PageInfo<>(recordList);
     }
 
 }

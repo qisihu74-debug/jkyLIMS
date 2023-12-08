@@ -37,4 +37,30 @@
     ON tort.check_item_id =tpi.check_item_id
     ${ew.customSqlsegment}
    </select>
+
+    <select id="getDetail" resultType="com.lims.manage.erp.entity.TestOriginalRecordTemplate">
+        select * from test_original_record_template where id = #{id}
+    </select>
+
+    <insert id="insertRecord" parameterType="com.lims.manage.erp.entity.TestOriginalRecordTemplate">
+        insert into test_original_record_template_record (id, code, name, check_item_id,
+                                                          file_url, is_available,status, del_flag, create_time,update_time,
+                                                 remark,pid)
+        values (#{id}, #{code}, #{name}, #{checkItemId},
+                #{fileUrl}, #{isAvailable}, #{status},#{delFlag}, #{createTime}, #{updateTime},
+                #{remark},#{pid})
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        delete
+        from test_original_record_template
+        where id = #{id}
+    </delete>
+
+    <select id="getRecordList" resultType="com.lims.manage.erp.entity.TestOriginalRecordTemplate" parameterType="java.lang.Integer">
+        select
+            *
+        from test_original_record_template_record
+        where pid = #{pid,jdbcType=INTEGER}
+    </select>
 </mapper>

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.TestOriginalRecordTemplate;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.TorttpiVo;
@@ -29,6 +30,9 @@ public interface TestOriginalRecordTemplateService extends IService<TestOriginal
      */
     Result getAllList();
 
+    Result changeTestOriginalRecordTemplate(TestOriginalRecordTemplate testOriginalRecordTemplate);
+
+    PageInfo getRecords(Integer pid, Integer pageNum, Integer pageSize);
 
 }
 
