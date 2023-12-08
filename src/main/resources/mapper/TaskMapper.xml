@@ -311,7 +311,7 @@
                  LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.entrustment_id = t5.entrust_id
                  LEFT JOIN test_team as t9 ON t9.id = t5.dept_id
             AND t4.id = t5.sample_id
-                 LEFT JOIN test_standard_file t6 ON t5.standard_id = t6.id
+                 LEFT JOIN ( SELECT * FROM test_standard_file UNION ALL SELECT * FROM test_standard_file_record ) t6 ON t5.standard_id = t6.id
                  LEFT JOIN test_method t7 ON t5.method_id = t7.id
                  left join test_product_item t8 on t5.check_item_id = t8.check_item_id
         where t1.id = #{taskId} and t5.task_id = #{taskId}

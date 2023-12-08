@@ -499,7 +499,7 @@
         t1.entrust_test_type,
         t6.report_code,
         t6.type AS reportType,
-        t6.combine_time,
+        t6.report_complete_time,
         t1.actual_price count_price,
         t6.operate_type As operateType,
         DATE_FORMAT( t1.request_date, '%Y-%m-%d' ) request_date
@@ -527,7 +527,7 @@
         t1.entrust_test_type,
         t6.report_code,
         t6.type AS reportType,
-        t6.combine_time,
+        t6.report_complete_time,
         t1.actual_price count_price,
         t6.operate_type AS operateType,
         DATE_FORMAT( t1.request_date, '%Y-%m-%d' ) request_date
@@ -549,7 +549,7 @@
         </if>
 
 
-        ) t1 order by t1.combine_time desc
+        ) t1 order by t1.report_complete_time desc
     </select>
 
     <select id="getSampleNames" resultType="java.lang.String">
