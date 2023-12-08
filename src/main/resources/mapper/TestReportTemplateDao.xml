@@ -18,27 +18,65 @@
 
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into test_report_template(report_code, product_id, report_name, report_file_uri, is_available, status, del_flag, create_time, update_time, remark)
+        insert into test_report_template(report_code, product_id, report_name, report_file_uri, is_available, status,
+        del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
-        (#{entity.reportCode}, #{entity.productId}, #{entity.reportName}, #{entity.reportFileUri}, #{entity.isAvailable}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+            (#{entity.reportCode}, #{entity.productId}, #{entity.reportName}, #{entity.reportFileUri},
+            #{entity.isAvailable}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime},
+            #{entity.remark})
         </foreach>
     </insert>
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into test_report_template(report_code, product_id, report_name, report_file_uri, is_available, status, del_flag, create_time, update_time, remark)
+        insert into test_report_template(report_code, product_id, report_name, report_file_uri, is_available, status,
+        del_flag, create_time, update_time, remark)
         values
         <foreach collection="entities" item="entity" separator=",">
-            (#{entity.reportCode}, #{entity.productId}, #{entity.reportName}, #{entity.reportFileUri}, #{entity.isAvailable}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+            (#{entity.reportCode}, #{entity.productId}, #{entity.reportName}, #{entity.reportFileUri},
+            #{entity.isAvailable}, #{entity.status}, #{entity.delFlag}, #{entity.createTime}, #{entity.updateTime},
+            #{entity.remark})
         </foreach>
         on duplicate key update
-         report_code = values(report_code) , product_id = values(product_id) , report_name = values(report_name) , report_file_uri = values(report_file_uri) , is_available = values(is_available) , status = values(status) , del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , remark = values(remark)     </insert>
+        report_code = values(report_code) , product_id = values(product_id) , report_name = values(report_name) ,
+        report_file_uri = values(report_file_uri) , is_available = values(is_available) , status = values(status) ,
+        del_flag = values(del_flag) , create_time = values(create_time) , update_time = values(update_time) , remark =
+        values(remark)
+    </insert>
 
     <select id="getTypeByUrl" resultType="String">
         select report_standard
-            from test_report_template
-                where report_file_uri
-                like concat('%',#{url},'%')
+        from test_report_template
+        where report_file_uri
+                  like concat('%', #{url}, '%')
+    </select>
+
+    <select id="getDetail" resultType="com.lims.manage.erp.entity.TestReportTemplate">
+        select *
+        from test_report_template
+        where id = #{id}
+    </select>
+
+    <insert id="insertRecord" parameterType="com.lims.manage.erp.entity.TestReportTemplate">
+        insert into test_report_template_record (id,report_code, product_id, report_name, report_file_uri,
+                                          is_available, status,del_flag, create_time, update_time,
+                                          remark,report_standard,pid)
+        values (#{id},#{reportCode}, #{productId}, #{reportName}, #{reportFileUri},
+                #{isAvailable}, #{status}, #{delFlag}, #{createTime}, #{updateTime},
+                #{remark},#{reportStandard},#{pid})
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        delete
+        from test_report_template
+        where id = #{id}
+    </delete>
+
+    <select id="getRecordList" resultType="com.lims.manage.erp.entity.TestReportTemplate" parameterType="java.lang.Integer">
+        select
+            *
+        from test_report_template_record
+        where pid = #{pid,jdbcType=INTEGER}
     </select>
 </mapper>
 

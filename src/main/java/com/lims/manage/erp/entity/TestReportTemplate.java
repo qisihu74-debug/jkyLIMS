@@ -21,6 +21,7 @@ public class TestReportTemplate extends Model<TestReportTemplate> {
     //报告模板id
     @TableId(type = IdType.AUTO)
     private Integer id;
+    private Integer pid;
     //报告编号
     private String reportCode;
     //产品id
@@ -152,6 +153,14 @@ public class TestReportTemplate extends Model<TestReportTemplate> {
 
     public void setCopyFileUri(String copyFileUri) {
         this.copyFileUri = copyFileUri;
+    }
+
+    public Integer getPid() {
+        return pid;
+    }
+
+    public void setPid(Integer pid) {
+        this.pid = pid;
     }
 
     /**

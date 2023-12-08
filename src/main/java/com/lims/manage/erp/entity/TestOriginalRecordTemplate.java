@@ -23,6 +23,7 @@ public class TestOriginalRecordTemplate extends Model<TestOriginalRecordTemplate
     //主键id
     @TableId(type = IdType.AUTO)
     private Integer id;
+    private Integer pid;
     //模板编号
     private String code;
     //模板名称
@@ -102,6 +103,54 @@ public class TestOriginalRecordTemplate extends Model<TestOriginalRecordTemplate
 
     public void setCopyUrl(String copyUrl) {
         this.copyUrl = copyUrl;
+    }
+
+    public Integer getPid() {
+        return pid;
+    }
+
+    public void setPid(Integer pid) {
+        this.pid = pid;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Integer getDelFlag() {
+        return delFlag;
+    }
+
+    public void setDelFlag(Integer delFlag) {
+        this.delFlag = delFlag;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
     /**

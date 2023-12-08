@@ -14,6 +14,7 @@ import com.lims.manage.erp.entity.TestReportTemplate;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestOriginalRecordTemplateService;
+import com.lims.manage.erp.vo.TestReportTemplateVo;
 import com.lims.manage.erp.vo.TorttpiVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -136,6 +137,24 @@ public class TestOriginalRecordTemplateController extends ApiController {
         return this.testOriginalRecordTemplateService.getAllList();
     }
 
+    /***********************************************/
+
+    @PostMapping("/change")
+    public Result change(@RequestBody TestOriginalRecordTemplate testOriginalRecordTemplate) {
+        if (StrUtil.isEmptyIfStr(testOriginalRecordTemplate)){
+            return ResultUtil.error("数据为空");
+        }
+        return this.testOriginalRecordTemplateService.changeTestOriginalRecordTemplate(testOriginalRecordTemplate);
+    }
+
+    @GetMapping("getRecordList")
+    public Result getRecordList(Integer pid, Integer pageNum, Integer pageSize) {
+        if (pid!=null){
+            return ResultUtil.success("查询原始记录变更列表成功！",this.testOriginalRecordTemplateService.getRecords(pid,pageNum,pageSize));
+        }else {
+            return ResultUtil.error("查询原始记录变更列表失败！");
+        }
+    }
 
 }
 

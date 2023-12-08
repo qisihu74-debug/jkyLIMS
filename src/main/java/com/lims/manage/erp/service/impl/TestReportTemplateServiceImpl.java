@@ -2,6 +2,9 @@ package com.lims.manage.erp.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.StandardFileEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestReportTemplate;
 import com.lims.manage.erp.entity.TestReportTemplateProductRef;
@@ -64,9 +67,12 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
         if (this.getOne(new QueryWrapper<TestReportTemplate>().eq("report_code",testReportTemplate.getTestReportTemplate().getReportCode()).eq("del_flag",0))!=null){
             return ResultUtil.error("检测模板编号重复");
         }
+        Integer maxId = templateDao.getMaxId();
         testReportTemplate.getTestReportTemplate().setStatus("0");
         testReportTemplate.getTestReportTemplate().setDelFlag(0);
         testReportTemplate.getTestReportTemplate().setCreateTime(new Date());
+        testReportTemplate.getTestReportTemplate().setId(maxId);
+        testReportTemplate.getTestReportTemplate().setPid(maxId);
         if (this.save(testReportTemplate.getTestReportTemplate())){
             //testReportTemplateProductRefService.saveBatch(this.getTestReportTemplateProductRef(testReportTemplate.getTestReportTemplate().getId(),testReportTemplate.getProductIds()));
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加报告模板"+testReportTemplate.getTestReportTemplate().getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
@@ -186,6 +192,47 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
             }
         }
         return integerList;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result changeReportTemplate(TestReportTemplateVo testReportTemplate) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if(userInfo==null){
+            return ResultUtil.error("token 已过期！");
+        }
+        if (this.getOne(new QueryWrapper<TestReportTemplate>().eq("report_code",testReportTemplate.getTestReportTemplate().getReportCode()).eq("del_flag",0))!=null){
+            return ResultUtil.error("检测模板编号重复");
+        }
+        //查询旧报告信息
+        Integer pid = testReportTemplate.getTestReportTemplate().getPid();
+        Integer oldId = testReportTemplate.getTestReportTemplate().getId();
+        TestReportTemplate detail = templateDao.getDetail(oldId);
+        //转存记录表
+        detail.setUpdateTime(new Date());//作废时间
+        templateDao.insertRecord(detail);
+        //删除旧报告
+        templateDao.deleteById(oldId);
+        //新增变更报告
+        testReportTemplate.getTestReportTemplate().setStatus("0");
+        testReportTemplate.getTestReportTemplate().setDelFlag(0);
+        testReportTemplate.getTestReportTemplate().setCreateTime(new Date());
+        testReportTemplate.getTestReportTemplate().setPid(pid);
+        if (this.save(testReportTemplate.getTestReportTemplate())){
+            //testReportTemplateProductRefService.saveBatch(this.getTestReportTemplateProductRef(testReportTemplate.getTestReportTemplate().getId(),testReportTemplate.getProductIds()));
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"变更报告模板"+testReportTemplate.getTestReportTemplate().getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
+            return ResultUtil.success("变更成功!");
+        }else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"变更报告模板失败!", Const.DETECTION_MANAGEMENT_LOG,false);
+            return ResultUtil.error("变更失败，未知异常!");
+        }
+    }
+
+    @Override
+    public PageInfo getRecords(Integer pid, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<TestReportTemplate> recordList = templateDao.getRecordList(pid);
+        return new PageInfo<>(recordList);
     }
 }
 

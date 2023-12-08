@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.TestProductType;
 import com.lims.manage.erp.entity.TestReportTemplate;
 import com.lims.manage.erp.result.Result;
@@ -27,5 +28,9 @@ public interface TestReportTemplateService extends IService<TestReportTemplate> 
     Result getUpdOne(Serializable id);
 
     String getNameById(Integer reportModelId);
+
+    Result changeReportTemplate(TestReportTemplateVo testReportTemplate);
+
+    PageInfo getRecords(Integer pid, Integer pageNum, Integer pageSize);
 }
 

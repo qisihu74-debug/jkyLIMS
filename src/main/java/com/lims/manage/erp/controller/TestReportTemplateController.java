@@ -138,5 +138,24 @@ public class TestReportTemplateController extends ApiController {
             return ResultUtil.error("数据为空");
         }
     }
+
+    /***********************************************/
+
+    @PostMapping("/change")
+    public Result change(@RequestBody TestReportTemplateVo testReportTemplateVo) {
+        if (StrUtil.isEmptyIfStr(testReportTemplateVo)){
+            return ResultUtil.error("数据为空");
+        }
+        return this.testReportTemplateService.changeReportTemplate(testReportTemplateVo);
+    }
+
+    @GetMapping("getRecordList")
+    public Result getRecordList(Integer pid, Integer pageNum, Integer pageSize) {
+        if (pid!=null){
+            return ResultUtil.success("查询报告变更列表成功！",this.testReportTemplateService.getRecords(pid,pageNum,pageSize));
+        }else {
+            return ResultUtil.error("查询报告变更列表失败！");
+        }
+    }
 }
 
