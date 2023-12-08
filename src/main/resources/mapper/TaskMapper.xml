@@ -781,7 +781,7 @@
               WHERE check_item_id = #{checkItemId}
                 AND entrust_id = #{entrustId}
                 AND sample_id = #{sampleId}) t1
-                 LEFT JOIN test_standard_file t2 ON t1.standard_id = t2.id
+                 LEFT JOIN (select * from test_standard_file union all select * from  test_standard_file_record) t2 ON t1.standard_id = t2.id
     </select>
 
     <select id="getJudgeBasis" resultType="java.lang.String">
@@ -792,7 +792,7 @@
               FROM test_entrusted_sample_standard_rel
               WHERE sample_id = #{sampleId}
                 AND entrustment_id = #{entrustId}) t1
-                 LEFT JOIN test_standard_file t2 ON t1.standard_id = t2.id
+                 LEFT JOIN (select * from test_standard_file union all select * from  test_standard_file_record) t2 ON t1.standard_id = t2.id
     </select>
 
     <select id="getOriginalTemplate" resultType="java.lang.String">
@@ -1287,7 +1287,7 @@
     </update>
 
     <select id="taskHall" resultType="com.lims.manage.erp.entity.TestTaskPool">
-        SELECT
+        SELECT distinct
         t1.id,
         t1.sn,
         t1.alias_name,
@@ -1383,7 +1383,7 @@
     </select>
 
     <select id="myTaskList" resultType="com.lims.manage.erp.entity.TestTaskPool">
-        SELECT
+        SELECT distinct
         tb1.id,
         tb1.sn,
         tb1.alias_name,
