@@ -36,5 +36,16 @@ int insertOrUpdateBatch(@Param("entities") List<TestReportTemplate> entities);
 
     @Select("select report_name from test_report_template where id=#{reportModelId}")
     String getNameById(@Param("reportModelId") Integer reportModelId);
+
+    @Select("select IFNULL(MAX(id),0)+1 from test_report_template")
+    Integer getMaxId();
+
+    TestReportTemplate getDetail(Integer id);
+
+    int insertRecord(TestReportTemplate reportTemplate);
+
+    int deleteById(Integer id);
+
+    List<TestReportTemplate> getRecordList(Integer pid);
 }
 
