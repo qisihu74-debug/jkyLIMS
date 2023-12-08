@@ -296,3 +296,46 @@ CREATE TABLE `test_report_original_template_record`  (
                                                          `pid` bigint(0) NULL DEFAULT NULL COMMENT '系列ID',
                                                          PRIMARY KEY (`id`) USING BTREE
 )
+
+--旧版报告，原始记录变更
+
+ALTER TABLE `test_report_template` ADD COLUMN `pid` int NULL COMMENT '报告变更关系ID' AFTER `report_standard`;
+ALTER TABLE `test_original_record_template` ADD COLUMN `pid` int NULL COMMENT '报告变更关系ID' AFTER `remark`;
+
+UPDATE test_report_template SET pid = id;
+UPDATE test_original_record_template SET pid = id;
+
+CREATE TABLE `test_report_template`  (
+                                         `id` int(0) NOT NULL AUTO_INCREMENT COMMENT '报告模板id',
+                                         `report_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '报告编号',
+                                         `product_id` int(0) NULL DEFAULT NULL COMMENT '产品id',
+                                         `report_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '产品名称',
+                                         `report_file_uri` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '报告模板文件路径',
+                                         `is_available` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '0' COMMENT '是否可用1.可用，0不可用',
+                                         `status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '0' COMMENT ' 0,启用，1,冻结',
+                                         `del_flag` int(0) NOT NULL DEFAULT 0 COMMENT '0默认未删除,1删除',
+                                         `create_time` timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '注册时间',
+                                         `update_time` timestamp(0) NULL DEFAULT NULL COMMENT '更新时间',
+                                         `remark` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
+                                         `report_standard` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '报告标准',
+                                         `pid` int(0) NULL DEFAULT NULL COMMENT '变更ID',
+                                         PRIMARY KEY (`id`) USING BTREE,
+                                         INDEX `product_index`(`product_id`) USING BTREE
+)
+
+CREATE TABLE `test_original_record_template`  (
+                                                  `id` int(0) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+                                                  `code` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '模板编号',
+                                                  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '模板名称',
+                                                  `check_item_id` int(0) NULL DEFAULT NULL COMMENT '检测项id',
+                                                  `file_url` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '原始记录',
+                                                  `is_available` varchar(2) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '是否有效1有效，0无效',
+                                                  `status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '0' COMMENT ' 0,启用，1,冻结',
+                                                  `del_flag` int(0) NOT NULL DEFAULT 0 COMMENT '0默认未删除,1删除',
+                                                  `create_time` timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '注册时间',
+                                                  `update_time` timestamp(0) NULL DEFAULT NULL COMMENT '更新时间',
+                                                  `remark` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
+                                                  `pid` int(0) NULL DEFAULT NULL COMMENT '变更ID',
+                                                  PRIMARY KEY (`id`) USING BTREE
+)
+
