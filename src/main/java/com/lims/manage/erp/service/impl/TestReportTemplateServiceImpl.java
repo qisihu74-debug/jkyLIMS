@@ -68,7 +68,7 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
         testReportTemplate.getTestReportTemplate().setDelFlag(0);
         testReportTemplate.getTestReportTemplate().setCreateTime(new Date());
         if (this.save(testReportTemplate.getTestReportTemplate())){
-            testReportTemplateProductRefService.saveBatch(this.getTestReportTemplateProductRef(testReportTemplate.getTestReportTemplate().getId(),testReportTemplate.getProductIds()));
+            //testReportTemplateProductRefService.saveBatch(this.getTestReportTemplateProductRef(testReportTemplate.getTestReportTemplate().getId(),testReportTemplate.getProductIds()));
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加报告模板"+testReportTemplate.getTestReportTemplate().getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
             return ResultUtil.success("添加成功!");
         }else {
@@ -95,8 +95,8 @@ public class TestReportTemplateServiceImpl extends ServiceImpl<TestReportTemplat
             if (!testReportTemplate.getTestReportTemplate().getReportFileUri().equals(testReportTemplate.getTestReportTemplate().getCopyFileUri())){
                 sysOssService.delAnnounce(testReportTemplate.getTestReportTemplate().getCopyFileUri());
             }
-            testReportTemplateProductRefService.remove(new QueryWrapper<TestReportTemplateProductRef>().eq("template_id",testReportTemplate.getTestReportTemplate().getId()));
-            testReportTemplateProductRefService.saveBatch(this.getTestReportTemplateProductRef(testReportTemplate.getTestReportTemplate().getId(),testReportTemplate.getProductIds()));
+            //testReportTemplateProductRefService.remove(new QueryWrapper<TestReportTemplateProductRef>().eq("template_id",testReportTemplate.getTestReportTemplate().getId()));
+            //testReportTemplateProductRefService.saveBatch(this.getTestReportTemplateProductRef(testReportTemplate.getTestReportTemplate().getId(),testReportTemplate.getProductIds()));
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改报告模板"+testReportTemplate.getTestReportTemplate().getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
             return ResultUtil.success("修改成功!");
         }else {
