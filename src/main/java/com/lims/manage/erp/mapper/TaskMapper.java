@@ -163,6 +163,11 @@ public interface TaskMapper extends BaseMapper {
     List<TaskListVo> getTaskListContainsSample(TaskListParamVo paramVo);
 
     /**
+     * 查询任务列表 包含样品信息-视图
+     */
+    List<TaskListVo> getTaskListContainsSampleShow(TaskListParamVo paramVo);
+
+    /**
      * 查询任务列表 并且 state>=1
      * @param paramVo
      * @return
