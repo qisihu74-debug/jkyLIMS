@@ -272,29 +272,33 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        PageHelper.clearPage();
-        PageHelper.startPage(pageNum, pageSize);
-        List<ReportListVo> list = reportMapper.reportDownloadList0512(userTeamIds, search);
-        for (ReportListVo reportListVo : list) {
-            if (reportListVo.getOperateType() == null){
-                reportListVo.setOperateType(1);
-            }
-            //设置样品信息
-            List<String> sampleNames = reportMapper.getSampleNames(reportListVo.getId());
-            StringBuilder sampleName = new StringBuilder();
-            for (int i = 0; i < sampleNames.size(); i++) {
-                sampleName.append(sampleNames.get(i));
-                if (i != sampleNames.size() - 1) {
-                    sampleName.append("/");
+        if (CollectionUtils.isEmpty(userTeamIds)){
+            return new PageInfo<ReportListVo>();
+        }else {
+            PageHelper.clearPage();
+            PageHelper.startPage(pageNum, pageSize);
+            List<ReportListVo> list = reportMapper.reportDownloadList0512(userTeamIds, search);
+            for (ReportListVo reportListVo : list) {
+                if (reportListVo.getOperateType() == null){
+                    reportListVo.setOperateType(1);
                 }
+                //设置样品信息
+                List<String> sampleNames = reportMapper.getSampleNames(reportListVo.getId());
+                StringBuilder sampleName = new StringBuilder();
+                for (int i = 0; i < sampleNames.size(); i++) {
+                    sampleName.append(sampleNames.get(i));
+                    if (i != sampleNames.size() - 1) {
+                        sampleName.append("/");
+                    }
+                }
+                reportListVo.setSampleName(sampleName.toString());
+                //设置任务单号
+                List<String> taskCodes = reportMapper.getTaskCodes(reportListVo.getId());
+                reportListVo.setTaskCodes(taskCodes);
             }
-            reportListVo.setSampleName(sampleName.toString());
-            //设置任务单号
-            List<String> taskCodes = reportMapper.getTaskCodes(reportListVo.getId());
-            reportListVo.setTaskCodes(taskCodes);
+            PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
+            return pageInfo;
         }
-        PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
-        return pageInfo;
     }
 
     /**
@@ -373,21 +377,25 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo reportDownloadListHistory(String search, Integer pageNum, Integer pageSize) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        PageHelper.startPage(pageNum, pageSize);
-        ReportListVo reportListVo = new ReportListVo();
-        reportListVo.setReportCode(search);
-        reportListVo.setDeptIds(userTeamIds);
-        List<ReportListVo> list = reportMapper.reportDownloadListHistory(reportListVo);
-        //设置任务单号
-        for (ReportListVo reportListVo1 : list) {
-            if (reportListVo1.getOperateType() == null){
-                reportListVo1.setOperateType(1);
+        if (CollectionUtils.isEmpty(userTeamIds)){
+            return new PageInfo<ReportListVo>();
+        }else {
+            PageHelper.startPage(pageNum, pageSize);
+            ReportListVo reportListVo = new ReportListVo();
+            reportListVo.setReportCode(search);
+            reportListVo.setDeptIds(userTeamIds);
+            List<ReportListVo> list = reportMapper.reportDownloadListHistory(reportListVo);
+            //设置任务单号
+            for (ReportListVo reportListVo1 : list) {
+                if (reportListVo1.getOperateType() == null){
+                    reportListVo1.setOperateType(1);
+                }
+                List<String> taskCodes = reportMapper.getTaskCodes(reportListVo1.getId());
+                reportListVo1.setTaskCodes(taskCodes);
             }
-            List<String> taskCodes = reportMapper.getTaskCodes(reportListVo1.getId());
-            reportListVo1.setTaskCodes(taskCodes);
+            PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
+            return pageInfo;
         }
-        PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
-        return pageInfo;
     }
 
     @Override
@@ -859,63 +867,67 @@ public class ReportServiceImpl implements ReportService {
         Long userId = ShiroUtils.getUserInfo().getUserId();
         List<Integer> ids = Lists.newArrayList();
         //校验用户id是否分配团队
-        int teamId = testTechnicistDao.getSealer(userId);
-        if (teamId > 0) {
-            //获取顶级团队
-            Long topTeamId = this.getTopDepartment((long) teamId);
-            //获取顶级团队下的所有下级团队
-            if (topTeamId == null) {
-                topTeamId = (long) teamId;
-            }
-            List<TeamTreeStructureEntity> chirds = teamMapper.getChirds(topTeamId);
-            for (TeamTreeStructureEntity entity : chirds) {
-                ids.add(Integer.valueOf(entity.getId() + ""));
-            }
-        }
-        //根据用户id判断用户角色是否是盖章人，盖章人查看所有数据，其它人员查看自己本团队数据
-        String byId = sysUserDao.checkRoleById(userId);
-        if (org.apache.commons.lang.StringUtils.isNotEmpty(byId)){
-            if ("1".equals(state)){
-                state = "2";
-            }
-            ids = null;
+        Integer teamId = testTechnicistDao.getSealer(userId);
+        if (teamId == null){
+            return new PageInfo<ReportRecordEntity>();
         }else {
-            if (ids.size() <= 0){
+            if (teamId > 0) {
+                //获取顶级团队
+                Long topTeamId = this.getTopDepartment((long) teamId);
+                //获取顶级团队下的所有下级团队
+                if (topTeamId == null) {
+                    topTeamId = (long) teamId;
+                }
+                List<TeamTreeStructureEntity> chirds = teamMapper.getChirds(topTeamId);
+                for (TeamTreeStructureEntity entity : chirds) {
+                    ids.add(Integer.valueOf(entity.getId() + ""));
+                }
+            }
+            //根据用户id判断用户角色是否是盖章人，盖章人查看所有数据，其它人员查看自己本团队数据
+            String byId = sysUserDao.checkRoleById(userId);
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(byId)){
+                if ("1".equals(state)){
+                    state = "2";
+                }
                 ids = null;
+            }else {
+                if (ids.size() <= 0){
+                    ids = null;
+                }
             }
-        }
-        PageHelper.startPage(pageNum, pageSize);
-        //TODO 兼容中间报告
-        List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state, reportTypeStatus, ids);
-        for (ReportRecordEntity recordEntity : list) {
-            if (StringUtils.isNotEmpty(recordEntity.getSealType()) && recordEntity.getSealType().contains("null")) {
-                recordEntity.setSealType("");
-            }
-            if ("0".equals(recordEntity.getType())) {
-                recordEntity.setType("最终报告");
-            } else {
-                recordEntity.setType("中间报告");
-            }
+            PageHelper.startPage(pageNum, pageSize);
             //TODO 兼容中间报告
-            if (recordEntity.getEntrustmentId() == null) {
-                recordEntity.setEntrustmentId(recordEntity.getEntrustId());
+            List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state, reportTypeStatus, ids);
+            for (ReportRecordEntity recordEntity : list) {
+                if (StringUtils.isNotEmpty(recordEntity.getSealType()) && recordEntity.getSealType().contains("null")) {
+                    recordEntity.setSealType("");
+                }
+                if ("0".equals(recordEntity.getType())) {
+                    recordEntity.setType("最终报告");
+                } else {
+                    recordEntity.setType("中间报告");
+                }
+                //TODO 兼容中间报告
+                if (recordEntity.getEntrustmentId() == null) {
+                    recordEntity.setEntrustmentId(recordEntity.getEntrustId());
+                }
             }
-        }
-        list.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
-                        new TreeSet<>(Comparator.comparing(ReportRecordEntity:: getIssuerTime).reversed())),
-                ArrayList::new));
-        PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
-        for (int i = 0; i <pageInfo.getList().size() ; i++) {
-            try {
-                String desc = "检测人,记录人："+pageInfo.getList().get(i).getInspector()+
-                        " 审核人："+pageInfo.getList().get(i).getVerifyer()+
-                        " 签发人："+ pageInfo.getList().get(i).getIssuer();
-                pageInfo.getList().get(i).setNote(desc);
-            }catch (Exception e){
-                log.error("电子印章列表展示相关人员信息备注失败：{},报告编号:{}",e,pageInfo.getList().get(i).getReportCode());
+            list.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
+                            new TreeSet<>(Comparator.comparing(ReportRecordEntity:: getIssuerTime).reversed())),
+                    ArrayList::new));
+            PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
+            for (int i = 0; i <pageInfo.getList().size() ; i++) {
+                try {
+                    String desc = "检测人,记录人："+pageInfo.getList().get(i).getInspector()+
+                            " 审核人："+pageInfo.getList().get(i).getVerifyer()+
+                            " 签发人："+ pageInfo.getList().get(i).getIssuer();
+                    pageInfo.getList().get(i).setNote(desc);
+                }catch (Exception e){
+                    log.error("电子印章列表展示相关人员信息备注失败：{},报告编号:{}",e,pageInfo.getList().get(i).getReportCode());
+                }
             }
+            return pageInfo;
         }
-        return pageInfo;
     }
 
     @Override

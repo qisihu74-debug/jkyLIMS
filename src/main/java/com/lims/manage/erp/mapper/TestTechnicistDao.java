@@ -44,7 +44,7 @@ int insertOrUpdateBatch(@Param("entities") List<TestTechnicist> entities);
     List<SysUserEntity> getUserList();
 
     @Select("select team_id from test_technicist where user_id=#{userId}")
-    int getSealer(@Param("userId") Long userId);
+    Integer getSealer(@Param("userId") Long userId);
 
     List<String> inspectorList(@Param("search") String search);
 

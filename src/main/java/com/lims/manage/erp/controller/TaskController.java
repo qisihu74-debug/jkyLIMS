@@ -1083,10 +1083,14 @@ public class TaskController {
     public Result taskHall(@RequestBody ReqTaskPool bean){
         bean.setUserId(ShiroUtils.getUserInfo().getUserId());
         Integer teamId = testTechnicistDao.getSealer(bean.getUserId());
-        Integer id = testTechnicistDao.getPidById(teamId);
-        bean.setTeamId(id);
-        PageInfo<TestTaskPool> pageInfo = taskService.taskHall(bean);
-        return ResultUtil.success(pageInfo);
+        if (teamId != null){
+            Integer id = testTechnicistDao.getPidById(teamId);
+            bean.setTeamId(id);
+            PageInfo<TestTaskPool> pageInfo = taskService.taskHall(bean);
+            return ResultUtil.success(pageInfo);
+        }else {
+            return ResultUtil.success(new PageInfo<TestTaskPool>());
+        }
     }
 
     /**
