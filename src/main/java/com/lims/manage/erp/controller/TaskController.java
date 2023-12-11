@@ -1094,9 +1094,12 @@ public class TaskController {
         }else {
             //根据用户id查询
             Boolean flag = userService.checkSysAndAdmRole(bean.getUserId());
-            
-
-            return ResultUtil.success(new PageInfo<TestTaskPool>());
+            if (flag){
+                PageInfo<TestTaskPool> pageInfo = taskService.taskHall(bean);
+                return ResultUtil.success(pageInfo);
+            }else {
+                return ResultUtil.success(new PageInfo<TestTaskPool>());
+            }
         }
     }
 
