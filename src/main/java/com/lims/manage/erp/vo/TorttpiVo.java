@@ -11,6 +11,7 @@ public class TorttpiVo {
     //主键id
     @TableId(type = IdType.AUTO)
     private Integer id;
+    private Integer pid;
     //模板编号
     private String code;
     //模板名称

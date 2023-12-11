@@ -6,6 +6,7 @@
 
    <resultMap id="tortv" type="com.lims.manage.erp.vo.TorttpiVo">
       <id column="id" property="id"/>
+      <result column="pid" property="pid"/>
       <result column="code" property="code"/>
       <result column="name" property="name"/>
       <result column="checkItemId" property="checkItemId"/>
@@ -21,6 +22,7 @@
 
    <select id="getPageList" resultMap="tortv">
     SELECT tort.id id,
+           tort.pid pid,
            tort.`code` code,
            tort.`name` name,
            tort.check_item_id checkItemId,
