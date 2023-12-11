@@ -654,4 +654,20 @@ public interface TaskMapper extends BaseMapper {
 
     @Update("update test_entrusted_sample_checkitem_rel set state=3 where entrust_id=#{entrustId}")
     void updateStateByEntrustId(@Param("entrustId") Long entrustId);
+
+    @Select("SELECT\n" +
+            "\tt1.id,\n" +
+            "\tt1.sn,\n" +
+            "\tt2.entrustment_no,\n" +
+            "\tt1.alias_name,\n" +
+            "\tt1.price,\n" +
+            "\tt1.task_flow_req,\n" +
+            "\tt1.publisher,\n" +
+            "\tt1.receive_date,\n" +
+            "\tt1.publish_date \n" +
+            "FROM\n" +
+            "\ttest_task_pool t1\n" +
+            "\tLEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id\n" +
+            "\tWHERE t1.id>0")
+    List<TestTaskPool> taskHallByAdm();
 }

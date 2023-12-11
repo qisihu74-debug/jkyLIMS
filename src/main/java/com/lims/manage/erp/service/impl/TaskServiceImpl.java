@@ -2420,7 +2420,12 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
     @Override
     public PageInfo<TestTaskPool> taskHall(ReqTaskPool bean) {
         PageHelper.startPage(bean.getPageNum(),bean.getPageSize());
-        List<TestTaskPool> list = taskMapper.taskHall(bean);
+        List<TestTaskPool> list = Lists.newArrayList();
+        if (bean.getTeamId() == null){
+            list = taskMapper.taskHallByAdm();
+        }else {
+            list = taskMapper.taskHall(bean);
+        }
         PageInfo<TestTaskPool> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
