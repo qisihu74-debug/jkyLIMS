@@ -370,7 +370,7 @@ public class TaskController {
             } else {
                 return ResultUtil.error("账号使用人未配置科室人员");
             }
-            return ResultUtil.success("查询任务列表成功！", taskService.getTaskList(paramVo, deptIds));
+            return ResultUtil.success("查询任务列表成功！", taskService.getTaskListShow(paramVo, deptIds));
         }
     }
 

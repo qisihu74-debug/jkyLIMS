@@ -427,8 +427,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             // 分页后 逻辑处理
             methodManualPages((List<TaskListVo>) pagingVo.getList());
             return pagingVo;
-        }
-        else {
+        } else {
             if (!CollectionUtils.isEmpty(personList)) {
                 pagingVo.setList(personList);
             }
@@ -437,6 +436,51 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             return pagingVo;
         }
 
+    }
+
+
+    /**
+     * 查询检测列表 并设置-视图
+     *
+     * @param paramVo
+     * @param deptIds
+     * @return
+     */
+    @Override
+//    public PagingToolVo getTaskListTwoShow(TaskListParamVo paramVo, String[] deptIds) {
+    public PageInfo<TaskListVo> getTaskListTwoShow(TaskListParamVo paramVo, String[] deptIds) {
+        if (deptIds != null && deptIds.length >= 1) {
+            // 根据部门id 遍历包含下级部门信息
+            List<Long> ids = new ArrayList<>();
+            for (int i = 0; i < deptIds.length; i++) {
+                ids.add(Long.valueOf(deptIds[i]));
+            }
+            paramVo.setDeptIds(ids);
+        } else {
+            paramVo.setDeptIds(null);
+        }
+        List<TaskListVo> personList = new ArrayList<>();
+        paramVo.setFlag(0);
+        PageHelper.clearPage();
+        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+        personList = taskMapper.getTaskListContainsSampleShow(paramVo);
+        methodManualPages(personList);
+        // 补充样品名称信息
+        if (!CollectionUtils.isEmpty(personList)) {
+            for (TaskListVo taskListVo : personList) {
+                StringBuilder stringBuilder = new StringBuilder();
+                if (!CollectionUtils.isEmpty(taskListVo.getSampleList())) {
+                    for (SamplePrivateInfoVo samplePrivateInfoVo : taskListVo.getSampleList()) {
+                        stringBuilder.append(samplePrivateInfoVo.getAliasName());
+                        stringBuilder.append("、");
+                    }
+                    taskListVo.setSampleName(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+                }
+            }
+        }
+        PageInfo<TaskListVo> pageInfo = new PageInfo<>();
+        pageInfo = new PageInfo<>(personList);
+        return pageInfo;
     }
 
     @Override
@@ -1696,13 +1740,12 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
 //            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
             PageHelper.clearPage();
             personList = taskMapper.getTaskListContainsSample(paramVo);
-        }
-        else {
+        } else {
             PageHelper.clearPage();
             personList = taskMapper.getTaskListTwoGreater(paramVo);
         }
         // 手动分页
-       Integer pageNum =  paramVo.getPageNum();
+        Integer pageNum = paramVo.getPageNum();
         Integer pageSize = paramVo.getPageSize();
         PagingToolVo pagingVo = new PagingToolVo();
         if(pageNum>0&&pageSize>0) {
@@ -1714,12 +1757,11 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             pagingVo.setPageSize(pageSize);
             // 当前页展示数量
             Integer size =  personList.size() - (pageNum*pageSize); // 实际返回页码展示数量
-            if(size>0){
+            if (size > 0) {
                 pagingVo.setSize(pageSize);
-            }
-            else {
-                size =pageSize -( pageNum*pageSize - personList.size());
-                pagingVo.setSize(size>0?size:0);
+            } else {
+                size = pageSize - (pageNum * pageSize - personList.size());
+                pagingVo.setSize(size > 0 ? size : 0);
             }
             // 总页数
             pagingVo.setPages(personList.size() / pageSize);
@@ -1759,7 +1801,47 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
     }
 
     /**
+     * 查询任务列表 - 视图
+     *
+     * @param paramVo
+     * @param deptIds
+     * @return
+     */
+    @Override
+    public PageInfo<TaskListVo> getTaskListShow(TaskListParamVo paramVo, String[] deptIds) {
+        if (deptIds != null && deptIds.length >= 1) {
+            // 根据部门id 遍历包含下级部门信息
+            List<Long> ids = new ArrayList<>();
+            for (int i = 0; i < deptIds.length; i++) {
+                ids.add(Long.valueOf(deptIds[i]));
+            }
+            paramVo.setDeptIds(ids);
+        } else {
+            paramVo.setDeptIds(null);
+        }
+        List<TaskListVo> personList = new ArrayList<>();
+        if (paramVo.getState() != null && paramVo.getState() != 1) {
+            paramVo.setFlag(0);
+            PageHelper.clearPage();
+            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+            personList = taskMapper.getTaskListContainsSampleShow(paramVo);
+            methodManualPages(personList);
+        } else {
+            paramVo.setFlag(1);
+            PageHelper.clearPage();
+            PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
+            personList = taskMapper.getTaskListContainsSampleShow(paramVo);
+            // 分页后 逻辑处理
+            methodManualPages(personList);
+        }
+        PageInfo<TaskListVo> pageInfo = new PageInfo<>();
+        pageInfo = new PageInfo<>(personList);
+        return pageInfo;
+    }
+
+    /**
      * 根据任务单id 判断 委托状态等于 144 返回true
+     *
      * @param id
      * @return
      */

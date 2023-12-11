@@ -63,6 +63,15 @@ public interface TaskService {
     PagingToolVo getTaskListTwo(TaskListParamVo paramVo, String [] deptIds);
 
     /**
+     * 查询检测列表——并设置分页 - 视图
+     *
+     * @param paramVo
+     * @return
+     */
+//    PagingToolVo getTaskListTwoShow(TaskListParamVo paramVo, String [] deptIds);
+    PageInfo<TaskListVo> getTaskListTwoShow(TaskListParamVo paramVo, String [] deptIds);
+
+    /**
      * 查询领样列表
      *
      * @param paramVo
@@ -225,6 +234,14 @@ public interface TaskService {
      * @return
      */
     PagingToolVo getTaskList(TaskListParamVo paramVo, String [] deptIds);
+
+    /**
+     * 查询任务列表——并设置分页-视图
+     *
+     * @param paramVo
+     * @return
+     */
+    PageInfo<TaskListVo> getTaskListShow(TaskListParamVo paramVo, String [] deptIds);
 
     /**
      * 根据任务单id 判断 委托状态不等于 144

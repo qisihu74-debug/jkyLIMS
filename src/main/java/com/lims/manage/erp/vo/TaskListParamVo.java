@@ -63,6 +63,10 @@ public class TaskListParamVo {
      * 辅助人员
      */
     private String auxiliaryPersonnel;
+    /**
+     * 实现标记信息
+     */
+    private Integer flag;
 
 
 }
