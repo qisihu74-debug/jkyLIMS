@@ -3547,7 +3547,10 @@ public class ReportServiceImpl implements ReportService {
     public List<TestTeam> getSealer() {
         Long userId = ShiroUtils.getUserInfo().getUserId();
         //校验用户id是否分配团队
-        int teamId = testTechnicistDao.getSealer(userId);
+        Integer teamId = testTechnicistDao.getSealer(userId);
+        if (teamId == null){
+            return null;
+        }
         Long aLong = this.getTopDepartment((long) teamId);
         if (aLong == null) {
             aLong = (long) teamId;
