@@ -559,15 +559,6 @@
         <result property="probationer" column="probationer"></result>
         <result property="interns" column="interns"></result>
         <result property="auxiliaryPersonnel" column="auxiliary_personnel"></result>
-        <collection property="sampleList" ofType="com.lims.manage.erp.vo.SamplePrivateInfoVo">
-            <id property="id" column="sampleId"></id>
-            <result property="sampleCode" column="sampeCode"></result>
-            <result property="batchNumber" column="batchNumber"></result>
-            <result property="picture" column="picture"></result>
-            <result property="aliasName" column="aliasName"></result>
-            <result property="sampleType" column="sampleType"></result>
-            <result property="outward" column="outwardDescribe"></result>
-        </collection>
         <collection property="instrumentRecordListVos" ofType="com.lims.manage.erp.vo.InstrumentRecordListVo">
             <id property="recordId" column="record_id"></id>
             <id property="escRelId" column="escRelId"></id>
@@ -595,7 +586,15 @@
                 and task_code LIKE CONCAT('%',#{taskCode},'%')
             </if>
             <if test="sampleName!=null and sampleName!=''">
-                and sample_name LIKE CONCAT('%',#{sampleName},'%')
+                entrustment_id IN (
+                SELECT
+                t2.entrustment_id
+                FROM
+                test_sample AS t1
+                LEFT JOIN test_entrusted_sample_details_rel AS t2 ON t1.id = t2.sample_id
+                WHERE
+                t1.sample_name LIKE CONCAT('%',#{sampleName},'%')
+                )
             </if>
             <if test="state!=null and flag == 0">
                 and state=#{state}

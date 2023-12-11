@@ -430,7 +430,7 @@ public class TaskController {
             paramVo.setInterns(userInfo.getName());
             // 辅助人员
             paramVo.setAuxiliaryPersonnel(userInfo.getName());
-            return ResultUtil.success("查询任务列表成功！", taskService.getTaskListTwo(paramVo, deptIds));
+            return ResultUtil.success("查询任务列表成功！", taskService.getTaskListTwoShow(paramVo, deptIds));
         }
     }
 

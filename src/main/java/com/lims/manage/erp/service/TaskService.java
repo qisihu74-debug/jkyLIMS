@@ -68,7 +68,6 @@ public interface TaskService {
      * @param paramVo
      * @return
      */
-//    PagingToolVo getTaskListTwoShow(TaskListParamVo paramVo, String [] deptIds);
     PageInfo<TaskListVo> getTaskListTwoShow(TaskListParamVo paramVo, String [] deptIds);
 
     /**

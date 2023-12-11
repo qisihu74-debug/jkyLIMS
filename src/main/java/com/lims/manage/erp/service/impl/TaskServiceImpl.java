@@ -1945,11 +1945,30 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             //TODO gjl添加样品状态
             EntrustServiceImpl service = new EntrustServiceImpl();
             for (TaskListVo sampleListVo : dataList) {
+                // TODO 通过委托单id 查询样品集合
+                List<SampleEntity> sampleEntities = sampleEntityMapper.selectSampleListGroup(sampleListVo.getEntrustmentId());
+                List<SamplePrivateInfoVo> sampleList = new ArrayList<>();
+                if(CollectionUtil.isNotEmpty(sampleEntities)){
+                    for(SampleEntity sampleEntity : sampleEntities){
+                        SamplePrivateInfoVo samplePrivateInfoVo = new SamplePrivateInfoVo();
+                        samplePrivateInfoVo.setId(sampleEntity.getId());
+                        samplePrivateInfoVo.setSampleCode(sampleEntity.getSampleCode());
+                        samplePrivateInfoVo.setBatchNumber(sampleEntity.getBatchNumber());
+                        samplePrivateInfoVo.setPicture(sampleEntity.getPicture());
+                        samplePrivateInfoVo.setAliasName(sampleEntity.getAliasName());
+                        samplePrivateInfoVo.setSampleType(sampleEntity.getSampleType());
+                        samplePrivateInfoVo.setOutward(sampleEntity.getOutwardDescribe());
+                        sampleList.add(samplePrivateInfoVo);
+                    }
+                }
+                sampleListVo.setSampleList(sampleList);
+            }
+            for (TaskListVo sampleListVo : dataList) {
+                List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
                 //TODO dlc 补充任务单价格
                 if(StringUtils.isEmpty(sampleListVo.getCost())){
                     sampleListVo.setCost("--");
                 }
-                List<SamplePrivateInfoVo> sampleList = sampleListVo.getSampleList();
                 List<SamplePrivateInfoVo> nodeSampleList = Lists.newArrayList();
                 //外观描述
                 StringBuilder outward = new StringBuilder();
