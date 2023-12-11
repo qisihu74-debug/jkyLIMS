@@ -161,6 +161,6 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
             "\tLEFT JOIN sys_user_role t2 ON t1.role_id = t2.role_id\n" +
             "\tLEFT JOIN sys_user t3 ON t2.user_id = t3.user_id \n" +
             "WHERE\n" +
-            "\tt1.role_name = '系统管理' or t1.role_name = '超级管理员' and t3.user_id=#{userId}")
+            "\tt1.role_name = '系统管理员' or t1.role_name = '超级管理员' and t3.user_id=#{userId}")
     String checkSysAndAdmRole(@Param("userId") Long userId);
 }
