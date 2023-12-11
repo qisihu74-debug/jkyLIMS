@@ -371,7 +371,13 @@ public class TaskController {
             if (dept != null) {
                 deptIds = dept.split(",");
             } else {
-                return ResultUtil.error("账号使用人未配置科室人员");
+                //根据用户id查询
+                Boolean flag = userService.checkSysAndAdmRole(userInfo.getUserId());
+                if(flag){
+                    deptIds = null;
+                }else {
+                    return ResultUtil.error("账号使用人未配置科室人员");
+                }
             }
             return ResultUtil.success("查询任务列表成功！", taskService.getTaskListShow(paramVo, deptIds));
         }
@@ -402,7 +408,13 @@ public class TaskController {
             if (dept != null) {
                 deptIds = dept.split(",");
             } else {
-                return ResultUtil.error("账号使用人未配置科室人员");
+                //根据用户id查询
+                Boolean flag = userService.checkSysAndAdmRole(userInfo.getUserId());
+                if(flag){
+                    deptIds = null;
+                }else {
+                    return ResultUtil.error("账号使用人未配置科室人员");
+                }
             }
             paramVo.setReviewer(userInfo.getUserId().toString());
             paramVo.setInspector(userInfo.getUserId().toString());
