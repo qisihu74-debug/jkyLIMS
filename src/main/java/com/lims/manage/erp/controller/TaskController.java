@@ -19,6 +19,7 @@ import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.PageOfficeCopyService;
 import com.lims.manage.erp.service.ReportService;
+import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestDetectionService;
 import com.lims.manage.erp.util.AsposeUtil;
@@ -97,6 +98,8 @@ public class TaskController {
     private ReportService reportService;
     @Autowired
     private TestTechnicistDao testTechnicistDao;
+    @Autowired
+    private SysUserService userService;
 
     /**
      * 查询任务详情——废弃
@@ -1089,6 +1092,9 @@ public class TaskController {
             PageInfo<TestTaskPool> pageInfo = taskService.taskHall(bean);
             return ResultUtil.success(pageInfo);
         }else {
+            //根据用户id查询
+            Boolean flag = userService.checkSysAndAdmRole(bean.getUserId());
+
             return ResultUtil.success(new PageInfo<TestTaskPool>());
         }
     }

@@ -122,5 +122,13 @@ public interface SysUserService extends IService<SysUserEntity> {
      * @return
      */
     boolean uploadSignature(MultipartFile file);
+
+    /**
+     * 根据当前登陆人用户id判断该用户是否有系统管理员或者超级管理员的角色
+     * 如果有返回true否则fasle
+     * @param userId
+     * @return
+     */
+    Boolean checkSysAndAdmRole(Long userId);
 }
 

@@ -344,4 +344,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
         }
         return true;
     }
+
+    @Override
+    public Boolean checkSysAndAdmRole(Long userId) {
+        String s = sysUserDao.checkSysAndAdmRole(userId);
+        if (StringUtils.isEmpty(s)){
+            return false;
+        }else {
+            return true;
+        }
+    }
 }
