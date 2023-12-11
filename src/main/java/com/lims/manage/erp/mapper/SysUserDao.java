@@ -135,13 +135,14 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
     SysUserEntity getNameByRolName();
 
     @Select("SELECT\n" +
-            "\tt3.`user_id`\n" +
+            "\tt1.user_id,t3.`role_name` \n" +
             "FROM\n" +
-            "\tsys_role t1\n" +
-            "\tLEFT JOIN sys_user_role t2 ON t1.role_id = t2.role_id\n" +
-            "\tLEFT JOIN sys_user t3 ON t2.user_id = t3.user_id \n" +
+            "\tsys_user t1\n" +
+            "\tLEFT JOIN sys_user_role t2 ON t1.user_id = t2.user_id\n" +
+            "\tLEFT JOIN sys_role t3 ON t2.role_id = t3.role_id \n" +
             "WHERE\n" +
-            "\tt1.role_name = '盖章人' and t3.user_id=#{userId}")
+            "\tt1.user_id = #{userId} \n" +
+            "\tAND t3.role_name = '盖章人' ")
     String checkRoleById(@Param("userId") Long userId);
 
     @Select("SELECT\n" +

@@ -4319,7 +4319,12 @@ public class ReportServiceImpl implements ReportService {
         PageHelper.startPage(pageNum, pageSize);
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         Long userId = userInfo.getUserId();
-        List<ReportListVo> list = reportMapper.getReportListOnline1023(search,userId+"");
+        //查询teamId
+        Integer teamId = testTechnicistDao.getSealer(userId);
+        if (teamId == null){
+            userId = null;
+        }
+        List<ReportListVo> list = reportMapper.getReportListOnline1023(search,userId == null?"":userId+"");
         for (ReportListVo reportListVo : list) {
             List<LabelValueVo> sampleInfos = reportMapper.getSampleInfos(reportListVo.getId());
             reportListVo.setSampleInfos(sampleInfos);
