@@ -228,7 +228,7 @@ public interface TaskService {
     ZipOutputStream packagingWorkbookZip(List<TaskIdEntity> dataEntitys, HttpServletResponse response,Long taskId) throws IOException;
 
     /**
-     * 查询任务列表——并设置分页
+     * 检测询任务列表——并设置分页
      *
      * @param paramVo
      * @return
@@ -236,7 +236,7 @@ public interface TaskService {
     PagingToolVo getTaskList(TaskListParamVo paramVo, String [] deptIds);
 
     /**
-     * 查询任务列表——并设置分页-视图
+     * 检测询任务列表——并设置分页-视图
      *
      * @param paramVo
      * @return

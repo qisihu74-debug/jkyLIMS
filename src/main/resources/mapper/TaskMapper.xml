@@ -629,6 +629,9 @@
                 or state = 0
                 )
             </if>
+            <if test="taskFlowDate!=null">
+                AND entrustment_id IN ( SELECT entrust_id FROM test_entrusted_task_rel WHERE task_flow_date = #{taskFlowDate} )
+            </if>
         </trim>
     </select>
 
