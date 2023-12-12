@@ -225,6 +225,11 @@ public interface ReportService {
     PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize,String type,Integer reportTypeStatus);
     PageInfo getSendList0623(String search, String reportType, Integer pageNum, Integer pageSize,String type,String category,Integer reportTypeStatus);
 
+    /**
+     * 导出Excel 表
+     */
+    InputStream sendListExport(List<ReportRecordEntity> list) throws Exception;
+
     Boolean isApprove(Long id);
 
     /**

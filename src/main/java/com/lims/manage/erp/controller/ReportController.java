@@ -89,13 +89,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
@@ -828,9 +822,48 @@ public class ReportController {
      * @return
      */
     @GetMapping("sendList")
-    public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type,String category,Integer reportTypeStatus) {
+    public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type, String category, Integer reportTypeStatus) {
+        if (pageNum == null || pageSize == null) {
+            return ResultUtil.error("分页参数为空");
+        }
         logger.info("分页参数pageNum:{},pageSize:{}", pageNum, pageSize);
-        PageInfo pageInfo = reportService.getSendList0623(search, reportType, pageNum, pageSize, type,category,reportTypeStatus);
+        PageInfo pageInfo = reportService.getSendList0623(search, reportType, pageNum, pageSize, type, category, reportTypeStatus);
+        return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * TODO： 查询报告邮寄列表--0623 -- 导出
+     *
+     * @param search
+     * @param reportType
+     * @param type
+     * @param category
+     * @param reportTypeStatus
+     * @return
+     */
+    @GetMapping("sendListExport")
+    public Result sendListExport(String search, String reportType, String type, String category, Integer reportTypeStatus,HttpServletResponse response) throws Exception {
+        BufferedOutputStream bos = null;
+        String fileName = "企业委托单详情表"+DateUtil.formatDate(new Date());
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode(fileName+".xlsx", "UTF-8") );
+        PageInfo pageInfo = reportService.getSendList0623(search, reportType, null, null, type, category, reportTypeStatus);
+        List<ReportRecordEntity> list = pageInfo.getList();
+
+        InputStream inputStream = reportService.sendListExport(list);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+
         return ResultUtil.success(pageInfo);
     }
 

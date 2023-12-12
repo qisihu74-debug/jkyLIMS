@@ -86,27 +86,14 @@ import com.lims.manage.erp.util.PDFHelper3;
 import com.lims.manage.erp.util.PdfDoc;
 import com.lims.manage.erp.util.ReturnResponse;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.EntrustCategoryVo;
-import com.lims.manage.erp.vo.HistoryEntrustDataVo;
-import com.lims.manage.erp.vo.JudgmentBasisVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.ReportCheckItemDetailVo;
-import com.lims.manage.erp.vo.ReportDetailListParamVo;
-import com.lims.manage.erp.vo.ReportDetailListVo;
-import com.lims.manage.erp.vo.ReportDetailVo;
-import com.lims.manage.erp.vo.ReportHistoryDetailVo;
-import com.lims.manage.erp.vo.ReportListVo;
-import com.lims.manage.erp.vo.ReportPreserveVo;
-import com.lims.manage.erp.vo.ReportProductRelVo;
-import com.lims.manage.erp.vo.ReportSampleDetailVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.TaskCodeVo;
-import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
+import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.usermodel.Range;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -1063,16 +1050,11 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo getSendList0623(String search, String reportType, Integer pageNum, Integer pageSize, String type, String category, Integer reportTypeStatus) {
-        PageHelper.startPage(pageNum, pageSize);
+        if (pageNum != null && pageSize != null) {
+            PageHelper.startPage(pageNum, pageSize);
+        }
         // 查询中间报告或最终报告
         List<ReportRecordEntity> list = new ArrayList<>();
-//        if(reportTypeStatus!=null &&reportTypeStatus==1){
-//            // 中间报告
-//            list = entityMapper.getSendList20230131MidReport(search, reportType, type,category,reportTypeStatus);
-//        }else {
-//            // 默认 展示最终报告
-//            list = entityMapper.getSendList0623(search, reportType, type,category,reportTypeStatus);
-//        }
         // 查询中间报告 和 最终报告
         list = entityMapper.getSendList20230203Report(search, reportType, type, category, reportTypeStatus);
         if (!CollectionUtils.isEmpty(list)) {
@@ -1094,6 +1076,50 @@ public class ReportServiceImpl implements ReportService {
                 ArrayList::new));
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
+    }
+
+    @Override
+    public InputStream sendListExport(List<ReportRecordEntity> list) throws Exception {
+        //创建HSSFWorkbook对象(excel的文档对象)
+        HSSFWorkbook wb = new HSSFWorkbook();
+//建立新的sheet对象（excel的表单）
+        HSSFSheet sheet = wb.createSheet("sheet0");
+//在sheet里创建第一行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
+        HSSFRow row1 = sheet.createRow(0);
+        //创建单元格并设置单元格内容
+        row1.createCell(0).setCellValue("报告编号");
+        row1.createCell(1).setCellValue("委托单号");
+        row1.createCell(2).setCellValue("委托单位");
+        row1.createCell(3).setCellValue("样品名称");
+        row1.createCell(4).setCellValue("报告份数");
+        row1.createCell(5).setCellValue("报告类型");
+        row1.createCell(6).setCellValue("报告盖章类型");
+        row1.createCell(7).setCellValue("取报告方式");
+        row1.createCell(8).setCellValue("报告发出时间");
+        row1.createCell(9).setCellValue("取报告人");
+        row1.createCell(10).setCellValue("邮寄单号");
+        row1.createCell(11).setCellValue("邮箱");
+        row1.createCell(12).setCellValue("操作人");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        for (int i = 0; i < list.size(); i++) {
+            ReportRecordEntity personVo = list.get(i);
+            //在sheet里创建第二行
+            HSSFRow row3 = sheet.createRow(i + 1);
+            row3.createCell(0).setCellValue(personVo.getReportCode());
+//            row3.createCell(1).setCellValue(personVo.getEntrustNumber()!=null?personVo.getEntrustNumber():0);
+//            row3.createCell(2).setCellValue(personVo.getTaskNumber()!=null?personVo.getTaskNumber():0);
+//            row3.createCell(3).setCellValue(personVo.getTestNumber()!=null?personVo.getTestNumber():0);
+//            row3.createCell(4).setCellValue(personVo.getReviewNumber()!=null?personVo.getReviewNumber():0);
+//            row3.createCell(5).setCellValue(personVo.getMakeNumber()!=null?personVo.getMakeNumber():0);
+//            row3.createCell(6).setCellValue(personVo.getApprovalNumber()!=null?personVo.getApprovalNumber():0);
+//            row3.createCell(7).setCellValue(personVo.getIssueNumber()!=null?personVo.getIssueNumber():0);
+//            row3.createCell(8).setCellValue(personVo.getSealNumber()!=null?personVo.getSealNumber():0);
+        }
+        //输出Excel文件 字节输出流
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        wb.write(os);
+        os.close();
+        return new ByteArrayInputStream(os.toByteArray());
     }
 
     @Override
