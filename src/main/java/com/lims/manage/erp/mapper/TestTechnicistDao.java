@@ -43,7 +43,7 @@ int insertOrUpdateBatch(@Param("entities") List<TestTechnicist> entities);
     IPage<TestTechnicistVo> getListPage(IPage<TestTechnicistVo> page, @Param(Constants.WRAPPER) Wrapper<TestTechnicist> queryWrapper);
     List<SysUserEntity> getUserList();
 
-    @Select("select team_id from test_technicist where user_id=#{userId}")
+    @Select("select team_id from test_technicist where user_id=#{userId} and del_flag = 0 limit 1")
     Integer getSealer(@Param("userId") Long userId);
 
     List<String> inspectorList(@Param("search") String search);
