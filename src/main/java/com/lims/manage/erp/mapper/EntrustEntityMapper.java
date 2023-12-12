@@ -19,6 +19,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -510,7 +511,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      * @param clientOrderdetailVo
      * @return
      */
-    String getClientListSumPrice(ClientOrderdetailVo clientOrderdetailVo);
+    BigDecimal getClientListSumPrice(ClientOrderdetailVo clientOrderdetailVo);
 
     // 获取样品信息
     List<SampleEntity> getSampleList(@Param("entrustIds") List<Long> entrustIds);

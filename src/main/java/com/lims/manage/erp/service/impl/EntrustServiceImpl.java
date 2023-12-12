@@ -55,6 +55,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -5114,8 +5115,8 @@ public class EntrustServiceImpl implements EntrustService {
             clientOrderdetailVo.setCompanyStrs(null);
         }
         PageHelper.clearPage();
-       String sumPrice = entityMapper.getClientListSumPrice(clientOrderdetailVo);
-        return ResultUtil.success(sumPrice);
+        BigDecimal sumPrice = entityMapper.getClientListSumPrice(clientOrderdetailVo);
+        return ResultUtil.success(sumPrice.setScale(2,BigDecimal.ROUND_HALF_UP));
     }
 
     @Override
