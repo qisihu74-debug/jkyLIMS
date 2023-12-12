@@ -837,19 +837,18 @@ public class ReportController {
      * @param search
      * @param reportType
      * @param type
-     * @param category
      * @param reportTypeStatus
      * @return
      */
     @GetMapping("sendListExport")
-    public void sendListExport(String search, String reportType, String type, String category, Integer reportTypeStatus, HttpServletResponse response) throws Exception {
+    public void sendListExport(String searchValue, String reportType, String type, String reportTypeStatus, HttpServletResponse response) throws Exception {
         BufferedOutputStream bos = null;
         String fileName = "报告邮寄列表" + DateUtil.formatDate(new Date());
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(fileName + ".xlsx", "UTF-8"));
-        PageInfo pageInfo = reportService.getSendList0623(search, reportType, null, null, type, category, reportTypeStatus);
+        PageInfo pageInfo = reportService.getSendList0623(searchValue, reportType.equals("null") ? null : reportType, null, null, type, null, reportTypeStatus.equals("null") ? null : Integer.parseInt(reportTypeStatus));
         List<ReportRecordEntity> list = pageInfo.getList();
         InputStream inputStream = reportService.sendListExport(list);
         ServletOutputStream outputStream = response.getOutputStream();
