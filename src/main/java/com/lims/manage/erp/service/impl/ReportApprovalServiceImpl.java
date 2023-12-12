@@ -77,18 +77,20 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     private TestTechnicistDao testTechnicistDao;
     @Override
     public PageInfo getApplyforList(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
-        PageHelper.startPage(pageNum, pageSize);
         Long userId = ShiroUtils.getUserInfo().getUserId();
         Integer teamId = testTechnicistDao.getSealer(userId);
-        Set<Long> ids = null;
+        Set<Long> ids = new HashSet<>();
         if(teamId != null){//有团队，优先团队权限
             ids = getNextIdsToTeam();
         }else{//无团队
             String s = sysUserDao.checkSysAndAdmRole(userId);
-            if(!org.apache.commons.lang3.StringUtils.isEmpty(s)){//不是管理员
+            if(s == null){//不是管理员
                 ids.add(0L);//ID为0，查不到数据
+            }else{
+                ids = null;
             }
         }
+        PageHelper.startPage(pageNum, pageSize);
         List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalList(search,ids,reportTypeStatus);
         //TODO 兼容中间报告
         for (ReportApprovalVo bean:list) {
@@ -271,18 +273,20 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 
     @Override
     public PageInfo applyfor_history(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
-        PageHelper.startPage(pageNum, pageSize);
         Long userId = ShiroUtils.getUserInfo().getUserId();
         Integer teamId = testTechnicistDao.getSealer(userId);
-        Set<Long> ids = null;
+        Set<Long> ids = new HashSet<>();
         if(teamId != null){//有团队，优先团队权限
             ids = getNextIdsToTeam();
         }else{//无团队
             String s = sysUserDao.checkSysAndAdmRole(userId);
-            if(!org.apache.commons.lang3.StringUtils.isEmpty(s)){//不是管理员
+            if(s == null){//不是管理员
                 ids.add(0L);//ID为0，查不到数据
+            }else{
+                ids = null;
             }
         }
+        PageHelper.startPage(pageNum, pageSize);
         List<ReportApprovalVo> list = reportApprovalMapper.getReportApprovalHistory(search,ids,reportTypeStatus);
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
@@ -329,18 +333,20 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 
     @Override
     public PageInfo getVerify_list(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
-        PageHelper.startPage(pageNum, pageSize);
         Long userId = ShiroUtils.getUserInfo().getUserId();
         Integer teamId = testTechnicistDao.getSealer(userId);
-        Set<Long> ids = null;
+        Set<Long> ids = new HashSet<>();
         if(teamId != null){//有团队，优先团队权限
             ids = getNextIdsToTeam();
         }else{//无团队
             String s = sysUserDao.checkSysAndAdmRole(userId);
-            if(!org.apache.commons.lang3.StringUtils.isEmpty(s)){//不是管理员
+            if(s == null){//不是管理员
                 ids.add(0L);//ID为0，查不到数据
+            }else{
+                ids = null;
             }
         }
+        PageHelper.startPage(pageNum, pageSize);
         List<ReportApprovalVo> list = reportApprovalMapper.getVerifyList(search,ids,reportTypeStatus);
         //TODO 兼容中间报告
         for (ReportApprovalVo bean:list) {
@@ -612,20 +618,20 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
 
     @Override
     public PageInfo verifyHistory(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus) {
-        PageHelper.startPage(pageNum, pageSize);
-
         Long userId = ShiroUtils.getUserInfo().getUserId();
         Integer teamId = testTechnicistDao.getSealer(userId);
-        Set<Long> ids = null;
+        Set<Long> ids = new HashSet<>();
         if(teamId != null){//有团队，优先团队权限
             ids = getNextIdsToTeam();
         }else{//无团队
             String s = sysUserDao.checkSysAndAdmRole(userId);
-            if(!org.apache.commons.lang3.StringUtils.isEmpty(s)){//不是管理员
+            if(s == null){//不是管理员
                 ids.add(0L);//ID为0，查不到数据
+            }else{
+                ids = null;
             }
         }
-
+        PageHelper.startPage(pageNum, pageSize);
         List<ReportApprovalVo> list = reportApprovalMapper.getVerifyHistory(search,ids,reportTypeStatus);
         PageInfo<ReportApprovalVo> result = new PageInfo<>(list);
         return result;
