@@ -842,16 +842,15 @@ public class ReportController {
      * @return
      */
     @GetMapping("sendListExport")
-    public Result sendListExport(String search, String reportType, String type, String category, Integer reportTypeStatus,HttpServletResponse response) throws Exception {
+    public void sendListExport(String search, String reportType, String type, String category, Integer reportTypeStatus, HttpServletResponse response) throws Exception {
         BufferedOutputStream bos = null;
-        String fileName = "企业委托单详情表"+DateUtil.formatDate(new Date());
+        String fileName = "报告邮寄列表" + DateUtil.formatDate(new Date());
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment;fileName=" +  java.net.URLEncoder.encode(fileName+".xlsx", "UTF-8") );
+        response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(fileName + ".xlsx", "UTF-8"));
         PageInfo pageInfo = reportService.getSendList0623(search, reportType, null, null, type, category, reportTypeStatus);
         List<ReportRecordEntity> list = pageInfo.getList();
-
         InputStream inputStream = reportService.sendListExport(list);
         ServletOutputStream outputStream = response.getOutputStream();
         BufferedInputStream bis = new BufferedInputStream(inputStream);
@@ -863,8 +862,6 @@ public class ReportController {
             bos.flush();
         }
         bos.close();
-
-        return ResultUtil.success(pageInfo);
     }
 
     /**

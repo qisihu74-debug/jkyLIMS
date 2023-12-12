@@ -1105,15 +1105,37 @@ public class ReportServiceImpl implements ReportService {
             ReportRecordEntity personVo = list.get(i);
             //在sheet里创建第二行
             HSSFRow row3 = sheet.createRow(i + 1);
-            row3.createCell(0).setCellValue(personVo.getReportCode());
-//            row3.createCell(1).setCellValue(personVo.getEntrustNumber()!=null?personVo.getEntrustNumber():0);
-//            row3.createCell(2).setCellValue(personVo.getTaskNumber()!=null?personVo.getTaskNumber():0);
-//            row3.createCell(3).setCellValue(personVo.getTestNumber()!=null?personVo.getTestNumber():0);
-//            row3.createCell(4).setCellValue(personVo.getReviewNumber()!=null?personVo.getReviewNumber():0);
-//            row3.createCell(5).setCellValue(personVo.getMakeNumber()!=null?personVo.getMakeNumber():0);
-//            row3.createCell(6).setCellValue(personVo.getApprovalNumber()!=null?personVo.getApprovalNumber():0);
-//            row3.createCell(7).setCellValue(personVo.getIssueNumber()!=null?personVo.getIssueNumber():0);
-//            row3.createCell(8).setCellValue(personVo.getSealNumber()!=null?personVo.getSealNumber():0);
+            // 报告单号
+            row3.createCell(0).setCellValue(personVo.getReportCode() != null ? personVo.getReportCode() : "-");
+            // 委托单号
+            row3.createCell(1).setCellValue(personVo.getEntrustmentNo() != null ? personVo.getEntrustmentNo() : "-");
+            // 委托单位
+            row3.createCell(2).setCellValue(personVo.getEntrustCompany() != null ? personVo.getEntrustCompany() : "-");
+            // 样品名称
+            row3.createCell(3).setCellValue(personVo.getSampleName() != null ? personVo.getSampleName() : "-");
+            // 报告份数
+            row3.createCell(4).setCellValue(personVo.getNumber() != null ? String.valueOf(personVo.getNumber()) : "-");
+            // 报告类型
+            row3.createCell(5).setCellValue(Integer.parseInt(personVo.getType()) == 0 ? "最终报告" : "中间报告");
+            // 报告盖章类型
+            row3.createCell(6).setCellValue(personVo.getSealType() != null ? personVo.getSealType() : "-");
+            // 取报告方式
+            row3.createCell(7).setCellValue(personVo.getReportType() != null ? personVo.getReportType() : "-");
+            // 报告发出时间
+            if (personVo.getReportTime() != null) {
+                String dateString = formatter.format(personVo.getReportTime());
+                row3.createCell(8).setCellValue(dateString);
+            } else {
+                row3.createCell(8).setCellValue("-");
+            }
+            // 取报告人
+            row3.createCell(9).setCellValue(personVo.getAddressee() != null ? personVo.getAddressee() : "-");
+            // 邮寄单号
+            row3.createCell(10).setCellValue(personVo.getWaybill() != null ? personVo.getWaybill() : "-");
+            // 邮箱
+            row3.createCell(11).setCellValue(personVo.getEmail() != null ? personVo.getEmail() : "-");
+            // 操作人
+            row3.createCell(12).setCellValue(personVo.getReportManager() != null ? personVo.getReportManager() : "-");
         }
         //输出Excel文件 字节输出流
         ByteArrayOutputStream os = new ByteArrayOutputStream();
