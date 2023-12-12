@@ -1277,7 +1277,7 @@
         ORDER BY create_time desc
     </select>
 
-    <select id="getClientListSumPrice" resultType="java.lang.String">
+    <select id="getClientListSumPrice" resultType="java.math.BigDecimal">
         SELECT
         sum(actual_price)
         FROM
@@ -1308,6 +1308,7 @@
         <if test="operatingPersonnel!=null and operatingPersonnel!=''">
             and operating_personnel LIKE CONCAT('%',#{operatingPersonnel},'%')
         </if>
+        LIMIT 1
     </select>
 
     <select id="getSampleList" resultType="com.lims.manage.erp.entity.SampleEntity">
