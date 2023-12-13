@@ -376,7 +376,9 @@ public interface ReportRecordEntityMapper {
                                                           @Param("reportType") String reportType,
                                                           @Param("type") String type,
                                                           @Param("category") String category,
-                                                          @Param("reportTypeStatus")Integer reportTypeStatus);
+                                                          @Param("reportTypeStatus")Integer reportTypeStatus,
+                                                          @Param("startTime")String startTime,
+                                                          @Param("endTime")String endTime);
 
     @Select("select name from test_init_data where type=20")
     String getInitInfo();

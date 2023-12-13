@@ -1307,6 +1307,9 @@
         <if test="category != null">
             AND t1.category = #{category}
         </if>
+        <if test="startTime != null and endTime != null ">
+            AND t1.report_time  BETWEEN #{startTime} AND #{endTime}
+        </if>
         )
         UNION
        ( SELECT
@@ -1351,6 +1354,9 @@
         </if>
         <if test="category != null">
             AND t1.category = #{category}
+        </if>
+        <if test="startTime != null and endTime != null ">
+            AND t1.report_time  BETWEEN #{startTime} AND #{endTime}
         </if>
         )
         order by operate_time desc

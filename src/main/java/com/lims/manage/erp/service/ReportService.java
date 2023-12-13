@@ -223,7 +223,8 @@ public interface ReportService {
      * @return
      */
     PageInfo getSendList(String search, String reportType, Integer pageNum, Integer pageSize,String type,Integer reportTypeStatus);
-    PageInfo getSendList0623(String search, String reportType, Integer pageNum, Integer pageSize,String type,String category,Integer reportTypeStatus);
+    PageInfo getSendList0623(String search, String reportType, Integer pageNum, Integer pageSize,String type,
+                             String category,Integer reportTypeStatus,String startTime,String endTime);
 
     /**
      * 导出Excel 表
