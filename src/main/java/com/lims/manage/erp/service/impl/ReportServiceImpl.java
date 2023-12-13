@@ -4364,7 +4364,6 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo onlineMakeReport1023(Integer pageNum, Integer pageSize, String search) {
-        PageHelper.startPage(pageNum, pageSize);
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         Long userId = userInfo.getUserId();
         //查询teamId
@@ -4372,6 +4371,7 @@ public class ReportServiceImpl implements ReportService {
         if (teamId == null){
             userId = null;
         }
+        PageHelper.startPage(pageNum, pageSize);
         List<ReportListVo> list = reportMapper.getReportListOnline1023(search,userId == null?"":userId+"");
         for (ReportListVo reportListVo : list) {
             List<LabelValueVo> sampleInfos = reportMapper.getSampleInfos(reportListVo.getId());
