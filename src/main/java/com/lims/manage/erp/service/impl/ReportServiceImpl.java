@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.aspose.cells.Cell;
@@ -259,12 +260,22 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        List<ReportListVo> list = null;
         if (CollectionUtils.isEmpty(userTeamIds)){
-            return new PageInfo<ReportListVo>();
+            String byId = sysUserDao.checkSysAndAdmRole(ShiroUtils.getUserInfo().getUserId());
+            if (StringUtils.isEmpty(byId)){
+                return new PageInfo<ReportListVo>();
+            }else {
+                PageHelper.clearPage();
+                PageHelper.startPage(pageNum, pageSize);
+                list = reportMapper.reportDownloadList0512(null, search);
+            }
         }else {
             PageHelper.clearPage();
             PageHelper.startPage(pageNum, pageSize);
-            List<ReportListVo> list = reportMapper.reportDownloadList0512(userTeamIds, search);
+            list = reportMapper.reportDownloadList0512(userTeamIds, search);
+        }
+        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(list)){
             for (ReportListVo reportListVo : list) {
                 if (reportListVo.getOperateType() == null){
                     reportListVo.setOperateType(1);
@@ -285,6 +296,8 @@ public class ReportServiceImpl implements ReportService {
             }
             PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
             return pageInfo;
+        }else {
+            return new PageInfo<ReportListVo>();
         }
     }
 
@@ -364,14 +377,25 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo reportDownloadListHistory(String search, Integer pageNum, Integer pageSize) {
         List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        List<ReportListVo> list = null;
         if (CollectionUtils.isEmpty(userTeamIds)){
-            return new PageInfo<ReportListVo>();
+            String s = sysUserDao.checkSysAndAdmRole(ShiroUtils.getUserInfo().getUserId());
+            if (StringUtils.isEmpty(s)){
+                return new PageInfo<ReportListVo>();
+            }else {
+                PageHelper.startPage(pageNum, pageSize);
+                ReportListVo reportListVo = new ReportListVo();
+                reportListVo.setReportCode(search);
+                list = reportMapper.reportDownloadListHistory(reportListVo);
+            }
         }else {
             PageHelper.startPage(pageNum, pageSize);
             ReportListVo reportListVo = new ReportListVo();
             reportListVo.setReportCode(search);
             reportListVo.setDeptIds(userTeamIds);
-            List<ReportListVo> list = reportMapper.reportDownloadListHistory(reportListVo);
+            list = reportMapper.reportDownloadListHistory(reportListVo);
+        }
+        if (CollectionUtil.isNotEmpty(list)){
             //设置任务单号
             for (ReportListVo reportListVo1 : list) {
                 if (reportListVo1.getOperateType() == null){
@@ -382,6 +406,8 @@ public class ReportServiceImpl implements ReportService {
             }
             PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
             return pageInfo;
+        }else {
+            return new PageInfo<ReportListVo>();
         }
     }
 
@@ -850,13 +876,21 @@ public class ReportServiceImpl implements ReportService {
         if (StringUtils.isEmpty(state)) {
             state = "1";
         }
+        List<ReportRecordEntity> list = null;
         //每个团队看子集大团队任务产生的报告列表
         Long userId = ShiroUtils.getUserInfo().getUserId();
         List<Integer> ids = Lists.newArrayList();
         //校验用户id是否分配团队
         Integer teamId = testTechnicistDao.getSealer(userId);
         if (teamId == null){
-            return new PageInfo<ReportRecordEntity>();
+            String s = sysUserDao.checkSysAndAdmRole(userId);
+            if (StringUtils.isEmpty(s)){
+                return new PageInfo<ReportRecordEntity>();
+            }else {
+                PageHelper.startPage(pageNum, pageSize);
+                //TODO 兼容中间报告
+                list = entityMapper.getSealList(search, reportType, "", reportTypeStatus, null);
+            }
         }else {
             if (teamId > 0) {
                 //获取顶级团队
@@ -884,7 +918,9 @@ public class ReportServiceImpl implements ReportService {
             }
             PageHelper.startPage(pageNum, pageSize);
             //TODO 兼容中间报告
-            List<ReportRecordEntity> list = entityMapper.getSealList(search, reportType, state, reportTypeStatus, ids);
+            list = entityMapper.getSealList(search, reportType, state, reportTypeStatus, ids);
+        }
+        if (CollectionUtil.isNotEmpty(list)){
             for (ReportRecordEntity recordEntity : list) {
                 if (StringUtils.isNotEmpty(recordEntity.getSealType()) && recordEntity.getSealType().contains("null")) {
                     recordEntity.setSealType("");
@@ -914,6 +950,8 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
             return pageInfo;
+        }else {
+            return new PageInfo<ReportRecordEntity>();
         }
     }
 
@@ -3553,8 +3591,8 @@ public class ReportServiceImpl implements ReportService {
         Long userId = ShiroUtils.getUserInfo().getUserId();
         List<Integer> ids = Lists.newArrayList();
         //校验用户id是否分配团队
-        int teamId = testTechnicistDao.getSealer(userId);
-        if (teamId > 0) {
+        Integer teamId = testTechnicistDao.getSealer(userId);
+        if (teamId != null) {
             //获取顶级团队
             Long topTeamId = this.getTopDepartment((long) teamId);
             if (topTeamId == null) {
@@ -3567,7 +3605,8 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         String byId = sysUserDao.checkRoleById(userId);
-        if (ids.size() <= 0 || StringUtils.isNotEmpty(byId)) {
+        String s = sysUserDao.checkSysAndAdmRole(userId);
+        if (ids.size() <= 0 || StringUtils.isNotEmpty(byId) || StringUtils.isNotEmpty(s)) {
             ids = null;
         }
         List<ReportRecordEntity> list;
