@@ -2236,17 +2236,18 @@ public class EntrustServiceImpl implements EntrustService {
             }
         }
         //设置样品信息
-        if(!CollectionUtils.isEmpty(dataList)){
+        if (!CollectionUtils.isEmpty(pageInfo.getList())) {
             List<EntrustSampleInfoVo> entrustSampleInfos = entityMapper.getEntrustSampleInfoIds_by_view(pageInfo.getList());
-            for (EntrustHistoryEntity entity : pageInfo.getList()) {
-                HashSet<EntrustSampleInfoVo> sampleInfoVos = new HashSet<>();
-                for(EntrustSampleInfoVo entrustSampleInfoVo : entrustSampleInfos){
-                    if(entrustSampleInfoVo.getEntrustId().equals(entity.getId())){
-                        sampleInfoVos.add(entrustSampleInfoVo);
+            if (CollectionUtil.isNotEmpty(entrustSampleInfos)) {
+                for (EntrustHistoryEntity entity : pageInfo.getList()) {
+                    List<EntrustSampleInfoVo> list = new ArrayList<>();
+                    for (EntrustSampleInfoVo entrustSampleInfoVo : entrustSampleInfos) {
+                        if (entrustSampleInfoVo.getEntrustId().equals(entity.getId())) {
+                            list.add(entrustSampleInfoVo);
+                        }
                     }
+                    entity.setSampleInfoVos(list);
                 }
-                List<EntrustSampleInfoVo> list = StreamSupport.stream(sampleInfoVos.spliterator(), false).collect(Collectors.toList());
-                entity.setSampleInfoVos(list);
             }
         }
         //设置物流单号信息

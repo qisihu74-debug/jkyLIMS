@@ -812,6 +812,7 @@ public class ReportController {
 
     /**
      * 查询报告邮寄列表--0623
+     *
      * @param search
      * @param reportType
      * @param pageNum
@@ -819,36 +820,53 @@ public class ReportController {
      * @param type
      * @param category
      * @param reportTypeStatus
+     * @param dateRange        日期范围 "2023-10-26 00:00:00~2023-10-27 23:59:59"
      * @return
      */
     @GetMapping("sendList")
-    public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type, String category, Integer reportTypeStatus) {
+    public Result sendList(String search, String reportType, Integer pageNum, Integer pageSize, String type, String category, Integer reportTypeStatus, String dateRange) {
         if (pageNum == null || pageSize == null) {
             return ResultUtil.error("分页参数为空");
         }
         logger.info("分页参数pageNum:{},pageSize:{}", pageNum, pageSize);
-        PageInfo pageInfo = reportService.getSendList0623(search, reportType, pageNum, pageSize, type, category, reportTypeStatus);
+        String startTime = null;
+        String endTime = null;
+        if (StringUtils.isNotEmpty(dateRange)) {
+            String[] times = dateRange.split("~");
+            startTime = times[0] + " 00:00:00";
+            endTime = times[1] + " 23:59:59";
+        }
+        PageInfo pageInfo = reportService.getSendList0623(search, reportType, pageNum, pageSize, type, category, reportTypeStatus, startTime, endTime);
         return ResultUtil.success(pageInfo);
     }
 
     /**
      * TODO： 查询报告邮寄列表--0623 -- 导出
      *
-     * @param search
+     * @param searchValue
      * @param reportType
      * @param type
      * @param reportTypeStatus
+     * @param dateRange        日期范围 "2023-10-26~2023-10-27"
      * @return
      */
     @GetMapping("sendListExport")
-    public void sendListExport(String searchValue, String reportType, String type, String reportTypeStatus, HttpServletResponse response) throws Exception {
+    public void sendListExport(String searchValue, String reportType, String type, String reportTypeStatus, String dateRange, HttpServletResponse response) throws Exception {
         BufferedOutputStream bos = null;
         String fileName = "报告邮寄列表" + DateUtil.formatDate(new Date());
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(fileName + ".xlsx", "UTF-8"));
-        PageInfo pageInfo = reportService.getSendList0623(searchValue, reportType.equals("null") ? null : reportType, null, null, type, null, reportTypeStatus.equals("null") ? null : Integer.parseInt(reportTypeStatus));
+        String startTime = null;
+        String endTime = null;
+        if (StringUtils.isNotEmpty(dateRange)) {
+            String[] times = dateRange.split("~");
+            startTime = times[0] + " 00:00:00";
+            endTime = times[1] + " 23:59:59";
+        }
+        PageInfo pageInfo = reportService.getSendList0623(searchValue, reportType.equals("null") ? null : reportType, null,
+                null, type, null, reportTypeStatus.equals("null") ? null : Integer.parseInt(reportTypeStatus), startTime, endTime);
         List<ReportRecordEntity> list = pageInfo.getList();
         InputStream inputStream = reportService.sendListExport(list);
         ServletOutputStream outputStream = response.getOutputStream();
