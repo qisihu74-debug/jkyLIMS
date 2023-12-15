@@ -807,7 +807,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(bufferedImage, "jpg", baos);
         byte[] imageData = baos.toByteArray();
-        //设置水印
+        /*//设置水印
         for (int i = 1; i <= stamper.getReader().getNumberOfPages(); i++) {
             // 获取当前页的内容
             //每一页设置四行水印
@@ -841,7 +841,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
                 content.endText();
             }
         }
-        logger.info("报告添加水印成功");
+        logger.info("报告添加水印成功");*/
         //除了第一页和第二页在报告左上角添加防伪标识码
         for (int pageNumber = 1; pageNumber <= stamper.getReader().getNumberOfPages(); pageNumber++) {
             if (pageNumber == 2){
