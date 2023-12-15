@@ -1542,7 +1542,8 @@
         <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
             #{item.id}
         </foreach>
-        order by create_time desc
+        ORDER BY
+        sample_id asc
     </select>
 
     <update id="updateReportTypeAndStatus" parameterType="java.util.List">
