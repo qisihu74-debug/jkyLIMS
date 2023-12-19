@@ -61,7 +61,7 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      * @param taskId
      * @return
      */
-    Result getMyHoursStatisticsDetails(Long taskId);
+    Result getMyHoursStatisticsDetails(Long taskId, String workingHoursId);
 
     /**
      * 工时统计-我的工时-调整分配
@@ -69,7 +69,7 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      * @param list
      * @return
      */
-    Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list);
+    Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list, String workingHoursId);
 
     /**
      * 工时统计-按照人员统计

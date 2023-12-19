@@ -71,7 +71,7 @@ public class TestTaskOrderWorkingHours implements Serializable {
      */
     private String source;
 
-    private Long workingHoursId;
+    private String workingHoursId;
 
     private static final long serialVersionUID = 1L;
 

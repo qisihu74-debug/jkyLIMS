@@ -177,4 +177,16 @@
     WHERE
         t1.task_id = #{taskId}
   </select>
+
+  <select id="getTotalWorkingHours" resultType="java.lang.String">
+    SELECT
+    IFNULL( sum( times * working_hours ), 0 )
+    FROM
+    test_item_order_working_hours
+    WHERE
+    task_id = #{taskId}
+    <if test="workingHoursId != null">
+      AND working_hours_id = #{workingHoursId}
+    </if>
+  </select>
 </mapper>

@@ -35,12 +35,5 @@ public interface TestItemOrderWorkingHoursMapper extends BaseMapper<TestItemOrde
      * @param workingHoursId
      * @return
      */
-    @Select("SELECT\n" +
-            "\tIFNULL( sum( times * working_hours ), 0 ) \n" +
-            "FROM\n" +
-            "\ttest_item_order_working_hours \n" +
-            "WHERE\n" +
-            "\ttask_id = #{taskId} \n" +
-            "\tAND working_hours_id = #{workingHoursId}")
     String getTotalWorkingHours(@Param("taskId") Long taskId, @Param("workingHoursId") Long workingHoursId);
 }
