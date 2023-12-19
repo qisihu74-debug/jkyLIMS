@@ -31,11 +31,11 @@
     insert into test_task_order_working_hours (id, task_id, total_working_hours, 
       detection_type, user_id, user_name, 
       working_hours, proportion, create_time,
-      update_time,add_operator,task_code,sample_name,source)
+      update_time,add_operator,task_code,sample_name,source,working_hours_id)
     values (id, #{taskId,jdbcType=BIGINT}, #{totalWorkingHours,jdbcType=INTEGER},
       #{detectionType,jdbcType=VARCHAR}, #{userId,jdbcType=BIGINT}, #{userName,jdbcType=VARCHAR}, 
       #{workingHours,jdbcType=INTEGER}, #{proportion,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
-      #{updateTime,jdbcType=TIMESTAMP},#{addOperator,jdbcType=VARCHAR},#{taskCode},#{sampleName},#{source})
+      #{updateTime,jdbcType=TIMESTAMP},#{addOperator,jdbcType=VARCHAR},#{taskCode},#{sampleName},#{source},#{workingHoursId,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.TestTaskOrderWorkingHours">
     insert into test_task_order_working_hours

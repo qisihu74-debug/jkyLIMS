@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.TestItemOrderWorkingHoursMapper">
+  <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.TestItemOrderWorkingHours">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="check_item_id" jdbcType="INTEGER" property="checkItemId" />
+    <result column="item_name" jdbcType="VARCHAR" property="itemName" />
+    <result column="item_id" jdbcType="INTEGER" property="itemId" />
+    <result column="working_hours" jdbcType="VARCHAR" property="workingHours" />
+    <result column="times" jdbcType="INTEGER" property="times" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="source" jdbcType="VARCHAR" property="source" />
+    <result column="working_hours_id" jdbcType="BIGINT" property="workingHoursId" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, check_item_id, item_name, item_id, working_hours, times, create_time, update_time, 
+    source, working_hours_id
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from test_item_order_working_hours
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from test_item_order_working_hours
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.lims.manage.erp.entity.TestItemOrderWorkingHours">
+    insert into test_item_order_working_hours (id, check_item_id, item_name, 
+      item_id, working_hours, times, 
+      create_time, update_time, source, 
+      working_hours_id,task_id,sample_id)
+    values (#{id,jdbcType=INTEGER}, #{checkItemId,jdbcType=INTEGER}, #{itemName,jdbcType=VARCHAR}, 
+      #{itemId,jdbcType=INTEGER}, #{workingHours,jdbcType=VARCHAR}, #{times,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{source,jdbcType=VARCHAR}, 
+      #{workingHoursId,jdbcType=BIGINT},#{taskId,jdbcType=BIGINT},#{sampleId,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.TestItemOrderWorkingHours">
+    insert into test_item_order_working_hours
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="checkItemId != null">
+        check_item_id,
+      </if>
+      <if test="itemName != null">
+        item_name,
+      </if>
+      <if test="itemId != null">
+        item_id,
+      </if>
+      <if test="workingHours != null">
+        working_hours,
+      </if>
+      <if test="times != null">
+        times,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="source != null">
+        source,
+      </if>
+      <if test="workingHoursId != null">
+        working_hours_id,
+      </if>
+      <if test="taskId != null">
+        task_id,
+      </if>
+      <if test="sampleId != null">
+        sample_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="checkItemId != null">
+        #{checkItemId,jdbcType=INTEGER},
+      </if>
+      <if test="itemName != null">
+        #{itemName,jdbcType=VARCHAR},
+      </if>
+      <if test="itemId != null">
+        #{itemId,jdbcType=INTEGER},
+      </if>
+      <if test="workingHours != null">
+        #{workingHours,jdbcType=VARCHAR},
+      </if>
+      <if test="times != null">
+        #{times,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="source != null">
+        #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="workingHoursId != null">
+        #{workingHoursId,jdbcType=BIGINT},
+      </if>
+      <if test="taskId != null">
+        #{taskId,jdbcType=BIGINT},
+      </if>
+      <if test="sampleId != null">
+        #{sampleId,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.TestItemOrderWorkingHours">
+    update test_item_order_working_hours
+    <set>
+      <if test="checkItemId != null">
+        check_item_id = #{checkItemId,jdbcType=INTEGER},
+      </if>
+      <if test="itemName != null">
+        item_name = #{itemName,jdbcType=VARCHAR},
+      </if>
+      <if test="itemId != null">
+        item_id = #{itemId,jdbcType=INTEGER},
+      </if>
+      <if test="workingHours != null">
+        working_hours = #{workingHours,jdbcType=VARCHAR},
+      </if>
+      <if test="times != null">
+        times = #{times,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="source != null">
+        source = #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="workingHoursId != null">
+        working_hours_id = #{workingHoursId,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.TestItemOrderWorkingHours">
+    update test_item_order_working_hours
+    set check_item_id = #{checkItemId,jdbcType=INTEGER},
+      item_name = #{itemName,jdbcType=VARCHAR},
+      item_id = #{itemId,jdbcType=INTEGER},
+      working_hours = #{workingHours,jdbcType=VARCHAR},
+      times = #{times,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      source = #{source,jdbcType=VARCHAR},
+      working_hours_id = #{workingHoursId,jdbcType=BIGINT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectTaskList" resultType="com.lims.manage.erp.entity.TestItemOrderWorkingHours">
+    SELECT
+        t1.id AS item_id,
+        t1.check_item_id,
+        t1.times,
+        t1.check_item_name AS item_name,
+        t1.sample_id,
+        t2.working_hours
+    FROM
+        test_entrusted_sample_checkitem_rel AS t1
+        LEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id
+    WHERE
+        t1.task_id = #{taskId}
+  </select>
+</mapper>

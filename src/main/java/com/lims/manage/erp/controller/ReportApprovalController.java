@@ -9,6 +9,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.ReportApprovalService;
 import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.service.TestCheckItemsTaskRelService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.ReportApprovalVo;
@@ -46,6 +47,8 @@ public class ReportApprovalController {
     private TaskService taskService;
     @Autowired
     private EntrustService entrustService;
+    @Autowired
+    private TestCheckItemsTaskRelService testCheckItemsTaskRelService;
 
     /**
      * 报告审批列表
@@ -573,6 +576,7 @@ public class ReportApprovalController {
         reportApprovalVo1.setIssuer(name);
         Boolean flag = reportApprovalService.verify_data_two(reportApprovalVo1);
         if (flag) {
+//            testCheckItemsTaskRelService.endReportAllottedTime(4678427883068868L);
             return ResultUtil.success(msg + "成功！", true);
         }
         return ResultUtil.error(678, "签发失败！");

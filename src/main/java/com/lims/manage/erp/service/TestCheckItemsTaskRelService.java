@@ -135,12 +135,21 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      */
     Result getAuthorizedSignatureHours(TaskStatisticsVo taskStatisticsVo);
 
-    /**
+    // TODO：2023年12月18日 任务单完成后 分配工时 废弃
+    /*    *//**
      * 任务单完成、分配工时
      * @param taskId
      * @return
+     *//*
+    Boolean endTaskAllottedTime(Long taskId);*/
+
+    /**
+     * 报告签发完成、分配工时
+     *
+     * @param taskId
+     * @return
      */
-    Boolean endTaskAllottedTime(Long taskId);
+    Boolean endReportAllottedTime(Long taskId);
 
 
 }
