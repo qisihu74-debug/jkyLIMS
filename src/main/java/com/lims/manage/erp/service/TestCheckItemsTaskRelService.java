@@ -151,5 +151,14 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      */
     Boolean endReportAllottedTime(Long taskId);
 
+    /**
+     * 报告签发后： 存储工时信息时，处理业务信息
+     *
+     * @param reportId 报告id
+     * @param state    state = 0 报告签发、state = 1 报告驳回
+     * @return
+     */
+    Boolean handleWorkingHours(Long reportId, Integer state);
+
 
 }

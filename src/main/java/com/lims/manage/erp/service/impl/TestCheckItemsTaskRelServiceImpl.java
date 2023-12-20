@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -55,6 +56,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     private SysUserDao sysUserDao;
     @Resource
     TestItemOrderWorkingHoursMapper testItemOrderWorkingHoursMapper;
+    @Autowired
+    private ReportMapper reportMapper;
 
     @Override
     public IPage<WorkHourStatisticVo> getWorkHoursList(Page<WorkHourStatisticVo> page, Map<String, Object> paramMap) {
@@ -1059,7 +1062,6 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         Long workingHoursId = GenID.getID();
 //        // 通过任务单id 获取任务单下对应的检测项总工时
         String workingHours = renturnWorkingHours(taskId, workingHoursId, name);
-        System.out.println("workingHours == " + workingHours);
         if (StringUtils.isNotEmpty(workingHours)) {
             for (TestTaskOrderWorkingHours taskOrderWorkingHours : countList) {
                 // 总工时
@@ -1177,5 +1179,101 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         } else {
             return null;
         }
+    }
+
+    /**
+     * 报告签发后： 存储工时信息时，处理业务信息
+     * 1、报告签发： 任务单 已经生成过了检测工时，报告签发时，把任务单工时删除，重新生成。
+     * 根据报告id 查询委托id 获得任务单列表。判断任务单工时生成规则（为试验操作时的则删除，为报告签发的则正常新增即可） 进行删除后，再新增。
+     *
+     * @param reportId 报告id
+     * @param state    state = 0 报告签发、state = 1 报告驳回
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Boolean handleWorkingHours(Long reportId, Integer state) {
+        // 1、通过报告单 获取任务单工时列表。
+        ReportRecordEntity detailById = reportMapper.getDetailById(reportId);
+        if (detailById == null) {
+            return false;
+        }
+        Long entrustId;
+        //      读取委托id
+        if (detailById.getType().equals("0")) {
+            // 最终报告
+            entrustId = detailById.getEntrustmentId();
+        } else {
+            // 中间报告
+            entrustId = detailById.getEntrustId();
+        }
+        List<Long> taskIds = testTaskOrderWorkingHoursMapper.getTaskList(entrustId);
+        if (CollectionUtil.isEmpty(taskIds)) {
+            return false;
+        }
+        // 通过任务单id 获取工时列表
+        List<TestTaskOrderWorkingHours> testTaskOrderWorkingHoursList = testTaskOrderWorkingHoursMapper.getTestTaskOrderWorkingHoursList(taskIds);
+        if (state == 0) {
+            // 报告发起签发：
+            if (CollectionUtil.isEmpty(testTaskOrderWorkingHoursList)) {
+                // 任务id集合 不包含 工时信息
+                for (Long taskId : taskIds) {
+                    // 根据taskId 循环新增工时数据
+                    endReportAllottedTime(taskId);
+                }
+            } else {
+                // 任务id集合获取 得到 工时信息:
+                //                      判断任务单工时生成规则（为试验操作时的则删除，为报告签发的则正常新增即可）
+                for (TestTaskOrderWorkingHours workingHoursData : testTaskOrderWorkingHoursList) {
+                    if (StringUtils.isEmpty(workingHoursData.getWorkingHoursId())) {
+                        LambdaQueryWrapper<TestTaskOrderWorkingHours> deleteQueryWrapper = new LambdaQueryWrapper<>();
+                        deleteQueryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, workingHoursData.getTaskId());
+                        deleteQueryWrapper.isNull(TestTaskOrderWorkingHours::getWorkingHoursId);
+                        testTaskOrderWorkingHoursMapper.delete(deleteQueryWrapper);
+                    }
+                }
+                for (Long taskId : taskIds) {
+                    // 根据taskId 循环新增工时数据
+                    endReportAllottedTime(taskId);
+                }
+            }
+        } else {
+            // 报告驳回
+            if (CollectionUtil.isEmpty(testTaskOrderWorkingHoursList)) {
+                // 任务单id集合 不包含工时信息
+                return true;
+            } else {
+                // 进行 日期的截取比较
+                Date now = new Date();
+                //实现将字符串转成⽇期类型
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String now1 = dateFormat.format(now);
+                // 查询工时信息 ： 撤回的情况。 当天撤回。 工时清除 重新计算。
+                for (TestTaskOrderWorkingHours workingHoursData : testTaskOrderWorkingHoursList) {
+                    String now2 = dateFormat.format(workingHoursData.getCreateTime());
+                    if (now1.equals(now2)) {
+                        // now1 != now2 进行工时清除 重新计算
+                        LambdaQueryWrapper<TestTaskOrderWorkingHours> deleteQueryWrapper = new LambdaQueryWrapper<>();
+                        deleteQueryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, workingHoursData.getTaskId());
+                        if (StringUtils.isEmpty(workingHoursData.getWorkingHoursId())) {
+                            deleteQueryWrapper.isNull(TestTaskOrderWorkingHours::getWorkingHoursId);
+                        } else {
+                            deleteQueryWrapper.eq(TestTaskOrderWorkingHours::getWorkingHoursId, workingHoursData.getWorkingHoursId());
+                        }
+                        testTaskOrderWorkingHoursMapper.delete(deleteQueryWrapper);
+                        LambdaQueryWrapper<TestItemOrderWorkingHours> itemDeleteQueryWrapper = new LambdaQueryWrapper<>();
+                        if (StringUtils.isEmpty(workingHoursData.getWorkingHoursId())) {
+                            itemDeleteQueryWrapper.isNull(TestItemOrderWorkingHours::getWorkingHoursId);
+                        } else {
+                            itemDeleteQueryWrapper.eq(TestItemOrderWorkingHours::getWorkingHoursId, workingHoursData.getWorkingHoursId());
+                        }
+                        itemDeleteQueryWrapper.eq(TestItemOrderWorkingHours::getTaskId, workingHoursData.getTaskId());
+                        testItemOrderWorkingHoursMapper.delete(itemDeleteQueryWrapper);
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }

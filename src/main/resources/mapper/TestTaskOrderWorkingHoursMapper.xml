@@ -287,4 +287,17 @@
       GROUP BY
           	CONCAT( t1.task_id, IFNULL( t1.working_hours_id, 0 ) )
   </select>
+  <select id="getTestTaskOrderWorkingHoursList" resultType="com.lims.manage.erp.entity.TestTaskOrderWorkingHours">
+    SELECT
+    *
+    FROM
+    test_task_order_working_hours
+    WHERE
+    task_id in
+    <foreach collection="taskIds" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+    GROUP BY
+    CONCAT( task_id, IFNULL( working_hours_id, 0 ) )
+  </select>
 </mapper>

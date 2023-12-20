@@ -576,7 +576,10 @@ public class ReportApprovalController {
         reportApprovalVo1.setIssuer(name);
         Boolean flag = reportApprovalService.verify_data_two(reportApprovalVo1);
         if (flag) {
-//            testCheckItemsTaskRelService.endReportAllottedTime(4678427883068868L);
+            // 报告签发完成：记录工时
+            if (reportApprovalVo1.getState() == 0) {
+                testCheckItemsTaskRelService.handleWorkingHours(reportApprovalVo1.getId(), 0);
+            }
             return ResultUtil.success(msg + "成功！", true);
         }
         return ResultUtil.error(678, "签发失败！");
