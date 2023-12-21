@@ -54,4 +54,14 @@ public class BucketsConst {
      * 报告原始记录模板
      */
     public static final String report_original="report-original-template";
+    /**
+     * 技术人员档案
+     */
+    public static final String technicist_files="technicist-files";
+    /**
+     * 受控文件
+     */
+    public static final String  controlled_documents=" controlled-documents";
+
+
 }

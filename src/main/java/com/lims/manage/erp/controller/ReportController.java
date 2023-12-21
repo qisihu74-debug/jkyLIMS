@@ -537,21 +537,21 @@ public class ReportController {
      * @return
      */
     @GetMapping("downloadQysFile")
-    public Result downloadQysFile(Long entrustId, Long contractId,String name,String contact,HttpServletResponse response){
+    public Result downloadQysFile(String reportCode,Long entrustId, Long contractId,String name,String contact,HttpServletResponse response){
         if (contractId == null || StringUtils.isEmpty(name) || StringUtils.isEmpty(contact)){
             return ResultUtil.error("缺少必要参数");
         }
         ReportRecordEntity bean = reportService.getDetailByEntrustId(entrustId);
         //TODO 兼容中间报告
         if (bean == null){
-            bean = reportService.getDetailByEntrustIdZj(entrustId);
+            bean = reportService.getDetailByCodeZj(reportCode);
         }
         byte[] bytes = reportService.downloadQysFile(entrustId, contractId, name, contact);
         response.reset();
         response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
         response.setContentType("application/zip");
         response.setCharacterEncoding("UTF-8");
-        String fileName = bean.getReportCode()+"（"+bean.getSampleName()+"）.zip";
+        String fileName = reportCode+"（"+bean.getSampleName()+"）.zip";
         try {
             response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(fileName, "UTF-8"));
             OutputStream outputStream = response.getOutputStream();

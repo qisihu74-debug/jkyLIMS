@@ -298,4 +298,6 @@ public interface ReportMapper {
     String getUrlByReportCode(@Param("reportCode") String reportCode);
 
     List<String> getCodeByIds(@Param("list") List<Long> list);
+
+    ReportRecordEntity getDetailByCodeZj(@Param("reportCode") String reportCode);
 }

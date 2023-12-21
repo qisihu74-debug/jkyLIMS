@@ -482,4 +482,6 @@ public interface ReportService {
     void updateShAndQfByReportCode(String reportCode, String shr, Long shrId, String qhr, Long qhrId, Date shTime, Date qfTime);
 
     Boolean revoke(String reportCode);
+
+    ReportRecordEntity getDetailByCodeZj(String reportCode);
 }
