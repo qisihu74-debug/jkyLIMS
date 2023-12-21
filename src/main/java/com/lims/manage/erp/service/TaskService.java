@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
@@ -225,6 +226,8 @@ public interface TaskService {
 
 
     ZipOutputStream packagingWorkbookZip(List<TaskIdEntity> dataEntitys, HttpServletResponse response,Long taskId) throws IOException;
+
+    OutputStream packagingWorkbookXls(List<TaskIdEntity> dataEntitys, HttpServletResponse response) throws IOException;
 
     /**
      * 检测询任务列表——并设置分页

@@ -879,13 +879,37 @@ public class TaskController {
         List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(taskStatsVo.getIntegers());
         // 判断 压缩数据=null 返回 null
         if(!CollectionUtils.isEmpty(dataEntitys)) {
-            response.reset();
-            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-            response.setContentType("application/zip");
-            response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录.zip", "UTF-8"));
-            ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys, response,null);
-            zipOutputStream.flush();
+            if (!CollectionUtils.isEmpty(dataEntitys)) {
+                // 处理条数 == 1 不需要zip打包
+                if (dataEntitys.size() == 1) {
+                    response.reset();
+                    response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+                    response.setContentType("application/vnd.ms-excel");
+                    response.setCharacterEncoding("UTF-8");
+                    String[] split = dataEntitys.get(0).getFileUrl().split("/");
+                    String[] split1 = split[4].split("\\?");
+                    // 附件后缀名
+                    String suffixName = "." + split1[0].split("\\.")[1];
+                    if (suffixName.equals(".xls")) {
+                        response.setContentType("application/vnd.ms-excel");
+                        response.setCharacterEncoding("UTF-8");
+                        response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录" + dataEntitys.get(0).getCheckItemName() + suffixName, "UTF-8"));
+                    } else {
+                        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                        response.setCharacterEncoding("UTF-8");
+                        response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录" + dataEntitys.get(0).getCheckItemName() + suffixName, "UTF-8"));
+                    }
+                    taskService.packagingWorkbookXls(dataEntitys, response);
+                } else {
+                    response.reset();
+                    response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+                    response.setContentType("application/zip");
+                    response.setCharacterEncoding("UTF-8");
+                    response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录.zip", "UTF-8"));
+                    ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys, response, null);
+                    zipOutputStream.flush();
+                }
+            }
         }
     }
 
@@ -938,13 +962,34 @@ public class TaskController {
                 List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
                 // 判断 压缩数据=null 返回 null
                 if (!CollectionUtils.isEmpty(dataEntitys)) {
-                    response.reset();
-                    response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-                    response.setContentType("application/zip");
-                    response.setCharacterEncoding("UTF-8");
-                    response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录.zip", "UTF-8"));
-                    ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys, response, taskId);
-                    zipOutputStream.flush();
+                    // 处理条数 == 1 不需要zip打包
+                    if (dataEntitys.size() == 1) {
+                        response.reset();
+                        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+
+                        String[] split = dataEntitys.get(0).getFileUrl().split("/");
+                        String[] split1 = split[4].split("\\?");
+                        // 附件后缀名
+                        String suffixName = "." + split1[0].split("\\.")[1];
+                        if (suffixName.equals(".xls")) {
+                            response.setContentType("application/vnd.ms-excel");
+                            response.setCharacterEncoding("UTF-8");
+                            response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录" + dataEntitys.get(0).getCheckItemName() + suffixName, "UTF-8"));
+                        } else {
+                            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                            response.setCharacterEncoding("UTF-8");
+                            response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录" + dataEntitys.get(0).getCheckItemName() + suffixName, "UTF-8"));
+                        }
+                        taskService.packagingWorkbookXls(dataEntitys, response);
+                    } else {
+                        response.reset();
+                        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+                        response.setContentType("application/zip");
+                        response.setCharacterEncoding("UTF-8");
+                        response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode("原始记录.zip", "UTF-8"));
+                        ZipOutputStream zipOutputStream = taskService.packagingWorkbookZip(dataEntitys, response, taskId);
+                        zipOutputStream.flush();
+                    }
                 }
             }
         }
