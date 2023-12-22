@@ -2,6 +2,8 @@ package com.lims.manage.erp.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
+import com.aspose.words.Document;
+import com.aspose.words.SaveFormat;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -31,10 +33,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
@@ -87,8 +91,9 @@ public class TechnicistFilesController {
         if (technicistId == null || file == null || file.isEmpty()){
             return ResultUtil.error("缺少参数");
         }
-        String s = file.getOriginalFilename().split("\\.")[1];
-        if (!"doc,docx,pdf".contains(s)){
+        String filename = file.getOriginalFilename();
+        String[] split = filename.split("\\.");
+        if (!"doc,docx,pdf".contains(split[split.length-1])){
             return ResultUtil.error("文件类型不正确，请上传doc,docx或者pdf文件");
         }
         Boolean flag = technicistFilesService.uploadResume(technicistId,file);
@@ -104,9 +109,9 @@ public class TechnicistFilesController {
      * @param technicistId
      */
     @GetMapping("previewResume")
-    public Result previewResume(Integer technicistId, HttpServletResponse response){
+    public void previewResume(Integer technicistId, HttpServletResponse response){
         if (technicistId == null){
-            return ResultUtil.error("缺少参数");
+            return ;
         }
         LambdaQueryWrapper<TechnicistFiles> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TechnicistFiles::getTechnicistId,technicistId);
@@ -116,25 +121,22 @@ public class TechnicistFilesController {
         String[] strings = one.getFileUrl().split("\\/");
         String bluckName = strings[3];
         String fileName = strings[4];
-        InputStream fileStream = MinIoUtil.getFileStream(bluckName, fileName);
-        response.reset();
-        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-        response.setContentType("application/x-msdownload");
-        response.setCharacterEncoding("UTF-8");
+        String[] split = fileName.split("\\.");
+        String rex = split[split.length-1];
         try {
-            byte[] bytes = fileName.getBytes("UTF-8");
-
-            // 将字节数组转换回字符串
-            fileName = new String(bytes, "UTF-8");
-            response.setHeader("Content-Disposition", "attachment; filename=" + new String(fileName.getBytes(), StandardCharsets.UTF_8));
-            OutputStream outputStream = response.getOutputStream();
-            IOUtils.copy(fileStream,outputStream);
-            fileStream.close();
+            InputStream inputStream = MinIoUtil.getFileStream(bluckName, fileName);
+            ServletOutputStream outputStream = response.getOutputStream();
+            if ("doc,docx".contains(rex)){
+                Document doc = new Document(inputStream);
+                doc.save(outputStream, SaveFormat.PDF);
+            }else {
+                IOUtils.copy(inputStream, outputStream);// copy流数据,i为字节数
+            }
+            inputStream.close();
             outputStream.close();
-        }catch (Exception e){
-            log.error("预览人员履历表文件失败:{}",e);
+        } catch (Exception e) {
+            log.info("导出失败：", e.getMessage());
         }
-        return ResultUtil.success();
     }
 
     /**
