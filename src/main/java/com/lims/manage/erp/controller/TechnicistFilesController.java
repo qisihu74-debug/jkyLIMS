@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -123,7 +122,10 @@ public class TechnicistFilesController {
         response.setContentType("application/x-msdownload");
         response.setCharacterEncoding("UTF-8");
         try {
-            fileName = URLEncoder.encode(fileName, "UTF-8");
+            byte[] bytes = fileName.getBytes("UTF-8");
+
+            // 将字节数组转换回字符串
+            fileName = new String(bytes, "UTF-8");
             response.setHeader("Content-Disposition", "attachment; filename=" + new String(fileName.getBytes(), StandardCharsets.UTF_8));
             OutputStream outputStream = response.getOutputStream();
             IOUtils.copy(fileStream,outputStream);
@@ -141,8 +143,7 @@ public class TechnicistFilesController {
      * @param file
      * @return
      */
-    @RequestMapping("add")
-    @ResponseBody
+    @RequestMapping("/add")
     public Result add(@RequestParam("jsonParam") String jsonParam, MultipartFile file){
         if (StringUtils.isEmpty(jsonParam) || file == null || file.isEmpty()){
             return ResultUtil.error("缺少参数");
