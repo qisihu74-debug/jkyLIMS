@@ -28,15 +28,12 @@ import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.AlertService;
-import com.lims.manage.erp.service.EntrustService;
-import com.lims.manage.erp.service.LogManagerService;
-import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.DownloadUtils;
@@ -132,8 +129,10 @@ public class ReportController {
     private RedisUtil redisUtil;
     @Autowired
     private SysUserDao sysUserDao;
-//    @Autowired
-//    private ReportRecordEntityMapper recordEntityMapper;
+    @Autowired
+    private ReportRecordEntityMapper recordEntityMapper;
+    @Autowired
+    private TestCheckItemsTaskRelService testCheckItemsTaskRelService;
 
     Logger logger = LoggerFactory.getLogger(ReportController.class);
     /**
@@ -198,6 +197,9 @@ public class ReportController {
         }
         Boolean flag = reportService.revoke(reportCode);
         if (flag){
+            ReportRecordEntity entity = recordEntityMapper.getUrlByCode(reportCode);
+            // 获取报告id 撤回
+            testCheckItemsTaskRelService.handleWorkingHours(entity.getId(), 1);
             log.info("用户："+ShiroUtils.getUserInfo().getName()+" 在："+DateUtil.getDayString(System.currentTimeMillis())+" 撤回了报告，编号为："+reportCode);
             return ResultUtil.success("撤回成功");
         }else {
