@@ -74,6 +74,11 @@ public class TaskProgressVo {
     /**
      * 任务号
      */
-    @TableField(exist=false)
+    @TableField(exist = false)
     private String code;
+    /**
+     * 标记
+     */
+    @TableField(exist = false)
+    private Boolean status;
 }

@@ -278,34 +278,36 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             return ResultUtil.error("领取失败： 当前流水号任务单不存在");
         }
         // 任务领取-循环验证 数据 msg = null 正常执行、！= null 抛出。
-        Result msg = loopValidation(list, taskProgressVos);
+        Result msg = loopValidation(list);
         if (msg != null) {
             return msg;
         }
         // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
         // 根据科室id 及 委托单主键 查询任务单是否存在？
-        //                         1、任务单存在 查看状态=试验开始 则返回错误信息 状态=未开始试验的话，最后删除任务单操作
-        //                         2、 任务单不存在的话，创建任务单即可。
+        //                        // TODO: 12月21日 1、 旧任务单存在 更新任务单 更新检测项 ，2、任务单与前端绑定不一致， 删除任务单操作。
+        //                           TODO:          2、 任务单不存在的话，创建任务单即可。
         //调用方法： 补充检测项信息并发布任务单
         // key = deptId value = 旧单号
         Map<Long, TaskProgressVo> taskCodeMap = new HashMap<>();
         // 1.1：任务单列表存在的话
         if (CollectionUtil.isNotEmpty(taskProgressVos)) {
-            // 删除任务单号
-            for (TaskProgressVo taskProgressVo : taskProgressVos) {
-                // 根据部门id 保留旧任务单号
-                taskCodeMap.put(taskProgressVo.getDeptId().longValue(), taskProgressVo);
-                taskMapper.deleteTaskById(taskProgressVo.getTaskId());
+            // 处理旧任务单与检测项关系
+            processingOldTaskList(list, taskProgressVos, itemList, entrustId);
+            // 针对 list 含有 taskId的 进行集合循环
+            Iterator<SampleItemEntity> it = list.iterator();
+            while (it.hasNext()) {
+                SampleItemEntity data = it.next();
+                if (data.getTaskId() != null) {
+                    it.remove();
+                }
             }
         }
-        // 根据 委托单id 条件删除流转信息
-        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
-        queryWrapper12.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
-        testCheckItemsTaskRelMapper.delete(queryWrapper12);
         // 2、进行录入任务单信息
-        for (SampleItemEntity sampleItemEntity : list) {
-            String sampler = sampleItemEntity.getSampler().split("-")[0];
-            methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue(), taskCodeMap);
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (SampleItemEntity sampleItemEntity : list) {
+                String sampler = sampleItemEntity.getSampler().split("-")[0];
+                methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue(), taskCodeMap);
+            }
         }
         // 调用方法 进行 更新流水号任务单信息
         methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
@@ -313,13 +315,131 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     }
 
     /**
+     * TODO: 12月21日 1、 旧任务单存在 更新任务单 更新检测项 ，2、任务单与前端绑定不一致， 删除任务单操作。
+     *
+     * @param list            任务大厅 检测项数据
+     * @param taskProgressVos old 旧任务单列表
+     * @param itemList        委托单下检测项
+     * @param entrustId       委托单id
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void processingOldTaskList(List<SampleItemEntity> list, List<TaskProgressVo> taskProgressVos, List<SampleItemEntity> itemList,
+                                      Long entrustId) {
+        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustId);
+        // 根据 entrustId 条件删除流转信息
+        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+        queryWrapper12.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
+        testCheckItemsTaskRelMapper.delete(queryWrapper12);
+        // 设置折扣
+        Double discount = null;
+        discount = Double.parseDouble(entrustAddVo.getDiscount());
+        for (SampleItemEntity itemEntity : list) {
+            //  -- 读取 deptId
+            for (TaskProgressVo taskProgressVo : taskProgressVos) {
+                if (taskProgressVo.getDeptId().longValue() == itemEntity.getTechnicistId()) {
+                    // 任务单保留
+                    taskProgressVo.setStatus(true);
+                    //  新增检测项流转信息
+                    itemEntity.setTaskId(taskProgressVo.getTaskId());
+                    itemEntity.setEntrustId(entrustId);
+                    inserCheckItemsTaskRel(itemEntity, itemList);
+//                    //更新检测项分配的部门和任务单号
+                    List<CheckItemDeptVo> checkItemDeptVoList1 = Lists.newArrayList();
+                    for (Integer itemId : itemEntity.getItemIds()) {
+                        CheckItemDeptVo itemDeptVo = new CheckItemDeptVo();
+                        itemDeptVo.setId(itemId);
+                        itemDeptVo.setDeptId(itemEntity.getTechnicistId());
+                        itemDeptVo.setTaskId(itemEntity.getTaskId());
+                        checkItemDeptVoList1.add(itemDeptVo);
+                    }
+//                    //更新检测项信息
+                    taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
+                    //计算本单价格
+                    double taskPrice = 0L;
+                    for (CheckItemDeptVo itemDeptVo : checkItemDeptVoList1) {
+                        for (SampleItemEntity sampleItemEntity : itemList) {
+                            if (sampleItemEntity.getId().equals(itemDeptVo.getId())) {
+                                taskPrice = taskPrice + ((discount == null ? 0 : discount) *
+                                        (sampleItemEntity.getUnitPrice() == null ? 0 : sampleItemEntity.getUnitPrice())) * sampleItemEntity.getTimes();
+                            }
+                        }
+                    }
+                    // 更新taskId 价格
+                    TaskTestEntity taskTestEntity = new TaskTestEntity();
+                    taskTestEntity.setId(itemEntity.getTaskId());
+                    taskTestEntity.setTaskPrice(taskPrice);
+                    // 领样人
+                    taskTestEntity.setSampler(itemEntity.getSampler());
+                    taskMapper.updateTestTask(taskTestEntity);
+                }
+            }
+        }
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        String userName = userInfo.getUserId() + "&" + userInfo.getUsername();
+        // 删除废弃的任务单信息。
+        for (TaskProgressVo taskProgressVo : taskProgressVos) {
+            // itemEntity.getTaskId()!=null 说明任务单更新了。
+            //  取 差集 list 和 taskProgressVos 都存在的保留 否则删除任务单。
+            if (taskProgressVo.getStatus() == null) {
+                // 任务单删除
+                // 查询任务单详情：
+                TaskTestEntity data = taskMapper.selectTaskEntity(taskProgressVo.getTaskId());
+                // 删除时间
+                data.setWasteTime(new Date());
+                // 操作人
+                data.setDerelict(userName);
+                // 新增已删除任务单 插入表 test_task_used
+                taskMapper.inserTasUsed(data);
+                // 删除任务单
+                taskMapper.deleteTaskById(data.getId());
+            }
+
+        }
+    }
+
+    /**
+     * 任务大厅-领取任务-新增检测项与使用人的关系
+     *
+     * @param sampleItemEntity 待绑定的检测项与使用人
+     * @param itemList         委托单下检测项
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void inserCheckItemsTaskRel(SampleItemEntity sampleItemEntity, List<SampleItemEntity> itemList) {
+        // 遍历每组检测项分配的itemId数量
+        for (int i = 0; i < sampleItemEntity.getItemIds().size(); i++) {
+            for (SampleItemEntity sampleItemEntity1 : itemList) {
+                Integer itemId = sampleItemEntity.getItemIds().get(i);
+                if (sampleItemEntity1.getId().equals(itemId)) {
+                    for (TestCheckItemsTaskRel taskRel : sampleItemEntity.getItemsTaskRels()) {
+                        // 检测项主键
+                        taskRel.setItemId(itemId);
+                        // 检测项名称
+                        taskRel.setCheckItemName(sampleItemEntity1.getCheckItemName());
+                        // 样品名称
+                        taskRel.setSampleName(sampleItemEntity1.getSampleName());
+                        // 样品编号
+                        taskRel.setSampleCode(sampleItemEntity1.getSampleCode());
+                        // 样品id
+                        taskRel.setSampleId(sampleItemEntity1.getSampleId());
+                        // 委托单主键
+                        taskRel.setEntrustId(sampleItemEntity.getEntrustId());
+                        // 任务单id
+                        taskRel.setTaskId(sampleItemEntity.getTaskId());
+                        // 调用方法： 对每组检测项的人员信息进行新增。
+                        testCheckItemsTaskRelMapper.insert(taskRel);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * 任务领取-循环验证 数据
      *
-     * @param list            任务单领取数据值
-     * @param taskProgressVos 通过委托单id 查询旧任务列表
+     * @param list 任务单领取数据值
      * @return = null 正常执行，否则抛出异常值。
      */
-    public Result loopValidation(List<SampleItemEntity> list, List<TaskProgressVo> taskProgressVos) {
+    public Result loopValidation(List<SampleItemEntity> list) {
         // 检测人集合
         List<Long> tsetUserIds = new ArrayList<>();
         // 报告制作人集合
@@ -404,6 +524,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 return ResultUtil.error("领取失败：检测人信息不能为空");
             }
             sampleItemEntity.setItemsTaskRels(inspectorRels);
+            // 设置留样人信息
+            sampleItemEntity.setSampler(sampleItemEntity.getSampler().split("-")[0]);
         }
         // 进行效验：每组检测项中 报告制作人 应该不同，相同 会生成两组同样的任务单号
         List<Long> detectorsCollection0 = teamMapper.getUsersByTechnicist(reportProducerIds);
@@ -414,15 +536,6 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         List<Long> detectorsCollection = teamMapper.getUsersByTechnicist(tsetUserIds);
         if (detectorsCollection.size() != list.size() && claimFlag == true) {
             return ResultUtil.error("领取失败：" + "请选择同一组人员，同一组人员必须要在同一个团队，不同组的人员，不能出现在同一个团队中");
-        }
-        for (TaskProgressVo taskProgressVo : taskProgressVos) {
-            if (taskProgressVo.getState() != 144) {
-                // 任务单状态： 状态0未抢单，1.已抢单，2已领样,3实验中，4实验完成，5原始记录已上传，6.原始记录已符合，
-                if (taskProgressVo.getState() >= 3) {
-                    // 1.2 查看状态=试验开始 则返回错误信息
-                    return ResultUtil.error("领取失败： 当前任务单 " + taskProgressVo.getTaskCode() + "已开始试验");
-                }
-            }
         }
         // 参与效验的数据--------------------------------- ↑↑↑↑ ------------------------
         return null;
