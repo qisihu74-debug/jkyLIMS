@@ -53,7 +53,10 @@
         t1.task_code,
         t2.NAME AS receiver,
         "任务大厅" AS source,
-        t1.working_hours_id as state
+        IF
+        ( IFNULL( t3.update_time, 0 ) = 0, 0, 1 ) AS state,
+        t3.total_working_hours as workingHours,
+        t3.working_hours_id as workingHoursId
         FROM
         test_task AS t1
         LEFT JOIN sys_user AS t2 ON t1.receiver = t2.user_id
@@ -71,7 +74,8 @@
                 AND #{stopDate} >= t1.required_completion_time
             </if>
         </where>
-        GROUP BY t1.id
+        GROUP BY
+        CONCAT( t1.id, IFNULL( t3.working_hours_id, 0 ) )
         ORDER BY t1.end_detection_time desc
     </select>
 

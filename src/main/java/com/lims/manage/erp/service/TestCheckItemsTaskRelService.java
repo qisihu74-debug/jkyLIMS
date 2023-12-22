@@ -61,7 +61,7 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      * @param taskId
      * @return
      */
-    Result getMyHoursStatisticsDetails(Long taskId);
+    Result getMyHoursStatisticsDetails(Long taskId, String workingHoursId);
 
     /**
      * 工时统计-我的工时-调整分配
@@ -69,7 +69,7 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      * @param list
      * @return
      */
-    Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list);
+    Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list, String workingHoursId);
 
     /**
      * 工时统计-按照人员统计
@@ -135,12 +135,30 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      */
     Result getAuthorizedSignatureHours(TaskStatisticsVo taskStatisticsVo);
 
-    /**
+    // TODO：2023年12月18日 任务单完成后 分配工时 废弃
+    /*    *//**
      * 任务单完成、分配工时
      * @param taskId
      * @return
+     *//*
+    Boolean endTaskAllottedTime(Long taskId);*/
+
+    /**
+     * 报告签发完成、分配工时
+     *
+     * @param taskId
+     * @return
      */
-    Boolean endTaskAllottedTime(Long taskId);
+    Boolean endReportAllottedTime(Long taskId);
+
+    /**
+     * 报告签发后： 存储工时信息时，处理业务信息
+     *
+     * @param reportId 报告id
+     * @param state    state = 0 报告签发、state = 1 报告驳回
+     * @return
+     */
+    Boolean handleWorkingHours(Long reportId, Integer state);
 
 
 }

@@ -269,7 +269,8 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
         FROM
         test_entrusted_sample_checkitem_rel AS t1
         LEFT JOIN test_product_item AS t2 ON t1.check_item_id = t2.check_item_id
-        LEFT JOIN (select * from test_standard_file union all select * from  test_standard_file_record) AS t3 ON t1.standard_id = t3.id
+        LEFT JOIN (select * from test_standard_file union all select * from  test_standard_file_record) AS t3
+            ON t1.standard_id = t3.id
         LEFT JOIN test_method As t4 ON t4.id = t1.method_id
         LEFT JOIN test_team as t5 ON t5.id = t1.dept_id
         <trim prefix="WHERE" prefixOverrides="AND |OR ">

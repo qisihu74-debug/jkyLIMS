@@ -82,6 +82,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -1701,7 +1702,9 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                  * TODD:7月5日 原始记录命名规则
                  * 任务单号+模板名称，如果有重复的，后面加序号
                  */
-                SampleServiceImpl.DealWithZip(workbook, data.getTaskCode()+data.getOriginalName()+(i+1)+".xls", out);
+                // 附件后缀名
+                String suffixName = "." + split1[0].split("\\.")[1];
+                SampleServiceImpl.DealWithZip(workbook, data.getTaskCode()+data.getOriginalName()+(i+1)+suffixName, out);
             }
             catch (Exception e){
                 log.info("输出异常\t"+e);
@@ -1715,6 +1718,31 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             out.close();
         }
         return out;
+    }
+
+    public OutputStream packagingWorkbookXls(List<TaskIdEntity> dataEntitys, HttpServletResponse response) throws IOException {
+        // 通过输入参数 返回 对应的处理成功的EXCEL数据。
+        ServletOutputStream outputStream = response.getOutputStream();
+        // 批量获取 检测项id（有可能对应多个模板） 再进行填充。
+        // 通过检测项id 获取 相应的 id关联信息。
+        for(int i=0; i<dataEntitys.size(); i++ ){
+            TaskIdEntity data = dataEntitys.get(i);
+            // 有序信息。
+            OriginalRecordDataVo originalData = getOriginalData(data.getTaskId(), data.getSampleId(),data.getCheckItemId(), data.getIdItem());
+            Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
+            result.put("result", originalData);
+            // 原始记录模板 比对信息
+            try {
+                Workbook workbook = methodPlugTheData(data.getFileUrl(),result, null,dataEntitys.get(0).getTaskId());
+                workbook.write(outputStream);
+            }
+            catch (Exception e){
+                log.info("输出异常\t"+e);
+            }
+        }
+        // 关闭输入流
+        outputStream.close();
+        return outputStream;
     }
 
     /**

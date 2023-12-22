@@ -381,4 +381,171 @@
         WHERE
             id = #{reportId}
     </select>
+
+    <insert id="insertTaskStatistics" parameterType="java.lang.Long">
+        INSERT INTO test_task_statistics (
+            id,
+            CODE,
+            entrustment_id,
+            orderer,
+            order_time,
+            required_completion_time,
+            team_id,
+            receiver,
+            receive_time,
+            sampler,
+            sample_receiving_time,
+            inspector,
+            start_detection_time,
+            end_detection_time,
+            recorder,
+            reviewer,
+            verifyer,
+            verify_time,
+            signer,
+            sign_time,
+            state,
+            report_producer,
+            task_code,
+            reason,
+            report_url,
+            issue_report,
+            dept_id,
+            report_complete,
+            sample_state_description,
+            review_time,
+            task_price,
+            present_information,
+            create_time,
+            probationer,
+            interns,
+            auxiliary_personnel,
+            pool_id,
+            working_hours_id,
+            issuer_time
+        ) SELECT
+              t1.id,
+              CODE,
+              t1.entrustment_id,
+              orderer,
+              order_time,
+              t1.required_completion_time,
+              team_id,
+              receiver,
+              receive_time,
+              sampler,
+              sample_receiving_time,
+              t1.inspector,
+              start_detection_time,
+              end_detection_time,
+              recorder,
+              reviewer,
+              t1.verifyer,
+              verify_time,
+              signer,
+              sign_time,
+              t1.state,
+              report_producer,
+              t1.task_code,
+              reason,
+              t1.report_url,
+              issue_report,
+              dept_id,
+              report_complete,
+              sample_state_description,
+              review_time,
+              task_price,
+              present_information,
+              create_time,
+              probationer,
+              interns,
+              auxiliary_personnel,
+              pool_id,
+              working_hours_id,
+              SYSDATE( )
+        FROM
+            test_task t1
+        WHERE
+            t1.entrustment_id = #{entrustmentId}
+    </insert>
+
+    <insert id="insertCheckItemStatistics" parameterType="java.lang.Long">
+        INSERT INTO test_entrusted_sample_checkitem_statistics (
+            id,
+            entrust_id,
+            sample_id,
+            check_item_name,
+            check_item_id,
+            instrument_id,
+            standard_id,
+            method_id,
+            times,
+            unit_price,
+            start_time,
+            end_time,
+            result,
+            test_people,
+            is_approved,
+            origin_url,
+            state,
+            sample_state,
+            opinion,
+            file_url_str,
+            dept_id,
+            distribution_date,
+            item_file_name,
+            task_id,
+            edit_data,
+            mid_state,
+            instrument_status,
+            original_record_status,
+            original_data,
+            test_set_url,
+            record_set_url,
+            reviewed_by_set_url,
+            check_item_code,
+            category,
+            qys_docment_id,
+            contract_id,
+            sign_url,
+            qys_state,
+            sealer,
+            seal_time,
+            origin_url_pdf,
+            issuer_time
+        ) SELECT
+            t2.*,SYSDATE()
+        FROM
+            test_entrusted_sample_checkitem_rel t2
+        WHERE
+            t2.entrust_id = #{entrustmentId}
+            and id in
+        <foreach collection='newEscIds' item='id' open='(' separator=',' close=')'>
+            #{id}
+        </foreach>
+    </insert>
+
+    <select id="getStatisticsEscId" resultType="java.lang.Integer">
+        SELECT
+            id
+        FROM
+            test_entrusted_sample_checkitem_statistics
+        WHERE
+            entrust_id = #{entrustmentId}
+    </select>
+
+    <select id="getNewEscId" resultType="java.lang.Integer">
+        SELECT
+            id
+        FROM
+            test_entrusted_sample_checkitem_rel
+        WHERE
+            entrust_id = #{entrustmentId}
+    </select>
+
+    <select id="getReportInfo" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        select *
+        from test_report_record
+        where id = #{reportCode}
+    </select>
 </mapper>

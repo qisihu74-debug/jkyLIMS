@@ -59,6 +59,13 @@ public interface ReportRecordEntityMapper {
     ReportRecordEntity getUrlByCode(String reportCode);
 
     /**
+     * 获取报告全部信息
+     * @param reportCode
+     * @return
+     */
+    ReportRecordEntity getReportInfo(String reportCode);
+
+    /**
      * 根据报告编号获取委托单id
      * @param reportCode
      * @return
@@ -556,4 +563,13 @@ public interface ReportRecordEntityMapper {
 
     @Update("update test_report_record set state=#{state},qys_state='1' where report_code = #{reportCode}")
     void updateStateByCode(@Param("reportCode") String reportCode,@Param("state") String state);
+
+    /**
+     * 撤回时产值归零
+     * @param entrustId
+     */
+    void updatePriceZero(@Param("entrustId") Long entrustId);
+
+    void deletePrice(@Param("entrustId") Long entrustId);
+    void deleteTask(@Param("entrustId") Long entrustId);
 }

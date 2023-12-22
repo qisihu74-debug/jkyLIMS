@@ -13,4 +13,6 @@ import java.util.List;
 public class TestTaskOrderWorkingHoursVo {
 
     List<TestTaskOrderWorkingHours> list;
+
+    String workingHoursId;
 }

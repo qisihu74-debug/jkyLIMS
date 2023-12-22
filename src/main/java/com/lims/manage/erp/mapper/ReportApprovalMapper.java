@@ -1,5 +1,6 @@
 package com.lims.manage.erp.mapper;
 
+import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -117,4 +118,33 @@ public interface ReportApprovalMapper {
      */
     String getReportUrl(Long reportId);
 
+    /**
+     * 签发生成任务快照
+     * @param entrustmentId
+     * @return
+     */
+    int insertTaskStatistics(Long entrustmentId);
+
+    /**
+     * 签发生成检测项快照
+     * @param entrustmentId
+     * @return
+     */
+    int insertCheckItemStatistics(@Param("entrustmentId")Long entrustmentId,@Param("newEscIds")List<Integer> newEscIds);
+
+    /**
+     * 查询快照中的检测项信息
+     * @param entrustmentId
+     * @return
+     */
+    List<Integer> getStatisticsEscId(Long entrustmentId);
+
+    /**
+     * 查询签发时的检测项信息
+     * @param entrustmentId
+     * @return
+     */
+    List<Integer> getNewEscId(Long entrustmentId);
+
+    ReportRecordEntity getReportInfo(Long reportId);
 }

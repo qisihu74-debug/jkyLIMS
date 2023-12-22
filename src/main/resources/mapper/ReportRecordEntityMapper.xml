@@ -434,6 +434,12 @@
         where report_code = #{reportCode}
     </select>
 
+    <select id="getReportInfo" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        select *
+        from test_report_record
+        where report_code = #{reportCode}
+    </select>
+
     <select id="getEntrustIdByCode" resultType="java.lang.Long">
         select entrustment_id
         from test_report_record
@@ -1372,4 +1378,26 @@
             #{id}
         </foreach>
     </select>
+
+    <update id="updatePriceZero" parameterType="java.lang.Long">
+        UPDATE test_entrusted_sample_checkitem_statistics
+        SET unit_price = 0
+        WHERE
+            entrust_id = #{entrustId}
+          AND DATE_FORMAT( issuer_time, '%Y-%m-%d' ) = DATE_FORMAT( SYSDATE(), '%Y-%m-%d' )
+    </update>
+
+    <delete id="deletePrice" parameterType="java.lang.Long">
+        delete
+        from test_entrusted_sample_checkitem_statistics
+        where entrust_id = #{entrustId}
+          AND DATE_FORMAT( issuer_time, '%Y-%m-%d' ) = DATE_FORMAT( SYSDATE(), '%Y-%m-%d' )
+    </delete>
+    <delete id="deleteTask" parameterType="java.lang.Long">
+        delete
+        from test_task_statistics
+        where entrustment_id = #{entrustId}
+          AND DATE_FORMAT( issuer_time, '%Y-%m-%d' ) = DATE_FORMAT( SYSDATE(), '%Y-%m-%d' )
+    </delete>
+
 </mapper>

@@ -122,6 +122,7 @@
             #{user_id}
         </foreach>
         AND tr.user_id IS NOT NULL
+        AND tr.del_flag = 0
     </select>
 
     <select id="getByTeamId" resultType="com.lims.manage.erp.entity.TestTeam">
