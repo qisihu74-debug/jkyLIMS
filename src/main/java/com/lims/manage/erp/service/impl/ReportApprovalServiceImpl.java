@@ -477,6 +477,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean verify_data_two(ReportApprovalVo reportApprovalVo1) {
         //      state  0是通过 1 是驳回
         // 报告状态，0报告被驳回 1指标填写已完成，2指标填写未完成，3.审批已抢单，4.签发待抢单，5.签发已抢单，6已签发，7已盖章，8已邮寄
@@ -484,10 +485,12 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
         // 获取报告状态 是中间报告 还是 最终报告
         ReportApprovalVo reportApprovalVo2  = reportApprovalMapper.getReportApprovalDetail(reportApprovalVo1.getId());
+        //TODO 最终报告通过
         if (reportApprovalVo1.getState() == 0 && reportApprovalVo2.getReportTypeStatus()==0) {
             //通过6已签
             state = 6;
-            reportApprovalVo.setIssuerTime(new Date());
+            Date issuerTime = new Date();
+            reportApprovalVo.setIssuerTime(issuerTime);
             reportApprovalVo.setIssuer(reportApprovalVo1.getIssuer());
             // 印章数据 转成字符串
             StringBuilder stringBuilder = new StringBuilder();
@@ -526,8 +529,21 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             }
             reportApprovalVo.setReportUrl(path);
             reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
+            //TODO 存储产值
+            ReportRecordEntity reportInfo = reportApprovalMapper.getReportInfo(reportApprovalVo1.getId());
+            Long entrustmentId = reportInfo.getEntrustmentId();
+            //转储任务
+            reportApprovalMapper.insertTaskStatistics(entrustmentId);
+            //转储检测项，校验有没有新增检测项
+            List<Integer> statisticsEscId = reportApprovalMapper.getStatisticsEscId(entrustmentId);
+            List<Integer> newEscId = reportApprovalMapper.getNewEscId(entrustmentId);
+            newEscId.removeAll(statisticsEscId);
+            if(newEscId.size() != 0){
+                reportApprovalMapper.insertCheckItemStatistics(entrustmentId,newEscId);
+            }
             return true;
         }
+        //TODO 最终报告驳回
         if (reportApprovalVo1.getState() == 1 && reportApprovalVo2.getReportTypeStatus()==0) {
             // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填 清除信息 退回上一步
             state = 0;
@@ -556,6 +572,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             return true;
         }
         // 处理中间报告
+        //TODO 中间报告通过
         if (reportApprovalVo1.getState() == 0 && reportApprovalVo2.getReportTypeStatus()==1) {
             //通过6已签
             state = 6;
@@ -594,6 +611,7 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
             reportApprovalMapper.updateVerifyMonad(reportApprovalVo);
             return true;
         }
+        //TODO 中间报告驳回
         if (reportApprovalVo1.getState() == 1 && reportApprovalVo2.getReportTypeStatus()==1) {
             // 驳回 对报告签发人清空 签发抢单时间清空 状态改变 如果有备注 选填 清除信息 退回上一步
             state = 0;

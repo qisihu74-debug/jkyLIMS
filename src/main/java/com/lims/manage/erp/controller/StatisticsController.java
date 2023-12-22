@@ -221,7 +221,7 @@ public class StatisticsController {
         if(paramVo.getPageNum() == null || paramVo.getPageSize() == null){
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), "缺少分页参数！");
         }
-        return ResultUtil.success("部门产值统计查询成功！", statisticsService.teamStatistics0419(paramVo));
+        return ResultUtil.success("部门产值统计查询成功！", statisticsService.teamStatistics1219(paramVo));
     }
 
     /**

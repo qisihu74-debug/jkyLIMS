@@ -1824,6 +1824,14 @@ public class ReportServiceImpl implements ReportService {
             String fileName = strings[4];
             MinIoUtil.deleteFile(bluckName,fileName);
         }
+        //产值逻辑
+        ReportRecordEntity reportInfo = recordEntityMapper.getReportInfo(reportCode);
+        String type = reportInfo.getType();
+        Long entrustId = reportInfo.getEntrustmentId();
+        if("0".equals(type)){//撤回最终报告
+            recordEntityMapper.deletePrice(entrustId);
+            recordEntityMapper.deleteTask(entrustId);
+        }
         return true;
     }
 
