@@ -120,4 +120,9 @@ public class TaskStatisticsVo {
     @TableField(exist = false)
     private String completedTaskVolume;
 
+    /**
+     * 工时id
+     */
+    private Long workingHoursId;
+
 }

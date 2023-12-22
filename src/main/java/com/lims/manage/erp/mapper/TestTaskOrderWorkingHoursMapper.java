@@ -3,6 +3,8 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
 import com.lims.manage.erp.vo.TaskStatisticsVo;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -53,8 +55,34 @@ public interface TestTaskOrderWorkingHoursMapper  extends BaseMapper<TestTaskOrd
 
     /**
      * 根据授权签字人 查询信息
+     *
      * @param taskStatisticsVo
      * @return
      */
     List<TestTaskOrderWorkingHours> selectTaskOrderList(TaskStatisticsVo taskStatisticsVo);
+
+    /**
+     * 通过委托单id 获取任务单id列表
+     *
+     * @param entrustId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid \n" +
+            "FROM\n" +
+            "\ttest_task \n" +
+            "WHERE\n" +
+            "\tentrustment_id = #{entrustId} \n" +
+            "\tAND state != 144")
+    List<Long> getTaskList(@Param("entrustId") Long entrustId);
+
+    /**
+     * 根据taskIds 查询返回数据
+     *
+     * @param taskIds
+     * @return
+     */
+    List<TestTaskOrderWorkingHours> getTestTaskOrderWorkingHoursList(@Param("taskIds") List<Long> taskIds);
+
+
 }

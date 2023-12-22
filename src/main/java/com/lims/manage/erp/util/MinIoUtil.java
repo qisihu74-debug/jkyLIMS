@@ -13,6 +13,8 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -191,7 +193,13 @@ public class MinIoUtil {
      */
     @SneakyThrows(Exception.class)
     public static InputStream getFileStream(String bucketName, String fileName) {
-        return minioClient.getObject(bucketName,fileName);
+        String decode = null;
+        try {
+            decode = URLDecoder.decode(fileName, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.error("文件名称解码失败:{}",e);
+        }
+        return minioClient.getObject(bucketName,decode);
     }
 
 }

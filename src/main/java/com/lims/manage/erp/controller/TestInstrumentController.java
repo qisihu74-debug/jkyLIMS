@@ -2,15 +2,18 @@ package com.lims.manage.erp.controller;
 
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
+import com.aspose.cells.Cells;
+import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageInfo;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.DeviceEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrument;
+import com.lims.manage.erp.mapper.DeviceEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -19,6 +22,7 @@ import com.lims.manage.erp.service.TestInstrumentService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.SnowflakeIdGenerator;
 import com.lims.manage.erp.vo.ExportParamVo;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.LabelValueVo;
@@ -28,9 +32,16 @@ import io.swagger.annotations.ApiOperation;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -40,6 +51,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -60,6 +73,10 @@ public class TestInstrumentController extends ApiController {
     private TestInstrumentService testInstrumentService;
     @Resource
     private LogManagerService logManagerService;
+    @Autowired
+    private DeviceEntityMapper deviceEntityMapper;
+    @Autowired
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     @GetMapping("/getAllOld")
     public Result getAllOld(TestInstrument testInstrument) {
@@ -379,5 +396,100 @@ public class TestInstrumentController extends ApiController {
             }
         }
     }
+
+    /**
+     * 导入仪器设备
+     */
+    @GetMapping("importDevice")
+    @Transactional(rollbackFor = Exception.class)
+    public void importDevice(HttpServletResponse response) throws Exception{
+        //读取excel
+        com.aspose.cells.Workbook workbook1 = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\需打印设备标识卡.xlsx");
+        Worksheet worksheet1 = workbook1.getWorksheets().get(0);
+        Cells cells1 = worksheet1.getCells();
+        //遍历excel，根据编号查询
+        int num1 = 2;
+        List<DeviceEntity> list = Lists.newArrayList();
+        while (num1<=45){
+            DeviceEntity deviceEntity = new DeviceEntity();
+            String codeIndex = "A"+num1;
+            String nameIndex = "C"+num1;
+            String modeIndex = "D"+num1;
+            String manufacturerIndex = "E"+num1;
+            String serial_numberIndex = "F"+num1;
+            String purchase_dateIndex = "G"+num1;
+            String isIndex = "H"+num1;
+            String affirm_wayIndex = "I"+num1;
+            String calibration_corporation = "J"+num1;
+            String appraisal_date = "K"+num1;
+            String use_dept = "N"+num1;
+            String range = "P"+num1;
+            String level = "Q"+num1;
+            String calibration_param = "R"+num1;
+            String store_place = "S"+num1;
+
+            deviceEntity.setCode(cells1.get(codeIndex).getValue() != null?cells1.get(codeIndex).getValue().toString():"");
+            deviceEntity.setName(cells1.get(nameIndex).getValue() != null?cells1.get(nameIndex).getValue().toString():"");
+            deviceEntity.setModel(cells1.get(modeIndex).getValue()!= null?cells1.get(modeIndex).getValue().toString():"");
+            deviceEntity.setManufacturer(cells1.get(manufacturerIndex).getValue()!= null?cells1.get(manufacturerIndex).getValue().toString():"");
+            deviceEntity.setSerialNumber(cells1.get(serial_numberIndex).getValue()!=null?cells1.get(serial_numberIndex).getValue().toString():"");
+            try {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                Object value = cells1.get(purchase_dateIndex).getValue();
+                if (value != null){
+                    String string = cells1.get(purchase_dateIndex).getValue().toString();
+                    Date date = simpleDateFormat.parse(string);
+                    deviceEntity.setPurchaseDate(date);
+                }
+            }catch (Exception e){
+
+            }
+            deviceEntity.setIsCalibration(cells1.get(isIndex).getValue()!=null?cells1.get(isIndex).getValue().toString():"");
+            deviceEntity.setAffirmWay(cells1.get(affirm_wayIndex).getValue()!=null?cells1.get(affirm_wayIndex).getValue().toString():"");
+            deviceEntity.setCalibrationCorporation(cells1.get(calibration_corporation).getValue()!=null?cells1.get(calibration_corporation).getValue().toString():"");
+            try {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                Object value = cells1.get(appraisal_date).getValue();
+                if (value != null){
+                    String string = cells1.get(appraisal_date).getValue().toString();
+                    Date date = simpleDateFormat.parse(string);
+                    deviceEntity.setAppraisalDate(date);
+                }
+            }catch (Exception e){
+
+            }
+            deviceEntity.setUseDept(cells1.get(use_dept).getValue()!=null?cells1.get(use_dept).getValue().toString():"");
+            deviceEntity.setRange(cells1.get(range).getValue()!=null?cells1.get(range).getValue().toString():"");
+            deviceEntity.setLevel(cells1.get(level).getValue()!=null?cells1.get(level).getValue().toString():"");
+            deviceEntity.setCalibrationParam(cells1.get(calibration_param).getValue()!=null?cells1.get(calibration_param).getValue().toString():"");
+            deviceEntity.setStorePlace(cells1.get(store_place).getValue()!=null?cells1.get(store_place).getValue().toString():"");
+            deviceEntity.setFilesState("正常");
+            deviceEntity.setId(snowflakeIdGenerator.nextId());
+            deviceEntity.setStatus("0");
+            deviceEntity.setDelFlag(0);
+            deviceEntity.setCreateTime(new Date());
+            list.add(deviceEntity);
+            num1++;
+        }
+        //导入
+        for (DeviceEntity deviceEntity :list){
+            deviceEntityMapper.insert(deviceEntity);
+        }
+        //打印
+        for (DeviceEntity deviceEntity :list){
+            TestInstrument testInstrument = new TestInstrument();
+            testInstrument.setName(deviceEntity.getName());//设备名称
+            testInstrument.setCode(deviceEntity.getCode());//设备编号
+            testInstrument.setModel(deviceEntity.getModel());//设备型号
+            testInstrument.setSerialNumber(deviceEntity.getSerialNumber());//出厂编号
+            try {
+                Thread.sleep(20);
+                testInstrumentService.printDeviceLables(deviceEntity.getId(),testInstrument, response);
+            }catch (Exception e){
+                logger.error("打印设备标签异常:{}",e);
+            }
+        }
+    }
+
 }
 

@@ -12,6 +12,7 @@ import com.lims.manage.erp.vo.TestTaskOrderWorkingHoursVo;
 import com.lims.manage.erp.vo.WorkHourStatisticVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -113,9 +114,12 @@ public class StatisticAnalysisInterface {
      * @return
      */
     @GetMapping(value = "getMyHoursStatisticsDetails")
-    public Result<?> getMyHoursStatisticsDetails(Long taskId) {
-
-        return testCheckItemsTaskRelService.getMyHoursStatisticsDetails(taskId);
+    public Result<?> getMyHoursStatisticsDetails(Long taskId, String workingHoursId) {
+        System.out.println("workingHoursId == " + workingHoursId);
+        if (StringUtils.isEmpty(workingHoursId)) {
+            workingHoursId = null;
+        }
+        return testCheckItemsTaskRelService.getMyHoursStatisticsDetails(taskId, workingHoursId);
     }
 
     /**
@@ -132,7 +136,9 @@ public class StatisticAnalysisInterface {
         if (CollectionUtils.isEmpty(taskOrderWorkingHoursVo.getList())) {
             return ResultUtil.error("数据不能为空");
         }
-        return testCheckItemsTaskRelService.postAdjustingQuotas(taskOrderWorkingHoursVo.getList());
+        System.out.println("workingHoursId == " + taskOrderWorkingHoursVo.getWorkingHoursId());
+
+        return testCheckItemsTaskRelService.postAdjustingQuotas(taskOrderWorkingHoursVo.getList(), taskOrderWorkingHoursVo.getWorkingHoursId());
     }
 
     /**

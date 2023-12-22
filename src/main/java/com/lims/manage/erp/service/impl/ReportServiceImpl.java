@@ -1836,6 +1836,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public ReportRecordEntity getDetailByCodeZj(String reportCode) {
+        return reportMapper.getDetailByCodeZj(reportCode);
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();
