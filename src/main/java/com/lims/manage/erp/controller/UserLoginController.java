@@ -11,6 +11,7 @@ import com.lims.manage.erp.entity.DynamicImg;
 import com.lims.manage.erp.entity.SysLog;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserRoleEntity;
+import com.lims.manage.erp.mapper.TestTechnicistDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.DynamicImgService;
@@ -109,6 +110,7 @@ public class UserLoginController {
         SysUserEntity userData = ShiroUtils.getUserInfo();
         userData.setPassword(null);
         userData.setSalt(null);
+        userData.setTechnicistId(sysUserService.getTechnicistIdByUserId(userData.getUserId()));
         //获取用户的角色列表
         List<SysUserRoleEntity> roleIdList = sysUserRoleService.list(Wrappers.<SysUserRoleEntity>lambdaQuery().eq(SysUserRoleEntity::getUserId, ShiroUtils.getUserInfo().getUserId()).select(SysUserRoleEntity::getRoleId));
         //只保存角色id

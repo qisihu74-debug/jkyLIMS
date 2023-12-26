@@ -88,6 +88,8 @@ public class SysUserEntity implements Serializable {
 
 	private String signatureUrl;
 
+	private Integer technicistId;
+
 	/**
 	 * 用户角色id列表
 	 */

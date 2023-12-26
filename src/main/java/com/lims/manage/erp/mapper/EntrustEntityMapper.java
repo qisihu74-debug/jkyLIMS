@@ -656,8 +656,9 @@ public interface EntrustEntityMapper extends BaseMapper {
             "LEFT JOIN test_task t4 ON t1.id=t4.entrustment_id\n" +
             "WHERE\n" +
             "\tt1.state != 144\n" +
-            "AND t1.state >=1\n" +
-            "AND 2023070000<t1.entrustment_no AND t1.entrustment_no<2023080000")
+            "AND t1.state >=1 and t1.state != 201 and t1.state != 202\n" +
+            "AND 2023120000<t1.entrustment_no AND t1.entrustment_no<2024000000" +
+            " AND t4.dept_id IN(231,232,233,234,235,236,266,267,268)")
     List<EntrustAddVo> get7Infos1();
 
     @Select("SELECT DISTINCT\n" +
@@ -673,14 +674,10 @@ public interface EntrustEntityMapper extends BaseMapper {
             "LEFT JOIN test_task t4 ON t1.id=t4.entrustment_id\n" +
             "WHERE\n" +
             "\tt1.state != 144\n" +
-            "AND t1.state = 1\n" +
-            "AND t3.product_name='突起路标'\n" +
-            "AND 2023030000<t1.entrustment_no AND t1.entrustment_no<2023040000\n" +
-            "AND t4.dept_id IN(237,\n" +
-            "238,\n" +
-            "239\n" +
-            ")")
-    List<EntrustAddVo> get8Infos();
+            "AND t1.state >=1 and t1.state != 201 and t1.state != 202\n" +
+            "AND 2023120000<t1.entrustment_no AND t1.entrustment_no<2024000000" +
+            " AND t4.dept_id IN(237,238,239,262,263)")
+    List<EntrustAddVo> get8Infos1();
 
     @Select("SELECT DISTINCT\n" +
             "\tt1.id AS id,\n" +
@@ -695,9 +692,10 @@ public interface EntrustEntityMapper extends BaseMapper {
             "LEFT JOIN test_task t4 ON t1.id=t4.entrustment_id\n" +
             "WHERE\n" +
             "\tt1.state != 144\n" +
-            "AND t1.state >= 1\n" +
-            "AND 2023080000<t1.entrustment_no AND t1.entrustment_no<2023090000")
-    List<EntrustAddVo> get8Infos1();
+            "AND t1.state >=1 and t1.state != 201 and t1.state != 202\n" +
+            "AND 2023120000<t1.entrustment_no AND t1.entrustment_no<2024000000" +
+            " AND t4.dept_id IN(264,265)")
+    List<EntrustAddVo> getJtInfos1();
 
     /**
      * 根据委托单id 获取任务单 列表

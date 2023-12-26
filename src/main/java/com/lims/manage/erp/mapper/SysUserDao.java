@@ -167,4 +167,7 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
             "\tt3.role_name = '系统管理员' \n" +
             "\tOR t3.role_name = '超级管理员')")
     String checkSysAndAdmRole(@Param("userId") Long userId);
+
+    @Select("select id from  test_technicist where user_id=#{userId} limit 1")
+    Integer getTechnicistIdByUserId(@Param("userId") Long userId);
 }

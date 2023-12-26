@@ -130,5 +130,7 @@ public interface SysUserService extends IService<SysUserEntity> {
      * @return
      */
     Boolean checkSysAndAdmRole(Long userId);
+
+    Integer getTechnicistIdByUserId(Long userId);
 }
 

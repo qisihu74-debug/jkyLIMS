@@ -61,7 +61,7 @@ public class BucketsConst {
     /**
      * 受控文件
      */
-    public static final String  controlled_documents=" controlled-documents";
+    public static final String  controlled_documents="controlled-documents";
 
 
 }
