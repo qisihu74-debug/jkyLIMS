@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.TestControlledDocumentsRecordMapper">
+  <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.TestControlledDocumentsRecordEntity">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="documents_code" jdbcType="VARCHAR" property="documentsCode" />
+    <result column="documents_name" jdbcType="VARCHAR" property="documentsName" />
+    <result column="is_available" jdbcType="VARCHAR" property="isAvailable" />
+    <result column="status" jdbcType="CHAR" property="status" />
+    <result column="del_flag" jdbcType="INTEGER" property="delFlag" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="usage_time" jdbcType="TIMESTAMP" property="usageTime" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="pid" jdbcType="INTEGER" property="pid" />
+    <result column="file_type" jdbcType="INTEGER" property="fileType" />
+    <result column="file_type_content" jdbcType="VARCHAR" property="fileTypeContent" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.lims.manage.erp.entity.TestControlledDocumentsRecordEntity">
+    <result column="documents_file_uri" jdbcType="LONGVARCHAR" property="documentsFileUri" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, documents_code, documents_name, is_available, status, del_flag, create_time, 
+    update_time, usage_time, remark, pid, file_type, file_type_content
+  </sql>
+  <sql id="Blob_Column_List">
+    documents_file_uri
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from test_controlled_documents_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from test_controlled_documents_record
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.lims.manage.erp.entity.TestControlledDocumentsRecordEntity">
+    insert into test_controlled_documents_record (id, documents_code, documents_name, 
+      is_available, status, del_flag, 
+      create_time, update_time, usage_time, 
+      remark, pid, file_type, 
+      file_type_content, documents_file_uri)
+    values (#{id,jdbcType=INTEGER}, #{documentsCode,jdbcType=VARCHAR}, #{documentsName,jdbcType=VARCHAR}, 
+      #{isAvailable,jdbcType=VARCHAR}, #{status,jdbcType=CHAR}, #{delFlag,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{usageTime,jdbcType=TIMESTAMP}, 
+      #{remark,jdbcType=VARCHAR}, #{pid,jdbcType=INTEGER}, #{fileType,jdbcType=INTEGER}, 
+      #{fileTypeContent,jdbcType=VARCHAR}, #{documentsFileUri,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.TestControlledDocumentsRecordEntity">
+    insert into test_controlled_documents_record
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="documentsCode != null">
+        documents_code,
+      </if>
+      <if test="documentsName != null">
+        documents_name,
+      </if>
+      <if test="isAvailable != null">
+        is_available,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="delFlag != null">
+        del_flag,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="usageTime != null">
+        usage_time,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+      <if test="pid != null">
+        pid,
+      </if>
+      <if test="fileType != null">
+        file_type,
+      </if>
+      <if test="fileTypeContent != null">
+        file_type_content,
+      </if>
+      <if test="documentsFileUri != null">
+        documents_file_uri,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="documentsCode != null">
+        #{documentsCode,jdbcType=VARCHAR},
+      </if>
+      <if test="documentsName != null">
+        #{documentsName,jdbcType=VARCHAR},
+      </if>
+      <if test="isAvailable != null">
+        #{isAvailable,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=CHAR},
+      </if>
+      <if test="delFlag != null">
+        #{delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="usageTime != null">
+        #{usageTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="pid != null">
+        #{pid,jdbcType=INTEGER},
+      </if>
+      <if test="fileType != null">
+        #{fileType,jdbcType=INTEGER},
+      </if>
+      <if test="fileTypeContent != null">
+        #{fileTypeContent,jdbcType=VARCHAR},
+      </if>
+      <if test="documentsFileUri != null">
+        #{documentsFileUri,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.TestControlledDocumentsRecordEntity">
+    update test_controlled_documents_record
+    <set>
+      <if test="documentsCode != null">
+        documents_code = #{documentsCode,jdbcType=VARCHAR},
+      </if>
+      <if test="documentsName != null">
+        documents_name = #{documentsName,jdbcType=VARCHAR},
+      </if>
+      <if test="isAvailable != null">
+        is_available = #{isAvailable,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=CHAR},
+      </if>
+      <if test="delFlag != null">
+        del_flag = #{delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="usageTime != null">
+        usage_time = #{usageTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="pid != null">
+        pid = #{pid,jdbcType=INTEGER},
+      </if>
+      <if test="fileType != null">
+        file_type = #{fileType,jdbcType=INTEGER},
+      </if>
+      <if test="fileTypeContent != null">
+        file_type_content = #{fileTypeContent,jdbcType=VARCHAR},
+      </if>
+      <if test="documentsFileUri != null">
+        documents_file_uri = #{documentsFileUri,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.lims.manage.erp.entity.TestControlledDocumentsRecordEntity">
+    update test_controlled_documents_record
+    set documents_code = #{documentsCode,jdbcType=VARCHAR},
+      documents_name = #{documentsName,jdbcType=VARCHAR},
+      is_available = #{isAvailable,jdbcType=VARCHAR},
+      status = #{status,jdbcType=CHAR},
+      del_flag = #{delFlag,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      usage_time = #{usageTime,jdbcType=TIMESTAMP},
+      remark = #{remark,jdbcType=VARCHAR},
+      pid = #{pid,jdbcType=INTEGER},
+      file_type = #{fileType,jdbcType=INTEGER},
+      file_type_content = #{fileTypeContent,jdbcType=VARCHAR},
+      documents_file_uri = #{documentsFileUri,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.TestControlledDocumentsRecordEntity">
+    update test_controlled_documents_record
+    set documents_code = #{documentsCode,jdbcType=VARCHAR},
+      documents_name = #{documentsName,jdbcType=VARCHAR},
+      is_available = #{isAvailable,jdbcType=VARCHAR},
+      status = #{status,jdbcType=CHAR},
+      del_flag = #{delFlag,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      usage_time = #{usageTime,jdbcType=TIMESTAMP},
+      remark = #{remark,jdbcType=VARCHAR},
+      pid = #{pid,jdbcType=INTEGER},
+      file_type = #{fileType,jdbcType=INTEGER},
+      file_type_content = #{fileTypeContent,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
