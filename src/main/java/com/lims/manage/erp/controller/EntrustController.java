@@ -97,9 +97,9 @@ public class EntrustController {
      */
     @RequestMapping("/addEntrust_Test")
     //@RequiresPermissions("entrust:entrust:addEntrust")
-    public Result addEntrustTest(@RequestParam("json") String json, MultipartFile[] file) {
+    public Result addEntrustTest(@RequestParam("jsonParam") String jsonParam, MultipartFile[] file) {
         try {
-            EntrustAddVo entrust = JSON.parseObject(json, EntrustAddVo.class);
+            EntrustAddVo entrust = JSON.parseObject(jsonParam, EntrustAddVo.class);
             return ResultUtil.success(entrustService.addEntrustTest0620(entrust, file));
         }
         catch (Exception e){
@@ -1054,14 +1054,14 @@ public class EntrustController {
         String message = entrustService.getMessage();
         String[] strings = message.split("/");
         String fileName = strings[1];
-        //获取所有符合条件的委托单id（七所、八月份、土的委托单）
-        //List<EntrustAddVo> list = entrustEntityMapper.getPublishEntrustIdBySearch();
-        //七所八月份
+        //七所12月份已发布
         List<EntrustAddVo> list7 = entrustEntityMapper.get7Infos1();
-        //八所八月份
+        //八所12月份已发布
         List<EntrustAddVo> list8 = entrustEntityMapper.get8Infos1();
+        //交通所12月份已发布
+        List<EntrustAddVo> listJt = entrustEntityMapper.getJtInfos1();
         for (EntrustAddVo bean:list7) {
-            String path = "D:\\doc\\saveOriginalRecord\\七月\\"+bean.getEntrustmentNo()+".docx";
+            String path = "D:\\doc\\saveOriginalRecord\\7所-12月\\"+bean.getEntrustmentNo()+".docx";
             try {
                 FileOutputStream outputStream = new FileOutputStream(path);
                 MinioClient client = MinIoUtil.minioClient;
@@ -1077,7 +1077,24 @@ public class EntrustController {
             }
         }
         for (EntrustAddVo bean:list8) {
-            String path = "D:\\doc\\saveOriginalRecord\\八月\\"+bean.getEntrustmentNo()+".docx";
+            String path = "D:\\doc\\saveOriginalRecord\\8所-12月\\"+bean.getEntrustmentNo()+".docx";
+            try {
+                FileOutputStream outputStream = new FileOutputStream(path);
+                MinioClient client = MinIoUtil.minioClient;
+                InputStream object = client.getObject(strings[0], fileName);
+                //填充数据
+                EntrustAddVo detail = entrustService.getEntrustHistoryDetail(bean.getId());
+                XWPFDocument document = entrustService.downloadEntrust(detail, object);
+                document.write(outputStream);
+                outputStream.close();
+                Thread.sleep(20);
+            } catch (Exception ex) {
+                log.info("导出失败：{}", ex);
+            }
+        }
+
+        for (EntrustAddVo bean:listJt) {
+            String path = "D:\\doc\\saveOriginalRecord\\交通所-12月\\"+bean.getEntrustmentNo()+".docx";
             try {
                 FileOutputStream outputStream = new FileOutputStream(path);
                 MinioClient client = MinIoUtil.minioClient;

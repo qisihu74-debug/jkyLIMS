@@ -399,6 +399,23 @@ public class FileAndFolderUtil {
     }
 
     /**
+     * 删除目录及目录下的文件
+     * @param directoryPath
+     */
+    public static void deleteDirectory(String directoryPath) {
+        File directory = new File(directoryPath);
+        if (directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    deleteDirectory(file.getAbsolutePath());
+                }
+            }
+        }
+        directory.delete();
+    }
+
+    /**
      * File转byte[]数组
      *
      * @param file
