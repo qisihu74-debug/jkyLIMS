@@ -197,7 +197,7 @@ public class ReportController {
         }
         Boolean flag = reportService.revoke(reportCode);
         if (flag){
-            ReportRecordEntity entity = recordEntityMapper.getUrlByCode(reportCode);
+            ReportRecordEntity entity = recordEntityMapper.getReportInfo(reportCode);
             // 获取报告id 撤回
             testCheckItemsTaskRelService.handleWorkingHours(entity.getId(), 1);
             log.info("用户："+ShiroUtils.getUserInfo().getName()+" 在："+DateUtil.getDayString(System.currentTimeMillis())+" 撤回了报告，编号为："+reportCode);

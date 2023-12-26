@@ -253,7 +253,7 @@
         t1.temperature,
         t1.humidity,
         DATE_FORMAT(t1.start_time, '%Y-%m-%d' ) startTime,
-        DATE_FORMAT(t1.end_time, '%Y-%m-%d' ) startTime,
+        DATE_FORMAT(t1.end_time, '%Y-%m-%d' ) endTime,
         t1.type,
         t1.USER,
         t1.before_status beforeStatus,
