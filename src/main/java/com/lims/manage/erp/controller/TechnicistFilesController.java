@@ -172,6 +172,12 @@ public class TechnicistFilesController {
             String uploadUrl = upload.substring(0, upload.indexOf("?"));
             technicistFiles.setFileUrl(uploadUrl);
         }
+        LambdaQueryWrapper<TechnicistFiles> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TechnicistFiles::getContent,technicistFiles.getContent());
+        TechnicistFiles one = technicistFilesService.getOne(queryWrapper);
+        if (one != null){
+            return ResultUtil.error("名称内容已存在！");
+        }
         boolean save = technicistFilesService.save(technicistFiles);
         if (save) {
             return ResultUtil.success("添加成功");
@@ -201,6 +207,14 @@ public class TechnicistFilesController {
         }
         TechnicistFiles technicistFiles = JSON.parseObject(jsonParam, TechnicistFiles.class);
         TechnicistFiles selectOne = technicistFilesService.getById(technicistFiles.getId());
+        if (!selectOne.getContent().equals(technicistFiles.getContent())){
+            LambdaQueryWrapper<TechnicistFiles> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(TechnicistFiles::getContent,technicistFiles.getContent());
+            TechnicistFiles one = technicistFilesService.getOne(queryWrapper);
+            if (one != null){
+                return ResultUtil.error("名称内容已存在");
+            }
+        }
         //如果文件发生变更删除旧文件，更新新文件
         if (file != null) {
             String fileUrl = selectOne.getFileUrl();
@@ -358,30 +372,34 @@ public class TechnicistFilesController {
                 }
             } else {
                 //根据不同受控类型获取模板文件
-                if (technicistFiles.getType() == 2) {
-                    if (CollectionUtil.isNotEmpty(datas[0])) {
-                        indexs[0] = handData(datas[0],docs[0], flags[0], indexs[0], technicistFiles, fileArray[1]);
-                    }
-                }
-                if (technicistFiles.getType() == 3) {
-                    if (CollectionUtil.isNotEmpty(datas[1])) {
-                        indexs[1] = handData(datas[1], docs[1], flags[1], indexs[1], technicistFiles, fileArray[2]);
-                    }
-                }
-                if (technicistFiles.getType() == 4) {
-                    if (CollectionUtil.isNotEmpty(datas[2])) {
-                        indexs[2] = handData(datas[2], docs[2], flags[2], indexs[2], technicistFiles, fileArray[3]);
-                    }
-                }
-                if (technicistFiles.getType() == 5) {
-                    if (CollectionUtil.isNotEmpty(datas[3])) {
-                        indexs[3] = handData(datas[3], docs[3], flags[3], indexs[3], technicistFiles, fileArray[4]);
-                    }
-                }
-                if (technicistFiles.getType() == 6) {
-                    if (CollectionUtil.isNotEmpty(datas[4])) {
-                        indexs[4] = handData(datas[4], docs[4], flags[4], indexs[4], technicistFiles, fileArray[5]);
-                    }
+                switch (technicistFiles.getType()) {
+                    case 2:
+                        if (CollectionUtil.isNotEmpty(datas[0])) {
+                            indexs[0] = handData(datas[0], docs[0], flags[0], indexs[0], technicistFiles, fileArray[1]);
+                        }
+                        break;
+                    case 3:
+                        if (CollectionUtil.isNotEmpty(datas[1])) {
+                            indexs[1] = handData(datas[1], docs[1], flags[1], indexs[1], technicistFiles, fileArray[2]);
+                        }
+                        break;
+                    case 4:
+                        if (CollectionUtil.isNotEmpty(datas[2])) {
+                            indexs[2] = handData(datas[2], docs[2], flags[2], indexs[2], technicistFiles, fileArray[3]);
+                        }
+                        break;
+                    case 5:
+                        if (CollectionUtil.isNotEmpty(datas[3])) {
+                            indexs[3] = handData(datas[3], docs[3], flags[3], indexs[3], technicistFiles, fileArray[4]);
+                        }
+                        break;
+                    case 6:
+                        if (CollectionUtil.isNotEmpty(datas[4])) {
+                            indexs[4] = handData(datas[4], docs[4], flags[4], indexs[4], technicistFiles, fileArray[5]);
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
         }
