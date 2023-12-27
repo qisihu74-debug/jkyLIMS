@@ -3,12 +3,14 @@ package com.lims.manage.erp.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
 @Data
-@SuppressWarnings("serial")
+//@SuppressWarnings("serial")
 @TableName("test_controlled_documents_record")
 public class TestControlledDocumentsRecordEntity implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
@@ -23,12 +25,18 @@ public class TestControlledDocumentsRecordEntity implements Serializable {
     private String status;
 
     private Integer delFlag;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date createTime;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date updateTime;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date usageTime;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date expirationTime;
 
     private String remark;
 
@@ -201,5 +209,24 @@ public class TestControlledDocumentsRecordEntity implements Serializable {
         result = prime * result + ((getFileTypeContent() == null) ? 0 : getFileTypeContent().hashCode());
         result = prime * result + ((getDocumentsFileUri() == null) ? 0 : getDocumentsFileUri().hashCode());
         return result;
+    }
+
+    public TestControlledDocumentsRecordEntity(TestControlledDocumentsEntity entity) {
+        this.documentsCode = entity.getDocumentsCode();
+        this.documentsName = entity.getDocumentsName();
+        this.status = entity.getStatus();
+        this.delFlag = entity.getDelFlag();
+        this.createTime = entity.getCreateTime();
+        this.updateTime = entity.getUpdateTime();
+        this.usageTime = entity.getUsageTime();
+        this.expirationTime = entity.getExpirationTime();
+        this.remark = entity.getRemark();
+        this.pid = entity.getPid();
+        this.fileType = entity.getFileType();
+        this.fileTypeContent = entity.getFileTypeContent();
+        this.documentsFileUri = entity.getDocumentsFileUri();
+    }
+
+    public TestControlledDocumentsRecordEntity() {
     }
 }

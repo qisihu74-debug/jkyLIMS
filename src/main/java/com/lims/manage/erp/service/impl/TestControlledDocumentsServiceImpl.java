@@ -24,10 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * (TestControlledDocuments)表服务接口
@@ -122,6 +119,10 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
             // 抛出 必填项不为空
             return ResultUtil.error("参数为空");
         }
+        if (testControlledDocumentsEntity.getDocumentsCode() == null) {
+            // 抛出 必填项不为空
+            return ResultUtil.error("编号参数不能为空");
+        }
         // 效验 编号唯一性。
         LambdaQueryWrapper<TestControlledDocumentsEntity> documentsWrapper = new LambdaQueryWrapper<>();
         documentsWrapper.eq(TestControlledDocumentsEntity::getDocumentsCode, testControlledDocumentsEntity.getDocumentsCode());
@@ -129,6 +130,33 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
         Integer count = testControlledDocumentsMapper.selectCount(documentsWrapper);
         if (count > 0) {
             return ResultUtil.error("编号不能重复");
+        }
+        // 获取数据type值:1、塞入 context 2、处理条数问题 （限制条数 <= 实际拥有条数）。
+        if (testControlledDocumentsEntity.getFileType() != null) {
+            // 返回字典数据
+            List<TestInitDataEntity> entrustBasis = testCompanyDao.selectEntrustBasis();
+            for (TestInitDataEntity dataEntity : entrustBasis) {
+                if (testControlledDocumentsEntity.getFileType().equals(dataEntity.getId())) {
+                    // 塞入字典Context
+                    testControlledDocumentsEntity.setFileTypeContent(dataEntity.getName());
+                    // 获取 dataEntity.getRemark(); 条数进行判断
+                    if (dataEntity.getRemark() != null) {
+                        // 限制条数
+                        int items = Integer.parseInt(dataEntity.getRemark());
+                        // 根据 类型 获取条数。
+                        // 效验 编号唯一性。
+                        LambdaQueryWrapper<TestControlledDocumentsEntity> queryWrapper = new LambdaQueryWrapper<>();
+                        queryWrapper.eq(TestControlledDocumentsEntity::getFileType, testControlledDocumentsEntity.getFileType());
+                        queryWrapper.eq(TestControlledDocumentsEntity::getDelFlag, 0);
+                        // 实际拥有条数
+                        Integer countType = testControlledDocumentsMapper.selectCount(queryWrapper);
+                        // 限制条数 <= 实际拥有条数
+                        if (items <= countType) {
+                            return ResultUtil.error("创建失败、受控文件类型限制为 " + items);
+                        }
+                    }
+                }
+            }
         }
         StringBuffer fileNameBuffer = new StringBuffer();
         //附件存在上传附件到服务器
@@ -151,7 +179,10 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
             testControlledDocumentsEntity.setDocumentsFileUri(null);
         }
         System.out.println("testControlledDocumentsEntity" + testControlledDocumentsEntity);
-        // 对数据新增
+        // 对数据新增补充
+        testControlledDocumentsEntity.setIsAvailable("1");
+        testControlledDocumentsEntity.setCreateTime(new Date());
+        testControlledDocumentsEntity.setDelFlag(0);
         testControlledDocumentsMapper.insert(testControlledDocumentsEntity);
         return ResultUtil.success("新增成功");
     }
@@ -174,6 +205,10 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
         if (testControlledDocumentsEntity.getId() == null) {
             return ResultUtil.error("参数id不能为空");
         }
+        if (testControlledDocumentsEntity.getDocumentsCode() == null) {
+            // 抛出 必填项不为空
+            return ResultUtil.error("编号参数不能为空");
+        }
         // 查询详情
         TestControlledDocumentsEntity oldData = testControlledDocumentsMapper.selectById(testControlledDocumentsEntity.getId());
         if (oldData == null) {
@@ -192,6 +227,33 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
             for (TestControlledDocumentsEntity entity : list) {
                 if (!entity.getId().equals(testControlledDocumentsEntity.getId())) {
                     return ResultUtil.error("编号不能重复");
+                }
+            }
+        }
+        // 获取数据type值:1、塞入 context 2、处理条数问题 （限制条数 <= 实际拥有条数）。
+        if (testControlledDocumentsEntity.getFileType() != null && !testControlledDocumentsEntity.getFileType().equals(oldData.getFileType())) {
+            // 返回字典数据
+            List<TestInitDataEntity> entrustBasis = testCompanyDao.selectEntrustBasis();
+            for (TestInitDataEntity dataEntity : entrustBasis) {
+                if (testControlledDocumentsEntity.getFileType().equals(dataEntity.getId())) {
+                    // 塞入字典Context
+                    testControlledDocumentsEntity.setFileTypeContent(dataEntity.getName());
+                    // 获取 dataEntity.getRemark(); 条数进行判断
+                    if (dataEntity.getRemark() != null) {
+                        // 限制条数
+                        int items = Integer.parseInt(dataEntity.getRemark());
+                        // 根据 类型 获取条数。
+                        // 效验 编号唯一性。
+                        LambdaQueryWrapper<TestControlledDocumentsEntity> queryWrapper = new LambdaQueryWrapper<>();
+                        queryWrapper.eq(TestControlledDocumentsEntity::getFileType, testControlledDocumentsEntity.getFileType());
+                        queryWrapper.eq(TestControlledDocumentsEntity::getDelFlag, 0);
+                        // 实际拥有条数
+                        Integer countType = testControlledDocumentsMapper.selectCount(queryWrapper);
+                        // 限制条数 <= 实际拥有条数
+                        if (items <= countType) {
+                            return ResultUtil.error("操作失败：当前类型限制为 " + countType);
+                        }
+                    }
                 }
             }
         }
@@ -221,12 +283,14 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
             String oldFileUrl = fileUrls[fileUrls.length - 1];
             MinIoUtil.deleteFile(BucketsConst.controlled_documents, oldFileUrl);
         }
+        // 补充信息
+        testControlledDocumentsEntity.setUpdateTime(new Date());
         testControlledDocumentsMapper.updateByPrimaryKeySelective(testControlledDocumentsEntity);
         return ResultUtil.success("更新成功");
     }
 
     /**
-     * 更新 受控文件信息
+     * 变更 受控文件信息
      *
      * @param testControlledDocumentsEntity
      * @return
@@ -242,6 +306,10 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
         if (testControlledDocumentsEntity.getId() == null) {
             return ResultUtil.error("参数id不能为空");
         }
+        if (testControlledDocumentsEntity.getDocumentsCode() == null) {
+            // 抛出 必填项不为空
+            return ResultUtil.error("编号参数不能为空");
+        }
         // 查询详情
         TestControlledDocumentsEntity oldData = testControlledDocumentsMapper.selectById(testControlledDocumentsEntity.getId());
         if (oldData == null) {
@@ -260,6 +328,33 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
             for (TestControlledDocumentsEntity entity : list) {
                 if (!entity.getId().equals(testControlledDocumentsEntity.getId())) {
                     return ResultUtil.error("编号不能重复");
+                }
+            }
+        }
+        // 获取数据type值:1、塞入 context 2、处理条数问题 （限制条数 <= 实际拥有条数）。
+        if (testControlledDocumentsEntity.getFileType() != null && !testControlledDocumentsEntity.getFileType().equals(oldData.getFileType())) {
+            // 返回字典数据
+            List<TestInitDataEntity> entrustBasis = testCompanyDao.selectEntrustBasis();
+            for (TestInitDataEntity dataEntity : entrustBasis) {
+                if (testControlledDocumentsEntity.getFileType().equals(dataEntity.getId())) {
+                    // 塞入字典Context
+                    testControlledDocumentsEntity.setFileTypeContent(dataEntity.getName());
+                    // 获取 dataEntity.getRemark(); 条数进行判断
+                    if (dataEntity.getRemark() != null) {
+                        // 限制条数
+                        int items = Integer.parseInt(dataEntity.getRemark());
+                        // 根据 类型 获取条数。
+                        // 效验 编号唯一性。
+                        LambdaQueryWrapper<TestControlledDocumentsEntity> queryWrapper = new LambdaQueryWrapper<>();
+                        queryWrapper.eq(TestControlledDocumentsEntity::getFileType, testControlledDocumentsEntity.getFileType());
+                        queryWrapper.eq(TestControlledDocumentsEntity::getDelFlag, 0);
+                        // 实际拥有条数
+                        Integer countType = testControlledDocumentsMapper.selectCount(queryWrapper);
+                        // 限制条数 <= 实际拥有条数
+                        if (items <= countType) {
+                            return ResultUtil.error("操作失败：当前类型限制为 " + countType);
+                        }
+                    }
                 }
             }
         }
@@ -282,15 +377,19 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
         if (fileNameBuffer.length() >= 1) {
             testControlledDocumentsEntity.setDocumentsFileUri(fileNameBuffer.deleteCharAt(fileNameBuffer.length() - 1).toString());
         }
-        // 旧文件移除
+        // 点击变更按钮：文件发生变动（旧的基础数据 移到变更记录中）
         if (oldData.getDocumentsFileUri() != null && fileNameBuffer.length() >= 1) {
-            String[] fileUrls = oldData.getDocumentsFileUri().split("\\/");
-            // 进行移除。
-            String oldFileUrl = fileUrls[fileUrls.length - 1];
-            MinIoUtil.deleteFile(BucketsConst.controlled_documents, oldFileUrl);
+            TestControlledDocumentsRecordEntity testControlledDocumentsRecordEntity = new TestControlledDocumentsRecordEntity(oldData);
+            testControlledDocumentsRecordEntity.setId(null);
+            testControlledDocumentsRecordEntity.setPid(oldData.getId());
+            // 文件过期时间 等于变更 实施时间。
+            if (testControlledDocumentsEntity.getUsageTime() != null) {
+                testControlledDocumentsRecordEntity.setExpirationTime(testControlledDocumentsEntity.getUsageTime());
+            }
+            testControlledDocumentsRecordMapper.insert(testControlledDocumentsRecordEntity);
         }
         testControlledDocumentsMapper.updateByPrimaryKeySelective(testControlledDocumentsEntity);
-        return ResultUtil.success("更新成功");
+        return ResultUtil.success("变更成功");
     }
 
     /**

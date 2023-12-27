@@ -41,12 +41,12 @@
   <insert id="insert" parameterType="com.lims.manage.erp.entity.TestControlledDocumentsRecordEntity">
     insert into test_controlled_documents_record (id, documents_code, documents_name, 
       is_available, status, del_flag, 
-      create_time, update_time, usage_time, 
+      create_time, update_time, usage_time,expiration_time,
       remark, pid, file_type, 
       file_type_content, documents_file_uri)
     values (#{id,jdbcType=INTEGER}, #{documentsCode,jdbcType=VARCHAR}, #{documentsName,jdbcType=VARCHAR}, 
       #{isAvailable,jdbcType=VARCHAR}, #{status,jdbcType=CHAR}, #{delFlag,jdbcType=INTEGER}, 
-      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{usageTime,jdbcType=TIMESTAMP}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{usageTime,jdbcType=TIMESTAMP}, #{expirationTime,jdbcType=TIMESTAMP},
       #{remark,jdbcType=VARCHAR}, #{pid,jdbcType=INTEGER}, #{fileType,jdbcType=INTEGER}, 
       #{fileTypeContent,jdbcType=VARCHAR}, #{documentsFileUri,jdbcType=LONGVARCHAR})
   </insert>
