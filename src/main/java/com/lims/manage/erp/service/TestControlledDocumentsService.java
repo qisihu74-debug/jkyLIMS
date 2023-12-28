@@ -6,6 +6,8 @@ import com.lims.manage.erp.entity.TestControlledDocumentsEntity;
 import com.lims.manage.erp.result.Result;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -81,6 +83,15 @@ public interface TestControlledDocumentsService extends IService<TestControlledD
      * @return
      */
     Result delReportTemplate(Integer id);
+
+    /**
+     * 返回桶信息 与 附件内容。
+     *
+     * @param id     通过id
+     * @param typeId 通过typeId
+     * @return
+     */
+    HashMap<String, String> returnBucketInformation(Long id, Integer typeId) throws ParseException;
 
 }
 

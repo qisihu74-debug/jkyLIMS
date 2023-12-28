@@ -6,17 +6,17 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.constant.BucketsConst;
+import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TestControlledDocumentsEntity;
 import com.lims.manage.erp.entity.TestControlledDocumentsRecordEntity;
 import com.lims.manage.erp.entity.TestInitDataEntity;
-import com.lims.manage.erp.mapper.TestCompanyDao;
-import com.lims.manage.erp.mapper.TestControlledDocumentsMapper;
-import com.lims.manage.erp.mapper.TestControlledDocumentsRecordMapper;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestControlledDocumentsService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.vo.EntrustAddVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -41,6 +43,10 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
     private TestControlledDocumentsRecordMapper testControlledDocumentsRecordMapper;
     @Autowired
     private TestCompanyDao testCompanyDao;
+    @Autowired
+    private TaskMapper taskMapper;
+    @Autowired
+    private EntrustEntityMapper entityMapper;
 
     @Override
     public Result selectTestControlledDocumentsList(TestControlledDocumentsEntity testControlledDocumentsEntity) {
@@ -428,5 +434,199 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
         record.setDelFlag(1);
         testControlledDocumentsMapper.updateByPrimaryKeySelective(record);
         return ResultUtil.success("删除成功");
+    }
+
+    /**
+     * 返回桶信息 与 附件内容。
+     *
+     * @param id
+     * @param typeId
+     * @return
+     */
+    @Override
+    public HashMap<String, String> returnBucketInformation(Long id, Integer typeId) throws ParseException {
+        HashMap<String, String> map = new HashMap<>();
+        if (typeId == 58) {
+            // 任务单模板
+        }
+        switch (typeId) {
+            case 58: // 调用方法处理任务单模板
+                map = methodTaskTemplate(id, typeId);
+                break;
+            case 59: // 调用方法处理任务单模板
+                map = methodEntrustTemplate(id, typeId);
+                break;
+            default:
+                break;
+        }
+        return map;
+    }
+
+    /**
+     * 任务单模板返回信息
+     *
+     * @param id
+     * @return
+     */
+    public HashMap<String, String> methodTaskTemplate(Long id, Integer typeId) throws ParseException {
+        // 查询任务单详情信息
+        // 获取任务单下单时间 进行比较
+        TaskTestEntity taskDetails = taskMapper.getTaskOrderTime(id);
+        if (taskDetails == null) {
+            return null;
+        }
+        // 获取下单时间
+        if (taskDetails.getOrderTime() == null) {
+            return null;
+        }
+        //实现将字符串转成⽇期类型
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        // 获取下单时间 年月日即可。
+        Date orderTime = dateFormat.parse(dateFormat.format(taskDetails.getOrderTime()));
+        // 查询受控文件数据
+        LambdaQueryWrapper<TestControlledDocumentsEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestControlledDocumentsEntity::getFileType, typeId);
+        queryWrapper.eq(TestControlledDocumentsEntity::getDelFlag, 0);
+        // 根据 typeId 类型返回的 基础受控文件集合
+        List<TestControlledDocumentsEntity> controlledDocuments = testControlledDocumentsMapper.selectList(queryWrapper);
+        // 根据 typeId 类型返回的变更记录信息
+        List<TestControlledDocumentsRecordEntity> changeList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(controlledDocuments)) {
+            for (TestControlledDocumentsEntity entity : controlledDocuments) {
+                // 获取变更记录
+                LambdaQueryWrapper<TestControlledDocumentsRecordEntity> queryWrapperRecord = new LambdaQueryWrapper<>();
+                queryWrapperRecord.eq(TestControlledDocumentsRecordEntity::getPid, entity.getId());
+                List<TestControlledDocumentsRecordEntity> list = testControlledDocumentsRecordMapper.selectList(queryWrapperRecord);
+                if (CollectionUtil.isNotEmpty(list)) {
+                    changeList.addAll(list);
+                }
+            }
+            // 优先选择 基础受控文件
+            for (TestControlledDocumentsEntity entity : controlledDocuments) {
+                //  测试此日期是否在指定日期之后。 :
+                //      任务单下单时间 在 基础受控文件实施时间 后面 符合条件 || 实施时间 = 下单时间
+                //      任务单下单时间 2023-12-28  受控文件实施时间 2023-08-01
+                // 获取实施时间 年月日即可。
+                Date usageTime = dateFormat.parse(dateFormat.format(entity.getUsageTime()));
+                if ((orderTime.after(usageTime) || orderTime.equals(usageTime)) && entity.getDocumentsFileUri() != null) {
+                    // 截取数据
+                    String[] strings = entity.getDocumentsFileUri().split("\\/");
+                    String fileContext = strings[strings.length - 1];
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put("bucketName", BucketsConst.controlled_documents);
+                    map.put("content", fileContext);
+                    // 最新的受控文件
+                    map.put("status", "0");
+                    return map;
+                }
+            }
+
+        }
+        // 其次处理 变更记录中 实施时间 与 过期时间的参数内容
+        if (CollectionUtil.isNotEmpty(changeList)) {
+            for (TestControlledDocumentsRecordEntity entity : changeList) {
+                // 下单时间 在 实施时间之后 && 下单时间 在 过期时间 之前
+                // 获取实施时间 年月日即可。 || 实施时间 = 下单时间
+                Date usageTime = dateFormat.parse(dateFormat.format(entity.getUsageTime()));
+                // 过期时间 年月日即可。
+                Date expirationTime = dateFormat.parse(dateFormat.format(entity.getExpirationTime()));
+                if ((orderTime.after(usageTime) || orderTime.equals(usageTime)) && orderTime.before(expirationTime)) {
+                    // 截取数据
+                    String[] strings = entity.getDocumentsFileUri().split("\\/");
+                    String fileContext = strings[strings.length - 1];
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put("bucketName", BucketsConst.controlled_documents);
+                    map.put("content", fileContext);
+                    // 最新的受控文件
+                    map.put("status", "1");
+                    return map;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 委托单模板处理
+     *
+     * @param id
+     * @return
+     */
+    public HashMap<String, String> methodEntrustTemplate(Long id, Integer typeId) throws ParseException {
+        PageHelper.clearPage();
+        // 通过委托ID 委托单信息 → test_entrusted_info
+        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(id);
+        if (entrustAddVo == null) {
+            return null;
+        }
+        // 获取受理时间
+        if (entrustAddVo.getAcceptanceDate() == null) {
+            return null;
+        }
+        //实现将字符串转成⽇期类型
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        // 获取受理时间 年月日即可。
+        Date acceptanceDate = dateFormat.parse(dateFormat.format(entrustAddVo.getAcceptanceDate()));
+        // 查询受控文件数据
+        LambdaQueryWrapper<TestControlledDocumentsEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestControlledDocumentsEntity::getFileType, typeId);
+        queryWrapper.eq(TestControlledDocumentsEntity::getDelFlag, 0);
+        // 根据 typeId 类型返回的 基础受控文件集合
+        List<TestControlledDocumentsEntity> controlledDocuments = testControlledDocumentsMapper.selectList(queryWrapper);
+        // 根据 typeId 类型返回的变更记录信息
+        List<TestControlledDocumentsRecordEntity> changeList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(controlledDocuments)) {
+            for (TestControlledDocumentsEntity entity : controlledDocuments) {
+                // 获取变更记录
+                LambdaQueryWrapper<TestControlledDocumentsRecordEntity> queryWrapperRecord = new LambdaQueryWrapper<>();
+                queryWrapperRecord.eq(TestControlledDocumentsRecordEntity::getPid, entity.getId());
+                List<TestControlledDocumentsRecordEntity> list = testControlledDocumentsRecordMapper.selectList(queryWrapperRecord);
+                if (CollectionUtil.isNotEmpty(list)) {
+                    changeList.addAll(list);
+                }
+            }
+            // 优先选择 基础受控文件
+            for (TestControlledDocumentsEntity entity : controlledDocuments) {
+                //  测试此日期是否在指定日期之后。 :
+                //      受理时间 在 基础受控文件实施时间 后面 符合条件 || 实施时间 = 下单时间
+                //      受理时间 2023-12-28  受控文件实施时间 2023-08-01
+                // 获取实施时间 年月日即可。
+                Date usageTime = dateFormat.parse(dateFormat.format(entity.getUsageTime()));
+                if ((acceptanceDate.after(usageTime) || acceptanceDate.equals(usageTime)) && entity.getDocumentsFileUri() != null) {
+                    // 截取数据
+                    String[] strings = entity.getDocumentsFileUri().split("\\/");
+                    String fileContext = strings[strings.length - 1];
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put("bucketName", BucketsConst.controlled_documents);
+                    map.put("content", fileContext);
+                    // 最新的受控文件
+                    map.put("status", "0");
+                    return map;
+                }
+            }
+
+        }
+        // 其次处理 变更记录中 实施时间 与 过期时间的参数内容
+        if (CollectionUtil.isNotEmpty(changeList)) {
+            for (TestControlledDocumentsRecordEntity entity : changeList) {
+                // 受理时间 在 实施时间之后 && 下单时间 在 过期时间 之前
+                // 获取实施时间 年月日即可。 || 实施时间 = 下单时间
+                Date usageTime = dateFormat.parse(dateFormat.format(entity.getUsageTime()));
+                // 过期时间 年月日即可。
+                Date expirationTime = dateFormat.parse(dateFormat.format(entity.getExpirationTime()));
+                if ((acceptanceDate.after(usageTime) || acceptanceDate.equals(usageTime)) && acceptanceDate.before(expirationTime)) {
+                    // 截取数据
+                    String[] strings = entity.getDocumentsFileUri().split("\\/");
+                    String fileContext = strings[strings.length - 1];
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put("bucketName", BucketsConst.controlled_documents);
+                    map.put("content", fileContext);
+                    // 最新的受控文件
+                    map.put("status", "1");
+                    return map;
+                }
+            }
+        }
+        return null;
     }
 }

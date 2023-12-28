@@ -17,6 +17,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
+import com.lims.manage.erp.service.TestControlledDocumentsService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.DingNotifyUtils;
@@ -54,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import sun.security.util.Debug;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
@@ -68,6 +70,7 @@ import java.io.OutputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
@@ -88,9 +91,16 @@ public class EntrustController {
     @Autowired
     private DingNotifyUtils dingNotifyUtils;
     /**
+     * 受控文件信息
+     */
+    @Resource
+    private TestControlledDocumentsService testControlledDocumentsService;
+
+    /**
      * 新增委托 使用中丁
-     *
+     * <p>
      * 丁 7月5日 : 返回字符串效验信息。
+     *
      * @param json
      * @param file
      * @return
@@ -101,10 +111,9 @@ public class EntrustController {
         try {
             EntrustAddVo entrust = JSON.parseObject(jsonParam, EntrustAddVo.class);
             return ResultUtil.success(entrustService.addEntrustTest0620(entrust, file));
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             // 日志输出。
-            Debug.println("新增委托日志异常输出\t",e+"");
+            Debug.println("新增委托日志异常输出\t", e + "");
             return ResultUtil.error("新建委托失败,请联系管理员！！！");
         }
 
@@ -491,34 +500,62 @@ public class EntrustController {
     @RequestMapping("downloadEntrust")
     public void downloadEntrust(Long entrustId, HttpServletResponse response) {
         EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
-        String message = entrustService.getMessage();
-        String[] strings = message.split("/");
-        String fileName = strings[1];
-        //20230314及之前的单子，单位名称用老的BD20210021-old.docx
-        String dayString = DateUtil.getDayString(detail.getAcceptanceDate().getTime());
-        if (Integer.parseInt(dayString)<20230313){
-            fileName = "BD20210021-old.docx";
-        }
-        //2023七月1号之后用新的委托模板
-        if (Integer.parseInt(dayString)>= 20230801){
-            fileName = "033检验委托单.docx";
-        }
+//        String message = entrustService.getMessage();
+//        String[] strings = message.split("/");
+//        String fileName = strings[1];
+//        //20230314及之前的单子，单位名称用老的BD20210021-old.docx
+//        String dayString = DateUtil.getDayString(detail.getAcceptanceDate().getTime());
+//        if (Integer.parseInt(dayString)<20230313){
+//            fileName = "BD20210021-old.docx";
+//        }
+//        //2023七月1号之后用新的委托模板
+//        if (Integer.parseInt(dayString)>= 20230801){
+//            fileName = "033检验委托单.docx";
+//        }
         XWPFDocument document = null;
+        String fileName = "";
+        Boolean status = false;
+        String bucketName = "";
+        // 委托单 - 调用受控文件信息工具类 返回map信息
         try {
+            HashMap<String, String> map = testControlledDocumentsService.returnBucketInformation(entrustId, 59);
+            if (CollectionUtil.isNotEmpty(map.keySet())) {
+                // 桶名
+                bucketName = map.get("bucketName");
+                // 文件名
+                fileName = map.get("content");
+                // 状态信息 == 0 是最新的
+                if (map.get("status").equals("0")) {
+                    status = true;
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        try {
+//            MinioClient client = MinIoUtil.minioClient;
+//            InputStream object = client.getObject(strings[0], fileName);
+//            //填充数据
+//            log.debug("====aaa:{}",JSON.toJSONString(detail));
+//            if ("033检验委托单.docx".equals(fileName)){
+//                document = entrustService.downloadEntrustNew(detail, object);
+//            }else {
+//                document = entrustService.downloadEntrust(detail, object);
+//            }
             MinioClient client = MinIoUtil.minioClient;
-            InputStream object = client.getObject(strings[0], fileName);
+            InputStream object = client.getObject(bucketName, fileName);
             //填充数据
-            log.debug("====aaa:{}",JSON.toJSONString(detail));
-            if ("033检验委托单.docx".equals(fileName)){
+            log.debug("====aaa:{}", JSON.toJSONString(detail));
+            if (status == true) {
                 document = entrustService.downloadEntrustNew(detail, object);
-            }else {
+            } else {
                 document = entrustService.downloadEntrust(detail, object);
             }
             response.reset();
-            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + detail.getEntrustmentNo()+".docx");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + detail.getEntrustmentNo() + ".docx");
             OutputStream outputStream = response.getOutputStream();
             document.write(outputStream);
             outputStream.close();
@@ -536,32 +573,60 @@ public class EntrustController {
     public void preview(Long entrustId, HttpServletResponse response) {
         //校验是否是委托单id
         Long id = entrustService.checkEntrustId(entrustId);
-        if (id == null){
+        if (id == null) {
             Long entrustIdById = reportService.getEntrustIdById(entrustId);
             entrustId = entrustIdById;
         }
         EntrustAddVo detail = entrustService.getEntrustHistoryDetail(entrustId);
-        String message = entrustService.getMessage();
-        String[] strings = message.split("/");
-        String fileName = strings[1];
-        //20230314及之前的单子，单位名称用老的BD20210021-old.docx
-        String dayString = DateUtil.getDayString(detail.getAcceptanceDate()==null?System.currentTimeMillis():detail.getAcceptanceDate().getTime());
-        if (Integer.parseInt(dayString)<20230313){
-            fileName = "BD20210021-old.docx";
-        }
-        //2023七月1号之后用新的委托模板
-        if (Integer.parseInt(dayString)>= 20230801){
-            fileName = "033检验委托单.docx";
-        }
+//        String message = entrustService.getMessage();
+//        String[] strings = message.split("/");
+//        String fileName = strings[1];
+//        //20230314及之前的单子，单位名称用老的BD20210021-old.docx
+//        String dayString = DateUtil.getDayString(detail.getAcceptanceDate()==null?System.currentTimeMillis():detail.getAcceptanceDate().getTime());
+//        if (Integer.parseInt(dayString)<20230313){
+//            fileName = "BD20210021-old.docx";
+//        }
+//        //2023七月1号之后用新的委托模板
+//        if (Integer.parseInt(dayString)>= 20230801){
+//            fileName = "033检验委托单.docx";
+//        }
         XWPFDocument document = null;
+        String fileName = "";
+        Boolean status = false;
+        String bucketName = "";
+        // 委托单 - 调用受控文件信息工具类 返回map信息
         try {
+            HashMap<String, String> map = testControlledDocumentsService.returnBucketInformation(entrustId, 59);
+            if (CollectionUtil.isNotEmpty(map.keySet())) {
+                // 桶名
+                bucketName = map.get("bucketName");
+                // 文件名
+                fileName = map.get("content");
+                // 状态信息 == 0 是最新的
+                if (map.get("status").equals("0")) {
+                    status = true;
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        try {
+//            MinioClient client = MinIoUtil.minioClient;
+//            InputStream object = client.getObject(strings[0], fileName);
+//            //填充数据
+//            log.debug("====aaa:{}",JSON.toJSONString(detail));
+//            if ("033检验委托单.docx".equals(fileName)){
+//                document = entrustService.downloadEntrustNew(detail, object);
+//            }else {
+//                document = entrustService.downloadEntrust(detail, object);
+//            }
             MinioClient client = MinIoUtil.minioClient;
-            InputStream object = client.getObject(strings[0], fileName);
+            InputStream object = client.getObject(bucketName, fileName);
             //填充数据
-            log.debug("====aaa:{}",JSON.toJSONString(detail));
-            if ("033检验委托单.docx".equals(fileName)){
+            log.debug("====aaa:{}", JSON.toJSONString(detail));
+            if (status) {
                 document = entrustService.downloadEntrustNew(detail, object);
-            }else {
+            } else {
                 document = entrustService.downloadEntrust(detail, object);
             }
             //相应pdf
