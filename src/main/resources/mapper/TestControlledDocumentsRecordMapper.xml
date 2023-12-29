@@ -168,6 +168,9 @@
       <if test="usageTime != null">
         usage_time = #{usageTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="expirationTime != null">
+        expiration_time = #{expirationTime,jdbcType=TIMESTAMP},
+      </if>
       <if test="remark != null">
         remark = #{remark,jdbcType=VARCHAR},
       </if>

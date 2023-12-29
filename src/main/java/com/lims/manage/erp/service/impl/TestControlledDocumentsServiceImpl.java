@@ -394,6 +394,22 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
             }
             testControlledDocumentsRecordMapper.insert(testControlledDocumentsRecordEntity);
         }
+        // 基础受控文件的 实施时间 = 变更记录中 最后一条的 实施时间。
+        if (testControlledDocumentsEntity.getUsageTime() != null) {
+            // 查询变更记录 列表
+            LambdaQueryWrapper<TestControlledDocumentsRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+            // 进行 查询分页。
+            PageHelper.clearPage();
+            queryWrapper.eq(TestControlledDocumentsRecordEntity::getPid, testControlledDocumentsEntity.getId());
+            queryWrapper.orderByDesc(TestControlledDocumentsRecordEntity::getId);
+            queryWrapper.last("limit 1");
+            TestControlledDocumentsRecordEntity entity = testControlledDocumentsRecordMapper.selectOne(queryWrapper);
+            if (entity != null) {
+                // 变更记录不为空 : 基础受控文件的 实施时间 = 变更记录中 最后一条的 实施时间
+                entity.setExpirationTime(testControlledDocumentsEntity.getUsageTime());
+                testControlledDocumentsRecordMapper.updateByPrimaryKeySelective(entity);
+            }
+        }
         testControlledDocumentsMapper.updateByPrimaryKeySelective(testControlledDocumentsEntity);
         return ResultUtil.success("变更成功");
     }
@@ -421,6 +437,7 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
         PageHelper.clearPage();
         PageHelper.startPage(testControlledDocuments.getPageNum(), testControlledDocuments.getPageSize());
         queryWrapper.eq(TestControlledDocumentsRecordEntity::getPid, testControlledDocuments.getId());
+        queryWrapper.orderByAsc(TestControlledDocumentsRecordEntity::getId);
         List<TestControlledDocumentsRecordEntity> list = testControlledDocumentsRecordMapper.selectList(queryWrapper);
         PageInfo<TestControlledDocumentsRecordEntity> result = new PageInfo<>(list);
         return ResultUtil.success(result);
