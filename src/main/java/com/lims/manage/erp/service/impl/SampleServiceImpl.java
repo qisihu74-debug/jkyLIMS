@@ -509,7 +509,12 @@ public class SampleServiceImpl implements SampleService {
                     worksheetS.copy(worksheet);
                 }
             }
-            newBook.save("D:\\doc\\saveOriginalRecord\\六月留样\\"+sampleTagInfo.getSampleCode()+".xlsx", SaveFormat.XLSX);
+            if ("王雪青".equals(sampleTagInfo.getInspector())) {
+                newBook.save("D:\\Users\\Administrator\\Desktop\\人员档案\\王雪青样品标签\\"+sampleTagInfo.getSampleCode()+".xlsx", SaveFormat.XLSX);
+            }
+            if ("石小玉".equals(sampleTagInfo.getInspector())) {
+                newBook.save("D:\\Users\\Administrator\\Desktop\\人员档案\\石小玉样品标签\\"+sampleTagInfo.getSampleCode()+".xlsx", SaveFormat.XLSX);
+            }
         }catch (Exception e){
             log.error("下载样品标签异常:{}",e);
         }
@@ -1312,6 +1317,11 @@ public class SampleServiceImpl implements SampleService {
         } catch (Exception e) {
             log.error("保存文档异常:{}",e);
         }
+    }
+
+    @Override
+    public List<SampleDetailVo> downloadNewSampleTab20231227() {
+        return sampleEntityMapper.downloadNewSampleTab20231227();
     }
 
     public HashSet<String> handlerData(String message){

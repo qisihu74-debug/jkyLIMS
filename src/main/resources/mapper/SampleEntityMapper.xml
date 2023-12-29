@@ -1526,4 +1526,26 @@ WHERE
         GROUP BY
         t1.id
     </select>
+
+    <select id="downloadNewSampleTab20231227" resultType="com.lims.manage.erp.vo.SampleDetailVo">
+        SELECT sample_code sampleCode,
+               sample_name sampleName,
+               alias_name aliasName,
+               sample_retention_period,
+               sample_retention_area,
+               specs,
+               outward,
+               inspector,
+               received_date,
+               quantity_per_group quantityPerGroup,
+               outward_describe outwardDescribe,
+               sample_type sampleType,
+               generation,
+               sample_quantity,
+               batch_number,
+               manufacturer,
+               id
+        FROM test_sample
+        WHERE id &gt; 29172
+    </select>
 </mapper>

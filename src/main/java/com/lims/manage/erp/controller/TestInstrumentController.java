@@ -35,6 +35,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -491,5 +492,144 @@ public class TestInstrumentController extends ApiController {
         }
     }
 
+    /**
+     * 更新或者插入仪器设备
+     */
+    @GetMapping("importDevice20231228")
+    @Transactional(rollbackFor = Exception.class)
+    public void importOrUpdateDevice() throws Exception{
+        List<DeviceEntity> list = Lists.newArrayList();
+        List<DeviceEntity> updateList = Lists.newArrayList();
+
+
+        //读取excel
+        com.aspose.cells.Workbook workbook1 = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\20231227设备清单(1).xlsx");
+        Worksheet worksheet1 = workbook1.getWorksheets().get(0);
+        Cells cells1 = worksheet1.getCells();
+        //遍历excel，根据编号查询
+        int num1 = 2;
+
+        while (num1<=557){
+            DeviceEntity deviceEntity = new DeviceEntity();
+            String codeIndex = "B"+num1;
+            String fileState = "C" +num1;
+            String nameIndex = "D"+num1;
+            String modeIndex = "E"+num1;
+            String manufacturerIndex = "F"+num1;
+            String serial_numberIndex = "G"+num1;
+            String price = "H"+num1;
+            String purchase_dateIndex = "I"+num1;
+            String isIndex = "J"+num1;//是否检定校准
+            String affirm_wayIndex = "K"+num1;//确认方式
+            String calibration_corporation = "L"+num1;//鉴定校准单位
+            String appraisal_date = "M"+num1;//检定校准日期
+            String calibration_period = "N"+num1;//检定周期
+            String expire_date = "O"+num1;//鉴定校准失效日期
+            //合并
+            String use_dept = "P"+num1;//设备使用维护部门
+            String team = "V"+num1; //使用科室
+
+            String calibration_number = "Q"+num1;//鉴定校准证书编号
+            String range = "R"+num1;//里程
+            String level = "S"+num1;//精度
+            String calibration_param = "T"+num1;
+            //合并
+            String place = "X"+num1;
+            String store_place = "U"+num1;
+
+            String device_admin = "W"+num1;
+            String code = cells1.get(codeIndex).getValue() != null?cells1.get(codeIndex).getValue().toString():"";
+            deviceEntity.setCode(code);
+            deviceEntity.setFilesState(cells1.get(fileState).getValue() != null?cells1.get(fileState).getValue().toString():"");
+            String name = cells1.get(nameIndex).getValue() != null?cells1.get(nameIndex).getValue().toString():"";
+            deviceEntity.setName(name);
+            String model = cells1.get(modeIndex).getValue()!= null?cells1.get(modeIndex).getValue().toString():"";
+            deviceEntity.setModel(model);
+            deviceEntity.setManufacturer(cells1.get(manufacturerIndex).getValue()!= null?cells1.get(manufacturerIndex).getValue().toString():"");
+
+            String sn = cells1.get(serial_numberIndex).getValue()!=null?cells1.get(serial_numberIndex).getValue().toString():"";
+            deviceEntity.setSerialNumber(sn);
+            deviceEntity.setPrice(cells1.get(price).getValue()!=null?cells1.get(price).getValue().toString():"");
+            try {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                Object value = cells1.get(purchase_dateIndex).getValue();
+                if (value != null){
+                    String string = cells1.get(purchase_dateIndex).getValue().toString();
+                    Date date = simpleDateFormat.parse(string);
+                    deviceEntity.setPurchaseDate(date);
+                }
+            }catch (Exception e){
+
+            }
+            deviceEntity.setIsCalibration(cells1.get(isIndex).getValue()!=null?cells1.get(isIndex).getValue().toString():"");
+            deviceEntity.setAffirmWay(cells1.get(affirm_wayIndex).getValue()!=null?cells1.get(affirm_wayIndex).getValue().toString():"");
+            deviceEntity.setCalibrationCorporation(cells1.get(calibration_corporation).getValue()!=null?cells1.get(calibration_corporation).getValue().toString():"");
+            try {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                Object value = cells1.get(appraisal_date).getValue();
+                if (value != null){
+                    String string = cells1.get(appraisal_date).getValue().toString();
+                    Date date = simpleDateFormat.parse(string);
+                    deviceEntity.setAppraisalDate(date);
+                }
+            }catch (Exception e){
+
+            }
+            deviceEntity.setCalibrationPeriod(cells1.get(calibration_period).getValue()!=null?cells1.get(calibration_period).getValue().toString():"");
+            try {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                Object value = cells1.get(expire_date).getValue();
+                if (value != null){
+                    String string = cells1.get(expire_date).getValue().toString();
+                    Date date = simpleDateFormat.parse(string);
+                    deviceEntity.setExpireDate(date);
+                }
+            }catch (Exception e){
+
+            }
+            String v1 = cells1.get(use_dept).getValue()!=null?cells1.get(use_dept).getValue().toString():"";
+            String v2 = cells1.get(team).getValue()!=null?cells1.get(team).getValue().toString():"";
+            deviceEntity.setUseDept(v1+v2);
+            deviceEntity.setCalibrationNumber(cells1.get(calibration_number).getValue()!=null?cells1.get(calibration_number).getValue().toString():"");
+            deviceEntity.setRange(cells1.get(range).getValue()!=null?cells1.get(range).getValue().toString():"");
+            deviceEntity.setLevel(cells1.get(level).getValue()!=null?cells1.get(level).getValue().toString():"");
+            deviceEntity.setCalibrationParam(cells1.get(calibration_param).getValue()!=null?cells1.get(calibration_param).getValue().toString():"");
+            String v3= cells1.get(place).getValue()!=null?cells1.get(place).getValue().toString():"";
+            String v4= cells1.get(store_place).getValue()!=null?cells1.get(store_place).getValue().toString():"";
+            deviceEntity.setCalibrationParam(v3+v4);
+            deviceEntity.setCalibrationParam(cells1.get(device_admin).getValue()!=null?cells1.get(device_admin).getValue().toString():"");
+
+            deviceEntity.setStatus("0");
+            deviceEntity.setDelFlag(0);
+            deviceEntity.setCreateTime(new Date());
+
+            LambdaQueryWrapper<TestInstrument>  queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(TestInstrument::getCode,code);
+            queryWrapper.eq(TestInstrument::getSerialNumber,sn);
+            queryWrapper.eq(TestInstrument::getModel,model);
+            queryWrapper.eq(TestInstrument::getName,name);
+            TestInstrument one = testInstrumentService.getOne(queryWrapper);
+
+
+            //判断excel设备编号在数据库不存在做插入，
+            // 如果存在判断机身出场编号是否存在，如果库和表一致做更新，如果不一致做插入
+            if (one == null){
+                deviceEntity.setId(snowflakeIdGenerator.nextId());
+                list.add(deviceEntity);
+            }else {
+                deviceEntity.setId(one.getId());
+                updateList.add(deviceEntity);
+            }
+            num1++;
+        }
+        //保存或者更新数据
+        for (DeviceEntity deviceEntity:list){
+            deviceEntityMapper.insert(deviceEntity);
+        }
+        for (DeviceEntity deviceEntity:updateList){
+            deviceEntityMapper.updateByIf(deviceEntity);
+        }
+        System.out.println("仪器设备插入更新成功");
+    }
 }
 
