@@ -6222,12 +6222,12 @@ public class EntrustServiceImpl implements EntrustService {
         if (entrustDetails.getState() == 1) {
             return ResultUtil.error("审核失败：委托单已发布成功");
         }
-        if (entrustDetails.getState() == 0 && state == 1) {
-            return ResultUtil.error("审核失败：委托单已审核通过");
-        }
-        if (entrustDetails.getState() != 201 && state == 1) {
-            return ResultUtil.error("审核失败：委托单不是预委托单");
-        }
+//        if (entrustDetails.getState() == 0 && state == 1) {
+//            return ResultUtil.error("审核失败：委托单已审核通过");
+//        }
+//        if (entrustDetails.getState() != 201 && state == 1) {
+//            return ResultUtil.error("审核失败：委托单不是预委托单");
+//        }
         if(entrustDetails.getAuditState().equals("0")){
             return ResultUtil.error("审核失败：委托单未受理");
         }
