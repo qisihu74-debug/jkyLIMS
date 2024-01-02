@@ -614,10 +614,6 @@ public class PDFHelper3 {
         return s;
     }
 
-    public static void main(String[] args) {
-        setPdfStyle("D:\\Users\\Administrator\\Desktop\\office-tools\\merge(1).pdf");
-    }
-
     /**
      * @Description: word和txt文件转换图片
      */
@@ -816,5 +812,35 @@ public class PDFHelper3 {
             }
         }
         return null;
+    }
+
+    public static void pdf2Excel1(String file, String basePath) {
+        FileInputStream inputStream = null;
+        File toFile = new File(file);
+        long old = System.currentTimeMillis();
+        try {
+            File fileDoc = new File(basePath);
+            FileOutputStream os = new FileOutputStream(fileDoc);
+            inputStream = new FileInputStream(toFile);
+            com.aspose.pdf.Document doc = new com.aspose.pdf.Document(inputStream,"015959");//加载源文件数据
+            // 检查密码是否正确
+            System.out.println("开始转换");
+            doc.save(os, com.aspose.pdf.SaveFormat.Excel);//设置转换文件类型并转换
+            os.close();
+            //去除水印
+            removeWatermark(new File(basePath));
+            //转化用时
+            long now = System.currentTimeMillis();
+            System.out.println("Pdf 转 excel共耗时：" + ((now - old) / 1000.0) + "秒");
+        } catch (Exception e) {
+            System.out.println("Pdf 转 excel 失败...");
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        String file = "C:\\Users\\Administrator\\Pictures\\ls.pdf";
+        String path = "C:\\Users\\Administrator\\Pictures\\银行流水.xlsx";
+        pdf2Excel1(file,path);
     }
 }

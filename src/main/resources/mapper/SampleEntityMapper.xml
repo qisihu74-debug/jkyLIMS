@@ -1546,6 +1546,16 @@ WHERE
                manufacturer,
                id
         FROM test_sample
-        WHERE id &gt; 29172
+        WHERE id in(29250
+,29251
+,29252
+,29253
+,29254
+,29255
+,29256
+,29257
+,29258
+,29259
+,29260)
     </select>
 </mapper>

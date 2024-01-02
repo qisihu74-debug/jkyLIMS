@@ -921,12 +921,12 @@ public class SampleController {
     @RequestMapping("/downloadNewSampleTab20231227")
     public void downloadNewSampleTab20231227(HttpServletResponse response) throws IOException {
        //查询满足条件的样品列表
-        //List<SampleDetailVo> list = sampleService.downloadNewSampleTab20231227();
-        SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(29238);
-        SampleDetailVo sampleTagInfo1 = sampleService.getSampleTagInfo(29239);
-        List<SampleDetailVo> list = Lists.newArrayList();
-        list.add(sampleTagInfo);
-        list.add(sampleTagInfo1);
+        List<SampleDetailVo> list = sampleService.downloadNewSampleTab20231227();
+//        SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(29250);
+//        SampleDetailVo sampleTagInfo1 = sampleService.getSampleTagInfo(29251);
+//        List<SampleDetailVo> list = Lists.newArrayList();
+//        list.add(sampleTagInfo);
+//        list.add(sampleTagInfo1);
         //王雪青，石小玉
         for (SampleDetailVo sampleDetailVo :list){
             sampleService.downloadNewSampleTab1(1, sampleDetailVo.getId(), sampleDetailVo, response);
