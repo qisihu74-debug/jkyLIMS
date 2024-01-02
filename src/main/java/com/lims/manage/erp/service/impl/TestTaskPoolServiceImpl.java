@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -284,7 +283,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         }
         // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
         // 根据科室id 及 委托单主键 查询任务单是否存在？
-        //                        // TODO: 12月21日 1、 旧任务单存在 更新任务单 更新检测项 ，2、任务单与前端绑定不一致， 删除任务单操作。
+        //                        // TODO: 12月21日 1、 旧任务单存在 更新任务单 更新检测项 ，2、任务单与前端绑定不一致， 任务单更新为废弃操作、产值 = 0 。
         //                           TODO:          2、 任务单不存在的话，创建任务单即可。
         //调用方法： 补充检测项信息并发布任务单
         // key = deptId value = 旧单号
@@ -368,6 +367,10 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     TaskTestEntity taskTestEntity = new TaskTestEntity();
                     taskTestEntity.setId(itemEntity.getTaskId());
                     taskTestEntity.setTaskPrice(taskPrice);
+                    // task == 144的话 变更任务单状态 = 1 领取
+                    if (taskProgressVo.getState() == 144) {
+                        taskTestEntity.setState(1);
+                    }
                     // 领样人
                     taskTestEntity.setSampler(itemEntity.getSampler());
                     taskMapper.updateTestTask(taskTestEntity);
@@ -376,22 +379,16 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         }
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         String userName = userInfo.getUserId() + "&" + userInfo.getUsername();
-        // 删除废弃的任务单信息。
+        // TODO：12月29日 变更为：废弃任务单信息。
         for (TaskProgressVo taskProgressVo : taskProgressVos) {
             // itemEntity.getTaskId()!=null 说明任务单更新了。
             //  取 差集 list 和 taskProgressVos 都存在的保留 否则删除任务单。
             if (taskProgressVo.getStatus() == null) {
-                // 任务单删除
-                // 查询任务单详情：
-                TaskTestEntity data = taskMapper.selectTaskEntity(taskProgressVo.getTaskId());
-                // 删除时间
-                data.setWasteTime(new Date());
-                // 操作人
-                data.setDerelict(userName);
-                // 新增已删除任务单 插入表 test_task_used
-                taskMapper.inserTasUsed(data);
-                // 删除任务单
-                taskMapper.deleteTaskById(data.getId());
+                TaskTestEntity taskTestEntity = new TaskTestEntity();
+                taskTestEntity.setId(taskProgressVo.getTaskId());
+                taskTestEntity.setTaskPrice(0.0);
+                taskTestEntity.setState(144);
+                taskMapper.updateTestTask(taskTestEntity);
             }
 
         }

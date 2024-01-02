@@ -827,16 +827,18 @@ public class SampleController {
     @RequestMapping("/downloadRetentionTab1")
     public void downloadRetentionSampleTab1(HttpServletResponse response) throws Exception {
         //读取excel
-        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\6月样品留样.xlsx");
+//        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\6月样品留样.xlsx");
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\样品留样.xlsx");
         Worksheet worksheet = workbook.getWorksheets().get(0);
         Cells cells = worksheet.getCells();
         //遍历excel，根据编号查询
         int num = 3;
         while (num<=166){
             String index = "C"+num;
-            String key = "I"+num;
-            String string = cells.get(key).getValue().toString();
-            if ("90d".equals(string)){
+            Thread.sleep(1000);
+//            String key = "I"+num;
+//            String string = cells.get(key).getValue().toString();
+//            if ("90d".equals(string)){
                 String code = cells.get(index).getValue().toString();
                 int sampleId = sampleService.getIdByCode(code);
                 SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
@@ -844,7 +846,7 @@ public class SampleController {
                     sampleTagInfo.setSampleCode(code);
                     sampleService.downloadNewSampleTab1(2, sampleId, sampleTagInfo, response);
                 }
-            }
+//            }
             num++;
         }
     }

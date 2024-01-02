@@ -87,7 +87,6 @@ public class SysUserEntity implements Serializable {
 	private Timestamp time;
 
 	private String signatureUrl;
-
 	@TableField(exist = false)
 	private Integer technicistId;
 

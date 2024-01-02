@@ -17,11 +17,7 @@ import com.lims.manage.erp.mapper.TestTechnicistDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.PageOfficeCopyService;
-import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.service.SysUserService;
-import com.lims.manage.erp.service.TaskService;
-import com.lims.manage.erp.service.TestDetectionService;
+import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
@@ -58,6 +54,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -71,10 +68,7 @@ import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipOutputStream;
 
 @Slf4j
@@ -100,6 +94,11 @@ public class TaskController {
     private TestTechnicistDao testTechnicistDao;
     @Autowired
     private SysUserService userService;
+    /**
+     * 受控文件信息
+     */
+    @Resource
+    private TestControlledDocumentsService testControlledDocumentsService;
 
     /**
      * 查询任务详情——废弃
@@ -534,8 +533,80 @@ public class TaskController {
     }
 
 
+//    /**downloadOriginalRecord
+//     * 下载任务通知单——二次开发 丁 线上使用中
+//     * 变更需求 world 转 pdf。
+//     *
+//     * @param taskId
+//     * @param response
+//     */
+//    @GetMapping("downloadEntrust_two")
+//    public void downloadEntrust_two(Long taskId, HttpServletResponse response) {
+//        String fileName = "";
+//        // 3月13日前
+//        String str1 = "taskOrder11.docx";
+//        // 2023年3月13 零点后
+//        String str2 = "taskOrder20.docx";
+//        // 2023年07月01 使用
+//        String str3 = "taskOrder30升级版3.docx";
+//        // 获取任务单下单时间 进行比较
+//        TaskTestEntity taskDetails = taskMapper.getTaskOrderTime(taskId);
+//        Boolean status = false;
+//        if(taskDetails!=null && taskDetails.getOrderTime()!=null){
+//            Date date = null;
+//            Date date2 = null;
+//            //实现将字符串转成⽇期类型
+//            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            try {
+//                date = dateFormat.parse("2023-03-12 23:59:59");
+//                date2 = dateFormat.parse("2023-07-31 23:59:59");
+//            } catch (ParseException e) {
+//                e.printStackTrace();
+//            }
+//            // 截止至 2023-03-12 23:59:59 后 任务单附件为  String str2 = "taskOrder20.docx"
+//            if((date.getTime() < taskDetails.getOrderTime().getTime()) && (date2.getTime() > taskDetails.getOrderTime().getTime())){
+//                fileName = str2;
+//            }else if(date2.getTime() < taskDetails.getOrderTime().getTime()){
+//                fileName = str3;
+//                status = true;
+//            }
+//             else {
+//                 fileName = str1;
+//             }
+//        }
+//        String url = "";
+//        String downloadFileName = "任务单编号";
+//        try {
+//            MinioClient client = MinIoUtil.minioClient;
+//            InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
+//            TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId, null);
+//            XWPFDocument doc = null;
+//            if(status == true){
+//               doc = taskService.downloadEntrustNew(taskDetailInfo, object);
+//            }else {
+//                doc = taskService.downloadEntrust(taskDetailInfo, object,false);
+//            }
+//            //相应pdf
+//            ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
+//            InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+//            //TODO 设置签名信息
+//            /** 设置文件下载名 （任务单号+检测项名）**/
+//            /** 不同文件的MimeType参考后续链接 **/
+//            String file = taskDetailInfo.getTaskCode()+".pdf";
+//            file = URLEncoder.encode(file, "UTF-8");
+//            response.setHeader("Content-Disposition", "inline;fileName=" + file + ";fileName*=UTF-8''" + file);
+//            ServletOutputStream outputStream = response.getOutputStream();
+//            int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+//            inputStream.close();
+//            outputStream.close();
+////            url = MinIoUtil.upload("task-download", taskId + ".pdf", inputStream, "application/octet-stream");
+//        } catch (Exception ex) {
+//            log.info("导出失败：{}", ex);
+//        }
+//    }
 
-    /**downloadOriginalRecord
+    /**
+     * downloadOriginalRecord
      * 下载任务通知单——二次开发 丁 线上使用中
      * 变更需求 world 转 pdf。
      *
@@ -544,49 +615,35 @@ public class TaskController {
      */
     @GetMapping("downloadEntrust_two")
     public void downloadEntrust_two(Long taskId, HttpServletResponse response) {
+
         String fileName = "";
-        // 3月13日前
-        String str1 = "taskOrder11.docx";
-        // 2023年3月13 零点后
-        String str2 = "taskOrder20.docx";
-        // 2023年07月01 使用
-        String str3 = "taskOrder30升级版3.docx";
-        // 获取任务单下单时间 进行比较
-        TaskTestEntity taskDetails = taskMapper.getTaskOrderTime(taskId);
         Boolean status = false;
-        if(taskDetails!=null && taskDetails.getOrderTime()!=null){
-            Date date = null;
-            Date date2 = null;
-            //实现将字符串转成⽇期类型
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            try {
-                date = dateFormat.parse("2023-03-12 23:59:59");
-                date2 = dateFormat.parse("2023-07-31 23:59:59");
-            } catch (ParseException e) {
-                e.printStackTrace();
+        String bucketName = "";
+        // 任务单 - 调用受控文件信息工具类 返回map信息
+        try {
+            HashMap<String, String> map = testControlledDocumentsService.returnBucketInformation(taskId, 58);
+            if (CollectionUtil.isNotEmpty(map.keySet())) {
+                // 桶名
+                bucketName = map.get("bucketName");
+                // 文件名
+                fileName = map.get("content");
+                // 状态信息 == 0 是最新的
+                if (map.get("status").equals("0")) {
+                    status = true;
+                }
             }
-            // 截止至 2023-03-12 23:59:59 后 任务单附件为  String str2 = "taskOrder20.docx"
-            if((date.getTime() < taskDetails.getOrderTime().getTime()) && (date2.getTime() > taskDetails.getOrderTime().getTime())){
-                fileName = str2;
-            }else if(date2.getTime() < taskDetails.getOrderTime().getTime()){
-                fileName = str3;
-                status = true;
-            }
-             else {
-                 fileName = str1;
-             }
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
-        String url = "";
-        String downloadFileName = "任务单编号";
         try {
             MinioClient client = MinIoUtil.minioClient;
-            InputStream object = client.getObject(BucketsConst.buckets_task_template, fileName);
+            InputStream object = client.getObject(bucketName, fileName);
             TaskDetailInfoVo taskDetailInfo = taskService.getTaskDetailInfoTwo(taskId, null);
             XWPFDocument doc = null;
-            if(status == true){
-               doc = taskService.downloadEntrustNew(taskDetailInfo, object);
-            }else {
-                doc = taskService.downloadEntrust(taskDetailInfo, object,false);
+            if (status == true) {
+                doc = taskService.downloadEntrustNew(taskDetailInfo, object);
+            } else {
+                doc = taskService.downloadEntrust(taskDetailInfo, object, false);
             }
             //相应pdf
             ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
@@ -594,14 +651,13 @@ public class TaskController {
             //TODO 设置签名信息
             /** 设置文件下载名 （任务单号+检测项名）**/
             /** 不同文件的MimeType参考后续链接 **/
-            String file = taskDetailInfo.getTaskCode()+".pdf";
+            String file = taskDetailInfo.getTaskCode() + ".pdf";
             file = URLEncoder.encode(file, "UTF-8");
             response.setHeader("Content-Disposition", "inline;fileName=" + file + ";fileName*=UTF-8''" + file);
             ServletOutputStream outputStream = response.getOutputStream();
             int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
             inputStream.close();
             outputStream.close();
-//            url = MinIoUtil.upload("task-download", taskId + ".pdf", inputStream, "application/octet-stream");
         } catch (Exception ex) {
             log.info("导出失败：{}", ex);
         }

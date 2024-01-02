@@ -586,7 +586,7 @@
                 and task_code LIKE CONCAT('%',#{taskCode},'%')
             </if>
             <if test="sampleName!=null and sampleName!=''">
-                entrustment_id IN (
+               and entrustment_id IN (
                 SELECT
                 t2.entrustment_id
                 FROM
