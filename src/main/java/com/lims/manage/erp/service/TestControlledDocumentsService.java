@@ -93,5 +93,13 @@ public interface TestControlledDocumentsService extends IService<TestControlledD
      */
     HashMap<String, String> returnBucketInformation(Long id, Integer typeId) throws ParseException;
 
+    /**
+     * 在线模板数据查看
+     *
+     * @param type
+     * @return
+     */
+    Result getTemplateData(String type);
+
 }
 
