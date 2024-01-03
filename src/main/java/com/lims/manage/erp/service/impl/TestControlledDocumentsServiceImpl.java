@@ -184,7 +184,7 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
         } else {
             testControlledDocumentsEntity.setDocumentsFileUri(null);
         }
-        System.out.println("testControlledDocumentsEntity" + testControlledDocumentsEntity);
+//        System.out.println("testControlledDocumentsEntity" + testControlledDocumentsEntity);
         // 对数据新增补充
         testControlledDocumentsEntity.setIsAvailable("1");
         testControlledDocumentsEntity.setCreateTime(new Date());

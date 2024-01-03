@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.ManageReviewInformationEntityMapper">
+  <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.ManageReviewInformationEntity">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="plan_creator" jdbcType="VARCHAR" property="planCreator" />
+    <result column="duties" jdbcType="VARCHAR" property="duties" />
+    <result column="original_file_name" jdbcType="VARCHAR" property="originalFileName" />
+    <result column="file_url" jdbcType="VARCHAR" property="fileUrl" />
+    <result column="del_flag" jdbcType="INTEGER" property="delFlag" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="pid" jdbcType="INTEGER" property="pid" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, plan_creator, duties, original_file_name, file_url, del_flag, create_time, update_time, 
+    pid
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from manage_review_information
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from manage_review_information
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" useGeneratedKeys="true" parameterType="com.lims.manage.erp.entity.ManageReviewInformationEntity" keyProperty="id">
+    insert into manage_review_information (id, plan_creator, duties, 
+      original_file_name, file_url, del_flag, 
+      create_time, update_time, pid
+      )
+    values (#{id,jdbcType=INTEGER}, #{planCreator,jdbcType=VARCHAR}, #{duties,jdbcType=VARCHAR}, 
+      #{originalFileName,jdbcType=VARCHAR}, #{fileUrl,jdbcType=VARCHAR}, #{delFlag,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{pid,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ManageReviewInformationEntity">
+    insert into manage_review_information
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="planCreator != null">
+        plan_creator,
+      </if>
+      <if test="duties != null">
+        duties,
+      </if>
+      <if test="originalFileName != null">
+        original_file_name,
+      </if>
+      <if test="fileUrl != null">
+        file_url,
+      </if>
+      <if test="delFlag != null">
+        del_flag,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="pid != null">
+        pid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="planCreator != null">
+        #{planCreator,jdbcType=VARCHAR},
+      </if>
+      <if test="duties != null">
+        #{duties,jdbcType=VARCHAR},
+      </if>
+      <if test="originalFileName != null">
+        #{originalFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null">
+        #{delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pid != null">
+        #{pid,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.ManageReviewInformationEntity">
+    update manage_review_information
+    <set>
+      <if test="planCreator != null">
+        plan_creator = #{planCreator,jdbcType=VARCHAR},
+      </if>
+      <if test="duties != null">
+        duties = #{duties,jdbcType=VARCHAR},
+      </if>
+      <if test="originalFileName != null">
+        original_file_name = #{originalFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        file_url = #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null">
+        del_flag = #{delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pid != null">
+        pid = #{pid,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.ManageReviewInformationEntity">
+    update manage_review_information
+    set plan_creator = #{planCreator,jdbcType=VARCHAR},
+      duties = #{duties,jdbcType=VARCHAR},
+      original_file_name = #{originalFileName,jdbcType=VARCHAR},
+      file_url = #{fileUrl,jdbcType=VARCHAR},
+      del_flag = #{delFlag,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      pid = #{pid,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
