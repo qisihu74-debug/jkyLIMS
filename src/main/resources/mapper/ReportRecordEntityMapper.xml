@@ -1417,7 +1417,19 @@
             test_entrusted_info t1
                 LEFT JOIN test_reserve_code t2 ON t1.entrustment_no = t2.entrustment_no
         WHERE
-            t1.id = #{entrustmentId}
+            use_date IS NULL
+          AND t1.id = #{entrustmentId}
+        ORDER BY
+            t2.id ASC
+            LIMIT 1
     </select>
+
+    <update id="updateReserveCode" parameterType="java.lang.String">
+        UPDATE test_reserve_code
+        SET state = '已使用',
+            use_date = SYSDATE( )
+        WHERE
+            report_code = #{reportCode}
+    </update>
 
 </mapper>

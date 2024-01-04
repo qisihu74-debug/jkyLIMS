@@ -706,6 +706,9 @@ public class ReportServiceImpl implements ReportService {
                         String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
                         if(reserveCodeStr == null){
                             reserveCodeStr = getMaxCode(entrustmentId);
+                        }else{
+                            //更新预留编号的状态和使用时间
+                            recordEntityMapper.updateReserveCode(reserveCodeStr);
                         }
                         reportRecordEntity1.setReportCode(reserveCodeStr);
                     }
@@ -744,6 +747,9 @@ public class ReportServiceImpl implements ReportService {
                     String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
                     if(reserveCodeStr == null){
                         reserveCodeStr = getMaxCode(entrustmentId);
+                    }else{
+                        //更新预留编号的状态和使用时间
+                        recordEntityMapper.updateReserveCode(reserveCodeStr);
                     }
                     reportRecordEntity.setReportCode(reserveCodeStr);
                 }
@@ -916,6 +922,9 @@ public class ReportServiceImpl implements ReportService {
         String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
         if(reserveCodeStr == null){
             reserveCodeStr = getMaxCode(entrustmentId);
+        }else{
+            //更新预留编号的状态和使用时间
+            recordEntityMapper.updateReserveCode(reserveCodeStr);
         }
         reportRecordEntity.setReportCode(reserveCodeStr);
         reportRecordEntity.setId(recordId);
@@ -4568,6 +4577,9 @@ public class ReportServiceImpl implements ReportService {
                 String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
                 if(reserveCodeStr == null){
                     reserveCodeStr = getMaxCode(entrustIdByTaskId);
+                }else{
+                    //更新预留编号的状态和使用时间
+                    recordEntityMapper.updateReserveCode(reserveCodeStr);
                 }
                 reportRecordEntity.setReportCode(reserveCodeStr);
                 reportRecordEntity.setId(GenID.getID());
@@ -4599,6 +4611,9 @@ public class ReportServiceImpl implements ReportService {
                     String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
                     if(reserveCodeStr == null){
                         reserveCodeStr = getMaxCode(entrustIdByTaskId);
+                    }else{
+                        //更新预留编号的状态和使用时间
+                        recordEntityMapper.updateReserveCode(reserveCodeStr);
                     }
                     reportRecordEntity.setReportCode(reserveCodeStr);
                     reportRecordEntity.setId(GenID.getID());
