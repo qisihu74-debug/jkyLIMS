@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.ManageReviewPlanEntityMapper">
+  <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.ManageReviewPlanEntity">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="plan_creator" jdbcType="VARCHAR" property="planCreator" />
+    <result column="plan_creation_time" jdbcType="TIMESTAMP" property="planCreationTime" />
+    <result column="review_start_time" jdbcType="TIMESTAMP" property="reviewStartTime" />
+    <result column="review_end_time" jdbcType="TIMESTAMP" property="reviewEndTime" />
+    <result column="review_purpose" jdbcType="VARCHAR" property="reviewPurpose" />
+    <result column="review_host" jdbcType="VARCHAR" property="reviewHost" />
+    <result column="review_location" jdbcType="VARCHAR" property="reviewLocation" />
+    <result column="review_report_status" jdbcType="VARCHAR" property="reviewReportStatus" />
+    <result column="del_flag" jdbcType="INTEGER" property="delFlag" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, plan_creator, plan_creation_time, review_start_time, review_end_time, review_purpose, 
+    review_host, review_location, review_report_status, del_flag, create_time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from manage_review_plan
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from manage_review_plan
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.lims.manage.erp.entity.ManageReviewPlanEntity">
+    insert into manage_review_plan (id, plan_creator, plan_creation_time, 
+      review_start_time, review_end_time, review_purpose, 
+      review_host, review_location, review_report_status, 
+      del_flag, create_time, update_time
+      )
+    values (#{id,jdbcType=INTEGER}, #{planCreator,jdbcType=VARCHAR}, #{planCreationTime,jdbcType=TIMESTAMP}, 
+      #{reviewStartTime,jdbcType=TIMESTAMP}, #{reviewEndTime,jdbcType=TIMESTAMP}, #{reviewPurpose,jdbcType=VARCHAR}, 
+      #{reviewHost,jdbcType=VARCHAR}, #{reviewLocation,jdbcType=VARCHAR}, #{reviewReportStatus,jdbcType=VARCHAR}, 
+      #{delFlag,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" useGeneratedKeys="true" parameterType="com.lims.manage.erp.entity.ManageReviewPlanEntity" keyProperty="id">
+    insert into manage_review_plan
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="planCreator != null">
+        plan_creator,
+      </if>
+      <if test="planCreationTime != null">
+        plan_creation_time,
+      </if>
+      <if test="reviewStartTime != null">
+        review_start_time,
+      </if>
+      <if test="reviewEndTime != null">
+        review_end_time,
+      </if>
+      <if test="reviewPurpose != null">
+        review_purpose,
+      </if>
+      <if test="reviewHost != null">
+        review_host,
+      </if>
+      <if test="reviewLocation != null">
+        review_location,
+      </if>
+      <if test="reviewReportStatus != null">
+        review_report_status,
+      </if>
+      <if test="delFlag != null">
+        del_flag,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="planCreator != null">
+        #{planCreator,jdbcType=VARCHAR},
+      </if>
+      <if test="planCreationTime != null">
+        #{planCreationTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reviewStartTime != null">
+        #{reviewStartTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reviewEndTime != null">
+        #{reviewEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reviewPurpose != null">
+        #{reviewPurpose,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewHost != null">
+        #{reviewHost,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewLocation != null">
+        #{reviewLocation,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewReportStatus != null">
+        #{reviewReportStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null">
+        #{delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.ManageReviewPlanEntity">
+    update manage_review_plan
+    <set>
+      <if test="planCreator != null">
+        plan_creator = #{planCreator,jdbcType=VARCHAR},
+      </if>
+      <if test="planCreationTime != null">
+        plan_creation_time = #{planCreationTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reviewStartTime != null">
+        review_start_time = #{reviewStartTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reviewEndTime != null">
+        review_end_time = #{reviewEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reviewPurpose != null">
+        review_purpose = #{reviewPurpose,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewHost != null">
+        review_host = #{reviewHost,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewLocation != null">
+        review_location = #{reviewLocation,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewReportStatus != null">
+        review_report_status = #{reviewReportStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null">
+        del_flag = #{delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.ManageReviewPlanEntity">
+    update manage_review_plan
+    set plan_creator = #{planCreator,jdbcType=VARCHAR},
+      plan_creation_time = #{planCreationTime,jdbcType=TIMESTAMP},
+      review_start_time = #{reviewStartTime,jdbcType=TIMESTAMP},
+      review_end_time = #{reviewEndTime,jdbcType=TIMESTAMP},
+      review_purpose = #{reviewPurpose,jdbcType=VARCHAR},
+      review_host = #{reviewHost,jdbcType=VARCHAR},
+      review_location = #{reviewLocation,jdbcType=VARCHAR},
+      review_report_status = #{reviewReportStatus,jdbcType=VARCHAR},
+      del_flag = #{delFlag,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

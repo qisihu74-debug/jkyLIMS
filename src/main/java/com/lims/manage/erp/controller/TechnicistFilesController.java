@@ -19,9 +19,11 @@ import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.ResumeEntity;
 import com.lims.manage.erp.entity.TechnicistFiles;
+import com.lims.manage.erp.entity.TestControlledDocumentsEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TechnicistFilesService;
+import com.lims.manage.erp.service.TestControlledDocumentsService;
 import com.lims.manage.erp.util.CombineFilesToZip;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
@@ -64,10 +66,12 @@ public class TechnicistFilesController {
     private TechnicistFilesService technicistFilesService;
     @Autowired
     private QiYueSuoEntity qiYueSuoEntity;
+    @Autowired
+    private TestControlledDocumentsService documentsService;
 
     /**
      * 受控文件类型
-     *
+     *档案文件类型1人员履历材料，2证件类材料，3培训类材料，4业绩类材料，5奖惩类材料，6其它材料
      * @param type
      */
     @GetMapping("downloadResumeTemp")
@@ -75,13 +79,40 @@ public class TechnicistFilesController {
         if (StringUtils.isEmpty(type)) {
             return ResultUtil.error("缺少参数");
         }
-        //受控文件查询 TODO
+        Result result= null;
+        switch (type) {
+            case "1":
+                result = documentsService.getTemplateData("人员履历");
+                break;
+            case "2":
+                result = documentsService.getTemplateData("证件类材料");
+                break;
+            case "3":
+                result = documentsService.getTemplateData("业绩类材料");
+                break;
+            case "4":
+                result = documentsService.getTemplateData("奖惩类材料");
+                break;
+            case "5":
+                result = documentsService.getTemplateData("培训类材料");
+                break;
+            case "6":
+                result = documentsService.getTemplateData("其它材料");
+                break;
+            default:
+                break;
+        }
         List<ResumeEntity> list = Lists.newArrayList();
-        ResumeEntity resumeEntity = new ResumeEntity();
-        resumeEntity.setCode("05-JL/GL-050");
-        resumeEntity.setName("人员履历表");
-        resumeEntity.setFileUrl("https://minio.lims.design/controlled-documents/人员履历表.doc");
-        list.add(resumeEntity);
+        if (result != null){
+            List<TestControlledDocumentsEntity> resultData = (List<TestControlledDocumentsEntity>) result.getData();
+            for (TestControlledDocumentsEntity entity :resultData){
+                ResumeEntity resumeEntity = new ResumeEntity();
+                resumeEntity.setCode(entity.getDocumentsCode());
+                resumeEntity.setName(entity.getDocumentsName());
+                resumeEntity.setFileUrl(entity.getDocumentsFileUri());
+                list.add(resumeEntity);
+            }
+        }
         return ResultUtil.success(list);
     }
 

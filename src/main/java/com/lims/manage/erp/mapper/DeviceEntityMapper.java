@@ -62,4 +62,6 @@ public interface DeviceEntityMapper {
 
     @Select("SELECT id from test_instrument where del_flag=0")
     List<Integer> getAllIds();
+
+    void updateByIf(DeviceEntity deviceEntity);
 }

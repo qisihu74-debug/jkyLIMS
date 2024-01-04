@@ -1526,4 +1526,36 @@ WHERE
         GROUP BY
         t1.id
     </select>
+
+    <select id="downloadNewSampleTab20231227" resultType="com.lims.manage.erp.vo.SampleDetailVo">
+        SELECT sample_code sampleCode,
+               sample_name sampleName,
+               alias_name aliasName,
+               sample_retention_period,
+               sample_retention_area,
+               specs,
+               outward,
+               inspector,
+               received_date,
+               quantity_per_group quantityPerGroup,
+               outward_describe outwardDescribe,
+               sample_type sampleType,
+               generation,
+               sample_quantity,
+               batch_number,
+               manufacturer,
+               id
+        FROM test_sample
+        WHERE id in(29250
+,29251
+,29252
+,29253
+,29254
+,29255
+,29256
+,29257
+,29258
+,29259
+,29260)
+    </select>
 </mapper>
