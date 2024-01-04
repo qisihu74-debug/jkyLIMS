@@ -1062,13 +1062,75 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         }
         // 补充任务单信息
         SampleItemEntity addSampleItemEntity = new SampleItemEntity();
-
-
+        for (Integer key : itemsTaskMap.keySet()) {
+            //  0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生
+            switch (key) {
+                case 0:
+                    //  0：检测人
+                    addSampleItemEntity.setInspector(methodReturnString(itemsTaskMap, key, 0));
+                    break;
+                case 1:
+                    // 1：记录人、
+                    addSampleItemEntity.setRecorder(methodReturnString(itemsTaskMap, key, 0));
+                    break;
+                case 2:
+                    // 2：复核人、
+                    addSampleItemEntity.setReviewer(methodReturnString(itemsTaskMap, key, 0));
+                    break;
+                case 3:
+                    // 3：报告制作人、
+                    addSampleItemEntity.setReportProducer(methodReturnString(itemsTaskMap, key, 0));
+                    break;
+                case 4:
+                    // 4：辅助人员、
+                    addSampleItemEntity.setAuxiliaryPersonnel(methodReturnString(itemsTaskMap, key, 0));
+                    break;
+                case 5:
+                    // 5、见习生：
+                    addSampleItemEntity.setProbationer(methodReturnString(itemsTaskMap, key, 0));
+                    break;
+                case 6:
+                    // 6、实习生：
+                    addSampleItemEntity.setInspector(methodReturnString(itemsTaskMap, key, 0));
+                    break;
+                default:
+                    break;
+            }
+        }
         // 领样人
-//        entity.setSampler(sampler);
-//        entity.setCheckItemDeptVoList(checkItemDeptVoList);
-        // 发布任务
-//        distributionTask412(entity, sampleItemEntity, poolId, taskId, entrustAddVo, taskCodeMap);
+        addSampleItemEntity.setSampler(sampler);
+        // 任务单id
+        addSampleItemEntity.setTaskId(taskId);
+        // 委托单id
+        addSampleItemEntity.setEntrustId(entrustId);
+        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustId);
+        // 进行新建任务单信息、补充信息
+        TaskVo entity = new TaskVo();
+        // 委托单信息
+        entity.setEntrustmentId(entrustId);
+        // 设置折扣
+        entity.setDiscount(Double.parseDouble(entrustAddVo.getDiscount()));
+        //计算本单价格
+        double taskPrice = 0L;
+        for (SampleItemEntity vo : itemList) {
+            taskPrice = taskPrice + ((entity.getDiscount() == null ? 0 : entity.getDiscount()) *
+                    (vo.getUnitPrice() == null ? 0 : vo.getUnitPrice()) * vo.getTimes());
+        }
+        // 计算task单价
+        addSampleItemEntity.setTaskPrice(taskPrice);
+        // 丁连春：任务单完成时间 以委托单下单时间为准
+        entity.setRequiredCompletionTime(entrustAddVo.getRequestDate());
+        // 任务单下单日期等于委托单受理日期
+        entity.setOrderTime(entrustAddVo.getAcceptanceDate());
+        // 任务单提供资料等于委托单提供资料
+        if (!org.springframework.util.StringUtils.isEmpty(entrustAddVo.getPresentInformation())) {
+            entity.setPresentInformation(entrustAddVo.getPresentInformation());
+        } else {
+            entity.setPresentInformation("--");
+        }
+        // 领取任务
+        addTask(entity, entrustAddVo, addSampleItemEntity);
+
     }
 
     /**
@@ -1104,15 +1166,30 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                         // 任务单id
                         taskRel.setTaskId(taskId);
                         // map 统计人员中信息
-                        if (map.get(Long.valueOf(taskRel.getUserId())) != null) {
-
+                        if (map.get(taskRel.getUserType()) == null) {
+                            HashMap<Long, TestCheckItemsTaskRel> userCheckItemsTaskRelMap = new HashMap<>();
+                            userCheckItemsTaskRelMap.put(Long.valueOf(taskRel.getUserId()), taskRel);
+                            map.put(taskRel.getUserType(), userCheckItemsTaskRelMap);
+                        } else {
+                            // map !=null 带出数据直接存储即可。
+                            HashMap<Long, TestCheckItemsTaskRel> userCheckItemsTaskRelMap = map.get(taskRel.getUserType());
+                            userCheckItemsTaskRelMap.put(Long.valueOf(taskRel.getUserId()), taskRel);
+                            map.put(taskRel.getUserType(), userCheckItemsTaskRelMap);
                         }
-//                        map.put(, );
                         // 调用方法： 对每组检测项的人员信息进行新增。
 //                        testCheckItemsTaskRelMapper.insert(taskRel);
                     }
                 }
             }
+        }
+        // 处理map数据
+        for (Integer userType : map.keySet()) {
+            Set<TestCheckItemsTaskRel> itemsTaskRelSet = new HashSet<>();
+            HashMap<Long, TestCheckItemsTaskRel> userCheckItemsTaskRelMap = map.get(userType);
+            for (Long userId : userCheckItemsTaskRelMap.keySet()) {
+                itemsTaskRelSet.add(userCheckItemsTaskRelMap.get(userId));
+            }
+            itemsTaskMap.put(userType, itemsTaskRelSet);
         }
     }
 
@@ -1223,5 +1300,30 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         //任务单保存
         taskMapper.batchSave(vos);
         return true;
+    }
+
+    /**
+     * 方法： 循环遍历 返回数据人员信息
+     *
+     * @param itemsTaskMap
+     * @param key
+     * @param type         =0 保留 name + & + userId 格式，=1 仅保留 userId即可。
+     * @return
+     */
+    public String methodReturnString(HashMap<Integer, Set<TestCheckItemsTaskRel>> itemsTaskMap, Integer key, Integer type) {
+        //  0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生
+        Set<TestCheckItemsTaskRel> taskRelSet = itemsTaskMap.get(key);
+        StringBuffer namebuffer = new StringBuffer();
+        for (TestCheckItemsTaskRel taskRel : taskRelSet) {
+            if (type == 0) {
+                namebuffer.append(taskRel.getUserName() + "&" + taskRel.getUserId());
+                namebuffer.append(",");
+            }
+            if (type == 1) {
+                namebuffer.append(taskRel.getUserId());
+                namebuffer.append(",");
+            }
+        }
+        return namebuffer.deleteCharAt(namebuffer.length() - 1).toString();
     }
 }
