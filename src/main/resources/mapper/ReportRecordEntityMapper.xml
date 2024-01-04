@@ -793,6 +793,16 @@
             AND report_code LIKE CONCAT('%',#{code},'%')
     </select>
 
+    <select id="getReserveCode" resultType="java.lang.Integer">
+        SELECT
+            MAX( SUBSTR( report_code FROM 13 )+0 )
+        FROM
+            test_reserve_code
+        WHERE
+            report_code LIKE CONCAT('%-',#{year},'-%')
+            AND report_code LIKE CONCAT('%',#{code},'%')
+    </select>
+
     <select id="getOtherMaxCode" resultType="java.lang.Integer">
         SELECT
             MAX( SUBSTR( report_code FROM 13 )+0 )
@@ -1399,5 +1409,15 @@
         where entrustment_id = #{entrustId}
           AND DATE_FORMAT( issuer_time, '%Y-%m-%d' ) = DATE_FORMAT( SYSDATE(), '%Y-%m-%d' )
     </delete>
+
+    <select id="getReserveCodeStr" resultType="java.lang.String">
+        SELECT
+            t2.report_code
+        FROM
+            test_entrusted_info t1
+                LEFT JOIN test_reserve_code t2 ON t1.entrustment_no = t2.entrustment_no
+        WHERE
+            t1.id = #{entrustmentId}
+    </select>
 
 </mapper>

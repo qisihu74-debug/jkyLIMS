@@ -166,6 +166,14 @@ public interface ReportRecordEntityMapper {
     Integer getMaxCode(String year,String code);
 
     /**
+     * 查询当前预留的最大编号
+     * @param year
+     * @param code
+     * @return
+     */
+    Integer getReserveCode(String year,String code);
+
+    /**
      *
      * @param year
      * @param code
@@ -572,4 +580,6 @@ public interface ReportRecordEntityMapper {
 
     void deletePrice(@Param("entrustId") Long entrustId);
     void deleteTask(@Param("entrustId") Long entrustId);
+
+    String getReserveCodeStr(Long entrustmentId);
 }

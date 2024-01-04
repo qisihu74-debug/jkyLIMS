@@ -291,4 +291,7 @@ public interface TeamMapper extends BaseMapper {
      */
     @Select("SELECT task_code FROM test_task WHERE entrustment_id = #{entrustId} and dept_id = #{deptId} LIMIT 1")
     String selectTaskCode(@Param("deptId") Long deptId,@Param("entrustId") Long entrustId);
+
+    @Select("SELECT team_id FROM test_technicist WHERE user_id = #{userId}")
+    Long getTeamByUserId(@Param("userId")Long userId);
 }
