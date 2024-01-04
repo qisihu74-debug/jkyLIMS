@@ -37,6 +37,13 @@ public class ResultUtil {
         return result;
     }
 
+    public static Result error(String msg,Object object){
+        Result result = new Result();
+        result.setMsg(msg);
+        result.setData(object);
+        return result;
+    }
+
     /**失败**/
     public static Result error(String msg){
         Result result = new Result();

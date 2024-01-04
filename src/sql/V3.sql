@@ -528,3 +528,16 @@ CREATE TABLE `test_internal_audit_info`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+--留号管理表
+CREATE TABLE `test_reserve_code`  (
+  `id` bigint(0) NOT NULL,
+  `entrustment_no` int(0) NULL DEFAULT NULL COMMENT '委托编号',
+  `report_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '报告编号',
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '编号类型',
+  `state` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '状态：未使用，已使用',
+  `create_date` date NULL DEFAULT NULL COMMENT '创建时间',
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
+  `use_date` datetime(0) NULL DEFAULT NULL COMMENT '使用时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
