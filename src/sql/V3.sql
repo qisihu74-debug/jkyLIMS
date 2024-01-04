@@ -479,7 +479,7 @@ CREATE TABLE `test_original_record_template_record`  (
           LEFT JOIN test_entrusted_sample_checkitem_rel t2 ON t1.entrustment_id = t2.entrust_id
           AND t1.id = t2.task_id
 
-CREATE TABLE test_technicist_files`  (
+CREATE TABLE test_technicist_files  (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '技术人员档案id',
   `type` int NULL DEFAULT NULL COMMENT '档案文件类型1人员履历材料，2证件类材料，3培训类材料，4业绩类材料，5奖惩类材料，6其它材料',
   `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '材料内容',
@@ -489,3 +489,55 @@ CREATE TABLE test_technicist_files`  (
   `technicist_id` int NOT NULL COMMENT '技术人员id',
   `file_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '附件',
   PRIMARY KEY (`id`) USING BTREE
+	)
+
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS `test_internal_audit`;
+CREATE TABLE `test_internal_audit`  (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '计划名称',
+  `operate_id` bigint NULL DEFAULT NULL COMMENT '创建人ID',
+  `operate_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '操作人姓名',
+  `operate_date` datetime NULL DEFAULT NULL COMMENT '计划创建日期',
+  `audit_date` datetime NULL DEFAULT NULL COMMENT '内审日期',
+  `audit_leader_id` bigint NULL DEFAULT NULL COMMENT '审核组长ID',
+  `audit_leader_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '审核组长姓名',
+  `state` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '进行中' COMMENT '审核状态，进行中，已完成',
+  `file_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '内审附件',
+  `report_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '技术质量部最终上传的报告附件url',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS `test_internal_audit_info`;
+CREATE TABLE `test_internal_audit_info`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `audit_id` int NOT NULL COMMENT '内审ID',
+  `auditor_id` bigint NULL DEFAULT NULL COMMENT '审核员id',
+  `auditor_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '审核员姓名',
+  `dept_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '受审部门',
+  `file_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '材料',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+--留号管理表
+CREATE TABLE `test_reserve_code`  (
+  `id` bigint(0) NOT NULL,
+  `entrustment_no` int(0) NULL DEFAULT NULL COMMENT '委托编号',
+  `report_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '报告编号',
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '编号类型',
+  `state` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '状态：未使用，已使用',
+  `create_date` date NULL DEFAULT NULL COMMENT '创建时间',
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
+  `use_date` datetime(0) NULL DEFAULT NULL COMMENT '使用时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;

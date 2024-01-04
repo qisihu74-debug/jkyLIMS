@@ -126,6 +126,8 @@ public interface ReportService {
 
     String max(Long id);
 
+    String getMaxByUser();
+
     /**
      * 保存中间报告
      * @param vo

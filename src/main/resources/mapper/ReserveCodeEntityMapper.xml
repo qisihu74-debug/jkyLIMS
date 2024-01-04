@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lims.manage.erp.mapper.ReserveCodeEntityMapper">
+    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.ReserveCodeEntity">
+        <constructor>
+            <idArg column="id" jdbcType="BIGINT" javaType="java.lang.Long"/>
+            <arg column="entrustment_no" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="report_code" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="type" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="state" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="create_date" jdbcType="DATE" javaType="java.util.Date"/>
+            <arg column="remark" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="use_date" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+        </constructor>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , entrustment_no, report_code, type, state, create_date, remark, use_date
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from test_reserve_code
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <select id="getList" resultType="com.lims.manage.erp.entity.ReserveCodeEntity"
+            parameterType="com.lims.manage.erp.entity.ReserveCodeEntity">
+        select
+        *
+        from test_reserve_code
+        <where>
+            <if test="entrustmentNo!=null and entrustmentNo!=''">
+                AND entrustment_no =#{entrustmentNo}
+            </if>
+            <if test="reportCode!=null and reportCode!=''">
+                AND report_code =#{reportCode}
+            </if>
+            <if test="type!=null and type!=''">
+                AND type =#{type}
+            </if>
+            <if test="state!=null and state!=''">
+                AND state =#{state}
+            </if>
+        </where>
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from test_reserve_code
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.lims.manage.erp.entity.ReserveCodeEntity">
+        insert into test_reserve_code (id, entrustment_no, report_code,
+                                       type, state, create_date,
+                                       remark, use_date)
+        values (#{id,jdbcType=BIGINT}, #{entrustmentNo,jdbcType=INTEGER}, #{reportCode,jdbcType=VARCHAR},
+                #{type,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR}, #{createDate,jdbcType=DATE},
+                #{remark,jdbcType=VARCHAR}, #{useDate,jdbcType=TIMESTAMP})
+    </insert>
+    <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReserveCodeEntity">
+        insert into test_reserve_code
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="entrustmentNo != null">
+                entrustment_no,
+            </if>
+            <if test="reportCode != null">
+                report_code,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="state != null">
+                state,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="useDate != null">
+                use_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="entrustmentNo != null">
+                #{entrustmentNo,jdbcType=INTEGER},
+            </if>
+            <if test="reportCode != null">
+                #{reportCode,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null">
+                #{state,jdbcType=VARCHAR},
+            </if>
+            <if test="createDate != null">
+                #{createDate,jdbcType=DATE},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="useDate != null">
+                #{useDate,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.ReserveCodeEntity">
+        update test_reserve_code
+        <set>
+            <if test="entrustmentNo != null">
+                entrustment_no = #{entrustmentNo,jdbcType=INTEGER},
+            </if>
+            <if test="reportCode != null">
+                report_code = #{reportCode,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                type = #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null">
+                state = #{state,jdbcType=VARCHAR},
+            </if>
+            <if test="createDate != null">
+                create_date = #{createDate,jdbcType=DATE},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="useDate != null">
+                use_date = #{useDate,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.ReserveCodeEntity">
+        update test_reserve_code
+        set entrustment_no = #{entrustmentNo,jdbcType=INTEGER},
+            report_code    = #{reportCode,jdbcType=VARCHAR},
+            type           = #{type,jdbcType=VARCHAR},
+            state          = #{state,jdbcType=VARCHAR},
+            create_date    = #{createDate,jdbcType=DATE},
+            remark         = #{remark,jdbcType=VARCHAR},
+            use_date       = #{useDate,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateReserveCode" parameterType="com.lims.manage.erp.entity.ReserveCodeEntity">
+        update test_reserve_code
+        set report_code = #{reportCode,jdbcType=VARCHAR},
+            remark      = #{remark,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <delete id="batchDelete" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            delete from test_reserve_code where id = #{item}
+        </foreach>
+    </delete>
+
+    <select id="getEntrustmentNoList" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT
+        id VALUE,
+        entrustment_no label
+        FROM
+        test_entrusted_info
+        WHERE
+        state NOT IN ( 144, 200 )
+        <if test="entrustmentNo!=null and entrustmentNo!=''">
+            AND entrustment_no LIKE concat(concat('%',#{entrustmentNo}),'%')
+        </if>
+        ORDER BY
+        entrustment_no DESC
+    </select>
+
+    <select id="getCodeSize" resultType="java.lang.Integer">
+        SELECT count(1) size
+        FROM
+            ( SELECT report_code FROM test_report_record UNION ALL SELECT report_code FROM test_report_record_mid UNION ALL SELECT report_code FROM test_reserve_code ) t1
+        WHERE
+            t1.report_code = #{code}
+    </select>
+
+    <insert id="batchInsert" parameterType="com.lims.manage.erp.entity.ReserveCodeEntity">
+        insert into test_reserve_code (id, entrustment_no, report_code,
+        type, state, create_date,
+        remark, use_date)
+        values
+        <foreach collection="records" item="item" open="" separator="," close="">
+            (#{item.id,jdbcType=BIGINT}, #{item.entrustmentNo,jdbcType=INTEGER}, #{item.reportCode,jdbcType=VARCHAR},
+            #{item.type,jdbcType=VARCHAR}, #{item.state,jdbcType=VARCHAR}, #{item.createDate,jdbcType=DATE},
+            #{item.remark,jdbcType=VARCHAR}, #{item.useDate,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+</mapper>

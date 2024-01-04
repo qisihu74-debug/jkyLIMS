@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.lims.manage.erp.entity.ApproveInfo;
 import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.ReserveCodeEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
 import com.lims.manage.erp.vo.ReportDetailListVo;
@@ -164,6 +165,14 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     Integer getMaxCode(String year,String code);
+
+    /**
+     * 查询当前预留的最大编号
+     * @param year
+     * @param code
+     * @return
+     */
+    Integer getReserveCode(String year,String code);
 
     /**
      *
@@ -572,4 +581,8 @@ public interface ReportRecordEntityMapper {
 
     void deletePrice(@Param("entrustId") Long entrustId);
     void deleteTask(@Param("entrustId") Long entrustId);
+
+    String getReserveCodeStr(Long entrustmentId);
+
+    void updateReserveCode(String reportCode);
 }

@@ -261,12 +261,22 @@ public class InternalAuditController {
         }
         String upload = MinIoUtil.upload(BucketsConst.internal_audit, file, file.getOriginalFilename());
         String uploadUrl = upload.substring(0, upload.indexOf("?"));
+        Boolean flag = true;
         if (type.intValue() == 2){
             LambdaUpdateWrapper<InternalAudit> updateWrapper = new LambdaUpdateWrapper();
             updateWrapper.eq(InternalAudit::getId,id);
             updateWrapper.set(InternalAudit::getReportUrl,uploadUrl);
             auditService.update(null,updateWrapper);
             //判断计划下所有的评审附件是否上传完成，如果完成更新状态为：已完成 TODO
+            LambdaQueryWrapper<InternalAuditInfo> queryWrapper = new LambdaQueryWrapper();
+            queryWrapper.eq(InternalAuditInfo::getAuditId,id);
+            List<InternalAuditInfo> list = auditInfoService.list(queryWrapper);
+            for (InternalAuditInfo info :list){
+                if (org.apache.commons.lang.StringUtils.isEmpty(info.getFileUrl())){
+                    flag = false;
+                }
+            }
+
         }else {
             LambdaUpdateWrapper<InternalAuditInfo> updateWrapper = new LambdaUpdateWrapper();
             updateWrapper.eq(InternalAuditInfo::getAuditId,id);
@@ -274,6 +284,25 @@ public class InternalAuditController {
             updateWrapper.set(InternalAuditInfo::getFileUrl,uploadUrl);
             auditInfoService.update(null,updateWrapper);
             //判断计划下所有的评审附件是否上传完成，如果完成更新状态为：已完成
+            LambdaQueryWrapper<InternalAuditInfo> queryWrapper = new LambdaQueryWrapper();
+            queryWrapper.eq(InternalAuditInfo::getAuditId,id);
+            List<InternalAuditInfo> list = auditInfoService.list(queryWrapper);
+            for (InternalAuditInfo info :list){
+                if (org.apache.commons.lang.StringUtils.isEmpty(info.getFileUrl())){
+                    flag = false;
+                }
+            }
+            InternalAudit byId = auditService.getById(id);
+            if (org.apache.commons.lang.StringUtils.isEmpty(byId.getReportUrl())){
+                flag = false;
+            }
+        }
+        if (flag){
+            //更新状态
+            LambdaUpdateWrapper<InternalAudit> lambdaUpdateWrapper = new LambdaUpdateWrapper();
+            lambdaUpdateWrapper.eq(InternalAudit::getId,id);
+            lambdaUpdateWrapper.set(InternalAudit::getState,"已完成");
+            auditService.update(null,lambdaUpdateWrapper);
         }
         return ResultUtil.success("上传成功");
     }
