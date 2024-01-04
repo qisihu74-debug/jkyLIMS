@@ -662,7 +662,7 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
         queryWrapper.eq(TestControlledDocumentsEntity::getFileTypeContent, type);
         queryWrapper.orderByDesc(TestControlledDocumentsEntity::getCreateTime);
         // 查看指定数据
-        queryWrapper.select(TestControlledDocumentsEntity::getDocumentsName, TestControlledDocumentsEntity::getDocumentsFileUri);
+        queryWrapper.select(TestControlledDocumentsEntity::getDocumentsName, TestControlledDocumentsEntity::getDocumentsFileUri,TestControlledDocumentsEntity::getDocumentsCode);
         // 进行 查询分页。
         PageHelper.clearPage();
         List<TestControlledDocumentsEntity> list = testControlledDocumentsMapper.selectList(queryWrapper);
