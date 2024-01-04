@@ -1365,7 +1365,8 @@
             present_information,
             create_time,
             auxiliary_personnel,
-            working_hours_id as workingHoursId
+            working_hours_id as workingHoursId,
+            task_list_status
         FROM
             test_task
             WHERE  id = #{taskId}

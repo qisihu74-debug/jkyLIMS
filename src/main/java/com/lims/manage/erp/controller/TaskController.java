@@ -5,12 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.QiYueSuoEntity;
-import com.lims.manage.erp.entity.ReqTaskPool;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TaskIdEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TestTaskPool;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.mapper.TestTechnicistDao;
@@ -94,6 +89,8 @@ public class TaskController {
     private TestTechnicistDao testTechnicistDao;
     @Autowired
     private SysUserService userService;
+    @Resource
+    private TestTaskPoolService testTaskPoolService;
     /**
      * 受控文件信息
      */
@@ -776,10 +773,24 @@ public class TaskController {
                 }
             }
             // 通过任务单id 查询 报告节点
-            if(taskService.getVerifyReportState(taskId)){
-                return ResultUtil.error( "操作失败，报告已经签发完成");
+            if (taskService.getVerifyReportState(taskId)) {
+                return ResultUtil.error("操作失败，报告已经签发完成");
             }
-            return ResultUtil.success(taskService.passorno(itemId, state, opinion,userInfo.getUserId()));
+            List<Integer> items = new ArrayList<>();
+            items.add(itemId);
+            Integer type = null;
+            if (state == 1) {
+                // 撤回操作 只有检测人才能操作
+                type = 0;
+            } else {
+                // 复核人操作
+                type = 2;
+            }
+            Result msg = testTaskPoolService.testDetectionTasks(taskId, items, 0);
+            if (msg.getCode() == null) {
+                return msg;
+            }
+            return ResultUtil.success(taskService.passorno(itemId, state, opinion, userInfo.getUserId()));
         }
     }
 
@@ -1116,18 +1127,26 @@ public class TaskController {
         // 通过检测项主键 获取test_task Id
         Long taskId = taskMapper.getReturnTaskId(excelInsertVo.getList().get(0));
         // 委托单144 则不能执行任务单
-        if(taskService.judgeTaskStatus(taskId)){
+        if (taskService.judgeTaskStatus(taskId)) {
             return ResultUtil.error(678, "操作失败！任务单已废弃！！！");
         }
         if (testDetectionService.reviewTheLogin(userInfo.getUserId(), taskId) == false) {
             return ResultUtil.error("登录人没有被派发复核资格");
+        }
+        List<Integer> items = new ArrayList<>();
+        for (Integer itemd : excelInsertVo.getList()) {
+            items.add(itemd);
+        }
+        Result msg = testTaskPoolService.testDetectionTasks(taskId, items, 2);
+        if (msg.getCode() == null) {
+            return msg;
         }
         // TODO: 2023年10月17日：发起复核前 判断任务单是否实验完成。效验数据为最终复核通过的
 //        if(!taskService.judgeTaskEndTest(taskId,excelInsertVo)){
 //            return ResultUtil.error(678, "操作失败！任务单未完成试验");
 //        }
         // 判断复核数据类型。
-        pageOfficeCopyService.finishCheckItemReview(excelInsertVo, userInfo.getUserId(),taskId);
+        pageOfficeCopyService.finishCheckItemReview(excelInsertVo, userInfo.getUserId(), taskId);
         return ResultUtil.success(pageOfficeCopyService.CompleteTheReview(excelInsertVo));
     }
 

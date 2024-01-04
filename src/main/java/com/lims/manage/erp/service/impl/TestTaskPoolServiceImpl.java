@@ -1114,7 +1114,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     break;
                 case 6:
                     // 6、实习生：
-                    addSampleItemEntity.setInspector(methodReturnString(itemsTaskMap, key, 0));
+                    addSampleItemEntity.setInterns(methodReturnString(itemsTaskMap, key, 0));
                     break;
                 default:
                     break;
@@ -1511,7 +1511,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     break;
                 case 6:
                     // 6、实习生：
-                    addSampleItemEntity.setInspector(methodReturnString(itemsTaskMap, key, 0));
+                    addSampleItemEntity.setInterns(methodReturnString(itemsTaskMap, key, 0));
                     break;
                 default:
                     break;
@@ -1672,4 +1672,29 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         }
     }
 
+    @Override
+    public Result testDetectionTasks(Long taskId, List<Integer> items, Integer type) {
+        TaskTestEntity taskData = taskMapper.selectTaskEntity(taskId);
+        if (taskData == null) {
+            return ResultUtil.error("任务单不存在");
+        }
+        if (taskData.getTaskListStatus() == null) {
+            return ResultUtil.success("请继续操作");
+        }
+        // 查询检测对应的信息
+        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(TestCheckItemsTaskRel::getItemId, items);
+        queryWrapper.eq(TestCheckItemsTaskRel::getUserType, type);
+        List<TestCheckItemsTaskRel> list = testCheckItemsTaskRelMapper.selectList(queryWrapper);
+        // 登录人
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (TestCheckItemsTaskRel taskRel : list) {
+                if (!taskRel.getUserId().equals(String.valueOf(userInfo.getUserId()))) {
+                    return ResultUtil.error("当前用户不能操作");
+                }
+            }
+        }
+        return ResultUtil.success("请继续操作");
+    }
 }

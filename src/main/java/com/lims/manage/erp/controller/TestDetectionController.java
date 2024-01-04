@@ -9,10 +9,7 @@ import com.lims.manage.erp.mapper.TestProductItemDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.PageOfficeCopyService;
-import com.lims.manage.erp.service.TaskService;
-import com.lims.manage.erp.service.TestCheckItemsTaskRelService;
-import com.lims.manage.erp.service.TestDetectionService;
+import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.SampleItemInstrumentVo;
 import com.lims.manage.erp.vo.TaskDetailInfoVo;
@@ -45,6 +42,8 @@ public class TestDetectionController {
     private TestProductItemDao testProductItemDao;
     @Resource
     private TestCheckItemsTaskRelService testCheckItemsTaskRelService;
+    @Resource
+    private TestTaskPoolService testTaskPoolService;
 
     @RequestMapping("/getTheInstrument")
     public Result getTheInstrument(Integer escRelId, Integer checkItemId) {
@@ -92,11 +91,19 @@ public class TestDetectionController {
             return ResultUtil.error("token 已过期！");
         }
         // 委托单144 则不能执行任务单
-        if(taskService.judgeTaskStatus(sampleItemInstrumentVo.getTaskId())){
+        if (taskService.judgeTaskStatus(sampleItemInstrumentVo.getTaskId())) {
             return ResultUtil.error(678, "开始试验失败！任务单已废弃！！！");
         }
-        if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),sampleItemInstrumentVo.getTaskId())==false){
+        if (testDetectionService.VerifyTheLogin(userInfo.getUserId(), sampleItemInstrumentVo.getTaskId()) == false) {
             return ResultUtil.error("登录人没有被派发检测资格");
+        }
+        List<Integer> items = new ArrayList<>();
+        for (SampleItemInstrumentEntity sampleItemInstrumentEntity : sampleItemInstrumentVo.getItemInstrumentEntityList()) {
+            items.add(sampleItemInstrumentEntity.getItemId());
+        }
+        Result msg = testTaskPoolService.testDetectionTasks(sampleItemInstrumentVo.getTaskId(), items, 0);
+        if (msg.getCode() == null) {
+            return msg;
         }
         Boolean flag = testDetectionService.postStartTest(sampleItemInstrumentVo);
         if (flag) {
@@ -131,11 +138,19 @@ public class TestDetectionController {
             return ResultUtil.error("token 已过期！");
         }
         // 委托单144 则不能执行任务单
-        if(taskService.judgeTaskStatus(sampleItemInstrumentVo.getTaskId())){
+        if (taskService.judgeTaskStatus(sampleItemInstrumentVo.getTaskId())) {
             return ResultUtil.error(678, "结束试验失败！任务单已废弃！！！");
         }
-        if(testDetectionService.VerifyTheLogin(userInfo.getUserId(),sampleItemInstrumentVo.getTaskId())==false){
+        if (testDetectionService.VerifyTheLogin(userInfo.getUserId(), sampleItemInstrumentVo.getTaskId()) == false) {
             return ResultUtil.error("结束试验只能由检测人操作");
+        }
+        List<Integer> items = new ArrayList<>();
+        for (SampleItemInstrumentEntity sampleItemInstrumentEntity : sampleItemInstrumentVo.getItemInstrumentEntityList()) {
+            items.add(sampleItemInstrumentEntity.getItemId());
+        }
+        Result msg0 = testTaskPoolService.testDetectionTasks(sampleItemInstrumentVo.getTaskId(), items, 0);
+        if (msg0.getCode() == null) {
+            return msg0;
         }
         // 比较检测项 start_time 与 end_time 时间
         String msg = testDetectionService.compareItemTime(sampleItemInstrumentVo);
