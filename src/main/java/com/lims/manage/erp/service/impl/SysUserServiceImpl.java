@@ -359,4 +359,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     public Integer getTechnicistIdByUserId(Long userId) {
         return sysUserDao.getTechnicistIdByUserId(userId);
     }
+
+    @Override
+    public List<SysUserEntity> auditUserList() {
+        return sysUserDao.auditUserList();
+    }
 }

@@ -163,4 +163,6 @@ public interface SampleService {
     List<Node> retentionSampleAreaList();
 
     void exportItemInfo(HttpServletResponse response);
+
+    List<SampleDetailVo> downloadNewSampleTab20231227();
 }

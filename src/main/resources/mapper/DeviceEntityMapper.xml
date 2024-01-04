@@ -51,9 +51,9 @@
         id
         , `code`, `name`, files_state, model, manufacturer, serial_number, price, appraisal_date,
     `range`, `level`, used, laboratory_id, old_code, device_admin, use_dept, calibration_param,
-    store_place, calibration_period, expire_date, calibration_number, purchase_date, 
-    is_calibration, affirm_way, calibration_corporation, price_per_hour, picture, incorporated_date, 
-    type_id, is_port, validity_date, content, check_price, specs, traceability_mode, 
+    store_place, calibration_period, expire_date, calibration_number, purchase_date,
+    is_calibration, affirm_way, calibration_corporation, price_per_hour, picture, incorporated_date,
+    type_id, is_port, validity_date, content, check_price, specs, traceability_mode,
     contract_url, invoice_url, remark, status, del_flag, create_time, update_time
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
@@ -631,4 +631,50 @@
             and t1.label LIKE CONCAT('%',#{search},'%')
         </if>
     </select>
+
+    <update id="updateByIf" parameterType="com.lims.manage.erp.entity.DeviceEntity">
+        update test_instrument
+        set code                    = #{code,jdbcType=VARCHAR},
+            name                    = #{name,jdbcType=VARCHAR},
+            files_state             = #{filesState,jdbcType=VARCHAR},
+            model                   = #{model,jdbcType=VARCHAR},
+            manufacturer            = #{manufacturer,jdbcType=VARCHAR},
+            serial_number           = #{serialNumber,jdbcType=VARCHAR},
+            price                   = #{price,jdbcType=VARCHAR},
+            appraisal_date          = #{appraisalDate,jdbcType=TIMESTAMP},
+            `range`                 = #{range},
+            `level`                 = #{level},
+            used                    = #{used,jdbcType=VARCHAR},
+            laboratory_id           = #{laboratoryId,jdbcType=INTEGER},
+            old_code                = #{oldCode,jdbcType=VARCHAR},
+            device_admin            = #{deviceAdmin,jdbcType=VARCHAR},
+            use_dept                = #{useDept,jdbcType=VARCHAR},
+            calibration_param       = #{calibrationParam,jdbcType=VARCHAR},
+            store_place             = #{storePlace,jdbcType=VARCHAR},
+            calibration_period      = #{calibrationPeriod,jdbcType=VARCHAR},
+            expire_date             = #{expireDate,jdbcType=TIMESTAMP},
+            calibration_number      = #{calibrationNumber,jdbcType=VARCHAR},
+            purchase_date           = #{purchaseDate,jdbcType=TIMESTAMP},
+            is_calibration          = #{isCalibration,jdbcType=VARCHAR},
+            affirm_way              = #{affirmWay,jdbcType=VARCHAR},
+            calibration_corporation = #{calibrationCorporation,jdbcType=VARCHAR},
+            price_per_hour          = #{pricePerHour,jdbcType=VARCHAR},
+            picture                 = #{picture,jdbcType=VARCHAR},
+            incorporated_date       = #{incorporatedDate,jdbcType=TIMESTAMP},
+            type_id                 = #{typeId,jdbcType=INTEGER},
+            is_port                 = #{isPort,jdbcType=VARCHAR},
+            validity_date           = #{validityDate,jdbcType=DATE},
+            content                 = #{content,jdbcType=VARCHAR},
+            check_price             = #{checkPrice,jdbcType=VARCHAR},
+            specs                   = #{specs,jdbcType=VARCHAR},
+            traceability_mode       = #{traceabilityMode,jdbcType=VARCHAR},
+            contract_url            = #{contractUrl,jdbcType=VARCHAR},
+            invoice_url             = #{invoiceUrl,jdbcType=VARCHAR},
+            remark                  = #{remark,jdbcType=VARCHAR},
+            status                  = #{status,jdbcType=CHAR},
+            del_flag                = #{delFlag,jdbcType=INTEGER},
+            create_time             = #{createTime,jdbcType=TIMESTAMP},
+            update_time             = #{updateTime,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
 </mapper>

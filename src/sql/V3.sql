@@ -478,3 +478,14 @@ CREATE TABLE `test_original_record_template_record`  (
       test_task_statistics t1
           LEFT JOIN test_entrusted_sample_checkitem_rel t2 ON t1.entrustment_id = t2.entrust_id
           AND t1.id = t2.task_id
+
+CREATE TABLE test_technicist_files`  (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '技术人员档案id',
+  `type` int NULL DEFAULT NULL COMMENT '档案文件类型1人员履历材料，2证件类材料，3培训类材料，4业绩类材料，5奖惩类材料，6其它材料',
+  `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '材料内容',
+  `operator` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '操作人',
+  `operate_time` datetime NULL DEFAULT NULL COMMENT '操作时间',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `technicist_id` int NOT NULL COMMENT '技术人员id',
+  `file_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '附件',
+  PRIMARY KEY (`id`) USING BTREE

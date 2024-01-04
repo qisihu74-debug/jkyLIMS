@@ -62,6 +62,12 @@ public class BucketsConst {
      * 受控文件
      */
     public static final String  controlled_documents="controlled-documents";
-
-
+    /**
+     * 内审资料
+     */
+    public static final String  internal_audit="internal-audit";
+    /**
+     * 管理评审资料
+     */
+    public static final String  manage_audit="manage-audit";
 }

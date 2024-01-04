@@ -593,4 +593,6 @@ public interface SampleEntityMapper {
      * @return
      */
     List<SampleEntity> getSampleOutwardDescribeList(@Param("itemIds") List<Integer> itemIds);
+
+    List<SampleDetailVo> downloadNewSampleTab20231227();
 }
