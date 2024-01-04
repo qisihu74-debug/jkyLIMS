@@ -170,4 +170,26 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
 
     @Select("select id from  test_technicist where user_id=#{userId} limit 1")
     Integer getTechnicistIdByUserId(@Param("userId") Long userId);
+
+    @Select("SELECT\n" +
+            "\tt1.user_id,\n" +
+            "\tt1.name\n" +
+            "FROM\n" +
+            "\tsys_user t1\n" +
+            "\tLEFT JOIN sys_user_role t2 ON t1.user_id = t2.user_id\n" +
+            "\tLEFT JOIN sys_role t3 ON t2.role_id = t3.role_id \n" +
+            "WHERE\n" +
+            "\tt3.role_name = '内审员'")
+    List<SysUserEntity> auditUserList();
+
+    @Select("SELECT\n" +
+            "\tt1.user_id,t3.`role_name` \n" +
+            "FROM\n" +
+            "\tsys_user t1\n" +
+            "\tLEFT JOIN sys_user_role t2 ON t1.user_id = t2.user_id\n" +
+            "\tLEFT JOIN sys_role t3 ON t2.role_id = t3.role_id \n" +
+            "WHERE\n" +
+            "\tt1.user_id = #{userId} \n" +
+            "\tAND t3.role_id = 99 ")
+    String checkTxRoleById(@Param("userId") Long userId);
 }
