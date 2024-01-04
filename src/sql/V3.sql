@@ -479,13 +479,28 @@ CREATE TABLE `test_original_record_template_record`  (
           LEFT JOIN test_entrusted_sample_checkitem_rel t2 ON t1.entrustment_id = t2.entrust_id
           AND t1.id = t2.task_id
 
-CREATE TABLE test_technicist_files`  (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '技术人员档案id',
-  `type` int NULL DEFAULT NULL COMMENT '档案文件类型1人员履历材料，2证件类材料，3培训类材料，4业绩类材料，5奖惩类材料，6其它材料',
-  `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '材料内容',
-  `operator` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '操作人',
-  `operate_time` datetime NULL DEFAULT NULL COMMENT '操作时间',
-  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `technicist_id` int NOT NULL COMMENT '技术人员id',
-  `file_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '附件',
+CREATE TABLE `test_technicist_files`
+(
+    `id`            int(0) NOT NULL AUTO_INCREMENT COMMENT '' 技术人员档案id '',
+    `type`          int(0) NULL DEFAULT NULL COMMENT '' 档案文件类型1人员履历材料，2证件类材料，3培训类材料，4业绩类材料，5奖惩类材料，6其它材料 '',
+    `content`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '' 材料内容 '',
+    `operator`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '' 操作人 '',
+    `operate_time`  datetime(0) NULL DEFAULT NULL COMMENT '' 操作时间 '',
+    `update_time`   datetime(0) NULL DEFAULT NULL COMMENT '' 更新时间 '',
+    `technicist_id` int(0) NOT NULL COMMENT '' 技术人员id '',
+    `file_url`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '' 附件 '',
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+--留号管理表
+CREATE TABLE `test_reserve_code`  (
+  `id` bigint(0) NOT NULL,
+  `entrustment_no` int(0) NULL DEFAULT NULL COMMENT '委托编号',
+  `report_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '报告编号',
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '编号类型',
+  `state` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '状态：未使用，已使用',
+  `create_date` date NULL DEFAULT NULL COMMENT '创建时间',
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
+  `use_date` datetime(0) NULL DEFAULT NULL COMMENT '使用时间',
   PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
