@@ -1217,15 +1217,29 @@ public class TaskController {
     }
 
     /**
-     *我的任务列表
+     * 我的任务列表
+     *
      * @param bean
      * @return
      */
     @PostMapping("myTaskList")
-    public Result myTaskList(@RequestBody ReqTaskPool bean){
+    public Result myTaskList(@RequestBody ReqTaskPool bean) {
         bean.setUserId(ShiroUtils.getUserInfo().getUserId());
         PageInfo<TestTaskPool> pageInfo = taskService.myTaskList(bean);
         return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * 返回 辅助人员 用户信息
+     *
+     * @return
+     */
+    @RequestMapping("getAuxiliaryPersonnelInformation")
+    public Result getAuxiliaryPersonnelInformation() {
+        if (ShiroUtils.getUserInfo() != null) {
+            return taskService.getAuxiliaryPersonnelInformation();
+        }
+        return ResultUtil.error(502, "token过期！");
     }
 
 }

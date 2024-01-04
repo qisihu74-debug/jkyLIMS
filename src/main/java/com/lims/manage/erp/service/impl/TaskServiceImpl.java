@@ -7,17 +7,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.config.PoiConfig;
 import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.EntrustFileTableDao;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.SysRoleDao;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestDetectionDao;
-import com.lims.manage.erp.mapper.TestEntrustedTaskRelDao;
-import com.lims.manage.erp.mapper.TestProductItemDao;
-import com.lims.manage.erp.mapper.TestSampleEntityMapper;
+import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TaskService;
@@ -126,6 +117,8 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
     private TestProductItemDao testProductItemDao;
     @Autowired
     private SysRoleDao sysRoleDao;
+    @Autowired
+    private TestCompanyDao testCompanyDao;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -2506,9 +2499,49 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         }
         // 任务单单自身 == 4 ：试验完成
         Integer state = taskMapper.getJudgmentTaskList(id);
-        if(state!=null && state >= 4){
+        if (state != null && state >= 4) {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 返回 辅助人员 用户信息
+     *
+     * @return
+     */
+    @Override
+    public Result getAuxiliaryPersonnelInformation() {
+        /***
+         * 辅助人员角色id
+         */
+        List<LabelValueVo> roleBasic = new ArrayList<>();
+        PageHelper.clearPage();
+        List<TestInitDataEntity> returnBasisData = testCompanyDao.selectEntrustBasis();
+        for (TestInitDataEntity testInitDataEntity : returnBasisData) {
+            LabelValueVo labelValueVo = new LabelValueVo();
+            labelValueVo.setLabel(testInitDataEntity.getName());
+            labelValueVo.setValue(Long.valueOf(testInitDataEntity.getId()));
+            switch (testInitDataEntity.getType()) {
+                case 19:
+                    roleBasic.add(labelValueVo);
+                    break;
+                default:
+                    break;
+            }
+        }
+        // TODO:24年1月3日 辅助人员 role =
+        List<LabelValueVo> userList = sysRoleDao.selectSysyRoleName(Long.valueOf(roleBasic.get(0).getLabel()));
+        if (CollectionUtil.isNotEmpty(userList)) {
+            Set<Long> userIds = new HashSet<>();
+            for (LabelValueVo labelValueVo : userList) {
+                userIds.add(labelValueVo.getValue());
+            }
+            // 根据用户id 返回对应科室
+            List<LabelValueVo> teamVos1 = new ArrayList<>();
+            teamVos1 = taskMapper.getMemberInformationConcat1(userIds);
+            return ResultUtil.success(teamVos1);
+        }
+        return ResultUtil.success(new ArrayList<>());
     }
 }

@@ -267,6 +267,25 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         }
         // 通过委托单id 查询旧任务列表
         List<TaskProgressVo> taskProgressVos = taskMapper.getTaskStateByEntrustId(entrustId);
+        // 判断旧任务单列表：领取（任务单列表 = null），还是修改。
+        if (CollectionUtils.isEmpty(taskProgressVos)) {
+            // TODO: 2024年1月3日  任务生成规则根据签发人所属团队走   = 授权操作人 = 领取人。
+            //    规则：人员跨部门可以选。 （新的任务单号 生成时、只有一个单号。）
+            //  领取任务单
+            newAddTask(list, entrustId);
+            return null;
+
+        }
+        if (CollectionUtil.isNotEmpty(taskProgressVos) && taskProgressVos.size() == 1) {
+            // TODO： 判断任务单状态 task_list_status = 任务单状态：!=null 任务生成规则根据签发人所属团队走
+            if (taskProgressVos.get(0).getTaskListStatus() != null) {
+                //TODO： 执行我的任务 修改即可
+                // 更新 领取任务单
+                newAddTask(list, entrustId);
+                return null;
+            }
+        }
+        // TODO： 执行 旧操作 下列操作 全为旧操作
         // 通过委托单id 查看检测项列表。
         List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
         // 通过委托单 获取流水任务单详情
@@ -283,7 +302,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         }
         // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
         // 根据科室id 及 委托单主键 查询任务单是否存在？
-        //                        // TODO: 12月21日 1、 旧任务单存在 更新任务单 更新检测项 ，2、任务单与前端绑定不一致， 任务单更新为废弃操作、产值 = 0 。
+        //                        // TODO: 2023年12月21日 1、 旧任务单存在 更新任务单 更新检测项 ，2、任务单与前端绑定不一致， 任务单更新为废弃操作、产值 = 0 。
         //                           TODO:          2、 任务单不存在的话，创建任务单即可。
         //调用方法： 补充检测项信息并发布任务单
         // key = deptId value = 旧单号
@@ -1009,5 +1028,200 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             titleBuffer.append("任务单号为： " + taskCode + " 请及时操作");
             dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), publisher);
         }
+    }
+
+    /**
+     * TODO: 2024年1月3日  任务生成规则根据签发人所属团队走   = 授权操作人 = 领取人。
+     * 规则：人员跨部门可以选。 （新的任务单号 生成时、只有一个单号。）
+     * 领取任务单
+     *
+     * @param list 检测项数据
+     */
+    public void newAddTask(List<SampleItemEntity> list, Long entrustId) {
+        // 通过委托单id 查看检测项列表。
+        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+        // 任务单id
+        long taskId = GenID.getID();
+        // 领样人
+        String sampler = "";
+        // map信息处理 ： key = （ userType） 、value = （set去重后的人员信息）
+        HashMap<Integer, Set<TestCheckItemsTaskRel>> itemsTaskMap = new HashMap<>();
+        // 补充每组检测项中人员信息
+        for (SampleItemEntity sampleItemEntity : list) {
+            // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
+            List<LabelValueVo> inspectorArraysVos = new ArrayList<>();
+            List<TestCheckItemsTaskRel> inspectorRels = new ArrayList<>();
+            // 调用方法： 针对记录人、复核人、报告制作人信息 方法读取人员信息
+            methodForPersonnel(sampleItemEntity, inspectorArraysVos, inspectorRels);
+            sampleItemEntity.setItemsTaskRels(inspectorRels);
+            // 新增检测项对应的操作人员信息。
+            newMethodPublishTaskList(entrustId, sampleItemEntity, itemList, taskId, itemsTaskMap);
+            if (StringUtils.isNotEmpty(sampleItemEntity.getSampler())) {
+                sampler = sampleItemEntity.getSampler();
+            }
+        }
+        // 补充任务单信息
+        SampleItemEntity addSampleItemEntity = new SampleItemEntity();
+
+
+        // 领样人
+//        entity.setSampler(sampler);
+//        entity.setCheckItemDeptVoList(checkItemDeptVoList);
+        // 发布任务
+//        distributionTask412(entity, sampleItemEntity, poolId, taskId, entrustAddVo, taskCodeMap);
+    }
+
+    /**
+     * 新增每组检测项数据
+     *
+     * @param entrustId
+     * @param sampleItemEntity
+     * @param itemList
+     * @param itemsTaskMap     map信息处理 ： key = （ userType） 、value = （set去重后的人员信息）
+     */
+    void newMethodPublishTaskList(Long entrustId, SampleItemEntity sampleItemEntity, List<SampleItemEntity> itemList,
+                                  Long taskId, HashMap<Integer, Set<TestCheckItemsTaskRel>> itemsTaskMap) {
+        // map中 key = userType 、value = （key = userId，value = 对象）。
+        HashMap<Integer, HashMap<Long, TestCheckItemsTaskRel>> map = new HashMap();
+        // 遍历每组检测项分配的itemId数量
+        for (int i = 0; i < sampleItemEntity.getItemIds().size(); i++) {
+            for (SampleItemEntity sampleItemEntity1 : itemList) {
+                Integer itemId = sampleItemEntity.getItemIds().get(i);
+                if (sampleItemEntity1.getId().equals(itemId)) {
+                    for (TestCheckItemsTaskRel taskRel : sampleItemEntity.getItemsTaskRels()) {
+                        // 检测项主键
+                        taskRel.setItemId(itemId);
+                        // 检测项名称
+                        taskRel.setCheckItemName(sampleItemEntity1.getCheckItemName());
+                        // 样品名称
+                        taskRel.setSampleName(sampleItemEntity1.getSampleName());
+                        // 样品编号
+                        taskRel.setSampleCode(sampleItemEntity1.getSampleCode());
+                        // 样品id
+                        taskRel.setSampleId(sampleItemEntity1.getSampleId());
+                        // 委托单主键
+                        taskRel.setEntrustId(entrustId);
+                        // 任务单id
+                        taskRel.setTaskId(taskId);
+                        // map 统计人员中信息
+                        if (map.get(Long.valueOf(taskRel.getUserId())) != null) {
+
+                        }
+//                        map.put(, );
+                        // 调用方法： 对每组检测项的人员信息进行新增。
+//                        testCheckItemsTaskRelMapper.insert(taskRel);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 新增任务单。
+     *
+     * @param entity
+     * @param sampleItemEntity
+     * @param entrustAddVo
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public synchronized Boolean addTask(TaskVo entity, EntrustAddVo entrustAddVo, SampleItemEntity sampleItemEntity) {
+        Long poolId = sampleItemEntity.getPoolId();
+        Long taskId = sampleItemEntity.getTaskId();
+        Long deptId = sampleItemEntity.getTechnicistId();
+        double taskPrice = sampleItemEntity.getTaskPrice();
+        //创建任务对象
+        List<TaskVo> vos = Lists.newArrayList();
+        // 检测项id集合
+        List<Integer> itemIds = new ArrayList<>();
+        itemIds.addAll(sampleItemEntity.getItemIds());
+        //计算本单价格
+        TaskVo vo = new TaskVo();
+        vo.setId(taskId);
+        vo.setTaskPrice(taskPrice);
+        String teamCode = taskMapper.getTeamCode(deptId);
+        String entrustmentNo = entrustAddVo.getEntrustmentNo() + "";
+        String format = entrustmentNo.substring(2, 6);
+        Integer integer = taskMapper.selectMaxNoByCode(teamCode + format);
+        Integer code = null;
+        if (integer == null) {
+            code = Integer.parseInt(format + "001");
+        } else {
+            code = integer + 1;
+        }
+        String codeStr = code + "";
+        vo.setCode(codeStr);
+        vo.setTaskCode(teamCode + codeStr.substring(0, 4) + "-" + codeStr.substring(4, 7));
+        vo.setDeptId(deptId);
+        vo.setEntrustmentId(entity.getEntrustmentId());
+        vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
+        vo.setOrderTime(entity.getOrderTime());
+        vo.setState(1);
+        vo.setReportComplete(2);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 下单人 = 委托单受理人
+        vo.setOrderer(entrustAddVo.getBusinessAcceptor());
+        // 下单日期 = 受理日期
+        vo.setOrderTime(entrustAddVo.getAcceptanceDate());
+        vo.setPresentInformation(entity.getPresentInformation());
+        // 接单人(授权签字人，报告签发人)
+        vo.setReceiver(userInfo.getUserId().toString());
+        // 接单时间
+        vo.setReceiverTime(new Date());
+        // 团队
+        vo.setTeamId(deptId);
+        // 设置出报告团队
+        vo.setIssueReport("是");
+        // 任务单创建时间
+        vo.setCreateTime(new Date());
+        // 补充人员信息 检测人
+        vo.setInspector(sampleItemEntity.getInspector());
+        // 记录人
+        vo.setRecorder(sampleItemEntity.getRecorder());
+        // 复核人
+        vo.setReviewer(sampleItemEntity.getReviewer());
+        // 报告制作人
+        vo.setReportProducer(sampleItemEntity.getReportProducer());
+        // 辅助人员
+        vo.setAuxiliaryPersonnel(sampleItemEntity.getAuxiliaryPersonnel());
+        // 见习生：实习的新手
+        vo.setProbationer(sampleItemEntity.getProbationer());
+        // 实习生
+        vo.setInterns(sampleItemEntity.getInterns());
+        // 领样人
+        vo.setSampler(entity.getSampler());
+        // 领样时间
+        vo.setSampleReceivingTime(vo.getOrderTime());
+        // 样品状态描述
+        vo.setOutwardDescribe(sampleItemEntity.getSampleStateDescription());
+        if (StringUtils.isEmpty(vo.getOutwardDescribe())) {
+            List<SampleEntity> outwardDescribeList = sampleEntityMapper.getSampleOutwardDescribeList(itemIds);
+            if (CollectionUtil.isNotEmpty(outwardDescribeList)) {
+                StringBuffer stringBuffer = new StringBuffer();
+                for (SampleEntity sampleEntityData : outwardDescribeList) {
+                    stringBuffer.append(sampleEntityData.getOutwardDescribe());
+                    stringBuffer.append("、");
+                }
+                if (StringUtils.isNotEmpty(stringBuffer.toString())) {
+                    vo.setOutwardDescribe(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+                }
+            }
+        }
+        // 流水号任务单id
+        vo.setPoolId(poolId);
+        vos.add(vo);
+        // 记录发布任务单的日志
+        StringBuffer stringBuilder1 = new StringBuffer();
+        stringBuilder1.append("任务大厅领取日志");
+        stringBuilder1.append("任务单id" + vo.getId());
+        stringBuilder1.append("任务单号" + vo.getTaskCode());
+        stringBuilder1.append("委托单id" + vo.getEntrustmentId());
+        stringBuilder1.append("是否出具报告" + vo.getIssueReport());
+        stringBuilder1.append("价格" + vo.getTaskPrice());
+        stringBuilder1.append("任务单创建时间" + vo.getCreateTime());
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.TASK_FLOW, true);
+        //任务单保存
+        taskMapper.batchSave(vos);
+        return true;
     }
 }

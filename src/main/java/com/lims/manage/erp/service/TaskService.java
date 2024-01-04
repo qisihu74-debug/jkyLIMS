@@ -5,6 +5,7 @@ import com.lims.manage.erp.entity.ReqTaskPool;
 import com.lims.manage.erp.entity.TaskIdEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
 import com.lims.manage.erp.entity.TestTaskPool;
+import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -292,5 +293,10 @@ public interface TaskService {
     /**
      * 根据任务单id 判断 任务单状态 == 实验完成
      */
-    Boolean judgeTaskEndTest(Long id,ExcelInsertVo excelInsertVo);
+    Boolean judgeTaskEndTest(Long id, ExcelInsertVo excelInsertVo);
+
+    /**
+     * 返回 辅助人员 用户信息
+     */
+    Result getAuxiliaryPersonnelInformation();
 }

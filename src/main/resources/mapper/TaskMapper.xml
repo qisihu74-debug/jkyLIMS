@@ -1124,7 +1124,8 @@
             task_price,
             sampler,
             sample_state_description,
-            code
+            code,
+            task_list_status
         FROM
             test_task
         WHERE
