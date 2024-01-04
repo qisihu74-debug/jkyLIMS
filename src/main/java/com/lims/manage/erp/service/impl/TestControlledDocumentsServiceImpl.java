@@ -184,7 +184,7 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
         } else {
             testControlledDocumentsEntity.setDocumentsFileUri(null);
         }
-        System.out.println("testControlledDocumentsEntity" + testControlledDocumentsEntity);
+//        System.out.println("testControlledDocumentsEntity" + testControlledDocumentsEntity);
         // 对数据新增补充
         testControlledDocumentsEntity.setIsAvailable("1");
         testControlledDocumentsEntity.setCreateTime(new Date());
@@ -645,5 +645,27 @@ public class TestControlledDocumentsServiceImpl extends ServiceImpl<TestControll
             }
         }
         return null;
+    }
+
+    /**
+     * 在线模板数据查看
+     *
+     * @param type
+     * @return
+     */
+    @Override
+    public Result getTemplateData(String type) {
+        // 获取受控文件数据
+        LambdaQueryWrapper<TestControlledDocumentsEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestControlledDocumentsEntity::getDelFlag, 0);
+        // 类型名称查询
+        queryWrapper.eq(TestControlledDocumentsEntity::getFileTypeContent, type);
+        queryWrapper.orderByDesc(TestControlledDocumentsEntity::getCreateTime);
+        // 查看指定数据
+        queryWrapper.select(TestControlledDocumentsEntity::getDocumentsName, TestControlledDocumentsEntity::getDocumentsFileUri);
+        // 进行 查询分页。
+        PageHelper.clearPage();
+        List<TestControlledDocumentsEntity> list = testControlledDocumentsMapper.selectList(queryWrapper);
+        return ResultUtil.success(list);
     }
 }

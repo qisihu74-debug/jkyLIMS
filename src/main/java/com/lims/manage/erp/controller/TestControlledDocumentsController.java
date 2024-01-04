@@ -132,5 +132,20 @@ public class TestControlledDocumentsController extends ApiController {
             return ResultUtil.error("数据为空");
         }
     }
+
+    /**
+     * 在线模板数据查看
+     *
+     * @param type
+     * @return
+     */
+    @GetMapping("/getTemplateData")
+    public Result getTemplateData(String type) {
+        if (type != null) {
+            return this.testControlledDocumentsService.getTemplateData(type);
+        } else {
+            return ResultUtil.error("请求数据为空");
+        }
+    }
 }
 
