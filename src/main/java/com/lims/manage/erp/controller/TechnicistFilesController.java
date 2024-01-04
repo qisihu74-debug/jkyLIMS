@@ -103,13 +103,15 @@ public class TechnicistFilesController {
                 break;
         }
         List<ResumeEntity> list = Lists.newArrayList();
-        List<TestControlledDocumentsEntity> resultData = (List<TestControlledDocumentsEntity>) result.getData();
-        for (TestControlledDocumentsEntity entity :resultData){
-            ResumeEntity resumeEntity = new ResumeEntity();
-            resumeEntity.setCode(entity.getDocumentsCode());
-            resumeEntity.setName(entity.getDocumentsName());
-            resumeEntity.setFileUrl(entity.getDocumentsFileUri());
-            list.add(resumeEntity);
+        if (result != null){
+            List<TestControlledDocumentsEntity> resultData = (List<TestControlledDocumentsEntity>) result.getData();
+            for (TestControlledDocumentsEntity entity :resultData){
+                ResumeEntity resumeEntity = new ResumeEntity();
+                resumeEntity.setCode(entity.getDocumentsCode());
+                resumeEntity.setName(entity.getDocumentsName());
+                resumeEntity.setFileUrl(entity.getDocumentsFileUri());
+                list.add(resumeEntity);
+            }
         }
         return ResultUtil.success(list);
     }
