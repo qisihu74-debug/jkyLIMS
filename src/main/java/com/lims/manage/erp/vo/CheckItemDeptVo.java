@@ -12,4 +12,6 @@ public class CheckItemDeptVo {
     private String issueReport;
     private Double checkPrice;
     private int times;
+    // 字节
+    private Integer bitValue;
 }
