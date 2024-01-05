@@ -147,4 +147,7 @@ public interface ReportApprovalMapper {
     List<Integer> getNewEscId(Long entrustmentId);
 
     ReportRecordEntity getReportInfo(Long reportId);
+
+    @Select("SELECT task_id FROM test_task_order_working_hours_copy1 GROUP BY task_id ")
+    List<Long> getTaskList();
 }

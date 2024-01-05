@@ -32,6 +32,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -58,6 +59,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     TestItemOrderWorkingHoursMapper testItemOrderWorkingHoursMapper;
     @Autowired
     private ReportMapper reportMapper;
+    @Autowired
+    private TestCheckItemsTaskRelMapper testCheckItemsTaskRelMapper;
 
     @Override
     public IPage<WorkHourStatisticVo> getWorkHoursList(Page<WorkHourStatisticVo> page, Map<String, Object> paramMap) {
@@ -307,17 +310,31 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
         // 检测人员
         String[] inspectorarrays = signatureInformation.split(",");
+        int listSize = inspectorarrays.length;
+//        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(TestCheckItemsTaskRel::getTaskId, taskId);
+//        queryWrapper.eq(TestCheckItemsTaskRel::getUserType, type);
+//        List<TestCheckItemsTaskRel> list = testCheckItemsTaskRelMapper.selectList(queryWrapper);
+//        String[] inspectorarrays = new String[list.size()];
+//        for (int j = 0; j < list.size(); j++) {
+//            TestCheckItemsTaskRel taskRel = list.get(j);
+////
+////        }
         for (int i = 0; i < inspectorarrays.length; i++) {
 //                "王亚玲&1652365523132106,马瑞玲&1652404746060112"
             String[] inspectorStr = inspectorarrays[i].split("&");
+//            String[] inspectorStr = new String[2];
+//            inspectorStr[0] = taskRel.getUserName();
+//            inspectorStr[1] = taskRel.getUserId();
             if (mapData.get(Long.parseLong(inspectorStr[1])) == null) {
                 TestTaskOrderWorkingHours data = new TestTaskOrderWorkingHours();
                 data.setUserName(inspectorStr[0]);
                 data.setUserId(Long.parseLong(inspectorStr[1]));
                 // 设置比例
                 if (map.get(typeStr) != null) {
-                    Integer value = map.get(typeStr);
-                    data.setProportion(value.toString());
+                    Double value = Double.valueOf(map.get(typeStr));
+                    BigDecimal zhi1 = BigDecimal.valueOf(value / listSize).setScale(2, BigDecimal.ROUND_HALF_UP);
+                    data.setProportion(String.valueOf(zhi1));
                 } else {
                     data.setProportion("0");
                 }
@@ -330,13 +347,17 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 data.setUserId(Long.parseLong(inspectorStr[1]));
                 // 设置比例
                 if (map.get(typeStr) != null) {
-                    Integer value1 = map.get(typeStr);
-                    Integer value2 = Integer.parseInt(data.getProportion());
-                    data.setProportion(String.valueOf(value1 + value2));
+                    Double value1 = Double.valueOf(map.get(typeStr));
+                    BigDecimal zhi1 = BigDecimal.valueOf(value1 / listSize).setScale(2, BigDecimal.ROUND_HALF_UP);
+                    BigDecimal value2 = BigDecimal.valueOf(Double.parseDouble(data.getProportion())).setScale(2, BigDecimal.ROUND_HALF_UP);
+                    BigDecimal sum = zhi1.add(value2);
+                    data.setProportion(String.valueOf(sum));
                 } else {
-                    Integer value1 = Integer.parseInt(data.getProportion());
-                    Integer value2 = 0;
-                    data.setProportion(String.valueOf(value1 + value2));
+//                    Integer value1 = Integer.parseInt(data.getProportion());
+//                    Integer value2 = 0;
+//                    data.setProportion(String.valueOf(value1 + value2));
+                    Double value1 = Double.valueOf(data.getProportion());
+                    data.setProportion(String.valueOf(value1));
                 }
                 data.setDetectionType(data.getDetectionType() + "、" + typeStr);
                 data.setTaskId(taskId);
@@ -1075,7 +1096,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 // 任务单号
                 taskOrderWorkingHours.setTaskCode(taskCode);
                 // 使用工时
-                int proportion = Integer.parseInt(taskOrderWorkingHours.getProportion());
+                Double proportion = Double.parseDouble(taskOrderWorkingHours.getProportion());
                 if (proportion == 0) {
                     // 工时 = 0
                     taskOrderWorkingHours.setWorkingHours("0");
@@ -1275,5 +1296,16 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             }
         }
         return false;
+    }
+
+    @Override
+    public Boolean testCommit(List<Long> taskIds) {
+
+        // 任务id集合 不包含 工时信息
+        for (Long taskId : taskIds) {
+            // 根据taskId 循环新增工时数据
+            endReportAllottedTime(taskId);
+        }
+        return true;
     }
 }
