@@ -177,5 +177,15 @@ public class SampleItemEntity {
      */
     @TableField(exist = false)
     private String sampleStateDescription;
+    /**
+     * 流水号任务单id
+     */
+    @TableField(exist = false)
+    private Long poolId;
+    /**
+     * 任务单价格
+     */
+    @TableField(exist = false)
+    private double taskPrice;
 
 }

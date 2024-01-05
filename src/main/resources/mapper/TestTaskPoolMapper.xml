@@ -11,7 +11,7 @@
             t1.check_item_id,
             t1.times,
             t1.unit_price,
-            t1.task_id,
+            t1.task_id + IFNULL(t1.bit_value,0) as task_id,
             t2.sample_code,
             t2.sample_name
         FROM

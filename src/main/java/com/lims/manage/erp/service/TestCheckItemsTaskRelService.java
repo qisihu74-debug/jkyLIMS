@@ -161,4 +161,7 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
     Boolean handleWorkingHours(Long reportId, Integer state);
 
 
+    Boolean testCommit(List<Long> taskIds);
+
+
 }

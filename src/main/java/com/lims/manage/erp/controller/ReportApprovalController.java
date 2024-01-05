@@ -267,7 +267,6 @@ public class ReportApprovalController {
     }
 
 
-
     /**
      * 根据报告id 查询详情
      *
@@ -603,17 +602,32 @@ public class ReportApprovalController {
 
     /**
      * 根据检测项 下载原始数据
+     *
      * @param id
      * @return
      */
     @GetMapping("download")
-    public String downloadData(Long id)
-    {
-        if(id==null){
-           return null;
+    public String downloadData(Long id) {
+        if (id == null) {
+            return null;
         }
         // 根据检测项 下载原始数据
         return reportApprovalMapper.getCheckItemUrl(id);
     }
+
+//    /**
+//     * 工时从新统计导入
+//     */
+//    /**
+//     * @return
+//     */
+//    @PostMapping("verifySave11")
+//    public Result verifySave() {
+//
+//        List<Long> taskIds = reportApprovalMapper.getTaskList();
+//        testCheckItemsTaskRelService.testCommit(taskIds);
+//        return null;
+//
+//    }
 
 }

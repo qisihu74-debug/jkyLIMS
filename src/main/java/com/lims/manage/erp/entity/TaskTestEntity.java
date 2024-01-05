@@ -175,6 +175,11 @@ public class TaskTestEntity {
      */
     @TableField(exist = false)
     private Integer workingHoursId;
+    /**
+     * 任务单状态：!=null 任务生成规则根据签发人所属团队走
+     */
+    @TableField(exist = false)
+    private String taskListStatus;
 
     public TaskTestEntity() {
     }

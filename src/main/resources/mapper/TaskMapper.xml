@@ -68,14 +68,15 @@
         receiver,
         receive_time,
         team_id,
-        sample_state_description
+        sample_state_description,
+        task_list_status
         )
         VALUES
         <foreach collection="vos" item="vo" separator=",">
             (#{vo.id}, #{vo.deptId}, #{vo.code}, #{vo.taskCode}, #{vo.entrustmentId}, #{vo.requiredCompletionTime},
              #{vo.state}, #{vo.issueReport}, #{vo.orderer},#{vo.reportComplete},#{vo.orderTime},#{vo.taskPrice},#{vo.presentInformation},
              #{vo.createTime},#{vo.inspector},#{vo.recorder},#{vo.reviewer},#{vo.reportProducer},#{vo.auxiliaryPersonnel},#{vo.probationer},#{vo.interns},
-             #{vo.sampler},#{vo.sampleReceivingTime},#{vo.poolId},#{vo.receiver},#{vo.receiverTime},#{vo.teamId},#{vo.outwardDescribe})
+             #{vo.sampler},#{vo.sampleReceivingTime},#{vo.poolId},#{vo.receiver},#{vo.receiverTime},#{vo.teamId},#{vo.outwardDescribe},#{vo.taskListStatus})
         </foreach>
     </insert>
 
@@ -1004,6 +1005,8 @@
                 dept_id = ${item.deptId},
                 distribution_date = current_timestamp(),
                 task_id = ${item.taskId}
+                <if test="#{item.bitValue}!=null">,bit_value = #{item.bitValue}</if>
+
             </set>
             where id = ${item.id}
         </foreach>
@@ -1124,7 +1127,8 @@
             task_price,
             sampler,
             sample_state_description,
-            code
+            code,
+            task_list_status
         FROM
             test_task
         WHERE
@@ -1361,7 +1365,8 @@
             present_information,
             create_time,
             auxiliary_personnel,
-            working_hours_id as workingHoursId
+            working_hours_id as workingHoursId,
+            task_list_status
         FROM
             test_task
             WHERE  id = #{taskId}

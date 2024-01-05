@@ -23,7 +23,7 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      * @param poolId
      * @return
      */
-    Result taskHallDetailsDisplay(Long poolId,Long entrustId);
+    Result taskHallDetailsDisplay(Long poolId, Long entrustId);
 
     /**
      * 任务大厅 领取任务单
@@ -32,5 +32,16 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      * @return
      */
     Result addTaskCollection(List<SampleItemEntity> list);
+
+    /**
+     * 试验检测：任务单判断是否为 new创建。
+     * 是：则 判断当前检测项 是否能够操作。
+     *
+     * @param taskId
+     * @param items
+     * @return
+     */
+    Result testDetectionTasks(Long taskId, List<Integer> items, Integer type);
+
 
 }
