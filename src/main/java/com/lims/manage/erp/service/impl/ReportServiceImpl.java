@@ -703,13 +703,13 @@ public class ReportServiceImpl implements ReportService {
                     reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
                     if (reportRecordEntity1.getReportCode() == null) {//当前任务单号为空时才会设置新的报告编号
                         Long entrustmentId = vo.getEntrustmentId();
-                        String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
-                        if(reserveCodeStr == null){
-                            reserveCodeStr = getMaxCode(entrustmentId);
-                        }else{
-                            //更新预留编号的状态和使用时间
-                            recordEntityMapper.updateReserveCode(reserveCodeStr);
-                        }
+                        String reserveCodeStr = getMaxCode(entrustmentId);
+//                        if(reserveCodeStr == null){
+//                            reserveCodeStr = getMaxCode(entrustmentId);
+//                        }else{
+//                            //更新预留编号的状态和使用时间
+//                            recordEntityMapper.updateReserveCode(reserveCodeStr);
+//                        }
                         reportRecordEntity1.setReportCode(reserveCodeStr);
                     }
                 }
@@ -744,13 +744,13 @@ public class ReportServiceImpl implements ReportService {
                     reportRecordEntity.setState(1 + "");
                     reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
                     Long entrustmentId = vo.getEntrustmentId();
-                    String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
-                    if(reserveCodeStr == null){
-                        reserveCodeStr = getMaxCode(entrustmentId);
-                    }else{
-                        //更新预留编号的状态和使用时间
-                        recordEntityMapper.updateReserveCode(reserveCodeStr);
-                    }
+                    String reserveCodeStr = getMaxCode(entrustmentId);
+//                    if(reserveCodeStr == null){
+//                        reserveCodeStr = getMaxCode(entrustmentId);
+//                    }else{
+//                        //更新预留编号的状态和使用时间
+//                        recordEntityMapper.updateReserveCode(reserveCodeStr);
+//                    }
                     reportRecordEntity.setReportCode(reserveCodeStr);
                 }
             }
@@ -919,13 +919,14 @@ public class ReportServiceImpl implements ReportService {
 //            reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
 //        }
         Long entrustmentId = vo.getEntrustmentId();
-        String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
-        if(reserveCodeStr == null){
-            reserveCodeStr = getMaxCode(entrustmentId);
-        }else{
-            //更新预留编号的状态和使用时间
-            recordEntityMapper.updateReserveCode(reserveCodeStr);
-        }
+//        String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
+        String reserveCodeStr = getMaxCode(entrustmentId);
+//        if(reserveCodeStr == null){
+//            reserveCodeStr = getMaxCode(entrustmentId);
+//        }else{
+//            //更新预留编号的状态和使用时间
+//            recordEntityMapper.updateReserveCode(reserveCodeStr);
+//        }
         reportRecordEntity.setReportCode(reserveCodeStr);
         reportRecordEntity.setId(recordId);
         reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
@@ -4574,13 +4575,14 @@ public class ReportServiceImpl implements ReportService {
                 reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
                 //设置报告类型
                 reportRecordEntity.setType("0");
-                String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
-                if(reserveCodeStr == null){
-                    reserveCodeStr = getMaxCode(entrustIdByTaskId);
-                }else{
-                    //更新预留编号的状态和使用时间
-                    recordEntityMapper.updateReserveCode(reserveCodeStr);
-                }
+//                String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
+                String reserveCodeStr = getMaxCode(entrustIdByTaskId);
+//                if(reserveCodeStr == null){
+//                    reserveCodeStr = getMaxCode(entrustIdByTaskId);
+//                }else{
+//                    //更新预留编号的状态和使用时间
+//                    recordEntityMapper.updateReserveCode(reserveCodeStr);
+//                }
                 reportRecordEntity.setReportCode(reserveCodeStr);
                 reportRecordEntity.setId(GenID.getID());
                 reportRecordEntity.setEntrustmentId(entrustIdByTaskId);
@@ -4608,13 +4610,14 @@ public class ReportServiceImpl implements ReportService {
                 }else {
                     //中间报告、如果报告类型是中间报告，报告记录新增数据
                     reportRecordEntity.setEntrustId(entrustIdByTaskId);
-                    String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
-                    if(reserveCodeStr == null){
-                        reserveCodeStr = getMaxCode(entrustIdByTaskId);
-                    }else{
-                        //更新预留编号的状态和使用时间
-                        recordEntityMapper.updateReserveCode(reserveCodeStr);
-                    }
+//                    String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
+                    String reserveCodeStr = getMaxCode(entrustIdByTaskId);
+//                    if(reserveCodeStr == null){
+//                        reserveCodeStr = getMaxCode(entrustIdByTaskId);
+//                    }else{
+//                        //更新预留编号的状态和使用时间
+//                        recordEntityMapper.updateReserveCode(reserveCodeStr);
+//                    }
                     reportRecordEntity.setReportCode(reserveCodeStr);
                     reportRecordEntity.setId(GenID.getID());
                     //设置报告类型
