@@ -641,5 +641,10 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         map.put("arrySeal", arrySeal);
         return map;
     }
+
+    @Override
+    public void updateHourById(Integer id, Integer hour) {
+        testProductItemDao.updateHourById(id,hour);
+    }
 }
 

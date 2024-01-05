@@ -43,7 +43,7 @@ public class DingNotifyUtils {
      * @param publisher 消息发布人
      * @throws Exception
      */
-    public void OAWorkNotice(String dingId,String title,String publisher) throws Exception {
+    public void OAWorkNotice(String dingId,String title,String publisher,String content) throws Exception {
         AccessTokenSingleton instance = AccessTokenSingleton.getInstance();
         String token = instance.getToken(tokenUrl, appKey, appsecret);
 
@@ -59,7 +59,7 @@ public class DingNotifyUtils {
 
         OapiMessageCorpconversationAsyncsendV2Request.Head head = new OapiMessageCorpconversationAsyncsendV2Request.Head();
         head.setBgcolor("FFFF6A00");
-        head.setText("lims检测系统任务池有新的任务注入");
+        head.setText("lims消息通知");
         OapiMessageCorpconversationAsyncsendV2Request.Body body = new OapiMessageCorpconversationAsyncsendV2Request.Body();
         if (StringUtils.isNotEmpty(publisher)){
             List<OapiMessageCorpconversationAsyncsendV2Request.Form> list = new ArrayList<>();
@@ -70,9 +70,9 @@ public class DingNotifyUtils {
             list.add(form1);
             body.setForm(list);
         }
-        body.setTitle(title+System.currentTimeMillis());
+        body.setTitle(title);
         body.setImage("@resource/dingtalk/message_image");
-
+        body.setContent(content);
         //oa.setPcMessageUrl("http://www.baidu.com");
         oa.setBody(body);
         oa.setHead(head);

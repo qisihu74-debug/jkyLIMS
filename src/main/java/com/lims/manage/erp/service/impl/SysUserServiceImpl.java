@@ -29,6 +29,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Description 系统用户业务实现
@@ -363,5 +364,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     @Override
     public List<SysUserEntity> auditUserList() {
         return sysUserDao.auditUserList();
+    }
+
+    @Override
+    public List<String> getDingIdsByUserIds(Set<Long> userIds) {
+        return sysUserDao.getDingIdsByUserIds(userIds);
     }
 }

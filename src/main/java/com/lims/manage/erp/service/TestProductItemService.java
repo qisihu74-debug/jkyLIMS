@@ -64,5 +64,7 @@ public interface TestProductItemService extends IService<TestProductItem> {
      * @return
      */
     Map<String, List<LabelValueVo>> returnEntrustData();
+
+    void updateHourById(Integer id, Integer hour);
 }
 

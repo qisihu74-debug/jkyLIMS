@@ -5,15 +5,18 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
+import com.google.api.client.util.Sets;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.InternalAudit;
 import com.lims.manage.erp.entity.InternalAuditInfo;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.DeptService;
 import com.lims.manage.erp.service.InternalAuditInfoService;
 import com.lims.manage.erp.service.InternalAuditService;
 import com.lims.manage.erp.service.SysUserService;
+import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.DingNotifyUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -31,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author gjl
@@ -50,6 +54,8 @@ public class InternalAuditController {
     private InternalAuditInfoService auditInfoService;
     @Autowired
     private SysUserService sysUserService;
+    @Autowired
+    private DeptService deptService;
     @Autowired
     private DingNotifyUtils dingNotifyUtils;
 
@@ -88,6 +94,8 @@ public class InternalAuditController {
     @PostMapping("addPlan")
     @Transactional(rollbackFor = Exception.class)
     public Result addPlan(@RequestParam("jsonParam") String jsonParam, MultipartFile file){
+        Set<Long> userIds = Sets.newHashSet();
+        List<String> deptNames = Lists.newArrayList();
         if (StringUtils.isEmpty(jsonParam) || file == null){
             return ResultUtil.error("缺少参数");
         }
@@ -120,9 +128,25 @@ public class InternalAuditController {
         auditService.save(internalAudit);
         for (InternalAuditInfo auditInfo :list){
             auditInfo.setAuditId(internalAudit.getId());
+            userIds.add(auditInfo.getAuditorId());
+            deptNames.add(auditInfo.getDeptName());
         }
         auditInfoService.saveBatch(list);
-        //给审核相关人员发布钉钉通知 TODO
+        //给审核相关人员发布钉钉通知
+        userIds.add(internalAudit.getAuditLeaderId());
+        //获取钉钉用户标识
+        List<String> idsByUserIds = sysUserService.getDingIdsByUserIds(userIds);
+        //查询部门下的所有人员钉钉ID
+        List<String> longs = deptService.getUserIdsByDeptNames(deptNames);
+        longs.addAll(idsByUserIds);
+        //发送钉钉通知
+        try {
+            for (String dingId:longs){
+                dingNotifyUtils.OAWorkNotice(dingId, DateUtil.getTodayString()+"评审计划通知",ShiroUtils.getUserInfo().getName(),DateUtil.getNowYear()+"年管理评审计划已发布，计划日期为"+internalAudit.getAuditDate()+"，请相关人员登录公司系统提交相关资料，特此通知！");
+            }
+        }catch (Exception e){
+            log.error("内审计划通知发送异常:{}",e);
+        }
         return ResultUtil.success("保存成功");
     }
 
