@@ -19,16 +19,7 @@ import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.PDFHelper3;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.BatchReceiveTaskVo;
-import com.lims.manage.erp.vo.ExcelInsertVo;
-import com.lims.manage.erp.vo.LabelValueTeamVo;
-import com.lims.manage.erp.vo.OriginalRecordParamVo;
-import com.lims.manage.erp.vo.PersonInfoVo;
-import com.lims.manage.erp.vo.ReceiveSampleParamVo;
-import com.lims.manage.erp.vo.TaskDetailInfoVo;
-import com.lims.manage.erp.vo.TaskListParamVo;
-import com.lims.manage.erp.vo.TaskStatsVo;
-import com.lims.manage.erp.vo.TeamVo;
+import com.lims.manage.erp.vo.*;
 import com.spire.xls.Workbook;
 import com.spire.xls.Worksheet;
 import io.minio.MinioClient;
@@ -322,7 +313,11 @@ public class TaskController {
     @RequestMapping("getEntrustTeamUserName")
     public Result getEntrustTeamUserName(Long entrustId) {
         if (ShiroUtils.getUserInfo() != null) {
-            TeamVo returnList = taskService.getEntrustTeamUserName(ShiroUtils.getUserInfo().getUserId(),entrustId);
+//            TeamVo returnList = taskService.getEntrustTeamUserName(ShiroUtils.getUserInfo().getUserId(),entrustId);
+//            return ResultUtil.success(returnList);
+            TeamVo returnList = new TeamVo();
+            List<LabelValueVo> teamVos0 = taskMapper.getAllTeamUser();
+            returnList.setTeamVo(teamVos0);
             return ResultUtil.success(returnList);
         }
         return ResultUtil.error(502, "token过期！");
