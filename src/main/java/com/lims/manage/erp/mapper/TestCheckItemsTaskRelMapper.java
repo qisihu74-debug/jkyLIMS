@@ -68,9 +68,18 @@ public interface TestCheckItemsTaskRelMapper extends BaseMapper<TestCheckItemsTa
 
     /**
      * 任务单id 获取 工时
+     *
      * @param taskId
      * @return
      */
     @Select("SELECT DISTINCT task_id FROM test_task_order_working_hours WHERE task_id = #{taskId}")
     String getTaskIdWorkingHours(@Param("taskId") Long taskId);
+
+    /**
+     * 根据任务单id 查询所有任务大厅 已领取检测信息
+     *
+     * @param taskId
+     * @return
+     */
+    List<TestCheckItemsTaskRel> selectAllDataBitValue(@Param("taskId") Long taskId);
 }

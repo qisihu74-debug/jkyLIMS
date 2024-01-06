@@ -676,13 +676,13 @@ public interface TaskMapper extends BaseMapper {
      *  返回全部科室人员信息
      */
     @Select("\tSELECT\n" +
-            "\t\tt2.user_id as value,\n" +
-            "\t\tt2.NAME as label,\n" +
-            "\t\tt3.NAME AS text\n" +
+            "\t\tt1.user_id as value,\n" +
+            "\t\tt1.NAME as label,\n" +
+            "\t\tt3.NAME AS text \n" +
             "\tFROM\n" +
-            "\t\ttest_technicist t1\n" +
-            "\t\tLEFT JOIN sys_user t2 ON t1.user_id = t2.user_id\n" +
-            "\t\tLEFT JOIN sys_ding_user t4 ON t2.ding_user_id = t4.userid\n" +
-            "\t\tLEFT JOIN sys_dept t3 ON t3.id LIKE CONCAT( '%', t4.department, '%' )")
+            "\t\tsys_user t1\n" +
+            "\t\tLEFT JOIN test_technicist AS t2 ON t1.user_id = t2.user_id\n" +
+            "\t\tLEFT JOIN test_team AS t3 ON t2.team_id = t3.id\n" +
+            "\t\tWHERE t3.NAME is not null")
     List<LabelValueVo> getAllTeamUser();
 }
