@@ -106,4 +106,15 @@ public interface DeptDao extends BaseMapper<DingDeptEntity> {
 
     @Select("select name from sys_dept where id=#{id} ")
     String getNameById(@Param("id") Long id);
+
+    @Select({"<script>",
+            " SELECT DISTINCT ",
+            " t1.userid",
+            " FROM sys_ding_user t1 LEFT  JOIN sys_dept t2 ON t2.id LIKE CONCAT( '%', t1.department, '%' )" +
+            " WHERE t2.name in ",
+            "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
+            "#{item}",
+            "</foreach>",
+            "</script>"})
+    List<String> getUserIdsByDeptNames(@Param("items") List<String> items);
 }

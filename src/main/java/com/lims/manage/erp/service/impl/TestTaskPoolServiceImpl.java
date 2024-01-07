@@ -1049,7 +1049,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             StringBuffer titleBuffer = new StringBuffer();
             titleBuffer.append("任务大厅中指派您：" + userDetails.getName() + "为" + PersonnelType);
             titleBuffer.append("任务单号为： " + taskCode + " 请及时操作");
-            dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), publisher);
+            dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), publisher,null);
         }
     }
 

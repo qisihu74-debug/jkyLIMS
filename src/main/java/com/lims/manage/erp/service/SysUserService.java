@@ -11,6 +11,7 @@ import com.lims.manage.erp.vo.UserInfoVo;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Description 系统用户业务接口
@@ -134,5 +135,7 @@ public interface SysUserService extends IService<SysUserEntity> {
     Integer getTechnicistIdByUserId(Long userId);
 
     List<SysUserEntity> auditUserList();
+
+    List<String> getDingIdsByUserIds(Set<Long> userIds);
 }
 

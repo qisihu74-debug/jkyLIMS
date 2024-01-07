@@ -68,5 +68,4 @@
         </if>
         ORDER BY updateTime desc
     </select>
-
 </mapper>

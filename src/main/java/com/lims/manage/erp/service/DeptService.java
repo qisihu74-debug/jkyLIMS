@@ -138,4 +138,11 @@ public interface DeptService extends IService<DingDeptEntity> {
      * @return
      */
     Boolean deletePersonDetail(List<String> ids);
+
+    /**
+     * 根据部门名称获取部门下的所有用户钉钉ID
+     * @param deptNames
+     * @return
+     */
+    List<String> getUserIdsByDeptNames(List<String> deptNames);
 }

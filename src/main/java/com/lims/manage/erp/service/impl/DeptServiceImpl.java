@@ -309,4 +309,9 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
         }
         return true;
     }
+
+    @Override
+    public List<String> getUserIdsByDeptNames(List<String> deptNames) {
+        return deptDao.getUserIdsByDeptNames(deptNames);
+    }
 }
