@@ -1009,7 +1009,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             basisList.set(4, auxiliaryPersonnel);
         } else {
             // 辅助人员 工时 = 0
-            TestInitDataEntity auxiliaryPersonnel = basisList.get(5);
+            TestInitDataEntity auxiliaryPersonnel = basisList.get(4);
             auxiliaryPersonnel.setRemark("0");
             basisList.set(4, auxiliaryPersonnel);
         }
@@ -1232,7 +1232,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 // 任务id集合 不包含 工时信息
                 for (Long taskId : taskIds) {
                     // 根据taskId 循环新增工时数据
-                    endReportAllottedTime(taskId);
+                    reportIssuanceAllottedTime(taskId);
                 }
             } else {
                 // 任务id集合获取 得到 工时信息:
@@ -1247,7 +1247,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 }
                 for (Long taskId : taskIds) {
                     // 根据taskId 循环新增工时数据
-                    endReportAllottedTime(taskId);
+                    reportIssuanceAllottedTime(taskId);
                 }
             }
         } else {

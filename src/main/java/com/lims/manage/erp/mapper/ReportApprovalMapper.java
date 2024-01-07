@@ -148,6 +148,6 @@ public interface ReportApprovalMapper {
 
     ReportRecordEntity getReportInfo(Long reportId);
 
-    @Select("SELECT task_id FROM test_task_order_working_hours_copy1 GROUP BY task_id ")
+    @Select("SELECT id as task_id FROM test_task WHERE order_time >= \"2023-11-1\"")
     List<Long> getTaskList();
 }
