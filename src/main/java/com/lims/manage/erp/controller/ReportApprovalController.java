@@ -625,11 +625,11 @@ public class ReportApprovalController {
     @PostMapping("verifySave11")
     public Result verifySave() {
 
-//        List<Long> taskIds = reportApprovalMapper.getTaskList();
+        List<Long> taskIds = reportApprovalMapper.getTaskList();
 //        List<Long> taskIds = new ArrayList<>();
 //        taskIds.add(4689202608451264L);
 //        taskIds.add(4689206872841732L);
-//        testCheckItemsTaskRelService.testCommit(taskIds);
+        testCheckItemsTaskRelService.testCommit(taskIds);
         return null;
 
     }

@@ -317,7 +317,10 @@ public class TaskController {
 //            return ResultUtil.success(returnList);
             TeamVo returnList = new TeamVo();
             List<LabelValueVo> teamVos0 = taskMapper.getAllTeamUser();
+            // 报告制作人、辅助人员、实习生，见习生。不考虑团队。
+            List<LabelValueVo> reviewVo = taskMapper.getAllTeamNAMEUser();
             returnList.setTeamVo(teamVos0);
+            returnList.setReviewVo(reviewVo);
             return ResultUtil.success(returnList);
         }
         return ResultUtil.error(502, "token过期！");
@@ -364,11 +367,27 @@ public class TaskController {
             } else {
                 //根据用户id查询
                 Boolean flag = userService.checkSysAndAdmRole(userInfo.getUserId());
-                if(flag){
+                if (flag) {
                     deptIds = null;
-                }else {
+                } else {
                     return ResultUtil.error("账号使用人未配置科室人员");
                 }
+            }
+            if (deptIds.length >= 1) {
+                paramVo.setReviewer(userInfo.getUserId().toString());
+                paramVo.setInspector(userInfo.getUserId().toString());
+                //记录人
+                paramVo.setRecorder(userInfo.getUserId().toString());
+                //报告制作人
+                paramVo.setReportProducer(userInfo.getName());
+                //领样人
+                paramVo.setSampler(userInfo.getName());
+                // 见习生：实习的新手
+                paramVo.setProbationer(userInfo.getName());
+                // 实习生
+                paramVo.setInterns(userInfo.getName());
+                // 辅助人员
+                paramVo.setAuxiliaryPersonnel(userInfo.getName());
             }
             return ResultUtil.success("查询任务列表成功！", taskService.getTaskListShow(paramVo, deptIds));
         }
