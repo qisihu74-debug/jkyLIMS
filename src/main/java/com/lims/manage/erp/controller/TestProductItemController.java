@@ -229,7 +229,7 @@ public class TestProductItemController extends ApiController {
         int num = 2;
         while (num<=2412){
             Object key = cells.get("A" + num).getValue();
-            Object value = cells.get("A" + num).getValue();
+            Object value = cells.get("D" + num).getValue();
             if (key != null){
                 Integer id = Integer.parseInt(key.toString().split("\\.")[0]);
                 if (value != null){
