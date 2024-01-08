@@ -470,6 +470,7 @@ CREATE TABLE `test_original_record_template_record`  (
     sealer,
     seal_time,
     origin_url_pdf,
+    bit_value,
     issuer_time
 ) SELECT
       t2.*,
