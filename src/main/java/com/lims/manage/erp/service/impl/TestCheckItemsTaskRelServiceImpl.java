@@ -97,7 +97,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
         // 查询条件 = 来源 不为空的话。
         if (StringUtils.isNotEmpty(taskStatisticsVo.getSource())) {
-            System.out.println("来源信息 == 暂定为空" + taskStatisticsVo.getSource());
+//            System.out.println("来源信息 == 暂定为空" + taskStatisticsVo.getSource());
             taskStatisticsVo.setSource(null);
         }
         // 获取当前用户登录的信息
@@ -216,15 +216,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 int zhi1 = Integer.parseInt(reportProducerData.getRemark()) / 2;
                 reportProducerData.setRemark(String.valueOf(zhi1));
                 basisList.set(3, reportProducerData);
-                TestInitDataEntity auxiliaryPersonnel = basisList.get(5);
+                TestInitDataEntity auxiliaryPersonnel = basisList.get(4);
                 int zhi2 = Integer.parseInt(auxiliaryPersonnel.getRemark()) / 2;
                 auxiliaryPersonnel.setRemark(String.valueOf(zhi2));
-                basisList.set(5, auxiliaryPersonnel);
+                basisList.set(4, auxiliaryPersonnel);
             } else {
                 // 辅助人员 工时 = 0
-                TestInitDataEntity auxiliaryPersonnel = basisList.get(5);
+                TestInitDataEntity auxiliaryPersonnel = basisList.get(4);
                 auxiliaryPersonnel.setRemark("0");
-                basisList.set(5, auxiliaryPersonnel);
+                basisList.set(4, auxiliaryPersonnel);
             }
             List<TestTaskOrderWorkingHours> countList = new ArrayList<>();
             // 使用 map 进行 数据统计 key = userId , value = 参数
@@ -255,12 +255,12 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 //  调用方法 去处理 签名信息进行截取
                 // 查找userId与name
                 String name = sysUserDao.getSysUserName(Long.valueOf(taskDetails.getReceiver()));
-                methodSubstr(4, name + "&" + taskDetails.getReceiver(), mapData, taskId, basisList);
+                methodSubstr(5, name + "&" + taskDetails.getReceiver(), mapData, taskId, basisList);
             }
             // 辅助人员
             if (StringUtils.isNotEmpty(taskDetails.getAuxiliaryPersonnel())) {
                 //  调用方法 去处理 签名信息进行截取
-                methodSubstr(5, taskDetails.getAuxiliaryPersonnel(), mapData, taskId, basisList);
+                methodSubstr(4, taskDetails.getAuxiliaryPersonnel(), mapData, taskId, basisList);
             }
             // 进行循环迭代 mapData 数据
             if (CollectionUtil.isNotEmpty(mapData.keySet())) {
@@ -311,21 +311,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         // 检测人员
         String[] inspectorarrays = signatureInformation.split(",");
         int listSize = inspectorarrays.length;
-//        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper = new LambdaQueryWrapper<>();
-//        queryWrapper.eq(TestCheckItemsTaskRel::getTaskId, taskId);
-//        queryWrapper.eq(TestCheckItemsTaskRel::getUserType, type);
-//        List<TestCheckItemsTaskRel> list = testCheckItemsTaskRelMapper.selectList(queryWrapper);
-//        String[] inspectorarrays = new String[list.size()];
-//        for (int j = 0; j < list.size(); j++) {
-//            TestCheckItemsTaskRel taskRel = list.get(j);
-////
-////        }
         for (int i = 0; i < inspectorarrays.length; i++) {
-//                "王亚玲&1652365523132106,马瑞玲&1652404746060112"
             String[] inspectorStr = inspectorarrays[i].split("&");
-//            String[] inspectorStr = new String[2];
-//            inspectorStr[0] = taskRel.getUserName();
-//            inspectorStr[1] = taskRel.getUserId();
             if (mapData.get(Long.parseLong(inspectorStr[1])) == null) {
                 TestTaskOrderWorkingHours data = new TestTaskOrderWorkingHours();
                 data.setUserName(inspectorStr[0]);
@@ -353,9 +340,6 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                     BigDecimal sum = zhi1.add(value2);
                     data.setProportion(String.valueOf(sum));
                 } else {
-//                    Integer value1 = Integer.parseInt(data.getProportion());
-//                    Integer value2 = 0;
-//                    data.setProportion(String.valueOf(value1 + value2));
                     Double value1 = Double.valueOf(data.getProportion());
                     data.setProportion(String.valueOf(value1));
                 }
@@ -386,6 +370,14 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
         if (!falg) {
             return ResultUtil.error("分配失败，当前操作人无授权签字人角色");
+        }
+        // 查询工时任务单信息 比对 是否为领单人。
+        LambdaQueryWrapper<TestTaskOrderWorkingHours> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(TestTaskOrderWorkingHours::getWorkingHoursId, workingHoursId);
+        lambdaQueryWrapper.like(TestTaskOrderWorkingHours::getAddOperator, user.getUserId());
+        TestTaskOrderWorkingHours taskOrderWokingHoursData = testTaskOrderWorkingHoursMapper.selectOne(lambdaQueryWrapper);
+        if (taskOrderWokingHoursData == null) {
+            return ResultUtil.error("分配失败，不是领单人");
         }
         // 允许调整一次。
         TaskTestEntity taskDetails = taskMapper.selectTaskEntity(list.get(0).getTaskId());
@@ -1011,15 +1003,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             int zhi1 = Integer.parseInt(reportProducerData.getRemark()) / 2;
             reportProducerData.setRemark(String.valueOf(zhi1));
             basisList.set(3, reportProducerData);
-            TestInitDataEntity auxiliaryPersonnel = basisList.get(5);
+            TestInitDataEntity auxiliaryPersonnel = basisList.get(4);
             int zhi2 = Integer.parseInt(auxiliaryPersonnel.getRemark()) / 2;
             auxiliaryPersonnel.setRemark(String.valueOf(zhi2));
-            basisList.set(5, auxiliaryPersonnel);
+            basisList.set(4, auxiliaryPersonnel);
         } else {
             // 辅助人员 工时 = 0
-            TestInitDataEntity auxiliaryPersonnel = basisList.get(5);
+            TestInitDataEntity auxiliaryPersonnel = basisList.get(4);
             auxiliaryPersonnel.setRemark("0");
-            basisList.set(5, auxiliaryPersonnel);
+            basisList.set(4, auxiliaryPersonnel);
         }
         List<TestTaskOrderWorkingHours> countList = new ArrayList<>();
         // 使用 map 进行 数据统计 key = userId , value = 参数
@@ -1051,12 +1043,12 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             //  调用方法 去处理 签名信息进行截取
             // 查找userId与name
             name = sysUserDao.getSysUserName(Long.valueOf(taskDetails.getReceiver()));
-            methodSubstr(4, name + "&" + taskDetails.getReceiver(), mapData, taskId, basisList);
+            methodSubstr(5, name + "&" + taskDetails.getReceiver(), mapData, taskId, basisList);
         }
         // 辅助人员
         if (StringUtils.isNotEmpty(taskDetails.getAuxiliaryPersonnel())) {
             //  调用方法 去处理 签名信息进行截取
-            methodSubstr(5, taskDetails.getAuxiliaryPersonnel(), mapData, taskId, basisList);
+            methodSubstr(4, taskDetails.getAuxiliaryPersonnel(), mapData, taskId, basisList);
         }
         // 进行循环迭代 mapData 数据
         if (CollectionUtil.isNotEmpty(mapData.keySet())) {
@@ -1115,7 +1107,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     }
 
     /**
-     * 根据taskId 进行获取检测项 存储信息 返回总工时。
+     * 根据taskId 进行获取检测项 存储工时对应检测项信息 返回总工时。
      *
      * @param taskId
      * @param workingHoursId
@@ -1240,7 +1232,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 // 任务id集合 不包含 工时信息
                 for (Long taskId : taskIds) {
                     // 根据taskId 循环新增工时数据
-                    endReportAllottedTime(taskId);
+                    reportIssuanceAllottedTime(taskId);
                 }
             } else {
                 // 任务id集合获取 得到 工时信息:
@@ -1255,7 +1247,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 }
                 for (Long taskId : taskIds) {
                     // 根据taskId 循环新增工时数据
-                    endReportAllottedTime(taskId);
+                    reportIssuanceAllottedTime(taskId);
                 }
             }
         } else {
@@ -1305,7 +1297,417 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         for (Long taskId : taskIds) {
             // 根据taskId 循环新增工时数据
             endReportAllottedTime(taskId);
+//            reportIssuanceAllottedTime(taskId);
         }
         return true;
+    }
+
+    /**
+     * 报告签发后：分配工时
+     *
+     * @param taskId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean reportIssuanceAllottedTime(Long taskId) {
+        // 根据任务单 查询任务下对应操作信息
+        TaskTestEntity taskDetails = taskMapper.selectTaskEntity(taskId);
+        if (taskDetails == null) {
+            return false;
+        }
+        if (taskDetails.getTaskListStatus() == null) {
+            return false;
+        }
+
+        // 通过任务单id 查询所有的 任务大厅 分配的检测项列表
+        List<TestCheckItemsTaskRel> bitValueList = testCheckItemsTaskRelMapper.selectAllDataBitValue(taskId);
+        // 通过任务单获取检测项工时信息
+        List<TestItemOrderWorkingHours> itemOrderWorkingHoursList = testItemOrderWorkingHoursMapper.selectTaskList(taskId);
+        // 分组设置任务大厅 工时信息
+        HashMap<Integer, List<TestCheckItemsTaskRel>> bitValueMap = new HashMap<>();
+        // 分组设置任务大厅 获取工时信息
+        HashMap<Integer, List<TestTaskOrderWorkingHours>> bitTaskRelList = new HashMap<>();
+        for (TestCheckItemsTaskRel taskRel : bitValueList) {
+            if (CollectionUtil.isNotEmpty(bitValueMap.get(taskRel.getBitValue()))) {
+                List<TestCheckItemsTaskRel> list = bitValueMap.get(taskRel.getBitValue());
+                list.add(taskRel);
+                bitValueMap.put(taskRel.getBitValue(), list);
+            } else {
+                List<TestCheckItemsTaskRel> list = new ArrayList<>();
+                list.add(taskRel);
+                bitValueMap.put(taskRel.getBitValue(), list);
+            }
+        }
+        // 获取每组的工时信息
+        for (Integer key : bitValueMap.keySet()) {
+            // 分组中比例信息
+            //TODO:1月5日  查询基础表信息 - 检测类型包含工时
+            List<TestInitDataEntity> sqlBasisList = taskMapper.selectEntrustBasis(30);
+            List<TestCheckItemsTaskRel> itemList = bitValueMap.get(key);
+            // 检测项去重
+            Set<Integer> itemSet = new HashSet<>();
+            for (TestCheckItemsTaskRel taskRel : itemList) {
+                itemSet.add(taskRel.getItemId());
+            }
+            // 根据检测项信息 生成 对应的工时、获取实际委托中组数。
+            List<TestItemOrderWorkingHours> itemWorkingHoursList = new ArrayList<>();
+            for (Integer itemId : itemSet) {
+                for (TestItemOrderWorkingHours itemOrderWorkingHours : itemOrderWorkingHoursList) {
+                    if (itemOrderWorkingHours.getItemId().equals(itemId)) {
+                        itemWorkingHoursList.add(itemOrderWorkingHours);
+                    }
+                }
+            }
+            // 把检测项与 表 test_item_work_hour_ladder 比对后 求乘积。
+            System.out.println("输出信息");
+            // 工时总信息
+            String sum = "";
+            for (TestItemOrderWorkingHours itemOrderWorkingHours : itemWorkingHoursList) {
+                Integer times = itemOrderWorkingHours.getTimes();
+                Double workingHours = 0.0;
+                if (StringUtils.isNotEmpty(itemOrderWorkingHours.getWorkingHours())) {
+                    workingHours = Double.valueOf(itemOrderWorkingHours.getWorkingHours());
+                }
+                BigDecimal he = BigDecimal.valueOf(times * workingHours).setScale(2, BigDecimal.ROUND_HALF_UP);
+                if (StringUtils.isEmpty(sum)) {
+                    sum = String.valueOf(he);
+                } else {
+                    // sum 不为空
+                    BigDecimal sumbig = new BigDecimal(sum);
+                    sum = String.valueOf(sumbig.add(he).setScale(2, BigDecimal.ROUND_HALF_UP));
+                }
+            }
+            // 每个人的所属比例及工时信息。
+            System.out.println("每个人的所属比例及工时信息");
+            List<TestTaskOrderWorkingHours> list = workHourRatioMethod(itemList, sqlBasisList, sum);
+            if (CollectionUtil.isNotEmpty(list)) {
+                bitTaskRelList.put(key, list);
+            }
+        }
+        // 获取分组检测项信息 进行合并 存储。
+        System.out.println("输出");
+        addTestTaskOrderWorkingHoursMapper(taskId, bitTaskRelList);
+        return true;
+    }
+
+    /**
+     * 返回 求每个人的所占比例及获取工时信息
+     *
+     * @param itemList  任务大厅 每组 检测项分配人员信息。
+     * @param basisList 人员比例
+     * @param sum       分组工时比例。
+     */
+    public List<TestTaskOrderWorkingHours> workHourRatioMethod(List<TestCheckItemsTaskRel> itemList, List<TestInitDataEntity> basisList, String sum) {
+        // key = userId 、 value = 比例信息。
+        // 使用 map 进行 数据统计 key = userId , value = 参数
+        Map<Long, TestTaskOrderWorkingHours> mapData = new HashMap<>();
+        /**
+         * 调整比例 ： 辅助人包括报告制作和辅助人员 : 两者存在 比例/2
+         */
+        methodAdjustingThePproportion(itemList, basisList);
+
+        /**
+         * 获取分组下人员占比信息
+         */
+        methodObtainProportionInformation(mapData, itemList, basisList);
+        System.out.println("获取分组下人员占比信息");
+        List<TestTaskOrderWorkingHours> list = new ArrayList<>();
+        // 返回 工时信息及比例
+        if (CollectionUtil.isNotEmpty(mapData.keySet())) {
+            for (Long userId : mapData.keySet()) {
+                TestTaskOrderWorkingHours data = mapData.get(userId);
+                // 比例 保留四位小数。
+                BigDecimal proportion = BigDecimal.valueOf(Double.valueOf(data.getProportion()) / 100).setScale(4, BigDecimal.ROUND_HALF_UP);
+                // 分组工时
+                data.setTotalWorkingHours(sum);
+                BigDecimal zhi1 = BigDecimal.valueOf(Double.valueOf(data.getTotalWorkingHours())).setScale(2, BigDecimal.ROUND_HALF_UP);
+                //当前人的工时 = 比例 * zhi 保留四位小数。
+                BigDecimal he = proportion.multiply(zhi1).setScale(4, BigDecimal.ROUND_HALF_UP);
+                data.setWorkingHours(String.valueOf(he));
+                mapData.put(userId, data);
+                list.add(data);
+            }
+            return list;
+        }
+        return list;
+    }
+
+    /**
+     * 私有方法：
+     * 调整比例 ： 辅助人包括报告制作和辅助人员 : 两者存在 比例/2
+     *
+     * @param itemList
+     * @param basisList
+     */
+    private void methodAdjustingThePproportion(List<TestCheckItemsTaskRel> itemList, List<TestInitDataEntity> basisList) {
+        // 报告制作人员
+        String reportProducer = null;
+        // 辅助人员
+        String auxiliaryPersonnelperson = null;
+        for (TestCheckItemsTaskRel taskRel : itemList) {
+            if (taskRel.getUserType() == 3) {
+                reportProducer = "报告制作人存在";
+            }
+            if (taskRel.getUserType() == 4) {
+                auxiliaryPersonnelperson = "辅助人员存在";
+            }
+        }
+
+        // 辅助人包括报告制作和辅助人员 : 两者存在 比例/2
+        if (StringUtils.isNotEmpty(reportProducer) && StringUtils.isNotEmpty(auxiliaryPersonnelperson)) {
+            // 任务单中 包含报告制作人与辅助人员 不为空 则平摊比例
+            TestInitDataEntity reportProducerData = basisList.get(3);
+            int zhi1 = Integer.parseInt(reportProducerData.getRemark()) / 2;
+            reportProducerData.setRemark(String.valueOf(zhi1));
+            basisList.set(3, reportProducerData);
+            TestInitDataEntity auxiliaryPersonnel = basisList.get(4);
+            int zhi2 = Integer.parseInt(auxiliaryPersonnel.getRemark()) / 2;
+            auxiliaryPersonnel.setRemark(String.valueOf(zhi2));
+            basisList.set(4, auxiliaryPersonnel);
+        } else {
+            // 辅助人员 工时 = 0
+            TestInitDataEntity auxiliaryPersonnel = basisList.get(5);
+            auxiliaryPersonnel.setRemark("0");
+            basisList.set(4, auxiliaryPersonnel);
+        }
+    }
+
+    /**
+     * 获取分组下人员占比信息
+     *
+     * @param mapData
+     * @param itemList
+     * @param basisList
+     */
+    private void methodObtainProportionInformation(Map<Long, TestTaskOrderWorkingHours> mapData, List<TestCheckItemsTaskRel> itemList, List<TestInitDataEntity> basisList) {
+        // itemList 中包含  0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生
+        // basisList 中包含：0 检测人员	25 。1、记录人员	25。2 复核人	20。3 报告制作人	10。 4 辅助人员	10 。 5 签发人	20。
+        for (int i = 0; i < basisList.size() - 1; i++) {
+            // 截取list中数据
+            String inspector = methodOrganizeData(i, itemList);
+            if (StringUtils.isNotEmpty(inspector)) {
+                methodSubstr(i, inspector, mapData, null, basisList);
+            }
+        }
+    }
+
+    /**
+     * 整理检测类型数据
+     *
+     * @param type
+     * @param itemList
+     * @return
+     */
+    private String methodOrganizeData(Integer type, List<TestCheckItemsTaskRel> itemList) {
+        // 检测人员
+        StringBuffer inspector = new StringBuffer();
+        // 获取 type类型去重后数据
+        HashMap<Long, TestCheckItemsTaskRel> map = new HashMap<>();
+        for (TestCheckItemsTaskRel taskRel : itemList) {
+            if (taskRel.getUserType() == type) {
+                map.put(Long.valueOf(taskRel.getUserId()), taskRel);
+            }
+        }
+        if (CollectionUtil.isNotEmpty(map.keySet())) {
+            for (Long userId : map.keySet()) {
+                TestCheckItemsTaskRel taskRel = map.get(userId);
+                inspector.append(taskRel.getUserName() + "&" + taskRel.getUserId());
+                inspector.append(",");
+            }
+            return inspector.deleteCharAt(inspector.length() - 1).toString();
+        }
+        return null;
+    }
+
+    /**
+     * 分配工时信息
+     *
+     * @param taskId
+     * @param bitTaskRelList 分组设置任务大厅 获取工时信息
+     */
+    private void addTestTaskOrderWorkingHoursMapper(Long taskId, HashMap<Integer, List<TestTaskOrderWorkingHours>> bitTaskRelList) {
+        //  人员对应的检测工时及比例信息。
+        // 使用map 进行用户数据合并
+        Map<Long, TestTaskOrderWorkingHours> taskRelMap = new HashMap<>();
+        // 总工时
+        String totalWorkingHours = "0.0";
+        for (Integer key : bitTaskRelList.keySet()) {
+
+            List<TestTaskOrderWorkingHours> list = bitTaskRelList.get(key);
+
+            // 当前组的工时
+            BigDecimal zhi1 = BigDecimal.valueOf(Double.parseDouble(list.get(0).getTotalWorkingHours())).setScale(4, BigDecimal.ROUND_HALF_UP);
+            BigDecimal zhi2 = BigDecimal.valueOf(Double.parseDouble(totalWorkingHours)).setScale(4, BigDecimal.ROUND_HALF_UP);
+            BigDecimal workingHours = zhi1.add(zhi2);
+            totalWorkingHours = String.valueOf(workingHours);
+
+            // 拆分组数据进行
+            for (TestTaskOrderWorkingHours taskRel : list) {
+                if (taskRelMap.get(taskRel.getUserId()) != null) {
+                    // 第一组工时
+                    TestTaskOrderWorkingHours data = taskRelMap.get(taskRel.getUserId());
+                    // 下一组工时
+//                    taskRel
+                    // 进行两组 检测类型进行合并。
+                    Set<String> stringSet = new HashSet<>();
+                    String[] strings = data.getDetectionType().split("、");
+                    for (int i = 0; i < strings.length; i++) {
+                        stringSet.add(strings[i]);
+                    }
+                    String[] strings2 = taskRel.getDetectionType().split("、");
+                    for (int j = 0; j < strings2.length; j++) {
+                        stringSet.add(strings2[j]);
+                    }
+                    StringBuffer stringBuffer = new StringBuffer();
+                    // 遍历set数据
+                    for (String str : stringSet) {
+                        stringBuffer.append(str);
+                        stringBuffer.append("、");
+                    }
+                    data.setDetectionType(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+                    // 进行两组 获取工时 相加。
+                    //第一组的工时
+                    BigDecimal value1 = BigDecimal.valueOf(Double.parseDouble(data.getWorkingHours())).setScale(4, BigDecimal.ROUND_HALF_UP);
+                    // 第二组工时
+                    BigDecimal value2 = BigDecimal.valueOf(Double.parseDouble(taskRel.getWorkingHours())).setScale(4, BigDecimal.ROUND_HALF_UP);
+                    System.out.println("value1 " + value1.toString() + " value2 =" + value2.toString());
+                    BigDecimal he = value1.add(value2).setScale(4, BigDecimal.ROUND_HALF_UP);
+                    System.out.println("he " + he.toString());
+                    data.setWorkingHours(String.valueOf(he));
+                    taskRelMap.put(data.getUserId(), data);
+                } else {
+                    // 如果两组 都无 则新增即可。
+                    taskRelMap.put(Long.valueOf(taskRel.getUserId()), taskRel);
+                }
+            }
+        }
+        // 展示数据
+        TaskTestEntity taskDetails = taskMapper.selectTaskEntity(taskId);
+        //TODO:1月5日  查询基础表信息 - 检测类型包含工时
+        List<TestInitDataEntity> sqlBasisList = taskMapper.selectEntrustBasis(30);
+        // 总工时
+        System.out.println("总工时 == " + totalWorkingHours);
+
+        // 签发人： 获取
+        Boolean issuerInformation = false;
+        for (Long userId : taskRelMap.keySet()) {
+            // 签收人为
+            if (Long.valueOf(taskDetails.getReceiver()).equals(userId)) {
+                issuerInformation = true;
+            }
+        }
+        // 每组人员拥有的检测项信息。
+        for (Long userId : taskRelMap.keySet()) {
+            TestTaskOrderWorkingHours data = taskRelMap.get(userId);
+            // 进行 计算比例。
+            // 签收人为
+            if (Long.valueOf(taskDetails.getReceiver()).equals(userId) && issuerInformation) {
+                // 设置比例。
+                TestInitDataEntity dataEntity = sqlBasisList.get(5);
+                // 当前符合条件 增加工时 = 百分比 * 总工时
+                // 百分比
+                BigDecimal proportion = BigDecimal.valueOf(Double.valueOf(dataEntity.getRemark()) / 100).setScale(4, BigDecimal.ROUND_HALF_UP);
+                // 总工时
+                BigDecimal totalWorkingHoursBig = BigDecimal.valueOf(Double.valueOf(totalWorkingHours)).setScale(4, BigDecimal.ROUND_HALF_UP);
+                //  增加工时 = 百分比 * 总工时
+                BigDecimal addWorkingHours = proportion.multiply(totalWorkingHoursBig).setScale(4, BigDecimal.ROUND_HALF_UP);
+                //所占工时 保留四位小数。
+                BigDecimal workingHours = BigDecimal.valueOf(Double.valueOf(data.getWorkingHours())).setScale(4, BigDecimal.ROUND_HALF_UP);
+                BigDecimal he = workingHours.add(addWorkingHours);
+                // 补充信息 检测类型
+                data.setDetectionType(data.getDetectionType() + "、" + dataEntity.getName());
+                data.setWorkingHours(String.valueOf(he));
+            }
+            // 总工时
+            data.setTotalWorkingHours(totalWorkingHours);
+            BigDecimal totalWorkingHoursBig = BigDecimal.valueOf(Double.valueOf(totalWorkingHours)).setScale(2, BigDecimal.ROUND_HALF_UP);
+            //所占工时 保留四位小数。
+            BigDecimal workingHours = BigDecimal.valueOf(Double.valueOf(data.getWorkingHours())).setScale(4, BigDecimal.ROUND_HALF_UP);
+            // 百分比 = 所占工时 / 总工时 * 100 保留两位小数
+            //当前人的工时 = 比例 * zhi 保留四位小数。
+            BigDecimal he = workingHours.divide(totalWorkingHoursBig).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+            // 所占工时
+            data.setProportion(String.valueOf(he));
+            System.out.println("每组人员拥有的检测项信息 == " + data);
+            taskRelMap.put(userId, data);
+        }
+        // 签发人不参与检测组中：新建
+        if (!issuerInformation) {
+            // 设置比例。
+            TestInitDataEntity dataEntity = sqlBasisList.get(5);
+            // 当前符合条件 增加工时 = 百分比 * 总工时
+            // 百分比
+            BigDecimal proportion = BigDecimal.valueOf(Double.valueOf(dataEntity.getRemark()) / 100).setScale(4, BigDecimal.ROUND_HALF_UP);
+            // 总工时
+            BigDecimal totalWorkingHoursBig = BigDecimal.valueOf(Double.valueOf(totalWorkingHours)).setScale(4, BigDecimal.ROUND_HALF_UP);
+            //  增加工时 = 百分比 * 总工时
+            BigDecimal addWorkingHours = proportion.multiply(totalWorkingHoursBig).setScale(4, BigDecimal.ROUND_HALF_UP);
+            TestTaskOrderWorkingHours data = new TestTaskOrderWorkingHours();
+            // 使用人id
+            data.setUserId(Long.valueOf(taskDetails.getReceiver()));
+            // 接单人name
+            String name = sysUserDao.getSysUserName(Long.valueOf(taskDetails.getReceiver()));
+            data.setUserName(name);
+            // 接单类型
+            data.setDetectionType(dataEntity.getName());
+            //总工时
+            data.setTotalWorkingHours(String.valueOf(totalWorkingHours));
+            // 百分比
+            data.setProportion(dataEntity.getRemark());
+            // 工时信息
+            data.setWorkingHours(String.valueOf(addWorkingHours));
+            // 新增签发人信息。
+            taskRelMap.put(data.getUserId(), data);
+        }
+        // 把数据 新增进去。
+        addtaskRelMap(taskId, taskRelMap, taskDetails);
+    }
+
+    /**
+     * 增加工时信息。增加item详情工时数据。
+     *
+     * @param taskId
+     * @param taskRelMap
+     * @param taskDetails
+     */
+    @Transactional(rollbackFor = Exception.class)
+    private void addtaskRelMap(Long taskId, Map<Long, TestTaskOrderWorkingHours> taskRelMap, TaskTestEntity taskDetails) {
+        // 工时id
+        Long workingHoursId = GenID.getID();
+
+        // 任务单号
+        String taskCode = taskDetails.getTaskCode();
+
+        // 接单人 =  来源
+        String name = "";
+        if (StringUtils.isEmpty(name)) {
+            name = sysUserDao.getSysUserName(Long.valueOf(taskDetails.getReceiver()));
+        }
+        // 通过任务单id 获取任务单下对应的检测项总工时
+        renturnWorkingHours(taskId, workingHoursId, name);
+
+        // 通过任务单 获取样品信息
+        List<String> sampleNames = taskMapper.getTaskSamples(taskDetails.getId());
+        StringBuffer nameBuffer = new StringBuffer();
+        if (CollectionUtil.isNotEmpty(sampleNames)) {
+            for (String sampleName : sampleNames) {
+                nameBuffer.append(sampleName + " ");
+            }
+        }
+        for (Long userId : taskRelMap.keySet()) {
+            TestTaskOrderWorkingHours taskOrderWorkingHours = taskRelMap.get(userId);
+            taskOrderWorkingHours.setAddOperator(name + "&" + taskDetails.getReceiver());
+            taskOrderWorkingHours.setCreateTime(new Date());
+            // 样品名称 = 任务单下 样品名称
+            taskOrderWorkingHours.setSampleName(nameBuffer.toString());
+            // 来源 = 任务单的下单人
+            taskOrderWorkingHours.setSource(name);
+            // 新增任务单id
+            taskOrderWorkingHours.setTaskId(taskId);
+            // 任务单号
+            taskOrderWorkingHours.setTaskCode(taskCode);
+            taskOrderWorkingHours.setWorkingHoursId(String.valueOf(workingHoursId));
+            testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        }
     }
 }

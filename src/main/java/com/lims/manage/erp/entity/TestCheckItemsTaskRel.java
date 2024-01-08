@@ -1,6 +1,7 @@
 package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.Version;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
@@ -76,6 +77,11 @@ public class TestCheckItemsTaskRel implements Serializable {
      * 任务单id
      */
     private Long taskId;
+    /**
+     * 实现任务大厅 领取后 进行分组。
+     */
+    @TableField(exist = false)
+    private Integer bitValue;
 
 
 }

@@ -1287,19 +1287,19 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         // 任务单创建时间
         vo.setCreateTime(new Date());
         // 补充人员信息 检测人
-        vo.setInspector(sampleItemEntity.getInspector());
+        vo.setInspector(methodRetrunStrSplit(sampleItemEntity.getInspector(), ","));
         // 记录人
-        vo.setRecorder(sampleItemEntity.getRecorder());
+        vo.setRecorder(methodRetrunStrSplit(sampleItemEntity.getRecorder(), ","));
         // 复核人
-        vo.setReviewer(sampleItemEntity.getReviewer());
+        vo.setReviewer(methodRetrunStrSplit(sampleItemEntity.getReviewer(), ","));
         // 报告制作人
-        vo.setReportProducer(sampleItemEntity.getReportProducer());
+        vo.setReportProducer(methodRetrunStrSplit(sampleItemEntity.getReportProducer(), ","));
         // 辅助人员
-        vo.setAuxiliaryPersonnel(sampleItemEntity.getAuxiliaryPersonnel());
+        vo.setAuxiliaryPersonnel(methodRetrunStrSplit(sampleItemEntity.getAuxiliaryPersonnel(), ","));
         // 见习生：实习的新手
-        vo.setProbationer(sampleItemEntity.getProbationer());
+        vo.setProbationer(methodRetrunStrSplit(sampleItemEntity.getProbationer(), ","));
         // 实习生
-        vo.setInterns(sampleItemEntity.getInterns());
+        vo.setInterns(methodRetrunStrSplit(sampleItemEntity.getInterns(), ","));
         // 领样人
         vo.setSampler(sampleItemEntity.getSampler());
         // 领样时间
@@ -1342,6 +1342,30 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 实现str 截取
+     *
+     * @param str
+     * @param split
+     * @return
+     */
+    public String methodRetrunStrSplit(String str, String split) {
+        if (StringUtils.isEmpty(str)) {
+            return null;
+        }
+        Set<String> set = new HashSet<>();
+        String[] strings = str.split(split);
+        for (int i = 0; i < strings.length; i++) {
+            set.add(strings[i]);
+        }
+        StringBuffer stringBuffer = new StringBuffer();
+        for (String strSet : set) {
+            stringBuffer.append(strSet);
+            stringBuffer.append(split);
+        }
+        return stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString();
     }
 
     /**
@@ -1551,19 +1575,19 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             taskTestEntity.setSampler(sampler);
         }
         // 补充人员信息 检测人
-        taskTestEntity.setInspector(addSampleItemEntity.getInspector());
+        taskTestEntity.setInspector(methodRetrunStrSplit(addSampleItemEntity.getInspector(), ","));
         // 记录人
-        taskTestEntity.setRecorder(addSampleItemEntity.getRecorder());
+        taskTestEntity.setRecorder(methodRetrunStrSplit(addSampleItemEntity.getRecorder(), ","));
         // 复核人
-        taskTestEntity.setReviewer(addSampleItemEntity.getReviewer());
+        taskTestEntity.setReviewer(methodRetrunStrSplit(addSampleItemEntity.getReviewer(), ","));
         // 报告制作人
-        taskTestEntity.setReportProducer(addSampleItemEntity.getReportProducer());
+        taskTestEntity.setReportProducer(methodRetrunStrSplit(addSampleItemEntity.getReportProducer(), ","));
         // 辅助人员
-        taskTestEntity.setAuxiliaryPersonnel(addSampleItemEntity.getAuxiliaryPersonnel());
+        taskTestEntity.setAuxiliaryPersonnel(methodRetrunStrSplit(addSampleItemEntity.getAuxiliaryPersonnel(), ","));
         // 见习生：实习的新手
-        taskTestEntity.setProbationer(addSampleItemEntity.getProbationer());
+        taskTestEntity.setProbationer(methodRetrunStrSplit(addSampleItemEntity.getProbationer(), ","));
         // 实习生
-        taskTestEntity.setInterns(addSampleItemEntity.getInterns());
+        taskTestEntity.setInterns(methodRetrunStrSplit(addSampleItemEntity.getInterns(), ","));
         taskMapper.updateTestTask(taskTestEntity);
         // 更新检测项及样品流转状态
         updateItemStatus(addSampleItemEntity, list);

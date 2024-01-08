@@ -49,29 +49,30 @@
         SELECT
         t1.id as taskId,
         t1.order_time,
-        t1.end_detection_time as required_completion_time,
+        t4.issuer_time as required_completion_time,
         t1.task_code,
         t2.NAME AS receiver,
         "任务大厅" AS source,
         IF
         ( IFNULL( t3.update_time, 0 ) = 0, 0, 1 ) AS state,
-        t3.total_working_hours as workingHours,
+        t3.working_hours as workingHours,
         t3.working_hours_id as workingHoursId
         FROM
         test_task AS t1
         LEFT JOIN sys_user AS t2 ON t1.receiver = t2.user_id
         LEFT JOIN test_task_order_working_hours AS t3 ON t1.id = t3.task_id
+        LEFT JOIN test_report_record AS t4 ON t4.entrustment_id = t1.entrustment_id
         <where>
             1=1
             and t3.task_id is not null
             <if test="receiverUserId!=null">
-                and t1.receiver = #{receiverUserId}
+                and ( t3.user_id = #{receiverUserId})
             </if>
             <if test="startDate!=null">
-                AND t1.order_time >= #{startDate}
+                AND t4.issuer_time  >= #{startDate}
             </if>
             <if test="stopDate!=null">
-                AND #{stopDate} >= t1.required_completion_time
+                AND #{stopDate} >= t4.issuer_time
             </if>
         </where>
         GROUP BY
@@ -93,27 +94,39 @@
         "任务大厅" AS source,
         IF
         ( IFNULL( t3.update_time, 0 ) = 0, 0, 1 ) AS state,
-        t3.total_working_hours as workingHours,
+        t3.working_hours as workingHours,
         t3.working_hours_id as workingHoursId
         FROM
         test_task AS t1
         LEFT JOIN sys_user AS t2 ON t1.receiver = t2.user_id
         LEFT JOIN test_task_order_working_hours AS t3 ON t1.id = t3.task_id
+        LEFT JOIN test_report_record AS t4 ON t4.entrustment_id = t1.entrustment_id
         <where>
             1=1
             and t3.task_id is not null
             <if test="receiverUserId!=null">
-                and t1.receiver = #{receiverUserId}
+                and (t3.user_id = #{receiverUserId} )
             </if>
             <if test="startDate!=null">
-                AND t1.order_time >= #{startDate}
+                AND t4.issuer_time >= #{startDate}
             </if>
             <if test="stopDate!=null">
-                AND #{stopDate} >= t1.required_completion_time
+                AND #{stopDate} >= t4.issuer_time
             </if>
         </where>
         GROUP BY
         CONCAT( t1.id, IFNULL( t3.working_hours_id, 0 ) )
         ORDER BY t1.end_detection_time desc ) as aa
+    </select>
+
+    <select id="selectAllDataBitValue" resultType="com.lims.manage.erp.entity.TestCheckItemsTaskRel">
+        SELECT
+            t1.*,
+            t2.bit_value AS bitValue
+        FROM
+            test_check_items_task_rel AS t1
+            LEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.item_id = t2.id
+        WHERE
+            t1.task_id = #{taskId}
     </select>
 </mapper>
