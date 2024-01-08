@@ -577,7 +577,7 @@
                     #{id}
                 </foreach>
             </if>
-            <if test="deptIds!=null and flag == 1">
+            <if test="deptIds!=null and inspector == null and flag == 1">
                 and dept_id in
                 <foreach collection="deptIds" item="id" index="index" open="(" close=")" separator=",">
                     #{id}

@@ -78,7 +78,7 @@ public class InternalAuditServiceImpl extends ServiceImpl<InternalAuditDao, Inte
             }
         }
         LambdaQueryWrapper<InternalAuditInfo> queryWrapper1 = new LambdaQueryWrapper();
-        queryWrapper1.in(InternalAuditInfo::getAuditId,ids);
+        queryWrapper1.in(CollectionUtils.isNotEmpty(ids), InternalAuditInfo::getAuditId, ids);
         List<InternalAuditInfo> internalAuditInfos = auditInfoDao.selectList(queryWrapper1);
         for (InternalAudit internalAudit :pageInfo.getList()){
             List<InternalAuditInfo> auditInfos = Lists.newArrayList();
