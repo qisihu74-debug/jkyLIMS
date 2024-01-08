@@ -282,10 +282,17 @@
       FROM
           test_task_order_working_hours AS t1
           LEFT JOIN test_task AS t2 ON t1.task_id = t2.id
+           LEFT JOIN test_report_record AS t4 ON t4.entrustment_id = t2.entrustment_id
       WHERE
         t2.receiver =  #{receiverUserId}
         AND t2.state >= 4
 	    AND t2.end_detection_time IS NOT NULL
+      <if test="startDate!=null">
+        AND t4.issuer_time >= #{startDate}
+      </if>
+      <if test="stopDate!=null">
+        AND #{stopDate} >= t4.issuer_time
+      </if>
       GROUP BY
           	CONCAT( t1.task_id, IFNULL( t1.working_hours_id, 0 ) )
   </select>
@@ -301,5 +308,22 @@
     </foreach>
     GROUP BY
     CONCAT( task_id, IFNULL( working_hours_id, 0 ) )
+  </select>
+  <select id="selectTaskOrderWorkingHoursList" resultType="com.lims.manage.erp.entity.TestTaskOrderWorkingHours">
+    SELECT
+        t1.*
+    FROM
+        test_task_order_working_hours AS t1
+        LEFT JOIN test_task AS t2 ON t1.task_id = t2.id
+        LEFT JOIN test_report_record AS t4 ON t4.entrustment_id = t2.entrustment_id
+    WHERE
+        1 = 1
+    and t1.user_id = #{receiverUserId}
+    <if test="startDate!=null">
+      AND t4.issuer_time >= #{startDate}
+    </if>
+    <if test="stopDate!=null">
+      AND #{stopDate} >= t4.issuer_time
+    </if>
   </select>
 </mapper>
