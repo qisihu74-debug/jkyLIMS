@@ -39,8 +39,8 @@ public class DingUserEntity {
     private String position;
     private String remark;
     private String tel;
+    @TableId
     private String unionid;
-    @TableId(value = "userid")
     private String userid;
     private String workplace;
 
