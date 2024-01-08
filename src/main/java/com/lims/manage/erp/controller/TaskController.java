@@ -317,7 +317,10 @@ public class TaskController {
 //            return ResultUtil.success(returnList);
             TeamVo returnList = new TeamVo();
             List<LabelValueVo> teamVos0 = taskMapper.getAllTeamUser();
+            // 报告制作人、辅助人员、实习生，见习生。不考虑团队。
+            List<LabelValueVo> reviewVo = taskMapper.getAllTeamNAMEUser();
             returnList.setTeamVo(teamVos0);
+            returnList.setReviewVo(reviewVo);
             return ResultUtil.success(returnList);
         }
         return ResultUtil.error(502, "token过期！");

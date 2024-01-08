@@ -2540,7 +2540,17 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             // 根据用户id 返回对应科室
             List<LabelValueVo> teamVos1 = new ArrayList<>();
             teamVos1 = taskMapper.getMemberInformationConcat1(userIds);
-            return ResultUtil.success(teamVos1);
+            // 拼接补充信息。
+            if (CollectionUtil.isNotEmpty(teamVos1)) {
+                for (LabelValueVo labelValueVo : teamVos1) {
+                    for (LabelValueVo labelValueVo1 : userList) {
+                        if (labelValueVo.getValue().equals(labelValueVo1.getValue())) {
+                            labelValueVo1.setText(labelValueVo.getText());
+                        }
+                    }
+                }
+            }
+            return ResultUtil.success(userList);
         }
         return ResultUtil.success(new ArrayList<>());
     }

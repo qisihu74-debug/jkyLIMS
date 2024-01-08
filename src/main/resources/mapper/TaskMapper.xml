@@ -1568,7 +1568,6 @@
                 #{id}
             </foreach>
         </if>
-        and t3.name is not NULL
         and t2.del_flag = 0
     </select>
 
