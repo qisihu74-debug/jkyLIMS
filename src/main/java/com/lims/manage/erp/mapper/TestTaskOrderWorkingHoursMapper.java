@@ -84,5 +84,12 @@ public interface TestTaskOrderWorkingHoursMapper  extends BaseMapper<TestTaskOrd
      */
     List<TestTaskOrderWorkingHours> getTestTaskOrderWorkingHoursList(@Param("taskIds") List<Long> taskIds);
 
+    /**
+     * 工时信息
+     * @param taskStatisticsVo
+     * @return
+     */
+    List<TestTaskOrderWorkingHours> selectTaskOrderWorkingHoursList(TaskStatisticsVo taskStatisticsVo);
+
 
 }
