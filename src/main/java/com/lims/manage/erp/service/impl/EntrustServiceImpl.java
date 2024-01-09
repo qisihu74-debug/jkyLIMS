@@ -5362,8 +5362,8 @@ public class EntrustServiceImpl implements EntrustService {
     /**
      * 处理配合比编号
      *
-     * @param strCode 原材编号
-     * @param selfNumber 自身编号
+     * @param strCode 原材编号 YP-2023-15637-01~09,YSY-202401-00204-01~03
+     * @param selfNumber 自身编号 YP-2023-15221-05,YP-2023-14952_06
      * @return
      */
     public String methodMixProportionSampleCode(String strCode,String selfNumber){
