@@ -5380,9 +5380,11 @@ public class EntrustServiceImpl implements EntrustService {
             sampleCode.append("-");
         }
         if(sampleCode.deleteCharAt(sampleCode.length()-1).toString().length()>1){
-            sampleCode.append("_");
-            sampleCode.append(numberSuffixs[1]);
-         return sampleCode.toString();
+            if (numberSuffixs.length >= 2) {
+                sampleCode.append("_");
+                sampleCode.append(numberSuffixs[1]);
+            }
+            return sampleCode.toString();
         }
         return null;
     }
