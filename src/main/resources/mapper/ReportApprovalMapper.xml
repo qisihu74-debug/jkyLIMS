@@ -512,6 +512,7 @@
             sealer,
             seal_time,
             origin_url_pdf,
+            bit_value,
             issuer_time
         ) SELECT
             t2.*,SYSDATE()

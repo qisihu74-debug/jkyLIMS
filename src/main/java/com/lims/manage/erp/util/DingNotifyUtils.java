@@ -71,7 +71,6 @@ public class DingNotifyUtils {
             body.setForm(list);
         }
         body.setTitle(title);
-        body.setImage("@resource/dingtalk/message_image");
         body.setContent(content);
         //oa.setPcMessageUrl("http://www.baidu.com");
         oa.setBody(body);
