@@ -4934,10 +4934,10 @@ public class EntrustServiceImpl implements EntrustService {
                         SampleEntity sampleData2 = new SampleEntity();
                         sampleData2.setId(sampleDetailVo1.getId());
                         sampleData2.setReceivedDate(sampleData.getReceivedDate());
-                        if(sampleData1.getSampleCode()!=null){
-                         // 处理配合比则 更改样品编号
-                         sampleData2.setSampleCode(methodMixProportionSampleCode(sampleData1.getSampleCode(),sampleDetailVo1.getSampleCode()));
-                        }
+//                        if(sampleData1.getSampleCode()!=null){
+//                         // 处理配合比则 更改样品编号
+//                         sampleData2.setSampleCode((sampleData1.getSampleCode(),sampleDetailVo1.getSampleCode()));
+//                        }
                         // update样品信息
                         sampleEntityMapper.updateByPrimaryKeySelective(sampleData2);
                     }
@@ -5373,7 +5373,7 @@ public class EntrustServiceImpl implements EntrustService {
         numbers[1] = sampleCodes[1];
         // 获取配合比下后缀规则定位 "_"
         String[] numberSuffixs = numbers[2].split("_");
-        numbers[2] = sampleCodes[2];
+//        numbers[2] = sampleCodes[2];
         StringBuffer sampleCode = new StringBuffer();
         for(int i=0; i<numbers.length; i++){
             sampleCode.append(numbers[i]);
