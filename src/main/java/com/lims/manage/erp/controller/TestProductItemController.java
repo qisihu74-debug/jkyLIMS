@@ -3,6 +3,8 @@ package com.lims.manage.erp.controller;
 
 
 import cn.hutool.core.util.StrUtil;
+import com.aspose.cells.Cells;
+import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -16,6 +18,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -209,6 +215,32 @@ public class TestProductItemController extends ApiController {
     @GetMapping("get_Basics")
     public Result ReturnBasicsData() {
         return ResultUtil.success(this.testProductItemService.returnEntrustData());
+    }
+
+    @GetMapping("exportWorkHour")
+    public void exportWorkHour() throws Exception {
+        String path = "C:\\Users\\Administrator\\Videos\\现有参数工时表(1).xls";
+        File file = new File(path);
+        InputStream inputStream = new FileInputStream(file);
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(inputStream);
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        Cells cells = worksheet.getCells();
+        int index = 0;
+        int num = 2;
+        while (num<=2412){
+            Object key = cells.get("A" + num).getValue();
+            Object value = cells.get("D" + num).getValue();
+            if (key != null){
+                Integer id = Integer.parseInt(key.toString().split("\\.")[0]);
+                if (value != null){
+                    Integer hour = Integer.parseInt(value.toString().split("\\.")[0]);
+                    testProductItemService.updateHourById(id,hour);
+                    index ++;
+                }
+            }
+            num ++;
+        }
+        System.out.println("导入工时总共插入了"+index+" 条");
     }
 }
 

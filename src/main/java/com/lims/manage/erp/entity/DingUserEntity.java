@@ -40,7 +40,7 @@ public class DingUserEntity {
     private String remark;
     private String tel;
     private String unionid;
-    @TableId(value = "userid")
+    @TableId
     private String userid;
     private String workplace;
 

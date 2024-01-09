@@ -4934,10 +4934,10 @@ public class EntrustServiceImpl implements EntrustService {
                         SampleEntity sampleData2 = new SampleEntity();
                         sampleData2.setId(sampleDetailVo1.getId());
                         sampleData2.setReceivedDate(sampleData.getReceivedDate());
-                        if(sampleData1.getSampleCode()!=null){
-                         // 处理配合比则 更改样品编号
-                         sampleData2.setSampleCode(methodMixProportionSampleCode(sampleData1.getSampleCode(),sampleDetailVo1.getSampleCode()));
-                        }
+//                        if(sampleData1.getSampleCode()!=null){
+//                         // 处理配合比则 更改样品编号
+//                         sampleData2.setSampleCode((sampleData1.getSampleCode(),sampleDetailVo1.getSampleCode()));
+//                        }
                         // update样品信息
                         sampleEntityMapper.updateByPrimaryKeySelective(sampleData2);
                     }
@@ -5362,8 +5362,8 @@ public class EntrustServiceImpl implements EntrustService {
     /**
      * 处理配合比编号
      *
-     * @param strCode 原材编号
-     * @param selfNumber 自身编号
+     * @param strCode 原材编号 YP-2023-15637-01~09,YSY-202401-00204-01~03
+     * @param selfNumber 自身编号 YP-2023-15221-05,YP-2023-14952_06
      * @return
      */
     public String methodMixProportionSampleCode(String strCode,String selfNumber){
@@ -5373,16 +5373,18 @@ public class EntrustServiceImpl implements EntrustService {
         numbers[1] = sampleCodes[1];
         // 获取配合比下后缀规则定位 "_"
         String[] numberSuffixs = numbers[2].split("_");
-        numbers[2] = sampleCodes[2];
+//        numbers[2] = sampleCodes[2];
         StringBuffer sampleCode = new StringBuffer();
         for(int i=0; i<numbers.length; i++){
             sampleCode.append(numbers[i]);
             sampleCode.append("-");
         }
         if(sampleCode.deleteCharAt(sampleCode.length()-1).toString().length()>1){
-            sampleCode.append("_");
-            sampleCode.append(numberSuffixs[1]);
-         return sampleCode.toString();
+            if (numberSuffixs.length >= 2) {
+                sampleCode.append("_");
+                sampleCode.append(numberSuffixs[1]);
+            }
+            return sampleCode.toString();
         }
         return null;
     }

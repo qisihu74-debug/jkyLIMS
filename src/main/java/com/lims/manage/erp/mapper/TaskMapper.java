@@ -670,4 +670,34 @@ public interface TaskMapper extends BaseMapper {
             "\tLEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id\n" +
             "\tWHERE t1.id>0")
     List<TestTaskPool> taskHallByAdm();
+
+
+    /**
+     *  返回全部科室人员信息
+     */
+    @Select("\tSELECT\n" +
+            "\t\tt1.user_id as value,\n" +
+            "\t\tt1.NAME as label,\n" +
+            "\t\tt3.NAME AS text \n" +
+            "\tFROM\n" +
+            "\t\tsys_user t1\n" +
+            "\t\tLEFT JOIN test_technicist AS t2 ON t1.user_id = t2.user_id\n" +
+            "\t\tLEFT JOIN test_team AS t3 ON t2.team_id = t3.id\n" +
+            "\t\tWHERE t3.NAME is not null")
+    List<LabelValueVo> getAllTeamUser();
+
+    /**
+     *  返回全部科室人员信息
+     */
+    @Select("SELECT\n" +
+            "\tt1.user_id AS \n" +
+            "VALUE\n" +
+            "\t,\n" +
+            "\tt1.NAME AS label,\n" +
+            "\tt3.NAME AS text \n" +
+            "FROM\n" +
+            "\tsys_user t1\n" +
+            "\tLEFT JOIN test_technicist AS t2 ON t1.user_id = t2.user_id\n" +
+            "\tLEFT JOIN test_team AS t3 ON t2.team_id = t3.id")
+    List<LabelValueVo> getAllTeamNAMEUser();
 }

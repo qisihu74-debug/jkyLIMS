@@ -1074,7 +1074,7 @@ save_place, admin, sample_groups, quantity_per_group, inspector,
     <select id="getMaxNumber" resultType="java.lang.Integer" parameterType="string">
         SELECT MAX(SUBSTR(sample_code, 9, 5) + 0) maxNum
         FROM test_sample
-        WHERE sample_code LIKE CONCAT('%-', #{year}, '-%')
+        WHERE sample_code LIKE CONCAT('%-', #{year}, '-%') for update
     </select>
 
     <select id="getOriginalSampleInfo" resultType="com.lims.manage.erp.vo.TemplateSampleVo">

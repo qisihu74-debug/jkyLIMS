@@ -147,4 +147,7 @@ public interface ReportApprovalMapper {
     List<Integer> getNewEscId(Long entrustmentId);
 
     ReportRecordEntity getReportInfo(Long reportId);
+
+    @Select("\tSELECT id as task_id FROM test_task WHERE order_time >= \"2023-11-1\" and state >= 4")
+    List<Long> getTaskList();
 }

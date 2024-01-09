@@ -3648,11 +3648,11 @@ public class ReportServiceImpl implements ReportService {
                 }else {
                     desc = " 电子报告盖章申请已提交";
                 }
-                dingNotifyUtils.OAWorkNotice(dingId,byRecordId.getReportCode()+desc,null);
+                dingNotifyUtils.OAWorkNotice(dingId,byRecordId.getReportCode()+desc,null,null);
                 //给盖章人员通知消息
                 List<String> dIds = sysUserDao.getDingIdByRoleName();
                 for (String did: dIds){
-                    dingNotifyUtils.OAWorkNotice(did,byRecordId.getReportCode()+" 报告盖章已提交",null);
+                    dingNotifyUtils.OAWorkNotice(did,byRecordId.getReportCode()+" 报告盖章已提交",null,null);
                 }
             } catch (Exception e) {
                 log.error("盖章完成发送消息给经营人员失败:{}",e);

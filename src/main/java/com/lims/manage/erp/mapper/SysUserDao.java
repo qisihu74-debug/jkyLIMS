@@ -192,4 +192,14 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
             "\tt1.user_id = #{userId} \n" +
             "\tAND t3.role_id = 99 ")
     String checkTxRoleById(@Param("userId") Long userId);
+
+    @Select({"<script>",
+            " SELECT DISTINCT ",
+            " ding_user_id",
+            " FROM sys_user WHERE user_id in ",
+            "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
+            "#{item}",
+            "</foreach>",
+            "</script>"})
+    List<String> getDingIdsByUserIds(@Param("items") Set<Long> items);
 }

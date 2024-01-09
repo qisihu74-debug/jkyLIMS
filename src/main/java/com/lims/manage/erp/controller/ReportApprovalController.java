@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -265,7 +266,6 @@ public class ReportApprovalController {
         }
         return ResultUtil.success("查询任务详情成功！", reportApprovalService.getDetails(id));
     }
-
 
 
     /**
@@ -603,17 +603,35 @@ public class ReportApprovalController {
 
     /**
      * 根据检测项 下载原始数据
+     *
      * @param id
      * @return
      */
     @GetMapping("download")
-    public String downloadData(Long id)
-    {
-        if(id==null){
-           return null;
+    public String downloadData(Long id) {
+        if (id == null) {
+            return null;
         }
         // 根据检测项 下载原始数据
         return reportApprovalMapper.getCheckItemUrl(id);
+    }
+
+    /**
+     * 工时从新统计导入
+     */
+    /**
+     * @return
+     */
+    @PostMapping("verifySave11")
+    public Result verifySave() {
+
+        List<Long> taskIds = reportApprovalMapper.getTaskList();
+//        List<Long> taskIds = new ArrayList<>();
+//        taskIds.add(4689202608451264L);
+//        taskIds.add(4689206872841732L);
+        testCheckItemsTaskRelService.testCommit(taskIds);
+        return null;
+
     }
 
 }
