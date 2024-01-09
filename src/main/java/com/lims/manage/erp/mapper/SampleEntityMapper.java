@@ -4,6 +4,7 @@ import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -193,6 +194,7 @@ public interface SampleEntityMapper {
      * @param year
      * @return
      */
+    @Transactional
     Integer getMaxNumber(String year);
 
     /**

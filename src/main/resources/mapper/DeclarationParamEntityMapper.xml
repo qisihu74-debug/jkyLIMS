@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lims.manage.erp.mapper.DeclarationParamEntityMapper" >
+  <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.DeclarationParamEntity" >
+    <constructor >
+      <arg column="plan_id" jdbcType="BIGINT" javaType="java.lang.Long" />
+      <arg column="product_id" jdbcType="BIGINT" javaType="java.lang.Long" />
+      <arg column="check_item_id" jdbcType="BIGINT" javaType="java.lang.Long" />
+      <arg column="check_item_name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="attribute" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="create_user" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="standard_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="standard_name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="method_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="method_name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="instrument_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="instrument_name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="limit_range" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="description" jdbcType="VARCHAR" javaType="java.lang.String" />
+    </constructor>
+  </resultMap>
+  <insert id="insert" parameterType="com.lims.manage.erp.entity.DeclarationParamEntity" >
+    insert into test_declaration_param (plan_id, product_id, check_item_id, 
+      check_item_name, attribute, create_user, 
+      create_time, standard_id, standard_name, 
+      method_id, method_name, instrument_id, 
+      instrument_name, limit_range, description
+      )
+    values (#{planId,jdbcType=BIGINT}, #{productId,jdbcType=BIGINT}, #{checkItemId,jdbcType=BIGINT}, 
+      #{checkItemName,jdbcType=VARCHAR}, #{attribute,jdbcType=VARCHAR}, #{createUser,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{standardId,jdbcType=INTEGER}, #{standardName,jdbcType=VARCHAR}, 
+      #{methodId,jdbcType=INTEGER}, #{methodName,jdbcType=VARCHAR}, #{instrumentId,jdbcType=INTEGER}, 
+      #{instrumentName,jdbcType=VARCHAR}, #{limitRange,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.DeclarationParamEntity" >
+    insert into test_declaration_param
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="planId != null" >
+        plan_id,
+      </if>
+      <if test="productId != null" >
+        product_id,
+      </if>
+      <if test="checkItemId != null" >
+        check_item_id,
+      </if>
+      <if test="checkItemName != null" >
+        check_item_name,
+      </if>
+      <if test="attribute != null" >
+        attribute,
+      </if>
+      <if test="createUser != null" >
+        create_user,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="standardId != null" >
+        standard_id,
+      </if>
+      <if test="standardName != null" >
+        standard_name,
+      </if>
+      <if test="methodId != null" >
+        method_id,
+      </if>
+      <if test="methodName != null" >
+        method_name,
+      </if>
+      <if test="instrumentId != null" >
+        instrument_id,
+      </if>
+      <if test="instrumentName != null" >
+        instrument_name,
+      </if>
+      <if test="limitRange != null" >
+        limit_range,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="planId != null" >
+        #{planId,jdbcType=BIGINT},
+      </if>
+      <if test="productId != null" >
+        #{productId,jdbcType=BIGINT},
+      </if>
+      <if test="checkItemId != null" >
+        #{checkItemId,jdbcType=BIGINT},
+      </if>
+      <if test="checkItemName != null" >
+        #{checkItemName,jdbcType=VARCHAR},
+      </if>
+      <if test="attribute != null" >
+        #{attribute,jdbcType=VARCHAR},
+      </if>
+      <if test="createUser != null" >
+        #{createUser,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="standardId != null" >
+        #{standardId,jdbcType=INTEGER},
+      </if>
+      <if test="standardName != null" >
+        #{standardName,jdbcType=VARCHAR},
+      </if>
+      <if test="methodId != null" >
+        #{methodId,jdbcType=INTEGER},
+      </if>
+      <if test="methodName != null" >
+        #{methodName,jdbcType=VARCHAR},
+      </if>
+      <if test="instrumentId != null" >
+        #{instrumentId,jdbcType=INTEGER},
+      </if>
+      <if test="instrumentName != null" >
+        #{instrumentName,jdbcType=VARCHAR},
+      </if>
+      <if test="limitRange != null" >
+        #{limitRange,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

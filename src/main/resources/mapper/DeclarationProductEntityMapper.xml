@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lims.manage.erp.mapper.DeclarationProductEntityMapper" >
+  <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.DeclarationProductEntity" >
+    <constructor >
+      <arg column="plan_id" jdbcType="BIGINT" javaType="java.lang.Long" />
+      <arg column="product_type" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="product_index" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="product_id" jdbcType="BIGINT" javaType="java.lang.Long" />
+      <arg column="product_name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="attribute" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="create_user" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+  </resultMap>
+  <insert id="insert" parameterType="com.lims.manage.erp.entity.DeclarationProductEntity" >
+    insert into test_declaration_product (plan_id, product_type, product_index, 
+      product_id, product_name, attribute, 
+      create_user, create_time)
+    values (#{planId,jdbcType=BIGINT}, #{productType,jdbcType=VARCHAR}, #{productIndex,jdbcType=VARCHAR}, 
+      #{productId,jdbcType=BIGINT}, #{productName,jdbcType=VARCHAR}, #{attribute,jdbcType=VARCHAR}, 
+      #{createUser,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.DeclarationProductEntity" >
+    insert into test_declaration_product
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="planId != null" >
+        plan_id,
+      </if>
+      <if test="productType != null" >
+        product_type,
+      </if>
+      <if test="productIndex != null" >
+        product_index,
+      </if>
+      <if test="productId != null" >
+        product_id,
+      </if>
+      <if test="productName != null" >
+        product_name,
+      </if>
+      <if test="attribute != null" >
+        attribute,
+      </if>
+      <if test="createUser != null" >
+        create_user,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="planId != null" >
+        #{planId,jdbcType=BIGINT},
+      </if>
+      <if test="productType != null" >
+        #{productType,jdbcType=VARCHAR},
+      </if>
+      <if test="productIndex != null" >
+        #{productIndex,jdbcType=VARCHAR},
+      </if>
+      <if test="productId != null" >
+        #{productId,jdbcType=BIGINT},
+      </if>
+      <if test="productName != null" >
+        #{productName,jdbcType=VARCHAR},
+      </if>
+      <if test="attribute != null" >
+        #{attribute,jdbcType=VARCHAR},
+      </if>
+      <if test="createUser != null" >
+        #{createUser,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+</mapper>

@@ -49,7 +49,7 @@ public interface ReserveCodeEntityMapper {
      * @param entrustmentNo
      * @return
      */
-    List<LabelValueVo> getEntrustmentNoList(String entrustmentNo);
+    List<LabelValueVo> getEntrustmentNoList(@Param("entrustmentNo") String entrustmentNo);
 
     /**
      * 校验预留编号是否重复
