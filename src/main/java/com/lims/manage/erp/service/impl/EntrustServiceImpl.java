@@ -4936,7 +4936,7 @@ public class EntrustServiceImpl implements EntrustService {
                         sampleData2.setReceivedDate(sampleData.getReceivedDate());
 //                        if(sampleData1.getSampleCode()!=null){
 //                         // 处理配合比则 更改样品编号
-//                         sampleData2.setSampleCode(methodMixProportionSampleCode(sampleData1.getSampleCode(),sampleDetailVo1.getSampleCode()));
+//                         sampleData2.setSampleCode((sampleData1.getSampleCode(),sampleDetailVo1.getSampleCode()));
 //                        }
                         // update样品信息
                         sampleEntityMapper.updateByPrimaryKeySelective(sampleData2);
