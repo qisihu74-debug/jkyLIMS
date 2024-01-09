@@ -4920,7 +4920,7 @@ public class EntrustServiceImpl implements EntrustService {
             sampleData1.setId(sampleData.getId());
             sampleData1.setReceivedDate(sampleData.getReceivedDate());
             // 处理原材样品编号
-            sampleData1.setSampleCode(methodSampleCode(sampleEntityData.getSampleNumber(),sampleData.getReceivedDate()));
+//            sampleData1.setSampleCode(methodSampleCode(sampleEntityData.getSampleNumber(),sampleData.getReceivedDate()));
             // update样品信息
             sampleEntityMapper.updateByPrimaryKeySelective(sampleData1);
             // 判断样品类别 处理配合比信息 进行同步时间。
@@ -5360,30 +5360,49 @@ public class EntrustServiceImpl implements EntrustService {
     }
 
     /**
-     * 处理配合比编号
+     * YSY - 处理配合比编号
      *
-     * @param strCode 原材编号
-     * @param selfNumber 自身编号
+     * @param sampleData     父类样品编号信息
+     * @param sampleDetailVo 自身编号=YSY
      * @return
      */
-    public String methodMixProportionSampleCode(String strCode,String selfNumber){
-        String[] sampleCodes = strCode.split("-");
-        String[] numbers = selfNumber.split("-");
-        numbers[0] = sampleCodes[0];
-        numbers[1] = sampleCodes[1];
-        // 获取配合比下后缀规则定位 "_"
-        String[] numberSuffixs = numbers[2].split("_");
-//        numbers[2] = sampleCodes[2];
+    public String methodMixProportionSampleCode(SampleEntity sampleData, SampleDetailVo sampleDetailVo) {
+        // 自身编号 带 下标"_" : 则取父类编号信息即可。
+        String[] arrays = sampleDetailVo.getSampleCode().split("_");
+        if (arrays.length >= 2) {
+            sampleDetailVo.setSampleCode(sampleData.getSampleCode() + "_" + arrays[1]);
+            return sampleDetailVo.getSampleCode();
+        }
+        // 获取年信息。 进行编号获取处理
+        String[] sampleCodes = sampleDetailVo.getSampleCode().split("-");
+        String acceptanceDate = sampleCodes[1].substring(0, 4);
+        Integer maxSampleCode = sampleEntityMapper.getYPMaxNumber(acceptanceDate, "YP");
+        // 更改样品编号
+        String suffix = "";
+        if (maxSampleCode == null) {
+            suffix = new DecimalFormat("00000").format(1);
+        } else {
+            maxSampleCode += 1;
+            suffix = new DecimalFormat("00000").format(maxSampleCode);
+        }
+        // YP
+        sampleCodes[0] = "YP";
+        // 年 ： 2024
+        sampleCodes[1] = acceptanceDate;
+        // 样品编号
+        sampleCodes[2] = suffix;
+        // 条数
+        String[] numbers = sampleData.getSampleCode().split("-");
         StringBuffer sampleCode = new StringBuffer();
-        for(int i=0; i<numbers.length; i++){
-            sampleCode.append(numbers[i]);
+        for (int i = 0; i < sampleCodes.length; i++) {
+            sampleCode.append(sampleCodes[i]);
             sampleCode.append("-");
         }
-        if(sampleCode.deleteCharAt(sampleCode.length()-1).toString().length()>1){
-            if (numberSuffixs.length >= 2) {
-                sampleCode.append("_");
-                sampleCode.append(numberSuffixs[1]);
-            }
+        if (numbers.length >= 4) {
+            sampleCode.append(numbers[3]);
+            sampleCode.append("-");
+        }
+        if (sampleCode.deleteCharAt(sampleCode.length() - 1).toString().length() > 1) {
             return sampleCode.toString();
         }
         return null;
@@ -6456,9 +6475,9 @@ public class EntrustServiceImpl implements EntrustService {
         List<SampleEntity> sampleCollection = sampleEntityMapper.selectSampleListGroup(entrustId);
         if (CollectionUtil.isNotEmpty(sampleCollection)) {
             for (SampleEntity sampleData1 : sampleCollection) {
+                StringBuffer stringBuffer = new StringBuffer();
                 // 读取编号 是否为 预样品编号。
                 if (sampleData1.getSampleCode().contains("YSY")) {
-                    StringBuffer stringBuffer = new StringBuffer();
                     stringBuffer.append("处理原材样品编号前  = YSY " + sampleData1.getSampleCode());
                     // 收样人
                     sampleData1.setInspector(userInfo.getName());
@@ -6469,30 +6488,30 @@ public class EntrustServiceImpl implements EntrustService {
                     stringBuffer.append("处理原材样品编号后  " + sampleData1.getSampleCode());
                     // update样品信息
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleData1);
-                    //补充配合比下的的样品信息
-                    if (!sampleData1.getSampleType().equals("原材")) {
-                        // 获取配合比信息：
-                        List<SampleDetailVo> sampleTagInfoPidList = Lists.newArrayList();
-                        sampleTagInfoPidList = sampleEntityMapper.getSampleTagInfoPidList(sampleData1.getId());
-                        if (!CollectionUtils.isEmpty(sampleTagInfoPidList)) {
-                            // 进行遍历塞配合比收样时间数值。
-                            for (SampleDetailVo sampleDetailVo1 : sampleTagInfoPidList) {
-                                SampleEntity sampleData2 = new SampleEntity();
-                                sampleData2.setId(sampleDetailVo1.getId());
-                                sampleData2.setReceivedDate(sampleData1.getReceivedDate());
-                                if (sampleData1.getSampleCode() != null && sampleDetailVo1.getSampleCode().contains("YSY")) {
-                                    // 处理配合比则 更改样品编号
-                                    stringBuffer.append("处理配合比样品编号前  " + sampleDetailVo1.getSampleCode());
-                                    sampleData2.setSampleCode(methodMixProportionSampleCode(sampleData1.getSampleCode(), sampleDetailVo1.getSampleCode()));
-                                    stringBuffer.append("处理配合比样品编号后  " + sampleData2.getSampleCode());
-                                    // update样品信息 更改样品编号
-                                    sampleEntityMapper.updateByPrimaryKeySelective(sampleData2);
-                                }
+                }
+                //补充配合比下的的样品信息
+                if (!sampleData1.getSampleType().equals("原材")) {
+                    // 获取配合比信息：
+                    List<SampleDetailVo> sampleTagInfoPidList = Lists.newArrayList();
+                    sampleTagInfoPidList = sampleEntityMapper.getSampleTagInfoPidList(sampleData1.getId());
+                    if (!CollectionUtils.isEmpty(sampleTagInfoPidList)) {
+                        // 进行遍历塞配合比收样时间数值。
+                        for (SampleDetailVo sampleDetailVo1 : sampleTagInfoPidList) {
+                            SampleEntity sampleData2 = new SampleEntity();
+                            sampleData2.setId(sampleDetailVo1.getId());
+                            sampleData2.setReceivedDate(sampleData1.getReceivedDate());
+                            if (sampleData1.getSampleCode() != null && sampleDetailVo1.getSampleCode().contains("YSY")) {
+                                // 处理配合比则 更改样品编号
+                                stringBuffer.append("处理配合比样品编号前  " + sampleDetailVo1.getSampleCode());
+                                sampleData2.setSampleCode(methodMixProportionSampleCode(sampleData1, sampleDetailVo1));
+                                stringBuffer.append("处理配合比样品编号后  " + sampleData2.getSampleCode());
+                                // update样品信息 更改样品编号
+                                sampleEntityMapper.updateByPrimaryKeySelective(sampleData2);
                             }
                         }
                     }
-                    logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "审核发布：审批通过时\t"+stringBuffer.toString(), Const.ENTRUST_FOUND, true);
                 }
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "审核发布：审批通过时\t" + stringBuffer.toString(), Const.ENTRUST_FOUND, true);
                 // 根据样品id 查询样品流转列表
                 List<SampleCirculationRecord> circulationList = sampleEntityMapper.getRecords(sampleData1.getId(), 30);
                 Boolean flag = false;
