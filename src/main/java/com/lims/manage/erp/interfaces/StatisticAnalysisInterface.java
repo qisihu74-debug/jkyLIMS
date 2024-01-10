@@ -1,6 +1,7 @@
 package com.lims.manage.erp.interfaces;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.entity.HourCount;
 import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.result.Result;
@@ -273,5 +274,19 @@ public class StatisticAnalysisInterface {
 //        }
 //    }
 
+    /**
+     * 导出积分统计表
+     * @param bean
+     */
+    @PostMapping("exportHours")
+    public void exportHours(@RequestBody TaskStatisticsVo bean){
+        if (bean.getStartDate() == null || bean.getStopDate() == null){
+            return ;
+        }
+        List<HourCount> list = testCheckItemsTaskRelService.exportHours(bean);
+        //导出数据
+
+
+    }
 
 }

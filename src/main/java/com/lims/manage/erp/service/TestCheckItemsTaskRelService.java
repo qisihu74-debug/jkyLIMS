@@ -3,6 +3,7 @@ package com.lims.manage.erp.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lims.manage.erp.entity.HourCount;
 import com.lims.manage.erp.entity.TestCheckItemsTaskRel;
 import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
 import com.lims.manage.erp.result.Result;
@@ -163,5 +164,9 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
 
     Boolean testCommit(List<Long> taskIds);
 
-
+    /**
+     * 工时导出
+     * @param bean
+     */
+    List<HourCount> exportHours(TaskStatisticsVo bean);
 }
