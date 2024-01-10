@@ -8,8 +8,22 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.entity.HourCount;
+import com.lims.manage.erp.entity.ReportRecordEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TestCheckItemsTaskRel;
+import com.lims.manage.erp.entity.TestInitDataEntity;
+import com.lims.manage.erp.entity.TestItemOrderWorkingHours;
+import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
+import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.mapper.ReportMapper;
+import com.lims.manage.erp.mapper.SysUserDao;
+import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TestCheckItemsTaskRelMapper;
+import com.lims.manage.erp.mapper.TestItemOrderWorkingHoursMapper;
+import com.lims.manage.erp.mapper.TestTaskOrderWorkingHoursMapper;
+import com.lims.manage.erp.mapper.TestTeamDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestCheckItemsTaskRelService;
@@ -35,8 +49,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -1186,6 +1208,43 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         return true;
     }
 
+    @Override
+    public List<HourCount> exportHours(TaskStatisticsVo bean) {
+        List<HourCount> hourCounts = testTaskOrderWorkingHoursMapper.exportHours(bean.getStartDate(), bean.getStopDate());
+        //处理部门名称
+        List<TestTeam> list = testTeamDao.getTeamsByPids(hourCounts);
+        for (HourCount hourCount :hourCounts){
+            hourCount.setDoubleHours(Double.parseDouble(hourCount.getHours()));
+            for (TestTeam team :list){
+                if (hourCount.getPid().equals(team.getId())){
+                    hourCount.setDeptName(team.getName());
+                }
+            }
+        }
+        //计算部门总积分
+        Map<String, Double> map = hourCounts.stream()
+                .collect(Collectors.groupingBy(HourCount::getDeptName, Collectors.summingDouble(HourCount::getDoubleHours)));
+        Set<String> set = map.keySet();
+        for (HourCount hourCount :hourCounts){
+            for (String key:set){
+                if (hourCount.getDeptName().equals(key)){
+                    if (map.get(key) != null){
+                        hourCount.setTeamHours(map.get(key));
+                    }
+                }
+            }
+        }
+        //计算个人所占部门比例
+        for (HourCount hourCount :hourCounts){
+            double percentage = getPercentage(hourCount.getDoubleHours(), hourCount.getTeamHours());
+            hourCount.setPercentage(percentage+"%");
+        }
+        //计算部门产值和个人绩效占比
+
+
+        return hourCounts;
+    }
+
     /**
      * 报告签发后：分配工时
      *
@@ -1635,5 +1694,17 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             taskOrderWorkingHours.setWorkingHoursId(String.valueOf(workingHoursId));
             testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
         }
+    }
+
+    /**
+     * 计算百分比
+     * @param a
+     * @param b
+     * @return
+     */
+    public static double getPercentage(double a, double b) {
+        double result = (a / b) * 100;
+        DecimalFormat df = new DecimalFormat("#.#");
+        return Double.parseDouble(df.format(result));
     }
 }

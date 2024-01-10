@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.lims.manage.erp.entity.HourCount;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.vo.Node;
 import com.lims.manage.erp.vo.TaskStatisticsVo;
@@ -71,5 +72,14 @@ IPage<TestTeamVo> getListPage(IPage<TestTeamVo> page, @Param(Constants.WRAPPER) 
      */
     List<TaskStatisticsVo> getRoleUserInformation(TaskStatisticsVo taskStatisticsVo);
 
+    @Select({"<script>",
+            " SELECT DISTINCT ",
+            " id,name",
+            " FROM test_team WHERE id in ",
+            "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
+            "#{item.pid}",
+            "</foreach>",
+            "</script>"})
+    List<TestTeam> getTeamsByPids(List<HourCount> items);
 }
 

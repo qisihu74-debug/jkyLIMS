@@ -96,6 +96,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/pageOffice/**", "anon");
         filterChainDefinitionMap.put("/news/list", "anon");
         filterChainDefinitionMap.put("/news/list", "anon");
+        filterChainDefinitionMap.put("/reserve/downloadTemplate", "anon");
         //#静态资源放行
         filterChainDefinitionMap.put("/css/**","anon");
         filterChainDefinitionMap.put("/img/**","anon");
