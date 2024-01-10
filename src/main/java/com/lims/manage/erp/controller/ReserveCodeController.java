@@ -85,12 +85,12 @@ public class ReserveCodeController {
     @GetMapping("/downloadTemplate")
     public void downloadTemplate(HttpServletResponse response) {
         try {
-            InputStream inputStream = MinIoUtil.getFileStream("lims-template", "预留编号模板.xlsx");
+            InputStream inputStream = MinIoUtil.getFileStream("lims-template", "预留报告编号模板.xls");
             response.reset();
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/vnd.ms-excel");
             response.setCharacterEncoding("UTF-8");
-            String fileName = URLEncoder.encode("预留编号模板.xlsx", "UTF-8");
+            String fileName = URLEncoder.encode("预留报告编号模板.xls", "UTF-8");
             response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
             ServletOutputStream outputStream = response.getOutputStream();
             IOUtils.copy(inputStream, outputStream);

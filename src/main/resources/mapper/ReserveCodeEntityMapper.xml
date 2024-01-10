@@ -30,10 +30,10 @@
         from test_reserve_code
         <where>
             <if test="entrustmentNo!=null and entrustmentNo!=''">
-                AND entrustment_no =#{entrustmentNo}
+                AND entrustment_no LIKE concat(concat('%',#{entrustmentNo}),'%')
             </if>
             <if test="reportCode!=null and reportCode!=''">
-                AND report_code =#{reportCode}
+                AND report_code LIKE concat(concat('%',#{reportCode}),'%')
             </if>
             <if test="type!=null and type!=''">
                 AND type =#{type}

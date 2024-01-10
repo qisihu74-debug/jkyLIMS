@@ -920,6 +920,7 @@ public class ReportServiceImpl implements ReportService {
 //        }
         Long entrustmentId = vo.getEntrustmentId();
         String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
+//        String reserveCodeStr = getMaxCode(entrustmentId);
         if(reserveCodeStr == null){
             reserveCodeStr = getMaxCode(entrustmentId);
         }else{
@@ -4575,6 +4576,7 @@ public class ReportServiceImpl implements ReportService {
                 //设置报告类型
                 reportRecordEntity.setType("0");
                 String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
+//                String reserveCodeStr = getMaxCode(entrustIdByTaskId);
                 if(reserveCodeStr == null){
                     reserveCodeStr = getMaxCode(entrustIdByTaskId);
                 }else{
@@ -4609,6 +4611,7 @@ public class ReportServiceImpl implements ReportService {
                     //中间报告、如果报告类型是中间报告，报告记录新增数据
                     reportRecordEntity.setEntrustId(entrustIdByTaskId);
                     String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
+//                    String reserveCodeStr = getMaxCode(entrustIdByTaskId);
                     if(reserveCodeStr == null){
                         reserveCodeStr = getMaxCode(entrustIdByTaskId);
                     }else{
