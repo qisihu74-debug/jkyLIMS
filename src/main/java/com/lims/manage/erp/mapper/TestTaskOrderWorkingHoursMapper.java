@@ -73,7 +73,7 @@ public interface TestTaskOrderWorkingHoursMapper  extends BaseMapper<TestTaskOrd
             "\ttest_task \n" +
             "WHERE\n" +
             "\tentrustment_id = #{entrustId} \n" +
-            "\tAND state != 144")
+            "\tAND state != 144 and task_list_status is not null")
     List<Long> getTaskList(@Param("entrustId") Long entrustId);
 
     /**

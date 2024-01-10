@@ -2,7 +2,10 @@ package com.lims.manage.erp.service.impl;
 
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.ManageReviewInformationEntity;
 import com.lims.manage.erp.entity.ManageReviewPlanEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -36,12 +39,29 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
     @Resource
     private ManageReviewInformationEntityMapper manageReviewInformationEntityMapper;
 
+    /**
+     * 管理评审 列表展示
+     *
+     * @param manageReviewPlanEntity
+     * @return
+     */
     @Override
     public Result getList(ManageReviewPlanEntity manageReviewPlanEntity) {
 
-        List<ManageReviewPlanEntity> list = manageReviewPlanEntityMapper.selectList(null);
-
-        return ResultUtil.success(list);
+        if (manageReviewPlanEntity.getPageNum() == null || manageReviewPlanEntity.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数");
+        }
+        PageHelper.clearPage();
+        PageHelper.startPage(manageReviewPlanEntity.getPageNum(), manageReviewPlanEntity.getPageSize());
+        LambdaQueryWrapper<ManageReviewPlanEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(ManageReviewPlanEntity::getDelFlag, 0);
+        // 模糊查询 管理评审 创建人信息
+        if (StringUtils.isEmpty(manageReviewPlanEntity.getPlanCreator())) {
+            lambdaQueryWrapper.like(ManageReviewPlanEntity::getPlanCreator, manageReviewPlanEntity.getPlanCreator());
+        }
+        List<ManageReviewPlanEntity> list = manageReviewPlanEntityMapper.selectList(lambdaQueryWrapper);
+        PageInfo<ManageReviewPlanEntity> result = new PageInfo<>(list);
+        return ResultUtil.success(result);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -58,7 +78,7 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
             return ResultUtil.error("评审主持不能为空");
         }
         // 参加人员不能为空
-        if (CollectionUtils.isEmpty(manageReviewPlanEntity.getManageReviewInformationEntities())) {
+        if (StringUtils.isEmpty(manageReviewPlanEntity.getParticipant())) {
             return ResultUtil.error("参加人员不能为空");
         }
         // 创建人：
