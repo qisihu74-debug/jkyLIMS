@@ -260,11 +260,13 @@ public class InternalAuditController {
         LambdaQueryWrapper<InternalAuditInfo> queryWrapper = new LambdaQueryWrapper();
         queryWrapper.in(InternalAuditInfo::getAuditId,ids);
         List<InternalAuditInfo> list = auditInfoService.list(queryWrapper);
-        List<Integer> integers = Lists.newArrayList();
-        for (InternalAuditInfo info :list){
-            integers.add(info.getId());
+        if (CollectionUtils.isNotEmpty(list)){
+            List<Integer> integers = Lists.newArrayList();
+            for (InternalAuditInfo info :list){
+                integers.add(info.getId());
+            }
+            auditInfoService.removeByIds(integers);
         }
-        auditInfoService.removeByIds(integers);
         return ResultUtil.success("删除成功");
     }
 

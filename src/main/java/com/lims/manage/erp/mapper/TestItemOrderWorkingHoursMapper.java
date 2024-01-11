@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestItemOrderWorkingHours;
+import com.lims.manage.erp.vo.TestItemWorkHourLadderVo;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -37,4 +38,12 @@ public interface TestItemOrderWorkingHoursMapper extends BaseMapper<TestItemOrde
      * @return
      */
     String getTotalWorkingHours(@Param("taskId") Long taskId, @Param("workingHoursId") Long workingHoursId);
+
+    /**
+     * 根据 checkItemIdSet 获取对应的 工时信息
+     *
+     * @param checkItemIdSet
+     * @return
+     */
+    List<TestItemWorkHourLadderVo> selectTestItemWorkHourLadderVos(@Param("checkItemIdSet") Set<Integer> checkItemIdSet);
 }

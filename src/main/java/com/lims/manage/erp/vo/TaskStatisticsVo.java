@@ -52,6 +52,8 @@ public class TaskStatisticsVo {
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     @TableField(exist = false)
     private Date stopDate;
+    @TableField(exist = false)
+    private Date date;
     /**
      * 工时
      */

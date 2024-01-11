@@ -1,14 +1,17 @@
 package com.lims.manage.erp.service;
 
+import com.aspose.cells.Workbook;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lims.manage.erp.entity.HourCount;
 import com.lims.manage.erp.entity.TestCheckItemsTaskRel;
 import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.TaskStatisticsVo;
 import com.lims.manage.erp.vo.WorkHourStatisticVo;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -163,5 +166,16 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
 
     Boolean testCommit(List<Long> taskIds);
 
+    /**
+     * 工时导出
+     * @param bean
+     */
+    List<HourCount> exportHours(TaskStatisticsVo bean);
 
+    /**
+     * 处理积分数据
+     * @param list
+     * @param workbook
+     */
+    void handExcelData(List<HourCount> list, Workbook workbook, TaskStatisticsVo bean, HttpServletResponse response) throws Exception;
 }

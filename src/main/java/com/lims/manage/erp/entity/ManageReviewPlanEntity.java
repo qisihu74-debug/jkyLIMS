@@ -44,6 +44,10 @@ public class ManageReviewPlanEntity implements Serializable {
     /**
      * 参与人员
      */
+    private String participant;
+    /**
+     * 参与人员
+     */
     @TableField(exist = false)
     private List<ManageReviewInformationEntity> manageReviewInformationEntities = new ArrayList<>();
     /**

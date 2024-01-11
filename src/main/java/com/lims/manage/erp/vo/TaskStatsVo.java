@@ -12,6 +12,7 @@ import java.util.List;
  */
 @Data
 public class TaskStatsVo {
+    private Integer pid;
     /**
      * 任务id
      */
