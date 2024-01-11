@@ -200,7 +200,7 @@ public class ReportController {
             ReportRecordEntity entity = recordEntityMapper.getReportInfo(reportCode);
             // 获取报告id 撤回
             testCheckItemsTaskRelService.handleWorkingHours(entity.getId(), 1);
-            log.info("用户："+ShiroUtils.getUserInfo().getName()+" 在："+DateUtil.getDayString(System.currentTimeMillis())+" 撤回了报告，编号为："+reportCode);
+            log.info("用户：" + ShiroUtils.getUserInfo().getName() + " 在：" + DateUtil.getDayString(System.currentTimeMillis()) + " 撤回了报告，编号为：" + reportCode);
             return ResultUtil.success("撤回成功");
         }else {
             return ResultUtil.error("撤回失败");
