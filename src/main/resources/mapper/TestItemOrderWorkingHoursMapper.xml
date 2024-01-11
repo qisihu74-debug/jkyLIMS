@@ -189,4 +189,16 @@
       AND working_hours_id = #{workingHoursId}
     </if>
   </select>
+
+  <select id="selectTestItemWorkHourLadderVos" resultType="com.lims.manage.erp.vo.TestItemWorkHourLadderVo">
+    SELECT
+        *
+    FROM
+        test_item_work_hour_ladder
+    WHERE
+    check_item_id IN
+    <foreach collection="checkItemIdSet" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </select>
 </mapper>
