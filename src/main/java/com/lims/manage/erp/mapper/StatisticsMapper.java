@@ -1,14 +1,23 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.HourCount;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.vo.*;
+import com.lims.manage.erp.vo.AreaStatisticsResultVo;
+import com.lims.manage.erp.vo.LabelValueVo;
+import com.lims.manage.erp.vo.PersonalStatsVo;
+import com.lims.manage.erp.vo.StatisticsParamVo;
+import com.lims.manage.erp.vo.TaskStatsVo;
+import com.lims.manage.erp.vo.TeamOutputValueVo;
+import com.lims.manage.erp.vo.TestTeamVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -139,4 +148,16 @@ public interface StatisticsMapper {
      * 查询任务单 获取发布人
      */
     List<TaskTestEntity> selectOrderTaskTest(PersonalStatsVo personalStats);
+
+    @Select("SELECT\n" +
+            "\tdept_id As teamId,\n" +
+            "\tsum( task_price ) AS teamPrice \n" +
+            "FROM\n" +
+            "\ttest_task_statistics \n" +
+            "WHERE\n" +
+            "\tissuer_time >= #{startDate} \n" +
+            "\tAND issuer_time <= #{stopDate} \n" +
+            "GROUP BY\n" +
+            "\tdept_id")
+    List<HourCount> countDeptPriceByTime(@Param("startDate") Date startDate, @Param("stopDate") Date stopDate);
 }

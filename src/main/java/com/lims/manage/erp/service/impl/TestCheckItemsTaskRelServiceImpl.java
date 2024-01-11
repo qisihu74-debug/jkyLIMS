@@ -1,6 +1,10 @@
 package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.aspose.cells.Cells;
+import com.aspose.cells.SaveFormat;
+import com.aspose.cells.Workbook;
+import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -18,6 +22,7 @@ import com.lims.manage.erp.entity.TestItemOrderWorkingHours;
 import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.mapper.ReportMapper;
+import com.lims.manage.erp.mapper.StatisticsMapper;
 import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TestCheckItemsTaskRelMapper;
@@ -27,9 +32,11 @@ import com.lims.manage.erp.mapper.TestTeamDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestCheckItemsTaskRelService;
+import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.TaskStatisticsVo;
+import com.lims.manage.erp.vo.TaskStatsVo;
 import com.lims.manage.erp.vo.WorkHourStatisticVo;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -42,6 +49,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -83,6 +92,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     private ReportMapper reportMapper;
     @Autowired
     private TestCheckItemsTaskRelMapper testCheckItemsTaskRelMapper;
+    @Autowired
+    private StatisticsMapper statisticsMapper;
 
     @Override
     public IPage<WorkHourStatisticVo> getWorkHoursList(Page<WorkHourStatisticVo> page, Map<String, Object> paramMap) {
@@ -1357,9 +1368,51 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             hourCount.setPercentage(percentage+"%");
         }
         //计算部门产值和个人绩效占比
-
-
+        List<HourCount> deptPriceByTime = statisticsMapper.countDeptPriceByTime(bean.getStartDate(), bean.getStopDate());
+        List<TestTeam> list1 = testTeamDao.getTeamPidsByIds(deptPriceByTime);
+        for (HourCount vo :deptPriceByTime){
+            for (TestTeam team :list1){
+                if (vo.getTeamId().equals(team.getId())){
+                    vo.setPid(team.getPid());
+                }
+            }
+        }
+        //计算部门总产值
+        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(deptPriceByTime)){
+            Map<Integer, Integer> collect = deptPriceByTime.stream()
+                    .collect(Collectors.groupingBy(HourCount::getPid, Collectors.summingInt(HourCount::getTeamPrice)));
+            for (HourCount hourCount :hourCounts){
+                Integer num = collect.get(hourCount.getPid());
+                hourCount.setTeamPrice(num);
+                if (num != null){
+                    double result = num * (0.05);
+                    result = Math.abs(result);
+                    hourCount.setPerformance(result);
+                }
+            }
+        }
         return hourCounts;
+    }
+
+    @Override
+    public void handExcelData(List<HourCount> list, Workbook workbook, TaskStatisticsVo bean, HttpServletResponse response) throws Exception {
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        Cells cells = worksheet.getCells();
+        cells.get("A1").setValue("积分统计表（"+ DateUtil.formatDate(bean.getStartDate()) +"～"+bean.getStopDate()+"）");
+        int index = 3;
+        for (HourCount hourCount :list){
+            cells.get("A"+index).setValue(hourCount.getUserName());
+            cells.get("B"+index).setValue(hourCount.getDeptName());
+            cells.get("C"+index).setValue(hourCount.getTeamHours());
+            cells.get("D"+index).setValue(hourCount.getTeamPrice());
+            cells.get("E"+index).setValue(hourCount.getPerformance());
+            cells.get("F"+index).setValue(hourCount.getDeptName()+"-"+hourCount.getTeamName());
+            cells.get("G"+index).setValue(hourCount.getDoubleHours());
+            cells.get("H"+index).setValue(hourCount.getPercentage());
+            index ++;
+        }
+        ServletOutputStream outputStream = response.getOutputStream();
+        workbook.save(outputStream, SaveFormat.XLSX);
     }
 
     /**

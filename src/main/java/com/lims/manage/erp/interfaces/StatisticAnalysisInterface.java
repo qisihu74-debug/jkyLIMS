@@ -1,6 +1,9 @@
 package com.lims.manage.erp.interfaces;
 
+import com.alibaba.fastjson.JSON;
+import com.aspose.cells.Workbook;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.HourCount;
 import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
 import com.lims.manage.erp.mapper.TaskMapper;
@@ -8,6 +11,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestCheckItemsTaskRelService;
 import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.TaskStatisticsVo;
 import com.lims.manage.erp.vo.TestTaskOrderWorkingHoursVo;
 import com.lims.manage.erp.vo.WorkHourStatisticVo;
@@ -21,9 +25,11 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 统计分析接口列表
@@ -279,14 +285,21 @@ public class StatisticAnalysisInterface {
      * @param bean
      */
     @PostMapping("exportHours")
-    public void exportHours(@RequestBody TaskStatisticsVo bean){
+    public void exportHours(@RequestBody TaskStatisticsVo bean,HttpServletResponse response){
         if (bean.getStartDate() == null || bean.getStopDate() == null){
             return ;
         }
         List<HourCount> list = testCheckItemsTaskRelService.exportHours(bean);
-        //导出数据
-
-
+        List<HourCount> sortList = list.stream()
+                .sorted(Comparator.comparing(HourCount::getPid))
+                .collect(Collectors.toList());
+        InputStream fileStream = MinIoUtil.getFileStream(BucketsConst.controlled_documents, "jifen.xlsx");
+        try {
+            Workbook workbook = new Workbook(fileStream);
+            testCheckItemsTaskRelService.handExcelData(sortList,workbook,bean,response);
+        } catch (Exception e) {
+            log.error("导出积分统计表失败:{}",e);
+        }
     }
 
 }
