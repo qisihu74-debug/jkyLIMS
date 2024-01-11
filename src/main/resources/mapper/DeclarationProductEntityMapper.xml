@@ -106,8 +106,8 @@
 
   <update id="updateProduct" parameterType="com.lims.manage.erp.entity.DeclarationProductEntity">
     update test_declaration_product
-    set product_type    = #{planName,jdbcType=VARCHAR},
-        product_index   = #{startDate,jdbcType=DATE}
+    set product_type    = #{productType,jdbcType=VARCHAR},
+        product_index   = #{productIndex,jdbcType=VARCHAR}
     where
           plan_id = #{planId,jdbcType=BIGINT}
       AND product_id = #{productId,jdbcType=BIGINT}
@@ -125,7 +125,7 @@
       AND product_name LIKE concat(concat('%',#{productName}),'%')
     </if>
     <if test="productType!=null and productType!=''">
-      AND product_type = LIKE concat(concat('%',#{productType}),'%')
+      AND product_type LIKE concat(concat('%',#{productType}),'%')
     </if>
   </select>
 </mapper>

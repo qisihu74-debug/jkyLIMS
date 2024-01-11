@@ -87,11 +87,11 @@ public class DeclarationServiceImpl implements DeclarationService {
             if(declarationProductEntity != null){
                 return ResultUtil.error("当前计划下已经存在此产品！");
             }
+            productEntity.setAttribute("扩项");
         }
         String username = ShiroUtils.getUserInfo().getUsername();
         productEntity.setCreateUser(username);
         productEntity.setCreateTime(new Date());
-        productEntity.setAttribute("扩项");
         productEntityMapper.insert(productEntity);
         return ResultUtil.success("新增参数申报产品成功！",null);
     }
@@ -161,6 +161,7 @@ public class DeclarationServiceImpl implements DeclarationService {
             if(declarationParamEntity != null){
                 return ResultUtil.error("当前计划下的产品已经存在此检测参数！");
             }
+            paramEntity.setAttribute("扩项");
         }
         String username = ShiroUtils.getUserInfo().getUsername();
         paramEntity.setCreateUser(username);

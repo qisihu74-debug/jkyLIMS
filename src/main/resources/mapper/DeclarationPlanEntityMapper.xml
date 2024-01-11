@@ -161,7 +161,7 @@
                 AND plan_name LIKE concat(concat('%',#{planName}),'%')
             </if>
             <if test="state!=null and state!=''">
-                AND state = #{reportCode}
+                AND state = #{state}
             </if>
         </where>
     </select>

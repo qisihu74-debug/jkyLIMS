@@ -129,13 +129,16 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
             Cells cells = worksheet.getCells();
             int maxRow = worksheet.getCells().getMaxRow();
             int index = 2;
-            for (int i = 1; i < maxRow; i++) {
-                String entrustmentNo = cells.get("A"+index).getValue().toString();
-                String reportCode = cells.get("B"+index).getValue().toString();//预留编号
-                String remark = cells.get("C"+index).getValue().toString();//备注
+            for (int i = 0; i < maxRow; i++) {
+                String entrustmentNo = cells.get("A"+index).getValue().toString().trim();
+                String reportCode = cells.get("B"+index).getValue().toString().trim();//预留编号
+                String remark = null;
+                if(cells.get("C"+index).getValue() != null){
+                    remark =cells.get("C"+index).getValue().toString();//备注
+                }
 //                System.out.println(entrustmentNo + "*----*" + reportCode + "*----*" + remark);
                 ReserveCodeEntity entity = new ReserveCodeEntity();
-                entity.setId(GenID.getID());
+//                entity.setId(GenID.getID());
                 entity.setEntrustmentNo(Integer.parseInt(entrustmentNo));
                 entity.setReportCode(reportCode);
                 entity.setType("报告编号");
