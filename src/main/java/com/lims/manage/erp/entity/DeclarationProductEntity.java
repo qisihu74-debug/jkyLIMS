@@ -21,4 +21,7 @@ public class DeclarationProductEntity {
     private String createUser;
 
     private Date createTime;
+
+    private Integer pageNum;
+    private Integer pageSize;
 }

@@ -131,4 +131,116 @@
       </if>
     </trim>
   </insert>
+
+  <select id="getStandard" resultType="com.lims.manage.erp.vo.LabelValueVo" parameterType="java.lang.String">
+    SELECT
+    t1.*
+    FROM
+    ( SELECT id VALUE, CONCAT( CODE, '&amp;', '《', NAME, '》' ) label FROM test_standard_file ) t1
+    <where>
+      <if test="standard!=null and standard!=''">
+        AND label LIKE concat(concat('%',#{standard}),'%')
+      </if>
+    </where>
+  </select>
+
+  <select id="getMethod" resultType="com.lims.manage.erp.vo.LabelValueVo">
+    SELECT
+      t1.*
+    FROM
+        ( SELECT method_id VALUE, CONCAT( chapter_num, '&amp;', chapter_name ) label FROM test_standard_method
+        WHERE standard_id = #{standardId} ) t1
+    <where>
+      <if test="method!=null and method!=''">
+        AND label LIKE concat(concat('%',#{method}),'%')
+      </if>
+    </where>
+  </select>
+
+  <select id="getEquipment" resultType="com.lims.manage.erp.vo.LabelValueVo" parameterType="java.lang.String">
+    SELECT
+    t1.*
+    FROM
+    ( SELECT id VALUE, CONCAT( CODE, '&amp;', '《', NAME, '》' ) label FROM test_instrument ) t1
+    <where>
+      <if test="standard!=null and standard!=''">
+        AND label LIKE concat(concat('%',#{standard}),'%')
+      </if>
+    </where>
+  </select>
+
+  <select id="checkParam" resultType="com.lims.manage.erp.entity.DeclarationParamEntity"
+          parameterType="com.lims.manage.erp.entity.DeclarationParamEntity">
+    SELECT
+      *
+    FROM
+      test_declaration_param
+    WHERE
+      plan_id = #{planId,jdbcType=BIGINT}
+      AND product_id = #{productId,jdbcType=BIGINT}
+      AND check_item_id = #{checkItemId,jdbcType=BIGINT}
+  </select>
+
+  <delete id="deleteParam" parameterType="com.lims.manage.erp.entity.DeclarationParamEntity">
+    delete
+    from test_declaration_param
+    where plan_id = #{planId,jdbcType=BIGINT}
+      and product_id = #{productId,jdbcType=BIGINT}
+      and check_item_id = #{checkItemId,jdbcType=BIGINT}
+  </delete>
+
+  <select id="getParamList" resultType="com.lims.manage.erp.entity.DeclarationParamEntity"
+          parameterType="com.lims.manage.erp.entity.DeclarationParamEntity">
+    SELECT
+      plan_id,
+      product_id,
+      check_item_id,
+      check_item_name,
+      attribute,
+      create_user,
+      create_time,
+      COUNT( standard_id ) num
+    FROM
+    test_declaration_param
+    WHERE
+        plan_id = #{planId,jdbcType=BIGINT}
+    and product_id = #{productId,jdbcType=BIGINT}
+    <if test="checkItemName!=null and checkItemName!=''">
+      AND check_item_name LIKE concat(concat('%',#{checkItemName}),'%')
+    </if>
+    <if test="attribute!=null and attribute!=''">
+      AND attribute LIKE concat(concat('%',#{attribute}),'%')
+    </if>
+    GROUP BY
+      plan_id,
+      product_id,
+      check_item_id,
+      check_item_name,
+      attribute,
+      create_user,
+      create_time
+    ORDER BY
+        create_time DESC
+  </select>
+
+  <delete id="deleteParamStandard" parameterType="com.lims.manage.erp.entity.DeclarationParamEntity">
+    delete
+    from test_declaration_param
+    where plan_id = #{planId,jdbcType=BIGINT}
+      and product_id = #{productId,jdbcType=BIGINT}
+      and check_item_id = #{checkItemId,jdbcType=BIGINT}
+      and standard_id = #{standardId,jdbcType=BIGINT}
+  </delete>
+
+  <select id="getParamDetail" resultType="com.lims.manage.erp.entity.DeclarationParamEntity"
+          parameterType="com.lims.manage.erp.entity.DeclarationParamEntity">
+    SELECT
+        *
+    FROM
+        test_declaration_param
+    WHERE
+    plan_id = #{planId,jdbcType=BIGINT}
+    and product_id = #{productId,jdbcType=BIGINT}
+    and check_item_id = #{checkItemId,jdbcType=BIGINT}
+  </select>
 </mapper>

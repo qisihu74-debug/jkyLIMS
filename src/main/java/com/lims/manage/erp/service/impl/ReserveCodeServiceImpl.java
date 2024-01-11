@@ -63,6 +63,10 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
 
     @Override
     public Result delete(Long id) {
+        ReserveCodeEntity entity = reserveCodeEntityMapper.selectByPrimaryKey(id);
+        if("已使用".equals(entity.getState())){
+            return ResultUtil.error("预留编号已被使用，无法删除！");
+        }
         reserveCodeEntityMapper.deleteByPrimaryKey(id);
         return ResultUtil.success("删除成功！",null);
     }
@@ -71,6 +75,10 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
     public Result updateReserveCode(ReserveCodeEntity reserveCodeEntity) {
         if(reserveCodeEntity.getId() == null){
             return ResultUtil.error("请选择要编辑的预留编号！");
+        }
+        ReserveCodeEntity entity = reserveCodeEntityMapper.selectByPrimaryKey(reserveCodeEntity.getId());
+        if("已使用".equals(entity.getState())){
+            return ResultUtil.error("预留编号已被使用，无法编辑！");
         }
         String reportCode = reserveCodeEntity.getReportCode();
         if(reportCode != null){
@@ -113,7 +121,7 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
             int rowCount = sheet.getLastRowNum() - sheet.getFirstRowNum() + 1;
             for (int i = 1; i < rowCount; i++) {
                 Row row = sheet.getRow(i);
-                String entrustmentNo = row.getCell(0).toString();//委托单号
+                String entrustmentNo = row.getCell(0).getStringCellValue();
                 String reportCode = row.getCell(1).toString();//预留编号
                 String remark = row.getCell(2).toString();//备注
 //                System.out.println(entrustmentNo + "*----*" + reportCode + "*----*" + remark);

@@ -17,9 +17,9 @@
         id
         , entrustment_no, report_code, type, state, create_date, remark, use_date
     </sql>
-    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    <select id="selectByPrimaryKey" resultType="com.lims.manage.erp.entity.ReserveCodeEntity" parameterType="java.lang.Long">
         select
-        <include refid="Base_Column_List"/>
+        *
         from test_reserve_code
         where id = #{id,jdbcType=BIGINT}
     </select>
@@ -42,6 +42,7 @@
                 AND state =#{state}
             </if>
         </where>
+        order by create_date
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete

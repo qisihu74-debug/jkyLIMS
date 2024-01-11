@@ -4553,7 +4553,7 @@ public class ReportServiceImpl implements ReportService {
             list.add(req);
         }
         entrustEntityMapper.updateReportTypeAndStatus(list);
-        if (reportType == 0){
+        if (reportType == 0){//最终报告制作
             Integer midReportExit = entrustEntityMapper.midReportExit(entrustIdByTaskId);
             if(midReportExit > 0){
                 return false;
@@ -4591,7 +4591,12 @@ public class ReportServiceImpl implements ReportService {
                 //新增报告记录数据
                 recordEntityMapper.insert(reportRecordEntity);
             }
-        }else {
+        }else {//中间报告制作
+            //校验中间报告是否完成
+            Integer midReportExit = entrustEntityMapper.midReportExit(entrustIdByTaskId);
+            if (midReportExit > 0){
+                return false;
+            }
             //报告记录表限制只存在同一委托下的报告记录
             Long id = reportMapper.getInfoByEntrustId1(entrustIdByTaskId);
             if (id != null){
