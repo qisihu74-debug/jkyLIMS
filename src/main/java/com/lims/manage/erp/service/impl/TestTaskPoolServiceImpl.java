@@ -413,6 +413,20 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     if (taskProgressVo.getState() == 144) {
                         taskTestEntity.setState(1);
                     }
+                    // 补充人员信息 检测人
+                    taskTestEntity.setInspector(itemEntity.getInspector());
+                    // 记录人
+                    taskTestEntity.setRecorder(itemEntity.getRecorder());
+                    // 复核人
+                    taskTestEntity.setReviewer(itemEntity.getReviewer());
+                    // 报告制作人
+                    taskTestEntity.setReportProducer(itemEntity.getReportProducer());
+                    // 辅助人员
+                    taskTestEntity.setAuxiliaryPersonnel(itemEntity.getAuxiliaryPersonnel());
+                    // 见习生：实习的新手
+                    taskTestEntity.setProbationer(itemEntity.getProbationer());
+                    // 实习生
+                    taskTestEntity.setInterns(itemEntity.getInterns());
                     // 领样人
                     taskTestEntity.setSampler(itemEntity.getSampler());
                     taskMapper.updateTestTask(taskTestEntity);
@@ -1714,11 +1728,12 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (CollectionUtil.isNotEmpty(list)) {
             for (TestCheckItemsTaskRel taskRel : list) {
-                if (!taskRel.getUserId().equals(String.valueOf(userInfo.getUserId()))) {
-                    return ResultUtil.error("当前用户不能操作");
+                if (taskRel.getUserId().equals(String.valueOf(userInfo.getUserId()))) {
+                    return ResultUtil.success("请继续操作");
                 }
             }
         }
-        return ResultUtil.success("请继续操作");
+        return ResultUtil.error("当前用户不能操作");
+
     }
 }

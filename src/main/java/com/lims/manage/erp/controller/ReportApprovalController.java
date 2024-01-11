@@ -3,7 +3,9 @@ package com.lims.manage.erp.controller;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TestInitDataEntity;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.EntrustService;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -50,6 +53,8 @@ public class ReportApprovalController {
     private EntrustService entrustService;
     @Autowired
     private TestCheckItemsTaskRelService testCheckItemsTaskRelService;
+    @Autowired
+    private TaskMapper taskMapper;
 
     /**
      * 报告审批列表
@@ -622,14 +627,24 @@ public class ReportApprovalController {
     /**
      * @return
      */
-    @PostMapping("verifySave11")
-    public Result verifySave() {
+    @GetMapping("verifySave11")
+    public Result verifySave(Integer type) {
 
 //        List<Long> taskIds = reportApprovalMapper.getTaskList();
-        List<Long> taskIds = new ArrayList<>();
-        taskIds.add(4689202608451264L);
-        taskIds.add(4689206872841732L);
-        testCheckItemsTaskRelService.testCommit(taskIds);
+//        List<Long> taskIds = new ArrayList<>();
+//        taskIds.add(4689202608451264L);
+//        taskIds.add(4689206872841732L);
+//        testCheckItemsTaskRelService.testCommit(taskIds);
+        List<Long> reortIds = new ArrayList<>();
+        reortIds.add(4689202608451264L);
+        //TODO:1月5日  查询基础表信息 - 检测类型包含工时
+        List<TestInitDataEntity> sqlBasisList = new ArrayList<>();
+        sqlBasisList = taskMapper.selectEntrustBasis(30);
+//        reortIds.add(4689206872841732L);
+        for (Long reportId : reortIds) {
+            System.out.println(reportId + " type == " + type);
+            testCheckItemsTaskRelService.handleWorkingHours(reportId, type);
+        }
         return null;
 
     }

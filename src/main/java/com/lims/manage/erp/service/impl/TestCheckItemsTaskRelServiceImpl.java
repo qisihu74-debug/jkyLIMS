@@ -29,10 +29,10 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestCheckItemsTaskRelService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.WorkHourRatioMethodUtils;
 import com.lims.manage.erp.vo.TaskStatisticsVo;
 import com.lims.manage.erp.vo.TestItemWorkHourLadderVo;
 import com.lims.manage.erp.vo.WorkHourStatisticVo;
-import org.antlr.v4.runtime.misc.Array2DHashSet;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -70,7 +70,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItemsTaskRelMapper, TestCheckItemsTaskRel> implements TestCheckItemsTaskRelService {
-
     @Resource
     private TestTeamDao testTeamDao;
     @Resource
@@ -1138,22 +1137,38 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 // 任务id集合 不包含 工时信息
                 for (Long taskId : taskIds) {
                     // 根据taskId 循环新增工时数据
-                    reportIssuanceAllottedTime(taskId);
+                    //TODO:1月5日  查询基础表信息 - 检测类型包含工时
+                    List<TestInitDataEntity> sqlBasisList = new ArrayList<>();
+                    sqlBasisList = taskMapper.selectEntrustBasis(30);
+                    reportIssuanceAllottedTime(taskId, sqlBasisList);
                 }
             } else {
                 // 任务id集合获取 得到 工时信息:
                 //                      判断任务单工时生成规则（为试验操作时的则删除，为报告签发的则正常新增即可）
                 for (TestTaskOrderWorkingHours workingHoursData : testTaskOrderWorkingHoursList) {
+                    LambdaQueryWrapper<TestTaskOrderWorkingHours> deleteQueryWrapper = new LambdaQueryWrapper<>();
+                    deleteQueryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, workingHoursData.getTaskId());
                     if (StringUtils.isEmpty(workingHoursData.getWorkingHoursId())) {
-                        LambdaQueryWrapper<TestTaskOrderWorkingHours> deleteQueryWrapper = new LambdaQueryWrapper<>();
-                        deleteQueryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, workingHoursData.getTaskId());
                         deleteQueryWrapper.isNull(TestTaskOrderWorkingHours::getWorkingHoursId);
-                        testTaskOrderWorkingHoursMapper.delete(deleteQueryWrapper);
+                    } else {
+                        deleteQueryWrapper.eq(TestTaskOrderWorkingHours::getWorkingHoursId, workingHoursData.getWorkingHoursId());
                     }
+                    testTaskOrderWorkingHoursMapper.delete(deleteQueryWrapper);
+                    LambdaQueryWrapper<TestItemOrderWorkingHours> itemDeleteQueryWrapper = new LambdaQueryWrapper<>();
+                    if (StringUtils.isEmpty(workingHoursData.getWorkingHoursId())) {
+                        itemDeleteQueryWrapper.isNull(TestItemOrderWorkingHours::getWorkingHoursId);
+                    } else {
+                        itemDeleteQueryWrapper.eq(TestItemOrderWorkingHours::getWorkingHoursId, workingHoursData.getWorkingHoursId());
+                    }
+                    itemDeleteQueryWrapper.eq(TestItemOrderWorkingHours::getTaskId, workingHoursData.getTaskId());
+                    testItemOrderWorkingHoursMapper.delete(itemDeleteQueryWrapper);
                 }
                 for (Long taskId : taskIds) {
                     // 根据taskId 循环新增工时数据
-                    reportIssuanceAllottedTime(taskId);
+                    //TODO:1月5日  查询基础表信息 - 检测类型包含工时
+                    List<TestInitDataEntity> sqlBasisList = new ArrayList<>();
+                    sqlBasisList = taskMapper.selectEntrustBasis(30);
+                    reportIssuanceAllottedTime(taskId, sqlBasisList);
                 }
             }
         } else {
@@ -1203,7 +1218,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         for (Long taskId : taskIds) {
             // 根据taskId 循环新增工时数据
 //            endReportAllottedTime(taskId);
-            reportIssuanceAllottedTime(taskId);
+            reportIssuanceAllottedTime(taskId, null);
         }
         return true;
     }
@@ -1249,10 +1264,11 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
      * 报告签发后：分配工时
      *
      * @param taskId
+     * @param sqlBasisList
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public Boolean reportIssuanceAllottedTime(Long taskId) {
+    public Boolean reportIssuanceAllottedTime(Long taskId, List<TestInitDataEntity> sqlBasisList) {
         // 根据任务单 查询任务下对应操作信息
         TaskTestEntity taskDetails = taskMapper.selectTaskEntity(taskId);
         if (taskDetails == null) {
@@ -1285,9 +1301,11 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
         // 获取每组的工时信息
         for (Integer key : bitValueMap.keySet()) {
-            // 分组中比例信息
-            //TODO:1月5日  查询基础表信息 - 检测类型包含工时
-            List<TestInitDataEntity> sqlBasisList = taskMapper.selectEntrustBasis(30);
+            // 分组中比例信息: key =序号，value = 值
+            HashMap<Integer, TestInitDataEntity> map = new HashMap<>();
+            for (int i = 0; i < sqlBasisList.size(); i++) {
+                map.put(i, sqlBasisList.get(i));
+            }
             List<TestCheckItemsTaskRel> itemList = bitValueMap.get(key);
             // 检测项去重
             Set<Integer> itemSet = new HashSet<>();
@@ -1321,13 +1339,16 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 }
             }
             // 每个人的所属比例及工时信息。
-            List<TestTaskOrderWorkingHours> list = workHourRatioMethod(itemList, sqlBasisList, sum);
+            // 工具类：工时业务处理
+            WorkHourRatioMethodUtils workHourRatioMethodUtils = new WorkHourRatioMethodUtils();
+            List<TestTaskOrderWorkingHours> list = new ArrayList<>();
+            list = workHourRatioMethodUtils.workHourRatioMethod(itemList, map, sum);
             if (CollectionUtil.isNotEmpty(list)) {
                 bitTaskRelList.put(key, list);
             }
         }
         // 获取分组检测项信息 进行合并 存储。
-        addTestTaskOrderWorkingHoursMapper(taskId, bitTaskRelList);
+        addTestTaskOrderWorkingHoursMapper(taskId, bitTaskRelList, sqlBasisList);
         return true;
     }
 
@@ -1336,7 +1357,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
      *
      * @param itemOrderWorkingHoursList
      */
-    private void methodStepCharging(List<TestItemOrderWorkingHours> itemOrderWorkingHoursList) {
+    public void methodStepCharging(List<TestItemOrderWorkingHours> itemOrderWorkingHoursList) {
         // 获取 check_item_id 集合 查询 阶梯表。
         Set<Integer> checkItemIdSet = new HashSet<>();
         for (TestItemOrderWorkingHours itemOrderWorkingHours : itemOrderWorkingHoursList) {
@@ -1379,142 +1400,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
     }
 
-    /**
-     * 返回 求每个人的所占比例及获取工时信息
-     *
-     * @param itemList  任务大厅 每组 检测项分配人员信息。
-     * @param basisList 人员比例
-     * @param sum       分组工时比例。
-     */
-    public List<TestTaskOrderWorkingHours> workHourRatioMethod(List<TestCheckItemsTaskRel> itemList, List<TestInitDataEntity> basisList, String sum) {
-        // key = userId 、 value = 比例信息。
-        // 使用 map 进行 数据统计 key = userId , value = 参数
-        Map<Long, TestTaskOrderWorkingHours> mapData = new HashMap<>();
-        /**
-         * 调整比例 ： 辅助人包括报告制作和辅助人员 : 两者存在 比例/2
-         */
-        methodAdjustingThePproportion(itemList, basisList);
-
-        /**
-         * 获取分组下人员占比信息
-         */
-        methodObtainProportionInformation(mapData, itemList, basisList);
-        System.out.println("获取分组下人员占比信息");
-        List<TestTaskOrderWorkingHours> list = new ArrayList<>();
-        // 返回 工时信息及比例
-        if (CollectionUtil.isNotEmpty(mapData.keySet())) {
-            for (Long userId : mapData.keySet()) {
-                TestTaskOrderWorkingHours data = mapData.get(userId);
-                // 比例 保留四位小数。
-                BigDecimal proportion = BigDecimal.valueOf(Double.valueOf(data.getProportion()) / 100).setScale(4, BigDecimal.ROUND_HALF_UP);
-                // 分组工时
-                data.setTotalWorkingHours(sum);
-                BigDecimal zhi1 = BigDecimal.valueOf(Double.valueOf(data.getTotalWorkingHours())).setScale(4, BigDecimal.ROUND_HALF_UP);
-                //当前人的工时 = 比例 * zhi 保留四位小数。
-                BigDecimal he = proportion.multiply(zhi1).setScale(4, BigDecimal.ROUND_HALF_UP);
-                data.setWorkingHours(String.valueOf(he));
-                mapData.put(userId, data);
-                list.add(data);
-            }
-            return list;
-        }
-        return list;
-    }
-
-    /**
-     * 私有方法：
-     * 调整比例 ： 辅助人包括报告制作和辅助人员 : 两者存在 比例/2
-     *
-     * @param itemList
-     * @param basisList
-     */
-    private void methodAdjustingThePproportion(List<TestCheckItemsTaskRel> itemList, List<TestInitDataEntity> basisList) {
-        // 报告制作人员
-        String reportProducer = null;
-        // 辅助人员
-        String auxiliaryPersonnelperson = null;
-        for (TestCheckItemsTaskRel taskRel : itemList) {
-            if (taskRel.getUserType() == 3) {
-                reportProducer = "报告制作人存在";
-            }
-            if (taskRel.getUserType() == 4) {
-                auxiliaryPersonnelperson = "辅助人员存在";
-            }
-        }
-
-        // 辅助人包括报告制作和辅助人员 : 两者存在 比例/2
-        if (StringUtils.isNotEmpty(reportProducer) && StringUtils.isNotEmpty(auxiliaryPersonnelperson)) {
-            // 任务单中 包含报告制作人与辅助人员 不为空 则平摊比例
-            TestInitDataEntity reportProducerData = basisList.get(3);
-            int zhi1 = Integer.parseInt(reportProducerData.getRemark()) / 2;
-            reportProducerData.setRemark(String.valueOf(zhi1));
-            basisList.set(3, reportProducerData);
-            TestInitDataEntity auxiliaryPersonnel = basisList.get(4);
-            int zhi2 = Integer.parseInt(auxiliaryPersonnel.getRemark()) / 2;
-            auxiliaryPersonnel.setRemark(String.valueOf(zhi2));
-            basisList.set(4, auxiliaryPersonnel);
-        } else {
-            // 辅助人员 工时 = 0
-            TestInitDataEntity auxiliaryPersonnel = basisList.get(5);
-            auxiliaryPersonnel.setRemark("0");
-            basisList.set(4, auxiliaryPersonnel);
-        }
-    }
-
-    /**
-     * 获取分组下人员占比信息
-     *
-     * @param mapData
-     * @param itemList
-     * @param basisList
-     */
-    private void methodObtainProportionInformation(Map<Long, TestTaskOrderWorkingHours> mapData, List<TestCheckItemsTaskRel> itemList, List<TestInitDataEntity> basisList) {
-        // itemList 中包含  0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生
-        // basisList 中包含：0 检测人员	25 。1、记录人员	25。2 复核人	20。3 报告制作人	10。 4 辅助人员	10 。 5 签发人	20。
-        for (int i = 0; i < basisList.size() - 1; i++) {
-            // 截取list中数据
-            String inspector = methodOrganizeData(i, itemList);
-            if (StringUtils.isNotEmpty(inspector)) {
-                methodSubstr(i, inspector, mapData, null, basisList);
-            }
-        }
-    }
-
-    /**
-     * 整理检测类型数据
-     *
-     * @param type
-     * @param itemList
-     * @return
-     */
-    private String methodOrganizeData(Integer type, List<TestCheckItemsTaskRel> itemList) {
-        // 检测人员
-        StringBuffer inspector = new StringBuffer();
-        // 获取 type类型去重后数据
-        HashMap<Long, TestCheckItemsTaskRel> map = new HashMap<>();
-        for (TestCheckItemsTaskRel taskRel : itemList) {
-            if (taskRel.getUserType() == type) {
-                map.put(Long.valueOf(taskRel.getUserId()), taskRel);
-            }
-        }
-        if (CollectionUtil.isNotEmpty(map.keySet())) {
-            for (Long userId : map.keySet()) {
-                TestCheckItemsTaskRel taskRel = map.get(userId);
-                inspector.append(taskRel.getUserName() + "&" + taskRel.getUserId());
-                inspector.append(",");
-            }
-            return inspector.deleteCharAt(inspector.length() - 1).toString();
-        }
-        return null;
-    }
 
     /**
      * 分配工时信息
      *
      * @param taskId
      * @param bitTaskRelList 分组设置任务大厅 获取工时信息
+     * @param sqlBasisList   查询基础表信息 - 检测类型包含工时
      */
-    private void addTestTaskOrderWorkingHoursMapper(Long taskId, HashMap<Integer, List<TestTaskOrderWorkingHours>> bitTaskRelList) {
+    public void addTestTaskOrderWorkingHoursMapper(Long taskId, HashMap<Integer, List<TestTaskOrderWorkingHours>> bitTaskRelList, List<TestInitDataEntity> sqlBasisList) {
         //  人员对应的检测工时及比例信息。
         // 使用map 进行用户数据合并
         Map<Long, TestTaskOrderWorkingHours> taskRelMap = new HashMap<>();
@@ -1570,9 +1464,6 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
         // 展示数据
         TaskTestEntity taskDetails = taskMapper.selectTaskEntity(taskId);
-        //TODO:1月5日  查询基础表信息 - 检测类型包含工时
-        List<TestInitDataEntity> sqlBasisList = taskMapper.selectEntrustBasis(30);
-
         // 签发人： 获取
         Boolean issuerInformation = false;
         for (Long userId : taskRelMap.keySet()) {
