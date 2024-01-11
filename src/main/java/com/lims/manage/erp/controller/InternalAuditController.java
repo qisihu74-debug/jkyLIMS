@@ -177,16 +177,18 @@ public class InternalAuditController {
         LambdaQueryWrapper<InternalAudit> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(InternalAudit::getName,internalAudit.getName());
         InternalAudit one = auditService.getOne(queryWrapper);
-        if (!one.getName().equals(internalAudit.getName())){
-            LambdaQueryWrapper<InternalAudit> queryWrapper1 = new LambdaQueryWrapper<>();
-            queryWrapper.eq(InternalAudit::getName,internalAudit.getName());
-            InternalAudit one1 = auditService.getOne(queryWrapper1);
-            if (one1 != null){
-                return ResultUtil.error("内审计划已存在");
+        if (one != null){
+            if (!one.getName().equals(internalAudit.getName())){
+                LambdaQueryWrapper<InternalAudit> queryWrapper1 = new LambdaQueryWrapper<>();
+                queryWrapper.eq(InternalAudit::getName,internalAudit.getName());
+                InternalAudit one1 = auditService.getOne(queryWrapper1);
+                if (one1 != null){
+                    return ResultUtil.error("内审计划已存在");
+                }
             }
         }
         //如果文件发生变更删除旧文件，更新新文件
-        if (file != null) {
+        if (file != null && one != null) {
             String fileUrl = one.getFileUrl();
             if (!StringUtils.isEmpty(fileUrl)) {
                 auditService.delFileByUrl(fileUrl);
@@ -226,7 +228,6 @@ public class InternalAuditController {
         ids.removeAll(ids2);
         if (CollectionUtils.isNotEmpty(ids)){
             auditInfoService.removeByIds(ids);
-            //发送钉钉通知 TODO
         }
         //更新数据
         for (InternalAuditInfo info :list){
