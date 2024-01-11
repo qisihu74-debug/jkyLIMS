@@ -24,6 +24,8 @@ import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -289,6 +291,13 @@ public class StatisticAnalysisInterface {
         if (bean.getStartDate() == null || bean.getStopDate() == null){
             return ;
         }
+        String s = DateUtil.formatDate(bean.getStopDate());
+        String[] split = s.split("-");
+        LocalDate startDate = LocalDate.of(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+        LocalDate endDate = startDate.plusDays(1);
+        Date date = Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        bean.setDate(bean.getStopDate());
+        bean.setStopDate(date);
         List<HourCount> list = testCheckItemsTaskRelService.exportHours(bean);
         List<HourCount> sortList = list.stream()
                 .sorted(Comparator.comparing(HourCount::getPid))

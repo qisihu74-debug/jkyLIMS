@@ -108,7 +108,7 @@ public interface TestTaskOrderWorkingHoursMapper  extends BaseMapper<TestTaskOrd
             "\tLEFT JOIN test_team t5 ON t4.team_id = t5.id \n" +
             "WHERE\n" +
             "\tt3.issuer_time >= #{startDate} \n" +
-            "\tAND t3.issuer_time <= #{stopDate} \n" +
+            "\tAND t3.issuer_time < #{stopDate} \n" +
             "GROUP BY\n" +
             "\tt1.user_id")
     List<HourCount> exportHours(Date startDate, Date stopDate);

@@ -156,7 +156,7 @@ public interface StatisticsMapper {
             "\ttest_task_statistics \n" +
             "WHERE\n" +
             "\tissuer_time >= #{startDate} \n" +
-            "\tAND issuer_time <= #{stopDate} \n" +
+            "\tAND issuer_time < #{stopDate} \n" +
             "GROUP BY\n" +
             "\tdept_id")
     List<HourCount> countDeptPriceByTime(@Param("startDate") Date startDate, @Param("stopDate") Date stopDate);

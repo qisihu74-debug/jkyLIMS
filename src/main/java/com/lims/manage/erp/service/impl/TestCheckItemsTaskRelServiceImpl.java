@@ -1281,7 +1281,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     public void handExcelData(List<HourCount> list, Workbook workbook, TaskStatisticsVo bean, HttpServletResponse response) throws Exception {
         Worksheet worksheet = workbook.getWorksheets().get(0);
         Cells cells = worksheet.getCells();
-        cells.get("A1").setValue("积分统计表（"+ DateUtil.formatDate(bean.getStartDate()) +"～"+bean.getStopDate()+"）");
+        cells.get("A1").setValue("积分统计表（"+ DateUtil.formatDate(bean.getStartDate()) +"～"+DateUtil.formatDate(bean.getDate())+"）");
         int index = 3;
         for (HourCount hourCount :list){
             cells.get("A"+index).setValue(hourCount.getUserName());
