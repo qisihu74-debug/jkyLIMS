@@ -46,6 +46,7 @@ public class InternalAuditServiceImpl extends ServiceImpl<InternalAuditDao, Inte
         if (StringUtils.isNotEmpty(byId)){
             LambdaQueryWrapper<InternalAudit> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.like(StringUtils.isNotEmpty(search),InternalAudit::getOperateName,search);
+            queryWrapper.orderByDesc(InternalAudit::getOperateDate);
             List<InternalAudit> auditList = this.baseMapper.selectList(queryWrapper);
             PageInfo<InternalAudit> pageInfo = new PageInfo<>(auditList);
             handerList(pageInfo);
