@@ -35,4 +35,8 @@ public class DeclarationParamEntity {
     private String limitRange;
 
     private String description;
+
+    private Integer pageNum;
+    private Integer pageSize;
+    private Integer num;
 }
