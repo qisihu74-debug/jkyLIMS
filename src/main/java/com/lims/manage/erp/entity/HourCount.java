@@ -56,5 +56,5 @@ public class HourCount {
     /**
      * 个人占部门绩效
      */
-    private Integer performance;
+    private Double performance;
 }

@@ -42,6 +42,6 @@ public interface InternalAuditDao extends BaseMapper<InternalAudit> {
             "\t\ttest_internal_audit \n" +
             "\tWHERE\n" +
             "\taudit_leader_id = #{userId} \n" +
-            "\t) tb1")
+            "\t) tb1 order by tb1.operate_date desc")
     List<InternalAudit> getListByNsRole(@Param("userId") Long userId);
 }

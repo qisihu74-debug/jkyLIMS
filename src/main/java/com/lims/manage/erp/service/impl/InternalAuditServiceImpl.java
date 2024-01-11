@@ -41,16 +41,18 @@ public class InternalAuditServiceImpl extends ServiceImpl<InternalAuditDao, Inte
 
     @Override
     public PageInfo<InternalAudit> planList(Integer pageSize, Integer pageNum, String search, SysUserEntity userEntity) {
-        PageHelper.startPage(pageNum,pageSize);
         String byId = sysUserDao.checkTxRoleById(userEntity.getUserId());
         if (StringUtils.isNotEmpty(byId)){
             LambdaQueryWrapper<InternalAudit> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.like(StringUtils.isNotEmpty(search),InternalAudit::getOperateName,search);
+            queryWrapper.orderByDesc(InternalAudit::getOperateDate);
+            PageHelper.startPage(pageNum,pageSize);
             List<InternalAudit> auditList = this.baseMapper.selectList(queryWrapper);
             PageInfo<InternalAudit> pageInfo = new PageInfo<>(auditList);
             handerList(pageInfo);
             return pageInfo;
         }else {
+            PageHelper.startPage(pageNum,pageSize);
             List<InternalAudit> list = auditDao.getListByNsRole(userEntity.getUserId());
             PageInfo<InternalAudit> pageInfo = new PageInfo<>(list);
             handerList(pageInfo);

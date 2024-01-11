@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.DeclarationPlanEntity;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -35,5 +36,11 @@ public interface DeclarationPlanEntityMapper {
      */
     int updatePlan(DeclarationPlanEntity record);
 
-    List<DeclarationPlanEntity> getPlanList();
+    /**
+     * 参数申报计划列表
+     * @param planEntity
+     * @return
+     */
+    List<DeclarationPlanEntity> getPlanList(DeclarationPlanEntity planEntity);
+
 }

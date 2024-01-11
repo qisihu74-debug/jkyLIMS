@@ -8,6 +8,7 @@ import com.lims.manage.erp.entity.HourCount;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.vo.Node;
 import com.lims.manage.erp.vo.TaskStatisticsVo;
+import com.lims.manage.erp.vo.TaskStatsVo;
 import com.lims.manage.erp.vo.TestTeamVo;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -80,6 +81,16 @@ IPage<TestTeamVo> getListPage(IPage<TestTeamVo> page, @Param(Constants.WRAPPER) 
             "#{item.pid}",
             "</foreach>",
             "</script>"})
-    List<TestTeam> getTeamsByPids(List<HourCount> items);
+    List<TestTeam> getTeamsByPids(@Param("items") List<HourCount> items);
+
+    @Select({"<script>",
+            " SELECT DISTINCT ",
+            " id,pid",
+            " FROM test_team WHERE id in ",
+            "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
+            "#{item.teamId}",
+            "</foreach>",
+            "</script>"})
+    List<TestTeam> getTeamPidsByIds(@Param("items") List<HourCount> items);
 }
 
