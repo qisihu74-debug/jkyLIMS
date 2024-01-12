@@ -2,6 +2,7 @@ package com.lims.manage.erp.util;
 
 import com.lims.manage.erp.config.MinioConfig;
 import io.minio.MinioClient;
+import io.minio.ObjectStat;
 import io.minio.messages.Bucket;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -202,4 +203,19 @@ public class MinIoUtil {
         return minioClient.getObject(bucketName,decode);
     }
 
+    /**
+     * 检测文件是否存在
+     * @param bucketName
+     * @param fileName
+     * @return
+     */
+    @SneakyThrows(Exception.class)
+    public static Boolean checkFileExist(String bucketName, String fileName) {
+        ObjectStat objectStat = minioClient.statObject(bucketName, fileName);
+        if (objectStat == null){
+            return false;
+        }else {
+            return true;
+        }
+    }
 }

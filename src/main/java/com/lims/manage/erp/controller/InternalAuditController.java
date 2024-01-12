@@ -208,7 +208,7 @@ public class InternalAuditController {
         auditService.updateById(one);
         //处理审核人信息
         LambdaQueryWrapper<InternalAuditInfo> lambdaQueryWrapper = new LambdaQueryWrapper();
-        lambdaQueryWrapper.eq(InternalAuditInfo::getAuditId,internalAudit.getId());
+        lambdaQueryWrapper.eq(InternalAuditInfo::getAuditId,internalAudit.getList().get(0).getAuditId());
         List<InternalAuditInfo> auditInfos = auditInfoService.list(lambdaQueryWrapper);
         List<Integer> ids = Lists.newArrayList();
         List<Integer> ids2 = Lists.newArrayList();
@@ -229,7 +229,7 @@ public class InternalAuditController {
         }
         //更新数据
         for (InternalAuditInfo info :list){
-            info.setAuditId(internalAudit.getId());
+            info.setAuditId(internalAudit.getList().get(0).getAuditId());
             for (InternalAuditInfo auditInfo :auditInfos){
                 if (info.getId() != null){
                     if (info.getId().equals(auditInfo.getId())){

@@ -47,6 +47,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.sql.Date;
 import java.util.List;
 
@@ -88,13 +89,13 @@ public class TechnicistFilesController {
                 result = documentsService.getTemplateData("证件类材料");
                 break;
             case "3":
-                result = documentsService.getTemplateData("业绩类材料");
+                result = documentsService.getTemplateData("培训类材料");
                 break;
             case "4":
-                result = documentsService.getTemplateData("奖惩类材料");
+                result = documentsService.getTemplateData("业绩类材料");
                 break;
             case "5":
-                result = documentsService.getTemplateData("培训类材料");
+                result = documentsService.getTemplateData("奖惩类材料");
                 break;
             case "6":
                 result = documentsService.getTemplateData("其它材料");
@@ -462,7 +463,7 @@ public class TechnicistFilesController {
         try {
             File file = new File(zipPath);
             FileInputStream inputStream = new FileInputStream(file);
-            response.setHeader("Content-Disposition", "attachment;fileName=" + "技术人员档案.zip");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode("技术人员档案.zip", "UTF-8"));
             OutputStream outputStream = response.getOutputStream();
             IOUtils.copy(inputStream,outputStream);
             inputStream.close();
