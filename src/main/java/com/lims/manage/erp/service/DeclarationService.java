@@ -138,4 +138,11 @@ public interface DeclarationService {
      * @return
      */
     Result getParamDetail(DeclarationParamEntity paramEntity);
+
+    /**
+     * 查询产品下拉列表
+     * @param productTypeId
+     * @return
+     */
+    Result getProductListSelect(Integer productTypeId);
 }

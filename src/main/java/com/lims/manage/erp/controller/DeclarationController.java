@@ -201,4 +201,14 @@ public class DeclarationController {
     public Result getParamDetail(@RequestBody DeclarationParamEntity paramEntity) {
         return this.declarationService.getParamDetail(paramEntity);
     }
+
+    /**
+     * 查询产品下拉列表
+     * @param productTypeId
+     * @return
+     */
+    @GetMapping("/getProductListSelect")
+    public Result getProductListSelect(Integer productTypeId) {
+        return this.declarationService.getProductListSelect(productTypeId);
+    }
 }

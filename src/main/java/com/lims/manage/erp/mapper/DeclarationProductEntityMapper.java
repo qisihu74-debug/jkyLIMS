@@ -21,6 +21,13 @@ public interface DeclarationProductEntityMapper {
     List<LabelValueVo> getProductType();
 
     /**
+     * 查询产品下拉
+     * @param productTypeId
+     * @return
+     */
+    List<LabelValueVo> getProductListSelect(Integer productTypeId);
+
+    /**
      * 删除申报计划下的产品
      * @param record
      * @return
@@ -33,6 +40,13 @@ public interface DeclarationProductEntityMapper {
      * @return
      */
     DeclarationProductEntity checkProduct(DeclarationProductEntity record);
+
+    /**
+     * 查询产品是否存在
+     * @param productName
+     * @return
+     */
+    Long getProductId(String productName);
 
     /**
      * 编辑申报计划下的产品信息

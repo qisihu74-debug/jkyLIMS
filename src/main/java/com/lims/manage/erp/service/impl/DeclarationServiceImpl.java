@@ -77,7 +77,9 @@ public class DeclarationServiceImpl implements DeclarationService {
 
     @Override
     public Result addProduct(DeclarationProductEntity productEntity) {
-        Long productId = productEntity.getProductId();
+        String productName = productEntity.getProductName();
+        Long productId = productEntityMapper.getProductId(productName);
+//        Long productId = productEntity.getProductId();
         if(productId == null){//产品ID为空，说明为新增产品
             productEntity.setAttribute("新增");
             long newProductId = GenID.getID();
@@ -151,7 +153,10 @@ public class DeclarationServiceImpl implements DeclarationService {
         if(paramEntity.getPlanId() == null || paramEntity.getProductId() == null){
             return ResultUtil.error("请先选择计划和产品信息！");
         }
-        Long checkItemId = paramEntity.getCheckItemId();
+        Long productId = paramEntity.getProductId();
+        String checkItemName = paramEntity.getCheckItemName();
+        Long checkItemId = paramEntityMapper.getCheckItemId(productId, checkItemName);
+//        Long checkItemId = paramEntity.getCheckItemId();
         if(checkItemId == null){//为新增的检测项
             paramEntity.setAttribute("新增");
             long newParamId = GenID.getID();
@@ -207,6 +212,7 @@ public class DeclarationServiceImpl implements DeclarationService {
             return ResultUtil.error("请先选择申报参数！");
         }
         DeclarationParamEntity declarationParamEntity = paramEntityMapper.checkParam(paramEntity);
+        paramEntity.setCheckItemName(declarationParamEntity.getCheckItemName());
         paramEntity.setAttribute(declarationParamEntity.getAttribute());//填报属性
         paramEntity.setCreateUser(declarationParamEntity.getCreateUser());//创建人
         paramEntity.setCreateTime(declarationParamEntity.getCreateTime());//创建时间
@@ -231,5 +237,14 @@ public class DeclarationServiceImpl implements DeclarationService {
         }
         List<DeclarationParamEntity> paramDetail = paramEntityMapper.getParamDetail(paramEntity);
         return ResultUtil.success("查询申报参数详情成功！",paramDetail);
+    }
+
+    @Override
+    public Result getProductListSelect(Integer productTypeId) {
+        if(productTypeId == null){
+            return ResultUtil.error("请先选择产品类别！");
+        }
+        List<LabelValueVo> productList = productEntityMapper.getProductListSelect(productTypeId);
+        return ResultUtil.success("查询产品下拉列表成功！",productList);
     }
 }
