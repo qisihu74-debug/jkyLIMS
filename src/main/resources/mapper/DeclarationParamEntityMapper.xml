@@ -181,6 +181,11 @@
       AND check_item_id = #{checkItemId,jdbcType=BIGINT}
   </select>
 
+  <select id="getCheckItemId" resultType="java.lang.Long">
+    SELECT
+    select check_item_id from test_product_item where product_id = #{productId} and check_item_name = #{checkItemName}
+  </select>
+
   <delete id="deleteParam" parameterType="com.lims.manage.erp.entity.DeclarationParamEntity">
     delete
     from test_declaration_param

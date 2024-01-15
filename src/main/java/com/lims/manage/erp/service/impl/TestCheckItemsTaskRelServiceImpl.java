@@ -1237,55 +1237,57 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     @Override
     public List<HourCount> exportHours(TaskStatisticsVo bean) {
         List<HourCount> hourCounts = testTaskOrderWorkingHoursMapper.exportHours(bean.getStartDate(), bean.getStopDate());
-        //处理部门名称
-        List<TestTeam> list = testTeamDao.getTeamsByPids(hourCounts);
-        for (HourCount hourCount :hourCounts){
-            hourCount.setDoubleHours(Double.parseDouble(hourCount.getHours()));
-            for (TestTeam team :list){
-                if (hourCount.getPid().equals(team.getId())){
-                    hourCount.setDeptName(team.getName());
-                }
-            }
-        }
-        //计算部门总积分
-        Map<String, Double> map = hourCounts.stream()
-                .collect(Collectors.groupingBy(HourCount::getDeptName, Collectors.summingDouble(HourCount::getDoubleHours)));
-        Set<String> set = map.keySet();
-        for (HourCount hourCount :hourCounts){
-            for (String key:set){
-                if (hourCount.getDeptName().equals(key)){
-                    if (map.get(key) != null){
-                        hourCount.setTeamHours(map.get(key));
+        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(hourCounts)){
+//处理部门名称
+            List<TestTeam> list = testTeamDao.getTeamsByPids(hourCounts);
+            for (HourCount hourCount :hourCounts){
+                hourCount.setDoubleHours(Double.parseDouble(hourCount.getHours()));
+                for (TestTeam team :list){
+                    if (hourCount.getPid().equals(team.getId())){
+                        hourCount.setDeptName(team.getName());
                     }
                 }
             }
-        }
-        //计算个人所占部门比例
-        for (HourCount hourCount :hourCounts){
-            double percentage = getPercentage(hourCount.getDoubleHours(), hourCount.getTeamHours());
-            hourCount.setPercentage(percentage+"%");
-        }
-        //计算部门产值和个人绩效占比
-        List<HourCount> deptPriceByTime = statisticsMapper.countDeptPriceByTime(bean.getStartDate(), bean.getStopDate());
-        List<TestTeam> list1 = testTeamDao.getTeamPidsByIds(deptPriceByTime);
-        for (HourCount vo :deptPriceByTime){
-            for (TestTeam team :list1){
-                if (vo.getTeamId().equals(team.getId())){
-                    vo.setPid(team.getPid());
+            //计算部门总积分
+            Map<String, Double> map = hourCounts.stream()
+                    .collect(Collectors.groupingBy(HourCount::getDeptName, Collectors.summingDouble(HourCount::getDoubleHours)));
+            Set<String> set = map.keySet();
+            for (HourCount hourCount :hourCounts){
+                for (String key:set){
+                    if (hourCount.getDeptName().equals(key)){
+                        if (map.get(key) != null){
+                            hourCount.setTeamHours(map.get(key));
+                        }
+                    }
                 }
             }
-        }
-        //计算部门总产值
-        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(deptPriceByTime)){
-            Map<Integer, Integer> collect = deptPriceByTime.stream()
-                    .collect(Collectors.groupingBy(HourCount::getPid, Collectors.summingInt(HourCount::getTeamPrice)));
+            //计算个人所占部门比例
             for (HourCount hourCount :hourCounts){
-                Integer num = collect.get(hourCount.getPid());
-                hourCount.setTeamPrice(num);
-                if (num != null){
-                    double result = num * (0.05);
-                    result = Math.abs(result);
-                    hourCount.setPerformance(result);
+                double percentage = getPercentage(hourCount.getDoubleHours(), hourCount.getTeamHours());
+                hourCount.setPercentage(percentage+"%");
+            }
+            //计算部门产值和个人绩效占比
+            List<HourCount> deptPriceByTime = statisticsMapper.countDeptPriceByTime(bean.getStartDate(), bean.getStopDate());
+            List<TestTeam> list1 = testTeamDao.getTeamPidsByIds(deptPriceByTime);
+            for (HourCount vo :deptPriceByTime){
+                for (TestTeam team :list1){
+                    if (vo.getTeamId().equals(team.getId())){
+                        vo.setPid(team.getPid());
+                    }
+                }
+            }
+            //计算部门总产值
+            if (org.apache.commons.collections.CollectionUtils.isNotEmpty(deptPriceByTime)){
+                Map<Integer, Integer> collect = deptPriceByTime.stream()
+                        .collect(Collectors.groupingBy(HourCount::getPid, Collectors.summingInt(HourCount::getTeamPrice)));
+                for (HourCount hourCount :hourCounts){
+                    Integer num = collect.get(hourCount.getPid());
+                    hourCount.setTeamPrice(num);
+                    if (num != null){
+                        double result = num * (0.05);
+                        result = Math.abs(result);
+                        hourCount.setPerformance(result);
+                    }
                 }
             }
         }

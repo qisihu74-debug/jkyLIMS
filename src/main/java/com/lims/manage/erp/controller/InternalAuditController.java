@@ -175,11 +175,11 @@ public class InternalAuditController {
             return ResultUtil.error("缺少审核员信息");
         }
         LambdaQueryWrapper<InternalAudit> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(InternalAudit::getName,internalAudit.getName());
+        queryWrapper.eq(InternalAudit::getId,internalAudit.getList().get(0).getAuditId());
         InternalAudit one = auditService.getOne(queryWrapper);
         if (!one.getName().equals(internalAudit.getName())){
             LambdaQueryWrapper<InternalAudit> queryWrapper1 = new LambdaQueryWrapper<>();
-            queryWrapper.eq(InternalAudit::getName,internalAudit.getName());
+            queryWrapper1.eq(InternalAudit::getName,internalAudit.getName());
             InternalAudit one1 = auditService.getOne(queryWrapper1);
             if (one1 != null){
                 return ResultUtil.error("内审计划已存在");
@@ -208,7 +208,7 @@ public class InternalAuditController {
         auditService.updateById(one);
         //处理审核人信息
         LambdaQueryWrapper<InternalAuditInfo> lambdaQueryWrapper = new LambdaQueryWrapper();
-        lambdaQueryWrapper.eq(InternalAuditInfo::getAuditId,internalAudit.getId());
+        lambdaQueryWrapper.eq(InternalAuditInfo::getAuditId,internalAudit.getList().get(0).getAuditId());
         List<InternalAuditInfo> auditInfos = auditInfoService.list(lambdaQueryWrapper);
         List<Integer> ids = Lists.newArrayList();
         List<Integer> ids2 = Lists.newArrayList();
@@ -226,11 +226,10 @@ public class InternalAuditController {
         ids.removeAll(ids2);
         if (CollectionUtils.isNotEmpty(ids)){
             auditInfoService.removeByIds(ids);
-            //发送钉钉通知 TODO
         }
         //更新数据
         for (InternalAuditInfo info :list){
-            info.setAuditId(internalAudit.getId());
+            info.setAuditId(internalAudit.getList().get(0).getAuditId());
             for (InternalAuditInfo auditInfo :auditInfos){
                 if (info.getId() != null){
                     if (info.getId().equals(auditInfo.getId())){

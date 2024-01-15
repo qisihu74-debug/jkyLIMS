@@ -8,11 +8,15 @@ import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.entity.TestOriginalRecordTemplate;
 import com.lims.manage.erp.entity.TestProductItem;
+import com.lims.manage.erp.mapper.TestOriginalRecordTemplateDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.TestOriginalRecordTemplateService;
 import com.lims.manage.erp.service.TestProductItemService;
 import com.lims.manage.erp.service.TestReportTemplateService;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.vo.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +47,8 @@ public class TestProductItemController extends ApiController {
     private TestProductItemService testProductItemService;
     @Resource
     private TestReportTemplateService templateService;
+    @Resource
+    private TestOriginalRecordTemplateService service;
 
 
     @GetMapping("/getList")
@@ -241,6 +247,23 @@ public class TestProductItemController extends ApiController {
             num ++;
         }
         System.out.println("导入工时总共插入了"+index+" 条");
+    }
+
+    /**
+     * 剔除无效原始记录
+     */
+    @GetMapping("removeUnvilableUrl")
+    public void removeUnvilableUrl(){
+        List<TestOriginalRecordTemplate> list = service.list();
+        for (TestOriginalRecordTemplate template :list){
+            String upload = template.getFileUrl();
+            String uploadUrl = upload.substring(0, upload.indexOf("?"));
+            String[] strings = uploadUrl.split("\\/");
+            String bluckName = strings[3];
+            String fileName = strings[4];
+            Boolean aBoolean = MinIoUtil.checkFileExist(bluckName, fileName);
+            System.out.println("地址是："+uploadUrl+" 结果是否存在"+aBoolean);
+        }
     }
 }
 

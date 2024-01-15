@@ -1,5 +1,8 @@
 package com.lims.manage.erp.service.impl;
 
+import com.aspose.cells.Cells;
+import com.aspose.cells.Workbook;
+import com.aspose.cells.Worksheet;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
@@ -116,17 +119,26 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
         List<ReserveCodeEntity> noInsertList = Lists.newArrayList();
         try {
             InputStream inputStream = file.getInputStream();
-            HSSFWorkbook workbook = new HSSFWorkbook(inputStream);
-            Sheet sheet = workbook.getSheetAt(0); // 获取第一个工作表
-            int rowCount = sheet.getLastRowNum() - sheet.getFirstRowNum() + 1;
-            for (int i = 1; i < rowCount; i++) {
-                Row row = sheet.getRow(i);
-                String entrustmentNo = row.getCell(0).getStringCellValue();
-                String reportCode = row.getCell(1).toString();//预留编号
-                String remark = row.getCell(2).toString();//备注
+            Workbook workbook = null;
+            try {
+                workbook = new Workbook(inputStream);
+            } catch (Exception e) {
+                log.error("加载文件失败:{}",e);
+            }
+            Worksheet worksheet = workbook.getWorksheets().get(0);
+            Cells cells = worksheet.getCells();
+            int maxRow = worksheet.getCells().getMaxRow();
+            int index = 2;
+            for (int i = 0; i < maxRow; i++) {
+                String entrustmentNo = cells.get("A"+index).getValue().toString().trim();
+                String reportCode = cells.get("B"+index).getValue().toString().trim();//预留编号
+                String remark = null;
+                if(cells.get("C"+index).getValue() != null){
+                    remark =cells.get("C"+index).getValue().toString();//备注
+                }
 //                System.out.println(entrustmentNo + "*----*" + reportCode + "*----*" + remark);
                 ReserveCodeEntity entity = new ReserveCodeEntity();
-                entity.setId(GenID.getID());
+//                entity.setId(GenID.getID());
                 entity.setEntrustmentNo(Integer.parseInt(entrustmentNo));
                 entity.setReportCode(reportCode);
                 entity.setType("报告编号");
@@ -134,6 +146,7 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
                 entity.setCreateDate(new Date());
                 entity.setRemark(remark);
                 allList.add(entity);
+                index ++;
             }
         }catch (IOException e) {
             e.printStackTrace();

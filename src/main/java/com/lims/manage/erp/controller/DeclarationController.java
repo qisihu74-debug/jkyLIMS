@@ -99,7 +99,7 @@ public class DeclarationController {
      * 查询申报计划下的产品列表
      * @return
      */
-    @GetMapping("/getProductList")
+    @PostMapping("/getProductList")
     public Result getProductList(@RequestBody DeclarationProductEntity productEntity) {
         return this.declarationService.getProductList(productEntity);
     }
@@ -114,7 +114,7 @@ public class DeclarationController {
     }
 
     /**
-     * 查询依据标准下拉列表
+     * 查询依据标准方法下拉列表
      * @return
      */
     @GetMapping("/getMethod")
@@ -200,5 +200,15 @@ public class DeclarationController {
     @PostMapping("/getParamDetail")
     public Result getParamDetail(@RequestBody DeclarationParamEntity paramEntity) {
         return this.declarationService.getParamDetail(paramEntity);
+    }
+
+    /**
+     * 查询产品下拉列表
+     * @param productTypeId
+     * @return
+     */
+    @GetMapping("/getProductListSelect")
+    public Result getProductListSelect(Integer productTypeId) {
+        return this.declarationService.getProductListSelect(productTypeId);
     }
 }

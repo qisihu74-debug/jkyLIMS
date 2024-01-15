@@ -45,6 +45,14 @@ public interface DeclarationParamEntityMapper {
     DeclarationParamEntity checkParam(DeclarationParamEntity paramEntity);
 
     /**
+     * 查询检测项ID
+     * @param productId
+     * @param checkItemName
+     * @return
+     */
+    Long getCheckItemId(Long productId,String checkItemName);
+
+    /**
      * 删除申报参数
      * @param record
      * @return

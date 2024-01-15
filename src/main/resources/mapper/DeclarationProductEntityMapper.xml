@@ -87,6 +87,18 @@
       del_flag = 0
   </select>
 
+  <select id="getProductListSelect" resultType="com.lims.manage.erp.vo.LabelValueVo">
+    SELECT
+      product_id VALUE,
+	product_name label
+    FROM
+      test_product
+    WHERE
+      del_flag = 0
+      and
+      product_type_id = #{productTypeId}
+  </select>
+
   <delete id="deleteProduct" parameterType="com.lims.manage.erp.entity.DeclarationProductEntity">
     delete
     from test_declaration_product
@@ -104,10 +116,15 @@
       AND product_id = #{productId,jdbcType=BIGINT}
   </select>
 
+  <select id="getProductId" resultType="java.lang.Long"
+          parameterType="java.lang.String">
+    select product_id from test_product where product_name = #{productName}
+  </select>
+
   <update id="updateProduct" parameterType="com.lims.manage.erp.entity.DeclarationProductEntity">
     update test_declaration_product
-    set product_type    = #{planName,jdbcType=VARCHAR},
-        product_index   = #{startDate,jdbcType=DATE}
+    set product_type    = #{productType,jdbcType=VARCHAR},
+        product_index   = #{productIndex,jdbcType=VARCHAR}
     where
           plan_id = #{planId,jdbcType=BIGINT}
       AND product_id = #{productId,jdbcType=BIGINT}
@@ -125,7 +142,7 @@
       AND product_name LIKE concat(concat('%',#{productName}),'%')
     </if>
     <if test="productType!=null and productType!=''">
-      AND product_type = LIKE concat(concat('%',#{productType}),'%')
+      AND product_type LIKE concat(concat('%',#{productType}),'%')
     </if>
   </select>
 </mapper>
