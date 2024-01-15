@@ -17,10 +17,7 @@ import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.ManagementReviewService;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.util.StringToolUtil;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +26,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,6 +46,8 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
     private TaskMapper taskMapper;
     @Autowired
     private SysUserDao sysUserDao;
+    @Autowired
+    private DingNotifyUtils dingNotifyUtils;
 
     /**
      * 管理评审 列表展示
@@ -91,6 +91,8 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
             lambdaQueryWrapper.like(ManageReviewPlanEntity::getPlanCreator, manageReviewPlanEntity.getPlanCreator());
         }
         lambdaQueryWrapper.eq(ManageReviewPlanEntity::getDelFlag, 0);
+        lambdaQueryWrapper.orderByDesc(ManageReviewPlanEntity::getCreateTime);
+
         List<ManageReviewPlanEntity> list = manageReviewPlanEntityMapper.selectList(lambdaQueryWrapper);
         if (CollectionUtil.isNotEmpty(list)) {
             // 截取数据：当前登录人 name&userId 跟创建匹配的话可操作。
@@ -158,18 +160,52 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         // 新增： 创建计划 并返回id
         manageReviewPlanEntityMapper.insertSelective(manageReviewPlanEntity);
         // 创建人：职位信息，新增附件
-        dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), file);
+        dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), file, userInfo);
         // 参加人员: 职位信息，数据截取后新增
         String[] participants = manageReviewPlanEntity.getParticipant().split(",");
         for (int i = 0; i < participants.length; i++) {
             manageReviewPlanEntity.setPlanCreator(participants[i]);
             // 参与人：新增附件
-            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(2).getName(), null);
+            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(2).getName(), null, userInfo);
         }
         // 主持人：职位信息，新增附件
         manageReviewPlanEntity.setPlanCreator(manageReviewPlanEntity.getReviewHost());
-        dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(1).getName(), null);
+        dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(1).getName(), null, userInfo);
         return ResultUtil.success("创建成功");
+    }
+
+    /**
+     * 管理评审:钉钉 计划通知
+     *
+     * @param planCreator
+     * @param publisher
+     */
+    public void methodDingTalkNotification(String planCreator, String publisher) {
+
+
+        // 通知时间
+        Date now = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        String nowString = simpleDateFormat.format(now);
+        // 当前年份
+        SimpleDateFormat yyyyFormat = new SimpleDateFormat("yyyy");
+        String yyyyString = yyyyFormat.format(now);
+        try {
+            // 查询钉钉id
+            String dingId = "";
+            // 获取 任务单下检测人信息 userId
+            LambdaQueryWrapper<SysUserEntity> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(SysUserEntity::getUserId, planCreator.split("&")[1]);
+            SysUserEntity userDetails = sysUserDao.selectOne(queryWrapper);
+            dingId = userDetails.getDingUserId();
+            StringBuffer titleBuffer = new StringBuffer();
+            titleBuffer.append(nowString + "评审计划通知");
+            StringBuffer contextBuffer = new StringBuffer();
+            contextBuffer.append(yyyyString + "年 管理评审计划已经发布  " + "请登录公司系统提交相关资料，特此通知！");
+            dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), publisher, contextBuffer.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -178,9 +214,10 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
      * @param manageReviewPlanEntity 计划信息
      * @param duties                 职务
      * @param file                   附件
+     * @param userInfo               当前登录用户
      */
     @Transactional(rollbackFor = Exception.class)
-    public void dynamicHandlingFileAddORUpdate(ManageReviewPlanEntity manageReviewPlanEntity, String duties, MultipartFile[] file) {
+    public void dynamicHandlingFileAddORUpdate(ManageReviewPlanEntity manageReviewPlanEntity, String duties, MultipartFile[] file, SysUserEntity userInfo) {
         // 创建人信息新增
         ManageReviewInformationEntity informationEntity = new ManageReviewInformationEntity();
         // 创建人
@@ -231,6 +268,8 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         // 查询 创建人、职位、pid
         ManageReviewInformationEntity oldData = manageReviewInformationEntityMapper.selectOne(queryWrapper);
         if (oldData == null) {
+            // 钉钉通知 ：
+            methodDingTalkNotification(manageReviewPlanEntity.getPlanCreator(), userInfo.getName());
             // 不存在的话 则add
             manageReviewInformationEntityMapper.insert(informationEntity);
         } else {
@@ -488,14 +527,14 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         // 更新： 创建计划
         manageReviewPlanEntityMapper.updateByPrimaryKeySelective(manageReviewPlanEntity);
         // 创建人：更新附件
-        dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), file);
+        dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), file, userInfo);
         // 参加人员: 数据截取后新增
         String[] participants = manageReviewPlanEntity.getParticipant().split(",");
 
         for (int i = 0; i < participants.length; i++) {
             manageReviewPlanEntity.setPlanCreator(participants[i]);
             // 创建人：更新附件
-            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(2).getName(), null);
+            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(2).getName(), null, userInfo);
         }
         // 旧参加人员
         String[] oldParticipants = oldManageReviewPlanEntity.getParticipant().split(",");
@@ -519,7 +558,7 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
             deleteOperation(deleteManageReviewPlanEntity, personnelPosition.get(1).getName());
             // 主持人：更新附件
             manageReviewPlanEntity.setPlanCreator(manageReviewPlanEntity.getReviewHost());
-            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(1).getName(), null);
+            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(1).getName(), null, userInfo);
         }
         return ResultUtil.success("更新成功");
     }
@@ -586,7 +625,7 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
                 deleteManageReviewPlanEntity.setPlanCreator(participants[i]);
                 deleteManageReviewPlanEntity.setId(oldManageReviewPlanEntity.getId());
                 // 删除文件及人员
-                dynamicHandlingFileAddORUpdate(deleteManageReviewPlanEntity, personnelPosition.get(2).getName(), null);
+                deleteOperation(deleteManageReviewPlanEntity, personnelPosition.get(2).getName());
             }
         }
         // 删除主持人信息
@@ -603,4 +642,49 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
 
         return ResultUtil.success("删除成功");
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result uploadFile(Integer type, Integer id, MultipartFile[] file) {
+
+        // 获取当前登录人：
+        // 创建人：
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+
+        //TODO:1月12日  查询基础表信息 - 管理评审：人员职位信息
+        List<TestInitDataEntity> personnelPosition = taskMapper.selectEntrustBasis(32);
+
+        // 查询旧数据
+        LambdaQueryWrapper<ManageReviewPlanEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ManageReviewPlanEntity::getId, id);
+        queryWrapper.eq(ManageReviewPlanEntity::getDelFlag, 0);
+        ManageReviewPlanEntity oldManageReviewPlanEntity = manageReviewPlanEntityMapper.selectOne(queryWrapper);
+        if (oldManageReviewPlanEntity == null) {
+            return ResultUtil.error("上传附件失败，计划不存在");
+        }
+        // 登录人 比较 创建人 信息
+        if (oldManageReviewPlanEntity.getParticipant().contains(userInfo.getName() + "&" + userInfo.getUserId()) && type == 2) {
+            ManageReviewPlanEntity manageReviewPlanEntity = new ManageReviewPlanEntity();
+            manageReviewPlanEntity.setPlanCreator(userInfo.getName() + "&" + userInfo.getUserId());
+            manageReviewPlanEntity.setId(oldManageReviewPlanEntity.getId());
+            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), file, userInfo);
+        }
+//        // 登录人 比较 主持人 信息
+//        if (oldManageReviewPlanEntity.getReviewHost().contains(userInfo.getName() + "&" + userInfo.getUserId()) && type == 1) {
+//            ManageReviewPlanEntity manageReviewPlanEntity = new ManageReviewPlanEntity();
+//            manageReviewPlanEntity.setPlanCreator(userInfo.getName() + "&" + userInfo.getUserId());
+//            manageReviewPlanEntity.setId(oldManageReviewPlanEntity.getId());
+//            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(1).getName(), file);
+//        }
+        // 登录人 比较 参与人员 信息
+        if (oldManageReviewPlanEntity.getParticipant().contains(userInfo.getName() + "&" + userInfo.getUserId()) && type == 1) {
+            ManageReviewPlanEntity manageReviewPlanEntity = new ManageReviewPlanEntity();
+            manageReviewPlanEntity.setPlanCreator(userInfo.getName() + "&" + userInfo.getUserId());
+            manageReviewPlanEntity.setId(oldManageReviewPlanEntity.getId());
+            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(2).getName(), file, userInfo);
+        }
+        return ResultUtil.success("上传附件成功");
+    }
+
+
 }

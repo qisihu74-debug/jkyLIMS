@@ -59,4 +59,14 @@ public interface ManagementReviewService extends IService<ManageReviewPlanEntity
      */
     Result delete(Integer id);
 
+    /**
+     * 上传附件信息
+     *
+     * @param type
+     * @param id
+     * @param file
+     * @return
+     */
+    Result uploadFile(Integer type, Integer id, MultipartFile[] file);
+
 }

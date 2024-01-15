@@ -100,7 +100,26 @@ public class ManagementReviewController extends ApiController {
     @GetMapping("/delete")
     public Result delete(Integer id) {
 
-        return this.managementReviewService.details(id);
+        return this.managementReviewService.delete(id);
+    }
+
+    /**
+     * 上传报告
+     *
+     * @param id
+     * @param file
+     * @param type 1内审员上传，2体系管理员上传
+     * @return
+     */
+    @RequestMapping("uploadFile")
+    public Result uploadFile(@RequestParam("type") Integer type, @RequestParam("id") Integer id, MultipartFile[] file) {
+        if (type == null || id == null || file == null) {
+            return ResultUtil.error("缺少参数");
+        }
+        if (type.intValue() > 2 || type.intValue() < 1) {
+            return ResultUtil.error("上传类型未定义");
+        }
+        return this.managementReviewService.uploadFile(type, id, file);
     }
 
 
