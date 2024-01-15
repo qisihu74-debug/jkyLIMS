@@ -378,6 +378,8 @@ public class TaskController {
                 paramVo.setInspector(userInfo.getUserId().toString());
                 //记录人
                 paramVo.setRecorder(userInfo.getUserId().toString());
+                // 签发人
+                paramVo.setReceiver(userInfo.getUserId().toString());
                 //报告制作人
                 paramVo.setReportProducer(userInfo.getName());
                 //领样人
@@ -440,6 +442,8 @@ public class TaskController {
             paramVo.setInterns(userInfo.getName());
             // 辅助人员
             paramVo.setAuxiliaryPersonnel(userInfo.getName());
+            // 签发人
+            paramVo.setReceiver(userInfo.getUserId().toString());
             return ResultUtil.success("查询任务列表成功！", taskService.getTaskListTwoShow(paramVo, deptIds));
         }
     }

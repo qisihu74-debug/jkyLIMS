@@ -616,6 +616,7 @@
                 OR probationer like CONCAT( '%',#{probationer}, '%' )
                 OR interns like CONCAT( '%',#{interns}, '%' )
                 OR auxiliary_personnel like CONCAT( '%',#{auxiliaryPersonnel}, '%' )
+                OR receiver like CONCAT( '%',#{receiver}, '%' )
                 )
             </if>
 

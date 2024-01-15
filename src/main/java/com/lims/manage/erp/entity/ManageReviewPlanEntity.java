@@ -60,6 +60,11 @@ public class ManageReviewPlanEntity implements Serializable {
      */
     @TableField(exist = false)
     private Integer pageSize;
+    /**
+     * 操作标记 sign = 0 可操作，为null或！=0 不可操作
+     */
+    @TableField(exist = false)
+    private Integer sign;
 
     public Integer getId() {
         return id;

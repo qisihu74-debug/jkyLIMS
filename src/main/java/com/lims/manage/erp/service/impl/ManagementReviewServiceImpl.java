@@ -9,21 +9,27 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.ManageReviewInformationEntity;
 import com.lims.manage.erp.entity.ManageReviewPlanEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TestInitDataEntity;
 import com.lims.manage.erp.mapper.ManageReviewInformationEntityMapper;
 import com.lims.manage.erp.mapper.ManageReviewPlanEntityMapper;
+import com.lims.manage.erp.mapper.SysUserDao;
+import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.ManagementReviewService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.StringToolUtil;
+import com.lims.manage.erp.vo.LabelValueVo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,6 +44,10 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
     private ManageReviewPlanEntityMapper manageReviewPlanEntityMapper;
     @Resource
     private ManageReviewInformationEntityMapper manageReviewInformationEntityMapper;
+    @Resource
+    private TaskMapper taskMapper;
+    @Autowired
+    private SysUserDao sysUserDao;
 
     /**
      * 管理评审 列表展示
@@ -54,12 +64,45 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         PageHelper.clearPage();
         PageHelper.startPage(manageReviewPlanEntity.getPageNum(), manageReviewPlanEntity.getPageSize());
         LambdaQueryWrapper<ManageReviewPlanEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(ManageReviewPlanEntity::getDelFlag, 0);
+        // 登录人信息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 判断当前登录人 是否是 体系管理员
+        List<SysUserEntity> userList = sysUserDao.systemManagementList();
+        Integer sign = 1;
+        for (SysUserEntity sysUserEntity : userList) {
+            if (sysUserEntity.getUserId().equals(userInfo.getUserId())) {
+                // sign = 0 表示当前用户为体系管理员
+                sign = 0;
+            }
+        }
+
+        // 当前登录用户 不是体系管理员
+        if (sign == 1) {
+            // or查询列表 当前登录人 是否包含 创建人、主持人、参与人员
+            // 创建人
+            lambdaQueryWrapper.or().like(ManageReviewPlanEntity::getPlanCreator, userInfo.getName() + "&" + userInfo.getUserId());
+            // 主持人
+            lambdaQueryWrapper.or().like(ManageReviewPlanEntity::getReviewHost, userInfo.getName() + "&" + userInfo.getUserId());
+            // 参与人员
+            lambdaQueryWrapper.or().like(ManageReviewPlanEntity::getParticipant, userInfo.getName() + "&" + userInfo.getUserId());
+        }
         // 模糊查询 管理评审 创建人信息
-        if (StringUtils.isEmpty(manageReviewPlanEntity.getPlanCreator())) {
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(manageReviewPlanEntity.getPlanCreator())) {
             lambdaQueryWrapper.like(ManageReviewPlanEntity::getPlanCreator, manageReviewPlanEntity.getPlanCreator());
         }
+        lambdaQueryWrapper.eq(ManageReviewPlanEntity::getDelFlag, 0);
         List<ManageReviewPlanEntity> list = manageReviewPlanEntityMapper.selectList(lambdaQueryWrapper);
+        if (CollectionUtil.isNotEmpty(list)) {
+            // 截取数据：当前登录人 name&userId 跟创建匹配的话可操作。
+            for (ManageReviewPlanEntity manageReviewPlanEntity1 : list) {
+                // 当前登录人 是体系管理员 sign=0、否则 sign=1。
+                if (sign == 0) {
+                    manageReviewPlanEntity1.setSign(0);
+                } else {
+                    manageReviewPlanEntity1.setSign(1);
+                }
+            }
+        }
         PageInfo<ManageReviewPlanEntity> result = new PageInfo<>(list);
         return ResultUtil.success(result);
     }
@@ -67,6 +110,10 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Result addManageReviewPlanEntity(ManageReviewPlanEntity manageReviewPlanEntity, MultipartFile[] file) {
+        //TODO:1月12日  查询基础表信息 - 管理评审：人员职位信息
+        List<TestInitDataEntity> personnelPosition = taskMapper.selectEntrustBasis(32);
+        //TODO:1月12日  查询基础表信息 - 管理评审：文件后缀效验
+        List<TestInitDataEntity> suffixSet = taskMapper.selectEntrustBasis(33);
         // 效验数据 评审目的
         if (StringUtils.isEmpty(manageReviewPlanEntity.getReviewPurpose())) {
             return ResultUtil.error("评审目的不能为空");
@@ -81,39 +128,59 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         if (StringUtils.isEmpty(manageReviewPlanEntity.getParticipant())) {
             return ResultUtil.error("参加人员不能为空");
         }
+        // 文件名与后缀名参与效验
+        String msg = validationFileSuffix(file, suffixSet);
+        if (msg != null) {
+            return ResultUtil.error(msg);
+        }
         // 创建人：
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        manageReviewPlanEntity.setPlanCreator(userInfo.getName() + "&" + userInfo.getUserId());
-        manageReviewPlanEntity.setDelFlag(0);
-        manageReviewPlanEntity.setCreateTime(new Date());
-        manageReviewPlanEntity.setId(null);
-        // 创建计划
-        manageReviewPlanEntityMapper.insertSelective(manageReviewPlanEntity);
-        if (manageReviewPlanEntity.getId() == null) {
-            return null;
-        }
-        // 创建人新增
-        fileAdd(manageReviewPlanEntity, "创建人", file);
-        // 参加人员新增
-        if (CollectionUtil.isNotEmpty(manageReviewPlanEntity.getManageReviewInformationEntities())) {
-            for (ManageReviewInformationEntity informationEntity1 : manageReviewPlanEntity.getManageReviewInformationEntities()) {
-                // 参加新增
-                manageReviewPlanEntity.setPlanCreator(informationEntity1.getPlanCreator());
-                fileAdd(manageReviewPlanEntity, "参加人员", null);
+
+        // 判断当前登录人 是否是 体系管理员
+        List<SysUserEntity> userList = sysUserDao.systemManagementList();
+        Integer sign = 1;
+        for (SysUserEntity sysUserEntity : userList) {
+            if (sysUserEntity.getUserId().equals(userInfo.getUserId())) {
+                // sign = 0 表示当前用户为体系管理员
+                sign = 0;
             }
         }
+        if (sign == 1) {
+            return ResultUtil.error(userInfo.getName() + "不是体系管理员");
+        }
+        //创建人信息
+        manageReviewPlanEntity.setPlanCreator(userInfo.getName() + "&" + userInfo.getUserId());
+        manageReviewPlanEntity.setDelFlag(0);
+        // 计划创建时间
+        manageReviewPlanEntity.setPlanCreationTime(new Date());
+        manageReviewPlanEntity.setCreateTime(new Date());
+        manageReviewPlanEntity.setId(null);
+        // 新增： 创建计划 并返回id
+        manageReviewPlanEntityMapper.insertSelective(manageReviewPlanEntity);
+        // 创建人：职位信息，新增附件
+        dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), file);
+        // 参加人员: 职位信息，数据截取后新增
+        String[] participants = manageReviewPlanEntity.getParticipant().split(",");
+        for (int i = 0; i < participants.length; i++) {
+            manageReviewPlanEntity.setPlanCreator(participants[i]);
+            // 参与人：新增附件
+            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(2).getName(), null);
+        }
+        // 主持人：职位信息，新增附件
+        manageReviewPlanEntity.setPlanCreator(manageReviewPlanEntity.getReviewHost());
+        dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(1).getName(), null);
         return ResultUtil.success("创建成功");
     }
 
     /**
-     * 方法处理
+     * 动态处理：新增或者更新根据计划信息 职位、附件。
      *
      * @param manageReviewPlanEntity 计划信息
      * @param duties                 职务
      * @param file                   附件
      */
     @Transactional(rollbackFor = Exception.class)
-    public void fileAdd(ManageReviewPlanEntity manageReviewPlanEntity, String duties, MultipartFile[] file) {
+    public void dynamicHandlingFileAddORUpdate(ManageReviewPlanEntity manageReviewPlanEntity, String duties, MultipartFile[] file) {
         // 创建人信息新增
         ManageReviewInformationEntity informationEntity = new ManageReviewInformationEntity();
         // 创建人
@@ -125,11 +192,12 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         // 状态
         informationEntity.setDelFlag(0);
         informationEntity.setPid(manageReviewPlanEntity.getId());
-        informationEntity.setId(null);
+        // 附件URL链接
         StringBuffer fileNameBuffer = new StringBuffer();
+        // 附件原始文件名称
         StringBuffer originalFileNameBuffer = new StringBuffer();
         //附件存在上传附件到服务器
-        if (file != null && file.length != 0) {
+        if (file != null && file.length >= 1) {
             for (MultipartFile multipartFile : file) {
                 Long fileCode = GenID.getID();
                 String name = multipartFile.getOriginalFilename();
@@ -150,7 +218,389 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         if (originalFileNameBuffer.length() >= 1) {
             informationEntity.setOriginalFileName(originalFileNameBuffer.deleteCharAt(originalFileNameBuffer.length() - 1).toString());
         }
-        manageReviewInformationEntityMapper.insert(informationEntity);
+        // 通过查询条件 判断是 存在 则update，不存在 则add
+        LambdaQueryWrapper<ManageReviewInformationEntity> queryWrapper = new LambdaQueryWrapper<>();
+        // 创建人信息
+        queryWrapper.eq(ManageReviewInformationEntity::getPlanCreator, informationEntity.getPlanCreator());
+        // 职位
+        queryWrapper.eq(ManageReviewInformationEntity::getDuties, duties);
+        // pid
+        queryWrapper.eq(ManageReviewInformationEntity::getPid, informationEntity.getId());
+        // delFlag = 0
+        queryWrapper.eq(ManageReviewInformationEntity::getDelFlag, 0);
+        // 查询 创建人、职位、pid
+        ManageReviewInformationEntity oldData = manageReviewInformationEntityMapper.selectOne(queryWrapper);
+        if (oldData == null) {
+            // 不存在的话 则add
+            manageReviewInformationEntityMapper.insert(informationEntity);
+        } else {
+            // 更新数据
+            informationEntity.setId(oldData.getId());
+            // 附件文件信息 : 说明存在则 拼接即可
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(oldData.getOriginalFileName())) {
+                informationEntity.setOriginalFileName(oldData.getOriginalFileName() + "," + informationEntity.getOriginalFileName());
+            } else {
+                informationEntity.setOriginalFileName(informationEntity.getOriginalFileName());
+            }
+            // 附件URL信息
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(oldData.getFileUrl())) {
+                informationEntity.setFileUrl(oldData.getFileUrl() + "," + informationEntity.getFileUrl());
+            } else {
+                informationEntity.setFileUrl(informationEntity.getFileUrl());
+            }
+            manageReviewInformationEntityMapper.updateByPrimaryKeySelective(informationEntity);
+        }
+    }
 
+    /**
+     * 动态处理：删除附件
+     *
+     * @param manageReviewPlanEntity 计划信息
+     * @param duties                 职务
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteOperation(ManageReviewPlanEntity manageReviewPlanEntity, String duties) {
+        // 创建人信息新增
+        ManageReviewInformationEntity informationEntity = new ManageReviewInformationEntity();
+        // 创建人
+        informationEntity.setPlanCreator(manageReviewPlanEntity.getPlanCreator());
+        // 职务
+        informationEntity.setDuties(duties);
+        // 更新时间
+        informationEntity.setUpdateTime(new Date());
+        // 状态
+//        informationEntity.setDelFlag(0);
+        informationEntity.setPid(manageReviewPlanEntity.getId());
+        // 通过查询条件 判断是 存在 则update，不存在 则 结束
+        LambdaQueryWrapper<ManageReviewInformationEntity> queryWrapper = new LambdaQueryWrapper<>();
+        // 创建人信息
+        queryWrapper.eq(ManageReviewInformationEntity::getPlanCreator, manageReviewPlanEntity.getPlanCreator());
+        // 职位
+        queryWrapper.eq(ManageReviewInformationEntity::getDuties, duties);
+        // pid
+        queryWrapper.eq(ManageReviewInformationEntity::getPid, informationEntity.getId());
+        // delFlag = 0
+        queryWrapper.eq(ManageReviewInformationEntity::getDelFlag, 0);
+        // 查询 创建人、职位、pid
+        ManageReviewInformationEntity oldData = manageReviewInformationEntityMapper.selectOne(queryWrapper);
+        if (oldData != null) {
+            // 附件删除
+            if (StringUtils.isEmpty(oldData.getFileUrl())) {
+                String[] strings = oldData.getFileUrl().split(",");
+                for (int i = 0; i < strings.length; i++) {
+                    String[] urls = strings[i].split("/");
+                    String url = urls[urls.length - 1];
+                    // 删除附件信息
+                    MinIoUtil.deleteFile("manage-audit", url);
+                }
+            }
+            // 删除数据
+            manageReviewInformationEntityMapper.deleteByPrimaryKey(oldData.getId());
+        }
+    }
+
+    /**
+     * 计划详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public Result details(Integer id) {
+
+        // 查询计划数据详情
+        LambdaQueryWrapper<ManageReviewPlanEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ManageReviewPlanEntity::getId, id);
+        queryWrapper.eq(ManageReviewPlanEntity::getDelFlag, 0);
+        ManageReviewPlanEntity data = manageReviewPlanEntityMapper.selectOne(queryWrapper);
+        if (data == null) {
+            return ResultUtil.error("计划不存在");
+        }
+
+        //TODO:1月12日  查询基础表信息 - 管理评审：人员职位信息
+        List<TestInitDataEntity> personnelPosition = taskMapper.selectEntrustBasis(32);
+
+        // 汇总集合数据
+        List<ManageReviewInformationEntity> summarySet = new ArrayList<>();
+        // 体系管理员附件信息
+        List<ManageReviewInformationEntity> planCreatorList = methodCallDataQuery(id, personnelPosition.get(0).getName(), data.getPlanCreator());
+        if (CollectionUtil.isNotEmpty(planCreatorList)) {
+            summarySet.addAll(planCreatorList);
+        }
+        // 主持人员附件信息
+        List<ManageReviewInformationEntity> reviewHostList = methodCallDataQuery(id, personnelPosition.get(1).getName(), data.getReviewHost());
+        if (CollectionUtil.isNotEmpty(reviewHostList)) {
+            summarySet.addAll(reviewHostList);
+        }
+        // 参加人员附件信息
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(data.getParticipant())) {
+            String[] arrays = data.getParticipant().split(",");
+            for (int i = 0; i < arrays.length; i++) {
+                String participant = arrays[i];
+                // 参与人员
+                List<ManageReviewInformationEntity> participantList = methodCallDataQuery(id, personnelPosition.get(2).getName(), participant);
+                if (CollectionUtil.isNotEmpty(participantList)) {
+                    summarySet.addAll(participantList);
+                }
+            }
+        }
+        // 人员信息不为空的话
+        if (CollectionUtil.isNotEmpty(summarySet)) {
+            data.setManageReviewInformationEntities(summarySet);
+        }
+        return ResultUtil.success(data);
+    }
+
+    /**
+     * 根据计划id 查询对应的附件信息及附件信息
+     *
+     * @param id          计划id
+     * @param duties      职位
+     * @param planCreator 人员信息
+     * @return
+     */
+    public List<ManageReviewInformationEntity> methodCallDataQuery(Integer id, String duties, String planCreator) {
+        // 接下来是 拼接人员与对应的附件信息。
+        LambdaQueryWrapper<ManageReviewInformationEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        // 创建人信息
+        lambdaQueryWrapper.eq(ManageReviewInformationEntity::getPlanCreator, planCreator);
+        // 职务
+        lambdaQueryWrapper.eq(ManageReviewInformationEntity::getDuties, duties);
+        // pid信息
+        lambdaQueryWrapper.eq(ManageReviewInformationEntity::getPid, id);
+        lambdaQueryWrapper.eq(ManageReviewInformationEntity::getDelFlag, 0);
+
+        // 创建人信息
+        List<ManageReviewInformationEntity> planCreatorList = manageReviewInformationEntityMapper.selectList(lambdaQueryWrapper);
+        // 需要 截取数据URL
+        if (CollectionUtil.isNotEmpty(planCreatorList)) {
+            for (ManageReviewInformationEntity informationEntity : planCreatorList) {
+                // 判断附件不为空的话
+                if (org.apache.commons.lang.StringUtils.isNotEmpty(informationEntity.getFileUrl())) {
+                    // 截取信息 = url链接
+                    String[] urls = informationEntity.getFileUrl().split(",");
+                    // 截取信息 = url原始文件名称
+                    String[] filaNames = informationEntity.getOriginalFileName().split(",");
+                    // 附件数组
+                    List<LabelValueVo> urlList = new ArrayList<>();
+                    for (int i = 0; i < urls.length; i++) {
+                        LabelValueVo valueVo = new LabelValueVo();
+                        valueVo.setLabel(filaNames[i]);
+                        valueVo.setText(urls[i]);
+                        urlList.add(valueVo);
+                    }
+                    informationEntity.setUrls(urlList);
+                }
+            }
+        }
+        return planCreatorList;
+    }
+
+    /**
+     * 管理评审：文件信息后缀名效验
+     *
+     * @param file      附件
+     * @param suffixSet 后缀名符合的集合
+     * @return
+     */
+    public String validationFileSuffix(MultipartFile[] file, List<TestInitDataEntity> suffixSet) {
+        if (file != null && file.length >= 1) {
+            for (MultipartFile multipartFile : file) {
+                String name = multipartFile.getOriginalFilename();
+                String[] strings = name.split("\\.");
+                String nameSuffix = strings[strings.length - 1];
+
+                // 当前附件标记
+                Boolean suffixTag = false;
+                // 遍历 : 后缀名符合的集合
+                for (TestInitDataEntity dataEntity : suffixSet) {
+                    if (dataEntity.getName().equals(nameSuffix)) {
+                        suffixTag = true;
+                    }
+                }
+                if (!suffixTag) {
+                    return "文件上传失败：  文件名 " + name + " 不支持存储 ";
+                }
+            }
+        }
+        return null;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Result updateManageReviewPlanEntity(ManageReviewPlanEntity manageReviewPlanEntity, MultipartFile[] file) {
+        //TODO:1月12日  查询基础表信息 - 管理评审：人员职位信息
+        List<TestInitDataEntity> personnelPosition = taskMapper.selectEntrustBasis(32);
+        //TODO:1月12日  查询基础表信息 - 管理评审：文件后缀效验
+        List<TestInitDataEntity> suffixSet = taskMapper.selectEntrustBasis(33);
+        // 效验数据 评审目的
+        if (StringUtils.isEmpty(manageReviewPlanEntity.getReviewPurpose())) {
+            return ResultUtil.error("评审目的不能为空");
+        }
+        if (StringUtils.isEmpty(manageReviewPlanEntity.getReviewStartTime()) || StringUtils.isEmpty(manageReviewPlanEntity.getReviewEndTime())) {
+            return ResultUtil.error("评审时间不能为空");
+        }
+        if (StringUtils.isEmpty(manageReviewPlanEntity.getReviewHost())) {
+            return ResultUtil.error("评审主持不能为空");
+        }
+        // 参加人员不能为空
+        if (StringUtils.isEmpty(manageReviewPlanEntity.getParticipant())) {
+            return ResultUtil.error("参加人员不能为空");
+        }
+        if (StringUtils.isEmpty(manageReviewPlanEntity.getId())) {
+            return ResultUtil.error("id不能为空");
+        }
+        // 文件名与后缀名参与效验
+        String msg = validationFileSuffix(file, suffixSet);
+        if (msg != null) {
+            return ResultUtil.error(msg);
+        }
+        // 查询旧数据
+        LambdaQueryWrapper<ManageReviewPlanEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ManageReviewPlanEntity::getId, manageReviewPlanEntity.getId());
+        queryWrapper.eq(ManageReviewPlanEntity::getDelFlag, 0);
+        ManageReviewPlanEntity oldManageReviewPlanEntity = manageReviewPlanEntityMapper.selectOne(queryWrapper);
+        if (oldManageReviewPlanEntity == null) {
+            return ResultUtil.error("更新失败，数据不存在");
+        }
+        // 创建人：
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+
+        // 判断当前登录人 是否是 体系管理员
+        List<SysUserEntity> userList = sysUserDao.systemManagementList();
+        Integer sign = 1;
+        for (SysUserEntity sysUserEntity : userList) {
+            if (sysUserEntity.getUserId().equals(userInfo.getUserId())) {
+                // sign = 0 表示当前用户为体系管理员
+                sign = 0;
+            }
+        }
+        if (sign == 1) {
+            return ResultUtil.error(userInfo.getName() + "不是体系管理员");
+        }
+
+        // TODO: ---- ↑↑↑↑ 上述信息 均参与效验  ↑↑↑↑ ----
+        //创建人信息
+        manageReviewPlanEntity.setPlanCreator(null);
+        manageReviewPlanEntity.setDelFlag(0);
+        // 计划更新时间
+        manageReviewPlanEntity.setUpdateTime(new Date());
+        // 更新： 创建计划
+        manageReviewPlanEntityMapper.updateByPrimaryKeySelective(manageReviewPlanEntity);
+        // 创建人：更新附件
+        dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), file);
+        // 参加人员: 数据截取后新增
+        String[] participants = manageReviewPlanEntity.getParticipant().split(",");
+
+        for (int i = 0; i < participants.length; i++) {
+            manageReviewPlanEntity.setPlanCreator(participants[i]);
+            // 创建人：更新附件
+            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(2).getName(), null);
+        }
+        // 旧参加人员
+        String[] oldParticipants = oldManageReviewPlanEntity.getParticipant().split(",");
+
+        // deleteUserList ： 删除用户列表信息： 获取string[] 差集
+        String[] deleteUserList = StringToolUtil.minus(participants, oldParticipants);
+        // 比较参加人员 获取得到 被删除用户操作 : deleteUserList
+        for (String string : deleteUserList) {
+            ManageReviewPlanEntity deleteManageReviewPlanEntity = new ManageReviewPlanEntity();
+            deleteManageReviewPlanEntity.setPlanCreator(string);
+            deleteManageReviewPlanEntity.setId(manageReviewPlanEntity.getId());
+            // 删除文件及附件信息
+            deleteOperation(deleteManageReviewPlanEntity, personnelPosition.get(2).getName());
+        }
+        // 比较主持人是否变更：
+        if (!manageReviewPlanEntity.getReviewHost().equals(oldManageReviewPlanEntity.getReviewHost())) {
+            // 删除文件及附件信息
+            ManageReviewPlanEntity deleteManageReviewPlanEntity = new ManageReviewPlanEntity();
+            deleteManageReviewPlanEntity.setPlanCreator(oldManageReviewPlanEntity.getReviewHost());
+            deleteManageReviewPlanEntity.setId(manageReviewPlanEntity.getId());
+            deleteOperation(deleteManageReviewPlanEntity, personnelPosition.get(1).getName());
+            // 主持人：更新附件
+            manageReviewPlanEntity.setPlanCreator(manageReviewPlanEntity.getReviewHost());
+            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(1).getName(), null);
+        }
+        return ResultUtil.success("更新成功");
+    }
+
+    @Override
+    public Result getSystemManagementList() {
+
+        // 查询体系管理员信息
+        List<SysUserEntity> userList = sysUserDao.systemManagementList();
+
+        if (CollectionUtil.isNotEmpty(userList)) {
+            return ResultUtil.success(userList);
+        } else {
+            return ResultUtil.success(new ArrayList<>());
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result delete(Integer id) {
+        if (StringUtils.isEmpty(id)) {
+            return ResultUtil.error("删除失败：id 不能为空");
+        }
+        // 查询旧数据
+        LambdaQueryWrapper<ManageReviewPlanEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ManageReviewPlanEntity::getId, id);
+        queryWrapper.eq(ManageReviewPlanEntity::getDelFlag, 0);
+        ManageReviewPlanEntity oldManageReviewPlanEntity = manageReviewPlanEntityMapper.selectOne(queryWrapper);
+        if (oldManageReviewPlanEntity == null) {
+            return ResultUtil.error("删除失败：数据不存在");
+        }
+        // 创建人：
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+
+        // 判断当前登录人 是否是 体系管理员
+        List<SysUserEntity> userList = sysUserDao.systemManagementList();
+        Integer sign = 1;
+        for (SysUserEntity sysUserEntity : userList) {
+            if (sysUserEntity.getUserId().equals(userInfo.getUserId())) {
+                // sign = 0 表示当前用户为体系管理员
+                sign = 0;
+            }
+        }
+        if (sign == 1) {
+            return ResultUtil.error(userInfo.getName() + "删除失败,不是体系管理员");
+        }
+        //TODO:1月12日  查询基础表信息 - 管理评审：人员职位信息
+        List<TestInitDataEntity> personnelPosition = taskMapper.selectEntrustBasis(32);
+        // 创建人附件
+        if (oldManageReviewPlanEntity.getPlanCreator() != null) {
+            // 删除文件及人员
+            ManageReviewPlanEntity deleteManageReviewPlanEntity = new ManageReviewPlanEntity();
+            deleteManageReviewPlanEntity.setPlanCreator(oldManageReviewPlanEntity.getPlanCreator());
+            deleteManageReviewPlanEntity.setId(oldManageReviewPlanEntity.getId());
+            deleteOperation(deleteManageReviewPlanEntity, personnelPosition.get(0).getName());
+        }
+        // 旧参与人员
+        if (oldManageReviewPlanEntity.getParticipant() != null) {
+            // 参加人员: 数据截取后新增
+            String[] participants = oldManageReviewPlanEntity.getParticipant().split(",");
+            for (int i = 0; i < participants.length; i++) {
+                // 删除文件及附件信息
+                ManageReviewPlanEntity deleteManageReviewPlanEntity = new ManageReviewPlanEntity();
+                deleteManageReviewPlanEntity.setPlanCreator(participants[i]);
+                deleteManageReviewPlanEntity.setId(oldManageReviewPlanEntity.getId());
+                // 删除文件及人员
+                dynamicHandlingFileAddORUpdate(deleteManageReviewPlanEntity, personnelPosition.get(2).getName(), null);
+            }
+        }
+        // 删除主持人信息
+        // 创建人附件
+        if (oldManageReviewPlanEntity.getReviewHost() != null) {
+            // 删除文件及人员
+            ManageReviewPlanEntity deleteManageReviewPlanEntity = new ManageReviewPlanEntity();
+            deleteManageReviewPlanEntity.setPlanCreator(oldManageReviewPlanEntity.getReviewHost());
+            deleteManageReviewPlanEntity.setId(oldManageReviewPlanEntity.getId());
+            deleteOperation(deleteManageReviewPlanEntity, personnelPosition.get(1).getName());
+        }
+        // 删除文件信息
+        manageReviewPlanEntityMapper.deleteByPrimaryKey(oldManageReviewPlanEntity.getId());
+
+        return ResultUtil.success("删除成功");
     }
 }

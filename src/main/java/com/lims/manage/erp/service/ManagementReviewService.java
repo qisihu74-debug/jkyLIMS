@@ -27,4 +27,36 @@ public interface ManagementReviewService extends IService<ManageReviewPlanEntity
      */
     Result addManageReviewPlanEntity(ManageReviewPlanEntity manageReviewPlanEntity, MultipartFile[] file);
 
+    /**
+     * 新增数据
+     *
+     * @param id
+     * @return
+     */
+    Result details(Integer id);
+
+
+    /**
+     * 更新数据
+     *
+     * @param manageReviewPlanEntity
+     * @return
+     */
+    Result updateManageReviewPlanEntity(ManageReviewPlanEntity manageReviewPlanEntity, MultipartFile[] file);
+
+    /**
+     * 体系管理员列表
+     *
+     * @return
+     */
+    Result getSystemManagementList();
+
+    /**
+     * 删除计划
+     *
+     * @param id
+     * @return
+     */
+    Result delete(Integer id);
+
 }
