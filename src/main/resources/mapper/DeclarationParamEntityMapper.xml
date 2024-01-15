@@ -20,18 +20,46 @@
       <arg column="description" jdbcType="VARCHAR" javaType="java.lang.String" />
     </constructor>
   </resultMap>
-  <insert id="insert" parameterType="com.lims.manage.erp.entity.DeclarationParamEntity" >
+  <insert id="batchInsert" parameterType="com.lims.manage.erp.entity.DeclarationParamEntity" >
     insert into test_declaration_param (plan_id, product_id, check_item_id, 
       check_item_name, attribute, create_user, 
       create_time, standard_id, standard_name, 
       method_id, method_name, instrument_id, 
       instrument_name, limit_range, description
       )
-    values (#{planId,jdbcType=BIGINT}, #{productId,jdbcType=BIGINT}, #{checkItemId,jdbcType=BIGINT}, 
-      #{checkItemName,jdbcType=VARCHAR}, #{attribute,jdbcType=VARCHAR}, #{createUser,jdbcType=VARCHAR}, 
-      #{createTime,jdbcType=TIMESTAMP}, #{standardId,jdbcType=INTEGER}, #{standardName,jdbcType=VARCHAR}, 
-      #{methodId,jdbcType=INTEGER}, #{methodName,jdbcType=VARCHAR}, #{instrumentId,jdbcType=INTEGER}, 
+    values
+    <foreach collection="items" item="item" open="" separator="," close="">
+      (#{item.planId,jdbcType=BIGINT}, #{item.productId,jdbcType=BIGINT}, #{item.checkItemId,jdbcType=BIGINT},
+      #{item.checkItemName,jdbcType=VARCHAR}, #{item.attribute,jdbcType=VARCHAR}, #{item.createUser,jdbcType=VARCHAR},
+      #{item.createTime,jdbcType=TIMESTAMP}, #{item.standardId,jdbcType=INTEGER}, #{item.standardName,jdbcType=VARCHAR},
+      #{item.methodId,jdbcType=INTEGER}, #{item.methodName,jdbcType=VARCHAR}, #{item.instrumentId,jdbcType=INTEGER},
+      #{item.instrumentName,jdbcType=VARCHAR}, #{item.limitRange,jdbcType=VARCHAR}, #{item.description,jdbcType=VARCHAR}
+      )
+    </foreach>
+  </insert>
+
+  <insert id="insert" parameterType="com.lims.manage.erp.entity.DeclarationParamEntity" >
+    insert into test_declaration_param (plan_id, product_id, check_item_id,
+      check_item_name, attribute, create_user,
+      create_time, standard_id, standard_name,
+      method_id, method_name, instrument_id,
+      instrument_name, limit_range, description
+      )
+    values (#{planId,jdbcType=BIGINT}, #{productId,jdbcType=BIGINT}, #{checkItemId,jdbcType=BIGINT},
+      #{checkItemName,jdbcType=VARCHAR}, #{attribute,jdbcType=VARCHAR}, #{createUser,jdbcType=VARCHAR},
+      #{createTime,jdbcType=TIMESTAMP}, #{standardId,jdbcType=INTEGER}, #{standardName,jdbcType=VARCHAR},
+      #{methodId,jdbcType=INTEGER}, #{methodName,jdbcType=VARCHAR}, #{instrumentId,jdbcType=INTEGER},
       #{instrumentName,jdbcType=VARCHAR}, #{limitRange,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertNew" parameterType="com.lims.manage.erp.entity.DeclarationParamEntity" >
+    insert into test_declaration_param (plan_id, product_id, check_item_id,
+      check_item_name, attribute, create_user,
+      create_time
+      )
+    values (#{planId,jdbcType=BIGINT}, #{productId,jdbcType=BIGINT}, #{checkItemId,jdbcType=BIGINT},
+      #{checkItemName,jdbcType=VARCHAR}, #{attribute,jdbcType=VARCHAR}, #{createUser,jdbcType=VARCHAR},
+      #{createTime,jdbcType=TIMESTAMP}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.DeclarationParamEntity" >
@@ -169,6 +197,17 @@
     </where>
   </select>
 
+  <select id="checkParamNew" resultType="com.lims.manage.erp.entity.DeclarationItemEntity"
+          parameterType="com.lims.manage.erp.entity.DeclarationItemEntity">
+    SELECT
+      *
+    FROM
+      test_declaration_item
+    WHERE
+      plan_id = #{planId,jdbcType=BIGINT}
+      AND product_id = #{productId,jdbcType=BIGINT}
+      AND check_item_id = #{checkItemId,jdbcType=BIGINT}
+  </select>
   <select id="checkParam" resultType="com.lims.manage.erp.entity.DeclarationParamEntity"
           parameterType="com.lims.manage.erp.entity.DeclarationParamEntity">
     SELECT
@@ -186,9 +225,17 @@
     select check_item_id from test_product_item where product_id = #{productId} and check_item_name = #{checkItemName}
   </select>
 
-  <delete id="deleteParam" parameterType="com.lims.manage.erp.entity.DeclarationParamEntity">
+  <delete id="deleteParam" parameterType="com.lims.manage.erp.entity.DeclarationItemEntity">
     delete
     from test_declaration_param
+    where plan_id = #{planId,jdbcType=BIGINT}
+      and product_id = #{productId,jdbcType=BIGINT}
+      and check_item_id = #{checkItemId,jdbcType=BIGINT}
+  </delete>
+
+  <delete id="deleteItem" parameterType="com.lims.manage.erp.entity.DeclarationItemEntity">
+    delete
+    from test_declaration_item
     where plan_id = #{planId,jdbcType=BIGINT}
       and product_id = #{productId,jdbcType=BIGINT}
       and check_item_id = #{checkItemId,jdbcType=BIGINT}
@@ -227,6 +274,24 @@
     ORDER BY
         create_time DESC
   </select>
+  <select id="getItemList" resultType="com.lims.manage.erp.entity.DeclarationItemEntity"
+          parameterType="com.lims.manage.erp.entity.DeclarationItemEntity">
+    SELECT
+    *
+    FROM
+    test_declaration_item
+    WHERE
+        plan_id = #{planId,jdbcType=BIGINT}
+    and product_id = #{productId,jdbcType=BIGINT}
+    <if test="checkItemName!=null and checkItemName!=''">
+      AND check_item_name LIKE concat(concat('%',#{checkItemName}),'%')
+    </if>
+    <if test="attribute!=null and attribute!=''">
+      AND attribute LIKE concat(concat('%',#{attribute}),'%')
+    </if>
+    ORDER BY
+        create_time DESC
+  </select>
 
   <delete id="deleteParamStandard" parameterType="com.lims.manage.erp.entity.DeclarationParamEntity">
     delete
@@ -238,7 +303,7 @@
   </delete>
 
   <select id="getParamDetail" resultType="com.lims.manage.erp.entity.DeclarationParamEntity"
-          parameterType="com.lims.manage.erp.entity.DeclarationParamEntity">
+          parameterType="com.lims.manage.erp.entity.DeclarationItemEntity">
     SELECT
         *
     FROM
@@ -247,5 +312,28 @@
     plan_id = #{planId,jdbcType=BIGINT}
     and product_id = #{productId,jdbcType=BIGINT}
     and check_item_id = #{checkItemId,jdbcType=BIGINT}
+  </select>
+  <select id="getParamDetailInfo" resultType="com.lims.manage.erp.entity.DeclarationItemEntity"
+          parameterType="com.lims.manage.erp.entity.DeclarationItemEntity">
+    SELECT
+        *
+    FROM
+        test_declaration_param
+    WHERE
+    plan_id = #{planId,jdbcType=BIGINT}
+    and product_id = #{productId,jdbcType=BIGINT}
+    and check_item_id = #{checkItemId,jdbcType=BIGINT}
+  </select>
+
+  <select id="getCheckItemList" resultType="com.lims.manage.erp.vo.LabelValueVo" parameterType="java.lang.Long">
+    SELECT
+      check_item_id value,
+	check_item_name label
+    FROM
+      test_product_item
+    WHERE
+      check_item_pid = 0
+      AND del_flag = 0
+      and product_id = #{productId}
   </select>
 </mapper>

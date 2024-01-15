@@ -1,9 +1,11 @@
 package com.lims.manage.erp.mapper;
 
+import com.lims.manage.erp.entity.DeclarationItemEntity;
 import com.lims.manage.erp.entity.DeclarationParamEntity;
 import com.lims.manage.erp.entity.DeclarationProductEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,6 +14,10 @@ import java.util.List;
 @Mapper
 public interface DeclarationParamEntityMapper {
     int insert(DeclarationParamEntity record);
+
+    int batchInsert(@Param("items")List<DeclarationParamEntity> items);
+
+    int insertNew(DeclarationItemEntity record);
 
     int insertSelective(DeclarationParamEntity record);
 
@@ -42,6 +48,7 @@ public interface DeclarationParamEntityMapper {
      * @param paramEntity
      * @return
      */
+    DeclarationItemEntity checkParamNew(DeclarationItemEntity paramEntity);
     DeclarationParamEntity checkParam(DeclarationParamEntity paramEntity);
 
     /**
@@ -57,7 +64,9 @@ public interface DeclarationParamEntityMapper {
      * @param record
      * @return
      */
-    int deleteParam(DeclarationParamEntity record);
+    int deleteParam(DeclarationItemEntity record);
+
+    int deleteItem(DeclarationItemEntity record);
 
     /**
      * 查询申报参数列表
@@ -65,6 +74,7 @@ public interface DeclarationParamEntityMapper {
      * @return
      */
     List<DeclarationParamEntity> getParamList(DeclarationParamEntity paramEntity);
+    List<DeclarationItemEntity> getItemList(DeclarationItemEntity paramEntity);
 
     /**
      * 删除申报参数的检测依据
@@ -78,5 +88,13 @@ public interface DeclarationParamEntityMapper {
      * @param paramEntity
      * @return
      */
-    List<DeclarationParamEntity> getParamDetail(DeclarationParamEntity paramEntity);
+    List<DeclarationParamEntity> getParamDetail(DeclarationItemEntity paramEntity);
+    DeclarationItemEntity getParamDetailInfo(DeclarationItemEntity paramEntity);
+
+    /**
+     * 查询产品的检测项
+     * @param productId
+     * @return
+     */
+    List<LabelValueVo> getCheckItemList(Long productId);
 }

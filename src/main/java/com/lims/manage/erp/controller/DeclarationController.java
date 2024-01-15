@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import com.lims.manage.erp.entity.DeclarationItemEntity;
 import com.lims.manage.erp.entity.DeclarationParamEntity;
 import com.lims.manage.erp.entity.DeclarationPlanEntity;
 import com.lims.manage.erp.entity.DeclarationProductEntity;
@@ -133,13 +134,27 @@ public class DeclarationController {
     }
 
     /**
+     * 查询产品检测项下拉列表
+     * @param productId
+     * @return
+     */
+    @GetMapping("/getCheckItemList")
+    public Result getCheckItemList(Long productId) {
+        return this.declarationService.getCheckItemList(productId);
+    }
+
+    /**
      * 新增申报参数
-     * @param paramEntity
+     * @param itemEntity
      * @return
      */
     @PostMapping("/addParam")
-    public Result addParam(@RequestBody DeclarationParamEntity paramEntity) {
-        return this.declarationService.addParam(paramEntity);
+    public Result addParam(@RequestBody DeclarationItemEntity itemEntity) {
+        return this.declarationService.addParam(itemEntity);
+    }
+    @PostMapping("/addParamOld")
+    public Result addParamOld(@RequestBody DeclarationParamEntity paramEntity) {
+        return this.declarationService.addParamOld(paramEntity);
     }
 
     /**
@@ -148,8 +163,8 @@ public class DeclarationController {
      * @return
      */
     @PostMapping("/deleteParam")
-    public Result deleteParam(@RequestBody DeclarationParamEntity paramEntity) {
-        return this.declarationService.deleteProduct(paramEntity);
+    public Result deleteParam(@RequestBody DeclarationItemEntity paramEntity) {
+        return this.declarationService.deleteParam(paramEntity);
     }
 
     /**
@@ -158,7 +173,7 @@ public class DeclarationController {
      * @return
      */
     @PostMapping("/updateParam")
-    public Result updateParam(@RequestBody DeclarationParamEntity paramEntity) {
+    public Result updateParam(@RequestBody DeclarationItemEntity paramEntity) {
         return this.declarationService.updateParam(paramEntity);
     }
 
@@ -168,7 +183,7 @@ public class DeclarationController {
      * @return
      */
     @PostMapping("/getParamList")
-    public Result getParamList(@RequestBody DeclarationParamEntity paramEntity) {
+    public Result getParamList(@RequestBody DeclarationItemEntity paramEntity) {
         return this.declarationService.getParamList(paramEntity);
     }
 
@@ -198,7 +213,7 @@ public class DeclarationController {
      * @return
      */
     @PostMapping("/getParamDetail")
-    public Result getParamDetail(@RequestBody DeclarationParamEntity paramEntity) {
+    public Result getParamDetail(@RequestBody DeclarationItemEntity paramEntity) {
         return this.declarationService.getParamDetail(paramEntity);
     }
 
@@ -210,5 +225,15 @@ public class DeclarationController {
     @GetMapping("/getProductListSelect")
     public Result getProductListSelect(Integer productTypeId) {
         return this.declarationService.getProductListSelect(productTypeId);
+    }
+
+    /**
+     * 查询申报参数详情成功
+     * @param itemEntity
+     * @return
+     */
+    @PostMapping("/getParamDetailInfo")
+    public Result getParamDetailInfo(@RequestBody DeclarationItemEntity itemEntity) {
+        return this.declarationService.getParamDetailInfo(itemEntity);
     }
 }
