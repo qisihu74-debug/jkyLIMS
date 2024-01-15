@@ -1,14 +1,19 @@
 package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lims.manage.erp.vo.LabelValueVo;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 @Data
 @SuppressWarnings("serial")
 @TableName("manage_review_information")
@@ -33,6 +38,11 @@ public class ManageReviewInformationEntity implements Serializable {
     private Date updateTime;
 
     private Integer pid;
+    /**
+     * url附件信息集合
+     */
+    @TableField(exist = false)
+    private List<LabelValueVo> urls = new ArrayList<>();
 
     private static final long serialVersionUID = 1L;
 

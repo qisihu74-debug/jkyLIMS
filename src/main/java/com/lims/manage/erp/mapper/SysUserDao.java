@@ -202,4 +202,20 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
             "</foreach>",
             "</script>"})
     List<String> getDingIdsByUserIds(@Param("items") Set<Long> items);
+
+    /**
+     * 体系管理员列表
+     *
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tt1.user_id,\n" +
+            "\tt1.NAME \n" +
+            "FROM\n" +
+            "\tsys_user AS t1\n" +
+            "\tLEFT JOIN sys_user_role t2 ON t1.user_id = t2.user_id\n" +
+            "\tLEFT JOIN sys_role t3 ON t2.role_id = t3.role_id \n" +
+            "WHERE\n" +
+            "\tt3.role_id = 99")
+    List<SysUserEntity> systemManagementList();
 }

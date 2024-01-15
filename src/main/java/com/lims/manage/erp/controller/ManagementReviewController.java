@@ -24,10 +24,22 @@ import javax.annotation.Resource;
 @RequestMapping("managementReview")
 public class ManagementReviewController extends ApiController {
     /**
-     * 受控文件信息
+     * 管理评审信息
      */
     @Resource
     private ManagementReviewService managementReviewService;
+
+
+    /**
+     * 获取具有管理评审角色的人员列表
+     *
+     * @return 返回人员列表
+     */
+    @GetMapping("/auditUserList")
+    public Result auditUserList() {
+
+        return this.managementReviewService.getSystemManagementList();
+    }
 
     /**
      * 分页查询所有数据
@@ -52,6 +64,43 @@ public class ManagementReviewController extends ApiController {
             return ResultUtil.error("数据为空");
         }
         return this.managementReviewService.addManageReviewPlanEntity(testControlledDocumentsEntity, file);
+    }
+
+
+    /**
+     * 更新数据
+     *
+     * @return 更新结果
+     */
+    @PostMapping("/update")
+    public Result update(@RequestParam("json") String json, MultipartFile[] file) {
+        ManageReviewPlanEntity testControlledDocumentsEntity = JSON.parseObject(json, ManageReviewPlanEntity.class);
+        if (StrUtil.isEmptyIfStr(testControlledDocumentsEntity)) {
+            return ResultUtil.error("数据为空");
+        }
+        return this.managementReviewService.updateManageReviewPlanEntity(testControlledDocumentsEntity, file);
+    }
+
+    /**
+     * 详情
+     *
+     * @return 详情
+     */
+    @GetMapping("/details")
+    public Result details(Integer id) {
+
+        return this.managementReviewService.details(id);
+    }
+
+    /**
+     * 删除
+     *
+     * @return 详情
+     */
+    @GetMapping("/delete")
+    public Result delete(Integer id) {
+
+        return this.managementReviewService.details(id);
     }
 
 
