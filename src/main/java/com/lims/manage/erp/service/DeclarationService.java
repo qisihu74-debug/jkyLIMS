@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service;
 
+import com.lims.manage.erp.entity.DeclarationItemEntity;
 import com.lims.manage.erp.entity.DeclarationParamEntity;
 import com.lims.manage.erp.entity.DeclarationPlanEntity;
 import com.lims.manage.erp.entity.DeclarationProductEntity;
@@ -92,31 +93,32 @@ public interface DeclarationService {
 
     /**
      * 新增申报参数
-     * @param paramEntity
+     * @param itemEntity
      * @return
      */
-    Result addParam(DeclarationParamEntity paramEntity);
+    Result addParam(DeclarationItemEntity itemEntity);
+    Result addParamOld(DeclarationParamEntity paramEntity);
 
     /**
      * 删除参数申报计划下的产品参数
      * @param paramEntity
      * @return
      */
-    Result deleteProduct(DeclarationParamEntity paramEntity);
+    Result deleteParam(DeclarationItemEntity paramEntity);
 
     /**
      * 修改参数申报计划下的产品参数
      * @param paramEntity
      * @return
      */
-    Result updateParam(DeclarationParamEntity paramEntity);
+    Result updateParam(DeclarationItemEntity paramEntity);
 
     /**
      * 查询申报参数列表
      * @param paramEntity
      * @return
      */
-    Result getParamList(DeclarationParamEntity paramEntity);
+    Result getParamList(DeclarationItemEntity paramEntity);
 
     /**
      * 添加检测项检测依据
@@ -137,7 +139,9 @@ public interface DeclarationService {
      * @param paramEntity
      * @return
      */
-    Result getParamDetail(DeclarationParamEntity paramEntity);
+    Result getParamDetail(DeclarationItemEntity paramEntity);
+
+    Result getParamDetailInfo(DeclarationItemEntity itemEntity);
 
     /**
      * 查询产品下拉列表
@@ -145,4 +149,11 @@ public interface DeclarationService {
      * @return
      */
     Result getProductListSelect(Integer productTypeId);
+
+    /**
+     * 查询产品检测项下拉列表
+     * @param productId
+     * @return
+     */
+    Result getCheckItemList(Long productId);
 }

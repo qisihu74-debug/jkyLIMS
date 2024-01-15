@@ -2,6 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.DeclarationItemEntity;
 import com.lims.manage.erp.entity.DeclarationParamEntity;
 import com.lims.manage.erp.entity.DeclarationPlanEntity;
 import com.lims.manage.erp.entity.DeclarationProductEntity;
@@ -17,6 +18,8 @@ import com.lims.manage.erp.vo.LabelValueVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -149,7 +152,42 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public Result addParam(DeclarationParamEntity paramEntity) {
+    @Transactional(rollbackFor = Exception.class)
+    public Result addParam(DeclarationItemEntity itemEntity) {
+        if(itemEntity.getPlanId() == null || itemEntity.getProductId() == null){
+            return ResultUtil.error("请先选择计划和产品信息！");
+        }
+        Long productId = itemEntity.getProductId();
+        String checkItemName = itemEntity.getCheckItemName();
+        Long checkItemId = paramEntityMapper.getCheckItemId(productId, checkItemName);
+        if(checkItemId == null){//为新增的检测项
+            itemEntity.setAttribute("新增");
+            long newParamId = GenID.getID();
+            itemEntity.setCheckItemId(newParamId);
+        }else{
+            DeclarationItemEntity declarationItemEntity = paramEntityMapper.checkParamNew(itemEntity);
+            if(declarationItemEntity != null){
+                return ResultUtil.error("当前计划下的产品已经存在此检测参数！");
+            }
+            itemEntity.setAttribute("扩项");
+        }
+        String username = ShiroUtils.getUserInfo().getUsername();
+        itemEntity.setCreateUser(username);
+        itemEntity.setCreateTime(new Date());
+        paramEntityMapper.insertNew(itemEntity);
+        List<DeclarationParamEntity> paramEntity = itemEntity.getParamEntity();
+        if(!CollectionUtils.isEmpty(paramEntity)){
+            for (DeclarationParamEntity param : paramEntity) {
+                param.setPlanId(itemEntity.getPlanId());
+                param.setProductId(itemEntity.getProductId());
+                param.setCheckItemId(itemEntity.getCheckItemId());
+            }
+            paramEntityMapper.batchInsert(paramEntity);
+        }
+        return ResultUtil.success("新增参数申报检测参数成功！",null);
+    }
+    @Override
+    public Result addParamOld(DeclarationParamEntity paramEntity) {
         if(paramEntity.getPlanId() == null || paramEntity.getProductId() == null){
             return ResultUtil.error("请先选择计划和产品信息！");
         }
@@ -176,33 +214,46 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public Result deleteProduct(DeclarationParamEntity paramEntity) {
-        if(paramEntity.getProductId() == null || paramEntity.getPlanId() == null
-                || paramEntity.getCheckItemId() == null){
+    public Result deleteParam(DeclarationItemEntity itemEntity) {
+        if(itemEntity.getProductId() == null || itemEntity.getPlanId() == null
+                || itemEntity.getCheckItemId() == null){
             return ResultUtil.error("请选择要删除的参数！");
         }
-        paramEntityMapper.deleteParam(paramEntity);
+        paramEntityMapper.deleteItem(itemEntity);//删除检测项
+        paramEntityMapper.deleteParam(itemEntity);//删除依据
         return ResultUtil.success("删除参数申报计划下的产品参数成功！",null);
     }
 
     @Override
-    public Result updateParam(DeclarationParamEntity paramEntity) {
-        if(paramEntity.getProductId() == null || paramEntity.getPlanId() == null
-                || paramEntity.getCheckItemId() == null){
+    public Result updateParam(DeclarationItemEntity itemEntity) {
+        if(itemEntity.getProductId() == null || itemEntity.getPlanId() == null
+                || itemEntity.getCheckItemId() == null){
             return ResultUtil.error("请选择要编辑的参数！");
         }
-//        paramEntityMapper.updateParam(paramEntity);
+        //删除原检测依据
+        paramEntityMapper.deleteParam(itemEntity);//删除依据
+        //增加新检测依据
+        paramEntityMapper.insertNew(itemEntity);
+        List<DeclarationParamEntity> paramEntity = itemEntity.getParamEntity();
+        if(!CollectionUtils.isEmpty(paramEntity)){
+            for (DeclarationParamEntity param : paramEntity) {
+                param.setPlanId(itemEntity.getPlanId());
+                param.setProductId(itemEntity.getProductId());
+                param.setCheckItemId(itemEntity.getCheckItemId());
+            }
+            paramEntityMapper.batchInsert(paramEntity);
+        }
         return ResultUtil.success("修改参数申报计划下的产品参数成功！",null);
     }
 
     @Override
-    public Result getParamList(DeclarationParamEntity paramEntity) {
+    public Result getParamList(DeclarationItemEntity paramEntity) {
         if(paramEntity.getPageNum() == null || paramEntity.getPageSize() == null){
             return ResultUtil.error("缺少分页参数！");
         }
         PageHelper.startPage(paramEntity.getPageNum(),paramEntity.getPageSize());
-        List<DeclarationParamEntity> productList = paramEntityMapper.getParamList(paramEntity);
-        PageInfo<DeclarationParamEntity> pageInfo = new PageInfo<>(productList);
+        List<DeclarationItemEntity> productList = paramEntityMapper.getItemList(paramEntity);
+        PageInfo<DeclarationItemEntity> pageInfo = new PageInfo<>(productList);
         return ResultUtil.success("查询申报计划下的产品参数列表成功！",pageInfo);
     }
 
@@ -231,12 +282,23 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public Result getParamDetail(DeclarationParamEntity paramEntity) {
+    public Result getParamDetail(DeclarationItemEntity paramEntity) {
         if(paramEntity.getPlanId() == null || paramEntity.getProductId() == null || paramEntity.getCheckItemId() == null){
             return ResultUtil.error("请先选择申报参数！");
         }
         List<DeclarationParamEntity> paramDetail = paramEntityMapper.getParamDetail(paramEntity);
         return ResultUtil.success("查询申报参数详情成功！",paramDetail);
+    }
+
+    @Override
+    public Result getParamDetailInfo(DeclarationItemEntity itemEntity) {
+        if(itemEntity.getPlanId() == null || itemEntity.getProductId() == null || itemEntity.getCheckItemId() == null){
+            return ResultUtil.error("请先选择申报参数！");
+        }
+        DeclarationItemEntity paramDetailInfo = paramEntityMapper.getParamDetailInfo(itemEntity);
+        List<DeclarationParamEntity> paramDetail = paramEntityMapper.getParamDetail(itemEntity);
+        paramDetailInfo.setParamEntity(paramDetail);
+        return ResultUtil.success("查询申报参数详情成功！",paramDetailInfo);
     }
 
     @Override
@@ -246,5 +308,11 @@ public class DeclarationServiceImpl implements DeclarationService {
         }
         List<LabelValueVo> productList = productEntityMapper.getProductListSelect(productTypeId);
         return ResultUtil.success("查询产品下拉列表成功！",productList);
+    }
+
+    @Override
+    public Result getCheckItemList(Long productId) {
+        List<LabelValueVo> itemList = paramEntityMapper.getCheckItemList(productId);
+        return ResultUtil.success("查询产品检测项下拉列表成功！",itemList);
     }
 }
