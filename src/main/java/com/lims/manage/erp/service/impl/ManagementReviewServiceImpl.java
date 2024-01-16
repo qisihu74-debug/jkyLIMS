@@ -297,25 +297,15 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         } else {
             // 更新数据
             informationEntity.setId(oldData.getId());
-            // 附件文件信息 : 说明存在则 拼接即可
-            if (org.apache.commons.lang.StringUtils.isNotEmpty(oldData.getOriginalFileName())) {
-                if (org.apache.commons.lang.StringUtils.isNotEmpty(informationEntity.getOriginalFileName())) {
-                    informationEntity.setOriginalFileName(oldData.getOriginalFileName() + "," + informationEntity.getOriginalFileName());
-                } else {
-                    informationEntity.setOriginalFileName(oldData.getOriginalFileName());
+            // 新附件不等于null && 旧附件不为空 则删除旧附件：始终保持最新一组数据
+            if (!StringUtils.isEmpty(informationEntity.getFileUrl()) && !StringUtils.isEmpty(oldData.getFileUrl())) {
+                String[] strings = oldData.getFileUrl().split(",");
+                for (int i = 0; i < strings.length; i++) {
+                    String[] urls = strings[i].split("/");
+                    String url = urls[urls.length - 1];
+                    // 删除附件信息
+                    MinIoUtil.deleteFile(BucketsConst.manage_audit, url);
                 }
-            } else {
-                informationEntity.setOriginalFileName(informationEntity.getOriginalFileName());
-            }
-            // 附件URL信息
-            if (org.apache.commons.lang.StringUtils.isNotEmpty(oldData.getFileUrl())) {
-                if (org.apache.commons.lang.StringUtils.isNotEmpty(informationEntity.getFileUrl())) {
-                    informationEntity.setFileUrl(oldData.getFileUrl() + "," + informationEntity.getFileUrl());
-                } else {
-                    informationEntity.setFileUrl(oldData.getFileUrl());
-                }
-            } else {
-                informationEntity.setFileUrl(informationEntity.getFileUrl());
             }
             manageReviewInformationEntityMapper.updateByPrimaryKeySelective(informationEntity);
         }
