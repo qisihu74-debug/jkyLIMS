@@ -236,16 +236,18 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         //附件存在上传附件到服务器
         if (file != null && file.length >= 1) {
             for (MultipartFile multipartFile : file) {
-                Long fileCode = GenID.getID();
-                String name = multipartFile.getOriginalFilename();
-                String[] strings = name.split("\\.");
-                String upload = MinIoUtil.upload("manage-audit", multipartFile, fileCode + "." + strings[strings.length - 1]);
-                // 截取 \\? 前数据
-                String filePath = upload.split("\\?")[0];
-                fileNameBuffer.append(filePath);
-                fileNameBuffer.append(",");
-                originalFileNameBuffer.append(name);
-                originalFileNameBuffer.append(",");
+                if (org.apache.commons.lang.StringUtils.isNotEmpty(multipartFile.getOriginalFilename())) {
+                    Long fileCode = GenID.getID();
+                    String name = multipartFile.getOriginalFilename();
+                    String[] strings = name.split("\\.");
+                    String upload = MinIoUtil.upload("manage-audit", multipartFile, fileCode + "." + strings[strings.length - 1]);
+                    // 截取 \\? 前数据
+                    String filePath = upload.split("\\?")[0];
+                    fileNameBuffer.append(filePath);
+                    fileNameBuffer.append(",");
+                    originalFileNameBuffer.append(name);
+                    originalFileNameBuffer.append(",");
+                }
             }
         }
         // 补充文件附件
@@ -262,7 +264,7 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         // 职位
         queryWrapper.eq(ManageReviewInformationEntity::getDuties, duties);
         // pid
-        queryWrapper.eq(ManageReviewInformationEntity::getPid, informationEntity.getId());
+        queryWrapper.eq(ManageReviewInformationEntity::getPid, informationEntity.getPid());
         // delFlag = 0
         queryWrapper.eq(ManageReviewInformationEntity::getDelFlag, 0);
         // 查询 创建人、职位、pid
@@ -277,13 +279,21 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
             informationEntity.setId(oldData.getId());
             // 附件文件信息 : 说明存在则 拼接即可
             if (org.apache.commons.lang.StringUtils.isNotEmpty(oldData.getOriginalFileName())) {
-                informationEntity.setOriginalFileName(oldData.getOriginalFileName() + "," + informationEntity.getOriginalFileName());
+                if (org.apache.commons.lang.StringUtils.isNotEmpty(informationEntity.getOriginalFileName())) {
+                    informationEntity.setOriginalFileName(oldData.getOriginalFileName() + "," + informationEntity.getOriginalFileName());
+                } else {
+                    informationEntity.setOriginalFileName(oldData.getOriginalFileName());
+                }
             } else {
                 informationEntity.setOriginalFileName(informationEntity.getOriginalFileName());
             }
             // 附件URL信息
             if (org.apache.commons.lang.StringUtils.isNotEmpty(oldData.getFileUrl())) {
-                informationEntity.setFileUrl(oldData.getFileUrl() + "," + informationEntity.getFileUrl());
+                if (org.apache.commons.lang.StringUtils.isNotEmpty(informationEntity.getFileUrl())) {
+                    informationEntity.setFileUrl(oldData.getFileUrl() + "," + informationEntity.getFileUrl());
+                } else {
+                    informationEntity.setFileUrl(oldData.getFileUrl());
+                }
             } else {
                 informationEntity.setFileUrl(informationEntity.getFileUrl());
             }
@@ -317,14 +327,14 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         // 职位
         queryWrapper.eq(ManageReviewInformationEntity::getDuties, duties);
         // pid
-        queryWrapper.eq(ManageReviewInformationEntity::getPid, informationEntity.getId());
+        queryWrapper.eq(ManageReviewInformationEntity::getPid, informationEntity.getPid());
         // delFlag = 0
         queryWrapper.eq(ManageReviewInformationEntity::getDelFlag, 0);
         // 查询 创建人、职位、pid
         ManageReviewInformationEntity oldData = manageReviewInformationEntityMapper.selectOne(queryWrapper);
         if (oldData != null) {
             // 附件删除
-            if (StringUtils.isEmpty(oldData.getFileUrl())) {
+            if (!StringUtils.isEmpty(oldData.getFileUrl())) {
                 String[] strings = oldData.getFileUrl().split(",");
                 for (int i = 0; i < strings.length; i++) {
                     String[] urls = strings[i].split("/");
@@ -527,13 +537,13 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         // 更新： 创建计划
         manageReviewPlanEntityMapper.updateByPrimaryKeySelective(manageReviewPlanEntity);
         // 创建人：更新附件
+        manageReviewPlanEntity.setPlanCreator(oldManageReviewPlanEntity.getPlanCreator());
         dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), file, userInfo);
         // 参加人员: 数据截取后新增
         String[] participants = manageReviewPlanEntity.getParticipant().split(",");
-
         for (int i = 0; i < participants.length; i++) {
             manageReviewPlanEntity.setPlanCreator(participants[i]);
-            // 创建人：更新附件
+            // 参加人员：更新附件
             dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(2).getName(), null, userInfo);
         }
         // 旧参加人员
@@ -668,6 +678,7 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
             manageReviewPlanEntity.setPlanCreator(userInfo.getName() + "&" + userInfo.getUserId());
             manageReviewPlanEntity.setId(oldManageReviewPlanEntity.getId());
             dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), file, userInfo);
+            return ResultUtil.success("上传附件成功");
         }
 //        // 登录人 比较 主持人 信息
 //        if (oldManageReviewPlanEntity.getReviewHost().contains(userInfo.getName() + "&" + userInfo.getUserId()) && type == 1) {
@@ -682,8 +693,9 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
             manageReviewPlanEntity.setPlanCreator(userInfo.getName() + "&" + userInfo.getUserId());
             manageReviewPlanEntity.setId(oldManageReviewPlanEntity.getId());
             dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(2).getName(), file, userInfo);
+            return ResultUtil.success("上传附件成功");
         }
-        return ResultUtil.success("上传附件成功");
+        return ResultUtil.error("上传附件失败");
     }
 
 

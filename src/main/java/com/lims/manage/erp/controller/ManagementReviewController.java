@@ -111,7 +111,7 @@ public class ManagementReviewController extends ApiController {
      * @param type 1内审员上传，2体系管理员上传
      * @return
      */
-    @RequestMapping("uploadFile")
+    @RequestMapping("/uploadFile")
     public Result uploadFile(@RequestParam("type") Integer type, @RequestParam("id") Integer id, MultipartFile[] file) {
         if (type == null || id == null || file == null) {
             return ResultUtil.error("缺少参数");
