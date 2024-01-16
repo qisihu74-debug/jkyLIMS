@@ -83,6 +83,12 @@
       <if test="participant != null">
         participant,
       </if>
+      <if test="originalFileName != null">
+        original_file_name,
+      </if>
+      <if test="fileUrl != null">
+        file_url,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -124,6 +130,12 @@
       <if test="participant != null">
         #{participant,jdbcType=VARCHAR},
       </if>
+      <if test="originalFileName != null">
+        #{originalFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        #{fileUrl,jdbcType=VARCHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.ManageReviewPlanEntity">
@@ -164,6 +176,12 @@
       </if>
       <if test="participant != null">
         participant = #{participant,jdbcType=VARCHAR},
+      </if>
+      <if test="originalFileName != null">
+        original_file_name = #{originalFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        file_url = #{fileUrl,jdbcType=VARCHAR},
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}

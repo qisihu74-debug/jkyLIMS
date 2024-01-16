@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.ManageReviewInformationEntity;
 import com.lims.manage.erp.entity.ManageReviewPlanEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -150,6 +151,8 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         if (sign == 1) {
             return ResultUtil.error(userInfo.getName() + "不是体系管理员");
         }
+        // 上述为 ↑↑↑↑↑ 验证信息 ↑↑↑↑↑
+
         //创建人信息
         manageReviewPlanEntity.setPlanCreator(userInfo.getName() + "&" + userInfo.getUserId());
         manageReviewPlanEntity.setDelFlag(0);
@@ -157,10 +160,27 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         manageReviewPlanEntity.setPlanCreationTime(new Date());
         manageReviewPlanEntity.setCreateTime(new Date());
         manageReviewPlanEntity.setId(null);
+        // 计划新建时：
+        manageReviewPlanEntity.setReviewReportStatus("待上传");
+        // 创建人 新增附件 - 单个
+        if (file != null && file.length >= 1) {
+            for (MultipartFile multipartFile : file) {
+                if (org.apache.commons.lang.StringUtils.isNotEmpty(multipartFile.getOriginalFilename())) {
+                    Long fileCode = GenID.getID();
+                    String name = multipartFile.getOriginalFilename();
+                    String[] strings = name.split("\\.");
+                    String upload = MinIoUtil.upload(BucketsConst.manage_audit, multipartFile, fileCode + "." + strings[strings.length - 1]);
+                    // 截取 \\? 前数据
+                    String filePath = upload.split("\\?")[0];
+                    manageReviewPlanEntity.setFileUrl(filePath);
+                    manageReviewPlanEntity.setOriginalFileName(name);
+                }
+            }
+        }
         // 新增： 创建计划 并返回id
         manageReviewPlanEntityMapper.insertSelective(manageReviewPlanEntity);
         // 创建人：职位信息，新增附件
-        dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), file, userInfo);
+        dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), null, userInfo);
         // 参加人员: 职位信息，数据截取后新增
         String[] participants = manageReviewPlanEntity.getParticipant().split(",");
         for (int i = 0; i < participants.length; i++) {
@@ -240,7 +260,7 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
                     Long fileCode = GenID.getID();
                     String name = multipartFile.getOriginalFilename();
                     String[] strings = name.split("\\.");
-                    String upload = MinIoUtil.upload("manage-audit", multipartFile, fileCode + "." + strings[strings.length - 1]);
+                    String upload = MinIoUtil.upload(BucketsConst.manage_audit, multipartFile, fileCode + "." + strings[strings.length - 1]);
                     // 截取 \\? 前数据
                     String filePath = upload.split("\\?")[0];
                     fileNameBuffer.append(filePath);
@@ -340,7 +360,7 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
                     String[] urls = strings[i].split("/");
                     String url = urls[urls.length - 1];
                     // 删除附件信息
-                    MinIoUtil.deleteFile("manage-audit", url);
+                    MinIoUtil.deleteFile(BucketsConst.manage_audit, url);
                 }
             }
             // 删除数据
@@ -455,20 +475,22 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
     public String validationFileSuffix(MultipartFile[] file, List<TestInitDataEntity> suffixSet) {
         if (file != null && file.length >= 1) {
             for (MultipartFile multipartFile : file) {
-                String name = multipartFile.getOriginalFilename();
-                String[] strings = name.split("\\.");
-                String nameSuffix = strings[strings.length - 1];
+                if (org.apache.commons.lang.StringUtils.isNotEmpty(multipartFile.getOriginalFilename())) {
+                    String name = multipartFile.getOriginalFilename();
+                    String[] strings = name.split("\\.");
+                    String nameSuffix = strings[strings.length - 1];
 
-                // 当前附件标记
-                Boolean suffixTag = false;
-                // 遍历 : 后缀名符合的集合
-                for (TestInitDataEntity dataEntity : suffixSet) {
-                    if (dataEntity.getName().equals(nameSuffix)) {
-                        suffixTag = true;
+                    // 当前附件标记
+                    Boolean suffixTag = false;
+                    // 遍历 : 后缀名符合的集合
+                    for (TestInitDataEntity dataEntity : suffixSet) {
+                        if (dataEntity.getName().equals(nameSuffix)) {
+                            suffixTag = true;
+                        }
                     }
-                }
-                if (!suffixTag) {
-                    return "文件上传失败：  文件名 " + name + " 不支持存储 ";
+                    if (!suffixTag) {
+                        return "文件上传失败：  文件名 " + name + " 不支持存储 ";
+                    }
                 }
             }
         }
@@ -534,11 +556,33 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         manageReviewPlanEntity.setDelFlag(0);
         // 计划更新时间
         manageReviewPlanEntity.setUpdateTime(new Date());
+        // 创建人 新增附件 - 单个
+        if (file != null && file.length >= 1) {
+            for (MultipartFile multipartFile : file) {
+                if (org.apache.commons.lang.StringUtils.isNotEmpty(multipartFile.getOriginalFilename())) {
+                    // 移除 旧附件信息 ：  附件删除
+                    if (!StringUtils.isEmpty(oldManageReviewPlanEntity.getFileUrl())) {
+                        String[] strings = oldManageReviewPlanEntity.getFileUrl().split(",");
+                        for (int i = 0; i < strings.length; i++) {
+                            String[] urls = strings[i].split("/");
+                            String url = urls[urls.length - 1];
+                            // 删除附件信息
+                            MinIoUtil.deleteFile(BucketsConst.manage_audit, url);
+                        }
+                    }
+                    Long fileCode = GenID.getID();
+                    String name = multipartFile.getOriginalFilename();
+                    String[] strings = name.split("\\.");
+                    String upload = MinIoUtil.upload(BucketsConst.manage_audit, multipartFile, fileCode + "." + strings[strings.length - 1]);
+                    // 截取 \\? 前数据
+                    String filePath = upload.split("\\?")[0];
+                    manageReviewPlanEntity.setFileUrl(filePath);
+                    manageReviewPlanEntity.setOriginalFileName(name);
+                }
+            }
+        }
         // 更新： 创建计划
         manageReviewPlanEntityMapper.updateByPrimaryKeySelective(manageReviewPlanEntity);
-        // 创建人：更新附件
-        manageReviewPlanEntity.setPlanCreator(oldManageReviewPlanEntity.getPlanCreator());
-        dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), file, userInfo);
         // 参加人员: 数据截取后新增
         String[] participants = manageReviewPlanEntity.getParticipant().split(",");
         for (int i = 0; i < participants.length; i++) {
@@ -647,7 +691,17 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
             deleteManageReviewPlanEntity.setId(oldManageReviewPlanEntity.getId());
             deleteOperation(deleteManageReviewPlanEntity, personnelPosition.get(1).getName());
         }
-        // 删除文件信息
+        // 移除 旧附件信息 ：  附件删除
+        if (!StringUtils.isEmpty(oldManageReviewPlanEntity.getFileUrl())) {
+            String[] strings = oldManageReviewPlanEntity.getFileUrl().split(",");
+            for (int i = 0; i < strings.length; i++) {
+                String[] urls = strings[i].split("/");
+                String url = urls[urls.length - 1];
+                // 删除附件信息
+                MinIoUtil.deleteFile(BucketsConst.manage_audit, url);
+            }
+        }
+        // 删除创建计划信息
         manageReviewPlanEntityMapper.deleteByPrimaryKey(oldManageReviewPlanEntity.getId());
 
         return ResultUtil.success("删除成功");
@@ -672,21 +726,41 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
         if (oldManageReviewPlanEntity == null) {
             return ResultUtil.error("上传附件失败，计划不存在");
         }
+        // 附件效验
+        for (MultipartFile multipartFile : file) {
+            if (StringUtils.isEmpty(multipartFile.getOriginalFilename())) {
+                return ResultUtil.error(userInfo.getName() + "： 上传失败,附件不能为空");
+            }
+        }
+
         // 登录人 比较 创建人 信息
-        if (oldManageReviewPlanEntity.getParticipant().contains(userInfo.getName() + "&" + userInfo.getUserId()) && type == 2) {
+        if (type == 2) {
+            // 判断当前登录人 是否是 体系管理员
+            List<SysUserEntity> userList = sysUserDao.systemManagementList();
+            Integer sign = 1;
+            for (SysUserEntity sysUserEntity : userList) {
+                if (sysUserEntity.getUserId().equals(userInfo.getUserId())) {
+                    // sign = 0 表示当前用户为体系管理员
+                    sign = 0;
+                }
+            }
+            if (sign == 1) {
+                return ResultUtil.error(userInfo.getName() + "上传失败,不是体系管理员");
+            }
+
             ManageReviewPlanEntity manageReviewPlanEntity = new ManageReviewPlanEntity();
             manageReviewPlanEntity.setPlanCreator(userInfo.getName() + "&" + userInfo.getUserId());
             manageReviewPlanEntity.setId(oldManageReviewPlanEntity.getId());
             dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(0).getName(), file, userInfo);
+            // 更新计划信息：评审报告状态
+            ManageReviewPlanEntity manageReviewPlanEntity1 = new ManageReviewPlanEntity();
+            manageReviewPlanEntity1.setId(oldManageReviewPlanEntity.getId());
+            // 上传评审总结时：
+            manageReviewPlanEntity1.setReviewReportStatus("已完成");
+            manageReviewPlanEntityMapper.updateByPrimaryKeySelective(manageReviewPlanEntity1);
             return ResultUtil.success("上传附件成功");
         }
-//        // 登录人 比较 主持人 信息
-//        if (oldManageReviewPlanEntity.getReviewHost().contains(userInfo.getName() + "&" + userInfo.getUserId()) && type == 1) {
-//            ManageReviewPlanEntity manageReviewPlanEntity = new ManageReviewPlanEntity();
-//            manageReviewPlanEntity.setPlanCreator(userInfo.getName() + "&" + userInfo.getUserId());
-//            manageReviewPlanEntity.setId(oldManageReviewPlanEntity.getId());
-//            dynamicHandlingFileAddORUpdate(manageReviewPlanEntity, personnelPosition.get(1).getName(), file);
-//        }
+
         // 登录人 比较 参与人员 信息
         if (oldManageReviewPlanEntity.getParticipant().contains(userInfo.getName() + "&" + userInfo.getUserId()) && type == 1) {
             ManageReviewPlanEntity manageReviewPlanEntity = new ManageReviewPlanEntity();

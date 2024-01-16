@@ -66,6 +66,10 @@ public class ManageReviewPlanEntity implements Serializable {
     @TableField(exist = false)
     private Integer sign;
 
+    private String originalFileName;
+
+    private String fileUrl;
+
     public Integer getId() {
         return id;
     }
