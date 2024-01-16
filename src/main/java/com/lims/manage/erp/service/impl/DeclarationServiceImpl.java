@@ -92,6 +92,7 @@ public class DeclarationServiceImpl implements DeclarationService {
             if(declarationProductEntity != null){
                 return ResultUtil.error("当前计划下已经存在此产品！");
             }
+            productEntity.setProductId(productId);
             productEntity.setAttribute("扩项");
         }
         String username = ShiroUtils.getUserInfo().getUsername();
