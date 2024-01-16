@@ -47,8 +47,8 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
     private TaskMapper taskMapper;
     @Autowired
     private SysUserDao sysUserDao;
-    @Autowired
-    private DingNotifyUtils dingNotifyUtils;
+//    @Autowired
+//    private DingNotifyUtils dingNotifyUtils;
 
     /**
      * 管理评审 列表展示
@@ -200,19 +200,20 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
      * @param planCreator
      * @param publisher
      */
-    public void methodDingTalkNotification(String planCreator, String publisher) {
+    void methodDingTalkNotification(String planCreator, String publisher) {
 
+        DingNotifyUtils dingNotifyUtils = new DingNotifyUtils();
 
         // 通知时间
         Date now = new Date();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
         String nowString = simpleDateFormat.format(now);
         // 当前年份
-        SimpleDateFormat yyyyFormat = new SimpleDateFormat("yyyy");
+        SimpleDateFormat yyyyFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String yyyyString = yyyyFormat.format(now);
+        // 查询钉钉id
+        String dingId = "";
         try {
-            // 查询钉钉id
-            String dingId = "";
             // 获取 任务单下检测人信息 userId
             LambdaQueryWrapper<SysUserEntity> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(SysUserEntity::getUserId, planCreator.split("&")[1]);
@@ -221,7 +222,7 @@ public class ManagementReviewServiceImpl extends ServiceImpl<ManageReviewPlanEnt
             StringBuffer titleBuffer = new StringBuffer();
             titleBuffer.append(nowString + "评审计划通知");
             StringBuffer contextBuffer = new StringBuffer();
-            contextBuffer.append(yyyyString + "年 管理评审计划已经发布  " + "请登录公司系统提交相关资料，特此通知！");
+            contextBuffer.append(yyyyString + " 管理评审计划已经发布：" + "请登录公司系统提交相关资料，特此通知！");
             dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), publisher, contextBuffer.toString());
         } catch (Exception e) {
             e.printStackTrace();
