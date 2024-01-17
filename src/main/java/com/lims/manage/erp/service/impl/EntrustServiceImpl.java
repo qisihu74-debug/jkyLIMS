@@ -6466,6 +6466,8 @@ public class EntrustServiceImpl implements EntrustService {
             }
             // 获取受理日期
             basisInfo.setAcceptanceDate(acceptanceTime);
+            // 委托单号变更后，进行传递 当前 年： yyyy  供样品编号获取
+            entrustDetails.setEntrustmentNo(basisInfo.getEntrustmentNo());
         }
         basisInfo.setBusinessAcceptor(userInfo.getName());
         entityMapper.updateEntrustInfoDetails(basisInfo);
@@ -6484,7 +6486,7 @@ public class EntrustServiceImpl implements EntrustService {
                     // 样品状态 预收样 = 收样
                     sampleData1.setState("5");
                     // 处理原材样品编号 （ps:定义预样品编号需要强制更改样品编号）
-                    sampleData1.setSampleCode(methodSampleCode(sampleData1.getSampleCode(), basisInfo.getEntrustmentNo()));
+                    sampleData1.setSampleCode(methodSampleCode(sampleData1.getSampleCode(), entrustDetails.getEntrustmentNo()));
                     stringBuffer.append("处理原材样品编号后  " + sampleData1.getSampleCode());
                     // update样品信息
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleData1);
