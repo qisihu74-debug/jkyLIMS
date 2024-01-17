@@ -5375,7 +5375,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
         // 获取年信息。 进行编号获取处理
         String[] sampleCodes = sampleDetailVo.getSampleCode().split("-");
-        String acceptanceDate = sampleCodes[1].substring(0, 4);
+        String acceptanceDate = sampleData.getSampleCode().split("-")[1].substring(0, 4);
         Integer maxSampleCode = sampleEntityMapper.getYPMaxNumber(acceptanceDate, "YP");
         // 更改样品编号
         String suffix = "";
@@ -6466,6 +6466,8 @@ public class EntrustServiceImpl implements EntrustService {
             }
             // 获取受理日期
             basisInfo.setAcceptanceDate(acceptanceTime);
+            // 委托单号变更后，进行传递 当前 年： yyyy  供样品编号获取
+            entrustDetails.setEntrustmentNo(basisInfo.getEntrustmentNo());
         }
         basisInfo.setBusinessAcceptor(userInfo.getName());
         entityMapper.updateEntrustInfoDetails(basisInfo);
@@ -6484,7 +6486,7 @@ public class EntrustServiceImpl implements EntrustService {
                     // 样品状态 预收样 = 收样
                     sampleData1.setState("5");
                     // 处理原材样品编号 （ps:定义预样品编号需要强制更改样品编号）
-                    sampleData1.setSampleCode(methodSampleCode(sampleData1.getSampleCode()));
+                    sampleData1.setSampleCode(methodSampleCode(sampleData1.getSampleCode(), entrustDetails.getEntrustmentNo()));
                     stringBuffer.append("处理原材样品编号后  " + sampleData1.getSampleCode());
                     // update样品信息
                     sampleEntityMapper.updateByPrimaryKeySelective(sampleData1);
@@ -6595,21 +6597,26 @@ public class EntrustServiceImpl implements EntrustService {
      * @param strSampleCode 样品预编号
      * @return 处理后预样品编号 String类型
      */
-    public String methodSampleCode(String strSampleCode) {
+    public String methodSampleCode(String strSampleCode, Integer entrustmentNo) {
         // 处理样品编号:来样时间与样品编号需要一致
         StringBuffer sampleCode = new StringBuffer();
         // 样品编号 比对 来样时间 年份不一致 则更改样品编号 为当前年份最大编号。
         // 截取样品编号
         String[] sampleCodes = strSampleCode.split("-");
-        sampleCodes[0]="YP";
+        sampleCodes[0] = "YP";
         // 根据年限 和类型 查询最大样品编号
-        String acceptanceDate = sampleCodes[1].substring(0, 4);
-        Integer maxSampleCode = sampleEntityMapper.getYPMaxNumber(acceptanceDate,"YP");
+        String acceptanceDate = "";
+        if (entrustmentNo == null) {
+            acceptanceDate = sampleCodes[1].substring(0, 4);
+        } else {
+            acceptanceDate = String.valueOf(entrustmentNo).substring(0, 4);
+        }
+        Integer maxSampleCode = sampleEntityMapper.getYPMaxNumber(acceptanceDate, "YP");
         // 更改样品编号
         String suffix = "";
-        if(maxSampleCode == null){
+        if (maxSampleCode == null) {
             suffix = new DecimalFormat("00000").format(1);
-        }else {
+        } else {
             maxSampleCode += 1;
             suffix = new DecimalFormat("00000").format(maxSampleCode);
         }
