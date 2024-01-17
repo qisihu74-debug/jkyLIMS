@@ -37,7 +37,7 @@ public class DeclarationServiceImpl implements DeclarationService {
     @Override
     public Result addPlan(DeclarationPlanEntity planEntity) {
         planEntity.setId(GenID.getID());
-        planEntity.setOperateUser(ShiroUtils.getUserInfo().getUsername());
+        planEntity.setOperateUser(ShiroUtils.getUserInfo().getName());
         planEntity.setOperateDate(new Date());
         planEntity.setState("待开始");
         planEntity.setIsDel(0);
@@ -47,6 +47,9 @@ public class DeclarationServiceImpl implements DeclarationService {
 
     @Override
     public Result deletePlan(Long planId) {
+        if(planId == null){
+            return ResultUtil.error("请选择要删除的申报计划！");
+        }
         planEntityMapper.updateDelete(planId);
         return ResultUtil.success("删除参数申报计划成功！",null);
     }
@@ -95,7 +98,7 @@ public class DeclarationServiceImpl implements DeclarationService {
             productEntity.setProductId(productId);
             productEntity.setAttribute("扩项");
         }
-        String username = ShiroUtils.getUserInfo().getUsername();
+        String username = ShiroUtils.getUserInfo().getName();
         productEntity.setCreateUser(username);
         productEntity.setCreateTime(new Date());
         productEntityMapper.insert(productEntity);
@@ -172,7 +175,7 @@ public class DeclarationServiceImpl implements DeclarationService {
             }
             itemEntity.setAttribute("扩项");
         }
-        String username = ShiroUtils.getUserInfo().getUsername();
+        String username = ShiroUtils.getUserInfo().getName();
         itemEntity.setCreateUser(username);
         itemEntity.setCreateTime(new Date());
         paramEntityMapper.insertNew(itemEntity);
@@ -207,7 +210,7 @@ public class DeclarationServiceImpl implements DeclarationService {
             }
             paramEntity.setAttribute("扩项");
         }
-        String username = ShiroUtils.getUserInfo().getUsername();
+        String username = ShiroUtils.getUserInfo().getName();
         paramEntity.setCreateUser(username);
         paramEntity.setCreateTime(new Date());
         paramEntityMapper.insert(paramEntity);
@@ -234,7 +237,6 @@ public class DeclarationServiceImpl implements DeclarationService {
         //删除原检测依据
         paramEntityMapper.deleteParam(itemEntity);//删除依据
         //增加新检测依据
-        paramEntityMapper.insertNew(itemEntity);
         List<DeclarationParamEntity> paramEntity = itemEntity.getParamEntity();
         if(!CollectionUtils.isEmpty(paramEntity)){
             for (DeclarationParamEntity param : paramEntity) {

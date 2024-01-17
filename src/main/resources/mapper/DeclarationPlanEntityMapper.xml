@@ -156,14 +156,14 @@
         select
             *
         from test_declaration_plan
-        <where>
-            <if test="planName!=null and planName!=''">
-                AND plan_name LIKE concat(concat('%',#{planName}),'%')
-            </if>
-            <if test="state!=null and state!=''">
-                AND state = #{state}
-            </if>
-        </where>
+        where is_del = 0
+        <if test="planName!=null and planName!=''">
+            AND plan_name LIKE concat(concat('%',#{planName}),'%')
+        </if>
+        <if test="state!=null and state!=''">
+            AND state = #{state}
+        </if>
+        order by operate_date desc,id desc
     </select>
 
 </mapper>
