@@ -7,10 +7,15 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
+import com.lims.manage.erp.annotation.Log;
+import com.lims.manage.erp.config.manager.AsyncManager;
+import com.lims.manage.erp.config.manager.factory.AsyncFactory;
+import com.lims.manage.erp.constant.Constants;
 import com.lims.manage.erp.entity.DynamicImg;
 import com.lims.manage.erp.entity.SysLog;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserRoleEntity;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.mapper.TestTechnicistDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
@@ -119,7 +124,7 @@ public class UserLoginController {
         map.put("userInfo", userData);
         // 根据 token 存储 用户信息
         redisUtil.setRedisTokenUser((String) map.get("token"),userData);
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userData.getUsername()+"登陆成功!", Const.LOGIN_LOG,true);
+        AsyncManager.me().execute(AsyncFactory.recordLogininfor(userData.getUsername(), Constants.LOGIN_SUCCESS, "登录成功"));
         return map;
     }
 
@@ -140,7 +145,7 @@ public class UserLoginController {
         userData.setPassword(null);
         userData.setSalt(null);
         map.put("userInfo", userData);
-        logManagerService.addOpSysLog(userData,"手机用户："+userData.getUsername()+"登陆成功!", Const.LOGIN_LOG,true);
+        AsyncManager.me().execute(AsyncFactory.recordLogininfor(userData.getUsername(), Constants.LOGIN_SUCCESS, "手机登录成功"));
         return map;
     }
 
@@ -196,8 +201,8 @@ public class UserLoginController {
     public Result logOut(){
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if(userInfo!=null){
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"退出登陆成功!", Const.LOGIN_LOG_OUT,true);
-        ShiroUtils.logout();
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(ShiroUtils.getUserInfo().getUsername(), Constants.LOGIN_SUCCESS, "退出成功"));
+            ShiroUtils.logout();
         }
         return ResultUtil.success("用户退出登陆成功！");
     }
@@ -206,6 +211,7 @@ public class UserLoginController {
      * 管理员上传客户委托系统的轮播图片
      * @return
      */
+    @Log(title = "个人中心", businessType = BusinessType.UPDATE)
     @PostMapping("uploadImgs")
     public Result uploadImgs(@RequestParam(value = "json") String json, MultipartFile[] file){
         DynamicImg dynamicImg = JSON.parseObject(json,DynamicImg.class);

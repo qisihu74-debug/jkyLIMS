@@ -9,7 +9,15 @@ import com.aspose.words.SaveFormat;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TestCompanyJsonEntity;
+import com.lims.manage.erp.entity.TestCustomerJsonEntity;
+import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -24,7 +32,6 @@ import com.lims.manage.erp.util.DingNotifyUtils;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.CheckItemDeptVo;
 import com.lims.manage.erp.vo.CheckItemParamVo;
 import com.lims.manage.erp.vo.ClientOrderdetailVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
@@ -101,7 +108,7 @@ public class EntrustController {
      * <p>
      * 丁 7月5日 : 返回字符串效验信息。
      *
-     * @param json
+     * @param jsonParam
      * @param file
      * @return
      */
@@ -113,7 +120,7 @@ public class EntrustController {
             return ResultUtil.success(entrustService.addEntrustTest0620(entrust, file));
         } catch (Exception e) {
             // 日志输出。
-            Debug.println("新增委托日志异常输出\t", e + "");
+            log.error("新增委托日志异常输出:{}",e);
             return ResultUtil.error("新建委托失败,请联系管理员！！！");
         }
 
@@ -133,7 +140,7 @@ public class EntrustController {
         }
         catch (Exception e){
             // 日志输出。
-            Debug.println("新增委托日志异常输出\t",e+"");
+            log.error("新增委托日志异常输出：{}",e);
             return ResultUtil.error("新建委托失败,请联系管理员！！！");
         }
 

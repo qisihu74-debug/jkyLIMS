@@ -6,10 +6,13 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.SysLog;
+import com.lims.manage.erp.entity.SysOperLog;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.mapper.LogManagerDao;
+import com.lims.manage.erp.mapper.SysOperateLogDao;
 import com.lims.manage.erp.service.LogManagerService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -28,6 +31,8 @@ import java.util.List;
  */
 @Service
 public class LogManagerServiceImpl extends ServiceImpl<LogManagerDao, SysLog> implements LogManagerService {
+    @Autowired
+    private SysOperateLogDao sysOperateLogDao;
     @Override
     public void addBatchOpSysLog(SysUserEntity sysUser, List<String> optDescs, String type) {
         List<SysLog> logs = new ArrayList<>();
@@ -84,5 +89,10 @@ public class LogManagerServiceImpl extends ServiceImpl<LogManagerDao, SysLog> im
         List<SysLog> logs = this.baseMapper.selectList(queryWrapper);
         PageInfo<SysLog> pageInfo = new PageInfo<>(logs);
         return pageInfo;
+    }
+
+    @Override
+    public void insertOperlog(SysOperLog operLog) {
+        sysOperateLogDao.save(operLog);
     }
 }
