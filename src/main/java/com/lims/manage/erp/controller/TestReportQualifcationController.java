@@ -7,9 +7,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.TestProduct;
 import com.lims.manage.erp.entity.TestReportQualifcation;
 import com.lims.manage.erp.entity.TestStandardFile;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestProductService;
@@ -78,6 +80,7 @@ public class TestReportQualifcationController extends ApiController {
      * @param testReportQualifcation 实体对象
      * @return 新增结果
      */
+    @Log(title = "新增技术指标", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public Result insert(@RequestBody TestReportQualifcation testReportQualifcation) {
         if (StrUtil.isEmptyIfStr(testReportQualifcation)){
@@ -92,6 +95,7 @@ public class TestReportQualifcationController extends ApiController {
      * @param testReportQualifcation 实体对象
      * @return 修改结果
      */
+    @Log(title = "修改技术指标", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     public Result update(@RequestBody TestReportQualifcation testReportQualifcation) {
         if (StrUtil.isEmptyIfStr(testReportQualifcation)){
@@ -106,6 +110,7 @@ public class TestReportQualifcationController extends ApiController {
      * @param idList 主键结合
      * @return 删除结果
      */
+    @Log(title = "删除技术指标", businessType = BusinessType.DELETE)
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {
         if (idList.size()!=0){
