@@ -4,8 +4,10 @@ package com.lims.manage.erp.controller;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.api.ApiController;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.ManageReviewPlanEntity;
 import com.lims.manage.erp.entity.TestControlledDocumentsEntity;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.ManagementReviewService;
@@ -57,6 +59,7 @@ public class ManagementReviewController extends ApiController {
      *
      * @return 新增结果
      */
+    @Log(title = "新增管理评审", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public Result insert(@RequestParam("json") String json, MultipartFile[] file) {
         ManageReviewPlanEntity testControlledDocumentsEntity = JSON.parseObject(json, ManageReviewPlanEntity.class);
@@ -72,6 +75,7 @@ public class ManagementReviewController extends ApiController {
      *
      * @return 更新结果
      */
+    @Log(title = "修改管理评审", businessType = BusinessType.UPDATE)
     @PostMapping("/update")
     public Result update(@RequestParam("json") String json, MultipartFile[] file) {
         ManageReviewPlanEntity testControlledDocumentsEntity = JSON.parseObject(json, ManageReviewPlanEntity.class);
@@ -97,6 +101,7 @@ public class ManagementReviewController extends ApiController {
      *
      * @return 详情
      */
+    @Log(title = "删除管理评审", businessType = BusinessType.DELETE)
     @GetMapping("/delete")
     public Result delete(Integer id) {
 
@@ -111,6 +116,7 @@ public class ManagementReviewController extends ApiController {
      * @param type 1内审员上传，2体系管理员上传
      * @return
      */
+    @Log(title = "上传评审文件", businessType = BusinessType.OTHER)
     @RequestMapping("/uploadFile")
     public Result uploadFile(@RequestParam("type") Integer type, @RequestParam("id") Integer id, MultipartFile[] file) {
         if (type == null || id == null || file == null) {

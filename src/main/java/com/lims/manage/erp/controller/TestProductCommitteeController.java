@@ -4,7 +4,9 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.TestProductCommitteeEntity;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestProductCommitteeService;
@@ -50,6 +52,7 @@ public class TestProductCommitteeController extends ApiController {
      * @param productCommittee 实体
      * @return 新增结果
      */
+    @Log(title = "新增产品委员会", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public Result insert(@RequestBody TestProductCommitteeEntity productCommittee) {
         if (StrUtil.isEmptyIfStr(productCommittee)) {
@@ -65,6 +68,7 @@ public class TestProductCommitteeController extends ApiController {
      * @param councilId 主键ID
      * @return 删除结果
      */
+    @Log(title = "删除产品委员会", businessType = BusinessType.DELETE)
     @PostMapping("/del")
     public Result delete(String councilId) {
         if (StringUtils.isNotBlank(councilId)) {

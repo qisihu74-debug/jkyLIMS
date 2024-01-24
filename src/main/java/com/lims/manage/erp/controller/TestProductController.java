@@ -110,7 +110,7 @@ public class TestProductController extends ApiController {
      *
      * @return 新增结果
      */
-    @Log(title = "新增专利", businessType = BusinessType.INSERT)
+    @Log(title = "新增产品", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public Result insert(@RequestBody TestProductItemVo testProductItemVo) {
         if (StrUtil.isEmptyIfStr(testProductItemVo)){
@@ -124,7 +124,7 @@ public class TestProductController extends ApiController {
      *
      * @return 修改结果
      */
-    @Log(title = "修改专利", businessType = BusinessType.UPDATE)
+    @Log(title = "修改产品", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     public Result update(@RequestBody TestProductItemVo testProductItemVo) {
         if (StrUtil.isEmptyIfStr(testProductItemVo)){
@@ -139,7 +139,7 @@ public class TestProductController extends ApiController {
      * @param idList 主键结合
      * @return 删除结果
      */
-    @Log(title = "删除专利", businessType = BusinessType.DELETE)
+    @Log(title = "删除产品", businessType = BusinessType.DELETE)
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {
         if (idList.size() != 0) {
