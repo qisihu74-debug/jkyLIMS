@@ -86,4 +86,9 @@ public class TaskProgressVo {
      */
     @TableField(exist = false)
     private String taskListStatus;
+    /**
+     * 接单人
+     */
+    @TableField(exist = false)
+    private String receiver;
 }

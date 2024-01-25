@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.TestBillingRegistrationEntityMapper">
+    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.TestBillingRegistrationEntity">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="entrustment_id" jdbcType="BIGINT" property="entrustmentId"/>
+        <result column="entrustment_no" jdbcType="INTEGER" property="entrustmentNo"/>
+        <result column="entrust_company" jdbcType="VARCHAR" property="entrustCompany"/>
+        <result column="sample_name" jdbcType="VARCHAR" property="sampleName"/>
+        <result column="registration_time" jdbcType="TIMESTAMP" property="registrationTime"/>
+        <result column="registered_name" jdbcType="VARCHAR" property="registeredName"/>
+        <result column="registered_userid" jdbcType="BIGINT" property="registeredUserid"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="crate_time" jdbcType="TIMESTAMP" property="crateTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, entrustment_id, entrustment_no, entrust_company, sample_name, registration_time, 
+    registered_name, registered_userid, remark, crate_time, update_time
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from test_billing_registration
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from test_billing_registration
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.lims.manage.erp.entity.TestBillingRegistrationEntity">
+    insert into test_billing_registration (id, entrustment_id, entrustment_no, 
+      entrust_company, sample_name, registration_time, 
+      registered_name, registered_userid, remark, 
+      crate_time, update_time)
+    values (#{id,jdbcType=INTEGER}, #{entrustmentId,jdbcType=BIGINT}, #{entrustmentNo,jdbcType=INTEGER}, 
+      #{entrustCompany,jdbcType=VARCHAR}, #{sampleName,jdbcType=VARCHAR}, #{registrationTime,jdbcType=TIMESTAMP}, 
+      #{registeredName,jdbcType=VARCHAR}, #{registeredUserid,jdbcType=BIGINT}, #{remark,jdbcType=VARCHAR}, 
+      #{crateTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+    <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.TestBillingRegistrationEntity">
+        insert into test_billing_registration
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="entrustmentId != null">
+                entrustment_id,
+            </if>
+            <if test="entrustmentNo != null">
+                entrustment_no,
+            </if>
+            <if test="entrustCompany != null">
+                entrust_company,
+            </if>
+            <if test="sampleName != null">
+                sample_name,
+            </if>
+            <if test="registrationTime != null">
+                registration_time,
+            </if>
+            <if test="registeredName != null">
+                registered_name,
+            </if>
+            <if test="registeredUserid != null">
+                registered_userid,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="crateTime != null">
+                crate_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="entrustmentId != null">
+                #{entrustmentId,jdbcType=BIGINT},
+            </if>
+            <if test="entrustmentNo != null">
+                #{entrustmentNo,jdbcType=INTEGER},
+            </if>
+            <if test="entrustCompany != null">
+                #{entrustCompany,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleName != null">
+                #{sampleName,jdbcType=VARCHAR},
+            </if>
+            <if test="registrationTime != null">
+                #{registrationTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="registeredName != null">
+                #{registeredName,jdbcType=VARCHAR},
+            </if>
+            <if test="registeredUserid != null">
+                #{registeredUserid,jdbcType=BIGINT},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="crateTime != null">
+                #{crateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lims.manage.erp.entity.TestBillingRegistrationEntity">
+        update test_billing_registration
+        <set>
+            <if test="entrustmentId != null">
+                entrustment_id = #{entrustmentId,jdbcType=BIGINT},
+            </if>
+            <if test="entrustmentNo != null">
+                entrustment_no = #{entrustmentNo,jdbcType=INTEGER},
+            </if>
+            <if test="entrustCompany != null">
+                entrust_company = #{entrustCompany,jdbcType=VARCHAR},
+            </if>
+            <if test="sampleName != null">
+                sample_name = #{sampleName,jdbcType=VARCHAR},
+            </if>
+            <if test="registrationTime != null">
+                registration_time = #{registrationTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="registeredName != null">
+                registered_name = #{registeredName,jdbcType=VARCHAR},
+            </if>
+            <if test="registeredUserid != null">
+                registered_userid = #{registeredUserid,jdbcType=BIGINT},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="crateTime != null">
+                crate_time = #{crateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.TestBillingRegistrationEntity">
+    update test_billing_registration
+    set entrustment_id = #{entrustmentId,jdbcType=BIGINT},
+      entrustment_no = #{entrustmentNo,jdbcType=INTEGER},
+      entrust_company = #{entrustCompany,jdbcType=VARCHAR},
+      sample_name = #{sampleName,jdbcType=VARCHAR},
+      registration_time = #{registrationTime,jdbcType=TIMESTAMP},
+      registered_name = #{registeredName,jdbcType=VARCHAR},
+      registered_userid = #{registeredUserid,jdbcType=BIGINT},
+      remark = #{remark,jdbcType=VARCHAR},
+      crate_time = #{crateTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

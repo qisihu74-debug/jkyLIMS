@@ -285,8 +285,6 @@
            LEFT JOIN test_report_record AS t4 ON t4.entrustment_id = t2.entrustment_id
       WHERE
         t2.receiver =  #{receiverUserId}
-        AND t2.state >= 4
-	    AND t2.end_detection_time IS NOT NULL
       <if test="startDate!=null">
         AND t4.issuer_time >= #{startDate}
       </if>

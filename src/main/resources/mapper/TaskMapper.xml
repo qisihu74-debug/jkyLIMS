@@ -1129,7 +1129,8 @@
             sampler,
             sample_state_description,
             code,
-            task_list_status
+            task_list_status,
+            receiver
         FROM
             test_task
         WHERE
@@ -1607,4 +1608,24 @@
     <update id="updateTaskWorkingHoursId">
 	UPDATE test_task set working_hours_id = 1 WHERE id = #{taskId}
     </update>
+
+    <select id="selectTaskTDetectionType" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM test_task WHERE 1=1
+        and (
+        receiver like CONCAT( '%',#{receiver}, '%')
+        or inspector LIKE CONCAT('%',#{inspector},'%')
+        OR recorder like CONCAT( '%',#{recorder}, '%' )
+        or reviewer LIKE CONCAT('%',#{reviewer},'%')
+        OR report_producer like CONCAT( '%',#{reportProducer}, '%' )
+        OR auxiliary_personnel like CONCAT( '%',#{auxiliaryPersonnel}, '%' )
+        OR interns like CONCAT( '%',#{interns}, '%' )
+        OR probationer like CONCAT( '%',#{probationer}, '%' )
+        )
+        <if test="startDate!=null">
+            AND receive_time >= #{startDate}
+        </if>
+        <if test="stopDate!=null">
+            AND #{stopDate} >= receive_time
+        </if>
+    </select>
 </mapper>

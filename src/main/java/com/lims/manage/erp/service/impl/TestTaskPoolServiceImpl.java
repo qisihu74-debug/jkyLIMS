@@ -296,6 +296,15 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
             return ResultUtil.success("领取成功");
         }
+        // 旧任务单不为空 参与效验 领取人 与登录是否一致
+        if (CollectionUtil.isNotEmpty(taskProgressVos)) {
+            // 遍历
+            for (TaskProgressVo taskProgressVo : taskProgressVos) {
+                if (taskProgressVo.getReceiver() != null && !taskProgressVo.getReceiver().equals(userInfo.getUserId().toString())) {
+                    return ResultUtil.error("领取失败： 领单人与任务单存在的领单人不符合");
+                }
+            }
+        }
         if (CollectionUtil.isNotEmpty(taskProgressVos) && taskProgressVos.size() == 1) {
             // TODO： 判断任务单状态 task_list_status = 任务单状态：!=null 任务生成规则根据签发人所属团队走
             if (taskProgressVos.get(0).getTaskListStatus() != null) {

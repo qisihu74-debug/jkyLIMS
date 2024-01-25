@@ -1,5 +1,6 @@
 package com.lims.manage.erp.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -80,6 +81,21 @@ public class TaskListParamVo {
      * 接单人
      */
     private String receiver;
+
+    /**
+     * 开始日期
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    @TableField(exist = false)
+    private Date startDate;
+    /**
+     * 截止日期
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    @TableField(exist = false)
+    private Date stopDate;
 
 
 }

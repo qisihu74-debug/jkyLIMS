@@ -36,10 +36,7 @@ import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.WorkHourRatioMethodUtils;
-import com.lims.manage.erp.vo.TaskStatisticsVo;
-import com.lims.manage.erp.vo.TaskStatsVo;
-import com.lims.manage.erp.vo.TestItemWorkHourLadderVo;
-import com.lims.manage.erp.vo.WorkHourStatisticVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -550,8 +547,6 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                     double zhi = Double.parseDouble(taskOrderWorkingHours.getWorkingHours());
                     String context = String.format("%.2f", zhi);
                     data.setWorkingHours(context);
-                    // 已接任务单量
-                    data.setReceivedTaskVolume(String.valueOf(1));
                     // 完成单量 任务单 state >=3 算是完成
                     if (taskOrderWorkingHours.getState() >= 3) {
                         data.setCompletedTaskVolume(String.valueOf(1));
@@ -569,8 +564,6 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                     double sum = zhi1 + zhi2;
                     String context = String.format("%.2f", sum);
                     data.setWorkingHours(context);
-                    // 已接任务单量 = 任务单量 + 1
-                    data.setReceivedTaskVolume(String.valueOf(Integer.parseInt(data.getReceivedTaskVolume()) + 1));
                     // 完成单量 任务单 state >=3 算是完成 = 任务量 + 1
                     if (taskOrderWorkingHours.getState() >= 3) {
                         data.setCompletedTaskVolume(String.valueOf(Integer.parseInt(data.getCompletedTaskVolume()) + 1));
@@ -585,8 +578,6 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 if (data != null) {
                     // 个人工时
                     statisticsVo.setWorkingHours(data.getWorkingHours());
-                    // 已接任务单量
-                    statisticsVo.setReceivedTaskVolume(data.getReceivedTaskVolume());
                     // 完成单量 任务单 state >=3 算是完成
                     statisticsVo.setCompletedTaskVolume(data.getCompletedTaskVolume());
                 }
@@ -634,6 +625,33 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             List<TestTaskOrderWorkingHours> totalWorkforAllTasks = testTaskOrderWorkingHoursMapper.selectTaskOrderWorkingHours(taskStatisticsVo);
             // 调用方法：全部任务单 工时统计
             methodWorkingHours(totalWorkforAllTasks, list);
+            // 计算 人员中任务单参与情况
+            for (TaskStatisticsVo statisticsVo : list) {
+                TaskListParamVo paramVo = new TaskListParamVo();
+                if (taskStatisticsVo.getStartDate() != null && taskStatisticsVo.getStopDate() != null) {
+                    paramVo.setStartDate(taskStatisticsVo.getStartDate());
+                    paramVo.setStopDate(taskStatisticsVo.getStopDate());
+                }
+                // 复核人
+                paramVo.setReviewer(statisticsVo.getReceiverUserId().toString());
+                // 检测人
+                paramVo.setInspector(statisticsVo.getReceiverUserId().toString());
+                //记录人
+                paramVo.setRecorder(statisticsVo.getReceiverUserId().toString());
+                //报告制作人
+                paramVo.setReportProducer(statisticsVo.getReceiverUserId().toString());
+                // 见习生：实习的新手
+                paramVo.setProbationer(statisticsVo.getReceiverUserId().toString());
+                // 实习生
+                paramVo.setInterns(statisticsVo.getReceiverUserId().toString());
+                // 辅助人员
+                paramVo.setAuxiliaryPersonnel(statisticsVo.getReceiverUserId().toString());
+                // 签发人
+                paramVo.setReceiver(statisticsVo.getReceiverUserId().toString());
+                Integer count = taskMapper.selectTaskTDetectionType(paramVo);
+                // 已经接的工作量
+                statisticsVo.setReceivedTaskVolume(String.valueOf(count));
+            }
         }
         PageInfo<TaskStatisticsVo> result = new PageInfo<>(list);
         return ResultUtil.success(result);
@@ -783,6 +801,33 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             if (taskStatisticsVo1.getCompletedTaskVolume() == null) {
                 taskStatisticsVo1.setCompletedTaskVolume("-");
             }
+        }
+        // 计算 人员中任务单参与情况
+        for (TaskStatisticsVo statisticsVo : list) {
+            TaskListParamVo paramVo = new TaskListParamVo();
+            if (taskStatisticsVo.getStartDate() != null && taskStatisticsVo.getStopDate() != null) {
+                paramVo.setStartDate(taskStatisticsVo.getStartDate());
+                paramVo.setStopDate(taskStatisticsVo.getStopDate());
+            }
+            // 复核人
+            paramVo.setReviewer(statisticsVo.getReceiverUserId().toString());
+            // 检测人
+            paramVo.setInspector(statisticsVo.getReceiverUserId().toString());
+            //记录人
+            paramVo.setRecorder(statisticsVo.getReceiverUserId().toString());
+            //报告制作人
+            paramVo.setReportProducer(statisticsVo.getReceiverUserId().toString());
+            // 见习生：实习的新手
+            paramVo.setProbationer(statisticsVo.getReceiverUserId().toString());
+            // 实习生
+            paramVo.setInterns(statisticsVo.getReceiverUserId().toString());
+            // 辅助人员
+            paramVo.setAuxiliaryPersonnel(statisticsVo.getReceiverUserId().toString());
+            // 签发人
+            paramVo.setReceiver(statisticsVo.getReceiverUserId().toString());
+            Integer count = taskMapper.selectTaskTDetectionType(paramVo);
+            // 已经接的工作量
+            statisticsVo.setReceivedTaskVolume(String.valueOf(count));
         }
         PageInfo<TaskStatisticsVo> result = new PageInfo<>(list);
         return ResultUtil.success(result);
@@ -1032,7 +1077,9 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         // 1、 根据taskId 获取检测项工时。
         List<TestItemOrderWorkingHours> workingHoursList = testItemOrderWorkingHoursMapper.selectTaskList(taskId);
         // 检测项工时-实现阶梯计算。
-        methodStepCharging(workingHoursList);
+        if (CollectionUtil.isNotEmpty(workingHoursList)) {
+            methodStepCharging(workingHoursList);
+        }
         // 1.1 根据taskId 获取检测项工时详情 可以为空
         LambdaQueryWrapper<TestItemOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TestItemOrderWorkingHours::getTaskId, taskId);
@@ -1228,8 +1275,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         // 任务id集合 不包含 工时信息
         for (Long taskId : taskIds) {
             // 根据taskId 循环新增工时数据
-//            endReportAllottedTime(taskId);
-            reportIssuanceAllottedTime(taskId, null);
+            endReportAllottedTime(taskId);
+//            reportIssuanceAllottedTime(taskId, null);
         }
         return true;
     }
@@ -1328,7 +1375,9 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         // 通过任务单获取检测项工时信息
         List<TestItemOrderWorkingHours> itemOrderWorkingHoursList = testItemOrderWorkingHoursMapper.selectTaskList(taskId);
         // 调用方法：进行阶梯计费
-        methodStepCharging(itemOrderWorkingHoursList);
+        if (CollectionUtil.isNotEmpty(itemOrderWorkingHoursList)) {
+            methodStepCharging(itemOrderWorkingHoursList);
+        }
         // 分组设置任务大厅 工时信息
         HashMap<Integer, List<TestCheckItemsTaskRel>> bitValueMap = new HashMap<>();
         // 分组设置任务大厅 获取工时信息

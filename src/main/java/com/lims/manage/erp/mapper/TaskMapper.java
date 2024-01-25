@@ -700,4 +700,9 @@ public interface TaskMapper extends BaseMapper {
             "\tLEFT JOIN test_technicist AS t2 ON t1.user_id = t2.user_id\n" +
             "\tLEFT JOIN test_team AS t3 ON t2.team_id = t3.id")
     List<LabelValueVo> getAllTeamNAMEUser();
+
+    /**
+     * 查询任务单中 已接任务单信息
+     */
+    Integer selectTaskTDetectionType(TaskListParamVo paramVo);
 }

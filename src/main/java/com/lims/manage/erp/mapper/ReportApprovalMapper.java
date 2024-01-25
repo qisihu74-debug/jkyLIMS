@@ -141,6 +141,7 @@ public interface ReportApprovalMapper {
 
     /**
      * 查询签发时的检测项信息
+     *
      * @param entrustmentId
      * @return
      */
@@ -148,6 +149,57 @@ public interface ReportApprovalMapper {
 
     ReportRecordEntity getReportInfo(Long reportId);
 
-    @Select("\tSELECT id as task_id FROM test_task WHERE order_time >= \"2023-11-1\" and state >= 4")
+    //    @Select("\tSELECT id as task_id FROM test_task WHERE order_time >= \"2023-11-1\" and state >= 4")
+//    List<Long> getTaskList();
+    @Select("SELECT\n" +
+            "\ttt.id \n" +
+            "FROM\n" +
+            "\t(\n" +
+            "SELECT\n" +
+            "\tid,\n" +
+            "\ttask_code,\n" +
+            "\tpool_id,\n" +
+            "\tworking_hours_id,\n" +
+            "\ttask_list_status \n" +
+            "FROM\n" +
+            "\ttest_task \n" +
+            "WHERE\n" +
+            "\t1 = 1 \n" +
+            "\tAND (\n" +
+            "\ttask_code LIKE \"%H2311-017%\" \n" +
+            "\tOR task_code LIKE \"%H2311-028%\" \n" +
+            "\tOR task_code LIKE \"%H2311-040%\" \n" +
+            "\tOR task_code LIKE \"%H2311-042%\" \n" +
+            "\tOR task_code LIKE \"%H2311-045%\" \n" +
+            "\tOR task_code LIKE \"%H2311-046%\" \n" +
+            "\tOR task_code LIKE \"%H2311-047%\" \n" +
+            "\tOR task_code LIKE \"%H2311-048%\" \n" +
+            "\tOR task_code LIKE \"%H2311-056%\" \n" +
+            "\tOR task_code LIKE \"%H2312-001%\" \n" +
+            "\tOR task_code LIKE \"%H2312-002%\" \n" +
+            "\tOR task_code LIKE \"%H2312-003%\" \n" +
+            "\tOR task_code LIKE \"%H2312-004%\" \n" +
+            "\tOR task_code LIKE \"%H2312-005%\" \n" +
+            "\tOR task_code LIKE \"%H2312-008%\" \n" +
+            "\tOR task_code LIKE \"%H2312-009%\" \n" +
+            "\tOR task_code LIKE \"%H2312-010%\" \n" +
+            "\tOR task_code LIKE \"%H2312-011%\" \n" +
+            "\tOR task_code LIKE \"%H2312-012%\" \n" +
+            "\tOR task_code LIKE \"%H2312-013%\" \n" +
+            "\tOR task_code LIKE \"%H2312-014%\" \n" +
+            "\tOR task_code LIKE \"%H2312-015%\" \n" +
+            "\tOR task_code LIKE \"%H2312-024%\" \n" +
+            "\tOR task_code LIKE \"%H2312-025%\" \n" +
+            "\tOR task_code LIKE \"%M2311-025%\" \n" +
+            "\tOR task_code LIKE \"%M2311-028%\" \n" +
+            "\tOR task_code LIKE \"%M2312-001%\" \n" +
+            "\tOR task_code LIKE \"%M2312-002%\" \n" +
+            "\tOR task_code LIKE \"%M2312-003%\" \n" +
+            "\tOR task_code LIKE \"%M2312-004%\" \n" +
+            "\t) \n" +
+            "ORDER BY\n" +
+            "\ttask_code DESC \n" +
+            "\t) tt")
     List<Long> getTaskList();
+
 }
