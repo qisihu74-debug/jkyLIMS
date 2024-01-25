@@ -6,9 +6,11 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.StandardFileEntity;
 import com.lims.manage.erp.entity.StandardMethodEntity;
 import com.lims.manage.erp.entity.TestStandardFile;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestStandardFileService;
@@ -172,6 +174,7 @@ public class TestStandardFileController extends ApiController {
      * @param standardJson
      * @return
      */
+    @Log(title = "新增依据", businessType = BusinessType.INSERT)
     @PostMapping("/addStandard")
     public Result addStandard(@RequestParam("standardFile") MultipartFile standardFile,
                               @RequestParam("standardJson") String standardJson) {
@@ -185,6 +188,7 @@ public class TestStandardFileController extends ApiController {
      * @param standardMethodEntity
      * @return
      */
+    @Log(title = "新增检测方法", businessType = BusinessType.INSERT)
     @PostMapping("/addStandardMethod")
     public Result addStandardMethod(@RequestBody StandardMethodEntity standardMethodEntity) {
         return this.testStandardFileService.addStandardMethod(standardMethodEntity);
@@ -197,6 +201,7 @@ public class TestStandardFileController extends ApiController {
      * @param standardJson
      * @return
      */
+    @Log(title = "变更依据", businessType = BusinessType.UPDATE)
     @PostMapping("/updateStandard")
     public Result updateStandard(@RequestParam("standardFile") MultipartFile standardFile,
                                  @RequestParam("standardJson") String standardJson) {
@@ -239,6 +244,7 @@ public class TestStandardFileController extends ApiController {
      * @param id
      * @return
      */
+    @Log(title = "删除检测方法", businessType = BusinessType.DELETE)
     @GetMapping("/deleteMethod")
     public Result deleteMethod(Integer id) {
         if (id != null) {

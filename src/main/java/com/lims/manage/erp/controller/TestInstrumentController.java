@@ -10,9 +10,11 @@ import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.DeviceEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrument;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.mapper.DeviceEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -282,6 +284,7 @@ public class TestInstrumentController extends ApiController {
      * @param record
      * @return
      */
+    @Log(title = "新增设备", businessType = BusinessType.INSERT)
     @PostMapping("addDevice")
 //    public Result addDevice(@RequestParam("json") String json, MultipartFile picture, MultipartFile contract, MultipartFile invoice) {
     public Result addDevice(@RequestBody DeviceEntity record) {
@@ -306,6 +309,7 @@ public class TestInstrumentController extends ApiController {
      * @param record
      * @return
      */
+    @Log(title = "修改设备", businessType = BusinessType.UPDATE)
     @PostMapping("updateDevice")
     public Result updateDevice(@RequestBody DeviceEntity record) {
         if (record.getId() == null || record.getName() == null || record.getCode() == null) {
@@ -328,6 +332,7 @@ public class TestInstrumentController extends ApiController {
      * @param idList
      * @return
      */
+    @Log(title = "删除设备", businessType = BusinessType.DELETE)
     @PostMapping("deleteDevice")
     public Result deleteDevice(@RequestParam("idList") List<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
@@ -350,6 +355,7 @@ public class TestInstrumentController extends ApiController {
      * @param id
      * @param response
      */
+    @Log(title = "打印设备标签", businessType = BusinessType.EXPORT)
     @GetMapping("printDeviceLable")
     public void printDeviceLable(Integer id, HttpServletResponse response){
         if (id == null){
@@ -401,6 +407,7 @@ public class TestInstrumentController extends ApiController {
     /**
      * 导入仪器设备
      */
+    @Log(title = "导入仪器设备", businessType = BusinessType.IMPORT)
     @GetMapping("importDevice")
     @Transactional(rollbackFor = Exception.class)
     public void importDevice(HttpServletResponse response) throws Exception{

@@ -9,7 +9,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.TestReportTemplate;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestReportTemplateService;
@@ -103,6 +105,7 @@ public class TestReportTemplateController extends ApiController {
      *
      * @return 新增结果
      */
+    @Log(title = "新增报告模板", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public Result insert(@RequestBody TestReportTemplateVo testReportTemplateVo) {
         if (StrUtil.isEmptyIfStr(testReportTemplateVo)){
@@ -116,6 +119,7 @@ public class TestReportTemplateController extends ApiController {
      *
      * @return 修改结果
      */
+    @Log(title = "修改报告模板", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     public Result update(@RequestBody TestReportTemplateVo testReportTemplateVo) {
         if (StrUtil.isEmptyIfStr(testReportTemplateVo)){
@@ -130,6 +134,7 @@ public class TestReportTemplateController extends ApiController {
      * @param idList 主键结合
      * @return 删除结果
      */
+    @Log(title = "删除报告模板", businessType = BusinessType.DELETE)
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {
         if (idList.size()!=0){
@@ -140,7 +145,7 @@ public class TestReportTemplateController extends ApiController {
     }
 
     /***********************************************/
-
+    @Log(title = "变更报告模板", businessType = BusinessType.OTHER)
     @PostMapping("/change")
     public Result change(@RequestBody TestReportTemplateVo testReportTemplateVo) {
         if (StrUtil.isEmptyIfStr(testReportTemplateVo)){

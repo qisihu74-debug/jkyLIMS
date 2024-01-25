@@ -7,9 +7,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.TestMethod;
 import com.lims.manage.erp.entity.TestProduct;
 import com.lims.manage.erp.entity.TestProductType;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestProductTypeService;
@@ -81,6 +83,7 @@ public class TestProductTypeController extends ApiController {
      * @param testProductType 实体对象
      * @return 新增结果
      */
+    @Log(title = "新增产品类别", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public Result insert(@RequestBody TestProductType testProductType) {
         if (StrUtil.isEmptyIfStr(testProductType)){
@@ -95,6 +98,7 @@ public class TestProductTypeController extends ApiController {
      * @param testProductType 实体对象
      * @return 修改结果
      */
+    @Log(title = "修改产品类别", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     public Result update(@RequestBody TestProductType testProductType) {
         if (StrUtil.isEmptyIfStr(testProductType)){
@@ -109,6 +113,7 @@ public class TestProductTypeController extends ApiController {
      * @param idList 主键结合
      * @return 删除结果
      */
+    @Log(title = "删除产品类别", businessType = BusinessType.DELETE)
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {
         if (idList.size()!=0){

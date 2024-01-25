@@ -719,6 +719,11 @@
             <artifactId>pageoffice</artifactId>
             <version>5.4.0.3</version>
         </dependency>
+        <dependency>
+            <groupId>eu.bitwalker</groupId>
+            <artifactId>UserAgentUtils</artifactId>
+            <version>1.21</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>

@@ -1,6 +1,8 @@
 package com.lims.manage.erp.controller;
 
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.ReserveCodeEntity;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.ReserveCodeService;
@@ -27,6 +29,7 @@ public class ReserveCodeController {
      * @param reserveCodeEntity
      * @return
      */
+    @Log(title = "新增预留编号", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public Result insert(@RequestBody ReserveCodeEntity reserveCodeEntity) {
         return this.reserveCodeService.addReserveCode(reserveCodeEntity);
@@ -37,6 +40,7 @@ public class ReserveCodeController {
      * @param id
      * @return
      */
+    @Log(title = "删除预留编号", businessType = BusinessType.DELETE)
     @GetMapping("/del")
     public Result delete(Long id) {
         if (id != null) {
@@ -52,6 +56,7 @@ public class ReserveCodeController {
      * @param reserveCodeEntity
      * @return
      */
+    @Log(title = "修改预留编号", businessType = BusinessType.UPDATE)
     @PostMapping("/update")
     public Result update(@RequestBody ReserveCodeEntity reserveCodeEntity) {
         return this.reserveCodeService.updateReserveCode(reserveCodeEntity);
@@ -106,6 +111,7 @@ public class ReserveCodeController {
      * @param file
      * @return
      */
+    @Log(title = "导入预留编号", businessType = BusinessType.IMPORT)
     @RequestMapping(value = "/importTemplate", method = RequestMethod.POST)
     public Result importEquipments(@RequestParam(required = true,name = "file") MultipartFile file) {
         return reserveCodeService.importEquipments(file);

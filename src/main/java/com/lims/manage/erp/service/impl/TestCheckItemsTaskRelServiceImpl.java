@@ -1285,13 +1285,18 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     public List<HourCount> exportHours(TaskStatisticsVo bean) {
         List<HourCount> hourCounts = testTaskOrderWorkingHoursMapper.exportHours(bean.getStartDate(), bean.getStopDate());
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(hourCounts)){
-//处理部门名称
+            //处理部门名称
             List<TestTeam> list = testTeamDao.getTeamsByPids(hourCounts);
             for (HourCount hourCount :hourCounts){
                 hourCount.setDoubleHours(Double.parseDouble(hourCount.getHours()));
                 for (TestTeam team :list){
-                    if (hourCount.getPid().equals(team.getId())){
-                        hourCount.setDeptName(team.getName());
+                    if (hourCount.getPid() != null){
+                        if (hourCount.getPid().equals(team.getId())){
+                            hourCount.setDeptName(team.getName());
+                        }
+                    }else {
+                        hourCount.setDeptName("辅助人员无部门");
+                        hourCount.setPid(1000);
                     }
                 }
             }

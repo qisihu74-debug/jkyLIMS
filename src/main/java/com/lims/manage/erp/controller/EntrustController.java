@@ -9,7 +9,17 @@ import com.aspose.words.SaveFormat;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.annotation.Log;
+import com.lims.manage.erp.entity.EntrustEntity;
+import com.lims.manage.erp.entity.EntrustHistoryEntity;
+import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
+import com.lims.manage.erp.entity.QiYueSuoEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TaskTestEntity;
+import com.lims.manage.erp.entity.TestCompanyJsonEntity;
+import com.lims.manage.erp.entity.TestCustomerJsonEntity;
+import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -24,7 +34,6 @@ import com.lims.manage.erp.util.DingNotifyUtils;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.CheckItemDeptVo;
 import com.lims.manage.erp.vo.CheckItemParamVo;
 import com.lims.manage.erp.vo.ClientOrderdetailVo;
 import com.lims.manage.erp.vo.EntrustAddVo;
@@ -101,10 +110,11 @@ public class EntrustController {
      * <p>
      * 丁 7月5日 : 返回字符串效验信息。
      *
-     * @param json
+     * @param jsonParam
      * @param file
      * @return
      */
+    @Log(title = "新增委托", businessType = BusinessType.INSERT)
     @RequestMapping("/addEntrust_Test")
     //@RequiresPermissions("entrust:entrust:addEntrust")
     public Result addEntrustTest(@RequestParam("jsonParam") String jsonParam, MultipartFile[] file) {
@@ -113,7 +123,7 @@ public class EntrustController {
             return ResultUtil.success(entrustService.addEntrustTest0620(entrust, file));
         } catch (Exception e) {
             // 日志输出。
-            Debug.println("新增委托日志异常输出\t", e + "");
+            log.error("新增委托日志异常输出:{}",e);
             return ResultUtil.error("新建委托失败,请联系管理员！！！");
         }
 
@@ -125,6 +135,7 @@ public class EntrustController {
      * @param file
      * @return
      */
+    @Log(title = "新增预委托", businessType = BusinessType.INSERT)
     @RequestMapping("/addPreEntrust")
     public Result addPreEntrust(@RequestParam("json") String json, MultipartFile[] file) {
         try {
@@ -133,7 +144,7 @@ public class EntrustController {
         }
         catch (Exception e){
             // 日志输出。
-            Debug.println("新增委托日志异常输出\t",e+"");
+            log.error("新增委托日志异常输出：{}",e);
             return ResultUtil.error("新建委托失败,请联系管理员！！！");
         }
 
@@ -146,6 +157,7 @@ public class EntrustController {
      * @param file
      * @return
      */
+    @Log(title = "修改委托基本信息", businessType = BusinessType.UPDATE)
     @RequestMapping("/updateEntrust_test_new")
 //    @RequiresPermissions("entrust:entrust:updateEntrust")
     public Result updateEntrustTestNew(@RequestParam("json") String json, MultipartFile[] file) throws ParseException {
@@ -169,6 +181,7 @@ public class EntrustController {
      * @param
      * @return
      */
+    @Log(title = "修改委托样品信息", businessType = BusinessType.UPDATE)
     @PostMapping("/updateEntrust_test_new_sample")
 //    @RequiresPermissions("entrust:entrust:updateEntrust")
     public Result updateEntrustTestNewSample(@RequestBody EntrustAddVo entrust) {
@@ -237,6 +250,7 @@ public class EntrustController {
      * @param testCompanyEntity
      * @return
      */
+    @Log(title = "新增客户", businessType = BusinessType.INSERT)
     @PostMapping("add_new_company")
     public Result methodPost(@RequestBody TestCompanyJsonEntity testCompanyEntity) {
         if (testCompanyEntity.getCompanyName() != null && testCompanyEntity.getType() != null) {
@@ -259,6 +273,7 @@ public class EntrustController {
      * @param testCompanyEntity
      * @return
      */
+    @Log(title = "新增委托单位", businessType = BusinessType.INSERT)
     @PostMapping("add_new_company_two")
     public Result methodPostTwo(@RequestBody TestCompanyJsonEntity testCompanyEntity) {
         if (testCompanyEntity.getCompanyName() != null && testCompanyEntity.getType() != null) {
@@ -733,6 +748,7 @@ public class EntrustController {
         }
     }
 
+    @Log(title = "修改出报告科室", businessType = BusinessType.UPDATE)
     @RequestMapping("/updateReportTeam")
 //    public Result updateReportTeam(@RequestParam(value = "entrustmentId") Long entrustmentId,@RequestParam(value = "deptIds") List<Integer> deptIds) {
     public Result updateReportTeam(@RequestBody UpdateIssueReportVo vo) {
@@ -754,6 +770,7 @@ public class EntrustController {
      * @param file
      * @return
      */
+    @Log(title = "新增再来一单", businessType = BusinessType.INSERT)
     @RequestMapping("/addEntrust_copy_old")
     public Result addEntrust_copy_old(@RequestParam("json") String json, MultipartFile[] file) {
         try {
@@ -774,6 +791,7 @@ public class EntrustController {
      * @param file
      * @return
      */
+    @Log(title = "新增再来一单", businessType = BusinessType.INSERT)
     @RequestMapping("/addEntrust_copy")
     public Result addEntrustCopy(@RequestParam("json") String json, MultipartFile[] file) {
         try {
@@ -841,6 +859,7 @@ public class EntrustController {
     /**
      * 删除文件id
      */
+    @Log(title = "删除委托单附件", businessType = BusinessType.DELETE)
     @RequestMapping("/removeding/{id}")
     public Result removeding(@PathVariable("id") Integer id) {
         entrustService.removeding(id);
@@ -850,6 +869,7 @@ public class EntrustController {
     /**
      * 修改任务流转要求
      */
+    @Log(title = "修改任务流转要求", businessType = BusinessType.UPDATE)
     @PostMapping("/updateTestEntrustedTaskRelEntity")
     public Result updateTestEntrustedTaskRelEntity(@RequestBody TestEntrustedTaskRelEntity testEntrustedTaskRelEntity){
         if(testEntrustedTaskRelEntity.getId()==null){
@@ -864,6 +884,7 @@ public class EntrustController {
     /**
      * 删除任务流转要求
      */
+    @Log(title = "删除任务流转要求", businessType = BusinessType.DELETE)
     @GetMapping("/removeTestEntrustedTask/{id}")
     public Result removeTestEntrustedTask(@PathVariable("id") Integer id) {
         entrustService.removeTestEntrustedTask(id);
@@ -873,6 +894,7 @@ public class EntrustController {
     /**
      * 新增任务流转要求
      */
+    @Log(title = "新增任务流转要求", businessType = BusinessType.INSERT)
     @PostMapping("/addTestEntrustedTaskRelEntity")
     public Result addTestEntrustedTaskRelEntity(@RequestBody TestEntrustedTaskRelEntity testEntrustedTaskRelEntity){
         if(testEntrustedTaskRelEntity.getEntrustId()==null){
@@ -899,6 +921,7 @@ public class EntrustController {
     /**
      * 支持批量修改
      */
+    @Log(title = "批量修改任务流转要求", businessType = BusinessType.UPDATE)
     @PostMapping("/updateEntrustedTaskRelEntityList")
     public Result updateEntrustedTaskRelEntityList(@RequestBody List<TestEntrustedTaskRelEntity> list){
        if(CollectionUtils.isEmpty(list)){
@@ -1181,6 +1204,7 @@ public class EntrustController {
      * @param entrustId
      * @return
      */
+    @Log(title = "委托单撤回", businessType = BusinessType.OTHER)
     @GetMapping("entrustRevocation")
     public Result entrustRevocation(Long entrustId) {
         // 委托单id = null 返回失败
@@ -1265,6 +1289,7 @@ public class EntrustController {
      * @param entrustId
      * @return
      */
+    @Log(title = "驳回委托单", businessType = BusinessType.OTHER)
     @GetMapping("entrustReviewRejection")
     public Result entrustReviewRejection(Long entrustId , String content) {
         // 委托单id = null 返回失败
@@ -1279,6 +1304,7 @@ public class EntrustController {
      * @param entrustId
      * @return
      */
+    @Log(title = "审核委托单通过", businessType = BusinessType.OTHER)
     @GetMapping("entrustApproved")
     public Result entrustApproved(Long entrustId) {
         // 委托单id = null 返回失败
@@ -1294,6 +1320,7 @@ public class EntrustController {
      * @param entity
      * @return
      */
+    @Log(title = "审核并发布", businessType = BusinessType.OTHER)
     @PostMapping("distributionTask")
     public Result distributionTask(@RequestBody TaskVo entity) {
         if (entity.getEntrustmentId() == null) {

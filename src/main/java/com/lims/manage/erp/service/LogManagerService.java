@@ -3,6 +3,7 @@ package com.lims.manage.erp.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SysLog;
+import com.lims.manage.erp.entity.SysOperLog;
 import com.lims.manage.erp.entity.SysUserEntity;
 
 import java.sql.Date;
@@ -35,4 +36,6 @@ public interface LogManagerService extends IService<SysLog> {
     void addOpSysLog(SysUserEntity sysUser, String optDescs, String type,boolean state);
 
     PageInfo<SysLog> getLogList(Integer logType, Integer pageNum, Integer pageSize, String operator, Long startDate, Long endDate);
+
+    void insertOperlog(SysOperLog operLog);
 }

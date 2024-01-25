@@ -4,7 +4,9 @@ package com.lims.manage.erp.controller;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.api.ApiController;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.TestControlledDocumentsEntity;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestControlledDocumentsService;
@@ -67,6 +69,7 @@ public class TestControlledDocumentsController extends ApiController {
      *
      * @return 新增结果
      */
+    @Log(title = "新增受控文件", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public Result insert(@RequestParam("json") String json, MultipartFile[] file) {
         TestControlledDocumentsEntity testControlledDocumentsEntity = JSON.parseObject(json, TestControlledDocumentsEntity.class);
@@ -81,6 +84,7 @@ public class TestControlledDocumentsController extends ApiController {
      *
      * @return 修改结果
      */
+    @Log(title = "修改受控文件", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     public Result update(@RequestParam("json") String json, MultipartFile[] file) {
         TestControlledDocumentsEntity testControlledDocumentsEntity = JSON.parseObject(json, TestControlledDocumentsEntity.class);
@@ -95,6 +99,7 @@ public class TestControlledDocumentsController extends ApiController {
      *
      * @return 变更记录
      */
+    @Log(title = "变更受控文件", businessType = BusinessType.OTHER)
     @PostMapping("/change")
     public Result changeRecord(@RequestParam("json") String json, MultipartFile[] file) {
         TestControlledDocumentsEntity testControlledDocumentsEntity = JSON.parseObject(json, TestControlledDocumentsEntity.class);
@@ -123,6 +128,7 @@ public class TestControlledDocumentsController extends ApiController {
      * @param id 主键
      * @return 删除结果
      */
+    @Log(title = "删除受控文件", businessType = BusinessType.DELETE)
     @GetMapping("/del")
 //    public Result delete(@RequestBody List<Integer> idList) {
     public Result delete(Integer id) {

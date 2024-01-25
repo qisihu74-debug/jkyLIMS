@@ -7,8 +7,10 @@ import com.aspose.cells.Worksheet;
 import com.google.api.client.util.IOUtils;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TestSampleEntity;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
@@ -27,6 +29,7 @@ import com.lims.manage.erp.vo.SamplesAddVo;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.lf5.LogLevel;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +72,7 @@ public class SampleController {
      * @param file 样品照片
      * @return
      */
+    @Log(title = "样品签收", businessType = BusinessType.INSERT)
     @RequestMapping(value = "/addSample", method = RequestMethod.POST)
     public Result getAddSampleData(@RequestParam("json") String json, MultipartFile[] file) {
         SampleAddParamVo samples = JSON.parseObject(json, SampleAddParamVo.class);
@@ -157,6 +161,7 @@ public class SampleController {
      * @param
      * @return
      */
+    @Log(title = "样品签收", businessType = BusinessType.UPDATE)
     @RequestMapping(value = "updateSample", method = RequestMethod.POST)
     public Result updateSampleData(@RequestBody SampleEntity sampleEntity) {
         if (sampleEntity == null) {
@@ -386,6 +391,7 @@ public class SampleController {
      * @param samples
      * @return
      */
+    @Log(title = "样品签收", businessType = BusinessType.INSERT)
     @RequestMapping(value = "/addSamples", method = RequestMethod.POST)
     public Result addSamples(@RequestBody SamplesAddVo samples) {
         if (samples == null || CollectionUtils.isEmpty(samples.getSamples())) {
@@ -405,6 +411,7 @@ public class SampleController {
      * @param samples
      * @return
      */
+    @Log(title = "样品签收", businessType = BusinessType.INSERT)
     @RequestMapping(value = "/preReceivedSamples", method = RequestMethod.POST)
     public Result preReceivedSamples(@RequestBody SamplesAddVo samples) {
         if (samples == null || CollectionUtils.isEmpty(samples.getSamples())) {
@@ -468,6 +475,7 @@ public class SampleController {
      * @param sampleEntity
      * @return
      */
+    @Log(title = "样品签收", businessType = BusinessType.UPDATE)
     @RequestMapping("/updateSampleInfo")
     public Result updateSample(@RequestBody TestSampleEntity sampleEntity) {
         if (sampleEntity == null || sampleEntity.getId() == null) {
@@ -543,6 +551,7 @@ public class SampleController {
      * @param samples
      * @return
      */
+    @Log(title = "样品签收", businessType = BusinessType.INSERT)
     @RequestMapping("/addMixSamples")
     public Result addMixSamples(@RequestBody SamplesAddVo samples) {
             Integer integer = testSampleEntityService.batchInsertMixSample(samples);
@@ -553,6 +562,7 @@ public class SampleController {
             }
     }
 
+    @Log(title = "样品签收", businessType = BusinessType.INSERT)
     @RequestMapping("/preAddMixSamples")
     public Result preAddMixSamples(@RequestBody SamplesAddVo samples) {
         Integer integer = testSampleEntityService.preAddMixSamples(samples);
@@ -586,6 +596,7 @@ public class SampleController {
      * @param sampleProcessMode 样品处置方式（state=4处置）
      * @return
      */
+    @Log(title = "样品管理", businessType = BusinessType.UPDATE)
     @GetMapping("updateState")
     public Result updateState(Integer sampleId, Integer state, String time,Integer saveTime,
                               Integer sampleRetentionPeriod,String sampleProcessMode,String approver,
@@ -652,6 +663,7 @@ public class SampleController {
     /**
      * 样品台账列表导出
      */
+    @Log(title = "样品台账", businessType = BusinessType.EXPORT)
     @RequestMapping("/exportSampleTab")
     public void exportSampleTab(Integer sampleId, HttpServletResponse response) throws IOException {
         if (sampleId == null){
@@ -678,6 +690,7 @@ public class SampleController {
     /**
      * 出入库台账列表导出
      */
+    @Log(title = "样品台账", businessType = BusinessType.EXPORT)
     @RequestMapping("/exportEntrustSampleTab")
     public void exportEntrustSampleTab(Integer sampleId, HttpServletResponse response) throws IOException {
         if (sampleId == null){
@@ -712,6 +725,7 @@ public class SampleController {
      * @param sampleOutPutVo
      * @param response
      */
+    @Log(title = "留样管理", businessType = BusinessType.EXPORT)
     @PostMapping("/sampleRetentionExport")
     public void sampleRetentionExport(@RequestBody SampleOutPutVo sampleOutPutVo, HttpServletResponse response ) throws Exception {
         BufferedOutputStream bos = null;
@@ -746,6 +760,7 @@ public class SampleController {
      * 样品留样 更新
      * @param sampleOutPutVo
      */
+    @Log(title = "留样管理", businessType = BusinessType.UPDATE)
     @PostMapping("/sampleRetentionUpdate")
     public Result sampleRetentionUpdate(@RequestBody SampleOutPutVo sampleOutPutVo) {
         if(org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getSampleId()) ||
@@ -779,6 +794,7 @@ public class SampleController {
      * @param sampleOutPutVo
      * @param response
      */
+    @Log(title = "样品出入库台账", businessType = BusinessType.EXPORT)
     @PostMapping("/sampleOutPutExport")
     public void sampleOutPutExport(@RequestBody SampleOutPutVo sampleOutPutVo, HttpServletResponse response ) throws Exception {
         BufferedOutputStream bos = null;
@@ -806,6 +822,7 @@ public class SampleController {
      * 样品出入库 更新
      * @param sampleOutPutVo
      */
+    @Log(title = "样品出入库", businessType = BusinessType.UPDATE)
     @PostMapping("/sampleOutPutUpdate")
     public Result sampleOutPutUpdate(@RequestBody SampleOutPutVo sampleOutPutVo) {
         if(org.springframework.util.StringUtils.isEmpty(sampleOutPutVo.getSampleId()) ||

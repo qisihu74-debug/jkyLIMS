@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestTeamService;
@@ -148,6 +150,7 @@ public class TestTeamController extends ApiController {
      * @param testTeam 实体对象
      * @return 新增结果
      */
+    @Log(title = "新增团队", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ApiOperation("添加科室信息")
     public Result insert(@RequestBody TestTeam testTeam) {
@@ -163,6 +166,7 @@ public class TestTeamController extends ApiController {
      * @param testTeam 实体对象
      * @return 修改结果
      */
+    @Log(title = "修改团队", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ApiOperation("修改科室信息")
     public Result update(@RequestBody TestTeam testTeam) {
@@ -178,6 +182,7 @@ public class TestTeamController extends ApiController {
      * @param idList 主键结合
      * @return 删除结果
      */
+    @Log(title = "删除团队", businessType = BusinessType.DELETE)
     @PostMapping("/del")
     @ApiOperation("删除科室信息")
     public Result delete(@RequestBody List<Long> idList) {
