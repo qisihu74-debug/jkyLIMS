@@ -1,6 +1,7 @@
 package com.lims.manage.erp.controller;
 
 import com.aspose.cells.Cells;
+import com.aspose.cells.SaveFormat;
 import com.aspose.cells.Workbook;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -358,8 +359,29 @@ public class StandardNoveltyController {
         queryWrapper.like(StringUtils.isNotEmpty(name),StandardNovelty::getName,name.trim());
         List<StandardNovelty> list = service.list(queryWrapper);
         InputStream fileStream = MinIoUtil.getFileStream(BucketsConst.controlled_documents, "bzgf.xlsx");
-
-
-
+        try {
+            if (CollectionUtils.isNotEmpty(list)){
+                Workbook workbook = new Workbook(fileStream);
+                Cells cells = workbook.getWorksheets().get(0).getCells();
+                int index = 2;
+                for (StandardNovelty standardNovelty :list){
+                    cells.get("A"+index).setValue(standardNovelty.getCode());
+                    cells.get("B"+index).setValue(standardNovelty.getName());
+                    cells.get("C"+index).setValue(standardNovelty.getStatus());
+                    if ("现行".equals(standardNovelty.getStatus())){
+                        standardNovelty.setNote("发布日期："+standardNovelty.getReleaseDate()+";实施日期："+standardNovelty.getImplementationDate());
+                    }else if ("作废".equals(standardNovelty.getStatus())){
+                        standardNovelty.setNote("发布日期："+standardNovelty.getReleaseDate()+";作废日期："+standardNovelty.getImplementationDate());
+                    }else if ("废止".equals(standardNovelty.getStatus())){
+                        standardNovelty.setNote("发布日期："+standardNovelty.getReleaseDate()+";废止日期："+standardNovelty.getImplementationDate());
+                    }
+                    cells.get("D"+index).setValue(standardNovelty.getNote());
+                    index ++;
+                }
+                workbook.save(response.getOutputStream(), SaveFormat.XLSX);
+            }
+        }catch (Exception e){
+            log.error("导出规范查新结果异常:{}",e);
+        }
     }
 }
