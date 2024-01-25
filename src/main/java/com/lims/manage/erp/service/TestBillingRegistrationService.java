@@ -1,6 +1,5 @@
 package com.lims.manage.erp.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.TestBillingRegistrationEntity;
 import com.lims.manage.erp.result.Result;
 
@@ -11,4 +10,12 @@ import com.lims.manage.erp.result.Result;
 public interface TestBillingRegistrationService {
 
     Result list(TestBillingRegistrationEntity registrationEntity);
+
+    /**
+     * 更新
+     *
+     * @param registrationEntity
+     * @return
+     */
+    Result update(TestBillingRegistrationEntity registrationEntity);
 }

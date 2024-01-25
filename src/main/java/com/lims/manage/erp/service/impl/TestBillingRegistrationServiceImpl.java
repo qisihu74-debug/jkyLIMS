@@ -50,7 +50,14 @@ public class TestBillingRegistrationServiceImpl implements TestBillingRegistrati
         PageHelper.startPage(registrationEntity.getPageNum(), registrationEntity.getPageSize());
         List<TestBillingRegistrationEntity> list = testBillingRegistrationEntityMapper.selectList(queryWrapper);
         PageInfo<TestBillingRegistrationEntity> result = new PageInfo<>(list);
-//        testBillingRegistrationEntityMapper.selectList();
+        return ResultUtil.success(result);
+    }
+
+    @Override
+    public Result update(TestBillingRegistrationEntity registrationEntity) {
+        if (registrationEntity.getId() == null) {
+            return ResultUtil.error("id 不能为空");
+        }
         return null;
     }
 }
