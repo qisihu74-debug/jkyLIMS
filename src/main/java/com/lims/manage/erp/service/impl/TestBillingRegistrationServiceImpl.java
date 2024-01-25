@@ -17,8 +17,7 @@ import java.util.List;
  * @Author: DLC
  * @Date: 2024/1/25 11:27
  */
-public class TestBillingRegistrationServiceImpl extends ServiceImpl<TestBillingRegistrationEntityMapper, TestBillingRegistrationEntity>
-        implements TestBillingRegistrationService {
+public class TestBillingRegistrationServiceImpl implements TestBillingRegistrationService {
     @Autowired
     private TestBillingRegistrationEntityMapper testBillingRegistrationEntityMapper;
 

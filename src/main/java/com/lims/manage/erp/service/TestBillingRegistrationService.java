@@ -8,7 +8,7 @@ import com.lims.manage.erp.result.Result;
  * @Author: DLC
  * @Date: 2024/1/25 11:26
  */
-public interface TestBillingRegistrationService extends IService<TestBillingRegistrationEntity> {
+public interface TestBillingRegistrationService {
 
     Result list(TestBillingRegistrationEntity registrationEntity);
 }
