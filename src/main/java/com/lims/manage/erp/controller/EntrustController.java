@@ -60,7 +60,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import sun.security.util.Debug;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -552,7 +551,7 @@ public class EntrustController {
             MinioClient client = MinIoUtil.minioClient;
             InputStream object = client.getObject(bucketName, fileName);
             //填充数据
-            log.debug("====aaa:{}", JSON.toJSONString(detail));
+            log.info("====aaa:{}", JSON.toJSONString(detail));
             if (status == true) {
                 document = entrustService.downloadEntrustNew(detail, object);
             } else {
@@ -769,7 +768,7 @@ public class EntrustController {
         }
         catch (Exception e){
             // 日志输出。
-            Debug.println("新增委托再来一单日志异常输出\t",e+"");
+            log.info("新增委托再来一单日志异常输出\t",e+"");
             return ResultUtil.error("再来一单新建委托失败,请联系管理员！！！");
         }
 
@@ -789,7 +788,7 @@ public class EntrustController {
         }
         catch (Exception e){
             // 日志输出。
-            Debug.println("新增委托再来一单日志异常输出\t",e+"");
+            log.info("新增委托再来一单日志异常输出\t",e+"");
             return ResultUtil.error("再来一单新建委托失败,请联系管理员！！！");
         }
 

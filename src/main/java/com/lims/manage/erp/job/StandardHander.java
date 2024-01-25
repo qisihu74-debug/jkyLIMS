@@ -3,8 +3,10 @@ package com.lims.manage.erp.job;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.TestStandardFile;
 import com.lims.manage.erp.service.TestStandardFileService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,6 +21,8 @@ import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -35,6 +39,7 @@ public class StandardHander {
 
     @Resource
     private TestStandardFileService testStandardFileService;
+
     /**
      * 中国标准服务网--https://www.cssn.net.cn/api/standards/?keyword=
      * 工标网--http://www.csres.com/s.jsp?keyword=
@@ -42,6 +47,48 @@ public class StandardHander {
     //国家标准全文公开系统
     private String url = "https://openstd.samr.gov.cn/bzgk/gb/std_list?p.p1=0&p.p90=circulation_date&p.p91=desc&p.p2=";
 
+    /**
+     * 根据编号进行标准规范查新
+     * @param code
+     * @return
+     */
+    public TestStandardFile checkStandard(String code){
+        String response = "";
+        TestStandardFile standard = new TestStandardFile();
+        String cod = "";
+        try {
+            cod = URLEncoder.encode(code, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        //发起查询请求
+        response = sendGet(url+cod, "UTF-8");
+        //响应为空跳出本次循环
+        if (StringUtils.isBlank(response)) {
+            //中国标准服务网
+            standard = cssn(code);
+            if (standard == null) {
+                //工标网
+                standard = csres(code);
+            }
+        }else {
+            //匹配标书数据，并更新表数据。涉及3个数据源查询
+            //国家标准全文公开系统
+            standard = openstd(response, code);
+            if (standard == null){
+                standard = cssn(code);
+                if (standard == null){
+                    standard = csres(code);
+                }
+            }
+        }
+        try {
+            Thread.sleep(3500);
+        } catch (InterruptedException e) {
+            logger.error("标准查新线程阻塞异常:{}",e);
+        }
+        return standard;
+    }
 
     /**
      * 定时更新标准规范状态。 每天24点更新数据
@@ -147,6 +194,42 @@ public class StandardHander {
         return true;
     }
 
+    public TestStandardFile openstd(String response, String code) {
+        TestStandardFile standard = null;
+        logger.info("查询国家标准全文公开系统");
+        Document document = Jsoup.parse(response);
+        if (document != null){
+            Elements elements = document.select("div.table-responsive");
+            if (elements != null){
+                Elements tr = elements.select("tr");
+                if (tr != null){
+                    for (int i = 0; i < tr.size(); i++) {
+                        Elements td = elements.select("td");
+
+                        if (td.size() >= 9) {
+                            //获取标书编号
+                            String standardNo = td.get(1).select("a").text();
+                            String standardStatus = td.get(5).select("span").text();
+                            logger.info("表编号:{},标准规范编号:{}, 状态：{}", code, standardNo, standardStatus);
+                            //比较标书编号
+                            if (code.equals(standardNo)) {
+                                String releaseDate = Optional.of(td.get(6).text()).orElse("");
+                                String implementationDate = Optional.of(td.get(7).text()).orElse("");
+                                standard = new TestStandardFile();
+                                //标书状态码
+                                standard.setStandardStatus(standardStatus);
+                                //发布日期
+                                standard.setReleaseDate(releaseDate.substring(0, 10));
+                                //实施日期
+                                standard.setImplementationDate(implementationDate.substring(0, 10));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return standard;
+    }
 
     /**
      * 查询中国标准服务网
@@ -219,8 +302,50 @@ public class StandardHander {
         return true;
     }
 
+    public TestStandardFile cssn(String code) {
+        TestStandardFile standard = null;
+        String cod = "";
+        logger.info("查询中国标准服务网");
+        try {
+            cod = URLEncoder.encode(code, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        //发起查询请求
+        String response = sendGet("https://www.cssn.net.cn/api/standards/?keyword=" + cod, "UTF-8");
+        if (StringUtils.isNotEmpty(response)){
+            JSONObject jsonObject = JSONObject.parseObject(response);
+            if (jsonObject != null){
+                JSONArray array = Optional.of(jsonObject.getJSONArray("results")).orElse(new JSONArray());
+                if (!array.isEmpty()) {
+                    JSONObject obj = Optional.of(array.getJSONObject(0)).orElse(new JSONObject());
+                    //A101  发布日期    a205 实施日期   a100  标砖编号  a000  状态
+                    if (!obj.isEmpty()) {
+                        //获取标书编号
+                        String standardNo = obj.getString("a100");
+                        String standardStatus = obj.getString("a000");
+                        logger.info("表编号:{},标准规范编号:{}, 状态：{}", code, standardNo, standardStatus);
+                        //比较标书编号
+                        if (code.equals(standardNo)) {
+                            String releaseDate = Optional.of(obj.getString("a101")).orElse("");
+                            String implementationDate = Optional.of(obj.getString("a205")).orElse("");
+                            standard = new TestStandardFile();
+                            standard.setCode(code);
+                            //标书状态码
+                            standard.setStandardStatus(standardStatus);
+                            //发布日期
+                            standard.setReleaseDate(releaseDate);
+                            //实施日期
+                            standard.setImplementationDate(implementationDate);
+                        }
+                    }
+                }
+            }
+        }
+        return standard;
+    }
 
-    /**
+    /**q
      * 查询工标网
      *
      * @param standard 实体类
@@ -271,6 +396,46 @@ public class StandardHander {
         return true;
     }
 
+    public TestStandardFile csres(String code) {
+        TestStandardFile standard = null;
+        String cod = "";
+        logger.info("查询工标网");
+        try {
+            cod = URLEncoder.encode(code, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        String url = "http://www.csres.com/s.jsp?keyword=";
+        //标准编号转义
+        //发起查询请求
+        String response = sendGet(url + cod, "gbk");
+        if (StringUtils.isNotEmpty(response)){
+            Document document = Jsoup.parse(response);
+            if (document != null){
+                Elements table = document.select("table.heng");
+                if (table != null){
+                    Elements td = table.select("td");
+                    if (td.size() >= 5) {
+                        //获取标书编号
+                        String standardNo = td.select("a").text();
+                        String standardStatus = td.get(4).text();
+                        logger.info("表编号:{},标准规范编号:{}, 状态：{}", code, standardNo, standardStatus);
+                        //比较标书编号
+                        if (code.equals(standardNo)) {
+                            String implementationDate = Optional.of(td.get(3).text()).orElse("");
+                            standard = new TestStandardFile();
+                            standard.setCode(code);
+                            //标书状态码
+                            standard.setStandardStatus(standardStatus);
+                            //实施日期
+                            standard.setImplementationDate(implementationDate);
+                        }
+                    }
+                }
+            }
+        }
+        return standard;
+    }
 
     /**
      * 发起get请求
@@ -284,7 +449,6 @@ public class StandardHander {
         BufferedReader in = null;
         try {
             URL realUrl = new URL(url);
-
             // 打开和URL之间的连接
             URLConnection connection = realUrl.openConnection();
             // 设置通用的请求属性
