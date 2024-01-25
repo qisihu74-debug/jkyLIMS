@@ -8,9 +8,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.TestOriginalRecordTemplate;
 
 import com.lims.manage.erp.entity.TestReportTemplate;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestOriginalRecordTemplateService;
@@ -86,6 +88,7 @@ public class TestOriginalRecordTemplateController extends ApiController {
      * @param testOriginalRecordTemplate 实体对象
      * @return 新增结果
      */
+    @Log(title = "新增原始记录模板", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public Result insert(@RequestBody TestOriginalRecordTemplate testOriginalRecordTemplate) {
         if (StrUtil.isEmptyIfStr(testOriginalRecordTemplate)){
@@ -102,6 +105,7 @@ public class TestOriginalRecordTemplateController extends ApiController {
      * @param testOriginalRecordTemplate 实体对象
      * @return 修改结果
      */
+    @Log(title = "修改原始记录模板", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     public Result update(@RequestBody TestOriginalRecordTemplate testOriginalRecordTemplate) {
         if (StrUtil.isEmptyIfStr(testOriginalRecordTemplate)){
@@ -116,6 +120,7 @@ public class TestOriginalRecordTemplateController extends ApiController {
      * @param idList 主键结合
      * @return 删除结果
      */
+    @Log(title = "删除原始记录模板", businessType = BusinessType.DELETE)
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {
         if (idList.size() != 0) {
@@ -138,7 +143,7 @@ public class TestOriginalRecordTemplateController extends ApiController {
     }
 
     /***********************************************/
-
+    @Log(title = "变更原始记录模板", businessType = BusinessType.OTHER)
     @PostMapping("/change")
     public Result change(@RequestBody TestOriginalRecordTemplate testOriginalRecordTemplate) {
         if (StrUtil.isEmptyIfStr(testOriginalRecordTemplate)){

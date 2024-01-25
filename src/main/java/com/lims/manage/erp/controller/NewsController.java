@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.NewsBean;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.NewsService;
@@ -53,6 +55,7 @@ public class NewsController {
      * @param id
      * @return
      */
+    @Log(title = "删除简报", businessType = BusinessType.DELETE)
     @GetMapping("delete")
     public Result detete(Long id) {
         if (id == null) {
@@ -113,6 +116,7 @@ public class NewsController {
      * @param newsBeanVo
      * @return
      */
+    @Log(title = "新增简报", businessType = BusinessType.INSERT)
     @PostMapping("saveNews")
     public Result saveNews(@RequestBody NewsBeanVo newsBeanVo) {
         if (newsBeanVo == null) {

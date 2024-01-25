@@ -6,7 +6,9 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.SopStandardInstruction;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.SopStandardInstructionService;
@@ -116,6 +118,7 @@ public class SopStandardInstructionController extends ApiController {
      * @param instruction 实体
      * @return 新增结果
      */
+    @Log(title = "新增SOP", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public Result insert(@RequestParam String instruction, MultipartFile file) {
         SopStandardInstruction standardInstruction = JSON.parseObject(instruction, SopStandardInstruction.class);
@@ -131,6 +134,7 @@ public class SopStandardInstructionController extends ApiController {
      *
      * @return 修改结果
      */
+    @Log(title = "修改SOP", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     public Result update(@RequestParam String instruction, MultipartFile file) {
         SopStandardInstruction standardInstruction = JSON.parseObject(instruction, SopStandardInstruction.class);
@@ -147,6 +151,7 @@ public class SopStandardInstructionController extends ApiController {
      * @param id 主键ID
      * @return 删除结果
      */
+    @Log(title = "删除SOP", businessType = BusinessType.DELETE)
     @PostMapping("/del")
     public Result delete(String id) {
         if (StringUtils.isNotBlank(id)) {

@@ -1,9 +1,11 @@
 package com.lims.manage.erp.controller;
 
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.DeclarationItemEntity;
 import com.lims.manage.erp.entity.DeclarationParamEntity;
 import com.lims.manage.erp.entity.DeclarationPlanEntity;
 import com.lims.manage.erp.entity.DeclarationProductEntity;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.service.DeclarationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ public class DeclarationController {
      * @param planEntity
      * @return
      */
+    @Log(title = "新增申报计划", businessType = BusinessType.INSERT)
     @PostMapping("/addPlan")
     public Result addPlan(@RequestBody DeclarationPlanEntity planEntity) {
         return this.declarationService.addPlan(planEntity);
@@ -32,6 +35,7 @@ public class DeclarationController {
      * @param planId
      * @return
      */
+    @Log(title = "删除参数申报计划", businessType = BusinessType.DELETE)
     @GetMapping("/deletePlan")
     public Result deletePlan(Long planId) {
         return this.declarationService.deletePlan(planId);
@@ -42,6 +46,7 @@ public class DeclarationController {
      * @param planEntity
      * @return
      */
+    @Log(title = "编辑参数申报计划", businessType = BusinessType.UPDATE)
     @PostMapping("/updatePlan")
     public Result updatePlan(@RequestBody DeclarationPlanEntity planEntity) {
         return this.declarationService.updatePlan(planEntity);
@@ -71,6 +76,7 @@ public class DeclarationController {
      * @param productEntity
      * @return
      */
+    @Log(title = "新增参数申报产品", businessType = BusinessType.INSERT)
     @PostMapping("/addProduct")
     public Result addProduct(@RequestBody DeclarationProductEntity productEntity) {
         return this.declarationService.addProduct(productEntity);
@@ -81,6 +87,7 @@ public class DeclarationController {
      * @param productEntity
      * @return
      */
+    @Log(title = "删除参数申报计划下的产品", businessType = BusinessType.DELETE)
     @PostMapping("/deleteProduct")
     public Result deleteProduct(@RequestBody DeclarationProductEntity productEntity) {
         return this.declarationService.deleteProduct(productEntity);
@@ -91,6 +98,7 @@ public class DeclarationController {
      * @param productEntity
      * @return
      */
+    @Log(title = "修改参数申报计划下的产品", businessType = BusinessType.UPDATE)
     @PostMapping("/updateProduct")
     public Result updateProduct(@RequestBody DeclarationProductEntity productEntity) {
         return this.declarationService.updateProduct(productEntity);
@@ -148,6 +156,7 @@ public class DeclarationController {
      * @param itemEntity
      * @return
      */
+    @Log(title = "新增申报参数", businessType = BusinessType.INSERT)
     @PostMapping("/addParam")
     public Result addParam(@RequestBody DeclarationItemEntity itemEntity) {
         return this.declarationService.addParam(itemEntity);
@@ -162,6 +171,7 @@ public class DeclarationController {
      * @param paramEntity
      * @return
      */
+    @Log(title = "删除参数申报计划下的产品参数", businessType = BusinessType.DELETE)
     @PostMapping("/deleteParam")
     public Result deleteParam(@RequestBody DeclarationItemEntity paramEntity) {
         return this.declarationService.deleteParam(paramEntity);
@@ -172,6 +182,7 @@ public class DeclarationController {
      * @param paramEntity
      * @return
      */
+    @Log(title = "修改参数申报计划下的产品参数", businessType = BusinessType.UPDATE)
     @PostMapping("/updateParam")
     public Result updateParam(@RequestBody DeclarationItemEntity paramEntity) {
         return this.declarationService.updateParam(paramEntity);
@@ -192,6 +203,7 @@ public class DeclarationController {
      * @param paramEntity
      * @return
      */
+    @Log(title = "新增检测项检测依据", businessType = BusinessType.INSERT)
     @PostMapping("/addParamStandard")
     public Result addParamStandard(@RequestBody DeclarationParamEntity paramEntity) {
         return this.declarationService.addParamStandard(paramEntity);
@@ -202,6 +214,7 @@ public class DeclarationController {
      * @param paramEntity
      * @return
      */
+    @Log(title = "删除参数申报参数检测依据", businessType = BusinessType.DELETE)
     @PostMapping("/deleteParamStandard")
     public Result deleteParamStandard(@RequestBody DeclarationParamEntity paramEntity) {
         return this.declarationService.deleteParamStandard(paramEntity);

@@ -7,10 +7,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.api.client.util.Lists;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.TechnicistCapacity;
 import com.lims.manage.erp.entity.TestProduct;
 import com.lims.manage.erp.entity.TestProductType;
 import com.lims.manage.erp.entity.TestTechnicist;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestTechnicistService;
@@ -124,6 +126,7 @@ public class TestTechnicistController extends ApiController {
      * @param testTechnicist 实体对象
      * @return 新增结果
      */
+    @Log(title = "新增技术人员", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public Result insert(@RequestBody TestTechnicist testTechnicist) {
         if (StrUtil.isEmptyIfStr(testTechnicist)){
@@ -138,6 +141,7 @@ public class TestTechnicistController extends ApiController {
      * @param testTechnicist 实体对象
      * @return 修改结果
      */
+    @Log(title = "修改技术人员", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     public Result update(@RequestBody TestTechnicist testTechnicist) {
         if (StrUtil.isEmptyIfStr(testTechnicist)){
@@ -152,6 +156,7 @@ public class TestTechnicistController extends ApiController {
      * @param idList 主键结合
      * @return 删除结果
      */
+    @Log(title = "删除技术人员", businessType = BusinessType.DELETE)
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {
         if (idList.size()!=0){

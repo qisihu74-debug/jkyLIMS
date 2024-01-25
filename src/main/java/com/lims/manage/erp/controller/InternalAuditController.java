@@ -6,10 +6,12 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Sets;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.InternalAudit;
 import com.lims.manage.erp.entity.InternalAuditInfo;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.DeptService;
@@ -91,6 +93,7 @@ public class InternalAuditController {
      * @param file
      * @return
      */
+    @Log(title = "新增评审计划", businessType = BusinessType.INSERT)
     @PostMapping("addPlan")
     @Transactional(rollbackFor = Exception.class)
     public Result addPlan(@RequestParam("jsonParam") String jsonParam, MultipartFile file){
@@ -156,6 +159,7 @@ public class InternalAuditController {
      * @param file
      * @return
      */
+    @Log(title = "修改评审计划", businessType = BusinessType.UPDATE)
     @PostMapping("editPlan")
     @Transactional(rollbackFor = Exception.class)
     public Result editPlan(@RequestParam("jsonParam") String jsonParam, MultipartFile file){
@@ -247,6 +251,7 @@ public class InternalAuditController {
      * @param ids
      * @return
      */
+    @Log(title = "删除评审计划", businessType = BusinessType.DELETE)
     @RequestMapping("delete")
     @Transactional(rollbackFor = Exception.class)
     public Result delete(@RequestParam("ids") List<String> ids){
@@ -276,6 +281,7 @@ public class InternalAuditController {
      * @param type 1内审员上传，2体系管理员上传
      * @return
      */
+    @Log(title = "上传评审文件", businessType = BusinessType.OTHER)
     @RequestMapping("uploadFile")
     public Result uploadFile(@RequestParam("type") Integer type, @RequestParam("id") Integer id,MultipartFile file){
         if (type == null || id == null || file  == null){
