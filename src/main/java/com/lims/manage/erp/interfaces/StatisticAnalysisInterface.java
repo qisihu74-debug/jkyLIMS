@@ -308,7 +308,7 @@ public class StatisticAnalysisInterface {
         List<HourCount> list = testCheckItemsTaskRelService.exportHours(bean);
         if (!CollectionUtils.isEmpty(list)){
             List<HourCount> sortList = list.stream()
-                    .sorted(Comparator.comparing(HourCount::getPid))
+                    .sorted(Comparator.comparing(HourCount::getDeptName))
                     .collect(Collectors.toList());
             InputStream fileStream = MinIoUtil.getFileStream(BucketsConst.controlled_documents, "jifen.xlsx");
             try {

@@ -418,4 +418,8 @@ public class DateUtil {
         return time;
     }
 
+    public static void main(String[] args) {
+        String s = formatDate(new Date());
+        System.out.println("");
+    }
 }

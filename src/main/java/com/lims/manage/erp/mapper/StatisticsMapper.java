@@ -150,14 +150,11 @@ public interface StatisticsMapper {
     List<TaskTestEntity> selectOrderTaskTest(PersonalStatsVo personalStats);
 
     @Select("SELECT\n" +
-            "\tdept_id As teamId,\n" +
             "\tsum( task_price ) AS teamPrice \n" +
             "FROM\n" +
             "\ttest_task_statistics \n" +
             "WHERE\n" +
             "\tissuer_time >= #{startDate} \n" +
-            "\tAND issuer_time < #{stopDate} \n" +
-            "GROUP BY\n" +
-            "\tdept_id")
-    List<HourCount> countDeptPriceByTime(@Param("startDate") Date startDate, @Param("stopDate") Date stopDate);
+            "\tAND issuer_time < #{stopDate}")
+    Double countDeptPriceByTime(@Param("startDate") Date startDate, @Param("stopDate") Date stopDate);
 }

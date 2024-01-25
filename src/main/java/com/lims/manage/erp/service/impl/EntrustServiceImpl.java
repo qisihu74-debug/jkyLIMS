@@ -111,7 +111,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import sun.security.util.Debug;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -4719,7 +4718,7 @@ public class EntrustServiceImpl implements EntrustService {
         // 获取样品详情
         PageHelper.clearPage();
         TemplateSampleVo sampleEntityData  = sampleEntityMapper.getOriginalSampleInfo(Id);
-        Debug.println("新增委托日志数据输出：根据样品id 获取详情\t",Id+" 详情 "+sampleEntityData);
+        logger.info("新增委托日志数据输出：根据样品id 获取详情\t",Id+" 详情 "+sampleEntityData);
         sampleData.setId(Id);
         sampleData.setIsUse(1);
         sampleData.setReceivedDate(sampleEntityData.getSampleTime());

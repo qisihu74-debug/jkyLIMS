@@ -1295,51 +1295,27 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                             hourCount.setDeptName(team.getName());
                         }
                     }else {
-                        hourCount.setDeptName("辅助人员无部门");
+                        hourCount.setDeptName("辅助人员");
                         hourCount.setPid(1000);
                     }
                 }
             }
             //计算部门总积分
-            Map<String, Double> map = hourCounts.stream()
-                    .collect(Collectors.groupingBy(HourCount::getDeptName, Collectors.summingDouble(HourCount::getDoubleHours)));
-            Set<String> set = map.keySet();
-            for (HourCount hourCount :hourCounts){
-                for (String key:set){
-                    if (hourCount.getDeptName().equals(key)){
-                        if (map.get(key) != null){
-                            hourCount.setTeamHours(map.get(key));
-                        }
-                    }
-                }
-            }
+            double totalScore = hourCounts.stream().mapToDouble(HourCount::getDoubleHours).sum();
             //计算个人所占部门比例
             for (HourCount hourCount :hourCounts){
-                double percentage = getPercentage(hourCount.getDoubleHours(), hourCount.getTeamHours());
+                hourCount.setTeamHours(totalScore);
+                double percentage = getPercentage(hourCount.getDoubleHours(), totalScore);
                 hourCount.setPercentage(percentage+"%");
             }
             //计算部门产值和个人绩效占比
-            List<HourCount> deptPriceByTime = statisticsMapper.countDeptPriceByTime(bean.getStartDate(), bean.getStopDate());
-            List<TestTeam> list1 = testTeamDao.getTeamPidsByIds(deptPriceByTime);
-            for (HourCount vo :deptPriceByTime){
-                for (TestTeam team :list1){
-                    if (vo.getTeamId().equals(team.getId())){
-                        vo.setPid(team.getPid());
-                    }
-                }
-            }
-            //计算部门总产值
-            if (org.apache.commons.collections.CollectionUtils.isNotEmpty(deptPriceByTime)){
-                Map<Integer, Integer> collect = deptPriceByTime.stream()
-                        .collect(Collectors.groupingBy(HourCount::getPid, Collectors.summingInt(HourCount::getTeamPrice)));
-                for (HourCount hourCount :hourCounts){
-                    Integer num = collect.get(hourCount.getPid());
-                    hourCount.setTeamPrice(num);
-                    if (num != null){
-                        double result = num * (0.05);
-                        result = Math.abs(result);
-                        hourCount.setPerformance(result);
-                    }
+            Double price = statisticsMapper.countDeptPriceByTime(bean.getStartDate(), bean.getStopDate());
+            for (HourCount hourCount :hourCounts){
+                hourCount.setTeamPrice(price.intValue());
+                if (price != null){
+                    double result = price * (0.05);
+                    result = Math.abs(result);
+                    hourCount.setPerformance(result);
                 }
             }
         }
@@ -1358,9 +1334,18 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             cells.get("C"+index).setValue(hourCount.getTeamHours());
             cells.get("D"+index).setValue(hourCount.getTeamPrice());
             cells.get("E"+index).setValue(hourCount.getPerformance());
-            cells.get("F"+index).setValue(hourCount.getDeptName()+"-"+hourCount.getTeamName());
+            if ("辅助人员".equals(hourCount.getDeptName())){
+                cells.get("F"+index).setValue("辅助人员");
+            }else {
+                cells.get("F"+index).setValue(hourCount.getDeptName()+"-"+hourCount.getTeamName());
+            }
             cells.get("G"+index).setValue(hourCount.getDoubleHours());
             cells.get("H"+index).setValue(hourCount.getPercentage());
+            String percentage = hourCount.getPercentage();
+            Double performance = hourCount.getPerformance();
+            double aValue = Double.parseDouble(percentage.replace("%", "")) / 100;
+            double result = Math.abs(aValue * performance);
+            cells.get("I"+index).setValue(result);
             index ++;
         }
         ServletOutputStream outputStream = response.getOutputStream();
@@ -1704,7 +1689,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
      */
     public static double getPercentage(double a, double b) {
         double result = (a / b) * 100;
-        DecimalFormat df = new DecimalFormat("#.#");
+        DecimalFormat df = new DecimalFormat("#.###");
         return Double.parseDouble(df.format(result));
     }
 }
