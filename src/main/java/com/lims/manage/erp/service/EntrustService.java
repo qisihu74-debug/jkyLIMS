@@ -41,11 +41,7 @@ public interface EntrustService {
      */
     Boolean updateEntrustTestNew(EntrustAddVo vo, MultipartFile[] file) throws ParseException;
 
-    /**
-     * 修改委托样品测试 new 3.23
-     */
-    Boolean updateEntrustTestNewSampleEnscript1(EntrustAddVo vo);
-    Boolean updateEntrustTestNewSampleEnscript(EntrustAddVo vo);
+
     Boolean updateEntrustTestNewSampleEnscript0621(EntrustAddVo vo);
 
     /**
@@ -371,21 +367,6 @@ public interface EntrustService {
      * @return false 失败 、true 正常执行。
      */
     Boolean verifyDistributionTask(TaskVo entity);
-
-    /**
-     * 任务发布3.12日修改
-     * 修改报告的制作单位选择样式
-     * 权限放到task表
-     * 新增逻辑（
-     * 情况1、 1.1：指定任务单存在相同团队。 合并，成功
-     *        1.2：启用废弃任务单，选择相同团队后。
-     * 情况2、不存在相同团队。 新增任务单即可。
-     *
-     * ）
-     * @param entity
-     * @return
-     */
-    Boolean distributionTask320(TaskVo entity);
 
     /**
      * 当天任务统计

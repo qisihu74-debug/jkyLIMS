@@ -642,249 +642,6 @@ public class EntrustServiceImpl implements EntrustService {
         return true;
     }
 
-
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean updateEntrustTestNewSampleEnscript1(EntrustAddVo vo) {
-        EntrustEntity basisInfo = new EntrustEntity(vo);
-        // 删除样品id
-        // 统计是否存在
-//        if (entityMapper.countSampleDetailsRel(basisInfo.getId()) > 0) {
-//            entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
-//        }
-        // 判断 样品与委托单是否存在
-        List<Integer> sampleIds = entityMapper.getSampleId(basisInfo.getId());
-        if (!CollectionUtils.isEmpty(sampleIds)) {
-            for (Integer sampleId : sampleIds) {
-                //修改样品为未使用
-                sampleEntityMapper.updateSampleUse(sampleId, 0);
-            }
-            // 1.0 样品与委托单已存在 1.1、删除样品id
-            entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
-        }
-        // 删除判定依据id
-        entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
-        // 删除缴费信息
-//        entityMapper.removeTestEntrustedPaymentRecordInfo(basisInfo.getId());
-        // 删除样品下检测项
-        entityMapper.removeTestEntrustedSampleCheckitemRel(basisInfo.getId());
-
-        //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
-        Double totalMoney = 0D;
-        List<SampleEntity> samples = vo.getSamples();
-        List<EntrustSampleEntity> list = new ArrayList<>();
-        List<EntrustSampleEntity> list1 = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(samples)) {
-            for (SampleEntity sampleEntity : samples) {
-                EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
-                entrustSampleEntity.setEntrustmentId(basisInfo.getId());
-                entrustSampleEntity.setSampleId(sampleEntity.getId());
-                list.add(entrustSampleEntity);
-                sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
-                // 样品依据
-                List<JudgmentBasisVo> standardFileIds = sampleEntity.getStandardFileIdStr();
-                if (!CollectionUtils.isEmpty(standardFileIds)) {
-                    for (JudgmentBasisVo integer : standardFileIds) {
-                        EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
-                        sampleEntity1.setSampleId(sampleEntity.getId());
-                        sampleEntity1.setStandardId(integer.getStandardId());
-                        sampleEntity1.setEntrustmentId(basisInfo.getId());
-                        list1.add(sampleEntity1);
-                    }
-                }
-                //样品下检测项集合
-                List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
-
-                // 迭代样品下检测项单价信息 如果为空 删除此检测项信息
-//                try {
-//                    if(!CollectionUtils.isEmpty(sampleCheckItem)){
-//                        Iterator<SampleItemEntity> sampleCheckItemList = sampleCheckItem.iterator();
-//                        while (sampleCheckItemList.hasNext()){
-//                            SampleItemEntity dataItem = sampleCheckItemList.next();
-//                            if(dataItem.getUnitPrice()==null){
-//                                sampleCheckItemList.remove();
-//                            }
-//                        }
-//                    }
-//                }
-//                catch (Exception e){
-//                    logger.error("删除样品下检测项单价为空时异常");
-//                }
-                if (!CollectionUtils.isEmpty(sampleCheckItem)) {
-                    for (SampleItemEntity entity : sampleCheckItem) {
-                        // 根据检测项id 遍历检测项层级和价格 获取集合
-                        List<SampleItemEntity> ItemList = entityMapper.getItemRecursionList(entity.getCheckItemId());
-                        //处理检测项 遍历出来的层级数据 拼接层级名。
-                        HashMap<Long, SampleItemEntity> itemMap = new HashMap<>();
-                        if (!CollectionUtils.isEmpty(ItemList)) {
-                            for (SampleItemEntity entity0 : ItemList) {
-                                if (entity0.getCheckItemId().equals(entity.getCheckItemId())) {
-                                    entity0.setCheckItemName(entity.getCheckItemName());
-                                }
-                                itemMap.put(entity0.getCheckItemId(), entity0);
-                            }
-                            for (SampleItemEntity entity2 : ItemList) {
-                                SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
-                                if (sampleItemEntity != null && entity2.getUnitPrice() == null) {
-                                    // 变更检测项名为： 伪造a-伪造b
-                                    entity2.setCheckItemName(sampleItemEntity.getCheckItemName() + "-" + entity2.getCheckItemName());
-                                }
-                            }
-                            //
-                        }
-                        // 根据检测项id 遍历检测项层级和价格 获取集合
-//                        List<SampleItemEntity> ItemList = entityMapper.getyItemList(entity.getCheckItemId());
-                        if (!CollectionUtils.isEmpty(ItemList)) {
-                            for (SampleItemEntity entity1 : ItemList) {
-                                //计算检测项总价钱
-                                if (entity1.getUnitPrice() != null && entity1.getUnitPrice() >= 0) {
-                                    double money = entity.getTimes() * entity1.getUnitPrice();
-                                    totalMoney = totalMoney + money;
-                                }
-                                //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
-                                entity1.setSampleId(sampleEntity.getId());
-                                entity1.setEntrustId(basisInfo.getId());
-                                entity1.setMethodId(entity.getMethodId());
-                                entity1.setStandardId(entity.getStandardId());
-                                entity1.setTimes(entity.getTimes());
-//                                if(!entity1.getCheckItemName().equals(entity.getCheckItemName())&&entity1.getUnitPrice()==null){
-//                                    entity1.setCheckItemName(entity.getCheckItemName()+"-"+entity1.getCheckItemName());
-//                                }
-                                // 比对检测项父级名称 进行存储例如：（）。
-//                                entity1.setCheckItemName(entity.getCheckItemName());
-                            }
-                            entityMapper.BatchSaveEntrustSampleItem(ItemList);
-                        }
-
-                    }
-                }
-
-
-            }
-            if (!CollectionUtils.isEmpty(list)) {
-                entityMapper.BatchSaveEntrustSample(list);
-            }
-            if (!CollectionUtils.isEmpty(list1)) {
-                entityMapper.BatchSaveSampleStandard(list1);
-            }
-        }
-
-
-        if (totalMoney != 0) {
-            //得到总价钱，再保存委托基本信息
-            basisInfo.setPaymentCount(totalMoney + "");
-            //存放委托基本信息==》test_entrusted
-            entityMapper.updateEntrustInfos(basisInfo);
-        }
-
-        return true;
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean updateEntrustTestNewSampleEnscript(EntrustAddVo vo) {
-        EntrustEntity basisInfo = new EntrustEntity(vo);
-        // 判断 样品与委托单是否存在
-        List<Integer> sampleIds = entityMapper.getSampleId(basisInfo.getId());
-        if (!CollectionUtils.isEmpty(sampleIds)) {
-            for (Integer sampleId : sampleIds) {
-                //修改样品为未使用
-                sampleEntityMapper.updateSampleUse(sampleId, 0);
-            }
-            // 1.0 样品与委托单已存在 1.1、删除样品id
-            entityMapper.removeTestEntrustedSampleDetailsRel(basisInfo.getId());
-        }
-        // 删除判定依据id
-        entityMapper.removeTestEntrustedSampleStandardRel(basisInfo.getId());
-        // 删除缴费信息
-//        entityMapper.removeTestEntrustedPaymentRecordInfo(basisInfo.getId());
-        // 删除样品下检测项
-        entityMapper.removeTestEntrustedSampleCheckitemRel(basisInfo.getId());
-
-        //存放委托单样品信息==》test_entrusted_sample_details_rel，上传附件
-        Double totalMoney = 0D;
-        List<SampleEntity> samples = vo.getSamples();
-        List<EntrustSampleEntity> list = new ArrayList<>();
-        List<EntrustSampleEntity> list1 = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(samples)) {
-            for (SampleEntity sampleEntity : samples) {
-                EntrustSampleEntity entrustSampleEntity = new EntrustSampleEntity();
-                entrustSampleEntity.setEntrustmentId(basisInfo.getId());
-                entrustSampleEntity.setSampleId(sampleEntity.getId());
-                list.add(entrustSampleEntity);
-                sampleEntityMapper.updateSampleUse(sampleEntity.getId(), 1);
-                // 样品依据
-                List<JudgmentBasisVo> standardFileIds = sampleEntity.getStandardFileIdStr();
-                if (!CollectionUtils.isEmpty(standardFileIds)) {
-                    for (JudgmentBasisVo integer : standardFileIds) {
-                        EntrustSampleEntity sampleEntity1 = new EntrustSampleEntity();
-                        sampleEntity1.setSampleId(sampleEntity.getId());
-                        sampleEntity1.setStandardId(integer.getStandardId());
-                        sampleEntity1.setEntrustmentId(basisInfo.getId());
-                        list1.add(sampleEntity1);
-                    }
-                }
-                //样品下检测项集合
-                List<SampleItemEntity> sampleCheckItem = sampleEntity.getSampleCheckItem();
-                if (!CollectionUtils.isEmpty(sampleCheckItem)) {
-                    for (SampleItemEntity entity : sampleCheckItem) {
-                        // 根据检测项id 遍历检测项层级和价格 获取集合
-                        List<SampleItemEntity> ItemList = entityMapper.getItemRecursionList(entity.getCheckItemId());
-                        //处理检测项 遍历出来的层级数据 拼接层级名。
-                        HashMap<Long, SampleItemEntity> itemMap = new HashMap<>();
-                        if (!CollectionUtils.isEmpty(ItemList)) {
-                            for (SampleItemEntity entity0 : ItemList) {
-                                if (entity0.getCheckItemId().equals(entity.getCheckItemId())) {
-                                    entity0.setCheckItemName(entity.getCheckItemName());
-                                }
-                                itemMap.put(entity0.getCheckItemId(), entity0);
-                            }
-                            for (SampleItemEntity entity2 : ItemList) {
-                                SampleItemEntity sampleItemEntity = itemMap.get(entity2.getCheckItemPid());
-                                if (sampleItemEntity != null && entity2.getUnitPrice() == null) {
-                                    // 变更检测项名为： 伪造a-伪造b
-                                    entity2.setCheckItemName(sampleItemEntity.getCheckItemName() + "-" + entity2.getCheckItemName());
-                                }
-                            }
-                            //
-                        }
-                        // 根据检测项id 遍历检测项层级和价格 获取集合
-                        if (!CollectionUtils.isEmpty(ItemList)) {
-                            for (SampleItemEntity entity1 : ItemList) {
-                                //计算检测项总价钱
-                                if (entity1.getUnitPrice() != null && entity1.getUnitPrice() >= 0) {
-                                    double money = entity.getTimes() * entity1.getUnitPrice();
-                                    totalMoney = totalMoney + money;
-                                }
-                                //存在委托单样品下检测项信息==》test_entrusted_sample_checkitem_rel
-                                entity1.setSampleId(sampleEntity.getId());
-                                entity1.setEntrustId(basisInfo.getId());
-                                entity1.setMethodId(entity.getMethodId());
-                                entity1.setStandardId(entity.getStandardId());
-                                entity1.setTimes(entity.getTimes());
-                            }
-                            entityMapper.BatchSaveEntrustSampleItem(ItemList);
-                        }
-                    }
-                }
-            }
-            if (!CollectionUtils.isEmpty(list)) {
-                entityMapper.BatchSaveEntrustSample(list);
-            }
-            if (!CollectionUtils.isEmpty(list1)) {
-                entityMapper.BatchSaveSampleStandard(list1);
-            }
-        }
-        if (totalMoney != 0) {
-            //得到总价钱，再保存委托基本信息
-//            basisInfo.setPaymentCount(totalMoney + "");2022年5月20日修改，不在后台计算检测项价格
-            //存放委托基本信息==》test_entrusted
-            entityMapper.updateEntrustInfos(basisInfo);
-        }
-        return true;
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateEntrustTestNewSampleEnscript0621(EntrustAddVo vo) {
@@ -3001,193 +2758,193 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean distributionTask(TaskVo entity) {
-        List<Long> deptIds = Lists.newArrayList();
-        List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
-//        Long dept = null;
-        List<Long> dept = Lists.newArrayList();
-        for (CheckItemDeptVo vo : checkItemDeptVoList) {
-            if (!deptIds.contains(vo.getDeptId())) {
-                deptIds.add(vo.getDeptId());
-            }
-            String issueReport = vo.getIssueReport();
-            if ("是".equals(issueReport)) {
-                dept.add(vo.getDeptId());
-            }
-        }
-        //创建任务对象
-        List<TaskVo> vos = Lists.newArrayList();
-        for (Long deptId : deptIds) {
-            TaskVo vo = new TaskVo();
-            vo.setId(GenID.getID());
-            String teamCode = taskMapper.getTeamCode(deptId);
-            Integer integer = taskMapper.selectMaxNoByCode(teamCode);
-            Integer code = null;
-            if (integer == null) {
-                String currentTime = DateUtil.getTodayString().substring(2, 6);
-                code = Integer.parseInt(currentTime + "001");
-            } else {
-                code = integer + 1;
-            }
-            String codeStr = code + "";
-            vo.setDeptId(deptId);
-            vo.setCode(codeStr);
-            vo.setTaskCode(teamCode + codeStr.substring(0, 4) + "-" + codeStr.substring(4, 7));
-            vo.setEntrustmentId(entity.getEntrustmentId());
-            vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
-            vo.setOrderTime(entity.getOrderTime());
-            vo.setState(0);
-            vo.setReportComplete(2);
-            vo.setOrderer(ShiroUtils.getUserInfo().getName());
-//            if(deptId.equals(dept)){
-            if (dept.contains(deptId)) {
-                vo.setIssueReport("是");
-            } else {
-                vo.setIssueReport("否");
-            }
-            vos.add(vo);
-        }
-        //任务单保存
-        taskMapper.batchSave(vos);
-        //更新检测项信息
-        taskMapper.batchUpdateCheckItem(entity.getCheckItemDeptVoList());
-        //更新委托单状态
-        taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
+//        List<Long> deptIds = Lists.newArrayList();
+//        List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
+////        Long dept = null;
+//        List<Long> dept = Lists.newArrayList();
+//        for (CheckItemDeptVo vo : checkItemDeptVoList) {
+//            if (!deptIds.contains(vo.getDeptId())) {
+//                deptIds.add(vo.getDeptId());
+//            }
+//            String issueReport = vo.getIssueReport();
+//            if ("是".equals(issueReport)) {
+//                dept.add(vo.getDeptId());
+//            }
+//        }
+//        //创建任务对象
+//        List<TaskVo> vos = Lists.newArrayList();
+//        for (Long deptId : deptIds) {
+//            TaskVo vo = new TaskVo();
+//            vo.setId(GenID.getID());
+//            String teamCode = taskMapper.getTeamCode(deptId);
+//            Integer integer = taskMapper.selectMaxNoByCode(teamCode);
+//            Integer code = null;
+//            if (integer == null) {
+//                String currentTime = DateUtil.getTodayString().substring(2, 6);
+//                code = Integer.parseInt(currentTime + "001");
+//            } else {
+//                code = integer + 1;
+//            }
+//            String codeStr = code + "";
+//            vo.setDeptId(deptId);
+//            vo.setCode(codeStr);
+//            vo.setTaskCode(teamCode + codeStr.substring(0, 4) + "-" + codeStr.substring(4, 7));
+//            vo.setEntrustmentId(entity.getEntrustmentId());
+//            vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
+//            vo.setOrderTime(entity.getOrderTime());
+//            vo.setState(0);
+//            vo.setReportComplete(2);
+//            vo.setOrderer(ShiroUtils.getUserInfo().getName());
+////            if(deptId.equals(dept)){
+//            if (dept.contains(deptId)) {
+//                vo.setIssueReport("是");
+//            } else {
+//                vo.setIssueReport("否");
+//            }
+//            vos.add(vo);
+//        }
+//        //任务单保存
+//        taskMapper.batchSave(vos);
+//        //更新检测项信息
+//        taskMapper.batchUpdateCheckItem(entity.getCheckItemDeptVoList());
+//        //更新委托单状态
+//        taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
         return true;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean distributionTask412(TaskVo entity) {
-        List<Long> deptIds = Lists.newArrayList();
-        List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
-        for (CheckItemDeptVo vo : checkItemDeptVoList) {
-            if (!deptIds.contains(vo.getDeptId())) {
-                deptIds.add(vo.getDeptId());
-            }
-        }
-        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entity.getEntrustmentId());
-        //创建任务对象
-        List<TaskVo> vos = Lists.newArrayList();
-        for (Long deptId : deptIds) {
-            //计算本单价格
-            double taskPrice = 0L;
-            for (CheckItemDeptVo vo : checkItemDeptVoList) {
-                if (deptId.equals(vo.getDeptId())) {
-                    taskPrice = taskPrice + ((entity.getDiscount() == null ? 0 : entity.getDiscount()) *
-                            (vo.getCheckPrice() == null ? 0 : vo.getCheckPrice()) * vo.getTimes());
-                }
-            }
-            TaskVo vo = new TaskVo();
-            long id = GenID.getID();
-            vo.setId(id);
-            vo.setTaskPrice(taskPrice);
-            //根据委托单号月份确定任务单ID
-            String teamCode = taskMapper.getTeamCode(deptId);
-            String entrustmentNo = entrustAddVo.getEntrustmentNo()+"";
-            String format = entrustmentNo.substring(2, 6);
-            Integer integer = taskMapper.selectMaxNoByCode(teamCode+format);
-            Integer code = null;
-            if (integer == null) {
-                String currentTime = DateUtil.getTodayString().substring(2, 6);
-                code = Integer.parseInt(format + "001");
-            } else {
-                code = integer + 1;
-            }
-            String codeStr = code + "";
-            vo.setDeptId(deptId);
-            vo.setCode(codeStr);
-            vo.setTaskCode(teamCode + codeStr.substring(0, 4) + "-" + codeStr.substring(4, 7));
-            vo.setEntrustmentId(entity.getEntrustmentId());
-            vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
-            vo.setOrderTime(entity.getOrderTime());
-            vo.setState(0);
-            vo.setReportComplete(2);
-            SysUserEntity userInfo = ShiroUtils.getUserInfo();
-            vo.setOrderer(userInfo.getName());
-            vo.setPresentInformation(entity.getPresentInformation());
-            if(!CollectionUtils.isEmpty(entity.getDeptIds())){
-                if (entity.getDeptIds().contains(deptId)) {
-                    vo.setIssueReport("是");
-                } else {
-                    vo.setIssueReport("否");
-                }
-            }
-            // 任务单创建时间
-            vo.setCreateTime(new Date());
-            vos.add(vo);
-            //更新检测项分配的部门和任务单号
-            List<CheckItemDeptVo> checkItemDeptVoList1 = Lists.newArrayList();
-            for (CheckItemDeptVo checkItemDeptVo : checkItemDeptVoList) {
-                if (deptId.equals(checkItemDeptVo.getDeptId())) {
-                    checkItemDeptVo.setTaskId(id);
-                    checkItemDeptVoList1.add(checkItemDeptVo);
-                }
-            }
-            //更新检测项信息
-            taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
-            // 2023年9月26日 发布时：样品状态 = 待检
-            // 通过委托单id 获取样品信息
-            List<Integer> sampleIds = entityMapper.getSampleId(entity.getEntrustmentId());
-            if (CollectionUtil.isNotEmpty(sampleIds)) {
-                for (Integer sampleId : sampleIds) {
-                    // 根据样品id 查询样品流转列表
-                    List<SampleCirculationRecord> circulationList = sampleEntityMapper.getRecords(sampleId, 30);
-                    if (CollectionUtils.isEmpty(circulationList)) {
-                        // 增加样品样品流转状态
-                        SampleCirculationRecord sa = new SampleCirculationRecord();
-                        sa.setSampleId(sampleId);
-                        sa.setStatus("0");
-                        sa.setOperatorId(userInfo.getUserId());
-                        sa.setOperatorName(userInfo.getName());
-                        sa.setTime(new Date());
-                        sampleEntityMapper.saveSampleCirculationRecord(sa);
-                    } else {
-                        Boolean flag = false;
-                        for (SampleCirculationRecord sampleCirculationRecord : circulationList) {
-                            if (sampleCirculationRecord.getStatus().equals("0")) {
-                                flag = true;
-                            }
-                        }
-                        if (!flag) {
-                            // 增加样品样品流转状态
-                            SampleCirculationRecord sa = new SampleCirculationRecord();
-                            sa.setSampleId(sampleId);
-                            sa.setStatus("0");
-                            sa.setOperatorId(userInfo.getUserId());
-                            sa.setOperatorName(userInfo.getName());
-                            sa.setTime(new Date());
-                            sampleEntityMapper.saveSampleCirculationRecord(sa);
-                        }
-                    }
-                    }
-                }
-            // 记录发布任务单的日志
-            StringBuffer stringBuilder1 = new StringBuffer();
-            stringBuilder1.append("任务单发布日志");
-            stringBuilder1.append("任务单id"+vo.getId());
-            stringBuilder1.append("任务单号" + vo.getTaskCode());
-            stringBuilder1.append("委托单id" + vo.getEntrustmentId());
-            stringBuilder1.append("是否出具报告" + vo.getIssueReport());
-            stringBuilder1.append("价格" + vo.getTaskPrice());
-            stringBuilder1.append("任务单创建时间" + vo.getCreateTime());
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.TASK_FLOW, true);
-        }
-        //任务单保存
-        taskMapper.batchSave(vos);
-        //更新委托单状态
-        taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
-        // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
-        if(!CollectionUtils.isEmpty(entity.getTaskRelEntities())){
-            // 补充发布人ID和姓名
-            SysUserEntity userEntity = ShiroUtils.getUserInfo();
-            List<TestEntrustedTaskRelEntity> TaskRelEntities = entity.getTaskRelEntities();
-            for(TestEntrustedTaskRelEntity taskdata:TaskRelEntities){
-                taskdata.setUserId(userEntity.getUserId());
-                taskdata.setAddressName(userEntity.getName());
-                taskdata.setCreateDate(new Date());
-            }
-            methodDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
-        }
+//        List<Long> deptIds = Lists.newArrayList();
+//        List<CheckItemDeptVo> checkItemDeptVoList = entity.getCheckItemDeptVoList();
+//        for (CheckItemDeptVo vo : checkItemDeptVoList) {
+//            if (!deptIds.contains(vo.getDeptId())) {
+//                deptIds.add(vo.getDeptId());
+//            }
+//        }
+//        EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entity.getEntrustmentId());
+//        //创建任务对象
+//        List<TaskVo> vos = Lists.newArrayList();
+//        for (Long deptId : deptIds) {
+//            //计算本单价格
+//            double taskPrice = 0L;
+//            for (CheckItemDeptVo vo : checkItemDeptVoList) {
+//                if (deptId.equals(vo.getDeptId())) {
+//                    taskPrice = taskPrice + ((entity.getDiscount() == null ? 0 : entity.getDiscount()) *
+//                            (vo.getCheckPrice() == null ? 0 : vo.getCheckPrice()) * vo.getTimes());
+//                }
+//            }
+//            TaskVo vo = new TaskVo();
+//            long id = GenID.getID();
+//            vo.setId(id);
+//            vo.setTaskPrice(taskPrice);
+//            //根据委托单号月份确定任务单ID
+//            String teamCode = taskMapper.getTeamCode(deptId);
+//            String entrustmentNo = entrustAddVo.getEntrustmentNo()+"";
+//            String format = entrustmentNo.substring(2, 6);
+//            Integer integer = taskMapper.selectMaxNoByCode(teamCode+format);
+//            Integer code = null;
+//            if (integer == null) {
+//                String currentTime = DateUtil.getTodayString().substring(2, 6);
+//                code = Integer.parseInt(format + "001");
+//            } else {
+//                code = integer + 1;
+//            }
+//            String codeStr = code + "";
+//            vo.setDeptId(deptId);
+//            vo.setCode(codeStr);
+//            vo.setTaskCode(teamCode + codeStr.substring(0, 4) + "-" + codeStr.substring(4, 7));
+//            vo.setEntrustmentId(entity.getEntrustmentId());
+//            vo.setRequiredCompletionTime(entity.getRequiredCompletionTime());
+//            vo.setOrderTime(entity.getOrderTime());
+//            vo.setState(0);
+//            vo.setReportComplete(2);
+//            SysUserEntity userInfo = ShiroUtils.getUserInfo();
+//            vo.setOrderer(userInfo.getName());
+//            vo.setPresentInformation(entity.getPresentInformation());
+//            if(!CollectionUtils.isEmpty(entity.getDeptIds())){
+//                if (entity.getDeptIds().contains(deptId)) {
+//                    vo.setIssueReport("是");
+//                } else {
+//                    vo.setIssueReport("否");
+//                }
+//            }
+//            // 任务单创建时间
+//            vo.setCreateTime(new Date());
+//            vos.add(vo);
+//            //更新检测项分配的部门和任务单号
+//            List<CheckItemDeptVo> checkItemDeptVoList1 = Lists.newArrayList();
+//            for (CheckItemDeptVo checkItemDeptVo : checkItemDeptVoList) {
+//                if (deptId.equals(checkItemDeptVo.getDeptId())) {
+//                    checkItemDeptVo.setTaskId(id);
+//                    checkItemDeptVoList1.add(checkItemDeptVo);
+//                }
+//            }
+//            //更新检测项信息
+//            taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
+//            // 2023年9月26日 发布时：样品状态 = 待检
+//            // 通过委托单id 获取样品信息
+//            List<Integer> sampleIds = entityMapper.getSampleId(entity.getEntrustmentId());
+//            if (CollectionUtil.isNotEmpty(sampleIds)) {
+//                for (Integer sampleId : sampleIds) {
+//                    // 根据样品id 查询样品流转列表
+//                    List<SampleCirculationRecord> circulationList = sampleEntityMapper.getRecords(sampleId, 30);
+//                    if (CollectionUtils.isEmpty(circulationList)) {
+//                        // 增加样品样品流转状态
+//                        SampleCirculationRecord sa = new SampleCirculationRecord();
+//                        sa.setSampleId(sampleId);
+//                        sa.setStatus("0");
+//                        sa.setOperatorId(userInfo.getUserId());
+//                        sa.setOperatorName(userInfo.getName());
+//                        sa.setTime(new Date());
+//                        sampleEntityMapper.saveSampleCirculationRecord(sa);
+//                    } else {
+//                        Boolean flag = false;
+//                        for (SampleCirculationRecord sampleCirculationRecord : circulationList) {
+//                            if (sampleCirculationRecord.getStatus().equals("0")) {
+//                                flag = true;
+//                            }
+//                        }
+//                        if (!flag) {
+//                            // 增加样品样品流转状态
+//                            SampleCirculationRecord sa = new SampleCirculationRecord();
+//                            sa.setSampleId(sampleId);
+//                            sa.setStatus("0");
+//                            sa.setOperatorId(userInfo.getUserId());
+//                            sa.setOperatorName(userInfo.getName());
+//                            sa.setTime(new Date());
+//                            sampleEntityMapper.saveSampleCirculationRecord(sa);
+//                        }
+//                    }
+//                    }
+//                }
+//            // 记录发布任务单的日志
+//            StringBuffer stringBuilder1 = new StringBuffer();
+//            stringBuilder1.append("任务单发布日志");
+//            stringBuilder1.append("任务单id"+vo.getId());
+//            stringBuilder1.append("任务单号" + vo.getTaskCode());
+//            stringBuilder1.append("委托单id" + vo.getEntrustmentId());
+//            stringBuilder1.append("是否出具报告" + vo.getIssueReport());
+//            stringBuilder1.append("价格" + vo.getTaskPrice());
+//            stringBuilder1.append("任务单创建时间" + vo.getCreateTime());
+//            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder1.toString(), Const.TASK_FLOW, true);
+//        }
+//        //任务单保存
+//        taskMapper.batchSave(vos);
+//        //更新委托单状态
+//        taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
+//        // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
+//        if(!CollectionUtils.isEmpty(entity.getTaskRelEntities())){
+//            // 补充发布人ID和姓名
+//            SysUserEntity userEntity = ShiroUtils.getUserInfo();
+//            List<TestEntrustedTaskRelEntity> TaskRelEntities = entity.getTaskRelEntities();
+//            for(TestEntrustedTaskRelEntity taskdata:TaskRelEntities){
+//                taskdata.setUserId(userEntity.getUserId());
+//                taskdata.setAddressName(userEntity.getName());
+//                taskdata.setCreateDate(new Date());
+//            }
+//            methodDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
+//        }
         return true;
     }
 
@@ -4568,81 +4325,82 @@ public class EntrustServiceImpl implements EntrustService {
     @Override
     public PageInfo taskStatisticsList(TestEntrustedTaskRelVo testEntrustedTaskRelVo) {
 
-        List<TestEntrustedTaskRelVo> list = Lists.newArrayList();
-        //拆分委托编号
-        if(!StringUtils.isEmpty(testEntrustedTaskRelVo.getEntrustmentNostr())){
-            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(testEntrustedTaskRelVo.getEntrustmentNostr());
-            testEntrustedTaskRelVo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
-            testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo().toString());
-            if(!StringUtils.isEmpty(entrustCategoryVo.getEntrustmentNo())){
-                testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo().toString());
-            }
-        }
-        PageHelper.clearPage();
-        list = testEntrustedTaskRelDao.getTaskStatisticsList(testEntrustedTaskRelVo);
-        if(!CollectionUtils.isEmpty(list)){
-            for(TestEntrustedTaskRelVo testEntrustedTaskRelVo1:list){
-                // 遍历输出数据
-                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getRemark()))
-                {
-                    testEntrustedTaskRelVo1.setRemark("--");
-                }
-                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getAddressName())){
-                    testEntrustedTaskRelVo1.setAddressName("--");
-                }
-                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskCode())){
-                    testEntrustedTaskRelVo1.setTaskCode("--");
-                }
-                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskSource())){
-                    testEntrustedTaskRelVo1.setTaskSource("--");
-                }
-                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getReportCode())){
-                    testEntrustedTaskRelVo1.setReportCode("--");
-                }
-                // 任务流转 type =1 && 中间报告 =1 相等
-                if(testEntrustedTaskRelVo1.getType().equals(testEntrustedTaskRelVo1.getMidReportType())){
-                    // if 中间报告==空
-                    if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportCode())){
-                        testEntrustedTaskRelVo1.setReportCode("--");
-                    }
-                    else {
-                        testEntrustedTaskRelVo1.setReportCode(testEntrustedTaskRelVo1.getMidReportCode());
-                    }
-                    // if 中间报告结束时间 ！= 空
-                    if(!StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportFinishTime()))
-                    {
-                        testEntrustedTaskRelVo1.setReportFinishTime(testEntrustedTaskRelVo1.getMidReportFinishTime());
-                    }
-                    else {
-                        testEntrustedTaskRelVo1.setReportFinishTime(null);
-                    }
-                }
-            }
-        }
-        Integer pageNum = testEntrustedTaskRelVo.getPageNum();
-        Integer pageSize = testEntrustedTaskRelVo.getPageSize();
-        if(StringUtils.isEmpty(pageNum)||pageNum<=0){
-            pageNum = 1;
-        }
-        if(StringUtils.isEmpty(pageSize)||pageSize<=0){
-            pageSize = 10;
-        }
-        // 如果页码展示数量大于最大数 返回最大数值
-        if(pageSize>list.size()){
-            pageSize = list.size();
-        }
-        PageInfo pageInfo = new PageInfo();
-        //分页
-        List<TestEntrustedTaskRelVo> subList;
-        if (list.size() > 10 && list.size() / 10 >= pageNum) {
-            subList = list.subList((pageNum - 1) * pageSize, pageNum * pageSize);
-        } else {
-            subList = list.subList((pageNum - 1) * pageSize, list.size());
-        }
-        getMethodSampleName(subList);
-        pageInfo.setList(subList);
-        pageInfo.setTotal(list.size());
-        return pageInfo;
+//        List<TestEntrustedTaskRelVo> list = Lists.newArrayList();
+//        //拆分委托编号
+//        if(!StringUtils.isEmpty(testEntrustedTaskRelVo.getEntrustmentNostr())){
+//            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(testEntrustedTaskRelVo.getEntrustmentNostr());
+//            testEntrustedTaskRelVo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
+//            testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo().toString());
+//            if(!StringUtils.isEmpty(entrustCategoryVo.getEntrustmentNo())){
+//                testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo().toString());
+//            }
+//        }
+//        PageHelper.clearPage();
+//        list = testEntrustedTaskRelDao.getTaskStatisticsList(testEntrustedTaskRelVo);
+//        if(!CollectionUtils.isEmpty(list)){
+//            for(TestEntrustedTaskRelVo testEntrustedTaskRelVo1:list){
+//                // 遍历输出数据
+//                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getRemark()))
+//                {
+//                    testEntrustedTaskRelVo1.setRemark("--");
+//                }
+//                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getAddressName())){
+//                    testEntrustedTaskRelVo1.setAddressName("--");
+//                }
+//                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskCode())){
+//                    testEntrustedTaskRelVo1.setTaskCode("--");
+//                }
+//                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getTaskSource())){
+//                    testEntrustedTaskRelVo1.setTaskSource("--");
+//                }
+//                if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getReportCode())){
+//                    testEntrustedTaskRelVo1.setReportCode("--");
+//                }
+//                // 任务流转 type =1 && 中间报告 =1 相等
+//                if(testEntrustedTaskRelVo1.getType().equals(testEntrustedTaskRelVo1.getMidReportType())){
+//                    // if 中间报告==空
+//                    if(StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportCode())){
+//                        testEntrustedTaskRelVo1.setReportCode("--");
+//                    }
+//                    else {
+//                        testEntrustedTaskRelVo1.setReportCode(testEntrustedTaskRelVo1.getMidReportCode());
+//                    }
+//                    // if 中间报告结束时间 ！= 空
+//                    if(!StringUtils.isEmpty(testEntrustedTaskRelVo1.getMidReportFinishTime()))
+//                    {
+//                        testEntrustedTaskRelVo1.setReportFinishTime(testEntrustedTaskRelVo1.getMidReportFinishTime());
+//                    }
+//                    else {
+//                        testEntrustedTaskRelVo1.setReportFinishTime(null);
+//                    }
+//                }
+//            }
+//        }
+//        Integer pageNum = testEntrustedTaskRelVo.getPageNum();
+//        Integer pageSize = testEntrustedTaskRelVo.getPageSize();
+//        if(StringUtils.isEmpty(pageNum)||pageNum<=0){
+//            pageNum = 1;
+//        }
+//        if(StringUtils.isEmpty(pageSize)||pageSize<=0){
+//            pageSize = 10;
+//        }
+//        // 如果页码展示数量大于最大数 返回最大数值
+//        if(pageSize>list.size()){
+//            pageSize = list.size();
+//        }
+//        PageInfo pageInfo = new PageInfo();
+//        //分页
+//        List<TestEntrustedTaskRelVo> subList;
+//        if (list.size() > 10 && list.size() / 10 >= pageNum) {
+//            subList = list.subList((pageNum - 1) * pageSize, pageNum * pageSize);
+//        } else {
+//            subList = list.subList((pageNum - 1) * pageSize, list.size());
+//        }
+//        getMethodSampleName(subList);
+//        pageInfo.setList(subList);
+//        pageInfo.setTotal(list.size());
+//        return pageInfo;
+        return null;
     }
 
     @Override
@@ -5584,152 +5342,7 @@ public class EntrustServiceImpl implements EntrustService {
         return true;
     }
 
-    /**
-     * 发布时 下拉选择团队：  新增逻辑（
-     *                      * 情况1、 1.1：指定任务单存在相同团队。 合并，成功
-     *                      *        1.2：启用废弃任务单，选择相同团队后。
-     *                      * 情况2、不存在相同团队。 新增任务单即可。
-     * 					都需要统一任务单价格计算。
-     * @param entity
-     * @return
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean distributionTask320(TaskVo entity) {
-        // 通过委托单id 查询任务列表？不存在（正常走发布列表）：存在 （处理情况1、2、3）
-        List<TaskProgressVo> taskList = taskMapper.getTaskStateByEntrustId(entity.getEntrustmentId());
-        // 没有任务单 走新增发布路线
-        if(CollectionUtils.isEmpty(taskList)){
-            Boolean flag = distributionTask412(entity);
-            return flag;
-        }
 
-        // 处理情况1：任务单与检测项指向团队一致的话 更新任务单价格和检测项所属部门
-        methodDistributionTask1(entity,taskList);
-        // 情况2、不存在相同团队。 新增任务单即可。
-        methodDistributionTask2(entity,taskList);
-        return true;
-    }
-
-    /**
-     * 情况1、 1.1：指定任务单存在相同团队。 合并，成功
-     *         1.2：启用废弃任务单，选择相同团队后。
-     * @param entity
-     * @param taskList
-     */
-    void methodDistributionTask1(TaskVo entity,List<TaskProgressVo> taskList){
-        Boolean status = true;
-        // 遍历：通过委托单id下 任务单依次展示
-        for(TaskProgressVo taskProgressVo : taskList){
-            TaskTestEntity taskTestEntity = new TaskTestEntity();
-            taskTestEntity.setId(taskProgressVo.getTaskId());
-            //计算本单价格
-            double taskPrice = taskProgressVo.getTaskPrice();
-            // 任务单 =144 && 检测项重新发布 改变任务单状态
-            if(taskProgressVo.getState().equals(144)){
-                // 状态0未抢单，1.已抢单，2已领样,3实验中，4实验完成
-                Integer state = null;
-                if(taskProgressVo.getOrderTime()!=null){
-                    state = 0;
-                }
-                if(taskProgressVo.getReceiveTime()!=null){
-                    state = 1;
-                }
-                if(taskProgressVo.getStartDetectionTime()!=null){
-                    state = 3;
-                }
-                taskTestEntity.setState(state);
-            }
-            taskTestEntity.setState(taskTestEntity.getState());
-            // 比对部门id 是否出具最终报告标记
-            if (!CollectionUtils.isEmpty(entity.getDeptIds())&&entity.getDeptIds().contains(taskProgressVo.getDeptId())) {
-                taskTestEntity.setIssueReport(1);
-            } else {
-                taskTestEntity.setIssueReport(0);
-            }
-            List<CheckItemDeptVo> checkItemDeptVoList1 = new ArrayList<>();
-            // 遍历待发布检测项列表
-            for(CheckItemDeptVo checkItemDeptVo : entity.getCheckItemDeptVoList()){
-                // if 任务单团队id = 检测项id 批量修改。
-                if(checkItemDeptVo.getDeptId().equals(taskProgressVo.getDeptId().longValue())){
-                    CheckItemDeptVo checkItemDeptVo1 = new CheckItemDeptVo();
-                    checkItemDeptVo1.setId(checkItemDeptVo.getId());
-                    checkItemDeptVo1.setDeptId(checkItemDeptVo.getDeptId());
-                    checkItemDeptVo1.setTaskId(taskProgressVo.getTaskId());
-                    // 任务单此次新增价格
-                    taskPrice = taskPrice + ((entity.getDiscount() == null ? 0 : entity.getDiscount()) *
-                            (checkItemDeptVo.getCheckPrice() == null ? 0 : checkItemDeptVo.getCheckPrice()) * checkItemDeptVo.getTimes());
-                    // 比对任务单团队与检测项团队一致的话 修改检测项所属团队信息。
-                    checkItemDeptVoList1.add(checkItemDeptVo1);
-                }
-                // 设置此次任务单最新价格
-                taskTestEntity.setTaskPrice(taskPrice);
-            }
-            if(!CollectionUtils.isEmpty(checkItemDeptVoList1)){
-                //批量更新检测项信息
-                taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
-            }
-            // 比对任务单价格发生变动则 更新数据
-            if(!taskTestEntity.getTaskPrice().equals(taskProgressVo.getTaskPrice())){
-                // 更新任务单价格并且状态修改为默认值
-                taskMapper.updateTestTask(taskTestEntity);
-                //更新委托单状态
-                taskMapper.updateEntrustById(entity.getEntrustmentId(), 1);
-                // status = false
-                status = false;
-            }
-        }
-        // 处理任务流转信息 通过委托单id 和 传入信息 !=taskRelEntities.isEmpty()
-        if(!CollectionUtils.isEmpty(entity.getTaskRelEntities()) && !status){
-            // 补充发布人ID和姓名
-            SysUserEntity userEntity = ShiroUtils.getUserInfo();
-            List<TestEntrustedTaskRelEntity> TaskRelEntities = entity.getTaskRelEntities();
-            for(TestEntrustedTaskRelEntity taskdata:TaskRelEntities){
-                taskdata.setUserId(userEntity.getUserId());
-                taskdata.setAddressName(userEntity.getName());
-                taskdata.setCreateDate(new Date());
-            }
-            methodDistributionOfFlow(entity.getEntrustmentId(),TaskRelEntities);
-        }
-    }
-    /**
-     * 情况2、不存在相同团队。 新增任务单即可。
-     * @param entity 新增待发布信息
-     * @param taskList 任务单列表
-     */
-    Boolean methodDistributionTask2(TaskVo entity,List<TaskProgressVo> taskList){
-        // 待发布检测项集合
-        List<CheckItemDeptVo> addItemList = new ArrayList<>();
-        // 遍历检测项
-        for(CheckItemDeptVo checkItemDeptVo : entity.getCheckItemDeptVoList()){
-            // 设置标志位
-            Boolean status = true;
-            // 当前待发布检测项（checkItemDeptVo） 不属于下列任务单（taskList）所属部门 则新增。
-            for(TaskProgressVo taskProgressVo : taskList){
-                // if 任务单团队deptId = 检测项deptId   status = false。
-                if(checkItemDeptVo.getDeptId().equals(taskProgressVo.getDeptId().longValue())){
-                    status = false;
-                }
-            }
-            if(status){
-                CheckItemDeptVo checkItemDeptVo1 = new CheckItemDeptVo();
-                checkItemDeptVo1.setId(checkItemDeptVo.getId());
-                checkItemDeptVo1.setDeptId(checkItemDeptVo.getDeptId());
-                checkItemDeptVo1.setCheckPrice(checkItemDeptVo.getCheckPrice());
-                checkItemDeptVo1.setTimes(checkItemDeptVo.getTimes());
-                checkItemDeptVo1.setTaskId(null);
-                addItemList.add(checkItemDeptVo1);
-            }
-        }
-        // 待发布检测项集合 不等于空
-        if(!CollectionUtils.isEmpty(addItemList)){
-            // 把数据进行替换。
-            entity.setCheckItemDeptVoList(addItemList);
-            Boolean flag = distributionTask412(entity);
-            return flag;
-        }
-        return true;
-    }
 
     /**
      * 当天任务统计
