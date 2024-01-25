@@ -8,8 +8,10 @@ import com.lims.manage.erp.entity.TestStandardFile;
 import com.lims.manage.erp.service.TestStandardFileService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,9 +78,12 @@ public class StandardHander {
             //国家标准全文公开系统
             standard = openstd(response, code);
             if (standard == null){
-                standard = cssn(code);
+                standard = std("https://std.samr.gov.cn/search/stdPage?q="+cod+"&tid=");
                 if (standard == null){
-                    standard = csres(code);
+                    standard = cssn(code);
+                    if (standard == null){
+                        standard = csres(code);
+                    }
                 }
             }
         }
@@ -86,6 +91,40 @@ public class StandardHander {
             Thread.sleep(3500);
         } catch (InterruptedException e) {
             logger.error("标准查新线程阻塞异常:{}",e);
+        }
+        return standard;
+    }
+
+    /**
+     * 获取https://std.samr.gov.cn数据
+     * @param url
+     * @return
+     */
+    private TestStandardFile std(String url) {
+        TestStandardFile standard = null;
+        //发起查询请求
+        String response = sendGet(url, "UTF-8");
+        if (response != null){
+            Document doc = Jsoup.parse(response);
+            if (doc != null){
+                standard = new TestStandardFile();
+                // 获取现行值
+                Element currentStatus = doc.select("span.label.label-success").first();
+                String current = currentStatus.text();
+                //标书状态码
+                standard.setStandardStatus(current);
+                // 获取发布于的值
+                Element publishDate = doc.select("time.post-date").get(0);
+                String published = publishDate.text();
+                //发布日期
+                standard.setReleaseDate(published);
+
+                // 获取实施于的值
+                Element implementDate = doc.select("time.post-date").get(1);
+                String implemented = implementDate.text();
+                //实施日期
+                standard.setImplementationDate(implemented);
+            }
         }
         return standard;
     }

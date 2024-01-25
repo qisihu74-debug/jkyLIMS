@@ -66,13 +66,13 @@ public class StandardNoveltyController {
     @PostMapping("list")
     public Result list(@RequestBody StandardNovelty bean){
         //查新列表前把缓存查新数据写入数据库
-        Collection<Object> values = CONCURRENT_HASH_MAP.values();
-        List<StandardNovelty> arrayList = Lists.newArrayList();
-        for (Object o :values){
-            StandardNovelty standardNovelty1 = (StandardNovelty)o;
-            arrayList.add(standardNovelty1);
-        }
-        service.updateBatchByCode(arrayList);
+//        Collection<Object> values = CONCURRENT_HASH_MAP.values();
+//        List<StandardNovelty> arrayList = Lists.newArrayList();
+//        for (Object o :values){
+//            StandardNovelty standardNovelty1 = (StandardNovelty)o;
+//            arrayList.add(standardNovelty1);
+//        }
+//        service.updateBatchByCode(arrayList);
         //查新数据
         LambdaQueryWrapper<StandardNovelty> queryWrapper = new LambdaQueryWrapper();
         queryWrapper.eq(StringUtils.isNotEmpty(bean.getStatus()),StandardNovelty::getStatus,bean.getStatus());
@@ -251,15 +251,16 @@ public class StandardNoveltyController {
                 one.setImplementationDate(standardFiles.getImplementationDate());
                 one.setNote(note);
                 CONCURRENT_HASH_MAP.put(code,one);
-                if ("是".equals(isEnd)){
-                    Collection<Object> values = CONCURRENT_HASH_MAP.values();
-                    List<StandardNovelty> list = Lists.newArrayList();
-                    for (Object o :values){
-                        StandardNovelty standardNovelty1 = (StandardNovelty)o;
-                        list.add(standardNovelty1);
-                    }
-                    service.updateBatchByCode(list);
-                }
+                service.updateById(one);
+//                if ("是".equals(isEnd)){
+//                    Collection<Object> values = CONCURRENT_HASH_MAP.values();
+//                    List<StandardNovelty> list = Lists.newArrayList();
+//                    for (Object o :values){
+//                        StandardNovelty standardNovelty1 = (StandardNovelty)o;
+//                        list.add(standardNovelty1);
+//                    }
+//                    service.updateBatchByCode(list);
+//                }
                 return ResultUtil.success(one);
             }
         }else {
@@ -351,6 +352,14 @@ public class StandardNoveltyController {
      */
     @GetMapping("export")
     public void exportFile(HttpServletResponse response,String code,String name,String status){
+        LambdaQueryWrapper<StandardNovelty> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(StringUtils.isNotEmpty(status),StandardNovelty::getStatus,status);
+        queryWrapper.like(StringUtils.isNotEmpty(code),StandardNovelty::getCode,code.trim());
+        queryWrapper.like(StringUtils.isNotEmpty(name),StandardNovelty::getName,name.trim());
+        List<StandardNovelty> list = service.list(queryWrapper);
+        InputStream fileStream = MinIoUtil.getFileStream(BucketsConst.controlled_documents, "bzgf.xlsx");
+
+
 
     }
 }
