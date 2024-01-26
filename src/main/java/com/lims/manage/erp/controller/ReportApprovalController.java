@@ -581,7 +581,7 @@ public class ReportApprovalController {
         reportApprovalVo1.setIssuer(name);
         Boolean flag = reportApprovalService.verify_data_two(reportApprovalVo1);
         if (flag) {
-            // 报告签发完成：记录工时
+//            报告签发完成：记录工时
             if (reportApprovalVo1.getState() == 0) {
                 testCheckItemsTaskRelService.handleWorkingHours(reportApprovalVo1.getId(), 0);
             }

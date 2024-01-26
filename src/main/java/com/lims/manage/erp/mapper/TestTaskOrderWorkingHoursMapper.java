@@ -112,4 +112,20 @@ public interface TestTaskOrderWorkingHoursMapper  extends BaseMapper<TestTaskOrd
             "GROUP BY\n" +
             "\tt1.user_id")
     List<HourCount> exportHours(Date startDate, Date stopDate);
+
+
+    /**
+     * 通过委托单id 获取旧任务单id列表
+     *
+     * @param entrustId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid \n" +
+            "FROM\n" +
+            "\ttest_task \n" +
+            "WHERE\n" +
+            "\tentrustment_id = #{entrustId} \n" +
+            "\tAND state != 144 and task_list_status is null")
+    List<Long> getTaskOldList(@Param("entrustId") Long entrustId);
 }

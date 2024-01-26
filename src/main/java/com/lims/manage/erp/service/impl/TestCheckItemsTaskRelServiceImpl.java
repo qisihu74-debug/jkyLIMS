@@ -1185,7 +1185,23 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
         List<Long> taskIds = testTaskOrderWorkingHoursMapper.getTaskList(entrustId);
         if (CollectionUtil.isEmpty(taskIds)) {
-            return false;
+            // 查询是否是 旧任务单数据
+            List<Long> oldTaskIds = testTaskOrderWorkingHoursMapper.getTaskOldList(entrustId);
+            if (CollectionUtil.isEmpty(oldTaskIds)) {
+                return false;
+            }
+            // 处理旧任务id集合 不包含 工时信息
+            for (Long taskId : oldTaskIds) {
+                LambdaQueryWrapper<TestTaskOrderWorkingHours> deleteTaskOrderWorkingHours = new LambdaQueryWrapper<>();
+                deleteTaskOrderWorkingHours.eq(TestTaskOrderWorkingHours::getTaskId, taskId);
+                testTaskOrderWorkingHoursMapper.delete(deleteTaskOrderWorkingHours);
+                LambdaQueryWrapper<TestItemOrderWorkingHours> deleteItemOrderWorkingHours = new LambdaQueryWrapper<>();
+                deleteItemOrderWorkingHours.eq(TestItemOrderWorkingHours::getTaskId, taskId);
+                testItemOrderWorkingHoursMapper.delete(deleteItemOrderWorkingHours);
+                // 根据taskId 循环新增工时数据
+                endReportAllottedTime(taskId);
+            }
+            return true;
         }
         // 通过任务单id 获取工时列表
         List<TestTaskOrderWorkingHours> testTaskOrderWorkingHoursList = testTaskOrderWorkingHoursMapper.getTestTaskOrderWorkingHoursList(taskIds);

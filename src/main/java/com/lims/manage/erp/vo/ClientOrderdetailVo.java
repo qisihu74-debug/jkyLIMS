@@ -156,7 +156,7 @@ public class ClientOrderdetailVo {
     /**
      * 委托单位id 数组
      */
-    @TableField(exist=false)
+    @TableField(exist = false)
     private String[] companyStrs;
     /**
      * 委托单编号
@@ -166,4 +166,10 @@ public class ClientOrderdetailVo {
      * 经营人员
      */
     private String operatingPersonnel;
+
+    /**
+     * 开票管理是否开具发票（为空是 否，有值 为是）
+     */
+    @TableField(exist = false)
+    private String isInvoice;
 }

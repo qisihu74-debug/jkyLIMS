@@ -1245,7 +1245,8 @@
         entrust_company ,
         entrust_company_id ,
         actual_price as systemPrice,
-        operating_personnel
+        operating_personnel,
+        is_invoice
         FROM
         test_entrusted_info
         WHERE
