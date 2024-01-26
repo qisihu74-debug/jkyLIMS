@@ -57,6 +57,8 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -138,6 +140,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         // 进行 查询分页。
         PageHelper.clearPage();
         PageHelper.startPage(taskStatisticsVo.getPageNum(), taskStatisticsVo.getPageSize());
+        if (taskStatisticsVo.getStopDate() != null) {
+            SimpleDateFormat startFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String startStr = startFormat.format(taskStatisticsVo.getStopDate());
+            String[] split = startStr.split("-");
+            LocalDate localDate = LocalDate.of(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+            LocalDate endDate = localDate.plusDays(1);
+            Date date = Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+            taskStatisticsVo.setStopDate(date);
+        }
         List<TaskStatisticsVo> list = baseMapper.getMyHoursStatistics(taskStatisticsVo);
         // 分页后： 进行统计每组检测项 工时
         if (CollectionUtil.isNotEmpty(list)) {
@@ -165,6 +176,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         PageHelper.clearPage();
         taskStatisticsVo.setPageSize(null);
         taskStatisticsVo.setPageNum(null);
+        if (taskStatisticsVo.getStopDate() != null) {
+            SimpleDateFormat startFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String startStr = startFormat.format(taskStatisticsVo.getStopDate());
+            String[] split = startStr.split("-");
+            LocalDate localDate = LocalDate.of(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+            LocalDate endDate = localDate.plusDays(1);
+            Date date = Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+            taskStatisticsVo.setStopDate(date);
+        }
         String countSum = baseMapper.getMyHoursStatisticsSum(taskStatisticsVo);
         if (countSum != null) {
             // 返回数据
@@ -622,6 +642,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             // TODO: 11月9日 暂时替换 userIds = deptIds
             taskStatisticsVo.setLongList(userIds);
             // 根据人员 查询 全部任务总工时列表
+            if (taskStatisticsVo.getStopDate() != null) {
+                SimpleDateFormat startFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String startStr = startFormat.format(taskStatisticsVo.getStopDate());
+                String[] split = startStr.split("-");
+                LocalDate localDate = LocalDate.of(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+                LocalDate endDate = localDate.plusDays(1);
+                Date date = Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+                taskStatisticsVo.setStopDate(date);
+            }
             List<TestTaskOrderWorkingHours> totalWorkforAllTasks = testTaskOrderWorkingHoursMapper.selectTaskOrderWorkingHours(taskStatisticsVo);
             // 调用方法：全部任务单 工时统计
             methodWorkingHours(totalWorkforAllTasks, list);
@@ -737,6 +766,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             // TODO: 11月9日 暂时替换 userIds = deptIds
             taskStatisticsVo.setLongList(userIds);
             // 根据人员 查询 全部任务总工时列表
+            if (taskStatisticsVo.getStopDate() != null) {
+                SimpleDateFormat startFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String startStr = startFormat.format(taskStatisticsVo.getStopDate());
+                String[] split = startStr.split("-");
+                LocalDate localDate = LocalDate.of(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+                LocalDate endDate = localDate.plusDays(1);
+                Date date = Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+                taskStatisticsVo.setStopDate(date);
+            }
             String totalData = testTaskOrderWorkingHoursMapper.selectTaskOrderCountWorkingHours(taskStatisticsVo);
             if (totalData != null) {
                 Map<String, Object> map = new HashMap<>();
@@ -763,6 +801,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
 //        LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
 //        queryWrapper.eq(TestTaskOrderWorkingHours::getUserId, taskStatisticsVo.getReceiverUserId());
 //        List<TestTaskOrderWorkingHours> list = testTaskOrderWorkingHoursMapper.selectList(queryWrapper);
+        if (taskStatisticsVo.getStopDate() != null) {
+            SimpleDateFormat startFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String startStr = startFormat.format(taskStatisticsVo.getStopDate());
+            String[] split = startStr.split("-");
+            LocalDate localDate = LocalDate.of(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+            LocalDate endDate = localDate.plusDays(1);
+            Date date = Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+            taskStatisticsVo.setStopDate(date);
+        }
         List<TestTaskOrderWorkingHours> list = testTaskOrderWorkingHoursMapper.selectTaskOrderWorkingHoursList(taskStatisticsVo);
         PageInfo<TestTaskOrderWorkingHours> result = new PageInfo<>(list);
         return ResultUtil.success(result);
@@ -787,6 +834,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             // TODO: 11月9日 暂时替换 userIds = deptIds
             taskStatisticsVo.setLongList(userIds);
             // 根据授权人员 查询 任务单工时列表-总工时
+            if (taskStatisticsVo.getStopDate() != null) {
+                SimpleDateFormat startFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String startStr = startFormat.format(taskStatisticsVo.getStopDate());
+                String[] split = startStr.split("-");
+                LocalDate localDate = LocalDate.of(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+                LocalDate endDate = localDate.plusDays(1);
+                Date date = Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+                taskStatisticsVo.setStopDate(date);
+            }
             List<TestTaskOrderWorkingHours> totalWorkforAllTasks = testTaskOrderWorkingHoursMapper.selectTaskOrderTotalWorkingHours(taskStatisticsVo);
             // 调用方法：全部任务单 工时统计
             methodWorkingHours(totalWorkforAllTasks, list);
@@ -884,6 +940,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         // 进行 查询分页。
         PageHelper.clearPage();
         PageHelper.startPage(taskStatisticsVo.getPageNum(), taskStatisticsVo.getPageSize());
+        if (taskStatisticsVo.getStopDate() != null) {
+            SimpleDateFormat startFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String startStr = startFormat.format(taskStatisticsVo.getStopDate());
+            String[] split = startStr.split("-");
+            LocalDate localDate = LocalDate.of(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+            LocalDate endDate = localDate.plusDays(1);
+            Date date = Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+            taskStatisticsVo.setStopDate(date);
+        }
         List<TestTaskOrderWorkingHours> list = testTaskOrderWorkingHoursMapper.selectTaskOrderList(taskStatisticsVo);
         if (CollectionUtil.isNotEmpty(list)) {
             for (TestTaskOrderWorkingHours data : list) {
@@ -928,6 +993,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         PageHelper.clearPage();
         taskStatisticsVo.setPageSize(null);
         taskStatisticsVo.setPageNum(null);
+        if (taskStatisticsVo.getStopDate() != null) {
+            SimpleDateFormat startFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String startStr = startFormat.format(taskStatisticsVo.getStopDate());
+            String[] split = startStr.split("-");
+            LocalDate localDate = LocalDate.of(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+            LocalDate endDate = localDate.plusDays(1);
+            Date date = Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+            taskStatisticsVo.setStopDate(date);
+        }
         String totalData = testTaskOrderWorkingHoursMapper.selectAuthorizedSignatureHours(taskStatisticsVo);
         if (totalData != null) {
             Map<String, Object> map = new HashMap<>();
