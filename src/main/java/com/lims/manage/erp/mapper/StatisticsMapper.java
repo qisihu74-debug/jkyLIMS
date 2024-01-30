@@ -151,6 +151,14 @@ public interface StatisticsMapper {
     List<TaskStatsVo> getTaskListShow(TaskStatsVo taskDetailInfoVo);
 
     /**
+     * entrustIds集合 查询 视图
+     *
+     * @param longs
+     * @return
+     */
+    List<TaskStatsVo> getTaskInListShow(@Param("longs") List<Long> longs);
+
+    /**
      * 查询区域信息
      *
      * @return

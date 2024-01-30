@@ -235,8 +235,23 @@
         </collection>
     </resultMap>
 
+    <!--任务列表结果集-->
+    <resultMap id="taskResultShowMap" type="com.lims.manage.erp.vo.TaskStatsVo">
+        <result property="taskId" column="task_id"></result>
+        <result property="taskCode" column="task_code"></result>
+        <result property="orderer" column="orderer"></result>
+        <result property="requestDate" column="requestDate"></result>
+        <result property="finishDate" column="finishDate"></result>
+        <result property="reportCode" column="report_code"></result>
+        <result property="state" column="state"></result>
+        <result property="cost" column="cost"></result>
+        <result property="entrustmentId" column="entrustment_id"></result>
+        <result property="discount" column="discount"></result>
+        <result property="reportType" column="type"></result>
+    </resultMap>
+
     <select id="getTaskList" resultMap="taskResultMap" parameterType="com.lims.manage.erp.vo.TaskDetailInfoVo">
-    SELECT
+        SELECT
         t1.id as task_id,
         t1.task_code task_code,
         t1.required_completion_time requestDate,
@@ -286,10 +301,10 @@
         ORDER BY t1.task_code DESC
     </select>
 
-    <select id="getTaskListShow" resultMap="taskResultMap" parameterType="com.lims.manage.erp.vo.TaskDetailInfoVo">
-        SELECT * FROM taskQueryShow
+    <select id="getTaskListShow" resultMap="taskResultShowMap" parameterType="com.lims.manage.erp.vo.TaskDetailInfoVo">
+        SELECT id as task_id,entrustment_id FROM test_task
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
-            and task_id >0
+            and id >0
             <if test="nodeTeam!=null">
                 and dept_id in
                 <foreach collection="nodeTeam" item="id" index="index" open="(" close=")" separator=",">
@@ -297,10 +312,10 @@
                 </foreach>
             </if>
             <if test="requestDate!=null">
-                and requestDate <![CDATA[ <= ]]>  #{requestDate}
+                and required_completion_time <![CDATA[ <= ]]>  #{requestDate}
             </if>
             <if test="finishDate!=null">
-                and finishDate <![CDATA[ <= ]]>  #{finishDate}
+                and review_time <![CDATA[ <= ]]>  #{finishDate}
             </if>
             <if test="startDate!=null">
                 and start_detection_time <![CDATA[ >= ]]>  #{startDate}
@@ -308,6 +323,16 @@
             <if test="stopDate!=null">
                 and end_detection_time <![CDATA[ <= ]]>  #{stopDate}
             </if>
+        </trim>
+        ORDER BY task_code DESC
+    </select>
+    <select id="getTaskInListShow" resultMap="taskResultMap" parameterType="com.lims.manage.erp.vo.TaskDetailInfoVo">
+        SELECT * FROM taskQueryShow
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            and task_id in
+            <foreach collection="longs" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
         </trim>
         ORDER BY task_code DESC
     </select>

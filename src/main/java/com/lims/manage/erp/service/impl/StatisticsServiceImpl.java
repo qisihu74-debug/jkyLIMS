@@ -548,12 +548,18 @@ public class StatisticsServiceImpl implements StatisticsService {
         PageHelper.clearPage();
         PageHelper.startPage(taskStatsVo.getPageNum(), taskStatsVo.getPageSize());
         // 基于视图
-        List<TaskStatsVo> list = statisticsMapper.getTaskListShow(taskStatsVo);
+        List<TaskStatsVo> taskList = statisticsMapper.getTaskListShow(taskStatsVo);
         // 获取状态
         PageInfo<TaskStatsVo> pageInfo = new PageInfo<>();
-        pageInfo = new PageInfo<>(list);
+        pageInfo = new PageInfo<>(taskList);
         // 遍历list数据
-        if (CollectionUtil.isNotEmpty(list)) {
+        if (CollectionUtil.isNotEmpty(taskList)) {
+            List<Long> taskIds = new ArrayList<>();
+            for (TaskStatsVo statsVo : taskList) {
+                taskIds.add(statsVo.getTaskId());
+            }
+            List<TaskStatsVo> list = statisticsMapper.getTaskInListShow(taskIds);
+            pageInfo.setList(list);
             for (TaskStatsVo taskDetailInfoVo : pageInfo.getList()) {
                 if (!taskDetailInfoVo.getSampleDetailList().isEmpty()) {
                     Set<String> set = new HashSet<>();
