@@ -4,7 +4,7 @@
     <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.TestBillingRegistrationEntity">
         <id column="id" jdbcType="INTEGER" property="id"/>
         <result column="entrustment_id" jdbcType="BIGINT" property="entrustmentId"/>
-        <result column="entrustment_no" jdbcType="INTEGER" property="entrustmentNo"/>
+        <result column="entrustment_no" jdbcType="VARCHAR" property="entrustmentNo"/>
         <result column="entrust_company" jdbcType="VARCHAR" property="entrustCompany"/>
         <result column="sample_name" jdbcType="VARCHAR" property="sampleName"/>
         <result column="registration_time" jdbcType="TIMESTAMP" property="registrationTime"/>
@@ -33,7 +33,7 @@
       entrust_company, sample_name, registration_time, 
       registered_name, registered_userid, remark, 
       crate_time, update_time)
-    values (#{id,jdbcType=INTEGER}, #{entrustmentId,jdbcType=BIGINT}, #{entrustmentNo,jdbcType=INTEGER}, 
+    values (#{id,jdbcType=INTEGER}, #{entrustmentId,jdbcType=BIGINT}, #{entrustmentNo,jdbcType=VARCHAR},
       #{entrustCompany,jdbcType=VARCHAR}, #{sampleName,jdbcType=VARCHAR}, #{registrationTime,jdbcType=TIMESTAMP}, 
       #{registeredName,jdbcType=VARCHAR}, #{registeredUserid,jdbcType=BIGINT}, #{remark,jdbcType=VARCHAR}, 
       #{crateTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
@@ -83,7 +83,7 @@
                 #{entrustmentId,jdbcType=BIGINT},
             </if>
             <if test="entrustmentNo != null">
-                #{entrustmentNo,jdbcType=INTEGER},
+                #{entrustmentNo,jdbcType=VARCHAR},
             </if>
             <if test="entrustCompany != null">
                 #{entrustCompany,jdbcType=VARCHAR},
@@ -118,7 +118,7 @@
                 entrustment_id = #{entrustmentId,jdbcType=BIGINT},
             </if>
             <if test="entrustmentNo != null">
-                entrustment_no = #{entrustmentNo,jdbcType=INTEGER},
+                entrustment_no = #{entrustmentNo,jdbcType=VARCHAR},
             </if>
             <if test="entrustCompany != null">
                 entrust_company = #{entrustCompany,jdbcType=VARCHAR},
@@ -150,7 +150,7 @@
     <update id="updateByPrimaryKey" parameterType="com.lims.manage.erp.entity.TestBillingRegistrationEntity">
     update test_billing_registration
     set entrustment_id = #{entrustmentId,jdbcType=BIGINT},
-      entrustment_no = #{entrustmentNo,jdbcType=INTEGER},
+      entrustment_no = #{entrustmentNo,jdbcType=VARCHAR},
       entrust_company = #{entrustCompany,jdbcType=VARCHAR},
       sample_name = #{sampleName,jdbcType=VARCHAR},
       registration_time = #{registrationTime,jdbcType=TIMESTAMP},
@@ -163,12 +163,13 @@
   </update>
 
 
-    <select id="selectEntrustNoList" resultType="com.lims.manage.erp.entity.EntrustEntity">
+    <select id="selectEntrustNoList" resultType="com.lims.manage.erp.vo.ClientOrderdetailVo">
         SELECT
-        t1.id,
+        t1.id as entrustmentId,
         t1.entrustment_no AS entrustmentNo,
+        IFNULL( CONCAT( t1.entrust_category_type, t1.entrustment_no ), t1.entrustment_no ) AS entrustmentNostr,
         t1.entrust_company AS entrustCompany,
-        GROUP_CONCAT( t3.alias_name SEPARATOR ', ' ) AS presentInformation
+        GROUP_CONCAT( t3.alias_name SEPARATOR ', ' ) AS sampleName
         FROM
         test_entrusted_info AS t1
         LEFT JOIN test_entrusted_sample_details_rel AS t2 ON t1.id = t2.entrustment_id

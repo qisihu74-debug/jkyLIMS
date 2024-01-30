@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.TestBillingRegistrationEntity;
+import com.lims.manage.erp.vo.ClientOrderdetailVo;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 
@@ -27,7 +28,7 @@ public interface TestBillingRegistrationEntityMapper extends BaseMapper<TestBill
      * @param list
      * @return
      */
-    List<EntrustEntity> selectEntrustNoList(@Param("list") List<TestBillingRegistrationEntity> list);
+    List<ClientOrderdetailVo> selectEntrustNoList(@Param("list") List<TestBillingRegistrationEntity> list);
 
     /**
      * 更新 委托单中 isInvoice = "是"

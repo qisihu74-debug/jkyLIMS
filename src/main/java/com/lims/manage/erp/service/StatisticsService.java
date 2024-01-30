@@ -88,10 +88,11 @@ public interface StatisticsService {
 
     /**
      * 任务单统计
+     *
      * @param taskStatsVo
      * @return
      */
-    PagingToolVo taskQuery1111(TaskStatsVo taskStatsVo);
+    PageInfo taskQuery1111(TaskStatsVo taskStatsVo);
 
     /**
      * 部门产值统计统计Excel

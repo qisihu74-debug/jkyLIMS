@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
@@ -64,27 +65,26 @@ public class StatisticsController {
     @PostMapping("/taskQuery_export")
     public void taskQueryExport(@RequestBody TaskStatsVo taskStatsVo,HttpServletResponse response) throws IOException {
         BufferedOutputStream bos = null;
-//        TaskStatsVo taskStatsVo = new TaskStatsVo();
-
-//        if(taskStatsVo.getPageNum()==null||taskStatsVo.getPageSize()==null){
-            taskStatsVo.setPageNum(1);
-            taskStatsVo.setPageSize(1000000);
-//        }
-        PagingToolVo list = statisticsService.taskQuery1111(taskStatsVo);
+        taskStatsVo.setPageNum(1);
+        taskStatsVo.setPageSize(1000000);
         String fileName = "任务统计结果";
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "attachment; filename="
                 + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
-        InputStream inputStream = statisticsService.exportPersonDetails(list);
-        ServletOutputStream outputStream = response.getOutputStream();
-        BufferedInputStream bis = new BufferedInputStream(inputStream);
-        bos = new BufferedOutputStream(outputStream);
-        byte[] buff = new byte[2048];
-        int bytesRead;
-        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
-            bos.write(buff, 0, bytesRead);
-            bos.flush();
+        PageInfo pageInfo = statisticsService.taskQuery1111(taskStatsVo);
+        if (CollectionUtil.isNotEmpty(pageInfo.getList())) {
+            InputStream inputStream = statisticsService.exportPersonDetails((PagingToolVo) pageInfo.getList());
+            ServletOutputStream outputStream = response.getOutputStream();
+            BufferedInputStream bis = new BufferedInputStream(inputStream);
+            bos = new BufferedOutputStream(outputStream);
+            byte[] buff = new byte[2048];
+            int bytesRead;
+            while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+                bos.write(buff, 0, bytesRead);
+                bos.flush();
+            }
+
         }
         bos.close();
     }

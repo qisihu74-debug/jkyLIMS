@@ -270,20 +270,46 @@
                 #{id}
             </foreach>
         </if>
-        <if test="requestDate!=null">
-            and t1.required_completion_time <![CDATA[ <= ]]>  #{requestDate}
-        </if>
-        <if test="finishDate!=null">
-            and t1.review_time <![CDATA[ <= ]]>  #{finishDate}
-        </if>
-        <if test="startDate!=null">
-            and t1.start_detection_time <![CDATA[ >= ]]>  #{startDate}
-        </if>
-        <if test="stopDate!=null">
-            and t1.end_detection_time <![CDATA[ <= ]]>  #{stopDate}
-        </if>
+            <if test="requestDate!=null">
+                and t1.required_completion_time <![CDATA[ <= ]]>  #{requestDate}
+            </if>
+            <if test="finishDate!=null">
+                and t1.review_time <![CDATA[ <= ]]>  #{finishDate}
+            </if>
+            <if test="startDate!=null">
+                and t1.start_detection_time <![CDATA[ >= ]]>  #{startDate}
+            </if>
+            <if test="stopDate!=null">
+                and t1.end_detection_time <![CDATA[ <= ]]>  #{stopDate}
+            </if>
         </trim>
         ORDER BY t1.task_code DESC
+    </select>
+
+    <select id="getTaskListShow" resultMap="taskResultMap" parameterType="com.lims.manage.erp.vo.TaskDetailInfoVo">
+        SELECT * FROM taskQueryShow
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            and task_id >0
+            <if test="nodeTeam!=null">
+                and dept_id in
+                <foreach collection="nodeTeam" item="id" index="index" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="requestDate!=null">
+                and requestDate <![CDATA[ <= ]]>  #{requestDate}
+            </if>
+            <if test="finishDate!=null">
+                and finishDate <![CDATA[ <= ]]>  #{finishDate}
+            </if>
+            <if test="startDate!=null">
+                and start_detection_time <![CDATA[ >= ]]>  #{startDate}
+            </if>
+            <if test="stopDate!=null">
+                and end_detection_time <![CDATA[ <= ]]>  #{stopDate}
+            </if>
+        </trim>
+        ORDER BY task_code DESC
     </select>
 
     <select id="areaStatistics2" resultType="com.lims.manage.erp.vo.AreaStatisticsResultVo"

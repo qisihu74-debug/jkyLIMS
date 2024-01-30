@@ -20,7 +20,7 @@ public class TestBillingRegistrationEntity implements Serializable {
 
     private Long entrustmentId;
 
-    private Integer entrustmentNo;
+    private String entrustmentNo;
 
     private String entrustCompany;
 
@@ -68,11 +68,11 @@ public class TestBillingRegistrationEntity implements Serializable {
         this.entrustmentId = entrustmentId;
     }
 
-    public Integer getEntrustmentNo() {
+    public String getEntrustmentNo() {
         return entrustmentNo;
     }
 
-    public void setEntrustmentNo(Integer entrustmentNo) {
+    public void setEntrustmentNo(String entrustmentNo) {
         this.entrustmentNo = entrustmentNo;
     }
 

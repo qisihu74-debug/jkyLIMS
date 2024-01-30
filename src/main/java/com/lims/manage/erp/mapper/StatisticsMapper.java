@@ -124,17 +124,35 @@ public interface StatisticsMapper {
 
     /**
      * 部门产值统计--子级
+     *
      * @param paramVo
      * @return
      */
     List<TeamOutputValueVo> teamStatisticsNode(StatisticsParamVo paramVo);
+
     List<TeamOutputValueVo> teamStatisticsNode0419(StatisticsParamVo paramVo);
+
     List<TeamOutputValueVo> teamStatisticsNode1219(StatisticsParamVo paramVo);
 
+    /**
+     * 废弃
+     *
+     * @param taskDetailInfoVo
+     * @return
+     */
     List<TaskStatsVo> getTaskList(TaskStatsVo taskDetailInfoVo);
 
     /**
+     * 视图
+     *
+     * @param taskDetailInfoVo
+     * @return
+     */
+    List<TaskStatsVo> getTaskListShow(TaskStatsVo taskDetailInfoVo);
+
+    /**
      * 查询区域信息
+     *
      * @return
      */
     List<LabelValueVo> getAreas();
