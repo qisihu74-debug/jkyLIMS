@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.DeviceEntity;
+import com.lims.manage.erp.entity.InstrumentRecordEntity;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
@@ -40,6 +41,18 @@ public interface TestInstrumentService extends IService<TestInstrument> {
      * @return
      */
     PageInfo getInstrumentRecord(InstrumentRecordParamVo paramVo);
+
+    /**
+     * 修改设备使用记录
+     * @param paramVo
+     */
+    void updateInstrumentRecord(InstrumentRecordEntity paramVo);
+
+    /**
+     * 删除设备使用记录
+     * @param recordId
+     */
+    void deleteInstrumentRecord(Long recordId);
 
     /**
      * 导出单个设备的使用记录
