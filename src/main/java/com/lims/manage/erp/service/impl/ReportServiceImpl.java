@@ -1939,6 +1939,14 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public Boolean reportTools(String type, String reportCode, MultipartFile file) {
+
+
+
+        return null;
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();

@@ -1,7 +1,9 @@
 package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -30,8 +32,12 @@ public class JsonRootBean {
     private String solrfq;
     private String active;
     private String a825_en;
-    private Date shishidate;
-    private Date fabudate;
+     @DateTimeFormat(pattern = "yyyy-MM-dd")
+     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private String shishidate;
+     @DateTimeFormat(pattern = "yyyy-MM-dd")
+     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private String fabudate;
     private String filename_json_s;
     private String a104new;
     private String a871;
@@ -148,19 +154,6 @@ public class JsonRootBean {
         return a825_en;
     }
 
-    public void setShishidate(Date shishidate) {
-        this.shishidate = shishidate;
-    }
-    public Date getShishidate() {
-        return shishidate;
-    }
-
-    public void setFabudate(Date fabudate) {
-        this.fabudate = fabudate;
-    }
-    public Date getFabudate() {
-        return fabudate;
-    }
 
     public void setFilename_json_s(String filename_json_s) {
         this.filename_json_s = filename_json_s;

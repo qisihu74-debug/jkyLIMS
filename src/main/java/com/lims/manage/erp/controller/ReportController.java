@@ -20,6 +20,7 @@ import com.lims.manage.erp.entity.QrCodeAuthRes;
 import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportResBean;
+import com.lims.manage.erp.entity.ReportTools;
 import com.lims.manage.erp.entity.ReqBean;
 import com.lims.manage.erp.entity.SealDefData;
 import com.lims.manage.erp.entity.SealEntity;
@@ -70,6 +71,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -1405,6 +1407,7 @@ public class ReportController {
      * @param file
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     @PostMapping(value = "offlineReportMerge")
     public Result offlineReportMerge(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file
@@ -1707,6 +1710,24 @@ public class ReportController {
             }
         } else {
             System.out.println("目录不存在或不是一个目录");
+        }
+    }
+
+    /**
+     * @desc 报告修改工具
+     * 操作类型 1中间报告改为最终报告，2最终报告改为中间报告
+     * 3.报告重新上传进行电子盖章，4线上审批改为线下，5线下审批改为线上
+     */
+    @GetMapping("reportTools")
+    public Result reportTools(String type,String reportCode, MultipartFile file){
+        if (org.apache.commons.lang3.StringUtils.isEmpty(type) || org.apache.commons.lang3.StringUtils.isEmpty(reportCode)){
+            return ResultUtil.error("缺少参数");
+        }
+        Boolean flag = reportService.reportTools(type,reportCode,file);
+        if (flag){
+            return ResultUtil.success("操作成功","操作成功");
+        }else {
+            return ResultUtil.error("操作失败");
         }
     }
 }

@@ -486,4 +486,6 @@ public interface ReportService {
     Boolean revoke(String reportCode);
 
     ReportRecordEntity getDetailByCodeZj(String reportCode);
+
+    Boolean reportTools(String type, String reportCode, MultipartFile file);
 }
