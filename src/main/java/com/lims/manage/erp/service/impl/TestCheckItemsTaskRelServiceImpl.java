@@ -1365,8 +1365,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         // 任务id集合 不包含 工时信息
         for (Long taskId : taskIds) {
             // 根据taskId 循环新增工时数据
-            endReportAllottedTime(taskId);
-//            reportIssuanceAllottedTime(taskId, null);
+//            endReportAllottedTime(taskId);
+            reportIssuanceAllottedTime(taskId, null);
         }
         return true;
     }

@@ -13,6 +13,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestBillingRegistrationService;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.StringUtils;
+import com.lims.manage.erp.vo.ClientOrderdetailVo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,7 +101,7 @@ public class TestBillingRegistrationServiceImpl extends ServiceImpl<TestBillingR
             return ResultUtil.error("新增数据不能为空");
         }
         // 处理编号信息。 1、in 查询 获取委托编号 比较是否正确。
-        List<EntrustEntity> entrustList = testBillingRegistrationEntityMapper.selectEntrustNoList(list);
+        List<ClientOrderdetailVo> entrustList = testBillingRegistrationEntityMapper.selectEntrustNoList(list);
         if (CollectionUtil.isEmpty(entrustList)) {
             // "所有单号不存在"
             Map<String, Object> map = new HashMap<>();
@@ -111,13 +112,13 @@ public class TestBillingRegistrationServiceImpl extends ServiceImpl<TestBillingR
             return ResultUtil.success(map);
         }
         // 不正确的单号标记
-        Set<Integer> entrustNoSet = new HashSet<>();
+        Set<String> entrustNoSet = new HashSet<>();
         // 遍历数据
         for (TestBillingRegistrationEntity data : list) {
             // 设置标记
             Boolean status = false;
-            for (EntrustEntity entrustEntity : entrustList) {
-                if (data.getEntrustmentNo().equals(entrustEntity.getEntrustmentNo())) {
+            for (ClientOrderdetailVo entrustEntity : entrustList) {
+                if (data.getEntrustmentNo().equals(entrustEntity.getEntrustmentNostr())) {
                     entrustEntity.setRemark(data.getRemark());
                     status = true;
                 }
@@ -131,7 +132,7 @@ public class TestBillingRegistrationServiceImpl extends ServiceImpl<TestBillingR
         // 2、比较 test_billing_registration 保证唯一性。
 
         LambdaQueryWrapper<TestBillingRegistrationEntity> queryWrapper = new LambdaQueryWrapper<>();
-        List<Integer> entrustNos = new ArrayList<>();
+        List<String> entrustNos = new ArrayList<>();
         for (TestBillingRegistrationEntity data : list) {
             entrustNos.add(data.getEntrustmentNo());
         }
@@ -139,7 +140,7 @@ public class TestBillingRegistrationServiceImpl extends ServiceImpl<TestBillingR
         List<TestBillingRegistrationEntity> billingRegistrations = testBillingRegistrationEntityMapper.selectList(queryWrapper);
 
         // test_billing_registration 中不存在的话
-        Set<Integer> registrationNoSet = new HashSet<>();
+        Set<String> registrationNoSet = new HashSet<>();
         if (CollectionUtil.isNotEmpty(billingRegistrations)) {
             // 遍历数据
             for (TestBillingRegistrationEntity data : list) {
@@ -161,7 +162,7 @@ public class TestBillingRegistrationServiceImpl extends ServiceImpl<TestBillingR
         List<TestBillingRegistrationEntity> returnList = new ArrayList<>();
         // 3.1： 单号不正确
         if (CollectionUtil.isNotEmpty(entrustNoSet)) {
-            for (Integer entrustNo : entrustNoSet) {
+            for (String entrustNo : entrustNoSet) {
                 TestBillingRegistrationEntity registrationEntity = new TestBillingRegistrationEntity();
                 registrationEntity.setEntrustmentNo(entrustNo);
                 registrationEntity.setRemark("委托单号不存在");
@@ -170,7 +171,7 @@ public class TestBillingRegistrationServiceImpl extends ServiceImpl<TestBillingR
         }
         // 3.2： 比较 test_billing_registration 保证唯一性。
         if (CollectionUtil.isNotEmpty(registrationNoSet)) {
-            for (Integer entrustNo : registrationNoSet) {
+            for (String entrustNo : registrationNoSet) {
                 TestBillingRegistrationEntity registrationEntity = new TestBillingRegistrationEntity();
                 registrationEntity.setEntrustmentNo(entrustNo);
                 registrationEntity.setRemark("发票单号已存在");
@@ -183,17 +184,17 @@ public class TestBillingRegistrationServiceImpl extends ServiceImpl<TestBillingR
             return ResultUtil.success(map);
         }
         // 执行批量新增：
-        for (EntrustEntity entrustEntity : entrustList) {
+        for (ClientOrderdetailVo entrustEntity : entrustList) {
             // 数据单个新增
             TestBillingRegistrationEntity data = new TestBillingRegistrationEntity();
             // 委托单ID
-            data.setEntrustmentId(entrustEntity.getId());
+            data.setEntrustmentId(entrustEntity.getEntrustmentId());
             // 单号
-            data.setEntrustmentNo(entrustEntity.getEntrustmentNo());
+            data.setEntrustmentNo(entrustEntity.getEntrustmentNostr());
             // 公司信息
             data.setEntrustCompany(entrustEntity.getEntrustCompany());
             // 样品名称 = presentInformation
-            data.setSampleName(entrustEntity.getPresentInformation());
+            data.setSampleName(entrustEntity.getSampleName());
             // 登记时间
             data.setRegistrationTime(new Date());
             // 登记人姓名

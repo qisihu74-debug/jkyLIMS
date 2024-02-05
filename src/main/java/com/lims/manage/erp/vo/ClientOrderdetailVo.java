@@ -172,4 +172,10 @@ public class ClientOrderdetailVo {
      */
     @TableField(exist = false)
     private String isInvoice;
+
+    /**
+     * 备注
+     */
+    @TableField(exist = false)
+    private String remark;
 }

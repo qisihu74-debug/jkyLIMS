@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -536,102 +537,64 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public PagingToolVo taskQuery1111(TaskStatsVo taskStatsVo) {
+    public PageInfo taskQuery1111(TaskStatsVo taskStatsVo) {
         // 分页数据
         List<TaskStatsVo> personList = new ArrayList<>();
-        if(!org.springframework.util.StringUtils.isEmpty(taskStatsVo.getTeamId())){
+        if (!org.springframework.util.StringUtils.isEmpty(taskStatsVo.getTeamId())) {
             PageHelper.clearPage();
             List<Long> nodeTeam = teamMapper.getNodeTeamId(Long.parseLong(taskStatsVo.getTeamId()));
             taskStatsVo.setNodeTeam(nodeTeam);
         }
         PageHelper.clearPage();
-        List<TaskStatsVo> list = statisticsMapper.getTaskList(taskStatsVo);
+        PageHelper.startPage(taskStatsVo.getPageNum(), taskStatsVo.getPageSize());
+        // 基于视图
+        List<TaskStatsVo> taskList = statisticsMapper.getTaskListShow(taskStatsVo);
+        // 获取状态
+        PageInfo<TaskStatsVo> pageInfo = new PageInfo<>();
+        pageInfo = new PageInfo<>(taskList);
         // 遍历list数据
-        for(TaskStatsVo taskDetailInfoVo :list){
-            if(!taskDetailInfoVo.getSampleDetailList().isEmpty())
-            {
-                Set<String> set = new HashSet<>();
-                for (SampleDetailVo sampleEntity : taskDetailInfoVo.getSampleDetailList()) {
-                    set.add(sampleEntity.getSampleName());
-                }
-                StringBuilder stringBuilder = new StringBuilder();
-                for(String str:set){
-                    stringBuilder.append(str);
-                }
-                taskDetailInfoVo.setSampleName(stringBuilder.toString());
-                // 任务单 state = 6.原始记录已复核， 其余都未复核
-                taskDetailInfoVo.setTaskStatus(taskDetailInfoVo.getState() != null && taskDetailInfoVo.getState() >= 6 ? "完成" : "未完成");
-                TaskStatsVo data = new TaskStatsVo();
-                data.setTaskId(taskDetailInfoVo.getTaskId());
-                data.setTaskCode(taskDetailInfoVo.getTaskCode());
-                data.setRequestDate(taskDetailInfoVo.getRequestDate());
-                data.setFinishDate(taskDetailInfoVo.getFinishDate()!=null?taskDetailInfoVo.getFinishDate():null);
-                data.setCost(taskDetailInfoVo.getCost());
-                data.setReportCode(taskDetailInfoVo.getReportCode());
-//                data.setReportType(taskDetailInfoVo.getReportType());
-                data.setSampleName(taskDetailInfoVo.getSampleName());
-                data.setTaskStatus(taskDetailInfoVo.getTaskStatus());
-                // 报告编号
-                data.setReportCode(taskDetailInfoVo.getReportCode()!=null?taskDetailInfoVo.getReportCode():"--");
-                if(StringUtils.isNotEmpty(taskDetailInfoVo.getReportType())){
-                    data.setReportType("0".equals(taskDetailInfoVo.getReportType())?"最终报告":"中间报告");
-                }
-                else {
-                    data.setReportType("--");
-                }
-                personList.add(data);
+        if (CollectionUtil.isNotEmpty(taskList)) {
+            List<Long> taskIds = new ArrayList<>();
+            for (TaskStatsVo statsVo : taskList) {
+                taskIds.add(statsVo.getTaskId());
             }
-        }
-        Integer pageNum = taskStatsVo.getPageNum();
-        Integer pageSize = taskStatsVo.getPageSize();
-        PagingToolVo pagingVo = new PagingToolVo();
-        if(pageNum>0&&pageSize>0) {
-            // 总条数
-            pagingVo.setTotal(personList.size());
-            // 开始
-            pagingVo.setPageNum(pageNum);
-            // 页码
-            pagingVo.setPageSize(pageSize);
-            // 当前页展示数量
-            Integer size = personList.size() - (pageNum*pageSize); // 实际返回页码展示数量
-            if(size>0){
-                pagingVo.setSize(pageSize);
-            }
-            else {
-                size =pageSize -( pageNum*pageSize - personList.size());
-                pagingVo.setSize(size>0?size:0);
-            }
-            // 总页数
-            pagingVo.setPages(personList.size() / pageSize);
-            // 开始行数
-            pagingVo.setStartRow(personList.size() / pageSize / pageNum);
-            // 结束行数
-            pagingVo.setEndRow(personList.size() / pageSize);
-            List<TaskStatsVo> subList = Lists.newArrayList();
-            if (!CollectionUtils.isEmpty(personList)) {
-                try {
-                    if (personList.size() > 10 && personList.size() / 10 >= pageNum) {
-                        subList = personList.subList((pageNum - 1) * pageSize, pageNum * pageSize);
-                    } else {
-                        subList = personList.subList((pageNum - 1) * pageSize, personList.size());
+            List<TaskStatsVo> list = statisticsMapper.getTaskInListShow(taskIds);
+            pageInfo.setList(list);
+            for (TaskStatsVo taskDetailInfoVo : pageInfo.getList()) {
+                if (!taskDetailInfoVo.getSampleDetailList().isEmpty()) {
+                    Set<String> set = new HashSet<>();
+                    for (SampleDetailVo sampleEntity : taskDetailInfoVo.getSampleDetailList()) {
+                        set.add(sampleEntity.getSampleName());
                     }
-                } catch (IndexOutOfBoundsException e) {
-                    subList = personList;
-                } catch (IllegalArgumentException e) {
-                    subList = personList.subList(0, personList.size());
-                } finally {
-                    // 返回数据
-                    pagingVo.setList(subList);
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (String str : set) {
+                        stringBuilder.append(str);
+                    }
+                    taskDetailInfoVo.setSampleName(stringBuilder.toString());
+                    // 任务单 state = 6.原始记录已复核， 其余都未复核
+                    taskDetailInfoVo.setTaskStatus(taskDetailInfoVo.getState() != null && taskDetailInfoVo.getState() >= 6 ? "完成" : "未完成");
+                    TaskStatsVo data = new TaskStatsVo();
+                    data.setTaskId(taskDetailInfoVo.getTaskId());
+                    data.setTaskCode(taskDetailInfoVo.getTaskCode());
+                    data.setRequestDate(taskDetailInfoVo.getRequestDate());
+                    data.setFinishDate(taskDetailInfoVo.getFinishDate() != null ? taskDetailInfoVo.getFinishDate() : null);
+                    data.setCost(taskDetailInfoVo.getCost());
+                    data.setReportCode(taskDetailInfoVo.getReportCode());
+                    //                data.setReportType(taskDetailInfoVo.getReportType());
+                    data.setSampleName(taskDetailInfoVo.getSampleName());
+                    data.setTaskStatus(taskDetailInfoVo.getTaskStatus());
+                    // 报告编号
+                    data.setReportCode(taskDetailInfoVo.getReportCode() != null ? taskDetailInfoVo.getReportCode() : "--");
+                    if (StringUtils.isNotEmpty(taskDetailInfoVo.getReportType())) {
+                        data.setReportType("0".equals(taskDetailInfoVo.getReportType()) ? "最终报告" : "中间报告");
+                    } else {
+                        data.setReportType("--");
+                    }
+                    personList.add(data);
                 }
             }
-            return pagingVo;
         }
-        else {
-            if (!CollectionUtils.isEmpty(personList)) {
-                pagingVo.setList(personList);
-            }
-            return pagingVo;
-        }
+        return pageInfo;
     }
 
     @Override

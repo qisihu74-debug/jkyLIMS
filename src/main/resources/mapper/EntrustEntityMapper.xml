@@ -1280,7 +1280,7 @@
 
     <select id="getClientListSumPrice" resultType="java.math.BigDecimal">
         SELECT
-        sum(actual_price)
+        IFNULL(sum( actual_price ),0)
         FROM
         test_entrusted_info
         WHERE
