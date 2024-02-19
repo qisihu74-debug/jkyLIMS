@@ -89,6 +89,25 @@ public class TestInstrument extends Model<TestInstrument> {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
 
+    private Integer isShow;
+    private Integer parallel;
+
+    public Integer getIsShow() {
+        return isShow;
+    }
+
+    public void setIsShow(Integer isShow) {
+        this.isShow = isShow;
+    }
+
+    public Integer getParallel() {
+        return parallel;
+    }
+
+    public void setParallel(Integer parallel) {
+        this.parallel = parallel;
+    }
+
     public Integer getId() {
         return id;
     }

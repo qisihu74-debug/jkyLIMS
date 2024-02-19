@@ -196,6 +196,16 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
     }
 
     @Override
+    public void updateInstrumentRecord(InstrumentRecordEntity paramVo) {
+        instrumentRecordEntityMapper.updateByPrimaryKeySelective(paramVo);
+    }
+
+    @Override
+    public void deleteInstrumentRecord(Long recordId) {
+        instrumentRecordEntityMapper.deleteByPrimaryKey(recordId);
+    }
+
+    @Override
     public HashMap<String,Object> exportInstrumentRecord(InstrumentRecordParamVo paramVo) {
         HashMap<String,Object> result = Maps.newHashMap();
         List<InstrumentRecordListVo> instrumentRecord = instrumentRecordEntityMapper.getInstrumentRecord(paramVo);

@@ -12,6 +12,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.DeviceEntity;
+import com.lims.manage.erp.entity.InstrumentRecordEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrument;
 import com.lims.manage.erp.enums.BusinessType;
@@ -192,6 +193,34 @@ public class TestInstrumentController extends ApiController {
         }
         PageInfo instrumentRecord = testInstrumentService.getInstrumentRecord(paramVo);
         return ResultUtil.success(instrumentRecord);
+    }
+
+    /**
+     * 修改设备使用记录
+     * @param paramVo
+     * @return
+     */
+    @PostMapping("/updateInstrumentRecord")
+    public Result updateInstrumentRecord(@RequestBody InstrumentRecordEntity paramVo) {
+        if (paramVo.getId() == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        testInstrumentService.updateInstrumentRecord(paramVo);
+        return ResultUtil.success("修改设备使用记录成功！");
+    }
+
+    /**
+     * 删除设备使用记录
+     * @param recordId
+     * @return
+     */
+    @GetMapping("/deleteInstrumentRecord")
+    public Result updateInstrumentRecord(Long recordId) {
+        if (recordId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        testInstrumentService.deleteInstrumentRecord(recordId);
+        return ResultUtil.success("删除设备使用记录成功！");
     }
 
     /**

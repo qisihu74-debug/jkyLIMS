@@ -1,11 +1,14 @@
 package com.lims.manage.erp.job;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.api.client.util.Lists;
+import com.lims.manage.erp.entity.JsonRootBean;
 import com.lims.manage.erp.entity.TestStandardFile;
 import com.lims.manage.erp.service.TestStandardFileService;
+import com.lims.manage.erp.util.DateUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.formula.functions.T;
@@ -23,6 +26,7 @@ import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
@@ -63,6 +67,11 @@ public class StandardHander {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+        //查新api
+        standard = serachApi(code);
+        if (standard != null){
+            return standard;
+        }
         //发起查询请求
         response = sendGet(url+cod, "UTF-8");
         //响应为空跳出本次循环
@@ -93,6 +102,75 @@ public class StandardHander {
             logger.error("标准查新线程阻塞异常:{}",e);
         }
         return standard;
+    }
+
+    /**
+     * 查新api
+     * @return
+     */
+    private TestStandardFile serachApi(String code) {
+        TestStandardFile standardFile = null;
+        try {
+            String cod = URLEncoder.encode(code, "UTF-8");
+            String url = "https://www.nssi.org.cn/cssn/front/standard/selectStandardListByCond";
+            String cookie = "__jsluid_s=b880ab25b9c9ab27cc50e8b8ec9a2b5f; Hm_lvt_bc93e3a5e15e3913035aef1581181e88=1706151236; token=; uname=; account_id=; user_id=; relogin_name=; user_type=; JSESSIONID=A7C2DC1690F380B244B16F1E5A6F56CB; Hm_lpvt_bc93e3a5e15e3913035aef1581181e88=1706157997";
+            String postData = "cond.orderBy=&cond.keywords="+cod+"&cond.activeValue=%E7%8E%B0%E8%A1%8C&cond.yearStartValue=&cond.yearEndValue=&cond.publishCorpA104=&cond.chinaClassCN=&cond.aboradClassICSN=&cond.otherpublishCorpGroup=&cond.account_id=&cond.login_name=&cond.superKeyWord=&cond.superKeyWordChoose=&cond.advanced_search=&cond.A100=&cond.caiyong=&cond.super_A101=&cond.super_standarnumber=&cond.super_w_level_s=&cond.super_w_location_s=&cond.super_tips_s=&cond.w_level_s=&cond.w_source_s=&cond.w_location_s=&cond.tips_s=&cond.shouye_a100=&cond.resulttype=0&cond.secondword=&cond.loadPage=true&cond.interface_type=&cond.containFullTextValue=%E5%90%A6&cond.whetherSearchAll=0&page=1&limit=10&start=0";
+
+            URL obj = new URL(url);
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01");
+            con.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9");
+            con.setRequestProperty("Connection", "keep-alive");
+            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+            con.setRequestProperty("Cookie", cookie);
+            con.setRequestProperty("Origin", "https://www.nssi.org.cn");
+            con.setRequestProperty("Referer", "https://www.nssi.org.cn/nssi/front/listpage.jsp");
+            con.setRequestProperty("Sec-Fetch-Dest", "empty");
+            con.setRequestProperty("Sec-Fetch-Mode", "cors");
+            con.setRequestProperty("Sec-Fetch-Site", "same-origin");
+            con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+            con.setRequestProperty("X-Requested-With", "XMLHttpRequest");
+            con.setRequestProperty("sec-ch-ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"");
+            con.setRequestProperty("sec-ch-ua-mobile", "?0");
+            con.setRequestProperty("sec-ch-ua-platform", "\"Windows\"");
+
+            con.setDoOutput(true);
+            con.getOutputStream().write(postData.getBytes("UTF-8"));
+
+            int responseCode = con.getResponseCode();
+            System.out.println("Response Code : " + responseCode);
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            JSONObject jsonObject = JSONObject.parseObject(response.toString());
+            JSONObject dataAllMap = (JSONObject) jsonObject.get("dataAllMap");
+            List<JsonRootBean> list = (List<JsonRootBean>) dataAllMap.get("standars");
+            if (list != null){
+                String jsonString = JSON.toJSONString(list.get(0));
+                JsonRootBean bean = JSONObject.parseObject(jsonString,JsonRootBean.class);
+                if (bean != null){
+                    standardFile = new TestStandardFile();
+                    standardFile.setCode(code);
+                    standardFile.setStandardStatus(bean.getActive());
+                    //发布日期
+                    standardFile.setReleaseDate(bean.getFabudate());
+                    //实施日期
+                    standardFile.setImplementationDate(bean.getShishidate());
+                }
+            }
+        } catch (Exception e) {
+            logger.error("批量查新规范api异常:{}",e);
+        }
+        return standardFile;
     }
 
     /**

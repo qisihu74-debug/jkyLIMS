@@ -5,6 +5,8 @@ import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SealEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.vo.*;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -300,4 +302,217 @@ public interface ReportMapper {
     List<String> getCodeByIds(@Param("list") List<Long> list);
 
     ReportRecordEntity getDetailByCodeZj(@Param("reportCode") String reportCode);
+
+    @Delete("delete from test_report_record_mid where report_code=#{report_code}")
+    void removeByCode(@Param("reportCode") String reportCode);
+
+    @Insert("INSERT INTO test_report_record (\n" +
+            "\tid,\n" +
+            "\tentrustment_id,\n" +
+            "\treport_code,\n" +
+            "\tsample_name,\n" +
+            "\tprice,\n" +
+            "\trequired_completion_time,\n" +
+            "\ttask_code,\n" +
+            "\tstate,\n" +
+            "\treport_url,\n" +
+            "\tnumber,\n" +
+            "\treport_type,\n" +
+            "\tverifyer_time,\n" +
+            "\tissuer_time,\n" +
+            "\tseal_type,\n" +
+            "\tseal_url,\n" +
+            "\tapply_reason,\n" +
+            "\tissu_reason,\n" +
+            "\tverifyer,\n" +
+            "\tverifyer_id,\n" +
+            "\t`ISSUER`,\n" +
+            "\tissuer_id,\n" +
+            "\tapplicant,\n" +
+            "\tsealer,\n" +
+            "\tseal_time,\n" +
+            "\treport_manager,\n" +
+            "\treport_time,\n" +
+            "\taddressee,\n" +
+            "\twaybill,\n" +
+            "\toperate_time,\n" +
+            "\temail,\n" +
+            "\treport_phone,\n" +
+            "\treport_mailing_address,\n" +
+            "\treport_complete_time,\n" +
+            "\ttemplate_name,\n" +
+            "\tqys_docment_id,\n" +
+            "\tqys_state,\n" +
+            "\tcontract_id,\n" +
+            "\tsign_url,\n" +
+            "\ttask_id,\n" +
+            "\ttype,\n" +
+            "\tcategory,\n" +
+            "\tcombine_time,\n" +
+            "\tentrust_id,\n" +
+            "\tinspector,\n" +
+            "\toperate_type \n" +
+            ")\n" +
+            "VALUES\n" +
+            "\t(\n" +
+            "\t\t#{item.id},\n" +
+            "\t\t#{item.entrustmentId},\n" +
+            "\t\t#{item.reportCode},\n" +
+            "\t\t#{item.sampleName},\n" +
+            "\t\t#{item.price},\n" +
+            "\t\t#{item.requiredCompletionTime},\n" +
+            "\t\t#{item.askCode},\n" +
+            "\t\t#{item.state},\n" +
+            "\t\t#{item.reportUrl},\n" +
+            "\t\t#{item.number},\n" +
+            "\t\t#{item.reportType},\n" +
+            "\t\t#{item.verifyerTime},\n" +
+            "\t\t#{item.issuerTime},\n" +
+            "\t\t#{item.sealType},\n" +
+            "\t\t#{item.sealUrl},\n" +
+            "\t\t#{item.applyReason},\n" +
+            "\t\t#{item.issuReason},\n" +
+            "\t\t#{item.verifyer},\n" +
+            "\t\t#{item.verifyerId},\n" +
+            "\t\t#{item.ISSUER},\n" +
+            "\t\t#{item.issuerId},\n" +
+            "\t\t#{item.applicant},\n" +
+            "\t\t#{item.sealer},\n" +
+            "\t\t#{item.sealTime},\n" +
+            "\t\t#{item.reportManager},\n" +
+            "\t\t#{item.reportTime},\n" +
+            "\t\t#{item.addressee},\n" +
+            "\t\t#{item.waybill},\n" +
+            "\t\t#{item.operateTime},\n" +
+            "\t\t#{item.email},\n" +
+            "\t\t#{item.reportPhone},\n" +
+            "\t\t#{item.reportMailingAddress},\n" +
+            "\t\t#{item.reportCompleteTime},\n" +
+            "\t\t#{item.templateName},\n" +
+            "\t\t#{item.qysDocmentId},\n" +
+            "\t\t#{item.qysState},\n" +
+            "\t\t#{item.contractId},\n" +
+            "\t\t#{item.signUrl},\n" +
+            "\t\t#{item.taskId},\n" +
+            "\t\t#{item.type},\n" +
+            "\t\t#{item.category},\n" +
+            "\t\t#{item.combineTime},\n" +
+            "\t\t#{item.entrustId},\n" +
+            "\t\t#{item.inspector},\n" +
+            "\t#{item.operateType} \n" +
+            "\t);")
+    void save(@Param("item") ReportRecordEntity item);
+
+    @Select("select * from test_report_record where report_code=#{reportCode}")
+    ReportRecordEntity getDetailByCode(@Param("reportCode") String reportCode);
+
+    @Update("update test_report_record set type=#{type},entrustmentId=#{entrustmentId},entrust_id=#{entrustId} where report_code=#{reportCode}")
+    void updateInfo(@Param("reportCode") String reportCode, @Param("type") String type,
+                    @Param("entrustmentId") Long entrustmentId, @Param("entrustId") Long entrustId);
+
+    @Insert("INSERT INTO test_report_record_mid (\n" +
+            "\tid,\n" +
+            "\tentrustment_id,\n" +
+            "\treport_code,\n" +
+            "\tsample_name,\n" +
+            "\tprice,\n" +
+            "\trequired_completion_time,\n" +
+            "\ttask_code,\n" +
+            "\tstate,\n" +
+            "\treport_url,\n" +
+            "\tnumber,\n" +
+            "\treport_type,\n" +
+            "\tverifyer_time,\n" +
+            "\tissuer_time,\n" +
+            "\tseal_type,\n" +
+            "\tseal_url,\n" +
+            "\tapply_reason,\n" +
+            "\tissu_reason,\n" +
+            "\tverifyer,\n" +
+            "\tverifyer_id,\n" +
+            "\t`ISSUER`,\n" +
+            "\tissuer_id,\n" +
+            "\tapplicant,\n" +
+            "\tsealer,\n" +
+            "\tseal_time,\n" +
+            "\treport_manager,\n" +
+            "\treport_time,\n" +
+            "\taddressee,\n" +
+            "\twaybill,\n" +
+            "\toperate_time,\n" +
+            "\temail,\n" +
+            "\treport_phone,\n" +
+            "\treport_mailing_address,\n" +
+            "\treport_complete_time,\n" +
+            "\ttemplate_name,\n" +
+            "\tqys_docment_id,\n" +
+            "\tqys_state,\n" +
+            "\tcontract_id,\n" +
+            "\tsign_url,\n" +
+            "\ttask_id,\n" +
+            "\ttype,\n" +
+            "\tcategory,\n" +
+            "\tcombine_time,\n" +
+            "\tentrust_id,\n" +
+            "\tinspector,\n" +
+            "\toperate_type \n" +
+            ")\n" +
+            "VALUES\n" +
+            "\t(\n" +
+            "\t\t#{item.id},\n" +
+            "\t\t#{item.entrustmentId},\n" +
+            "\t\t#{item.reportCode},\n" +
+            "\t\t#{item.sampleName},\n" +
+            "\t\t#{item.price},\n" +
+            "\t\t#{item.requiredCompletionTime},\n" +
+            "\t\t#{item.askCode},\n" +
+            "\t\t#{item.state},\n" +
+            "\t\t#{item.reportUrl},\n" +
+            "\t\t#{item.number},\n" +
+            "\t\t#{item.reportType},\n" +
+            "\t\t#{item.verifyerTime},\n" +
+            "\t\t#{item.issuerTime},\n" +
+            "\t\t#{item.sealType},\n" +
+            "\t\t#{item.sealUrl},\n" +
+            "\t\t#{item.applyReason},\n" +
+            "\t\t#{item.issuReason},\n" +
+            "\t\t#{item.verifyer},\n" +
+            "\t\t#{item.verifyerId},\n" +
+            "\t\t#{item.ISSUER},\n" +
+            "\t\t#{item.issuerId},\n" +
+            "\t\t#{item.applicant},\n" +
+            "\t\t#{item.sealer},\n" +
+            "\t\t#{item.sealTime},\n" +
+            "\t\t#{item.reportManager},\n" +
+            "\t\t#{item.reportTime},\n" +
+            "\t\t#{item.addressee},\n" +
+            "\t\t#{item.waybill},\n" +
+            "\t\t#{item.operateTime},\n" +
+            "\t\t#{item.email},\n" +
+            "\t\t#{item.reportPhone},\n" +
+            "\t\t#{item.reportMailingAddress},\n" +
+            "\t\t#{item.reportCompleteTime},\n" +
+            "\t\t#{item.templateName},\n" +
+            "\t\t#{item.qysDocmentId},\n" +
+            "\t\t#{item.qysState},\n" +
+            "\t\t#{item.contractId},\n" +
+            "\t\t#{item.signUrl},\n" +
+            "\t\t#{item.taskId},\n" +
+            "\t\t#{item.type},\n" +
+            "\t\t#{item.category},\n" +
+            "\t\t#{item.combineTime},\n" +
+            "\t\t#{item.entrustId},\n" +
+            "\t\t#{item.inspector},\n" +
+            "\t#{item.operateType} \n" +
+            "\t);")
+    void saveZj(@Param("item") ReportRecordEntity item);
+
+    @Delete("delete from test_report_record where report_code=#{reportCode}")
+    void removeReByCode(@Param("reportCode") String reportCode);
+
+    @Update("update test_report_record set report_url=#{url} where report_code=#{reportCode} ")
+    void updateUrlByCode(@Param("reportCode") String reportCode, @Param("url") String url);
+
+    @Update("update test_report_record set operate_type=#{state} where report_code=#{reportCode} ")
+    void updateOperateState(@Param("reportCode") String reportCode, @Param("state") int state);
 }

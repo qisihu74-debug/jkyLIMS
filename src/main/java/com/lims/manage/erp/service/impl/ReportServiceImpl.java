@@ -1736,10 +1736,15 @@ public class ReportServiceImpl implements ReportService {
             String inspector = approveInfo.getInspector();
             String recorder = approveInfo.getRecorder();
             if (org.apache.commons.lang.StringUtils.isNotEmpty(inspector)){
-                KeyValue keyValue = new KeyValue();
-                keyValue.setKey(inspector.split("&")[1]);
-                keyValue.setValue(inspector.split("&")[0]);
-                jcMap.add(keyValue);
+                String[] split = inspector.split(",");
+                if (split != null){
+                    for (String jcr:split){
+                        KeyValue keyValue = new KeyValue();
+                        keyValue.setKey(jcr.split("&")[1]);
+                        keyValue.setValue(jcr.split("&")[0]);
+                        jcMap.add(keyValue);
+                    }
+                }
             }
             if (org.apache.commons.lang.StringUtils.isNotEmpty(recorder)){
                 KeyValue keyValue = new KeyValue();
@@ -1931,6 +1936,76 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ReportRecordEntity getDetailByCodeZj(String reportCode) {
         return reportMapper.getDetailByCodeZj(reportCode);
+    }
+
+    /**
+     * 操作类型 1中间报告改为最终报告，2最终报告改为中间报告
+     *  3.报告重新上传进行电子盖章，4线上审批改为线下，5线下审批改为线上
+     * @param type
+     * @param reportCode
+     * @param file
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String reportTools(String type, String reportCode, MultipartFile file) {
+        String flag = "";
+        ReportRecordEntity recordEntity = reportMapper.getDetailByCode(reportCode);
+        switch (type) {
+            //中间报告改为最终，修改报告类型及委托单ID字段的值，判断报告是否已经完成，如果已完成需把报告从中间表移入到报告表，对应任务的完成状态修改为已完成
+            //如果报告未完成，对应任务的完成状态修改为已完成
+            case "1":
+                ReportRecordEntity detailByCodeZj = reportMapper.getDetailByCodeZj(reportCode);
+                if (detailByCodeZj != null){
+                    detailByCodeZj.setEntrustmentId(detailByCodeZj.getEntrustId());
+                    detailByCodeZj.setEntrustId(null);
+                    detailByCodeZj.setType("0");
+                    reportMapper.save(detailByCodeZj);
+                    reportMapper.removeByCode(reportCode);
+                }else {
+                    reportMapper.updateInfo(reportCode,"0",recordEntity.getEntrustId(),null);
+                }
+                taskMapper.updateTaskReportComplete(detailByCodeZj.getEntrustId(),"1");
+                flag = "中间报告改为最终成功";
+                break;
+            //最终报告u改为中间报告，修改报告类型及委托单ID字段的值，判断报告是否已经完成，如果已完成需把报告从报告表移入到中间报告表，对应任务的完成状态修改为未完成
+            //如果报告未完成，对应任务的完成状态修改为未完成
+            case "2":
+                if (recordEntity != null && Integer.parseInt(recordEntity.getState()) >=7){
+                    recordEntity.setEntrustId(recordEntity.getEntrustmentId());
+                    recordEntity.setEntrustmentId(null);
+                    recordEntity.setType("1");
+                    reportMapper.saveZj(recordEntity);
+                    reportMapper.removeReByCode(reportCode);
+                }else {
+                    reportMapper.updateInfo(reportCode,"1",null,recordEntity.getEntrustmentId());
+                }
+                taskMapper.updateTaskReportComplete(recordEntity.getEntrustmentId(),"2");
+                flag = "最终报告改为中间报告成功";
+                break;
+            case "3":
+                if (recordEntity != null && Integer.parseInt(recordEntity.getState()) ==6){
+                    String url = MinIoUtil.upload("report-download", file, reportCode + ".pdf");
+                    String substring = url.substring(0, url.indexOf("?"));
+                    reportMapper.updateUrlByCode(reportCode,substring);
+                    flag = "报告重新上传成功";
+                }else{
+                    flag = "报告重新上传失败";
+                }
+                break;
+            case "4":
+                //0线上，1线下
+                reportMapper.updateOperateState(reportCode,1);
+                flag = "线上审批改为线下成功";
+                break;
+            case "5":
+                reportMapper.updateOperateState(reportCode,0);
+                flag = "线下审批改为线上成功";
+                break;
+            default:
+                break;
+        }
+        return flag;
     }
 
     @Override

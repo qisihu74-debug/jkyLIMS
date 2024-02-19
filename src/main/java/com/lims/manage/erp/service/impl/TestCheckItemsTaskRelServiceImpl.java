@@ -1438,6 +1438,11 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             cells.get("I"+index).setValue(result);
             index ++;
         }
+        response.reset();
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/x-msdownload");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName="  + "gongshi.xlsx");
         ServletOutputStream outputStream = response.getOutputStream();
         workbook.save(outputStream, SaveFormat.XLSX);
     }
