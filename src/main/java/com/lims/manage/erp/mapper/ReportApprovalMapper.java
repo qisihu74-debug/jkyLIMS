@@ -152,54 +152,28 @@ public interface ReportApprovalMapper {
     //    @Select("\tSELECT id as task_id FROM test_task WHERE order_time >= \"2023-11-1\" and state >= 4")
 //    List<Long> getTaskList();
     @Select("SELECT\n" +
-            "\ttt.id \n" +
+            "\ttt.task_id\n" +
             "FROM\n" +
             "\t(\n" +
-            "SELECT\n" +
-            "\tid,\n" +
-            "\ttask_code,\n" +
-            "\tpool_id,\n" +
-            "\tworking_hours_id,\n" +
-            "\ttask_list_status \n" +
+            "SELECT DISTINCT\n" +
+            "\tt1.id AS task_id,\n" +
+            "\tt1.task_code,\n" +
+            "\tt2.NAME \n" +
             "FROM\n" +
-            "\ttest_task \n" +
+            "\ttest_task t1\n" +
+            "\tLEFT JOIN sys_user t2 ON t1.receiver = t2.user_id\n" +
+            "\tLEFT JOIN test_report_record AS t3 ON t3.entrustment_id = t1.entrustment_id \n" +
             "WHERE\n" +
-            "\t1 = 1 \n" +
-            "\tAND (\n" +
-            "\ttask_code LIKE \"%H2311-017%\" \n" +
-            "\tOR task_code LIKE \"%H2311-028%\" \n" +
-            "\tOR task_code LIKE \"%H2311-040%\" \n" +
-            "\tOR task_code LIKE \"%H2311-042%\" \n" +
-            "\tOR task_code LIKE \"%H2311-045%\" \n" +
-            "\tOR task_code LIKE \"%H2311-046%\" \n" +
-            "\tOR task_code LIKE \"%H2311-047%\" \n" +
-            "\tOR task_code LIKE \"%H2311-048%\" \n" +
-            "\tOR task_code LIKE \"%H2311-056%\" \n" +
-            "\tOR task_code LIKE \"%H2312-001%\" \n" +
-            "\tOR task_code LIKE \"%H2312-002%\" \n" +
-            "\tOR task_code LIKE \"%H2312-003%\" \n" +
-            "\tOR task_code LIKE \"%H2312-004%\" \n" +
-            "\tOR task_code LIKE \"%H2312-005%\" \n" +
-            "\tOR task_code LIKE \"%H2312-008%\" \n" +
-            "\tOR task_code LIKE \"%H2312-009%\" \n" +
-            "\tOR task_code LIKE \"%H2312-010%\" \n" +
-            "\tOR task_code LIKE \"%H2312-011%\" \n" +
-            "\tOR task_code LIKE \"%H2312-012%\" \n" +
-            "\tOR task_code LIKE \"%H2312-013%\" \n" +
-            "\tOR task_code LIKE \"%H2312-014%\" \n" +
-            "\tOR task_code LIKE \"%H2312-015%\" \n" +
-            "\tOR task_code LIKE \"%H2312-024%\" \n" +
-            "\tOR task_code LIKE \"%H2312-025%\" \n" +
-            "\tOR task_code LIKE \"%M2311-025%\" \n" +
-            "\tOR task_code LIKE \"%M2311-028%\" \n" +
-            "\tOR task_code LIKE \"%M2312-001%\" \n" +
-            "\tOR task_code LIKE \"%M2312-002%\" \n" +
-            "\tOR task_code LIKE \"%M2312-003%\" \n" +
-            "\tOR task_code LIKE \"%M2312-004%\" \n" +
-            "\t) \n" +
+            "\tt1.dept_id IN ( 229, 231, 232, 233, 234, 235, 236, 266, 267, 268 ) \n" +
+            "\t\n" +
+            "\tAND t3.issuer_time >= '2024-01-01' \n" +
+            "\tAND t3.issuer_time <= '2024-01-31' \n" +
+            "\t) tt \n" +
+            "WHERE\n" +
+            "\ttt.task_id not IN ( SELECT DISTINCT task_id FROM test_task_order_working_hours ) \n" +
             "ORDER BY\n" +
-            "\ttask_code DESC \n" +
-            "\t) tt")
+            "\ttt.NAME,\n" +
+            "\ttt.task_code ASC")
     List<Long> getTaskList();
 
 }
