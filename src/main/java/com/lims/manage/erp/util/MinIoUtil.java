@@ -124,6 +124,9 @@ public class MinIoUtil {
      */
     @SneakyThrows(Exception.class)
     public static String upload(String bucketName, MultipartFile file,String fileName) {
+        if ("report-download".equals(bucketName)){
+            bucketName = "report-download-20240218";
+        }
         createBucket(bucketName);
         final InputStream is = file.getInputStream();
         //final String fileName = file.getOriginalFilename();

@@ -487,5 +487,5 @@ public interface ReportService {
 
     ReportRecordEntity getDetailByCodeZj(String reportCode);
 
-    Boolean reportTools(String type, String reportCode, MultipartFile file);
+    String reportTools(String type, String reportCode, MultipartFile file);
 }

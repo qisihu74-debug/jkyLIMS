@@ -1718,16 +1718,19 @@ public class ReportController {
      * 操作类型 1中间报告改为最终报告，2最终报告改为中间报告
      * 3.报告重新上传进行电子盖章，4线上审批改为线下，5线下审批改为线上
      */
-    @GetMapping("reportTools")
-    public Result reportTools(String type,String reportCode, MultipartFile file){
+    @PostMapping("reportTools")
+    public Result reportTools(@RequestParam("type") String type,@RequestParam("reportCode") String reportCode, MultipartFile file){
         if (org.apache.commons.lang3.StringUtils.isEmpty(type) || org.apache.commons.lang3.StringUtils.isEmpty(reportCode)){
             return ResultUtil.error("缺少参数");
         }
-        Boolean flag = reportService.reportTools(type,reportCode,file);
-        if (flag){
-            return ResultUtil.success("操作成功","操作成功");
-        }else {
-            return ResultUtil.error("操作失败");
+        if (file != null){
+            String filename = file.getOriginalFilename();
+            String[] split = filename.split("\\.");
+            if (!"pdf".equals(split[split.length - 1])) {
+                return ResultUtil.error("文件类型不正确，请上传pdf文件类型");
+            }
         }
+        String flag = reportService.reportTools(type,reportCode,file);
+        return ResultUtil.success(flag);
     }
 }
