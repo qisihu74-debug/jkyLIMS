@@ -1,5 +1,6 @@
 package com.lims.manage.erp.mapper;
 
+import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReserveCodeEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Mapper;
@@ -69,12 +70,12 @@ public interface ReserveCodeEntityMapper {
     int batchInsert(@Param("records") List<ReserveCodeEntity> records);
 
     // 查询最终报告：
-    @Select("SELECT id,report_code FROM test_report_record WHERE report_code like CONCAT(\"%\",#{reportCode},\"%\")  LIMIT 1")
-    ReserveCodeEntity selectReportRecord(String reportCode);
+    @Select("SELECT id,report_code,entrustment_id as entrustmentId FROM test_report_record WHERE report_code like CONCAT(\"%\",#{reportCode},\"%\")  LIMIT 1")
+    ReportRecordEntity selectReportRecord(String reportCode);
 
     // 查询中间报告：
-    @Select("SELECT id,report_code FROM test_report_record_mid WHERE report_code like CONCAT(\"%\",#{reportCode},\"%\")  LIMIT 1")
-    ReserveCodeEntity selectReportRecordMid(String reportCode);
+    @Select("SELECT id,report_code,entrust_id as entrustId FROM test_report_record_mid WHERE report_code like CONCAT(\"%\",#{reportCode},\"%\")  LIMIT 1")
+    ReportRecordEntity selectReportRecordMid(String reportCode);
 
     // 查询留号报告：
     @Select("SELECT id,entrustment_no,report_code,create_date,use_date FROM test_reserve_code WHERE report_code like CONCAT(\"%\",#{reportCode},\"%\")  LIMIT 1")
@@ -131,6 +132,15 @@ public interface ReserveCodeEntityMapper {
      */
     @Update("UPDATE test_report_record_mid SET report_code = #{reportCode} WHERE id = #{id}")
     int updateMidReport(@Param("id") Long id, @Param("reportCode") String reportCode);
+
+    /**
+     * 查询委托单编号
+     *
+     * @param entrustId
+     * @return
+     */
+    @Select("SELECT entrustment_no FROM test_entrusted_info WHERE id = #{entrustId}")
+    String getEntrustmentNo(@Param("entrustId") Long entrustId);
 
 
 }

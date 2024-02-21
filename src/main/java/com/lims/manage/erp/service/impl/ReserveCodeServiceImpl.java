@@ -6,12 +6,15 @@ import com.aspose.cells.Worksheet;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
+import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReserveCodeEntity;
 import com.lims.manage.erp.mapper.ReserveCodeEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.service.ReserveCodeService;
+import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.StringUtils;
@@ -38,16 +41,18 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
     private ReserveCodeEntityMapper reserveCodeEntityMapper;
     @Autowired
     private ReportService reportService;
+    @Autowired
+    private LogManagerService logManagerService;
 
     @Override
     public Result addReserveCode(ReserveCodeEntity reserveCodeEntity) {
-        if(reserveCodeEntity.getEntrustmentNo() == null){
+        if (reserveCodeEntity.getEntrustmentNo() == null) {
             return ResultUtil.error("委托单号不能为空！");
         }
         String reportCode = reserveCodeEntity.getReportCode();
-        if(reportCode != null){
+        if (reportCode != null) {
             int codeSize = reserveCodeEntityMapper.getCodeSize(reportCode);
-            if(codeSize != 0){
+            if (codeSize != 0) {
                 return ResultUtil.error("预留编号已存在，请重新设置！");
             }
         }
@@ -180,6 +185,7 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result alternateReportNumber(String oldReportNumber, String newReportNumber) {
         if (StringUtils.isEmpty(oldReportNumber)) {
             return ResultUtil.error("操作失败：旧报告号不能为空");
@@ -188,14 +194,14 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
             return ResultUtil.error("操作失败：报告号不能为空");
         }
         // 效验旧报告单号信息：旧报告号 在其中 = test_report_record、test_report_record_mid、test_reserve_code（state = 已废弃，备注描述信息已废弃）。
-        ReserveCodeEntity oldReportMark1 = reserveCodeEntityMapper.selectReportRecord(oldReportNumber);
-        ReserveCodeEntity oldReportMark2 = reserveCodeEntityMapper.selectReportRecordMid(oldReportNumber);
+        ReportRecordEntity oldReportMark1 = reserveCodeEntityMapper.selectReportRecord(oldReportNumber);
+        ReportRecordEntity oldReportMark2 = reserveCodeEntityMapper.selectReportRecordMid(oldReportNumber);
         if (oldReportMark1 == null && oldReportMark2 == null) {
             return ResultUtil.error("操作失败：旧报告号不存在");
         }
         // 新单号 不在其中 在其中 = test_report_record、test_report_record_mid、test_reserve_code在的话，需要清除。
-        ReserveCodeEntity newReportMark1 = reserveCodeEntityMapper.selectReportRecord(newReportNumber);
-        ReserveCodeEntity newReportMark2 = reserveCodeEntityMapper.selectReportRecordMid(newReportNumber);
+        ReportRecordEntity newReportMark1 = reserveCodeEntityMapper.selectReportRecord(newReportNumber);
+        ReportRecordEntity newReportMark2 = reserveCodeEntityMapper.selectReportRecordMid(newReportNumber);
         if (newReportMark1 != null || newReportMark2 != null) {
             return ResultUtil.error("操作失败：报告号已存在");
         }
@@ -208,6 +214,7 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
         if (finalReportMaxCode == null && midReportMaxCode == null) {
             return ResultUtil.error("操作失败： " + "报告号" + newReportNumber + " 在系统中不存在 " + arrays[1] + "年" + "报告号");
         }
+        if (midReportMaxCode == null) midReportMaxCode = 0;
         // 比较报告最大值进行返回
         if (finalReportMaxCode.compareTo(midReportMaxCode) > 0) {
             reportMaxCode = finalReportMaxCode;
@@ -229,30 +236,43 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
         ReserveCodeEntity oldReportMark3 = reserveCodeEntityMapper.selectReportRecordReserveCode(oldReportNumber);
         if (oldReportMark3 != null) {
             // 删除数据
-            System.out.println("待删除的旧留号报告号 == oldReportMark3 " + oldReportMark3);
             logBuffer.append("留号管理中旧报告号 = " + oldReportMark3.getReportCode() + "委托单号 = " + oldReportMark3.getEntrustmentNo());
+            reserveCodeEntityMapper.deleteByPrimaryKey(oldReportMark3.getId());
         }
         ReserveCodeEntity newReportMark3 = reserveCodeEntityMapper.selectReportRecordReserveCode(newReportNumber);
         if (newReportMark3 != null) {
             // 删除数据
-            System.out.println("待删除的报告号 == newReportMark3  " + newReportMark3);
             logBuffer.append(" 留号管理中报告号 = " + newReportMark3.getReportCode() + "委托单号 = " + newReportMark3.getEntrustmentNo());
+            reserveCodeEntityMapper.deleteByPrimaryKey(newReportMark3.getId());
         }
+        String entrustmentNo = "";
         // 执行更新报告号操作。
         if (oldReportMark1 != null) {
             // 更新最终报告
-            System.out.println("更新最终报告 == oldReportMark3  " + oldReportMark1.getReportCode() + "待更新的报告号" + newReportNumber);
             logBuffer.append(" 更新最终报告 旧报告号 = " + oldReportMark1.getReportCode() + "报告id = " + oldReportMark1.getId());
             logBuffer.append("委托单号 = " + oldReportMark1.getEntrustmentNo() + "新报告号 = " + newReportNumber);
+            reserveCodeEntityMapper.updatefinalReport(oldReportMark1.getId(), newReportNumber);
+            // 在中间报告中，当前新号 大于 最大号 需要进行add留号 state已使用。
+            entrustmentNo = reserveCodeEntityMapper.getEntrustmentNo(oldReportMark1.getEntrustmentId());
         }
         if (oldReportMark2 != null) {
             // 更新中间报告
-            System.out.println("更新最终报告 == oldReportMark3  " + oldReportMark2.getReportCode() + "待更新的报告号" + newReportNumber);
             logBuffer.append(" 更新中间报告 旧报告号 = " + oldReportMark2.getReportCode() + "报告id = " + oldReportMark2.getId());
             logBuffer.append("委托单号 = " + oldReportMark2.getEntrustmentNo() + "新报告号 = " + newReportNumber);
-            // 在中间报告中，当前新号 大于 最大号 需要进行留号 已使用。
-
+            reserveCodeEntityMapper.updateMidReport(oldReportMark2.getId(), newReportNumber);
+            entrustmentNo = reserveCodeEntityMapper.getEntrustmentNo(oldReportMark2.getEntrustId());
         }
+        // 在中间报告中，当前新号 大于 最大号 需要进行add留号 state已使用。
+        ReserveCodeEntity reserveCodeEntity = new ReserveCodeEntity();
+        reserveCodeEntity.setId(GenID.getID());
+        reserveCodeEntity.setCreateDate(new Date());
+        reserveCodeEntity.setState("已使用");
+        reserveCodeEntity.setEntrustmentNo(Integer.parseInt(entrustmentNo));
+        reserveCodeEntity.setReportCode(newReportNumber);
+        reserveCodeEntity.setUseDate(new Date());
+        reserveCodeEntity.setType("报告编号");
+        reserveCodeEntityMapper.insert(reserveCodeEntity);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), logBuffer.toString(), Const.REPORT_ORIGINAL, true);
         return ResultUtil.error("操作成功");
     }
 
