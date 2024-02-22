@@ -82,5 +82,17 @@ public class HomeController {
         return ResultUtil.success(homeService.taskKanban(userInfo.getUserId()));
     }
 
-
+    /**
+     * 全局搜索框模糊查询
+     * @param search
+     * @return
+     */
+    @GetMapping("overallSearch")
+    public Result overallSearch(String search) {
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token 已过期！");
+        }
+        return homeService.overallSearch(search);
+    }
 }

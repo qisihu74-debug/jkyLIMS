@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.entity.HomeAfficheEntity;
+import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,4 +37,11 @@ public interface HomeService {
      * @return
      */
     List<LabelValueVo> taskKanban(Long userId) throws ParseException;
+
+    /**
+     * 全局搜索框模糊查询
+     * @param search
+     * @return
+     */
+    Result overallSearch(String search);
 }

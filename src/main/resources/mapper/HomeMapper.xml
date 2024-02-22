@@ -74,4 +74,35 @@
             SUBSTR( str_to_date( request_date, '%Y-%m-%d' ), 1, 7 )
     </select>
 
+    <select id="overallSearch" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT
+            id value,
+	entrustment_no label
+        FROM
+            test_entrusted_info
+        WHERE
+            entrustment_no LIKE CONCAT('%',#{search},'%') UNION ALL
+        SELECT
+            entrustment_id,
+            task_code
+        FROM
+            test_task
+        WHERE
+            task_code LIKE CONCAT('%',#{search},'%') UNION ALL
+        SELECT
+            entrustment_id,
+            report_code
+        FROM
+            test_report_record
+        WHERE
+            report_code LIKE CONCAT('%',#{search},'%') UNION ALL
+        SELECT
+            entrust_id,
+            report_code
+        FROM
+            test_report_record_mid
+        WHERE
+            report_code LIKE CONCAT('%',#{search},'%')
+    </select>
+
 </mapper>
