@@ -12,6 +12,7 @@ import com.lims.manage.erp.vo.StatisticsParamVo;
 import com.lims.manage.erp.vo.TaskStatsVo;
 import com.lims.manage.erp.vo.TeamOutputValueVo;
 import com.lims.manage.erp.vo.TestTeamVo;
+import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Mapper
@@ -183,4 +185,62 @@ public interface StatisticsMapper {
             "\tissuer_time >= #{startDate} \n" +
             "\tAND issuer_time < #{stopDate}")
     Double countDeptPriceByTime(@Param("startDate") Date startDate, @Param("stopDate") Date stopDate);
+
+    /**
+     * 查询委托单中 委托人次数
+     *
+     * @return
+     */
+    @MapKey("businessAcceptor")
+    Map<String, Map<String, Object>> selectEntrustBusinessAcceptorMap(PersonalStatsVo personalStats);
+
+    /**
+     * 查询发布任务
+     *
+     * @return
+     */
+    @MapKey("orderer")
+    Map<String, Map<String, Object>> selectReleaseTaskMap(PersonalStatsVo personalStats);
+
+    /**
+     * 查询试验检测
+     *
+     * @return
+     */
+    @MapKey("inspector")
+    Map<String, Map<String, Object>> selectInspectorMap(PersonalStatsVo personalStats);
+
+    /**
+     * 查询复核人员
+     *
+     * @return
+     */
+    @MapKey("reviewer")
+    Map<String, Map<String, Object>> selectReviewerMap(PersonalStatsVo personalStats);
+
+    /**
+     * 查询报告审核人员
+     *
+     * @return
+     */
+    @MapKey("verifyerId")
+    Map<Long, Map<Long, Object>> selectreportApprovalMap(PersonalStatsVo personalStats);
+
+    /**
+     * 查询报告签发人员
+     *
+     * @return
+     */
+    @MapKey("issuerId")
+    Map<Long, Map<Long, Object>> selectReportIssueMap(PersonalStatsVo personalStats);
+
+    /**
+     * 查询报告签发人员
+     *
+     * @return
+     */
+    @MapKey("sealer")
+    Map<String, Map<String, Object>> selectReportSealerMap(PersonalStatsVo personalStats);
+
+
 }

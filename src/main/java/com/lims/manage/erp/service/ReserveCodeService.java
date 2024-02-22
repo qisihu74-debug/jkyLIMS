@@ -51,6 +51,7 @@ public interface ReserveCodeService {
 
     /**
      * 导入预留编号
+     *
      * @param file
      * @return
      */
@@ -58,8 +59,16 @@ public interface ReserveCodeService {
 
     /**
      * 查询当前最大的报告编号
+     *
      * @return
      */
     Result getMaxReportCode();
+
+    /**
+     * 旧报告号-替换新报告号
+     *
+     * @return
+     */
+    Result alternateReportNumber(String oldReportNumber, String newReportNumber);
 
 }

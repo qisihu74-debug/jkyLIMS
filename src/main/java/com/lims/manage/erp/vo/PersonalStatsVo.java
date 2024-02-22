@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.sql.Date;
+import java.util.List;
 
 /**
  * @Author: DLC
@@ -94,5 +95,17 @@ public class PersonalStatsVo {
      * 报告盖章
      */
     private Integer sealNumber;
+    /**
+     * 名字集合
+     */
+    private List<String> names;
+    /**
+     * name&userId 集合
+     */
+    private List<String> userIds;
+    /**
+     * userId集合
+     */
+    private List<Long> userIdSet;
 
 }

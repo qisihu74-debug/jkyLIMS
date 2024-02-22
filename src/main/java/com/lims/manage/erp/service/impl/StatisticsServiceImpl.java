@@ -118,106 +118,132 @@ public class StatisticsServiceImpl implements StatisticsService {
     public PageInfo personalStats(PersonalStatsVo personalStats) {
         // 部门部门 集合。
         List<Long> deptIds = new ArrayList<>();
-        if(!org.springframework.util.StringUtils.isEmpty(personalStats.getTeamId())){
+        if (!org.springframework.util.StringUtils.isEmpty(personalStats.getTeamId())) {
             List<Long> nodeTeam = teamMapper.getNodeTeamId(Long.parseLong(personalStats.getTeamId()));
             deptIds.addAll(nodeTeam);
         }
         // in 查询 遍历出所有人员信息。
-        if(personalStats.getPageNum()!=null&&personalStats.getPageSize()!=null){
+        if (personalStats.getPageNum() != null && personalStats.getPageSize() != null) {
             PageHelper.startPage(personalStats.getPageNum(), personalStats.getPageSize());
         }
         List<PersonalStatsVo> perons = new ArrayList<>();
-        if(!CollectionUtils.isEmpty(deptIds)){
-            perons =  statisticsMapper.selectAllPerson(deptIds);
+        if (!CollectionUtils.isEmpty(deptIds)) {
+            perons = statisticsMapper.selectAllPerson(deptIds);
+        } else {
+            perons = statisticsMapper.selectAllPerson(null);
         }
-        else {
-            perons =  statisticsMapper.selectAllPerson(null);
-        }
-        // 使用 人名 进行 遍历。
-        HashMap<String, Integer> nameMap = new HashMap<>();
-        for (PersonalStatsVo personalStatsVo : perons) {
-            nameMap.put(personalStatsVo.getName(), 0);
-        }
-        // 使用userId 进行遍历
-        HashMap<Long, Integer> userIdMap = new HashMap<>();
-        for (PersonalStatsVo personalStatsVo : perons) {
-            userIdMap.put(personalStatsVo.getUserId(), 0);
-        }
-        // 查询委托的全部信息。
-        List<EntrustHistoryEntity> entrustlist = statisticsMapper.selectEntrustHistoryListRelease(personalStats);
-        // 查询任务单报告信息 获取test人员
-        List<TaskTestEntity> testList = statisticsMapper.selectTaskTest(personalStats);
-        // 查询任务单报告信息 获取test人员
-        List<TaskTestEntity> reviewList = statisticsMapper.selectTaskReview(personalStats);
-        // 查询获取报告信息 获取 报告审批人(id)
-        List<ReportRecordEntity> reporVerifyertList = statisticsMapper.selectReportVerifyer(personalStats);
-        //
-        List<ReportRecordEntity> reporIssuerList = statisticsMapper.selectReportIssuer(personalStats);
-        // 盖章
-        List<ReportRecordEntity> reporSealList = statisticsMapper.selectReportSeal(personalStats);
-        for (EntrustHistoryEntity entrustHistoryEntity : entrustlist) {
-            if (!org.springframework.util.StringUtils.isEmpty(entrustHistoryEntity.getBusinessAcceptor())) {
-                Integer mapValue = nameMap.get(entrustHistoryEntity.getBusinessAcceptor());
-                if (mapValue != null) {
-                    nameMap.put(entrustHistoryEntity.getBusinessAcceptor(), mapValue += 1);
-                }
-            }
-        }
-        // 遍历 委托下 各人员的 统计数量。
-        for (PersonalStatsVo personalStatsVo : perons) {
-            Integer map = nameMap.get(personalStatsVo.getName());
-            if(map!=null){
-                personalStatsVo.setEntrustNumber(map);
-            }
-        }
-        // 统计发布人
-        List<TaskTestEntity> orderList = statisticsMapper.selectOrderTaskTest(personalStats);
-        //键的foreach遍历
-        Set<String>keys = nameMap.keySet();
-        for(String key:keys){
-            nameMap.put(key,0);
-        }
-        // 统计发布人
-        for (TaskTestEntity taskTestEntity : orderList) {
-            if (!org.springframework.util.StringUtils.isEmpty(taskTestEntity.getOrderer())) {
-                Integer mapValue = nameMap.get(taskTestEntity.getOrderer());
-                if (mapValue != null) {
-                    nameMap.put(taskTestEntity.getOrderer(), mapValue += 1);
-                }
-            }
-        }
-        // 遍历 委托下 发布人的 统计数量。
-        for (PersonalStatsVo personalStatsVo : perons) {
-            Integer map = nameMap.get(personalStatsVo.getName());
-            if(map!=null){
-                personalStatsVo.setTaskNumber(map);
-            }
-        }
-
-        // 统计任务单信息 -- 检测人（指定的在任务领取中） 邓喜旺&1647657004269101
-        methodInspectorTask(testList,userIdMap,perons);
-
-        // 统计任务单信息 -- 处理 复核人 邓喜旺&1647657004269101
-        methodReviewTask(reviewList,userIdMap,perons);
-
-        // 统计 报告信息（报告审批）。
-        methodApprovalReport(reporVerifyertList,userIdMap,perons);
-        // 签发
-        methodIssuerIdReport(reporIssuerList,userIdMap,perons);
-        // 盖章 盖章人=sealer  邓喜旺&1647657004269101
-        methodsealIdReport(reporSealList,userIdMap,perons);
         PageInfo<PersonalStatsVo> result = new PageInfo<>(perons);
+        // 查询委托的全部信息。
+        if (CollectionUtil.isNotEmpty(result.getList())) {
+            List<String> names = new ArrayList<>();
+            List<String> userIds = new ArrayList<>();
+            List<Long> userIdSet = new ArrayList<>();
+            for (PersonalStatsVo personalStatsVo : result.getList()) {
+                names.add(personalStatsVo.getName());
+                userIds.add(personalStatsVo.getName() + "&" + personalStatsVo.getUserId());
+                userIdSet.add(personalStatsVo.getUserId());
+            }
+            personalStats.setNames(names);
+            personalStats.setUserIds(userIds);
+            personalStats.setUserIdSet(userIdSet);
+        }
+        if (CollectionUtil.isNotEmpty(personalStats.getNames())) {
+            // 统计委托单人数
+            Map<String, Map<String, Object>> entrustMap = statisticsMapper.selectEntrustBusinessAcceptorMap(personalStats);
+            if (CollectionUtil.isNotEmpty(entrustMap.keySet())) {
+                for (String key : entrustMap.keySet()) {
+                    Map<String, Object> mapData = entrustMap.get(key);
+                    for (PersonalStatsVo personalStatsVo : result.getList()) {
+                        if (personalStatsVo.getName().equals(key)) {
+                            personalStatsVo.setEntrustNumber(Math.toIntExact((Long) mapData.get("count")));
+                        }
+                    }
+                }
+            }
+            // 统计发布人
+            Map<String, Map<String, Object>> releaseTaskMap = statisticsMapper.selectReleaseTaskMap(personalStats);
+            if (CollectionUtil.isNotEmpty(releaseTaskMap.keySet())) {
+                for (String key : releaseTaskMap.keySet()) {
+                    Map<String, Object> mapData = releaseTaskMap.get(key);
+                    for (PersonalStatsVo personalStatsVo : result.getList()) {
+                        if (personalStatsVo.getName().equals(key)) {
+                            personalStatsVo.setTaskNumber(Math.toIntExact((Long) mapData.get("count")));
+                        }
+                    }
+                }
+            }
+            // 统计检测人员信息条数
+            Map<String, Map<String, Object>> inspectorMap = statisticsMapper.selectInspectorMap(personalStats);
+            if (CollectionUtil.isNotEmpty(inspectorMap.keySet())) {
+                for (String key : inspectorMap.keySet()) {
+                    Map<String, Object> mapData = inspectorMap.get(key);
+                    for (PersonalStatsVo personalStatsVo : result.getList()) {
+                        if ((personalStatsVo.getName() + "&" + personalStatsVo.getUserId()).equals(key)) {
+                            personalStatsVo.setTestNumber(Math.toIntExact((Long) mapData.get("count")));
+                        }
+                    }
+                }
+            }
+            // 统计复核人员信息条数
+            Map<String, Map<String, Object>> reviewerMap = statisticsMapper.selectReviewerMap(personalStats);
+            if (CollectionUtil.isNotEmpty(reviewerMap.keySet())) {
+                for (String key : reviewerMap.keySet()) {
+                    Map<String, Object> mapData = reviewerMap.get(key);
+                    for (PersonalStatsVo personalStatsVo : result.getList()) {
+                        if ((personalStatsVo.getName() + "&" + personalStatsVo.getUserId()).equals(key)) {
+                            personalStatsVo.setReviewNumber(Math.toIntExact((Long) mapData.get("count")));
+                        }
+                    }
+                }
+            }
+            // 统计报告审批人员信息条数
+            Map<Long, Map<Long, Object>> reportApprovalMap = statisticsMapper.selectreportApprovalMap(personalStats);
+            if (CollectionUtil.isNotEmpty(reportApprovalMap.keySet())) {
+                for (Long key : reportApprovalMap.keySet()) {
+                    Map<Long, Object> mapData = reportApprovalMap.get(key);
+                    for (PersonalStatsVo personalStatsVo : result.getList()) {
+                        if (personalStatsVo.getUserId().equals(key)) {
+                            personalStatsVo.setApprovalNumber(Math.toIntExact((Long) mapData.get("count")));
+                        }
+                    }
+                }
+            }
+            // 统计报告签发人员信息条数
+            Map<Long, Map<Long, Object>> reportIssuerIdMap = statisticsMapper.selectReportIssueMap(personalStats);
+            if (CollectionUtil.isNotEmpty(reportIssuerIdMap.keySet())) {
+                for (Long key : reportIssuerIdMap.keySet()) {
+                    Map<Long, Object> mapData = reportIssuerIdMap.get(key);
+                    for (PersonalStatsVo personalStatsVo : result.getList()) {
+                        if (personalStatsVo.getUserId().equals(key)) {
+                            personalStatsVo.setIssueNumber(Math.toIntExact((Long) mapData.get("count")));
+                        }
+                    }
+                }
+            }
+            // 统计报告盖章人员信息条数
+            Map<String, Map<String, Object>> reportSealerMap = statisticsMapper.selectReportSealerMap(personalStats);
+            if (CollectionUtil.isNotEmpty(reportSealerMap.keySet())) {
+                for (String key : reportSealerMap.keySet()) {
+                    Map<String, Object> mapData = reportSealerMap.get(key);
+                    for (PersonalStatsVo personalStatsVo : result.getList()) {
+                        if ((personalStatsVo.getName() + "&" + personalStatsVo.getUserId()).equals(key)) {
+                            personalStatsVo.setSealNumber(Math.toIntExact((Long) mapData.get("count")));
+                        }
+                    }
+                }
+            }
+        }
         return result;
     }
 
     @Override
     public List<TestTeamVo> selectAllTeamVo() {
         List<TestTeamVo> testTeamVos = statisticsMapper.selectAllTeamVo();
-        for (TestTeamVo team1:testTeamVos) {
-            for (TestTeamVo team:testTeamVos) {
-                if (team1.getPid() !=0){
-                    if (team1.getPid().equals(team.getId())){
-                        String name = team.getName()+"—"+team1.getName();
+        for (TestTeamVo team1 : testTeamVos) {
+            for (TestTeamVo team : testTeamVos) {
+                if (team1.getPid() != 0) {
+                    if (team1.getPid().equals(team.getId())) {
+                        String name = team.getName() + "—" + team1.getName();
                         team1.setName(name);
                     }
                 }

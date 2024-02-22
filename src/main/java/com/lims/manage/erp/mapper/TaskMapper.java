@@ -705,4 +705,7 @@ public interface TaskMapper extends BaseMapper {
      * 查询任务单中 已接任务单信息
      */
     Integer selectTaskTDetectionType(TaskListParamVo paramVo);
+
+    @Update("update test_task set report_complete = #{state} WHERE entrustment_id = #{entrustId}")
+    void updateTaskReportComplete(@Param("entrustId") Long entrustId, @Param("state") String state);
 }
