@@ -21,6 +21,8 @@ import com.lims.manage.erp.mapper.SysRoleFuncMenuDao;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TeamMapper;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.HomeService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ConvertUtil;
@@ -283,6 +285,14 @@ public class HomeServiceImpl implements HomeService {
             methodTaskKanbanData(deptIds, personalMenu,isDepartment,department,userId);
         }
         return personalMenu;
+    }
+
+    @Override
+    public Result overallSearch(String search) {
+        if(search == null || "".equals(search)){
+            return ResultUtil.error("查询条件不能为空！");
+        }
+        return ResultUtil.success(homeMapper.overallSearch(search));
     }
 
     /**
