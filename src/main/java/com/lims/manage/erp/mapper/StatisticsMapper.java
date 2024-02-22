@@ -242,5 +242,13 @@ public interface StatisticsMapper {
     @MapKey("sealer")
     Map<String, Map<String, Object>> selectReportSealerMap(PersonalStatsVo personalStats);
 
+    /**
+     * 查询报告制作人员
+     *
+     * @return
+     */
+    @MapKey("reportProducer")
+    Map<String, Map<String, Object>> selectReportProducerMap(PersonalStatsVo personalStats);
+
 
 }

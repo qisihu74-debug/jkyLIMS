@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.aspose.cells.Cells;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
@@ -237,7 +238,18 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
         }
         int cc = newReportNumber.lastIndexOf("-", newReportNumber.length());
         String spritStr = newReportNumber.substring(0, cc);
-
+        // 查询报告号条数
+        List<Integer> reportArrayCollection = reserveCodeEntityMapper.selectReportNumber(spritStr);
+        if (reportArrayCollection.size() == 1) {
+            if (reportArrayCollection.get(0).equals(0)) {
+                return ResultUtil.error("报告号格式不匹配  " + newReportNumber);
+            }
+        }
+        if (reportArrayCollection.size() > 1) {
+            if (reportArrayCollection.get(0).equals(0) && reportArrayCollection.get(1).equals(0)) {
+                return ResultUtil.error("报告号格式不匹配  " + newReportNumber);
+            }
+        }
         // 日志Buffer
         StringBuffer logBuffer = new StringBuffer();
         // 留号管理中
@@ -275,7 +287,9 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
         reserveCodeEntity.setId(GenID.getID());
         reserveCodeEntity.setCreateDate(new Date());
         reserveCodeEntity.setState("已使用");
-        reserveCodeEntity.setEntrustmentNo(Integer.parseInt(entrustmentNo));
+        if (StringUtils.isNotEmpty(entrustmentNo)) {
+            reserveCodeEntity.setEntrustmentNo(Integer.parseInt(entrustmentNo));
+        }
         reserveCodeEntity.setReportCode(newReportNumber);
         reserveCodeEntity.setUseDate(new Date());
         reserveCodeEntity.setType("报告编号");

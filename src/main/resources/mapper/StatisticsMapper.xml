@@ -1396,4 +1396,18 @@
             </if>
         </foreach>
     </select>
+
+    <select id="selectReportProducerMap" resultType="java.util.HashMap">
+        <foreach item="keyword" index="index" collection="userIds" open="" separator="UNION ALL" close="">
+            SELECT #{keyword} AS reportProducer, COUNT(*) AS count
+            FROM test_task
+            WHERE report_producer LIKE CONCAT('%', #{keyword}, '%')
+            <if test="startDate!=null">
+                and receive_time <![CDATA[ >= ]]>  #{startDate}
+            </if>
+            <if test="stopDate!=null">
+                and receive_time <![CDATA[ <= ]]>  #{stopDate}
+            </if>
+        </foreach>
+    </select>
 </mapper>

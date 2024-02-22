@@ -196,6 +196,18 @@ public class StatisticsServiceImpl implements StatisticsService {
                     }
                 }
             }
+            // 报告制作人
+            Map<String, Map<String, Object>> reportProducerMap = statisticsMapper.selectReportProducerMap(personalStats);
+            if (CollectionUtil.isNotEmpty(reportProducerMap.keySet())) {
+                for (String key : reportProducerMap.keySet()) {
+                    Map<String, Object> mapData = reportProducerMap.get(key);
+                    for (PersonalStatsVo personalStatsVo : result.getList()) {
+                        if ((personalStatsVo.getName() + "&" + personalStatsVo.getUserId()).equals(key)) {
+                            personalStatsVo.setMakeNumber(Math.toIntExact((Long) mapData.get("count")));
+                        }
+                    }
+                }
+            }
             // 统计报告审批人员信息条数
             Map<Long, Map<Long, Object>> reportApprovalMap = statisticsMapper.selectreportApprovalMap(personalStats);
             if (CollectionUtil.isNotEmpty(reportApprovalMap.keySet())) {
@@ -230,6 +242,33 @@ public class StatisticsServiceImpl implements StatisticsService {
                             personalStatsVo.setSealNumber(Math.toIntExact((Long) mapData.get("count")));
                         }
                     }
+                }
+            }
+            // 数据为空 补0
+            for (PersonalStatsVo personalStatsVo : result.getList()) {
+                if (personalStatsVo.getEntrustNumber() == null) {
+                    personalStatsVo.setEntrustNumber(0);
+                }
+                if (personalStatsVo.getTaskNumber() == null) {
+                    personalStatsVo.setTestNumber(0);
+                }
+                if (personalStatsVo.getTestNumber() == null) {
+                    personalStatsVo.setTestNumber(0);
+                }
+                if (personalStatsVo.getReviewNumber() == null) {
+                    personalStatsVo.setReviewNumber(0);
+                }
+                if (personalStatsVo.getIssueNumber() == null) {
+                    personalStatsVo.setIssueNumber(0);
+                }
+                if (personalStatsVo.getApprovalNumber() == null) {
+                    personalStatsVo.setApprovalNumber(0);
+                }
+                if (personalStatsVo.getMakeNumber() == null) {
+                    personalStatsVo.setMakeNumber(0);
+                }
+                if (personalStatsVo.getSealNumber() == null) {
+                    personalStatsVo.setSealNumber(0);
                 }
             }
         }
