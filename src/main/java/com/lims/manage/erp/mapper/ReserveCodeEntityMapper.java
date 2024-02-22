@@ -142,5 +142,9 @@ public interface ReserveCodeEntityMapper {
     @Select("SELECT entrustment_no FROM test_entrusted_info WHERE id = #{entrustId}")
     String getEntrustmentNo(@Param("entrustId") Long entrustId);
 
+    @Select("SELECT COUNT(*) FROM test_report_record WHERE report_code like CONCAT(\"%\",#{reportCode},\"%\")\n" +
+            "union SELECT COUNT(*) FROM test_report_record_mid WHERE report_code like CONCAT(\"%\",#{reportCode},\"%\")")
+    List<Integer> selectReportNumber(@Param("reportCode") String reportCode);
+
 
 }

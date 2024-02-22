@@ -27,15 +27,19 @@ public class SysRoleEntity implements Serializable {
 	private Long roleId;
 	/**
 	 * 角色名称
-	 */
-	private String roleName;
-	/**
-	 * 备注
-	 */
-	private String roleRemark;
-	/**
-	 * 创建时间
-	 */
-	private Timestamp createTime;
+     */
+    private String roleName;
+    /**
+     * 备注
+     */
+    private String roleRemark;
+    /**
+     * 创建时间
+     */
+    private Timestamp createTime;
+    /**
+     * 是否删除-=1不可删除
+     */
+    private Integer isDelete;
 
 }

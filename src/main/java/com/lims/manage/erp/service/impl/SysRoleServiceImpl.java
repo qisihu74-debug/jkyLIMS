@@ -1,5 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.SysRoleEntity;
 import com.lims.manage.erp.mapper.SysRoleDao;
@@ -41,8 +43,11 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleDao, SysRoleEntity> i
 
     @Override
     public int updateSysRoleByUserId(SysRoleEntity sysRoleEntity) {
-
-        return baseMapper.updateById(sysRoleEntity);
+//        return baseMapper.updateById(sysRoleEntity);
+        LambdaQueryWrapper<SysRoleEntity> updateWrapper = new LambdaQueryWrapper<>();
+        updateWrapper.eq(SysRoleEntity::getRoleId, sysRoleEntity.getRoleId());
+        sysRoleEntity.setRoleId(null);
+        return baseMapper.update(sysRoleEntity, updateWrapper);
     }
 
     @Override

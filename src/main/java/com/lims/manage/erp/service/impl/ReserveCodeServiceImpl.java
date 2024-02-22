@@ -230,6 +230,14 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
                 return ResultUtil.error("操作失败：报告号 " + nowRportNumber + " 超过当前最大数10位" + " 系统最大报告号 " + arrays[0] + "-" + arrays[1] + "-YC-" + reportMaxCode);
             }
         }
+        // 效验报告号
+        String[] reportArrays = newReportNumber.split("-");
+        if (reportArrays.length != 4) {
+            return ResultUtil.error("报告号格式不匹配  " + newReportNumber);
+        }
+        int cc = newReportNumber.lastIndexOf("-", newReportNumber.length());
+        String spritStr = newReportNumber.substring(0, cc);
+
         // 日志Buffer
         StringBuffer logBuffer = new StringBuffer();
         // 留号管理中
