@@ -145,4 +145,10 @@ public interface DeptService extends IService<DingDeptEntity> {
      * @return
      */
     List<String> getUserIdsByDeptNames(List<String> deptNames);
+
+    /**
+     * 判断当前登录人是否为技术质量部成员
+     * @return
+     */
+    Boolean checkUserId();
 }

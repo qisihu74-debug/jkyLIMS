@@ -497,7 +497,8 @@ public interface SampleEntityMapper {
             "\tt1.product_type_name As productTypeName,\n" +
             "\tt2.product_name As productName,\n" +
             "\tt3.check_item_name As checkItemName,\n" +
-            "\tt3.check_price As checkPrice\n" +
+            "\tt3.check_price As checkPrice,\n" +
+            "\tt3.working_hours As workingHours\n" +
             "FROM\n" +
             "\ttest_product_type t1\n" +
             "LEFT JOIN test_product t2 ON t1.product_type_id = t2.product_type_id\n" +

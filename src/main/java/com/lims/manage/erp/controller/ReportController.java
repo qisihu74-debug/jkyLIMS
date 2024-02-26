@@ -135,6 +135,8 @@ public class ReportController {
     private ReportRecordEntityMapper recordEntityMapper;
     @Autowired
     private TestCheckItemsTaskRelService testCheckItemsTaskRelService;
+    @Autowired
+    private DeptService deptService;
 
     Logger logger = LoggerFactory.getLogger(ReportController.class);
     /**
@@ -1729,6 +1731,11 @@ public class ReportController {
             if (!"pdf".equals(split[split.length - 1])) {
                 return ResultUtil.error("文件类型不正确，请上传pdf文件类型");
             }
+        }
+        //判断人员是否为技术质量部下的人员
+        Boolean exist = deptService.checkUserId();
+        if (!exist){
+            return ResultUtil.error("非技术质量部成员无权限操作！");
         }
         String flag = reportService.reportTools(type,reportCode,file);
         return ResultUtil.success(flag);

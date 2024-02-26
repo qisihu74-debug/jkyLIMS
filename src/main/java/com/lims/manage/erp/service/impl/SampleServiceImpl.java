@@ -1300,7 +1300,7 @@ public class SampleServiceImpl implements SampleService {
 
     @Override
     public void exportItemInfo(HttpServletResponse response) {
-        try {
+        /*try {
             List<ItemExportBean> list = sampleEntityMapper.exportItemInfo();
             com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\参数表.xlsx");
             Worksheet worksheet = workbook.getWorksheets().get(0);
@@ -1311,6 +1311,25 @@ public class SampleServiceImpl implements SampleService {
                 worksheet.getCells().get("C"+start).setValue(list.get(i).getProductName());
                 worksheet.getCells().get("D"+start).setValue(list.get(i).getCheckItemName());
                 worksheet.getCells().get("E"+start).setValue(list.get(i).getCheckPrice());
+                worksheet.getCells().get("F"+start).setValue(list.get(i).getWorkingHours());
+                start++;
+            }
+            workbook.save("D:\\JD\\检测参数.xlsx");
+        } catch (Exception e) {
+            log.error("保存文档异常:{}",e);
+        }*/
+        try {
+            List<ItemExportBean> list = sampleEntityMapper.exportItemInfo();
+            com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook();
+            Worksheet worksheet = workbook.getWorksheets().get(0);
+            int start=1;
+            for (int i = 0; i < list.size(); i++) {
+                worksheet.getCells().get("A"+start).setValue(list.get(i).getCheckItemId());
+                worksheet.getCells().get("B"+start).setValue(list.get(i).getProductTypeName());
+                worksheet.getCells().get("C"+start).setValue(list.get(i).getProductName());
+                worksheet.getCells().get("D"+start).setValue(list.get(i).getCheckItemName());
+                worksheet.getCells().get("E"+start).setValue(list.get(i).getCheckPrice());
+                worksheet.getCells().get("F"+start).setValue(list.get(i).getWorkingHours());
                 start++;
             }
             workbook.save("D:\\JD\\检测参数.xlsx");

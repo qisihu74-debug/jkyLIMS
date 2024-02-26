@@ -117,4 +117,14 @@ public interface DeptDao extends BaseMapper<DingDeptEntity> {
             "</foreach>",
             "</script>"})
     List<String> getUserIdsByDeptNames(@Param("items") List<String> items);
+
+    @Select("SELECT\n" +
+            "\tu.user_id \n" +
+            "FROM\n" +
+            "\tsys_user u\n" +
+            "\tJOIN sys_dept d ON FIND_IN_SET( d.id, u.department ) > 0 \n" +
+            "WHERE\n" +
+            "\tu.user_id = #{userId}\n" +
+            "\tAND d.`name` = '技术质量部'")
+    Long checkUserId(@Param("userId") Long userId);
 }

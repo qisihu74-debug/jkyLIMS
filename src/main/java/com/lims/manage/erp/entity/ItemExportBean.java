@@ -17,4 +17,5 @@ public class ItemExportBean {
     private String productName;
     private String checkItemName;
     private String checkPrice;
+    private String workingHours;
 }
