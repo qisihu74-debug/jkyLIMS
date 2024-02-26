@@ -23,6 +23,7 @@ import com.lims.manage.erp.mapper.TeamMapper;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.DeptService;
 import com.lims.manage.erp.service.HomeService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ConvertUtil;
@@ -82,6 +83,8 @@ public class HomeServiceImpl implements HomeService {
     private SysRoleFuncMenuDao sysRoleFuncMenuDao;
     @Autowired
     private EntrustServiceImpl entrustServiceImpl;
+    @Autowired
+    private DeptService deptService;
 
 
     @Override
@@ -289,6 +292,11 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public Result overallSearch(String search) {
+        //判断人员是否为技术质量部下的人员
+        Boolean exist = deptService.checkUserId();
+        if (!exist){
+            return ResultUtil.error("非技术质量部成员无权限操作！");
+        }
         if(search == null || "".equals(search)){
             return ResultUtil.error("查询条件不能为空！");
         }
