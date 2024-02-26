@@ -628,10 +628,10 @@ public class ReportApprovalController {
      * @return
      */
     @GetMapping("verifySave11")
-    public Result verifySave(Integer type) {
+    public Result verifySave(Long taskId) {
 
-        List<Long> taskIds = reportApprovalMapper.getTaskList();
-//        List<Long> taskIds = new ArrayList<>();
+//        List<Long> taskIds = reportApprovalMapper.getTaskList();
+        List<Long> taskIds = new ArrayList<>();
 //        taskIds.add(4674591957546050L);
 //        taskIds.add(4647968125737833L);
 //        taskIds.add(4647968013347710L);
@@ -641,8 +641,11 @@ public class ReportApprovalController {
 //        taskIds.add(4672383731860710L);
 //        taskIds.add(4672361937528213L);
 //        taskIds.add(4668514196575131L);
-//        taskIds.add(4665392087504388L);
-
+        if (taskId != null) {
+            taskIds.add(taskId);
+        }
+//        taskIds.add(4694424886611500L);
+        System.out.println("taskId == " + taskIds.get(0));
 //        System.out.println("----");
         testCheckItemsTaskRelService.testCommit(taskIds);
 //        List<Long> reortIds = new ArrayList<>();

@@ -124,7 +124,7 @@ public class UserLoginController {
         map.put("userInfo", userData);
         // 根据 token 存储 用户信息
         redisUtil.setRedisTokenUser((String) map.get("token"),userData);
-        AsyncManager.me().execute(AsyncFactory.recordLogininfor(userData.getUsername(), Constants.LOGIN_SUCCESS, "登录成功"));
+//        AsyncManager.me().execute(AsyncFactory.recordLogininfor(userData.getUsername(), Constants.LOGIN_SUCCESS, "登录成功"));
         return map;
     }
 
