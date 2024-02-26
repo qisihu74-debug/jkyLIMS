@@ -1256,4 +1256,158 @@
         </if>
         GROUP BY(CONCAT(orderer,entrustment_id))
     </select>
+
+    <select id="selectEntrustBusinessAcceptorMap" resultType="java.util.HashMap">
+        SELECT
+        business_acceptor AS businessAcceptor,
+        COUNT( business_acceptor ) AS count
+        FROM
+        test_entrusted_info
+        WHERE
+        1 = 1
+        <if test="names != null">
+            AND business_acceptor IN
+            <foreach collection="names" item="name" index="index" open="(" close=")" separator=",">
+                #{name}
+            </foreach>
+        </if>
+        <if test="startDate!=null">
+            and acceptance_date <![CDATA[ >= ]]>  #{startDate}
+        </if>
+        <if test="stopDate!=null">
+            and acceptance_date <![CDATA[ <= ]]>  #{stopDate}
+        </if>
+        GROUP BY
+        business_acceptor
+    </select>
+    <select id="selectReleaseTaskMap" resultType="java.util.HashMap">
+        SELECT
+        tt.orderer as orderer,
+        COUNT( tt.orderer ) AS count
+        FROM
+        ( SELECT orderer,create_time FROM test_task GROUP BY ( CONCAT( orderer, entrustment_id ) ) ) AS tt
+        WHERE
+        1 = 1
+        <if test="names != null">
+            and tt.orderer IN
+            <foreach collection="names" item="name" index="index" open="(" close=")" separator=",">
+                #{name}
+            </foreach>
+        </if>
+        <if test="startDate!=null">
+            and tt.create_time <![CDATA[ >= ]]>  #{startDate}
+        </if>
+        <if test="stopDate!=null">
+            and tt.create_time <![CDATA[ <= ]]>  #{stopDate}
+        </if>
+        GROUP BY
+        tt.orderer
+    </select>
+
+    <select id="selectInspectorMap" resultType="java.util.HashMap">
+        <foreach item="keyword" index="index" collection="userIds" open="" separator="UNION ALL" close="">
+            SELECT #{keyword} AS inspector, COUNT(*) AS count
+            FROM test_task
+            WHERE inspector LIKE CONCAT('%', #{keyword}, '%')
+            <if test="startDate!=null">
+                and start_detection_time <![CDATA[ >= ]]>  #{startDate}
+            </if>
+            <if test="stopDate!=null">
+                and end_detection_time <![CDATA[ <= ]]>  #{stopDate}
+            </if>
+        </foreach>
+    </select>
+
+    <select id="selectReviewerMap" resultType="java.util.HashMap">
+        <foreach item="keyword" index="index" collection="userIds" open="" separator="UNION ALL" close="">
+            SELECT #{keyword} AS reviewer, COUNT(*) AS count
+            FROM test_task
+            WHERE reviewer LIKE CONCAT('%', #{keyword}, '%')
+            <if test="startDate!=null">
+                and review_time <![CDATA[ >= ]]>  #{startDate}
+            </if>
+            <if test="stopDate!=null">
+                and review_time <![CDATA[ <= ]]>  #{stopDate}
+            </if>
+        </foreach>
+    </select>
+
+    <select id="selectreportApprovalMap" resultType="java.util.HashMap">
+        SELECT
+        verifyer_id as verifyerId,
+        COUNT( verifyer_id ) AS count
+        FROM
+        test_report_record
+        WHERE
+        1 = 1
+        <if test="userIdSet != null">
+            and verifyer_id IN
+            <foreach collection="userIdSet" item="name" index="index" open="(" close=")" separator=",">
+                #{name}
+            </foreach>
+        </if>
+        <if test="startDate!=null">
+            and verifyer_time <![CDATA[ >= ]]>  #{startDate}
+        </if>
+        <if test="stopDate!=null">
+            and verifyer_time <![CDATA[ <= ]]>  #{stopDate}
+        </if>
+        GROUP BY
+        verifyer_id
+    </select>
+
+    <select id="selectReportIssueMap" resultType="java.util.HashMap">
+        SELECT
+        issuer_id issuerId,
+        COUNT( issuer_id ) AS count
+        FROM
+        test_report_record
+        WHERE
+        1 = 1
+        <if test="userIdSet != null">
+            and issuer_id IN
+            <foreach collection="userIdSet" item="name" index="index" open="(" close=")" separator=",">
+                #{name}
+            </foreach>
+        </if>
+        <if test="startDate!=null">
+            and issuer_time <![CDATA[ >= ]]>  #{startDate}
+        </if>
+        <if test="stopDate!=null">
+            and issuer_time <![CDATA[ <= ]]>  #{stopDate}
+        </if>
+        GROUP BY
+        issuer_id
+    </select>
+
+    <select id="selectReportSealerMap" resultType="java.util.HashMap">
+        <foreach item="keyword" index="index" collection="userIds" open="" separator="UNION ALL" close="">
+            SELECT
+            #{keyword} as sealer,
+            COUNT(*) AS count
+            FROM
+            test_report_record
+            WHERE sealer LIKE CONCAT('%', #{keyword}, '%')
+            <if test="startDate!=null">
+                and seal_time <![CDATA[ >= ]]>  #{startDate}
+            </if>
+            <if test="stopDate!=null">
+                and seal_time <![CDATA[ <= ]]>  #{stopDate}
+            </if>
+        </foreach>
+    </select>
+
+    <select id="selectReportProducerMap" resultType="java.util.HashMap">
+        <foreach item="keyword" index="index" collection="userIds" open="" separator="UNION ALL" close="">
+            SELECT #{keyword} AS reportProducer, COUNT(*) AS count
+            FROM test_task
+            WHERE report_producer LIKE CONCAT('%', #{keyword}, '%')
+            <if test="startDate!=null">
+                and receive_time <![CDATA[ >= ]]>  #{startDate}
+            </if>
+            <if test="stopDate!=null">
+                and receive_time <![CDATA[ <= ]]>  #{stopDate}
+            </if>
+        </foreach>
+    </select>
 </mapper>

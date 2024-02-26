@@ -7,6 +7,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.StringUtils;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -104,82 +105,99 @@ public class UserRoleController {
 
     /**
      * 角色信息展示
+     *
      * @param sysRoleEntity
      * @return
      */
     @GetMapping("/list")
     //@RequiresPermissions("sys:role:list")
-    public Result mehtodStr(SysRoleEntity sysRoleEntity)
-    {
+    public Result mehtodStr(SysRoleEntity sysRoleEntity) {
         return ResultUtil.success(sysRoleService.selectSysRoleList(sysRoleEntity));
     }
+
     @PostMapping("/edit")
     //@RequiresPermissions("sys:role:edit")
-    public Result methodEditData(@RequestBody SysRoleEntity sysRoleEntity)
-    {
+    public Result methodEditData(@RequestBody SysRoleEntity sysRoleEntity) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        int statusNumber=0;
+        if (sysRoleEntity == null) {
+            return ResultUtil.error("参数不能为空");
+        }
+        if (sysRoleEntity.getRoleId() == null) {
+            return ResultUtil.error("角色id不能为空");
+        }
+        if (StringUtils.isEmpty(sysRoleEntity.getRoleName())) {
+            return ResultUtil.error("角色名称不能为空");
+        }
+        int statusNumber = 0;
         try {
             statusNumber = sysRoleService.updateSysRoleByUserId(sysRoleEntity);
+        } catch (Exception e) {
         }
-        catch (Exception e){
-        }
-        Map<String,Object> map = new HashMap<>();
-        if(statusNumber>=1)
-        {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"成功！", Const.SYS_MANAGER_LOG,true);
+        Map<String, Object> map = new HashMap<>();
+        if (statusNumber >= 1) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改角色ID【" + sysRoleEntity.getRoleId() + "】状态为" + "成功！", Const.SYS_MANAGER_LOG, true);
             return ResultUtil.success("修改角色成功");
         }
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"修改角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"失败！", Const.SYS_MANAGER_LOG,false);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改角色ID【" + sysRoleEntity.getRoleId() + "】状态为" + "失败！", Const.SYS_MANAGER_LOG, false);
         return ResultUtil.error("修改角色失败");
     }
+
     @PostMapping("/add")
     //@RequiresPermissions("sys:role:add")
-    public Result methodAddData(@RequestBody SysRoleEntity sysRoleEntity)
-    {
+    public Result methodAddData(@RequestBody SysRoleEntity sysRoleEntity) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        Boolean judge =false;
+        if (StringUtils.isEmpty(sysRoleEntity.getRoleName())) {
+            return ResultUtil.error("角色名称不能为空");
+        }
+        Boolean judge = false;
         try {
             judge = sysRoleService.addSysRoleByUserId(sysRoleEntity);
+        } catch (Exception e) {
         }
-        catch (Exception e){
-        }
-        Map<String,Object> map = new HashMap<>();
-        if(judge==false)
-        {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"失败！", Const.SYS_MANAGER_LOG,false);
+        Map<String, Object> map = new HashMap<>();
+        if (judge == false) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "新增角色ID【" + sysRoleEntity.getRoleId() + "】状态为" + "失败！", Const.SYS_MANAGER_LOG, false);
             return ResultUtil.error("新增失败");
         }
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"新增角色ID【"+sysRoleEntity.getRoleId()+"】状态为"+"成功！", Const.SYS_MANAGER_LOG,true);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "新增角色ID【" + sysRoleEntity.getRoleId() + "】状态为" + "成功！", Const.SYS_MANAGER_LOG, true);
         return ResultUtil.success("新增角色成功");
     }
+
     @PostMapping("/remove/{roleId}")
     //@RequiresPermissions("sys:role:remove")
-    public Result methodAddData(@PathVariable Long roleId)
-    {
+    public Result methodAddData(@PathVariable Long roleId) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        int statusNumber=0;
+        if (roleId == null) {
+            return ResultUtil.error("角色id不能为空");
+        }
+        // 查询角色详情
+        SysRoleEntity roleEntity = sysRoleService.getById(roleId);
+        if (roleEntity == null) {
+            return ResultUtil.error("删除失败-角色不存在");
+        }
+        if (roleEntity.getIsDelete() != null && roleEntity.getIsDelete().equals(1)) {
+            return ResultUtil.error("删除失败-角色不允许删除");
+        }
+        int statusNumber = 0;
         try {
             statusNumber = sysRoleService.deleteSysRoleByUserId(roleId);
+        } catch (Exception e) {
         }
-        catch (Exception e){
-        }
-        Map<String,Object> map = new HashMap<>();
-        if(statusNumber>=1)
-        {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除角色ID【"+roleId+"】", Const.SYS_MANAGER_LOG,true);
+        Map<String, Object> map = new HashMap<>();
+        if (statusNumber >= 1) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "删除角色ID【" + roleId + "】", Const.SYS_MANAGER_LOG, true);
             return ResultUtil.success("删除角色成功");
         }
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+ShiroUtils.getUserInfo().getUsername()+"删除角色ID【"+roleId+"】", Const.SYS_MANAGER_LOG,false);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "删除角色ID【" + roleId + "】", Const.SYS_MANAGER_LOG, false);
         return ResultUtil.error("删除角色失败");
     }
 }

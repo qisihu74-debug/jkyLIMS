@@ -119,11 +119,21 @@ public class ReserveCodeController {
 
     /**
      * 获取最大报告 编号
+     *
      * @return
      */
     @GetMapping("/getMaxReportCode")
     public Result getMaxReportCode() {
         return this.reserveCodeService.getMaxReportCode();
+    }
+
+    /**
+     * 查询最终报告与中间报告编号列表
+     */
+    @GetMapping("/alternateReportNumber")
+    public Result alternateReportNumber(@RequestParam(value = "oldReportNumber") String oldReportNumber, @RequestParam(value = "newReportNumber") String newReportNumber) {
+        System.out.println("信息输出 oldReportNumber " + oldReportNumber + "newReportNumber" + newReportNumber);
+        return this.reserveCodeService.alternateReportNumber(oldReportNumber, newReportNumber);
     }
 
 }

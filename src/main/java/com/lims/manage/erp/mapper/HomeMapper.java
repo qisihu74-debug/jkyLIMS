@@ -50,4 +50,11 @@ public interface HomeMapper {
      * @return
      */
     List<LabelValueVo> outputValueStatisticsYear(String beginDate,String endDate);
+
+    /**
+     * 全局搜索框模糊查询
+     * @param search
+     * @return
+     */
+    List<LabelValueVo> overallSearch(String search);
 }
