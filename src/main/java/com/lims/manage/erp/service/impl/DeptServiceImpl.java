@@ -11,6 +11,7 @@ import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.mapper.DingUsertDao;
 import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.DingDeptVo;
 import com.lims.manage.erp.mapper.DeptDao;
 import com.lims.manage.erp.service.DeptService;
@@ -316,7 +317,8 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     }
 
     @Override
-    public Boolean checkUserId(Long userId) {
+    public Boolean checkUserId() {
+        Long userId = ShiroUtils.getUserInfo().getUserId();
         Long id = deptDao.checkUserId(userId);
         if (id != null){
             return true;
