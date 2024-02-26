@@ -145,4 +145,6 @@ public interface DeptService extends IService<DingDeptEntity> {
      * @return
      */
     List<String> getUserIdsByDeptNames(List<String> deptNames);
+
+    Boolean checkUserId(Long userId);
 }

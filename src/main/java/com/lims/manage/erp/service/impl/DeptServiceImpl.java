@@ -314,4 +314,14 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     public List<String> getUserIdsByDeptNames(List<String> deptNames) {
         return deptDao.getUserIdsByDeptNames(deptNames);
     }
+
+    @Override
+    public Boolean checkUserId(Long userId) {
+        Long id = deptDao.checkUserId(userId);
+        if (id != null){
+            return true;
+        }else {
+            return false;
+        }
+    }
 }

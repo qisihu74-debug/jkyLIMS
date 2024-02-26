@@ -303,7 +303,7 @@ public interface ReportMapper {
 
     ReportRecordEntity getDetailByCodeZj(@Param("reportCode") String reportCode);
 
-    @Delete("delete from test_report_record_mid where report_code=#{report_code}")
+    @Delete("delete from test_report_record_mid where report_code=#{reportCode}")
     void removeByCode(@Param("reportCode") String reportCode);
 
     @Insert("INSERT INTO test_report_record (\n" +
@@ -326,7 +326,7 @@ public interface ReportMapper {
             "\tissu_reason,\n" +
             "\tverifyer,\n" +
             "\tverifyer_id,\n" +
-            "\t`ISSUER`,\n" +
+            "\t`issuer`,\n" +
             "\tissuer_id,\n" +
             "\tapplicant,\n" +
             "\tsealer,\n" +
@@ -361,7 +361,7 @@ public interface ReportMapper {
             "\t\t#{item.sampleName},\n" +
             "\t\t#{item.price},\n" +
             "\t\t#{item.requiredCompletionTime},\n" +
-            "\t\t#{item.askCode},\n" +
+            "\t\t#{item.taskCode},\n" +
             "\t\t#{item.state},\n" +
             "\t\t#{item.reportUrl},\n" +
             "\t\t#{item.number},\n" +
@@ -374,7 +374,7 @@ public interface ReportMapper {
             "\t\t#{item.issuReason},\n" +
             "\t\t#{item.verifyer},\n" +
             "\t\t#{item.verifyerId},\n" +
-            "\t\t#{item.ISSUER},\n" +
+            "\t\t#{item.issuer},\n" +
             "\t\t#{item.issuerId},\n" +
             "\t\t#{item.applicant},\n" +
             "\t\t#{item.sealer},\n" +
@@ -406,7 +406,7 @@ public interface ReportMapper {
     @Select("select * from test_report_record where report_code=#{reportCode}")
     ReportRecordEntity getDetailByCode(@Param("reportCode") String reportCode);
 
-    @Update("update test_report_record set type=#{type},entrustmentId=#{entrustmentId},entrust_id=#{entrustId} where report_code=#{reportCode}")
+    @Update("update test_report_record set type=#{type},entrustment_Id=#{entrustmentId},entrust_id=#{entrustId} where report_code=#{reportCode}")
     void updateInfo(@Param("reportCode") String reportCode, @Param("type") String type,
                     @Param("entrustmentId") Long entrustmentId, @Param("entrustId") Long entrustId);
 
@@ -430,7 +430,7 @@ public interface ReportMapper {
             "\tissu_reason,\n" +
             "\tverifyer,\n" +
             "\tverifyer_id,\n" +
-            "\t`ISSUER`,\n" +
+            "\t`issuer`,\n" +
             "\tissuer_id,\n" +
             "\tapplicant,\n" +
             "\tsealer,\n" +
@@ -465,7 +465,7 @@ public interface ReportMapper {
             "\t\t#{item.sampleName},\n" +
             "\t\t#{item.price},\n" +
             "\t\t#{item.requiredCompletionTime},\n" +
-            "\t\t#{item.askCode},\n" +
+            "\t\t#{item.taskCode},\n" +
             "\t\t#{item.state},\n" +
             "\t\t#{item.reportUrl},\n" +
             "\t\t#{item.number},\n" +
@@ -478,7 +478,7 @@ public interface ReportMapper {
             "\t\t#{item.issuReason},\n" +
             "\t\t#{item.verifyer},\n" +
             "\t\t#{item.verifyerId},\n" +
-            "\t\t#{item.ISSUER},\n" +
+            "\t\t#{item.issuer},\n" +
             "\t\t#{item.issuerId},\n" +
             "\t\t#{item.applicant},\n" +
             "\t\t#{item.sealer},\n" +

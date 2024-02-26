@@ -71,6 +71,7 @@ import com.lims.manage.erp.mapper.TestReportTemplateDao;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.mapper.TestTechnicistDao;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.ConvertUtil;
@@ -1963,10 +1964,15 @@ public class ReportServiceImpl implements ReportService {
                     reportMapper.save(detailByCodeZj);
                     reportMapper.removeByCode(reportCode);
                 }else {
-                    reportMapper.updateInfo(reportCode,"0",recordEntity.getEntrustId(),null);
+                    reportMapper.updateInfo(reportCode,"0",recordEntity.getEntrustId()!=null?recordEntity.getEntrustId():recordEntity.getEntrustmentId(),null);
                 }
-                taskMapper.updateTaskReportComplete(detailByCodeZj.getEntrustId(),"1");
-                flag = "中间报告改为最终成功";
+                if (detailByCodeZj != null){
+                    taskMapper.updateTaskReportComplete(detailByCodeZj.getEntrustmentId()!=null?detailByCodeZj.getEntrustmentId():detailByCodeZj.getEntrustId(),"1");
+                    flag = "中间报告改为最终成功";
+                }else {
+                    taskMapper.updateTaskReportComplete(recordEntity.getEntrustmentId()!=null?recordEntity.getEntrustmentId():recordEntity.getEntrustId(),"1");
+                    flag = "中间报告改为最终成功";
+                }
                 break;
             //最终报告u改为中间报告，修改报告类型及委托单ID字段的值，判断报告是否已经完成，如果已完成需把报告从报告表移入到中间报告表，对应任务的完成状态修改为未完成
             //如果报告未完成，对应任务的完成状态修改为未完成
@@ -1978,28 +1984,40 @@ public class ReportServiceImpl implements ReportService {
                     reportMapper.saveZj(recordEntity);
                     reportMapper.removeReByCode(reportCode);
                 }else {
-                    reportMapper.updateInfo(reportCode,"1",null,recordEntity.getEntrustmentId());
+                    reportMapper.updateInfo(reportCode,"1",null,recordEntity.getEntrustmentId()!=null?recordEntity.getEntrustmentId():recordEntity.getEntrustId());
                 }
-                taskMapper.updateTaskReportComplete(recordEntity.getEntrustmentId(),"2");
-                flag = "最终报告改为中间报告成功";
+                if (recordEntity != null){
+                    taskMapper.updateTaskReportComplete(recordEntity.getEntrustId()!=null?recordEntity.getEntrustId():recordEntity.getEntrustmentId(),"2");
+                    flag = "最终报告改为中间报告成功";
+                }else {
+                    flag = "修改的报告编号不存在";
+                }
                 break;
             case "3":
+                if (file == null){
+                    flag = "请上传报告文件";
+                    break;
+                }
+                if (recordEntity == null){
+                    flag = "报告不存在";
+                    break;
+                }
                 if (recordEntity != null && Integer.parseInt(recordEntity.getState()) ==6){
                     String url = MinIoUtil.upload("report-download", file, reportCode + ".pdf");
                     String substring = url.substring(0, url.indexOf("?"));
                     reportMapper.updateUrlByCode(reportCode,substring);
                     flag = "报告重新上传成功";
                 }else{
-                    flag = "报告重新上传失败";
+                    flag = "报告流程未到电子盖章，请稍后再试！";
                 }
                 break;
             case "4":
                 //0线上，1线下
-                reportMapper.updateOperateState(reportCode,1);
+                reportMapper.updateOperateState(reportCode,0);
                 flag = "线上审批改为线下成功";
                 break;
             case "5":
-                reportMapper.updateOperateState(reportCode,0);
+                reportMapper.updateOperateState(reportCode,1);
                 flag = "线下审批改为线上成功";
                 break;
             default:
