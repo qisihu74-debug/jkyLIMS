@@ -1818,10 +1818,16 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             List<TestTaskOrderWorkingHours> testTaskOrderWorkingHoursList = testTaskOrderWorkingHoursMapper.selectList(lambdaQueryWrapper);
             TestTaskOrderWorkingHours data = testTaskOrderWorkingHoursList.get(0);
             // 获取任务单对应人员工时
-            String sqlTotalWorking = testTaskOrderWorkingHoursMapper.selectTaskOrderWorkingSum(taskId);
+//            String sqlTotalWorking = testTaskOrderWorkingHoursMapper.selectTaskOrderWorkingSum(taskId);
+            BigDecimal sqlTotalWorking = new BigDecimal("0");
+            for (TestTaskOrderWorkingHours taskOrderWorkingHours : testTaskOrderWorkingHoursList) {
+                // 任务单下 人员工时累计相加
+                BigDecimal workHours = sqlTotalWorking.add(new BigDecimal(taskOrderWorkingHours.getWorkingHours()));
+                sqlTotalWorking = workHours;
+            }
             // 剩余工时 = 总工时 - 实际工时 保留小位点两位
-            BigDecimal zhi01 = BigDecimal.valueOf(Double.valueOf(data.getTotalWorkingHours()));
-            BigDecimal zhi02 = BigDecimal.valueOf(Double.valueOf(sqlTotalWorking));
+            BigDecimal zhi01 = BigDecimal.valueOf(Double.valueOf(data.getTotalWorkingHours())).setScale(2, BigDecimal.ROUND_FLOOR);
+            BigDecimal zhi02 = sqlTotalWorking.setScale(2, BigDecimal.ROUND_FLOOR);
             BigDecimal zhi03 = zhi01.subtract(zhi02).setScale(2, BigDecimal.ROUND_FLOOR);
             // 结果保留小位小数 = 剩余工时 + 最小工时相加
             BigDecimal workHours = zhi03.add(new BigDecimal(data.getWorkingHours()));

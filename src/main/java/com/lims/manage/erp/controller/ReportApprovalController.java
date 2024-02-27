@@ -628,36 +628,11 @@ public class ReportApprovalController {
      * @return
      */
     @GetMapping("verifySave11")
-    public Result verifySave(Long taskId) {
-
-//        List<Long> taskIds = reportApprovalMapper.getTaskList();
-        List<Long> taskIds = new ArrayList<>();
-//        taskIds.add(4674591957546050L);
-//        taskIds.add(4647968125737833L);
-//        taskIds.add(4647968013347710L);
-//        taskIds.add(4647967908990107L);
-//        taskIds.add(4647967770139289L);
-//        taskIds.add(4647967665350123L);
-//        taskIds.add(4672383731860710L);
-//        taskIds.add(4672361937528213L);
-//        taskIds.add(4668514196575131L);
-        if (taskId != null) {
-            taskIds.add(taskId);
+    public Result verifySave(@RequestParam("list") List<Long> list) {
+        for (Long id : list) {
+            System.out.println("id == " + id);
         }
-//        taskIds.add(4694424886611500L);
-        System.out.println("taskId == " + taskIds.get(0));
-//        System.out.println("----");
-        testCheckItemsTaskRelService.testCommit(taskIds);
-//        List<Long> reortIds = new ArrayList<>();
-//        reortIds.add(4689202608451264L);
-//        TODO:1月5日  查询基础表信息 - 检测类型包含工时
-//        List<TestInitDataEntity> sqlBasisList = new ArrayList<>();
-//        sqlBasisList = taskMapper.selectEntrustBasis(30);
-//        reortIds.add(4689206872841732L);
-//        for (Long reportId : reortIds) {
-//            System.out.println(reportId + " type == " + type);
-//            testCheckItemsTaskRelService.handleWorkingHours(reportId, type);
-//        }
+        testCheckItemsTaskRelService.testCommit(list);
         return null;
 
     }
