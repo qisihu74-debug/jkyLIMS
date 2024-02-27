@@ -5,8 +5,10 @@ import com.lims.manage.erp.entity.ReserveCodeEntity;
 import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.DeptService;
 import com.lims.manage.erp.service.ReserveCodeService;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,9 @@ import java.net.URLEncoder;
 public class ReserveCodeController {
     @Autowired
     private ReserveCodeService reserveCodeService;
+    @Autowired
+    private DeptService deptService;
+
 
     /**
      * 新增预留编号
@@ -132,6 +137,12 @@ public class ReserveCodeController {
      */
     @GetMapping("/alternateReportNumber")
     public Result alternateReportNumber(@RequestParam(value = "oldReportNumber") String oldReportNumber, @RequestParam(value = "newReportNumber") String newReportNumber) {
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        //判断人员是否为技术质量部下的人员
+        Boolean exist = deptService.checkUserId();
+        if (!exist) {
+            return ResultUtil.error("非技术质量部成员无权限操作！");
+        }
         System.out.println("信息输出 oldReportNumber " + oldReportNumber + "newReportNumber" + newReportNumber);
         return this.reserveCodeService.alternateReportNumber(oldReportNumber, newReportNumber);
     }

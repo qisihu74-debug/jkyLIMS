@@ -128,4 +128,25 @@ public interface TestTaskOrderWorkingHoursMapper  extends BaseMapper<TestTaskOrd
             "\tentrustment_id = #{entrustId} \n" +
             "\tAND state != 144 and task_list_status is null")
     List<Long> getTaskOldList(@Param("entrustId") Long entrustId);
+
+    /**
+     * 查询 taskId 工时是否整除：!null 整除
+     *
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\ttt.count \n" +
+            "FROM\n" +
+            "\t( SELECT *, COUNT( * ) AS count FROM test_task_order_working_hours WHERE task_id = #{taskId} GROUP BY task_id HAVING ROUND( sum( working_hours ), 2 ) != total_working_hours ) tt")
+    String selectTaskOrderWorkingCount(@Param("taskId") Long taskId);
+
+    /**
+     * 查询任务单 获取总工时
+     *
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT sum(working_hours) FROM test_task_order_working_hours WHERE task_id = #{taskId} ")
+    String selectTaskOrderWorkingSum(@Param("taskId") Long taskId);
 }

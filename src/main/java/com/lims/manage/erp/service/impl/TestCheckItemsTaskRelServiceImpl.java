@@ -6,6 +6,7 @@ import com.aspose.cells.SaveFormat;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -55,6 +56,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -1286,9 +1288,9 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 for (Long taskId : taskIds) {
                     // 根据taskId 循环新增工时数据
                     //TODO:1月5日  查询基础表信息 - 检测类型包含工时
-                    List<TestInitDataEntity> sqlBasisList = new ArrayList<>();
-                    sqlBasisList = taskMapper.selectEntrustBasis(30);
-                    reportIssuanceAllottedTime(taskId, sqlBasisList);
+//                    List<TestInitDataEntity> sqlBasisList = new ArrayList<>();
+//                    sqlBasisList = taskMapper.selectEntrustBasis(30);
+                    reportIssuanceAllottedTime(taskId);
                 }
             } else {
                 // 任务id集合获取 得到 工时信息:
@@ -1314,9 +1316,9 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 for (Long taskId : taskIds) {
                     // 根据taskId 循环新增工时数据
                     //TODO:1月5日  查询基础表信息 - 检测类型包含工时
-                    List<TestInitDataEntity> sqlBasisList = new ArrayList<>();
-                    sqlBasisList = taskMapper.selectEntrustBasis(30);
-                    reportIssuanceAllottedTime(taskId, sqlBasisList);
+//                    List<TestInitDataEntity> sqlBasisList = new ArrayList<>();
+//                    sqlBasisList = taskMapper.selectEntrustBasis(30);
+                    reportIssuanceAllottedTime(taskId);
                 }
             }
         } else {
@@ -1366,7 +1368,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         for (Long taskId : taskIds) {
             // 根据taskId 循环新增工时数据
 //            endReportAllottedTime(taskId);
-            reportIssuanceAllottedTime(taskId, null);
+            reportIssuanceAllottedTime(taskId);
         }
         return true;
     }
@@ -1451,11 +1453,10 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
      * 报告签发后：分配工时
      *
      * @param taskId
-     * @param sqlBasisList
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public Boolean reportIssuanceAllottedTime(Long taskId, List<TestInitDataEntity> sqlBasisList) {
+    public Boolean reportIssuanceAllottedTime(Long taskId) {
         // 根据任务单 查询任务下对应操作信息
         TaskTestEntity taskDetails = taskMapper.selectTaskEntity(taskId);
         if (taskDetails == null) {
@@ -1464,7 +1465,12 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         if (taskDetails.getTaskListStatus() == null) {
             return false;
         }
-
+        //TODO:11月10 查询基础表信息 - 检测类型包含工时
+        List<TestInitDataEntity> sqlBasisList = taskMapper.selectEntrustBasis(30);
+        String[] strings = new String[sqlBasisList.size()];
+        for (int i = 0; i < strings.length; i++) {
+            strings[i] = sqlBasisList.get(i).getRemark();
+        }
         // 通过任务单id 查询所有的 任务大厅 分配的检测项列表
         List<TestCheckItemsTaskRel> bitValueList = testCheckItemsTaskRelMapper.selectAllDataBitValue(taskId);
         // 通过任务单获取检测项工时信息
@@ -1490,10 +1496,16 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
         // 获取每组的工时信息
         for (Integer key : bitValueMap.keySet()) {
+            List<TestInitDataEntity> updateList = sqlBasisList.stream().collect(Collectors.toList());
+            for (int i = 0; i < strings.length; i++) {
+                TestInitDataEntity dataEntity = updateList.get(i);
+                dataEntity.setRemark(strings[i]);
+                updateList.set(i, dataEntity);
+            }
             // 分组中比例信息: key =序号，value = 值
             HashMap<Integer, TestInitDataEntity> map = new HashMap<>();
-            for (int i = 0; i < sqlBasisList.size(); i++) {
-                map.put(i, sqlBasisList.get(i));
+            for (int i = 0; i < updateList.size(); i++) {
+                map.put(i, updateList.get(i));
             }
             List<TestCheckItemsTaskRel> itemList = bitValueMap.get(key);
             // 检测项去重
@@ -1537,7 +1549,13 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             }
         }
         // 获取分组检测项信息 进行合并 存储。
-        addTestTaskOrderWorkingHoursMapper(taskId, bitTaskRelList, sqlBasisList);
+        List<TestInitDataEntity> updateList1 = sqlBasisList.stream().collect(Collectors.toList());
+        for (int i = 0; i < strings.length; i++) {
+            TestInitDataEntity dataEntity = updateList1.get(i);
+            dataEntity.setRemark(strings[i]);
+            updateList1.set(i, dataEntity);
+        }
+        addTestTaskOrderWorkingHoursMapper(taskId, bitTaskRelList, updateList1);
         return true;
     }
 
@@ -1750,7 +1768,6 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
         // 通过任务单id 新增任务单下对应的检测项总工时
         renturnWorkingHours(taskId, workingHoursId, name);
-
         // 通过任务单 获取样品信息
         List<String> sampleNames = taskMapper.getTaskSamples(taskDetails.getId());
         StringBuffer nameBuffer = new StringBuffer();
@@ -1759,6 +1776,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 nameBuffer.append(sampleName + " ");
             }
         }
+        List<TestTaskOrderWorkingHours> list = new ArrayList<>();
         for (Long userId : taskRelMap.keySet()) {
             TestTaskOrderWorkingHours taskOrderWorkingHours = taskRelMap.get(userId);
             taskOrderWorkingHours.setAddOperator(name + "&" + taskDetails.getReceiver());
@@ -1772,7 +1790,53 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             // 任务单号
             taskOrderWorkingHours.setTaskCode(taskCode);
             taskOrderWorkingHours.setWorkingHoursId(String.valueOf(workingHoursId));
-            testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+            // 总工时 保留小位小数
+//            taskOrderWorkingHours.setTotalWorkingHours();
+            BigDecimal totalWorkingHoursZhi = BigDecimal.valueOf(Double.valueOf(taskOrderWorkingHours.getTotalWorkingHours())).setScale(2, BigDecimal.ROUND_FLOOR);
+            taskOrderWorkingHours.setTotalWorkingHours(totalWorkingHoursZhi.toString());
+            list.add(taskOrderWorkingHours);
+        }
+        // list排序 进行保留小数点后两位
+        for (int i = 0; i < list.size(); i++) {
+            TestTaskOrderWorkingHours workingHoursData = list.get(i);
+            // 工时保留小位小数。
+            BigDecimal workHours = BigDecimal.valueOf(Double.valueOf(workingHoursData.getWorkingHours())).setScale(2, RoundingMode.FLOOR);
+            workingHoursData.setWorkingHours(workHours.toString());
+            // 百分比 = 所占工时 / 总工时 * 100 保留两位小数
+            BigDecimal proportion = workHours.divide(new BigDecimal(Double.valueOf(workingHoursData.getTotalWorkingHours())), 4, BigDecimal.ROUND_FLOOR);
+            BigDecimal percentum = proportion.multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_FLOOR);
+            workingHoursData.setProportion(percentum.toString());
+            testTaskOrderWorkingHoursMapper.insert(workingHoursData);
+        }
+        // 统计数据 是否被整除
+        String count = testTaskOrderWorkingHoursMapper.selectTaskOrderWorkingCount(taskId);
+        if (StringUtils.isNotEmpty(count)) {
+            // 获取比例信息 进行更新
+            LambdaQueryWrapper<TestTaskOrderWorkingHours> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, taskId);
+            lambdaQueryWrapper.orderByAsc(TestTaskOrderWorkingHours::getWorkingHours);
+            List<TestTaskOrderWorkingHours> testTaskOrderWorkingHoursList = testTaskOrderWorkingHoursMapper.selectList(lambdaQueryWrapper);
+            TestTaskOrderWorkingHours data = testTaskOrderWorkingHoursList.get(0);
+            // 获取任务单对应人员工时
+//            String sqlTotalWorking = testTaskOrderWorkingHoursMapper.selectTaskOrderWorkingSum(taskId);
+            BigDecimal sqlTotalWorking = new BigDecimal("0");
+            for (TestTaskOrderWorkingHours taskOrderWorkingHours : testTaskOrderWorkingHoursList) {
+                // 任务单下 人员工时累计相加
+                BigDecimal workHours = sqlTotalWorking.add(new BigDecimal(taskOrderWorkingHours.getWorkingHours()));
+                sqlTotalWorking = workHours;
+            }
+            // 剩余工时 = 总工时 - 实际工时 保留小位点两位
+            BigDecimal zhi01 = BigDecimal.valueOf(Double.valueOf(data.getTotalWorkingHours())).setScale(2, BigDecimal.ROUND_FLOOR);
+            BigDecimal zhi02 = sqlTotalWorking.setScale(2, BigDecimal.ROUND_FLOOR);
+            BigDecimal zhi03 = zhi01.subtract(zhi02).setScale(2, BigDecimal.ROUND_FLOOR);
+            // 结果保留小位小数 = 剩余工时 + 最小工时相加
+            BigDecimal workHours = zhi03.add(new BigDecimal(data.getWorkingHours()));
+            data.setWorkingHours(workHours.toString());
+            // 百分比 = 所占工时 / 总工时 * 100 保留两位小数
+            BigDecimal proportion = workHours.divide(new BigDecimal(Double.valueOf(data.getTotalWorkingHours())), 4, BigDecimal.ROUND_FLOOR);
+            BigDecimal percentum = proportion.multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_FLOOR);
+            data.setProportion(percentum.toString());
+            testTaskOrderWorkingHoursMapper.updateByPrimaryKeySelective(data);
         }
     }
 
