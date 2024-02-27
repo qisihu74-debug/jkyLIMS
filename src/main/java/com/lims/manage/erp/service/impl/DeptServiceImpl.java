@@ -9,7 +9,9 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.entity.DingUserEntity;
+import com.lims.manage.erp.entity.SysRoleEntity;
 import com.lims.manage.erp.mapper.DingUsertDao;
+import com.lims.manage.erp.service.SysRoleService;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.DingDeptVo;
@@ -40,6 +42,8 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     private DeptDao deptDao;
     @Autowired
     private DingUsertDao dingUsertDao;
+    @Autowired
+    private SysRoleService sysRoleService;
 
     @Override
     public List<DingDeptVo> getAllDept() {
@@ -319,8 +323,8 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     @Override
     public Boolean checkUserId() {
         Long userId = ShiroUtils.getUserInfo().getUserId();
-        Long id = deptDao.checkUserId(userId);
-        if (id != null){
+        SysRoleEntity sysRoleEntity = sysRoleService.checkRole(userId);
+        if (sysRoleEntity != null){
             return true;
         }else {
             return false;
