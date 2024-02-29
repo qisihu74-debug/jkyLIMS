@@ -138,7 +138,8 @@ public interface TestTaskOrderWorkingHoursMapper  extends BaseMapper<TestTaskOrd
     @Select("SELECT\n" +
             "\ttt.count \n" +
             "FROM\n" +
-            "\t( SELECT *, COUNT( * ) AS count FROM test_task_order_working_hours WHERE task_id = #{taskId} GROUP BY task_id HAVING ROUND( sum( working_hours ), 2 ) != total_working_hours ) tt")
+            "\t( SELECT *, COUNT( * ) AS count FROM test_task_order_working_hours WHERE task_id = #{taskId} GROUP BY task_id HAVING ROUND( sum( working_hours ), 2 ) != total_working_hours " +
+            "or ROUND( sum( proportion ), 2 ) != 100) tt")
     String selectTaskOrderWorkingCount(@Param("taskId") Long taskId);
 
     /**
