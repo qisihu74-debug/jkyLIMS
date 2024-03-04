@@ -1863,8 +1863,25 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void sealRevoke(Long id) {
-        recordEntityMapper.sealRevoke(id);
+        ReportRecordEntity detail = recordEntityMapper.getInfo(id);
+        if (detail != null){
+            recordEntityMapper.sealRevoke(id);
+        }else {
+            ReportRecordEntity recordEntity = recordEntityMapper.getMidInfo(id);
+            if (recordEntity != null){
+                //删除中间表报告
+                recordEntityMapper.delMidReportById(id);
+                //移入到报告表
+                recordEntity.setQysState("1");
+                recordEntity.setState("6");
+                recordEntity.setQysDocmentId(null);
+                recordEntity.setContractId(null);
+                recordEntity.setSignUrl(null);
+                recordEntityMapper.insert(recordEntity);
+            }
+        }
     }
 
     @Override
