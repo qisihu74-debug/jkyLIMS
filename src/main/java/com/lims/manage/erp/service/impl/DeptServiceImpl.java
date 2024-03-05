@@ -1,7 +1,9 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
@@ -9,9 +11,16 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.entity.DingUserEntity;
+import com.lims.manage.erp.entity.SysRoleEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.UserDepartmentMiddleEntity;
 import com.lims.manage.erp.mapper.DingUsertDao;
+import com.lims.manage.erp.service.SysRoleService;
+import com.lims.manage.erp.mapper.SysUserDao;
+import com.lims.manage.erp.mapper.UserDepartmentMiddleMapper;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.StringUtils;
 import com.lims.manage.erp.vo.DingDeptVo;
 import com.lims.manage.erp.mapper.DeptDao;
 import com.lims.manage.erp.service.DeptService;
@@ -24,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author gjl
@@ -40,6 +50,12 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     private DeptDao deptDao;
     @Autowired
     private DingUsertDao dingUsertDao;
+    @Autowired
+    private SysRoleService sysRoleService;
+    @Autowired
+    private UserDepartmentMiddleMapper userDepartmentMiddleMapper;
+    @Autowired
+    private SysUserDao sysUserDao;
 
     @Override
     public List<DingDeptVo> getAllDept() {
@@ -265,6 +281,90 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean updatePersonDetails(DingUserEntity personEntity) {
+        // 查询 ding_user_id 与 部门id 关系
+        LambdaQueryWrapper<UserDepartmentMiddleEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserDepartmentMiddleEntity::getDingUserId, personEntity.getUserid());
+        List<UserDepartmentMiddleEntity> sqlDingUserIds = userDepartmentMiddleMapper.selectList(queryWrapper);
+        // 处理部门id 使用逗号分开。
+        if (StringUtils.isNotEmpty(personEntity.getDepartment())) {
+            String[] departments = personEntity.getDepartment().split(",");
+            // 前端页面传递的 部门信息
+            List<Long> newDepartments = new ArrayList<>();
+            for (int i = 0; i < departments.length; i++) {
+                newDepartments.add(Long.valueOf(departments[i]));
+            }
+            // 进行比较部门信息：进行删除或新增操作
+            if (CollectionUtil.isNotEmpty(sqlDingUserIds)) {
+                List<Long> dingUserIds = new ArrayList<>();
+                for (UserDepartmentMiddleEntity userDepartmentMiddleEntity : sqlDingUserIds) {
+                    dingUserIds.add(userDepartmentMiddleEntity.getDeptId());
+                }
+                // 进行删除或新增操作
+                List<Long> deleteList = dingUserIds.stream()
+                        .filter(element -> !newDepartments.contains(element))
+                        .collect(Collectors.toList());
+                if (CollectionUtil.isNotEmpty(deleteList)) {
+                    LambdaQueryWrapper<UserDepartmentMiddleEntity> deleteWrapper = new LambdaQueryWrapper<>();
+                    deleteWrapper.eq(UserDepartmentMiddleEntity::getDingUserId, personEntity.getUserid());
+                    deleteWrapper.in(UserDepartmentMiddleEntity::getDeptId, deleteList);
+                    userDepartmentMiddleMapper.delete(deleteWrapper);
+                }
+                // addList
+                List<Long> addDeptList = newDepartments.stream()
+                        .filter(element -> !dingUserIds.contains(element))
+                        .collect(Collectors.toList());
+                if (CollectionUtil.isNotEmpty(addDeptList)) {
+                    for (int x = 0; x < addDeptList.size(); x++) {
+                        UserDepartmentMiddleEntity record = new UserDepartmentMiddleEntity();
+                        // 判断 用户与 dingUserId
+                        record.setUserId(sqlDingUserIds.get(0).getUserId());
+                        record.setDingUserId(personEntity.getUserid());
+                        record.setDeptId(Long.valueOf(addDeptList.get(x)));
+                        userDepartmentMiddleMapper.insert(record);
+                    }
+                }
+                // 更新 sys_user中 部门信息。
+                if (sqlDingUserIds.get(0).getUserId() != null && (CollectionUtil.isNotEmpty(deleteList) || CollectionUtil.isNotEmpty(addDeptList))) {
+                    /// 更新
+                    LambdaQueryWrapper<SysUserEntity> updateWrapper = new LambdaQueryWrapper<>();
+                    updateWrapper.eq(SysUserEntity::getUserId, sqlDingUserIds.get(0).getUserId());
+                    SysUserEntity updateEntity = new SysUserEntity();
+                    updateEntity.setDepartment("[" + personEntity.getDepartment() + ",]");
+                    sysUserDao.update(updateEntity, updateWrapper);
+                }
+            } else {
+                // 直接新增即可
+                for (int x = 0; x < newDepartments.size(); x++) {
+                    UserDepartmentMiddleEntity record = new UserDepartmentMiddleEntity();
+                    // 判断 用户与 dingUserId
+                    record.setUserId(null);
+                    record.setDingUserId(personEntity.getUserid());
+                    record.setDeptId(Long.valueOf(newDepartments.get(x)));
+                    userDepartmentMiddleMapper.insert(record);
+                }
+            }
+        } else {
+            // 删除关于部门信息成员。
+            if (CollectionUtil.isNotEmpty(sqlDingUserIds)) {
+                List<Long> deptIds = new ArrayList<>();
+                for (UserDepartmentMiddleEntity userDepartmentMiddleEntity : sqlDingUserIds) {
+                    deptIds.add(userDepartmentMiddleEntity.getDeptId());
+                }
+                LambdaQueryWrapper<UserDepartmentMiddleEntity> deleteWrapper = new LambdaQueryWrapper<>();
+                deleteWrapper.eq(UserDepartmentMiddleEntity::getDingUserId, personEntity.getUserid());
+                deleteWrapper.in(UserDepartmentMiddleEntity::getDeptId, deptIds);
+                userDepartmentMiddleMapper.delete(deleteWrapper);
+                // 更新 sys_user中 部门信息。
+                if (sqlDingUserIds.get(0).getUserId() != null) {
+                    /// 更新
+                    LambdaQueryWrapper<SysUserEntity> updateWrapper = new LambdaQueryWrapper<>();
+                    updateWrapper.eq(SysUserEntity::getUserId, sqlDingUserIds.get(0).getUserId());
+                    SysUserEntity updateEntity = new SysUserEntity();
+                    updateEntity.setDepartment("[" + personEntity.getDepartment() + ",]");
+                    sysUserDao.update(updateEntity, updateWrapper);
+                }
+            }
+        }
         dingUsertDao.updatePerson(personEntity);
         return true;
     }
@@ -295,10 +395,19 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addPersonDetails(DingUserEntity personEntity) {
-        // 处理部门id 使用逗号分开。
-
         // String类型 主键规则
         personEntity.setUserid(GenID.getOrderNum());
+        // 处理部门id 使用逗号分开。
+        if (StringUtils.isNotEmpty(personEntity.getDepartment())) {
+            String[] departments = personEntity.getDepartment().split(",");
+            for (int i = 0; i < departments.length; i++) {
+                // 员工创建时： 员工建立绑定部门信息,可以绑定多组
+                UserDepartmentMiddleEntity record = new UserDepartmentMiddleEntity();
+                record.setDingUserId(personEntity.getUserid());
+                record.setDeptId(Long.valueOf(departments[i]));
+                userDepartmentMiddleMapper.insert(record);
+            }
+        }
         dingUsertDao.insert(personEntity);
         return true;
     }
@@ -320,10 +429,64 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
     public Boolean checkUserId() {
         Long userId = ShiroUtils.getUserInfo().getUserId();
         Long id = deptDao.checkUserId(userId);
-        if (id != null){
+        if (id != null) {
+//            SysRoleEntity sysRoleEntity = sysRoleService.checkRole(userId);
+//            if (sysRoleEntity != null) {
             return true;
-        }else {
-            return false;
+//            } else {
+//                return false;
+//            }
         }
+        return false;
+    }
+
+    /**
+     * 通过账号id 和 钉钉用户id 返回部门信息
+     *
+     * @param userId
+     * @param dingUserId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public List<Long> getDepartmentIdLong(Long userId, String dingUserId) {
+        // 查询 ding_user_id 与 部门id 关系
+        LambdaQueryWrapper<UserDepartmentMiddleEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserDepartmentMiddleEntity::getDingUserId, dingUserId);
+        List<UserDepartmentMiddleEntity> sqlDingUserIds = userDepartmentMiddleMapper.selectList(queryWrapper);
+        if (CollectionUtil.isNotEmpty(sqlDingUserIds)) {
+            // 更新账号id信息
+            UserDepartmentMiddleEntity entity = new UserDepartmentMiddleEntity();
+            entity.setUserId(userId);
+            LambdaQueryWrapper<UserDepartmentMiddleEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(UserDepartmentMiddleEntity::getDingUserId, dingUserId);
+            userDepartmentMiddleMapper.update(entity, lambdaQueryWrapper);
+            List<Long> deptList = new ArrayList<>();
+            for (int i = 0; i < sqlDingUserIds.size(); i++) {
+                deptList.add(sqlDingUserIds.get(i).getDeptId());
+            }
+            return deptList;
+        }
+        return null;
+    }
+
+    /**
+     * 通过 userId 查询钉钉用户id与部门信息 把userId更新为空。
+     *
+     * @param userId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Boolean updateDepartmentId(Long userId) {
+        // 查询 ding_user_id 与 部门id 关系
+        LambdaQueryWrapper<UserDepartmentMiddleEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserDepartmentMiddleEntity::getUserId, userId);
+        List<UserDepartmentMiddleEntity> sqlDingUserIds = userDepartmentMiddleMapper.selectList(queryWrapper);
+        if (CollectionUtil.isNotEmpty(sqlDingUserIds)) {
+            // 把userId更新为空
+            userDepartmentMiddleMapper.updateUserIsNull(sqlDingUserIds.get(0).getDingUserId());
+        }
+        return true;
     }
 }

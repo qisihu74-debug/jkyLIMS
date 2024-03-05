@@ -68,4 +68,9 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleDao, SysRoleEntity> i
         sysRoleFuncMenuDao.delFuncByRoleId(roleId);
         return baseMapper.deleteById(roleId);
     }
+
+    @Override
+    public SysRoleEntity checkRole(Long userId) {
+        return baseMapper.checkRole(userId);
+    }
 }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.UserDepartmentMiddleMapper">
+    <resultMap id="BaseResultMap" type="com.lims.manage.erp.entity.UserDepartmentMiddleEntity">
+        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="ding_user_id" jdbcType="VARCHAR" property="dingUserId"/>
+        <result column="dept_id" jdbcType="BIGINT" property="deptId"/>
+    </resultMap>
+    <insert id="insert" parameterType="com.lims.manage.erp.entity.UserDepartmentMiddleEntity">
+    insert into sys_user_department_middle (user_id, ding_user_id, dept_id
+      )
+    values (#{userId,jdbcType=BIGINT}, #{dingUserId,jdbcType=VARCHAR}, #{deptId,jdbcType=BIGINT}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.UserDepartmentMiddleEntity">
+        insert into sys_user_department_middle
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="dingUserId != null">
+                ding_user_id,
+            </if>
+            <if test="deptId != null">
+                dept_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                #{userId,jdbcType=BIGINT},
+            </if>
+            <if test="dingUserId != null">
+                #{dingUserId,jdbcType=VARCHAR},
+            </if>
+            <if test="deptId != null">
+                #{deptId,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+</mapper>

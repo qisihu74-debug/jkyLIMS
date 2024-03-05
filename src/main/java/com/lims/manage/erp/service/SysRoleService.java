@@ -47,5 +47,6 @@ public interface SysRoleService extends IService<SysRoleEntity> {
      */
     int deleteSysRoleByUserId(Long roleId);
 
+    SysRoleEntity checkRole(Long userId);
 }
 

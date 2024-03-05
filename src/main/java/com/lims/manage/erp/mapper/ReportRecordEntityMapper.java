@@ -8,6 +8,7 @@ import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
 import com.lims.manage.erp.vo.ReportDetailListVo;
 import com.lims.manage.erp.vo.ReportNodeVo;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -585,4 +586,11 @@ public interface ReportRecordEntityMapper {
     String getReserveCodeStr(Long entrustmentId);
 
     void updateReserveCode(String reportCode);
+
+    ReportRecordEntity getInfo(Long id);
+
+    @Delete("delete from test_report_record_mid where id=#{id}")
+    void delMidReportById(@Param("id") Long id);
+
+    ReportRecordEntity getMidInfo(Long id);
 }

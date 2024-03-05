@@ -3,20 +3,82 @@ package com.lims.manage.erp.util;
 import cn.hutool.core.collection.CollectionUtil;
 import com.lims.manage.erp.entity.TestCheckItemsTaskRel;
 import com.lims.manage.erp.entity.TestInitDataEntity;
+import com.lims.manage.erp.entity.TestItemOrderWorkingHours;
 import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
 import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author: DLC
  * @Date: 2024/1/11 15:25
  */
 public class WorkHourRatioMethodUtils {
+    /**
+     * 动态计算 工时信息
+     *
+     * @param sqlBasisList              检测类型比例信息
+     * @param itemList                  集合工时人员信息
+     * @param itemOrderWorkingHoursList 通过任务单获取检测项工时信息
+     * @return
+     */
+    public List<TestTaskOrderWorkingHours> searchingLoop(List<TestInitDataEntity> sqlBasisList, List<TestCheckItemsTaskRel> itemList, List<TestItemOrderWorkingHours> itemOrderWorkingHoursList) {
+//        List<TestInitDataEntity> updateSqlBasisList = sqlBasisList.stream().collect(Collectors.toList());
+//        // 初始化默认人员比例。
+//        for (int i = 0; i < strings.length; i++) {
+//            TestInitDataEntity dataEntity = updateSqlBasisList.get(i);
+//            dataEntity.setRemark(strings[i]);
+//            updateSqlBasisList.set(i, dataEntity);
+//        }
+        // 分组中比例信息: key =序号，value = 值
+        HashMap<Integer, TestInitDataEntity> map = new HashMap<>();
+        for (int i = 0; i < sqlBasisList.size(); i++) {
+            map.put(i, sqlBasisList.get(i));
+        }
+//        List<TestCheckItemsTaskRel> itemList = bitValueMap.get(key);
+        // 检测项去重
+        Set<Integer> itemSet = new HashSet<>();
+        for (TestCheckItemsTaskRel taskRel : itemList) {
+            itemSet.add(taskRel.getItemId());
+        }
+        // 根据检测项信息 生成 对应的工时、获取实际委托中组数。
+        List<TestItemOrderWorkingHours> itemWorkingHoursList = new ArrayList<>();
+        for (Integer itemId : itemSet) {
+            for (TestItemOrderWorkingHours itemOrderWorkingHours : itemOrderWorkingHoursList) {
+                if (itemOrderWorkingHours.getItemId().equals(itemId)) {
+                    itemWorkingHoursList.add(itemOrderWorkingHours);
+                }
+            }
+        }
+        // 工时总信息
+        String sum = "";
+        for (TestItemOrderWorkingHours itemOrderWorkingHours : itemWorkingHoursList) {
+            Integer times = itemOrderWorkingHours.getTimes();
+            Double workingHours = 0.0;
+            if (StringUtils.isNotEmpty(itemOrderWorkingHours.getWorkingHours())) {
+                workingHours = Double.valueOf(itemOrderWorkingHours.getWorkingHours());
+            }
+            BigDecimal he = BigDecimal.valueOf(times * workingHours).setScale(4, BigDecimal.ROUND_HALF_UP);
+            if (StringUtils.isEmpty(sum)) {
+                sum = String.valueOf(he);
+            } else {
+                // sum 不为空
+                BigDecimal sumbig = new BigDecimal(sum);
+                sum = String.valueOf(sumbig.add(he).setScale(4, BigDecimal.ROUND_HALF_UP));
+            }
+        }
+        // 每个人的所属比例及工时信息。
+        // 工具类：工时业务处理
+        List<TestTaskOrderWorkingHours> list = new ArrayList<>();
+        list = workHourRatioMethod(itemList, map, sum);
+//        if (CollectionUtil.isNotEmpty(list)) {
+//            bitTaskRelList.put(key, list);
+//        }
+        return list;
+    }
+
 
     /**
      * 返回 求每个人的所占比例及获取工时信息
