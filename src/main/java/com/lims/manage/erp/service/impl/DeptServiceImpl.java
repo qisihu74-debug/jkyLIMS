@@ -430,15 +430,13 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
         Long userId = ShiroUtils.getUserInfo().getUserId();
         Long id = deptDao.checkUserId(userId);
         if (id != null) {
-//            SysRoleEntity sysRoleEntity = sysRoleService.checkRole(userId);
-//            if (sysRoleEntity != null) {
-            return true;
-//            } else {
-//                return false;
-//            }
+            SysRoleEntity sysRoleEntity = sysRoleService.checkRole(userId);
+            if (sysRoleEntity != null) {
+                return true;
+            } else {
+                return false;
+            }
         }
-        return false;
-    }
 
     /**
      * 通过账号id 和 钉钉用户id 返回部门信息
