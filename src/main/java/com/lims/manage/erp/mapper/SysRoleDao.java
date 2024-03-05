@@ -5,6 +5,8 @@ import com.lims.manage.erp.entity.SysRoleEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -32,6 +34,8 @@ public interface SysRoleDao extends BaseMapper<SysRoleEntity> {
      */
     List<LabelValueVo> selectSysyRoleName(Long roleId);
 
-
-
+    @Select("SELECT sr.* FROM sys_role sr\n" +
+            "        LEFT JOIN sys_user_role se ON sr.role_id=se.role_id\n" +
+            "        WHERE se.user_id = #{userId} AND se.role_id=100")
+    SysRoleEntity checkRole(@Param("userId") Long userId);
 }

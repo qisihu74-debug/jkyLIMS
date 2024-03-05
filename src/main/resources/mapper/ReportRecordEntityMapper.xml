@@ -422,6 +422,24 @@
         id = #{id}
     </select>
 
+    <select id="getInfo" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+         *
+        FROM
+        test_report_record
+        WHERE
+        id = #{id}
+    </select>
+
+    <select id="getMidInfo" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+         *
+        FROM
+        test_report_record_mid
+        WHERE
+        id = #{id}
+    </select>
+
     <update id="updateImgByid">
         update test_report_record
         set seal_url=#{url},state = '7'
