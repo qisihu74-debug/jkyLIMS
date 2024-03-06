@@ -430,14 +430,15 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
         Long userId = ShiroUtils.getUserInfo().getUserId();
         Long id = deptDao.checkUserId(userId);
         if (id != null) {
-//            SysRoleEntity sysRoleEntity = sysRoleService.checkRole(userId);
-//            if (sysRoleEntity != null) {
             return true;
-//            } else {
-//                return false;
-//            }
+        } else {
+            SysRoleEntity sysRoleEntity = sysRoleService.checkRole(userId);
+            if (sysRoleEntity != null) {
+                return true;
+            } else {
+                return false;
+            }
         }
-        return false;
     }
 
     /**
