@@ -1611,6 +1611,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskTestEntity.setProbationer(methodRetrunStrSplit(addSampleItemEntity.getProbationer(), ","));
         // 实习生
         taskTestEntity.setInterns(methodRetrunStrSplit(addSampleItemEntity.getInterns(), ","));
+        // 样品描述信息
+        taskTestEntity.setSampleStateDescription(list.get(0).getSampleStateDescription());
         taskMapper.updateTestTask(taskTestEntity);
         // 更新检测项及样品流转状态
         updateItemStatus(addSampleItemEntity, list);
