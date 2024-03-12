@@ -59,6 +59,40 @@
         LIMIT 1
     </select>
 
+    <select id="selectCompanyList" resultType="com.lims.manage.erp.entity.TestCompanyEntity">
+        SELECT
+        company_id AS companyId,
+        company_name AS companyName,
+        type,
+        address,
+        add_time AS addTime,
+        update_time AS updateTime
+        FROM
+        test_company
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="companyName!=null and companyName!=''">
+                AND company_name like CONCAT('%',#{companyName},'%')
+            </if>
+            <if test="type!=null and type!=''">
+                AND type = #{type}
+            </if>
+            <if test="contacts!=null and contacts!=''">
+                AND company_id in(
+                SELECT company_id FROM test_customer WHERE contacts like CONCAT('%',#{contacts},'%')
+                )
+            </if>
+            <if test="phone!=null and phone!=''">
+                AND company_id in(
+                SELECT company_id FROM test_customer WHERE phone like CONCAT('%',#{phone},'%')
+                )
+            </if>
+        </trim>
+        ORDER BY
+        company_id
+        <if test="order!=null and order!=''">
+            ${order}
+        </if>
+    </select>
 
 
 </mapper>

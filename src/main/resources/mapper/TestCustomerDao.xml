@@ -45,4 +45,41 @@
         </if>
     </select>
 
+    <select id="selectCustomerList" resultType="com.lims.manage.erp.entity.TestCustomerEntity">
+        SELECT
+        customer_id,
+        contacts,
+        phone,
+        company_id
+        FROM
+        `test_customer`
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            and company_id in
+            <foreach item="item" index="index" collection="companyIds"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </trim>
+    </select>
+
+    <select id="selectEntrustList" resultType="com.lims.manage.erp.vo.EntrustAddVo">
+        SELECT
+        id,
+        IFNULL(CONCAT(entrust_category_type,entrustment_no),entrustment_no) as entrustment_no,
+        entrust_company,
+        entrust_people,
+        entrust_phone,
+        discount,
+        actual_price,
+        system_price
+        FROM
+        test_entrusted_info
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="companyId!=null and companyId!=''">
+                and entrust_company_id =#{companyId}
+            </if>
+        </trim>
+    </select>
+
+
 </mapper>
