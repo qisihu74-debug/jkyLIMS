@@ -29,7 +29,6 @@ public class ReportRecordEntity {
     /**
      * 检测人
      */
-    @TableField(exist = false)
     private String inspector;
     /**
      * 记录人
