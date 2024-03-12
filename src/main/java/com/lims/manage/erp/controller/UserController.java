@@ -9,10 +9,7 @@ import com.lims.manage.erp.mapper.SysUserRoleDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.DingUserService;
-import com.lims.manage.erp.service.LogManagerService;
-import com.lims.manage.erp.service.SysUserRoleService;
-import com.lims.manage.erp.service.SysUserService;
+import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.AccountValidatorUtil;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.GenID;
@@ -69,6 +66,8 @@ public class UserController {
     private SysUserDao sysUserDao;
     @Autowired
     private SysUserRoleDao sysUserRoleDao;
+    @Autowired
+    private DeptService deptService;
 
 //    /**
 //     * 获取用户列表废弃
@@ -166,7 +165,17 @@ public class UserController {
                 return ResultUtil.error("使用人 已拥有账号");
             }
         }
+
+        // 查询此账号是否存在
+        DingUserEntity sysDingUserData = dingUserService.getById(vo.getDingUserId());
+        if (sysDingUserData == null) {
+            return ResultUtil.error("使用人不存在！，请重新选择使用人");
+        }
+        vo.setUserId(GenID.getID());
         RegisterUserInfoVo userInfoVo = new RegisterUserInfoVo();
+        // 更改用户时： 通过userId 和 员工使用人 查询绑定问题 并返回 部门集合 List<Long>
+        List<Long> deptList = deptService.getDepartmentIdLong(vo.getUserId(), vo.getDingUserId());
+        vo.setDepartmentIdLong(deptList);
         // 处理部门信息
         if (vo.getDepartmentIdLong() != null && vo.getDepartmentIdLong().size() > 0) {
             StringBuilder stringBuilder = new StringBuilder();
@@ -174,7 +183,6 @@ public class UserController {
             for (Long deptId : vo.getDepartmentIdLong()) {
                 stringBuilder.append("" + deptId + ",");
             }
-            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
             stringBuilder.append("]");
             userInfoVo.setDeptId(stringBuilder.toString());
         }
@@ -193,13 +201,8 @@ public class UserController {
             entity.setDingUserId(vo.getDingUserId());
         }
         entity.setTime(new Timestamp(new Date(System.currentTimeMillis()).getTime()));
-        entity.setUserId(GenID.getID());
+        entity.setUserId(vo.getUserId());
 
-        // 查询此账号是否存在
-        DingUserEntity sysDingUserData = dingUserService.getById(vo.getDingUserId());
-        if (sysDingUserData == null) {
-            return ResultUtil.error("使用人不存在！，请重新选择使用人");
-        }
         if (sysDingUserData.getName() != null && !sysDingUserData.getName().isEmpty()) {
             entity.setName(sysDingUserData.getName());
         }
@@ -408,6 +411,9 @@ public class UserController {
             if (sysUserDao.getOne(vo.getUsername()) != null) {
                 return ResultUtil.error("当前账号已存在");
             }
+            // 更改用户时： 通过userId 和 员工使用人 查询绑定问题 并返回 部门集合 List<Long>
+            List<Long> deptList = deptService.getDepartmentIdLong(vo.getUserId(), vo.getDingUserId());
+            vo.setDepartmentIdLong(deptList);
             Boolean isSuccess = sysUserService.updateUserInfo(vo);
             if (isSuccess) {
                 logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改用户【" + vo.getUsername() + "】信息成功！", Const.UPDATE_USERINFO, true);
@@ -417,6 +423,9 @@ public class UserController {
                 return ResultUtil.error(ResultEnum.UPDATE_USERINFO.getCode(), ResultEnum.UPDATE_USERINFO.getMsg());
             }
         } else {
+            // 更改用户时： 通过userId 和 员工使用人 查询绑定问题 并返回 部门集合 List<Long>
+            List<Long> deptList = deptService.getDepartmentIdLong(vo.getUserId(), vo.getDingUserId());
+            vo.setDepartmentIdLong(deptList);
             Boolean isSuccess = sysUserService.updateUserInfo(vo);
             if (isSuccess) {
                 logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "修改用户【" + vo.getUsername() + "】信息成功！", Const.UPDATE_USERINFO, true);
@@ -434,12 +443,16 @@ public class UserController {
             return ResultUtil.error("未选中需要删除的人员id");
         }
         // 查询此账号是否存在
-        if (sysUserService.getById(sysUserEntity.getUserId()) == null) {
+        SysUserEntity userEntity = sysUserService.getById(sysUserEntity.getUserId());
+        if (userEntity == null) {
             return ResultUtil.error("账号为空");
         }
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
+        }
+        if (userEntity.getState().contains("NORMAL")) {
+            return ResultUtil.error("用户状态正常 不允许删除");
         }
         boolean statusflag = false;
         try {
@@ -449,6 +462,10 @@ public class UserController {
         }
         if (statusflag) {
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "删除系统用户ID【" + sysUserEntity.getUserId() + "】", Const.SYS_MANAGER_LOG, true);
+            // 删除角色与用户之间的关系
+            sysUserRoleDao.removeOldRole(sysUserEntity.getUserId());
+            // 更新 用户与使用人之间的部门关系
+            deptService.updateDepartmentId(sysUserEntity.getUserId());
             return ResultUtil.success("删除角色成功");
         }
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "删除系统用户ID【" + sysUserEntity.getUserId() + "】", Const.SYS_MANAGER_LOG, false);

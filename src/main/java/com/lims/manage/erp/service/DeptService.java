@@ -148,7 +148,25 @@ public interface DeptService extends IService<DingDeptEntity> {
 
     /**
      * 判断当前登录人是否为技术质量部成员
+     *
      * @return
      */
     Boolean checkUserId();
+
+    /**
+     * 通过账号id 和 钉钉用户id 返回部门信息
+     *
+     * @param userId
+     * @param dingUserId
+     * @return
+     */
+    List<Long> getDepartmentIdLong(Long userId, String dingUserId);
+
+    /**
+     * 通过 userId 查询钉钉用户id与部门信息 把userId更新为空。
+     *
+     * @param userId
+     * @return
+     */
+    Boolean updateDepartmentId(Long userId);
 }
