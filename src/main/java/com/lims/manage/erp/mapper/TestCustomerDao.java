@@ -47,4 +47,12 @@ public interface TestCustomerDao extends BaseMapper<TestCompanyEntity> {
      */
     List<EntrustAddVo> selectEntrustList(TestCustomerEntity entity);
 
+    /**
+     * 通过委托单及人员信息 总金额
+     *
+     * @param entity
+     * @return
+     */
+    String selectEntrusTotalMoney(TestCustomerEntity entity);
+
 }

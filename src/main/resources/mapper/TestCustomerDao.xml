@@ -65,7 +65,7 @@
     <select id="selectEntrustList" resultType="com.lims.manage.erp.vo.EntrustAddVo">
         SELECT
         id,
-        IFNULL(CONCAT(entrust_category_type,entrustment_no),entrustment_no) as entrustment_no,
+        IFNULL(CONCAT(entrust_category_type,entrustment_no),entrustment_no) as entrustmentNostr,
         entrust_company,
         entrust_people,
         entrust_phone,
@@ -77,6 +77,26 @@
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
             <if test="companyId!=null and companyId!=''">
                 and entrust_company_id =#{companyId}
+            </if>
+            <if test="entrustmentNo!=null and entrustmentNo!=''">
+                and IFNULL(CONCAT(entrust_category_type,entrustment_no),entrustment_no) like
+                concat('%',#{entrustmentNo},'%')
+            </if>
+        </trim>
+    </select>
+
+    <select id="selectEntrusTotalMoney" resultType="java.lang.String">
+        SELECT
+        ROUND(sum(system_price),2)
+        FROM
+        test_entrusted_info
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="companyId!=null and companyId!=''">
+                and entrust_company_id =#{companyId}
+            </if>
+            <if test="entrustmentNo!=null and entrustmentNo!=''">
+                and IFNULL(CONCAT(entrust_category_type,entrustment_no),entrustment_no) like
+                concat('%',#{entrustmentNo},'%')
             </if>
         </trim>
     </select>

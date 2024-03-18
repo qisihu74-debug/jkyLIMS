@@ -37,6 +37,8 @@ public class TestCustomerEntity implements Serializable {
     private Integer pageNum;
     @TableField(exist = false)
     private Integer pageSize;
+    @TableField(exist = false)
+    private String entrustmentNo;
 
     public TestCustomerEntity() {
     }

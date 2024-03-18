@@ -1,5 +1,6 @@
 package com.lims.manage.erp.vo;
 
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lims.manage.erp.entity.EntrustFileTableEntity;
 import com.lims.manage.erp.entity.SampleEntity;
@@ -314,5 +315,7 @@ public class EntrustAddVo {
      * 流转信息数据
      */
     private List<TestEntrustedTaskRelEntity> taskList;
+
+    private JSONObject jsonObject = new JSONObject();
 
 }

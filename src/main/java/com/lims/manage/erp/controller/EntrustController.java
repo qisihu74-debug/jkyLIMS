@@ -1379,6 +1379,18 @@ public class EntrustController {
     }
 
     /**
+     * 通过 companyId 获取委托单 实际应收总金额
+     *
+     * @param entity
+     * @return
+     */
+//    @Log(title = "审核并发布", businessType = BusinessType.OTHER)
+    @GetMapping("searchEntrusTotalMoney")
+    public Result searchEntrusTotalMoney(TestCustomerEntity entity) {
+        return testCompanyService.searchEntrusTotalMoney(entity);
+    }
+
+    /**
      * 委托单位新增
      *
      * @param entity
@@ -1388,6 +1400,30 @@ public class EntrustController {
     @PostMapping("addCompany")
     public Result addCompany(@RequestBody TestCompanyEntity entity) {
         return testCompanyService.addCompany(entity);
+    }
+
+    /**
+     * 添加联系人
+     *
+     * @param entity
+     * @return
+     */
+//    @Log(title = "审核并发布", businessType = BusinessType.OTHER)
+    @PostMapping("addContacts")
+    public Result addCompany(@RequestBody TestCustomerEntity entity) {
+        return testCompanyService.addContacts(entity);
+    }
+
+    /**
+     * 新增回款登记
+     *
+     * @param entity
+     * @return
+     */
+//    @Log(title = "审核并发布", businessType = BusinessType.OTHER)
+    @PostMapping("addRegistration")
+    public Result addRegistrationEntity(@RequestBody EntrustRemittanceRegistrationEntity entity) {
+        return testCompanyService.addRegistrationEntity(entity);
     }
 
 }
