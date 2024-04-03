@@ -1851,6 +1851,7 @@ public class ReportServiceImpl implements ReportService {
         String seals = recordEntityMapper.getsealsById(id)+","+"2937191218674492340";
         String replace = seals.replace("综合甲级", "2934033400316387595").
                 replace("CMA", "2937188764910183324").
+                replace("2024新CMA", "3212968793413837357").
                 replace("CNAS", "2937178885881422636");
         SealDefData sealDefData = new SealDefData();
         sealDefData.setType("印章");
@@ -2152,6 +2153,7 @@ public class ReportServiceImpl implements ReportService {
         for (QiYueSuoSealEntity qiYueSuoSealEntity : list) {
             if (qiYueSuoSealEntity.getName().contains("公路工程综合甲级专用章")
                     || qiYueSuoSealEntity.getName().contains("实验室认可（CNAS）专用章")
+                    || qiYueSuoSealEntity.getName().trim().contains("2024ma")
                     || qiYueSuoSealEntity.getName().contains("计量认证（CMA）专用章")) {
                 newList.add(qiYueSuoSealEntity);
             }
