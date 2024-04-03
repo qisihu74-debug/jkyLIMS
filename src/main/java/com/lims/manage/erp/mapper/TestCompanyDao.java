@@ -54,6 +54,7 @@ public interface TestCompanyDao extends BaseMapper<TestCompanyEntity> {
 
     /**
      * 查询委托单下 所有委托单位信息
+     *
      * @return
      */
     @Select("SELECT\n" +
@@ -62,4 +63,12 @@ public interface TestCompanyDao extends BaseMapper<TestCompanyEntity> {
             "test_entrusted_info\n" +
             "WHERE entrust_company is not null and entrust_company !=''")
     List<String> selectEntrustCompanys();
+
+    /**
+     * 查询单位信息列表
+     *
+     * @param entity
+     * @return
+     */
+    List<TestCompanyEntity> selectCompanyList(TestCompanyEntity entity);
 }

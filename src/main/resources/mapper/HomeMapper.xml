@@ -100,6 +100,13 @@
             entrust_id,
             report_code
         FROM
+            test_report_record
+        WHERE
+            report_code LIKE CONCAT('%',#{search},'%') UNION ALL
+        SELECT
+            entrust_id,
+            report_code
+        FROM
             test_report_record_mid
         WHERE
             report_code LIKE CONCAT('%',#{search},'%')

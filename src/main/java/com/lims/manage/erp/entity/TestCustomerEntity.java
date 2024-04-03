@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -32,6 +33,12 @@ public class TestCustomerEntity implements Serializable {
      * 联系方式
      */
     private String phone;
+    @TableField(exist = false)
+    private Integer pageNum;
+    @TableField(exist = false)
+    private Integer pageSize;
+    @TableField(exist = false)
+    private String entrustmentNo;
 
     public TestCustomerEntity() {
     }

@@ -1,12 +1,14 @@
 package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Author: DLC
@@ -44,6 +46,27 @@ public class TestCompanyEntity implements Serializable {
      * 更新时间
      */
     private Date updateTime;
+    /**
+     * 联系人信息
+     */
+    @TableField(exist = false)
+    List<TestCustomerEntity> testCustomerEntityList;
+    @TableField(exist = false)
+    private Integer pageNum;
+    @TableField(exist = false)
+    private Integer pageSize;
+    @TableField(exist = false)
+    private String order;
+    /**
+     * 联系人
+     */
+    @TableField(exist = false)
+    private String contacts;
+    /**
+     * 联系方式
+     */
+    @TableField(exist = false)
+    private String phone;
 
     public TestCompanyEntity() {
     }

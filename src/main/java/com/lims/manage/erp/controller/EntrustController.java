@@ -10,24 +10,13 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.annotation.Log;
-import com.lims.manage.erp.entity.EntrustEntity;
-import com.lims.manage.erp.entity.EntrustHistoryEntity;
-import com.lims.manage.erp.entity.EntrustHistoryTaskEntity;
-import com.lims.manage.erp.entity.QiYueSuoEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TestCompanyJsonEntity;
-import com.lims.manage.erp.entity.TestCustomerJsonEntity;
-import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.EntrustService;
-import com.lims.manage.erp.service.LogManagerService;
-import com.lims.manage.erp.service.ReportService;
-import com.lims.manage.erp.service.TestControlledDocumentsService;
+import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.DingNotifyUtils;
@@ -103,6 +92,8 @@ public class EntrustController {
      */
     @Resource
     private TestControlledDocumentsService testControlledDocumentsService;
+    @Autowired
+    private TestCompanyService testCompanyService;
 
     /**
      * 新增委托 使用中丁
@@ -1355,12 +1346,84 @@ public class EntrustController {
      * @return
      */
     @GetMapping("previewMaterial")
-    public Result previewMaterial(Long entrustmentId){
-        if (entrustmentId == null){
+    public Result previewMaterial(Long entrustmentId) {
+        if (entrustmentId == null) {
             return ResultUtil.error("缺少参数");
         }
         List<String> list = entrustService.getUrlListById(entrustmentId);
         return ResultUtil.success(list);
+    }
+
+    /**
+     * 委托单位搜索查询
+     *
+     * @param entity
+     * @return
+     */
+//    @Log(title = "审核并发布", businessType = BusinessType.OTHER)
+    @GetMapping("searchCompanyInformation")
+    public Result searchCompanyInformation(TestCompanyEntity entity) {
+        return testCompanyService.searchCompanyInformation(entity);
+    }
+
+    /**
+     * 通过 companyId 获取委托单的信息。
+     *
+     * @param entity
+     * @return
+     */
+//    @Log(title = "审核并发布", businessType = BusinessType.OTHER)
+    @GetMapping("searchEntrustList")
+    public Result searchEntrustList(TestCustomerEntity entity) {
+        return testCompanyService.searchEntrustList(entity);
+    }
+
+    /**
+     * 通过 companyId 获取委托单 实际应收总金额
+     *
+     * @param entity
+     * @return
+     */
+//    @Log(title = "审核并发布", businessType = BusinessType.OTHER)
+    @GetMapping("searchEntrusTotalMoney")
+    public Result searchEntrusTotalMoney(TestCustomerEntity entity) {
+        return testCompanyService.searchEntrusTotalMoney(entity);
+    }
+
+    /**
+     * 委托单位新增
+     *
+     * @param entity
+     * @return
+     */
+//    @Log(title = "审核并发布", businessType = BusinessType.OTHER)
+    @PostMapping("addCompany")
+    public Result addCompany(@RequestBody TestCompanyEntity entity) {
+        return testCompanyService.addCompany(entity);
+    }
+
+    /**
+     * 添加联系人
+     *
+     * @param entity
+     * @return
+     */
+//    @Log(title = "审核并发布", businessType = BusinessType.OTHER)
+    @PostMapping("addContacts")
+    public Result addCompany(@RequestBody TestCustomerEntity entity) {
+        return testCompanyService.addContacts(entity);
+    }
+
+    /**
+     * 新增回款登记
+     *
+     * @param entity
+     * @return
+     */
+//    @Log(title = "审核并发布", businessType = BusinessType.OTHER)
+    @PostMapping("addRegistration")
+    public Result addRegistrationEntity(@RequestBody EntrustRemittanceRegistrationEntity entity) {
+        return testCompanyService.addRegistrationEntity(entity);
     }
 
 }
