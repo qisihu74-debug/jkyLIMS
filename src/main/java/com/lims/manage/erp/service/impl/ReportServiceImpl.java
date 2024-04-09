@@ -813,24 +813,42 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
         } else {
-            Integer maxCode = recordEntityMapper.getMaxCode(year, topDepartmentCode);
-            if (maxCode != null) {
-                Integer maxCodeMid = recordEntityMapper.getMaxCodeMid(year, topDepartmentCode);
-                if (maxCodeMid != null && maxCode < maxCodeMid) {
-                    maxCode = maxCodeMid;
-                }
+//            Integer maxCode = recordEntityMapper.getMaxCode(year, topDepartmentCode);
+//            if (maxCode != null) {
+//                Integer maxCodeMid = recordEntityMapper.getMaxCodeMid(year, topDepartmentCode);
+//                if (maxCodeMid != null && maxCode < maxCodeMid) {
+//                    maxCode = maxCodeMid;
+//                }
+//            }
+//            //新增查询预留编号
+//            if (maxCode != null) {
+//                Integer maxReserveCode = recordEntityMapper.getReserveCode(year, topDepartmentCode);
+//                if (maxReserveCode != null && maxCode < maxReserveCode) {
+//                    maxCode = maxReserveCode;
+//                }
+//            }
+            Integer max;
+            Integer maxCode = recordEntityMapper.getMaxCodeZX(year);
+            Integer maxReserveCode = recordEntityMapper.getReserveCodeZX(year);
+            Integer maxCodeMid = recordEntityMapper.getMaxCodeMidZX(year);
+            if (maxCode == null && maxReserveCode == null && maxCodeMid == null) {
+                max = null; // All numbers are null
+            }else{
+                max = Integer.MIN_VALUE;
             }
-            //新增查询预留编号
-            if (maxCode != null) {
-                Integer maxReserveCode = recordEntityMapper.getReserveCode(year, topDepartmentCode);
-                if (maxReserveCode != null && maxCode < maxReserveCode) {
-                    maxCode = maxReserveCode;
-                }
+            if (maxCode != null && maxCode > max) {
+                max = maxCode;
             }
-            if (maxCode == null) {
+            if (maxReserveCode != null && maxReserveCode > max) {
+                max = maxReserveCode;
+            }
+            if (maxCodeMid != null && maxCodeMid > max) {
+                max = maxCodeMid;
+            }
+            if (max == null) {
                 return topDepartmentCode + "-" + year + "-YC-0001";
             } else {
-                int newCode = maxCode + 1;
+                int newCode = max + 1;
                 if(newCode >= 10000){
                     return topDepartmentCode + "-" + year + "-YC-" + new DecimalFormat("00000").format(newCode);
                 }else{
@@ -869,24 +887,42 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
         } else {//常规原材检测
+            Integer max;
             Integer maxCode = recordEntityMapper.getMaxCodeZX(year);
-            if (maxCode != null) {
-                Integer maxCodeMid = recordEntityMapper.getMaxCodeMidZX(year);
-                if (maxCodeMid != null && maxCode < maxCodeMid) {
-                    maxCode = maxCodeMid;
-                }
+            Integer maxReserveCode = recordEntityMapper.getReserveCodeZX(year);
+            Integer maxCodeMid = recordEntityMapper.getMaxCodeMidZX(year);
+            if (maxCode == null && maxReserveCode == null && maxCodeMid == null) {
+                max = null; // All numbers are null
+            }else{
+                max = Integer.MIN_VALUE;
             }
-            //新增查询预留编号
-            if (maxCode != null) {
-                Integer maxReserveCode = recordEntityMapper.getReserveCodeZX(year);
-                if (maxReserveCode != null && maxCode < maxReserveCode) {
-                    maxCode = maxReserveCode;
-                }
+//            Integer max = Integer.MIN_VALUE;
+            if (maxCode != null && maxCode > max) {
+                max = maxCode;
             }
-            if (maxCode == null) {
+            if (maxReserveCode != null && maxReserveCode > max) {
+                max = maxReserveCode;
+            }
+            if (maxCodeMid != null && maxCodeMid > max) {
+                max = maxCodeMid;
+            }
+//            if (maxCode != null) {
+//                Integer maxCodeMid = recordEntityMapper.getMaxCodeMidZX(year);
+//                if (maxCodeMid != null && maxCode < maxCodeMid) {
+//                    maxCode = maxCodeMid;
+//                }
+//            }
+//            //新增查询预留编号
+//            if (maxCode != null) {
+//                Integer maxReserveCode = recordEntityMapper.getReserveCodeZX(year);
+//                if (maxReserveCode != null && maxCode < maxReserveCode) {
+//                    maxCode = maxReserveCode;
+//                }
+//            }
+            if (max == null) {
                 return "ZX-" + year + "-YC-0001";
             } else {
-                int newCode = maxCode + 1;
+                int newCode = max + 1;
                 if(newCode >= 10000){
                     return "ZX-" + year + "-YC-" + new DecimalFormat("00000").format(newCode);
                 }else{
