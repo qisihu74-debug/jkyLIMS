@@ -23,6 +23,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestInstrumentService;
 import com.lims.manage.erp.util.Const;
+import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.SnowflakeIdGenerator;
@@ -632,7 +633,7 @@ public class TestInstrumentController extends ApiController {
             deviceEntity.setCalibrationParam(cells1.get(calibration_param).getValue()!=null?cells1.get(calibration_param).getValue().toString():"");
             String v3= cells1.get(place).getValue()!=null?cells1.get(place).getValue().toString():"";
             String v4= cells1.get(store_place).getValue()!=null?cells1.get(store_place).getValue().toString():"";
-            deviceEntity.setCalibrationParam(v3+v4);
+            deviceEntity.setStorePlace(v3+v4);
             deviceEntity.setCalibrationParam(cells1.get(device_admin).getValue()!=null?cells1.get(device_admin).getValue().toString():"");
 
             deviceEntity.setStatus("0");
@@ -666,6 +667,82 @@ public class TestInstrumentController extends ApiController {
             deviceEntityMapper.updateByIf(deviceEntity);
         }
         System.out.println("仪器设备插入更新成功");
+    }
+
+    /**
+     * 导出仪器设备
+     * @throws Exception
+     */
+    @GetMapping("exportDevice")
+    @Transactional(rollbackFor = Exception.class)
+    public void exportDevice(HttpServletResponse response) throws Exception{
+        List<DeviceEntity> allDevice = deviceEntityMapper.getAllDevice(null);
+        //读取excel
+        com.aspose.cells.Workbook workbook1 = new com.aspose.cells.Workbook();
+        Worksheet worksheet1 = workbook1.getWorksheets().get(0);
+        Cells cells1 = worksheet1.getCells();
+        //遍历excel，根据编号查询
+        int num1 = 2;
+        for (DeviceEntity deviceEntity :allDevice){
+            String idIndex = "A"+num1;
+            String codeIndex = "B"+num1;
+            String fileState = "C" +num1;
+            String nameIndex = "D"+num1;
+            String modeIndex = "E"+num1;
+            String manufacturerIndex = "F"+num1;
+            String serial_numberIndex = "G"+num1;
+            String price = "H"+num1;
+            String purchase_dateIndex = "I"+num1;
+            String isIndex = "J"+num1;//是否检定校准
+            String affirm_wayIndex = "K"+num1;//确认方式
+            String calibration_corporation = "L"+num1;//鉴定校准单位
+            String appraisal_date = "M"+num1;//检定校准日期
+            String calibration_period = "N"+num1;//检定周期
+            String expire_date = "O"+num1;//鉴定校准失效日期
+            //合并
+            String use_dept = "P"+num1;//设备使用维护部门
+            String team = "V"+num1; //使用科室
+
+            String calibration_number = "Q"+num1;//鉴定校准证书编号
+            String range = "R"+num1;//里程
+            String level = "S"+num1;//精度
+            String calibration_param = "T"+num1;
+            //合并
+            String store_place = "U"+num1;
+
+            String device_admin = "W"+num1;
+            cells1.get(idIndex).setValue(deviceEntity.getId());
+            cells1.get(codeIndex).setValue(deviceEntity.getCode());
+            cells1.get(fileState).setValue(deviceEntity.getFilesState());
+            cells1.get(nameIndex).setValue(deviceEntity.getName());
+            cells1.get(modeIndex).setValue(deviceEntity.getModel());
+            cells1.get(manufacturerIndex).setValue(deviceEntity.getManufacturer());
+            cells1.get(serial_numberIndex).setValue(deviceEntity.getSerialNumber());
+            cells1.get(price).setValue(deviceEntity.getPrice());
+            if (deviceEntity.getPurchaseDate() != null){
+                cells1.get(purchase_dateIndex).setValue(DateUtil.formatDate(deviceEntity.getPurchaseDate()));
+            }
+            cells1.get(isIndex).setValue(deviceEntity.getIsCalibration());
+            cells1.get(affirm_wayIndex).setValue(deviceEntity.getAffirmWay());
+            cells1.get(calibration_corporation).setValue(deviceEntity.getCalibrationCorporation());
+            if (deviceEntity.getAppraisalDate() != null){
+                cells1.get(appraisal_date).setValue(DateUtil.formatDate(deviceEntity.getAppraisalDate()));
+            }
+            cells1.get(calibration_period).setValue(deviceEntity.getCalibrationPeriod());
+            if (deviceEntity.getExpireDate() != null){
+                cells1.get(expire_date).setValue(DateUtil.formatDate(deviceEntity.getExpireDate()));
+            }
+            cells1.get(use_dept).setValue(deviceEntity.getUseDept());
+            cells1.get(team).setValue("");
+            cells1.get(calibration_number).setValue(deviceEntity.getCalibrationNumber());
+            cells1.get(range).setValue(deviceEntity.getRange());
+            cells1.get(level).setValue(deviceEntity.getLevel());
+            cells1.get(calibration_param).setValue(deviceEntity.getCalibrationParam());
+            cells1.get(store_place).setValue(deviceEntity.getStorePlace());
+            cells1.get(device_admin).setValue(deviceEntity.getDeviceAdmin());
+            num1++;
+        }
+        workbook1.save("D:\\Users\\Administrator\\Desktop\\人员档案\\lims仪器.xlsx");
     }
 }
 

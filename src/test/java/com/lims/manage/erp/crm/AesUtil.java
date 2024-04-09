@@ -17,21 +17,13 @@ import java.util.Base64;
  */
 public class AesUtil {
     public static void main(String[] args) throws Exception {
-        int index =1;
-        while (true){
-            if (index<10){
-                index ++;
-            }else {
-                break;
-            }
-        }
         //秘钥key 加解密使用
         String key = "KnxXcadsri6l1Q490SVnQA==";
         byte[] decodedKey = Base64.getDecoder().decode(key);
         // 生成密钥
         SecretKey secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
         // 加密
-        String plainText = "https://hntri.lims.design?cardNum=123456789&deviceId=2001";
+        String plainText = "https://hntri.lims.design?cardNum=123456789&deviceId=2001&taskCode=N1001";
         String encryptedText = encrypt(plainText, secretKey);
         System.out.println("加密后的文本：" + encryptedText);
         // 解密
