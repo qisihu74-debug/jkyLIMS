@@ -703,15 +703,16 @@ public class ReportServiceImpl implements ReportService {
                     reportRecordEntity1.setState(1 + "");
                     reportRecordEntity1.setReportCompleteTime(new Date(System.currentTimeMillis()));
                     if (reportRecordEntity1.getReportCode() == null) {//当前任务单号为空时才会设置新的报告编号
-                        Long entrustmentId = vo.getEntrustmentId();
-                        String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
-                        if(reserveCodeStr == null){
-                            reserveCodeStr = getMaxCode(entrustmentId);
-                        }else{
-                            //更新预留编号的状态和使用时间
-                            recordEntityMapper.updateReserveCode(reserveCodeStr);
-                        }
-                        reportRecordEntity1.setReportCode(reserveCodeStr);
+//                        Long entrustmentId = vo.getEntrustmentId();
+//                        String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
+//                        if(reserveCodeStr == null){
+//                            reserveCodeStr = getMaxCode(entrustmentId);
+//                        }else{
+//                            //更新预留编号的状态和使用时间
+//                            recordEntityMapper.updateReserveCode(reserveCodeStr);
+//                        }
+                        //设置临时报告编号
+                        reportRecordEntity1.setReportCode(GenID.getUUID());
                     }
                 }
             }
@@ -744,15 +745,16 @@ public class ReportServiceImpl implements ReportService {
                 } else {
                     reportRecordEntity.setState(1 + "");
                     reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
-                    Long entrustmentId = vo.getEntrustmentId();
-                    String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
-                    if(reserveCodeStr == null){
-                        reserveCodeStr = getMaxCode(entrustmentId);
-                    }else{
-                        //更新预留编号的状态和使用时间
-                        recordEntityMapper.updateReserveCode(reserveCodeStr);
-                    }
-                    reportRecordEntity.setReportCode(reserveCodeStr);
+//                    Long entrustmentId = vo.getEntrustmentId();
+//                    String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
+//                    if(reserveCodeStr == null){
+//                        reserveCodeStr = getMaxCode(entrustmentId);
+//                    }else{
+//                        //更新预留编号的状态和使用时间
+//                        recordEntityMapper.updateReserveCode(reserveCodeStr);
+//                    }
+                    //设置临时报告编号
+                    reportRecordEntity.setReportCode(GenID.getUUID());
                 }
             }
             reportRecordEntity.setId(recordId);
@@ -779,6 +781,11 @@ public class ReportServiceImpl implements ReportService {
         return getMaxCodeByUser();
     }
 
+    /**
+     * 2024年4月10日前执行的报告编号规则 JC7-2023-YC-0001
+     * @param entrustId
+     * @return
+     */
     private String getMaxCode(Long entrustId){
         //获取父级code
         Long deptId = taskMapper.getDeptByEntrustId(entrustId);
@@ -828,6 +835,62 @@ public class ReportServiceImpl implements ReportService {
                     return topDepartmentCode + "-" + year + "-YC-" + new DecimalFormat("00000").format(newCode);
                 }else{
                     return topDepartmentCode + "-" + year + "-YC-" + new DecimalFormat("0000").format(newCode);
+                }
+            }
+        }
+    }
+
+    /**
+     * 2024年4月10日后执行的报告编号规则 ZX-2024-YC-0001
+     * @param entrustId
+     * @return
+     */
+    private String getMaxCodeZX(Long entrustId){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+        String year = sdf.format(new Date());
+        //判断委托编号类型
+        String entrustCategoryType = recordEntityMapper.getEntrustCategoryType(entrustId);
+        if (entrustCategoryType != null) {//MN或BD
+            Integer maxCode = recordEntityMapper.getOtherMaxCodeZX(year, entrustCategoryType);//先查最终报告
+            if (maxCode != null) {//再查中间报告
+                Integer maxCodeMid = recordEntityMapper.getOtherMaxCodeMidZX(year, entrustCategoryType);
+                if (maxCodeMid != null && maxCode < maxCodeMid) {//小于中间报告的报告号
+                    maxCode = maxCodeMid;//用中间报告里面的最大号
+                }
+            }
+            if (maxCode == null) {//为空时，从1开始
+                return "ZX-" + year + "-" + entrustCategoryType + "-0001";
+            } else {//不为空+1
+                int newCode = maxCode + 1;
+                if(newCode >= 10000){
+                    return "ZX-" + year + "-" + entrustCategoryType + "-" + new DecimalFormat("00000").format(newCode);
+                }else{
+                    return "ZX-" + year + "-" + entrustCategoryType + "-" + new DecimalFormat("0000").format(newCode);
+                }
+            }
+        } else {//常规原材检测
+            Integer maxCode = recordEntityMapper.getMaxCodeZX(year);
+            if (maxCode != null) {
+                Integer maxCodeMid = recordEntityMapper.getMaxCodeMidZX(year);
+                if (maxCodeMid != null && maxCode < maxCodeMid) {
+                    maxCode = maxCodeMid;
+                }
+            }
+            //新增查询预留编号
+            if (maxCode != null) {
+                Integer maxReserveCode = recordEntityMapper.getReserveCodeZX(year);
+                if (maxReserveCode != null && maxCode < maxReserveCode) {
+                    maxCode = maxReserveCode;
+                }
+            }
+            if (maxCode == null) {
+                return "ZX-" + year + "-YC-0001";
+            } else {
+                int newCode = maxCode + 1;
+                if(newCode >= 10000){
+                    return "ZX-" + year + "-YC-" + new DecimalFormat("00000").format(newCode);
+                }else{
+                    return "ZX-" + year + "-YC-" + new DecimalFormat("0000").format(newCode);
                 }
             }
         }
@@ -919,16 +982,17 @@ public class ReportServiceImpl implements ReportService {
 //            int newCode = maxCode + 1;
 //            reportRecordEntity.setReportCode(topDepartmentCode+"-" + year + "-YC-" + new DecimalFormat("0000").format(newCode));
 //        }
-        Long entrustmentId = vo.getEntrustmentId();
-        String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
-//        String reserveCodeStr = getMaxCode(entrustmentId);
-        if(reserveCodeStr == null){
-            reserveCodeStr = getMaxCode(entrustmentId);
-        }else{
-            //更新预留编号的状态和使用时间
-            recordEntityMapper.updateReserveCode(reserveCodeStr);
-        }
-        reportRecordEntity.setReportCode(reserveCodeStr);
+//        Long entrustmentId = vo.getEntrustmentId();
+//        String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
+////        String reserveCodeStr = getMaxCode(entrustmentId);
+//        if(reserveCodeStr == null){
+//            reserveCodeStr = getMaxCode(entrustmentId);
+//        }else{
+//            //更新预留编号的状态和使用时间
+//            recordEntityMapper.updateReserveCode(reserveCodeStr);
+//        }
+        //设置临时报告编号
+        reportRecordEntity.setReportCode(GenID.getUUID());
         reportRecordEntity.setId(recordId);
         reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
         reportRecordEntity.setState(1 + "");//报告已合成，设置为待发起审批
@@ -4626,15 +4690,16 @@ public class ReportServiceImpl implements ReportService {
                 reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
                 //设置报告类型
                 reportRecordEntity.setType("0");
-                String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
+//                String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
 //                String reserveCodeStr = getMaxCode(entrustIdByTaskId);
-                if(reserveCodeStr == null){
-                    reserveCodeStr = getMaxCode(entrustIdByTaskId);
-                }else{
-                    //更新预留编号的状态和使用时间
-                    recordEntityMapper.updateReserveCode(reserveCodeStr);
-                }
-                reportRecordEntity.setReportCode(reserveCodeStr);
+//                if(reserveCodeStr == null){
+//                    reserveCodeStr = getMaxCode(entrustIdByTaskId);
+//                }else{
+//                    //更新预留编号的状态和使用时间
+//                    recordEntityMapper.updateReserveCode(reserveCodeStr);
+//                }
+                //设置临时报告编号
+                reportRecordEntity.setReportCode(GenID.getUUID());
                 reportRecordEntity.setId(GenID.getID());
                 reportRecordEntity.setEntrustmentId(entrustIdByTaskId);
                 // 报告数量
@@ -4666,15 +4731,16 @@ public class ReportServiceImpl implements ReportService {
                 }else {
                     //中间报告、如果报告类型是中间报告，报告记录新增数据
                     reportRecordEntity.setEntrustId(entrustIdByTaskId);
-                    String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
+//                    String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
 //                    String reserveCodeStr = getMaxCode(entrustIdByTaskId);
-                    if(reserveCodeStr == null){
-                        reserveCodeStr = getMaxCode(entrustIdByTaskId);
-                    }else{
-                        //更新预留编号的状态和使用时间
-                        recordEntityMapper.updateReserveCode(reserveCodeStr);
-                    }
-                    reportRecordEntity.setReportCode(reserveCodeStr);
+//                    if(reserveCodeStr == null){
+//                        reserveCodeStr = getMaxCode(entrustIdByTaskId);
+//                    }else{
+//                        //更新预留编号的状态和使用时间
+//                        recordEntityMapper.updateReserveCode(reserveCodeStr);
+//                    }
+                    //设置临时报告编号
+                    reportRecordEntity.setReportCode(GenID.getUUID());
                     reportRecordEntity.setId(GenID.getID());
                     //设置报告类型
                     reportRecordEntity.setType("1");
@@ -4706,7 +4772,29 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode,Date combineTime) {
-        recordEntityMapper.updateTime(reportCode,reportCompleteTime,date,sampleName,taskId,taskCode,combineTime);
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date codeDate = null;
+        try {
+            codeDate = format.parse("2024-04-10");
+        } catch (ParseException e) {
+            logger.error("时间格式转换错误:{}",e);
+        }
+        //设置正式报告编号
+        Long entrustmentId = recordEntityMapper.getEntrustmentId(taskId);
+        String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
+        if(reserveCodeStr == null){//不存在预留编号
+            //比较报告完成日期data和报告规则起始日期
+            if(reportCompleteTime.after(codeDate)){
+                reserveCodeStr = getMaxCodeZX(entrustmentId);//报告完成日期在新规则之后的使用新规则
+            }else{
+                reserveCodeStr = getMaxCode(entrustmentId);//报告完成日期在新规则之前的使用旧规则
+            }
+        }else{
+            //更新预留编号的状态和使用时间
+            recordEntityMapper.updateReserveCode(reserveCodeStr);
+        }
+        recordEntityMapper.updateTime(reportCode,reportCompleteTime,date,sampleName,taskId,taskCode,combineTime,reserveCodeStr);
     }
 
     /**

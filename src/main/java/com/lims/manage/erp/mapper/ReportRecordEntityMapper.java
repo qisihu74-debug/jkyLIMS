@@ -166,6 +166,7 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     Integer getMaxCode(String year,String code);
+    Integer getMaxCodeZX(String year);
 
     /**
      * 查询当前预留的最大编号
@@ -174,15 +175,24 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     Integer getReserveCode(String year,String code);
+    Integer getReserveCodeZX(String year);
 
     /**
-     *
+     * 查询MN,BD类型的最大编号
      * @param year
      * @param code
      * @param type
      * @return
      */
     Integer getOtherMaxCode(String year,String code,String type);
+
+    /**
+     * 查询MN,BD类型的最大编号
+     * @param year
+     * @param type
+     * @return
+     */
+    Integer getOtherMaxCodeZX(String year,String type);
 
     /**
      * 获取委托编号类别
@@ -196,15 +206,17 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     Integer getMaxCodeMid(String year,String code);
+    Integer getMaxCodeMidZX(String year);
 
     /**
-     *
+     * 查询BD,MN类型的中间报告中的最大编号
      * @param year
      * @param code
      * @param type
      * @return
      */
     Integer getOtherMaxCodeMid(String year,String code,String type);
+    Integer getOtherMaxCodeMidZX(String year,String type);
 
     /**
      * 根据委托单id查询所用报告模板名称
@@ -422,9 +434,11 @@ public interface ReportRecordEntityMapper {
     @Select("select max(end_time) from test_entrusted_sample_checkitem_rel where entrust_id=#{entrustId}")
     java.sql.Date getMaxTime(@Param("entrustId") Long entrustId);
 
-    @Update("update test_report_record set report_complete_time=#{reportCompleteTime},required_completion_time=#{date},sample_name=#{sampleName},task_code=#{taskCode},task_id=#{taskId},combine_time=#{combineTime} where report_code=#{reportCode}")
+    @Update("update test_report_record set report_code=#{newReportCode},report_complete_time=#{reportCompleteTime},required_completion_time=#{date}," +
+            "sample_name=#{sampleName},task_code=#{taskCode},task_id=#{taskId},combine_time=#{combineTime} where report_code=#{reportCode}")
     void updateTime(@Param("reportCode") String reportCode, @Param("reportCompleteTime") Date reportCompleteTime,
-                    @Param("date") Date date,@Param("sampleName") String sampleName,@Param("taskId") Long taskId,@Param("taskCode") String taskCode,@Param("combineTime") Date combineTime);
+                    @Param("date") Date date,@Param("sampleName") String sampleName,@Param("taskId") Long taskId,
+                    @Param("taskCode") String taskCode,@Param("combineTime") Date combineTime,@Param("newReportCode") String newReportCode);
 
     @Update("update test_report_record set category = '电子章', qys_docment_id = #{documentId} where report_code=#{reportCode}")
     void updateQysInfo(@Param("reportCode") String reportCode, @Param("documentId") Long documentId);
@@ -584,6 +598,8 @@ public interface ReportRecordEntityMapper {
     void deleteTask(@Param("entrustId") Long entrustId);
 
     String getReserveCodeStr(Long entrustmentId);
+
+    Long getEntrustmentId(Long taskId);
 
     void updateReserveCode(String reportCode);
 
