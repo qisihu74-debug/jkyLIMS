@@ -42,7 +42,7 @@
                 AND state =#{state}
             </if>
         </where>
-        order by state desc ,create_date desc
+        order by `state` desc ,create_date desc
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete
