@@ -782,7 +782,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * 2024年4月10日前执行的报告编号规则 JC7-2023-YC-0001
+     * 2024年4月11日前执行的报告编号规则 JC7-2023-YC-0001
      * @param entrustId
      * @return
      */
@@ -828,9 +828,9 @@ public class ReportServiceImpl implements ReportService {
 //                }
 //            }
             Integer max;
-            Integer maxCode = recordEntityMapper.getMaxCodeZX(year);
-            Integer maxReserveCode = recordEntityMapper.getReserveCodeZX(year);
-            Integer maxCodeMid = recordEntityMapper.getMaxCodeMidZX(year);
+            Integer maxCode = recordEntityMapper.getMaxCode(year,topDepartmentCode);
+            Integer maxReserveCode = recordEntityMapper.getReserveCode(year,topDepartmentCode);
+            Integer maxCodeMid = recordEntityMapper.getMaxCodeMid(year,topDepartmentCode);
             if (maxCode == null && maxReserveCode == null && maxCodeMid == null) {
                 max = null; // All numbers are null
             }else{
