@@ -451,7 +451,7 @@ public interface ReportService {
 
     Date getReportCompleteTime(String reportCode);
 
-    void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode,Date date2);
+    void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode,Date date2,String newReportCode);
 
     QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean,List<String> stringList);
 
@@ -488,4 +488,8 @@ public interface ReportService {
     ReportRecordEntity getDetailByCodeZj(String reportCode);
 
     String reportTools(String type, String reportCode, MultipartFile file);
+
+    String getFormalReportCode(Long entrustmentId, String date);
+
+    String getReportCode(Long entrustmentId);
 }

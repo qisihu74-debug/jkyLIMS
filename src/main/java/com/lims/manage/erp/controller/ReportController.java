@@ -1414,7 +1414,7 @@ public class ReportController {
     public Result offlineReportMerge(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file
             ,@RequestParam("reportCompleteTime") String reportCompleteTime, @RequestParam("time") String requestDate
-            , @RequestParam("sampleName") String sampleName,@Param("taskId") Long taskId,@Param("taskCode") String taskCode) {
+            , @RequestParam("sampleName") String sampleName,@Param("taskId") Long taskId,@Param("taskCode") String taskCode,@Param("taskCode") String newReportCode) {
         if (reportCompleteTime == null || file == null || StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数");
         }
@@ -1441,7 +1441,7 @@ public class ReportController {
         if (flag) {
             //更新报告上盖章的时间
             Date date2 = new Date(System.currentTimeMillis());
-            reportService.updateTime(reportCode,date,date1,sampleName,taskId,taskCode,date2);
+            reportService.updateTime(reportCode,date,date1,sampleName,taskId,taskCode,date2,newReportCode);
             return ResultUtil.success("报告文件上传成功！");
         }else {
             return ResultUtil.error("报告文件上传失败！");
@@ -1493,7 +1493,7 @@ public class ReportController {
     @RequestMapping("onlineReportMergeSave")
     public Result onlineReportMergeSave(String reportCode,String inspector,String verifyer, String issuer,
                                         String reportCompleteTime, String requestDate, String sampleName
-            ,Long taskId, String taskCode){
+            ,Long taskId, String taskCode,String newReportCode){
         if (StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)
                 ||StringUtils.isEmpty(sampleName) ||StringUtils.isEmpty(requestDate)){
             return ResultUtil.error("缺少参数");
@@ -1517,7 +1517,7 @@ public class ReportController {
         }
         if (flag) {
             Date date2 = new Date(System.currentTimeMillis());
-            reportService.updateTime(reportCode,date,date1,sampleName,taskId,taskCode,date2);
+            reportService.updateTime(reportCode,date,date1,sampleName,taskId,taskCode,date2,newReportCode);
             return ResultUtil.success("报告文件上传成功！");
         }else {
             return ResultUtil.error("报告文件上传失败！");
@@ -1739,5 +1739,22 @@ public class ReportController {
         }
         String flag = reportService.reportTools(type,reportCode,file);
         return ResultUtil.success(flag);
+    }
+
+    /**
+     * 根据日期获取正式报告编号
+     * @param entrustmentId
+     * @param date
+     * @return
+     */
+    @GetMapping("getFormalReportCode")
+    public Result getFormalReportCode(Long entrustmentId,String date){
+        String reportCode = reportService.getReportCode(entrustmentId);
+        if(reportCode != null && reportCode.contains("-")){
+            return ResultUtil.success(null);
+        }else{
+            String formalReportCode = reportService.getFormalReportCode(entrustmentId, date);
+            return ResultUtil.success(formalReportCode);
+        }
     }
 }

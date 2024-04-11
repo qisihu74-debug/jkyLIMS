@@ -440,6 +440,16 @@
         id = #{id}
     </select>
 
+    <select id="getReportCode" resultType="java.lang.String">
+        SELECT
+            report_code
+        FROM
+            test_report_record
+        WHERE
+            entrustment_id = #{entrustmentId}
+           OR entrust_id = #{entrustmentId} limit 1
+    </select>
+
     <update id="updateImgByid">
         update test_report_record
         set seal_url=#{url},state = '7'

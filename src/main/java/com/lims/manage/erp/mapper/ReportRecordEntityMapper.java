@@ -609,4 +609,6 @@ public interface ReportRecordEntityMapper {
     void delMidReportById(@Param("id") Long id);
 
     ReportRecordEntity getMidInfo(Long id);
+
+    String getReportCode(Long entrustmentId);
 }

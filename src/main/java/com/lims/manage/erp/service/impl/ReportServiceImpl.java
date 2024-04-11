@@ -2145,6 +2145,40 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public String getFormalReportCode(Long entrustmentId, String date) {
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date codeDate = null;
+        Date reportCompleteTime = null;
+        try {
+            reportCompleteTime = format.parse(date);
+            codeDate = format.parse("2024-04-10");
+        } catch (ParseException e) {
+            logger.error("时间格式转换错误:{}",e);
+        }
+        //设置正式报告编号
+        String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
+        if(reserveCodeStr == null){//不存在预留编号
+            //比较报告完成日期data和报告规则起始日期
+            if(reportCompleteTime.after(codeDate)){
+                reserveCodeStr = getMaxCodeZX(entrustmentId);//报告完成日期在新规则之后的使用新规则
+            }else{
+                reserveCodeStr = getMaxCode(entrustmentId);//报告完成日期在新规则之前的使用旧规则
+            }
+        }else{
+            //更新预留编号的状态和使用时间
+            recordEntityMapper.updateReserveCode(reserveCodeStr);
+        }
+        return reserveCodeStr;
+    }
+
+    @Override
+    public String getReportCode(Long entrustmentId) {
+        String reportCode = recordEntityMapper.getReportCode(entrustmentId);
+        return reportCode;
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();
@@ -4809,30 +4843,33 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode,Date combineTime) {
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
-        format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date codeDate = null;
-        try {
-            codeDate = format.parse("2024-04-10");
-        } catch (ParseException e) {
-            logger.error("时间格式转换错误:{}",e);
-        }
+    public void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode,Date combineTime,String newReportCode) {
+//        DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+//        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+//        Date codeDate = null;
+//        try {
+//            codeDate = format.parse("2024-04-10");
+//        } catch (ParseException e) {
+//            logger.error("时间格式转换错误:{}",e);
+//        }
         //设置正式报告编号
-        Long entrustmentId = recordEntityMapper.getEntrustmentId(taskId);
-        String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
-        if(reserveCodeStr == null){//不存在预留编号
-            //比较报告完成日期data和报告规则起始日期
-            if(reportCompleteTime.after(codeDate)){
-                reserveCodeStr = getMaxCodeZX(entrustmentId);//报告完成日期在新规则之后的使用新规则
-            }else{
-                reserveCodeStr = getMaxCode(entrustmentId);//报告完成日期在新规则之前的使用旧规则
-            }
-        }else{
-            //更新预留编号的状态和使用时间
-            recordEntityMapper.updateReserveCode(reserveCodeStr);
+//        Long entrustmentId = recordEntityMapper.getEntrustmentId(taskId);
+//        String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustmentId);
+//        if(reserveCodeStr == null){//不存在预留编号
+//            //比较报告完成日期data和报告规则起始日期
+//            if(reportCompleteTime.after(codeDate)){
+//                reserveCodeStr = getMaxCodeZX(entrustmentId);//报告完成日期在新规则之后的使用新规则
+//            }else{
+//                reserveCodeStr = getMaxCode(entrustmentId);//报告完成日期在新规则之前的使用旧规则
+//            }
+//        }else{
+//            //更新预留编号的状态和使用时间
+//            recordEntityMapper.updateReserveCode(reserveCodeStr);
+//        }
+        if(newReportCode == null){
+            newReportCode = reportCode;
         }
-        recordEntityMapper.updateTime(reportCode,reportCompleteTime,date,sampleName,taskId,taskCode,combineTime,reserveCodeStr);
+        recordEntityMapper.updateTime(reportCode,reportCompleteTime,date,sampleName,taskId,taskCode,combineTime,newReportCode);
     }
 
     /**
