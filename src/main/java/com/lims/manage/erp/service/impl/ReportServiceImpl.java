@@ -4866,7 +4866,7 @@ public class ReportServiceImpl implements ReportService {
 //            //更新预留编号的状态和使用时间
 //            recordEntityMapper.updateReserveCode(reserveCodeStr);
 //        }
-        if(newReportCode == null){
+        if(newReportCode == null || "null".equals(newReportCode)){
             newReportCode = reportCode;
         }
         recordEntityMapper.updateTime(reportCode,reportCompleteTime,date,sampleName,taskId,taskCode,combineTime,newReportCode);

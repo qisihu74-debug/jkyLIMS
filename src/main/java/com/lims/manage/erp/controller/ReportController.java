@@ -89,6 +89,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
@@ -1751,7 +1752,7 @@ public class ReportController {
     public Result getFormalReportCode(Long entrustmentId,String date){
         String reportCode = reportService.getReportCode(entrustmentId);
         if(reportCode != null && reportCode.contains("-")){
-            return ResultUtil.success(null);
+            return ResultUtil.success();
         }else{
             String formalReportCode = reportService.getFormalReportCode(entrustmentId, date);
             return ResultUtil.success(formalReportCode);
