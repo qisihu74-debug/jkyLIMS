@@ -2179,6 +2179,16 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public Boolean isExist(String reportCode) {
+        Boolean flag = false;
+        int reportCodeSize = recordEntityMapper.getReportCodeSize(reportCode);
+        if(reportCodeSize != 0){
+            flag = true;
+        }
+        return flag;
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();

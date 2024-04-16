@@ -611,4 +611,6 @@ public interface ReportRecordEntityMapper {
     ReportRecordEntity getMidInfo(Long id);
 
     String getReportCode(Long entrustmentId);
+
+    int getReportCodeSize(String reportCode);
 }

@@ -1415,9 +1415,12 @@ public class ReportController {
     public Result offlineReportMerge(@RequestParam("reportCode") String reportCode,@RequestParam("inspector") String inspector,@RequestParam("verifyer") String verifyer,
                                @RequestParam("issuer") String issuer, @RequestParam(required = false,name = "file") MultipartFile file
             ,@RequestParam("reportCompleteTime") String reportCompleteTime, @RequestParam("time") String requestDate
-            , @RequestParam("sampleName") String sampleName,@Param("taskId") Long taskId,@Param("taskCode") String taskCode,@Param("taskCode") String newReportCode) {
+            , @RequestParam("sampleName") String sampleName,@Param("taskId") Long taskId,@Param("taskCode") String taskCode,@Param("newReportCode") String newReportCode) {
         if (reportCompleteTime == null || file == null || StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数");
+        }
+        if(reportService.isExist(newReportCode)){//报告号被使用
+            return ResultUtil.error("报告号已被使用，请重新在报告合成打开审批！");
         }
         logger.debug("发起审批检测人:{},审核人:{},签发人:{}",inspector,verifyer,issuer);
         if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer) || org.apache.commons.lang3.StringUtils.isEmpty(inspector)){

@@ -450,6 +450,15 @@
            OR entrust_id = #{entrustmentId} limit 1
     </select>
 
+    <select id="getReportCodeSize" resultType="java.lang.Integer">
+        SELECT
+            count( 1 )
+        FROM
+            test_report_record
+        WHERE
+            report_code = #{reportCode}
+    </select>
+
     <update id="updateImgByid">
         update test_report_record
         set seal_url=#{url},state = '7'

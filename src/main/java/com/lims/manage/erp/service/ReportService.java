@@ -492,4 +492,6 @@ public interface ReportService {
     String getFormalReportCode(Long entrustmentId, String date);
 
     String getReportCode(Long entrustmentId);
+
+    Boolean isExist(String reportCode);
 }
