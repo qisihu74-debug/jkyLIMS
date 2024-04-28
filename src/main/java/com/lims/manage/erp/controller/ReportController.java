@@ -1502,6 +1502,9 @@ public class ReportController {
                 ||StringUtils.isEmpty(sampleName) ||StringUtils.isEmpty(requestDate)){
             return ResultUtil.error("缺少参数");
         }
+        if(reportService.isExist(newReportCode)){//报告号被使用
+            return ResultUtil.error("报告号已被使用，请重新在报告合成打开审批！");
+        }
         logger.debug("发起审批检测人:{},审核人:{},签发人:{}",inspector,verifyer,issuer);
         Boolean flag = reportService.onlineReportMergeSave(reportCode,verifyer.split("&")[0],issuer.split("&")[0]
                 ,Long.parseLong(verifyer.split("&")[1]),Long.parseLong(issuer.split("&")[1]),inspector);
