@@ -440,6 +440,25 @@
         id = #{id}
     </select>
 
+    <select id="getReportCode" resultType="java.lang.String">
+        SELECT
+            report_code
+        FROM
+            test_report_record
+        WHERE
+            entrustment_id = #{entrustmentId}
+           OR entrust_id = #{entrustmentId} limit 1
+    </select>
+
+    <select id="getReportCodeSize" resultType="java.lang.Integer">
+        SELECT
+            count( 1 )
+        FROM
+            test_report_record
+        WHERE
+            report_code = #{reportCode}
+    </select>
+
     <update id="updateImgByid">
         update test_report_record
         set seal_url=#{url},state = '7'
@@ -811,6 +830,16 @@
             AND report_code LIKE CONCAT('%',#{code},'%')
     </select>
 
+    <select id="getMaxCodeZX" resultType="java.lang.Integer">
+        SELECT
+            MAX( SUBSTR( report_code FROM 12 )+0 )
+        FROM
+            test_report_record
+        WHERE
+            report_code LIKE CONCAT('%-',#{year},'-%')
+            AND report_code LIKE CONCAT('%ZX%')
+    </select>
+
     <select id="getReserveCode" resultType="java.lang.Integer">
         SELECT
             MAX( SUBSTR( report_code FROM 13 )+0 )
@@ -819,6 +848,15 @@
         WHERE
             report_code LIKE CONCAT('%-',#{year},'-%')
             AND report_code LIKE CONCAT('%',#{code},'%')
+    </select>
+    <select id="getReserveCodeZX" resultType="java.lang.Integer">
+        SELECT
+            MAX( SUBSTR( report_code FROM 12 )+0 )
+        FROM
+            test_reserve_code
+        WHERE
+            report_code LIKE CONCAT('%-',#{year},'-%')
+            AND report_code LIKE CONCAT('%ZX%')
     </select>
 
     <select id="getOtherMaxCode" resultType="java.lang.Integer">
@@ -829,6 +867,17 @@
         WHERE
             report_code LIKE CONCAT('%-',#{year},'-%')
             AND report_code LIKE CONCAT('%',#{code},'%')
+            AND report_code LIKE CONCAT('%-',#{type},'-%')
+    </select>
+
+    <select id="getOtherMaxCodeZX" resultType="java.lang.Integer">
+        SELECT
+            MAX( SUBSTR( report_code FROM 12 )+0 )
+        FROM
+            test_report_record
+        WHERE
+            report_code LIKE CONCAT('%-',#{year},'-%')
+            AND report_code LIKE CONCAT('%ZX%')
             AND report_code LIKE CONCAT('%-',#{type},'-%')
     </select>
 
@@ -849,6 +898,15 @@
             report_code LIKE CONCAT('%-',#{year},'-%')
             AND report_code LIKE CONCAT('%',#{code},'%')
     </select>
+    <select id="getMaxCodeMidZX" resultType="java.lang.Integer">
+        SELECT
+            MAX( SUBSTR( report_code FROM 12 )+0 )
+        FROM
+            test_report_record_mid
+        WHERE
+            report_code LIKE CONCAT('%-',#{year},'-%')
+            AND report_code LIKE CONCAT('%ZX%')
+    </select>
     <select id="getOtherMaxCodeMid" resultType="java.lang.Integer">
         SELECT
             MAX( SUBSTR( report_code FROM 13 )+0 )
@@ -857,6 +915,17 @@
         WHERE
             report_code LIKE CONCAT('%-',#{year},'-%')
             AND report_code LIKE CONCAT('%',#{code},'%')
+            AND report_code LIKE CONCAT('%-',#{type},'-%')
+    </select>
+
+    <select id="getOtherMaxCodeMidZX" resultType="java.lang.Integer">
+        SELECT
+            MAX( SUBSTR( report_code FROM 12 )+0 )
+        FROM
+            test_report_record_mid
+        WHERE
+            report_code LIKE CONCAT('%-',#{year},'-%')
+            AND report_code LIKE CONCAT('%ZX%')
             AND report_code LIKE CONCAT('%-',#{type},'-%')
     </select>
 
@@ -1440,6 +1509,9 @@
         ORDER BY
             t2.id ASC
             LIMIT 1
+    </select>
+    <select id="getEntrustmentId" resultType="java.lang.Long">
+        select entrustment_id from test_task where id = #{taskId}
     </select>
 
     <update id="updateReserveCode" parameterType="java.lang.String">
