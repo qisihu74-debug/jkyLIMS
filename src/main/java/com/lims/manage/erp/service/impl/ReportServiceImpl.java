@@ -1880,6 +1880,9 @@ public class ReportServiceImpl implements ReportService {
                 recordEntity.setQysDocmentId(null);
                 recordEntity.setContractId(null);
                 recordEntity.setSignUrl(null);
+                if (recordEntity.getOperateType() == null){
+                    recordEntity.setOperateType(1);
+                }
                 recordEntityMapper.insert(recordEntity);
             }
         }
@@ -1976,6 +1979,9 @@ public class ReportServiceImpl implements ReportService {
             case "1":
                 ReportRecordEntity detailByCodeZj = reportMapper.getDetailByCodeZj(reportCode);
                 if (detailByCodeZj != null){
+                    if (detailByCodeZj.getOperateType() == null){
+                        detailByCodeZj.setOperateType(1);
+                    }
                     detailByCodeZj.setEntrustmentId(detailByCodeZj.getEntrustId());
                     detailByCodeZj.setEntrustId(null);
                     detailByCodeZj.setType("0");
