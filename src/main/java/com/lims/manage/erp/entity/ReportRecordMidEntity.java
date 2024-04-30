@@ -93,6 +93,10 @@ public class ReportRecordMidEntity {
     private String inspector;
 
     private String reportUrl;
+    /**
+     * 操作类型0线上编辑的报告，1线下编辑的报告
+     */
+    private Integer operateType;
 
     public ReportRecordMidEntity() {
     }
@@ -142,5 +146,6 @@ public class ReportRecordMidEntity {
         this.entrustId = recordEntity.getEntrustId();
         this.inspector = recordEntity.getInspector();
         this.reportUrl = recordEntity.getReportUrl();
+        this.operateType = recordEntity.getOperateType();
     }
 }

@@ -141,7 +141,7 @@
       template_name, qys_docment_id, qys_state, 
       contract_id, sign_url, task_id, 
       type, category, combine_time, 
-      entrust_id, inspector, report_url
+      entrust_id, inspector, report_url,operate_type
       )
     values (#{id,jdbcType=BIGINT}, #{entrustmentId,jdbcType=BIGINT}, #{reportCode,jdbcType=VARCHAR}, 
       #{sampleName,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{requiredCompletionTime,jdbcType=TIMESTAMP}, 
@@ -157,7 +157,7 @@
       #{templateName,jdbcType=VARCHAR}, #{qysDocmentId,jdbcType=BIGINT}, #{qysState,jdbcType=VARCHAR}, 
       #{contractId,jdbcType=BIGINT}, #{signUrl,jdbcType=VARCHAR}, #{taskId,jdbcType=BIGINT}, 
       #{type,jdbcType=VARCHAR}, #{category,jdbcType=VARCHAR}, #{combineTime,jdbcType=TIMESTAMP}, 
-      #{entrustId,jdbcType=BIGINT}, #{inspector,jdbcType=VARCHAR}, #{reportUrl,jdbcType=LONGVARCHAR}
+      #{entrustId,jdbcType=BIGINT}, #{inspector,jdbcType=VARCHAR}, #{reportUrl,jdbcType=LONGVARCHAR}, #{operateType}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.lims.manage.erp.entity.ReportRecordMidEntity" >
